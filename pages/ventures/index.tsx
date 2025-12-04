@@ -1,5 +1,3 @@
-// pages/ventures/index.tsx
-
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -16,7 +14,36 @@ import {
 import { motion } from "framer-motion";
 
 import Layout from "@/components/Layout";
-import { pickEnvUrl, ENV_KEYS } from "@/lib/utils";
+
+// Define the environment keys locally since we don't have the utils file
+const ENV_KEYS = {
+  ALOMARADA_URL: 'NEXT_PUBLIC_ALOMARADA_URL',
+  ENDURELUXE_URL: 'NEXT_PUBLIC_ENDURELUXE_URL',
+  INNOVATEHUB_URL: 'NEXT_PUBLIC_INNOVATEHUB_URL',
+  INNOVATEHUB_ALT_URL: 'NEXT_PUBLIC_INNOVATEHUB_ALT_URL',
+} as const;
+
+// Helper function to get environment variables safely
+const pickEnvUrl = (keys: string[], fallback: string): string => {
+  // Try each key
+  for (const key of keys) {
+    // Use process.env on server, window on client
+    let value: string | undefined;
+    
+    if (typeof window !== 'undefined') {
+      // Client-side: check for NEXT_PUBLIC_ prefixed variables
+      const clientKey = key.startsWith('NEXT_PUBLIC_') ? key : `NEXT_PUBLIC_${key}`;
+      value = (window as any)[clientKey] || (window as any)[key];
+    } else {
+      // Server-side
+      value = process.env[key];
+    }
+    
+    if (value) return value;
+  }
+  
+  return fallback;
+};
 
 type VentureStatus = "Active" | "Emerging" | "In development";
 
@@ -33,18 +60,18 @@ interface Venture {
 
 // Resolve external URLs safely with env overrides
 const ALOMARADA_URL = pickEnvUrl(
-  [ENV_KEYS.ALOMARADA_URL],
+  [ENV_KEYS.ALOMARADA_URL, "ALOMARADA_URL"],
   "https://alomarada.com/"
 );
 
 const ENDURELUXE_URL = pickEnvUrl(
-  [ENV_KEYS.ENDURELUXE_URL],
+  [ENV_KEYS.ENDURELUXE_URL, "ENDURELUXE_URL"],
   "https://alomarada.com/endureluxe"
 );
 
 // Branded InnovateHub URL by default, with env overrides
 const INNOVATEHUB_URL = pickEnvUrl(
-  [ENV_KEYS.INNOVATEHUB_URL, ENV_KEYS.INNOVATEHUB_ALT_URL],
+  [ENV_KEYS.INNOVATEHUB_URL, ENV_KEYS.INNOVATEHUB_ALT_URL, "INNOVATEHUB_URL"],
   "https://innovatehub.abrahamoflondon.org"
 );
 
@@ -104,17 +131,17 @@ const VenturesPage: NextPage = () => {
         />
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-b from-black via-deepCharcoal to-black text-white">
+      <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
         {/* HERO */}
-        <section className="border-b border-white/10 bg-gradient-to-b from-black/80 via-deepCharcoal/80 to-black/90">
+        <section className="border-b border-white/10 bg-gradient-to-b from-black/80 via-gray-900/80 to-black/90">
           <div className="mx-auto flex max-w-6xl flex-col px-4 pb-16 pt-20 md:flex-row md:items-center md:justify-between md:pt-24">
             <div className="max-w-xl">
-              <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
+              <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-amber-400/80">
                 Abraham of London · Ventures
               </p>
-              <h1 className="font-serif text-3xl font-semibold tracking-tight text-cream sm:text-4xl md:text-5xl">
+              <h1 className="font-serif text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
                 Ventures that move in the{" "}
-                <span className="text-softGold">same direction</span>.
+                <span className="text-amber-400">same direction</span>.
               </h1>
               <p className="mt-5 max-w-xl text-sm text-gray-200 md:text-base">
                 The writing, fatherhood work, and strategy conversations live at
@@ -125,7 +152,7 @@ const VenturesPage: NextPage = () => {
               <div className="mt-8 flex flex-wrap gap-4 text-xs md:text-sm">
                 <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
                   From the house of{" "}
-                  <span className="font-semibold text-softGold">
+                  <span className="font-semibold text-amber-400">
                     Abraham of London
                   </span>
                 </div>
@@ -142,14 +169,14 @@ const VenturesPage: NextPage = () => {
               <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/60">
                 <div className="mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">
                   <span>Abraham of London · House View</span>
-                  <span className="rounded-full bg-softGold/10 px-2 py-1 text-[0.65rem] text-softGold">
+                  <span className="rounded-full bg-amber-400/10 px-2 py-1 text-[0.65rem] text-amber-400">
                     Aligned ventures
                   </span>
                 </div>
                 <dl className="grid grid-cols-2 gap-4 text-sm text-gray-100">
                   <div>
                     <dt className="text-xs text-gray-400">Core narrative</dt>
-                    <dd className="mt-1 font-serif text-lg text-softGold">
+                    <dd className="mt-1 font-serif text-lg text-amber-400">
                       Abraham of London
                     </dd>
                   </div>
@@ -183,7 +210,7 @@ const VenturesPage: NextPage = () => {
         <section className="mx-auto max-w-6xl px-4 pb-20 pt-12">
           <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h2 className="font-serif text-2xl font-semibold text-cream md:text-3xl">
+              <h2 className="font-serif text-2xl font-semibold text-white md:text-3xl">
                 Venture portfolio
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-gray-300 md:text-base">
@@ -201,33 +228,33 @@ const VenturesPage: NextPage = () => {
             {ventures.map((venture) => (
               <motion.article
                 key={venture.slug ?? venture.name}
-                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/40 transition-all duration-300 hover:-translate-y-1 hover:border-softGold/40 hover:bg-white/10"
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/40 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/40 hover:bg-white/10"
                 variants={itemVariants}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-80px" }}
               >
                 <div className="mb-5 flex items-start justify-between gap-3">
-                  <div className="rounded-xl bg-softGold/10 p-3">
-                    <venture.icon className="h-7 w-7 text-softGold" />
+                  <div className="rounded-xl bg-amber-400/10 p-3">
+                    <venture.icon className="h-7 w-7 text-amber-400" />
                   </div>
                   <span
                     className={`rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide ${
                       venture.status === "Active"
-                        ? "bg-green-100/10 text-emerald-200"
+                        ? "bg-green-500/10 text-green-400"
                         : venture.status === "Emerging"
-                          ? "bg-blue-100/10 text-sky-200"
-                          : "bg-amber-100/10 text-amber-200"
+                          ? "bg-blue-500/10 text-blue-400"
+                          : "bg-amber-500/10 text-amber-400"
                     }`}
                   >
                     {venture.status}
                   </span>
                 </div>
 
-                <h3 className="mb-2 font-serif text-xl font-semibold text-cream">
+                <h3 className="mb-2 font-serif text-xl font-semibold text-white">
                   {venture.name}
                 </h3>
-                <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-softGold/80">
+                <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-amber-400/80">
                   {venture.focus}
                 </p>
 
@@ -238,7 +265,7 @@ const VenturesPage: NextPage = () => {
                 <div className="mt-4 flex items-center justify-between">
                   <span className="text-xs text-gray-300">
                     External ·{" "}
-                    <span className="font-medium text-softGold">
+                    <span className="font-medium text-amber-400">
                       {venture.href.replace(/^https?:\/\//, "")}
                     </span>
                   </span>
@@ -246,7 +273,7 @@ const VenturesPage: NextPage = () => {
                     href={venture.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex items-center text-xs font-semibold uppercase tracking-wide text-softGold hover:text-softGold/80"
+                    className="group inline-flex items-center text-xs font-semibold uppercase tracking-wide text-amber-400 hover:text-amber-300"
                   >
                     {venture.externalLabel ?? "Visit site"}
                     <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
@@ -258,10 +285,10 @@ const VenturesPage: NextPage = () => {
         </section>
 
         {/* BUILD PHILOSOPHY */}
-        <section className="border-t border-white/10 bg-gradient-to-br from-deepCharcoal via-black to-forest/30">
+        <section className="border-t border-white/10 bg-gradient-to-br from-gray-900 via-black to-emerald-900/30">
           <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
             <div className="mb-10 text-center">
-              <h2 className="font-serif text-2xl font-semibold text-cream md:text-3xl">
+              <h2 className="font-serif text-2xl font-semibold text-white md:text-3xl">
                 How we choose what deserves a logo
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-300 md:text-base">
@@ -273,10 +300,10 @@ const VenturesPage: NextPage = () => {
 
             <div className="grid gap-8 md:grid-cols-3">
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-softGold/15">
-                  <Target className="h-6 w-6 text-softGold" />
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15">
+                  <Target className="h-6 w-6 text-amber-400" />
                 </div>
-                <h3 className="mb-3 text-lg font-semibold text-cream">
+                <h3 className="mb-3 text-lg font-semibold text-white">
                   Clear assignment
                 </h3>
                 <p className="text-sm text-gray-300">
@@ -287,10 +314,10 @@ const VenturesPage: NextPage = () => {
               </div>
 
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-forest/20">
-                  <TrendingUp className="h-6 w-6 text-forest/90" />
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
+                  <TrendingUp className="h-6 w-6 text-emerald-400" />
                 </div>
-                <h3 className="mb-3 text-lg font-semibold text-cream">
+                <h3 className="mb-3 text-lg font-semibold text-white">
                   Substance over spin
                 </h3>
                 <p className="text-sm text-gray-300">
@@ -301,10 +328,10 @@ const VenturesPage: NextPage = () => {
               </div>
 
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-softGold/15">
-                  <Users className="h-6 w-6 text-softGold" />
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15">
+                  <Users className="h-6 w-6 text-amber-400" />
                 </div>
-                <h3 className="mb-3 text-lg font-semibold text-cream">
+                <h3 className="mb-3 text-lg font-semibold text-white">
                   Built with people in mind
                 </h3>
                 <p className="text-sm text-gray-300">
@@ -320,7 +347,7 @@ const VenturesPage: NextPage = () => {
               or ecosystem collaboration around these ventures,{" "}
               <Link
                 href="/contact"
-                className="font-semibold text-softGold underline-offset-4 hover:underline"
+                className="font-semibold text-amber-400 underline-offset-4 hover:underline"
               >
                 start a strategic conversation
               </Link>
