@@ -1,10 +1,5 @@
 // lib/resources.ts
-export {
-  getAllResources,
-  getResourceBySlug,
-  getResourceSlugs,
-  getResourcesBySlugs,
-  getAllContent,
-} from "@/lib/server/resources-data";
+// Re-export resource functions for consistent imports
 
-export type { ResourceMeta } from "@/lib/server/resources-data";
+export { getAllContent, getContentBySlug } from "./mdx";
+export type { RawContentEntry } from "./mdx";

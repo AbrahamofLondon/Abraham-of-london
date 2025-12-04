@@ -10,36 +10,25 @@ import Image from "next/image";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
+import type { RawContentEntry } from "@/lib/mdx";
 
 interface ResourceMeta {
   slug: string;
   title: string;
   description?: string | null;
+  subtitle?: string | null;
   date?: string | null;
   author?: string | null;
   readtime?: string | null;
   coverImage?: string | null;
   tags?: string[] | null;
   downloadUrl?: string | null;
+  excerpt?: string | null;
 }
 
 interface ResourcePageProps {
   meta: ResourceMeta;
   mdxSource: MDXRemoteSerializeResult;
-}
-
-// Shape of what comes back from MDX for resources
-interface RawResourceDoc {
-  slug: string;
-  title: string;
-  description?: string | null;
-  date?: string | null;
-  author?: string | null;
-  readtime?: string | null;
-  coverImage?: string | null;
-  tags?: string[] | null;
-  downloadUrl?: string | null;
-  content: string;
 }
 
 const SITE_URL =
@@ -49,6 +38,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
   const {
     title,
     description,
+    subtitle,
     date,
     author,
     readtime,
@@ -90,6 +80,10 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
             <h1 className="mb-3 font-serif text-3xl font-bold tracking-tight sm:text-4xl">
               {title}
             </h1>
+
+            {subtitle && (
+              <h2 className="mb-2 text-lg text-gray-300">{subtitle}</h2>
+            )}
 
             {description && (
               <p className="max-w-2xl text-sm text-gray-300">{description}</p>
@@ -145,6 +139,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
                 width={1200}
                 height={800}
                 className="mx-auto max-h-[480px] w-full rounded-2xl object-cover shadow-2xl"
+                priority
               />
             </div>
           )}
@@ -166,6 +161,8 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
                 <a
                   href={downloadUrl}
                   className="inline-flex items-center justify-center rounded-full bg-softGold px-4 py-2 text-xs font-semibold text-black transition hover:bg-softGold/90"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Download as PDF
                 </a>
@@ -212,7 +209,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
  * ------------------------------------------ */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const all = getAllContent("resources") as { slug: string }[];
+  const all = getAllContent("resources");
 
   return {
     paths: all.map((r) => ({ params: { slug: r.slug } })),
@@ -225,7 +222,7 @@ export const getStaticProps: GetStaticProps<ResourcePageProps> = async ({
 }) => {
   const slug = String(params?.slug);
 
-  const doc = getContentBySlug("resources", slug) as RawResourceDoc | null;
+  const doc = getContentBySlug("resources", slug) as RawContentEntry | null;
 
   if (!doc) {
     return { notFound: true };
@@ -233,7 +230,7 @@ export const getStaticProps: GetStaticProps<ResourcePageProps> = async ({
 
   const { content, ...rawMeta } = doc;
 
-  const mdxSource = await serialize(content, {
+  const mdxSource = await serialize(content || "", {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
     },
@@ -241,14 +238,16 @@ export const getStaticProps: GetStaticProps<ResourcePageProps> = async ({
 
   const typedMeta: ResourceMeta = {
     slug: rawMeta.slug,
-    title: rawMeta.title,
+    title: rawMeta.title || "Untitled Resource",
     description: rawMeta.description ?? null,
+    subtitle: rawMeta.subtitle ?? null,
     date: rawMeta.date ?? null,
     author: rawMeta.author ?? null,
     readtime: rawMeta.readtime ?? null,
     coverImage: rawMeta.coverImage ?? null,
     tags: rawMeta.tags ?? null,
     downloadUrl: rawMeta.downloadUrl ?? null,
+    excerpt: rawMeta.excerpt ?? null,
   };
 
   return {

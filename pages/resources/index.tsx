@@ -7,30 +7,22 @@ import Image from "next/image";
 
 import Layout from "@/components/Layout";
 import { getAllContent } from "@/lib/mdx";
+import type { RawContentEntry } from "@/lib/mdx";
 
 interface ResourceMeta {
   slug: string;
   title: string;
   description?: string | null;
+  subtitle?: string | null;
   date?: string | null;
   readtime?: string | null;
   coverImage?: string | null;
   tags?: string[] | null;
+  author?: string | null;
 }
 
 interface ResourcesPageProps {
   resources: ResourceMeta[];
-}
-
-// Shape of MDX content for resources
-interface RawResourceMeta {
-  slug: string;
-  title: string;
-  description?: string | null;
-  date?: string | null;
-  readtime?: string | null;
-  coverImage?: string | null;
-  tags?: string[] | null;
 }
 
 const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
@@ -38,10 +30,27 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
   const pageDescription =
     "Curated frameworks and tools for fathers, founders, and institutional architects who are building for generations.";
 
+  // Sort resources by date (newest first) or title if no date
+  const sortedResources = [...resources].sort((a, b) => {
+    if (a.date && b.date) {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    }
+    return (a.title || "").localeCompare(b.title || "");
+  });
+
   return (
     <Layout pageTitle={pageTitle}>
       <Head>
+        <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content="https://www.abrahamoflondon.org/resources"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <main className="min-h-screen bg-charcoal text-cream">
@@ -63,91 +72,185 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
               for men and women who refuse to drift. These are not feel-good
               downloads. They are structural.
             </p>
+
+            <div className="mt-6 flex justify-center">
+              <p className="max-w-2xl text-sm text-gray-400">
+                {sortedResources.length} curated resources for builders,
+                leaders, and legacy architects.
+              </p>
+            </div>
           </header>
 
-          {/* Grid */}
-          <div className="grid gap-8 md:grid-cols-2">
-            {resources.map((res) => {
-              const href = `/resources/${res.slug}`;
-              return (
-                <article
-                  key={res.slug}
-                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition hover:-translate-y-1 hover:border-softGold/40 hover:shadow-softGold/20"
-                >
-                  {res.coverImage && (
-                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
-                      <Image
-                        src={res.coverImage}
-                        alt={res.title}
-                        width={800}
-                        height={600}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                  )}
-
-                  <div
-                    className={`flex flex-1 flex-col p-6 ${res.coverImage ? "" : "pt-8"}`}
+          {/* Resources Grid */}
+          {sortedResources.length > 0 ? (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+              {sortedResources.map((res) => {
+                const href = `/resources/${res.slug}`;
+                return (
+                  <article
+                    key={res.slug}
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-softGold/40 hover:shadow-softGold/20"
                   >
-                    <h2 className="mb-2 font-serif text-xl font-semibold tracking-tight text-cream">
-                      {res.title}
-                    </h2>
-
-                    {res.description && (
-                      <p className="mb-3 text-sm text-gray-300">
-                        {res.description}
-                      </p>
-                    )}
-
-                    <div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-gray-400">
-                      {res.date && (
-                        <time dateTime={res.date}>
-                          {new Date(res.date).toLocaleDateString("en-GB", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </time>
-                      )}
-                      {res.readtime && (
-                        <>
-                          <span className="h-1 w-1 rounded-full bg-gray-500" />
-                          <span>{res.readtime}</span>
-                        </>
-                      )}
-                    </div>
-
-                    {res.tags && res.tags.length > 0 && (
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {res.tags.slice(0, 4).map((tag) => (
-                          <span
-                            key={`${res.slug}-${tag}`}
-                            className="rounded-full bg-softGold/10 px-2.5 py-0.5 text-xs text-softGold"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                    {res.coverImage && (
+                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
+                        <Image
+                          src={res.coverImage}
+                          alt={res.title}
+                          width={800}
+                          height={600}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          priority={false}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                       </div>
                     )}
 
-                    <div className="mt-auto flex items-center justify-between pt-2">
-                      <Link
-                        href={href}
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-softGold transition hover:text-softGold/80"
-                      >
-                        Open resource
-                        <span aria-hidden>↗</span>
-                      </Link>
+                    <div
+                      className={`flex flex-1 flex-col p-6 ${res.coverImage ? "" : "pt-8"}`}
+                    >
+                      <div className="mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold uppercase tracking-[0.15em] text-softGold">
+                            Resource
+                          </span>
+                          {res.readtime && (
+                            <span className="text-xs text-gray-500">
+                              • {res.readtime}
+                            </span>
+                          )}
+                        </div>
+                        <h2 className="mt-2 font-serif text-xl font-semibold tracking-tight text-cream">
+                          {res.title}
+                        </h2>
+                      </div>
 
-                      <span className="text-[11px] uppercase tracking-[0.18em] text-gray-500">
-                        Pedigree · Not Pop-Content
-                      </span>
+                      {res.subtitle && (
+                        <p className="mb-3 text-sm text-gray-300">
+                          {res.subtitle}
+                        </p>
+                      )}
+
+                      {res.description && (
+                        <p className="mb-4 text-sm text-gray-400 line-clamp-2">
+                          {res.description}
+                        </p>
+                      )}
+
+                      <div className="mb-4 mt-auto">
+                        {res.tags && res.tags.length > 0 && (
+                          <div className="mb-4 flex flex-wrap gap-2">
+                            {res.tags.slice(0, 3).map((tag) => (
+                              <span
+                                key={`${res.slug}-${tag}`}
+                                className="rounded-full bg-softGold/10 px-2.5 py-0.5 text-xs text-softGold"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {res.tags.length > 3 && (
+                              <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs text-gray-400">
+                                +{res.tags.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between border-t border-white/10 pt-4">
+                          <div className="flex flex-col gap-1">
+                            {res.author && (
+                              <span className="text-xs text-gray-300">
+                                By {res.author}
+                              </span>
+                            )}
+                            {res.date && (
+                              <time
+                                dateTime={res.date}
+                                className="text-xs text-gray-500"
+                              >
+                                {new Date(res.date).toLocaleDateString(
+                                  "en-GB",
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )}
+                              </time>
+                            )}
+                          </div>
+
+                          <Link
+                            href={href}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-1.5 text-xs font-semibold text-softGold transition-colors hover:bg-softGold/20"
+                          >
+                            Open
+                            <svg
+                              className="h-3 w-3"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                              />
+                            </svg>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-20 text-center">
+              <div className="mx-auto max-w-md">
+                <div className="mb-6 inline-flex items-center justify-center rounded-full border border-softGold/20 bg-softGold/10 p-4">
+                  <svg
+                    className="h-8 w-8 text-softGold"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="mb-2 font-serif text-2xl font-bold text-cream">
+                  Resources Coming Soon
+                </h3>
+                <p className="text-gray-400">
+                  Strategic frameworks and tools are being prepared for
+                  publication.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Note */}
+          {sortedResources.length > 0 && (
+            <div className="mt-16 border-t border-white/10 pt-10 text-center">
+              <p className="text-sm text-gray-400">
+                These resources are designed for practical application, not
+                passive consumption.
+                <br />
+                Each has been tested in real-world contexts of leadership,
+                family, and institutional building.
+              </p>
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-4 py-2">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-softGold">
+                  Pedigree · Not Pop-Content
+                </span>
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </Layout>
@@ -155,24 +258,41 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
-  const all = getAllContent("resources") as unknown as RawResourceMeta[];
+  try {
+    const all = getAllContent("resources") as RawContentEntry[];
 
-  const resources: ResourceMeta[] = all.map((r) => ({
-    slug: r.slug,
-    title: r.title,
-    description: r.description ?? null,
-    date: r.date ?? null,
-    readtime: r.readtime ?? null,
-    coverImage: r.coverImage ?? null,
-    tags: r.tags ?? null,
-  }));
+    const resources: ResourceMeta[] = all.map((r) => ({
+      slug: r.slug || "",
+      title: r.title || "Untitled Resource",
+      description: r.description ?? null,
+      subtitle: r.subtitle ?? null,
+      date: r.date ?? null,
+      readtime: r.readtime ?? r.readTime ?? null,
+      coverImage: r.coverImage ?? null,
+      tags: Array.isArray(r.tags) ? r.tags : r.tags ? [r.tags] : null,
+      author: r.author ?? null,
+    }));
 
-  return {
-    props: {
-      resources,
-    },
-    revalidate: 60,
-  };
+    // Filter out any drafts
+    const publishedResources = resources.filter(
+      (r) => !(r as any).draft // Access draft from the raw data if needed
+    );
+
+    return {
+      props: {
+        resources: publishedResources,
+      },
+      revalidate: 60, // Revalidate every minute
+    };
+  } catch (error) {
+    console.error("Error loading resources:", error);
+    return {
+      props: {
+        resources: [],
+      },
+      revalidate: 60,
+    };
+  }
 };
 
 export default ResourcesIndexPage;
