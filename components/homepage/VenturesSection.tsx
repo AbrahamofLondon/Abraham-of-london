@@ -1,16 +1,12 @@
-"use client";
-
+// components/homepage/VenturesSection.tsx
 import * as React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   Building2,
   PackageCheck,
   Lightbulb,
 } from "lucide-react";
-
-import { LIBRARY_AESTHETICS } from "@/lib/content";
 
 type VentureStatus = "Active" | "Emerging" | "In development";
 
@@ -22,6 +18,7 @@ interface Venture {
   status: VentureStatus | string;
   focus: string;
   externalLabel?: string;
+  accentColor: string;
 }
 
 // Use the same URLs as in the ventures page
@@ -38,6 +35,7 @@ const ventures: Venture[] = [
     status: "Active",
     focus: "Strategic advisory · Market systems · Deal architecture",
     externalLabel: "Visit Alomarada.com",
+    accentColor: "emerald", // Active ventures in emerald
   },
   {
     name: "Endureluxe",
@@ -47,6 +45,7 @@ const ventures: Venture[] = [
     status: "Active",
     focus: "Fitness community · Performance gear · Everyday durability",
     externalLabel: "Explore Endureluxe",
+    accentColor: "blue", // Physical/community ventures in blue
   },
   {
     name: "InnovateHub",
@@ -56,15 +55,32 @@ const ventures: Venture[] = [
     status: "In development",
     focus: "Innovation engine · Capability building · Venture design",
     externalLabel: "Visit InnovateHub",
+    accentColor: "amber", // Development stage in amber
   },
 ];
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
+// Color mapping for consistent styling
+const colorClasses = {
+  emerald: {
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-300",
+    border: "border-emerald-400/30",
+    iconBg: "bg-emerald-400/10",
+    iconText: "text-emerald-300",
+  },
+  blue: {
+    bg: "bg-blue-500/10",
+    text: "text-blue-300",
+    border: "border-blue-400/30",
+    iconBg: "bg-blue-400/10",
+    iconText: "text-blue-300",
+  },
+  amber: {
+    bg: "bg-amber-500/10",
+    text: "text-amber-300",
+    border: "border-amber-400/30",
+    iconBg: "bg-amber-400/10",
+    iconText: "text-amber-300",
   },
 };
 
@@ -89,66 +105,60 @@ const VenturesSection: React.FC = () => {
 
         {/* Ventures Grid */}
         <div className="grid gap-8 md:grid-cols-3">
-          {ventures.map((venture) => (
-            <motion.article
-              key={venture.name}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-              variants={itemVariants}
-              className="group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-slate-950/60 to-slate-900/40 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-slate-950/80 hover:shadow-2xl"
-            >
-              {/* Icon and Status */}
-              <div className="mb-5 flex items-start justify-between gap-3">
-                <div className="rounded-xl bg-amber-400/10 p-3">
-                  <venture.icon className="h-7 w-7 text-amber-300" />
-                </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
-                    venture.status === "Active"
-                      ? "bg-emerald-500/10 text-emerald-300"
-                      : venture.status === "Emerging"
-                      ? "bg-blue-500/10 text-blue-300"
-                      : "bg-amber-500/10 text-amber-300"
-                  }`}
-                >
-                  {venture.status}
-                </span>
-              </div>
-
-              {/* Content */}
-              <h3 className="mb-3 font-serif text-xl font-semibold text-cream">
-                {venture.name}
-              </h3>
-              
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-amber-300/80">
-                {venture.focus}
-              </p>
-
-              <p className="mb-6 flex-1 text-sm leading-relaxed text-cream/75">
-                {venture.description}
-              </p>
-
-              {/* CTA */}
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-cream/60">
-                  External ·{" "}
-                  <span className="font-medium text-amber-300">
-                    {venture.href.replace(/^https?:\/\//, "")}
+          {ventures.map((venture) => {
+            const colors = colorClasses[venture.accentColor as keyof typeof colorClasses] || colorClasses.amber;
+            
+            return (
+              <article
+                key={venture.name}
+                className={`group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-slate-950/60 to-slate-900/40 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${colors.border} hover:border-opacity-50 hover:bg-slate-950/80`}
+              >
+                {/* Icon and Status */}
+                <div className="mb-5 flex items-start justify-between gap-3">
+                  <div className={`rounded-xl p-3 ${colors.iconBg}`}>
+                    <venture.icon className={`h-7 w-7 ${colors.iconText}`} />
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${colors.bg} ${colors.text}`}
+                  >
+                    {venture.status}
                   </span>
-                </span>
-                <Link
-                  href={venture.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center text-xs font-semibold uppercase tracking-wide text-amber-300 hover:text-amber-200"
-                >
-                  {venture.externalLabel ?? "Visit site"}
-                  <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-            </motion.article>
-          ))}
+                </div>
+
+                {/* Content */}
+                <h3 className="mb-3 font-serif text-xl font-semibold text-cream">
+                  {venture.name}
+                </h3>
+                
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-amber-300/80">
+                  {venture.focus}
+                </p>
+
+                <p className="mb-6 flex-1 text-sm leading-relaxed text-cream/75">
+                  {venture.description}
+                </p>
+
+                {/* CTA */}
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-cream/60">
+                    External ·{" "}
+                    <span className={`font-medium ${colors.text}`}>
+                      {venture.href.replace(/^https?:\/\//, "")}
+                    </span>
+                  </span>
+                  <Link
+                    href={venture.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group inline-flex items-center text-xs font-semibold uppercase tracking-wide ${colors.text} hover:opacity-80`}
+                  >
+                    {venture.externalLabel ?? "Visit site"}
+                    <ArrowRight className={`ml-1 h-3 w-3 transition-transform group-hover:translate-x-1 ${colors.iconText}`} />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
         {/* Footer CTA */}
