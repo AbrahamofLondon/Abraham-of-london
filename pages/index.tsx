@@ -218,73 +218,77 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
 };
 
 /* -------------------------------------------------------------------------- */
-/* COMPACT BOOK CARDS - COLOR-CODED                                          */
+/* CANON SPOTLIGHT – PREMIUM BOOK PRESENTATION                                */
 /* -------------------------------------------------------------------------- */
 
-type BookDraftType = "memoir" | "fiction" | "strategy" | "manual";
+const CanonPrimaryCard: React.FC = () => (
+  <Link
+    href="/books/the-architecture-of-human-purpose"
+    className="group block h-full"
+  >
+    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-softGold/15 bg-gradient-to-br from-charcoal via-black to-softBlack shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-3xl hover:shadow-softGold/20">
+      <div className="grid gap-6 p-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:p-8">
+        {/* Book cover as object, not wallpaper */}
+        <div className="relative flex items-center justify-center">
+          <div className="relative aspect-[3/4] w-full max-w-sm rounded-2xl bg-gradient-to-br from-softGold/10 via-black to-charcoal shadow-[0_25px_60px_rgba(0,0,0,0.75)]">
+            <div className="absolute inset-[6%] overflow-hidden rounded-xl border border-softGold/20 bg-black">
+              <Image
+                src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+                alt="The Architecture of Human Purpose — Prelude MiniBook"
+                fill
+                sizes="(max-width: 768px) 80vw, 40vw"
+                className="object-contain"
+                priority
+              />
+            </div>
 
-const bookDraftColors: Record<BookDraftType, { 
-  bg: string; 
-  text: string; 
-  border: string; 
-  accent: string; 
-  status: string 
-}> = {
-  memoir: {
-    bg: "bg-amber-50 dark:bg-amber-900/10",
-    text: "text-amber-700 dark:text-amber-400",
-    border: "border-amber-200 dark:border-amber-800/30",
-    accent: "bg-gradient-to-r from-amber-500 to-amber-600",
-    status: "Personal Narrative"
-  },
-  fiction: {
-    bg: "bg-indigo-50 dark:bg-indigo-900/10",
-    text: "text-indigo-700 dark:text-indigo-400",
-    border: "border-indigo-200 dark:border-indigo-800/30",
-    accent: "bg-gradient-to-r from-indigo-500 to-indigo-600",
-    status: "Narrative Experiment"
-  },
-  strategy: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/10",
-    text: "text-emerald-700 dark:text-emerald-400",
-    border: "border-emerald-200 dark:border-emerald-800/30",
-    accent: "bg-gradient-to-r from-emerald-500 to-emerald-600",
-    status: "Strategic Framework"
-  },
-  manual: {
-    bg: "bg-blue-50 dark:bg-blue-900/10",
-    text: "text-blue-700 dark:text-blue-400",
-    border: "border-blue-200 dark:border-blue-800/30",
-    accent: "bg-gradient-to-r from-blue-500 to-blue-600",
-    status: "Practical Guide"
-  }
-};
+            {/* Subtle light strip on the 'spine' */}
+            <div className="pointer-events-none absolute left-0 top-6 h-[70%] w-1 rounded-full bg-gradient-to-b from-softGold/40 via-transparent to-transparent opacity-70" />
+          </div>
+        </div>
 
-interface CompactBookCardProps {
-  title: string;
-  subtitle: string;
-  href: string;
-  tag: string;
-  imageSrc: string;
-  status?: string;
-  progress?: number;
-}
+        {/* Copy block */}
+        <div className="flex flex-col justify-center">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="rounded-full bg-softGold/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-softGold">
+              Entry into the Canon
+            </span>
+            <span className="rounded-full border border-softGold/30 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-softGold/80">
+              Volume I · Prelude
+            </span>
+          </div>
 
-const CompactBookCard: React.FC<CompactBookCardProps> = ({
-  title,
-  subtitle,
-  href,
-  tag,
-  imageSrc,
-  status = "In Progress",
-  progress = 50,
-}) => {
-  const getTypeFromTag = (tag: string): BookDraftType => {
-    if (tag.toLowerCase().includes("memoir")) return "memoir";
-    if (tag.toLowerCase().includes("fiction")) return "fiction";
-    if (tag.toLowerCase().includes("strategy")) return "strategy";
-    return "manual";
-  };
+          <h3 className="mb-3 font-serif text-2xl font-light text-ivory md:text-3xl">
+            The Architecture of Human Purpose
+          </h3>
+
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-softGold/80">
+            Canon · Foundations of Purpose
+          </p>
+
+          <p className="mb-6 text-sm leading-relaxed text-ivory/70">
+            A distilled, high-level prelude to the Canon — written for men who
+            understand that human flourishing is not accidental, but
+            architectural. This is the foundation stone for everything that
+            follows.
+          </p>
+
+          <div className="mt-auto flex items-center justify-between pt-4 border-t border-softGold/15">
+            <span className="text-xs font-medium uppercase tracking-[0.22em] text-ivory/50">
+              Foundational Text · Limited Release
+            </span>
+            <div className="flex items-center gap-2 text-softGold transition-colors group-hover:text-softGold/80">
+              <span className="text-sm font-semibold">Enter Volume</span>
+              <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">
+                ↠
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </Link>
+);
 
   const type = getTypeFromTag(tag);
   const colors = bookDraftColors[type];
