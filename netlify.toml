@@ -7,10 +7,9 @@
   PNPM_VERSION = "9.12.0"
   NODE_ENV = "production"
   
-  # Critical build flags
+  # Critical build flags - REMOVED NEXT_DISABLE_TYPECHECK
   CI = "false"
   NEXT_DISABLE_ESLINT = "1"
-  NEXT_DISABLE_TYPECHECK = "1"
   NEXT_TELEMETRY_DISABLED = "1"
   DISABLE_ESLINT_PLUGIN = "true"
   
