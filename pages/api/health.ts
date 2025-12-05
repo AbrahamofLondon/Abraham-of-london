@@ -1,4 +1,4 @@
-// pages/api/health.ts
+// pages/api/health.ts - CORRECTED VERSION
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   allPosts,
@@ -10,7 +10,7 @@ import {
   allResources,
   allCanons,
 } from "@/lib/contentlayer-helper";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/siteConfig"; // Correct import
 
 type HealthStatus = "healthy" | "degraded";
 
@@ -74,7 +74,7 @@ export default function handler(
       timestamp: new Date(now).toISOString(),
       uptimeSeconds: Math.floor((now - startedAt) / 1000),
       environment: process.env.NODE_ENV || "development",
-      siteUrl: siteConfig.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "",
+      siteUrl: siteConfig.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "", // CORRECTED: Use siteConfig.siteUrl
       contentCounts: counts,
     };
 
@@ -96,7 +96,7 @@ export default function handler(
       timestamp: new Date(now).toISOString(),
       uptimeSeconds: Math.floor((now - startedAt) / 1000),
       environment: process.env.NODE_ENV || "development",
-      siteUrl: siteConfig.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "",
+      siteUrl: siteConfig.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "", // CORRECTED: Use siteConfig.siteUrl
       contentCounts: {
         posts: 0,
         books: 0,

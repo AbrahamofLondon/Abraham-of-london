@@ -309,3 +309,5 @@ export const siteConfig: FullSiteConfig = {
     return `${pageTitle} | ${base}`;
   },
 };
+
+export const siteUrl = siteConfig.siteUrl;

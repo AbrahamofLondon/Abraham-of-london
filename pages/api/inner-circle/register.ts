@@ -1,4 +1,4 @@
-// pages/api/inner-circle/register.ts
+// pages/api/inner-circle/register.ts - CORRECTED
 import type { NextApiRequest, NextApiResponse } from "next";
 import { sendInnerCircleEmail } from "@/lib/email/sendInnerCircleEmail";
 import {
@@ -9,7 +9,7 @@ import {
 import {
   createOrUpdateMemberAndIssueKey,
   getPrivacySafeStats,
-} from "@/lib/innerCircleMembership";
+} from "@/lib/server/innerCircleMembership"; // CORRECTED: Added "/server/"
 import { getClientIpWithAnalysis } from "@/lib/server/ip";
 import { verifyRecaptcha } from "@/lib/recaptchaServer";
 
