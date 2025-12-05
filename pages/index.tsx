@@ -11,8 +11,8 @@ import {
   CONTENT_CATEGORIES,
 } from "@/lib/content";
 
-// Import the missing ContentCard component
-import ContentCard from "@/components/ContentCard"; // Add this line
+// Import the ContentCard component
+import ContentCard from "@/components/ContentCard";
 
 import VenturesSection from "@/components/homepage/VenturesSection";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
@@ -53,8 +53,8 @@ const CanonPrimaryCard: React.FC = () => (
           alt="The Architecture of Human Purpose — Prelude MiniBook"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover object-center" // Added object-center
-          style={{ objectFit: 'cover', objectPosition: 'center' }} // Ensure proper fitting
+          className="object-cover object-center"
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
@@ -128,41 +128,108 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
 );
 
 /* -------------------------------------------------------------------------- */
-/* COMPACT BOOKS SPOTLIGHT                                                   */
+/* ENHANCED COMPACT BOOKS SPOTLIGHT                                           */
 /* -------------------------------------------------------------------------- */
 
-const CompactBookCard: React.FC<{
+interface CompactBookCardProps {
   title: string;
   subtitle: string;
   href: string;
   tag: string;
   imageSrc: string;
-}> = ({ title, subtitle, href, tag, imageSrc }) => (
+  status?: string;
+  progress?: number;
+}
+
+const CompactBookCard: React.FC<CompactBookCardProps> = ({
+  title,
+  subtitle,
+  href,
+  tag,
+  imageSrc,
+  status = "In Progress",
+  progress = 50,
+}) => (
   <Link href={href} className="group block">
-    <article className="flex items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
-      <div className="relative h-16 w-12 overflow-hidden rounded-md">
-        <Image
-          src={imageSrc}
-          alt={title}
-          fill
-          sizes="64px"
-          className="object-cover object-center"
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
-        />
-      </div>
-      <div className="flex-1">
-        <div className="mb-1 flex items-center gap-2">
-          <h3 className="font-serif text-sm font-semibold text-gray-900 dark:text-white">
-            {title}
-          </h3>
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-            {tag}
-          </span>
+    <article className="h-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900">
+      <div className="p-6">
+        <div className="flex items-start gap-6">
+          <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-gray-700">
+            <Image
+              src={imageSrc}
+              alt={title}
+              fill
+              sizes="96px"
+              className="object-cover object-center"
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+          </div>
+
+          <div className="flex-1">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                {tag}
+              </span>
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                {status}
+              </span>
+            </div>
+
+            <h3 className="mb-2 font-serif text-xl font-bold text-gray-900 dark:text-white">
+              {title}
+            </h3>
+            
+            <p className="mb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+              {subtitle}
+            </p>
+
+            {/* Progress bar */}
+            <div className="mb-3">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Progress
+                </span>
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                  {progress}%
+                </span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Draft manuscript
+              </span>
+              <div className="flex items-center gap-1 text-sm font-medium text-amber-600 transition-all group-hover:gap-2 dark:text-amber-400">
+                <span>Preview Draft</span>
+                <span className="transition-transform group-hover:translate-x-1">
+                  ↠
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
       </div>
-      <div className="text-amber-600 opacity-70 transition-transform group-hover:translate-x-1 dark:text-amber-400">
-        →
+
+      {/* Decorative footer */}
+      <div className="border-t border-gray-100 bg-gray-50 px-6 py-3 dark:border-gray-800 dark:bg-gray-800/50">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            Not yet published
+          </span>
+          <div className="flex items-center gap-1">
+            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+            <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+              Active development
+            </span>
+          </div>
+        </div>
       </div>
     </article>
   </Link>
@@ -402,34 +469,53 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* 4. COMPACT BOOKS SPOTLIGHT */}
-      <section className="border-y border-gray-200 bg-gray-50 py-12 dark:border-gray-800 dark:bg-gray-900">
+      {/* 4. COMPACT BOOKS SPOTLIGHT - ENHANCED */}
+      <section className="border-y border-gray-200 bg-gradient-to-b from-gray-50 to-white py-24 dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 text-center">
-            <h3 className="font-serif text-xl font-semibold text-gray-700 dark:text-gray-300">
+          <div className="mb-12 text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 dark:border-amber-900/30 dark:bg-amber-900/10">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+                In Development
+              </div>
+            </div>
+            <h3 className="mb-4 font-serif text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
               Current Projects & Drafts
             </h3>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Works in progress and narrative experiments currently in
-              development
+            <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+              Works in progress and narrative experiments currently shaping the edges
+              of the Canon.
             </p>
           </div>
 
-          <div className="mx-auto grid max-w-2xl gap-3">
+          <div className="mx-auto grid max-w-4xl gap-8 sm:grid-cols-2">
             <CompactBookCard
               title="Fathering Without Fear"
-              subtitle="Memoir and strategic narrative for fathers."
+              subtitle="Memoir and strategic narrative for fathers navigating leadership in an age of uncertainty."
               href="/books/fathering-without-fear"
               tag="Memoir Draft"
               imageSrc="/assets/images/books/fathering-without-fear.jpg"
+              status="Early Draft"
+              progress={65}
             />
             <CompactBookCard
               title="The Fiction Adaptation"
-              subtitle="When fiction tells what truth cannot."
+              subtitle="When fiction tells what truth cannot — a narrative exploration of strategic faith in hostile times."
               href="/books/the-fiction-adaptation"
               tag="Fiction Draft"
               imageSrc="/assets/images/books/the-fiction-adaptation.jpg"
+              status="Research Phase"
+              progress={35}
             />
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/works-in-progress"
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            >
+              <span>View all projects in development</span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
           </div>
         </div>
       </section>
