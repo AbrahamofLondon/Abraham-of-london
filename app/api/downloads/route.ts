@@ -1,12 +1,8 @@
 // app/api/downloads/route.ts
+
 import { NextResponse } from "next/server";
-import { allDownloads } from "@/lib/contentlayer-helper";
-import {
-  rateLimitAsync,
-  RATE_LIMIT_CONFIGS,
-  createRateLimitHeaders,
-} from "@/lib/rate-limit";
-import { getClientIp, anonymizeIp } from "@/lib/server/ip";
+// Use a RELATIVE import so we completely bypass the "@/lib" alias here
+import { allDownloads } from "../../../lib/contentlayer-helper";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -50,7 +46,7 @@ type DownloadsResponse =
   | { ok: false; error: string };
 
 // ---------------------------------------------------------------------------
-// Constants & helpers
+// Helpers
 // ---------------------------------------------------------------------------
 
 const SECURITY_HEADERS: Record<string, string> = {
@@ -85,26 +81,13 @@ function mapDownload(doc: DownloadDocument): DownloadItem {
   };
 }
 
-// Very conservative slug validation – avoids path-style or script-y junk
-function isValidSlug(slug: string): boolean {
-  if (!slug) return false;
-  if (slug.length > 120) return false;
-  // allow a–z 0–9 - and /
-  return /^[a-zA-Z0-9\-\/]+$/.test(slug);
-}
-
-// Helper for error responses with security headers
 function jsonError(
   body: { ok: false; error: string },
-  status: number,
-  extraHeaders?: Record<string, string>
-) {
+  status: number
+): NextResponse<DownloadsResponse> {
   return NextResponse.json(body, {
     status,
-    headers: {
-      ...SECURITY_HEADERS,
-      ...(extraHeaders || {}),
-    },
+    headers: SECURITY_HEADERS,
   });
 }
 
@@ -118,119 +101,58 @@ export async function GET(
   const url = new URL(request.url);
   const slugParam = url.searchParams.get("slug");
 
-  // Derive IP from headers using shared helper
-  const ip = getClientIp({
-    headers: (() => {
-      const headers: Record<string, string> = {};
-      request.headers.forEach((value, key) => {
-        headers[key.toLowerCase()] = value;
-      });
-      return headers;
-    })(),
-  });
-
-  // Apply API-level rate limiting
-  const rlKey = `downloads:${ip || "unknown"}`;
-  const rlResult = await rateLimitAsync(
-    rlKey,
-    RATE_LIMIT_CONFIGS.API_GENERAL
-  );
-  const rateHeaders = createRateLimitHeaders(rlResult);
-
-  const baseHeaders: Record<string, string> = {
-    ...SECURITY_HEADERS,
-    // cache for 10 mins, allow stale for 10 mins at the edge
-    "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
-    ...rateHeaders,
-  };
-
-  if (!rlResult.allowed) {
-    // Minimal logging; anonymise IP
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("[downloads] rate limit exceeded", {
-        ip: anonymizeIp(ip),
-      });
-    }
-
-    return jsonError(
-      {
-        ok: false,
-        error: "Too many requests. Please try again later.",
-      },
-      429,
-      rateHeaders
-    );
-  }
-
-  // Single download fetch
+  // Single download
   if (slugParam && typeof slugParam === "string") {
     const slug = slugParam.trim();
-
-    if (!isValidSlug(slug)) {
-      return jsonError(
-        { ok: false, error: "Invalid slug" },
-        400,
-        baseHeaders
-      );
-    }
-
-    const found = allDownloads.find(
-      (d) => d.slug === slug
-    ) as DownloadDocument | undefined;
+    const found = allDownloads.find((d) => d.slug === slug) as
+      | DownloadDocument
+      | undefined;
 
     if (!found) {
       return NextResponse.json(
         { ok: false, error: "Download not found" },
-        { status: 404, headers: baseHeaders }
+        { status: 404, headers: SECURITY_HEADERS }
       );
     }
 
     return NextResponse.json(
-      {
-        ok: true,
-        item: mapDownload(found),
-      },
-      { headers: baseHeaders }
+      { ok: true, item: mapDownload(found) },
+      { headers: SECURITY_HEADERS }
     );
   }
 
-  // Full list of downloads
+  // Full list
   const items = allDownloads
     .slice()
     .sort(
       (a, b) =>
-        new Date(b.date).getTime() - new Date(a.date).getTime()
+        new Date((b as any).date || 0).getTime() -
+        new Date((a as any).date || 0).getTime()
     )
     .map((doc) => mapDownload(doc as DownloadDocument));
 
   return NextResponse.json(
+    { ok: true, count: items.length, items },
     {
-      ok: true,
-      count: items.length,
-      items,
-    },
-    { headers: baseHeaders }
+      headers: {
+        ...SECURITY_HEADERS,
+        // safe caching for reads
+        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
+      },
+    }
   );
 }
 
 // ---------------------------------------------------------------------------
-// Other methods – explicitly disallowed
+// Other methods – not allowed
 // ---------------------------------------------------------------------------
 
-export async function POST(): Promise<
-  NextResponse<DownloadsResponse>
-> {
+export async function POST() {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
-
-export async function PUT(): Promise<
-  NextResponse<DownloadsResponse>
-> {
+export async function PUT() {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
-
-export async function DELETE(): Promise<
-  NextResponse<DownloadsResponse>
-> {
+export async function DELETE() {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
