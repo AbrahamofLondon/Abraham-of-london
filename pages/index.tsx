@@ -41,23 +41,24 @@ const SectionDivider: React.FC = () => (
 );
 
 /* -------------------------------------------------------------------------- */
-/* CANON SPOTLIGHT                                                            */
+/* CANON SPOTLIGHT - FIXED IMAGE                                              */
 /* -------------------------------------------------------------------------- */
 
 const CanonPrimaryCard: React.FC = () => (
   <Link href="/books/the-architecture-of-human-purpose" className="group block h-full">
     <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900">
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <Image
-          src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-          alt="The Architecture of Human Purpose — Prelude MiniBook"
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover object-center"
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+      <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+        <div className="relative h-full w-full">
+          <Image
+            src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+            alt="The Architecture of Human Purpose — Prelude MiniBook"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-contain object-center p-4" // Changed from object-cover to object-contain
+            priority
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent" />
         <div className="absolute left-4 bottom-4">
           <span className="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
             Prelude MiniBook · Limited Release
@@ -83,13 +84,6 @@ const CanonPrimaryCard: React.FC = () => (
     </article>
   </Link>
 );
-
-type CanonEntryProps = {
-  title: string;
-  subtitle: string;
-  href: string;
-  imageSrc: string;
-};
 
 const CanonEntryCard: React.FC<CanonEntryProps> = ({
   title,
