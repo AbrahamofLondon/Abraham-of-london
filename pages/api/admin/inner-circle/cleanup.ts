@@ -1,5 +1,7 @@
 // pages/api/admin/inner-circle/cleanup.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { rateLimit, createRateLimitHeaders, RATE_LIMIT_CONFIGS } from "@/lib/server/rateLimit";
+import { getInnerCircleStore } from "@/lib/server/innerCircleStore";
 
 type CleanupResponse = {
   ok: boolean;
