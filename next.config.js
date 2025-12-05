@@ -14,7 +14,10 @@ const nextConfig = {
 
   compress: true,
   poweredByHeader: false,
-  typescript: { ignoreBuildErrors: true },
+  typescript: { 
+    ignoreBuildErrors: true,
+    tsconfigPath: "./tsconfig.json"
+  },
 
   // Expose environment variables to the browser
   env: {
@@ -65,7 +68,14 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
 
+  // Simplified webpack config without require issues
   webpack: (config, { isServer }) => {
+    // Add path aliases
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': process.cwd(),
+    };
+
     if (isServer) {
       config.externals = [
         ...(config.externals || []),

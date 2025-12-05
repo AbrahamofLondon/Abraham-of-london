@@ -715,3 +715,9 @@ export default {
   getFileExtension,
   isValidFileType,
 };
+
+// Safe string utility
+export function safeString(str: unknown): string {
+  return typeof str === 'string' ? str : '';
+}
+

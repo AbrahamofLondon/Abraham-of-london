@@ -7,25 +7,25 @@ import {
   type MdxMeta,
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
-import type { BookMeta as SharedBookMeta } from "@/types/index";
+import type { any as Sharedany } from "@/types/index";
 
-// Re-export shared BookMeta so everything speaks the same type.
-export type BookMeta = SharedBookMeta;
+// Re-export shared any so everything speaks the same type.
+export type any = Sharedany;
 
-export type BookWithContent = BookMeta & {
+export type BookWithContent = any & {
   content: string;
 };
 
-// MDX meta that may also carry book-specific fields defined in SharedBookMeta
+// MDX meta that may also carry book-specific fields defined in Sharedany
 type BookishMdxMeta = MdxMeta &
-  Partial<SharedBookMeta> & {
+  Partial<Sharedany> & {
     publishDate?: string; // allow alternate date field
     releaseDate?: string; // another alternate for date
   };
 
 type BookishMdxDocument = MdxDocument & {
   content: string;
-} & Partial<SharedBookMeta>;
+} & Partial<Sharedany>;
 
 /**
  * Safely convert any value to string or return undefined
@@ -96,10 +96,10 @@ function safeFormat(
 }
 
 /**
- * Map generic MDX meta into a fully shaped BookMeta.
- * We assume MDX frontmatter matches a subset of SharedBookMeta.
+ * Map generic MDX meta into a fully shaped any.
+ * We assume MDX frontmatter matches a subset of Sharedany.
  */
-function fromMdxMeta(meta: MdxMeta): BookMeta {
+function fromMdxMeta(meta: MdxMeta): any {
   const m = meta as BookishMdxMeta;
 
   // Handle different date fields - prefer date, then publishDate, then releaseDate
@@ -161,7 +161,7 @@ function fromMdxMeta(meta: MdxMeta): BookMeta {
 }
 
 /**
- * Attach MDX content to a typed BookMeta.
+ * Attach MDX content to a typed any.
  */
 function fromMdxDocument(doc: MdxDocument): BookWithContent {
   const bookDoc = doc as BookishMdxDocument;
@@ -176,7 +176,7 @@ function fromMdxDocument(doc: MdxDocument): BookWithContent {
 /**
  * All books – meta only.
  */
-export function getAllBooksMeta(): BookMeta[] {
+export function getAllBooksMeta(): any[] {
   try {
     const metas = getMdxCollectionMeta("books");
     if (!metas || !Array.isArray(metas)) {
@@ -247,7 +247,7 @@ export function getAllBooks(): BookWithContent[] {
 /**
  * Get books by category
  */
-export function getBooksByCategory(category: string): BookMeta[] {
+export function getBooksByCategory(category: string): any[] {
   try {
     const books = getAllBooksMeta();
     const normalizedCategory = category.toLowerCase().trim();
@@ -265,7 +265,7 @@ export function getBooksByCategory(category: string): BookMeta[] {
 /**
  * Get books by tag
  */
-export function getBooksByTag(tag: string): BookMeta[] {
+export function getBooksByTag(tag: string): any[] {
   try {
     const books = getAllBooksMeta();
     const normalizedTag = tag.toLowerCase().trim();
@@ -282,7 +282,7 @@ export function getBooksByTag(tag: string): BookMeta[] {
 /**
  * Get featured books
  */
-export function getFeaturedBooks(): BookMeta[] {
+export function getFeaturedBooks(): any[] {
   try {
     const books = getAllBooksMeta();
     return books.filter(book => book.featured === true);
@@ -295,7 +295,7 @@ export function getFeaturedBooks(): BookMeta[] {
 /**
  * Get published books only (filter out drafts)
  */
-export function getPublishedBooks(): BookMeta[] {
+export function getPublishedBooks(): any[] {
   try {
     const books = getAllBooksMeta();
     return books.filter(book => book.draft !== true && book.status !== "draft");
@@ -308,7 +308,7 @@ export function getPublishedBooks(): BookMeta[] {
 /**
  * Search books by title, description, or tags
  */
-export function searchBooks(query: string): BookMeta[] {
+export function searchBooks(query: string): any[] {
   try {
     const books = getAllBooksMeta();
     const normalizedQuery = query.toLowerCase().trim();
@@ -345,7 +345,7 @@ export function searchBooks(query: string): BookMeta[] {
 /**
  * Get recent books (sorted by date, newest first)
  */
-export function getRecentBooks(limit?: number): BookMeta[] {
+export function getRecentBooks(limit?: number): any[] {
   try {
     const books = getAllBooksMeta();
     
@@ -366,7 +366,7 @@ export function getRecentBooks(limit?: number): BookMeta[] {
 /**
  * Get books by format (hardcover, paperback, etc.)
  */
-export function getBooksByFormat(format: string): BookMeta[] {
+export function getBooksByFormat(format: string): any[] {
   try {
     const books = getAllBooksMeta();
     const normalizedFormat = format.toLowerCase().trim();

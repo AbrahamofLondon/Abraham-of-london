@@ -5,9 +5,9 @@ if (typeof window !== "undefined") {
   throw new Error("downloads-data must not be imported on the client");
 }
 
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
+import * as fs from "fs";
+import * as path from "path";
+import * as matter from "gray-matter";
 
 export interface DownloadMeta {
   slug: string; // URL slug (filename without extension)

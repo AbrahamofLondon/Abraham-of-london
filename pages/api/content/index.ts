@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getAllUnifiedContent } from '@/lib/server/unified-content';
+import { getAllUnifiedContent } from '../../../lib/server/unified-content';
 
 export default async function handler(
   req: NextApiRequest,

@@ -2,7 +2,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
-import { safeString } from "@/lib/utils";
+import { isString } from "@/lib/utils";
 
 type BookHeroProps = {
   title?: string | null;

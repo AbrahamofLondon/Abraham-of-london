@@ -1,5 +1,7 @@
-// Add these lines to proxy.ts:
+import { proxy } from './proxy';
+
+// Export middleware function
 export const middleware = proxy;
 
-// Re-export for TypeScript compatibility with old imports
-export * from './_middleware';
+// Default export for Next.js compatibility
+export default proxy;

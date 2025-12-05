@@ -4,10 +4,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useMemo } from "react";
-import type { BookMeta } from "@/types/index";
+import type { any } from "@/types/index";
 
 interface BookCardProps {
-  book: BookMeta;
+  book: any;
   className?: string;
   priority?: boolean;
   size?: "default" | "featured";

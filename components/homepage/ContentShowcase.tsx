@@ -5,15 +5,15 @@ import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, FileText } from "lucide-react";
 import BlogPostCard from "@/components/BlogPostCard"; // Fixed import path
 import BookCard from "@/components/books/BookCard";
-import type { PostMeta, BookMeta } from "@/types/index";
+import type { any, any } from "@/types/index";
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
 type ContentItem =
-  | (PostMeta & { _type: "post" })
-  | (BookMeta & { _type: "book" });
+  | (any & { _type: "post" })
+  | (any & { _type: "book" });
 
 interface ContentShowcaseProps {
   items: ContentItem[];
@@ -31,13 +31,13 @@ interface ContentShowcaseProps {
 
 const isPostItem = (
   item: ContentItem
-): item is PostMeta & { _type: "post" } => {
+): item is any & { _type: "post" } => {
   return item._type === "post";
 };
 
 const isBookItem = (
   item: ContentItem
-): item is BookMeta & { _type: "book" } => {
+): item is any & { _type: "book" } => {
   return item._type === "book";
 };
 
@@ -162,3 +162,4 @@ export default function ContentShowcase({
     </section>
   );
 }
+

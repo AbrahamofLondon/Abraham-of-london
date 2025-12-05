@@ -6,12 +6,12 @@ import { getAllDownloadsMeta } from "./downloads-data";
 import { getAllEvents } from "./events-data";
 
 // Already used elsewhere
-import { getAllPosts } from "@/lib/posts";
-import { getAllBooksMeta } from "@/lib/server/books-data";
+import { getAllPosts } from "../../lib/posts";
+import { getAllBooksMeta } from "./books-data";
 
 // Light wrappers for prints/resources – make sure these files exist.
-import { getAllPrintsMeta } from "@/lib/server/prints-data";
-import { getAllResources } from "@/lib/server/resources-data"; // Changed from getAllResourcesMeta
+import { getAllPrintsMeta } from "./prints-data";
+import { getAllResources } from "./resources-data"; // Changed from getAllResourcesMeta
 
 export type UnifiedType =
   | "essay"

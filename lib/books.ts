@@ -3,10 +3,10 @@ import {
   getBookBySlug as getBookDocBySlug,
 } from "@/lib/server/books-data";
 
-import type { BookMeta } from "@/types/index";
+import type { any } from "@/types/index";
 
 // Extended type that includes content
-export type BookWithContent = BookMeta & {
+export type BookWithContent = any & {
   content?: string;
 };
 
@@ -52,9 +52,9 @@ function safeArray(value: unknown): string[] | undefined {
 }
 
 /**
- * Normalise raw meta into a strongly-typed BookMeta.
+ * Normalise raw meta into a strongly-typed any.
  */
-function normaliseBookMeta(raw: Record<string, unknown>): BookMeta {
+function normaliseany(raw: Record<string, unknown>): any {
   const slug = safeString(raw.slug) || "";
   const title = safeString(raw.title) || "Untitled";
 
@@ -126,9 +126,9 @@ export function getRawBooks(): Record<string, unknown>[] {
 /**
  * Fully typed & normalised books for UI components.
  */
-export function getAllBooks(): BookMeta[] {
+export function getAllBooks(): any[] {
   const rawBooks = getRawBooks();
-  return rawBooks.map(normaliseBookMeta);
+  return rawBooks.map(normaliseany);
 }
 
 /**
@@ -139,7 +139,7 @@ export function getBookBySlug(slug: string): BookWithContent | undefined {
   if (!raw) return undefined;
 
   const record = toSafeRecord(raw);
-  const meta = normaliseBookMeta(record);
+  const meta = normaliseany(record);
 
   // Extract content if it exists
   const content = safeString(raw.content);

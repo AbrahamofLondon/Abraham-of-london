@@ -1,7 +1,7 @@
 // src/lib/server/events-data.ts
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
+import * as fs from "fs";
+import * as path from "path";
+import * as matter from "gray-matter";
 
 // -----------------------------------------------------------------------------
 // Core types
