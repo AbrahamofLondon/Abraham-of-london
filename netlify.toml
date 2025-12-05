@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm run build:netlify"
+  command = "CI= pnpm run build:netlify"
   publish = ".next"
 
 [build.environment]
