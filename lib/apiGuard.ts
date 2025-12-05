@@ -1,6 +1,6 @@
 // lib/apiGuard.ts
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
-import { isRecaptchaValid } from "@/lib/verifyRecaptcha";
+import { verifyRecaptcha } from "@/lib/recaptchaServer";
 
 export type GuardOptions = {
   requireRecaptcha?: boolean;
@@ -15,6 +15,17 @@ interface ApiRequestBody {
   [key: string]: unknown;
 }
 
+type RecaptchaRawResult =
+  | boolean
+  | {
+      success?: boolean;
+      score?: number;
+      action?: string;
+      errors?: string[];
+    }
+  | null
+  | undefined;
+
 function getClientIp(req: NextApiRequest): string | undefined {
   const forwardedFor = req.headers["x-forwarded-for"];
   if (Array.isArray(forwardedFor)) return forwardedFor[0];
@@ -25,6 +36,57 @@ function getClientIp(req: NextApiRequest): string | undefined {
   if (typeof realIp === "string") return realIp;
 
   return req.socket?.remoteAddress ?? undefined;
+}
+
+/**
+ * Normalise the recaptchaServer result (boolean | object) into a single boolean.
+ * - Checks success flag
+ * - Optionally enforces action match
+ * - Optionally enforces minimum score
+ */
+async function isRecaptchaValid(
+  token: string,
+  expectedAction?: string,
+  clientIp?: string
+): Promise<boolean> {
+  try {
+    const raw: RecaptchaRawResult = await verifyRecaptcha(
+      token,
+      expectedAction,
+      clientIp
+    );
+
+    // Legacy boolean behaviour
+    if (typeof raw === "boolean") {
+      return raw;
+    }
+
+    if (!raw || typeof raw !== "object") {
+      return false;
+    }
+
+    const success = raw.success ?? false;
+    if (!success) return false;
+
+    // If we know the expected action and the API returns an action, enforce match
+    if (expectedAction && raw.action && raw.action !== expectedAction) {
+      return false;
+    }
+
+    // Optional score enforcement – fall back to 0.5 if not configured
+    const minScore = parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5");
+    if (typeof raw.score === "number" && raw.score < minScore) {
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.error("[apiGuard] reCAPTCHA verification error:", err);
+    }
+    return false;
+  }
 }
 
 export function withSecurity<T = unknown>(
@@ -42,7 +104,7 @@ export function withSecurity<T = unknown>(
   } = options;
 
   return async (req: NextApiRequest, res: NextApiResponse<T>) => {
-    // Method-level CORS preflight shortcut if ever needed
+    // Basic CORS preflight shortcut if ever needed
     if (req.method === "OPTIONS") {
       res.status(204).end();
       return;
@@ -70,9 +132,9 @@ export function withSecurity<T = unknown>(
       }
     }
 
-    // reCAPTCHA v3 (using your verifyRecaptcha.ts)
+    // reCAPTCHA v3 via recaptchaServer
     if (requireRecaptcha) {
-      const body = req.body as ApiRequestBody;
+      const body = (req.body || {}) as ApiRequestBody;
       const token =
         body.recaptchaToken ||
         body.token ||

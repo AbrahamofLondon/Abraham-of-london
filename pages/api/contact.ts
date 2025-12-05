@@ -1,12 +1,5 @@
 // pages/api/contact.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { withSecurity } from "@/lib/apiGuard";
-import {
-  rateLimit,
-  RATE_LIMIT_CONFIGS,
-  createRateLimitHeaders,
-} from "@/lib/server/rateLimit";
-import { getRateLimitKey } from "@/lib/server/ip";
 
 interface OkResponse {
   ok: true;
@@ -61,20 +54,6 @@ async function contactHandler(
     return res.status(405).json({ ok: false, message: "Method Not Allowed" });
   }
 
-  // 🔒 Per-IP rate limiting (shared infra)
-  const rlKey = getRateLimitKey(req, RATE_LIMIT_CONFIGS.CONTACT_FORM.keyPrefix);
-  const rl = rateLimit(rlKey, RATE_LIMIT_CONFIGS.CONTACT_FORM);
-  const rlHeaders = createRateLimitHeaders(rl);
-  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
-
-  if (!rl.allowed) {
-    return res.status(429).json({
-      ok: false,
-      message: "Too many requests. Please slow down.",
-      error: "RATE_LIMITED",
-    });
-  }
-
   try {
     const rawBody = req.body;
     const body: ContactRequestBody =
@@ -105,7 +84,7 @@ async function contactHandler(
     const teaserA4Url = abs(SITE_URL, TEASER_A4);
     const teaserMobUrl = abs(SITE_URL, TEASER_MOB);
 
-    // Primary honeypot (belt and braces on top of withSecurity)
+    // Honeypot – silent success for bots
     if (honeypot) {
       return res
         .status(200)
@@ -142,6 +121,7 @@ async function contactHandler(
     }
 
     const provider = (process.env.CONTACT_PROVIDER || "").toLowerCase();
+
     if (provider === "resend") {
       const apiKey = process.env.RESEND_API_KEY;
       const to = process.env.MAIL_TO || "info@abrahamoflondon.org";
@@ -401,9 +381,4 @@ async function sendViaResend(args: SendViaResendArgs): Promise<ResendResponse> {
   };
 }
 
-// 🔐 export with guard
-export default withSecurity(contactHandler, {
-  requireRecaptcha: true,
-  expectedAction: "contact_form",
-  requireHoneypot: false,
-});
+export default contactHandler;

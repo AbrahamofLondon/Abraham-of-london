@@ -1,24 +1,8 @@
 // pages/api/admin/inner-circle/export.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import {
-  rateLimit,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-} from "@/lib/server/rateLimit";
-import { exportInnerCircleAdminSummary, getPrivacySafeStats } from "@/lib/server/innerCircleMembership";
-
-type AdminExportRow = {
-  created_at: string;
-  status: string;
-  key_suffix: string;
-  email_hash_prefix: string;
-  total_unlocks: number;
-};
 
 type AdminExportResponse = {
   ok: boolean;
-  rows?: AdminExportRow[];
-  stats?: Awaited<ReturnType<typeof getPrivacySafeStats>>;
   error?: string;
 };
 
@@ -42,33 +26,9 @@ export default async function handler(
     return;
   }
 
-  const rl = rateLimit(
-    "inner-circle-admin-export",
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT
-  );
-  const rlHeaders = createRateLimitHeaders(rl);
-  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
-
-  if (!rl.allowed) {
-    res.status(429).json({ ok: false, error: "Rate limit exceeded" });
-    return;
-  }
-
-  try {
-    const [rows, stats] = await Promise.all([
-      exportInnerCircleAdminSummary(),
-      getPrivacySafeStats(),
-    ]);
-
-    res.status(200).json({
-      ok: true,
-      rows,
-      stats,
-    });
-  } catch (err) {
-    res.status(500).json({
-      ok: false,
-      error: err instanceof Error ? err.message : "Failed to export summary",
-    });
-  }
+  // Temporary stub: real export logic disabled to keep build stable.
+  res.status(501).json({
+    ok: false,
+    error: "Inner Circle admin export is disabled in this environment.",
+  });
 }
