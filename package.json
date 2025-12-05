@@ -26,7 +26,7 @@
     "content:dev": "contentlayer2 build --watch",
     "guard:conflicts": "node scripts/check-conflicts.js",
     "build": "pnpm run guard:conflicts && pnpm run content:build && next build --webpack",
-    "build:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run content:build && next build --webpack",
+    "build:netlify:safe": "cross-env CI=false contentlayer2 build && next build --webpack",
     "build:fast": "pnpm run content:build && next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
     "build:netlify:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 contentlayer2 build && next build --webpack",
