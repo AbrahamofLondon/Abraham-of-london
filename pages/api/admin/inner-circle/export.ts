@@ -5,10 +5,7 @@ import {
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rateLimit";
-import {
-  exportInnerCircleAdminSummary,
-  getPrivacySafeStats,
-} from "@/lib/innerCircleMembership";
+import { exportInnerCircleAdminSummary, getPrivacySafeStats } from "@/lib/server/innerCircleMembership";
 
 type AdminExportRow = {
   created_at: string;
