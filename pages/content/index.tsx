@@ -3,18 +3,32 @@ import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Search, ArrowRight, FileText, Download, Star, Layers, Grid, Filter, ChevronDown, Bookmark } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  Clock,
+  ArrowRight,
+  FileText,
+  Download,
+  Star,
+  Layers,
+  Filter,
+  ChevronDown,
+  Bookmark,
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getAllContent } from "@/lib/mdx";
-import type { RawContentEntry } from "@/lib/mdx";
+import {
+  getAllUnifiedContent,
+  type UnifiedContent,
+} from "@/lib/server/unified-content";
 
 /* -------------------------------------------------------------------------- */
 /* TYPE DEFINITIONS                                                           */
 /* -------------------------------------------------------------------------- */
 
 type ContentKind =
-  | "blog"
+  | "essay"
   | "book"
   | "download"
   | "event"
@@ -46,7 +60,7 @@ interface ContentPageProps {
   items: ContentResource[];
   contentStats: {
     total: number;
-    blog: number;
+    essay: number;
     book: number;
     download: number;
     event: number;
@@ -72,7 +86,11 @@ const GlassSurface: React.FC<{
     bg-gradient-to-b from-charcoal/80 to-charcoal
     border border-softGold/10
     backdrop-blur-sm
-    ${hover ? "transition-all duration-500 hover:border-softGold/30 hover:shadow-2xl hover:shadow-softGold/10" : ""}
+    ${
+      hover
+        ? "transition-all duration-500 hover:border-softGold/30 hover:shadow-2xl hover:shadow-softGold/10"
+        : ""
+    }
     ${className}
   `}
   >
@@ -83,7 +101,7 @@ const GlassSurface: React.FC<{
 
 const ContentTypeBadge: React.FC<{ kind: ContentKind }> = ({ kind }) => {
   const labels: Record<ContentKind, string> = {
-    blog: "Essay",
+    essay: "Essay",
     book: "Volume",
     download: "Tool",
     event: "Session",
@@ -93,7 +111,7 @@ const ContentTypeBadge: React.FC<{ kind: ContentKind }> = ({ kind }) => {
   };
 
   const colors: Record<ContentKind, string> = {
-    blog: "text-emerald-200 border-emerald-400/20 bg-emerald-500/5",
+    essay: "text-emerald-200 border-emerald-400/20 bg-emerald-500/5",
     book: "text-violet-200 border-violet-400/20 bg-violet-500/5",
     download: "text-amber-200 border-amber-400/20 bg-amber-500/5",
     event: "text-rose-200 border-rose-400/20 bg-rose-500/5",
@@ -199,9 +217,9 @@ const ContentCard: React.FC<{
               </p>
             )}
 
-            {item.description && (
+            {(item.description || item.excerpt) && (
               <p className="line-clamp-2 text-sm text-ivory/40">
-                {item.description}
+                {item.description || item.excerpt}
               </p>
             )}
           </div>
@@ -227,7 +245,7 @@ const ContentCard: React.FC<{
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-ivory/30">
-                  Read {item.kind === "blog" ? "essay" : item.kind}
+                  Read {item.kind === "essay" ? "essay" : item.kind}
                 </span>
               </div>
               <ArrowRight
@@ -252,7 +270,7 @@ const StatItem: React.FC<{
     <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-softGold/10 bg-gradient-to-b from-softGold/5 to-transparent">
       <div className="text-softGold/80">{icon}</div>
     </div>
-    <div className="mb-1 text-3xl font-serif font-light text-ivory">
+    <div className="mb-1 font-serif text-3xl font-light text-ivory">
       {value}
     </div>
     <div className="text-xs uppercase tracking-wider text-ivory/40">
@@ -297,17 +315,15 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
     if (debouncedQuery.trim()) {
       const query = debouncedQuery.toLowerCase();
       result = result.filter((item) => {
-        const matchesTitle = item.title.toLowerCase().includes(query);
-        const matchesDescription =
-          item.description && item.description.toLowerCase().includes(query);
-        const matchesSubtitle =
-          item.subtitle && item.subtitle.toLowerCase().includes(query);
-        const matchesTags =
-          item.tags &&
-          item.tags.some((tag) => tag.toLowerCase().includes(query));
-
+        const inTags = item.tags.some((tag) =>
+          tag.toLowerCase().includes(query),
+        );
         return (
-          matchesTitle || matchesDescription || matchesSubtitle || matchesTags
+          item.title.toLowerCase().includes(query) ||
+          item.description?.toLowerCase().includes(query) ||
+          item.subtitle?.toLowerCase().includes(query) ||
+          item.excerpt?.toLowerCase().includes(query) ||
+          inTags
         );
       });
     }
@@ -318,8 +334,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
   // Sort items by date (newest first)
   const sortedItems = React.useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      const dateA = new Date(a.date || 0).getTime();
+      const dateB = new Date(b.date || 0).getTime();
       return dateB - dateA;
     });
   }, [filteredItems]);
@@ -327,7 +343,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
   // Group items by type
   const groupedItems = React.useMemo(() => {
     const groups: Record<ContentKind, ContentResource[]> = {
-      blog: [],
+      essay: [],
       book: [],
       download: [],
       event: [],
@@ -337,26 +353,60 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
     };
 
     sortedItems.forEach((item) => {
-      groups[item.kind].push(item);
+      if (groups[item.kind]) {
+        groups[item.kind].push(item);
+      }
     });
 
     return groups;
   }, [sortedItems]);
 
-  const filterOptions: { key: FilterKey; label: string; count: number }[] = [
-    { key: "all", label: "All Content", count: contentStats.total },
-    { key: "featured", label: "Featured", count: contentStats.featured },
-    { key: "blog", label: "Essays", count: contentStats.blog },
-    { key: "book", label: "Volumes", count: contentStats.book },
-    { key: "download", label: "Tools", count: contentStats.download },
-    { key: "event", label: "Sessions", count: contentStats.event },
-    { key: "print", label: "Prints", count: contentStats.print },
-    { key: "resource", label: "Frameworks", count: contentStats.resource },
-    { key: "canon", label: "Canon", count: contentStats.canon },
+  const filterOptions = [
+    { key: "all" as FilterKey, label: "All Content", count: contentStats.total },
+    {
+      key: "featured" as FilterKey,
+      label: "Featured",
+      count: contentStats.featured,
+    },
+    {
+      key: "essay" as FilterKey,
+      label: "Essays",
+      count: contentStats.essay,
+    },
+    {
+      key: "book" as FilterKey,
+      label: "Volumes",
+      count: contentStats.book,
+    },
+    {
+      key: "download" as FilterKey,
+      label: "Tools",
+      count: contentStats.download,
+    },
+    {
+      key: "event" as FilterKey,
+      label: "Sessions",
+      count: contentStats.event,
+    },
+    {
+      key: "print" as FilterKey,
+      label: "Prints",
+      count: contentStats.print,
+    },
+    {
+      key: "resource" as FilterKey,
+      label: "Frameworks",
+      count: contentStats.resource,
+    },
+    {
+      key: "canon" as FilterKey,
+      label: "Canon",
+      count: contentStats.canon,
+    },
   ];
 
   return (
-    <Layout title="Complete Library | Abraham of London">
+    <Layout pageTitle="Complete Library | Abraham of London">
       <Head>
         <meta
           name="description"
@@ -384,7 +434,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
           <div className="absolute inset-0 bg-gradient-to-b from-charcoal via-charcoal/95 to-charcoal" />
           <div className="absolute inset-0 bg-[url('/assets/images/texture-paper.png')] opacity-10 mix-blend-overlay" />
 
-          <div className="relative z-10 container mx-auto px-6">
+          <div className="container relative z-10 mx-auto px-6">
             <div className="mx-auto max-w-4xl text-center">
               <div className="mb-8 inline-flex items-center gap-2">
                 <div className="h-px w-12 bg-gradient-to-r from-transparent to-softGold/30" />
@@ -404,7 +454,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
               </p>
 
               {/* Stats */}
-              <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-4">
+              <div className="mb-12 grid gap-8 grid-cols-2 md:grid-cols-4">
                 <StatItem
                   value={contentStats.total}
                   label="Total Works"
@@ -416,7 +466,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                   icon={<Star className="h-6 w-6" />}
                 />
                 <StatItem
-                  value={contentStats.blog}
+                  value={contentStats.essay}
                   label="Essays"
                   icon={<FileText className="h-6 w-6" />}
                 />
@@ -435,15 +485,15 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
           <div className="container mx-auto px-6">
             <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
               {/* Search */}
-              <div className="max-w-xl flex-1">
+              <div className="flex-1 max-w-xl">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-ivory/40" />
+                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ivory/40" />
                   <input
                     type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search the library..."
-                    className="w-full rounded-lg border border-softGold/10 bg-black/20 px-12 py-3 text-ivory placeholder-ivory/40 transition-all duration-300 focus:outline-none focus:border-softGold/30 focus:ring-1 focus:ring-softGold/20"
+                    className="w-full rounded-lg border border-softGold/10 bg-black/20 px-12 py-3 text-ivory placeholder-ivory/40 outline-none transition-all duration-300 focus:border-softGold/30 focus:ring-1 focus:ring-softGold/20"
                   />
                 </div>
               </div>
@@ -451,8 +501,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
               {/* Filters */}
               <div className="flex items-center gap-4">
                 <button
-                  type="button"
-                  onClick={() => setShowFilters((v) => !v)}
+                  onClick={() => setShowFilters(!showFilters)}
                   className="flex items-center gap-2 rounded-lg border border-softGold/10 px-4 py-3 text-ivory/70 transition-all duration-300 hover:border-softGold/30 hover:text-ivory"
                 >
                   <Filter className="h-5 w-5" />
@@ -466,7 +515,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
 
                 <div className="flex items-center gap-1 rounded-lg border border-softGold/10 p-1">
                   <button
-                    type="button"
                     onClick={() => setViewMode("grid")}
                     className={`rounded p-2 ${
                       viewMode === "grid"
@@ -474,10 +522,14 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                         : "text-ivory/40 hover:text-ivory"
                     }`}
                   >
-                    <Grid className="h-5 w-5" />
+                    <div className="grid h-5 w-5 grid-cols-2 gap-0.5">
+                      <span className="block rounded-sm bg-current" />
+                      <span className="block rounded-sm bg-current" />
+                      <span className="block rounded-sm bg-current" />
+                      <span className="block rounded-sm bg-current" />
+                    </div>
                   </button>
                   <button
-                    type="button"
                     onClick={() => setViewMode("compact")}
                     className={`rounded p-2 ${
                       viewMode === "compact"
@@ -502,7 +554,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                   {filterOptions.map((option) => (
                     <button
                       key={option.key}
-                      type="button"
                       onClick={() => setActiveFilter(option.key)}
                       className={`rounded-full border px-4 py-2 text-sm transition-all duration-300 ${
                         activeFilter === option.key
@@ -525,11 +576,13 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
             {activeFilter === "all" ? (
               // Show by category
               <div className="space-y-20">
-                {Object.entries(groupedItems).map(([kind, kindItems]) => {
-                  if (kindItems.length === 0) return null;
+                {(
+                  Object.entries(groupedItems) as [ContentKind, ContentResource[]][]
+                ).map(([kind, groupItems]) => {
+                  if (groupItems.length === 0) return null;
 
-                  const kindLabel =
-                    kind === "blog"
+                  const sectionTitle =
+                    kind === "essay"
                       ? "Essays"
                       : kind === "book"
                       ? "Volumes"
@@ -547,11 +600,11 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                     <div key={kind} className="space-y-8">
                       <div className="flex items-center justify-between">
                         <h2 className="font-serif text-2xl font-light text-ivory">
-                          {kindLabel}
+                          {sectionTitle}
                         </h2>
                         <span className="text-sm text-ivory/40">
-                          {kindItems.length}{" "}
-                          {kindItems.length === 1 ? "work" : "works"}
+                          {groupItems.length}{" "}
+                          {groupItems.length === 1 ? "work" : "works"}
                         </span>
                       </div>
 
@@ -562,7 +615,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                             : "md:grid-cols-1"
                         }`}
                       >
-                        {kindItems
+                        {groupItems
                           .slice(0, viewMode === "compact" ? 5 : undefined)
                           .map((item) => (
                             <ContentCard
@@ -572,18 +625,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                             />
                           ))}
                       </div>
-
-                      {kindItems.length > 5 && viewMode === "compact" && (
-                        <div className="pt-6 text-center">
-                          <button
-                            type="button"
-                            className="text-sm text-softGold transition-colors hover:text-softGold/80"
-                          >
-                            View all {kindItems.length}{" "}
-                            {kind === "blog" ? "essays" : `${kind}s`} →
-                          </button>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -639,7 +680,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                 </p>
                 {(searchQuery || activeFilter !== "all") && (
                   <button
-                    type="button"
                     onClick={() => {
                       setSearchQuery("");
                       setActiveFilter("all");
@@ -695,103 +735,76 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
 /* DATA PROCESSING                                                            */
 /* -------------------------------------------------------------------------- */
 
-const processContent = (): ContentResource[] => {
-  const contentTypes: ContentKind[] = [
-    "blog",
-    "book",
-    "download",
-    "event",
-    "print",
-    "resource",
-    "canon",
-  ];
+const mapUnifiedToContent = (entry: UnifiedContent): ContentResource | null => {
+  // We don't surface "page" types on this Library page
+  if (entry.type === "page") return null;
 
-  const allItems: ContentResource[] = [];
+  // Map unified type → local ContentKind
+  let kind: ContentKind;
+  switch (entry.type) {
+    case "essay":
+      kind = "essay";
+      break;
+    case "book":
+      kind = "book";
+      break;
+    case "download":
+      kind = "download";
+      break;
+    case "event":
+      kind = "event";
+      break;
+    case "print":
+      kind = "print";
+      break;
+    case "resource":
+      kind = "resource";
+      break;
+    default:
+      // anything unknown gets skipped for now
+      return null;
+  }
 
-  contentTypes.forEach((kind) => {
-    try {
-      const items = getAllContent(kind) as RawContentEntry[];
-
-      items.forEach((item: RawContentEntry) => {
-        // Map kind → href
-        let href: string;
-        switch (kind) {
-          case "blog":
-            href = `/${item.slug}`;
-            break;
-          case "book":
-            href = `/books/${item.slug}`;
-            break;
-          case "download":
-            href = `/downloads/${item.slug}`;
-            break;
-          case "event":
-            href = `/events/${item.slug}`;
-            break;
-          case "print":
-            href = `/prints/${item.slug}`;
-            break;
-          case "resource":
-            href = `/resources/${item.slug}`;
-            break;
-          case "canon":
-            href = `/canon/${item.slug}`;
-            break;
-          default:
-            href = `/${item.slug}`;
-        }
-
-        const tagsRaw = item.tags;
-        const tagsArray: string[] = Array.isArray(tagsRaw)
-          ? tagsRaw.map((t) => String(t))
-          : tagsRaw
-          ? [String(tagsRaw)]
-          : [];
-
-        allItems.push({
-          kind,
-          title: item.title || "Untitled",
-          slug: item.slug || "",
-          href,
-          date: item.date,
-          description: item.description,
-          subtitle: item.subtitle,
-          excerpt: item.excerpt,
-          category: item.category,
-          tags: tagsArray,
-          featured: Boolean(item.featured),
-          readTime: (item as any).readTime || (item as any).readtime,
-          coverImage: item.coverImage,
-          author: item.author,
-        });
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`Error processing ${kind}:`, error);
-    }
-  });
-
-  return allItems;
+  return {
+    kind,
+    title: entry.title || "Untitled",
+    slug: entry.slug,
+    href: entry.url,
+    date: entry.date || undefined,
+    description: entry.description || undefined,
+    subtitle: undefined,
+    excerpt: entry.excerpt || undefined,
+    category: entry.category || undefined,
+    tags: Array.isArray(entry.tags) ? entry.tags : [],
+    featured: false,
+    readTime: undefined,
+    coverImage: undefined,
+    author: entry.author || undefined,
+  };
 };
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  const allItems = processContent();
+  const unified = await getAllUnifiedContent();
+
+  const items: ContentResource[] = unified
+    .map(mapUnifiedToContent)
+    .filter((x): x is ContentResource => x !== null);
 
   const contentStats = {
-    total: allItems.length,
-    blog: allItems.filter((i) => i.kind === "blog").length,
-    book: allItems.filter((i) => i.kind === "book").length,
-    download: allItems.filter((i) => i.kind === "download").length,
-    event: allItems.filter((i) => i.kind === "event").length,
-    print: allItems.filter((i) => i.kind === "print").length,
-    resource: allItems.filter((i) => i.kind === "resource").length,
-    canon: allItems.filter((i) => i.kind === "canon").length,
-    featured: allItems.filter((i) => i.featured).length,
+    total: items.length,
+    essay: items.filter((i) => i.kind === "essay").length,
+    book: items.filter((i) => i.kind === "book").length,
+    download: items.filter((i) => i.kind === "download").length,
+    event: items.filter((i) => i.kind === "event").length,
+    print: items.filter((i) => i.kind === "print").length,
+    resource: items.filter((i) => i.kind === "resource").length,
+    canon: items.filter((i) => i.kind === "canon").length, // placeholder for future
+    featured: items.filter((i) => i.featured).length,
   };
 
   return {
     props: {
-      items: JSON.parse(JSON.stringify(allItems)),
+      items: JSON.parse(JSON.stringify(items)),
       contentStats,
     },
     revalidate: 3600,

@@ -8,9 +8,8 @@ import dynamic from 'next/dynamic';
 
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
-import {
-  CONTENT_CATEGORIES,
-} from "@/lib/content";
+import { CONTENT_CATEGORIES } from "@/lib/content";
+import ContentCard from "@/components/ContentCard";
 
 // Dynamic imports for better performance
 const VenturesSection = dynamic(() => import('@/components/homepage/VenturesSection'), {
@@ -54,14 +53,10 @@ const AboutSection = dynamic(() => import('@/components/homepage/AboutSection'),
   loading: () => <div className="space-y-20"><div className="h-64 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 animate-pulse"></div></div>,
 });
 
-// Static imports for critical components
-import ContentCard from "@/components/ContentCard";
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 /* -------------------------------------------------------------------------- */
-/* LUXURY DESIGN SYSTEM                                                       */
+/* SECTION DIVIDER                                                           */
 /* -------------------------------------------------------------------------- */
 
 const SectionDivider: React.FC = () => (
@@ -79,56 +74,72 @@ const SectionDivider: React.FC = () => (
 );
 
 /* -------------------------------------------------------------------------- */
-/* CANON SPOTLIGHT - COLOR-CODED BY VOLUME TYPE                              */
+/* CANON SPOTLIGHT - PREMIUM DESIGN                                          */
 /* -------------------------------------------------------------------------- */
 
 const CanonPrimaryCard: React.FC = () => (
   <Link href="/books/the-architecture-of-human-purpose" className="group block h-full">
-    <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-amber-200/30 bg-gradient-to-br from-amber-50 to-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl dark:border-amber-800/30 dark:from-gray-900 dark:to-gray-950">
-      <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/20 dark:to-gray-900">
-        <div className="relative h-full w-full">
-          <Image
-            src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-            alt="The Architecture of Human Purpose — Prelude MiniBook"
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-contain object-center p-6"
-            priority
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
-        <div className="absolute left-4 bottom-4">
-          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-lg">
-            Volume I · Prelude MiniBook
-          </span>
+    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200/10 bg-black shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-3xl dark:border-gray-800/20">
+      {/* Full-bleed image */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <Image
+          src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+          alt="The Architecture of Human Purpose — Prelude MiniBook"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+        
+        <div className="absolute left-6 bottom-6">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-2 text-sm font-bold uppercase tracking-[0.2em] text-white">
+              Volume I · Prelude
+            </span>
+            <span className="rounded-full border border-amber-400/40 bg-black/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-300">
+              Limited Release
+            </span>
+          </div>
         </div>
       </div>
-      <div className="flex flex-1 flex-col p-6">
+      
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-6 bg-gradient-to-b from-gray-900 to-black">
         <div className="mb-4 flex items-center gap-3">
           <div className="rounded-lg bg-amber-500/10 p-2">
-            <span className="text-lg text-amber-600 dark:text-amber-400">⚖</span>
+            <span className="text-lg text-amber-500">𓆓</span>
           </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
             Canon · Foundation Volume
           </span>
         </div>
-        <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+        
+        <h3 className="mb-3 font-serif text-2xl font-bold text-white">
           The Architecture of Human Purpose
         </h3>
-        <p className="mb-4 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+        
+        <p className="mb-6 text-sm leading-relaxed text-gray-300">
           A distilled, high-level prelude to the Canon — for men who know that
           human flourishing is not accidental, but architectural.
         </p>
-        <div className="mt-auto flex items-center justify-between pt-4 text-sm font-semibold text-amber-600 dark:text-amber-400">
-          <span>Enter through the Prelude</span>
-          <span className="transition-transform group-hover:translate-x-2">↠</span>
+        
+        <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-800/50">
+          <span className="text-sm font-medium text-gray-400">Foundational Text</span>
+          <div className="flex items-center gap-2 text-amber-400 group-hover:text-amber-300 transition-colors">
+            <span className="text-sm font-semibold">Enter Volume</span>
+            <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">↠</span>
+          </div>
         </div>
       </div>
     </article>
   </Link>
 );
 
-// Canon entry types with color coding
+/* -------------------------------------------------------------------------- */
+/* CANON ENTRY CARDS - COLOR-CODED                                           */
+/* -------------------------------------------------------------------------- */
+
 type CanonEntryType = "catechism" | "campaign" | "letter";
 
 const canonEntryColors: Record<CanonEntryType, { bg: string; text: string; border: string; accent: string }> = {
@@ -207,70 +218,166 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
 };
 
 /* -------------------------------------------------------------------------- */
-/* CANON SPOTLIGHT - BUILD-SAFE PREMIUM DESIGN                               */
+/* COMPACT BOOK CARDS - COLOR-CODED                                          */
 /* -------------------------------------------------------------------------- */
 
-const CanonPrimaryCard: React.FC = () => (
-  <Link href="/books/the-architecture-of-human-purpose" className="group block h-full">
-    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200/10 bg-black shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-3xl dark:border-gray-800/20">
-      {/* Full-bleed image */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <Image
-          src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-          alt="The Architecture of Human Purpose — Prelude MiniBook"
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover object-center"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-        
-        <div className="absolute left-6 bottom-6">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-2 text-sm font-bold uppercase tracking-[0.2em] text-white">
-              Volume I · Prelude
+type BookDraftType = "memoir" | "fiction" | "strategy" | "manual";
+
+const bookDraftColors: Record<BookDraftType, { 
+  bg: string; 
+  text: string; 
+  border: string; 
+  accent: string; 
+  status: string 
+}> = {
+  memoir: {
+    bg: "bg-amber-50 dark:bg-amber-900/10",
+    text: "text-amber-700 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-800/30",
+    accent: "bg-gradient-to-r from-amber-500 to-amber-600",
+    status: "Personal Narrative"
+  },
+  fiction: {
+    bg: "bg-indigo-50 dark:bg-indigo-900/10",
+    text: "text-indigo-700 dark:text-indigo-400",
+    border: "border-indigo-200 dark:border-indigo-800/30",
+    accent: "bg-gradient-to-r from-indigo-500 to-indigo-600",
+    status: "Narrative Experiment"
+  },
+  strategy: {
+    bg: "bg-emerald-50 dark:bg-emerald-900/10",
+    text: "text-emerald-700 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-800/30",
+    accent: "bg-gradient-to-r from-emerald-500 to-emerald-600",
+    status: "Strategic Framework"
+  },
+  manual: {
+    bg: "bg-blue-50 dark:bg-blue-900/10",
+    text: "text-blue-700 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-800/30",
+    accent: "bg-gradient-to-r from-blue-500 to-blue-600",
+    status: "Practical Guide"
+  }
+};
+
+interface CompactBookCardProps {
+  title: string;
+  subtitle: string;
+  href: string;
+  tag: string;
+  imageSrc: string;
+  status?: string;
+  progress?: number;
+}
+
+const CompactBookCard: React.FC<CompactBookCardProps> = ({
+  title,
+  subtitle,
+  href,
+  tag,
+  imageSrc,
+  status = "In Progress",
+  progress = 50,
+}) => {
+  const getTypeFromTag = (tag: string): BookDraftType => {
+    if (tag.toLowerCase().includes("memoir")) return "memoir";
+    if (tag.toLowerCase().includes("fiction")) return "fiction";
+    if (tag.toLowerCase().includes("strategy")) return "strategy";
+    return "manual";
+  };
+
+  const type = getTypeFromTag(tag);
+  const colors = bookDraftColors[type];
+  
+  return (
+    <Link href={href} className="group block">
+      <article className={`h-full overflow-hidden rounded-2xl border-2 ${colors.border} ${colors.bg} shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}>
+        <div className="p-6">
+          <div className="flex items-start gap-6">
+            <div className={`relative h-32 w-24 overflow-hidden rounded-lg border-2 ${colors.border} shadow-sm`}>
+              <Image
+                src={imageSrc}
+                alt={title}
+                fill
+                sizes="96px"
+                className="object-cover object-center"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </div>
+
+            <div className="flex-1">
+              <div className="mb-3 flex items-center justify-between">
+                <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${colors.text} ${colors.border} border`}>
+                  {tag}
+                </span>
+                <span className={`text-xs font-bold ${colors.text}`}>
+                  {colors.status}
+                </span>
+              </div>
+
+              <h3 className="mb-2 font-serif text-xl font-bold text-gray-900 dark:text-white">
+                {title}
+              </h3>
+              
+              <p className="mb-4 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                {subtitle}
+              </p>
+
+              {/* Progress bar */}
+              <div className="mb-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    Progress
+                  </span>
+                  <span className={`text-xs font-bold ${colors.text}`}>
+                    {progress}%
+                  </span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className={`h-full rounded-full ${colors.accent} transition-all duration-500`}
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  {progress < 50 ? "Early Draft" : progress < 80 ? "Mid Draft" : "Final Review"}
+                </span>
+                <div className={`flex items-center gap-1 text-sm font-semibold ${colors.text} transition-all group-hover:gap-2`}>
+                  <span>Preview Draft</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    ↠
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Color-coded footer */}
+        <div className={`border-t ${colors.border} bg-white/50 px-6 py-3 dark:bg-gray-800/30`}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-600 dark:text-gray-400">
+              {progress < 30 ? "Research Phase" : progress < 60 ? "Writing Phase" : "Editing Phase"}
             </span>
-            <span className="rounded-full border border-amber-400/40 bg-black/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-300">
-              Limited Release
-            </span>
+            <div className="flex items-center gap-1">
+              <div className={`h-2 w-2 animate-pulse rounded-full ${colors.accent}`} />
+              <span className={`text-xs font-medium ${colors.text}`}>
+                Active Development
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Content */}
-      <div className="flex flex-1 flex-col p-6 bg-gradient-to-b from-gray-900 to-black">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="rounded-lg bg-amber-500/10 p-2">
-            <span className="text-lg text-amber-500">𓆓</span>
-          </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-            Canon · Foundation Volume
-          </span>
-        </div>
-        
-        <h3 className="mb-3 font-serif text-2xl font-bold text-white">
-          The Architecture of Human Purpose
-        </h3>
-        
-        <p className="mb-6 text-sm leading-relaxed text-gray-300">
-          A distilled, high-level prelude to the Canon — for men who know that
-          human flourishing is not accidental, but architectural.
-        </p>
-        
-        <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-800/50">
-          <span className="text-sm font-medium text-gray-400">Foundational Text</span>
-          <div className="flex items-center gap-2 text-amber-400 group-hover:text-amber-300 transition-colors">
-            <span className="text-sm font-semibold">Enter Volume</span>
-            <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">↠</span>
-          </div>
-        </div>
-      </div>
-    </article>
-  </Link>
-);
+      </article>
+    </Link>
+  );
+};
 
 /* -------------------------------------------------------------------------- */
-/* MAIN PAGE                                                                  */
+/* HOME PAGE                                                                  */
 /* -------------------------------------------------------------------------- */
 
 const HomePage: NextPage = () => {
@@ -314,9 +421,7 @@ const HomePage: NextPage = () => {
         <meta name="theme-color" content="#ffffff" />
       </Head>
 
-      {/* -------------------------------------------------------------------
-       1. PRIMARY HERO
-      -------------------------------------------------------------------- */}
+      {/* 1. PRIMARY HERO */}
       <section className="relative min-h-[95vh] overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl dark:bg-amber-500/5" />
@@ -411,7 +516,7 @@ const HomePage: NextPage = () => {
 
       <SectionDivider />
 
-      {/* 3. CANON SPOTLIGHT - COLOR-CODED */}
+      {/* 3. CANON SPOTLIGHT */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
@@ -460,7 +565,7 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* Supporting works & resources - COLOR-CODED BY CATEGORY */}
+      {/* Supporting works & resources */}
       <section className="bg-gradient-to-b from-white to-gray-50 pb-20 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
@@ -511,7 +616,7 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* 4. COMPACT BOOKS SPOTLIGHT - COLOR-CODED */}
+      {/* 4. COMPACT BOOKS SPOTLIGHT */}
       <section className="border-y border-gray-200 bg-gradient-to-b from-gray-50 to-white py-24 dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
@@ -534,7 +639,7 @@ const HomePage: NextPage = () => {
               title="Fathering Without Fear"
               subtitle="Memoir and strategic narrative for fathers navigating leadership in an age of uncertainty."
               href="/books/fathering-without-fear"
-              type="memoir"
+              tag="Memoir Draft"
               imageSrc="/assets/images/books/fathering-without-fear.jpg"
               status="Early Draft"
               progress={65}
@@ -543,7 +648,7 @@ const HomePage: NextPage = () => {
               title="The Fiction Adaptation"
               subtitle="When fiction tells what truth cannot — a narrative exploration of strategic faith in hostile times."
               href="/books/the-fiction-adaptation"
-              type="fiction"
+              tag="Fiction Draft"
               imageSrc="/assets/images/books/the-fiction-adaptation.jpg"
               status="Research Phase"
               progress={35}
@@ -571,7 +676,7 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* 6. VENTURES - DYNAMICALLY LOADED */}
+      {/* 6. VENTURES */}
       <VenturesSection />
 
       <SectionDivider />
