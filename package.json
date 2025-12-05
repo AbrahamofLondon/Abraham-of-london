@@ -34,7 +34,6 @@
     "guard:conflicts": "node scripts/check-conflicts.js",
 
     "build": "pnpm run guard:conflicts && pnpm run content:build && next build --webpack",
-
     "build:netlify:safe": "cross-env CI=false pnpm run content:build && next build --webpack",
     "build:fast": "pnpm run content:build && next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
@@ -67,6 +66,8 @@
     "@react-email/components": "0.0.23",
     "@react-pdf/renderer": "4.3.1",
     "@tailwindcss/typography": "0.5.19",
+    "@types/node": "20.11.30",
+    "@types/react": "18.3.12",
     "autoprefixer": "10.4.20",
     "better-sqlite3": "12.5.0",
     "clsx": "2.1.1",
@@ -94,6 +95,7 @@
     "styled-jsx": "5.1.7",
     "tailwind-merge": "3.4.0",
     "tailwindcss": "3.4.14",
+    "typescript": "5.6.3",
     "ws": "8.18.3"
   },
   "devDependencies": {
@@ -101,8 +103,6 @@
     "@react-email/components": "0.0.23",
     "@tailwindcss/typography": "0.5.19",
     "@types/mdx": "^2.0.13",
-    "@types/node": "20.11.30",
-    "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@types/ws": "8.5.10",
     "@typescript-eslint/eslint-plugin": "8.46.4",
@@ -120,8 +120,7 @@
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
     "tailwindcss": "3.4.14",
-    "tsx": "^4.20.6",
-    "typescript": "5.6.3"
+    "tsx": "^4.20.6"
   },
   "pnpm": {
     "overrides": {
