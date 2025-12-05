@@ -207,119 +207,64 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
 };
 
 /* -------------------------------------------------------------------------- */
-/* CANON SPOTLIGHT - PREMIUM EDGE-TO-EDGE DESIGN                            */
+/* CANON SPOTLIGHT - BUILD-SAFE PREMIUM DESIGN                               */
 /* -------------------------------------------------------------------------- */
 
 const CanonPrimaryCard: React.FC = () => (
   <Link href="/books/the-architecture-of-human-purpose" className="group block h-full">
-    <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-amber-200/20 bg-gradient-to-br from-gray-900 via-gray-800 to-black shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-3xl hover:border-amber-400/30 dark:border-amber-800/20 dark:from-gray-950 dark:via-gray-900 dark:to-black">
-      {/* Main image container - cinematic aspect ratio */}
-      <div className="relative aspect-[21/9] w-full overflow-hidden">
+    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200/10 bg-black shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-3xl dark:border-gray-800/20">
+      {/* Full-bleed image */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
         <Image
           src="/assets/images/books/the-architecture-of-human-purpose.jpg"
           alt="The Architecture of Human Purpose — Prelude MiniBook"
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-          className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover object-center"
           priority
-          quality={90}
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
         
-        {/* Premium gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-900/10 via-transparent to-amber-900/10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_black_100%)]" />
-        
-        {/* Status badge - positioned over image */}
         <div className="absolute left-6 bottom-6">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-2 text-sm font-bold uppercase tracking-[0.2em] text-white shadow-xl backdrop-blur-sm">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-white/80"></span>
+            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-2 text-sm font-bold uppercase tracking-[0.2em] text-white">
               Volume I · Prelude
             </span>
-            <span className="rounded-full border border-amber-400/40 bg-black/40 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-300 backdrop-blur-sm">
+            <span className="rounded-full border border-amber-400/40 bg-black/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-300">
               Limited Release
             </span>
           </div>
         </div>
-        
-        {/* Premium corner accent */}
-        <div className="absolute right-6 top-6">
-          <div className="rounded-lg bg-gradient-to-br from-amber-400/20 to-amber-600/10 p-2 backdrop-blur-sm">
-            <div className="text-2xl text-amber-300">⚖</div>
-          </div>
-        </div>
       </div>
       
-      {/* Content area with premium spacing */}
-      <div className="relative flex flex-1 flex-col p-8">
-        {/* Decorative top border */}
-        <div className="mb-6 h-px w-16 bg-gradient-to-r from-amber-500 via-amber-400 to-transparent"></div>
-        
-        {/* Title and meta */}
-        <div className="mb-6">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="rounded-lg bg-gradient-to-r from-amber-500/10 to-amber-600/5 p-2">
-              <span className="text-lg text-amber-500">𓆓</span>
-            </div>
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-              Canon · Foundation Volume
-            </span>
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-6 bg-gradient-to-b from-gray-900 to-black">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="rounded-lg bg-amber-500/10 p-2">
+            <span className="text-lg text-amber-500">𓆓</span>
           </div>
-          
-          <h3 className="mb-4 font-serif text-3xl font-bold text-white leading-tight">
-            The Architecture of Human Purpose
-          </h3>
-          
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-amber-300/80">2024 Edition</span>
-            <span className="h-1 w-1 rounded-full bg-amber-400/50"></span>
-            <span className="text-gray-400">128 pages</span>
-            <span className="h-1 w-1 rounded-full bg-amber-400/50"></span>
-            <span className="text-gray-400">Premium Hardcover</span>
-          </div>
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            Canon · Foundation Volume
+          </span>
         </div>
         
-        {/* Description */}
-        <p className="mb-8 text-lg leading-relaxed text-gray-300">
+        <h3 className="mb-3 font-serif text-2xl font-bold text-white">
+          The Architecture of Human Purpose
+        </h3>
+        
+        <p className="mb-6 text-sm leading-relaxed text-gray-300">
           A distilled, high-level prelude to the Canon — for men who know that
-          human flourishing is not accidental, but architectural. The first volume
-          in a series that builds from first principles to applied wisdom.
+          human flourishing is not accidental, but architectural.
         </p>
         
-        {/* Action area */}
-        <div className="mt-auto pt-6 border-t border-gray-800/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-3">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-10 w-10 rounded-full border-2 border-gray-900 bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-xs font-bold text-white"
-                  >
-                    {i}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-400">Already reading</p>
-                <p className="text-xs text-gray-500">48 founding members</p>
-              </div>
-            </div>
-            
-            <div className="group relative">
-              <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-amber-500 to-amber-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"></div>
-              <div className="relative flex items-center gap-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-sm font-bold text-white shadow-xl transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
-                <span>Begin Reading</span>
-                <span className="text-lg transition-transform duration-300 group-hover:translate-x-2">↠</span>
-              </div>
-            </div>
+        <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-800/50">
+          <span className="text-sm font-medium text-gray-400">Foundational Text</span>
+          <div className="flex items-center gap-2 text-amber-400 group-hover:text-amber-300 transition-colors">
+            <span className="text-sm font-semibold">Enter Volume</span>
+            <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">↠</span>
           </div>
         </div>
       </div>
-      
-      {/* Premium glow effect */}
-      <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-amber-500/10 blur-3xl group-hover:bg-amber-500/20 transition-all duration-1000"></div>
     </article>
   </Link>
 );
