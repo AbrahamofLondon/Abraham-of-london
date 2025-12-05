@@ -1,4 +1,4 @@
-// Update your pages/content/index.tsx
+// pages/content/index.tsx
 import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -22,16 +22,15 @@ import {
   Sparkles,
   Cpu,
   Zap,
-  Tool,
+  Wrench,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import SilentSurface from "@/components/ui/SilentSurface";
 import {
   getAllUnifiedContent,
   type UnifiedContent,
 } from "@/lib/server/unified-content";
-import { getAllResources, type ResourceMeta } from "@/lib/server/resources-data";
-import SilentSurface from "@/components/ui/SilentSurface";
 
 /* -------------------------------------------------------------------------- */
 /* Type Definitions (Updated to include resources properly)                   */
@@ -85,26 +84,8 @@ interface ContentPageProps {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Map Resources to ContentResource                                           */
+/* Map UnifiedContent to ContentResource                                      */
 /* -------------------------------------------------------------------------- */
-
-const mapResourceToContent = (resource: ResourceMeta): ContentResource => ({
-  kind: "resource",
-  title: resource.title,
-  slug: resource.slug,
-  href: `/resources/${resource.slug}`,
-  date: resource.date,
-  description: resource.description,
-  excerpt: resource.excerpt,
-  category: resource.category,
-  tags: resource.tags || [],
-  featured: (resource as any).featured || false,
-  readTime: (resource as any).readTime,
-  coverImage: (resource as any).coverImage,
-  author: (resource as any).author,
-  resourceType: (resource as any).resourceType || "Framework",
-  applications: (resource as any).applications || ["Strategy", "Execution"],
-});
 
 const mapUnifiedToContent = (entry: UnifiedContent): ContentResource | null => {
   // Skip page types
@@ -150,8 +131,9 @@ const mapUnifiedToContent = (entry: UnifiedContent): ContentResource | null => {
     readTime: entry.readTime || undefined,
     coverImage: entry.coverImage || undefined,
     author: entry.author || undefined,
-    resourceType: (entry as any).resourceType,
-    applications: (entry as any).applications,
+    // Resource-specific fields
+    resourceType: entry.resourceType,
+    applications: entry.applications,
   };
 };
 
@@ -160,30 +142,13 @@ const mapUnifiedToContent = (entry: UnifiedContent): ContentResource | null => {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  // Get unified content
+  // Get unified content (which now includes resources)
   const unified = await getAllUnifiedContent();
   
-  // Get resources separately (in case they're not in unified content)
-  const resources = getAllResources();
-  
-  // Map all content to ContentResource
-  const unifiedItems = unified
+  // Map all unified content to ContentResource
+  const allItems = unified
     .map(mapUnifiedToContent)
     .filter((x): x is ContentResource => x !== null);
-  
-  // Map resources to ContentResource
-  const resourceItems = resources.map(mapResourceToContent);
-  
-  // Combine all items (avoid duplicates by slug)
-  const allItems = [...unifiedItems];
-  const resourceSlugs = new Set(resourceItems.map(r => r.slug));
-  
-  // Only add resources that aren't already in unified items
-  resourceItems.forEach(resource => {
-    if (!resourceSlugs.has(resource.slug)) {
-      allItems.push(resource);
-    }
-  });
 
   // Calculate statistics
   const contentStats = {
@@ -263,34 +228,28 @@ const ContentTypeBadge: React.FC<{ kind: ContentKind; resourceType?: string }> =
     download: <Download className="h-4 w-4" />,
     event: <Calendar className="h-4 w-4" />,
     print: <Eye className="h-4 w-4" />,
-    resource: <Tool className="h-4 w-4" />,
+    resource: <Wrench className="h-4 w-4" />,
     canon: <Lock className="h-4 w-4" />,
   };
 
   const colors: Record<ContentKind, string> = {
-    essay: "text-[#26619C]/[0.08] text-[#26619C] border-[#26619C]/[0.15]",
-    book: "text-[#D4AF37]/[0.08] text-[#D4AF37] border-[#D4AF37]/[0.15]",
-    download: "text-[#CD7F32]/[0.08] text-[#CD7F32] border-[#CD7F32]/[0.15]",
-    event: "text-[#C0C0C0]/[0.08] text-[#C0C0C0] border-[#C0C0C0]/[0.15]",
-    print: "text-[#FFFFF0]/[0.08] text-[#FFFFF0] border-[#FFFFF0]/[0.15]",
-    resource: "text-[#F5F1E8]/[0.08] text-[#F5F1E8] border-[#F5F1E8]/[0.15]",
+    essay: "bg-[#26619C]/[0.08] text-[#26619C] border-[#26619C]/[0.15]",
+    book: "bg-[#D4AF37]/[0.08] text-[#D4AF37] border-[#D4AF37]/[0.15]",
+    download: "bg-[#CD7F32]/[0.08] text-[#CD7F32] border-[#CD7F32]/[0.15]",
+    event: "bg-[#C0C0C0]/[0.08] text-[#C0C0C0] border-[#C0C0C0]/[0.15]",
+    print: "bg-[#FFFFF0]/[0.08] text-[#FFFFF0] border-[#FFFFF0]/[0.15]",
+    resource: "bg-[#F5F1E8]/[0.08] text-[#F5F1E8] border-[#F5F1E8]/[0.15]",
     canon: "bg-gradient-to-r from-[#D4AF37]/[0.1] to-[#CD7F32]/[0.1] text-[#D4AF37] border-[#D4AF37]/[0.2]",
   };
 
-  const scheme = colors[kind];
-  const [bg, text, border] = scheme.split(' ');
-
   return (
     <div className="inline-flex items-center gap-2">
-      <div className={`rounded-sm border px-2.5 py-1 flex items-center gap-2 ${bg} ${text} ${border}`}>
+      <div className={`rounded-sm border px-2.5 py-1 flex items-center gap-2 ${colors[kind]}`}>
         {icons[kind]}
         <span className="text-xs font-medium tracking-[0.1em]">
           {labels[kind]}
         </span>
       </div>
-      {kind === 'resource' && resourceType && (
-        <div className="h-3 w-px bg-white/[0.1]" />
-      )}
     </div>
   );
 };
@@ -518,7 +477,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
         item.description?.toLowerCase().includes(query) ||
         item.excerpt?.toLowerCase().includes(query) ||
         item.tags.some(tag => tag.toLowerCase().includes(query)) ||
-        item.author?.toLowerCase().includes(query)
+        item.author?.toLowerCase().includes(query) ||
+        (item.kind === 'resource' && item.applications?.some(app => 
+          app.toLowerCase().includes(query)
+        ))
       );
     }
 
@@ -561,7 +523,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
     { key: 'featured' as FilterKey, label: 'Featured', count: contentStats.featured, icon: <Sparkles className="h-4 w-4" /> },
     { key: 'essay' as FilterKey, label: 'Essays', count: contentStats.essay, icon: <FileText className="h-4 w-4" /> },
     { key: 'book' as FilterKey, label: 'Volumes', count: contentStats.book, icon: <BookOpen className="h-4 w-4" /> },
-    { key: 'resource' as FilterKey, label: 'Frameworks', count: contentStats.resource, icon: <Tool className="h-4 w-4" /> },
+    { key: 'resource' as FilterKey, label: 'Frameworks', count: contentStats.resource, icon: <Wrench className="h-4 w-4" /> },
     { key: 'download' as FilterKey, label: 'Tools', count: contentStats.download, icon: <Download className="h-4 w-4" /> },
     { key: 'event' as FilterKey, label: 'Sessions', count: contentStats.event, icon: <Calendar className="h-4 w-4" /> },
     { key: 'print' as FilterKey, label: 'Editions', count: contentStats.print, icon: <Eye className="h-4 w-4" /> },
@@ -604,7 +566,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
               description="Strategic analysis & long-form thinking"
             />
             <StatItem
-              icon={<Tool className="h-6 w-6 text-[#F5F1E8]" />}
+              icon={<Wrench className="h-6 w-6 text-[#F5F1E8]" />}
               label="Frameworks"
               value={contentStats.resource}
               description="Operational models & mental models"
@@ -735,7 +697,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredItems.map((item) => (
-                  <ContentCard key={item.slug} item={item} variant="grid" />
+                  <ContentCard key={`${item.kind}-${item.slug}`} item={item} variant="grid" />
                 ))}
               </div>
             ) : (
@@ -748,7 +710,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, contentStats }) => {
                     </h3>
                     <div className="space-y-1">
                       {yearItems.map((item) => (
-                        <ContentCard key={item.slug} item={item} variant="compact" />
+                        <ContentCard key={`${item.kind}-${item.slug}`} item={item} variant="compact" />
                       ))}
                     </div>
                   </div>

@@ -10,10 +10,8 @@ import { getAllPosts } from "@/lib/posts";
 import { getAllBooksMeta } from "@/lib/server/books-data";
 
 // Light wrappers for prints/resources – make sure these files exist.
-// If you don't have these collections yet, you can temporarily
-// comment BOTH the imports and usage sections out.
 import { getAllPrintsMeta } from "@/lib/server/prints-data";
-import { getAllResourcesMeta } from "@/lib/server/resources-data";
+import { getAllResources } from "@/lib/server/resources-data"; // Changed from getAllResourcesMeta
 
 export type UnifiedType =
   | "essay"
@@ -37,6 +35,13 @@ export interface UnifiedContent {
   tags?: string[];
   content?: string | null;
   url: string;
+  // Resource-specific fields
+  resourceType?: string;
+  applications?: string[];
+  // Common fields that might be needed
+  featured?: boolean;
+  readTime?: string;
+  coverImage?: string;
 }
 
 // Small helper – keeps one bad source from killing everything.
@@ -76,7 +81,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
     safe("posts", () => getAllPosts()),
     safe("books", () => getAllBooksMeta()),
     safe("prints", () => getAllPrintsMeta()),
-    safe("resources", () => getAllResourcesMeta()),
+    safe("resources", () => getAllResources()), // Changed from getAllResourcesMeta
   ]);
 
   const unified: UnifiedContent[] = [];
@@ -97,6 +102,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       tags: page.tags ?? [],
       content: page.content ?? null,
       url: `/${page.slug}`,
+      featured: page.featured ?? false,
+      readTime: page.readTime ?? null,
+      coverImage: page.coverImage ?? null,
     });
   });
 
@@ -116,6 +124,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       tags: post.tags ?? [],
       content: null,
       url: `/blog/${post.slug}`, // important: /blog/…
+      featured: post.featured ?? false,
+      readTime: post.readTime ?? null,
+      coverImage: post.coverImage ?? null,
     });
   });
 
@@ -135,6 +146,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       tags: book.tags ?? [],
       content: null,
       url: `/books/${book.slug}`,
+      featured: book.featured ?? false,
+      readTime: book.readTime ?? null,
+      coverImage: book.coverImage ?? null,
     });
   });
 
@@ -154,6 +168,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       tags: download.tags ?? [],
       content: null,
       url: `/downloads/${download.slug}`,
+      featured: download.featured ?? false,
+      readTime: download.readTime ?? null,
+      coverImage: download.coverImage ?? null,
     });
   });
 
@@ -173,6 +190,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       tags: event.tags ?? [],
       content: null,
       url: `/events/${event.slug}`,
+      featured: event.featured ?? false,
+      readTime: event.readTime ?? null,
+      coverImage: event.coverImage ?? null,
     });
   });
 
@@ -192,6 +212,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       tags: print.tags ?? [],
       content: null,
       url: `/prints/${print.slug}`,
+      featured: print.featured ?? false,
+      readTime: print.readTime ?? null,
+      coverImage: print.coverImage ?? null,
     });
   });
 
@@ -211,6 +234,12 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       tags: resource.tags ?? [],
       content: null,
       url: `/resources/${resource.slug}`,
+      // Resource-specific fields
+      resourceType: resource.resourceType ?? "Framework",
+      applications: resource.applications ?? ["Strategy", "Execution"],
+      featured: resource.featured ?? false,
+      readTime: resource.readTime ?? null,
+      coverImage: resource.coverImage ?? null,
     });
   });
 

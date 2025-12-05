@@ -74,69 +74,6 @@ const SectionDivider: React.FC = () => (
 );
 
 /* -------------------------------------------------------------------------- */
-/* CANON SPOTLIGHT - PREMIUM DESIGN                                          */
-/* -------------------------------------------------------------------------- */
-
-const CanonPrimaryCard: React.FC = () => (
-  <Link href="/books/the-architecture-of-human-purpose" className="group block h-full">
-    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200/10 bg-black shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-3xl dark:border-gray-800/20">
-      {/* Full-bleed image */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <Image
-          src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-          alt="The Architecture of Human Purpose — Prelude MiniBook"
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover object-center"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-        
-        <div className="absolute left-6 bottom-6">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-2 text-sm font-bold uppercase tracking-[0.2em] text-white">
-              Volume I · Prelude
-            </span>
-            <span className="rounded-full border border-amber-400/40 bg-black/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-300">
-              Limited Release
-            </span>
-          </div>
-        </div>
-      </div>
-      
-      {/* Content */}
-      <div className="flex flex-1 flex-col p-6 bg-gradient-to-b from-gray-900 to-black">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="rounded-lg bg-amber-500/10 p-2">
-            <span className="text-lg text-amber-500">𓆓</span>
-          </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-            Canon · Foundation Volume
-          </span>
-        </div>
-        
-        <h3 className="mb-3 font-serif text-2xl font-bold text-white">
-          The Architecture of Human Purpose
-        </h3>
-        
-        <p className="mb-6 text-sm leading-relaxed text-gray-300">
-          A distilled, high-level prelude to the Canon — for men who know that
-          human flourishing is not accidental, but architectural.
-        </p>
-        
-        <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-800/50">
-          <span className="text-sm font-medium text-gray-400">Foundational Text</span>
-          <div className="flex items-center gap-2 text-amber-400 group-hover:text-amber-300 transition-colors">
-            <span className="text-sm font-semibold">Enter Volume</span>
-            <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">↠</span>
-          </div>
-        </div>
-      </div>
-    </article>
-  </Link>
-);
-
-/* -------------------------------------------------------------------------- */
 /* CANON ENTRY CARDS - COLOR-CODED                                           */
 /* -------------------------------------------------------------------------- */
 
@@ -290,8 +227,47 @@ const CanonPrimaryCard: React.FC = () => (
   </Link>
 );
 
-  const type = getTypeFromTag(tag);
-  const colors = bookDraftColors[type];
+/* -------------------------------------------------------------------------- */
+/* COMPACT BOOK CARD                                                          */
+/* -------------------------------------------------------------------------- */
+
+const bookDraftColors = {
+  "Memoir Draft": {
+    border: "border-amber-500/20",
+    bg: "bg-gradient-to-br from-amber-50/10 to-amber-900/5 dark:from-amber-900/10 dark:to-amber-950/5",
+    text: "text-amber-600 dark:text-amber-400",
+    accent: "bg-gradient-to-r from-amber-500 to-amber-600",
+    status: "Early Draft",
+  },
+  "Fiction Draft": {
+    border: "border-blue-500/20",
+    bg: "bg-gradient-to-br from-blue-50/10 to-blue-900/5 dark:from-blue-900/10 dark:to-blue-950/5",
+    text: "text-blue-600 dark:text-blue-400",
+    accent: "bg-gradient-to-r from-blue-500 to-blue-600",
+    status: "Research Phase",
+  },
+};
+
+interface CompactBookCardProps {
+  tag: string;
+  title: string;
+  subtitle: string;
+  progress: number;
+  href: string;
+  imageSrc: string;
+  status: string;
+}
+
+const CompactBookCard: React.FC<CompactBookCardProps> = ({
+  tag,
+  title,
+  subtitle,
+  progress,
+  href,
+  imageSrc,
+  status,
+}) => {
+  const colors = bookDraftColors[tag as keyof typeof bookDraftColors] || bookDraftColors["Memoir Draft"];
   
   return (
     <Link href={href} className="group block">
@@ -316,7 +292,7 @@ const CanonPrimaryCard: React.FC = () => (
                   {tag}
                 </span>
                 <span className={`text-xs font-bold ${colors.text}`}>
-                  {colors.status}
+                  {status}
                 </span>
               </div>
 
