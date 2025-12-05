@@ -11,6 +11,9 @@ import {
   CONTENT_CATEGORIES,
 } from "@/lib/content";
 
+// Import the missing ContentCard component
+import ContentCard from "@/components/ContentCard"; // Add this line
+
 import VenturesSection from "@/components/homepage/VenturesSection";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 import StatsBar from "@/components/homepage/StatsBar";
@@ -50,7 +53,8 @@ const CanonPrimaryCard: React.FC = () => (
           alt="The Architecture of Human Purpose — Prelude MiniBook"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className="object-cover object-center" // Added object-center
+          style={{ objectFit: 'cover', objectPosition: 'center' }} // Ensure proper fitting
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
@@ -101,7 +105,8 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
           alt={title}
           fill
           sizes="80px"
-          className="object-cover"
+          className="object-cover object-center"
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
         />
       </div>
       <div className="flex-1">
@@ -141,7 +146,8 @@ const CompactBookCard: React.FC<{
           alt={title}
           fill
           sizes="64px"
-          className="object-cover"
+          className="object-cover object-center"
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
         />
       </div>
       <div className="flex-1">
@@ -279,6 +285,7 @@ const HomePage: NextPage = () => {
                     height={900}
                     priority
                     className="h-full w-full object-cover object-center"
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                 </div>
@@ -328,7 +335,7 @@ const HomePage: NextPage = () => {
             </div>
             <div className="space-y-4">
               <CanonEntryCard
-                title="Builder’s Catechism"
+                title="Builder's Catechism"
                 subtitle="Core questions and answers for men who build — families, ventures, and institutions."
                 href="/canon/builders-catechism"
                 imageSrc="/assets/images/canon/builders-catechism-cover.jpg"
@@ -350,7 +357,7 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* Supporting works & resources (unchanged except for using CONTENT_CATEGORIES) */}
+      {/* Supporting works & resources */}
       <section className="bg-gradient-to-b from-white to-gray-50 pb-20 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
