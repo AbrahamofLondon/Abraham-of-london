@@ -1,4 +1,3 @@
-/ pages/api/content/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAllUnifiedContent } from '@/lib/server/unified-content';
 
