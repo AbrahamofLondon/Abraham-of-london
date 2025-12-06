@@ -2,7 +2,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
-import { isString , safeString } from "@/lib/utils""; // Import the utility
+import { isString, safeString } from "@/lib/utils"; // Import the utility
 
 type ArticleHeroProps = {
   title?: string | null;
@@ -105,3 +105,4 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
     </section>
   );
 }
+

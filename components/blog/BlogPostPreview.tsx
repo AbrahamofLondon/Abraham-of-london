@@ -17,14 +17,6 @@ interface BlogPostPreviewProps {
 // -----------------------------------------------------------------------------
 // Local utility functions (safe, JSON-friendly, no external deps)
 // -----------------------------------------------------------------------------
-
-const safeString = (value: unknown, fallback: string = ""): string => {
-  if (typeof value === "string") return value.trim();
-  if (value == null) return fallback;
-  const asString = String(value).trim();
-  return asString || fallback;
-};
-
 const safePostProp = (value: unknown): string => safeString(value, "");
 
 // Safe date formatting utility
@@ -196,4 +188,5 @@ export default function BlogPostPreview({
 
 // Optional: Display name for debugging
 BlogPostPreview.displayName = "BlogPostPreview";
+
 
