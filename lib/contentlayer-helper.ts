@@ -4,10 +4,11 @@
 import path from "path";
 
 // ============================================================================
-// 1. CORE TYPES
+// 1. CORE TYPES - DECLARED WITHOUT EXPORT
 // ============================================================================
 
-export interface ContentlayerDocument {
+// Declare interfaces WITHOUT export keyword
+interface ContentlayerDocument {
   _id: string;
   _raw: {
     sourceFilePath: string;
@@ -32,7 +33,7 @@ export interface ContentlayerDocument {
   };
 }
 
-export interface PostDocument extends ContentlayerDocument {
+interface PostDocument extends ContentlayerDocument {
   type: "Post";
   category?: string;
   author?: string;
@@ -42,7 +43,7 @@ export interface PostDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-export interface BookDocument extends ContentlayerDocument {
+interface BookDocument extends ContentlayerDocument {
   type: "Book";
   subtitle?: string;
   author?: string;
@@ -53,11 +54,9 @@ export interface BookDocument extends ContentlayerDocument {
   lockMessage?: string;
   status?: 'published' | 'draft' | 'archived';
   format?: string;
-  featured?: boolean;
-
 }
 
-export interface DownloadDocument extends ContentlayerDocument {
+interface DownloadDocument extends ContentlayerDocument {
   type: "Download";
   subtitle?: string;
   author?: string;
@@ -71,7 +70,7 @@ export interface DownloadDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-export interface PrintDocument extends ContentlayerDocument {
+interface PrintDocument extends ContentlayerDocument {
   type: "Print";
   dimensions?: string;
   price?: string;
@@ -81,7 +80,7 @@ export interface PrintDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-export interface ResourceDocument extends ContentlayerDocument {
+interface ResourceDocument extends ContentlayerDocument {
   type: "Resource";
   resourceType?: string;
   author?: string;
@@ -92,13 +91,12 @@ export interface ResourceDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-export interface CanonDocument extends ContentlayerDocument {
+interface CanonDocument extends ContentlayerDocument {
   type: "Canon";
   subtitle?: string;
   author?: string;
   coverAspect?: string;
   coverFit?: string;
-  // comes out of Contentlayer as string, but we allow number for safety
   volumeNumber?: string | number;
   order?: number;
   featured?: boolean;
@@ -107,7 +105,7 @@ export interface CanonDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-export interface EventDocument extends ContentlayerDocument {
+interface EventDocument extends ContentlayerDocument {
   type: "Event";
   eventDate?: string;
   time?: string;
@@ -118,7 +116,7 @@ export interface EventDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-export interface StrategyDocument extends ContentlayerDocument {
+interface StrategyDocument extends ContentlayerDocument {
   type: "Strategy";
   category?: string;
   author?: string;
@@ -127,26 +125,18 @@ export interface StrategyDocument extends ContentlayerDocument {
 }
 
 // ============================================================================
-// 2. CONTENTLAYER EXPORTS LOADING (SYNCHRONOUS)
+// 2. CONTENTLAYER EXPORTS LOADING
 // ============================================================================
 
 let contentlayerExports: any = {};
 
 try {
-  // Resolve .contentlayer/generated from project root, not from compiled file location
   const generatedPath = path.join(process.cwd(), ".contentlayer", "generated");
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   contentlayerExports = require(generatedPath);
 } catch (error) {
-  if (
-    process.env.NODE_ENV === "development" ||
-    process.env.NODE_ENV === "test"
-  ) {
-    // Helpful, but non-fatal
-    // eslint-disable-next-line no-console
+  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
     console.warn(
       "[contentlayer-helper] .contentlayer/generated not found – using empty exports.",
-      "This is normal during the first build or if content hasn't been generated yet.",
       error
     );
   }
@@ -154,112 +144,227 @@ try {
 }
 
 // ============================================================================
-// 3. SAFE COLLECTION GETTERS
+// 3. ROBUST COLLECTION GETTERS
 // ============================================================================
 
-function safeGetCollection<T>(
-  collection: T[] | undefined,
+function safeCastArray<T>(collection: unknown, fallback: T[] = []): T[] {
+  if (!Array.isArray(collection)) return fallback;
+  return collection as T[];
+}
+
+function getCollection<T extends ContentlayerDocument>(
+  key: string, 
   fallback: T[] = []
 ): T[] {
-  return Array.isArray(collection) ? collection : fallback;
-}
-
-function getCollection<T>(key: string, fallback: T[] = []): T[] {
   const collection = contentlayerExports[key];
-  return safeGetCollection(collection, fallback);
+  return safeCastArray<T>(collection, fallback);
 }
 
 // ============================================================================
-// 4. EXPORTED COLLECTIONS
+// 4. COLLECTIONS (DECLARED)
 // ============================================================================
 
-export const allPosts: PostDocument[] = getCollection("allPosts");
-export const allBooks: BookDocument[] = getCollection("allBooks");
-export const allDownloads: DownloadDocument[] = getCollection("allDownloads");
-export const allEvents: EventDocument[] = getCollection("allEvents");
-export const allPrints: PrintDocument[] = getCollection("allPrints");
-export const allStrategies: StrategyDocument[] = getCollection("allStrategies");
-export const allResources: ResourceDocument[] = getCollection("allResources");
-export const allCanons: CanonDocument[] = getCollection("allCanons");
-export const allDocuments: ContentlayerDocument[] = getCollection("allDocuments");
+const allPosts: PostDocument[] = getCollection<PostDocument>("allPosts");
+const allBooks: BookDocument[] = getCollection<BookDocument>("allBooks");
+const allDownloads: DownloadDocument[] = getCollection<DownloadDocument>("allDownloads");
+const allEvents: EventDocument[] = getCollection<EventDocument>("allEvents");
+const allPrints: PrintDocument[] = getCollection<PrintDocument>("allPrints");
+const allStrategies: StrategyDocument[] = getCollection<StrategyDocument>("allStrategies");
+const allResources: ResourceDocument[] = getCollection<ResourceDocument>("allResources");
+const allCanons: CanonDocument[] = getCollection<CanonDocument>("allCanons");
+const allDocuments: ContentlayerDocument[] = getCollection<ContentlayerDocument>("allDocuments");
 
-// Combined collections for convenience
-export const allContent = [...allDocuments];
-export const allPublished = getCollection("allDocuments").filter(
-  (doc) => !doc.draft
+const allContent: ContentlayerDocument[] = [...allDocuments];
+const allPublished: ContentlayerDocument[] = allDocuments.filter(
+  (doc: ContentlayerDocument) => !doc.draft
 );
 
 // ============================================================================
-// 5. HELPER FUNCTIONS
+// 5. TYPE GUARDS (DECLARED)
 // ============================================================================
 
-/**
- * Get all non-draft documents sorted by date (newest first)
- */
-export function getPublishedDocuments<T extends ContentlayerDocument>(
-  docs: T[] = allDocuments
+function isPost(doc: ContentlayerDocument): doc is PostDocument {
+  return doc.type === "Post";
+}
+
+function isBook(doc: ContentlayerDocument): doc is BookDocument {
+  return doc.type === "Book";
+}
+
+function isDownload(doc: ContentlayerDocument): doc is DownloadDocument {
+  return doc.type === "Download";
+}
+
+function isEvent(doc: ContentlayerDocument): doc is EventDocument {
+  return doc.type === "Event";
+}
+
+function isPrint(doc: ContentlayerDocument): doc is PrintDocument {
+  return doc.type === "Print";
+}
+
+function isResource(doc: ContentlayerDocument): doc is ResourceDocument {
+  return doc.type === "Resource";
+}
+
+function isCanon(doc: ContentlayerDocument): doc is CanonDocument {
+  return doc.type === "Canon";
+}
+
+function isStrategy(doc: ContentlayerDocument): doc is StrategyDocument {
+  return doc.type === "Strategy";
+}
+
+// ============================================================================
+// 6. HELPER FUNCTIONS (DECLARED)
+// ============================================================================
+
+function getPublishedDocuments<T extends ContentlayerDocument>(
+  docs: T[] = allDocuments as T[]
 ): T[] {
   return docs
-    .filter((doc) => !doc.draft)
+    .filter((doc: T) => !doc.draft)
     .sort(
-      (a, b) =>
+      (a: T, b: T) =>
         new Date(b.date || "").getTime() - new Date(a.date || "").getTime()
     );
 }
 
-/**
- * Get documents by type
- */
-export function getDocumentsByType<T extends ContentlayerDocument>(
-  type: T["type"]
+function getDocumentsByType<T extends ContentlayerDocument>(
+  type: string
 ): T[] {
-  return allDocuments.filter((doc) => doc.type === type) as T[];
+  return allDocuments.filter((doc: ContentlayerDocument) => doc.type === type) as T[];
 }
 
-/**
- * Find document by slug
- */
-export function getDocumentBySlug(
+function getDocumentBySlug(
   slug: string,
   type?: string
 ): ContentlayerDocument | undefined {
   const candidates = type
-    ? allDocuments.filter((doc) => doc.type === type)
+    ? allDocuments.filter((doc: ContentlayerDocument) => doc.type === type)
     : allDocuments;
 
-  return candidates.find((doc) => doc.slug === slug);
+  return candidates.find((doc: ContentlayerDocument) => doc.slug === slug);
 }
 
-/**
- * Get featured documents
- */
-export function getFeaturedDocuments(): ContentlayerDocument[] {
+function getFeaturedDocuments(): ContentlayerDocument[] {
   return allDocuments.filter(
-    (doc) => (doc as any).featured === true && !doc.draft
+    (doc: ContentlayerDocument) => (doc as any).featured === true && !doc.draft
   );
 }
 
-/**
- * Check if contentlayer is properly loaded
- */
-export function isContentlayerLoaded(): boolean {
+function isContentlayerLoaded(): boolean {
   return Object.keys(contentlayerExports).length > 0;
 }
 
 // ============================================================================
-// 6. TYPE EXPORTS (for convenience)
+// 7. CARD MAPPING FUNCTIONS (DECLARED)
 // ============================================================================
 
-export type Post = PostDocument;
-export type Book = BookDocument;
-export type Download = DownloadDocument;
-export type Event = EventDocument;
-export type Print = PrintDocument;
-export type Resource = ResourceDocument;
-export type Canon = CanonDocument;
-export type Strategy = StrategyDocument;
+function mapToBaseCardProps(doc: ContentlayerDocument): any {
+  return {
+    slug: doc.slug,
+    title: doc.title || 'Untitled',
+    subtitle: (doc as any).subtitle || null,
+    excerpt: doc.excerpt || null,
+    description: doc.description || null,
+    coverImage: doc.coverImage || null,
+    date: doc.date || null,
+    tags: doc.tags || [],
+    featured: (doc as any).featured || false,
+    accessLevel: (doc as any).accessLevel || null,
+    lockMessage: (doc as any).lockMessage || null,
+  };
+}
 
-export type DocumentTypes =
+function mapToBookCardProps(doc: BookDocument): any {
+  return {
+    ...mapToBaseCardProps(doc),
+    author: doc.author || null,
+    isbn: doc.isbn || null,
+    publisher: doc.publisher || null,
+    publishDate: doc.date || null,
+  };
+}
+
+function mapToBlogPostCardProps(doc: PostDocument): any {
+  return {
+    ...mapToBaseCardProps(doc),
+    author: doc.author || null,
+    readTime: doc.readTime || null,
+    category: doc.category || null,
+  };
+}
+
+function mapToCanonCardProps(doc: CanonDocument): any {
+  return {
+    ...mapToBaseCardProps(doc),
+    author: doc.author || null,
+    volumeNumber: doc.volumeNumber || null,
+    readTime: doc.readTime || null,
+  };
+}
+
+function getCardPropsForDocument(doc: ContentlayerDocument): any {
+  if (isBook(doc)) return mapToBookCardProps(doc);
+  if (isPost(doc)) return mapToBlogPostCardProps(doc);
+  if (isCanon(doc)) return mapToCanonCardProps(doc);
+  return mapToBaseCardProps(doc);
+}
+
+// ============================================================================
+// 8. UTILITY FUNCTIONS (DECLARED)
+// ============================================================================
+
+function getCardFallbackConfig() {
+  return {
+    defaultImage: '/images/fallback-card.jpg',
+    defaultTitle: 'Untitled',
+    defaultDescription: 'No description available.',
+    defaultTags: [] as string[],
+    defaultAuthor: 'Unknown Author',
+    defaultAvatar: '/images/default-avatar.jpg',
+  };
+}
+
+function getCardImage(
+  image: string | null | undefined,
+  fallback?: string
+): string {
+  if (!image) return fallback || getCardFallbackConfig().defaultImage;
+  return image;
+}
+
+function formatCardDate(dateString: string | null | undefined): string {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch {
+    return '';
+  }
+}
+
+// ============================================================================
+// 9. TYPE ALIASES (DECLARED)
+// ============================================================================
+
+type Post = PostDocument;
+type Book = BookDocument;
+type Download = DownloadDocument;
+type Event = EventDocument;
+type Print = PrintDocument;
+type Resource = ResourceDocument;
+type Canon = CanonDocument;
+type Strategy = StrategyDocument;
+
+type DocumentTypes =
   | PostDocument
   | BookDocument
   | DownloadDocument
@@ -269,42 +374,80 @@ export type DocumentTypes =
   | ResourceDocument
   | CanonDocument;
 
-// Type guard helpers
-export function isPost(doc: ContentlayerDocument): doc is PostDocument {
-  return doc.type === "Post";
-}
+// ============================================================================
+// 10. SINGLE COMPREHENSIVE EXPORT SECTION
+// ============================================================================
 
-export function isBook(doc: ContentlayerDocument): doc is BookDocument {
-  return doc.type === "Book";
-}
+// Export all collections
+export {
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allStrategies,
+  allResources,
+  allCanons,
+  allDocuments,
+  allContent,
+  allPublished,
+};
 
-export function isDownload(
-  doc: ContentlayerDocument
-): doc is DownloadDocument {
-  return doc.type === "Download";
-}
+// Export all type guards
+export {
+  isPost,
+  isBook,
+  isDownload,
+  isEvent,
+  isPrint,
+  isResource,
+  isCanon,
+  isStrategy,
+};
 
-export function isEvent(doc: ContentlayerDocument): doc is EventDocument {
-  return doc.type === "Event";
-}
+// Export all helper functions
+export {
+  getPublishedDocuments,
+  getDocumentsByType,
+  getDocumentBySlug,
+  getFeaturedDocuments,
+  isContentlayerLoaded,
+};
 
-export function isPrint(doc: ContentlayerDocument): doc is PrintDocument {
-  return doc.type === "Print";
-}
+// Export all mapping functions
+export {
+  mapToBaseCardProps,
+  mapToBookCardProps,
+  mapToBlogPostCardProps,
+  mapToCanonCardProps,
+  getCardPropsForDocument,
+};
 
-export function isResource(
-  doc: ContentlayerDocument
-): doc is ResourceDocument {
-  return doc.type === "Resource";
-}
+// Export all utility functions
+export {
+  getCardFallbackConfig,
+  getCardImage,
+  formatCardDate,
+};
 
-export function isCanon(doc: ContentlayerDocument): doc is CanonDocument {
-  return doc.type === "Canon";
-}
-
-export function isStrategy(
-  doc: ContentlayerDocument
-): doc is StrategyDocument {
-  return doc.type === "Strategy";
-}
-
+// Export all types and interfaces
+export type {
+  ContentlayerDocument,
+  PostDocument,
+  BookDocument,
+  DownloadDocument,
+  EventDocument,
+  PrintDocument,
+  ResourceDocument,
+  CanonDocument,
+  StrategyDocument,
+  Post,
+  Book,
+  Download,
+  Event,
+  Print,
+  Resource,
+  Canon,
+  Strategy,
+  DocumentTypes,
+};

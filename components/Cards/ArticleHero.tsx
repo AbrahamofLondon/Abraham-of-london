@@ -1,7 +1,20 @@
 // components/Cards/ArticleHero.tsx
-import * as React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+
+import {
+  getCardImage,
+  getCardImageAlt,
+  getAuthorName,
+  getAuthorPicture,
+  formatCardDate,
+  truncateTags,
+  formatTagText,
+  getDisplayText,
+  truncateText,
+  getCardAriaLabel,
+} from "./utils";
 
 export interface HeroCardProps {
   slug: string;
@@ -33,59 +46,61 @@ const ArticleHero: React.FC<HeroCardProps> = ({
   featured = false,
   category,
   readTime,
-  className = '',
+  className = "",
   href,
 }) => {
   const linkHref = href || `/${slug}`;
-  const displayText = excerpt || description || subtitle || '';
-  const displayTags = tags.slice(0, 4);
 
-  const authorName = typeof author === 'string' 
-    ? author 
-    : author?.name || null;
+  const displayTextRaw = getDisplayText(excerpt, description, subtitle);
+  const displayText = truncateText(displayTextRaw, 260);
+  const displayTags = truncateTags(tags, 4);
 
-  const authorPicture = typeof author === 'object' && author !== null
-    ? author.picture
-    : null;
+  const authorName = getAuthorName(author ?? null);
+  const authorPicture = getAuthorPicture(author ?? null);
+  const dateLabel = formatCardDate(date ?? null);
 
-  const readTimeText = typeof readTime === 'number'
-    ? `${readTime} min read`
-    : readTime || null;
+  const readTimeText =
+    typeof readTime === "number" ? `${readTime} min read` : readTime || null;
+
+  const heroImage = getCardImage(coverImage);
+  const heroAlt = getCardImageAlt(title, "Article");
 
   return (
     <Link
       href={linkHref}
       className={`group block rounded-3xl border border-white/10 bg-gradient-to-br from-black/60 via-[#020617]/80 to-black/60 backdrop-blur-md transition-all duration-500 hover:border-softGold/40 hover:shadow-[0_20px_60px_rgba(226,197,120,0.2)] ${className}`}
+      aria-label={getCardAriaLabel(title, "Article")}
     >
       <article className="relative flex h-full flex-col overflow-hidden lg:flex-row">
-        {coverImage && (
-          <div className="relative aspect-[21/9] w-full overflow-hidden lg:aspect-auto lg:w-1/2">
-            <Image
-              src={coverImage}
-              alt={title}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-            />
-            
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent lg:bg-gradient-to-r" />
-            
-            {featured && (
-              <div className="absolute left-4 top-4 rounded-full bg-softGold px-4 py-2 text-sm font-bold uppercase tracking-wider text-black shadow-lg">
-                Featured Article
-              </div>
-            )}
-            
-            {category && (
-              <div className="absolute right-4 top-4 rounded-full border border-softGold/40 bg-black/70 px-4 py-2 text-sm font-semibold text-softGold backdrop-blur-md">
-                {category}
-              </div>
-            )}
-          </div>
-        )}
+        {/* HERO IMAGE (with fallback from utils) */}
+        <div className="relative aspect-[21/9] w-full overflow-hidden lg:aspect-auto lg:w-1/2">
+          <Image
+            src={heroImage}
+            alt={heroAlt}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            priority
+          />
 
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent lg:bg-gradient-to-r" />
+
+          {featured && (
+            <div className="absolute left-4 top-4 rounded-full bg-softGold px-4 py-2 text-sm font-bold uppercase tracking-wider text-black shadow-lg">
+              Featured Article
+            </div>
+          )}
+
+          {category && (
+            <div className="absolute right-4 top-4 rounded-full border border-softGold/40 bg-black/70 px-4 py-2 text-sm font-semibold text-softGold backdrop-blur-md">
+              {category}
+            </div>
+          )}
+        </div>
+
+        {/* COPY SIDE */}
         <div className="flex flex-1 flex-col justify-center gap-6 p-8 lg:p-12">
+          {/* TAGS */}
           {displayTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {displayTags.map((tag, idx) => (
@@ -93,12 +108,13 @@ const ArticleHero: React.FC<HeroCardProps> = ({
                   key={idx}
                   className="rounded-full border border-softGold/30 bg-softGold/15 px-4 py-1.5 text-sm font-medium text-softGold/95"
                 >
-                  {tag}
+                  {formatTagText(tag)}
                 </span>
               ))}
             </div>
           )}
 
+          {/* TITLE / SUBTITLE */}
           <div className="space-y-3">
             <h2 className="font-serif text-3xl font-bold text-cream transition-colors group-hover:text-softGold lg:text-4xl xl:text-5xl">
               {title}
@@ -110,63 +126,61 @@ const ArticleHero: React.FC<HeroCardProps> = ({
             )}
           </div>
 
+          {/* BODY / EXCERPT */}
           {displayText && (
-            <p className="text-base leading-relaxed text-gray-300 line-clamp-4 lg:text-lg">
+            <p className="line-clamp-4 text-base leading-relaxed text-gray-300 lg:text-lg">
               {displayText}
             </p>
           )}
 
+          {/* META ROW */}
           <div className="flex flex-wrap items-center gap-4 border-t border-white/10 pt-6">
-            {(authorName || authorPicture) && (
+            {/* AUTHOR + DATE */}
+            {(authorName || authorPicture || dateLabel) && (
               <div className="flex items-center gap-3">
                 {authorPicture && (
                   <div className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-softGold/30">
                     <Image
                       src={authorPicture}
-                      alt={authorName || 'Author'}
+                      alt={authorName || "Author"}
                       fill
                       className="object-cover"
                     />
                   </div>
                 )}
-                {authorName && (
-                  <div>
+                <div>
+                  {authorName && (
                     <p className="text-sm font-semibold text-cream">
                       {authorName}
                     </p>
-                    {date && (
-                      <time className="text-xs text-gray-400">
-                        {new Date(date).toLocaleDateString('en-GB', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })}
-                      </time>
-                    )}
-                  </div>
-                )}
+                  )}
+                  {dateLabel && (
+                    <time className="text-xs text-gray-400">{dateLabel}</time>
+                  )}
+                </div>
               </div>
             )}
-            
-            {!authorName && !authorPicture && date && (
-              <time className="text-sm text-gray-400">
-                {new Date(date).toLocaleDateString('en-GB', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </time>
-            )}
-            
+
             {readTimeText && (
               <span className="flex items-center gap-2 text-sm text-gray-400">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 {readTimeText}
               </span>
             )}
-            
+
+            {/* CTA */}
             <div className="ml-auto flex items-center gap-2 text-base font-semibold text-softGold transition-all group-hover:gap-3">
               Read Article
               <svg

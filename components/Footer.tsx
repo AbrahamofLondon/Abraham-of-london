@@ -19,7 +19,7 @@ import { siteConfig } from "@/lib/imports";
 
 // Extended type that includes kind for icon mapping
 interface FooterSocialLink extends SocialLink {
-  kind?: string;
+  kind?: string; // 'kind' is your custom property for icon mapping
 }
 
 const iconMap: Record<
@@ -43,54 +43,63 @@ const DEFAULT_SOCIALS: FooterSocialLink[] = [
     label: "TikTok",
     kind: "tiktok",
     external: true,
+    platform: "tiktok", // Added required property
   },
   {
     href: "https://x.com/AbrahamAda48634",
     label: "X",
     kind: "twitter",
     external: true,
+    platform: "twitter", // Added required property
   },
   {
     href: "https://www.instagram.com/abraham_of_london_/",
     label: "Instagram",
     kind: "instagram",
     external: true,
+    platform: "instagram", // Added required property
   },
   {
     href: "https://www.facebook.com/share/16tvsnTgRG/",
     label: "Facebook",
     kind: "facebook",
     external: true,
+    platform: "facebook", // Added required property
   },
   {
     href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
     label: "LinkedIn",
     kind: "linkedin",
     external: true,
+    platform: "linkedin", // Added required property
   },
   {
     href: "https://www.youtube.com/@abrahamoflondon",
     label: "YouTube",
     kind: "youtube",
     external: true,
+    platform: "youtube", // Added required property
   },
   {
     href: "mailto:info@abrahamoflondon.org",
     label: "Email",
     kind: "email",
     external: false,
+    platform: "email", // Added required property
   },
   {
     href: "https://wa.me/447496334022",
     label: "WhatsApp",
     kind: "whatsapp",
     external: true,
+    platform: "whatsapp", // Added required property
   },
   {
     href: "tel:+442086225909",
     label: "Landline",
     kind: "phone",
     external: false,
+    platform: "phone", // Added required property
   },
 ];
 
@@ -139,10 +148,23 @@ export default function Footer(): JSX.Element {
   const email = siteConfig.email || "info@abrahamoflondon.org";
 
   const configSocials: FooterSocialLink[] = Array.isArray(siteConfig.socialLinks)
-    ? siteConfig.socialLinks.map(social => ({
-        ...social,
-        kind: (social as any).kind // Type assertion for existing social links
-      }))
+    ? siteConfig.socialLinks.map(social => {
+        // Type-safe extraction of properties
+        const href = typeof social.href === 'string' ? social.href : '';
+        const label = typeof social.label === 'string' ? social.label : '';
+        const platform = (social as any).platform || (social as any).kind || 'general';
+        const external = typeof social.external === 'boolean' ? social.external : 
+                        href.startsWith('http') && !href.startsWith('mailto:') && !href.startsWith('tel:');
+        const kind = (social as any).kind || platform;
+        
+        return {
+          href,
+          label,
+          platform, // Required by SocialLink type
+          external,
+          kind, // Your custom property for icon mapping
+        };
+      })
     : [];
 
   const byHref = new Map<string, FooterSocialLink>();

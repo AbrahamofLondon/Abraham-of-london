@@ -2,18 +2,72 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, FileText } from "lucide-react";
-import BlogPostCard from "@/components/BlogPostCard"; // Fixed import path
+import { ArrowRight, FileText } from "lucide-react";
+import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/books/BookCard";
-import type { Post, Book } from "@/types/index";
 
 // -----------------------------------------------------------------------------
-// Types
+// Types - ENSURE required properties exist
 // -----------------------------------------------------------------------------
 
-type ContentItem =
-  | (any & { _type: "post" })
-  | (any & { _type: "book" });
+// Define minimal required properties for all content items
+interface ContentItem {
+  // Required by both BlogPostCard and BookCard
+  slug: string;
+  title: string;
+  
+  // Common optional properties
+  _type?: string;
+  type?: string;
+  _id?: string;
+  id?: string;
+  excerpt?: string;
+  description?: string;
+  coverImage?: string;
+  date?: string;
+  author?: string;
+  tags?: string[];
+  featured?: boolean;
+  
+  // Allow any other properties
+  [key: string]: any;
+}
+
+// Type assertions WITHOUT duplicate properties
+const asBlogPost = (item: ContentItem): any => {
+  // Create a new object without properties we're explicitly setting
+  const { slug, title, excerpt, description, ...rest } = item;
+  
+  return {
+    slug: slug || "",
+    title: title || "Untitled",
+    excerpt: excerpt || description || "",
+    coverImage: rest.coverImage,
+    date: rest.date,
+    author: rest.author,
+    tags: rest.tags,
+    featured: rest.featured,
+    ...rest // Include all OTHER properties (excluding the ones we already set)
+  };
+};
+
+const asBook = (item: ContentItem): any => {
+  // Create a new object without properties we're explicitly setting
+  const { slug, title, excerpt, description, _id, id, ...rest } = item;
+  
+  return {
+    slug: slug || "",
+    title: title || "Untitled",
+    excerpt: excerpt || description || "",
+    coverImage: rest.coverImage,
+    date: rest.date,
+    author: rest.author,
+    tags: rest.tags,
+    featured: rest.featured,
+    _id: _id || id || `book-${slug || Date.now()}`,
+    ...rest // Include all OTHER properties (excluding the ones we already set)
+  };
+};
 
 interface ContentShowcaseProps {
   items: ContentItem[];
@@ -25,26 +79,6 @@ interface ContentShowcaseProps {
   className?: string;
 }
 
-// -----------------------------------------------------------------------------
-// Type Guards
-// -----------------------------------------------------------------------------
-
-const isPostItem = (
-  item: ContentItem
-): item is any & { _type: "post" } => {
-  return item._type === "post";
-};
-
-const isBookItem = (
-  item: ContentItem
-): item is any & { _type: "book" } => {
-  return item._type === "book";
-};
-
-// -----------------------------------------------------------------------------
-// Component
-// -----------------------------------------------------------------------------
-
 export default function ContentShowcase({
   items,
   title = "Latest Content",
@@ -54,26 +88,12 @@ export default function ContentShowcase({
   maxItems = 6,
   className = "",
 }: ContentShowcaseProps): JSX.Element {
-  const displayedItems = items.slice(0, maxItems);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
+  // Filter out items missing required properties
+  const validItems = items.filter(item => 
+    item && typeof item === 'object' && item.slug && item.title
+  );
+  
+  const displayedItems = validItems.slice(0, maxItems);
 
   return (
     <section className={`py-16 ${className}`}>
@@ -96,32 +116,63 @@ export default function ContentShowcase({
         </motion.div>
 
         {/* Content Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
-        >
-          {displayedItems.map((item) => {
-            if (isPostItem(item)) {
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {displayedItems.map((item, index) => {
+            const type = item._type || item.type || '';
+            const key = item.slug || item._id || item.id || `item-${index}`;
+            
+            if (type === 'post' || type === 'Post') {
               return (
-                <motion.div key={item.slug} variants={itemVariants}>
-                  <BlogPostCard post={item} />
-                </motion.div>
-              );
-            } else if (isBookItem(item)) {
-              return (
-                <motion.div key={item.slug} variants={itemVariants}>
-                  <BookCard book={item} />
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <BlogPostCard post={asBlogPost(item)} />
                 </motion.div>
               );
             }
-            return null;
+            
+            if (type === 'book' || type === 'Book') {
+              return (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <BookCard book={asBook(item)} />
+                </motion.div>
+              );
+            }
+            
+            // Fallback for unknown types - still show something
+            return (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <div className="rounded-lg border border-gray-200 p-6">
+                  <h3 className="font-semibold text-deepCharcoal">
+                    {item.title || 'Untitled'}
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Type: {type || 'unknown'}
+                  </p>
+                  {item.excerpt && (
+                    <p className="mt-2 text-sm text-gray-500">{item.excerpt}</p>
+                  )}
+                </div>
+              </motion.div>
+            );
           })}
-        </motion.div>
+        </div>
 
         {/* View All CTA */}
-        {items.length > maxItems && (
+        {validItems.length > maxItems && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -153,7 +204,7 @@ export default function ContentShowcase({
                 Content Coming Soon
               </h3>
               <p className="mt-2 text-gray-600">
-                We're preparing some valuable content for you. Check back soon!
+                We&apos;re preparing some valuable content for you. Check back soon!
               </p>
             </div>
           </motion.div>
@@ -162,4 +213,3 @@ export default function ContentShowcase({
     </section>
   );
 }
-

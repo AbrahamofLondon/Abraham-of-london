@@ -1,4 +1,3 @@
-// pages/api/inner-circle/register.ts - CORRECTED
 import type { NextApiRequest, NextApiResponse } from "next";
 import { sendInnerCircleEmail } from "@/lib/email/sendInnerCircleEmail";
 import {
@@ -9,12 +8,15 @@ import {
 import {
   createOrUpdateMemberAndIssueKey,
   getPrivacySafeStats,
-} from "@/lib/server/innerCircleMembership"; // CORRECTED: Added "/server/"
+  IssuedKey,
+} from "@/lib/innerCircleMembership";
 import { getClientIpWithAnalysis } from "@/lib/server/ip";
 import { verifyRecaptcha } from "@/lib/recaptchaServer";
 
 type Success = {
   ok: true;
+  accessKey: string;
+  unlockUrl: string;
   message?: string;
 };
 
@@ -27,9 +29,9 @@ export type RegisterResponse = Success | Failure;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 const RECAPTCHA_REQUIRED = process.env.INNER_CIRCLE_RECAPTCHA_REQUIRED === "1";
-// Default to 0.5 if not set, but use 0.2 for initial detection
-const RECAPTCHA_MIN_SCORE = parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5");
-// Special lower threshold just for detecting very suspicious attempts
+const RECAPTCHA_MIN_SCORE = parseFloat(
+  process.env.RECAPTCHA_MIN_SCORE || "0.5"
+);
 const RECAPTCHA_SUSPICIOUS_THRESHOLD = 0.2;
 
 type RecaptchaResult = {
@@ -50,7 +52,11 @@ function logRegistration(
   });
 }
 
-function createRecaptchaResult(success: boolean, score: number = 1.0, errors?: string[]): RecaptchaResult {
+function createRecaptchaResult(
+  success: boolean,
+  score: number = 1.0,
+  errors?: string[]
+): RecaptchaResult {
   return { success, score, errors };
 }
 
@@ -90,7 +96,9 @@ export default async function handler(
     return;
   }
 
-  // Check if reCAPTCHA is required but token is missing
+  // ───────────────────────────────────────────────
+  // reCAPTCHA handling
+  // ───────────────────────────────────────────────
   if (RECAPTCHA_REQUIRED && !recaptchaToken) {
     logRegistration("recaptcha_missing", { required: true });
     res.status(400).json({
@@ -100,76 +108,61 @@ export default async function handler(
     return;
   }
 
-  // If reCAPTCHA is not required and token is missing, we can proceed
-  // but still log it for monitoring
-  if (!recaptchaToken) {
-    logRegistration("recaptcha_optional_missing", { required: false });
-    // Continue without reCAPTCHA verification
-  }
-
   const ipInfo = getClientIpWithAnalysis(req);
   const ip = ipInfo.ip;
 
-  // ───────────────────────────────────────────────
-  // Enhanced reCAPTCHA verification with scoring
-  // ───────────────────────────────────────────────
   let recaptchaResult: RecaptchaResult | null = null;
-  
+
   if (recaptchaToken) {
     try {
-      // Call the new verifyRecaptcha function that returns detailed result
       const result = await verifyRecaptcha(
         recaptchaToken,
         "inner_circle_register",
         ip
       );
-      
-      // Handle both old boolean and new object return types
-      if (typeof result === 'boolean') {
-        // Legacy boolean response - treat as success/failure
+
+      if (typeof result === "boolean") {
         recaptchaResult = createRecaptchaResult(result, result ? 1.0 : 0.0);
-      } else if (result && typeof result === 'object') {
-        // New object response
+      } else if (result && typeof result === "object") {
         recaptchaResult = {
           success: result.success || false,
-          score: typeof result.score === 'number' ? result.score : 0.0,
+          score: typeof result.score === "number" ? result.score : 0.0,
           action: result.action,
-          errors: result.errors
+          errors: result.errors,
         };
       } else {
-        // Invalid response format
-        throw new Error('Invalid reCAPTCHA response format');
+        throw new Error("Invalid reCAPTCHA response format");
       }
-      
-      // Log reCAPTCHA result for analysis
+
       logRegistration("recaptcha_result", {
         success: recaptchaResult.success,
         score: recaptchaResult.score,
         action: recaptchaResult.action,
         minScore: RECAPTCHA_MIN_SCORE,
         suspiciousThreshold: RECAPTCHA_SUSPICIOUS_THRESHOLD,
-        ip
+        ip,
       });
-      
-      // Check if reCAPTCHA failed or score is too low
+
       if (!recaptchaResult.success || recaptchaResult.score < RECAPTCHA_MIN_SCORE) {
-        const reason = !recaptchaResult.success ? 'verification_failed' : 'score_too_low';
-        logRegistration(`recaptcha_${reason}`, { 
-          ip, 
+        const reason = !recaptchaResult.success
+          ? "verification_failed"
+          : "score_too_low";
+
+        logRegistration(`recaptcha_${reason}`, {
+          ip,
           score: recaptchaResult.score,
           minScore: RECAPTCHA_MIN_SCORE,
-          required: RECAPTCHA_REQUIRED
+          required: RECAPTCHA_REQUIRED,
         });
-        
-        // Check if it's suspiciously low (potential bot)
+
         if (recaptchaResult.score < RECAPTCHA_SUSPICIOUS_THRESHOLD) {
           logRegistration("recaptcha_suspicious_bot", {
             ip,
             score: recaptchaResult.score,
-            emailHashBase64: Buffer.from(email).toString('base64').slice(0, 16)
+            emailHashBase64: Buffer.from(email).toString("base64").slice(0, 16),
           });
         }
-        
+
         if (RECAPTCHA_REQUIRED) {
           res.status(400).json({
             ok: false,
@@ -177,18 +170,17 @@ export default async function handler(
           });
           return;
         }
-        // If not strictly required, log and continue with warning
+
         logRegistration("recaptcha_bypassed_low_score", {
           ip,
-          score: recaptchaResult.score
+          score: recaptchaResult.score,
         });
       }
-      
     } catch (err) {
       logRegistration("recaptcha_error", {
         ip,
         error: err instanceof Error ? err.message : "unknown",
-        required: RECAPTCHA_REQUIRED
+        required: RECAPTCHA_REQUIRED,
       });
 
       if (RECAPTCHA_REQUIRED) {
@@ -198,9 +190,11 @@ export default async function handler(
         });
         return;
       }
-      // If not strictly required, log and continue
+
       logRegistration("recaptcha_error_bypassed", { ip });
     }
+  } else {
+    logRegistration("recaptcha_optional_missing", { required: false });
   }
 
   const sanitizedEmail = email.toLowerCase().trim();
@@ -212,11 +206,11 @@ export default async function handler(
       ? returnTo
       : "/canon";
 
-  // Rate limit (IP + email) - include reCAPTCHA score in rate limit consideration
-  const rateLimitKey = recaptchaResult && recaptchaResult.score < 0.3 
-    ? "inner-circle-register-low-score" 
-    : "inner-circle-register";
-    
+  const rateLimitKey =
+    recaptchaResult && recaptchaResult.score < 0.3
+      ? "inner-circle-register-low-score"
+      : "inner-circle-register";
+
   const { allowed, hitIpLimit, hitEmailLimit, ipResult, emailResult } =
     combinedRateLimit(
       req,
@@ -242,7 +236,7 @@ export default async function handler(
       hitIpLimit,
       hitEmailLimit,
       recaptchaScore: recaptchaResult?.score,
-      rateLimitKey
+      rateLimitKey,
     });
 
     res.status(429).json({ ok: false, error: msg });
@@ -259,56 +253,87 @@ export default async function handler(
     return;
   }
 
-  try {
-    // Include reCAPTCHA score in the registration context for analytics
-    const context = recaptchaResult ? {
-      action: "register",
-      recaptchaScore: recaptchaResult.score,
-      recaptchaSuccess: recaptchaResult.success,
-      ipAnalysis: ipInfo.analysis
-    } : "register";
+  // ───────────────────────────────────────────────
+  // Membership creation
+  // ───────────────────────────────────────────────
+  let keyRecord: IssuedKey;
 
-    const keyRecord = await createOrUpdateMemberAndIssueKey({
+  try {
+    const context =
+      recaptchaResult == null
+        ? "register"
+        : JSON.stringify({
+            action: "register",
+            recaptchaScore: recaptchaResult.score,
+            recaptchaSuccess: recaptchaResult.success,
+            ipAnalysis: ipInfo,
+          });
+
+    keyRecord = await createOrUpdateMemberAndIssueKey({
       email: sanitizedEmail,
       name: sanitizedName,
       ipAddress: ip,
-      context: typeof context === 'string' ? context : JSON.stringify(context),
+      context,
+    });
+  } catch (err) {
+    logRegistration("membership_error", {
+      ip,
+      error: err instanceof Error ? err.message : "unknown",
     });
 
-    const unlockUrl = `${siteUrl}/api/inner-circle/unlock?key=${encodeURIComponent(
-      keyRecord.key
-    )}&returnTo=${encodeURIComponent(safeReturnTo)}`;
+    res.status(500).json({
+      ok: false,
+      error:
+        "We couldn't create your Inner Circle record. Please try again or contact support.",
+    });
+    return;
+  }
 
+  const unlockUrl = `${siteUrl}/api/inner-circle/unlock?key=${encodeURIComponent(
+    keyRecord.key
+  )}&returnTo=${encodeURIComponent(safeReturnTo)}`;
+
+  // ───────────────────────────────────────────────
+  // Email sending (non-fatal – we still return key)
+  // ───────────────────────────────────────────────
+  try {
     await sendInnerCircleEmail({
       email: sanitizedEmail,
       name: sanitizedName,
       accessKey: keyRecord.key,
       unlockUrl,
     });
-
-    logRegistration("success", {
-      keySuffix: keyRecord.keySuffix,
-      siteUrl,
-      recaptchaScore: recaptchaResult?.score,
-      ipAnalysis: ipInfo.analysis
+  } catch (err) {
+    logRegistration("email_error", {
+      ip,
+      error: err instanceof Error ? err.message : "unknown",
     });
 
+    // IMPORTANT: still return success with key + unlockUrl
     res.status(200).json({
       ok: true,
+      accessKey: keyRecord.key,
+      unlockUrl,
       message:
-        "Registration successful. Check your email for your Inner Circle access key.",
+        "Your Inner Circle key was generated, but the email failed. Please contact us if you don't receive it.",
     });
-  } catch (err) {
-    logRegistration("error", {
-      error: err instanceof Error ? err.message : "unknown",
-      recaptchaScore: recaptchaResult?.score,
-      ip
-    });
-    res.status(500).json({
-      ok: false,
-      error: "Something went wrong processing your registration.",
-    });
+    return;
   }
+
+  logRegistration("success", {
+    keySuffix: keyRecord.keySuffix,
+    siteUrl,
+    recaptchaScore: recaptchaResult?.score,
+    ipAnalysis: ipInfo,
+  });
+
+  res.status(200).json({
+    ok: true,
+    accessKey: keyRecord.key,
+    unlockUrl,
+    message:
+      "Registration successful. Check your email for your Inner Circle access key.",
+  });
 }
 
 // Optional: make stats callable elsewhere

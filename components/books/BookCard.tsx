@@ -12,10 +12,10 @@ import {
   type FallbackConfig 
 } from "@/lib/image-utils";
 
-// Instead of extending, create a new type that's compatible with both
+// FIXED: Made _id optional with a fallback
 interface BookCardBook {
   // Required fields from Book interface
-  _id: string;
+  _id?: string; // CHANGED: Made optional
   slug: string;
   title: string;
   
@@ -90,26 +90,34 @@ export default function BookCard({
   const [imageError, setImageError] = useState(false);
   const [fallbackIndex, setFallbackIndex] = useState(0);
 
+  // FIXED: Generate a fallback ID if _id is missing
+  const bookWithId = useMemo(() => {
+    return {
+      ...book,
+      _id: book._id || `book-${book.slug || Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    };
+  }, [book]);
+
   // Safely extract all values with defaults
-  const safeTitle = safeString(book.title, "Untitled Book");
-  const safeExcerpt = safeString(book.excerpt, "");
-  const safeDate = formatDateSafe(book.date);
-  const safeSlug = safeString(book.slug);
-  const safeAuthor = safeString(book.author);
-  const safeFormat = safeString(book.format);
-  const readTimeText = getReadTimeText(book.readTime);
+  const safeTitle = safeString(bookWithId.title, "Untitled Book");
+  const safeExcerpt = safeString(bookWithId.excerpt, "");
+  const safeDate = formatDateSafe(bookWithId.date);
+  const safeSlug = safeString(bookWithId.slug);
+  const safeAuthor = safeString(bookWithId.author);
+  const safeFormat = safeString(bookWithId.format);
+  const readTimeText = getReadTimeText(bookWithId.readTime);
   
   // Determine category for fallback images
   const category = useMemo(() => {
-    if (book.tags && book.tags.length > 0) {
-      const firstTag = safeString(book.tags[0]);
+    if (bookWithId.tags && bookWithId.tags.length > 0) {
+      const firstTag = safeString(bookWithId.tags[0]);
       if (firstTag.includes("philosophy")) return "philosophy";
       if (firstTag.includes("business")) return "business";
       if (firstTag.includes("fiction")) return "fiction";
       if (firstTag.includes("non-fiction") || firstTag.includes("nonfiction")) return "nonFiction";
     }
     return "default";
-  }, [book.tags]);
+  }, [bookWithId.tags]);
 
   // Prepare fallback configuration
   const fallbackConfig: FallbackConfig = {
@@ -119,7 +127,7 @@ export default function BookCard({
   };
 
   // Get safe image props using our utility
-  const imageProps = getSafeImageProps(book.coverImage, safeTitle, {
+  const imageProps = getSafeImageProps(bookWithId.coverImage, safeTitle, {
     priority,
     fallbackConfig,
   });
@@ -199,7 +207,7 @@ export default function BookCard({
             />
 
             {/* Featured badge overlay */}
-            {book.featured && (
+            {bookWithId.featured && (
               <div className="absolute left-4 top-4 z-20">
                 <div className="rounded-full border border-white/10 bg-gradient-to-r from-softGold to-amber-500 px-3 py-1.5 backdrop-blur-sm shadow-lg">
                   <span className="text-xs font-semibold uppercase tracking-wider text-white">
@@ -266,17 +274,17 @@ export default function BookCard({
             <div className="mt-auto space-y-4">
               {/* Status badges */}
               <div className="flex flex-wrap gap-2">
-                {book.status && (
+                {bookWithId.status && (
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      book.status === "published"
+                      bookWithId.status === "published"
                         ? "bg-green-100 text-green-800 border border-green-200"
-                        : book.status === "draft"
+                        : bookWithId.status === "draft"
                         ? "bg-gray-100 text-gray-800 border border-gray-200"
                         : "bg-blue-100 text-blue-800 border border-blue-200"
                     }`}
                   >
-                    {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
+                    {bookWithId.status.charAt(0).toUpperCase() + bookWithId.status.slice(1)}
                   </span>
                 )}
 
@@ -292,7 +300,7 @@ export default function BookCard({
                 <div className="flex flex-col gap-1">
                   {safeDate && (
                     <time
-                      dateTime={book.date || undefined}
+                      dateTime={bookWithId.date || undefined}
                       className="text-xs font-light text-gray-500"
                     >
                       {safeDate}
@@ -325,9 +333,9 @@ export default function BookCard({
               </div>
 
               {/* Tags */}
-              {book.tags && book.tags.length > 0 && (
+              {bookWithId.tags && bookWithId.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {book.tags
+                  {bookWithId.tags
                     .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
                     .slice(0, 3)
                     .map((tag, index) => (
@@ -338,9 +346,9 @@ export default function BookCard({
                         {tag}
                       </span>
                     ))}
-                  {book.tags.length > 3 && (
+                  {bookWithId.tags.length > 3 && (
                     <span className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-500 backdrop-blur-sm">
-                      +{book.tags.length - 3}
+                      +{bookWithId.tags.length - 3}
                     </span>
                   )}
                 </div>

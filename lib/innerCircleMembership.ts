@@ -1,8 +1,7 @@
-// lib/innerCircleMembership.ts
 /* eslint-disable no-console */
 
 import crypto from "node:crypto";
-import { Pool, type PoolClient } from "pg";
+import { Pool, type PoolClient, type QueryResult } from "pg";
 
 // ---------------------------------------------------------------------------
 // Shared types
@@ -479,53 +478,55 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     const now = nowIso();
     const { key, keyHash, keySuffix } = generateAccessKey();
 
+    let memberId: string;
+
     await this.withClient(async (client) => {
       await client.query("BEGIN");
 
-      // Ensure member exists
-      const memberRes = await client.query<{ id: string }>(
-        `
-        INSERT INTO inner_circle_members (email_hash, email_hash_prefix, name, last_ip)
-        VALUES ($1, $2, NULLIF($3, ''), NULLIF($4, ''))
-        ON CONFLICT (email_hash)
-        DO UPDATE SET
-          name = COALESCE(NULLIF($3, ''), inner_circle_members.name),
-          last_seen_at = NOW(),
-          last_ip = COALESCE(NULLIF($4, ''), inner_circle_members.last_ip)
-        RETURNING id
-      `,
-        [emailHash, emailHashPrefix, args.name ?? "", args.ipAddress ?? ""]
-      );
+      try {
+        // Ensure member exists
+        const memberRes = await client.query<{ id: string }>(
+          `
+          INSERT INTO inner_circle_members (email_hash, email_hash_prefix, name, last_ip)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (email_hash) 
+          DO UPDATE SET
+            name = COALESCE($3, inner_circle_members.name),
+            last_seen_at = NOW(),
+            last_ip = COALESCE($4, inner_circle_members.last_ip)
+          RETURNING id
+        `,
+          [
+            emailHash,
+            emailHashPrefix,
+            args.name || null,
+            args.ipAddress || null
+          ]
+        );
 
-      const memberId = memberRes.rows[0].id;
+        memberId = memberRes.rows[0].id;
 
-      // Mark previous keys as replaced/revoked? Here we simply leave them;
-      // they remain valid until TTL. If you want strict single-key policy,
-      // uncomment the update:
-      //
-      // await client.query(
-      //   "UPDATE inner_circle_keys SET status = 'revoked' WHERE member_id = $1 AND status = 'active'",
-      //   [memberId],
-      // );
+        // Insert the new key
+        await client.query(
+          `
+          INSERT INTO inner_circle_keys (member_id, key_hash, key_suffix, status)
+          VALUES ($1, $2, $3, 'active')
+        `,
+          [memberId, keyHash, keySuffix]
+        );
 
-      await client.query(
-        `
-        INSERT INTO inner_circle_keys (
-          member_id, key_hash, key_suffix, status, total_unlocks
-        )
-        VALUES ($1, $2, $3, 'active', 0)
-      `,
-        [memberId, keyHash, keySuffix]
-      );
+        await client.query("COMMIT");
 
-      await client.query("COMMIT");
-
-      logPrivacyAction("pg_key_issued", {
-        memberId,
-        emailHashPrefix,
-        keySuffix,
-        context: args.context,
-      });
+        logPrivacyAction("pg_key_issued", {
+          memberId,
+          emailHashPrefix,
+          keySuffix,
+          context: args.context,
+        });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      }
     });
 
     return {
@@ -544,14 +545,15 @@ class PostgresInnerCircleStore implements InnerCircleStore {
 
     const res = await this.withClient((client) =>
       client.query<{
-        id: string;
+        member_id: string;
         status: InnerCircleStatus;
         created_at: string;
+        key_suffix: string;
       }>(
         `
-        SELECT k.id, k.status, k.created_at
-        FROM inner_circle_keys k
-        WHERE k.key_hash = $1
+        SELECT member_id, status, created_at, key_suffix
+        FROM inner_circle_keys
+        WHERE key_hash = $1
         LIMIT 1
       `,
         [keyHash]
@@ -568,8 +570,8 @@ class PostgresInnerCircleStore implements InnerCircleStore {
 
     return {
       valid: true,
-      memberId: row.id,
-      keySuffix: safeKey.slice(-4),
+      memberId: row.member_id,
+      keySuffix: row.key_suffix,
       createdAt: row.created_at,
     };
   }
@@ -586,52 +588,61 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     await this.withClient(async (client) => {
       await client.query("BEGIN");
 
-      const keyRes = await client.query<{
-        id: string;
-        member_id: string;
-      }>(
-        `
-        SELECT id, member_id
-        FROM inner_circle_keys
-        WHERE key_hash = $1
-        LIMIT 1
-      `,
-        [keyHash]
-      );
+      try {
+        const keyRes = await client.query<{
+          id: string;
+          member_id: string;
+        }>(
+          `
+          SELECT id, member_id
+          FROM inner_circle_keys
+          WHERE key_hash = $1
+          LIMIT 1
+          FOR UPDATE
+        `,
+          [keyHash]
+        );
 
-      const row = keyRes.rows[0];
-      if (!row) {
-        await client.query("ROLLBACK");
-        return;
-      }
+        const row = keyRes.rows[0];
+        if (!row) {
+          await client.query("ROLLBACK");
+          return;
+        }
 
-      await client.query(
-        `
-        UPDATE inner_circle_keys
-        SET total_unlocks = total_unlocks + 1,
-            last_used_at = NOW()
-        WHERE id = $1
-      `,
-        [row.id]
-      );
-
-      await client.query(
-        `
-        UPDATE inner_circle_members
-        SET last_seen_at = NOW(),
+        await client.query(
+          `
+          UPDATE inner_circle_keys
+          SET 
+            total_unlocks = total_unlocks + 1,
+            last_used_at = NOW(),
             last_ip = COALESCE($2, last_ip)
-        WHERE id = $1
-      `,
-        [row.member_id, ipAddress ?? null]
-      );
+          WHERE id = $1
+        `,
+          [row.id, ipAddress || null]
+        );
 
-      await client.query("COMMIT");
+        await client.query(
+          `
+          UPDATE inner_circle_members
+          SET 
+            last_seen_at = NOW(),
+            last_ip = COALESCE($2, last_ip)
+          WHERE id = $1
+        `,
+          [row.member_id, ipAddress || null]
+        );
 
-      logPrivacyAction("pg_key_used", {
-        keyId: row.id,
-        memberId: row.member_id,
-        hasIp: !!ipAddress,
-      });
+        await client.query("COMMIT");
+
+        logPrivacyAction("pg_key_used", {
+          keyId: row.id,
+          memberId: row.member_id,
+          hasIp: !!ipAddress,
+        });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      }
     });
   }
 
@@ -642,12 +653,13 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     const keyHash = sha256Hex(safeKey);
 
     const res = await this.withClient((client) =>
-      client.query(
+      client.query<{ rowCount: number }>(
         `
         UPDATE inner_circle_keys
         SET status = 'revoked',
             last_used_at = NOW()
         WHERE key_hash = $1
+        RETURNING 1
       `,
         [keyHash]
       )
@@ -661,10 +673,11 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     const emailHash = sha256Hex(emailNormalised);
 
     const res = await this.withClient((client) =>
-      client.query(
+      client.query<{ rowCount: number }>(
         `
         DELETE FROM inner_circle_members
         WHERE email_hash = $1
+        RETURNING 1
       `,
         [emailHash]
       )
@@ -677,62 +690,67 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     deletedMembers: number;
     deletedKeys: number;
   }> {
-    const result = await this.withClient(async (client) => {
+    return await this.withClient(async (client) => {
       await client.query("BEGIN");
 
-      const oldMembers = await client.query<{ id: string }>(
-        `
-        SELECT id
-        FROM inner_circle_members
-        WHERE last_seen_at < NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
-      `
-      );
-
-      const memberIds = oldMembers.rows.map((r) => r.id);
-      let deletedKeys = 0;
-
-      if (memberIds.length > 0) {
-        const keyDel = await client.query(
+      try {
+        // Find old members
+        const oldMembers = await client.query<{ id: string }>(
           `
-          DELETE FROM inner_circle_keys
-          WHERE member_id = ANY($1)
-        `,
-          [memberIds]
-        );
-        deletedKeys = keyDel.rowCount ?? 0;
-
-        await client.query(
+          SELECT id
+          FROM inner_circle_members
+          WHERE last_seen_at < NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
           `
-          DELETE FROM inner_circle_members
-          WHERE id = ANY($1)
-        `,
-          [memberIds]
         );
+
+        const memberIds = oldMembers.rows.map((r) => r.id);
+        let deletedKeys = 0;
+
+        if (memberIds.length > 0) {
+          // Delete keys for these members
+          const keyDel = await client.query<{ rowCount: number }>(
+            `
+            DELETE FROM inner_circle_keys
+            WHERE member_id = ANY($1)
+            RETURNING 1
+          `,
+            [memberIds]
+          );
+          deletedKeys = keyDel.rowCount ?? 0;
+
+          // Delete the members
+          await client.query(
+            `
+            DELETE FROM inner_circle_members
+            WHERE id = ANY($1)
+          `,
+            [memberIds]
+          );
+        }
+
+        await client.query("COMMIT");
+
+        if (memberIds.length > 0) {
+          logPrivacyAction("pg_cleanup_completed", {
+            deletedMembers: memberIds.length,
+            deletedKeys,
+          });
+        }
+
+        return {
+          deletedMembers: memberIds.length,
+          deletedKeys,
+        };
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
       }
-
-      await client.query("COMMIT");
-
-      return {
-        deletedMembers: memberIds.length,
-        deletedKeys,
-      };
     });
-
-    if (result.deletedMembers > 0) {
-      logPrivacyAction("pg_cleanup_completed", {
-        deletedMembers: result.deletedMembers,
-        deletedKeys: result.deletedKeys,
-      });
-    }
-
-    return result;
   }
 
   async getPrivacySafeStats(): Promise<PrivacySafeStats> {
-    const pool = getPool();
-    const client = await pool.connect();
-    try {
-      const [membersRes, keysRes, unlocksRes] = await Promise.all([
+    return await this.withClient(async (client) => {
+      const [membersRes, keysRes, unlocksRes, activeRes] = await Promise.all([
         client.query<{ count: string }>(
           "SELECT COUNT(*) AS count FROM inner_circle_members"
         ),
@@ -742,41 +760,36 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         client.query<{ total: string }>(
           "SELECT COALESCE(SUM(total_unlocks), 0) AS total FROM inner_circle_keys"
         ),
+        client.query<{ count: string }>(
+          `
+          SELECT COUNT(DISTINCT m.id) AS count
+          FROM inner_circle_members m
+          JOIN inner_circle_keys k ON k.member_id = m.id
+          WHERE k.status = 'active'
+            AND k.created_at > NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
+          `
+        ),
       ]);
 
-      const totalMembers = Number(membersRes.rows[0].count ?? "0");
-      const totalKeys = Number(keysRes.rows[0].count ?? "0");
-      const totalUnlocks = Number(unlocksRes.rows[0].total ?? "0");
-
-      // Active members: any with a non-revoked, non-expired key
-      const activeRes = await client.query<{ count: string }>(
-        `
-        SELECT COUNT(DISTINCT m.id) AS count
-        FROM inner_circle_members m
-        JOIN inner_circle_keys k ON k.member_id = m.id
-        WHERE k.status = 'active'
-          AND k.created_at > NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
-      `
-      );
+      const totalMembers = Number(membersRes.rows[0]?.count ?? "0");
+      const totalKeys = Number(keysRes.rows[0]?.count ?? "0");
+      const totalUnlocks = Number(unlocksRes.rows[0]?.total ?? "0");
+      const activeMembers = Number(activeRes.rows[0]?.count ?? "0");
 
       return {
         totalMembers,
-        activeMembers: Number(activeRes.rows[0].count ?? "0"),
+        activeMembers,
         totalKeys,
         totalUnlocks,
         dataRetentionDays: DATA_RETENTION_DAYS,
-        estimatedMemoryBytes: totalMembers * 1024, // heuristic
+        estimatedMemoryBytes: totalMembers * 1024,
         lastCleanup: nowIso(),
       };
-    } finally {
-      client.release();
-    }
+    });
   }
 
   async exportInnerCircleAdminSummary(): Promise<InnerCircleAdminExportRow[]> {
-    const pool = getPool();
-    const client = await pool.connect();
-    try {
+    return await this.withClient(async (client) => {
       const res = await client.query<InnerCircleAdminExportRow>(
         `
         SELECT
@@ -791,9 +804,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       `
       );
       return res.rows;
-    } finally {
-      client.release();
-    }
+    });
   }
 }
 
@@ -863,4 +874,3 @@ export async function exportInnerCircleAdminSummary(): Promise<
 > {
   return getStore().exportInnerCircleAdminSummary();
 }
-

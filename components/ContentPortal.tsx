@@ -119,6 +119,46 @@ export function ContentPortal() {
 
   const hoveredCategoryData = getHoveredCategory();
 
+  // Mock featured content data
+  const featuredContent = [
+    {
+      slug: 'architectural-framework-v1',
+      title: 'Architectural Framework v1.0',
+      description: 'A comprehensive system for structural decision-making with adaptive governance layers',
+      category: 'Strategic Insights',
+      date: '2024-01-15',
+      readingTime: '12 min',
+      tags: ['Strategic', 'Framework', 'Governance'],
+      featured: true,
+      isNew: true,
+      coverImage: '/images/framework-cover.jpg',
+    },
+    {
+      slug: 'bound-volumes-guide',
+      title: 'Bound Volumes: Curator\'s Guide',
+      description: 'Complete methodologies for compiling and structuring archival knowledge systems',
+      category: 'Curated Volumes',
+      date: '2024-01-10',
+      readingTime: '8 min',
+      tags: ['Archival', 'Methodology', 'Systems'],
+      featured: true,
+      isNew: false,
+      coverImage: '/images/volumes-cover.jpg',
+    },
+    {
+      slug: 'execution-instruments',
+      title: 'Execution Instruments Toolkit',
+      description: 'Practical tools and instruments for implementing architectural decisions',
+      category: 'Execution Tools',
+      date: '2024-01-05',
+      readingTime: '6 min',
+      tags: ['Tools', 'Implementation', 'Practical'],
+      featured: true,
+      isNew: false,
+      coverImage: '/images/tools-cover.jpg',
+    },
+  ];
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background grid with parallax effect */}
@@ -307,18 +347,21 @@ export function ContentPortal() {
             </Link>
           </div>
 
-          {/* Mock featured content - Replace with real data later */}
+          {/* Featured content cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((item) => (
+            {featuredContent.map((item, index) => (
               <BaseCard
-                key={item}
-                title="Architectural Framework"
-                description="A comprehensive system for structural decision-making"
-                category="Strategic Insights"
-                date="2024-01-15"
-                readingTime="12 min"
-                isNew={item === 1}
-                href="/content/sample"
+                key={item.slug}
+                slug={item.slug}
+                title={item.title}
+                description={item.description}
+                category={item.category}
+                date={item.date}
+                readingTime={item.readingTime}
+                tags={item.tags}
+                featured={item.featured}
+                isNew={item.isNew}
+                coverImage={item.coverImage}
                 className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               />
             ))}

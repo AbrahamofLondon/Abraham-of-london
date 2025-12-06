@@ -1,4 +1,3 @@
-// lib/server/ip.ts
 import type { NextApiRequest } from "next";
 
 export interface IpAnalysis {

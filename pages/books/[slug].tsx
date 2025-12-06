@@ -7,9 +7,9 @@ import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import { getAllBooks, getBookBySlug } from "@/lib/content";
+import { getAllBooks, getBookBySlug, type Book } from "@/lib/content";
 
-type BookDoc = ReturnType<typeof getAllBooks>[number];
+type BookDoc = Book;
 
 type BookPageProps = {
   book: BookDoc;
@@ -38,11 +38,14 @@ const BookPage: NextPage<BookPageProps> = ({ book, mdxSource }) => {
   };
 
   const SITE_URL =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    "https://www.abrahamoflondon.org";
   const canonicalUrl = `${SITE_URL}/books/${slug}`;
 
   const metaDescription =
-    description || excerpt || "Curated volume from the Abraham of London Canon.";
+    description ||
+    excerpt ||
+    "Curated volume from the Abraham of London Canon.";
 
   const dateLabel =
     date && !Number.isNaN(new Date(date).getTime())

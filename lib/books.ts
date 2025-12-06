@@ -3,10 +3,49 @@ import {
   getBookBySlug as getBookDocBySlug,
 } from "@/lib/server/books-data";
 
-import type { any } from "@/types/index";
+// Remove the incorrect import and define proper types locally
+
+// Define Book interface locally since it's not exported from @/types/index
+interface Book {
+  // Required fields
+  slug: string;
+  title: string;
+
+  // Optional string fields
+  excerpt?: string;
+  coverImage?: string;
+  date?: string;
+  author?: string;
+  readTime?: string;
+  subtitle?: string;
+  description?: string;
+  lastModified?: string;
+  category?: string;
+  isbn?: string;
+  publisher?: string;
+  publishedDate?: string;
+  language?: string;
+  price?: string;
+  purchaseLink?: string;
+
+  // Optional boolean fields
+  featured?: boolean;
+  published?: boolean;
+  draft?: boolean;
+
+  // Optional array fields
+  tags?: string[];
+
+  // Optional number fields
+  pages?: number;
+  rating?: number;
+
+  // Optional typed fields
+  format?: "hardcover" | "paperback" | "ebook" | "audiobook";
+}
 
 // Extended type that includes content
-export type BookWithContent = any & {
+export type BookWithContent = Book & {
   content?: string;
 };
 
@@ -52,9 +91,9 @@ function safeArray(value: unknown): string[] | undefined {
 }
 
 /**
- * Normalise raw meta into a strongly-typed any.
+ * Normalise raw meta into a strongly-typed Book.
  */
-function normaliseany(raw: Record<string, unknown>): any {
+function normaliseBook(raw: Record<string, unknown>): Book {
   const slug = safeString(raw.slug) || "";
   const title = safeString(raw.title) || "Untitled";
 
@@ -126,9 +165,9 @@ export function getRawBooks(): Record<string, unknown>[] {
 /**
  * Fully typed & normalised books for UI components.
  */
-export function getAllBooks(): any[] {
+export function getAllBooks(): Book[] {
   const rawBooks = getRawBooks();
-  return rawBooks.map(normaliseany);
+  return rawBooks.map(normaliseBook);
 }
 
 /**
@@ -139,7 +178,7 @@ export function getBookBySlug(slug: string): BookWithContent | undefined {
   if (!raw) return undefined;
 
   const record = toSafeRecord(raw);
-  const meta = normaliseany(record);
+  const meta = normaliseBook(record);
 
   // Extract content if it exists
   const content = safeString(raw.content);

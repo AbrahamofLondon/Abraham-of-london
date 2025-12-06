@@ -2,10 +2,11 @@
 import { safeString } from './utils';
 
 /* -------------------------------------------------------------------------- */
-/* TYPES & INTERFACES                                                         */
+/* TYPES & INTERFACES - DECLARED WITHOUT EXPORT                              */
 /* -------------------------------------------------------------------------- */
 
-export interface ImageMetadata {
+// Declare interfaces WITHOUT export keyword
+interface ImageMetadata {
   src: string;
   alt?: string;
   width?: number;
@@ -16,13 +17,13 @@ export interface ImageMetadata {
   blurDataURL?: string;
 }
 
-export interface FallbackConfig {
+interface FallbackConfig {
   type: 'book' | 'post' | 'avatar' | 'project';
   theme?: 'light' | 'dark' | 'gradient';
   category?: string;
 }
 
-export interface ImageValidationResult {
+interface ImageValidationResult {
   isValid: boolean;
   reason?: 'invalid-url' | 'missing-protocol' | 'unsupported-format' | 'size-too-large';
   suggestedFix?: string;
@@ -33,14 +34,14 @@ export interface ImageValidationResult {
 /* -------------------------------------------------------------------------- */
 
 // Base CDN URL for optimized images
-export const CDN_BASE_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.abrahamoflondon.org';
+const CDN_BASE_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.abrahamoflondon.org';
 
 // Supported image formats
-export const SUPPORTED_FORMATS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'svg'] as const;
-export const PREFERRED_FORMAT: typeof SUPPORTED_FORMATS[number] = 'webp';
+const SUPPORTED_FORMATS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'svg'] as const;
+const PREFERRED_FORMAT: typeof SUPPORTED_FORMATS[number] = 'webp';
 
 // Image optimization settings by context
-export const IMAGE_OPTIMIZATION = {
+const IMAGE_OPTIMIZATION = {
   cover: {
     widths: [320, 640, 768, 1024, 1280, 1536, 1920],
     quality: 85,
@@ -59,7 +60,7 @@ export const IMAGE_OPTIMIZATION = {
 } as const;
 
 // Fallback images organized by type and theme
-export const FALLBACK_IMAGES = {
+const FALLBACK_IMAGES = {
   // Books
   book: {
     default: [
@@ -122,7 +123,7 @@ export const FALLBACK_IMAGES = {
 /**
  * Validates if a string is a valid image URL
  */
-export function isValidImageUrl(url: string | undefined | null): boolean {
+function isValidImageUrl(url: string | undefined | null): boolean {
   if (!url || typeof url !== 'string' || url.trim() === '') {
     return false;
   }
@@ -154,7 +155,7 @@ export function isValidImageUrl(url: string | undefined | null): boolean {
 /**
  * Extracts file extension from URL or path
  */
-export function getFileExtension(path: string): string {
+function getFileExtension(path: string): string {
   const fileName = path.split('/').pop() || '';
   const extension = fileName.split('.').pop() || '';
   return extension.toLowerCase();
@@ -163,7 +164,7 @@ export function getFileExtension(path: string): string {
 /**
  * Normalizes an image URL to ensure it's properly formatted
  */
-export function normalizeImageUrl(
+function normalizeImageUrl(
   url: string | undefined | null,
   options: {
     baseUrl?: string;
@@ -218,7 +219,7 @@ export function normalizeImageUrl(
 /**
  * Validates and analyzes an image URL
  */
-export function validateImageUrl(url: string): ImageValidationResult {
+function validateImageUrl(url: string): ImageValidationResult {
   if (!url) {
     return { isValid: false, reason: 'invalid-url' };
   }
@@ -246,7 +247,7 @@ export function validateImageUrl(url: string): ImageValidationResult {
 /**
  * Gets appropriate fallback image based on context
  */
-export function getFallbackImage(config: FallbackConfig = { type: 'book' }): string {
+function getFallbackImage(config: FallbackConfig = { type: 'book' }): string {
   const { type, theme = 'gradient', category } = config;
   
   const fallbacks = FALLBACK_IMAGES[type];
@@ -281,7 +282,7 @@ export function getFallbackImage(config: FallbackConfig = { type: 'book' }): str
 /**
  * Creates a deterministic fallback sequence for an item
  */
-export function createFallbackSequence(
+function createFallbackSequence(
   seed: string | number,
   config: FallbackConfig = { type: 'book' }
 ): string[] {
@@ -326,7 +327,7 @@ export function createFallbackSequence(
 /**
  * Generates optimized image URLs for responsive images
  */
-export function generateOptimizedImageUrls(
+function generateOptimizedImageUrls(
   baseUrl: string,
   options: {
     widths?: number[];
@@ -382,7 +383,7 @@ export function generateOptimizedImageUrls(
 /**
  * Calculates aspect ratio from width and height
  */
-export function calculateAspectRatio(
+function calculateAspectRatio(
   width: number | undefined,
   height: number | undefined
 ): number | undefined {
@@ -396,7 +397,7 @@ export function calculateAspectRatio(
 /**
  * Generates a blur placeholder for images
  */
-export function generateBlurDataURL(
+function generateBlurDataURL(
   width: number = 20,
   height: number = 20,
   color: string = '#6B7280'
@@ -424,7 +425,7 @@ export function generateBlurDataURL(
 /**
  * Creates a robust image loading handler with fallback support
  */
-export function createImageLoader(
+function createImageLoader(
   initialUrl: string | undefined,
   fallbackConfig?: FallbackConfig,
   onError?: (error: Error, attempt: number) => void
@@ -499,7 +500,7 @@ export function createImageLoader(
 /**
  * Safe wrapper for Next.js Image component props
  */
-export function getSafeImageProps(
+function getSafeImageProps(
   image: unknown,
   alt: string = '',
   options: {
@@ -561,10 +562,39 @@ export function getSafeImageProps(
 }
 
 /* -------------------------------------------------------------------------- */
-/* EXPORT TYPES & DEFAULT EXPORTS                                             */
+/* COMPREHENSIVE EXPORTS SECTION                                             */
 /* -------------------------------------------------------------------------- */
 
-export type { ImageMetadata, FallbackConfig, ImageValidationResult };
+// Export all types and interfaces
+export type {
+  ImageMetadata,
+  FallbackConfig,
+  ImageValidationResult,
+};
+
+// Export all constants
+export {
+  CDN_BASE_URL,
+  SUPPORTED_FORMATS,
+  PREFERRED_FORMAT,
+  IMAGE_OPTIMIZATION,
+  FALLBACK_IMAGES,
+};
+
+// Export all functions
+export {
+  isValidImageUrl,
+  getFileExtension,
+  normalizeImageUrl,
+  validateImageUrl,
+  getFallbackImage,
+  createFallbackSequence,
+  generateOptimizedImageUrls,
+  calculateAspectRatio,
+  generateBlurDataURL,
+  createImageLoader,
+  getSafeImageProps,
+};
 
 // Default exports for easy importing
 export default {

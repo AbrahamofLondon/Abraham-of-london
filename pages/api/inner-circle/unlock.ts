@@ -1,4 +1,3 @@
-// pages/api/inner-circle/unlock.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import {
@@ -106,10 +105,10 @@ export default async function handler(
 
     // Set cookie
     const maxAgeSeconds = INNER_CIRCLE_COOKIE_DAYS * 24 * 60 * 60;
+    const isProduction = process.env.NODE_ENV === "production";
+    
     res.setHeader("Set-Cookie", [
-      `${INNER_CIRCLE_COOKIE_NAME}=${INNER_CIRCLE_COOKIE_VALUE}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax; HttpOnly=false; Secure=${
-        process.env.NODE_ENV === "production"
-      }`,
+      `${INNER_CIRCLE_COOKIE_NAME}=${INNER_CIRCLE_COOKIE_VALUE}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax; HttpOnly=false; ${isProduction ? "Secure" : ""}`,
     ]);
 
     logUnlock("success", {

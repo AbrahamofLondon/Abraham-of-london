@@ -5,23 +5,20 @@ import type {
   InferGetStaticPropsType,
   NextPage,
 } from "next";
+
 import Layout from "@/components/Layout";
-
-import {
-  allBooks,
-  getPublishedDocuments,
-  type BookDocument as Book,
-} from "@/lib/contentlayer-helper";
-
-// Card system
 import { BookCard } from "@/components/Cards";
+
+// Centralised content access
+import { getAllBooks, type Book } from "@/lib/content";
 
 type Props = {
   books: Book[];
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const books = getPublishedDocuments(allBooks as Book[]);
+  // Non-draft books, already sorted by date desc via lib/content
+  const books = getAllBooks();
 
   return {
     props: {
@@ -35,7 +32,10 @@ const BooksIndexPage: NextPage<
   InferGetStaticPropsType<typeof getStaticProps>
 > = ({ books }) => {
   return (
-    <Layout title="Books">
+    <Layout
+      title="Books & Canon Volumes"
+      description="Memoir, theology, and strategy for men who want to carry weight in history, not just comment on it."
+    >
       <main className="mx-auto max-w-5xl px-4 py-12 sm:py-16 lg:py-20">
         <header className="mb-8 space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
@@ -60,9 +60,8 @@ const BooksIndexPage: NextPage<
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {books.map((book) => (
               <BookCard
-                key={book._id}
-                // Again, cast to any at the boundary – your internal Card
-                // component can expect its own shape.
+                key={book.slug ?? (book as any)._id}
+                // Cast at the boundary; the card can keep its own internal shape
                 book={book as any}
               />
             ))}
