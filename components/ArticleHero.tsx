@@ -1,4 +1,3 @@
-// components/ArticleHero.tsx
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
@@ -24,17 +23,6 @@ function formatDate(iso?: string | null): string | null {
     month: "short",
     day: "2-digit",
   }).format(d);
-}
-
-// Helper function to safely convert to string
-function safeString(value: unknown): string {
-  if (isString(value)) {
-    return value;
-  }
-  if (value === null || value === undefined) {
-    return "";
-  }
-  return String(value);
 }
 
 export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
@@ -105,4 +93,3 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
     </section>
   );
 }
-
