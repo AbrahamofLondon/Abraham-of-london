@@ -6,23 +6,15 @@
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.12.0"
   NODE_ENV = "production"
-
-  # Critical build flags – typechecking is now handled by scripts, not env hacks
   CI = "false"
   NEXT_DISABLE_ESLINT = "1"
   NEXT_TELEMETRY_DISABLED = "1"
   DISABLE_ESLINT_PLUGIN = "true"
-
-  # Site URLs
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_INNOVATEHUB_URL = "https://innovatehub.abrahamoflondon.org"
   NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
-
-  # Ventures URLs
   NEXT_PUBLIC_ALOMARADA_URL = "https://alomarada.com/"
   NEXT_PUBLIC_ENDURELUXE_URL = "https://alomarada.com/endureluxe"
-
-  # WebSocket (optional)
   NEXT_PUBLIC_WS_URL = ""
 
 [functions]
