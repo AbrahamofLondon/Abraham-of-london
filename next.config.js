@@ -2,7 +2,13 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
-  serverExternalPackages: ["@react-email/components", "better-sqlite3"],
+  
+  // Move serverExternalPackages to experimental (required for your version)
+  experimental: {
+    serverExternalPackages: ["@react-email/components", "better-sqlite3"],
+    // For Next.js 15+, move turbopack here
+    turbopack: {},
+  },
 
   images: {
     unoptimized: true,

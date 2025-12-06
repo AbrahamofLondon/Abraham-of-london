@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { getPageTitle, siteConfig } from "@/lib/siteConfig";
+import { getPageTitle, siteConfig } from "@/lib/imports";
 
 const PrivacyPage: NextPage = () => {
   const pageTitle = "Privacy";
@@ -454,3 +454,4 @@ const PrivacyPage: NextPage = () => {
 };
 
 export default PrivacyPage;
+

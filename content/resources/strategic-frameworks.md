@@ -4,11 +4,6 @@ category: "Resources"
 excerpt: "A collection of proven strategic frameworks for decision-making and planning"
 description: "Curated frameworks for strategy, decision-making, and execution across various domains."
 date: "2024-01-10"
-tags: 
-  - "strategy"
-  - "frameworks"
-  - "tools"
-  - "decision-making"
 ---
 
 # Strategic Frameworks Collection

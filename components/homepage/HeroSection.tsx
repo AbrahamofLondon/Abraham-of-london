@@ -3,6 +3,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
+import { BaseCard, CARD_ANIMATIONS } from '@/components/Cards';
 
 // --- Utility Components ------------------------------------------------------
 

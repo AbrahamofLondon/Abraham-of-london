@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/imports";
 
 // ---------------------------------------------------------------------------
 // Animation variants

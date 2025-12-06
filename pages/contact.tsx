@@ -16,7 +16,7 @@ import {
   Calendar,
 } from "lucide-react";
 import Layout from "@/components/Layout";
-import { getPageTitle, siteConfig } from "@/lib/siteConfig";
+import { getPageTitle, siteConfig } from "@/lib/imports";
 import PolicyFooter from "@/components/PolicyFooter";
 
 const ContactPage = (): JSX.Element => {

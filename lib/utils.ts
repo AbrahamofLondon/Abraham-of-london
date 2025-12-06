@@ -718,8 +718,9 @@ export default {
 
 // Safe string utility
 export function safeString(str: unknown, fallback: string = ""): string {
-  return typeof str === 'string' ? str : '';
+  return typeof str === "string" ? str : fallback;
 }
+
 
 
 

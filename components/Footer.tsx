@@ -15,7 +15,7 @@ import {
   Phone,
   ArrowUp,
 } from "lucide-react";
-import { siteConfig, type SocialLink } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/imports";
 
 // Extended type that includes kind for icon mapping
 interface FooterSocialLink extends SocialLink {

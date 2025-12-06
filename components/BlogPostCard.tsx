@@ -4,7 +4,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/imports";
+import { 
+  getSafeImageProps, 
+  getFallbackImage, 
+  createFallbackSequence,
+  type FallbackConfig 
+} from "@/lib/image-utils";
+import { safeString } from "@/lib/utils";
 
 type PostLike = {
   slug: string;
@@ -39,11 +46,6 @@ interface BlogPostCardProps {
 const FALLBACK_AVATAR =
   siteConfig.authorImage ?? "/assets/images/profile-portrait.webp";
 
-const FALLBACK_COVERS = [
-  "/assets/images/blog/default.webp",
-  "/assets/images/writing-desk.webp",
-];
-
 function formatDateISOToGB(iso?: string | null): string | null {
   if (!iso) return null;
   const d = new Date(iso);
@@ -70,6 +72,42 @@ const ImageShimmer = () => (
   </div>
 );
 
+// Get best image source from post
+const getPostImage = (post: PostLike): string | null => {
+  const sources = [post.coverImage, post.heroImage, post.image];
+  for (const src of sources) {
+    if (src && typeof src === 'string' && src.trim().length > 0) {
+      return src.trim();
+    }
+  }
+  return null;
+};
+
+// Get fallback configuration based on post data
+const getPostFallbackConfig = (post: PostLike): FallbackConfig => {
+  const type = "post";
+  let theme: FallbackConfig['theme'] = "gradient";
+  let category = "default";
+
+  if (post.category) {
+    if (post.category.toLowerCase().includes('essay')) category = 'essay';
+    else if (post.category.toLowerCase().includes('article')) category = 'article';
+    else if (post.category.toLowerCase().includes('thought')) category = 'thought';
+    else category = post.category.toLowerCase();
+  }
+
+  if (post.tags && post.tags.length > 0) {
+    const firstTag = safeString(post.tags[0]).toLowerCase();
+    if (firstTag.includes('philosophy') || firstTag.includes('deep')) {
+      theme = 'dark';
+    } else if (firstTag.includes('business') || firstTag.includes('strategy')) {
+      theme = 'light';
+    }
+  }
+
+  return { type, theme, category };
+};
+
 export default function BlogPostCard({
   post,
   priority = false,
@@ -80,38 +118,40 @@ export default function BlogPostCard({
   className = "",
 }: BlogPostCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [coverIndex, setCoverIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
+  const [fallbackIndex, setFallbackIndex] = useState(0);
   const [authorImageError, setAuthorImageError] = useState(false);
 
   const slug = normalisePostSlug(post.slug);
   const href = `/${slug}`;
+  const fallbackConfig = getPostFallbackConfig(post);
 
-  // Build ordered list of possible cover images
-  const coverCandidates = useMemo(() => {
-    const candidates: string[] = [];
+  // Create fallback sequence
+  const fallbackSequence = useMemo(() => {
+    const mainImage = getPostImage(post);
+    const sequence: string[] = [];
 
-    const addCandidate = (value?: string | null) => {
-      if (typeof value === "string" && value.trim().length > 0) {
-        candidates.push(value.trim());
-      }
-    };
-
-    addCandidate(post.coverImage);
-    addCandidate(post.heroImage);
-    addCandidate(post.image);
-
-    // Ensure at least our known-good fallbacks are present
-    for (const fb of FALLBACK_COVERS) {
-      if (!candidates.includes(fb)) {
-        candidates.push(fb);
-      }
+    if (mainImage) {
+      sequence.push(mainImage);
     }
 
-    return candidates;
-  }, [post.coverImage, post.heroImage, post.image]);
+    // Add fallback images based on configuration
+    const additionalFallbacks = createFallbackSequence(
+      post.slug + post.title,
+      fallbackConfig
+    );
+    
+    return [...sequence, ...additionalFallbacks];
+  }, [post.slug, post.title, post.coverImage, post.heroImage, post.image, fallbackConfig]);
 
-  const cover =
-    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
+  // Get current image URL
+  const currentImage = fallbackSequence[Math.min(fallbackIndex, fallbackSequence.length - 1)];
+
+  // Get safe image props using utility
+  const imageProps = getSafeImageProps(currentImage, post.title, {
+    priority,
+    fallbackConfig,
+  });
 
   const authorName =
     typeof post.author === "string"
@@ -169,6 +209,20 @@ export default function BlogPostCard({
     published: "bg-green-100 text-green-800 border-green-200",
   };
 
+  // Handle image events
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(false);
+    if (fallbackIndex < fallbackSequence.length - 1) {
+      setFallbackIndex(prev => prev + 1);
+    }
+  };
+
   return (
     <article
       className={`group relative overflow-hidden bg-white/95 backdrop-blur-sm shadow-2xl shadow-black/10 border border-white/20 transition-all duration-700 hover:shadow-3xl hover:shadow-black/20 hover:-translate-y-2 ${currentSize.container} ${className}`}
@@ -189,24 +243,20 @@ export default function BlogPostCard({
           <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
           {/* Enhanced loading shimmer */}
-          {!imageLoaded && <ImageShimmer />}
+          {!imageLoaded && !imageError && <ImageShimmer />}
 
           <Image
-            src={cover}
-            alt={post.title}
+            src={imageProps.src}
+            alt={imageProps.alt}
             fill
             className={`object-cover transition-all duration-700 ${
               imageLoaded ? "opacity-100 group-hover:scale-105" : "opacity-0"
             }`}
             sizes="(min-width: 1024px) 600px, (min-width: 768px) 400px, 100vw"
-            priority={priority}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => {
-              setImageLoaded(false);
-              setCoverIndex((prev) =>
-                prev + 1 < coverCandidates.length ? prev + 1 : prev
-              );
-            }}
+            priority={imageProps.priority}
+            loading={imageProps.loading}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
           />
 
           {/* Enhanced badge overlay */}
@@ -345,14 +395,17 @@ export default function BlogPostCard({
           {/* Enhanced tags */}
           {showTags && post.tags && post.tags.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-2">
-              {post.tags.slice(0, 3).map((t, i) => (
-                <span
-                  key={`${String(t)}-${i}`}
-                  className="rounded-full border border-gray-200/50 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
-                >
-                  {String(t)}
-                </span>
-              ))}
+              {post.tags
+                .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
+                .slice(0, 3)
+                .map((t, i) => (
+                  <span
+                    key={`${t}-${i}`}
+                    className="rounded-full border border-gray-200/50 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
+                  >
+                    {t}
+                  </span>
+                ))}
               {post.tags.length > 3 && (
                 <span className="rounded-full border border-gray-200/50 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-500 backdrop-blur-sm">
                   +{post.tags.length - 3}

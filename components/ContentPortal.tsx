@@ -1,10 +1,12 @@
-// components/ContentPortal.tsx
 'use client';
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { BaseCard } from '@/components/Cards';
 
+// Define Category type locally (no Contentlayer dependency yet)
 interface Category {
   id: string;
   title: string;
@@ -13,7 +15,6 @@ interface Category {
   color: string;
   count: number;
   signal: { subtle: string; texture: string };
-  latestItems: any[];
 }
 
 export function ContentPortal() {
@@ -21,9 +22,10 @@ export function ContentPortal() {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [hoveredCategory, setHoveredCategory] = React.useState<string | null>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 
   React.useEffect(() => {
-    // Simulate fetching data - in reality, you'd fetch from your API
+    // Keep mock data for now (safe)
     const mockCategories: Category[] = [
       {
         id: 'strategic-insights',
@@ -33,7 +35,6 @@ export function ContentPortal() {
         color: '#d4af37',
         count: 24,
         signal: { subtle: 'Structural principles for decision-making', texture: 'architectural' },
-        latestItems: []
       },
       {
         id: 'curated-volumes',
@@ -43,7 +44,6 @@ export function ContentPortal() {
         color: '#b8941f',
         count: 12,
         signal: { subtle: 'Comprehensive architectural systems', texture: 'bound' },
-        latestItems: []
       },
       {
         id: 'execution-tools',
@@ -53,7 +53,6 @@ export function ContentPortal() {
         color: '#9c7c1a',
         count: 18,
         signal: { subtle: 'Applied architectural instruments', texture: 'instrument' },
-        latestItems: []
       },
       {
         id: 'scholarly-gatherings',
@@ -63,7 +62,6 @@ export function ContentPortal() {
         color: '#806515',
         count: 8,
         signal: { subtle: 'Live structural conversations', texture: 'gathering' },
-        latestItems: []
       },
       {
         id: 'print-editions',
@@ -73,7 +71,6 @@ export function ContentPortal() {
         color: '#645010',
         count: 6,
         signal: { subtle: 'Tactile architectural expressions', texture: 'physical' },
-        latestItems: []
       },
       {
         id: 'scholars-toolkit',
@@ -83,244 +80,262 @@ export function ContentPortal() {
         color: '#48390b',
         count: 14,
         signal: { subtle: 'Auxiliary structural components', texture: 'supplementary' },
-        latestItems: []
       }
     ];
     
     setCategories(mockCategories);
     
     // Animation delay
-    setTimeout(() => setIsLoaded(true), 100);
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleCategoryClick = (categoryId: string) => {
-    // Animate before navigation
-    const element = document.getElementById(categoryId);
-    if (element) {
-      element.classList.add('scale-105');
-      setTimeout(() => {
-        router.push(`/content?category=${categoryId}`);
-      }, 200);
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  const handleCategoryClick = async (categoryId: string) => {
+    try {
+      router.push(`/content?category=${categoryId}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to direct navigation
+      window.location.href = `/content?category=${categoryId}`;
     }
   };
 
+  const getHoveredCategory = () => {
+    return categories.find(cat => cat.id === hoveredCategory);
+  };
+
+  const hoveredCategoryData = getHoveredCategory();
+
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Architectural Background */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]" />
-        
-        {/* Structural Grid */}
-        <div className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `
-              linear-gradient(90deg, rgba(212, 175, 55, 0.1) 1px, transparent 1px),
-              linear-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '80px 80px'
-          }}
-        />
-        
-        {/* Dynamic Gradient */}
-        <div 
-          className="absolute inset-0 transition-opacity duration-1000"
-          style={{
-            background: hoveredCategory 
-              ? `radial-gradient(circle at 30% 50%, ${hoveredCategory}08 0%, transparent 70%)`
-              : 'radial-gradient(circle at 30% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 70%)'
-          }}
-        />
-      </div>
+      {/* Background grid with parallax effect */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-br from-stone-50 via-amber-50/20 to-stone-50"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(184, 148, 31, 0.03) 0%, transparent 50%),
+            linear-gradient(45deg, transparent 49%, rgba(212, 175, 55, 0.05) 49%, rgba(212, 175, 55, 0.05) 51%, transparent 51%),
+            linear-gradient(-45deg, transparent 49%, rgba(184, 148, 31, 0.05) 49%, rgba(184, 148, 31, 0.05) 51%, transparent 51%)
+          `,
+          backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px',
+          transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`
+        }}
+      />
 
-      {/* Main Container */}
-      <div className={`relative mx-auto max-w-7xl px-4 py-24 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+      {/* Decorative corner accents */}
+      <div className="absolute top-0 left-0 w-64 h-64 border-t-2 border-l-2 border-amber-900/10" />
+      <div className="absolute bottom-0 right-0 w-64 h-64 border-b-2 border-r-2 border-amber-900/10" />
+
+      <div className="container relative mx-auto px-4 py-16 md:py-24">
         {/* Header */}
-        <div className="mb-16 text-center">
-          <div className="inline-flex items-center gap-4 mb-8">
-            <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#d4af37]/30" />
-            <span className="text-sm tracking-[0.3em] uppercase text-[#d4af37]/70">
-              The Structural Collection
-            </span>
-            <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#d4af37]/30" />
+        <div className="text-center mb-16 md:mb-24">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-900/5 border border-amber-900/10 mb-6">
+            <span className="text-amber-900/60 text-sm font-medium">Content Portal</span>
+            <span className="text-amber-900/40">•</span>
+            <span className="text-amber-900/40 text-sm">Structural Access</span>
           </div>
-
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight mb-6">
-            Architectural
-            <span className="block mt-2 text-[#d4af37] font-medium">Content Portals</span>
+          
+          <h1 className="text-4xl md:text-6xl font-serif font-light text-stone-900 mb-6">
+            Architectural <span className="italic">Intelligence</span> Repository
           </h1>
           
-          <p className="max-w-2xl mx-auto text-lg text-[#999] leading-relaxed">
-            Six structural approaches to understanding and applying systematic thinking.
-            Each portal offers a distinct architectural perspective on purpose, civilisation, and human flourishing.
+          <p className="text-lg md:text-xl text-stone-600 max-w-3xl mx-auto leading-relaxed">
+            A curated collection of structural frameworks, strategic instruments, 
+            and scholarly materials for architectural thought and execution.
           </p>
         </div>
 
-        {/* Category Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Categories Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {categories.map((category, index) => (
-            <div
+            <button
               key={category.id}
-              id={category.id}
-              onMouseEnter={() => setHoveredCategory(category.color)}
-              onMouseLeave={() => setHoveredCategory(null)}
               onClick={() => handleCategoryClick(category.id)}
-              className={`group relative cursor-pointer transition-all duration-500 hover:scale-[1.02] ${
-                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
+              onMouseEnter={() => setHoveredCategory(category.id)}
+              onMouseLeave={() => setHoveredCategory(null)}
+              className={`
+                group relative p-6 rounded-2xl border-2 transition-all duration-500
+                ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+                hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]
+                ${hoveredCategory === category.id 
+                  ? 'border-amber-900/30 bg-white shadow-xl' 
+                  : 'border-amber-900/10 bg-white/50 hover:border-amber-900/20'
+                }
+              `}
               style={{ 
                 transitionDelay: `${index * 100}ms`,
-                backgroundColor: `${category.color}05`
+                borderColor: hoveredCategory === category.id ? `${category.color}40` : undefined
               }}
             >
-              {/* Card Container */}
-              <div className="relative h-full border border-[#2a2a2a] rounded-xl p-6 overflow-hidden">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 20% 80%, ${category.color} 0%, transparent 50%)`
-                  }}
-                />
-                
-                {/* Corner Accents */}
-                <div className="absolute top-0 left-0 w-12 h-12 border-t border-l border-[#2a2a2a] rounded-tl-xl" />
-                <div className="absolute bottom-0 right-0 w-12 h-12 border-b border-r border-[#2a2a2a] rounded-br-xl" />
+              {/* Background glow effect */}
+              <div 
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{ 
+                  background: `radial-gradient(circle at center, ${category.color}15 0%, transparent 70%)`,
+                }}
+              />
 
-                {/* Content */}
-                <div className="relative">
-                  {/* Icon and Count */}
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="text-3xl opacity-70 group-hover:opacity-100 transition-opacity">
-                      {category.icon}
-                    </div>
-                    <div className="text-sm px-3 py-1 rounded-full border border-[#2a2a2a]"
-                      style={{ color: category.color }}>
-                      {category.count} structures
-                    </div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform duration-300 group-hover:scale-110"
+                    style={{ 
+                      backgroundColor: `${category.color}15`,
+                      color: category.color,
+                      border: `1px solid ${category.color}20`
+                    }}
+                  >
+                    {category.icon}
                   </div>
-
-                  {/* Title */}
-                  <h3 className="text-xl font-medium mb-3 group-hover:text-[#fff] transition-colors"
-                    style={{ color: category.color }}>
-                    {category.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-[#999] text-sm leading-relaxed mb-6">
-                    {category.description}
-                  </p>
-
-                  {/* Signal */}
-                  <div className="text-xs text-[#666] group-hover:text-[#888] transition-colors">
-                    {category.signal.subtle}
-                  </div>
-
-                  {/* Interactive Elements */}
-                  <div className="mt-8 pt-6 border-t border-[#2a2a2a] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full animate-pulse"
-                        style={{ backgroundColor: category.color }} />
-                      <span className="text-xs text-[#666]">Active Portal</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 text-sm"
-                      style={{ color: category.color }}>
-                      <span className="opacity-70 group-hover:opacity-100 transition-opacity">
-                        Enter
-                      </span>
-                      <span className="transform transition-transform group-hover:translate-x-1">
-                        →
-                      </span>
-                    </div>
-                  </div>
+                  <span 
+                    className="text-sm font-medium px-3 py-1 rounded-full"
+                    style={{ 
+                      backgroundColor: `${category.color}10`,
+                      color: category.color
+                    }}
+                  >
+                    {category.count} entries
+                  </span>
                 </div>
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[#0a0a0a] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <h3 className="text-xl font-serif font-medium text-stone-900 mb-2 group-hover:text-amber-900 transition-colors">
+                  {category.title}
+                </h3>
                 
-                {/* Glow Effect */}
-                <div className="absolute -inset-4 opacity-0 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle at center, ${category.color}30 0%, transparent 70%)`
-                  }}
-                />
+                <p className="text-stone-600 mb-4 leading-relaxed">
+                  {category.description}
+                </p>
+
+                <div className="flex items-center text-sm text-stone-500">
+                  <span className="mr-2">Access →</span>
+                  <ChevronDownIcon className="w-4 h-4 transform group-hover:translate-y-1 transition-transform" />
+                </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
 
-        {/* All Content Portal */}
-        <div className={`mt-12 transition-all duration-1000 delay-700 ${
-          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
-          <Link
-            href="/content"
-            className="group relative block border border-[#2a2a2a] rounded-xl p-8 overflow-hidden hover:border-[#d4af37]/30 transition-all duration-300"
+        {/* Hover Preview Panel */}
+        {hoveredCategoryData && (
+          <div 
+            className={`
+              fixed bottom-8 left-1/2 transform -translate-x-1/2
+              w-full max-w-4xl px-4 z-40 transition-all duration-500
+              ${hoveredCategory ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+            `}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1a1a1a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-            <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl text-[#d4af37]">∞</div>
-                  <h3 className="text-xl font-medium">Complete Structural Collection</h3>
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-amber-900/10 shadow-2xl p-6">
+              <div className="flex items-start gap-4">
+                <div 
+                  className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl flex-shrink-0"
+                  style={{ 
+                    backgroundColor: `${hoveredCategoryData.color}15`,
+                    color: hoveredCategoryData.color,
+                    border: `2px solid ${hoveredCategoryData.color}20`
+                  }}
+                >
+                  {hoveredCategoryData.icon}
                 </div>
-                <p className="text-[#999] max-w-xl">
-                  Access the entire architectural library. All portals, all structures, 
-                  all thinking in one unified interface.
-                </p>
-              </div>
-              
-              <div className="flex items-center gap-3 text-[#d4af37]">
-                <span className="text-sm">Open Full Collection</span>
-                <span className="transform transition-transform group-hover:translate-x-2">↠</span>
+                
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-2xl font-serif font-medium text-stone-900">
+                      {hoveredCategoryData.title}
+                    </h3>
+                    <span 
+                      className="text-sm font-medium px-3 py-1 rounded-full"
+                      style={{ 
+                        backgroundColor: `${hoveredCategoryData.color}10`,
+                        color: hoveredCategoryData.color
+                      }}
+                    >
+                      {hoveredCategoryData.count} structural entries
+                    </span>
+                  </div>
+                  
+                  <p className="text-stone-600 mb-4 text-lg">
+                    {hoveredCategoryData.description}
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 rounded-lg bg-amber-50/50 border border-amber-900/10">
+                      <p className="text-sm text-amber-900/60 mb-1">Subtle Signal</p>
+                      <p className="text-stone-700">{hoveredCategoryData.signal.subtle}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-stone-50/50 border border-stone-900/10">
+                      <p className="text-sm text-stone-600 mb-1">Texture</p>
+                      <p className="text-stone-700 font-medium">{hoveredCategoryData.signal.texture}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </Link>
-        </div>
+          </div>
+        )}
 
-        {/* Stats Footer */}
-        <div className={`mt-16 pt-8 border-t border-[#2a2a2a] transition-all duration-1000 delay-900 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { label: 'Total Structures', value: '82' },
-              { label: 'Active Portals', value: '6' },
-              { label: 'Architectural Layers', value: '12' },
-              { label: 'Structural Depth', value: '7' }
-            ].map((stat, index) => (
-              <div key={index}>
-                <div className="text-2xl font-light text-[#d4af37] mb-2">{stat.value}</div>
-                <div className="text-sm text-[#666]">{stat.label}</div>
-              </div>
+        {/* Featured Content Preview */}
+        <div className="mt-24">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-serif font-light text-stone-900">
+                Recently <span className="italic">Structured</span>
+              </h2>
+              <p className="text-stone-600 mt-2">
+                Latest additions to the architectural repository
+              </p>
+            </div>
+            <Link
+              href="/content"
+              className="px-6 py-3 rounded-full bg-amber-900 text-white font-medium hover:bg-amber-800 transition-colors flex items-center gap-2 group"
+            >
+              Explore All Content
+              <ChevronDownIcon className="w-4 h-4 transform rotate-90 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
+          {/* Mock featured content - Replace with real data later */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((item) => (
+              <BaseCard
+                key={item}
+                title="Architectural Framework"
+                description="A comprehensive system for structural decision-making"
+                category="Strategic Insights"
+                date="2024-01-15"
+                readingTime="12 min"
+                isNew={item === 1}
+                href="/content/sample"
+                className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              />
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Interactive Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-50">
-        <div className="absolute w-96 h-96 rounded-full bg-gradient-to-r from-[#d4af37]/5 to-transparent blur-3xl"
-          style={{
-            transform: hoveredCategory 
-              ? `translate(var(--mouse-x, 0px), var(--mouse-y, 0px)) scale(1.5)`
-              : `translate(var(--mouse-x, 0px), var(--mouse-y, 0px)) scale(1)`,
-            transition: 'transform 0.3s ease-out',
-          }}
-        />
+        {/* Footer note */}
+        <div className="text-center mt-16 pt-8 border-t border-amber-900/10">
+          <p className="text-stone-500 text-sm">
+            This portal serves as an index to structural intelligence. 
+            Each category represents a distinct architectural dimension of thought.
+          </p>
+          <p className="text-stone-400 text-xs mt-2">
+            Access levels may vary based on subscription tier
+          </p>
+        </div>
       </div>
-
-      {/* Mouse Tracking Script */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            document.addEventListener('mousemove', (e) => {
-              document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
-              document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
-            });
-          `
-        }}
-      />
     </div>
   );
 }

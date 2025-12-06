@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { getPageTitle, siteConfig } from "@/lib/siteConfig";
+import { getPageTitle, siteConfig } from "@/lib/imports";
 
 const TermsPage: NextPage = () => {
   const pageTitle = "Terms";
@@ -277,3 +277,4 @@ const TermsPage: NextPage = () => {
 };
 
 export default TermsPage;
+

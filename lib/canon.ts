@@ -1,100 +1,44 @@
 // lib/canon.ts
-// Centralised helpers for Canon content (Contentlayer-powered)
+import {
+  allCanons,
+  getPublishedDocuments,
+  getDocumentBySlug,
+  type Canon as CanonDocument,
+} from "./contentlayer-helper";
 
-import type { Canon } from "../.contentlayer/generated";
-import { allCanons } from "../.contentlayer/generated";
-
-export type CanonDoc = Canon;
-
-type CanonFilterOptions = {
-  includeDrafts?: boolean;
-};
-
-function sortCanon(a: CanonDoc, b: CanonDoc): number {
-  // 1) Explicit order field if both have it
-  if (typeof a.order === "number" && typeof b.order === "number") {
-    if (a.order !== b.order) return a.order - b.order;
-  }
-
-  // 2) Otherwise sort by date desc
-  const aDate = new Date(a.date ?? "1970-01-01").getTime();
-  const bDate = new Date(b.date ?? "1970-01-01").getTime();
-  if (aDate !== bDate) return bDate - aDate;
-
-  // 3) Fallback by title for stability
-  return (a.title ?? "").localeCompare(b.title ?? "");
+/**
+ * Return all Canon documents (including drafts if you ever decide to).
+ * Currently we only return published (non-draft) items.
+ */
+export function getAllCanon(): CanonDocument[] {
+  return getPublishedDocuments(allCanons as CanonDocument[]);
 }
 
 /**
- * All Canon docs, sorted consistently.
+ * Return a single Canon volume by slug.
  */
-export function getAllCanon(opts?: CanonFilterOptions): CanonDoc[] {
-  const includeDrafts = !!opts?.includeDrafts;
-
-  return (allCanons as CanonDoc[])
-    .filter((c) => (includeDrafts ? true : !c.draft))
-    .slice()
-    .sort(sortCanon);
+export function getCanonBySlug(slug: string): CanonDocument | undefined {
+  const doc = getDocumentBySlug(slug, "Canon");
+  return doc as CanonDocument | undefined;
 }
 
 /**
- * Featured Canon docs – for hero/primary grid.
+ * Return featured Canon volumes (featured = true in frontmatter).
  */
-export function getFeaturedCanon(): CanonDoc[] {
-  return getAllCanon()
-    .filter((c) => !!c.featured)
-    .sort(sortCanon);
+export function getFeaturedCanon(): CanonDocument[] {
+  return getAllCanon().filter((canon) => (canon as any).featured === true);
 }
 
 /**
- * All numbered Canon volumes (those with a volumeNumber).
+ * Return Canon volumes ordered by their "order" field (ascending).
  */
-export function getCanonVolumes(): CanonDoc[] {
-  return getAllCanon().filter((c) => !!c.volumeNumber);
+export function getOrderedCanon(): CanonDocument[] {
+  return getAllCanon().sort((a, b) => {
+    const aOrder = typeof a.order === "number" ? a.order : 9999;
+    const bOrder = typeof b.order === "number" ? b.order : 9999;
+    return aOrder - bOrder;
+  });
 }
 
-/**
- * Canon "campaign" / marketing prelude document.
- */
-export function getCanonCampaign(): CanonDoc | null {
-  return (
-    (allCanons as CanonDoc[]).find(
-      (c) => c.slug === "canon-campaign" && !c.draft
-    ) ?? null
-  );
-}
-
-/**
- * Canon Master Index / landing helper – adjust slug if you rename it.
- */
-export function getCanonMasterIndex(): CanonDoc | null {
-  return (
-    (allCanons as CanonDoc[]).find(
-      (c) => c.slug === "canon-master-index-preview" && !c.draft
-    ) ?? null
-  );
-}
-
-/**
- * Strong handle for Volume X – if you ever change the slug,
- * change it here once instead of hunting across pages.
- */
-export function getCanonVolumeX(): CanonDoc | null {
-  return (
-    (allCanons as CanonDoc[]).find(
-      (c) => c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft
-    ) ?? null
-  );
-}
-
-/**
- * Generic single fetch by slug.
- */
-export function getCanonBySlug(slug: string): CanonDoc | null {
-  const normalised = String(slug).trim().toLowerCase();
-  return (
-    (allCanons as CanonDoc[]).find(
-      (c) => c.slug && c.slug.toLowerCase() === normalised
-    ) ?? null
-  );
-}
+// Re-export the Canon type for convenience
+export type Canon = CanonDocument;

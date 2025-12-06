@@ -51,6 +51,10 @@ export interface BookDocument extends ContentlayerDocument {
   featured?: boolean;
   accessLevel?: string;
   lockMessage?: string;
+  status?: 'published' | 'draft' | 'archived';
+  format?: string;
+  featured?: boolean;
+
 }
 
 export interface DownloadDocument extends ContentlayerDocument {
@@ -303,3 +307,4 @@ export function isStrategy(
 ): doc is StrategyDocument {
   return doc.type === "Strategy";
 }
+

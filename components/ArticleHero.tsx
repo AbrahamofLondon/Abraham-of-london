@@ -93,3 +93,4 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
     </section>
   );
 }
+

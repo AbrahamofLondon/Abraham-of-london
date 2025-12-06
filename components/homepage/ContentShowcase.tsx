@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, FileText } from "lucide-react";
 import BlogPostCard from "@/components/BlogPostCard"; // Fixed import path
 import BookCard from "@/components/books/BookCard";
-import type { any, any } from "@/types/index";
+import type { Post, Book } from "@/types/index";
 
 // -----------------------------------------------------------------------------
 // Types

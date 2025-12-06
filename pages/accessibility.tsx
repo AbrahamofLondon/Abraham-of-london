@@ -3,7 +3,7 @@ import * as React from "react";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/imports";
 
 const AccessibilityPage: NextPage = () => {
   const lastUpdated = React.useMemo(
@@ -141,3 +141,4 @@ const AccessibilityPage: NextPage = () => {
 };
 
 export default AccessibilityPage;
+

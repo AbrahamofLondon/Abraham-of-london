@@ -1,3 +1,4 @@
+import { siteConfig } from '@/lib/imports';
 // components/Layout.tsx
 import * as React from "react";
 import Head from "next/head";
@@ -44,3 +45,6 @@ export default function Layout({
     </div>
   );
 }
+
+
+

@@ -4,66 +4,50 @@
   "type": "module",
   "packageManager": "pnpm@9.12.0",
   "engines": {
-    "node": ">=20 <21",
+    "node": ">=20 <22",
     "pnpm": ">=9 <10"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-
     "dev": "next dev",
     "dev:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next dev",
     "dev:content": "contentlayer2 build --watch",
-
     "start": "next start",
     "start:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next start",
-
     "typecheck": "pnpm exec tsc --project tsconfig.json --noEmit",
     "typecheck:safe": "pnpm exec tsc --project tsconfig.json --noEmit --skipLibCheck",
-
     "lint": "next lint",
     "lint:safe": "next lint",
     "lint:fix": "next lint --fix",
-
     "clean": "rimraf .next .turbo node_modules .reports .contentlayer",
     "clean:build": "rimraf .next .contentlayer",
     "clean:functions": "if exist \"netlify\\functions\" (for /r \"netlify\\functions\" %%f in (*.js) do del \"%%f\")",
-
     "content:build": "contentlayer2 build",
     "content:dev": "contentlayer2 build --watch",
-
     "guard:conflicts": "node scripts/check-conflicts.js",
-
-    "build": "pnpm run guard:conflicts && pnpm run content:build && next build --webpack",
-    "build:netlify:safe": "contentlayer2 build && next build --webpack",
+    "build": "pnpm run guard:conflicts && pnpm run content:build && next build",
+    "build:netlify:safe": "contentlayer2 build && next build",
     "build:fast": "pnpm run content:build && next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
-
     "check": "pnpm run lint && pnpm run typecheck",
     "check:safe": "pnpm run lint:safe && pnpm run typecheck:safe",
     "check:ci": "pnpm run check:safe",
     "build:ci": "pnpm run build:netlify:safe",
-
     "prebuild": "pnpm run clean:build",
     "postbuild": "node -e \"console.log('Build completed successfully')\"",
-
     "postinstall": "contentlayer2 build",
-
     "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.tsx",
     "pdfs": "pnpm run pdf:purpose",
-
     "downloads:validate": "node scripts/validate-downloads.mjs",
-
     "test:e2e": "pnpm dlx playwright test",
-
     "build:functions": "pnpm exec tsc --project tsconfig.functions.json --noEmit",
-
     "debug:content": "node scripts/debug-content-routes.mjs"
   },
   "dependencies": {
     "@contentlayer/cli": "0.3.4",
     "@contentlayer/core": "npm:contentlayer2@0.5.8",
+    "@heroicons/react": "2.2.0",
     "@netlify/functions": "5.1.0",
-    "@react-email/components": "0.0.23",
     "@react-pdf/renderer": "4.3.1",
     "@tailwindcss/typography": "0.5.19",
     "@types/node": "20.11.30",
@@ -78,7 +62,7 @@
     "fuse.js": "7.0.0",
     "gray-matter": "4.0.3",
     "lucide-react": "0.454.0",
-    "next": "16.0.3",
+    "next": "14.2.12",
     "next-mdx-remote": "5.0.0",
     "next-themes": "0.4.3",
     "pg": "8.16.3",
@@ -101,8 +85,10 @@
   "devDependencies": {
     "@netlify/plugin-nextjs": "5.14.5",
     "@react-email/components": "0.0.23",
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/typography": "0.5.19",
     "@types/mdx": "^2.0.13",
+    "@types/next": "9.0.0",
     "@types/react-dom": "18.3.1",
     "@types/ws": "8.5.10",
     "@typescript-eslint/eslint-plugin": "8.46.4",
@@ -111,10 +97,11 @@
     "baseline-browser-mapping": "2.8.30",
     "contentlayer": "0.3.4",
     "cross-env": "7.0.3",
-    "eslint": "8.57.1",
+    "eslint": "^8.57.1",
     "eslint-config-next": "14.2.12",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-prettier": "5.5.4",
+    "eslint-plugin-unused-imports": "4.3.0",
     "next-contentlayer": "0.3.4",
     "postcss": "8.4.47",
     "prettier": "3.3.3",
@@ -133,7 +120,6 @@
         "@opentelemetry/*"
       ],
       "allowedVersions": {
-        "@opentelemetry/api": "1.9.0",
         "react": "18.3.1"
       }
     }

@@ -1,36 +1,48 @@
-import { safeString } from "@/lib/utils";
-
 // components/books/BookCard.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useMemo } from "react";
-import type { any } from "@/types/index";
+import type { Book } from "@/types/index";
+import { safeString } from "@/lib/utils";
+import { 
+  getSafeImageProps, 
+  getFallbackImage,
+  type FallbackConfig 
+} from "@/lib/image-utils";
+
+// Instead of extending, create a new type that's compatible with both
+interface BookCardBook {
+  // Required fields from Book interface
+  _id: string;
+  slug: string;
+  title: string;
+  
+  // Optional fields with explicit null/undefined handling
+  excerpt?: string | null;
+  description?: string | null;
+  date?: string | null;
+  coverImage?: string | null;
+  
+  // Extended properties
+  status?: "published" | "draft" | "archived";
+  format?: string | null;
+  featured?: boolean;
+  tags?: (string | null)[];
+  readTime?: string | number | null;
+  author?: string | null;
+  
+  // Allow any additional properties that might exist on Book
+  [key: string]: unknown;
+}
 
 interface BookCardProps {
-  book: any;
+  book: BookCardBook;
   className?: string;
   priority?: boolean;
   size?: "default" | "featured";
 }
-
-// Fallback cover images for books
-const FALLBACK_BOOK_COVERS = [
-  "/assets/images/books/default-cover-1.webp",
-  "/assets/images/books/default-cover-2.webp",
-  "/assets/images/writing-desk.webp",
-];
-
-// Utility functions
-const safeString = (value: unknown, fallback: string = ""): string => {
-  if (typeof value === "string") return value.trim();
-  if (value == null) return fallback;
-  const asString = String(value).trim();
-  return asString || fallback;
-};
-
-const safeBookProp = (value: unknown): string => safeString(value, "");
 
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
@@ -49,33 +61,22 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
   }
 };
 
-const getSafeImageUrl = (image: unknown): string => {
-  if (!image) return "";
-
-  if (typeof image === "string") {
-    const url = safeString(image);
-    if (!url) return "";
-    if (url.startsWith("/")) return url;
-
-    try {
-      new URL(url);
-      return url;
-    } catch {
-      return "";
-    }
+const getReadTimeText = (readTime: string | number | null | undefined): string => {
+  if (!readTime) return "";
+  
+  if (typeof readTime === "number") {
+    return `${readTime} min read`;
   }
-
-  if (typeof image === "object" && image !== null && "src" in image) {
-    const candidate = safeString((image as { src?: string }).src);
-    if (candidate?.startsWith("/")) return candidate;
-    try {
-      new URL(candidate);
-      return candidate;
-    } catch {
-      return "";
-    }
+  
+  if (typeof readTime === "string") {
+    // Check if it's already formatted
+    if (readTime.includes("min")) return readTime;
+    // Try to parse as number
+    const num = parseInt(readTime);
+    if (!isNaN(num)) return `${num} min read`;
+    return readTime;
   }
-
+  
   return "";
 };
 
@@ -86,39 +87,55 @@ export default function BookCard({
   size = "default",
 }: BookCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [coverIndex, setCoverIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
+  const [fallbackIndex, setFallbackIndex] = useState(0);
 
+  // Safely extract all values with defaults
   const safeTitle = safeString(book.title, "Untitled Book");
-  const safeExcerpt = safeBookProp(book.excerpt);
+  const safeExcerpt = safeString(book.excerpt, "");
   const safeDate = formatDateSafe(book.date);
   const safeSlug = safeString(book.slug);
-  const href = safeSlug ? `/books/${safeSlug}` : "#";
-
-  // Build ordered list of possible cover images with fallbacks
-  const coverCandidates = useMemo(() => {
-    const candidates: string[] = [];
-
-    const addCandidate = (value?: string | null) => {
-      if (typeof value === "string" && value.trim().length > 0) {
-        candidates.push(value.trim());
-      }
-    };
-
-    addCandidate(book.coverImage);
-
-    // Ensure at least our known-good fallbacks are present
-    for (const fb of FALLBACK_BOOK_COVERS) {
-      if (!candidates.includes(fb)) {
-        candidates.push(fb);
-      }
+  const safeAuthor = safeString(book.author);
+  const safeFormat = safeString(book.format);
+  const readTimeText = getReadTimeText(book.readTime);
+  
+  // Determine category for fallback images
+  const category = useMemo(() => {
+    if (book.tags && book.tags.length > 0) {
+      const firstTag = safeString(book.tags[0]);
+      if (firstTag.includes("philosophy")) return "philosophy";
+      if (firstTag.includes("business")) return "business";
+      if (firstTag.includes("fiction")) return "fiction";
+      if (firstTag.includes("non-fiction") || firstTag.includes("nonfiction")) return "nonFiction";
     }
+    return "default";
+  }, [book.tags]);
 
-    return candidates;
-  }, [book.coverImage]);
+  // Prepare fallback configuration
+  const fallbackConfig: FallbackConfig = {
+    type: "book",
+    category,
+    theme: "gradient",
+  };
 
-  const cover =
-    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)] || 
-    FALLBACK_BOOK_COVERS[0];
+  // Get safe image props using our utility
+  const imageProps = getSafeImageProps(book.coverImage, safeTitle, {
+    priority,
+    fallbackConfig,
+  });
+
+  // Handle image load
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  // Handle image error
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(false);
+    setFallbackIndex(prev => prev + 1);
+  };
 
   // Size-based styling
   const sizeClasses = {
@@ -139,6 +156,7 @@ export default function BookCard({
   } as const;
 
   const currentSize = sizeClasses[size];
+  const href = safeSlug ? `/books/${safeSlug}` : "#";
 
   return (
     <article
@@ -161,27 +179,23 @@ export default function BookCard({
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
             {/* Loading shimmer */}
-            {!imageLoaded && (
+            {!imageLoaded && !imageError && (
               <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
             )}
 
-            {/* Add explicit type assertion for the Image component */}
+            {/* Image */}
             <Image
-              src={cover}
-              alt={safeTitle}
+              src={imageProps.src}
+              alt={imageProps.alt}
               fill
               className={`object-cover transition-all duration-700 ${
                 imageLoaded ? "opacity-100 group-hover:scale-110" : "opacity-0"
               }`}
               sizes="(min-width: 1024px) 400px, (min-width: 768px) 300px, 100vw"
-              priority={priority}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => {
-                setImageLoaded(false);
-                setCoverIndex((prev) =>
-                  prev + 1 < coverCandidates.length ? prev + 1 : prev
-                );
-              }}
+              priority={imageProps.priority}
+              loading={imageProps.loading}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
             />
 
             {/* Featured badge overlay */}
@@ -233,9 +247,9 @@ export default function BookCard({
             </h3>
 
             {/* Author */}
-            {book.author && (
+            {safeAuthor && (
               <p className="mb-3 text-sm font-medium text-softGold">
-                by {book.author}
+                by {safeAuthor}
               </p>
             )}
 
@@ -258,17 +272,17 @@ export default function BookCard({
                       book.status === "published"
                         ? "bg-green-100 text-green-800 border border-green-200"
                         : book.status === "draft"
-                          ? "bg-gray-100 text-gray-800 border border-gray-200"
-                          : "bg-blue-100 text-blue-800 border border-blue-200"
+                        ? "bg-gray-100 text-gray-800 border border-gray-200"
+                        : "bg-blue-100 text-blue-800 border border-blue-200"
                     }`}
                   >
                     {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
                   </span>
                 )}
 
-                {book.format && (
+                {safeFormat && (
                   <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 border border-gray-200">
-                    {book.format}
+                    {safeFormat}
                   </span>
                 )}
               </div>
@@ -284,11 +298,9 @@ export default function BookCard({
                       {safeDate}
                     </time>
                   )}
-                  {book.readTime && (
+                  {readTimeText && (
                     <span className="text-xs font-light text-gray-500">
-                      {typeof book.readTime === "number"
-                        ? `${book.readTime} min read`
-                        : book.readTime}
+                      {readTimeText}
                     </span>
                   )}
                 </div>
@@ -315,14 +327,17 @@ export default function BookCard({
               {/* Tags */}
               {book.tags && book.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {book.tags.slice(0, 3).map((tag, index) => (
-                    <span
-                      key={`${tag}-${index}`}
-                      className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
-                    >
-                      {String(tag)}
-                    </span>
-                  ))}
+                  {book.tags
+                    .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
+                    .slice(0, 3)
+                    .map((tag, index) => (
+                      <span
+                        key={`${tag}-${index}`}
+                        className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   {book.tags.length > 3 && (
                     <span className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-500 backdrop-blur-sm">
                       +{book.tags.length - 3}
@@ -340,5 +355,3 @@ export default function BookCard({
     </article>
   );
 }
-
-

@@ -1,7 +1,7 @@
 // components/LegalStrip.tsx
 import * as React from "react";
 import Link from "next/link";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/imports";
 
 export interface LegalStripProps {
   variant?: "subtle" | "strong";
@@ -60,3 +60,4 @@ export default function LegalStrip({
     </section>
   );
 }
+

@@ -1,0 +1,60 @@
+// lib/imports.ts
+/**
+ * Central import hub for optimized tree-shaking
+ * Single source of truth for frequently used imports
+ */
+
+// Site configuration
+export { siteConfig, getPageTitle, absUrl, internalHref } from './siteConfig';
+
+// Core utilities
+export { safeString, cn, getEnv, absoluteUrl } from './utils';
+
+// Image utilities
+export { 
+  getSafeImageProps, 
+  createFallbackSequence, 
+  getFallbackImage,
+  isValidImageUrl,
+  normalizeImageUrl,
+  type FallbackConfig,
+  type ImageMetadata 
+} from './image-utils';
+
+// Card system (from components/Cards)
+export { 
+  BookCard, 
+  BlogPostCard, 
+  CanonResourceCard, 
+  ArticleHero, 
+  BaseCard,
+  getCardImage,
+  getCardFallbackConfig,
+  formatCardDate,
+  formatReadTime,
+  getAuthorName,
+  getAuthorPicture,
+  getCardAriaLabel,
+  getCardAriaDescription,
+  CARD_COLORS,
+  CARD_SIZES,
+  CARD_ANIMATIONS
+} from '@/components/Cards';
+
+// Card system types
+export type { 
+  BaseCardProps,
+  BookCardProps,
+  CanonCardProps,
+  BlogPostCardProps,
+  HeroCardProps,
+  CardComponentProps
+} from '@/components/Cards';
+
+// Site configuration types
+export type { 
+  SocialLink, 
+  Venture, 
+  RouteConfig,
+  RouteId 
+} from './siteConfig';

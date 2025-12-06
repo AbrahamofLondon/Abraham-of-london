@@ -1,259 +1,280 @@
 // lib/content.ts
-// Core content access + aesthetic metadata for the Library of Applied Wisdom.
 
-import {
-  allPosts,
-  allBooks,
-  allEvents,
-  allDownloads,
-  allPrints,
-  allResources,
-  allCanons,
-} from "../.contentlayer/generated";
-
-import type {
-  Post,
-  Book,
-  Event,
-  Download,
-  Print,
-  Resource,
-  Canon,
-} from "../.contentlayer/generated";
-
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export type AnyContent =
-  | Post
-  | Book
-  | Event
-  | Download
-  | Print
-  | Resource
-  | Canon;
-
-export type CanonDoc = Canon;
-
-/* -------------------------------------------------------------------------- */
-/* GENERAL HELPERS                                                            */
-/* -------------------------------------------------------------------------- */
-
-function sortByDate<T extends { date?: string | null }>(
-  items: readonly T[],
-): T[] {
-  return [...items].sort((a, b) => {
-    const da = a.date ? new Date(a.date).getTime() : 0;
-    const db = b.date ? new Date(b.date).getTime() : 0;
-    return db - da; // newest first
-  });
-}
-
-/* -------------------------------------------------------------------------- */
-/* RAW CONTENT ACCESSORS (NO AESTHETIC DECORATION)                            */
-/* -------------------------------------------------------------------------- */
-
-export function getAllPosts(): Post[] {
-  return sortByDate(
-    (allPosts as Post[]).filter((p) => !(p as any).draft),
-  );
-}
-
-export function getPostBySlug(slug: string): Post | null {
-  return getAllPosts().find((p) => p.slug === slug) ?? null;
-}
-
-export function getAllBooks(): Book[] {
-  return sortByDate(allBooks as Book[]).filter(
-    (b) => !(b as any).draft && (b as any).status !== "draft",
-  );
-}
-
-export function getBookBySlug(slug: string): Book | null {
-  return getAllBooks().find((b) => b.slug === slug) ?? null;
-}
-
-export function getAllEvents(): Event[] {
-  return sortByDate(allEvents as Event[]);
-}
-
-export function getEventBySlug(slug: string): Event | null {
-  return getAllEvents().find((e) => e.slug === slug) ?? null;
-}
-
-export function getAllDownloads(): Download[] {
-  return sortByDate(allDownloads as Download[]);
-}
-
-export function getDownloadBySlug(slug: string): Download | null {
-  return getAllDownloads().find((d) => d.slug === slug) ?? null;
-}
-
-export function getAllPrints(): Print[] {
-  return sortByDate(allPrints as Print[]);
-}
-
-export function getPrintBySlug(slug: string): Print | null {
-  return getAllPrints().find((p) => p.slug === slug) ?? null;
-}
-
-export function getAllResources(): Resource[] {
-  return sortByDate(allResources as Resource[]);
-}
-
-export function getResourceBySlug(slug: string): Resource | null {
-  return getAllResources().find((r) => r.slug === slug) ?? null;
-}
-
-export function getAllCanonDocs(): CanonDoc[] {
-  return sortByDate(
-    (allCanons as CanonDoc[]).filter((doc) => !(doc as any).draft),
-  );
-}
-
-export function getCanonBySlug(slug: string): CanonDoc | null {
-  return getAllCanonDocs().find((doc) => doc.slug === slug) ?? null;
-}
-
-/* -------------------------------------------------------------------------- */
-/* UNIFIED CONTENT LIST (USED BY /content)                                    */
-/* -------------------------------------------------------------------------- */
-
-export function getAllContent(): AnyContent[] {
-  return sortByDate([
-    ...getAllPosts(),
-    ...getAllBooks(),
-    ...getAllEvents(),
-    ...getAllDownloads(),
-    ...getAllPrints(),
-    ...getAllResources(),
-    ...getAllCanonDocs(),
-  ]);
-}
-
-/* -------------------------------------------------------------------------- */
-/* AESTHETIC CONSTANTS – HARR0DS × ANCIENT PERSIAN LIBRARY                    */
-/* -------------------------------------------------------------------------- */
-
-export const LIBRARY_AESTHETICS = {
-  colors: {
-    primary: {
-      lapis: "#283B5C", // Deep Persian blue
-      saffron: "#DAA520", // Gold accent
-      terracotta: "#B35441", // Earthy red
-      parchment: "#F5F1E6", // Cream background
-      malachite: "#0B9E7C", // Green accent
-    },
-    accents: {
-      gilded: "#E8C170", // Soft gold
-      indigo: "#4B0082", // Deep purple
-    },
-  },
-  symbols: {
-    wisdom: ["𓀲", "☿", "𓆓"],
-    knowledge: "📜",
-    portal: "𓇯",
-    infinity: "∞",
-  },
-} as const;
+// ============================================================================
+// CONTENT CATEGORIES CONSTANTS
+// ============================================================================
 
 export const CONTENT_CATEGORIES = {
   POSTS: {
-    id: "strategic-insights",
     title: "Strategic Essays",
-    description: "Timeless wisdom for modern challenges.",
-    icon: "𓆓",
-    color: LIBRARY_AESTHETICS.colors.primary.lapis,
-    signal: {
-      subtle: "Illuminated manuscripts of contemporary thought.",
-      texture: "textured-parchment",
-    },
+    description: "Applying first principles to culture, policy, and markets with ruthless pragmatism.",
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-50 dark:bg-blue-900/10",
+    icon: "✒",
   },
-
-  BOOKS: {
-    id: "curated-volumes",
-    title: "Curated Volumes",
-    description: "Bound knowledge for discerning minds.",
-    icon: "📚",
-    color: LIBRARY_AESTHETICS.colors.primary.terracotta,
-    signal: {
-      subtle: "Scrolls of applied wisdom.",
-      texture: "leather-bound",
-    },
-  },
-
-  EVENTS: {
-    id: "scholarly-gatherings",
-    title: "Live Sessions",
-    description: "Conversations in curated spaces.",
-    icon: "𓇯",
-    color: LIBRARY_AESTHETICS.colors.primary.malachite,
-    signal: {
-      subtle: "Symposiums for strategic exchange.",
-      texture: "ceramic-tile",
-    },
-  },
-
-  DOWNLOADS: {
-    id: "tools-of-application",
-    title: "Execution Tools",
-    description: "Practical instruments for implementation.",
-    icon: "𓀲",
-    color: LIBRARY_AESTHETICS.colors.accents.indigo,
-    signal: {
-      subtle: "Instruments of practical wisdom.",
-      texture: "woven-texture",
-    },
-  },
-
-  PRINTS: {
-    id: "art-of-knowledge",
-    title: "Print Editions",
-    description: "Visual manifestations of insight.",
-    icon: "𓍯",
-    color: LIBRARY_AESTHETICS.colors.primary.saffron,
-    signal: {
-      subtle: "Illuminated visual treatises.",
-      texture: "gilded-edge",
-    },
-  },
-
   RESOURCES: {
-    id: "scholars-toolkit",
-    title: "Core Resources",
-    description: "Companion materials for deep study.",
-    icon: "☿",
-    color: LIBRARY_AESTHETICS.colors.accents.gilded,
-    signal: {
-      subtle: "Auxiliary scrolls for the seeker.",
-      texture: "papyrus-texture",
-    },
+    title: "Execution Tools",
+    description: "Playbooks, templates, and frameworks for turning wisdom into action.",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-50 dark:bg-emerald-900/10",
+    icon: "⚙",
   },
-
-  CANON: {
-    id: "foundational-texts",
-    title: "Canon Volumes",
-    description: "Foundational texts of purpose, power & stewardship.",
-    icon: "∞",
-    color: LIBRARY_AESTHETICS.colors.primary.malachite,
-    signal: {
-      subtle: "Pillars of perennial wisdom.",
-      texture: "stone-tablet",
-    },
+  BOOKS: {
+    title: "Applied Narratives",
+    description: "Memoir, parable, and strategic narrative for men, fathers, and builders.",
+    color: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-50 dark:bg-amber-900/10",
+    icon: "📚",
+  },
+  EVENTS: {
+    title: "Strategic Gatherings",
+    description: "Workshops, salons, and covenants where decisions — not opinions — are the output.",
+    color: "text-purple-600 dark:text-purple-400",
+    bgColor: "bg-purple-50 dark:bg-purple-900/10",
+    icon: "🕯",
   },
 } as const;
 
-export const SEASONAL_CURATIONS = {
-  wisdomTheme: "Persian Library of Applied Wisdom",
-  tactileSignals: {
-    texture: "Embossed leather, gilded edges, hand-made paper.",
-    scent: "Notes of aged paper, sandalwood, and saffron.",
-    sound: "Subtle rustle of turning pages, distant fountain.",
-  },
-  invitation: {
-    visual: "Softly illuminated manuscripts on dark wood.",
-    text: "A sanctuary for the curious mind.",
-    action: "Dwell. Discover. Digest.",
-  },
-} as const;
+export const SITE_NAME = "Abraham of London";
+export const SITE_DESCRIPTION = "Structural thinking for fathers, founders, and builders of legacy.";
+
+// ============================================================================
+// IMPORT FROM CONTENTLAYER
+// ============================================================================
+
+import {
+  allDocuments,
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allResources,
+  allCanons,
+  allStrategies,
+  getPublishedDocuments,
+  getDocumentBySlug,
+  getDocumentsByType,
+  type ContentlayerDocument,
+  type PostDocument,
+  type BookDocument,
+  type DownloadDocument,
+  type EventDocument,
+  type PrintDocument,
+  type ResourceDocument,
+  type CanonDocument,
+  type StrategyDocument,
+} from "./contentlayer";
+
+// ============================================================================
+// RE-EXPORTS OF RAW COLLECTIONS
+// ============================================================================
+
+export {
+  allDocuments,
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allResources,
+  allCanons,
+  allStrategies,
+};
+
+// ============================================================================
+// TYPE ALIASES (for convenience)
+// ============================================================================
+
+export type ContentDoc = ContentlayerDocument;
+export type Post = PostDocument;
+export type Book = BookDocument;
+export type Download = DownloadDocument;
+export type Event = EventDocument;
+export type Print = PrintDocument;
+export type Resource = ResourceDocument;
+export type Canon = CanonDocument;
+export type Strategy = StrategyDocument;
+
+// ============================================================================
+// HIGH-LEVEL HELPERS
+// ============================================================================
+
+/**
+ * All non-draft documents, sorted by date desc.
+ */
+export function getAllContent(): ContentDoc[] {
+  return getPublishedDocuments(allDocuments);
+}
+
+/**
+ * Get a single document by slug (optionally constrained to a type).
+ */
+export function getContentBySlug(
+  slug: string,
+  type?: ContentDoc["type"],
+): ContentDoc | undefined {
+  return getDocumentBySlug(slug, type);
+}
+
+/**
+ * Get all non-draft docs by type (e.g. "Post", "Book", "Event").
+ */
+export function getContentByType<T extends ContentDoc>(
+  type: T["type"],
+): T[] {
+  const docs = getDocumentsByType<T>(type);
+  return getPublishedDocuments(docs as ContentDoc[]) as T[];
+}
+
+/**
+ * Public-facing content only (accessLevel !== "inner-circle").
+ */
+export function getPublicContent(): ContentDoc[] {
+  return getAllContent().filter((doc) => {
+    const access = (doc as any).accessLevel ?? "public";
+    return access !== "inner-circle";
+  });
+}
+
+// ============================================================================
+// PUBLIC CONTENT GETTERS
+// ============================================================================
+
+/**
+ * Public posts (accessLevel === "public")
+ */
+export function getPublicPosts(): Post[] {
+  return getContentByType<Post>("Post").filter((post) => {
+    const access = (post as any).accessLevel ?? "public";
+    return access === "public";
+  });
+}
+
+/**
+ * Public books (accessLevel === "public")
+ */
+export function getPublicBooks(): Book[] {
+  return getContentByType<Book>("Book").filter((book) => {
+    const access = (book as any).accessLevel ?? "public";
+    return access === "public";
+  });
+}
+
+/**
+ * Public events (accessLevel === "public")
+ */
+export function getPublicEvents(): Event[] {
+  return getContentByType<Event>("Event").filter((event) => {
+    const access = (event as any).accessLevel ?? "public";
+    return access === "public";
+  });
+}
+
+/**
+ * Public downloads (accessLevel === "public")
+ */
+export function getPublicDownloads(): Download[] {
+  return getContentByType<Download>("Download").filter((dl) => {
+    const access = (dl as any).accessLevel ?? "public";
+    return access === "public";
+  });
+}
+
+/**
+ * Public canon entries (accessLevel === "public")
+ */
+export function getPublicCanon(): Canon[] {
+  return getContentByType<Canon>("Canon").filter((canon) => {
+    const access = (canon as any).accessLevel ?? "public";
+    return access === "public";
+  });
+}
+
+// ============================================================================
+// CONTENT-SPECIFIC HELPERS (ADDED)
+// ============================================================================
+
+/**
+ * Get all non-draft books
+ */
+export function getAllBooks(): Book[] {
+  return getContentByType<Book>("Book");
+}
+
+/**
+ * Get a book by slug
+ */
+export function getBookBySlug(slug: string): Book | undefined {
+  return getContentBySlug(slug, "Book") as Book | undefined;
+}
+
+/**
+ * Get all non-draft posts
+ */
+export function getAllPosts(): Post[] {
+  return getContentByType<Post>("Post");
+}
+
+/**
+ * Get a post by slug
+ */
+export function getPostBySlug(slug: string): Post | undefined {
+  return getContentBySlug(slug, "Post") as Post | undefined;
+}
+
+/**
+ * Get all non-draft canon entries
+ */
+export function getAllCanon(): Canon[] {
+  return getContentByType<Canon>("Canon");
+}
+
+/**
+ * Get a canon entry by slug
+ */
+export function getCanonBySlug(slug: string): Canon | undefined {
+  return getContentBySlug(slug, "Canon") as Canon | undefined;
+}
+
+/**
+ * Get all non-draft downloads
+ */
+export function getAllDownloads(): Download[] {
+  return getContentByType<Download>("Download");
+}
+
+/**
+ * Get a download by slug
+ */
+export function getDownloadBySlug(slug: string): Download | undefined {
+  return getContentBySlug(slug, "Download") as Download | undefined;
+}
+
+/**
+ * Get all non-draft events
+ */
+export function getAllEvents(): Event[] {
+  return getContentByType<Event>("Event");
+}
+
+/**
+ * Get an event by slug
+ */
+export function getEventBySlug(slug: string): Event | undefined {
+  return getContentBySlug(slug, "Event") as Event | undefined;
+}
+
+/**
+ * Get all non-draft resources
+ */
+export function getAllResources(): Resource[] {
+  return getContentByType<Resource>("Resource");
+}
+
+/**
+ * Get a resource by slug
+ */
+export function getResourceBySlug(slug: string): Resource | undefined {
+  return getContentBySlug(slug, "Resource") as Resource | undefined;
+}

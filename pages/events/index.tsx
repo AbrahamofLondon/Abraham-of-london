@@ -1,116 +1,160 @@
 // pages/events/index.tsx
 import * as React from "react";
-import type { GetStaticProps, NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Link from "next/link";
-
 import Layout from "@/components/Layout";
-import { getAllEvents } from "@/lib/content";
-import type { Event } from "contentlayer/generated";
 
-type EventsPageProps = {
-  events: Event[];
+import {
+  allEvents,
+  getPublishedDocuments,
+  type EventDocument as Event,
+} from "@/lib/contentlayer-helper";
+
+type Props = {
+  upcoming: Event[];
+  past: Event[];
 };
 
-const EventsPage: NextPage<EventsPageProps> = ({ events }) => {
-  const safe = Array.isArray(events) ? events : [];
-  const hasEvents = safe.length > 0;
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const events = getPublishedDocuments(allEvents as Event[]);
 
+  const now = new Date();
+
+  const upcoming = events
+    .filter((e) => e.eventDate && new Date(e.eventDate) >= now)
+    .sort(
+      (a, b) =>
+        new Date(a.eventDate || "").getTime() -
+        new Date(b.eventDate || "").getTime(),
+    );
+
+  const past = events
+    .filter((e) => !e.eventDate || new Date(e.eventDate) < now)
+    .sort(
+      (a, b) =>
+        new Date(b.eventDate || "").getTime() -
+        new Date(a.eventDate || "").getTime(),
+    );
+
+  return {
+    props: {
+      upcoming,
+      past,
+    },
+    revalidate: 1800, // 30 mins
+  };
+};
+
+const EventsIndexPage: NextPage<
+  InferGetStaticPropsType<typeof getStaticProps>
+> = ({ upcoming, past }) => {
   return (
-    <Layout title="Events" pageTitle="Events">
+    <Layout title="Events">
       <main className="mx-auto max-w-5xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-10 space-y-3">
+        <header className="mb-8 space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Abraham of London · Live Sessions
+            Canon · Gatherings
           </p>
           <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-            Live Sessions &amp; Rooms
+            Events & Rooms
           </h1>
-          <p className="max-w-2xl text-sm text-gray-300">
-            Curated salons, leadership workshops, and private rooms for people who are
-            building lives and institutions that outlast headlines.
+          <p className="text-sm text-gray-300">
+            Private rooms, salons and workshops designed for builders who take
+            responsibility seriously.
           </p>
         </header>
 
-        {!hasEvents && (
-          <section className="rounded-2xl border border-dashed border-gold/30 bg-charcoal-light/40 p-8 text-center text-sm text-gray-200">
-            <h2 className="mb-2 font-semibold text-cream">No events live yet</h2>
-            <p className="mx-auto max-w-md">
-              The next set of salons and workshops is being scheduled. Join the Inner
-              Circle to be first in the room when new dates drop.
-            </p>
-          </section>
-        )}
+        <section className="space-y-4">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Upcoming
+          </h2>
 
-        {hasEvents && (
-          <section className="grid gap-6 md:grid-cols-2">
-            {safe.map((event) => (
-              <EventCard key={event.slug} event={event} />
-            ))}
-          </section>
-        )}
+          {(!upcoming || upcoming.length === 0) && (
+            <p className="text-sm text-gray-400">
+              No upcoming events announced yet. Join the newsletter to hear
+              first when the next room opens.
+            </p>
+          )}
+
+          {upcoming.length > 0 && (
+            <ul className="space-y-4">
+              {upcoming.map((event) => (
+                <li
+                  key={event._id}
+                  className="rounded-2xl border border-white/5 bg-black/40 p-4 transition hover:border-gold/60 hover:bg-black/70"
+                >
+                  <Link
+                    href={`/events/${event.slug}`}
+                    className="block space-y-1 no-underline"
+                  >
+                    <p className="text-xs uppercase tracking-[0.25em] text-gold/70">
+                      {event.location || "Private Room"}
+                    </p>
+                    <h3 className="font-serif text-lg font-semibold text-cream">
+                      {event.title ?? "Untitled Event"}
+                    </h3>
+                    <p className="text-xs text-gray-300">
+                      {event.eventDate
+                        ? new Date(event.eventDate).toLocaleString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Date TBC"}
+                    </p>
+                    {event.excerpt && (
+                      <p className="mt-2 text-sm text-gray-300">
+                        {event.excerpt}
+                      </p>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="mt-10 space-y-4">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Archive
+          </h2>
+
+          {(!past || past.length === 0) && (
+            <p className="text-sm text-gray-400">
+              Once the first rooms have run, they’ll live here as part of the
+              Canon archive.
+            </p>
+          )}
+
+          {past.length > 0 && (
+            <ul className="space-y-3 text-sm text-gray-400">
+              {past.map((event) => (
+                <li key={event._id} className="flex items-baseline gap-3">
+                  <span className="w-32 shrink-0 text-xs text-gray-500">
+                    {event.eventDate
+                      ? new Date(event.eventDate).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "Past"}
+                  </span>
+                  <Link
+                    href={`/events/${event.slug}`}
+                    className="flex-1 text-cream hover:text-gold"
+                  >
+                    {event.title ?? "Untitled Event"}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </main>
     </Layout>
   );
 };
 
-type EventCardProps = {
-  event: Event;
-};
-
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const { slug, title, excerpt, description, date, tags } = event;
-  const href = `/events/${slug}`;
-  const copy = description || excerpt || "";
-  const displayTags = Array.isArray(tags) ? tags.slice(0, 3) : [];
-
-  return (
-    <Link
-      href={href}
-      className="group flex h-full flex-col rounded-2xl border border-gold/25 bg-charcoal-light/60 p-5 transition hover:-translate-y-0.5 hover:border-gold/70"
-    >
-      <div className="flex flex-1 flex-col gap-3">
-        <div className="space-y-1">
-          <h2 className="font-serif text-lg font-semibold text-cream transition group-hover:text-gold">
-            {title}
-          </h2>
-          {copy && <p className="text-xs text-gray-300 line-clamp-3">{copy}</p>}
-        </div>
-
-        <div className="mt-auto flex flex-wrap items-center gap-2 text-[0.7rem] text-gray-400">
-          {date && (
-            <span>
-              {new Date(date).toLocaleString("en-GB", {
-                year: "numeric",
-                month: "short",
-                day: "2-digit",
-              })}
-            </span>
-          )}
-
-          {displayTags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {displayTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-charcoal px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.12em] text-gray-200"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-};
-
-export const getStaticProps: GetStaticProps<EventsPageProps> = async () => {
-  const events = getAllEvents();
-  return {
-    props: { events },
-    revalidate: 3600,
-  };
-};
-
-export default EventsPage;
+export default EventsIndexPage;

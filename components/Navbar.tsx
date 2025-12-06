@@ -6,6 +6,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import ScrollProgress from "./ScrollProgress";
+import { siteConfig } from '@/lib/imports';
 
 // Self-contained route configuration
 type RouteId =
@@ -182,3 +183,5 @@ export default function Navbar() {
     </>
   );
 }
+
+

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { BaseCard, getCardAriaLabel } from '@/components/Cards';
 import SilentSurface from "@/components/ui/SilentSurface";
 import {
   getAllUnifiedContent,
