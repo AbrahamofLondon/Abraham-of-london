@@ -2,7 +2,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
-import { isString } from "@/lib/utils"; // Import the utility
+import { isString , safeString } from "@/lib/utils""; // Import the utility
 
 type ArticleHeroProps = {
   title?: string | null;
@@ -26,6 +26,17 @@ function formatDate(iso?: string | null): string | null {
   }).format(d);
 }
 
+// Helper function to safely convert to string
+function safeString(value: unknown): string {
+  if (isString(value)) {
+    return value;
+  }
+  if (value === null || value === undefined) {
+    return "";
+  }
+  return String(value);
+}
+
 export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
   const {
     title = "",
@@ -46,7 +57,7 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
       : null;
   const metaBits = [dateLabel, readLabel].filter(Boolean).join(" • ");
 
-  // Use the safeString utility
+  // Use the safeString function
   const safeTitle = safeString(title);
   const safeSubtitle = safeString(subtitle);
 

@@ -2,7 +2,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
-import { isString } from "@/lib/utils";
+import { isString , safeString } from "@/lib/utils"";
 
 type BookHeroProps = {
   title?: string | null;
@@ -152,3 +152,4 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
     </section>
   );
 }
+

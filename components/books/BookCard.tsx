@@ -1,3 +1,5 @@
+import { safeString } from "@/lib/utils";
+
 // components/books/BookCard.tsx
 "use client";
 
@@ -338,3 +340,4 @@ export default function BookCard({
     </article>
   );
 }
+

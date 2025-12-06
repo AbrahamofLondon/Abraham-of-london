@@ -1,3 +1,5 @@
+import { safeString } from "@/lib/utils";
+
 import Link from "next/link";
 import Image from "next/image";
 import type { PostMeta } from "@/types/post";
@@ -194,3 +196,4 @@ export default function BlogPostPreview({
 
 // Optional: Display name for debugging
 BlogPostPreview.displayName = "BlogPostPreview";
+
