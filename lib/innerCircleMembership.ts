@@ -538,43 +538,43 @@ class PostgresInnerCircleStore implements InnerCircleStore {
   }
 
   async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
-    const safeKey = key.trim();
-    if (!safeKey) return { valid: false, reason: "missing-key" };
+  const safeKey = key.trim();
+  if (!safeKey) return { valid: false, reason: "missing-key" };
 
-    const keyHash = sha256Hex(safeKey);
+  const keyHash = sha256Hex(safeKey);
 
-    const res = await this.withClient((client) =>
-      client.query<{
-        member_id: string;
-        status: InnerCircleStatus;
-        created_at: string;
-        key_suffix: string;
-      }>(
-        `
-        SELECT member_id, status, created_at, key_suffix
-        FROM inner_circle_keys
-        WHERE key_hash = $1
-        LIMIT 1
-      `,
-        [keyHash]
-      )
-    );
+  const res = await this.withClient((client) =>
+    client.query<{
+      member_id: string;
+      status: InnerCircleStatus;
+      created_at: string;
+      key_suffix: string;
+    }>(
+      `
+      SELECT member_id, status, created_at, key_suffix
+      FROM inner_circle_keys
+      WHERE key_hash = $1
+      LIMIT 1
+    `,
+      [keyHash]
+    )
+  );
 
-    const row = res.rows[0];
-    if (!row) return { valid: false, reason: "not-found" };
-    if (row.status === "revoked") return { valid: false, reason: "revoked" };
+  const row = res.rows[0];
+  if (!row) return { valid: false, reason: "not-found" };
+  if (row.status === "revoked") return { valid: false, reason: "revoked" };
 
-    const created = new Date(row.created_at).getTime();
-    const ageMs = Date.now() - created;
-    if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
+  const created = new Date(row.created_at).getTime();
+  const ageMs = Date.now() - created;
+  if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
 
-    return {
-      valid: true,
-      memberId: row.member_id,
-      keySuffix: row.key_suffix,
-      createdAt: row.created_at,
-    };
-  }
+  return {
+    valid: true,
+    memberId: row.member_id,
+    keySuffix: row.key_suffix,
+    createdAt: row.created_at,
+  };
+}
 
   async recordInnerCircleUnlock(
     key: string,
