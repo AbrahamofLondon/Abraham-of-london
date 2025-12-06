@@ -67,7 +67,7 @@ export async function sendInnerCircleEmail(
         ? "Your Canon Inner Circle access link (resent)"
         : "Your Canon Inner Circle access key";
 
-    // Generate plain text version as fallback
+    // Generate plain text version
     const textVersion = `
 ${args.name ? `Dear ${args.name},` : 'Hello,'}
 
@@ -90,16 +90,24 @@ Best regards,
 The Abraham of London Team
     `.trim();
 
+    // Generate HTML version using React
+    const React = await import('react');
+    const { renderToString } = await import('react-dom/server');
+    
+    const emailElement = React.createElement(InnerCircleEmail, {
+      name: args.name,
+      accessKey: args.accessKey,
+      unlockUrl: args.unlockUrl,
+      mode: args.mode ?? "register",
+    });
+    
+    const htmlVersion = renderToString(emailElement);
+
     const result = await resend.emails.send({
       from: fromAddress,
       to: args.email,
       subject,
-      react: InnerCircleEmail({
-        name: args.name,
-        accessKey: args.accessKey,
-        unlockUrl: args.unlockUrl,
-        mode: args.mode ?? "register",
-      }),
+      html: htmlVersion,
       text: textVersion,
     });
 
@@ -147,7 +155,7 @@ export function checkEmailConfiguration(): {
 }
 
 // Test function for development
-export async function testEmailSending(): Promise<void> {
+export async function testEmailSending(): Promise<boolean> {
   console.log("Testing email configuration...");
   
   const config = checkEmailConfiguration();
@@ -155,7 +163,7 @@ export async function testEmailSending(): Promise<void> {
   
   if (!config.configured) {
     console.warn("⚠️ Email is not properly configured for production!");
-    return;
+    return false;
   }
   
   const testArgs: SendInnerCircleEmailArgs = {
@@ -166,17 +174,15 @@ export async function testEmailSending(): Promise<void> {
     mode: "register"
   };
   
-  console.log("Sending test email with args:", {
-    ...testArgs,
-    unlockUrl: "[REDACTED]",
-    accessKey: "[REDACTED]"
-  });
+  console.log("Sending test email...");
   
   const result = await sendInnerCircleEmail(testArgs);
   
   if (result.success) {
     console.log("✅ Email test successful!");
+    return true;
   } else {
     console.error("❌ Email test failed:", result.error);
+    return false;
   }
 }

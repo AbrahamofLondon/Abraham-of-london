@@ -543,6 +543,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
 
   const keyHash = sha256Hex(safeKey);
 
+  // FIX: Add proper type annotation for the query
   const res = await this.withClient((client) =>
     client.query<{
       member_id: string;
@@ -555,10 +556,27 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       FROM inner_circle_keys
       WHERE key_hash = $1
       LIMIT 1
-    `,
+      `,
       [keyHash]
     )
   );
+
+  // Now TypeScript knows the type of res.rows[0]
+  const row = res.rows[0];
+  if (!row) return { valid: false, reason: "not-found" };
+  if (row.status === "revoked") return { valid: false, reason: "revoked" };
+
+  const created = new Date(row.created_at).getTime();
+  const ageMs = Date.now() - created;
+  if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
+
+  return {
+    valid: true,
+    memberId: row.member_id,
+    keySuffix: row.key_suffix,
+    createdAt: row.created_at,
+  };
+}
 
   const row = res.rows[0];
   if (!row) return { valid: false, reason: "not-found" };
