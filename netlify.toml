@@ -1,12 +1,12 @@
 [build]
-  command = "pnpm install && pnpm run build:netlify"
+  command = "CI=false pnpm install && pnpm run build:netlify"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.12.0"
   NODE_ENV = "production"
-  CI = "false"
+  CI = "false"  # Also set here as backup
   NEXT_DISABLE_ESLINT = "1"
   NEXT_TELEMETRY_DISABLED = "1"
   DISABLE_ESLINT_PLUGIN = "true"

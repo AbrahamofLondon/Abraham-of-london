@@ -15,8 +15,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   typescript: { 
-    ignoreBuildErrors: true,
-    tsconfigPath: "./tsconfig.json"
+    ignoreBuildErrors: false,  // Changed to false to see real errors
   },
 
   // Expose environment variables to the browser
@@ -44,7 +43,7 @@ const nextConfig = {
       "default-src 'self';",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com;",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
-      "img-src 'self' data: https://www.google-analytics.com;",
+      "img-src 'self' data: https:;",  // CHANGED: Allow all HTTPS images
       "font-src 'self' https://fonts.gstatic.com;",
       "connect-src 'self' https://www.google-analytics.com;",
       "frame-ancestors 'none';",
@@ -68,8 +67,16 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
 
-  // Simplified webpack config without require issues
-  webpack: (config, { isServer }) => {
+  // Add output configuration for Netlify
+  output: 'standalone',
+
+  // Optimize for Netlify
+  experimental: {
+    optimizeCss: true,
+  },
+
+  // Simplified webpack config
+  webpack: (config, { isServer, dev }) => {
     // Add path aliases
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -87,6 +94,12 @@ const nextConfig = {
       ...config.module,
       exprContextCritical: false,
     };
+
+    // Handle SVG imports
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
 
     return config;
   },

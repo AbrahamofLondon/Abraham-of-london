@@ -34,7 +34,7 @@
     "guard:conflicts": "node scripts/check-conflicts.js",
 
     "build": "pnpm run guard:conflicts && pnpm run content:build && next build --webpack",
-    "build:netlify:safe": "cross-env CI=false pnpm run content:build && next build --webpack",
+    "build:netlify:safe": "contentlayer2 build && next build --webpack",
     "build:fast": "pnpm run content:build && next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
 
