@@ -1,195 +1,208 @@
-// lib/email/templates/InnerCircleEmail.tsx
-import * as React from "react";
+import React from 'react';
 import {
   Body,
-  Button,
   Container,
   Head,
+  Heading,
+  Hr,
   Html,
+  Link,
   Preview,
   Section,
   Text,
-} from "@react-email/components";
+} from '@react-email/components';
 
-export interface InnerCircleEmailProps {
+interface InnerCircleEmailProps {
   name?: string;
   accessKey: string;
   unlockUrl: string;
-  mode?: "register" | "resend";
+  mode?: 'register' | 'resend';
 }
 
 export function InnerCircleEmail({
   name,
   accessKey,
   unlockUrl,
-  mode = "register",
-}: InnerCircleEmailProps): JSX.Element {
-  const greetingName = name && name.trim().length > 0 ? name.trim() : "Friend";
-  const previewText =
-    mode === "register"
-      ? "Your Canon Inner Circle access key and unlock link."
-      : "Your Inner Circle access link has been resent.";
-
+  mode = 'register',
+}: InnerCircleEmailProps) {
+  const isResend = mode === 'resend';
+  const greeting = name ? `Dear ${name},` : 'Hello,';
+  
   return (
     <Html>
       <Head />
-      <Preview>{previewText}</Preview>
-      <Body style={body}>
+      <Preview>
+        {isResend 
+          ? 'Your Canon Inner Circle access link (resent)' 
+          : 'Your Canon Inner Circle access key'
+        }
+      </Preview>
+      <Body style={main}>
         <Container style={container}>
-          <Section style={header}>
-            <Text style={brand}>Abraham of London · Canon Inner Circle</Text>
+          <Heading style={h1}>
+            {isResend ? '🔁 Access Link Resent' : '✨ Welcome to the Inner Circle'}
+          </Heading>
+          
+          <Text style={text}>{greeting}</Text>
+          
+          {isResend ? (
+            <Text style={text}>
+              As requested, here is your access link to the Canon Inner Circle:
+            </Text>
+          ) : (
+            <Text style={text}>
+              Thank you for registering for the Inner Circle. This is your personal access key:
+            </Text>
+          )}
+          
+          <Section style={codeContainer}>
+            <Text style={code}>{accessKey}</Text>
           </Section>
-
-          <Section style={content}>
-            <Text style={salutation}>Dear {greetingName},</Text>
-
-            <Text style={paragraph}>
-              Thank you for stepping into the Canon Inner Circle. This key gives
-              you access to restricted Canon volumes and commentary reserved for
-              serious builders and stewards.
-            </Text>
-
-            <Text style={paragraph}>
-              To unlock this device, simply click the button below. A secure
-              cookie will be set in your browser, and you&apos;ll be taken
-              straight back to the Canon.
-            </Text>
-
-            <Section style={buttonRow}>
-              <Button href={unlockUrl} style={button}>
-                Unlock Inner Circle on this device
-              </Button>
-            </Section>
-
-            <Text style={paragraph}>
-              If the button doesn&apos;t work, you can also paste this access
-              key manually on the Inner Circle page:
-            </Text>
-
-            <Section style={codeBox}>
-              <Text style={code}>{accessKey}</Text>
-            </Section>
-
-            <Text style={paragraphMuted}>
-              Keep this key private. If you ever suspect misuse, reply to this
-              email and we&apos;ll revoke the key and issue a new one.
-            </Text>
-
-            <Text style={paragraph}>
-              With grace and resolve,
-              <br />
-              <span style={signature}>Abraham of London</span>
-            </Text>
+          
+          <Text style={text}>
+            To activate your access, click the link below:
+          </Text>
+          
+          <Section style={buttonContainer}>
+            <Link href={unlockUrl} style={button}>
+              {isResend ? 'Access Inner Circle' : 'Activate Inner Circle Access'}
+            </Link>
           </Section>
-
-          <Section style={footer}>
-            <Text style={footerText}>
-              You received this email because your address was used to request
-              Canon Inner Circle access at abrahamoflondon.org.
+          
+          <Text style={text}>
+            Or copy and paste this URL into your browser:
+          </Text>
+          
+          <Text style={linkText}>{unlockUrl}</Text>
+          
+          <Hr style={hr} />
+          
+          <Text style={text}>
+            <strong>Important:</strong> This access key is personal and should not be shared.
+            It will grant you access to exclusive Canon content and features.
+          </Text>
+          
+          {isResend ? (
+            <Text style={footer}>
+              This link was resent at your request. If you did not request a new link,
+              please contact support immediately.
             </Text>
-          </Section>
+          ) : (
+            <Text style={footer}>
+              If you did not request this access, please ignore this email.
+            </Text>
+          )}
+          
+          <Text style={signature}>
+            Best regards,
+            <br />
+            The Abraham of London Team
+          </Text>
         </Container>
       </Body>
     </Html>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
-const body: React.CSSProperties = {
-  backgroundColor: "#050509",
-  color: "#f5f5f5",
+const main = {
+  backgroundColor: '#f6f9fc',
   fontFamily:
-    '"system-ui", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
+  padding: '20px 0',
 };
 
-const container: React.CSSProperties = {
-  maxWidth: "560px",
-  margin: "40px auto",
-  borderRadius: "20px",
-  overflow: "hidden",
-  border: "1px solid #a79a68",
-  background: "radial-gradient(circle at top, #161622 0, #050509 60%)",
+const container = {
+  backgroundColor: '#ffffff',
+  margin: '0 auto',
+  padding: '40px 20px',
+  maxWidth: '600px',
+  borderRadius: '8px',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
 };
 
-const header: React.CSSProperties = {
-  padding: "18px 24px 8px",
+const h1 = {
+  color: '#1a202c',
+  fontSize: '28px',
+  fontWeight: '700',
+  lineHeight: '1.25',
+  margin: '0 0 30px',
+  textAlign: 'center' as const,
 };
 
-const brand: React.CSSProperties = {
-  fontSize: "11px",
-  letterSpacing: "0.18em",
-  textTransform: "uppercase",
-  color: "#d4c58f",
+const text = {
+  color: '#4a5568',
+  fontSize: '16px',
+  lineHeight: '1.6',
+  margin: '0 0 20px',
 };
 
-const content: React.CSSProperties = {
-  padding: "8px 24px 28px",
+const codeContainer = {
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  borderRadius: '8px',
+  margin: '30px 0',
+  padding: '20px',
+  textAlign: 'center' as const,
 };
 
-const salutation: React.CSSProperties = {
-  fontSize: "15px",
-  marginBottom: "12px",
+const code = {
+  color: '#ffffff',
+  fontFamily: 'monospace',
+  fontSize: '28px',
+  fontWeight: '700',
+  letterSpacing: '1px',
+  margin: '0',
+  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
 };
 
-const paragraph: React.CSSProperties = {
-  fontSize: "14px",
-  lineHeight: "1.6",
-  marginBottom: "14px",
+const buttonContainer = {
+  textAlign: 'center' as const,
+  margin: '30px 0',
 };
 
-const paragraphMuted: React.CSSProperties = {
-  ...paragraph,
-  color: "#b3b3b3",
+const button = {
+  backgroundColor: '#1a202c',
+  borderRadius: '6px',
+  color: '#ffffff',
+  fontSize: '16px',
+  fontWeight: '600',
+  textDecoration: 'none',
+  textAlign: 'center' as const,
+  display: 'inline-block',
+  padding: '14px 32px',
+  transition: 'all 0.2s ease',
 };
 
-const buttonRow: React.CSSProperties = {
-  textAlign: "center",
-  margin: "18px 0 22px",
+const linkText = {
+  color: '#3182ce',
+  fontSize: '14px',
+  lineHeight: '1.5',
+  margin: '15px 0',
+  wordBreak: 'break-all' as const,
+  backgroundColor: '#edf2f7',
+  padding: '12px',
+  borderRadius: '4px',
+  fontFamily: 'monospace',
 };
 
-const button: React.CSSProperties = {
-  backgroundColor: "#d4c58f",
-  color: "#050509",
-  padding: "12px 22px",
-  borderRadius: "999px",
-  fontSize: "13px",
-  fontWeight: 600,
-  textTransform: "uppercase",
-  letterSpacing: "0.16em",
-  textDecoration: "none",
+const hr = {
+  borderColor: '#e2e8f0',
+  margin: '30px 0',
 };
 
-const codeBox: React.CSSProperties = {
-  borderRadius: "12px",
-  backgroundColor: "rgba(0,0,0,0.65)",
-  border: "1px solid rgba(212,197,143,0.5)",
-  padding: "10px 14px",
-  margin: "6px 0 18px",
+const footer = {
+  color: '#718096',
+  fontSize: '14px',
+  lineHeight: '1.5',
+  margin: '20px 0',
+  fontStyle: 'italic',
 };
 
-const code: React.CSSProperties = {
-  fontFamily:
-    '"JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-  fontSize: "13px",
-  letterSpacing: "0.2em",
-  textAlign: "center",
+const signature = {
+  color: '#4a5568',
+  fontSize: '16px',
+  lineHeight: '1.6',
+  margin: '30px 0 0',
+  fontWeight: '600',
 };
 
-const signature: React.CSSProperties = {
-  fontWeight: 600,
-  color: "#f5f5f5",
-};
-
-const footer: React.CSSProperties = {
-  borderTop: "1px solid rgba(212,197,143,0.3)",
-  padding: "14px 24px 18px",
-};
-
-const footerText: React.CSSProperties = {
-  fontSize: "11px",
-  lineHeight: "1.5",
-  color: "#8b8b8b",
-};
+export default InnerCircleEmail;

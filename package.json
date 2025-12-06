@@ -41,13 +41,16 @@
     "downloads:validate": "node scripts/validate-downloads.mjs",
     "test:e2e": "pnpm dlx playwright test",
     "build:functions": "pnpm exec tsc --project tsconfig.functions.json --noEmit",
-    "debug:content": "node scripts/debug-content-routes.mjs"
+    "debug:content": "node scripts/debug-content-routes.mjs",
+    "email:test": "tsx scripts/test-email.ts"
   },
   "dependencies": {
     "@contentlayer/cli": "0.3.4",
     "@contentlayer/core": "npm:contentlayer2@0.5.8",
     "@heroicons/react": "2.2.0",
     "@netlify/functions": "5.1.0",
+    "@react-email/components": "0.0.23",
+    "@react-email/render": "0.0.23",
     "@react-pdf/renderer": "4.3.1",
     "@tailwindcss/typography": "0.5.19",
     "@types/node": "20.11.30",
@@ -84,7 +87,6 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "5.14.5",
-    "@react-email/components": "0.0.23",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/typography": "0.5.19",
     "@types/mdx": "^2.0.13",
