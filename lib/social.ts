@@ -38,7 +38,7 @@ interface RawSocialItem {
 }
 
 /** Map aliases → canonical platform keys */
-const PLATFORM_ALIASES: Record<string, SocialPlatform> = {
+export const PLATFORM_ALIASES: Record<string, SocialPlatform> = {
   x: "twitter",
   twitter: "twitter",
   ig: "instagram",
@@ -64,7 +64,7 @@ const PLATFORM_ALIASES: Record<string, SocialPlatform> = {
 };
 
 /** Base URL builders for common platforms given a handle/username */
-const PLATFORM_BUILDERS: Partial<
+export const PLATFORM_BUILDERS: Partial<
   Record<SocialPlatform, (h: string) => string>
 > = {
   twitter: (h) => `https://twitter.com/${stripAt(h)}`,
@@ -72,7 +72,6 @@ const PLATFORM_BUILDERS: Partial<
   facebook: (h) => `https://facebook.com/${stripAt(h)}`,
   linkedin: (h) => {
     const u = stripAt(h);
-    // crude heuristic: company vs profile
     return u.startsWith("company/") || u.startsWith("in/") || u.includes("/")
       ? `https://www.linkedin.com/${u.replace(/^\/+/, "")}`
       : `https://www.linkedin.com/in/${u}`;
@@ -99,7 +98,7 @@ function normalisePlatform(input: unknown): SocialPlatform | undefined {
   return PLATFORM_ALIASES[key] ?? undefined;
 }
 
-/** Very strict URL safety: only http(s), mailto, tel allowed */
+/** Very strict URL safety: only http(s), mailto, tel, or relative allowed */
 function isSafeHref(href: string): boolean {
   const v = String(href).trim();
   if (v.startsWith("mailto:") || v.startsWith("tel:")) return true;
@@ -112,12 +111,28 @@ function isSafeHref(href: string): boolean {
   }
 }
 
+/** WhatsApp URL builder: accepts phone numbers or message templates */
+export function buildWhatsApp(input: string): string {
+  const v = String(input || "").trim();
+  if (/^https?:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(v)) return v;
+
+  if (/^[+]?[\d\s().-]{6,}$/.test(v)) {
+    const digits = v.replace(/[^\d]/g, "");
+    return `https://wa.me/${digits}`;
+  }
+
+  const text = encodeURIComponent(v.replace(/^msg:/i, "").trim() || "Hello");
+  return `https://wa.me/?text=${text}`;
+}
+
 /** Build href from handle when platform known; fall back to raw href */
-function coerceHref(rawHref: unknown, kind?: SocialPlatform): string | null {
+export function coerceHref(
+  rawHref: unknown,
+  kind?: SocialPlatform,
+): string | null {
   const v = String(rawHref ?? "").trim();
   if (!v) return null;
 
-  // Already a complete safe link?
   if (
     v.startsWith("http://") ||
     v.startsWith("https://") ||
@@ -128,43 +143,20 @@ function coerceHref(rawHref: unknown, kind?: SocialPlatform): string | null {
     return isSafeHref(v) ? v : null;
   }
 
-  // If looks like email
   if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return `mailto:${v}`;
-
-  // If looks like phone (very permissive)
   if (/^[+]?[\d\s().-]{6,}$/.test(v)) return `tel:${v.replace(/\s+/g, "")}`;
 
-  // If we know the platform and it's a handle, build URL
   if (kind && PLATFORM_BUILDERS[kind]) {
-    return PLATFORM_BUILDERS[kind](v);
+    return PLATFORM_BUILDERS[kind]!(v);
   }
 
-  // If it looks like a bare domain, normalise to https
   if (/^[a-z0-9.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(v)) {
     return `https://${v}`;
   }
 
-  // If starts with @ and unknown platform, assume Twitter-style
   if (v.startsWith("@")) return `https://twitter.com/${stripAt(v)}`;
 
-  // Otherwise refuse unsafe strings
   return null;
-}
-
-/** WhatsApp URL builder: accepts phone numbers or message templates */
-function buildWhatsApp(input: string): string {
-  const v = String(input || "").trim();
-  // if full wa.me link passed through
-  if (/^https?:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(v)) return v;
-
-  // If phone
-  if (/^[+]?[\d\s().-]{6,}$/.test(v)) {
-    const digits = v.replace(/[^\d]/g, "");
-    return `https://wa.me/${digits}`;
-  }
-  // If text message
-  const text = encodeURIComponent(v.replace(/^msg:/i, "").trim() || "Hello");
-  return `https://wa.me/?text=${text}`;
 }
 
 /** Decide external flag */
@@ -183,7 +175,6 @@ export function isSocialLink(x: unknown): x is SocialLink {
 
 /** Coerce unknown shapes (array/object/primitive) into a clean SocialLink[] */
 export function sanitizeSocialLinks(input: unknown): SocialLink[] {
-  // Flatten input to a candidate array
   const arr: unknown[] = Array.isArray(input)
     ? input
     : input && typeof input === "object"
@@ -220,7 +211,6 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
     out.push({ href, kind, label, icon, external });
   }
 
-  // Deduplicate by (kind, href)
   const seen = new Set<string>();
   const deduped: SocialLink[] = [];
   for (const s of out) {
@@ -232,3 +222,14 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
   }
   return deduped;
 }
+
+const socialApi = {
+  PLATFORM_ALIASES,
+  PLATFORM_BUILDERS,
+  sanitizeSocialLinks,
+  isSocialLink,
+  buildWhatsApp,
+  coerceHref,
+};
+
+export default socialApi;

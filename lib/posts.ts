@@ -1,58 +1,62 @@
 // lib/posts.ts
-// Contentlayer-free adapter hooked into lib/server/posts-data
+// Robust posts data facade with post-specific utilities
 
-import {
-  getAllPostsMeta,
-  getPostBySlug as getPostBySlugServer,
-  type PostMeta,
-} from "@/lib/server/posts-data";
+import { getAllPostsMeta, getPostBySlug as getPostBySlugServer } from "@/lib/server/posts-data";
 
-export type Post = PostMeta & {
-  content?: string;
-};
-
-const DEFAULT_FIELDS = [
-  "slug",
-  "title",
-  "description",
-  "excerpt",
-  "coverImage",
-  "heroImage",
-  "date",
-  "updated",
-  "author",
-  "tags",
-  "category",
-  "readTime",
-  "resources",
-  "content",
-  "seoTitle",
-  "seoDescription",
-  "status",
-] as const;
+// Type definitions
+export type Post = any;
+export type PostMeta = Post;
+export type PostFieldKey = keyof PostMeta;
 
 /**
- * Used by lib/server/unified-content.ts
+ * Get all posts
  */
-export async function getAllPosts(): Promise<Post[]> {
-  const metas = getAllPostsMeta?.() ?? [];
-
-  const posts: Post[] = metas.map((meta) => {
-    // pull full doc if needed
-    const full = getPostBySlugServer(meta.slug, [...DEFAULT_FIELDS]) as any;
-    const merged = { ...meta, ...(full || {}) };
-    // JSON clone to strip Date objects etc.
-    return JSON.parse(JSON.stringify(merged)) as Post;
-  });
-
-  return posts;
+export function getAllPosts(): PostMeta[] {
+  try {
+    const posts = getAllPostsMeta();
+    return Array.isArray(posts) ? posts : [];
+  } catch {
+    return [];
+  }
 }
 
 /**
- * Optional convenience single-fetch
+ * Get post by slug
  */
-export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const full = getPostBySlugServer(slug, [...DEFAULT_FIELDS]) as any;
-  if (!full || !full.title) return null;
-  return JSON.parse(JSON.stringify(full)) as Post;
+export function getPostBySlug(slug: string): Post | null {
+  try {
+    return getPostBySlugServer(slug);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get post slugs
+ */
+export function getPostSlugs(): string[] {
+  const posts = getAllPosts();
+  return posts.map(p => p.slug).filter(Boolean);
+}
+
+/**
+ * Get public posts
+ */
+export function getPublicPosts(): PostMeta[] {
+  const posts = getAllPosts();
+  return posts.filter(post => {
+    const isDraft = post.draft === true;
+    const isNotPublished = post.published === false;
+    const isStatusDraft = post.status === 'draft';
+    return !(isDraft || isNotPublished || isStatusDraft);
+  });
+}
+
+/**
+ * Get featured posts
+ */
+export function getFeaturedPosts(limit?: number): PostMeta[] {
+  const posts = getPublicPosts();
+  const featured = posts.filter(p => p.featured === true);
+  return limit ? featured.slice(0, limit) : featured;
 }

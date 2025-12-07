@@ -1,44 +1,62 @@
 // lib/canon.ts
-import {
-  allCanons,
-  getPublishedDocuments,
-  getDocumentBySlug,
-  type Canon as CanonDocument,
-} from "./contentlayer-helper";
+// Canon data facade
+
+import { getAllCanon as getAllCanonServer } from "@/lib/server/canon-data";
+
+// Type definitions
+export type Canon = any;
+export type CanonMeta = Canon;
+export type CanonFieldKey = keyof CanonMeta;
 
 /**
- * Return all Canon documents (including drafts if you ever decide to).
- * Currently we only return published (non-draft) items.
+ * Get all canon
  */
-export function getAllCanon(): CanonDocument[] {
-  return getPublishedDocuments(allCanons as CanonDocument[]);
+export function getAllCanon(): CanonMeta[] {
+  try {
+    const canon = getAllCanonServer();
+    return Array.isArray(canon) ? canon : [];
+  } catch {
+    return [];
+  }
 }
 
 /**
- * Return a single Canon volume by slug.
+ * Get canon by slug
  */
-export function getCanonBySlug(slug: string): CanonDocument | undefined {
-  const doc = getDocumentBySlug(slug, "Canon");
-  return doc as CanonDocument | undefined;
+export function getCanonBySlug(slug: string): Canon | null {
+  try {
+    const canon = getAllCanon();
+    return canon.find(c => c.slug === slug) || null;
+  } catch {
+    return null;
+  }
 }
 
 /**
- * Return featured Canon volumes (featured = true in frontmatter).
+ * Get canon slugs
  */
-export function getFeaturedCanon(): CanonDocument[] {
-  return getAllCanon().filter((canon) => (canon as any).featured === true);
+export function getCanonSlugs(): string[] {
+  const canon = getAllCanon();
+  return canon.map(c => c.slug).filter(Boolean);
 }
 
 /**
- * Return Canon volumes ordered by their "order" field (ascending).
+ * Get public canon
  */
-export function getOrderedCanon(): CanonDocument[] {
-  return getAllCanon().sort((a, b) => {
-    const aOrder = typeof a.order === "number" ? a.order : 9999;
-    const bOrder = typeof b.order === "number" ? b.order : 9999;
-    return aOrder - bOrder;
+export function getPublicCanon(): CanonMeta[] {
+  const canon = getAllCanon();
+  return canon.filter(canon => {
+    const isDraft = canon.draft === true;
+    const isNotPublished = canon.published === false;
+    const isStatusDraft = canon.status === 'draft';
+    return !(isDraft || isNotPublished || isStatusDraft);
   });
 }
 
-// Re-export the Canon type for convenience
-export type Canon = CanonDocument;
+/**
+ * Get featured canon
+ */
+export function getFeaturedCanon(): CanonMeta[] {
+  const canon = getPublicCanon();
+  return canon.filter(c => c.featured === true);
+}

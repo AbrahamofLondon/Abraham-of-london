@@ -1,193 +1,142 @@
-// src/lib/server/downloads-data.ts
-// Server-only helpers for Downloads (MD/MDX in content/downloads)
+// lib/server/downloads-data.ts
+import {
+  getMdxCollectionMeta,
+  getMdxDocumentBySlug,
+  type MdxMeta,
+  type MdxDocument,
+} from "@/lib/server/mdx-collections";
+import type { Download } from "@/types/index";
 
-if (typeof window !== "undefined") {
-  throw new Error("downloads-data must not be imported on the client");
-}
-
-import * as fs from "fs";
-import * as path from "path";
-import * as matter from "gray-matter";
-
-export interface DownloadMeta {
-  slug: string; // URL slug (filename without extension)
-  title: string;
-  excerpt?: string;
-  description?: string;
-  category?: string;
-  tags?: string[];
-  date?: string;
-  author?: string;
-  coverImage?: string;
-  pdfPath?: string;
-}
-
-export interface Download extends DownloadMeta {
+export type DownloadWithContent = Download & {
   content: string;
+};
+
+// Safe converters (same pattern as posts)
+function safeString(value: any): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-export type DownloadFieldKey = keyof DownloadMeta;
-
-const DOWNLOADS_DIR = path.join(process.cwd(), "content", "downloads");
-
-/**
- * Internal helper – resolve a slug to an actual md/mdx file if it exists.
- */
-function resolveDownloadPath(slug: string): string | null {
-  const real = slug.replace(/\.mdx?$/i, "");
-  const mdxPath = path.join(DOWNLOADS_DIR, `${real}.mdx`);
-  const mdPath = path.join(DOWNLOADS_DIR, `${real}.md`);
-
-  if (fs.existsSync(mdxPath)) return mdxPath;
-  if (fs.existsSync(mdPath)) return mdPath;
-  return null;
+function safeArray(value: any): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter(item => typeof item === "string");
 }
 
-/**
- * Read all download front-matter metadata (no body).
- */
-export function getAllDownloadsMeta(): DownloadMeta[] {
-  if (!fs.existsSync(DOWNLOADS_DIR)) {
-    console.warn("[downloads-data] Downloads directory does not exist:", DOWNLOADS_DIR);
+function safeNumber(value: any): number | undefined {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+}
+
+function fromMdxMeta(meta: MdxMeta): Download {
+  const m = meta as any;
+  
+  const slug = safeString(m.slug) || safeString(m._raw?.flattenedPath) || "";
+  
+  return {
+    // Required
+    slug,
+    title: safeString(m.title) || "Untitled Download",
+    
+    // Content
+    description: safeString(m.description) || safeString(m.excerpt),
+    excerpt: safeString(m.excerpt) || safeString(m.description),
+    
+    // Metadata
+    date: safeString(m.date),
+    author: safeString(m.author),
+    category: safeString(m.category),
+    tags: safeArray(m.tags),
+    featured: m.featured === true,
+    
+    // Visual
+    coverImage: safeString(m.coverImage) || safeString(m.image),
+    
+    // State
+    draft: m.draft === true,
+    published: m.published === true,
+    
+    // Download-specific
+    fileName: safeString(m.fileName),
+    fileSize: safeString(m.fileSize) || safeNumber(m.fileSize)?.toString(),
+    fileFormat: safeString(m.fileFormat),
+    fileUrl: safeString(m.fileUrl),
+    downloadUrl: safeString(m.downloadUrl),
+    version: safeString(m.version),
+    versionDate: safeString(m.versionDate),
+    changelog: safeArray(m.changelog),
+    requirements: safeArray(m.requirements),
+    compatibility: safeArray(m.compatibility),
+    systemRequirements: safeString(m.systemRequirements),
+    license: safeString(m.license),
+    licenseUrl: safeString(m.licenseUrl),
+    termsOfUse: safeString(m.termsOfUse),
+    useCases: safeArray(m.useCases),
+    applications: safeArray(m.applications),
+    industries: safeArray(m.industries),
+    framework: safeString(m.framework),
+    dependencies: safeArray(m.dependencies),
+    installation: safeString(m.installation),
+    supportEmail: safeString(m.supportEmail),
+    documentationUrl: safeString(m.documentationUrl),
+    tutorialUrl: safeString(m.tutorialUrl),
+    
+    // System
+    _raw: m._raw,
+    url: safeString(m.url),
+    type: "download",
+  };
+}
+
+function fromMdxDocument(doc: MdxDocument): DownloadWithContent {
+  const { content, ...rest } = doc as any;
+  const meta = fromMdxMeta(rest);
+  
+  return {
+    ...meta,
+    content: typeof content === "string" ? content : "",
+  };
+}
+
+export function getAllDownloadsMeta(): Download[] {
+  try {
+    const metas = getMdxCollectionMeta("downloads");
+    return metas.map(m => fromMdxMeta(m));
+  } catch (error) {
+    console.error("[downloads-data] Error getting all downloads meta:", error);
     return [];
   }
-
-  const files = fs
-    .readdirSync(DOWNLOADS_DIR)
-    .filter((f) => f.toLowerCase().endsWith(".md") || f.toLowerCase().endsWith(".mdx"));
-
-  return files.map((file) => {
-    const slug = file.replace(/\.mdx?$/i, "");
-    const fullPath = path.join(DOWNLOADS_DIR, file);
-    const raw = fs.readFileSync(fullPath, "utf8");
-    const { data } = matter(raw);
-    const fm = data || {};
-
-    const title =
-      typeof fm.title === "string" && fm.title.trim().length
-        ? fm.title
-        : slug;
-
-    const description =
-      typeof fm.description === "string" && fm.description.trim().length
-        ? fm.description
-        : undefined;
-
-    const excerpt =
-      typeof fm.excerpt === "string" && fm.excerpt.trim().length
-        ? fm.excerpt
-        : description;
-
-    return {
-      slug,
-      title,
-      excerpt,
-      description,
-      category:
-        typeof fm.category === "string" && fm.category.trim().length
-          ? fm.category
-          : undefined,
-      tags: Array.isArray(fm.tags) ? fm.tags : undefined,
-      date:
-        typeof fm.date === "string" && fm.date.trim().length
-          ? fm.date
-          : undefined,
-      author:
-        typeof fm.author === "string" && fm.author.trim().length
-          ? fm.author
-          : "Abraham of London",
-      coverImage:
-        typeof fm.coverImage === "string" && fm.coverImage.trim().length
-          ? fm.coverImage
-          : undefined,
-      pdfPath:
-        typeof fm.pdfPath === "string" && fm.pdfPath.trim().length
-          ? fm.pdfPath
-          : undefined,
-    } satisfies DownloadMeta;
-  });
 }
 
-/**
- * For callers like unified-content – full list of metadata.
- * (Thin wrapper for backwards compatibility.)
- */
-export function getAllDownloads(): DownloadMeta[] {
-  return getAllDownloadsMeta();
-}
-
-/**
- * Convenience: just the slugs (for getStaticPaths).
- */
-export function getDownloadSlugs(): string[] {
-  return getAllDownloadsMeta().map((d) => d.slug);
-}
-
-/**
- * Full download (frontmatter + content body).
- */
-export function getDownloadBySlug(slug: string): Download | null {
-  const filePath = resolveDownloadPath(slug);
-  if (!filePath) {
-    console.warn("[downloads-data] No file found for slug:", slug);
+export function getDownloadBySlug(slug: string): DownloadWithContent | null {
+  try {
+    const doc = getMdxDocumentBySlug("downloads", slug);
+    if (!doc) {
+      console.warn(`[downloads-data] Download not found: ${slug}`);
+      return null;
+    }
+    
+    return fromMdxDocument(doc);
+  } catch (error) {
+    console.error(`[downloads-data] Error getting download ${slug}:`, error);
     return null;
   }
-
-  const fileContent = fs.readFileSync(filePath, "utf8");
-  const { data, content } = matter(fileContent);
-  const fm = data || {};
-
-  const title =
-    typeof fm.title === "string" && fm.title.trim().length
-      ? fm.title
-      : slug;
-
-  const description =
-    typeof fm.description === "string" && fm.description.trim().length
-      ? fm.description
-      : undefined;
-
-  const excerpt =
-    typeof fm.excerpt === "string" && fm.excerpt.trim().length
-      ? fm.excerpt
-      : description;
-
-  return {
-    slug,
-    title,
-    excerpt,
-    description,
-    category:
-      typeof fm.category === "string" && fm.category.trim().length
-        ? fm.category
-        : undefined,
-    tags: Array.isArray(fm.tags) ? fm.tags : undefined,
-    date:
-      typeof fm.date === "string" && fm.date.trim().length
-        ? fm.date
-        : undefined,
-    author:
-      typeof fm.author === "string" && fm.author.trim().length
-        ? fm.author
-        : "Abraham of London",
-    coverImage:
-      typeof fm.coverImage === "string" && fm.coverImage.trim().length
-        ? fm.coverImage
-        : undefined,
-    pdfPath:
-      typeof fm.pdfPath === "string" && fm.pdfPath.trim().length
-        ? fm.pdfPath
-        : undefined,
-    content,
-  } satisfies Download;
 }
 
-/**
- * Default export for any legacy imports.
- */
+export function getFeaturedDownloads(): Download[] {
+  try {
+    return getAllDownloadsMeta()
+      .filter(d => d.featured && !d.draft);
+  } catch (error) {
+    console.error("[downloads-data] Error getting featured downloads:", error);
+    return [];
+  }
+}
+
 export default {
   getAllDownloadsMeta,
-  getAllDownloads,
-  getDownloadSlugs,
   getDownloadBySlug,
+  getFeaturedDownloads,
 };

@@ -496,12 +496,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
             last_ip = COALESCE($4, inner_circle_members.last_ip)
           RETURNING id
         `,
-          [
-            emailHash,
-            emailHashPrefix,
-            args.name || null,
-            args.ipAddress || null
-          ]
+          [emailHash, emailHashPrefix, args.name || null, args.ipAddress || null]
         );
 
         memberId = memberRes.rows[0].id;
@@ -538,61 +533,49 @@ class PostgresInnerCircleStore implements InnerCircleStore {
   }
 
   async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
-  const safeKey = key.trim();
-  if (!safeKey) return { valid: false, reason: "missing-key" };
+    const safeKey = key.trim();
+    if (!safeKey) return { valid: false, reason: "missing-key" };
 
-  const keyHash = sha256Hex(safeKey);
+    const keyHash = sha256Hex(safeKey);
 
-  // FIX: Add proper type annotation for the query
-  const res = await this.withClient((client) =>
-    client.query<{
+    // Explicitly type the return value
+    const res = await this.withClient<QueryResult<{
       member_id: string;
       status: InnerCircleStatus;
       created_at: string;
       key_suffix: string;
-    }>(
-      `
-      SELECT member_id, status, created_at, key_suffix
-      FROM inner_circle_keys
-      WHERE key_hash = $1
-      LIMIT 1
+    }>>((client) =>
+      client.query<{
+        member_id: string;
+        status: InnerCircleStatus;
+        created_at: string;
+        key_suffix: string;
+      }>(
+        `
+        SELECT member_id, status, created_at, key_suffix
+        FROM inner_circle_keys
+        WHERE key_hash = $1
+        LIMIT 1
       `,
-      [keyHash]
-    )
-  );
+        [keyHash]
+      )
+    );
 
-  // Now TypeScript knows the type of res.rows[0]
-  const row = res.rows[0];
-  if (!row) return { valid: false, reason: "not-found" };
-  if (row.status === "revoked") return { valid: false, reason: "revoked" };
+    const row = res.rows[0];
+    if (!row) return { valid: false, reason: "not-found" };
+    if (row.status === "revoked") return { valid: false, reason: "revoked" };
 
-  const created = new Date(row.created_at).getTime();
-  const ageMs = Date.now() - created;
-  if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
+    const created = new Date(row.created_at).getTime();
+    const ageMs = Date.now() - created;
+    if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
 
-  return {
-    valid: true,
-    memberId: row.member_id,
-    keySuffix: row.key_suffix,
-    createdAt: row.created_at,
-  };
-}
-
-  const row = res.rows[0];
-  if (!row) return { valid: false, reason: "not-found" };
-  if (row.status === "revoked") return { valid: false, reason: "revoked" };
-
-  const created = new Date(row.created_at).getTime();
-  const ageMs = Date.now() - created;
-  if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
-
-  return {
-    valid: true,
-    memberId: row.member_id,
-    keySuffix: row.key_suffix,
-    createdAt: row.created_at,
-  };
-}
+    return {
+      valid: true,
+      memberId: row.member_id,
+      keySuffix: row.key_suffix,
+      createdAt: row.created_at,
+    };
+  }
 
   async recordInnerCircleUnlock(
     key: string,
@@ -670,14 +653,13 @@ class PostgresInnerCircleStore implements InnerCircleStore {
 
     const keyHash = sha256Hex(safeKey);
 
-    const res = await this.withClient((client) =>
-      client.query<{ rowCount: number }>(
+    const res = await this.withClient<QueryResult>((client) =>
+      client.query(
         `
         UPDATE inner_circle_keys
         SET status = 'revoked',
             last_used_at = NOW()
         WHERE key_hash = $1
-        RETURNING 1
       `,
         [keyHash]
       )
@@ -690,12 +672,11 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     const emailNormalised = normaliseEmail(email);
     const emailHash = sha256Hex(emailNormalised);
 
-    const res = await this.withClient((client) =>
-      client.query<{ rowCount: number }>(
+    const res = await this.withClient<QueryResult>((client) =>
+      client.query(
         `
         DELETE FROM inner_circle_members
         WHERE email_hash = $1
-        RETURNING 1
       `,
         [emailHash]
       )
@@ -712,7 +693,6 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       await client.query("BEGIN");
 
       try {
-        // Find old members
         const oldMembers = await client.query<{ id: string }>(
           `
           SELECT id
@@ -725,18 +705,15 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         let deletedKeys = 0;
 
         if (memberIds.length > 0) {
-          // Delete keys for these members
-          const keyDel = await client.query<{ rowCount: number }>(
+          const keyDel = await client.query(
             `
             DELETE FROM inner_circle_keys
             WHERE member_id = ANY($1)
-            RETURNING 1
           `,
             [memberIds]
           );
           deletedKeys = keyDel.rowCount ?? 0;
 
-          // Delete the members
           await client.query(
             `
             DELETE FROM inner_circle_members

@@ -1,93 +1,70 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { 
-  rateLimit, 
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS 
-} from '@/lib/rate-limit';
-import { getAllUnifiedContent } from '@/lib/server/unified-content';
+// lib/content.ts
+// Unified content exports - Simplified version
 
-type ContentResponse = {
-  ok: boolean;
-  data?: any[];
-  timestamp?: string;
-  count?: number;
-  error?: string;
-};
+// Core exports
+export { getAllPosts } from "./posts";
+export { getPostBySlug } from "./posts";
+export { getPublicPosts } from "./posts";
 
-function logContentApi(action: string, meta: Record<string, unknown> = {}): void {
-  // eslint-disable-next-line no-console
-  console.log(`[ContentAPI] ${action}`, {
-    ts: new Date().toISOString(),
-    ...meta,
-  });
+export { getAllBooks } from "./books";
+export { getBookBySlug } from "./books";
+export { getPublicBooks } from "./books";
+
+export { getAllDownloads } from "./downloads";
+export { getDownloadBySlug } from "./downloads";
+export { getPublicDownloads } from "./downloads";
+
+export { getAllEvents } from "./events";
+export { getEventBySlug } from "./events";
+export { getPublicEvents } from "./events";
+
+export { getAllPrints } from "./prints";
+export { getPrintBySlug } from "./prints";
+export { getPublicPrints } from "./prints";
+
+export { getAllResources } from "./resources";
+export { getResourceBySlug } from "./resources";
+export { getPublicResources } from "./resources";
+
+export { getAllStrategies } from "./strategies";
+export { getStrategyBySlug } from "./strategies";
+export { getPublicStrategies } from "./strategies";
+
+export { getAllCanon } from "./canon";
+export { getCanonBySlug } from "./canon";
+export { getPublicCanon } from "./canon";
+export { getFeaturedCanon } from "./canon";
+
+// Unified content functions
+export async function getAllUnifiedContent() {
+  const [
+    posts,
+    books,
+    downloads,
+    events,
+    prints,
+    resources,
+    strategies,
+    canon,
+  ] = await Promise.all([
+    import("./posts").then(m => m.getAllPosts()),
+    import("./books").then(m => m.getAllBooks()),
+    import("./downloads").then(m => m.getAllDownloads()),
+    import("./events").then(m => m.getAllEvents()),
+    import("./prints").then(m => m.getAllPrints()),
+    import("./resources").then(m => m.getAllResources()),
+    import("./strategies").then(m => m.getAllStrategies()),
+    import("./canon").then(m => m.getAllCanon()),
+  ]);
+
+  return [
+    ...posts.map((p: any) => ({ ...p, type: "post" })),
+    ...books.map((b: any) => ({ ...b, type: "book" })),
+    ...downloads.map((d: any) => ({ ...d, type: "download" })),
+    ...events.map((e: any) => ({ ...e, type: "event" })),
+    ...prints.map((p: any) => ({ ...p, type: "print" })),
+    ...resources.map((r: any) => ({ ...r, type: "resource" })),
+    ...strategies.map((s: any) => ({ ...s, type: "strategy" })),
+    ...canon.map((c: any) => ({ ...c, type: "canon" })),
+  ];
 }
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<ContentResponse>
-) {
-  // Rate limiting
-  const clientIp = req.headers["x-forwarded-for"]?.toString().split(",")[0] || 
-                   req.socket?.remoteAddress || "unknown";
-  
-  // Use CONTENT_API config from rate-limit.ts
-  const rl = rateLimit(
-    `content-api:${clientIp}`,
-    RATE_LIMIT_CONFIGS.CONTENT_API
-  );
-  
-  const rlHeaders = createRateLimitHeaders(rl);
-  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
-
-  if (!rl.allowed) {
-    logContentApi("rate_limited", { ip: clientIp });
-    res.status(429).json({ 
-      ok: false, 
-      error: "Too many requests. Please try again later." 
-    });
-    return;
-  }
-
-  try {
-    logContentApi("fetching", { 
-      ip: clientIp,
-      userAgent: req.headers["user-agent"]?.substring(0, 100)
-    });
-    
-    const content = await getAllUnifiedContent();
-    
-    // Cache headers for CDN
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-    res.setHeader('Content-Type', 'application/json');
-    
-    logContentApi("success", { 
-      ip: clientIp,
-      count: content.length,
-      timestamp: new Date().toISOString()
-    });
-    
-    res.status(200).json({
-      ok: true,
-      data: content,
-      timestamp: new Date().toISOString(),
-      count: content.length
-    });
-  } catch (error) {
-    logContentApi("error", { 
-      ip: clientIp,
-      error: error instanceof Error ? error.message : 'unknown'
-    });
-    
-    res.status(500).json({ 
-      ok: false, 
-      error: 'Failed to fetch content. Please try again later.' 
-    });
-  }
-}
-
-// Configure API to avoid body parsing for GET requests
-export const config = {
-  api: {
-    responseLimit: false,
-  },
-};

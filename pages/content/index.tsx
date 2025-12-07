@@ -3,6 +3,12 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+
+// import { getAllContent } from "@/lib/content-utils";
+
+// Add this instead (if you still need it for something else):
+import { getAllContent } from "@/lib/content-utils"; // Keep if used elsewhere in the file
+
 import {
   Search,
   Calendar,

@@ -1,38 +1,53 @@
 // lib/downloads.ts
-// -----------------------------------------------------------------------------
-// Thin wrapper around lib/server/downloads-data for server-side usage only.
-// -----------------------------------------------------------------------------
+// Downloads data facade
 
-import type {
-  Download,
-  DownloadMeta,
-  DownloadFieldKey,
-} from "@/lib/server/downloads-data";
-import {
-  getAllDownloadsMeta as _getAllDownloadsMeta,
-  getDownloadBySlug as _getDownloadBySlug,
-  getDownloadSlugs as _getDownloadSlugs,
-} from "@/lib/server/downloads-data";
+import { getAllDownloadsMeta, getDownloadBySlug as getDownloadBySlugServer } from "@/lib/server/downloads-data";
 
-export type { Download, DownloadMeta, DownloadFieldKey };
+// Type definitions
+export type Download = any;
+export type DownloadMeta = Download;
+export type DownloadFieldKey = keyof DownloadMeta;
 
 /**
- * All downloads (meta only) for listings / grids.
+ * Get all downloads
  */
 export function getAllDownloads(): DownloadMeta[] {
-  return _getAllDownloadsMeta();
+  try {
+    const downloads = getAllDownloadsMeta();
+    return Array.isArray(downloads) ? downloads : [];
+  } catch {
+    return [];
+  }
 }
 
 /**
- * Slugs for getStaticPaths in pages/downloads/[slug].tsx.
- */
-export function getDownloadSlugs(): string[] {
-  return _getDownloadSlugs();
-}
-
-/**
- * Full download (including content) for detail pages.
+ * Get download by slug
  */
 export function getDownloadBySlug(slug: string): Download | null {
-  return _getDownloadBySlug(slug);
+  try {
+    return getDownloadBySlugServer(slug);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get download slugs
+ */
+export function getDownloadSlugs(): string[] {
+  const downloads = getAllDownloads();
+  return downloads.map(d => d.slug).filter(Boolean);
+}
+
+/**
+ * Get public downloads
+ */
+export function getPublicDownloads(): DownloadMeta[] {
+  const downloads = getAllDownloads();
+  return downloads.filter(download => {
+    const isDraft = download.draft === true;
+    const isNotPublished = download.published === false;
+    const isStatusDraft = download.status === 'draft';
+    return !(isDraft || isNotPublished || isStatusDraft);
+  });
 }

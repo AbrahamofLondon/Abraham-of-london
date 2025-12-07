@@ -1,13 +1,13 @@
-// lib/server/resources-data.ts
+// lib/server/strategies-data.ts
 import {
   getMdxCollectionMeta,
   getMdxDocumentBySlug,
   type MdxMeta,
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
-import type { Resource } from "@/types/index";
+import type { Strategy } from "@/types/index";
 
-export type ResourceWithContent = Resource & {
+export type StrategyWithContent = Strategy & {
   content: string;
 };
 
@@ -39,7 +39,7 @@ function safeBoolean(value: any): boolean {
   return false;
 }
 
-function fromMdxMeta(meta: MdxMeta): Resource {
+function fromMdxMeta(meta: MdxMeta): Strategy {
   const m = meta as any;
   
   const slug = safeString(m.slug) || safeString(m._raw?.flattenedPath) || "";
@@ -47,7 +47,7 @@ function fromMdxMeta(meta: MdxMeta): Resource {
   return {
     // Required
     slug,
-    title: safeString(m.title) || "Untitled Resource",
+    title: safeString(m.title) || "Untitled Strategy",
     
     // Content
     description: safeString(m.description) || safeString(m.excerpt),
@@ -67,32 +67,35 @@ function fromMdxMeta(meta: MdxMeta): Resource {
     draft: safeBoolean(m.draft),
     published: safeBoolean(m.published),
     
-    // Resource-specific
-    resourceType: safeString(m.resourceType) as any,
-    applications: safeArray(m.applications),
-    useCases: safeArray(m.useCases),
-    industries: safeArray(m.industries),
-    format: safeString(m.format) as any,
-    complexity: safeString(m.complexity) as any,
-    timeRequired: safeString(m.timeRequired),
-    version: safeString(m.version),
-    lastUpdated: safeString(m.lastUpdated),
-    prerequisites: safeArray(m.prerequisites),
-    toolsRequired: safeArray(m.toolsRequired),
-    deliverables: safeArray(m.deliverables),
-    outcomes: safeArray(m.outcomes),
-    instructions: safeString(m.instructions),
-    examples: safeArray(m.examples),
-    tips: safeArray(m.tips),
+    // Strategy-specific
+    strategyType: safeString(m.strategyType) as any,
+    framework: safeString(m.framework),
+    methodology: safeString(m.methodology),
+    scope: safeString(m.scope) as any,
+    scale: safeString(m.scale) as any,
+    timeframe: safeString(m.timeframe) as any,
+    implementationTime: safeString(m.implementationTime),
+    kpis: safeArray(m.kpis),
+    successMetrics: safeArray(m.successMetrics),
+    roi: safeString(m.roi),
+    steps: safeArray(m.steps),
+    phases: safeArray(m.phases),
+    milestones: safeArray(m.milestones),
+    risks: safeArray(m.risks),
+    challenges: safeArray(m.challenges),
+    mitigation: safeArray(m.mitigation),
+    tools: safeArray(m.tools),
+    templates: safeArray(m.templates),
+    software: safeArray(m.software),
     
     // System
     _raw: m._raw,
     url: safeString(m.url),
-    type: "resource",
+    type: "strategy",
   };
 }
 
-function fromMdxDocument(doc: MdxDocument): ResourceWithContent {
+function fromMdxDocument(doc: MdxDocument): StrategyWithContent {
   const { content, ...rest } = doc as any;
   const meta = fromMdxMeta(rest);
   
@@ -102,54 +105,54 @@ function fromMdxDocument(doc: MdxDocument): ResourceWithContent {
   };
 }
 
-export function getAllResourcesMeta(): Resource[] {
+export function getAllStrategiesMeta(): Strategy[] {
   try {
-    const metas = getMdxCollectionMeta("resources");
+    const metas = getMdxCollectionMeta("strategies");
     return metas.map(m => fromMdxMeta(m));
   } catch (error) {
-    console.error("[resources-data] Error getting all resources meta:", error);
+    console.error("[strategies-data] Error getting all strategies meta:", error);
     return [];
   }
 }
 
-export function getResourceBySlug(slug: string): ResourceWithContent | null {
+export function getStrategyBySlug(slug: string): StrategyWithContent | null {
   try {
-    const doc = getMdxDocumentBySlug("resources", slug);
+    const doc = getMdxDocumentBySlug("strategies", slug);
     if (!doc) {
-      console.warn(`[resources-data] Resource not found: ${slug}`);
+      console.warn(`[strategies-data] Strategy not found: ${slug}`);
       return null;
     }
     
     return fromMdxDocument(doc);
   } catch (error) {
-    console.error(`[resources-data] Error getting resource ${slug}:`, error);
+    console.error(`[strategies-data] Error getting strategy ${slug}:`, error);
     return null;
   }
 }
 
-export function getResourcesByType(type: string): Resource[] {
+export function getStrategiesByType(type: string): Strategy[] {
   try {
-    return getAllResourcesMeta()
-      .filter(r => !r.draft && r.resourceType?.toLowerCase() === type.toLowerCase());
+    return getAllStrategiesMeta()
+      .filter(s => !s.draft && s.strategyType?.toLowerCase() === type.toLowerCase());
   } catch (error) {
-    console.error(`[resources-data] Error getting resources by type ${type}:`, error);
+    console.error(`[strategies-data] Error getting strategies by type ${type}:`, error);
     return [];
   }
 }
 
-export function getFeaturedResources(): Resource[] {
+export function getFeaturedStrategies(): Strategy[] {
   try {
-    return getAllResourcesMeta()
-      .filter(r => r.featured && !r.draft);
+    return getAllStrategiesMeta()
+      .filter(s => s.featured && !s.draft);
   } catch (error) {
-    console.error("[resources-data] Error getting featured resources:", error);
+    console.error("[strategies-data] Error getting featured strategies:", error);
     return [];
   }
 }
 
 export default {
-  getAllResourcesMeta,
-  getResourceBySlug,
-  getResourcesByType,
-  getFeaturedResources,
+  getAllStrategiesMeta,
+  getStrategyBySlug,
+  getStrategiesByType,
+  getFeaturedStrategies,
 };

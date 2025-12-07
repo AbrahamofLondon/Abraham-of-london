@@ -3,11 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
   
-  // Move serverExternalPackages to experimental (required for your version)
   experimental: {
-    serverExternalPackages: ["@react-email/components", "better-sqlite3"],
-    // For Next.js 15+, move turbopack here
-    turbopack: {},
+    optimizeCss: true,
   },
 
   images: {
@@ -21,17 +18,18 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   typescript: { 
-    ignoreBuildErrors: false,  // Changed to false to see real errors
+    ignoreBuildErrors: false,
   },
 
-  // Expose environment variables to the browser
   env: {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org',
     NEXT_PUBLIC_INNOVATEHUB_URL: process.env.NEXT_PUBLIC_INNOVATEHUB_URL || 'https://innovatehub.abrahamoflondon.org',
-    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-R2Y3YMY8F8',
     NEXT_PUBLIC_ALOMARADA_URL: process.env.NEXT_PUBLIC_ALOMARADA_URL || 'https://alomarada.com/',
     NEXT_PUBLIC_ENDURELUXE_URL: process.env.NEXT_PUBLIC_ENDURELUXE_URL || 'https://alomarada.com/endureluxe',
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-R2Y3YMY8F8',
     NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || '',
+    NEXT_PUBLIC_INNER_CIRCLE_STORE: process.env.INNER_CIRCLE_STORE || 'memory',
+    ESLINT_NO_DEV_ERRORS: process.env.ESLINT_NO_DEV_ERRORS || 'false',
   },
 
   async redirects() {
@@ -49,9 +47,9 @@ const nextConfig = {
       "default-src 'self';",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com;",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
-      "img-src 'self' data: https:;",  // CHANGED: Allow all HTTPS images
+      "img-src 'self' data: https:;",
       "font-src 'self' https://fonts.gstatic.com;",
-      "connect-src 'self' https://www.google-analytics.com;",
+      "connect-src 'self' https://www.google-analytics.com ws: wss:;",
       "frame-ancestors 'none';",
       "base-uri 'self';",
       "form-action 'self';",
@@ -64,6 +62,7 @@ const nextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Content-Security-Policy", value: csp },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
       },
     ];
@@ -73,17 +72,9 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
 
-  // Add output configuration for Netlify
   output: 'standalone',
 
-  // Optimize for Netlify
-  experimental: {
-    optimizeCss: true,
-  },
-
-  // Simplified webpack config
   webpack: (config, { isServer, dev }) => {
-    // Add path aliases
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': process.cwd(),
@@ -101,7 +92,6 @@ const nextConfig = {
       exprContextCritical: false,
     };
 
-    // Handle SVG imports
     config.module.rules.push({
       test: /\.svg$/,
       use: ['@svgr/webpack'],

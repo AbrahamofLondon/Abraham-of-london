@@ -1,400 +1,568 @@
-// lib/mdx.ts
-// Centralised MD/MDX utilities using the filesystem + gray-matter.
-// NOTE: Primary content (blog, downloads, prints, etc.) is now handled by
-// Contentlayer. This helper remains for any legacy or ad-hoc collections.
+// lib/mdx.ts - Clean and working version
+/* eslint-disable no-console */
 
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { useMDXComponent } from "next-contentlayer/hooks";
 
-// Import Contentlayer helper
+// ✅ Direct import from local generated contentlayer output
 import {
   allPosts,
-  allBooks,
+  allCanons,
   allDownloads,
+  allBooks,
   allEvents,
   allPrints,
   allStrategies,
   allResources,
-  allCanons,
-  type PostDocument,
-  type BookDocument,
-  type DownloadDocument,
-  type EventDocument,
-  type PrintDocument,
-  type StrategyDocument,
-  type ResourceDocument,
-  type CanonDocument,
-} from "./contentlayer-helper";
+  type DocumentTypes,
+} from "../.contentlayer/generated";
 
-export interface RawContentEntry {
+// ---------------------------------------------------------------------------
+// Legacy-compatible PostDocument type
+// ---------------------------------------------------------------------------
+
+export type PostDocument = {
   slug: string;
-  content: string;
   title: string;
   description?: string;
-  subtitle?: string;
   date?: string;
-  author?: string;
-  readtime?: string;
-  readTime?: string;
-  coverImage?: string;
+  updated?: string;
   tags?: string[];
-  downloadUrl?: string;
-  fileUrl?: string;
+  author?: string;
+  category?: string;
+  readTime?: number;
+  image?: string;
+  content?: string;
   excerpt?: string;
-  resourceType?: string;
+  draft?: boolean;
+  url?: string;
+  body?: {
+    code: string;
+    raw: string;
+  };
+  _raw?: any;
+  subtitle?: string;
+  coverImage?: string;
+  coverAspect?: string;
+  coverFit?: string;
+  accessLevel?: string;
+  lockMessage?: string;
+  volumeNumber?: string;
+  order?: number;
+};
+
+// Add RawContentEntry type for backward compatibility
+export type RawContentEntry = {
+  slug?: string;
+  title?: string;
+  date?: string;
+  excerpt?: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
   featured?: boolean;
-  [key: string]: unknown;
+  readTime?: string | number;
+  _raw?: {
+    flattenedPath?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+};
+
+// ---------------------------------------------------------------------------
+// Helpers with safe property access
+// ---------------------------------------------------------------------------
+
+function safeGetTags(doc: any): string[] {
+  if (doc.tags && Array.isArray(doc.tags)) {
+    const tags = doc.tags as any[];
+    return tags.filter((tag: any): tag is string => typeof tag === 'string');
+  }
+  return [];
 }
 
-interface GetContentOptions {
-  /** If false, content will be omitted from the returned object. */
-  withContent?: boolean;
+function safeGetAuthor(doc: any): string | undefined {
+  return doc.author || doc._raw?.flatData?.author || undefined;
 }
 
-// Root folder where your MD/MDX content lives.
-const CONTENT_ROOT = path.join(process.cwd(), "content");
-
-function resolveCollectionDir(collection: string): string {
-  return path.join(CONTENT_ROOT, collection);
+function safeGetCategory(doc: any): string | undefined {
+  return doc.category || doc._raw?.flatData?.category || undefined;
 }
 
-function readFileSafe(filePath: string): string | null {
+function safeGetDescription(doc: any): string | undefined {
+  return doc.description || doc._raw?.flatData?.description || undefined;
+}
+
+function safeGetReadTime(doc: any): number | undefined {
+  return doc.readTime || doc.readingTime || undefined;
+}
+
+function safeGetCoverImage(doc: any): string | undefined {
+  return doc.coverImage || doc.image || undefined;
+}
+
+function safeGetSubtitle(doc: any): string | undefined {
+  return doc.subtitle || doc._raw?.flatData?.subtitle || undefined;
+}
+
+function safeHasDraft(doc: any): boolean {
+  return doc.draft === true;
+}
+
+function convertToPostDocument(doc: any): PostDocument {
+  const rawData = doc._raw?.flatData || {};
+
+  return {
+    slug: doc.slug || "",
+    title: doc.title || "",
+    description: safeGetDescription(doc),
+    date: doc.date ? new Date(doc.date).toISOString() : undefined,
+    updated: doc.updated || undefined,
+    tags: safeGetTags(doc),
+    author: safeGetAuthor(doc),
+    category: safeGetCategory(doc),
+    readTime: safeGetReadTime(doc),
+    image: safeGetCoverImage(doc),
+    content: doc.body?.raw || "",
+    excerpt:
+      doc.excerpt ||
+      (doc.body?.raw ? String(doc.body.raw).slice(0, 200) + "..." : "") ||
+      "",
+    draft: safeHasDraft(doc),
+    url: doc.url || undefined,
+    body: doc.body || undefined,
+    _raw: doc._raw || undefined,
+    subtitle: safeGetSubtitle(doc),
+    coverImage: safeGetCoverImage(doc),
+    coverAspect: rawData.coverAspect || undefined,
+    coverFit: rawData.coverFit || undefined,
+    accessLevel: doc.accessLevel || rawData.accessLevel || "public",
+    lockMessage: doc.lockMessage || rawData.lockMessage || undefined,
+    volumeNumber: rawData.volumeNumber || undefined,
+    order: rawData.order || undefined,
+  };
+}
+
+function getAllDocuments(): DocumentTypes[] {
+  return [
+    ...(allPosts as DocumentTypes[]),
+    ...(allCanons as DocumentTypes[]),
+    ...(allDownloads as DocumentTypes[]),
+    ...(allBooks as DocumentTypes[]),
+    ...(allEvents as DocumentTypes[]),
+    ...(allPrints as DocumentTypes[]),
+    ...(allStrategies as DocumentTypes[]),
+    ...(allResources as DocumentTypes[]),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Primary API
+// ---------------------------------------------------------------------------
+
+export function getSortedPostsData(): PostDocument[] {
+  const allDocs = getAllDocuments();
+
+  return allDocs
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+export async function getPostData(slug: string): Promise<PostDocument> {
+  const allDocs = getAllDocuments();
+  const doc = allDocs.find((d: any) => d.slug === slug);
+
+  if (!doc) {
+    throw new Error(`Document not found: ${slug}`);
+  }
+
+  return convertToPostDocument(doc);
+}
+
+export function getMdxContent(slug: string) {
+  const allDocs = getAllDocuments();
+  const doc: any = allDocs.find((d: any) => d.slug === slug);
+
+  if (!doc) {
+    throw new Error(`Document not found: ${slug}`);
+  }
+
+  const MDXComponent = useMDXComponent(doc.body.code);
+
+  return {
+    source: doc.body.code,
+    frontMatter: {
+      title: doc.title,
+      description: safeGetDescription(doc),
+      date: doc.date,
+      tags: safeGetTags(doc),
+      author: safeGetAuthor(doc),
+      category: safeGetCategory(doc),
+      readTime: safeGetReadTime(doc),
+      image: safeGetCoverImage(doc),
+      draft: safeHasDraft(doc),
+      subtitle: safeGetSubtitle(doc),
+      accessLevel: doc.accessLevel,
+      lockMessage: doc.lockMessage,
+      volumeNumber: doc._raw?.flatData?.volumeNumber,
+    },
+    Component: MDXComponent,
+  };
+}
+
+export function getAllPostSlugs() {
+  const allDocs = getAllDocuments();
+
+  return allDocs.map((doc: any) => ({
+    params: {
+      slug: doc.slug,
+    },
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Static pages (non-contentlayer MDX in /content/pages)
+// ---------------------------------------------------------------------------
+
+export function getPageData(slug: string): PostDocument | null {
   try {
-    return fs.readFileSync(filePath, "utf8");
-  } catch {
+    const pagesDirectory = path.join(process.cwd(), "content/pages");
+    const fullPath = path.join(pagesDirectory, `${slug}.mdx`);
+
+    if (!fs.existsSync(fullPath)) {
+      return null;
+    }
+
+    const fileContents = fs.readFileSync(fullPath, "utf8");
+    const matterResult = matter(fileContents);
+    const { data, content } = matterResult;
+
+    return {
+      slug,
+      title: data.title || "",
+      description: data.description || undefined,
+      content,
+      excerpt: content.slice(0, 200) + "...",
+    };
+  } catch (error) {
+    console.error(`Error reading page ${slug}:`, error);
     return null;
   }
 }
 
-/**
- * Return all MD/MDX entries within a collection folder.
- * Now uses Contentlayer for supported collections, falls back to filesystem for others.
- */
-export function getAllContent(collection: string): RawContentEntry[] {
-  // Try Contentlayer first for supported collections
-  switch (collection.toLowerCase()) {
-    case "blog":
-    case "post":
-    case "posts":
-      return allPosts
-        .filter((p: PostDocument) => !p.draft)
-        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-        .map((doc: PostDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          readtime: doc.readTime || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
+export function getAllPages(): PostDocument[] {
+  try {
+    const pagesDirectory = path.join(process.cwd(), "content/pages");
 
-    case "book":
-    case "books":
-      return allBooks
-        .filter((b: BookDocument) => !b.draft)
-        .sort((a, b) => (a.title || "").localeCompare(b.title || ""))
-        .map((doc: BookDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
+    if (!fs.existsSync(pagesDirectory)) {
+      return [];
+    }
 
-    case "download":
-    case "downloads":
-      return allDownloads
-        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-        .map((doc: DownloadDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          downloadUrl: doc.downloadUrl || doc.fileUrl || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
+    const fileNames = fs.readdirSync(pagesDirectory);
 
-    case "event":
-    case "events":
-      return allEvents
-        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-        .map((doc: EventDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
+    return fileNames
+      .filter((fileName) => fileName.endsWith(".mdx"))
+      .map((fileName) => {
+        const slug = fileName.replace(/\.mdx$/, "");
+        const fullPath = path.join(pagesDirectory, fileName);
+        const fileContents = fs.readFileSync(fullPath, "utf8");
+        const matterResult = matter(fileContents);
+        const { data, content } = matterResult;
 
-    case "print":
-    case "prints":
-      return allPrints
-        .filter((p: PrintDocument) => p.available !== false)
-        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-        .map((doc: PrintDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
-
-    case "strategy":
-    case "strategies":
-      return allStrategies
-        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-        .map((doc: StrategyDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
-
-    case "resource":
-    case "resources":
-      return allResources
-        .filter((r: ResourceDocument) => !r.draft)
-        .map((doc: ResourceDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          subtitle: doc.subtitle || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          readtime: doc.readtime || doc.readTime || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          downloadUrl: doc.downloadUrl || doc.fileUrl || undefined,
-          excerpt: doc.excerpt || undefined,
-          resourceType: doc.resourceType || undefined,
-          featured: doc.featured || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
-
-    case "canon":
-      return allCanons
-        .filter((c: CanonDocument) => !c.draft)
-        .sort((a, b) => {
-          // Sort by order field if present, otherwise by title
-          if (a.order !== undefined && b.order !== undefined) {
-            return a.order - b.order;
-          }
-          return (a.title || "").localeCompare(b.title || "");
-        })
-        .map((doc: CanonDocument) => ({
-          slug: doc.slug || "",
-          title: doc.title || "",
-          description: doc.description || undefined,
-          subtitle: doc.subtitle || undefined,
-          date: doc.date || undefined,
-          author: doc.author || undefined,
-          coverImage: doc.coverImage || undefined,
-          tags: doc.tags || undefined,
-          content: doc.body.raw,
-          ...doc,
-        }));
+        return {
+          slug,
+          title: data.title || "",
+          description: data.description || undefined,
+          excerpt: content.slice(0, 200) + "...",
+        };
+      });
+  } catch (error) {
+    console.error("Error reading pages:", error);
+    return [];
   }
-
-  // Fallback to filesystem for unknown collections
-  const dir = resolveCollectionDir(collection);
-  if (!fs.existsSync(dir)) return [];
-
-  const files = fs.readdirSync(dir);
-  const entries: RawContentEntry[] = [];
-
-  for (const file of files) {
-    if (!file.endsWith(".md") && !file.endsWith(".mdx")) continue;
-
-    const filePath = path.join(dir, file);
-    const raw = readFileSafe(filePath);
-    if (!raw) continue;
-
-    const { data, content } = matter(raw);
-    const slug = (data.slug as string) ?? file.replace(/\.mdx?$/iu, "");
-
-    entries.push({
-      slug,
-      content,
-      title: (data.title as string) || slug || "Untitled",
-      description: (data.description as string) || undefined,
-      subtitle: (data.subtitle as string) || undefined,
-      date: (data.date as string) || undefined,
-      author: (data.author as string) || undefined,
-      readtime: (data.readtime as string) || undefined,
-      coverImage: (data.coverImage as string) || undefined,
-      tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
-      downloadUrl: (data.downloadUrl as string) || undefined,
-      excerpt: (data.excerpt as string) || undefined,
-      ...data,
-    });
-  }
-
-  return entries;
 }
 
-/**
- * Get a single MD/MDX entry by slug from a collection.
- * Uses Contentlayer for supported collections, falls back to filesystem.
- */
+// ---------------------------------------------------------------------------
+// Backward-compat helpers used elsewhere (pages/[slug].tsx, etc.)
+// ---------------------------------------------------------------------------
+
+export function getAllContent(collection?: string): PostDocument[] {
+  if (!collection) {
+    return getSortedPostsData();
+  }
+
+  switch (collection.toLowerCase()) {
+    case "post":
+    case "posts":
+    case "blog":
+    case "essay":
+      return (allPosts || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    case "canon":
+    case "canons":
+      return (allCanons || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    case "download":
+    case "downloads":
+    case "tool":
+    case "tools":
+      return (allDownloads || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    case "book":
+    case "books":
+    case "volume":
+    case "volumes":
+      return (allBooks || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    case "event":
+    case "events":
+    case "session":
+    case "sessions":
+      return (allEvents || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    case "print":
+    case "prints":
+    case "edition":
+    case "editions":
+      return (allPrints || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    case "resource":
+    case "resources":
+    case "framework":
+    case "frameworks":
+      return (allResources || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    case "strategy":
+    case "strategies":
+      return (allStrategies || [])
+        .filter((doc: any) => !safeHasDraft(doc))
+        .map(convertToPostDocument);
+    
+    default:
+      console.warn(`Unknown collection: ${collection}`);
+      return [];
+  }
+}
+
 export function getContentBySlug(
   collection: string,
   slug: string,
-  options: GetContentOptions = { withContent: true }
-): RawContentEntry | null {
-  const targetSlug = String(slug).trim();
-
-  // Try Contentlayer first
-  let doc: ResourceDocument | null = null;
-
-  switch (collection.toLowerCase()) {
-    case "resource":
-    case "resources":
-      doc = allResources.find((r: ResourceDocument) => r.slug === targetSlug) || null;
-      break;
-  }
-
-  if (doc) {
-    const entry: RawContentEntry = {
-      slug: doc.slug || "",
-      title: doc.title || "",
-      description: doc.description || undefined,
-      subtitle: doc.subtitle || undefined,
-      date: doc.date || undefined,
-      author: doc.author || undefined,
-      readtime: doc.readtime || doc.readTime || undefined,
-      coverImage: doc.coverImage || undefined,
-      tags: doc.tags || undefined,
-      downloadUrl: doc.downloadUrl || doc.fileUrl || undefined,
-      excerpt: doc.excerpt || undefined,
-      resourceType: doc.resourceType || undefined,
-      featured: doc.featured || undefined,
-      content: doc.body.raw,
-      ...doc,
-    };
-
-    if (options?.withContent === false) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { content: _omit, ...meta } = entry;
-      return meta as RawContentEntry;
+  options?: { withContent?: boolean }
+): PostDocument | null {
+  const sourceArray = (() => {
+    switch (collection.toLowerCase()) {
+      case "post":
+      case "posts":
+      case "blog":
+      case "essay":
+        return allPosts;
+      case "canon":
+      case "canons":
+        return allCanons;
+      case "download":
+      case "downloads":
+      case "tool":
+      case "tools":
+        return allDownloads;
+      case "book":
+      case "books":
+      case "volume":
+      case "volumes":
+        return allBooks;
+      case "event":
+      case "events":
+      case "session":
+      case "sessions":
+        return allEvents;
+      case "print":
+      case "prints":
+      case "edition":
+      case "editions":
+        return allPrints;
+      case "resource":
+      case "resources":
+      case "framework":
+      case "frameworks":
+        return allResources;
+      case "strategy":
+      case "strategies":
+        return allStrategies;
+      default:
+        return getAllDocuments();
     }
+  })() as any[];
 
-    return entry;
-  }
+  const doc = sourceArray.find((d) => d.slug === slug);
+  if (!doc) return null;
 
-  // Fallback to filesystem for unknown collections or if not found in Contentlayer
-  const dir = resolveCollectionDir(collection);
-  const candidates = [
-    path.join(dir, `${targetSlug}.mdx`),
-    path.join(dir, `${targetSlug}.md`),
-    path.join(dir, `${targetSlug.toLowerCase()}.mdx`),
-    path.join(dir, `${targetSlug.toLowerCase()}.md`),
-  ];
-
-  let filePath: string | null = null;
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      filePath = candidate;
-      break;
-    }
-  }
-
-  // If no exact file match, search all entries in the collection
-  if (!filePath) {
-    const all = getAllContent(collection);
-    const found =
-      all.find(
-        (entry) =>
-          entry.slug === targetSlug || entry.slug === targetSlug.toLowerCase()
-      ) || null;
-    if (!found) return null;
-
-    if (options?.withContent === false) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { content: _omit, ...meta } = found;
-      return meta as RawContentEntry;
-    }
-    return found;
-  }
-
-  const raw = readFileSafe(filePath);
-  if (!raw) return null;
-
-  const { data, content } = matter(raw);
-  const resolvedSlug = (data.slug as string) || targetSlug;
-
-  const entry: RawContentEntry = {
-    slug: resolvedSlug,
-    content,
-    title: (data.title as string) || resolvedSlug || "Untitled",
-    description: (data.description as string) || undefined,
-    subtitle: (data.subtitle as string) || undefined,
-    date: (data.date as string) || undefined,
-    author: (data.author as string) || undefined,
-    readtime: (data.readtime as string) || undefined,
-    coverImage: (data.coverImage as string) || undefined,
-    tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
-    downloadUrl: (data.downloadUrl as string) || undefined,
-    excerpt: (data.excerpt as string) || undefined,
-    ...data,
-  };
+  const converted = convertToPostDocument(doc);
 
   if (options?.withContent === false) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { content: _omit, ...meta } = entry;
-    return meta as RawContentEntry;
+    const { content, ...rest } = converted;
+    return rest as PostDocument;
   }
 
-  return entry;
+  return converted;
 }
 
-/**
- * Check if a collection is managed by Contentlayer
- */
-export function isContentlayerCollection(collection: string): boolean {
-  const knownCollections = [
-    "blog",
-    "post",
-    "posts",
-    "book",
-    "books",
-    "download",
-    "downloads",
-    "event",
-    "events",
-    "print",
-    "prints",
-    "strategy",
-    "strategies",
-    "resource",
-    "resources",
-    "canon",
-  ];
-  return knownCollections.includes(collection.toLowerCase());
+// Collection-specific functions
+export function getAllCanons(): PostDocument[] {
+  return (allCanons || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const volA = a.volumeNumber || "0";
+      const volB = b.volumeNumber || "0";
+      return parseInt(volA, 10) - parseInt(volB, 10);
+    });
 }
+
+export function getAllPosts(): PostDocument[] {
+  return (allPosts || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+export function getAllDownloads(): PostDocument[] {
+  return (allDownloads || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+export function getAllBooks(): PostDocument[] {
+  return (allBooks || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+export function getAllEvents(): PostDocument[] {
+  return (allEvents || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+export function getAllPrints(): PostDocument[] {
+  return (allPrints || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+export function getAllResources(): PostDocument[] {
+  return (allResources || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+export function getAllStrategies(): PostDocument[] {
+  return (allStrategies || [])
+    .filter((doc: any) => !safeHasDraft(doc))
+    .map(convertToPostDocument)
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+}
+
+// Type-safe finders
+export function findDocumentBySlug(slug: string): PostDocument | null {
+  const allDocs = getAllDocuments();
+  const doc = (allDocs as any[]).find((d) => d.slug === slug);
+  return doc ? convertToPostDocument(doc) : null;
+}
+
+export function findDocumentsByTag(tag: string): PostDocument[] {
+  const allDocs = getAllDocuments();
+  return (allDocs as any[])
+    .filter((doc) => {
+      const tags = safeGetTags(doc);
+      return tags.includes(tag);
+    })
+    .map(convertToPostDocument);
+}
+
+export function findDocumentsByAuthor(author: string): PostDocument[] {
+  const allDocs = getAllDocuments();
+  return (allDocs as any[])
+    .filter((doc) => {
+      const docAuthor = safeGetAuthor(doc);
+      return docAuthor === author;
+    })
+    .map(convertToPostDocument);
+}
+
+// Utility function for RawContentEntry conversion
+export function convertToRawContentEntry(doc: PostDocument): RawContentEntry {
+  return {
+    slug: doc.slug,
+    title: doc.title,
+    date: doc.date,
+    excerpt: doc.excerpt,
+    description: doc.description,
+    category: doc.category,
+    tags: doc.tags || [],
+    featured: false,
+    readTime: doc.readTime,
+    _raw: doc._raw,
+    subtitle: doc.subtitle,
+    author: doc.author,
+    coverImage: doc.coverImage,
+    accessLevel: doc.accessLevel,
+    lockMessage: doc.lockMessage,
+    volumeNumber: doc.volumeNumber,
+  };
+}
+
+// Re-export hook for convenience
+export { useMDXComponent };
