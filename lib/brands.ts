@@ -1,4 +1,3 @@
-// lib/brands.ts
 // -----------------------------------------------------------------------------
 // Comprehensive brand registry with validation, utilities, and integration
 // -----------------------------------------------------------------------------
@@ -9,7 +8,12 @@ import type { ContentBase } from "@/types/index";
 // TYPE DEFINITIONS
 // -----------------------------------------------------------------------------
 
-export type BrandKey = "abraham" | "endom" | "alomarada" | "endureluxe";
+export type BrandKey =
+  | "abraham"
+  | "endom"
+  | "alomarada"
+  | "endureluxe"
+  | "innovatehub";
 
 export type BrandColorPalette = {
   primary: string;
@@ -98,7 +102,9 @@ export type BrandSettings = {
   };
 };
 
-export interface Brand extends ContentBase {
+// NB: ContentBase already has `content?: string`, so we omit it here and
+// introduce our own richer `content?: BrandContent`.
+export interface Brand extends Omit<ContentBase, "content"> {
   key: BrandKey;
   name: string;
   short?: string;
@@ -132,12 +138,15 @@ export interface BrandContentFilter extends Partial<ContentBase> {
 // -----------------------------------------------------------------------------
 // BRAND REGISTRY
 // -----------------------------------------------------------------------------
-// NOTE: Paths aligned with known assets in /public/assets/images/*
-//   - /assets/images/abraham-logo.jpg
-//   - /assets/images/abraham-of-london-on-cursive.svg
-//   - /assets/images/alomarada-ltd.webp
-//   - /assets/images/endureluxe-ltd.webp
-//   - /assets/images/social/og-image.jpg
+// Paths aligned with your actual assets:
+//   /public/assets/images/abraham-logo.jpg
+//   /public/assets/images/alomarada-ltd.webp
+//   /public/assets/images/endureluxe-ltd.webp
+//   /public/assets/images/logo/abraham-of-london-logo.svg
+//   /public/assets/images/logo/alomarada.svg
+//   /public/assets/images/logo/endureluxe.svg
+//   /public/assets/images/logo/innovatehub-logo-full.jpg
+//   /public/assets/images/social/og-image.jpg
 
 export const brandRegistry: Record<BrandKey, Brand> = {
   abraham: {
@@ -149,9 +158,9 @@ export const brandRegistry: Record<BrandKey, Brand> = {
     displayName: "Abraham",
     legalName: "Abraham of London Ltd",
     colors: {
-      primary: "#0F172A", // deep charcoal
-      secondary: "#D1B37D", // soft gold
-      accent: "#7C3AED", // vibrant purple
+      primary: "#0F172A",
+      secondary: "#D1B37D",
+      accent: "#7C3AED",
       text: "#F9FAFB",
       background: "#020617",
       muted: "#64748B",
@@ -161,13 +170,10 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       success: "#059669",
     },
     logo: {
-      // Wordmark / cursive SVG we actually have
-      svg: "/assets/images/abraham-of-london-on-cursive.svg",
-      // Main square/raster logo
+      svg: "/assets/images/logo/abraham-of-london-logo.svg",
       raster: "/assets/images/abraham-logo.jpg",
-      // Re-use raster as mark if no separate asset
       mark: "/assets/images/abraham-logo.jpg",
-      wordmark: "/assets/images/abraham-of-london-on-cursive.svg",
+      wordmark: "/assets/images/logo/abraham-of-london-logo.svg",
       favicon: "/favicon.ico",
       dimensions: {
         width: 200,
@@ -191,7 +197,8 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       description:
         "Strategic frameworks, Christian realism, and enduring principles for modern leadership.",
       tagline: "Wisdom for the strategic mind.",
-      mission: "To equip leaders and builders with frameworks that outlast headlines.",
+      mission:
+        "To equip leaders and builders with frameworks that outlast headlines.",
       vision:
         "A world where strategic, moral, and theological clarity are normal, not rare.",
       founded: "2023",
@@ -254,7 +261,7 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       highlight: "#E5E7EB",
     },
     logo: {
-      // No dedicated asset confirmed yet – use generic writing desk / placeholder if needed
+      // No dedicated logo asset specified yet – fallback to a neutral image
       raster: "/assets/images/writing-desk.webp",
     },
     metadata: {
@@ -285,8 +292,9 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       highlight: "#111827",
     },
     logo: {
+      svg: "/assets/images/logo/alomarada.svg",
       raster: "/assets/images/alomarada-ltd.webp",
-      mark: "/assets/images/alomarada-ltd.webp",
+      mark: "/assets/images/logo/alomarada.svg",
     },
     metadata: {
       description:
@@ -317,8 +325,9 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       highlight: "#E5E5E5",
     },
     logo: {
+      svg: "/assets/images/logo/endureluxe.svg",
       raster: "/assets/images/endureluxe-ltd.webp",
-      mark: "/assets/images/endureluxe-ltd.webp",
+      mark: "/assets/images/logo/endureluxe.svg",
     },
     metadata: {
       description: "Enduring luxury products and experiences.",
@@ -331,6 +340,38 @@ export const brandRegistry: Record<BrandKey, Brand> = {
     date: "2023-01-01",
     category: "brand",
     tags: ["endureluxe", "luxury", "endurance"],
+  },
+
+  innovatehub: {
+    key: "innovatehub",
+    slug: "innovatehub",
+    title: "InnovateHub",
+    name: "InnovateHub",
+    colors: {
+      primary: "#020617",
+      secondary: "#38BDF8",
+      accent: "#F97316",
+      text: "#F9FAFB",
+      background: "#020617",
+      muted: "#6B7280",
+      highlight: "#111827",
+    },
+    logo: {
+      raster: "/assets/images/logo/innovatehub-logo-full.jpg",
+      mark: "/assets/images/logo/innovatehub-logo-full.jpg",
+    },
+    metadata: {
+      description:
+        "A focused space for founders, operators, and builders to design, stress-test, and launch durable ventures.",
+      industry: ["Innovation", "Startups", "Advisory"],
+      location: "London, UK",
+    },
+    url: "https://innovatehub.abrahamoflondon.org",
+    isActive: true,
+    order: 5,
+    date: "2023-01-01",
+    category: "brand",
+    tags: ["innovatehub", "founders", "innovation"],
   },
 };
 
@@ -416,7 +457,10 @@ export function getBrandColors(key: BrandKey): Record<string, string> {
 
     return cssVars;
   } catch (error) {
-    console.error(`[lib/brands] Error getting colors for brand "${key}":`, error);
+    console.error(
+      `[lib/brands] Error getting colors for brand "${key}":`,
+      error,
+    );
     return {};
   }
 }
@@ -454,7 +498,7 @@ export function getBrandMetadata(key: BrandKey): Record<string, unknown> {
       canonicalUrl: brand.canonicalUrl ?? brand.url,
       image:
         brand.logo?.raster ??
-        "/assets/images/social/og-image.jpg", // known social OG
+        "/assets/images/social/og-image.jpg",
       siteName: brand.name,
       type: "website",
       locale: "en_GB",
@@ -508,6 +552,7 @@ export function groupContentByBrand<T extends ContentBase>(
       endom: [],
       alomarada: [],
       endureluxe: [],
+      innovatehub: [],
     };
 
     content.forEach((item) => {
@@ -523,7 +568,7 @@ export function groupContentByBrand<T extends ContentBase>(
       if (Array.isArray(item.tags)) {
         item.tags.forEach((tag) => {
           if (isValidBrandKey(tag)) {
-            assignedBrands.push(tag);
+            assignedBrands.push(tag as BrandKey);
           }
         });
       }
@@ -532,6 +577,7 @@ export function groupContentByBrand<T extends ContentBase>(
         groups[brand].push(item);
       });
 
+      // Default to Abraham if nothing explicitly assigned
       if (assignedBrands.length === 0) {
         groups.abraham.push(item);
       }
@@ -545,6 +591,7 @@ export function groupContentByBrand<T extends ContentBase>(
       endom: [],
       alomarada: [],
       endureluxe: [],
+      innovatehub: [],
     };
   }
 }
@@ -620,6 +667,7 @@ export function getBrandStats<T extends ContentBase>(content: T[] = []): {
         endom: { total: 0, featured: 0, byType: {}, byCategory: {} },
         alomarada: { total: 0, featured: 0, byType: {}, byCategory: {} },
         endureluxe: { total: 0, featured: 0, byType: {}, byCategory: {} },
+        innovatehub: { total: 0, featured: 0, byType: {}, byCategory: {} },
       },
       totalContent: 0,
       featuredContent: 0,
@@ -652,19 +700,20 @@ export function getBrandHierarchy(): Record<
       endom: { parent: undefined, children: [], level: 0 },
       alomarada: { parent: undefined, children: [], level: 0 },
       endureluxe: { parent: undefined, children: [], level: 0 },
+      innovatehub: { parent: undefined, children: [], level: 0 },
     };
 
-    // If later you wire parentBrand / childBrands in registry,
-    // this will still be safe.
     Object.values(brandRegistry).forEach((brand) => {
       const current = hierarchy[brand.key];
       if (!current) return;
-
       current.parent = brand.parentBrand;
       current.children = brand.childBrands ?? [];
     });
 
-    const calculateLevel = (key: BrandKey, visited = new Set<BrandKey>()): number => {
+    const calculateLevel = (
+      key: BrandKey,
+      visited = new Set<BrandKey>(),
+    ): number => {
       if (visited.has(key)) return 0;
       visited.add(key);
       const node = hierarchy[key];
@@ -684,6 +733,7 @@ export function getBrandHierarchy(): Record<
       endom: { parent: undefined, children: [], level: 0 },
       alomarada: { parent: undefined, children: [], level: 0 },
       endureluxe: { parent: undefined, children: [], level: 0 },
+      innovatehub: { parent: undefined, children: [], level: 0 },
     };
   }
 }
@@ -699,13 +749,14 @@ export function getRelatedBrands(key: BrandKey): Brand[] {
     if (current.parent) relatedKeys.add(current.parent);
     current.children.forEach((child) => relatedKeys.add(child));
 
-    (Object.entries(hierarchy) as [BrandKey, { parent?: BrandKey }][]).forEach(
-      ([brandKey, info]) => {
-        if (brandKey !== key && info.parent === current.parent) {
-          relatedKeys.add(brandKey);
-        }
-      },
-    );
+    (Object.entries(hierarchy) as [
+      BrandKey,
+      { parent?: BrandKey },
+    ][]).forEach(([brandKey, info]) => {
+      if (brandKey !== key && info.parent === current.parent) {
+        relatedKeys.add(brandKey);
+      }
+    });
 
     return Array.from(relatedKeys)
       .map((k) => getBrand(k))

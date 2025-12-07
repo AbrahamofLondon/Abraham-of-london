@@ -1,10 +1,9 @@
-// lib/mdx.ts - Clean and working version
+// lib/mdx.ts - Fixed version without next-contentlayer/hooks
 /* eslint-disable no-console */
 
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { useMDXComponent } from "next-contentlayer/hooks";
 
 // ✅ Direct import from local generated contentlayer output
 import {
@@ -184,47 +183,6 @@ export async function getPostData(slug: string): Promise<PostDocument> {
   }
 
   return convertToPostDocument(doc);
-}
-
-export function getMdxContent(slug: string) {
-  const allDocs = getAllDocuments();
-  const doc: any = allDocs.find((d: any) => d.slug === slug);
-
-  if (!doc) {
-    throw new Error(`Document not found: ${slug}`);
-  }
-
-  const MDXComponent = useMDXComponent(doc.body.code);
-
-  return {
-    source: doc.body.code,
-    frontMatter: {
-      title: doc.title,
-      description: safeGetDescription(doc),
-      date: doc.date,
-      tags: safeGetTags(doc),
-      author: safeGetAuthor(doc),
-      category: safeGetCategory(doc),
-      readTime: safeGetReadTime(doc),
-      image: safeGetCoverImage(doc),
-      draft: safeHasDraft(doc),
-      subtitle: safeGetSubtitle(doc),
-      accessLevel: doc.accessLevel,
-      lockMessage: doc.lockMessage,
-      volumeNumber: doc._raw?.flatData?.volumeNumber,
-    },
-    Component: MDXComponent,
-  };
-}
-
-export function getAllPostSlugs() {
-  const allDocs = getAllDocuments();
-
-  return allDocs.map((doc: any) => ({
-    params: {
-      slug: doc.slug,
-    },
-  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -563,6 +521,3 @@ export function convertToRawContentEntry(doc: PostDocument): RawContentEntry {
     volumeNumber: doc.volumeNumber,
   };
 }
-
-// Re-export hook for convenience
-export { useMDXComponent };
