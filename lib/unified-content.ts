@@ -8,9 +8,19 @@ import {
   getAllUnifiedContent as _getAllUnifiedContent,
   getUnifiedContentByType as _getUnifiedContentByType,
   searchUnifiedContent as _searchUnifiedContent,
+  getContentStats as _getContentStats,
+  getContentUrl as _getContentUrl,
+  formatReadTime as _formatReadTime,
+  getYearFromDate as _getYearFromDate,
 } from "@/lib/server/unified-content";
 
-export type { UnifiedContent } from "@/lib/server/unified-content";
+// Re-export types
+export type { 
+  UnifiedContent, 
+  ContentType,
+  ContentQuery,
+  ContentStats
+} from "@/lib/server/unified-content";
 
 // -----------------------------------------------------------------------------
 // Re-export original server functions (backwards-compatible)
@@ -19,6 +29,10 @@ export type { UnifiedContent } from "@/lib/server/unified-content";
 export const getAllUnifiedContent = _getAllUnifiedContent;
 export const getUnifiedContentByType = _getUnifiedContentByType;
 export const searchUnifiedContent = _searchUnifiedContent;
+export const getContentStats = _getContentStats;
+export const getContentUrl = _getContentUrl;
+export const formatReadTime = _formatReadTime;
+export const getYearFromDate = _getYearFromDate;
 
 // -----------------------------------------------------------------------------
 // Safe UI-facing summary types
@@ -355,6 +369,10 @@ export default {
   getAllUnifiedContent,
   getUnifiedContentByType,
   searchUnifiedContent,
+  getContentStats,
+  getContentUrl,
+  formatReadTime,
+  getYearFromDate,
   getAllUnifiedContentSafe,
   getUnifiedContentByTypeSafe,
   searchUnifiedContentSafe,

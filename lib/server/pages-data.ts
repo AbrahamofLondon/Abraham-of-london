@@ -1,60 +1,44 @@
-// lib/server/pages-data.ts
-// Server-side page data loader with comprehensive type safety
+// lib/server/pages-data.ts - FIXED VERSION
+// Pages under content/pages/* - Using MDX collections
 
-import * as fs from "fs";
-import * as path from "path";
-import * as matter from "gray-matter";
-import type { ContentBase, ContentEntry } from "@/types/index";
+import {
+  getMdxCollectionMeta,
+  getMdxDocumentBySlug,
+  type MdxMeta,
+  type MdxDocument,
+} from "@/lib/server/mdx-collections";
+import type { Page, ContentEntry, ContentMeta } from "@/types/index";
 
-export interface PageMeta extends ContentBase {
-  // Pages have all ContentBase fields plus page-specific ones
+export type PageWithContent = Page & {
   content: string;
-  type: "page";
-}
-
-export type PageWithContent = PageMeta & {
-  content: string;
-  body?: {
-    code: string;
-    raw: string;
-  };
 };
 
-// Server-side guard
-if (typeof window !== "undefined") {
-  throw new Error("This module is server-only");
-}
+// Extended MDX meta with page-specific fields
+type PageishMdxMeta = MdxMeta & Partial<Page> & {
+  publishDate?: string;
+  releaseDate?: string;
+  [key: string]: any;
+};
 
-// Configuration
-const PAGES_DIR = path.join(process.cwd(), "content", "pages");
-const VALID_EXTENSIONS = [".mdx", ".md"] as const;
+type PageishMdxDocument = MdxDocument & {
+  content: string;
+} & Partial<Page>;
 
 // ---------------------------------------------------------------------------
-// UTILITY FUNCTIONS
+// SAFE TYPE CONVERTERS
 // ---------------------------------------------------------------------------
 
-/**
- * Safe type converters with validation
- */
 function safeString(value: unknown): string | undefined {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : undefined;
-  }
-  return undefined;
-}
-
-function safeArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  const filtered = value.filter((item): item is string => typeof item === "string");
-  return filtered.length > 0 ? filtered : undefined;
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : undefined;
 }
 
 function safeNumber(value: unknown): number | undefined {
   if (typeof value === "number") return value;
   if (typeof value === "string") {
     const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? undefined : parsed;
+    return Number.isNaN(parsed) ? undefined : parsed;
   }
   return undefined;
 }
@@ -63,380 +47,162 @@ function safeBoolean(value: unknown): boolean | undefined {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
     const lower = value.toLowerCase().trim();
-    if (lower === "true" || lower === "yes" || lower === "1") return true;
-    if (lower === "false" || lower === "no" || lower === "0") return false;
+    if (lower === "true") return true;
+    if (lower === "false") return false;
+    if (lower === "yes") return true;
+    if (lower === "no") return false;
+    if (lower === "1") return true;
+    if (lower === "0") return false;
+  }
+  if (typeof value === "number") {
+    return value === 1;
   }
   return undefined;
 }
 
-function safeAccessLevel(value: unknown): "public" | "premium" | "private" | undefined {
-  if (value === "public" || value === "premium" || value === "private") {
-    return value;
-  }
-  return undefined;
+function safeArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const filtered = value.filter((item) => typeof item === "string") as string[];
+  return filtered.length > 0 ? filtered : undefined;
 }
 
-function safeStatus(value: unknown): "draft" | "published" | "scheduled" | "archived" | undefined {
+function safeStatus(
+  value: unknown
+): "draft" | "published" | "scheduled" | "archived" | undefined {
   if (value === "draft" || value === "published" || value === "scheduled" || value === "archived") {
     return value;
   }
   return undefined;
 }
 
-/**
- * Resolve page file path
- */
-function resolvePagePath(slug: string): string | null {
-  const cleanSlug = slug.replace(/\.mdx?$/i, "");
-
-  // Check if pages directory exists
-  if (!fs.existsSync(PAGES_DIR)) {
-    console.warn("[pages-data] Pages directory does not exist:", PAGES_DIR);
-    return null;
+function safeAccessLevel(
+  value: unknown
+): "public" | "premium" | "private" | undefined {
+  if (value === "public" || value === "premium" || value === "private") {
+    return value;
   }
-
-  // Try each valid extension
-  for (const ext of VALID_EXTENSIONS) {
-    const fullPath = path.join(PAGES_DIR, `${cleanSlug}${ext}`);
-    if (fs.existsSync(fullPath)) {
-      return fullPath;
-    }
-  }
-
-  return null;
+  return undefined;
 }
 
 /**
- * Generate excerpt from content
+ * Safely convert layout field to allowed values
  */
-function generateExcerpt(content: string, maxLength: number = 200): string {
-  const plainText = content
-    .replace(/[#*`\[\]]/g, '') // Remove markdown formatting
-    .replace(/\s+/g, ' ')      // Normalize whitespace
-    .trim();
-  
-  if (plainText.length <= maxLength) return plainText;
-  
-  return plainText.substring(0, maxLength).trim() + '...';
-}
-
-/**
- * Estimate read time
- */
-function estimateReadTime(content: string): string {
-  const wordsPerMinute = 200;
-  const wordCount = content.split(/\s+/).length;
-  const minutes = Math.ceil(wordCount / wordsPerMinute);
-  return `${minutes} min`;
+function safeLayout(
+  value: unknown
+): "narrow" | "default" | "wide" | "fullscreen" | undefined {
+  if (typeof value === "string") {
+    const lowerValue = value.toLowerCase().trim();
+    if (lowerValue === "narrow") return "narrow";
+    if (lowerValue === "default") return "default";
+    if (lowerValue === "wide") return "wide";
+    if (lowerValue === "fullscreen") return "fullscreen";
+  }
+  return undefined;
 }
 
 // ---------------------------------------------------------------------------
-// CORE PAGE FUNCTIONS
+// MAIN CONVERSION FUNCTIONS
 // ---------------------------------------------------------------------------
 
-/**
- * Get all page slugs from filesystem
- */
-export function getPageSlugs(): string[] {
-  if (!fs.existsSync(PAGES_DIR)) {
-    console.warn("[pages-data] Pages directory not found:", PAGES_DIR);
-    return [];
+function fromMdxMeta(meta: MdxMeta): Page {
+  const m = meta as PageishMdxMeta;
+
+  // Handle different date fields
+  const date = safeString(m.date) || safeString(m.publishDate) || safeString(m.releaseDate);
+  
+  // Ensure required fields have defaults
+  const slug = safeString(m.slug) || "";
+  const title = safeString(m.title) || "Untitled Page";
+  
+  if (!slug || !title) {
+    console.warn(`Page metadata missing slug or title: ${slug} - ${title}`);
   }
 
-  try {
-    return fs
-      .readdirSync(PAGES_DIR)
-      .filter((filename) => 
-        VALID_EXTENSIONS.some((ext) => 
-          filename.toLowerCase().endsWith(ext)
-        )
-      )
-      .map((filename) => 
-        filename.replace(/\.mdx?$/i, "")
-      )
-      .filter(Boolean);
-  } catch (error) {
-    console.error("[pages-data] Error reading pages directory:", error);
-    return [];
-  }
-}
+  return {
+    // Core identifiers
+    slug,
+    title,
 
-/**
- * Parse and process a single page file
- */
-function parsePageFile(filePath: string, slug: string): PageMeta | null {
-  try {
-    const fileContent = fs.readFileSync(filePath, "utf8");
-    const { data: frontmatter, content } = matter(fileContent);
-    
-    const fm = frontmatter || {};
-    
-    // Generate ID from file path
-    const fileId = path.relative(process.cwd(), filePath);
-    
-    return {
-      // Core identifiers
-      slug,
-      title: safeString(fm.title) || path.basename(slug).replace(/-/g, ' '),
-      
-      // Content
-      description: safeString(fm.description),
-      excerpt: safeString(fm.excerpt) || generateExcerpt(content),
-      content,
-      
-      // Metadata
-      date: safeString(fm.date) || safeString(fm.createdAt) || new Date().toISOString().split('T')[0],
-      author: safeString(fm.author) || "Abraham of London",
-      category: safeString(fm.category),
-      tags: safeArray(fm.tags),
-      featured: safeBoolean(fm.featured),
-      readTime: safeString(fm.readTime) || estimateReadTime(content),
-      
-      // Visual
-      coverImage: safeString(fm.coverImage) || safeString(fm.image),
-      
-      // State
-      draft: safeBoolean(fm.draft),
-      published: safeBoolean(fm.published) ?? true,
-      status: safeStatus(fm.status) || "published",
-      
-      // Access
-      accessLevel: safeAccessLevel(fm.accessLevel) || "public",
-      lockMessage: safeString(fm.lockMessage),
-      
-      // Page-specific
-      type: "page",
-      
-      // System fields
-      _raw: {
-        sourceFilePath: filePath,
-        sourceFileDir: PAGES_DIR,
-        contentType: "page",
-        flatData: fm,
-      },
-      _id: `page-${slug}-${fileId}`,
-      url: `/${slug}`,
-      
-      // Additional fields from frontmatter
-      ...Object.fromEntries(
-        Object.entries(fm).filter(([key]) => ![
-          'title', 'description', 'excerpt', 'date', 'author', 'category',
-          'tags', 'featured', 'readTime', 'coverImage', 'image', 'draft',
-          'published', 'status', 'accessLevel', 'lockMessage'
+    // Content fields
+    description: safeString(m.description),
+    excerpt: safeString(m.excerpt),
+    subtitle: safeString(m.subtitle),
+
+    // Metadata
+    date,
+    author: safeString(m.author),
+    category: safeString(m.category),
+    tags: safeArray(m.tags),
+    featured: safeBoolean(m.featured),
+    readTime: safeString(m.readTime) || safeNumber(m.readTime),
+
+    // Visual
+    coverImage: safeString(m.coverImage) || safeString(m.image),
+
+    // Page-specific fields
+    pageType: safeString(m.pageType) || "page",
+    parentPage: safeString(m.parentPage),
+    order: safeNumber(m.order),
+    template: safeString(m.template),
+    layout: safeLayout(m.layout) || "default", // Use safeLayout converter with default
+    showInNav: safeBoolean(m.showInNav),
+    navOrder: safeNumber(m.navOrder),
+    navTitle: safeString(m.navTitle),
+    metaTitle: safeString(m.metaTitle),
+    metaDescription: safeString(m.metaDescription),
+    keywords: safeArray(m.keywords),
+    lastModified: safeString(m.lastModified),
+
+    // State
+    draft: safeBoolean(m.draft),
+    published: safeBoolean(m.published),
+    status: safeStatus(m.status),
+
+    // Access
+    accessLevel: safeAccessLevel(m.accessLevel) || "public",
+    lockMessage: safeString(m.lockMessage),
+
+    // System fields
+    _raw: m._raw,
+    _id: safeString(m._id),
+    url: safeString(m.url),
+    type: safeString(m.type) || "page",
+
+    // Preserve any additional fields
+    ...Object.fromEntries(
+      Object.entries(m)
+        .filter(([key]) => ![
+          'slug', 'title', 'description', 'excerpt', 'subtitle',
+          'date', 'author', 'category', 'tags', 'featured', 'readTime',
+          'coverImage', 'image', 'pageType', 'parentPage', 'order',
+          'template', 'layout', 'showInNav', 'navOrder', 'navTitle',
+          'metaTitle', 'metaDescription', 'keywords', 'lastModified',
+          'draft', 'published', 'status', 'accessLevel', 'lockMessage',
+          '_raw', '_id', 'url', 'type', 'publishDate', 'releaseDate'
         ].includes(key))
         .map(([key, value]) => [key, value])
-      ),
-    };
-  } catch (error) {
-    console.error(`[pages-data] Error parsing page file ${filePath}:`, error);
-    return null;
-  }
+    ),
+  };
 }
 
-/**
- * Get a single page by slug
- */
-export function getPageBySlug(
-  slug: string,
-  options?: {
-    fields?: string[];
-    withContent?: boolean;
-  }
-): (PageMeta | PageWithContent) | null {
-  try {
-    if (!slug || typeof slug !== 'string') {
-      console.error("[pages-data] Invalid slug provided:", slug);
-      return null;
-    }
-    
-    const cleanSlug = slug.replace(/\.mdx?$/i, "");
-    const filePath = resolvePagePath(cleanSlug);
-    
-    if (!filePath) {
-      console.warn(`[pages-data] Page not found for slug: ${cleanSlug}`);
-      
-      // Check mock pages as fallback
-      const mockPage = mockPages.find(page => page.slug === cleanSlug);
-      if (mockPage) {
-        console.log(`[pages-data] Using mock data for: ${cleanSlug}`);
-        return options?.withContent ? mockPage : { ...mockPage, content: '' };
-      }
-      
-      return null;
-    }
-    
-    const page = parsePageFile(filePath, cleanSlug);
-    if (!page) return null;
-    
-    // Handle field filtering
-    if (options?.fields && options.fields.length > 0) {
-      const filtered: any = {};
-      for (const field of options.fields) {
-        if (field === 'content' && options.withContent) {
-          filtered.content = page.content;
-        } else if (field in page) {
-          filtered[field] = (page as any)[field];
-        }
-      }
-      return filtered;
-    }
-    
-    // Return with or without content
-    return options?.withContent ? page : { ...page, content: '' };
-    
-  } catch (error) {
-    console.error(`[pages-data] Error getting page ${slug}:`, error);
-    return null;
-  }
+function fromMdxDocument(doc: MdxDocument): PageWithContent {
+  const pageDoc = doc as PageishMdxDocument;
+  const { content, ...rest } = pageDoc;
+  const meta = fromMdxMeta(rest);
+  
+  return { 
+    ...meta, 
+    content: typeof content === "string" ? content : "",
+    body: pageDoc.body || undefined,
+  };
 }
 
-/**
- * Get all pages
- */
-export function getAllPages(options?: {
-  includeDrafts?: boolean;
-  fields?: string[];
-  withContent?: boolean;
-  sortBy?: 'date' | 'title' | 'slug';
-  sortOrder?: 'asc' | 'desc';
-}): (PageMeta | PageWithContent)[] {
-  try {
-    const slugs = getPageSlugs();
-    const pages: (PageMeta | PageWithContent)[] = [];
-    
-    for (const slug of slugs) {
-      const page = getPageBySlug(slug, {
-        fields: options?.fields,
-        withContent: options?.withContent
-      });
-      
-      if (page) {
-        // Filter drafts if requested
-        if (!options?.includeDrafts && page.draft) {
-          continue;
-        }
-        pages.push(page);
-      }
-    }
-    
-    // Apply sorting
-    const sortBy = options?.sortBy || 'date';
-    const sortOrder = options?.sortOrder || 'desc';
-    
-    pages.sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortBy) {
-        case 'date':
-          const dateA = a.date ? new Date(a.date).getTime() : 0;
-          const dateB = b.date ? new Date(b.date).getTime() : 0;
-          comparison = dateB - dateA;
-          break;
-          
-        case 'title':
-          comparison = (a.title || '').localeCompare(b.title || '');
-          break;
-          
-        case 'slug':
-          comparison = a.slug.localeCompare(b.slug);
-          break;
-      }
-      
-      return sortOrder === 'desc' ? comparison : -comparison;
-    });
-    
-    return pages;
-    
-  } catch (error) {
-    console.error("[pages-data] Error getting all pages:", error);
-    return [];
-  }
+export function pageToContentMeta(page: Page): ContentMeta {
+  const { content, body, ...meta } = page;
+  return meta;
 }
 
-/**
- * Search pages by query
- */
-export function searchPages(
-  query: string,
-  options?: {
-    fields?: ('title' | 'description' | 'excerpt' | 'content' | 'tags')[];
-    limit?: number;
-  }
-): PageMeta[] {
-  try {
-    const allPages = getAllPages({ withContent: false });
-    const normalizedQuery = query.toLowerCase().trim();
-    
-    if (!normalizedQuery) return allPages;
-    
-    const searchFields = options?.fields || ['title', 'description', 'excerpt', 'tags'];
-    const results = allPages.filter(page => {
-      for (const field of searchFields) {
-        if (field === 'tags') {
-          if (page.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) {
-            return true;
-          }
-        } else {
-          const value = page[field];
-          if (typeof value === 'string' && value.toLowerCase().includes(normalizedQuery)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    });
-    
-    return options?.limit ? results.slice(0, options.limit) : results;
-    
-  } catch (error) {
-    console.error(`[pages-data] Error searching pages for "${query}":`, error);
-    return [];
-  }
-}
-
-/**
- * Get pages by category
- */
-export function getPagesByCategory(category: string): PageMeta[] {
-  try {
-    return getAllPages({ withContent: false })
-      .filter(page => page.category?.toLowerCase() === category.toLowerCase());
-  } catch (error) {
-    console.error(`[pages-data] Error getting pages by category "${category}":`, error);
-    return [];
-  }
-}
-
-/**
- * Get pages by tag
- */
-export function getPagesByTag(tag: string): PageMeta[] {
-  try {
-    return getAllPages({ withContent: false })
-      .filter(page => page.tags?.some(t => t.toLowerCase() === tag.toLowerCase()));
-  } catch (error) {
-    console.error(`[pages-data] Error getting pages by tag "${tag}":`, error);
-    return [];
-  }
-}
-
-/**
- * Get featured pages
- */
-export function getFeaturedPages(): PageMeta[] {
-  try {
-    return getAllPages({ withContent: false })
-      .filter(page => page.featured);
-  } catch (error) {
-    console.error("[pages-data] Error getting featured pages:", error);
-    return [];
-  }
-}
-
-/**
- * Convert PageMeta to ContentEntry for backward compatibility
- */
-export function pageToContentEntry(page: PageMeta): ContentEntry {
+export function pageToContentEntry(page: Page): ContentEntry {
   return {
     slug: page.slug,
     title: page.title,
@@ -449,122 +215,445 @@ export function pageToContentEntry(page: PageMeta): ContentEntry {
     readTime: page.readTime,
     _raw: page._raw,
     ...Object.fromEntries(
-      Object.entries(page).filter(([key]) => ![
-        'slug', 'title', 'date', 'excerpt', 'description', 'category',
-        'tags', 'featured', 'readTime', '_raw', 'content', 'type'
-      ].includes(key))
+      Object.entries(page)
+        .filter(([key]) => ![
+          'slug', 'title', 'date', 'excerpt', 'description', 'category',
+          'tags', 'featured', 'readTime', '_raw', 'content', 'body'
+        ].includes(key))
     ),
   };
 }
 
 // ---------------------------------------------------------------------------
-// MOCK DATA FOR DEVELOPMENT
+// PUBLIC API FUNCTIONS
 // ---------------------------------------------------------------------------
 
-export const mockPages: PageMeta[] = [
-  {
-    slug: "about",
-    title: "About Abraham of London",
-    description: "Learn more about Abraham of London and his work in technology and innovation.",
-    excerpt: "Building faith-rooted strategy for leaders who refuse to outsource responsibility.",
-    content: "# About Abraham of London\n\nWelcome to my digital space. This is where faith, strategy, and legacy converge for fathers, founders, and leaders.",
-    author: "Abraham of London",
-    date: "2024-01-01",
-    readTime: "3 min",
-    category: "Personal",
-    tags: ["about", "biography"],
-    featured: true,
-    draft: false,
-    published: true,
-    status: "published",
-    accessLevel: "public",
-    type: "page",
-    _raw: {
-      sourceFilePath: "content/pages/about.mdx",
-      sourceFileDir: "content/pages",
-      contentType: "page",
-      flatData: {},
-    },
-    _id: "page-about",
-    url: "/about",
-  },
-  {
-    slug: "contact",
-    title: "Contact",
-    description: "Get in touch with Abraham of London for collaborations and inquiries.",
-    excerpt: "Connect for strategic conversations about faith, fatherhood, and legacy.",
-    content: "# Contact\n\nReach out to discuss opportunities, strategic partnerships, or meaningful conversations about faith, fatherhood, and legacy building.",
-    author: "Abraham of London",
-    date: "2024-01-01",
-    readTime: "2 min",
-    category: "Contact",
-    tags: ["contact", "connect"],
-    featured: false,
-    draft: false,
-    published: true,
-    status: "published",
-    accessLevel: "public",
-    type: "page",
-    _raw: {
-      sourceFilePath: "content/pages/contact.mdx",
-      sourceFileDir: "content/pages",
-      contentType: "page",
-      flatData: {},
-    },
-    _id: "page-contact",
-    url: "/contact",
-  },
-  {
-    slug: "privacy",
-    title: "Privacy Policy",
-    description: "Privacy policy and data protection information.",
-    excerpt: "How we protect and handle your personal data.",
-    content: "# Privacy Policy\n\nYour privacy is important to us. This policy explains how we handle your data.",
-    author: "Abraham of London",
-    date: "2024-01-01",
-    readTime: "5 min",
-    category: "Legal",
-    tags: ["privacy", "policy", "legal"],
-    featured: false,
-    draft: false,
-    published: true,
-    status: "published",
-    accessLevel: "public",
-    type: "page",
-    _raw: {
-      sourceFilePath: "content/pages/privacy.mdx",
-      sourceFileDir: "content/pages",
-      contentType: "page",
-      flatData: {},
-    },
-    _id: "page-privacy",
-    url: "/privacy",
-  },
-];
+export function getAllPagesMeta(): Page[] {
+  try {
+    const metas = getMdxCollectionMeta("pages");
+    if (!metas || !Array.isArray(metas)) {
+      console.warn("No pages metadata found or metadata is not an array");
+      return [];
+    }
+    
+    const pages = metas.map((m) => fromMdxMeta(m));
+    
+    // Filter out invalid pages (missing required fields)
+    const validPages = pages.filter(page => {
+      const isValid = page.slug && page.title;
+      if (!isValid) {
+        console.warn(`Invalid page skipped: ${page.slug || 'no-slug'} - ${page.title || 'no-title'}`);
+      }
+      return isValid;
+    });
+    
+    console.log(`Found ${validPages.length} valid pages out of ${metas.length} total`);
+    return validPages;
+  } catch (error) {
+    console.error("Error fetching all pages meta:", error);
+    return [];
+  }
+}
+
+export function getPageBySlug(slug: string): PageWithContent | null {
+  try {
+    if (!slug || typeof slug !== 'string') {
+      console.error("getPageBySlug called with invalid slug:", slug);
+      return null;
+    }
+    
+    const doc = getMdxDocumentBySlug("pages", slug);
+    if (!doc) {
+      console.warn(`No page found for slug: ${slug}`);
+      return null;
+    }
+    
+    return fromMdxDocument(doc);
+  } catch (error) {
+    console.error(`Error fetching page by slug (${slug}):`, error);
+    return null;
+  }
+}
+
+export function getAllPages(): PageWithContent[] {
+  try {
+    const metas = getAllPagesMeta();
+    if (metas.length === 0) return [];
+    
+    const pagesWithContent: PageWithContent[] = [];
+    
+    for (const meta of metas) {
+      const page = getPageBySlug(meta.slug);
+      if (page) {
+        pagesWithContent.push(page);
+      } else {
+        console.warn(`Could not load content for page: ${meta.slug}`);
+      }
+    }
+    
+    return pagesWithContent;
+  } catch (error) {
+    console.error("Error fetching all pages:", error);
+    return [];
+  }
+}
+
+export function getPagesByCategory(category: string): Page[] {
+  try {
+    const pages = getAllPagesMeta();
+    if (!category || typeof category !== 'string') return [];
+    
+    const normalizedCategory = category.toLowerCase().trim();
+    
+    return pages.filter(page => {
+      const pageCategory = page.category?.toLowerCase().trim();
+      return pageCategory === normalizedCategory;
+    });
+  } catch (error) {
+    console.error(`Error fetching pages by category (${category}):`, error);
+    return [];
+  }
+}
+
+export function getPagesByTag(tag: string): Page[] {
+  try {
+    const pages = getAllPagesMeta();
+    if (!tag || typeof tag !== 'string') return [];
+    
+    const normalizedTag = tag.toLowerCase().trim();
+    
+    return pages.filter(page => {
+      return page.tags?.some(t => t.toLowerCase().trim() === normalizedTag);
+    });
+  } catch (error) {
+    console.error(`Error fetching pages by tag (${tag}):`, error);
+    return [];
+  }
+}
+
+export function getFeaturedPages(): Page[] {
+  try {
+    const pages = getAllPagesMeta();
+    return pages.filter(page => page.featured === true);
+  } catch (error) {
+    console.error("Error fetching featured pages:", error);
+    return [];
+  }
+}
+
+export function getPublishedPages(): Page[] {
+  try {
+    const pages = getAllPagesMeta();
+    return pages.filter(page => 
+      page.draft !== true && 
+      page.status !== "draft" && 
+      (page.published === true || page.status === "published")
+    );
+  } catch (error) {
+    console.error("Error fetching published pages:", error);
+    return [];
+  }
+}
+
+export function getNavPages(): Page[] {
+  try {
+    const pages = getPublishedPages();
+    return pages
+      .filter(page => page.showInNav !== false)
+      .sort((a, b) => {
+        // Sort by navOrder, then by title
+        const orderA = a.navOrder || 999;
+        const orderB = b.navOrder || 999;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.navTitle || a.title || '').localeCompare(b.navTitle || b.title || '');
+      });
+  } catch (error) {
+    console.error("Error fetching nav pages:", error);
+    return [];
+  }
+}
+
+export function getChildPages(parentSlug: string): Page[] {
+  try {
+    const pages = getPublishedPages();
+    if (!parentSlug || typeof parentSlug !== 'string') return [];
+    
+    return pages
+      .filter(page => page.parentPage === parentSlug)
+      .sort((a, b) => {
+        // Sort by order, then by title
+        const orderA = a.order || 999;
+        const orderB = b.order || 999;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.title || '').localeCompare(b.title || '');
+      });
+  } catch (error) {
+    console.error(`Error fetching child pages for ${parentSlug}:`, error);
+    return [];
+  }
+}
+
+export function getPagesByType(pageType: string): Page[] {
+  try {
+    const pages = getPublishedPages();
+    if (!pageType || typeof pageType !== 'string') return [];
+    
+    const normalizedType = pageType.toLowerCase().trim();
+    
+    return pages.filter(page => 
+      page.pageType?.toLowerCase().trim() === normalizedType
+    );
+  } catch (error) {
+    console.error(`Error fetching pages by type (${pageType}):`, error);
+    return [];
+  }
+}
+
+export function searchPages(query: string): Page[] {
+  try {
+    const pages = getPublishedPages();
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    if (!normalizedQuery) return pages;
+    
+    return pages.filter(page => {
+      // Search in title
+      if (page.title?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in subtitle
+      if (page.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in description
+      if (page.description?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in excerpt
+      if (page.excerpt?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in tags
+      if (page.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
+      
+      // Search in category
+      if (page.category?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      return false;
+    });
+  } catch (error) {
+    console.error(`Error searching pages (${query}):`, error);
+    return [];
+  }
+}
+
+export function getRecentPages(limit?: number): Page[] {
+  try {
+    const pages = getPublishedPages();
+    
+    // Sort by date (newest first), then by title for same dates
+    const sorted = pages.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      
+      if (dateB !== dateA) return dateB - dateA;
+      
+      // Same date, sort alphabetically by title
+      return (a.title || '').localeCompare(b.title || '');
+    });
+    
+    return limit && limit > 0 ? sorted.slice(0, limit) : sorted;
+  } catch (error) {
+    console.error("Error fetching recent pages:", error);
+    return [];
+  }
+}
+
+export function getAllPageCategories(): string[] {
+  try {
+    const pages = getAllPagesMeta();
+    const categories = pages
+      .map(page => page.category)
+      .filter((category): category is string => 
+        typeof category === "string" && category.trim().length > 0
+      );
+    
+    // Remove duplicates and sort alphabetically
+    return [...new Set(categories)].sort();
+  } catch (error) {
+    console.error("Error fetching page categories:", error);
+    return [];
+  }
+}
+
+export function getAllPageTags(): string[] {
+  try {
+    const pages = getAllPagesMeta();
+    const allTags = pages
+      .flatMap(page => page.tags || [])
+      .filter((tag): tag is string => typeof tag === "string");
+    
+    // Remove duplicates and sort alphabetically
+    return [...new Set(allTags)].sort();
+  } catch (error) {
+    console.error("Error fetching page tags:", error);
+    return [];
+  }
+}
+
+export function getAllPageAuthors(): string[] {
+  try {
+    const pages = getAllPagesMeta();
+    const authors = pages
+      .map(page => page.author)
+      .filter((author): author is string => 
+        typeof author === "string" && author.trim().length > 0
+      );
+    
+    // Remove duplicates and sort alphabetically
+    return [...new Set(authors)].sort();
+  } catch (error) {
+    console.error("Error fetching page authors:", error);
+    return [];
+  }
+}
+
+export function getAllPageSlugs(): string[] {
+  try {
+    const pages = getAllPagesMeta();
+    return pages
+      .map(page => page.slug)
+      .filter((slug): slug is string => typeof slug === "string" && slug.length > 0);
+  } catch (error) {
+    console.error("Error fetching page slugs:", error);
+    return [];
+  }
+}
+
+export function getHomePage(): PageWithContent | null {
+  try {
+    // Try common home page slugs
+    const homeSlugs = ["", "/", "home", "index", "welcome"];
+    
+    for (const slug of homeSlugs) {
+      const page = getPageBySlug(slug);
+      if (page) {
+        return page;
+      }
+    }
+    
+    // Try to find any page marked as home
+    const pages = getAllPagesMeta();
+    const homePage = pages.find(page => 
+      page.pageType === "home" || 
+      page.template === "home" ||
+      page.tags?.includes("home")
+    );
+    
+    if (homePage) {
+      return getPageBySlug(homePage.slug);
+    }
+    
+    // Return first published page as fallback
+    const publishedPages = getPublishedPages();
+    if (publishedPages.length > 0) {
+      return getPageBySlug(publishedPages[0].slug);
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error fetching home page:", error);
+    return null;
+  }
+}
+
+export function getPageStats(): {
+  total: number;
+  published: number;
+  drafts: number;
+  featured: number;
+  byCategory: Record<string, number>;
+  byType: Record<string, number>;
+  byYear: Record<string, number>;
+} {
+  try {
+    const pages = getAllPagesMeta();
+    
+    const stats = {
+      total: pages.length,
+      published: pages.filter(p => p.published === true || p.status === "published").length,
+      drafts: pages.filter(p => p.draft === true || p.status === "draft").length,
+      featured: pages.filter(p => p.featured === true).length,
+      byCategory: {} as Record<string, number>,
+      byType: {} as Record<string, number>,
+      byYear: {} as Record<string, number>,
+    };
+    
+    pages.forEach(page => {
+      // Count by category
+      if (page.category) {
+        stats.byCategory[page.category] = (stats.byCategory[page.category] || 0) + 1;
+      }
+      
+      // Count by type
+      if (page.pageType) {
+        stats.byType[page.pageType] = (stats.byType[page.pageType] || 0) + 1;
+      }
+      
+      // Count by year
+      if (page.date) {
+        const year = new Date(page.date).getFullYear().toString();
+        stats.byYear[year] = (stats.byYear[year] || 0) + 1;
+      }
+    });
+    
+    return stats;
+  } catch (error) {
+    console.error("Error fetching page stats:", error);
+    return {
+      total: 0,
+      published: 0,
+      drafts: 0,
+      featured: 0,
+      byCategory: {},
+      byType: {},
+      byYear: {},
+    };
+  }
+}
 
 // ---------------------------------------------------------------------------
-// DEFAULT EXPORT FOR COMPATIBILITY
+// DEFAULT EXPORT
 // ---------------------------------------------------------------------------
 
-export default {
+const pagesData = {
   // Core functions
-  getPageSlugs,
+  getAllPagesMeta,
   getPageBySlug,
   getAllPages,
   
   // Filter functions
-  searchPages,
   getPagesByCategory,
   getPagesByTag,
   getFeaturedPages,
+  getPublishedPages,
+  getNavPages,
+  getChildPages,
+  getPagesByType,
+  searchPages,
+  getRecentPages,
+  
+  // Special pages
+  getHomePage,
+  
+  // List functions
+  getAllPageCategories,
+  getAllPageTags,
+  getAllPageAuthors,
+  getAllPageSlugs,
+  
+  // Stats
+  getPageStats,
   
   // Utility functions
+  pageToContentMeta,
   pageToContentEntry,
-  
-  // Mock data
-  mockPages,
-  
-  // Types
-  PageMeta,
-  PageWithContent,
 };
+
+export default pagesData;

@@ -1,38 +1,31 @@
-// lib/siteConfig.ts
-// Browser-safe site configuration + route & venture registry.
-// No fs, no Node-only APIs.
+// lib/siteConfig.ts - CORRECTED VERSION
+import { SiteConfig, SEOConfig, ContactInfo, SocialLink } from "@/types/config";
 
-// =======================================================
-// TYPE DEFINITIONS
-// =======================================================
+// =============================================================================
+// PUBLIC ENVIRONMENT VARIABLES
+// =============================================================================
 
-export interface SocialLink {
-  href: string;
-  label: string;
-  kind?: string;
-  external?: boolean;
-}
+export const PUBLIC_SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org";
 
-export interface BaseSiteConfig {
-  siteUrl: string;
-  title: string;
-  description: string;
-  author: string;
-  email: string;
-  phone: string;
-  copyright?: string;
-  companyNumber?: string;
-  socialLinks?: SocialLink[];
-  contact?: {
-    email: string;
-    phone?: string;
-  };
-  seo?: {
-    title: string;
-    description: string;
-  };
-  authorImage?: string;
-}
+// =============================================================================
+// BRAND CONFIGURATION
+// =============================================================================
+
+export const brand = {
+  name: "Abraham of London",
+  tagline: "Faith · Strategy · Fatherhood",
+  logo: "/images/logo.svg",
+  logoDark: "/images/logo-dark.svg",
+  logoAlt: "Abraham of London Logo",
+  favicon: "/favicon.ico",
+  themeColor: "#1a1a1a",
+  accentColor: "#D4AF37",
+} as const;
+
+// =============================================================================
+// ROUTE CONFIGURATION
+// =============================================================================
 
 export type RouteId =
   | "home"
@@ -47,139 +40,170 @@ export type RouteId =
   | "contact";
 
 export interface RouteConfig {
-  id: RouteId;
   path: string;
-  label?: string;
+  label: string;
+  description?: string;
 }
 
-export interface BrandConfig {
-  name: string;
-  tagline: string;
-  mission: string;
-  values: string[];
-  principles?: string[];
-}
+export const routes: Record<RouteId, RouteConfig> = {
+  home: {
+    path: "/",
+    label: "Home",
+    description: "Welcome to Abraham of London",
+  },
+  about: {
+    path: "/about",
+    label: "About",
+    description: "Learn about Abraham's journey and philosophy",
+  },
+  blogIndex: {
+    path: "/blog",
+    label: "Insights",
+    description: "Strategic wisdom and insights",
+  },
+  contentIndex: {
+    path: "/content",
+    label: "Content",
+    description: "Articles, resources, and frameworks",
+  },
+  booksIndex: {
+    path: "/books",
+    label: "Books",
+    description: "Curated volumes and publications",
+  },
+  canonIndex: {
+    path: "/canon",
+    label: "The Canon",
+    description: "The 10-volume system of strategic wisdom",
+  },
+  ventures: {
+    path: "/ventures",
+    label: "Ventures",
+    description: "Business pursuits and initiatives",
+  },
+  downloadsIndex: {
+    path: "/downloads",
+    label: "Downloads",
+    description: "Resources and tools for download",
+  },
+  strategyLanding: {
+    path: "/strategy",
+    label: "Strategy",
+    description: "Strategic frameworks and consulting",
+  },
+  contact: {
+    path: "/contact",
+    label: "Contact",
+    description: "Get in touch with Abraham",
+  },
+} as const;
 
-export interface Venture {
-  initials: string;
-  title: string;
-  description: string;
-  href: string;
-  cta: string;
-  muted?: boolean;
-  themeColor?: string;
-}
-
-export interface FullSiteConfig extends BaseSiteConfig {
-  brand: BrandConfig;
-  routes: Record<RouteId, RouteConfig>;
-  ventures: Venture[];
-  getPageTitle: (pageTitle?: string) => string;
-}
-
-// =======================================================
+// =============================================================================
 // UTILITY FUNCTIONS
-// =======================================================
+// =============================================================================
 
-function normalisePath(raw: string): string {
-  const s = String(raw || "").trim();
-  if (!s) return "/";
-  const withLead = s.startsWith("/") ? s : `/${s}`;
-  if (withLead === "/") return "/";
-  return withLead.replace(/\/+$/u, "");
-}
+export const getRoutePath = (route: RouteId): string => {
+  return routes[route]?.path || "/";
+};
 
-export function getRoutePath(id: RouteId): string {
-  const cfg = siteConfig.routes[id];
-  if (!cfg) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn(`[siteConfig] Unknown route id: ${id}`);
-    }
-    return "/";
-  }
-  return normalisePath(cfg.path);
-}
+export const absUrl = (path: string): string => {
+  return `${PUBLIC_SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+};
 
-export function internalHref(target: RouteId | string): string {
-  if (typeof target === "string" && target in siteConfig.routes) {
-    return getRoutePath(target as RouteId);
-  }
+export const internalHref = (route: RouteId): string => {
+  return getRoutePath(route);
+};
 
-  if (typeof target === "string") {
-    if (
-      target.startsWith("/") ||
-      target.startsWith("#") ||
-      target.startsWith("mailto:") ||
-      target.startsWith("tel:")
-    ) {
-      return target;
-    }
-    return normalisePath(`/${target}`);
-  }
+// =============================================================================
+// CONTACT INFORMATION
+// =============================================================================
 
-  return getRoutePath(target);
-}
+export const contact: ContactInfo = {
+  email: "info@abrahamoflondon.org",
+  phone: "+44 20 8622 5909",
+  address: "London, United Kingdom",
+};
 
-export function absUrl(path: string | RouteId): string {
-  const href =
-    typeof path === "string" ? internalHref(path) : getRoutePath(path);
-  if (/^https?:\/\//iu.test(href)) return href;
-  if (
-    href.startsWith("#") ||
-    href.startsWith("mailto:") ||
-    href.startsWith("tel:")
-  ) {
-    return href;
-  }
-  return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
-}
+// =============================================================================
+// SEO CONFIGURATION - UPDATED
+// =============================================================================
 
-export function isActiveRoute(
-  currentPath: string,
-  target: RouteId | string
-): boolean {
-  const targetPath = internalHref(target);
-  const normalizedCurrent = normalisePath(currentPath);
-  if (targetPath === "/") return normalizedCurrent === "/";
-  return normalizedCurrent.startsWith(targetPath);
-}
+export const seo: SEOConfig = {
+  title: "Abraham of London",
+  description: "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
+  author: "Abraham of London", // Now allowed with updated SEOConfig type
+  ogImage: "/images/og-default.jpg",
+  keywords: ["strategy", "leadership", "fatherhood", "legacy", "faith", "business"],
+  canonicalUrl: PUBLIC_SITE_URL,
+  twitterHandle: "@AbrahamofLondon",
+  siteName: "Abraham of London",
+  type: "website",
+  locale: "en_GB",
+};
 
-export function getPageTitle(pageTitle?: string): string {
-  const base = siteConfig.title || "Abraham of London";
-  if (!pageTitle || typeof pageTitle !== "string") return base;
-  return `${pageTitle} | ${base}`;
-}
+// =============================================================================
+// SOCIAL LINKS
+// =============================================================================
 
-// =======================================================
-// CONSTANTS
-// =======================================================
-
-const PUBLIC_SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org"
-).replace(/\/+$/u, "");
-
-const ALOMARADA_URL =
-  process.env.NEXT_PUBLIC_ALOMARADA_URL || "https://alomarada.com";
-
-const ENDURELUXE_URL =
-  process.env.NEXT_PUBLIC_ENDURELUXE_URL || "https://endureluxe.com";
-
-const INNOVATEHUB_URL =
-  process.env.NEXT_PUBLIC_INNOVATEHUB_URL ||
-  process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL ||
-  "https://innovatehub.abrahamoflondon.org";
-
-const defaultSocialLinks: SocialLink[] = [
+export const socialLinks: SocialLink[] = [
   {
-    href: "https://www.linkedin.com/in/seunadaramola",
+    href: "https://tiktok.com/@abrahamoflondon",
+    label: "TikTok",
+    kind: "tiktok",
+    external: true,
+  },
+  {
+    href: "https://x.com/AbrahamAda48634",
+    label: "X (Twitter)",
+    kind: "twitter",
+    external: true,
+  },
+  {
+    href: "https://www.instagram.com/abraham_of_london_/",
+    label: "Instagram",
+    kind: "instagram",
+    external: true,
+  },
+  {
+    href: "https://www.facebook.com/share/16tvsnTgRG/",
+    label: "Facebook",
+    kind: "facebook",
+    external: true,
+  },
+  {
+    href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
     label: "LinkedIn",
     kind: "linkedin",
     external: true,
   },
   {
-    href: "https://x.com/abrahamoflondon",
-    label: "X (Twitter)",
-    kind: "twitter",
+    href: "https://www.youtube.com/@abrahamoflondon",
+    label: "YouTube",
+    kind: "youtube",
+    external: true,
+  },
+  {
+    href: "mailto:info@abrahamoflondon.org",
+    label: "Email",
+    kind: "email",
+    external: false,
+  },
+  {
+    href: "https://wa.me/447496334022",
+    label: "WhatsApp",
+    kind: "whatsapp",
+    external: true,
+  },
+  {
+    href: "tel:+442086225909",
+    label: "Landline",
+    kind: "phone",
+    external: false,
+  },
+  {
+    href: "https://github.com/AbrahamofLondon",
+    label: "GitHub",
+    kind: "github",
     external: true,
   },
   {
@@ -188,119 +212,126 @@ const defaultSocialLinks: SocialLink[] = [
     kind: "medium",
     external: true,
   },
+];
+
+// =============================================================================
+// VENTURES
+// =============================================================================
+
+export interface Venture {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  status: "active" | "upcoming" | "archived";
+  category: string;
+}
+
+export const ventures: Venture[] = [
   {
-    href: "https://github.com/AbrahamofLondon",
-    label: "GitHub",
-    kind: "github",
-    external: true,
+    id: "chatham-rooms",
+    name: "Chatham Rooms",
+    description: "Strategic advisory and board-level counsel",
+    url: "/ventures/chatham-rooms",
+    status: "active",
+    category: "consulting",
+  },
+  {
+    id: "canon-prelude",
+    name: "Canon Prelude",
+    description: "The Architecture of Human Purpose",
+    url: "/books/the-architecture-of-human-purpose-landing",
+    status: "active",
+    category: "publication",
+  },
+  {
+    id: "fatherhood-frameworks",
+    name: "Fatherhood Frameworks",
+    description: "Resources for intentional fatherhood",
+    url: "/content/fatherhood-frameworks",
+    status: "active",
+    category: "education",
   },
 ];
 
-// =======================================================
-// FINAL SITE CONFIG (DROP-IN)
-// =======================================================
+// =============================================================================
+// PAGE TITLE HELPER
+// =============================================================================
+
+export const getPageTitle = (pageTitle?: string): string => {
+  const baseTitle = "Abraham of London";
+  return pageTitle ? `${pageTitle} | ${baseTitle}` : baseTitle;
+};
+
+// Alias for backward compatibility
+export const getPageTitleMethod = getPageTitle;
+
+// =============================================================================
+// MAIN SITE CONFIGURATION
+// =============================================================================
+
+export interface BrandConfig {
+  name: string;
+  tagline: string;
+  logo: string;
+  logoDark: string;
+  logoAlt: string;
+  favicon: string;
+  themeColor: string;
+  accentColor: string;
+}
+
+export interface FullSiteConfig extends SiteConfig {
+  brand: BrandConfig;
+  routes: Record<RouteId, RouteConfig>;
+  ventures: Venture[];
+}
 
 export const siteConfig: FullSiteConfig = {
+  // Core
+  title: brand.name,
+  description: seo.description,
   siteUrl: PUBLIC_SITE_URL,
-  title: "Abraham of London",
-  description:
-    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
   author: "Abraham of London",
-  email: "info@abrahamoflondon.org",
-  phone: "+44 20 8622 5909",
-  companyNumber: "11549053",
+  
+  // Contact
+  email: contact.email,
+  contact,
+  
+  // Social
+  socialLinks,
+  
+  // SEO
+  seo,
+  
+  // Brand
+  brand,
+  
+  // Navigation
+  routes,
+  
+  // Ventures
+  ventures,
+  
+  // Optional fields
   copyright: `© ${new Date().getFullYear()} Abraham of London. All rights reserved.`,
-  authorImage: "/assets/images/profile-portrait.webp",
-
-  contact: {
-    email: "info@abrahamoflondon.org",
-    phone: "+44 20 8622 5909",
-  },
-
-  seo: {
-    title: "Abraham of London",
-    description:
-      "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
-  },
-
-  socialLinks: defaultSocialLinks,
-
-  brand: {
-    name: "Abraham of London",
-    tagline: "Building Fathers, Founders & Faithful Leaders",
-    mission:
-      "Equipping serious men with faith-rooted strategy, tools, and frameworks for intentional fatherhood, disciplined leadership, and generational legacy.",
-
-    values: [
-      "Faith-rooted leadership",
-      "Strategic discipline",
-      "Generational thinking",
-      "Community focus",
-      "Excellence in execution",
-      "Sustainable impact",
-    ],
-
-    principles: [
-      "Legacy over noise",
-      "Standards before sensations",
-      "Execution above excuses",
-      "Wisdom before ambition",
-    ],
-  },
-
-  routes: {
-    home: { id: "home", path: "/", label: "Home" },
-    about: { id: "about", path: "/about", label: "About" },
-    blogIndex: { id: "blogIndex", path: "/blog", label: "Insights" },
-    contentIndex: { id: "contentIndex", path: "/content", label: "All Content" },
-    booksIndex: { id: "booksIndex", path: "/books", label: "Books" },
-    canonIndex: { id: "canonIndex", path: "/canon", label: "The Canon" },
-    ventures: { id: "ventures", path: "/ventures", label: "Ventures" },
-    downloadsIndex: { id: "downloadsIndex", path: "/downloads", label: "Downloads" },
-    strategyLanding: { id: "strategyLanding", path: "/strategy", label: "Strategy" },
-    contact: { id: "contact", path: "/contact", label: "Contact" },
-  },
-
-  ventures: [
-    {
-      initials: "AL",
-      title: "Alomarada Ltd",
-      description:
-        "Board-level advisory, operating systems, and market-entry strategy for Africa-focused founders, boards, and institutions.",
-      href: ALOMARADA_URL,
-      cta: "Visit Alomarada.com",
-      themeColor: "#0b2e1f",
-    },
-    {
-      initials: "EL",
-      title: "EndureLuxe",
-      description:
-        "Durable luxury performance gear for people who train, build, and endure — without compromising quality or aesthetics.",
-      href: ENDURELUXE_URL,
-      cta: "Explore EndureLuxe",
-      muted: true,
-      themeColor: "#9f7a38",
-    },
-    {
-      initials: "IH",
-      title: "InnovateHub",
-      description:
-        "Tools, cohorts, and hands-on support for builders who want to test ideas, ship value, and stay accountable.",
-      href: INNOVATEHUB_URL,
-      cta: "Visit InnovateHub",
-      themeColor: "#0b2e1f",
-    },
-  ],
-
-  getPageTitle: (pageTitle?: string) => {
-    const base = "Abraham of London";
-    if (!pageTitle || typeof pageTitle !== "string") return base;
-    return `${pageTitle} | ${base}`;
+  getPageTitle,
+  
+  // Analytics (optional - can be added later)
+  analytics: {
+    // googleAnalyticsId: "G-XXXXXXXXXX",
+    // hotjarId: "XXXXXXXX",
   },
 };
 
-// =======================================================
-// EXPORT ALIASES FOR BACKWARD COMPATIBILITY
-// =======================================================
+// =============================================================================
+// ALIAS EXPORTS FOR CONVENIENCE
+// =============================================================================
 
+export const title = siteConfig.title;
+export const description = siteConfig.description;
+export const author = siteConfig.author;
 export const siteUrl = siteConfig.siteUrl;
+export const brandConfig = siteConfig.brand;
+export const siteRoutes = siteConfig.routes;
+export const siteVentures = siteConfig.ventures;

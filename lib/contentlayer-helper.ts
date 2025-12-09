@@ -4,11 +4,11 @@
 import path from "path";
 
 // ============================================================================
-// 1. CORE TYPES - DECLARED WITHOUT EXPORT
+// 1. CORE TYPES - FIXED WITH PROPER EXPORTS
 // ============================================================================
 
-// Declare interfaces WITHOUT export keyword
-interface ContentlayerDocument {
+// Export interfaces WITH export keyword
+export interface ContentlayerDocument {
   _id: string;
   _raw: {
     sourceFilePath: string;
@@ -27,13 +27,14 @@ interface ContentlayerDocument {
   description?: string;
   tags?: string[];
   coverImage?: string;
+  published?: boolean; // NEW: Added for Short type compatibility
   body: {
     raw: string;
     code: string;
   };
 }
 
-interface PostDocument extends ContentlayerDocument {
+export interface PostDocument extends ContentlayerDocument {
   type: "Post";
   category?: string;
   author?: string;
@@ -43,7 +44,7 @@ interface PostDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-interface BookDocument extends ContentlayerDocument {
+export interface BookDocument extends ContentlayerDocument {
   type: "Book";
   subtitle?: string;
   author?: string;
@@ -56,7 +57,7 @@ interface BookDocument extends ContentlayerDocument {
   format?: string;
 }
 
-interface DownloadDocument extends ContentlayerDocument {
+export interface DownloadDocument extends ContentlayerDocument {
   type: "Download";
   subtitle?: string;
   author?: string;
@@ -70,7 +71,7 @@ interface DownloadDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-interface PrintDocument extends ContentlayerDocument {
+export interface PrintDocument extends ContentlayerDocument {
   type: "Print";
   dimensions?: string;
   price?: string;
@@ -80,7 +81,7 @@ interface PrintDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-interface ResourceDocument extends ContentlayerDocument {
+export interface ResourceDocument extends ContentlayerDocument {
   type: "Resource";
   resourceType?: string;
   author?: string;
@@ -91,7 +92,7 @@ interface ResourceDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-interface CanonDocument extends ContentlayerDocument {
+export interface CanonDocument extends ContentlayerDocument {
   type: "Canon";
   subtitle?: string;
   author?: string;
@@ -105,7 +106,7 @@ interface CanonDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-interface EventDocument extends ContentlayerDocument {
+export interface EventDocument extends ContentlayerDocument {
   type: "Event";
   eventDate?: string;
   time?: string;
@@ -116,12 +117,21 @@ interface EventDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-interface StrategyDocument extends ContentlayerDocument {
+export interface StrategyDocument extends ContentlayerDocument {
   type: "Strategy";
   category?: string;
   author?: string;
   accessLevel?: string;
   lockMessage?: string;
+}
+
+// NEW: Short document interface
+export interface ShortDocument extends ContentlayerDocument {
+  type: "Short";
+  theme?: string;
+  audience?: string;
+  readTime?: string;
+  published?: boolean; // Explicitly declared here as well
 }
 
 // ============================================================================
@@ -161,82 +171,97 @@ function getCollection<T extends ContentlayerDocument>(
 }
 
 // ============================================================================
-// 4. COLLECTIONS (DECLARED)
+// 4. COLLECTIONS (EXPORTED)
 // ============================================================================
 
-const allPosts: PostDocument[] = getCollection<PostDocument>("allPosts");
-const allBooks: BookDocument[] = getCollection<BookDocument>("allBooks");
-const allDownloads: DownloadDocument[] = getCollection<DownloadDocument>("allDownloads");
-const allEvents: EventDocument[] = getCollection<EventDocument>("allEvents");
-const allPrints: PrintDocument[] = getCollection<PrintDocument>("allPrints");
-const allStrategies: StrategyDocument[] = getCollection<StrategyDocument>("allStrategies");
-const allResources: ResourceDocument[] = getCollection<ResourceDocument>("allResources");
-const allCanons: CanonDocument[] = getCollection<CanonDocument>("allCanons");
-const allDocuments: ContentlayerDocument[] = getCollection<ContentlayerDocument>("allDocuments");
+export const allPosts: PostDocument[] = getCollection<PostDocument>("allPosts");
+export const allBooks: BookDocument[] = getCollection<BookDocument>("allBooks");
+export const allDownloads: DownloadDocument[] = getCollection<DownloadDocument>("allDownloads");
+export const allEvents: EventDocument[] = getCollection<EventDocument>("allEvents");
+export const allPrints: PrintDocument[] = getCollection<PrintDocument>("allPrints");
+export const allStrategies: StrategyDocument[] = getCollection<StrategyDocument>("allStrategies");
+export const allResources: ResourceDocument[] = getCollection<ResourceDocument>("allResources");
+export const allCanons: CanonDocument[] = getCollection<CanonDocument>("allCanons");
+export const allShorts: ShortDocument[] = getCollection<ShortDocument>("allShorts"); // NEW
+export const allDocuments: ContentlayerDocument[] = getCollection<ContentlayerDocument>("allDocuments");
 
-const allContent: ContentlayerDocument[] = [...allDocuments];
-const allPublished: ContentlayerDocument[] = allDocuments.filter(
-  (doc: ContentlayerDocument) => !doc.draft
+export const allContent: ContentlayerDocument[] = [...allDocuments];
+export const allPublished: ContentlayerDocument[] = allDocuments.filter(
+  (doc: ContentlayerDocument) => !doc.draft && doc.published !== false // UPDATED: Check both draft and published
 );
 
 // ============================================================================
-// 5. TYPE GUARDS (DECLARED)
+// 5. TYPE GUARDS (EXPORTED)
 // ============================================================================
 
-function isPost(doc: ContentlayerDocument): doc is PostDocument {
+export function isPost(doc: ContentlayerDocument): doc is PostDocument {
   return doc.type === "Post";
 }
 
-function isBook(doc: ContentlayerDocument): doc is BookDocument {
+export function isBook(doc: ContentlayerDocument): doc is BookDocument {
   return doc.type === "Book";
 }
 
-function isDownload(doc: ContentlayerDocument): doc is DownloadDocument {
+export function isDownload(doc: ContentlayerDocument): doc is DownloadDocument {
   return doc.type === "Download";
 }
 
-function isEvent(doc: ContentlayerDocument): doc is EventDocument {
+export function isEvent(doc: ContentlayerDocument): doc is EventDocument {
   return doc.type === "Event";
 }
 
-function isPrint(doc: ContentlayerDocument): doc is PrintDocument {
+export function isPrint(doc: ContentlayerDocument): doc is PrintDocument {
   return doc.type === "Print";
 }
 
-function isResource(doc: ContentlayerDocument): doc is ResourceDocument {
+export function isResource(doc: ContentlayerDocument): doc is ResourceDocument {
   return doc.type === "Resource";
 }
 
-function isCanon(doc: ContentlayerDocument): doc is CanonDocument {
+export function isCanon(doc: ContentlayerDocument): doc is CanonDocument {
   return doc.type === "Canon";
 }
 
-function isStrategy(doc: ContentlayerDocument): doc is StrategyDocument {
+export function isStrategy(doc: ContentlayerDocument): doc is StrategyDocument {
   return doc.type === "Strategy";
 }
 
+export function isShort(doc: ContentlayerDocument): doc is ShortDocument { // NEW
+  return doc.type === "Short";
+}
+
 // ============================================================================
-// 6. HELPER FUNCTIONS (DECLARED)
+// 6. HELPER FUNCTIONS (EXPORTED) - UPDATED WITH MDX.TS COMPATIBILITY
 // ============================================================================
 
-function getPublishedDocuments<T extends ContentlayerDocument>(
+// CRITICAL: These functions are required by mdx.ts
+export function getAllContentlayerDocs(): ContentlayerDocument[] {
+  return allDocuments;
+}
+
+export function getContentlayerDocBySlug(slug: string): ContentlayerDocument | null {
+  const doc = getDocumentBySlug(slug);
+  return doc || null;
+}
+
+export function getPublishedDocuments<T extends ContentlayerDocument>(
   docs: T[] = allDocuments as T[]
 ): T[] {
   return docs
-    .filter((doc: T) => !doc.draft)
+    .filter((doc: T) => !doc.draft && doc.published !== false) // UPDATED: Check published flag
     .sort(
       (a: T, b: T) =>
         new Date(b.date || "").getTime() - new Date(a.date || "").getTime()
     );
 }
 
-function getDocumentsByType<T extends ContentlayerDocument>(
+export function getDocumentsByType<T extends ContentlayerDocument>(
   type: string
 ): T[] {
   return allDocuments.filter((doc: ContentlayerDocument) => doc.type === type) as T[];
 }
 
-function getDocumentBySlug(
+export function getDocumentBySlug(
   slug: string,
   type?: string
 ): ContentlayerDocument | undefined {
@@ -247,21 +272,42 @@ function getDocumentBySlug(
   return candidates.find((doc: ContentlayerDocument) => doc.slug === slug);
 }
 
-function getFeaturedDocuments(): ContentlayerDocument[] {
+export function getFeaturedDocuments(): ContentlayerDocument[] {
   return allDocuments.filter(
     (doc: ContentlayerDocument) => (doc as any).featured === true && !doc.draft
   );
 }
 
-function isContentlayerLoaded(): boolean {
+export function isContentlayerLoaded(): boolean {
   return Object.keys(contentlayerExports).length > 0;
 }
 
+// NEW: Short-specific helper functions
+export function getPublishedShorts(): ShortDocument[] {
+  return getPublishedDocuments<ShortDocument>(allShorts);
+}
+
+export function getShortBySlug(slug: string): ShortDocument | null {
+  return getPublishedShorts().find((short) => short.slug === slug) ?? null;
+}
+
+// NEW: convenience for homepage etc - ADDED HERE
+export function getLatestShorts(limit: number = 3): ShortDocument[] {
+  return getPublishedShorts()
+    .slice()
+    .sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    })
+    .slice(0, limit);
+}
+
 // ============================================================================
-// 7. CARD MAPPING FUNCTIONS (DECLARED)
+// 7. CARD MAPPING FUNCTIONS (EXPORTED)
 // ============================================================================
 
-function mapToBaseCardProps(doc: ContentlayerDocument): any {
+export function mapToBaseCardProps(doc: ContentlayerDocument): any {
   return {
     slug: doc.slug,
     title: doc.title || 'Untitled',
@@ -277,7 +323,7 @@ function mapToBaseCardProps(doc: ContentlayerDocument): any {
   };
 }
 
-function mapToBookCardProps(doc: BookDocument): any {
+export function mapToBookCardProps(doc: BookDocument): any {
   return {
     ...mapToBaseCardProps(doc),
     author: doc.author || null,
@@ -287,7 +333,7 @@ function mapToBookCardProps(doc: BookDocument): any {
   };
 }
 
-function mapToBlogPostCardProps(doc: PostDocument): any {
+export function mapToBlogPostCardProps(doc: PostDocument): any {
   return {
     ...mapToBaseCardProps(doc),
     author: doc.author || null,
@@ -296,7 +342,7 @@ function mapToBlogPostCardProps(doc: PostDocument): any {
   };
 }
 
-function mapToCanonCardProps(doc: CanonDocument): any {
+export function mapToCanonCardProps(doc: CanonDocument): any {
   return {
     ...mapToBaseCardProps(doc),
     author: doc.author || null,
@@ -305,18 +351,28 @@ function mapToCanonCardProps(doc: CanonDocument): any {
   };
 }
 
-function getCardPropsForDocument(doc: ContentlayerDocument): any {
+export function mapToShortCardProps(doc: ShortDocument): any { // NEW
+  return {
+    ...mapToBaseCardProps(doc),
+    theme: doc.theme || null,
+    audience: doc.audience || null,
+    readTime: doc.readTime || null,
+  };
+}
+
+export function getCardPropsForDocument(doc: ContentlayerDocument): any {
   if (isBook(doc)) return mapToBookCardProps(doc);
   if (isPost(doc)) return mapToBlogPostCardProps(doc);
   if (isCanon(doc)) return mapToCanonCardProps(doc);
+  if (isShort(doc)) return mapToShortCardProps(doc); // NEW
   return mapToBaseCardProps(doc);
 }
 
 // ============================================================================
-// 8. UTILITY FUNCTIONS (DECLARED)
+// 8. UTILITY FUNCTIONS (EXPORTED)
 // ============================================================================
 
-function getCardFallbackConfig() {
+export function getCardFallbackConfig() {
   return {
     defaultImage: '/images/fallback-card.jpg',
     defaultTitle: 'Untitled',
@@ -327,7 +383,7 @@ function getCardFallbackConfig() {
   };
 }
 
-function getCardImage(
+export function getCardImage(
   image: string | null | undefined,
   fallback?: string
 ): string {
@@ -335,7 +391,7 @@ function getCardImage(
   return image;
 }
 
-function formatCardDate(dateString: string | null | undefined): string {
+export function formatCardDate(dateString: string | null | undefined): string {
   if (!dateString) return '';
   
   try {
@@ -352,19 +408,20 @@ function formatCardDate(dateString: string | null | undefined): string {
 }
 
 // ============================================================================
-// 9. TYPE ALIASES (DECLARED)
+// 9. TYPE ALIASES (EXPORTED)
 // ============================================================================
 
-type Post = PostDocument;
-type Book = BookDocument;
-type Download = DownloadDocument;
-type Event = EventDocument;
-type Print = PrintDocument;
-type Resource = ResourceDocument;
-type Canon = CanonDocument;
-type Strategy = StrategyDocument;
+export type Post = PostDocument;
+export type Book = BookDocument;
+export type Download = DownloadDocument;
+export type Event = EventDocument;
+export type Print = PrintDocument;
+export type Resource = ResourceDocument;
+export type Canon = CanonDocument;
+export type Strategy = StrategyDocument;
+export type Short = ShortDocument; // NEW
 
-type DocumentTypes =
+export type DocumentTypes =
   | PostDocument
   | BookDocument
   | DownloadDocument
@@ -372,14 +429,33 @@ type DocumentTypes =
   | PrintDocument
   | StrategyDocument
   | ResourceDocument
-  | CanonDocument;
+  | CanonDocument
+  | ShortDocument; // UPDATED: Added ShortDocument
 
 // ============================================================================
-// 10. SINGLE COMPREHENSIVE EXPORT SECTION
+// 10. RE-EXPORT FOR BACKWARD COMPATIBILITY
 // ============================================================================
 
-// Export all collections
+// For compatibility with existing imports
 export {
+  allPosts as posts,
+  allBooks as books,
+  allCanons as canons,
+  allEvents as events,
+  allPrints as prints,
+  allStrategies as strategies,
+  allResources as resources,
+  allDownloads as downloads,
+  allShorts as shorts, // NEW
+};
+
+// ============================================================================
+// 11. DEFAULT EXPORT FOR EASY IMPORT
+// ============================================================================
+
+// Create a default export object for convenience
+const contentlayerHelper = {
+  // Collections
   allPosts,
   allBooks,
   allDownloads,
@@ -388,13 +464,12 @@ export {
   allStrategies,
   allResources,
   allCanons,
+  allShorts, // NEW
   allDocuments,
   allContent,
   allPublished,
-};
-
-// Export all type guards
-export {
+  
+  // Type guards
   isPost,
   isBook,
   isDownload,
@@ -403,51 +478,39 @@ export {
   isResource,
   isCanon,
   isStrategy,
-};
-
-// Export all helper functions
-export {
+  isShort, // NEW
+  
+  // Helper functions
+  getAllContentlayerDocs,
+  getContentlayerDocBySlug,
   getPublishedDocuments,
   getDocumentsByType,
   getDocumentBySlug,
   getFeaturedDocuments,
   isContentlayerLoaded,
-};
-
-// Export all mapping functions
-export {
+  getPublishedShorts, // NEW
+  getShortBySlug, // NEW
+  getLatestShorts, // NEW: Added here
+  
+  // Mapping functions
   mapToBaseCardProps,
   mapToBookCardProps,
   mapToBlogPostCardProps,
   mapToCanonCardProps,
+  mapToShortCardProps, // NEW
   getCardPropsForDocument,
-};
-
-// Export all utility functions
-export {
+  
+  // Utility functions
   getCardFallbackConfig,
   getCardImage,
   formatCardDate,
 };
 
-// Export all types and interfaces
-export type {
-  ContentlayerDocument,
-  PostDocument,
-  BookDocument,
-  DownloadDocument,
-  EventDocument,
-  PrintDocument,
-  ResourceDocument,
-  CanonDocument,
-  StrategyDocument,
-  Post,
-  Book,
-  Download,
-  Event,
-  Print,
-  Resource,
-  Canon,
-  Strategy,
-  DocumentTypes,
-};
+export default contentlayerHelper;
+
+// ============================================================================
+// 12. LEGACY EXPORTS FOR BACKWARD COMPATIBILITY
+// ============================================================================
+
+// Export everything individually as well (already done above)
+// This ensures both named imports and default import work

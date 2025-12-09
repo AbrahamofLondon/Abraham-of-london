@@ -1,9 +1,26 @@
-// types/index.ts
-// COMPREHENSIVE CONTENT TYPE SYSTEM
-// Centralized type definitions for all content collections
+// types/index.ts - COMPLETE TYPE SYSTEM WITH IMAGE FIX
 
 // ---------------------------------------------------------------------------
-// 1. BASE TYPES - Foundation for all content
+// 1. SHARED IMAGE TYPE
+// ---------------------------------------------------------------------------
+
+/**
+ * Image can be either a string URL or an object with src property
+ */
+export type ImageType = string | { src?: string } | null | undefined;
+
+/**
+ * Normalize image to string
+ */
+export function normalizeImage(image: ImageType): string | null {
+  if (!image) return null;
+  if (typeof image === 'string') return image;
+  if (typeof image === 'object' && 'src' in image && image.src) return image.src;
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// 2. BASE TYPES - Foundation for all content
 // ---------------------------------------------------------------------------
 
 /**
@@ -22,9 +39,9 @@ export interface ContentBase {
   category?: string;
   featured?: boolean;
   
-  // Visual
-  coverImage?: string;
-  image?: string;
+  // Visual - FIXED: Allow object or string
+  coverImage?: ImageType;
+  image?: ImageType;
   
   // Content
   content?: string;
@@ -64,37 +81,44 @@ export interface ContentBase {
   [key: string]: any;
 }
 
+/**
+ * Metadata-only version (for listings)
+ */
+export type ContentMeta = Omit<ContentBase, 'content' | 'body'>;
+
+/**
+ * Content with ID for database operations
+ */
+export interface ContentWithId extends ContentBase {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ---------------------------------------------------------------------------
-// 2. SPECIFIC CONTENT TYPES (Aligned with actual data structure)
+// 3. SPECIFIC CONTENT TYPES
 // ---------------------------------------------------------------------------
 
 /**
  * POST / BLOG / ESSAY
  */
 export interface Post extends ContentBase {
-  // Post-specific fields
   subtitle?: string;
   updated?: string;
-  
-  // SEO
   seoTitle?: string;
   seoDescription?: string;
   canonicalUrl?: string;
-  
-  // Series
   series?: string;
   part?: number;
-  
-  // Layout
   layout?: "post" | "article" | "essay";
   template?: string;
+  ogImage?: ImageType;
 }
 
 /**
  * BOOK / VOLUME
  */
 export interface Book extends ContentBase {
-  // Book-specific fields
   subtitle?: string;
   isbn?: string;
   publisher?: string;
@@ -103,24 +127,16 @@ export interface Book extends ContentBase {
   price?: string;
   purchaseLink?: string;
   pages?: number;
-  
-  // Format
   format?: "hardcover" | "paperback" | "ebook" | "audiobook" | "pdf";
-  
-  // Book details
   series?: string;
   volume?: number | string;
   edition?: string;
   rating?: number;
-  
-  // Additional metadata
   genre?: string[];
   translator?: string;
   illustrator?: string;
   forewordBy?: string;
   introductionBy?: string;
-  
-  // Physical properties
   dimensions?: string;
   weight?: string;
   binding?: string;
@@ -130,40 +146,27 @@ export interface Book extends ContentBase {
  * DOWNLOAD / TOOL / RESOURCE
  */
 export interface Download extends ContentBase {
-  // File information - CRITICAL: match actual field names
   downloadFile?: string;
   fileName?: string;
   fileSize?: string | number;
   fileFormat?: string;
   fileUrl?: string;
   downloadUrl?: string;
-  
-  // Versioning
   version?: string;
   versionDate?: string;
   changelog?: string[];
-  
-  // Requirements
   requirements?: string[];
   compatibility?: string[];
   systemRequirements?: string;
-  
-  // Licensing
   license?: string;
   licenseUrl?: string;
   termsOfUse?: string;
-  
-  // Usage
   useCases?: string[];
   applications?: string[];
   industries?: string[];
-  
-  // Technical
   framework?: string;
   dependencies?: string[];
   installation?: string;
-  
-  // Support
   supportEmail?: string;
   documentationUrl?: string;
   tutorialUrl?: string;
@@ -175,14 +178,11 @@ export type DownloadMeta = Download;
  * EVENT / SESSION / MASTERCLASS
  */
 export interface Event extends ContentBase {
-  // Timing - CRITICAL: match actual field names
   eventDate?: string;
   startTime?: string;
   endTime?: string;
   timezone?: string;
   duration?: string;
-  
-  // Location
   location?: string;
   venue?: string;
   address?: string;
@@ -190,36 +190,27 @@ export interface Event extends ContentBase {
   country?: string;
   isOnline?: boolean;
   onlineUrl?: string;
-  
-  // Registration
   registrationUrl?: string;
   registrationDeadline?: string;
   price?: string | number;
   currency?: string;
   capacity?: number;
   seatsAvailable?: number;
-  
-  // Speakers
   speakers?: string[];
   host?: string;
   organizer?: string;
-  
-  // Event details
   eventType?: "workshop" | "conference" | "webinar" | "masterclass" | "meetup";
   level?: "beginner" | "intermediate" | "advanced" | "all";
-  
-  // Logistics
   requirements?: string[];
   materials?: string[];
   takeaways?: string[];
-  
-  // Status
   isUpcoming?: boolean;
   isPast?: boolean;
   isCancelled?: boolean;
 }
 
 export type EventMeta = Event;
+
 export interface EventResources {
   articles?: any[];
   downloads?: any[];
@@ -227,6 +218,7 @@ export interface EventResources {
   books?: any[];
   canonicalReferences?: any[];
 }
+
 export interface EventResourceLink {
   type: string;
   title: string;
@@ -238,43 +230,30 @@ export interface EventResourceLink {
  * PRINT / EDITION / ARTWORK
  */
 export interface Print extends ContentBase {
-  // Physical properties
   dimensions?: string;
   material?: string;
   finish?: string;
   weight?: string;
-  
-  // Edition details
   editionNumber?: string | number;
   editionSize?: number;
   limitedEdition?: boolean;
   signed?: boolean;
   numbered?: boolean;
-  
-  // Production
   printMethod?: string;
   paperType?: string;
   inkType?: string;
-  
-  // Pricing
   price?: string | number;
   currency?: string;
   salePrice?: string | number;
   inStock?: boolean;
   stockQuantity?: number;
-  
-  // Shipping
   shippingWeight?: string;
   shippingCost?: string | number;
   shipsFrom?: string;
-  
-  // Art details
   artist?: string;
   yearCreated?: string | number;
   style?: string;
   medium?: string;
-  
-  // Display
   frame?: string;
   orientation?: "portrait" | "landscape" | "square";
 }
@@ -285,34 +264,19 @@ export type PrintMeta = Print;
  * RESOURCE / FRAMEWORK / TEMPLATE
  */
 export interface Resource extends ContentBase {
-  // Type classification - CRITICAL: match actual field names
   resourceType?: "framework" | "template" | "checklist" | "guide" | "worksheet" | string;
   applications?: string[];
-  
-  // Additional fields
   useCases?: string[];
   industries?: string[];
-  
-  // Format
   format?: "pdf" | "doc" | "xls" | "notion" | "figma" | "miro" | string;
-  
-  // Complexity
   complexity?: "simple" | "moderate" | "complex";
   timeRequired?: string;
-  
-  // Version
   version?: string;
   lastUpdated?: string;
-  
-  // Dependencies
   prerequisites?: string[];
   toolsRequired?: string[];
-  
-  // Output
   deliverables?: string[];
   outcomes?: string[];
-  
-  // Support
   instructions?: string;
   examples?: string[];
   tips?: string[];
@@ -324,37 +288,22 @@ export type ResourceMeta = Resource;
  * STRATEGY / METHODOLOGY
  */
 export interface Strategy extends ContentBase {
-  // Strategy classification
   strategyType?: "business" | "marketing" | "product" | "operational" | "financial" | string;
-  
-  // Framework details
   framework?: string;
   methodology?: string;
-  
-  // Application scope
   scope?: "department" | "team" | "organization" | "project";
   scale?: "small" | "medium" | "large" | "enterprise";
-  
-  // Timeframe
   timeframe?: "short-term" | "mid-term" | "long-term";
   implementationTime?: string;
-  
-  // Metrics
   kpis?: string[];
   successMetrics?: string[];
   roi?: string;
-  
-  // Implementation
   steps?: string[];
   phases?: string[];
   milestones?: string[];
-  
-  // Risks
   risks?: string[];
   challenges?: string[];
   mitigation?: string[];
-  
-  // Tools
   tools?: string[];
   templates?: string[];
   software?: string[];
@@ -366,38 +315,25 @@ export type StrategyMeta = Strategy;
  * CANON / REFERENCE / ARCHIVE
  */
 export interface Canon extends ContentBase {
-  // Canon classification
   canonType?: "principle" | "law" | "rule" | "heuristic" | "maxim" | string;
-  
-  // Origin
   origin?: string;
   source?: string;
   attributedTo?: string;
   era?: string;
-  
-  // Application
   domain?: string[];
   context?: string[];
   exceptions?: string[];
-  
-  // Strength
   strength?: "weak" | "moderate" | "strong" | "absolute";
   evidence?: string;
   counterpoints?: string[];
-  
-  // Related
   relatedCanons?: string[];
   derivedFrom?: string;
   variations?: string[];
-  
-  // Metadata - CRITICAL: match actual field names
   volumeNumber?: string | number;
   order?: number;
   importance?: number;
   frequency?: string;
   memorability?: string;
-  
-  // Presentation
   icon?: string;
   color?: string;
   symbol?: string;
@@ -409,24 +345,17 @@ export type CanonMeta = Canon;
  * PAGE / STATIC PAGE
  */
 export interface Page extends ContentBase {
-  // Page-specific fields
   pageType?: string;
   parentPage?: string;
   showInNav?: boolean;
   layout?: "default" | "wide" | "narrow" | "fullscreen";
   template?: string;
-  
-  // SEO
   metaTitle?: string;
   metaDescription?: string;
   noIndex?: boolean;
-  
-  // Navigation
   navOrder?: number;
   navTitle?: string;
   navGroup?: string;
-  
-  // Components
   components?: any[];
   sections?: any[];
 }
@@ -434,7 +363,7 @@ export interface Page extends ContentBase {
 export type PageMeta = Page;
 
 // ---------------------------------------------------------------------------
-// 3. UNIFIED TYPES
+// 4. UNIFIED TYPES
 // ---------------------------------------------------------------------------
 
 /**
@@ -469,24 +398,6 @@ export interface ContentEntry {
     [key: string]: any;
   };
   [key: string]: any;
-}
-
-// ---------------------------------------------------------------------------
-// 4. HELPER TYPES & UTILITIES
-// ---------------------------------------------------------------------------
-
-/**
- * Metadata-only version (for listings)
- */
-export type ContentMeta = Omit<ContentBase, 'content' | 'body'>;
-
-/**
- * Content with ID for database operations
- */
-export interface ContentWithId extends ContentBase {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 /**
@@ -548,28 +459,23 @@ export interface ContentStats {
 }
 
 // ---------------------------------------------------------------------------
-// 5. TYPE UTILITY FUNCTIONS
+// 5. FIELD KEY TYPES
 // ---------------------------------------------------------------------------
 
-/**
- * Get content type from document
- */
-export function getContentType(doc: any): string {
-  if (isPost(doc)) return 'post';
-  if (isBook(doc)) return 'book';
-  if (isDownload(doc)) return 'download';
-  if (isEvent(doc)) return 'event';
-  if (isPrint(doc)) return 'print';
-  if (isResource(doc)) return 'resource';
-  if (isStrategy(doc)) return 'strategy';
-  if (isCanon(doc)) return 'canon';
-  if (isPage(doc)) return 'page';
-  return 'unknown';
-}
+export type DownloadFieldKey = keyof DownloadMeta;
+export type EventFieldKey = keyof EventMeta;
+export type PostFieldKey = keyof Post;
+export type BookFieldKey = keyof Book;
+export type PrintFieldKey = keyof PrintMeta;
+export type ResourceFieldKey = keyof ResourceMeta;
+export type StrategyFieldKey = keyof StrategyMeta;
+export type CanonFieldKey = keyof CanonMeta;
+export type PageFieldKey = keyof PageMeta;
 
-/**
- * Type guard functions
- */
+// ---------------------------------------------------------------------------
+// 6. TYPE GUARD FUNCTIONS
+// ---------------------------------------------------------------------------
+
 export function isPost(doc: any): doc is Post {
   return doc && (doc.type === 'post' || doc.type === 'essay' || doc._raw?.sourceFilePath?.includes('/posts/'));
 }
@@ -606,6 +512,26 @@ export function isPage(doc: any): doc is Page {
   return doc && doc.type === 'page';
 }
 
+// ---------------------------------------------------------------------------
+// 7. UTILITY FUNCTIONS
+// ---------------------------------------------------------------------------
+
+/**
+ * Get content type from document
+ */
+export function getContentType(doc: any): string {
+  if (isPost(doc)) return 'post';
+  if (isBook(doc)) return 'book';
+  if (isDownload(doc)) return 'download';
+  if (isEvent(doc)) return 'event';
+  if (isPrint(doc)) return 'print';
+  if (isResource(doc)) return 'resource';
+  if (isStrategy(doc)) return 'strategy';
+  if (isCanon(doc)) return 'canon';
+  if (isPage(doc)) return 'page';
+  return 'unknown';
+}
+
 /**
  * Convert any document to ContentEntry for backward compatibility
  */
@@ -635,71 +561,10 @@ export function safeCast<T extends ContentBase>(obj: any, defaults: Partial<T> =
 }
 
 // ---------------------------------------------------------------------------
-// 6. FIELD KEY TYPES (For lib/ modules)
+// 8. UTILITY OBJECT EXPORT
 // ---------------------------------------------------------------------------
 
-export type DownloadFieldKey = keyof DownloadMeta;
-export type EventFieldKey = keyof EventMeta;
-export type PostFieldKey = keyof Post;
-export type BookFieldKey = keyof Book;
-export type PrintFieldKey = keyof PrintMeta;
-export type ResourceFieldKey = keyof ResourceMeta;
-export type StrategyFieldKey = keyof StrategyMeta;
-export type CanonFieldKey = keyof CanonMeta;
-export type PageFieldKey = keyof PageMeta;
-
-// ---------------------------------------------------------------------------
-// 7. EXPORT EVERYTHING
-// ---------------------------------------------------------------------------
-
-export default {
-  // Base Types
-  ContentBase,
-  ContentMeta,
-  ContentWithId,
-  
-  // Specific Types
-  Post,
-  Book,
-  Download,
-  DownloadMeta,
-  Event,
-  EventMeta,
-  EventResources,
-  EventResourceLink,
-  Print,
-  PrintMeta,
-  Resource,
-  ResourceMeta,
-  Strategy,
-  StrategyMeta,
-  Canon,
-  CanonMeta,
-  Page,
-  PageMeta,
-  
-  // Union Types
-  DocumentTypes,
-  ContentEntry,
-  
-  // Helper Types
-  SearchResult,
-  ContentFilter,
-  PaginatedResponse,
-  ContentStats,
-  
-  // Field Key Types
-  DownloadFieldKey,
-  EventFieldKey,
-  PostFieldKey,
-  BookFieldKey,
-  PrintFieldKey,
-  ResourceFieldKey,
-  StrategyFieldKey,
-  CanonFieldKey,
-  PageFieldKey,
-  
-  // Utility Functions
+export const TypeUtils = {
   isPost,
   isBook,
   isDownload,
@@ -712,4 +577,15 @@ export default {
   getContentType,
   toContentEntry,
   safeCast,
+  normalizeImage,
 };
+
+// ---------------------------------------------------------------------------
+// 9. DEFAULT EXPORT
+// ---------------------------------------------------------------------------
+
+const ContentTypes = {
+  utils: TypeUtils,
+};
+
+export default ContentTypes;

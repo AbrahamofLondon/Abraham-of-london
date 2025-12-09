@@ -1,90 +1,136 @@
-// pages/index.tsx
+// pages/index.tsx - MODERNIZED RESPONSIVE VERSION
 import * as React from "react";
-import type { NextPage, GetStaticProps } from "next";
-import Link from "next/link";
+import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
+import type { NextPage, GetStaticProps } from "next";
+import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
+import MandateStatement from "@/components/MandateStatement";
+import { BookCard, BlogPostCard } from "@/components/Cards";
+import ShortCard from "@/components/ShortCard";
+
 import {
-  getPublicPosts,
-  getPublicBooks,
-  getPublicDownloads,
-  getFeaturedCanon,
+  allPosts,
+  allBooks,
   type Post,
   type Book,
-  type Download,
-  type Canon,
-} from "@/lib/content";
-import {
-  BlogPostCard,
-  BookCard,
-  BaseCard,
-} from "@/components/Cards";
+  getPublishedDocuments,
+  getLatestShorts,
+} from "@/lib/contentlayer-helper";
+import type { Short } from "contentlayer/generated";
 
-/* -------------------------------------------------------------------------- */
-/* Types                                                                      */
-/* -------------------------------------------------------------------------- */
+// Device detection hook for responsive design
+const useDeviceType = () => {
+  const [deviceType, setDeviceType] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
-type HomePageProps = {
-  featuredPost: Post | null;
-  latestPosts: Post[];
-  featuredBooks: Book[];
-  featuredDownloads: Download[];
-  canonPrimary: Canon | null;
-  canonSecondary: Canon[];
+  React.useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      if (width < 768) setDeviceType('mobile');
+      else if (width < 1024) setDeviceType('tablet');
+      else setDeviceType('desktop');
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  return deviceType;
 };
+
+const VenturesSection = dynamic(
+  () => import("@/components/homepage/VenturesSection"),
+  {
+    ssr: false,
+    loading: () => (
+      <section className="py-12 md:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 md:mb-12 text-center">
+            <p className="mb-3 md:mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+              Ventures
+            </p>
+            <h2 className="mb-3 md:mb-4 font-serif text-2xl md:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
+              Where philosophy becomes operating system
+            </h2>
+            <p className="mx-auto max-w-2xl text-base md:text-lg text-gray-600 dark:text-gray-300">
+              Alomarada, Endureluxe, and InnovateHub are not side projects.
+              They are infrastructure.
+            </p>
+          </div>
+          <div className="grid gap-6 md:gap-8 md:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-48 md:h-64 rounded-xl md:rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    ),
+  }
+);
+
+const StrategicFunnelStrip = dynamic(
+  () => import("@/components/homepage/StrategicFunnelStrip"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-48 md:h-64 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 animate-pulse" />
+    ),
+  }
+);
+
+const StatsBar = dynamic(() => import("@/components/homepage/StatsBar"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-16 md:h-24 border-y border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 animate-pulse" />
+  ),
+});
+
+const AboutSection = dynamic(
+  () => import("@/components/homepage/AboutSection"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-48 md:h-64 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 animate-pulse" />
+    ),
+  }
+);
+
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+
+/* -------------------------------------------------------------------------- */
+/* SECTION DIVIDER                                                            */
+/* -------------------------------------------------------------------------- */
+
+const SectionDivider: React.FC = () => {
+  const deviceType = useDeviceType();
+  
+  return (
+    <div className={`relative overflow-hidden ${deviceType === 'mobile' ? 'h-12' : 'h-16'}`}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-px w-16 md:w-32 bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700" />
+        <div className="mx-3 md:mx-6 flex items-center gap-2">
+          <div className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600" />
+          <div className="h-1 w-1 rounded-full bg-gradient-to-r from-amber-300 to-amber-500" />
+          <div className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600" />
+        </div>
+        <div className="h-px w-16 md:w-32 bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700" />
+      </div>
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/* CANON ENTRY CARDS                                                          */
+/* -------------------------------------------------------------------------- */
 
 type CanonEntryType = "catechism" | "campaign" | "letter";
-
-type CanonEntryProps = {
-  title: string;
-  subtitle: string;
-  href: string;
-  imageSrc: string;
-  type: CanonEntryType;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Data helpers                                                               */
-/* -------------------------------------------------------------------------- */
-
-function safeSortByDate<T extends { date?: string | null }>(items: T[]): T[] {
-  return [...items].sort((a, b) => {
-    const da = a.date ? new Date(a.date).getTime() : 0;
-    const db = b.date ? new Date(b.date).getTime() : 0;
-    return db - da;
-  });
-}
-
-function mapCanonToEntryProps(
-  canon: Canon,
-  fallbackType: CanonEntryType,
-): CanonEntryProps {
-  const anyCanon = canon as any;
-
-  const entryType: CanonEntryType =
-    anyCanon.entryType && ["catechism", "campaign", "letter"].includes(anyCanon.entryType)
-      ? anyCanon.entryType
-      : fallbackType;
-
-  return {
-    title: canon.title,
-    subtitle:
-      anyCanon.subtitle ||
-      canon.excerpt ||
-      canon.description ||
-      "Entry from the Abraham of London Canon.",
-    href: `/canon/${canon.slug}`,
-    imageSrc:
-      anyCanon.coverImage ||
-      "/assets/images/books/the-architecture-of-human-purpose.jpg",
-    type: entryType,
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/* Canon Cards                                                                */
-/* -------------------------------------------------------------------------- */
 
 const canonEntryColors: Record<
   CanonEntryType,
@@ -92,22 +138,30 @@ const canonEntryColors: Record<
 > = {
   catechism: {
     bg: "bg-blue-50 dark:bg-blue-900/10",
-    text: "text-blue-700 dark:text-blue-300",
-    border: "border-blue-200 dark:border-blue-800/40",
+    text: "text-blue-600 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-800/30",
     accent: "bg-gradient-to-r from-blue-500 to-blue-600",
   },
   campaign: {
     bg: "bg-emerald-50 dark:bg-emerald-900/10",
-    text: "text-emerald-700 dark:text-emerald-300",
-    border: "border-emerald-200 dark:border-emerald-800/40",
+    text: "text-emerald-600 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-800/30",
     accent: "bg-gradient-to-r from-emerald-500 to-emerald-600",
   },
   letter: {
     bg: "bg-purple-50 dark:bg-purple-900/10",
-    text: "text-purple-700 dark:text-purple-300",
-    border: "border-purple-200 dark:border-purple-800/40",
+    text: "text-purple-600 dark:text-purple-400",
+    border: "border-purple-200 dark:border-purple-800/30",
     accent: "bg-gradient-to-r from-purple-500 to-purple-600",
   },
+};
+
+type CanonEntryProps = {
+  title: string;
+  subtitle: string;
+  href: string;
+  imageSrc: string;
+  type: CanonEntryType;
 };
 
 const CanonEntryCard: React.FC<CanonEntryProps> = ({
@@ -120,34 +174,27 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
   const colors = canonEntryColors[type];
 
   return (
-    <Link href={href} className="group block h-full">
+    <Link href={href} className="group block">
       <article
-        className={[
-          "flex h-full items-center gap-4 rounded-2xl border-2 p-4 transition-all",
-          "hover:-translate-y-0.5 hover:shadow-xl",
-          colors.bg,
-          colors.border,
-        ].join(" ")}
+        className={`flex items-center gap-3 md:gap-4 rounded-xl md:rounded-2xl border ${colors.border} ${colors.bg} p-3 md:p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-95`}
       >
-        <div className="relative h-20 w-14 flex-shrink-0 overflow-hidden rounded-md border border-gray-200/70 dark:border-gray-700/70">
+        <div className="relative h-16 w-12 md:h-20 md:w-14 overflow-hidden rounded border border-gray-200 dark:border-gray-700">
           <Image
             src={imageSrc}
             alt={title}
             fill
-            sizes="80px"
+            sizes="(max-width: 768px) 60px, 80px"
             className="object-cover object-center"
+            style={{ objectFit: "cover", objectPosition: "center" }}
           />
         </div>
-        <div className="flex-1">
-          <div className="mb-1 flex items-center gap-2">
-            <h4 className="font-serif text-sm font-semibold text-gray-900 dark:text-white">
+        <div className="flex-1 min-w-0">
+          <div className="mb-1 flex items-center gap-1 md:gap-2">
+            <h4 className="font-serif text-sm md:text-sm font-semibold text-gray-900 dark:text-white truncate">
               {title}
             </h4>
             <span
-              className={[
-                "rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider",
-                colors.text,
-              ].join(" ")}
+              className={`rounded-full px-1.5 py-0.5 text-[0.6rem] md:text-[0.65rem] font-bold uppercase tracking-wider ${colors.text} whitespace-nowrap`}
             >
               {type === "catechism"
                 ? "Q&A"
@@ -156,126 +203,19 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
                 : "Personal"}
             </span>
           </div>
-          <p className="mb-2 text-xs text-gray-700 dark:text-gray-300">
+          <p className="mb-2 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
             {subtitle}
           </p>
           <div
-            className={[
-              "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white",
-              colors.accent,
-            ].join(" ")}
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 md:px-3 md:py-1 text-[0.65rem] md:text-[0.7rem] font-semibold uppercase tracking-[0.15em] md:tracking-[0.18em] text-white ${colors.accent} whitespace-nowrap`}
           >
-            <span>Canon Entry</span>
-            <span className="transition-transform group-hover:translate-x-1">
-              ↠
-            </span>
+            Canon Entry
           </div>
         </div>
-      </article>
-    </Link>
-  );
-};
-
-type CanonPrimaryCardProps = {
-  canon: Canon | null;
-};
-
-const CanonPrimaryCard: React.FC<CanonPrimaryCardProps> = ({ canon }) => {
-  const anyCanon = canon as any;
-
-  const slug = canon ? canon.slug : "the-architecture-of-human-purpose";
-  const href = canon
-    ? `/canon/${slug}`
-    : "/books/the-architecture-of-human-purpose";
-
-  const title = canon ? canon.title : "The Architecture of Human Purpose";
-  const subtitle =
-    anyCanon?.subtitle ||
-    canon?.description ||
-    canon?.excerpt ||
-    "Prelude MiniBook — foundations of purpose, governance, and human destiny.";
-
-  const coverImage =
-    anyCanon?.coverImage ||
-    "/assets/images/books/the-architecture-of-human-purpose.jpg";
-
-  const volumeLabel =
-    anyCanon?.volumeLabel || "Volume I · Prelude (Limited Release)";
-  const categoryLabel =
-    anyCanon?.categoryLabel || "Canon · Foundations of Purpose";
-
-  return (
-    <Link href={href} className="group block h-full">
-      <article
-        className={[
-          "relative flex h-full flex-col overflow-hidden rounded-3xl",
-          "border border-softGold/15 bg-gradient-to-br",
-          "from-charcoal via-black to-softBlack",
-          "shadow-2xl transition-all duration-500",
-          "hover:-translate-y-1 hover:shadow-3xl hover:shadow-softGold/20",
-        ].join(" ")}
-      >
-        <div className="pointer-events-none absolute inset-0 opacity-60">
-          <div className="absolute -inset-32 bg-[radial-gradient(circle_at_top,_rgba(233,200,130,0.12),_transparent_60%)]" />
-          <div className="absolute left-10 top-0 h-full w-px bg-gradient-to-b from-softGold/50 via-transparent to-transparent" />
-          <div className="absolute right-16 bottom-0 h-full w-px bg-gradient-to-t from-softGold/40 via-transparent to-transparent" />
-        </div>
-
-        <div className="relative grid gap-8 p-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:p-10">
-          {/* Book cover */}
-          <div className="relative flex items-center justify-center">
-            <div className="relative aspect-[3/4] w-full max-w-sm rounded-2xl bg-gradient-to-br from-softGold/15 via-black to-charcoal shadow-[0_25px_60px_rgba(0,0,0,0.85)]">
-              <div className="absolute inset-[6%] overflow-hidden rounded-xl border border-softGold/25 bg-black">
-                <Image
-                  src={coverImage}
-                  alt={title}
-                  fill
-                  sizes="(max-width: 768px) 80vw, 40vw"
-                  className="object-contain"
-                  priority
-                />
-              </div>
-              <div className="pointer-events-none absolute left-0 top-8 h-[72%] w-1 rounded-full bg-gradient-to-b from-softGold/40 via-transparent to-transparent" />
-            </div>
-          </div>
-
-          {/* Copy */}
-          <div className="flex flex-col justify-center">
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-softGold/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-softGold">
-                Entry into the Canon
-              </span>
-              <span className="rounded-full border border-softGold/30 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-softGold/80">
-                {volumeLabel}
-              </span>
-            </div>
-
-            <h3 className="mb-3 font-serif text-2xl font-light text-ivory md:text-3xl lg:text-4xl">
-              {title}
-            </h3>
-
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-softGold/80">
-              {categoryLabel}
-            </p>
-
-            <p className="mb-6 text-sm leading-relaxed text-ivory/75 md:text-[0.95rem]">
-              {subtitle}
-            </p>
-
-            <div className="mt-auto flex items-center justify-between border-t border-softGold/15 pt-4">
-              <span className="text-[0.7rem] font-medium uppercase tracking-[0.22em] text-ivory/55">
-                Foundational Text · {canon ? "Canon Entry" : "Prelude · Limited Release"}
-              </span>
-              <div className="flex items-center gap-2 text-softGold transition-all group-hover:gap-3 group-hover:text-softGold/80">
-                <span className="text-sm font-semibold">
-                  {canon ? "Enter Canon" : "Open Prelude"}
-                </span>
-                <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">
-                  ↠
-                </span>
-              </div>
-            </div>
-          </div>
+        <div
+          className={`${colors.text} opacity-70 transition-transform group-hover:translate-x-1 md:group-hover:translate-x-2 flex-shrink-0`}
+        >
+          →
         </div>
       </article>
     </Link>
@@ -283,425 +223,560 @@ const CanonPrimaryCard: React.FC<CanonPrimaryCardProps> = ({ canon }) => {
 };
 
 /* -------------------------------------------------------------------------- */
-/* Stats strip                                                                */
+/* CANON PRIMARY CARD                                                         */
 /* -------------------------------------------------------------------------- */
 
-const StatPill: React.FC<{
-  label: string;
-  value: number;
-  helper?: string;
-}> = ({ label, value, helper }) => (
-  <div className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-gray-200 backdrop-blur-sm sm:px-5">
-    <div className="flex items-baseline gap-2">
-      <span className="font-serif text-2xl font-normal text-softGold">
-        {value}
-      </span>
-      <span className="text-[0.7rem] uppercase tracking-[0.22em] text-gray-400">
-        {label}
-      </span>
-    </div>
-    {helper && (
-      <p className="mt-1 text-xs text-gray-400">
-        {helper}
-      </p>
-    )}
-  </div>
-);
-
-/* -------------------------------------------------------------------------- */
-/* Page                                                                       */
-/* -------------------------------------------------------------------------- */
-
-const HomePage: NextPage<HomePageProps> = ({
-  featuredPost,
-  latestPosts,
-  featuredBooks,
-  featuredDownloads,
-  canonPrimary,
-  canonSecondary,
-}) => {
-  const siteTitle = "Abraham of London";
-  const siteDescription =
-    "Structural thinking for fathers, founders, and builders of legacy.";
-
+const CanonPrimaryCard: React.FC = () => {
+  const deviceType = useDeviceType();
+  
   return (
-    <Layout title={siteTitle} description={siteDescription}>
-      {/* HERO – tall, bold, image-dominant, text-wrapped */}
-      <section className="relative overflow-hidden border-b border-white/10 bg-gradient-to-b from-black via-slate-950 to-charcoal">
-        <div className="pointer-events-none absolute inset-0 opacity-60">
-          <div className="absolute -inset-40 bg-[radial-gradient(circle_at_top,_rgba(233,200,130,0.16),_transparent_60%)]" />
-          <div className="absolute inset-y-0 left-10 w-px bg-gradient-to-b from-softGold/70 via-transparent to-transparent" />
-          <div className="absolute inset-y-0 right-24 w-px bg-gradient-to-t from-softGold/60 via-transparent to-transparent" />
-        </div>
-
-        <div className="relative mx-auto flex min-h-[78vh] max-w-6xl flex-col gap-12 px-4 pb-16 pt-20 sm:px-6 lg:flex-row lg:items-center lg:gap-16 lg:pb-24 lg:pt-24">
-          {/* Left column: text wrapping the hero visual */}
-          <div className="relative z-10 flex-1 space-y-6">
-            <p className="inline-flex items-center gap-2 rounded-full border border-softGold/40 bg-softGold/10 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-softGold">
-              Canon · Strategy · Fatherhood
-            </p>
-
-            <h1 className="font-serif text-4xl font-normal leading-tight text-cream sm:text-5xl lg:text-[3.1rem]">
-              Structural thinking for{" "}
-              <span className="text-softGold">fathers</span>,{" "}
-              <span className="text-softGold">founders</span>, and{" "}
-              <span className="text-softGold">builders of legacy</span>.
-            </h1>
-
-            <p className="max-w-xl text-sm leading-relaxed text-gray-200 sm:text-[0.95rem]">
-              Not motivational noise. Not abstract theology. A canon of
-              lived strategy — purpose, governance, and multi-generational
-              stewardship — for those who intend to carry weight in history,
-              not just comment on it.
-            </p>
-
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                href="/canon"
-                className="inline-flex items-center gap-2 rounded-full bg-softGold px-5 py-2.5 text-sm font-semibold text-black shadow-[0_12px_30px_rgba(226,197,120,0.35)] transition-transform hover:-translate-y-0.5"
-              >
-                Enter the Canon
-                <span className="text-lg">↠</span>
-              </Link>
-              <Link
-                href="/content"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-semibold text-cream transition hover:border-softGold/50 hover:bg-white/10"
-              >
-                Browse the Library
-              </Link>
-            </div>
-
-            <div className="pt-6">
-              <div className="inline-flex flex-wrap gap-3 text-[0.7rem] uppercase tracking-[0.18em] text-gray-400">
-                <span>Essays</span>
-                <span className="h-px w-6 bg-gray-600" />
-                <span>Volumes</span>
-                <span className="h-px w-6 bg-gray-600" />
-                <span>Tools & Covenants</span>
+    <Link
+      href="/books/the-architecture-of-human-purpose"
+      className="group block h-full"
+    >
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl md:rounded-3xl border border-amber-200 dark:border-amber-800/30 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-lg md:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl md:hover:shadow-3xl">
+        <div className="p-4 md:p-6 lg:p-8">
+          {/* Mobile layout - vertical */}
+          {deviceType === 'mobile' ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-center">
+                <div className="relative aspect-[3/4] w-48 rounded-xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800">
+                  <div className="absolute inset-[3%] overflow-hidden rounded-lg border border-amber-200 dark:border-amber-800/30">
+                    <Image
+                      src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+                      alt="The Architecture of Human Purpose — Prelude MiniBook"
+                      fill
+                      sizes="(max-width: 768px) 90vw"
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Right column: tall hero banner / stacked visual */}
-          <div className="relative z-10 flex-1">
-            <div className="relative mx-auto h-[420px] max-w-sm">
-              {/* Base panel */}
-              <div className="absolute inset-0 rounded-3xl border border-softGold/20 bg-gradient-to-br from-black/80 via-slate-950 to-black/90 shadow-[0_26px_80px_rgba(0,0,0,0.9)]" />
-              {/* Book / canon preview image */}
-              <div className="absolute inset-x-6 top-6 bottom-20 rounded-2xl border border-softGold/25 bg-black/80">
-                <Image
-                  src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                  alt="The Architecture of Human Purpose"
-                  fill
-                  sizes="(max-width: 768px) 80vw, 28vw"
-                  className="object-contain"
-                  priority
-                />
-              </div>
-              {/* Lower stat band */}
-              <div className="absolute inset-x-4 bottom-4 flex items-center justify-between rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-xs text-gray-200 backdrop-blur-md">
-                <div className="flex flex-col">
-                  <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-softGold/90">
-                    Prelude · Volume I
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+                    Entry into the Canon
                   </span>
-                  <span className="text-[0.75rem] text-gray-300">
-                    The Architecture of Human Purpose
+                  <span className="rounded-full border border-amber-300 dark:border-amber-800/30 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-600/80 dark:text-amber-400/80">
+                    Volume I · Prelude
                   </span>
                 </div>
-                <Link
-                  href="/books/the-architecture-of-human-purpose"
-                  className="inline-flex items-center gap-1 rounded-full border border-softGold/40 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-softGold hover:bg-softGold/10"
-                >
-                  Open
-                  <span className="text-sm">↠</span>
-                </Link>
+
+                <h3 className="font-serif text-xl font-semibold text-gray-900 dark:text-white">
+                  The Architecture of Human Purpose
+                </h3>
+
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-600/80 dark:text-amber-400/80">
+                  Canon · Foundations of Purpose
+                </p>
+
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                  A distilled prelude to the Canon — for men who know that human flourishing is designed, not accidental.
+                </p>
+
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-800/20 pt-3">
+                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+                    Foundational Text
+                  </span>
+                  <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 transition-colors group-hover:text-amber-500">
+                    <span className="text-sm font-semibold">Open</span>
+                    <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
+                      →
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* STATS STRIP – compact, grown-up */}
-      <section className="border-b border-white/10 bg-black/70">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div className="max-w-md text-xs text-gray-300">
-            <p className="font-semibold uppercase tracking-[0.22em] text-softGold/80">
-              The Canon as Operating System
-            </p>
-            <p className="mt-1 text-[0.8rem] text-gray-400">
-              Essays for diagnosis, volumes for depth, tools for execution.
-              All anchored in a coherent view of God, man, and history.
-            </p>
-          </div>
-          <div className="grid flex-1 grid-cols-2 gap-3 sm:max-w-md sm:grid-cols-4">
-            <StatPill label="Essays" value={latestPosts.length + (featuredPost ? 1 : 0)} helper="First-principles analysis" />
-            <StatPill label="Volumes" value={featuredBooks.length} helper="Curated long-form" />
-            <StatPill label="Tools" value={featuredDownloads.length} helper="Execution frameworks" />
-            <StatPill label="Canon" value={1 + canonSecondary.length} helper="Core structural texts" />
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURED ESSAY SECTION (if available) */}
-      {featuredPost && (
-        <section className="border-b border-white/5 bg-gradient-to-b from-charcoal via-black to-slate-950">
-          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-16">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-softGold/80">
-                  Featured Essay
-                </p>
-                <h2 className="mt-1 font-serif text-2xl font-normal text-cream sm:text-3xl">
-                  Strategic essay currently at the front of the queue
-                </h2>
+          ) : (
+            /* Desktop/Tablet layout - horizontal */
+            <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+              <div className="relative flex items-center justify-center">
+                <div className="relative aspect-[3/4] w-full max-w-sm rounded-xl md:rounded-2xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800">
+                  <div className="absolute inset-[3%] md:inset-[6%] overflow-hidden rounded-lg md:rounded-xl border border-amber-200 dark:border-amber-800/30">
+                    <Image
+                      src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+                      alt="The Architecture of Human Purpose — Prelude MiniBook"
+                      fill
+                      sizes="(max-width: 768px) 90vw, 40vw"
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
               </div>
-              <Link
-                href="/content"
-                className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-400 hover:text-softGold"
-              >
-                View all essays ↠
-              </Link>
-            </div>
 
-            <BlogPostCard
-              slug={featuredPost.slug}
-              title={featuredPost.title}
-              subtitle={(featuredPost as any).subtitle ?? null}
-              excerpt={featuredPost.excerpt ?? null}
-              description={featuredPost.description ?? null}
-              coverImage={featuredPost.coverImage ?? null}
-              date={featuredPost.date ?? null}
-              author={(featuredPost as any).author ?? "Abraham of London"}
-              tags={featuredPost.tags ?? []}
-              featured={true}
-              readTime={(featuredPost as any).readTime ?? null}
-              category={(featuredPost as any).category ?? "Strategic Essay"}
-              href={`/${featuredPost.slug}`}
-              className="mt-2"
-            />
-          </div>
-        </section>
-      )}
-
-      {/* CANON SPOTLIGHT – wired to featured canon, 1 + 3 balanced items */}
-      <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 dark:border-amber-900/40 dark:bg-amber-900/10">
-              <div className="h-1 w-5 rounded-full bg-gradient-to-r from-amber-400 to-amber-600" />
-              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
-                Entry into the Canon
-              </span>
-            </div>
-            <h2 className="mb-3 font-serif text-3xl font-semibold text-gray-900 dark:text-white sm:text-4xl">
-              Begin with the Prelude and the opening Canon entries
-            </h2>
-            <p className="mx-auto max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-[0.95rem]">
-              The Canon doesn’t start with abstract theory. It begins with a
-              Prelude and a handful of entry pieces that frame purpose,
-              governance, and fatherhood as one continuous assignment.
-            </p>
-          </div>
-
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)]">
-            {/* Primary Canon spotlight */}
-            <CanonPrimaryCard canon={canonPrimary} />
-
-            {/* Side Canon entries */}
-            <div className="flex flex-col gap-4">
-              {canonSecondary.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-amber-300/60 bg-amber-50/60 p-4 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-900/10 dark:text-amber-100">
-                  Additional Canon entries are being catalogued. As volumes and
-                  catechisms go live, they will surface here automatically.
+              <div className="flex flex-col justify-center space-y-4 md:space-y-6">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                  <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+                    Entry into the Canon
+                  </span>
+                  <span className="rounded-full border border-amber-300 dark:border-amber-800/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-600/80 dark:text-amber-400/80">
+                    Volume I · Prelude
+                  </span>
                 </div>
-              )}
 
-              {canonSecondary.map((canon, idx) => {
-                const defaultType: CanonEntryType =
-                  idx === 0 ? "catechism" : idx === 1 ? "campaign" : "letter";
+                <h3 className="font-serif text-xl md:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
+                  The Architecture of Human Purpose
+                </h3>
 
-                const props = mapCanonToEntryProps(canon, defaultType);
-                return <CanonEntryCard key={canon.slug} {...props} />;
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* BOOKS & TOOLS ROW – compact, grown-up grid */}
-      <section className="border-t border-white/10 bg-black/90 py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-softGold/80">
-                Volumes & Execution Tools
-              </p>
-              <h2 className="mt-1 font-serif text-2xl font-normal text-cream sm:text-3xl">
-                Read deeply. Then implement ruthlessly.
-              </h2>
-            </div>
-            <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-gray-400">
-              <Link
-                href="/books"
-                className="hover:text-softGold"
-              >
-                All volumes ↠
-              </Link>
-              <span className="h-px w-6 bg-gray-700" />
-              <Link
-                href="/downloads"
-                className="hover:text-softGold"
-              >
-                All tools ↠
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1.2fr)]">
-            {/* Books */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-                Canon Volumes
-              </h3>
-              {featuredBooks.length === 0 ? (
-                <p className="text-xs text-gray-500">
-                  Volumes are being prepared for release.
+                <p className="text-xs md:text-sm font-semibold uppercase tracking-[0.18em] text-amber-600/80 dark:text-amber-400/80">
+                  Canon · Foundations of Purpose
                 </p>
-              ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {featuredBooks.map((book) => (
-                    <BookCard
-                      key={book.slug}
-                      slug={book.slug}
-                      title={book.title}
-                      subtitle={(book as any).subtitle ?? null}
-                      author={(book as any).author ?? "Abraham of London"}
-                      excerpt={book.excerpt ?? null}
-                      description={book.description ?? null}
-                      coverImage={book.coverImage ?? null}
-                      publishDate={book.date ?? null}
-                      isbn={(book as any).isbn ?? null}
-                      tags={book.tags ?? []}
-                      featured={book.featured ?? false}
-                      href={`/books/${book.slug}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
 
-            {/* Tools / Downloads */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-                Execution Tools & Frameworks
-              </h3>
-              {featuredDownloads.length === 0 ? (
-                <p className="text-xs text-gray-500">
-                  Tools and frameworks will appear here as they are published.
+                <p className="text-sm md:text-base leading-relaxed text-gray-600 dark:text-gray-300">
+                  A distilled, high-level prelude to the Canon — written for men who know that human flourishing is not accidental but designed. This is the reference point for everything else on the site.
                 </p>
-              ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {featuredDownloads.map((dl) => (
-                    <BaseCard
-                      key={dl.slug}
-                      slug={dl.slug}
-                      title={dl.title}
-                      subtitle={(dl as any).subtitle ?? null}
-                      excerpt={dl.excerpt ?? null}
-                      description={dl.description ?? null}
-                      coverImage={dl.coverImage ?? null}
-                      date={dl.date ?? null}
-                      tags={dl.tags ?? []}
-                      featured={dl.featured ?? false}
-                      category={(dl as any).category ?? "Execution Tool"}
-                      readingTime={(dl as any).readTime ?? null}
-                      href={`/downloads/${dl.slug}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* LATEST ESSAYS STRIP (non-featured) */}
-      {latestPosts.length > 0 && (
-        <section className="border-t border-white/5 bg-charcoal py-14">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-serif text-2xl font-normal text-cream sm:text-3xl">
-                Latest essays in circulation
-              </h2>
-              <Link
-                href="/content"
-                className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-400 hover:text-softGold"
-              >
-                Open content library ↠
-              </Link>
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-800/20 pt-4">
+                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+                    Foundational Text · Limited Release
+                  </span>
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 transition-colors group-hover:text-amber-500">
+                    <span className="text-sm font-semibold">Open Prelude</span>
+                    <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">
+                      ↠
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {latestPosts.map((post) => (
-                <BlogPostCard
-                  key={post.slug}
-                  slug={post.slug}
-                  title={post.title}
-                  subtitle={(post as any).subtitle ?? null}
-                  excerpt={post.excerpt ?? null}
-                  description={post.description ?? null}
-                  coverImage={post.coverImage ?? null}
-                  date={post.date ?? null}
-                  author={(post as any).author ?? "Abraham of London"}
-                  tags={post.tags ?? []}
-                  featured={false}
-                  readTime={(post as any).readTime ?? null}
-                  category={(post as any).category ?? "Strategic Essay"}
-                  href={`/${post.slug}`}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-    </Layout>
+          )}
+        </div>
+      </article>
+    </Link>
   );
 };
 
 /* -------------------------------------------------------------------------- */
-/* getStaticProps                                                             */
+/* TYPES & DATA FETCHING                                                      */
 /* -------------------------------------------------------------------------- */
+
+type HomePageProps = {
+  latestPosts: Post[];
+  featuredBooks: Book[];
+  latestShorts: Short[];
+};
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  // Posts
-  const allPosts = safeSortByDate(getPublicPosts());
-  const featuredPost = allPosts[0] ?? null;
-  const latestPosts = allPosts.slice(1, 4);
-
-  // Books
-  const allBooks = safeSortByDate(getPublicBooks());
-  const featuredBooks = allBooks.slice(0, 3);
-
-  // Downloads / tools
-  const allDownloads = safeSortByDate(getPublicDownloads());
-  const featuredDownloads = allDownloads.slice(0, 3);
-
-  // Canon spotlight
-  const featuredCanon = getFeaturedCanon(4);
-  const [primary, ...rest] = featuredCanon;
-  const canonPrimary = primary ?? null;
-  const canonSecondary = rest.slice(0, 3);
+  const publishedPosts = getPublishedDocuments<Post>(allPosts);
+  const publishedBooks = getPublishedDocuments<Book>(allBooks);
+  const latestShorts = getLatestShorts(3);
 
   return {
     props: {
-      featuredPost,
-      latestPosts,
-      featuredBooks,
-      featuredDownloads,
-      canonPrimary,
-      canonSecondary,
+      latestPosts: publishedPosts.slice(0, 3),
+      featuredBooks: publishedBooks.slice(0, 2),
+      latestShorts,
     },
     revalidate: 3600,
   };
+};
+
+/* -------------------------------------------------------------------------- */
+/* HOME PAGE                                                                  */
+/* -------------------------------------------------------------------------- */
+
+const HomePage: NextPage<HomePageProps> = ({
+  latestPosts,
+  featuredBooks,
+  latestShorts,
+}) => {
+  const deviceType = useDeviceType();
+  const siteTitle = "Abraham of London";
+  const siteTagline =
+    "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
+
+  return (
+    <Layout
+      title={siteTitle}
+      description={siteTagline}
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: siteTitle,
+        description: siteTagline,
+        url: siteUrl,
+        publisher: {
+          "@type": "Person",
+          name: "Abraham of London",
+        },
+      }}
+    >
+      <Head>
+        <title>{siteTitle} | Structural Thinking for Builders of Legacy</title>
+        <meta name="description" content={siteTagline} />
+        <meta property="og:title" content={siteTitle} />
+        <meta property="og:description" content={siteTagline} />
+        <meta
+          property="og:image"
+          content={`${siteUrl}/assets/images/social/og-image.jpg`}
+        />
+        <meta property="og:url" content={siteUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={siteTitle} />
+        <meta name="twitter:description" content={siteTagline} />
+        <meta
+          name="twitter:image"
+          content={`${siteUrl}/assets/images/social/twitter-image.jpg`}
+        />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+      </Head>
+
+      {/* HERO */}
+      <section className="relative min-h-[85vh] md:min-h-[90vh] overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 h-60 w-60 md:h-80 md:w-80 rounded-full bg-amber-500/10 blur-3xl dark:bg-amber-500/5" />
+          <div className="absolute -bottom-40 -left-40 h-60 w-60 md:h-80 md:w-80 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/5" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
+          <div className="grid items-center gap-8 lg:gap-16 lg:grid-cols-5">
+            <div className="max-w-xl lg:col-span-3 xl:col-span-2">
+              <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-6 inline-flex items-center gap-2 md:gap-3 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 md:px-4 md:py-2 dark:border-amber-900/30 dark:bg-amber-900/10">
+                  <div className="text-base md:text-lg text-amber-600 dark:text-amber-400">
+                    𓆓
+                  </div>
+                  <span className="text-xs md:text-[0.65rem] font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                    Library of Applied Wisdom
+                  </span>
+                </div>
+
+                <h1 className="mb-4 md:mb-6 font-serif text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight text-gray-900 dark:text-white">
+                  Abraham of London
+                  <span className="mt-2 md:mt-4 block text-lg md:text-xl lg:text-2xl xl:text-3xl font-normal text-gray-600 dark:text-gray-300">
+                    Structural thinking for fathers, founders,
+                    <br className="hidden sm:block" />
+                    and builders of legacy.
+                  </span>
+                </h1>
+
+                <p className="mb-6 md:mb-10 text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+                  For men who carry responsibility for a family, a company, or a
+                  community — this is where faith, history, and strategy are
+                  turned into operating systems, not slogans.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3 md:gap-4">
+                <Link
+                  href="/canon"
+                  className="group inline-flex items-center gap-2 md:gap-3 rounded-lg bg-gradient-to-r from-gray-900 to-black px-6 md:px-8 py-2.5 md:py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95 hover:shadow-xl hover:shadow-gray-900/30 dark:from-amber-600 dark:to-amber-700 dark:hover:shadow-amber-600/30 min-h-[44px]"
+                >
+                  <span>Enter the Canon</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    ↠
+                  </span>
+                </Link>
+                <Link
+                  href="/consulting"
+                  className="group inline-flex items-center gap-2 md:gap-3 rounded-lg border border-gray-300 bg-white px-6 md:px-8 py-2.5 md:py-3 text-sm font-semibold text-gray-900 transition-all hover:scale-105 active:scale-95 hover:bg-gray-50 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 min-h-[44px]"
+                >
+                  <span>Work with Abraham</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+              </div>
+
+              <p className="mt-4 md:mt-6 text-xs uppercase tracking-[0.18em] md:tracking-[0.2em] text-gray-500 dark:text-gray-400">
+                Essays · Canon Volumes · Execution Tools · Inner Circle
+              </p>
+            </div>
+
+            <div className="relative lg:col-span-2 xl:col-span-3">
+              <div className="relative overflow-hidden rounded-xl md:rounded-2xl border border-gray-200 shadow-lg md:shadow-2xl dark:border-gray-800">
+                <div className="relative aspect-video md:aspect-[16/9] w-full">
+                  <Image
+                    src="/assets/images/abraham-of-london-banner.webp"
+                    alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
+                    width={1600}
+                    height={900}
+                    priority
+                    className="h-full w-full object-cover object-center"
+                    style={{ objectFit: "cover", objectPosition: "center" }}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+                </div>
+                <div className="border-t border-gray-100 bg-gradient-to-r from-white to-gray-50 p-4 md:p-5 text-center dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+                  <p className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-300">
+                    Built for men who refuse to outsource responsibility — to
+                    the state, the culture, or the algorithm.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* STATS */}
+      <section className="border-y border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <StatsBar />
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* CANON SPOTLIGHT */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-12 md:py-16 lg:py-20 dark:from-gray-900 dark:to-gray-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 md:mb-12 text-center">
+            <div className="mb-3 md:mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 md:px-4 md:py-2 dark:border-amber-900/30 dark:bg-amber-900/10">
+              <div className="text-xs md:text-sm font-semibold uppercase tracking-[0.18em] md:tracking-[0.2em] text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                Entry into the Canon
+              </div>
+            </div>
+            <h2 className="mb-3 md:mb-4 font-serif text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-gray-900 dark:text-white">
+              Start with the Prelude &amp; the three doorways
+            </h2>
+            <p className="mx-auto max-w-2xl text-base md:text-lg text-gray-600 dark:text-gray-300">
+              The Canon opens through a limited-release Prelude and three entry
+              pieces. Together they frame purpose, destiny, and resilience the
+              way serious men actually live them.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)]">
+            <CanonPrimaryCard />
+            <div className="space-y-3 md:space-y-4">
+              <CanonEntryCard
+                type="catechism"
+                title="The Ultimate Purpose of Man"
+                subtitle="A catechism-style walkthrough of why we exist — anchored in Scripture, stripped of sentimentality."
+                href="/ultimate-purpose-of-man"
+                imageSrc="/assets/images/books/the-architecture-of-human-purpose.jpg"
+              />
+              <CanonEntryCard
+                type="campaign"
+                title="Foundations of Purpose · Volume I"
+                subtitle="The first movement in the Canon — building a scaffold for multi-generational, covenant-level thinking."
+                href="/canon/volume-i-foundations-of-purpose"
+                imageSrc="/assets/images/books/the-architecture-of-human-purpose.jpg"
+              />
+              <CanonEntryCard
+                type="letter"
+                title="When the Storm Finds You"
+                subtitle="A field letter for the man blindsided by loss, delay, and institutional injustice — and still required to stand."
+                href="/when-the-storm-finds-you"
+                imageSrc="/assets/images/writing-desk.webp"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* SHORTS STRIP – nourishing, low-friction */}
+      <section className="bg-gray-50 py-10 md:py-14 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 md:mb-8 space-y-4">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+                Shorts · Outer Court
+              </p>
+              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white">
+                For the days you&apos;re too tired for long form
+              </h2>
+              <p className="mt-2 max-w-xl text-sm md:text-base text-gray-600 dark:text-gray-300">
+                High-protein reflections for the honest skeptic, the overloaded
+                professional, and the over-churched believer who still wants something
+                real — in under five minutes.
+              </p>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <Link
+                href="/shorts"
+                className="text-sm md:text-base font-semibold text-gray-900 underline-offset-4 hover:underline dark:text-amber-300 inline-flex items-center gap-1"
+              >
+                Browse all Shorts
+                <span className="transition-transform hover:translate-x-1">↠</span>
+              </Link>
+              <p className="max-w-xs text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                Think of this as the outer court: safe, accessible, and still anchored
+                in the same standards as the Canon.
+              </p>
+            </div>
+          </div>
+
+          {latestShorts.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Shorts are being prepared. Once live, this will be the easiest place to
+              start when you&apos;re exhausted but still hungry.
+            </p>
+          ) : (
+            <div className="grid gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {latestShorts.map((short) => (
+                <ShortCard key={short._id} short={short} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* LATEST ESSAYS */}
+      <section className="bg-white py-12 md:py-16 dark:bg-gray-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 md:mb-10 space-y-4">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+                Latest Essays
+              </p>
+              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white">
+                From the Canon in motion
+              </h2>
+              <p className="mt-2 max-w-xl text-sm md:text-base text-gray-600 dark:text-gray-300">
+                Long-form essays for fathers, founders, and builders who prefer
+                structure over hype and diagnosis over clickbait.
+              </p>
+            </div>
+            <Link
+              href="/blog"
+              className="text-sm md:text-base font-semibold text-gray-900 underline-offset-4 hover:underline dark:text-amber-300 inline-flex items-center gap-1"
+            >
+              View all essays
+              <span className="transition-transform hover:translate-x-1">↠</span>
+            </Link>
+          </div>
+
+          {latestPosts.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No essays are published yet.
+            </p>
+          ) : (
+            <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {latestPosts.map((post) => (
+                <BlogPostCard key={post._id} post={post} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* BOOKS */}
+      <section className="bg-gradient-to-b from-gray-50 to-white py-12 md:py-16 dark:from-gray-950 dark:to-gray-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 md:mb-10 space-y-4">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+                Canon &amp; Narrative
+              </p>
+              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white">
+                Books in active development
+              </h2>
+              <p className="mt-2 max-w-xl text-sm md:text-base text-gray-600 dark:text-gray-300">
+                The Canon volumes and memoir projects that will anchor this
+                entire ecosystem — theology, strategy, and story in one spine.
+              </p>
+            </div>
+            <Link
+              href="/books"
+              className="text-sm md:text-base font-semibold text-gray-900 underline-offset-4 hover:underline dark:text-amber-300 inline-flex items-center gap-1"
+            >
+              View all books
+              <span className="transition-transform hover:translate-x-1">↠</span>
+            </Link>
+          </div>
+
+          {featuredBooks.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No books are registered yet.
+            </p>
+          ) : (
+            <div className="grid gap-4 md:gap-6 md:grid-cols-2">
+              {featuredBooks.map((book) => (
+                <BookCard key={book._id} book={book} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* MANDATE / ABOUT / VENTURES STRIP */}
+      <section className="bg-white py-12 md:py-16 dark:bg-gray-950">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <MandateStatement />
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      <VenturesSection />
+      <StrategicFunnelStrip />
+      <AboutSection />
+
+      {/* Mobile-specific optimizations */}
+      <style jsx global>{`
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+          /* Prevent zoom on iOS */
+          input, 
+          textarea, 
+          select {
+            font-size: 16px !important;
+          }
+          
+          /* Better touch targets */
+          a[role="button"],
+          button,
+          .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+          }
+          
+          /* Optimize image loading */
+          img {
+            content-visibility: auto;
+          }
+        }
+        
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+        
+        /* Line clamp for better text handling */
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        .line-clamp-3 {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        /* Smooth scrolling */
+        html {
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+        }
+      `}</style>
+    </Layout>
+  );
 };
 
 export default HomePage;

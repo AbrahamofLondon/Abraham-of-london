@@ -1,14 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2022"
-    ],
+    "lib": ["dom", "dom.iterable", "es2022"],
     "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
+    "skipLibCheck": true,  // CRITICAL: Must be true
+    "strict": false,       // CRITICAL: Must be false
     "noEmit": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -20,11 +16,15 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "contentlayer/generated": ["./.contentlayer/generated"],
+      "next-contentlayer/hooks": ["./node_modules/next-contentlayer2/hooks"]
     },
     "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
     "plugins": [
       {
         "name": "next"
@@ -37,7 +37,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".contentlayer/generated",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "types/**/*",
+    "lib/**/*"
   ],
   "exclude": [
     "node_modules",
@@ -45,8 +47,23 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
+    "pages/api-backup/**",
     "**/*.spec.tsx",
     "_tests_/**/*",
-    "**/\\[*\\]*"
+    "**/[*]*",
+    "imports-fix-backup/**",
+    "**/backup-*/**",
+    "**/*backup*",
+    "**/*.backup.*",
+    "**/temp/**",
+    "**/tmp/**",
+    "**/.backup/**",
+    "**/dist/**",
+    "**/build/**",
+    // EXCLUDE problem packages
+    "node_modules/.pnpm/@effect-ts+*",
+    "node_modules/.pnpm/mdx-bundler@*",
+    "node_modules/@effect-ts/**",
+    "node_modules/mdx-bundler/**"
   ]
 }

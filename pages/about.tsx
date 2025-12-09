@@ -1,4 +1,4 @@
-// pages/about.tsx
+// pages/about.tsx - FIXED IMPORTS
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -614,3 +614,4 @@ const AboutPage: NextPage = () => {
 };
 
 export default AboutPage;
+

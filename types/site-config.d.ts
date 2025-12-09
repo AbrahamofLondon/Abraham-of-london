@@ -1,5 +1,4 @@
-// types/site-config.ts
-
+// types/site-config.ts - UPDATED VERSION
 // Define the core types here to avoid circular dependencies
 export type SocialPlatform = 
   | "twitter" 
@@ -48,6 +47,7 @@ export interface AnalyticsConfig {
   facebookPixelId?: string;
 }
 
+// ADD getPageTitle method to the base SiteConfig interface
 export interface SiteConfig {
   siteUrl: string;
   title: string;
@@ -58,6 +58,8 @@ export interface SiteConfig {
   favicon?: FaviconConfig;
   analytics?: AnalyticsConfig;
   socialLinks?: SocialLink[];
+  // Add this method to fix the type error
+  getPageTitle?: (pageTitle?: string) => string;
 }
 
 // Default social links from your siteConfig

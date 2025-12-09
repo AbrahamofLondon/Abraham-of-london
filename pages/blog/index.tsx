@@ -14,8 +14,8 @@ import {
   type PostDocument as Post,
 } from "@/lib/contentlayer-helper";
 
-// Card system
-import { BlogPostCard } from "@/components/Cards";
+// Use the correct import from BlogPostCard
+import { BlogPostCard } from "@/components/BlogPostCard";
 
 type Props = {
   posts: Post[];

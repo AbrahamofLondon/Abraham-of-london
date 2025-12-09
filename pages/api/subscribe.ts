@@ -23,8 +23,8 @@ interface SubscribeRequestBody {
   metadata?: Record<string, unknown>;
   tags?: string[];
   referrer?: string;
-  website?: string; // Honeypot
-  confirm_email?: string; // Honeypot
+  website?: string;        // Honeypot
+  confirm_email?: string;  // Honeypot
   recaptchaToken?: string;
   source?: string;
   userAgent?: string;
@@ -61,7 +61,7 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
 
 async function subscribeHandler(
   req: NextApiRequest,
-  res: NextApiResponse<SubscribeResponseBody>
+  res: NextApiResponse<SubscribeResponseBody>,
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -127,7 +127,7 @@ async function subscribeHandler(
     // 🔒 Shared per-IP rate limiting (generic API profile)
     const rlKey = getRateLimitKey(
       req,
-      RATE_LIMIT_CONFIGS.API_GENERAL.keyPrefix
+      RATE_LIMIT_CONFIGS.API_GENERAL.keyPrefix,
     );
     const rl = rateLimit(rlKey, RATE_LIMIT_CONFIGS.API_GENERAL);
     const rlHeaders = createRateLimitHeaders(rl);
@@ -161,7 +161,7 @@ async function subscribeHandler(
       recaptchaResult = await verifyRecaptcha(
         recaptchaToken,
         "generic_subscribe",
-        clientIp
+        clientIp,
       );
       if (!recaptchaResult.success) {
         // eslint-disable-next-line no-console

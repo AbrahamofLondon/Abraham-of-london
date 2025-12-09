@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import crypto from "node:crypto";
+import crypto from "crypto";
 import { Pool, type PoolClient, type QueryResult } from "pg";
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,6 @@
-// components/Footer.tsx
+// components/Footer.tsx - MODERNIZED RESPONSIVE VERSION
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -14,348 +16,386 @@ import {
   MessageCircle,
   Phone,
   ArrowUp,
+  Globe,
+  FileText,
+  BookOpen,
 } from "lucide-react";
-import { siteConfig } from "@/lib/imports";
 
-// Extended type that includes kind for icon mapping
-interface FooterSocialLink extends SocialLink {
-  kind?: string; // 'kind' is your custom property for icon mapping
-}
+// Simplified site configuration to avoid external dependencies
+const SITE_CONFIG = {
+  title: "Abraham of London",
+  description: "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
+  contact: {
+    email: "info@abrahamoflondon.org",
+    phone: "+44 20 8622 5909",
+    location: "Based in London, working globally"
+  },
+  socialLinks: [
+    { href: "https://twitter.com/abrahamoflondon", label: "Twitter", kind: "twitter" },
+    { href: "https://linkedin.com/company/abraham-of-london", label: "LinkedIn", kind: "linkedin" },
+    { href: "https://instagram.com/abrahamoflondon", label: "Instagram", kind: "instagram" },
+    { href: "https://youtube.com/@abrahamoflondon", label: "YouTube", kind: "youtube" },
+    { href: "mailto:info@abrahamoflondon.org", label: "Email", kind: "email" },
+  ]
+} as const;
 
-const iconMap: Record<
-  string,
-  React.ComponentType<React.SVGProps<SVGSVGElement>>
-> = {
+type SocialPlatform = "twitter" | "linkedin" | "instagram" | "youtube" | "email" | "facebook" | "tiktok" | "medium";
+
+const iconMap: Record<SocialPlatform, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   twitter: Twitter,
   linkedin: Linkedin,
   instagram: Instagram,
   youtube: Youtube,
+  email: Mail,
   facebook: Facebook,
   tiktok: MessageCircle,
-  email: Mail,
-  phone: Phone,
-  whatsapp: MessageCircle,
+  medium: BookOpen,
 };
 
-const DEFAULT_SOCIALS: FooterSocialLink[] = [
-  {
-    href: "https://tiktok.com/@abrahamoflondon",
-    label: "TikTok",
-    kind: "tiktok",
-    external: true,
-    platform: "tiktok", // Added required property
-  },
-  {
-    href: "https://x.com/AbrahamAda48634",
-    label: "X",
-    kind: "twitter",
-    external: true,
-    platform: "twitter", // Added required property
-  },
-  {
-    href: "https://www.instagram.com/abraham_of_london_/",
-    label: "Instagram",
-    kind: "instagram",
-    external: true,
-    platform: "instagram", // Added required property
-  },
-  {
-    href: "https://www.facebook.com/share/16tvsnTgRG/",
-    label: "Facebook",
-    kind: "facebook",
-    external: true,
-    platform: "facebook", // Added required property
-  },
-  {
-    href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
-    label: "LinkedIn",
-    kind: "linkedin",
-    external: true,
-    platform: "linkedin", // Added required property
-  },
-  {
-    href: "https://www.youtube.com/@abrahamoflondon",
-    label: "YouTube",
-    kind: "youtube",
-    external: true,
-    platform: "youtube", // Added required property
-  },
-  {
-    href: "mailto:info@abrahamoflondon.org",
-    label: "Email",
-    kind: "email",
-    external: false,
-    platform: "email", // Added required property
-  },
-  {
-    href: "https://wa.me/447496334022",
-    label: "WhatsApp",
-    kind: "whatsapp",
-    external: true,
-    platform: "whatsapp", // Added required property
-  },
-  {
-    href: "tel:+442086225909",
-    label: "Landline",
-    kind: "phone",
-    external: false,
-    platform: "phone", // Added required property
-  },
-];
-
+// Enhanced footer sections for mobile-first design
 const footerSections = [
   {
-    title: "Navigation",
+    title: "Explore",
+    icon: Globe,
     links: [
       { label: "Home", href: "/" },
-      { label: "Content", href: "/content" },
+      { label: "Content Library", href: "/content" },
       { label: "The Canon", href: "/canon" },
+      { label: "Books", href: "/books" },
       { label: "Downloads", href: "/downloads" },
       { label: "Events", href: "/events" },
-      { label: "Ventures", href: "/ventures" },
     ],
   },
   {
     title: "Resources",
+    icon: FileText,
     links: [
-      { label: "Fatherhood Frameworks", href: "/content" },
-      { label: "Founder Tools", href: "/downloads" },
-      { label: "Leadership Resources", href: "/content" },
-      {
-        label: "Canon Campaign",
-        href: "/canon/canon-campaign",
-      },
-      {
-        label: "Volume X — Arc of Future Civilisation",
-        href: "/canon/volume-x-the-arc-of-future-civilisation",
-      },
+      { label: "Fatherhood Frameworks", href: "/fatherhood" },
+      { label: "Founder Tools", href: "/founders" },
+      { label: "Leadership Resources", href: "/leadership" },
+      { label: "Strategy Guides", href: "/strategy" },
+      { label: "Canon Campaign", href: "/canon-campaign" },
     ],
   },
   {
     title: "Connect",
+    icon: MessageCircle,
     links: [
       { label: "Contact", href: "/contact" },
       { label: "Newsletter", href: "/newsletter" },
-      { label: "Speaking", href: "/contact" },
+      { label: "Speaking", href: "/speaking" },
       { label: "Consulting", href: "/consulting" },
-      { label: "Chatham Rooms", href: "/chatham-rooms" },
+      { label: "Inner Circle", href: "/inner-circle" },
     ],
   },
 ];
 
-export default function Footer(): JSX.Element {
-  const title = siteConfig.title || "Abraham of London";
-  const email = siteConfig.email || "info@abrahamoflondon.org";
+// Mobile device detection hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = React.useState(false);
 
-  const configSocials: FooterSocialLink[] = Array.isArray(siteConfig.socialLinks)
-    ? siteConfig.socialLinks.map(social => {
-        // Type-safe extraction of properties
-        const href = typeof social.href === 'string' ? social.href : '';
-        const label = typeof social.label === 'string' ? social.label : '';
-        const platform = (social as any).platform || (social as any).kind || 'general';
-        const external = typeof social.external === 'boolean' ? social.external : 
-                        href.startsWith('http') && !href.startsWith('mailto:') && !href.startsWith('tel:');
-        const kind = (social as any).kind || platform;
-        
-        return {
-          href,
-          label,
-          platform, // Required by SocialLink type
-          external,
-          kind, // Your custom property for icon mapping
-        };
-      })
-    : [];
-
-  const byHref = new Map<string, FooterSocialLink>();
-  [...DEFAULT_SOCIALS, ...configSocials].forEach((item) => {
-    const rawHref = typeof item.href === "string" ? item.href.trim() : "";
-    if (!rawHref) return;
-    byHref.set(rawHref, item);
-  });
-
-  const socials = Array.from(byHref.values()).map((item) => {
-    const external =
-      item.external ??
-      (item.href.startsWith("http") &&
-        !item.href.startsWith("mailto:") &&
-        !item.href.startsWith("tel:"));
-    const Icon =
-      item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
-
-    return {
-      ...item,
-      external,
-      Icon,
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
     };
-  });
 
-  const year = new Date().getFullYear();
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-  const scrollToTop = () => {
-    if (typeof window === "undefined") return;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  return isMobile;
+};
+
+// Animated wrapper component
+const FadeIn: React.FC<{
+  children: React.ReactNode;
+  delay?: number;
+  direction?: "up" | "down" | "left" | "right";
+}> = ({ children, delay = 0, direction = "up" }) => {
+  const directions = {
+    up: { y: 20 },
+    down: { y: -20 },
+    left: { x: 20 },
+    right: { x: -20 },
   };
 
   return (
-    <footer className="relative border-t border-gold/20 bg-gradient-to-b from-charcoal to-black">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
+    <motion.div
+      initial={{ opacity: 0, ...directions[direction] }}
+      whileInView={{ opacity: 1, y: 0, x: 0 }}
+      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-50px" }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        {/* Main footer content */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
-          {/* Brand section */}
-          <motion.div
-            className="lg:col-span-1"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <Link href="/" className="group mb-6 flex flex-col gap-1">
-              <span className="font-serif text-2xl font-bold tracking-wide text-cream">
-                Abraham of London
-              </span>
-              <span className="text-xs font-sans font-normal tracking-[0.3em] text-gold/70">
-                FAITH · STRATEGY · FATHERHOOD
-              </span>
-            </Link>
+export default function Footer() {
+  const isMobile = useIsMobile();
+  const [currentYear, setCurrentYear] = React.useState<number>(2024);
 
-            <p className="mb-6 text-sm leading-relaxed text-gold/70">
-              Faith-rooted strategy and leadership for fathers, founders, and
-              board-level leaders who refuse to outsource responsibility.
-            </p>
+  React.useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
-            <div className="mb-6 space-y-3">
-              <div className="flex items-center gap-2 text-sm text-gold/60">
-                <MapPin className="h-4 w-4" />
-                <span>Based in London, working globally</span>
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.href = `mailto:${SITE_CONFIG.contact.email}`;
+  };
+
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.href = `tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, '')}`;
+  };
+
+  return (
+    <footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-amber-500/10">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
+      
+      {/* Glow effect */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand Column - Full width on mobile, first in order */}
+          <FadeIn delay={0.1} direction="up">
+            <div className="lg:col-span-1">
+              <Link 
+                href="/" 
+                className="group inline-block mb-4 lg:mb-6"
+                aria-label="Go to homepage"
+              >
+                <div className="flex flex-col gap-1">
+                  <h2 className="font-serif text-2xl font-bold text-white lg:text-3xl">
+                    Abraham
+                    <span className="text-amber-400"> of London</span>
+                  </h2>
+                  <p className="text-xs font-medium tracking-[0.2em] text-amber-400/70 uppercase">
+                    Faith · Strategy · Fatherhood
+                  </p>
+                </div>
+              </Link>
+
+              <p className="mb-4 text-sm text-gray-300 lg:mb-6 lg:text-base leading-relaxed">
+                {SITE_CONFIG.description}
+              </p>
+
+              {/* Contact Info - Stacked on mobile */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-amber-400/70 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-300">{SITE_CONFIG.contact.location}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
+                  <a
+                    href={`mailto:${SITE_CONFIG.contact.email}`}
+                    onClick={handleEmailClick}
+                    className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
+                    aria-label="Send email"
+                  >
+                    {SITE_CONFIG.contact.email}
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
+                  <a
+                    href={`tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, '')}`}
+                    onClick={handlePhoneClick}
+                    className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
+                    aria-label="Call phone number"
+                  >
+                    {SITE_CONFIG.contact.phone}
+                  </a>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gold/60">
-                <Mail className="h-4 w-4" />
-                <a
-                  href={`mailto:${email}`}
-                  className="transition-colors hover:text-gold"
-                >
-                  {email}
-                </a>
+
+              {/* Social Links - Horizontal on mobile, vertical on desktop */}
+              <div className="mb-6">
+                <p className="mb-3 text-sm font-semibold text-white">Follow</p>
+                <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'flex-col gap-2'}`}>
+                  {SITE_CONFIG.socialLinks.map((social, index) => {
+                    const Icon = social.kind && iconMap[social.kind as SocialPlatform] 
+                      ? iconMap[social.kind as SocialPlatform] 
+                      : Sparkles;
+                    
+                    return (
+                      <motion.a
+                        key={social.label}
+                        href={social.href}
+                        target={social.href.startsWith('http') ? '_blank' : '_self'}
+                        rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className={`
+                          group flex items-center gap-2 rounded-lg px-3 py-2
+                          ${isMobile 
+                            ? 'text-xs border border-amber-400/20 bg-amber-400/5' 
+                            : 'text-sm border border-transparent hover:border-amber-400/20 hover:bg-amber-400/5'
+                          }
+                          transition-all duration-200
+                        `}
+                        whileHover={{ x: 2 }}
+                        whileTap={{ scale: 0.98 }}
+                        aria-label={`Follow on ${social.label}`}
+                      >
+                        <Icon className="h-3 w-3 text-amber-400" />
+                        <span className="text-gray-300 group-hover:text-white transition-colors">
+                          {social.label}
+                        </span>
+                      </motion.a>
+                    );
+                  })}
+                </div>
               </div>
             </div>
+          </FadeIn>
 
-            <div className="flex flex-wrap gap-2">
-              {socials.slice(0, 6).map((social, index) => (
-                <motion.a
-                  key={`${social.label}-${index}`}
-                  href={social.href}
-                  target={social.external ? "_blank" : "_self"}
-                  rel={social.external ? "noopener noreferrer" : undefined}
-                  className="group flex h-10 w-10 items-center justify-center rounded-xl border border-gold/30 bg-gold/5 text-gold transition-all hover:bg-gold hover:text-charcoal"
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  aria-label={social.label}
-                >
-                  <social.Icon className="h-4 w-4" />
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Navigation sections */}
+          {/* Navigation Sections - Stack on mobile, grid on tablet/desktop */}
           {footerSections.map((section, index) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="mb-4 font-serif text-lg font-semibold text-cream">
-                {section.title}
-              </h3>
-              <ul className="space-y-3">
-                {section.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="group flex items-center gap-2 text-sm text-gold/70 transition-all hover:text-gold"
-                    >
-                      <Sparkles className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
-                      <span className="transition-transform group-hover:translate-x-1">
-                        {link.label}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
+            <FadeIn key={section.title} delay={0.1 + index * 0.1} direction="up">
+              <div className={isMobile ? 'border-t border-gray-800 pt-6 first:pt-0 first:border-t-0' : ''}>
+                <div className="flex items-center gap-2 mb-4">
+                  {React.createElement(section.icon, { 
+                    className: "h-4 w-4 text-amber-400" 
+                  })}
+                  <h3 className="text-lg font-semibold text-white">
+                    {section.title}
+                  </h3>
+                </div>
+                <ul className="space-y-2">
+                  {section.links.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-1"
+                        prefetch={false}
+                      >
+                        <span className="w-1 h-1 rounded-full bg-amber-400/30 group-hover:bg-amber-400 transition-colors" />
+                        <span>{link.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </FadeIn>
           ))}
         </div>
 
-        {/* Bottom section */}
-        <motion.div
-          className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-gold/20 pt-8 lg:flex-row"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-        >
-          <div className="text-center lg:text-left">
-            <p className="text-sm text-gold/50">
-              © {year} {title}. All rights reserved.
-            </p>
-            <p className="mt-1 text-xs text-gold/30">
-              Built for men who still believe in duty, consequence, and legacy.
-            </p>
-          </div>
+        {/* Bottom Section - Column on mobile, row on desktop */}
+        <FadeIn delay={0.4} direction="up">
+          <div className="mt-12 pt-8 border-t border-gray-800">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              {/* Copyright and tagline */}
+              <div className="text-center lg:text-left">
+                <p className="text-sm text-gray-400">
+                  © {currentYear} {SITE_CONFIG.title}. All rights reserved.
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Built for those who still believe in duty, consequence, and legacy.
+                </p>
+              </div>
 
-          {/* Governance links */}
-          <div className="flex flex-col items-center gap-2 lg:items-end">
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-gold/40">
-              Governance
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
-              <Link
-                href="/privacy"
-                className="transition-colors hover:text-gold"
+              {/* Legal Links - Horizontal scroll on mobile, normal on desktop */}
+              <div className="flex-1">
+                <div className="flex flex-wrap justify-center gap-4 lg:gap-6 text-xs">
+                  <Link 
+                    href="/privacy" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link 
+                    href="/terms" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Terms of Service
+                  </Link>
+                  <Link 
+                    href="/cookies" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Cookie Policy
+                  </Link>
+                  <Link 
+                    href="/accessibility" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Accessibility
+                  </Link>
+                  <Link 
+                    href="/security" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Security
+                  </Link>
+                </div>
+              </div>
+
+              {/* Back to Top Button - Full width on mobile, auto on desktop */}
+              <motion.button
+                onClick={scrollToTop}
+                className={`
+                  group flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+                  ${isMobile ? 'w-full' : ''}
+                  bg-amber-500 text-black font-semibold text-sm
+                  hover:bg-amber-400 active:scale-95
+                  transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-amber-500/50
+                `}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                aria-label="Scroll back to top"
               >
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="transition-colors hover:text-gold">
-                Terms of Service
-              </Link>
-              <Link
-                href="/cookies"
-                className="transition-colors hover:text-gold"
-              >
-                Cookie Policy
-              </Link>
-              <Link
-                href="/accessibility"
-                className="transition-colors hover:text-gold"
-              >
-                Accessibility
-              </Link>
-              <Link
-                href="/security"
-                className="transition-colors hover:text-gold"
-              >
-                Security
-              </Link>
+                Back to Top
+                <ArrowUp className="h-3 w-3 transition-transform group-hover:-translate-y-0.5" />
+              </motion.button>
+            </div>
+
+            {/* Microcopy - Only visible on larger screens */}
+            <div className="mt-6 hidden lg:block">
+              <p className="text-center text-xs text-gray-500">
+                Version 2.1.0 · Designed in London · Built with purpose
+              </p>
             </div>
           </div>
-
-          <motion.button
-            onClick={scrollToTop}
-            className="group flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/5 px-4 py-2 text-sm font-semibold text-gold transition-all hover:bg-gold hover:text-charcoal"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Scroll to top"
-          >
-            Back to Top
-            <ArrowUp className="h-4 w-4 transition-transform group-hover:-translate-y-1" />
-          </motion.button>
-        </motion.div>
+        </FadeIn>
       </div>
+
+      {/* Mobile optimizations */}
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          /* Prevent text size adjustment on iOS */
+          * {
+            -webkit-text-size-adjust: 100%;
+          }
+          
+          /* Better touch targets */
+          a, button {
+            min-height: 44px;
+            min-width: 44px;
+          }
+          
+          /* Smooth scrolling for iOS */
+          html {
+            -webkit-overflow-scrolling: touch;
+          }
+        }
+        
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }

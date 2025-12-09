@@ -1,4 +1,4 @@
-// pages/resources/[slug].tsx
+// pages/resources/[slug].tsx - COMPLETE FIXED VERSION
 import type { GetStaticPaths, GetStaticProps } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -9,8 +9,7 @@ import Image from "next/image";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug } from "@/lib/mdx";
-import type { RawContentEntry } from "@/lib/mdx";
+import { getAllContent, getContentBySlug, type PostDocument } from "@/lib/mdx";
 
 interface ResourceMeta {
   slug: string;
@@ -205,56 +204,78 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
 }
 
 /* ------------------------------------------
- *  STATIC GENERATION
+ *  STATIC GENERATION - FIXED
  * ------------------------------------------ */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const all = getAllContent("resources");
+  try {
+    // FIXED: getAllContent returns a Promise, so we need to await it
+    const all = await getAllContent("resources");
+    
+    const paths = Array.isArray(all) 
+      ? all.map((r) => ({ params: { slug: r.slug } }))
+      : [];
 
-  return {
-    paths: all.map((r) => ({ params: { slug: r.slug } })),
-    fallback: false,
-  };
+    return {
+      paths,
+      fallback: false,
+    };
+  } catch (error) {
+    console.error("Error generating static paths for resources:", error);
+    return {
+      paths: [],
+      fallback: false,
+    };
+  }
 };
 
 export const getStaticProps: GetStaticProps<ResourcePageProps> = async ({
   params,
 }) => {
-  const slug = String(params?.slug);
+  try {
+    const slug = String(params?.slug);
 
-  const doc = getContentBySlug("resources", slug) as RawContentEntry | null;
+    // FIXED: Use PostDocument type instead of RawContentEntry
+    const doc = await getContentBySlug("resources", slug);
 
-  if (!doc) {
+    if (!doc) {
+      return { notFound: true };
+    }
+
+    const { content, ...rawMeta } = doc;
+
+    const mdxSource = await serialize(content || "", {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+      },
+    });
+
+    // Convert PostDocument to ResourceMeta
+    const typedMeta: ResourceMeta = {
+      slug: rawMeta.slug || slug,
+      title: rawMeta.title || "Untitled Resource",
+      description: rawMeta.description ?? null,
+      subtitle: rawMeta.subtitle ?? null,
+      date: rawMeta.date ?? null,
+      author: rawMeta.author ?? null,
+      readtime: rawMeta.readTime ?? rawMeta.readtime ?? null,
+      coverImage: typeof rawMeta.coverImage === 'string' 
+        ? rawMeta.coverImage 
+        : (rawMeta.coverImage as any)?.src ?? null,
+      tags: Array.isArray(rawMeta.tags) ? rawMeta.tags : null,
+      downloadUrl: rawMeta.downloadUrl ?? null,
+      excerpt: rawMeta.excerpt ?? null,
+    };
+
+    return {
+      props: {
+        meta: typedMeta,
+        mdxSource,
+      },
+      revalidate: 60,
+    };
+  } catch (error) {
+    console.error("Error in getStaticProps for resources/[slug]:", error);
     return { notFound: true };
   }
-
-  const { content, ...rawMeta } = doc;
-
-  const mdxSource = await serialize(content || "", {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-    },
-  });
-
-  const typedMeta: ResourceMeta = {
-    slug: rawMeta.slug,
-    title: rawMeta.title || "Untitled Resource",
-    description: rawMeta.description ?? null,
-    subtitle: rawMeta.subtitle ?? null,
-    date: rawMeta.date ?? null,
-    author: rawMeta.author ?? null,
-    readtime: rawMeta.readtime ?? null,
-    coverImage: rawMeta.coverImage ?? null,
-    tags: rawMeta.tags ?? null,
-    downloadUrl: rawMeta.downloadUrl ?? null,
-    excerpt: rawMeta.excerpt ?? null,
-  };
-
-  return {
-    props: {
-      meta: typedMeta,
-      mdxSource,
-    },
-    revalidate: 60,
-  };
 };

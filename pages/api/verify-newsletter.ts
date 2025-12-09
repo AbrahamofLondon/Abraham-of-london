@@ -10,7 +10,7 @@ interface VerifyResponseBody {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<VerifyResponseBody>
+  res: NextApiResponse<VerifyResponseBody>,
 ) {
   if (req.method !== "GET") {
     return res.status(405).json({
@@ -22,12 +22,7 @@ export default async function handler(
   try {
     const { token, email } = req.query;
 
-    if (
-      !token ||
-      !email ||
-      typeof token !== "string" ||
-      typeof email !== "string"
-    ) {
+    if (!token || !email || typeof token !== 'string' || typeof email !== 'string') {
       return res.status(400).json({
         ok: false,
         message: "Invalid verification link",
@@ -37,11 +32,11 @@ export default async function handler(
 
     // In production, retrieve from your database
     // const verificationData = await getVerificationData(token, email);
-
+    
     // For now, we'll simulate verification
     // Replace this with actual database lookup
     const isValid = true; // Replace with actual verification logic
-
+    
     if (!isValid) {
       return res.status(400).json({
         ok: false,
@@ -71,16 +66,16 @@ export default async function handler(
     }
 
     // Send success notification to Abraham
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: "Newsletter System <system@fatheringwithoutfear.com>",
-        to: "Abraham@AbrahamofLondon.com",
-        subject: "New Verified Newsletter Subscriber",
+        from: 'Newsletter System <system@fatheringwithoutfear.com>',
+        to: 'Abraham@AbrahamofLondon.com',
+        subject: 'New Verified Newsletter Subscriber',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #2c5530;">🎉 New Verified Subscriber!</h2>
@@ -97,12 +92,12 @@ export default async function handler(
     // Redirect to success page or return success
     return res.status(200).json({
       ok: true,
-      message:
-        "Successfully verified! You are now subscribed to our newsletter.",
+      message: "Successfully verified! You are now subscribed to our newsletter.",
     });
+
   } catch (error) {
     console.error("Verification endpoint error:", error);
-
+    
     return res.status(500).json({
       ok: false,
       message: "Verification failed. Please try again.",

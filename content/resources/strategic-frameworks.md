@@ -1,9 +1,15 @@
 ---
-title: "Strategic Frameworks Collection"
-category: "Resources"
-excerpt: "A collection of proven strategic frameworks for decision-making and planning"
-description: "Curated frameworks for strategy, decision-making, and execution across various domains."
+title: "Strategic Frameworks"
 date: "2024-01-10"
+description: "Collection of strategic frameworks for decision-making."
+excerpt: "Tools and models for thinking strategically about complex challenges."
+author: "Abraham of London"
+coverImage: "/assets/images/resources/strategic-frameworks.jpg"
+tags: ["strategic", "frameworks", "tools", "decision-making"]
+resourceType: "document"
+featured: true
+draft: false
+accessLevel: "public"
 ---
 
 # Strategic Frameworks Collection

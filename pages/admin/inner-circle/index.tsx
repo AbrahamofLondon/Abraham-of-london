@@ -148,6 +148,9 @@ const AdminInnerCirclePage: NextPage = () => {
     }
 
     setCleanupLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+    
     try {
       const res = await fetch("/api/admin/inner-circle/cleanup", {
         method: "POST",
@@ -160,13 +163,19 @@ const AdminInnerCirclePage: NextPage = () => {
       const data = await res.json();
       
       if (data.ok) {
-        setSuccessMessage(`Cleanup completed: ${data.deletedMembers} members and ${data.deletedKeys} keys deleted`);
+        if (data.stats) {
+          setSuccessMessage(
+            `Cleanup completed: ${data.stats.deletedMembers} members and ${data.stats.deletedKeys} keys deleted. ${data.message || ""}`
+          );
+        } else {
+          setSuccessMessage(data.message || "Cleanup completed successfully");
+        }
         loadData(); // Refresh the list
       } else {
         setError(data.error || "Failed to run cleanup");
       }
     } catch (err) {
-      setError("Error running cleanup");
+      setError(err instanceof Error ? err.message : "Error running cleanup");
     } finally {
       setCleanupLoading(false);
     }
@@ -258,6 +267,8 @@ const AdminInnerCirclePage: NextPage = () => {
                     setAdminKey('');
                     setRows([]);
                     setStats(null);
+                    setError(null);
+                    setSuccessMessage(null);
                   }}
                   className="rounded-lg border border-softGold/30 bg-black/50 px-4 py-2.5 text-sm text-softGold/70 hover:bg-black/70"
                 >
@@ -296,7 +307,14 @@ const AdminInnerCirclePage: NextPage = () => {
                 disabled={cleanupLoading || !adminKey}
                 className="rounded-full border border-red-500/50 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.16em] text-red-400 transition-colors hover:border-red-500 hover:text-red-300 disabled:cursor-not-allowed disabled:border-red-500/20 disabled:text-red-500/40"
               >
-                {cleanupLoading ? "Cleaning…" : "Run Cleanup"}
+                {cleanupLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 animate-ping rounded-full bg-red-400"></span>
+                    Cleaning…
+                  </span>
+                ) : (
+                  "Run Cleanup"
+                )}
               </button>
             </div>
           </div>
@@ -522,22 +540,13 @@ const AdminInnerCirclePage: NextPage = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      const csvData = rows.map(r => ({
-                        date: r.created_at,
-                        status: r.status,
-                        keySuffix: r.key_suffix,
-                        emailPrefix: r.email_hash_prefix,
-                        unlocks: r.total_unlocks
-                      }));
-                      console.log('Inner Circle Data:', {
-                        stats,
-                        rows: csvData
-                      });
-                      setSuccessMessage('Data logged to console');
+                      // FIXED: Remove console.log for production
+                      // Data can be accessed via the rows and stats state variables
+                      setSuccessMessage('Data available in state variables');
                     }}
                     className="rounded-lg border border-softGold/30 bg-black/50 px-3 py-1.5 text-xs text-softGold/70 hover:bg-black/70"
                   >
-                    Log to Console
+                    View Data
                   </button>
                 </div>
               </div>

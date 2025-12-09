@@ -3,10 +3,11 @@
 // Server-only Inner Circle store with persistence and enhanced features
 // ---------------------------------------------------------------------------
 
-import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { existsSync, mkdirSync } from "node:fs";
+import crypto from "crypto";  // CHANGED: Remove 'node:' prefix
+import fs from "fs/promises"; // CHANGED: Remove 'node:' prefix
+import path from "path";      // CHANGED: Remove 'node:' prefix
+import { existsSync, mkdirSync } from "fs"; // CHANGED: Remove 'node:' prefix
+import { Mutex } from 'async-mutex';
 
 // Types - extended with persistence support
 export type InnerCircleStatus = "pending" | "active" | "revoked" | "expired";
@@ -96,15 +97,67 @@ export interface InnerCircleKey {
   revokedReason?: string;
 }
 
-// Configuration
+// Custom error classes
+export class InnerCircleError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly context?: Record<string, any>
+  ) {
+    super(message);
+    this.name = 'InnerCircleError';
+  }
+}
+
+export class MemberNotFoundError extends InnerCircleError {
+  constructor(email: string) {
+    super(`Member not found: ${email}`, 'MEMBER_NOT_FOUND', { email });
+  }
+}
+
+export class InvalidKeyError extends InnerCircleError {
+  constructor(reason: string) {
+    super(`Invalid key: ${reason}`, 'INVALID_KEY', { reason });
+  }
+}
+
+export class InvalidEmailError extends InnerCircleError {
+  constructor(email: string) {
+    super(`Invalid email format: ${email}`, 'INVALID_EMAIL', { email });
+  }
+}
+
+// Metrics interface
+interface StoreMetrics {
+  operations: {
+    createKey: number;
+    verifyKey: number;
+    unlockKey: number;
+    errors: number;
+  };
+  latency: {
+    createKey: number[];
+    verifyKey: number[];
+  };
+}
+
+// Configuration with environment variable support
 const CONFIG = {
-  DATA_RETENTION_DAYS: 365,
-  KEY_EXPIRY_DAYS: 90,
-  BACKUP_INTERVAL_HOURS: 24,
-  MAX_KEYS_PER_MEMBER: 5,
-  STORAGE_DIR: path.join(process.cwd(), ".data", "inner-circle"),
-  BACKUP_DIR: path.join(process.cwd(), ".data", "backups", "inner-circle"),
+  DATA_RETENTION_DAYS: parseInt(process.env.INNER_CIRCLE_DATA_RETENTION_DAYS || '365', 10),
+  KEY_EXPIRY_DAYS: parseInt(process.env.INNER_CIRCLE_KEY_EXPIRY_DAYS || '90', 10),
+  BACKUP_INTERVAL_HOURS: parseInt(process.env.INNER_CIRCLE_BACKUP_INTERVAL_HOURS || '24', 10),
+  MAX_KEYS_PER_MEMBER: parseInt(process.env.INNER_CIRCLE_MAX_KEYS_PER_MEMBER || '5', 10),
+  STORAGE_DIR: path.join(process.cwd(), process.env.INNER_CIRCLE_STORAGE_DIR || '.data/inner-circle'),
+  BACKUP_DIR: path.join(process.cwd(), process.env.INNER_CIRCLE_BACKUP_DIR || '.data/backups/inner-circle'),
 } as const;
+
+// Validate configuration
+if (CONFIG.KEY_EXPIRY_DAYS > CONFIG.DATA_RETENTION_DAYS) {
+  console.warn('[InnerCircle] Warning: Key expiry days is greater than data retention days');
+}
+if (CONFIG.MAX_KEYS_PER_MEMBER < 1) {
+  throw new Error('MAX_KEYS_PER_MEMBER must be at least 1');
+}
 
 // Helper functions
 function normaliseEmail(email: string): string {
@@ -157,6 +210,18 @@ function logPrivacyAction(
   }
 }
 
+// Validation functions
+function validateEmail(email: string): boolean {
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+  return EMAIL_REGEX.test(email);
+}
+
+function validateKeyFormat(key: string): boolean {
+  const displayKeyRegex = /^[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}$/;
+  const iclKeyRegex = /^icl_[A-Za-z0-9_-]{28}$/;
+  return displayKeyRegex.test(key) || iclKeyRegex.test(key);
+}
+
 // Storage interface for persistence
 interface StorageBackend {
   saveMembers(members: Map<string, InnerCircleMember>): Promise<void>;
@@ -169,7 +234,32 @@ interface StorageBackend {
   cleanup(): Promise<void>;
 }
 
-// File-based storage implementation
+// Retry helper for persistence operations
+async function retryOperation<T>(
+  operation: () => Promise<T>,
+  maxAttempts = 3,
+  delayMs = 100
+): Promise<T> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      if (attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+      }
+    }
+  }
+  
+  // TypeScript now knows lastError will be assigned if we reach here
+  // because we enter the loop at least once (maxAttempts >= 1)
+  throw lastError!;
+}
+
+// File-based storage implementation with backup validation
 class FileStorage implements StorageBackend {
   private membersPath: string;
   private keysPath: string;
@@ -207,6 +297,22 @@ class FileStorage implements StorageBackend {
     await fs.rename(tempPath, filePath);
   }
 
+  private async validateBackup(backupPath: string): Promise<boolean> {
+    try {
+      const files = ['members.json', 'keys.json', 'emailMap.json'];
+      for (const file of files) {
+        const filePath = path.join(backupPath, file);
+        if (existsSync(filePath)) {
+          const content = await fs.readFile(filePath, 'utf-8');
+          JSON.parse(content); // Will throw if invalid JSON
+        }
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async saveMembers(members: Map<string, InnerCircleMember>): Promise<void> {
     const data = Object.fromEntries(members);
     await this.writeJsonFile(this.membersPath, data);
@@ -241,17 +347,29 @@ class FileStorage implements StorageBackend {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupDir = path.join(CONFIG.BACKUP_DIR, timestamp);
     
-    await fs.mkdir(backupDir, { recursive: true });
-    
-    const files = [this.membersPath, this.keysPath, this.emailMapPath];
-    for (const file of files) {
-      if (existsSync(file)) {
-        const backupFile = path.join(backupDir, path.basename(file));
-        await fs.copyFile(file, backupFile);
+    try {
+      await fs.mkdir(backupDir, { recursive: true });
+      
+      const files = [this.membersPath, this.keysPath, this.emailMapPath];
+      for (const file of files) {
+        if (existsSync(file)) {
+          const backupFile = path.join(backupDir, path.basename(file));
+          await fs.copyFile(file, backupFile);
+        }
       }
+      
+      // Validate backup
+      const isValid = await this.validateBackup(backupDir);
+      if (!isValid) {
+        await fs.rm(backupDir, { recursive: true });
+        throw new Error('Backup validation failed');
+      }
+      
+      logPrivacyAction("backup_created", { backupDir, files: files.length });
+    } catch (error) {
+      logPrivacyAction("backup_failed", { error, backupDir }, "error");
+      throw error;
     }
-    
-    logPrivacyAction("backup_created", { backupDir, files: files.length });
   }
 
   async cleanup(): Promise<void> {
@@ -275,7 +393,7 @@ class FileStorage implements StorageBackend {
   }
 }
 
-// Enhanced Inner Circle store with persistence
+// Enhanced Inner Circle store with persistence and concurrency protection
 class EnhancedInnerCircleStore {
   private members: Map<string, InnerCircleMember> = new Map();
   private keys: Map<string, InnerCircleKey> = new Map();
@@ -285,6 +403,11 @@ class EnhancedInnerCircleStore {
   private lastBackup?: string;
   private cleanupInterval?: NodeJS.Timeout;
   private backupInterval?: NodeJS.Timeout;
+  private mutex = new Mutex();
+  private metrics: StoreMetrics = {
+    operations: { createKey: 0, verifyKey: 0, unlockKey: 0, errors: 0 },
+    latency: { createKey: [], verifyKey: [] }
+  };
 
   constructor(storageBackend?: StorageBackend) {
     this.storage = storageBackend || new FileStorage();
@@ -294,43 +417,51 @@ class EnhancedInnerCircleStore {
   private startBackgroundJobs(): void {
     // Run cleanup every hour
     this.cleanupInterval = setInterval(async () => {
-      await this.cleanupOldData();
+      try {
+        await this.cleanupOldData();
+      } catch (error) {
+        logPrivacyAction("background_cleanup_error", { error }, "error");
+      }
     }, 60 * 60 * 1000);
 
     // Run backup every 24 hours
     this.backupInterval = setInterval(async () => {
-      await this.storage.backup();
-      this.lastBackup = nowIso();
+      try {
+        await this.storage.backup();
+        this.lastBackup = nowIso();
+      } catch (error) {
+        logPrivacyAction("background_backup_error", { error }, "error");
+      }
     }, CONFIG.BACKUP_INTERVAL_HOURS * 60 * 60 * 1000);
   }
 
   async initialize(): Promise<void> {
-    try {
-      this.members = await this.storage.loadMembers();
-      this.keys = await this.storage.loadKeys();
-      this.emailToMember = await this.storage.loadEmailMap();
-      
-      logPrivacyAction("store_initialized", {
-        members: this.members.size,
-        keys: this.keys.size,
-        emailMappings: this.emailToMember.size,
-      });
-    } catch (error) {
-      logPrivacyAction("store_initialization_failed", { error }, "error");
-      // Continue with empty store if loading fails
-    }
+    return this.mutex.runExclusive(async () => {
+      try {
+        this.members = await this.storage.loadMembers();
+        this.keys = await this.storage.loadKeys();
+        this.emailToMember = await this.storage.loadEmailMap();
+        
+        logPrivacyAction("store_initialized", {
+          members: this.members.size,
+          keys: this.keys.size,
+          emailMappings: this.emailToMember.size,
+        });
+      } catch (error) {
+        logPrivacyAction("store_initialization_failed", { error }, "error");
+        // Continue with empty store if loading fails
+      }
+    });
   }
 
   private async persist(): Promise<void> {
-    try {
+    await retryOperation(async () => {
       await Promise.all([
         this.storage.saveMembers(this.members),
         this.storage.saveKeys(this.keys),
         this.storage.saveEmailMap(this.emailToMember),
       ]);
-    } catch (error) {
-      logPrivacyAction("persistence_failed", { error }, "error");
-    }
+    });
   }
 
   private validateMemberKeys(memberId: string): void {
@@ -382,134 +513,181 @@ class EnhancedInnerCircleStore {
   async createOrUpdateMemberAndIssueKey(
     args: CreateOrUpdateMemberArgs
   ): Promise<IssuedKey> {
-    const emailNormalised = normaliseEmail(args.email);
-    const emailHash = sha256Hex(emailNormalised);
-    const emailHashPrefix = emailHash.slice(0, 10);
-    const now = nowIso();
-    const expiresAt = addDays(new Date(), CONFIG.KEY_EXPIRY_DAYS).toISOString();
-    const { key, keyHash, keySuffix } = generateAccessKey();
+    const start = Date.now();
+    
+    return this.mutex.runExclusive(async () => {
+      try {
+        // Validate email
+        if (!validateEmail(args.email)) {
+          throw new InvalidEmailError(args.email);
+        }
 
-    let memberId = this.emailToMember.get(emailHash);
-    const isNewMember = !memberId;
+        const emailNormalised = normaliseEmail(args.email);
+        const emailHash = sha256Hex(emailNormalised);
+        const emailHashPrefix = emailHash.slice(0, 10);
+        const now = nowIso();
+        const expiresAt = addDays(new Date(), CONFIG.KEY_EXPIRY_DAYS).toISOString();
+        const { key, keyHash, keySuffix } = generateAccessKey();
 
-    if (!memberId) {
-      memberId = crypto.randomUUID();
-      const member: InnerCircleMember = {
-        id: memberId,
-        emailHash,
-        emailHashPrefix,
-        name: args.name?.trim() || undefined,
-        createdAt: now,
-        lastSeenAt: now,
-        lastIp: args.ipAddress,
-        status: "active",
-        totalUnlocks: 0,
-        keys: [keyHash],
-        metadata: args.metadata,
-        context: args.context,
-      };
-      
-      this.members.set(memberId, member);
-      this.emailToMember.set(emailHash, memberId);
-    } else {
-      const member = this.members.get(memberId);
-      if (member) {
-        member.lastSeenAt = now;
-        if (args.name && args.name.trim()) member.name = args.name.trim();
-        if (args.ipAddress) member.lastIp = args.ipAddress;
-        if (args.metadata) member.metadata = { ...member.metadata, ...args.metadata };
-        if (args.context) member.context = args.context;
+        let memberId = this.emailToMember.get(emailHash);
+        const isNewMember = !memberId;
+
+        if (!memberId) {
+          memberId = crypto.randomUUID();
+          const member: InnerCircleMember = {
+            id: memberId,
+            emailHash,
+            emailHashPrefix,
+            name: args.name?.trim() || undefined,
+            createdAt: now,
+            lastSeenAt: now,
+            lastIp: args.ipAddress,
+            status: "active",
+            totalUnlocks: 0,
+            keys: [keyHash],
+            metadata: args.metadata,
+            context: args.context,
+          };
+          
+          this.members.set(memberId, member);
+          this.emailToMember.set(emailHash, memberId);
+        } else {
+          const member = this.members.get(memberId);
+          if (member) {
+            member.lastSeenAt = now;
+            if (args.name && args.name.trim()) member.name = args.name.trim();
+            if (args.ipAddress) member.lastIp = args.ipAddress;
+            if (args.metadata) member.metadata = { ...member.metadata, ...args.metadata };
+            if (args.context) member.context = args.context;
+            
+            member.keys.push(keyHash);
+            this.validateMemberKeys(memberId);
+          }
+        }
+
+        const keyRecord: InnerCircleKey = {
+          keyHash,
+          keySuffix,
+          createdAt: now,
+          expiresAt,
+          status: "active",
+          totalUnlocks: 0,
+          memberId,
+        };
+
+        this.keys.set(keyHash, keyRecord);
+
+        await this.persist();
+
+        const latency = Date.now() - start;
+        this.metrics.latency.createKey.push(latency);
+        this.metrics.operations.createKey++;
         
-        member.keys.push(keyHash);
-        this.validateMemberKeys(memberId);
+        if (this.metrics.latency.createKey.length > 100) {
+          this.metrics.latency.createKey = this.metrics.latency.createKey.slice(-100);
+        }
+
+        logPrivacyAction("key_issued", {
+          memberId,
+          emailHashPrefix,
+          keySuffix,
+          isNewMember,
+          expiresAt,
+        });
+
+        return {
+          key,
+          keySuffix,
+          createdAt: now,
+          expiresAt,
+          status: "active",
+          memberId,
+        };
+      } catch (error) {
+        this.metrics.operations.errors++;
+        throw error;
       }
-    }
-
-    const keyRecord: InnerCircleKey = {
-      keyHash,
-      keySuffix,
-      createdAt: now,
-      expiresAt,
-      status: "active",
-      totalUnlocks: 0,
-      memberId,
-    };
-
-    this.keys.set(keyHash, keyRecord);
-
-    await this.persist();
-
-    logPrivacyAction("key_issued", {
-      memberId,
-      emailHashPrefix,
-      keySuffix,
-      isNewMember,
-      expiresAt,
     });
-
-    return {
-      key,
-      keySuffix,
-      createdAt: now,
-      expiresAt,
-      status: "active",
-      memberId,
-    };
   }
 
   async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
-    const safeKey = key.trim();
-    if (!safeKey) return { valid: false, reason: "missing_key" };
+    const start = Date.now();
+    
+    return this.mutex.runExclusive(async () => {
+      try {
+        if (!validateKeyFormat(key)) {
+          throw new InvalidKeyError('invalid_format');
+        }
 
-    const keyHash = sha256Hex(safeKey);
-    const keyRecord = this.keys.get(keyHash);
+        const safeKey = key.trim();
+        if (!safeKey) {
+          throw new InvalidKeyError('missing_key');
+        }
 
-    if (!keyRecord) return { valid: false, reason: "key_not_found" };
-    
-    const now = new Date();
-    const expiresAt = new Date(keyRecord.expiresAt);
-    
-    // Check status
-    if (keyRecord.status === "revoked") {
-      return { 
-        valid: false, 
-        reason: "key_revoked",
-        memberId: keyRecord.memberId,
-        keySuffix: keyRecord.keySuffix,
-        createdAt: keyRecord.createdAt,
-        expiresAt: keyRecord.expiresAt,
-        status: keyRecord.status,
-      };
-    }
-    
-    // Check expiration
-    if (now > expiresAt) {
-      // Auto-mark as expired
-      keyRecord.status = "expired";
-      await this.persist();
-      
-      return { 
-        valid: false, 
-        reason: "key_expired",
-        memberId: keyRecord.memberId,
-        keySuffix: keyRecord.keySuffix,
-        createdAt: keyRecord.createdAt,
-        expiresAt: keyRecord.expiresAt,
-        status: "expired",
-      };
-    }
+        const keyHash = sha256Hex(safeKey);
+        const keyRecord = this.keys.get(keyHash);
 
-    const member = this.members.get(keyRecord.memberId);
-    
-    return {
-      valid: true,
-      memberId: keyRecord.memberId,
-      keySuffix: keyRecord.keySuffix,
-      createdAt: keyRecord.createdAt,
-      expiresAt: keyRecord.expiresAt,
-      status: keyRecord.status,
-      metadata: member?.metadata,
-    };
+        if (!keyRecord) {
+          throw new InvalidKeyError('key_not_found');
+        }
+        
+        const now = new Date();
+        const expiresAt = new Date(keyRecord.expiresAt);
+        
+        // Check status
+        if (keyRecord.status === "revoked") {
+          return { 
+            valid: false, 
+            reason: "key_revoked",
+            memberId: keyRecord.memberId,
+            keySuffix: keyRecord.keySuffix,
+            createdAt: keyRecord.createdAt,
+            expiresAt: keyRecord.expiresAt,
+            status: keyRecord.status,
+          };
+        }
+        
+        // Check expiration
+        if (now > expiresAt) {
+          // Auto-mark as expired
+          keyRecord.status = "expired";
+          await this.persist();
+          
+          return { 
+            valid: false, 
+            reason: "key_expired",
+            memberId: keyRecord.memberId,
+            keySuffix: keyRecord.keySuffix,
+            createdAt: keyRecord.createdAt,
+            expiresAt: keyRecord.expiresAt,
+            status: "expired",
+          };
+        }
+
+        const member = this.members.get(keyRecord.memberId);
+        
+        const latency = Date.now() - start;
+        this.metrics.latency.verifyKey.push(latency);
+        this.metrics.operations.verifyKey++;
+        
+        if (this.metrics.latency.verifyKey.length > 100) {
+          this.metrics.latency.verifyKey = this.metrics.latency.verifyKey.slice(-100);
+        }
+        
+        return {
+          valid: true,
+          memberId: keyRecord.memberId,
+          keySuffix: keyRecord.keySuffix,
+          createdAt: keyRecord.createdAt,
+          expiresAt: keyRecord.expiresAt,
+          status: keyRecord.status,
+          metadata: member?.metadata,
+        };
+      } catch (error) {
+        this.metrics.operations.errors++;
+        throw error;
+      }
+    });
   }
 
   async recordInnerCircleUnlock(
@@ -517,44 +695,48 @@ class EnhancedInnerCircleStore {
     ipAddress?: string,
     unlockContext?: Record<string, any>
   ): Promise<VerifyInnerCircleKeyResult> {
-    const verification = await this.verifyInnerCircleKey(key);
-    
-    if (!verification.valid || !verification.memberId) {
-      return verification;
-    }
-
-    const keyHash = sha256Hex(key.trim());
-    const keyRecord = this.keys.get(keyHash);
-    const member = this.members.get(verification.memberId);
-
-    if (keyRecord && member) {
-      keyRecord.totalUnlocks += 1;
-      keyRecord.lastUsedAt = nowIso();
+    return this.mutex.runExclusive(async () => {
+      const verification = await this.verifyInnerCircleKey(key);
       
-      member.totalUnlocks += 1;
-      member.lastSeenAt = keyRecord.lastUsedAt;
-      if (ipAddress) member.lastIp = ipAddress;
-      
-      // Store unlock context in metadata
-      if (unlockContext) {
-        member.metadata = {
-          ...member.metadata,
-          lastUnlockContext: unlockContext,
-          lastUnlockAt: keyRecord.lastUsedAt,
-        };
+      if (!verification.valid || !verification.memberId) {
+        return verification;
       }
 
-      await this.persist();
+      const keyHash = sha256Hex(key.trim());
+      const keyRecord = this.keys.get(keyHash);
+      const member = this.members.get(verification.memberId);
 
-      logPrivacyAction("key_unlocked", {
-        memberId: verification.memberId,
-        keySuffix: verification.keySuffix,
-        totalUnlocks: keyRecord.totalUnlocks,
-        ipAddress,
-      });
-    }
+      if (keyRecord && member) {
+        keyRecord.totalUnlocks += 1;
+        keyRecord.lastUsedAt = nowIso();
+        
+        member.totalUnlocks += 1;
+        member.lastSeenAt = keyRecord.lastUsedAt;
+        if (ipAddress) member.lastIp = ipAddress;
+        
+        // Store unlock context in metadata
+        if (unlockContext) {
+          member.metadata = {
+            ...member.metadata,
+            lastUnlockContext: unlockContext,
+            lastUnlockAt: keyRecord.lastUsedAt,
+          };
+        }
 
-    return verification;
+        await this.persist();
+
+        logPrivacyAction("key_unlocked", {
+          memberId: verification.memberId,
+          keySuffix: verification.keySuffix,
+          totalUnlocks: keyRecord.totalUnlocks,
+          ipAddress,
+        });
+
+        this.metrics.operations.unlockKey++;
+      }
+
+      return verification;
+    });
   }
 
   async revokeInnerCircleKey(
@@ -562,29 +744,31 @@ class EnhancedInnerCircleStore {
     revokedBy: string = "admin", 
     reason: string = "manual_revocation"
   ): Promise<boolean> {
-    const safeKey = key.trim();
-    if (!safeKey) return false;
+    return this.mutex.runExclusive(async () => {
+      const safeKey = key.trim();
+      if (!safeKey) return false;
 
-    const keyHash = sha256Hex(safeKey);
-    const keyRecord = this.keys.get(keyHash);
+      const keyHash = sha256Hex(safeKey);
+      const keyRecord = this.keys.get(keyHash);
 
-    if (!keyRecord || keyRecord.status === "revoked") return false;
+      if (!keyRecord || keyRecord.status === "revoked") return false;
 
-    keyRecord.status = "revoked";
-    keyRecord.revokedAt = nowIso();
-    keyRecord.revokedBy = revokedBy;
-    keyRecord.revokedReason = reason;
+      keyRecord.status = "revoked";
+      keyRecord.revokedAt = nowIso();
+      keyRecord.revokedBy = revokedBy;
+      keyRecord.revokedReason = reason;
 
-    await this.persist();
+      await this.persist();
 
-    logPrivacyAction("key_revoked", {
-      memberId: keyRecord.memberId,
-      keySuffix: keyRecord.keySuffix,
-      revokedBy,
-      reason,
+      logPrivacyAction("key_revoked", {
+        memberId: keyRecord.memberId,
+        keySuffix: keyRecord.keySuffix,
+        revokedBy,
+        reason,
+      });
+
+      return true;
     });
-
-    return true;
   }
 
   async revokeAllMemberKeys(
@@ -592,57 +776,61 @@ class EnhancedInnerCircleStore {
     revokedBy: string = "admin", 
     reason: string = "member_deletion"
   ): Promise<number> {
-    const emailNormalised = normaliseEmail(email);
-    const emailHash = sha256Hex(emailNormalised);
-    const memberId = this.emailToMember.get(emailHash);
+    return this.mutex.runExclusive(async () => {
+      const emailNormalised = normaliseEmail(email);
+      const emailHash = sha256Hex(emailNormalised);
+      const memberId = this.emailToMember.get(emailHash);
 
-    if (!memberId) return 0;
+      if (!memberId) return 0;
 
-    const member = this.members.get(memberId);
-    if (!member) return 0;
+      const member = this.members.get(memberId);
+      if (!member) return 0;
 
-    let revokedCount = 0;
-    for (const keyHash of member.keys) {
-      if (this.revokeKeyByHash(keyHash, revokedBy, reason)) {
-        revokedCount++;
+      let revokedCount = 0;
+      for (const keyHash of member.keys) {
+        if (this.revokeKeyByHash(keyHash, revokedBy, reason)) {
+          revokedCount++;
+        }
       }
-    }
 
-    await this.persist();
+      await this.persist();
 
-    logPrivacyAction("all_member_keys_revoked", {
-      memberId,
-      emailHashPrefix: member.emailHashPrefix,
-      revokedCount,
-      revokedBy,
-      reason,
+      logPrivacyAction("all_member_keys_revoked", {
+        memberId,
+        emailHashPrefix: member.emailHashPrefix,
+        revokedCount,
+        revokedBy,
+        reason,
+      });
+
+      return revokedCount;
     });
-
-    return revokedCount;
   }
 
   async deleteMemberByEmail(email: string): Promise<boolean> {
-    const emailNormalised = normaliseEmail(email);
-    const emailHash = sha256Hex(emailNormalised);
-    const memberId = this.emailToMember.get(emailHash);
+    return this.mutex.runExclusive(async () => {
+      const emailNormalised = normaliseEmail(email);
+      const emailHash = sha256Hex(emailNormalised);
+      const memberId = this.emailToMember.get(emailHash);
 
-    if (!memberId) return false;
+      if (!memberId) return false;
 
-    // First revoke all keys
-    await this.revokeAllMemberKeys(email, "system", "member_deletion");
+      // First revoke all keys
+      await this.revokeAllMemberKeys(email, "system", "member_deletion");
 
-    // Remove from mappings
-    this.emailToMember.delete(emailHash);
-    this.members.delete(memberId);
+      // Remove from mappings
+      this.emailToMember.delete(emailHash);
+      this.members.delete(memberId);
 
-    await this.persist();
+      await this.persist();
 
-    logPrivacyAction("member_deleted", {
-      memberId,
-      emailHash: emailHash.slice(0, 10) + "...",
+      logPrivacyAction("member_deleted", {
+        memberId,
+        emailHash: emailHash.slice(0, 10) + "...",
+      });
+
+      return true;
     });
-
-    return true;
   }
 
   async cleanupOldData(): Promise<{
@@ -650,182 +838,194 @@ class EnhancedInnerCircleStore {
     deletedKeys: number;
     expiredKeys: number;
   }> {
-    const cutoff = Date.now() - CONFIG.DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-    let deletedMembers = 0;
-    let deletedKeys = 0;
-    let expiredKeys = 0;
+    return this.mutex.runExclusive(async () => {
+      const cutoff = Date.now() - CONFIG.DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+      let deletedMembers = 0;
+      let deletedKeys = 0;
+      let expiredKeys = 0;
 
-    // Clean up expired keys
-    for (const [keyHash, keyRecord] of this.keys.entries()) {
-      const expiresAt = new Date(keyRecord.expiresAt).getTime();
-      if (expiresAt < Date.now() && keyRecord.status === "active") {
-        keyRecord.status = "expired";
-        expiredKeys++;
-      }
-      
-      const lastUsed = keyRecord.lastUsedAt 
-        ? new Date(keyRecord.lastUsedAt).getTime() 
-        : new Date(keyRecord.createdAt).getTime();
+      // Clean up expired keys
+      for (const [keyHash, keyRecord] of this.keys.entries()) {
+        const expiresAt = new Date(keyRecord.expiresAt).getTime();
+        if (expiresAt < Date.now() && keyRecord.status === "active") {
+          keyRecord.status = "expired";
+          expiredKeys++;
+        }
         
-      if (lastUsed < cutoff) {
-        this.keys.delete(keyHash);
-        deletedKeys++;
+        const lastUsed = keyRecord.lastUsedAt 
+          ? new Date(keyRecord.lastUsedAt).getTime() 
+          : new Date(keyRecord.createdAt).getTime();
+          
+        if (lastUsed < cutoff) {
+          this.keys.delete(keyHash);
+          deletedKeys++;
+        }
       }
-    }
 
-    // Clean up inactive members
-    for (const [memberId, member] of this.members.entries()) {
-      const lastSeen = new Date(member.lastSeenAt).getTime();
-      if (lastSeen < cutoff) {
-        // Remove from email mapping
-        this.emailToMember.delete(member.emailHash);
-        this.members.delete(memberId);
-        deletedMembers++;
+      // Clean up inactive members
+      for (const [memberId, member] of this.members.entries()) {
+        const lastSeen = new Date(member.lastSeenAt).getTime();
+        if (lastSeen < cutoff) {
+          // Remove from email mapping
+          this.emailToMember.delete(member.emailHash);
+          this.members.delete(memberId);
+          deletedMembers++;
+        }
       }
-    }
 
-    this.lastCleanup = nowIso();
+      this.lastCleanup = nowIso();
 
-    if (deletedMembers > 0 || deletedKeys > 0 || expiredKeys > 0) {
-      await this.persist();
-      logPrivacyAction("cleanup_completed", {
-        deletedMembers,
-        deletedKeys,
-        expiredKeys,
-      });
-    }
+      if (deletedMembers > 0 || deletedKeys > 0 || expiredKeys > 0) {
+        await this.persist();
+        logPrivacyAction("cleanup_completed", {
+          deletedMembers,
+          deletedKeys,
+          expiredKeys,
+        });
+      }
 
-    // Run storage cleanup
-    await this.storage.cleanup();
+      // Run storage cleanup
+      await this.storage.cleanup();
 
-    return { deletedMembers, deletedKeys, expiredKeys };
+      return { deletedMembers, deletedKeys, expiredKeys };
+    });
   }
 
   async getPrivacySafeStats(): Promise<PrivacySafeStats> {
-    const totalMembers = this.members.size;
-    const totalKeys = this.keys.size;
+    return this.mutex.runExclusive(async () => {
+      const totalMembers = this.members.size;
+      const totalKeys = this.keys.size;
 
-    let activeMembers = 0;
-    let pendingMembers = 0;
-    let revokedMembers = 0;
-    let activeKeys = 0;
-    let expiredKeys = 0;
-    let revokedKeys = 0;
-    let totalUnlocks = 0;
+      let activeMembers = 0;
+      let pendingMembers = 0;
+      let revokedMembers = 0;
+      let activeKeys = 0;
+      let expiredKeys = 0;
+      let revokedKeys = 0;
+      let totalUnlocks = 0;
 
-    const now = new Date();
+      const now = new Date();
 
-    for (const member of this.members.values()) {
-      switch (member.status) {
-        case "active":
-          activeMembers++;
-          break;
-        case "pending":
-          pendingMembers++;
-          break;
-        case "revoked":
-          revokedMembers++;
-          break;
+      for (const member of this.members.values()) {
+        switch (member.status) {
+          case "active":
+            activeMembers++;
+            break;
+          case "pending":
+            pendingMembers++;
+            break;
+          case "revoked":
+            revokedMembers++;
+            break;
+        }
+        totalUnlocks += member.totalUnlocks;
       }
-      totalUnlocks += member.totalUnlocks;
-    }
 
-    for (const key of this.keys.values()) {
-      switch (key.status) {
-        case "active":
-          if (new Date(key.expiresAt) > now) {
-            activeKeys++;
-          } else {
+      for (const key of this.keys.values()) {
+        switch (key.status) {
+          case "active":
+            if (new Date(key.expiresAt) > now) {
+              activeKeys++;
+            } else {
+              expiredKeys++;
+            }
+            break;
+          case "expired":
             expiredKeys++;
-          }
-          break;
-        case "expired":
-          expiredKeys++;
-          break;
-        case "revoked":
-          revokedKeys++;
-          break;
+            break;
+          case "revoked":
+            revokedKeys++;
+            break;
+        }
       }
-    }
 
-    const avgUnlocksPerKey = totalKeys > 0 ? totalUnlocks / totalKeys : 0;
+      const avgUnlocksPerKey = totalKeys > 0 ? totalUnlocks / totalKeys : 0;
 
-    return {
-      totalMembers,
-      activeMembers,
-      pendingMembers,
-      revokedMembers,
-      totalKeys,
-      activeKeys,
-      expiredKeys,
-      revokedKeys,
-      totalUnlocks,
-      avgUnlocksPerKey,
-      dataRetentionDays: CONFIG.DATA_RETENTION_DAYS,
-      estimatedMemoryBytes: totalMembers * 1024 + totalKeys * 256,
-      lastCleanup: this.lastCleanup,
-      lastBackup: this.lastBackup,
-      storagePath: CONFIG.STORAGE_DIR,
-    };
+      return {
+        totalMembers,
+        activeMembers,
+        pendingMembers,
+        revokedMembers,
+        totalKeys,
+        activeKeys,
+        expiredKeys,
+        revokedKeys,
+        totalUnlocks,
+        avgUnlocksPerKey,
+        dataRetentionDays: CONFIG.DATA_RETENTION_DAYS,
+        estimatedMemoryBytes: totalMembers * 1024 + totalKeys * 256,
+        lastCleanup: this.lastCleanup,
+        lastBackup: this.lastBackup,
+        storagePath: CONFIG.STORAGE_DIR,
+      };
+    });
   }
 
   async exportInnerCircleAdminSummary(): Promise<InnerCircleAdminExportRow[]> {
-    const rows: InnerCircleAdminExportRow[] = [];
+    return this.mutex.runExclusive(async () => {
+      const rows: InnerCircleAdminExportRow[] = [];
 
-    for (const keyRecord of this.keys.values()) {
-      const member = this.members.get(keyRecord.memberId);
-      if (member) {
-        rows.push({
-          created_at: keyRecord.createdAt,
-          status: keyRecord.status,
-          key_suffix: keyRecord.keySuffix,
-          email_hash_prefix: member.emailHashPrefix,
-          total_unlocks: keyRecord.totalUnlocks,
-          last_used_at: keyRecord.lastUsedAt,
-          expires_at: keyRecord.expiresAt,
-        });
+      for (const keyRecord of this.keys.values()) {
+        const member = this.members.get(keyRecord.memberId);
+        if (member) {
+          rows.push({
+            created_at: keyRecord.createdAt,
+            status: keyRecord.status,
+            key_suffix: keyRecord.keySuffix,
+            email_hash_prefix: member.emailHashPrefix,
+            total_unlocks: keyRecord.totalUnlocks,
+            last_used_at: keyRecord.lastUsedAt,
+            expires_at: keyRecord.expiresAt,
+          });
+        }
       }
-    }
 
-    // Sort by creation date, newest first
-    rows.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+      // Sort by creation date, newest first
+      rows.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
 
-    return rows;
+      return rows;
+    });
   }
 
   async getMemberByEmail(email: string): Promise<InnerCircleMember | null> {
-    const emailNormalised = normaliseEmail(email);
-    const emailHash = sha256Hex(emailNormalised);
-    const memberId = this.emailToMember.get(emailHash);
-    
-    if (!memberId) return null;
-    
-    return this.members.get(memberId) || null;
+    return this.mutex.runExclusive(async () => {
+      const emailNormalised = normaliseEmail(email);
+      const emailHash = sha256Hex(emailNormalised);
+      const memberId = this.emailToMember.get(emailHash);
+      
+      if (!memberId) return null;
+      
+      return this.members.get(memberId) || null;
+    });
   }
 
   async getMemberKeys(memberId: string): Promise<InnerCircleKey[]> {
-    const member = this.members.get(memberId);
-    if (!member) return [];
+    return this.mutex.runExclusive(async () => {
+      const member = this.members.get(memberId);
+      if (!member) return [];
 
-    return member.keys
-      .map(keyHash => this.keys.get(keyHash))
-      .filter((key): key is InnerCircleKey => key !== undefined);
+      return member.keys
+        .map(keyHash => this.keys.get(keyHash))
+        .filter((key): key is InnerCircleKey => key !== undefined);
+    });
   }
 
   async updateMemberMetadata(
     memberId: string, 
     metadata: Record<string, any>
   ): Promise<boolean> {
-    const member = this.members.get(memberId);
-    if (!member) return false;
+    return this.mutex.runExclusive(async () => {
+      const member = this.members.get(memberId);
+      if (!member) return false;
 
-    member.metadata = { ...member.metadata, ...metadata };
-    await this.persist();
-    
-    return true;
+      member.metadata = { ...member.metadata, ...metadata };
+      await this.persist();
+      
+      return true;
+    });
   }
 
   async searchMembers(
@@ -836,31 +1036,106 @@ class EnhancedInnerCircleStore {
       offset?: number;
     }
   ): Promise<InnerCircleMember[]> {
-    const searchTerm = query.toLowerCase().trim();
-    let results: InnerCircleMember[] = [];
+    return this.mutex.runExclusive(async () => {
+      const searchTerm = query.toLowerCase().trim();
+      let results: InnerCircleMember[] = [];
 
-    for (const member of this.members.values()) {
-      // Filter by status if specified
-      if (options?.status && member.status !== options.status) {
-        continue;
+      for (const member of this.members.values()) {
+        // Filter by status if specified
+        if (options?.status && member.status !== options.status) {
+          continue;
+        }
+
+        // Search in name and email hash prefix
+        const matches = 
+          (member.name?.toLowerCase().includes(searchTerm)) ||
+          (member.emailHashPrefix.includes(searchTerm)) ||
+          (member.context?.toLowerCase().includes(searchTerm));
+
+        if (matches) {
+          results.push(member);
+        }
       }
 
-      // Search in name and email hash prefix
-      const matches = 
-        (member.name?.toLowerCase().includes(searchTerm)) ||
-        (member.emailHashPrefix.includes(searchTerm)) ||
-        (member.context?.toLowerCase().includes(searchTerm));
+      // Apply pagination
+      const offset = options?.offset || 0;
+      const limit = options?.limit || results.length;
+      
+      return results.slice(offset, offset + limit);
+    });
+  }
 
-      if (matches) {
-        results.push(member);
+  async rotateMemberKeys(
+    email: string,
+    options?: { revokeOldKeys?: boolean; maxKeys?: number }
+  ): Promise<{ oldKeysRevoked: number; newKey: string }> {
+    return this.mutex.runExclusive(async () => {
+      const emailNormalised = normaliseEmail(email);
+      const emailHash = sha256Hex(emailNormalised);
+      const memberId = this.emailToMember.get(emailHash);
+      
+      if (!memberId) {
+        throw new MemberNotFoundError(email);
       }
-    }
+      
+      const member = this.members.get(memberId);
+      if (!member) {
+        throw new MemberNotFoundError(email);
+      }
+      
+      let oldKeysRevoked = 0;
+      
+      // Revoke old keys if requested
+      if (options?.revokeOldKeys) {
+        for (const keyHash of member.keys) {
+          if (this.revokeKeyByHash(keyHash, 'system', 'key_rotation')) {
+            oldKeysRevoked++;
+          }
+        }
+      }
+      
+      // Issue new key
+      const { key, keyHash, keySuffix } = generateAccessKey();
+      const now = nowIso();
+      const expiresAt = addDays(new Date(), CONFIG.KEY_EXPIRY_DAYS).toISOString();
+      
+      const keyRecord: InnerCircleKey = {
+        keyHash,
+        keySuffix,
+        createdAt: now,
+        expiresAt,
+        status: 'active',
+        totalUnlocks: 0,
+        memberId,
+      };
+      
+      this.keys.set(keyHash, keyRecord);
+      member.keys.push(keyHash);
+      
+      // Enforce max keys limit
+      this.validateMemberKeys(memberId);
+      
+      await this.persist();
+      
+      logPrivacyAction('key_rotated', {
+        memberId,
+        emailHashPrefix: member.emailHashPrefix,
+        oldKeysRevoked,
+        keySuffix,
+      });
+      
+      return { oldKeysRevoked, newKey: key };
+    });
+  }
 
-    // Apply pagination
-    const offset = options?.offset || 0;
-    const limit = options?.limit || results.length;
-    
-    return results.slice(offset, offset + limit);
+  getMetrics(): StoreMetrics {
+    return {
+      ...this.metrics,
+      latency: {
+        createKey: [...this.metrics.latency.createKey],
+        verifyKey: [...this.metrics.latency.verifyKey]
+      }
+    };
   }
 
   async shutdown(): Promise<void> {
@@ -961,6 +1236,19 @@ export async function searchMembers(
 ): Promise<InnerCircleMember[]> {
   const store = await getInnerCircleStore();
   return store.searchMembers(query, options);
+}
+
+export async function rotateMemberKeys(
+  email: string,
+  options?: { revokeOldKeys?: boolean; maxKeys?: number }
+): Promise<{ oldKeysRevoked: number; newKey: string }> {
+  const store = await getInnerCircleStore();
+  return store.rotateMemberKeys(email, options);
+}
+
+export async function getStoreMetrics(): Promise<StoreMetrics> {
+  const store = await getInnerCircleStore();
+  return store.getMetrics();
 }
 
 export async function shutdownInnerCircleStore(): Promise<void> {

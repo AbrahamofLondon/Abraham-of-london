@@ -4,31 +4,88 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
 
 const PurposeLandingPage: NextPage = () => {
+  const router = useRouter();
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
-  const canonicalUrl = `${SITE_URL}/books/the-architecture-of-human-purpose-landing`;
+  const canonicalUrl = `${SITE_URL}${router.pathname}`;
 
   // Animation states
   const [isHeroVisible, setIsHeroVisible] = React.useState(false);
   const [isContentVisible, setIsContentVisible] = React.useState(false);
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 
   React.useEffect(() => {
     const timer1 = setTimeout(() => setIsHeroVisible(true), 100);
     const timer2 = setTimeout(() => setIsContentVisible(true), 300);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // Smooth scroll for anchor links
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a[href^="#"]');
+      if (anchor) {
+        e.preventDefault();
+        const href = anchor.getAttribute('href');
+        if (href) {
+          const targetElement = document.querySelector(href);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }
+      }
+    };
+
+    document.addEventListener('click', handleAnchorClick);
+
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('click', handleAnchorClick);
     };
   }, []);
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": "The Architecture of Human Purpose",
+    "alternateName": "Volume Zero",
+    "author": {
+      "@type": "Organization",
+      "name": "Abraham of London"
+    },
+    "datePublished": "2024",
+    "bookEdition": "Prelude Edition",
+    "bookFormat": "https://schema.org/DigitalDocument",
+    "description": "Volume Zero of the Canon. The foundational architecture for purpose, civilisation, governance, and human destiny.",
+    "publisher": "Abraham of London",
+    "image": `${SITE_URL}/assets/images/books/the-architecture-of-human-purpose.jpg`,
+    "offers": {
+      "@type": "Offer",
+      "availability": "https://schema.org/InStock",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  };
 
   return (
     <Layout 
       title="The Architecture of Human Purpose — Prelude" 
-      pageTitle=""
       description="Volume Zero: The foundational scaffolding for purpose, civilisation, and human destiny. A limited-release prelude."
+      structuredData={structuredData}
+      ogType="book"
     >
       <Head>
         <title>The Architecture of Human Purpose — Prelude | Volume Zero</title>
@@ -54,35 +111,6 @@ const PurposeLandingPage: NextPage = () => {
         <meta name="twitter:title" content="The Architecture of Human Purpose — Volume Zero" />
         <meta name="twitter:description" content="Volume Zero of the Canon. Limited prelude release." />
         <meta name="twitter:image" content={`${SITE_URL}/api/og/books/the-architecture-of-human-purpose`} />
-
-        {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Book",
-              "name": "The Architecture of Human Purpose",
-              "subtitle": "Prelude Minibook",
-              "author": {
-                "@type": "Organization",
-                "name": "Abraham of London"
-              },
-              "datePublished": "2024",
-              "bookEdition": "Prelude Edition",
-              "bookFormat": "https://schema.org/DigitalDocument",
-              "description": "Volume Zero of the Canon. The foundational architecture for purpose, civilisation, governance, and human destiny.",
-              "publisher": "Abraham of London",
-              "image": `${SITE_URL}/assets/images/books/the-architecture-of-human-purpose.jpg`,
-              "offers": {
-                "@type": "Offer",
-                "availability": "https://schema.org/InStock",
-                "price": "0",
-                "priceCurrency": "USD"
-              }
-            })
-          }}
-        />
       </Head>
 
       <main className="min-h-screen">
@@ -106,6 +134,15 @@ const PurposeLandingPage: NextPage = () => {
             }}
           />
         </div>
+
+        {/* Mouse trail effect */}
+        <div 
+          className="fixed inset-0 pointer-events-none z-50"
+          style={{
+            background: `radial-gradient(800px at ${mousePosition.x}px ${mousePosition.y}px, rgba(212, 175, 55, 0.05) 0%, transparent 80%)`,
+            transition: 'background 0.1s ease-out'
+          }}
+        />
 
         {/* Hero Section - Volume Zero */}
         <section className="relative min-h-[90vh] overflow-hidden">
@@ -147,7 +184,7 @@ const PurposeLandingPage: NextPage = () => {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Link
                     href="/books/the-architecture-of-human-purpose"
-                    className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-medium transition-all duration-300 hover:scale-[1.02]"
+                    className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-medium text-white transition-all duration-300 hover:scale-[1.02]"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f] opacity-90 group-hover:opacity-100 transition-opacity" />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f] opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
@@ -157,7 +194,7 @@ const PurposeLandingPage: NextPage = () => {
 
                   <Link
                     href="/inner-circle"
-                    className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-medium border border-[#d4af37]/30 hover:border-[#d4af37]/60 transition-all duration-300 hover:scale-[1.02]"
+                    className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-medium text-white border border-[#d4af37]/30 hover:border-[#d4af37]/60 transition-all duration-300 hover:scale-[1.02]"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4af37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <span className="relative">Inner Circle Access</span>
@@ -187,25 +224,27 @@ const PurposeLandingPage: NextPage = () => {
               {/* Right Column - Book Presentation */}
               <div className="relative">
                 {/* Floating Container */}
-                <div className="relative group perspective-1000">
+                <div className="relative group">
                   {/* Glow Effect */}
                   <div className="absolute -inset-8 bg-gradient-to-r from-[#d4af37]/10 via-transparent to-[#d4af37]/5 blur-3xl opacity-0 group-hover:opacity-50 transition-opacity duration-700" />
                   
                   {/* Book Container */}
-                  <div className="relative bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border border-[#2a2a2a] rounded-2xl p-8 shadow-2xl transform-gpu transition-all duration-500 group-hover:scale-[1.01] group-hover:shadow-[0_40px_80px_rgba(212,175,55,0.1)]">
+                  <div className="relative bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border border-[#2a2a2a] rounded-2xl p-8 shadow-2xl transform transition-all duration-500 group-hover:scale-[1.01] group-hover:shadow-[0_40px_80px_rgba(212,175,55,0.1)]">
                     {/* Book Cover */}
                     <div className="relative">
                       {/* Embossed Effect */}
                       <div className="absolute -inset-4 bg-gradient-to-br from-[#d4af37]/5 via-transparent to-transparent rounded-xl blur-xl" />
                       
-                      <Image
-                        src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                        alt="The Architecture of Human Purpose — Volume Zero"
-                        width={400}
-                        height={580}
-                        className="relative w-full h-auto rounded-xl border border-[#d4af37]/20 shadow-2xl"
-                        priority
-                      />
+                      <div className="relative w-full aspect-[3/4] rounded-xl border border-[#d4af37]/20 shadow-2xl overflow-hidden">
+                        <Image
+                          src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+                          alt="The Architecture of Human Purpose — Volume Zero"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          priority
+                        />
+                      </div>
                       
                       {/* Overlay Glint */}
                       <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-transparent via-transparent to-[#d4af37]/5 pointer-events-none" />
@@ -284,7 +323,7 @@ const PurposeLandingPage: NextPage = () => {
                           <div className="w-2 h-2 rounded-full bg-[#d4af37]" />
                         </div>
                         <div>
-                          <div className="font-medium group-hover:text-[#d4af37] transition-colors">
+                          <div className="font-medium text-white group-hover:text-[#d4af37] transition-colors">
                             {item.title}
                           </div>
                           <div className="text-sm text-[#666] mt-1">
@@ -366,7 +405,7 @@ const PurposeLandingPage: NextPage = () => {
               <div className="text-6xl opacity-10">∞</div>
             </div>
             
-            <h2 className="text-3xl md:text-4xl font-light mb-6">
+            <h2 className="text-3xl md:text-4xl font-light mb-6 text-white">
               The Prelude Awaits
             </h2>
             
@@ -378,7 +417,7 @@ const PurposeLandingPage: NextPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/books/the-architecture-of-human-purpose"
-                className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-medium transition-all duration-500 hover:scale-[1.02]"
+                className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-medium text-white transition-all duration-500 hover:scale-[1.02]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f]" />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f] opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
@@ -388,7 +427,7 @@ const PurposeLandingPage: NextPage = () => {
               
               <Link
                 href="/content"
-                className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-medium border border-[#3a3a3a] hover:border-[#d4af37]/40 transition-all duration-300 hover:scale-[1.02]"
+                className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-medium text-white border border-[#3a3a3a] hover:border-[#d4af37]/40 transition-all duration-300 hover:scale-[1.02]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1a1a1a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <span className="relative">Explore the Canon</span>
@@ -403,43 +442,6 @@ const PurposeLandingPage: NextPage = () => {
             </p>
           </div>
         </section>
-
-        {/* Global Interaction Overlay */}
-        <div className="fixed inset-0 pointer-events-none z-50">
-          {/* Mouse Trail Effect */}
-          <div className="absolute w-64 h-64 rounded-full bg-gradient-to-r from-[#d4af37]/5 to-transparent blur-3xl"
-            style={{
-              transform: 'translate(var(--mouse-x), var(--mouse-y))',
-              transition: 'transform 0.1s ease-out'
-            }}
-          />
-        </div>
-
-        {/* Custom Cursor Script */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              document.addEventListener('mousemove', (e) => {
-                document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
-                document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
-              });
-              
-              // Smooth scroll to anchor links
-              document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                  e.preventDefault();
-                  const target = document.querySelector(this.getAttribute('href'));
-                  if (target) {
-                    target.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'start'
-                    });
-                  }
-                });
-              });
-            `
-          }}
-        />
       </main>
     </Layout>
   );

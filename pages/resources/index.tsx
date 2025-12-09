@@ -1,4 +1,4 @@
-// pages/resources/index.tsx
+// pages/resources/index.tsx - COMPLETE FIXED VERSION
 import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -6,8 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-import { getAllContent } from "@/lib/mdx";
-import type { RawContentEntry } from "@/lib/mdx";
+import { getAllContent, type PostDocument } from "@/lib/mdx";
 
 interface ResourceMeta {
   slug: string;
@@ -19,6 +18,7 @@ interface ResourceMeta {
   coverImage?: string | null;
   tags?: string[] | null;
   author?: string | null;
+  draft?: boolean; // Add draft field for filtering
 }
 
 interface ResourcesPageProps {
@@ -30,8 +30,10 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
   const pageDescription =
     "Curated frameworks and tools for fathers, founders, and institutional architects who are building for generations.";
 
-  // Sort resources by date (newest first) or title if no date
-  const sortedResources = [...resources].sort((a, b) => {
+  // Filter out drafts and sort by date (newest first) or title
+  const publishedResources = resources.filter(r => !r.draft);
+  
+  const sortedResources = [...publishedResources].sort((a, b) => {
     if (a.date && b.date) {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     }
@@ -259,28 +261,28 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
   try {
-    const all = getAllContent("resources") as RawContentEntry[];
+    // FIXED: getAllContent returns a Promise, await it and use PostDocument type
+    const all = await getAllContent("resources");
 
-    const resources: ResourceMeta[] = all.map((r) => ({
+    const resources: ResourceMeta[] = (all || []).map((r: PostDocument) => ({
       slug: r.slug || "",
       title: r.title || "Untitled Resource",
       description: r.description ?? null,
       subtitle: r.subtitle ?? null,
       date: r.date ?? null,
-      readtime: r.readtime ?? r.readTime ?? null,
-      coverImage: r.coverImage ?? null,
+      readtime: r.readTime ?? null,
+      coverImage: typeof r.coverImage === 'string' 
+        ? r.coverImage 
+        : (r.coverImage as any)?.src ?? null,
       tags: Array.isArray(r.tags) ? r.tags : r.tags ? [r.tags] : null,
       author: r.author ?? null,
+      draft: r.draft ?? false, // Get draft status
     }));
 
-    // Filter out any drafts
-    const publishedResources = resources.filter(
-      (r) => !(r as any).draft // Access draft from the raw data if needed
-    );
-
+    // Filter out drafts - now done in the component
     return {
       props: {
-        resources: publishedResources,
+        resources,
       },
       revalidate: 60, // Revalidate every minute
     };

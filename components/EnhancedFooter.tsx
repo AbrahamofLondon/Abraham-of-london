@@ -1,237 +1,431 @@
-// components/EnhancedFooter.tsx
+// components/EnhancedFooter.tsx - MODERNIZED RESPONSIVE VERSION
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { siteConfig, type SocialLink } from "@/lib/siteConfig";
+import {
+  Mail,
+  MapPin,
+  Twitter,
+  Linkedin,
+  Instagram,
+  Youtube,
+  Facebook,
+  Phone,
+  ArrowUp,
+  Github,
+  Globe,
+  BookOpen,
+  FileText,
+  MessageCircle,
+  Users,
+} from "lucide-react";
 
-interface EnhancedFooterProps {
-  variant?: "light" | "dark";
-  className?: string;
-}
+// Device detection hook
+const useDeviceType = () => {
+  const [deviceType, setDeviceType] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
-// Extended type that includes kind for emoji mapping
-interface SocialLinkWithKind extends SocialLink {
-  kind?: string;
-}
+  React.useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      if (width < 768) setDeviceType('mobile');
+      else if (width < 1024) setDeviceType('tablet');
+      else setDeviceType('desktop');
+    };
 
-export default function EnhancedFooter({
-  variant = "light",
-  className,
-}: EnhancedFooterProps) {
-  // Use type assertion to include the kind property
-  const config = siteConfig as any;
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
 
-  // Safely normalize social links with kind property
-  const socialLinks: SocialLinkWithKind[] = Array.isArray(config.socialLinks)
-    ? [...config.socialLinks]
-    : [];
+  return deviceType;
+};
 
-  const baseClasses = "py-16 transition-colors";
-  const variantClasses = {
-    light:
-      "bg-gradient-to-b from-warmWhite to-cream/30 text-deepCharcoal border-t border-lightGrey",
-    dark: "bg-gradient-to-b from-deepCharcoal to-forest/20 text-cream border-t border-cream/20",
-  };
+// Simplified site configuration (removed external dependencies)
+const SITE_CONFIG = {
+  title: "Abraham of London",
+  description: "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
+  contact: {
+    email: "info@abrahamoflondon.org",
+    phone: "+44 20 8622 5909",
+    location: "Based in London, working globally"
+  },
+  socialLinks: [
+    { href: "https://twitter.com/abrahamoflondon", label: "Twitter", kind: "twitter" },
+    { href: "https://linkedin.com/company/abraham-of-london", label: "LinkedIn", kind: "linkedin" },
+    { href: "https://instagram.com/abrahamoflondon", label: "Instagram", kind: "instagram" },
+    { href: "https://youtube.com/@abrahamoflondon", label: "YouTube", kind: "youtube" },
+    { href: "mailto:info@abrahamoflondon.org", label: "Email", kind: "email" },
+  ]
+} as const;
 
-  const linkClasses = "hover:text-forest transition-colors duration-200";
-  const socialLinkClasses =
-    "p-3 rounded-xl hover:scale-110 transition-all duration-200 shadow-sm hover:shadow-md";
+type SocialPlatform = "twitter" | "linkedin" | "github" | "instagram" | "youtube" | "website" | "tiktok" | "facebook" | "email" | "phone" | "whatsapp" | "medium";
 
-  const footerSections = [
-    {
-      title: "Navigation",
-      links: [
-        { href: "/", label: "Home" },
-        { href: "/content", label: "Content" },
-        { href: "/downloads", label: "Downloads" },
-        { href: "/events", label: "Events" },
-        { href: "/ventures", label: "Ventures" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { href: "/content", label: "Fatherhood Frameworks" },
-        { href: "/downloads", label: "Founder Tools" },
-        { href: "/content", label: "Leadership Resources" },
-        { href: "/content", label: "Book Manuscripts" },
-      ],
-    },
-    {
-      title: "Connect",
-      links: [
-        { href: "/contact", label: "Contact" },
-        { href: "/newsletter", label: "Newsletter" },
-        { href: "/contact", label: "Speaking" },
-        { href: "/consulting", label: "Consulting" },
-        { href: "/chatham-rooms", label: "Chatham Rooms" },
-      ],
-    },
-  ];
+const iconMap: Record<SocialPlatform, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  twitter: Twitter,
+  linkedin: Linkedin,
+  github: Github,
+  instagram: Instagram,
+  youtube: Youtube,
+  website: Globe,
+  tiktok: MessageCircle,
+  facebook: Facebook,
+  email: Mail,
+  phone: Phone,
+  whatsapp: MessageCircle,
+  medium: BookOpen,
+};
 
-  // Function to get emoji based on link properties
-  const getSocialEmoji = (link: SocialLinkWithKind): string => {
-    // If kind is explicitly provided, use it
-    if (link.kind) {
-      const kindMap: Record<string, string> = {
-        twitter: "𝕏",
-        linkedin: "💼",
-        github: "⚡",
-        instagram: "📸",
-        youtube: "🎥",
-        website: "🌐",
-        tiktok: "🎵",
-        facebook: "📘",
-        email: "✉️",
-        phone: "📞",
-        whatsapp: "💬",
-        medium: "📝",
-      };
-      return kindMap[link.kind] || "🔗";
-    }
+// Enhanced footer sections with better mobile organization
+const footerSections = [
+  {
+    title: "Explore",
+    icon: Globe,
+    links: [
+      { label: "Home", href: "/" },
+      { label: "Content", href: "/content" },
+      { label: "The Canon", href: "/canon" },
+      { label: "Books", href: "/books" },
+      { label: "Downloads", href: "/downloads" },
+      { label: "Events", href: "/events" },
+    ],
+  },
+  {
+    title: "Resources",
+    icon: FileText,
+    links: [
+      { label: "Fatherhood Frameworks", href: "/fatherhood" },
+      { label: "Founder Tools", href: "/founders" },
+      { label: "Leadership Resources", href: "/leadership" },
+      { label: "Canon Campaign", href: "/canon-campaign" },
+      { label: "Volume X — Future Civilisation", href: "/canon/volume-x" },
+    ],
+  },
+  {
+    title: "Connect",
+    icon: Users,
+    links: [
+      { label: "Contact", href: "/contact" },
+      { label: "Newsletter", href: "/newsletter" },
+      { label: "Speaking", href: "/speaking" },
+      { label: "Consulting", href: "/consulting" },
+      { label: "Inner Circle", href: "/inner-circle" },
+    ],
+  },
+];
 
-    // Fallback: infer from href or label
-    const href = link.href.toLowerCase();
-    const label = link.label.toLowerCase();
-
-    if (href.includes('twitter.com') || href.includes('x.com') || label.includes('twitter') || label.includes('x')) return "𝕏";
-    if (href.includes('linkedin.com') || label.includes('linkedin')) return "💼";
-    if (href.includes('github.com') || label.includes('github')) return "⚡";
-    if (href.includes('instagram.com') || label.includes('instagram')) return "📸";
-    if (href.includes('youtube.com') || label.includes('youtube')) return "🎥";
-    if (href.includes('tiktok.com') || label.includes('tiktok')) return "🎵";
-    if (href.includes('facebook.com') || label.includes('facebook')) return "📘";
-    if (href.startsWith('mailto:') || label.includes('email')) return "✉️";
-    if (href.startsWith('tel:') || label.includes('phone')) return "📞";
-    if (href.includes('whatsapp.com') || label.includes('whatsapp')) return "💬";
-    if (href.includes('medium.com') || label.includes('medium')) return "📝";
-
-    return "🔗";
+// Animated wrapper component
+const FadeIn: React.FC<{
+  children: React.ReactNode;
+  delay?: number;
+  direction?: "up" | "down" | "left" | "right";
+}> = ({ children, delay = 0, direction = "up" }) => {
+  const directions = {
+    up: { y: 20 },
+    down: { y: -20 },
+    left: { x: 20 },
+    right: { x: -20 },
   };
 
   return (
-    <footer
-      className={`${baseClasses} ${variantClasses[variant]} ${className || ""}`}
+    <motion.div
+      initial={{ opacity: 0, ...directions[direction] }}
+      whileInView={{ opacity: 1, y: 0, x: 0 }}
+      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-50px" }}
     >
-      <div className="mx-auto max-w-7xl px-4">
-        {/* Main Footer Content */}
-        <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
-          {/* Brand Section */}
-          <motion.div
-            className="lg:col-span-2"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <Link href="/" className="mb-6 block">
-              <h3 className="bg-gradient-to-r from-forest to-deepCharcoal bg-clip-text font-serif text-2xl font-bold text-transparent">
-                {config.title || "Abraham of London"}
-              </h3>
-            </Link>
+      {children}
+    </motion.div>
+  );
+};
 
-            <p className="mb-6 max-w-md text-lg leading-relaxed opacity-80">
-              {config.description ||
-                "Building enduring legacies through wisdom, strategy, and brotherhood."}
-            </p>
+export default function EnhancedFooter() {
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
+  const isTablet = deviceType === 'tablet';
+  const [currentYear, setCurrentYear] = React.useState<number>(2024);
 
-            <div className="flex gap-3">
-              {socialLinks.map((link, index) => (
-                <motion.a
-                  key={link.href}
-                  href={link.href}
-                  target={link.external ? "_blank" : undefined}
-                  rel={link.external ? "noopener noreferrer" : undefined}
-                  className={`${socialLinkClasses} ${
-                    variant === "light"
-                      ? "bg-white/70 text-deepCharcoal hover:bg-forest hover:text-cream"
-                      : "bg-cream/10 text-cream hover:bg-cream hover:text-deepCharcoal"
-                  }`}
-                  aria-label={link.label}
-                  title={link.label}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <span className="text-lg font-medium">
-                    {getSocialEmoji(link)}
-                  </span>
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
+  React.useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
-          {/* Links Sections */}
-          {footerSections.map((section, sectionIndex) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: sectionIndex * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <h4 className="mb-6 text-base font-semibold uppercase tracking-wider opacity-70">
-                {section.title}
-              </h4>
-              <ul className="space-y-4">
-                {section.links.map((link, linkIndex) => (
-                  <motion.li
-                    key={link.href}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{
-                      duration: 0.4,
-                      delay: sectionIndex * 0.1 + linkIndex * 0.05,
-                    }}
-                    viewport={{ once: true }}
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.href = `mailto:${SITE_CONFIG.contact.email}`;
+  };
+
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.href = `tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, '')}`;
+  };
+
+  // Responsive grid columns
+  const gridCols = isMobile ? '1' : isTablet ? '2' : '4';
+
+  return (
+    <footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-amber-500/10">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
+      
+      {/* Glow effect */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className={`grid grid-cols-${gridCols} gap-8`}>
+          {/* Brand Column */}
+          <div className={isMobile ? 'col-span-1' : isTablet ? 'col-span-2' : 'col-span-1'}>
+            <FadeIn delay={0.1} direction="up">
+              <Link 
+                href="/" 
+                className="group inline-block mb-4 lg:mb-6"
+                aria-label="Go to homepage"
+              >
+                <div className="flex flex-col gap-1">
+                  <h2 className="font-serif text-2xl lg:text-3xl font-bold text-white">
+                    Abraham
+                    <span className="text-amber-400"> of London</span>
+                  </h2>
+                  <p className="text-xs font-medium tracking-[0.2em] text-amber-400/70 uppercase">
+                    Faith · Strategy · Fatherhood
+                  </p>
+                </div>
+              </Link>
+
+              <p className="mb-4 lg:mb-6 text-sm lg:text-base text-gray-300 leading-relaxed">
+                {SITE_CONFIG.description}
+              </p>
+
+              {/* Contact Info */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-amber-400/70 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-300">{SITE_CONFIG.contact.location}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
+                  <a
+                    href={`mailto:${SITE_CONFIG.contact.email}`}
+                    onClick={handleEmailClick}
+                    className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
+                    aria-label="Send email"
                   >
-                    <Link
-                      href={link.href}
-                      className={`text-base font-medium ${linkClasses}`}
-                      prefetch={false}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
+                    {SITE_CONFIG.contact.email}
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
+                  <a
+                    href={`tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, '')}`}
+                    onClick={handlePhoneClick}
+                    className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
+                    aria-label="Call phone number"
+                  >
+                    {SITE_CONFIG.contact.phone}
+                  </a>
+                </div>
+              </div>
+
+              {/* Social Links */}
+              <div className="mb-6">
+                <p className="mb-3 text-sm font-semibold text-white">Follow</p>
+                <div className="flex flex-wrap gap-2">
+                  {SITE_CONFIG.socialLinks.map((social, index) => {
+                    const Icon = social.kind && iconMap[social.kind as SocialPlatform] 
+                      ? iconMap[social.kind as SocialPlatform] 
+                      : Globe;
+                    
+                    return (
+                      <motion.a
+                        key={social.label}
+                        href={social.href}
+                        target={social.href.startsWith('http') ? '_blank' : '_self'}
+                        rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className="group flex items-center gap-2 rounded-lg px-3 py-2 text-xs border border-amber-400/20 bg-amber-400/5 transition-all duration-200 hover:border-amber-400/40 hover:bg-amber-400/10"
+                        whileHover={{ x: 2 }}
+                        whileTap={{ scale: 0.98 }}
+                        aria-label={`Follow on ${social.label}`}
+                      >
+                        <Icon className="h-3 w-3 text-amber-400" />
+                        <span className="text-gray-300 group-hover:text-white transition-colors">
+                          {social.label}
+                        </span>
+                      </motion.a>
+                    );
+                  })}
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+
+          {/* Navigation Sections */}
+          {footerSections.map((section, index) => (
+            <div key={section.title} className={isMobile ? 'col-span-1' : ''}>
+              <FadeIn delay={0.1 + index * 0.1} direction="up">
+                <div className={isMobile ? 'border-t border-gray-800 pt-6 first:pt-0 first:border-t-0' : ''}>
+                  <div className="flex items-center gap-2 mb-4">
+                    {React.createElement(section.icon, { 
+                      className: "h-4 w-4 text-amber-400" 
+                    })}
+                    <h3 className="text-lg font-semibold text-white">
+                      {section.title}
+                    </h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {section.links.map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-1"
+                          prefetch={false}
+                        >
+                          <span className="w-1 h-1 rounded-full bg-amber-400/30 group-hover:bg-amber-400 transition-colors" />
+                          <span>{link.label}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </FadeIn>
+            </div>
           ))}
         </div>
 
-        {/* Bottom Bar */}
-        <motion.div
-          className="border-t border-current/20 pt-8"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-        >
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="text-center md:text-left">
-              <p className="text-sm font-medium opacity-70">
-                {config.copyright ||
-                  `© ${new Date().getFullYear()} Abraham of London. All rights reserved.`}
-              </p>
+        {/* Bottom Section */}
+        <FadeIn delay={0.4} direction="up">
+          <div className="mt-12 pt-8 border-t border-gray-800">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              {/* Copyright and tagline */}
+              <div className="text-center lg:text-left">
+                <p className="text-sm text-gray-400">
+                  © {currentYear} {SITE_CONFIG.title}. All rights reserved.
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Built for those who still believe in duty, consequence, and legacy.
+                </p>
+              </div>
+
+              {/* Legal Links */}
+              <div className="flex-1">
+                <div className="flex flex-wrap justify-center gap-4 lg:gap-6 text-xs">
+                  <Link 
+                    href="/privacy" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link 
+                    href="/terms" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Terms of Service
+                  </Link>
+                  <Link 
+                    href="/cookies" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Cookie Policy
+                  </Link>
+                  <Link 
+                    href="/accessibility" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Accessibility
+                  </Link>
+                  <Link 
+                    href="/security" 
+                    className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
+                  >
+                    Security
+                  </Link>
+                </div>
+              </div>
+
+              {/* Back to Top Button */}
+              <motion.button
+                onClick={scrollToTop}
+                className="group flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-amber-500 text-black font-semibold text-sm hover:bg-amber-400 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                aria-label="Scroll back to top"
+              >
+                Back to Top
+                <ArrowUp className="h-3 w-3 transition-transform group-hover:-translate-y-0.5" />
+              </motion.button>
             </div>
 
-            <div className="flex items-center gap-8 text-sm font-medium opacity-70">
-              <Link href="/sitemap.xml" className={linkClasses}>
-                Sitemap
-              </Link>
-              <Link href="/rss.xml" className={linkClasses}>
-                RSS
-              </Link>
-              <Link href="/security" className={linkClasses}>
-                Security
-              </Link>
+            {/* Microcopy */}
+            <div className="mt-6 text-center">
+              <p className="text-xs text-gray-500">
+                Version 2.1.0 · Designed in London · Built with purpose
+              </p>
             </div>
           </div>
-        </motion.div>
+        </FadeIn>
       </div>
+
+      {/* Mobile-specific optimizations */}
+      <style jsx global>{`
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+          /* Better touch targets */
+          a[role="button"],
+          button,
+          .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+          }
+          
+          /* Optimize grid columns for mobile */
+          .grid {
+            grid-template-columns: 1fr !important;
+          }
+          
+          /* Ensure proper spacing on mobile */
+          .col-span-1 {
+            grid-column: span 1;
+          }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          
+          .col-span-2 {
+            grid-column: span 2;
+          }
+        }
+        
+        /* Desktop optimizations */
+        @media (min-width: 1024px) {
+          .grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+        }
+        
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+        
+        /* Smooth scrolling */
+        html {
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+        }
+      `}</style>
     </footer>
   );
 }

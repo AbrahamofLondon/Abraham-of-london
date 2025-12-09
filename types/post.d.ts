@@ -1,54 +1,43 @@
-// types/post.d.ts
+// types/post.d.ts - DECLARATION FILE
+declare type ImageType = string | { src?: string } | null;
 
 declare interface PostMeta {
-  // Required fields
   slug: string;
   title: string;
-
-  // Content information
   subtitle?: string;
   excerpt?: string;
   description?: string;
-  content?: string;
-  body?: string;
-
-  // Dates
   date: string;
   lastModified?: string;
   published?: boolean;
-
-  // Categorization
   category?: string;
   tags?: string[];
   series?: string;
   seriesOrder?: number;
-
-  // Media
-  coverImage?: string;
-  ogImage?: string;
+  coverImage?: ImageType;
+  ogImage?: ImageType;
   coverAspect?: string;
   coverFit?: "contain" | "cover";
   coverPosition?: string;
-
-  // Authorship
   author?: string;
   authors?: string[];
-
-  // Reading
   readTime?: string;
   wordCount?: number;
-
-  // SEO
   canonicalUrl?: string;
   noindex?: boolean;
-
-  // Legacy/compatibility
   [key: string]: unknown;
 }
 
 declare interface Post extends PostMeta {
-  // Extended post with full content
   content: string;
+  html?: string;
+  compiledSource?: string;
+}
+
+declare interface PostWithContent extends Omit<PostMeta, 'coverImage' | 'ogImage'> {
+  content: string;
+  coverImage?: string | null;
+  ogImage?: string | null;
   html?: string;
   compiledSource?: string;
 }
@@ -60,7 +49,9 @@ declare interface PostSummary {
   date: string;
   category?: string;
   readTime?: string;
-  coverImage?: string;
+  coverImage?: string | null;
+  tags?: string[];
+  author?: string;
 }
 
 declare interface PostNavigation {
@@ -78,7 +69,6 @@ declare interface PostList {
   };
 }
 
-// Content layer types (if using contentlayer)
 declare module "contentlayer" {
   export interface Document {
     _id: string;
@@ -87,19 +77,17 @@ declare module "contentlayer" {
   }
 }
 
-// MDX related types
 declare module "*.mdx" {
-  import { ComponentType } from "...";
-
+  import { ComponentType } from "react";
+  
   interface MDXProps {
     components?: Record<string, ComponentType>;
   }
-
+  
   const MDXContent: ComponentType<MDXProps>;
   export default MDXContent;
 }
 
-// Frontmatter validation
 declare interface FrontmatterValidation {
   required: string[];
   optional: string[];

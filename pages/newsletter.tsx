@@ -1,11 +1,11 @@
-// pages/newsletter.tsx
+// pages/newsletter.tsx - FIXED
 import * as React from "react";
 import Head from "next/head";
-import Link from "next/link"; // ADDED: Import Link
+import Link from "next/link";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import NewsletterForm from "@/components/NewsletterForm";
-import { getPageTitle } from "@/lib/siteConfig";
+import { getPageTitle } from '@/lib/imports';
 
 export default function NewsletterPage() {
   const pageTitle = "Newsletter";
@@ -197,14 +197,14 @@ export default function NewsletterPage() {
                     <p className="text-xs text-gold/40">
                       You can unsubscribe at any time via the link in each
                       email. For details on how we handle your data, please see
-                      our {/* FIXED: Replace <a> with <Link> */}
+                      our{" "}
                       <Link
                         href="/privacy-policy"
                         className="underline underline-offset-2 text-gold hover:text-amber-200"
                       >
                         Privacy Policy
                       </Link>{" "}
-                      and {/* FIXED: Replace <a> with <Link> */}
+                      and{" "}
                       <Link
                         href="/cookie-policy"
                         className="underline underline-offset-2 text-gold hover:text-amber-200"
@@ -303,7 +303,6 @@ export default function NewsletterPage() {
                 <p className="text-gold/70 text-sm leading-relaxed">
                   Every email includes a one-click unsubscribe link. If you
                   prefer, you can also contact us using the details in our{" "}
-                  {/* FIXED: Replace <a> with <Link> */}
                   <Link
                     href="/privacy-policy"
                     className="underline underline-offset-2 text-gold hover:text-amber-200"
@@ -324,7 +323,7 @@ export default function NewsletterPage() {
                   related communications you have opted into. We may also use
                   high-level engagement metrics (opens, clicks) to refine what
                   we send. We do not sell your data and handle it in accordance
-                  with our {/* FIXED: Replace <a> with <Link> */}
+                  with our{" "}
                   <Link
                     href="/privacy-policy"
                     className="underline underline-offset-2 text-gold hover:text-amber-200"

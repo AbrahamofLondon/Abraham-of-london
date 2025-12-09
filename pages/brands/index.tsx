@@ -1,4 +1,4 @@
-// pages/brands/index.tsx
+// pages/brands/index.tsx - FIXED
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import {
   Heart,
 } from "lucide-react";
 import Layout from "@/components/Layout";
-import { getPageTitle } from "@/lib/siteConfig";
+import { getPageTitle } from '@/lib/imports';
 
 interface Brand {
   id: string;

@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { BlogPostCard, formatCardDate, getCardImage } from '@/components/Cards';
+import { BlogPostCard, type BlogPostCardProps, type PostLike } from "@/components/BlogPostCard";
 import mdxComponents from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { RawContentEntry } from "@/lib/mdx";

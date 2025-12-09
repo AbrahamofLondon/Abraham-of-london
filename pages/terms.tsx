@@ -278,3 +278,4 @@ const TermsPage: NextPage = () => {
 
 export default TermsPage;
 
+

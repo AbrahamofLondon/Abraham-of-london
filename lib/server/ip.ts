@@ -7,6 +7,12 @@ export interface IpAnalysis {
   isLocalhost: boolean;
   version: 4 | 6 | "unknown";
   trusted: boolean;
+  analysis?: {
+    isPrivate: boolean;
+    isLocalhost: boolean;
+    version: 4 | 6 | "unknown";
+    trusted: boolean;
+  };
 }
 
 // ----------------------------------------------------------------------------
@@ -78,6 +84,12 @@ function analyzeIp(ip: string, source = "unknown"): IpAnalysis {
       isLocalhost: false,
       version: "unknown",
       trusted: false,
+      analysis: {
+        isPrivate: false,
+        isLocalhost: false,
+        version: "unknown",
+        trusted: false,
+      },
     };
   }
 
@@ -97,6 +109,12 @@ function analyzeIp(ip: string, source = "unknown"): IpAnalysis {
     isLocalhost,
     version,
     trusted,
+    analysis: {
+      isPrivate,
+      isLocalhost,
+      version,
+      trusted,
+    },
   };
 }
 

@@ -1,5 +1,5 @@
 
-# scripts/build.sh - Simple build script for Netlify
+// scripts/build.sh - Simple build script for Netlify
 echo "Setting build environment..."
 export CI=false
 export NEXT_DISABLE_ESLINT=1

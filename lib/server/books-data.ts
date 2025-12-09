@@ -7,8 +7,9 @@ import {
   type MdxMeta,
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
-import type { Book, ContentEntry, ContentMeta } from "@/types/index";
+import type { Book as BookType, ContentEntry, ContentMeta } from "@/types/index";
 
+export type Book = BookType;
 export type BookWithContent = Book & {
   content: string;
 };
@@ -678,7 +679,7 @@ export function getBookStats(): {
 // DEFAULT EXPORT
 // ---------------------------------------------------------------------------
 
-export default {
+const booksData = {
   // Core functions
   getAllBooksMeta,
   getBookBySlug,
@@ -706,8 +707,6 @@ export default {
   // Utility functions
   bookToContentMeta,
   bookToContentEntry,
-  
-  // Types
-  Book,
-  BookWithContent,
 };
+
+export default booksData;

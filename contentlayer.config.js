@@ -1,4 +1,3 @@
-// contentlayer.config.mjs
 import path from "node:path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
@@ -33,6 +32,37 @@ function generateUrl(slug, basePath) {
   return `/${cleanBase}/${cleanSlug}`.replace(/\/+/gu, "/");
 }
 
+// Helper to ensure fields have proper defaults (not undefined)
+function withDefaults(fields) {
+  const defaultedFields = {};
+  for (const [key, config] of Object.entries(fields)) {
+    if (config.type === "string") {
+      defaultedFields[key] = {
+        ...config,
+        default: config.required ? "" : (config.default || ""),
+      };
+    } else if (config.type === "list") {
+      defaultedFields[key] = {
+        ...config,
+        default: config.required ? [] : (config.default || []),
+      };
+    } else if (config.type === "boolean") {
+      defaultedFields[key] = {
+        ...config,
+        default: config.required ? false : (config.default || false),
+      };
+    } else if (config.type === "json") {
+      defaultedFields[key] = {
+        ...config,
+        default: config.required ? null : (config.default || null),
+      };
+    } else {
+      defaultedFields[key] = config;
+    }
+  }
+  return defaultedFields;
+}
+
 // -----------------------------------------------------------------------------
 // Document types
 // -----------------------------------------------------------------------------
@@ -41,12 +71,12 @@ export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Post" },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
     description: { type: "string", required: false },
@@ -68,15 +98,15 @@ export const Post = defineDocumentType(() => ({
     resources: { type: "json", required: false },
     keyInsights: { type: "json", required: false },
     authorNote: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
-    draft: { type: "boolean", default: false },
-    featured: { type: "boolean", default: false },
+    excerpt: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    draft: { type: "boolean", required: false },
+    featured: { type: "boolean", required: false },
     layout: { type: "string", required: false },
-    accessLevel: { type: "string", required: false, default: "public" },
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -106,12 +136,12 @@ export const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Download" },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
@@ -124,18 +154,18 @@ export const Download = defineDocumentType(() => ({
     layout: { type: "string", required: false },
     description: { type: "string", required: false },
     fileSize: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
-    downloadFile: { type: "string", required: false, default: "" },
-    fileUrl: { type: "string", default: "" },
-    type: { type: "string", default: "download" },
-    featured: { type: "boolean", default: false },
-    draft: { type: "boolean", default: false },
-    downloadUrl: { type: "string", default: "" },
-    accessLevel: { type: "string", required: false, default: "public" },
+    excerpt: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    downloadFile: { type: "string", required: false },
+    fileUrl: { type: "string", required: false },
+    type: { type: "string", required: false },
+    featured: { type: "boolean", required: false },
+    draft: { type: "boolean", required: false },
+    downloadUrl: { type: "string", required: false },
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -170,28 +200,29 @@ export const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Book" },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
     readTime: { type: "string", required: false },
     description: { type: "string", required: false },
     subtitle: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
-    author: { type: "string", default: "" },
-    publisher: { type: "string", default: "" },
-    isbn: { type: "string", default: "" },
-    draft: { type: "boolean", default: false },
-    featured: { type: "boolean", default: false },
-    accessLevel: { type: "string", required: false, default: "public" },
+    excerpt: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    author: { type: "string", required: false },
+    publisher: { type: "string", required: false },
+    isbn: { type: "string", required: false },
+    draft: { type: "boolean", required: false },
+    featured: { type: "boolean", required: false },
+    category: { type: "string", required: false }, // Added missing category field
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -213,28 +244,29 @@ export const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Event" },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
     time: { type: "string", required: false },
     description: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
+    excerpt: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
     eventDate: {
       type: "date",
-      default: new Date().toISOString().split("T")[0],
+      required: false,
+      default: () => new Date().toISOString().split("T")[0],
     },
-    location: { type: "string", default: "" },
-    registrationUrl: { type: "string", default: "" },
-    accessLevel: { type: "string", required: false, default: "public" },
+    location: { type: "string", required: false },
+    registrationUrl: { type: "string", required: false },
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -265,25 +297,25 @@ export const Print = defineDocumentType(() => ({
   name: "Print",
   filePathPattern: "prints/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Print" },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
     description: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
-    dimensions: { type: "string", default: "" },
-    downloadFile: { type: "string", default: "" },
-    price: { type: "string", default: "" },
-    available: { type: "boolean", default: true },
-    accessLevel: { type: "string", required: false, default: "public" },
+    excerpt: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    dimensions: { type: "string", required: false },
+    downloadFile: { type: "string", required: false },
+    price: { type: "string", required: false },
+    available: { type: "boolean", required: false },
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -305,22 +337,22 @@ export const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Strategy" },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     description: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
-    accessLevel: { type: "string", required: false, default: "public" },
+    excerpt: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -342,12 +374,12 @@ export const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: "resources/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Resource" },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     description: { type: "string", required: false },
     slug: { type: "string", required: false },
@@ -355,17 +387,17 @@ export const Resource = defineDocumentType(() => ({
     readtime: { type: "string", required: false },
     readTime: { type: "string", required: false },
     subtitle: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
-    resourceType: { type: "string", default: "document" },
-    fileUrl: { type: "string", default: "" },
-    downloadUrl: { type: "string", default: "" },
-    featured: { type: "boolean", default: false },
-    draft: { type: "boolean", default: false },
-    accessLevel: { type: "string", required: false, default: "public" },
+    excerpt: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    resourceType: { type: "string", required: false },
+    fileUrl: { type: "string", required: false },
+    downloadUrl: { type: "string", required: false },
+    featured: { type: "boolean", required: false },
+    draft: { type: "boolean", required: false },
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -383,40 +415,34 @@ export const Resource = defineDocumentType(() => ({
   },
 }));
 
-// Canon – this is the key one for your volumes
 export const Canon = defineDocumentType(() => ({
   name: "Canon",
   filePathPattern: "canon/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    title: {
-      type: "string",
-      required: true,
-      default: "Untitled Canon Document",
-    },
+  fields: withDefaults({
+    title: { type: "string", required: true },
     date: {
       type: "date",
       required: true,
-      default: new Date().toISOString().split("T")[0],
+      default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
     subtitle: { type: "string", required: false },
     description: { type: "string", required: false },
-    excerpt: { type: "string", default: "" },
-    author: { type: "string", default: "Abraham of London" },
-    coverImage: { type: "string", default: "" },
+    excerpt: { type: "string", required: false },
+    author: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
     coverAspect: { type: "string", required: false },
     coverFit: { type: "string", required: false },
-    // keep as string: "1", "2", "10" – your page code parses this safely
     volumeNumber: { type: "string", required: false },
     order: { type: "number", required: false },
-    featured: { type: "boolean", default: false },
-    draft: { type: "boolean", default: false },
-    tags: { type: "list", of: { type: "string" }, default: [] },
+    featured: { type: "boolean", required: false },
+    draft: { type: "boolean", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
     readTime: { type: "string", required: false },
-    accessLevel: { type: "string", required: false, default: "public" },
+    accessLevel: { type: "string", required: false },
     lockMessage: { type: "string", required: false },
-  },
+  }),
   computedFields: {
     slug: {
       type: "string",
@@ -429,6 +455,45 @@ export const Canon = defineDocumentType(() => ({
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "canon"),
           "canon"
+        ),
+    },
+  },
+}));
+
+export const Short = defineDocumentType(() => ({
+  name: "Short",
+  filePathPattern: "shorts/**/*.mdx", // Changed to match nested structure
+  contentType: "mdx",
+  fields: withDefaults({
+    title: { type: "string", required: true },
+    date: { 
+      type: "date", 
+      required: false,
+      default: () => new Date().toISOString().split("T")[0],
+    },
+    excerpt: { type: "string", required: false },
+    theme: { type: "string", required: false },
+    audience: { type: "string", required: false },
+    readTime: { type: "string", required: false },
+    published: { type: "boolean", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    // Add common fields for consistency
+    description: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    draft: { type: "boolean", required: false },
+    author: { type: "string", required: false },
+  }),
+  computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "shorts"),
+    },
+    url: {
+      type: "string",
+      resolve: (doc) =>
+        generateUrl(
+          generateSlug(doc._raw.flattenedPath, "shorts"),
+          "shorts"
         ),
     },
   },
@@ -449,6 +514,7 @@ export default makeSource({
     Strategy,
     Resource,
     Canon,
+    Short,
   ],
   mdx: {
     remarkPlugins: [remarkGfm],

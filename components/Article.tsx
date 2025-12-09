@@ -1,6 +1,7 @@
 // components/Article.tsx
 import * as React from "react";
 import Image from "next/image";
+import { getSafeImageProps } from "@/lib/image-utils";
 
 interface ArticleProps {
   title?: string;
@@ -30,6 +31,15 @@ export default function Article(props: ArticleProps) {
     props;
 
   const dateText = formatDateISOToGB(date);
+
+  // Normalise and fallback-cover handling
+  const hasCover = Boolean(coverImage);
+  const safeCover = hasCover
+    ? getSafeImageProps(coverImage, title || "Cover image", {
+        // let Next handle sizing via `fill`, so we only use src + alt
+        fallbackConfig: { type: "post" },
+      })
+    : null;
 
   return (
     <article className="mx-auto flex w-full max-w-4xl flex-col px-4 pb-16 pt-10 sm:px-6 lg:px-0">
@@ -72,23 +82,24 @@ export default function Article(props: ArticleProps) {
         )}
       </header>
 
-      {/* HERO IMAGE – now cinematic, capped height, not a skyscraper */}
-      {coverImage && (
+      {/* HERO IMAGE – cinematic, capped height */}
+      {safeCover && (
         <section className="mb-10">
           <div className="relative overflow-hidden rounded-3xl border border-softGold/25 bg-black/70 shadow-2xl shadow-black/50">
-            {/* hard cap on height + fixed aspect ratio */}
             <div className="relative aspect-[16/9] max-h-[420px] w-full">
               <Image
-                src={coverImage}
-                alt={title || "Cover image"}
+                src={safeCover.src}
+                alt={safeCover.alt}
                 fill
                 priority={false}
                 className="object-cover"
                 sizes="(min-width: 1024px) 896px, 100vw"
+                // keep blur placeholder if we ever decide to pass it
+                placeholder={safeCover.blurDataURL ? "blur" : "empty"}
+                blurDataURL={safeCover.blurDataURL}
               />
             </div>
 
-            {/* subtle footer strip under the image for breathing space */}
             <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-[0.7rem] text-gray-400">
               <span className="truncate pr-4">
                 {title ?? "Abraham of London"}
@@ -101,9 +112,8 @@ export default function Article(props: ArticleProps) {
         </section>
       )}
 
-      {/* BODY CONTENT – generous spacing */}
+      {/* BODY CONTENT */}
       <section className="prose prose-invert prose-sm max-w-none prose-headings:font-serif prose-headings:text-cream prose-p:text-gray-200 prose-strong:text-gray-50 prose-em:text-gray-200 prose-a:text-softGold">
-        {/* extra spacing so the first paragraph isn’t glued to the hero */}
         <div className="mt-2 space-y-4">{children}</div>
       </section>
     </article>

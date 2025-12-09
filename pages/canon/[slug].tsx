@@ -11,9 +11,9 @@ import mdxComponents from "@/components/mdx-components";
 import LockClosedIcon from "@/components/icons/LockClosedIcon";
 
 import {
-  getAllCanon,
+  getPublicCanon, // Changed from getAllCanon
   getCanonBySlug,
-  type CanonDoc,
+  type Canon, // Changed from CanonDoc
 } from "@/lib/canon";
 
 // ---------------------------------------------------------------------------
@@ -199,7 +199,7 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
               </div>
             </div>
 
-            {/* Right: “Shelf card” */}
+            {/* Right: "Shelf card" */}
             <div className="w-full max-w-xs rounded-3xl border border-white/10 bg-black/40 px-5 py-5 shadow-[0_18px_40px_rgba(0,0,0,0.85)] backdrop-blur-sm">
               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-softGold/80">
                 Shelf Reference
@@ -313,7 +313,7 @@ export default CanonPage;
 // ---------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs: CanonDoc[] = getAllCanon({ includeDrafts: false });
+  const docs: Canon[] = getPublicCanon(); // Changed from getAllCanon({ includeDrafts: false })
 
   const paths =
     docs
@@ -363,7 +363,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     lockMessage: (match as any).lockMessage ?? null,
   };
 
-  const raw = match.body?.raw ?? "";
+  const raw = (match as any).body?.raw ?? "";
   const clean = raw.trim();
 
   const mdxSource = await serialize(clean || "# Draft Canon Entry", {

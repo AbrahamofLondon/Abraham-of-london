@@ -1,37 +1,8 @@
-// components/Cards/BaseCard.tsx
+// components/Cards/BaseCard.tsx - UPDATED
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-
-// =============================================================================
-// TYPES
-// =============================================================================
-
-export interface BaseCardProps {
-  slug: string;
-  title: string;
-  subtitle?: string | null;
-  excerpt?: string | null;
-  description?: string | null;
-  coverImage?: string | null;
-  date?: string | null;
-  tags?: string[];
-  featured?: boolean;
-  accessLevel?: string | null;
-  lockMessage?: string | null;
-  category?: string | null;
-  readingTime?: string | null;
-  isNew?: boolean;
-  className?: string;
-  href?: string;
-}
-
-// Document interface for future Contentlayer integration
-export interface DocumentCardProps {
-  document: any;
-  className?: string;
-  href?: string;
-}
+import type { BaseCardProps, DocumentCardProps } from "./types"; // Import from local types
 
 // =============================================================================
 // HELPER FUNCTION
@@ -222,7 +193,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
           </div>
         </div>
 
-        {/* New badge for “text-only” cards if you ever render without images via a wrapper */}
+        {/* New badge for "text-only" cards if you ever render without images via a wrapper */}
         {!coverImage && isNew && (
           <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-green-600/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
             New
@@ -249,3 +220,6 @@ export function DocumentCard({
   const cardProps = getCardPropsFromDocument(document);
   return <BaseCard {...cardProps} className={className} href={href} />;
 }
+
+// Export types from this file
+export type { BaseCardProps, DocumentCardProps };

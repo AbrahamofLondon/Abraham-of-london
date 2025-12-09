@@ -4,6 +4,7 @@
 // =========================================================================
 
 import type { NextApiRequest } from "next";
+import crypto from "crypto"; // Added for secure hashing
 
 // -------------------------------------------------------------------------
 // Types
@@ -409,7 +410,9 @@ export function rateLimitForEmail(
   options: RateLimitOptions
 ): { result: RateLimitResult; email: string } {
   const normalizedEmail = email.toLowerCase().trim();
-  const key = `${label}:${normalizedEmail}`;
+  // Hash email for privacy - never store raw emails
+  const emailHash = crypto.createHash("sha256").update(normalizedEmail).digest("hex");
+  const key = `${label}:${emailHash}`;
   const result = rateLimit(key, options);
 
   logRateLimitAction("email_rate_limit_check", {
@@ -433,7 +436,11 @@ export function rateLimitForRequestIp(
   options: RateLimitOptions
 ): { result: RateLimitResult; ip: string } {
   const ip = getClientIp(req);
-  const key = `${label}:${ip}`;
+  // Anonymize IP for privacy - keep only first 3 octets for IPv4
+  const anonymizedIp = ip.includes(":") 
+    ? ip.split(":").slice(0, 3).join(":") + "::" 
+    : ip.split(".").slice(0, 3).join(".") + ".0";
+  const key = `${label}:${anonymizedIp}`;
   const result = rateLimit(key, options);
 
   logRateLimitAction("ip_rate_limit_check", {
@@ -544,9 +551,76 @@ export const RATE_LIMIT_CONFIGS = {
     windowMs: 10 * 60 * 1000, // 10 minutes per IP
     keyPrefix: "ic-unlock",
   },
+  // NEW: Resend Configurations (Added to fix the error)
+  INNER_CIRCLE_RESEND: {
+    limit: 3,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    keyPrefix: "ic-resend",
+  },
+  INNER_CIRCLE_RESEND_EMAIL: {
+    limit: 2,
+    windowMs: 60 * 60 * 1000, // 1 hour
+    keyPrefix: "ic-resend-email",
+  },
   INNER_CIRCLE_ADMIN_EXPORT: {
     limit: 10,
-    windowMs: 60 * 1000, // 1 minute per IP
+    windowMs: 60 * 1000, // 1 minute
     keyPrefix: "ic-admin-export",
   },
+  ADMIN_OPERATIONS: {
+    limit: 10,
+    windowMs: 60 * 60 * 1000, // 1 hour
+    keyPrefix: "admin-ops",
+  },
+  ADMIN_LOGIN: {
+    limit: 5,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    keyPrefix: "admin-login",
+  },
+  ADMIN_API: {
+    limit: 100,
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    keyPrefix: "admin-api",
+  },
 } as const;
+
+// -------------------------------------------------------------------------
+// Type-safe access to configuration keys
+// -------------------------------------------------------------------------
+
+export type RateLimitConfigKey = keyof typeof RATE_LIMIT_CONFIGS;
+
+/**
+ * Helper function to safely get a rate limit configuration
+ */
+export function getRateLimitConfig(key: RateLimitConfigKey): RateLimitOptions {
+  const config = RATE_LIMIT_CONFIGS[key];
+  if (!config) {
+    throw new Error(`Rate limit configuration "${key}" not found`);
+  }
+  return config;
+}
+
+/**
+ * Check if a configuration exists
+ */
+export function hasRateLimitConfig(key: string): key is RateLimitConfigKey {
+  return key in RATE_LIMIT_CONFIGS;
+}
+
+// -------------------------------------------------------------------------
+// Default exports for backward compatibility
+// -------------------------------------------------------------------------
+
+export default {
+  rateLimit,
+  rateLimitAsync,
+  createRateLimitHeaders,
+  getClientIp,
+  rateLimitForEmail,
+  rateLimitForRequestIp,
+  combinedRateLimit,
+  RATE_LIMIT_CONFIGS,
+  getRateLimitConfig,
+  hasRateLimitConfig,
+};

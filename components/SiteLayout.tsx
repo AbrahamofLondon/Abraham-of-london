@@ -1,7 +1,8 @@
+// components/SiteLayout.tsx - FIXED
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { getPageTitle, absUrl } from "@/lib/siteConfig";
+import { getPageTitle, absUrl } from '@/lib/imports';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 

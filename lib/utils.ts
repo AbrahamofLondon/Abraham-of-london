@@ -1,4 +1,4 @@
-// /lib/utils.ts
+// lib/utils.ts - CORRECTED VERSION
 
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -409,28 +409,63 @@ export function deepClone<T>(obj: T): T {
 }
 
 /**
- * Deep merges objects
+ * Deep merges objects (simplified, type-safe version)
  */
 export function deepMerge<T extends Record<string, any>>(
   target: T,
-  ...sources: Partial<T>[]
+  ...sources: Array<Record<string, any>>
+): T {
+  const output: Record<string, any> = { ...target };
+  
+  sources.forEach(source => {
+    if (isObject(source)) {
+      Object.keys(source).forEach(key => {
+        const sourceValue = source[key];
+        const targetValue = output[key];
+        
+        if (isObject(sourceValue) && isObject(targetValue)) {
+          output[key] = deepMerge({ ...targetValue }, sourceValue);
+        } else {
+          output[key] = sourceValue;
+        }
+      });
+    }
+  });
+  
+  return output as T;
+}
+
+// Alternative, even simpler version:
+/**
+ * Deep merges objects (alternative implementation)
+ */
+export function deepMerge2<T extends Record<string, any>>(
+  target: T,
+  ...sources: Array<Record<string, any>>
 ): T {
   if (!sources.length) return target;
   
-  const source = sources.shift();
+  const source = sources[0];
+  const remainingSources = sources.slice(1);
   
   if (isObject(target) && isObject(source)) {
-    for (const key in source) {
-      if (isObject(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: {} });
-        deepMerge(target[key], source[key]);
+    const result: Record<string, any> = { ...target };
+    
+    Object.keys(source).forEach(key => {
+      const sourceValue = source[key];
+      const targetValue = target[key];
+      
+      if (isObject(sourceValue) && isObject(targetValue)) {
+        result[key] = deepMerge2({ ...targetValue }, sourceValue);
       } else {
-        Object.assign(target, { [key]: source[key] });
+        result[key] = sourceValue;
       }
-    }
+    });
+    
+    return deepMerge2(result as T, ...remainingSources);
   }
   
-  return deepMerge(target, ...sources);
+  return target;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -720,7 +755,3 @@ export default {
 export function safeString(str: unknown, fallback: string = ""): string {
   return typeof str === "string" ? str : fallback;
 }
-
-
-
-

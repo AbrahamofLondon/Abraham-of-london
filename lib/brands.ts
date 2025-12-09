@@ -102,7 +102,7 @@ export type BrandSettings = {
   };
 };
 
-// NB: ContentBase already has `content?: string`, so we omit it here and
+// NB: ContentBase already has `content?: string`, so we omit it and
 // introduce our own richer `content?: BrandContent`.
 export interface Brand extends Omit<ContentBase, "content"> {
   key: BrandKey;
@@ -128,10 +128,12 @@ export interface Brand extends Omit<ContentBase, "content"> {
   order?: number;
 }
 
-export interface BrandContentFilter extends Partial<ContentBase> {
+// Fix type clash with ContentBase.status by reusing its type
+export interface BrandContentFilter
+  extends Omit<Partial<ContentBase>, "status"> {
   brand?: BrandKey | BrandKey[];
   contentType?: string | string[];
-  status?: string;
+  status?: ContentBase["status"];
   featured?: boolean;
 }
 
@@ -270,6 +272,7 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       location: "Global",
     },
     url: "https://endom.co",
+    canonicalUrl: "https://endom.co",
     isActive: true,
     order: 2,
     date: "2023-01-01",
@@ -303,6 +306,8 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       location: "London & Lagos",
     },
     url: "https://alomarada.com",
+    canonicalUrl: "https://alomarada.com",
+    domains: ["alomarada.com", "www.alomarada.com"],
     isActive: true,
     order: 3,
     date: "2023-01-01",
@@ -334,7 +339,15 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       industry: ["Luxury", "Lifestyle", "Retail"],
       location: "Global",
     },
+    // Primary brand domain
     url: "https://endureluxe.com",
+    // Canonical under Alomarada umbrella (per your note)
+    canonicalUrl: "https://alomarada.com/endureluxe",
+    domains: [
+      "endureluxe.com",
+      "www.endureluxe.com",
+      "alomarada.com/endureluxe",
+    ],
     isActive: true,
     order: 4,
     date: "2023-01-01",
@@ -367,6 +380,8 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       location: "London, UK",
     },
     url: "https://innovatehub.abrahamoflondon.org",
+    canonicalUrl: "https://innovatehub.abrahamoflondon.org",
+    domains: ["innovatehub.abrahamoflondon.org"],
     isActive: true,
     order: 5,
     date: "2023-01-01",
@@ -772,7 +787,7 @@ export function getRelatedBrands(key: BrandKey): Brand[] {
 }
 
 // -----------------------------------------------------------------------------
-// DEFAULT EXPORT (VALUES ONLY – NO TYPES)
+// DEFAULT EXPORT
 // -----------------------------------------------------------------------------
 
 const brandApi = {

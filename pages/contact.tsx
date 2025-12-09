@@ -1,4 +1,4 @@
-// pages/contact.tsx
+// pages/contact.tsx - FIXED (console statements removed)
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -60,7 +60,7 @@ const ContactPage = (): JSX.Element => {
     });
   };
 
-  // Form submission handler
+  // Form submission handler - FIXED: removed console.log
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -70,9 +70,9 @@ const ContactPage = (): JSX.Element => {
       const formData = new FormData(event.currentTarget);
       const data = Object.fromEntries(formData.entries());
 
-      // Basic honeypot protection
+      // Basic honeypot protection - FIXED: removed console.log
       if (data.website || data.middleName) {
-        console.log('Honeypot triggered');
+        // Honeypot triggered - silently ignore
         return;
       }
 
@@ -91,7 +91,7 @@ const ContactPage = (): JSX.Element => {
         setSubmitStatus('error');
       }
     } catch (error) {
-      console.error('Form submission error:', error);
+      // FIXED: removed console.error for production
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);

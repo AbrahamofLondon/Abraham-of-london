@@ -1,10 +1,13 @@
-// pages/_app.tsx
+// pages/_app.tsx - CORRECTED VERSION
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
+
+// Remove content initialization from _app.tsx
+// Content should be loaded per-page via getStaticProps or API routes
 
 function usePageView() {
   const router = useRouter();

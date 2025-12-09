@@ -3,7 +3,7 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText } from "lucide-react";
-import BlogPostCard from "@/components/BlogPostCard";
+import { BlogPostCard } from "@/components/BlogPostCard";
 import BookCard from "@/components/books/BookCard";
 
 // -----------------------------------------------------------------------------
@@ -213,3 +213,6 @@ export default function ContentShowcase({
     </section>
   );
 }
+
+// Only export the component, not types that don't exist here
+export { ContentShowcase };

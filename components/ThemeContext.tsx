@@ -1,4 +1,4 @@
-// components/ThemeContext.tsx
+// components/ThemeContext.tsx - FIXED
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -43,7 +43,7 @@ interface ThemeContextType {
   setAccentColor: (color: string) => void;
   setTypography: (type: 'serif' | 'sans' | 'mono') => void;
   setSpacing: (spacing: 'compact' | 'comfortable' | 'expansive') => void;
-  refreshStats: () => void;
+  refreshStats: () => Promise<void>;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -93,11 +93,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return defaultTheme;
   });
 
-  // Calculate content stats
-  const calculateStats = (): ThemeStats => {
+  // Calculate content stats - now async
+  const calculateStats = async (): Promise<ThemeStats> => {
     try {
-      // Use getAllContent from content-utils
-      const allContent = getAllContent();
+      // Use getAllContent from content-utils - it returns a Promise
+      const allContent = await getAllContent();
       
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -112,6 +112,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         canon: 0,
       };
 
+      // Now allContent is an array, so forEach works
       allContent.forEach(item => {
         const kind = item.category?.toLowerCase() as ContentKind;
         if (kind && byType.hasOwnProperty(kind)) {
@@ -137,11 +138,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Update stats on mount and when theme changes
   useEffect(() => {
-    const newStats = calculateStats();
-    setTheme(prev => ({
-      ...prev,
-      stats: newStats,
-    }));
+    const updateStats = async () => {
+      const newStats = await calculateStats();
+      setTheme(prev => ({
+        ...prev,
+        stats: newStats,
+      }));
+    };
+    
+    updateStats();
   }, []);
 
   // Save theme to localStorage
@@ -177,8 +182,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   };
 
-  const refreshStats = () => {
-    const newStats = calculateStats();
+  const refreshStats = async () => {
+    const newStats = await calculateStats();
     setTheme(prev => ({
       ...prev,
       stats: newStats,
