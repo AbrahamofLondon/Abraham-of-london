@@ -1,0 +1,41 @@
+// content/downloads/THE-FILE-SLUG.tsx
+
+import BrandFrame from "../../components/print/BrandFrame";
+import * as React from "react";
+{
+  /* Add any other imports needed here */
+}
+
+// --- Metadata Definition (REQUIRED for ContentLayer) ---
+export const metadata = {
+  // ⚠️ YOU MUST CUSTOMIZE THESE VALUES FOR EACH FILE ⚠️
+  title: "The Correct Title for This Download",
+  slug: "the-file-slug",
+  date: "2025-10-21",
+  author: "Abraham of London",
+  readTime: "X min",
+  category: "Correct Category",
+  type: "download",
+  subtitle: "A concise description of the download.",
+};
+
+const TheComponentName = () => {
+  return (
+    <BrandFrame
+      title={metadata.title}
+      subtitle={metadata.subtitle}
+      pageSize="A4"
+    >
+      {/* Ensure ALL existing C-style comments (//) inside this
+        return block are changed to JSX block comments ({/* ... * /})
+      */}
+
+      {/* Start of Download Content */}
+      <p>This is the content of the download.</p>
+
+      {/* End of Download Content */}
+    </BrandFrame>
+  );
+};
+
+export default TheComponentName;

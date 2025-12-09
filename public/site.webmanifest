@@ -1,0 +1,21 @@
+{
+  "name": "Abraham of London",
+  "short_name": "Abraham",
+  "description": "Luxury Brand Strategy & Consulting",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "theme_color": "#1a1a1a",
+  "background_color": "#1a1a1a",
+  "display": "standalone",
+  "start_url": "/"
+}
