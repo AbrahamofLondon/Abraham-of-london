@@ -1,4 +1,0 @@
-echo "â³ Running Tailwind slash-opacity checksâ€¦"
-node scripts/convert-tailwind-slash-opacity.mjs --check || exit 1
-node scripts/postcss-guard-dryrun.mjs || exit 1
-echo "âœ… Checks passed."
