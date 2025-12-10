@@ -1,15 +1,10 @@
 // pages/shorts/[slug].tsx
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Head from "next/head";
+import type { GetStaticPaths, GetStaticProps } from "next";import Head from "next/head";
 import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import {
-  getPublishedShorts,
-  getShortBySlug,
-} from "@/lib/contentlayer-helper";
 
 // We define a local, serialisable type instead of importing from contentlayer2
 type ShortDoc = {
@@ -113,35 +108,31 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params?.slug as string;
-  const short = getShortBySlug(slug);
 
-  if (!short) {
+  // Pull raw doc from helper
+  const raw = getShortBySlug(slug);
+
+  if (!raw) {
     return { notFound: true };
   }
 
-  return {
-    props: {
-      short,
-    },
-  };
-};
-
-  // Normalise to a serialisable ShortDoc (no undefined)
-  const short: ShortDoc = {
-    _id: raw._id ?? raw.slug ?? slug,
-    slug: raw.slug,
+  // Normalise to a serialisable object (no undefined)
+  const short = {
+    ...raw,
     title: raw.title ?? "Untitled short",
-    body: raw.body,
     excerpt: raw.excerpt ?? null,
     date: raw.date ?? null,
-    readTime: (raw as any).readTime ?? (raw as any).readingTime ?? null,
     tags: raw.tags ?? [],
+    readTime:
+      (raw as any).readTime ??
+      (raw as any).readingTime ??
+      null,
     theme: (raw as any).theme ?? null,
   };
 
   return {
     props: { short },
-    revalidate: 1800,
+    revalidate: 1800, // 30 mins ISR if you want it
   };
 };
 
