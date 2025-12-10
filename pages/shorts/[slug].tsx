@@ -2,7 +2,7 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useMDXComponent } from "next-contentlayer2/hooks";
+import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
@@ -104,20 +104,27 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const shorts = getPublishedShorts();
 
   return {
-    paths: shorts.map((short: any) => ({
+    paths: shorts.map((short) => ({
       params: { slug: short.slug },
     })),
     fallback: false,
   };
 };
 
-export const getStaticProps: GetStaticProps<ShortPageProps> = async (ctx) => {
-  const slug = ctx.params?.slug as string | undefined;
-  const raw = slug ? getShortBySlug(slug) : null;
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params?.slug as string;
+  const short = getShortBySlug(slug);
 
-  if (!raw) {
+  if (!short) {
     return { notFound: true };
   }
+
+  return {
+    props: {
+      short,
+    },
+  };
+};
 
   // Normalise to a serialisable ShortDoc (no undefined)
   const short: ShortDoc = {

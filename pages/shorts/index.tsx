@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getPublishedShorts } from "@/lib/contentlayer-helper";
+import { allShorts, getPublishedShorts } from "@/lib/contentlayer-helper";
 
 // Local shape we actually use in the UI
 type ShortDoc = {
@@ -833,19 +833,32 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
-  const shorts = allShorts
-    .filter((s) => s.published !== false)
-    .slice()
-    .sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0;
-      const db = b.date ? new Date(b.date).getTime() : 0;
-      return db - da;
-    });
+export const getStaticProps: GetStaticProps = async () => {
+  // ✅ pull from helper, already filtered & sorted
+  const shorts = getPublishedShorts();
+
+  // If you compute stats, keep using the same array:
+  const totalReads = 0;  // or your existing logic using `shorts`
+  const totalLikes = 0;  // same
+  const avgReadTime =
+    shorts.length > 0
+      ? Math.round(
+          shorts.reduce((sum, s) => {
+            const rt = Number((s as any).readTime || 3);
+            return sum + (isNaN(rt) ? 3 : rt);
+          }, 0) / shorts.length
+        )
+      : 3;
 
   return {
-    props: { shorts },
-    revalidate: 1800, // 30 min
+    props: {
+      shorts,
+      stats: {
+        totalReads,
+        totalLikes,
+        avgReadTime,
+      },
+    },
   };
 };
 
