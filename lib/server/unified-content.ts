@@ -1,10 +1,6 @@
 // lib/server/unified-content.ts
 // Server-side unified content system for Abraham of London
-// Production-ready with proper typing, now wired to contentlayer-helper
-
-/* -------------------------------------------------------------------------- */
-/* STEP 1: Use the new Contentlayer-based helpers                             */
-/* -------------------------------------------------------------------------- */
+// Now wired to Contentlayer via contentlayer-helper
 
 import {
   getPublishedPosts,
@@ -18,10 +14,9 @@ import {
 } from "@/lib/contentlayer-helper";
 
 /* -------------------------------------------------------------------------- */
-/* STEP 2: Define Minimal Types - Based on what you actually have             */
+/* STEP 2: Types                                                              */
 /* -------------------------------------------------------------------------- */
 
-// Base content interface that all content types must implement
 export interface BaseContent {
   slug: string;
   title: string;
@@ -36,22 +31,29 @@ export interface BaseContent {
   status?: string;
   author?: string | { name: string; [key: string]: any } | null;
   category?: string;
-  // Allow any other properties
   [key: string]: any;
 }
 
-// Unified content type that works with your actual data
+export type ContentType =
+  | "essay"
+  | "book"
+  | "download"
+  | "event"
+  | "print"
+  | "resource"
+  | "canon"
+  | "strategy"
+  | "page";
+
 export interface UnifiedContent extends BaseContent {
   id: string;
   type: ContentType;
   url: string;
 
-  // Common optional fields
   readTime?: string | number;
   accessLevel?: string;
   lockMessage?: string;
 
-  // Type-specific fields
   volumeNumber?: number;
   order?: number;
   resourceType?: string;
@@ -66,46 +68,26 @@ export interface UnifiedContent extends BaseContent {
   pages?: number;
 }
 
-export type ContentType =
-  | "essay"
-  | "book"
-  | "download"
-  | "event"
-  | "print"
-  | "resource"
-  | "canon"
-  | "strategy"
-  | "page"; // Added 'page' type to match client expectations
-
 // Client-facing summary type (exported for client compatibility)
 export type UnifiedContentSummaryType = "page" | "download" | "event";
 
 /* -------------------------------------------------------------------------- */
-/* STEP 3: Safe Content Loaders - Handle missing modules gracefully           */
+/* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
-// Helper to safely extract author name
 function getAuthorName(item: any): string | undefined {
   if (!item || !item.author) return undefined;
-
-  if (typeof item.author === "string") {
-    return item.author;
-  }
-
+  if (typeof item.author === "string") return item.author;
   if (typeof item.author === "object" && item.author !== null) {
     return item.author.name;
   }
-
   return undefined;
 }
 
-// Helper to convert server ContentType to client UnifiedContentSummaryType
 function toSummaryType(type: ContentType): UnifiedContentSummaryType {
-  // Map server types to client summary types
   const typeMap: Record<string, UnifiedContentSummaryType> = {
     download: "download",
     event: "event",
-    // Default everything else to 'page' for client compatibility
     essay: "page",
     book: "page",
     print: "page",
@@ -114,20 +96,18 @@ function toSummaryType(type: ContentType): UnifiedContentSummaryType {
     strategy: "page",
     page: "page",
   };
-
   return typeMap[type] || "page";
 }
 
-async function safeLoadContent<T extends BaseContent>(
+async function safeLoadContent(
   label: string,
-  loader: () => Promise<T[]> | T[] | undefined,
+  loader: () => Promise<any[]> | any[] | undefined,
   type: ContentType,
 ): Promise<UnifiedContent[]> {
   try {
     console.log(`[unified-content] Loading ${label}...`);
 
-    // Safely execute the loader
-    let result: T[] | undefined;
+    let result: any[] | undefined;
     try {
       const data = loader();
       result = data instanceof Promise ? await data : data;
@@ -139,7 +119,6 @@ async function safeLoadContent<T extends BaseContent>(
       return [];
     }
 
-    // Handle undefined or non-array results
     if (!result || !Array.isArray(result)) {
       console.warn(
         `[unified-content] ${label} returned invalid data:`,
@@ -148,84 +127,78 @@ async function safeLoadContent<T extends BaseContent>(
       return [];
     }
 
-    // Transform to unified format
-    const unified = result
+    const unified: UnifiedContent[] = result
       .filter(
         (item) =>
-          item && typeof item === "object" && item.slug && item.title,
+          item &&
+          typeof item === "object" &&
+          (item as any).slug &&
+          (item as any).title,
       )
-      .map((item) => ({
-        // Core fields
+      .map((item: any) => ({
         id: `${type}-${item.slug}`,
         type,
         slug: item.slug,
         title: item.title,
         url: getContentUrl(type, item.slug),
 
-        // Common fields with safe access
         excerpt: item.excerpt,
         description: item.description,
         date: item.date,
-        coverImage:
-          item.coverImage || (item as any).image || (item as any).heroImage,
+        coverImage: item.coverImage || item.image || item.heroImage,
         tags: Array.isArray(item.tags) ? item.tags : [],
         featured: Boolean(item.featured),
         draft: Boolean(item.draft),
         published: item.published !== false,
         status: item.status || (item.draft ? "draft" : "published"),
-        author: getAuthorName(item), // Using safe helper function
+        author: getAuthorName(item),
         category: item.category,
 
-        // Optional common fields
-        readTime: (item as any).readTime || (item as any).readingTime,
-        accessLevel: (item as any).accessLevel,
-        lockMessage: (item as any).lockMessage,
+        readTime: item.readTime || item.readingTime,
+        accessLevel: item.accessLevel,
+        lockMessage: item.lockMessage,
 
-        // Type-specific fields
         ...(type === "book" || type === "canon"
           ? {
-              volumeNumber: (item as any).volumeNumber,
-              order: (item as any).order,
+              volumeNumber: item.volumeNumber,
+              order: item.order,
             }
           : {}),
 
         ...(type === "resource"
           ? {
-              resourceType: (item as any).resourceType,
-              applications: (item as any).applications,
+              resourceType: item.resourceType,
+              applications: item.applications,
             }
           : {}),
 
         ...(type === "download"
           ? {
-              downloadFile: (item as any).downloadFile,
-              fileSize: (item as any).fileSize,
+              downloadFile: item.downloadFile,
+              fileSize: item.fileSize,
             }
           : {}),
 
         ...(type === "event"
           ? {
-              eventDate: (item as any).eventDate,
-              location: (item as any).location,
+              eventDate: item.eventDate,
+              location: item.location,
             }
           : {}),
 
         ...(type === "book"
           ? {
-              isbn: (item as any).isbn,
-              format: (item as any).format,
-              publisher: (item as any).publisher,
-              pages: (item as any).pages,
+              isbn: item.isbn,
+              format: item.format,
+              publisher: item.publisher,
+              pages: item.pages,
             }
           : {}),
 
-        // Preserve original data
         _raw: item,
       }));
 
-    console.log(
-      `[unified-content] Loaded ${label}: ${unified.length} items`,
-    );
+    console.log(`[unified-content] Loaded ${label}: ${unified.length} items`);
     return unified;
   } catch (error) {
     console.error(`[unified-content] Error loading ${label}:`, error);
@@ -234,14 +207,13 @@ async function safeLoadContent<T extends BaseContent>(
 }
 
 /* -------------------------------------------------------------------------- */
-/* STEP 4: Main API Functions                                                */
+/* Main API functions                                                         */
 /* -------------------------------------------------------------------------- */
 
 export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
   console.time("[unified-content] Total load time");
 
   try {
-    // Load all content types in parallel (including 'page' type if needed)
     const loaders = [
       {
         label: "essays",
@@ -286,13 +258,13 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
     ];
 
     const results = await Promise.all(
-      loaders.map(({ label, loader, type }) => safeLoadContent(label, loader, type)),
+      loaders.map(({ label, loader, type }) =>
+        safeLoadContent(label, loader, type),
+      ),
     );
 
-    // Combine all results
     const allContent = results.flat();
 
-    // Sort by date (newest first)
     allContent.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
@@ -307,7 +279,6 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
     return allContent;
   } catch (error) {
     console.error("[unified-content] Critical error loading content:", error);
-    // Return empty array instead of throwing to prevent page crashes
     return [];
   }
 }
@@ -334,7 +305,6 @@ export async function getUnifiedContentBySlug(
   try {
     const allContent = await getAllUnifiedContent();
 
-    // Filter by slug and optionally by type
     const filteredContent = allContent.filter((item) => {
       const slugMatch = item.slug === slug;
       if (type) {
@@ -343,11 +313,7 @@ export async function getUnifiedContentBySlug(
       return slugMatch;
     });
 
-    if (filteredContent.length === 0) {
-      return null;
-    }
-
-    // If multiple items have same slug (shouldn't happen), return first
+    if (filteredContent.length === 0) return null;
     return filteredContent[0];
   } catch (error) {
     console.error(
@@ -388,7 +354,7 @@ export async function getPublishedUnifiedContent(): Promise<UnifiedContent[]> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* STEP 5: Search Function - Fixed signature for client compatibility        */
+/* Query & search                                                             */
 /* -------------------------------------------------------------------------- */
 
 export interface ContentQuery {
@@ -410,7 +376,6 @@ export async function queryUnifiedContent(
   try {
     let content = await getPublishedUnifiedContent();
 
-    // Filter by type
     if (options.type) {
       const types = Array.isArray(options.type)
         ? options.type
@@ -418,34 +383,25 @@ export async function queryUnifiedContent(
       content = content.filter((item) => types.includes(item.type));
     }
 
-    // Filter by tag
     if (options.tag) {
       content = content.filter((item) =>
         item.tags?.some(
-          (tag) => tag.toLowerCase() === options.tag?.toLowerCase(),
+          (tag) => tag.toLowerCase() === options.tag!.toLowerCase(),
         ),
       );
     }
 
-    // Filter by featured
     if (options.featured !== undefined) {
-      content = content.filter(
-        (item) => item.featured === options.featured,
-      );
+      content = content.filter((item) => item.featured === options.featured);
     }
 
-    // Filter by author
     if (options.author) {
-      const term = options.author.toLowerCase();
+      const searchAuthor = options.author.toLowerCase();
       content = content.filter((item) =>
-        (item.author || "")
-          .toString()
-          .toLowerCase()
-          .includes(term),
+        (item.author || "").toLowerCase().includes(searchAuthor),
       );
     }
 
-    // Filter by year
     if (options.year) {
       content = content.filter((item) => {
         if (!item.date) return false;
@@ -454,7 +410,6 @@ export async function queryUnifiedContent(
       });
     }
 
-    // Search
     if (options.search) {
       const searchTerm = options.search.toLowerCase();
       content = content.filter(
@@ -465,7 +420,6 @@ export async function queryUnifiedContent(
       );
     }
 
-    // Sorting
     const sortBy = options.sortBy || "date";
     const sortOrder = options.sortOrder || "desc";
 
@@ -491,40 +445,29 @@ export async function queryUnifiedContent(
       }
 
       if (sortOrder === "desc") {
-        return bVal - aVal;
-      } else {
-        return aVal - bVal;
+        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
       }
+      return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
     });
 
-    // Pagination
     const skip = options.skip || 0;
     const limit = options.limit || content.length;
 
     return content.slice(skip, skip + limit);
   } catch (error) {
-    console.error(
-      "[unified-content] Error querying content:",
-      error,
-    );
+    console.error("[unified-content] Error querying content:", error);
     return [];
   }
 }
 
-/**
- * Simple search function for unified content
- * This matches the client signature: searchUnifiedContent(query: string)
- */
 export async function searchUnifiedContent(
   query: string,
 ): Promise<UnifiedContent[]> {
-  return queryUnifiedContent({
-    search: query,
-  });
+  return queryUnifiedContent({ search: query });
 }
 
 /* -------------------------------------------------------------------------- */
-/* STEP 6: Utility Functions                                                  */
+/* Utilities                                                                  */
 /* -------------------------------------------------------------------------- */
 
 export function getContentUrl(type: ContentType, slug: string): string {
@@ -537,9 +480,8 @@ export function getContentUrl(type: ContentType, slug: string): string {
     resource: "resources",
     canon: "canon",
     strategy: "strategies",
-    page: "", // Pages use root path
+    page: "",
   };
-
   const path = typeMap[type];
   return path ? `/${path}/${slug}` : `/${slug}`;
 }
@@ -557,13 +499,11 @@ export function formatReadTime(
     const trimmed = readTime.trim();
     if (!trimmed) return undefined;
 
-    // Check if it already has "min" or "read"
     const lower = trimmed.toLowerCase();
     if (lower.includes("min") || lower.includes("read")) {
       return trimmed;
     }
 
-    // Try to parse as number
     const asNumber = Number(trimmed);
     if (!isNaN(asNumber)) {
       return `${asNumber} min read`;
@@ -586,7 +526,7 @@ export function getYearFromDate(date?: string): string {
 }
 
 /* -------------------------------------------------------------------------- */
-/* STEP 7: Content Statistics                                                 */
+/* Stats & default export                                                     */
 /* -------------------------------------------------------------------------- */
 
 export interface ContentStats {
@@ -617,28 +557,20 @@ export async function getContentStats(): Promise<ContentStats> {
   };
 
   allContent.forEach((item) => {
-    // Count by type
     stats.byType[item.type]++;
 
-    // Count by year
     if (item.date) {
       const year = getYearFromDate(item.date);
       stats.byYear[year] = (stats.byYear[year] || 0) + 1;
     }
 
-    // Count featured
     if (item.featured) stats.featured++;
   });
 
   return stats;
 }
 
-/* -------------------------------------------------------------------------- */
-/* STEP 8: Default Export                                                     */
-/* -------------------------------------------------------------------------- */
-
 const unifiedContent = {
-  // Core functions
   getAllUnifiedContent,
   getUnifiedContentByType,
   getUnifiedContentBySlug,
@@ -646,13 +578,9 @@ const unifiedContent = {
   queryUnifiedContent,
   searchUnifiedContent,
   getContentStats,
-
-  // Utilities
   getContentUrl,
   formatReadTime,
   getYearFromDate,
-
-  // Types
   type: {} as {
     UnifiedContent: UnifiedContent;
     ContentType: ContentType;

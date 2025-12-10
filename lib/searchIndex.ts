@@ -6,17 +6,13 @@ import {
   getAllPrints,
   getAllResources,
   getAllCanons,
+  type Post as PostDocument,
+  type Book as BookDocument,
+  type Download as DownloadDocument,
+  type Print as PrintDocument,
+  type Resource as ResourceDocument,
+  type Canon as CanonDocument,
 } from "./contentlayer-helper";
-
-import type {
-  Post,
-  Book,
-  Download,
-  Print,
-  Resource,
-  Canon,
-} from "contentlayer/generated";
-
 import { absUrl } from "@/lib/siteConfig";
 
 // ----------------- Shared types & helpers -----------------
@@ -70,101 +66,101 @@ export interface SearchDoc {
 // ----------------- Builders per collection -----------------
 
 function mapPosts(): SearchDoc[] {
-  const posts = getPublishedPosts() as Post[];
-
-  return sortByDate(posts).map((p) => ({
-    type: "post" as const,
-    slug: p.slug,
-    href: p.url || `/blog/${p.slug}`,
-    url: absUrl(p.url || `/blog/${p.slug}`),
-    title: p.title ?? "Untitled",
-    date: p.date ?? null,
-    excerpt: p.excerpt ?? p.description ?? null,
-    tags: p.tags ?? [],
-    coverImage: p.coverImage || null,
-  }));
+  const posts = getPublishedPosts();
+  return sortByDate(posts)
+    .filter((p: PostDocument) => !(p as any).draft)
+    .map((p: PostDocument) => ({
+      type: "post" as const,
+      slug: p.slug,
+      href: (p as any).url || `/blog/${p.slug}`,
+      url: absUrl((p as any).url || `/blog/${p.slug}`),
+      title: p.title ?? "Untitled",
+      date: (p as any).date ?? null,
+      excerpt: (p as any).excerpt ?? (p as any).description ?? null,
+      tags: (p as any).tags ?? [],
+      coverImage: (p as any).coverImage || null,
+    }));
 }
 
 function mapBooks(): SearchDoc[] {
-  const books = getAllBooks().filter((b) => !(b as any).draft) as Book[];
-
-  return sortByDate(books).map((b) => ({
-    type: "book" as const,
-    slug: b.slug,
-    href: b.url || `/books/${b.slug}`,
-    url: absUrl(b.url || `/books/${b.slug}`),
-    title: b.title ?? "Untitled Book",
-    date: b.date ?? null,
-    excerpt: b.excerpt ?? b.description ?? null,
-    tags: b.tags ?? [],
-    coverImage: b.coverImage || null,
-  }));
+  const books = getAllBooks();
+  return sortByDate(books)
+    .filter((b: BookDocument) => !(b as any).draft)
+    .map((b: BookDocument) => ({
+      type: "book" as const,
+      slug: b.slug,
+      href: (b as any).url || `/books/${b.slug}`,
+      url: absUrl((b as any).url || `/books/${b.slug}`),
+      title: b.title ?? "Untitled Book",
+      date: (b as any).date ?? null,
+      excerpt: (b as any).excerpt ?? (b as any).description ?? null,
+      tags: (b as any).tags ?? [],
+      coverImage: (b as any).coverImage || null,
+    }));
 }
 
 function mapDownloads(): SearchDoc[] {
-  const downloads = getAllDownloads() as Download[];
-
-  return sortByDate(downloads).map((d) => ({
+  const downloads = getAllDownloads();
+  return sortByDate(downloads).map((d: DownloadDocument) => ({
     type: "download" as const,
     slug: d.slug,
-    href: d.url || `/downloads/${d.slug}`,
-    url: absUrl(d.url || `/downloads/${d.slug}`),
+    href: (d as any).url || `/downloads/${d.slug}`,
+    url: absUrl((d as any).url || `/downloads/${d.slug}`),
     title: d.title ?? "Untitled Download",
-    date: d.date ?? null,
-    excerpt: d.excerpt ?? d.description ?? null,
-    tags: d.tags ?? [],
-    coverImage: d.coverImage || null,
+    date: (d as any).date ?? null,
+    excerpt: (d as any).excerpt ?? (d as any).description ?? null,
+    tags: (d as any).tags ?? [],
+    coverImage: (d as any).coverImage || null,
   }));
 }
 
 function mapPrints(): SearchDoc[] {
-  const prints = getAllPrints() as Print[];
-
+  const prints = getAllPrints();
   return sortByDate(prints)
-    .filter((p) => (p as any).available !== false)
-    .map((p) => ({
+    .filter((p: PrintDocument) => (p as any).available !== false)
+    .map((p: PrintDocument) => ({
       type: "print" as const,
       slug: p.slug,
-      href: p.url || `/prints/${p.slug}`,
-      url: absUrl(p.url || `/prints/${p.slug}`),
+      href: (p as any).url || `/prints/${p.slug}`,
+      url: absUrl((p as any).url || `/prints/${p.slug}`),
       title: p.title ?? "Untitled Print",
-      date: p.date ?? null,
-      excerpt: p.excerpt ?? p.description ?? null,
-      tags: p.tags ?? [],
-      coverImage: p.coverImage || null,
+      date: (p as any).date ?? null,
+      excerpt: (p as any).excerpt ?? (p as any).description ?? null,
+      tags: (p as any).tags ?? [],
+      coverImage: (p as any).coverImage || null,
     }));
 }
 
 function mapResources(): SearchDoc[] {
-  const resources = getAllResources() as Resource[];
-
-  return sortByDate(resources).map((r) => ({
+  const resources = getAllResources();
+  return sortByDate(resources).map((r: ResourceDocument) => ({
     type: "resource" as const,
     slug: r.slug,
-    href: r.url || `/resources/${r.slug}`,
-    url: absUrl(r.url || `/resources/${r.slug}`),
+    href: (r as any).url || `/resources/${r.slug}`,
+    url: absUrl((r as any).url || `/resources/${r.slug}`),
     title: r.title ?? "Untitled Resource",
-    date: r.date ?? null,
-    excerpt: r.excerpt ?? r.description ?? null,
-    tags: r.tags ?? [],
-    coverImage: r.coverImage || null,
+    date: (r as any).date ?? null,
+    excerpt: (r as any).excerpt ?? (r as any).description ?? null,
+    tags: (r as any).tags ?? [],
+    coverImage: (r as any).coverImage || null,
   }));
 }
 
 function mapCanons(): SearchDoc[] {
-  const canons = getAllCanons().filter((c) => !(c as any).draft) as Canon[];
-
-  return sortByDate(canons).map((c) => ({
-    type: "canon" as const,
-    slug: c.slug,
-    href: c.url || `/canon/${c.slug}`,
-    url: absUrl(c.url || `/canon/${c.slug}`),
-    title: c.title ?? "Untitled Canon",
-    date: c.date ?? null,
-    excerpt: c.excerpt ?? c.description ?? null,
-    tags: c.tags ?? [],
-    coverImage: c.coverImage || null,
-  }));
+  const canons = getAllCanons();
+  return sortByDate(canons)
+    .filter((c: CanonDocument) => !(c as any).draft)
+    .map((c: CanonDocument) => ({
+      type: "canon" as const,
+      slug: c.slug,
+      href: (c as any).url || `/canon/${c.slug}`,
+      url: absUrl((c as any).url || `/canon/${c.slug}`),
+      title: c.title ?? "Untitled Canon",
+      date: (c as any).date ?? null,
+      excerpt: (c as any).excerpt ?? (c as any).description ?? null,
+      tags: (c as any).tags ?? [],
+      coverImage: (c as any).coverImage || null,
+    }));
 }
 
 // ----------------- Main search index -----------------
