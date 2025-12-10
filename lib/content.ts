@@ -1,8 +1,8 @@
 // lib/content.ts
-// Centralized content exports for Abraham of London
+// Centralised content exports for Abraham of London
 
 // ============================================
-// POSTS MODULE EXPORTS
+// POSTS MODULE EXPORTS (legacy posts module)
 // ============================================
 import postsModule from "./posts";
 
@@ -32,8 +32,7 @@ export type {
 } from "./posts";
 
 // ============================================
-// CONTENT CATEGORIES CONSTANT
-// (used by Content Library UI)
+// CONTENT CATEGORIES (used by navigation / UI)
 // ============================================
 
 export const CONTENT_CATEGORIES = [
@@ -41,49 +40,55 @@ export const CONTENT_CATEGORIES = [
     id: "essays",
     label: "Structural Essays",
     slug: "/content",
-    description: "In-depth analysis of institutional architecture",
+    description: "Long-form thinking on purpose, power, and institutions.",
   },
   {
     id: "canon",
     label: "Canon",
     slug: "/canon",
-    description: "Foundational texts and frameworks",
+    description: "Foundational volumes shaping the Builders’ Canon.",
   },
   {
     id: "books",
     label: "Books",
     slug: "/books",
-    description: "Published works and manuscripts",
+    description: "Published works, pre-releases, and manuscripts.",
   },
   {
     id: "strategies",
     label: "Strategies",
     slug: "/strategy",
-    description: "Practical frameworks and operating models",
+    description: "Practical operating playbooks and strategic frameworks.",
   },
   {
     id: "resources",
     label: "Resources",
     slug: "/resources",
-    description: "Downloadable tools, templates, and guides",
+    description: "Frameworks, templates, and council-ready artefacts.",
   },
   {
     id: "downloads",
     label: "Downloads",
     slug: "/downloads",
-    description: "Packs, cards, and tactical artefacts",
+    description: "Toolkits, cue cards, and execution-ready packs.",
   },
   {
     id: "events",
     label: "Events",
     slug: "/events",
-    description: "Workshops, talks, and gatherings",
+    description: "Workshops, salons, and live teaching sessions.",
   },
   {
     id: "prints",
     label: "Prints",
     slug: "/prints",
-    description: "Physical artefacts and collectibles",
+    description: "Physical editions, cards, and wall-ready assets.",
+  },
+  {
+    id: "shorts",
+    label: "Shorts",
+    slug: "/shorts",
+    description: "Bite-sized provocations for builders on the move.",
   },
 ] as const;
 
@@ -107,7 +112,7 @@ export const {
 export type { BasicDoc, ContentItem } from "./utils/docs";
 
 // ============================================
-// OTHER CONTENT MODULES
+// OTHER CONTENT MODULES (legacy FS/MDX loaders)
 // ============================================
 
 // Books
@@ -153,6 +158,15 @@ export { getAllStrategies, getStrategyBySlug };
 export type { Strategy };
 
 // ============================================
+// CONTENTLAYER-BACKED SHORTS (new stack)
+// ============================================
+
+import {
+  getPublishedShorts,
+} from "./contentlayer-helper";
+import type { Short } from "./contentlayer-helper";
+
+// ============================================
 // CONTENT LOADER UTILITIES
 // ============================================
 
@@ -169,8 +183,8 @@ export { loadPostsFromSource, initAllContent, createContentLoader };
 // ============================================
 
 /**
- * Initialize all content modules
- * (currently a no-op hook – keep it light for production)
+ * Initialize all content modules.
+ * Currently a light hook – keep side effects minimal in production.
  */
 export async function initializeAllContent(): Promise<void> {
   // If you later need to hydrate caches, do it here.
@@ -178,7 +192,7 @@ export async function initializeAllContent(): Promise<void> {
 
 /**
  * Get all content grouped by type.
- * Used by the Content Library for counts & filters.
+ * Used by dashboards / overview views.
  */
 export function getAllContent() {
   return {
@@ -190,13 +204,16 @@ export function getAllContent() {
     prints: getAllPrints(),
     resources: getAllResources(),
     strategies: getAllStrategies(),
+    shorts: getPublishedShorts(),
   };
 }
 
 /**
- * Flat list helper (if you ever need one list of everything).
+ * Flat list helper (one big array when needed).
  */
-export function getAllContentFlat(): Array<ContentItem | BasicDoc | any> {
+export function getAllContentFlat(): Array<
+  ContentItem | BasicDoc | Short | any
+> {
   const {
     posts,
     books,
@@ -206,6 +223,7 @@ export function getAllContentFlat(): Array<ContentItem | BasicDoc | any> {
     prints,
     resources,
     strategies,
+    shorts,
   } = getAllContent();
 
   return [
@@ -217,23 +235,44 @@ export function getAllContentFlat(): Array<ContentItem | BasicDoc | any> {
     ...prints,
     ...resources,
     ...strategies,
+    ...shorts,
   ];
 }
 
 /**
  * Search across all content types.
- * (Extend per-type search later if needed.)
+ * Currently:
+ *  - Uses dedicated searchPosts() for essays/posts
+ *  - Adds a simple title/excerpt/tags scan for Shorts
+ *  - Leaves other types as TODO until you need them
  */
 export function searchAllContent(query: string) {
+  const q = query.trim().toLowerCase();
+
+  const shorts = getPublishedShorts().filter((short) => {
+    const haystack = [
+      short.title ?? "",
+      short.excerpt ?? "",
+      ...(short.tags ?? []),
+      (short as any).theme ?? "",
+      (short as any).audience ?? "",
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return q.length > 0 && haystack.includes(q);
+  });
+
   return {
     posts: searchPosts(query),
-    books: [], // TODO: implement book search
+    books: [],      // intentional: wire up when needed
     canon: [],
     downloads: [],
     events: [],
     prints: [],
     resources: [],
     strategies: [],
+    shorts,
   };
 }
 
@@ -250,10 +289,9 @@ export async function loadAndInitializeContent() {
 
 // ============================================
 // BACKWARD-COMPATIBILITY EXPORTS
-// (arrays – safe for .length, .map, etc.)
+// Arrays – safe for .length, .map, etc.
 // ============================================
 
-// NOTE: these are **arrays**, not functions.
 export const posts = getAllPosts();
 export const books = getAllBooks();
 export const canons = getAllCanon();
@@ -262,3 +300,4 @@ export const prints = getAllPrints();
 export const strategies = getAllStrategies();
 export const resources = getAllResources();
 export const downloads = getAllDownloads();
+export const shorts = getPublishedShorts();
