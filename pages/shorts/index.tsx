@@ -1,12 +1,9 @@
-// pages/shorts/index.tsx - BEAUTIFUL & ADDICTIVE VERSION (FIXED)
+// pages/shorts/index.tsx
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import {
-  motion,
-  AnimatePresence,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   Clock,
@@ -23,12 +20,12 @@ import {
   List,
   MessageCircle,
   ThumbsUp,
-  ChevronRight, // ✅ needed for the "Read" link
+  ChevronRight,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getPublishedShorts } from "@/lib/contentlayer-helper";
 import type { Short } from "contentlayer2/generated";
+import { allShorts } from "contentlayer2/generated";
 
 type ShortsIndexProps = {
   shorts: Short[];
@@ -827,7 +824,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 };
 
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
-  const shorts = getPublishedShorts()
+  const shorts = allShorts
+    .filter((s) => s.published !== false)
     .slice()
     .sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;

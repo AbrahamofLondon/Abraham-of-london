@@ -1,11 +1,10 @@
-// lib/content.ts - CORRECTED VERSION (console removed)
+// lib/content.ts
 // Centralized content exports for Abraham of London
 
 // ============================================
 // POSTS MODULE EXPORTS
 // ============================================
-
-import postsModule from './posts';
+import postsModule from "./posts";
 
 export const {
   getAllPosts,
@@ -21,7 +20,7 @@ export const {
   getPostsByTag,
   initializePosts,
   createPost,
-  postsAPI
+  postsAPI,
 } = postsModule;
 
 export type {
@@ -29,28 +28,70 @@ export type {
   PostMeta,
   PostWithContent,
   PostForClient,
-  PostSummary
-} from './posts';
+  PostSummary,
+} from "./posts";
 
 // ============================================
-// CONTENT CATEGORIES CONSTANT (ADDED)
+// CONTENT CATEGORIES CONSTANT
+// (used by Content Library UI)
 // ============================================
 
 export const CONTENT_CATEGORIES = [
-  { id: 'essays', label: 'Structural Essays', slug: '/content', description: 'In-depth analysis of institutional architecture' },
-  { id: 'canon', label: 'Canon', slug: '/canon', description: 'Foundational texts and frameworks' },
-  { id: 'books', label: 'Books', slug: '/books', description: 'Published works and manuscripts' },
-  { id: 'strategies', label: 'Strategies', slug: '/strategies', description: 'Practical frameworks and tools' },
-  { id: 'resources', label: 'Resources', slug: '/resources', description: 'Downloads, templates, and guides' },
-  { id: 'events', label: 'Events', slug: '/events', description: 'Workshops, talks, and gatherings' },
-  { id: 'prints', label: 'Prints', slug: '/prints', description: 'Physical artifacts and collectibles' },
+  {
+    id: "essays",
+    label: "Structural Essays",
+    slug: "/content",
+    description: "In-depth analysis of institutional architecture",
+  },
+  {
+    id: "canon",
+    label: "Canon",
+    slug: "/canon",
+    description: "Foundational texts and frameworks",
+  },
+  {
+    id: "books",
+    label: "Books",
+    slug: "/books",
+    description: "Published works and manuscripts",
+  },
+  {
+    id: "strategies",
+    label: "Strategies",
+    slug: "/strategy",
+    description: "Practical frameworks and operating models",
+  },
+  {
+    id: "resources",
+    label: "Resources",
+    slug: "/resources",
+    description: "Downloadable tools, templates, and guides",
+  },
+  {
+    id: "downloads",
+    label: "Downloads",
+    slug: "/downloads",
+    description: "Packs, cards, and tactical artefacts",
+  },
+  {
+    id: "events",
+    label: "Events",
+    slug: "/events",
+    description: "Workshops, talks, and gatherings",
+  },
+  {
+    id: "prints",
+    label: "Prints",
+    slug: "/prints",
+    description: "Physical artefacts and collectibles",
+  },
 ] as const;
 
 // ============================================
 // DOCUMENT UTILITIES
 // ============================================
 
-import * as docsUtils from './utils/docs';
+import * as docsUtils from "./utils/docs";
 
 export const {
   indexBySlug,
@@ -60,57 +101,54 @@ export const {
   filterByTag,
   groupByYear,
   searchDocuments,
-  paginateDocuments
+  paginateDocuments,
 } = docsUtils;
 
-export type {
-  BasicDoc,
-  ContentItem
-} from './utils/docs';
+export type { BasicDoc, ContentItem } from "./utils/docs";
 
 // ============================================
-// OTHER CONTENT MODULES - CORRECTED IMPORTS
+// OTHER CONTENT MODULES
 // ============================================
 
-// Books module
-import { getAllBooks, getBookBySlug } from './books';
-import type { Book } from './books';
+// Books
+import { getAllBooks, getBookBySlug } from "./books";
+import type { Book } from "./books";
 export { getAllBooks, getBookBySlug };
 export type { Book };
 
-// Canon module
-import { getAllCanon, getCanonBySlug } from './canon';
-import type { Canon } from './canon';
+// Canon
+import { getAllCanon, getCanonBySlug } from "./canon";
+import type { Canon } from "./canon";
 export { getAllCanon, getCanonBySlug };
 export type { Canon };
 
-// Downloads module
-import { getAllDownloads, getDownloadBySlug } from './downloads';
-import type { Download } from './downloads';
+// Downloads
+import { getAllDownloads, getDownloadBySlug } from "./downloads";
+import type { Download } from "./downloads";
 export { getAllDownloads, getDownloadBySlug };
 export type { Download };
 
-// Events module
-import { getAllEvents, getEventBySlug } from './events';
-import type { Event } from './events';
+// Events
+import { getAllEvents, getEventBySlug } from "./events";
+import type { Event } from "./events";
 export { getAllEvents, getEventBySlug };
 export type { Event };
 
-// Prints module
-import { getAllPrints, getPrintBySlug } from './prints';
-import type { Print } from './prints';
+// Prints
+import { getAllPrints, getPrintBySlug } from "./prints";
+import type { Print } from "./prints";
 export { getAllPrints, getPrintBySlug };
 export type { Print };
 
-// Resources module
-import { getAllResources, getResourceBySlug } from './resources';
-import type { Resource } from './resources';
+// Resources
+import { getAllResources, getResourceBySlug } from "./resources";
+import type { Resource } from "./resources";
 export { getAllResources, getResourceBySlug };
 export type { Resource };
 
-// Strategies module
-import { getAllStrategies, getStrategyBySlug } from './strategies';
-import type { Strategy } from './strategies';
+// Strategies / Frameworks
+import { getAllStrategies, getStrategyBySlug } from "./strategies";
+import type { Strategy } from "./strategies";
 export { getAllStrategies, getStrategyBySlug };
 export type { Strategy };
 
@@ -118,32 +156,29 @@ export type { Strategy };
 // CONTENT LOADER UTILITIES
 // ============================================
 
-import { 
-  loadPostsFromSource, 
-  initializeAllContent as initAllContent,
-  createContentLoader
-} from './content-loader';
-
-export {
+import {
   loadPostsFromSource,
-  initAllContent,
-  createContentLoader
-};
+  initializeAllContent as initAllContent,
+  createContentLoader,
+} from "./content-loader";
+
+export { loadPostsFromSource, initAllContent, createContentLoader };
 
 // ============================================
-// CONVENIENCE FUNCTIONS
+// AGGREGATED HELPERS
 // ============================================
 
 /**
  * Initialize all content modules
+ * (currently a no-op hook – keep it light for production)
  */
 export async function initializeAllContent(): Promise<void> {
-  // FIXED: Removed console.log for production
-  // Initialize your content data here
+  // If you later need to hydrate caches, do it here.
 }
 
 /**
- * Get all content (posts, books, etc.)
+ * Get all content grouped by type.
+ * Used by the Content Library for counts & filters.
  */
 export function getAllContent() {
   return {
@@ -159,23 +194,51 @@ export function getAllContent() {
 }
 
 /**
- * Search across all content types
+ * Flat list helper (if you ever need one list of everything).
+ */
+export function getAllContentFlat(): Array<ContentItem | BasicDoc | any> {
+  const {
+    posts,
+    books,
+    canon,
+    downloads,
+    events,
+    prints,
+    resources,
+    strategies,
+  } = getAllContent();
+
+  return [
+    ...posts,
+    ...books,
+    ...canon,
+    ...downloads,
+    ...events,
+    ...prints,
+    ...resources,
+    ...strategies,
+  ];
+}
+
+/**
+ * Search across all content types.
+ * (Extend per-type search later if needed.)
  */
 export function searchAllContent(query: string) {
   return {
     posts: searchPosts(query),
-    books: [], // Add book search if available
-    canon: [], // Add canon search if available
-    downloads: [], // Add downloads search if available
-    events: [], // Add events search if available
-    prints: [], // Add prints search if available
-    resources: [], // Add resources search if available
-    strategies: [], // Add strategies search if available
+    books: [], // TODO: implement book search
+    canon: [],
+    downloads: [],
+    events: [],
+    prints: [],
+    resources: [],
+    strategies: [],
   };
 }
 
 /**
- * Convenience function to load and initialize content
+ * Convenience function to load and initialize content.
  */
 export async function loadAndInitializeContent() {
   const content = await initAllContent();
@@ -186,15 +249,16 @@ export async function loadAndInitializeContent() {
 }
 
 // ============================================
-// BACKWARD COMPATIBILITY EXPORTS
+// BACKWARD-COMPATIBILITY EXPORTS
+// (arrays – safe for .length, .map, etc.)
 // ============================================
 
-// For components that expect these exports
-export const posts = getAllPosts;
-export const books = getAllBooks;
-export const canons = getAllCanon;
-export const events = getAllEvents;
-export const prints = getAllPrints;
-export const strategies = getAllStrategies;
-export const resources = getAllResources;
-export const downloads = getAllDownloads;
+// NOTE: these are **arrays**, not functions.
+export const posts = getAllPosts();
+export const books = getAllBooks();
+export const canons = getAllCanon();
+export const events = getAllEvents();
+export const prints = getAllPrints();
+export const strategies = getAllStrategies();
+export const resources = getAllResources();
+export const downloads = getAllDownloads();

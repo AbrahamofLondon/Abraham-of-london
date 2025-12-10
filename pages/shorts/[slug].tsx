@@ -5,8 +5,9 @@ import Head from "next/head";
 import { useMDXComponent } from "next-contentlayer2/hooks";
 
 import Layout from "@/components/Layout";
-import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
+import mdxComponents from "@/components/mdx-components";
 import type { Short } from "contentlayer2/generated";
+import { allShorts } from "contentlayer2/generated";
 
 type ShortPageProps = {
   short: Short;
@@ -25,6 +26,16 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta
+          property="og:type"
+          content="article"
+        />
+        <meta
+          property="og:url"
+          content={`https://www.abrahamoflondon.org/shorts/${short.slug}`}
+        />
       </Head>
 
       <main className="bg-white py-12 dark:bg-gray-950">
@@ -74,8 +85,8 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
 
           <footer className="mt-10 border-t border-gray-200 pt-5 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
             <p>
-              If this helped you exhale even a little, the Canon goes further — into the
-              structural patterns behind days like this.
+              If this helped you exhale even a little, the Canon goes further —
+              into the structural patterns behind days like this.
             </p>
           </footer>
         </article>
@@ -85,7 +96,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const shorts = getPublishedShorts();
+  const shorts = allShorts.filter((s) => s.published !== false);
 
   return {
     paths: shorts.map((short) => ({
@@ -96,8 +107,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<ShortPageProps> = async (ctx) => {
-  const slug = ctx.params?.slug as string;
-  const short = slug ? getShortBySlug(slug) : null;
+  const slug = ctx.params?.slug as string | undefined;
+
+  if (!slug) {
+    return { notFound: true };
+  }
+
+  const short =
+    allShorts.find((s) => s.slug === slug && s.published !== false) || null;
 
   if (!short) {
     return { notFound: true };
