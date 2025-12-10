@@ -24,11 +24,22 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import type { Short } from "contentlayer2/generated";
-import { allShorts } from "contentlayer2/generated";
+import { getPublishedShorts } from "@/lib/contentlayer-helper";
+
+// Local shape we actually use in the UI
+type ShortDoc = {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  date?: string | null;
+  readTime?: string | null;
+  tags?: string[];
+  theme?: string | null;
+};
 
 type ShortsIndexProps = {
-  shorts: Short[];
+  shorts: ShortDoc[];
 };
 
 // Animation variants
@@ -168,7 +179,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     });
   };
 
-  // ✅ Use slug for URL, not _id
   const handleShare = (slug: string, title: string) => {
     const url =
       typeof window !== "undefined"

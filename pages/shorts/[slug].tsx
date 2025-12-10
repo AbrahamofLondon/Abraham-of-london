@@ -6,11 +6,26 @@ import { useMDXComponent } from "next-contentlayer2/hooks";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import type { Short } from "contentlayer2/generated";
-import { allShorts } from "contentlayer2/generated";
+import {
+  getPublishedShorts,
+  getShortBySlug,
+} from "@/lib/contentlayer-helper";
+
+// We define a local, serialisable type instead of importing from contentlayer2
+type ShortDoc = {
+  _id: string;
+  slug: string;
+  title: string;
+  body: { code: string };
+  excerpt?: string | null;
+  date?: string | null;
+  readTime?: string | null;
+  tags?: string[];
+  theme?: string | null;
+};
 
 type ShortPageProps = {
-  short: Short;
+  short: ShortDoc;
 };
 
 const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
@@ -26,16 +41,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta
-          property="og:type"
-          content="article"
-        />
-        <meta
-          property="og:url"
-          content={`https://www.abrahamoflondon.org/shorts/${short.slug}`}
-        />
       </Head>
 
       <main className="bg-white py-12 dark:bg-gray-950">
@@ -96,10 +101,10 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const shorts = allShorts.filter((s) => s.published !== false);
+  const shorts = getPublishedShorts();
 
   return {
-    paths: shorts.map((short) => ({
+    paths: shorts.map((short: any) => ({
       params: { slug: short.slug },
     })),
     fallback: false,
@@ -108,17 +113,24 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<ShortPageProps> = async (ctx) => {
   const slug = ctx.params?.slug as string | undefined;
+  const raw = slug ? getShortBySlug(slug) : null;
 
-  if (!slug) {
+  if (!raw) {
     return { notFound: true };
   }
 
-  const short =
-    allShorts.find((s) => s.slug === slug && s.published !== false) || null;
-
-  if (!short) {
-    return { notFound: true };
-  }
+  // Normalise to a serialisable ShortDoc (no undefined)
+  const short: ShortDoc = {
+    _id: raw._id ?? raw.slug ?? slug,
+    slug: raw.slug,
+    title: raw.title ?? "Untitled short",
+    body: raw.body,
+    excerpt: raw.excerpt ?? null,
+    date: raw.date ?? null,
+    readTime: (raw as any).readTime ?? (raw as any).readingTime ?? null,
+    tags: raw.tags ?? [],
+    theme: (raw as any).theme ?? null,
+  };
 
   return {
     props: { short },
