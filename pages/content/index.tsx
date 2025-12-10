@@ -1,4 +1,5 @@
-// pages/index.tsx – FIXED HOMEPAGE
+// pages/index.tsx – Stable Master Homepage
+
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -25,9 +26,9 @@ import type { Post, Book, Short } from "contentlayer/generated";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
-// -----------------------------------------------------------------------------
-// Section divider
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* Small shared pieces                                                        */
+/* -------------------------------------------------------------------------- */
 
 const SectionDivider: React.FC = () => (
   <div className="relative h-12 overflow-hidden md:h-16">
@@ -42,10 +43,6 @@ const SectionDivider: React.FC = () => (
     </div>
   </div>
 );
-
-// -----------------------------------------------------------------------------
-// Canon entry cards
-// -----------------------------------------------------------------------------
 
 type CanonEntryType = "catechism" | "campaign" | "letter";
 
@@ -96,15 +93,13 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
         className={`flex items-center gap-3 rounded-xl border ${colors.border} ${colors.bg} p-3 transition-all hover:-translate-y-0.5 hover:shadow-lg md:gap-4 md:rounded-2xl md:p-4`}
       >
         <div className="relative h-16 w-12 overflow-hidden rounded border border-gray-200/60 bg-white/60 dark:border-gray-700/70 dark:bg-gray-900/40 md:h-20 md:w-14">
-          <div className="relative h-full w-full">
-            <Image
-              src={imageSrc}
-              alt={title}
-              fill
-              sizes="(max-width: 768px) 60px, 80px"
-              className="object-cover object-center"
-            />
-          </div>
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 60px, 80px"
+            className="object-cover object-center"
+          />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -142,17 +137,7 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
   );
 };
 
-// -----------------------------------------------------------------------------
-// Canon primary card - FIXED (SSR compatible)
-// -----------------------------------------------------------------------------
-
 const CanonPrimaryCard: React.FC = () => {
-  const [isClient, setIsClient] = React.useState(false);
-  
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
   return (
     <Link
       href="/books/the-architecture-of-human-purpose"
@@ -160,62 +145,7 @@ const CanonPrimaryCard: React.FC = () => {
     >
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-br from-white via-[#FDF9F1] to-gray-50 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:border-amber-900/40 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
         <div className="p-4 md:p-6 lg:p-8">
-          {/* Mobile layout - always render both, hide/show with CSS */}
-          <div className="block space-y-4 md:hidden">
-            <div className="flex items-center justify-center">
-              <div className="relative aspect-[3/4] w-40 rounded-xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800 sm:w-48">
-                <div className="absolute inset-[4%] overflow-hidden rounded-lg border border-amber-200/80 dark:border-amber-800/60">
-                  <Image
-                    src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                    alt="The Architecture of Human Purpose — Prelude MiniBook"
-                    fill
-                    sizes="(max-width: 768px) 80vw"
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">
-                  Entry into the Canon
-                </span>
-                <span className="rounded-full border border-amber-300/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:border-amber-800/70 dark:text-amber-300/80">
-                  Volume I · Prelude
-                </span>
-              </div>
-
-              <h3 className="font-serif text-xl font-semibold text-gray-900 dark:text-white">
-                The Architecture of Human Purpose
-              </h3>
-
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80">
-                Canon · Foundations of Purpose
-              </p>
-
-              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                A distilled prelude to the Canon — for men who know human
-                flourishing is designed, not accidental.
-              </p>
-
-              <div className="flex items-center justify-between border-top border-amber-200/80 pt-3 dark:border-amber-900/40">
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
-                  Foundational Text
-                </span>
-                <div className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
-                  <span className="text-sm font-semibold">Open Prelude</span>
-                  <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
-                    ↠
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop layout */}
-          <div className="hidden grid-cols-1 gap-6 md:grid md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
             <div className="relative flex items-center justify-center">
               <div className="relative aspect-[3/4] w-full max-w-sm rounded-2xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800">
                 <div className="absolute inset-[5%] overflow-hidden rounded-xl border border-amber-200/80 dark:border-amber-800/70">
@@ -275,9 +205,9 @@ const CanonPrimaryCard: React.FC = () => {
   );
 };
 
-// -----------------------------------------------------------------------------
-// Types & data fetching
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* Data                                                                       */
+/* -------------------------------------------------------------------------- */
 
 type HomePageProps = {
   latestPosts: Post[];
@@ -286,49 +216,32 @@ type HomePageProps = {
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  try {
-    const publishedPosts = getPublishedPosts();
-    const allBooks = getAllBooks().filter((b) => !(b as any).draft);
-    const publishedShorts = getPublishedShorts();
+  const publishedPosts = getPublishedPosts();
+  const allBooks = getAllBooks().filter((b) => !(b as any).draft);
+  const publishedShorts = getPublishedShorts();
 
-    return {
-      props: {
-        latestPosts: publishedPosts.slice(0, 3),
-        featuredBooks: allBooks.slice(0, 2),
-        latestShorts: publishedShorts.slice(0, 3),
-      },
-      revalidate: 3600,
-    };
-  } catch (error) {
-    console.error("Error in getStaticProps:", error);
-    return {
-      props: {
-        latestPosts: [],
-        featuredBooks: [],
-        latestShorts: [],
-      },
-      revalidate: 3600,
-    };
-  }
+  return {
+    props: {
+      latestPosts: publishedPosts.slice(0, 3),
+      featuredBooks: allBooks.slice(0, 2), // books in development – modest footprint
+      latestShorts: publishedShorts.slice(0, 3),
+    },
+    revalidate: 3600,
+  };
 };
 
-// -----------------------------------------------------------------------------
-// Page component
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* Page                                                                       */
+/* -------------------------------------------------------------------------- */
 
 const HomePage: NextPage<HomePageProps> = ({
-  latestPosts = [],
-  featuredBooks = [],
-  latestShorts = [],
+  latestPosts,
+  featuredBooks,
+  latestShorts,
 }) => {
   const siteTitle = "Abraham of London";
   const siteTagline =
     "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
-
-  // Ensure we have valid data
-  const safeLatestPosts = Array.isArray(latestPosts) ? latestPosts : [];
-  const safeFeaturedBooks = Array.isArray(featuredBooks) ? featuredBooks : [];
-  const safeLatestShorts = Array.isArray(latestShorts) ? latestShorts : [];
 
   return (
     <Layout
@@ -366,7 +279,7 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta name="theme-color" content="#050608" />
       </Head>
 
-      {/* HERO – Canon spine + ventures narrative */}
+      {/* HERO — Canon spine + ventures as working arm */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#050608] via-[#0B0C10] to-[#050608]">
         <div className="absolute inset-0">
           <div className="pointer-events-none absolute -top-40 -right-32 h-64 w-64 rounded-full bg-amber-500/15 blur-3xl sm:h-80 sm:w-80" />
@@ -454,7 +367,7 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </section>
 
-      {/* STATS */}
+      {/* STATS BAR */}
       <section className="border-y border-gray-200/60 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <StatsBar />
@@ -549,14 +462,14 @@ const HomePage: NextPage<HomePageProps> = ({
             </div>
           </div>
 
-          {safeLatestShorts.length === 0 ? (
+          {latestShorts.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Shorts are being prepared. Once live, this will be the easiest
               place to start when you&apos;re exhausted but still hungry.
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
-              {safeLatestShorts.map((short) => (
+              {latestShorts.map((short) => (
                 <ShortCard key={short._id} short={short} />
               ))}
             </div>
@@ -593,13 +506,13 @@ const HomePage: NextPage<HomePageProps> = ({
             </Link>
           </div>
 
-          {safeLatestPosts.length === 0 ? (
+          {latestPosts.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               No essays are published yet.
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-              {safeLatestPosts.map((post) => (
+              {latestPosts.map((post) => (
                 <BlogPostCard key={post._id} post={post} />
               ))}
             </div>
@@ -617,7 +530,7 @@ const HomePage: NextPage<HomePageProps> = ({
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
                 Canon &amp; Narrative
               </p>
-              <h2 className="font-serif text-2xl font-semibold text-gray-900 dark:text-white md:text-3xl lg:text-4xl">
+              <h2 className="font-serif text-2xl font-semibold text-gray-900 dark:text:white md:text-3xl lg:text-4xl">
                 Books in active development
               </h2>
               <p className="mt-2 max-w-xl text-sm text-gray-700 dark:text-gray-300 md:text-base">
@@ -637,13 +550,13 @@ const HomePage: NextPage<HomePageProps> = ({
             </Link>
           </div>
 
-          {safeFeaturedBooks.length === 0 ? (
+          {featuredBooks.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               No books are registered yet.
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 md:gap-6">
-              {safeFeaturedBooks.map((book) => (
+              {featuredBooks.map((book) => (
                 <BookCard key={book._id} book={book} />
               ))}
             </div>
