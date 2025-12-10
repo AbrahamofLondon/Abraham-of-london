@@ -378,7 +378,7 @@ export const LayoutHelpers = {
       },
       mainEntityOfPage: {
         "@type": "WebPage",
-        "@id:": config.canonicalUrl || `${DEFAULT_SEO.siteUrl}`,
+        "@id": config.canonicalUrl || `${DEFAULT_SEO.siteUrl}`,
       },
       ...(config.image
         ? {
