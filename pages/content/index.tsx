@@ -16,28 +16,139 @@ type ContentPageProps = {
   docs: SearchDoc[];
 };
 
-const typeLabel: Record<SearchDocType, string> = {
-  post: "Insight",
-  book: "Book",
-  download: "Download",
-  print: "Print",
-  resource: "Resource",
-  canon: "Canon",
+// Enhanced type configurations with distinct color palettes
+const typeConfig: Record<SearchDocType, {
+  label: string;
+  description: string;
+  color: {
+    bg: string;
+    text: string;
+    border: string;
+    gradient: string;
+    accent: string;
+  };
+  icon: string;
+  category: 'insights' | 'frameworks' | 'tools' | 'archives';
+}> = {
+  post: {
+    label: "Insight",
+    description: "Thoughtful essays and perspectives",
+    color: {
+      bg: "bg-blue-500/5",
+      text: "text-blue-300",
+      border: "border-blue-500/20",
+      gradient: "from-blue-500/10 via-blue-600/5 to-transparent",
+      accent: "bg-blue-500/20"
+    },
+    icon: "💭",
+    category: 'insights'
+  },
+  book: {
+    label: "Book",
+    description: "Comprehensive volumes and collections",
+    color: {
+      bg: "bg-amber-500/5",
+      text: "text-amber-300",
+      border: "border-amber-500/20",
+      gradient: "from-amber-500/10 via-amber-600/5 to-transparent",
+      accent: "bg-amber-500/20"
+    },
+    icon: "📚",
+    category: 'frameworks'
+  },
+  download: {
+    label: "Download",
+    description: "Practical tools and templates",
+    color: {
+      bg: "bg-emerald-500/5",
+      text: "text-emerald-300",
+      border: "border-emerald-500/20",
+      gradient: "from-emerald-500/10 via-emerald-600/5 to-transparent",
+      accent: "bg-emerald-500/20"
+    },
+    icon: "📥",
+    category: 'tools'
+  },
+  print: {
+    label: "Print",
+    description: "Curated prints and editions",
+    color: {
+      bg: "bg-purple-500/5",
+      text: "text-purple-300",
+      border: "border-purple-500/20",
+      gradient: "from-purple-500/10 via-purple-600/5 to-transparent",
+      accent: "bg-purple-500/20"
+    },
+    icon: "🖨️",
+    category: 'archives'
+  },
+  resource: {
+    label: "Resource",
+    description: "Guides and reference materials",
+    color: {
+      bg: "bg-sky-500/5",
+      text: "text-sky-300",
+      border: "border-sky-500/20",
+      gradient: "from-sky-500/10 via-sky-600/5 to-transparent",
+      accent: "bg-sky-500/20"
+    },
+    icon: "📋",
+    category: 'tools'
+  },
+  canon: {
+    label: "Canon",
+    description: "Foundational principles and systems",
+    color: {
+      bg: "bg-rose-500/5",
+      text: "text-rose-300",
+      border: "border-rose-500/20",
+      gradient: "from-rose-500/10 via-rose-600/5 to-transparent",
+      accent: "bg-rose-500/20"
+    },
+    icon: "⚖️",
+    category: 'frameworks'
+  },
 };
 
-const typeAccent: Record<SearchDocType, string> = {
-  post: "bg-blue-500/10 text-blue-400 border-blue-500/40",
-  book: "bg-amber-500/10 text-amber-400 border-amber-500/40",
-  download: "bg-emerald-500/10 text-emerald-400 border-emerald-500/40",
-  print: "bg-purple-500/10 text-purple-300 border-purple-500/40",
-  resource: "bg-sky-500/10 text-sky-300 border-sky-500/40",
-  canon: "bg-rose-500/10 text-rose-300 border-rose-500/40",
+const categoryConfig: Record<string, {
+  label: string;
+  description: string;
+  color: string;
+  gradient: string;
+  icon: string;
+}> = {
+  insights: {
+    label: "Insights",
+    description: "Essays and perspectives",
+    color: "border-blue-500/30",
+    gradient: "from-blue-900/10 to-blue-950/5",
+    icon: "💭"
+  },
+  frameworks: {
+    label: "Frameworks",
+    description: "Systems and principles",
+    color: "border-amber-500/30",
+    gradient: "from-amber-900/10 to-amber-950/5",
+    icon: "⚙️"
+  },
+  tools: {
+    label: "Tools",
+    description: "Resources and downloads",
+    color: "border-emerald-500/30",
+    gradient: "from-emerald-900/10 to-emerald-950/5",
+    icon: "🛠️"
+  },
+  archives: {
+    label: "Archives",
+    description: "Prints and collections",
+    color: "border-purple-500/30",
+    gradient: "from-purple-900/10 to-purple-950/5",
+    icon: "📦"
+  },
 };
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  // ✅ Build the search index on the server at build-time
   const docs = buildSearchIndex();
-
   return {
     props: { docs },
     revalidate: 3600,
@@ -46,36 +157,64 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 
 const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
   const [query, setQuery] = React.useState("");
-  const [view, setView] = React.useState<"grid" | "list">("grid");
-  const [activeType, setActiveType] = React.useState<SearchDocType | "all">(
-    "all",
-  );
+  const [activeCategory, setActiveCategory] = React.useState<string>("all");
+  const [activeType, setActiveType] = React.useState<SearchDocType | "all">("all");
 
-  const filtered = React.useMemo(() => {
+  // Organize docs by category
+  const docsByCategory = React.useMemo(() => {
+    const organized: Record<string, SearchDoc[]> = {
+      insights: [],
+      frameworks: [],
+      tools: [],
+      archives: [],
+      all: docs
+    };
+
+    docs.forEach(doc => {
+      const category = typeConfig[doc.type].category;
+      organized[category].push(doc);
+    });
+
+    return organized;
+  }, [docs]);
+
+  // Filter docs based on search and active filters
+  const filteredDocs = React.useMemo(() => {
     const q = query.trim().toLowerCase();
+    
+    const sourceDocs = activeCategory === "all" ? docs : docsByCategory[activeCategory];
+    
+    if (!q && activeType === "all") {
+      return sourceDocs;
+    }
 
-    return docs.filter((doc) => {
+    return sourceDocs.filter(doc => {
       if (activeType !== "all" && doc.type !== activeType) return false;
-
       if (!q) return true;
 
-      const haystack = [
+      const searchable = [
         doc.title,
         doc.excerpt,
         doc.tags?.join(" "),
-        typeLabel[doc.type],
+        typeConfig[doc.type].label,
+        typeConfig[doc.type].description,
       ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
 
-      return haystack.includes(q);
+      return searchable.includes(q);
     });
-  }, [docs, query, activeType]);
+  }, [docs, docsByCategory, query, activeCategory, activeType]);
+
+  // Get category statistics
+  const getCategoryStats = (category: string) => {
+    const categoryDocs = docsByCategory[category];
+    return categoryDocs.length;
+  };
 
   const title = "Content Library";
-  const description =
-    "A well-organized collection of essays, frameworks, volumes, and tools for builders who think in systems, not slogans.";
+  const description = "A curated collection of insights, frameworks, and tools for systematic thinkers.";
 
   return (
     <Layout title={title} description={description}>
@@ -84,218 +223,259 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
         <meta name="description" content={description} />
       </Head>
 
-      <main className="bg-gradient-to-b from-gray-950 via-gray-900 to-black text-cream">
-        <section className="border-b border-amber-500/20 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
-          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-            <header className="space-y-4 text-center">
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream">
+      <main className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black text-cream">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden border-b border-gray-800">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent" />
+          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-3 rounded-full border border-amber-500/20 bg-amber-500/5 px-5 py-2 mb-8">
+                <span className="text-sm font-medium uppercase tracking-[0.25em] text-amber-300">
+                  Library
+                </span>
+              </div>
+              <h1 className="mb-6 font-serif text-5xl font-light tracking-tight text-cream sm:text-6xl lg:text-7xl">
                 Content Library
               </h1>
-              <p className="mx-auto max-w-3xl text-sm sm:text-base text-gray-300">
-                A well-organized collection of essays, frameworks, volumes, and
-                tools for builders who think in systems, not slogans.
+              <p className="mx-auto max-w-2xl text-lg font-light leading-relaxed text-gray-300">
+                An organized collection of insights, frameworks, and resources for 
+                those who build with depth and intention.
               </p>
-            </header>
+            </div>
+          </div>
+        </section>
 
-            {/* Search + controls */}
-            <div className="mt-10 space-y-4 rounded-2xl border border-amber-500/20 bg-gray-900/60 p-4 sm:p-5 shadow-lg">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                {/* Search input */}
-                <div className="relative flex-1">
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
-                    🔎
-                  </span>
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search content…"
-                    className="w-full rounded-full border border-amber-500/30 bg-black/40 py-2.5 pl-9 pr-4 text-sm text-cream placeholder:text-gray-500 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  />
+        {/* Controls Section */}
+        <section className="sticky top-0 z-10 border-b border-gray-800 bg-black/80 backdrop-blur-lg">
+          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              {/* Search */}
+              <div className="relative flex-1">
+                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+                  <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </div>
-
-                {/* View toggle */}
-                <div className="flex items-center justify-end gap-2 text-xs text-gray-400">
-                  <button
-                    type="button"
-                    onClick={() => setView("grid")}
-                    className={`rounded-full px-3 py-1 font-semibold ${
-                      view === "grid"
-                        ? "bg-amber-500 text-black"
-                        : "border border-amber-500/30 text-gray-300 hover:border-amber-400"
-                    }`}
-                  >
-                    Grid
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setView("list")}
-                    className={`rounded-full px-3 py-1 font-semibold ${
-                      view === "list"
-                        ? "bg-amber-500 text-black"
-                        : "border border-amber-500/30 text-gray-300 hover:border-amber-400"
-                    }`}
-                  >
-                    List
-                  </button>
-                </div>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search across the collection..."
+                  className="w-full rounded-xl border border-gray-700 bg-gray-900/50 py-3 pl-12 pr-4 text-cream placeholder:text-gray-500 backdrop-blur-sm transition-all hover:border-gray-600 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/20"
+                />
               </div>
 
-              {/* Type filter pills */}
-              <div className="flex flex-wrap gap-2 text-[0.7rem]">
+              {/* Category Filter */}
+              <div className="flex flex-wrap gap-2">
                 <button
-                  type="button"
-                  onClick={() => setActiveType("all")}
-                  className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-[0.16em] ${
-                    activeType === "all"
-                      ? "border-amber-500 bg-amber-500 text-black"
-                      : "border-amber-500/30 text-gray-300 hover:border-amber-400"
+                  onClick={() => setActiveCategory("all")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                    activeCategory === "all"
+                      ? "bg-amber-500 text-black"
+                      : "border border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/50"
                   }`}
                 >
                   All ({docs.length})
                 </button>
-                {(Object.keys(typeLabel) as SearchDocType[]).map((t) => {
-                  const count = docs.filter((d) => d.type === t).length;
-                  if (!count) return null;
+                {Object.entries(categoryConfig).map(([key, category]) => {
+                  const count = getCategoryStats(key);
+                  if (count === 0) return null;
                   return (
                     <button
-                      key={t}
-                      type="button"
-                      onClick={() => setActiveType(t)}
-                      className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-[0.16em] ${
-                        activeType === t
-                          ? "border-amber-500 bg-amber-500 text-black"
-                          : "border-amber-500/30 text-gray-300 hover:border-amber-400"
+                      key={key}
+                      onClick={() => setActiveCategory(key)}
+                      className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
+                        activeCategory === key
+                          ? `bg-gradient-to-r ${category.gradient} border-${key === 'insights' ? 'blue' : key === 'frameworks' ? 'amber' : key === 'tools' ? 'emerald' : 'purple'}-500/50 text-cream`
+                          : "border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/50"
                       }`}
                     >
-                      {typeLabel[t]} ({count})
+                      <span className="flex items-center gap-2">
+                        <span>{category.icon}</span>
+                        <span>{category.label}</span>
+                        <span className="text-xs opacity-60">({count})</span>
+                      </span>
                     </button>
                   );
                 })}
               </div>
             </div>
+
+            {/* Type Filter */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveType("all")}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                  activeType === "all"
+                    ? "bg-gray-700 text-cream"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                All Types
+              </button>
+              {(Object.keys(typeConfig) as SearchDocType[]).map((type) => {
+                const config = typeConfig[type];
+                const count = docs.filter(d => d.type === type).length;
+                if (count === 0) return null;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => setActiveType(type)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                      activeType === type
+                        ? `${config.color.bg} ${config.color.border} ${config.color.text}`
+                        : "border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <span>{config.icon}</span>
+                      <span>{config.label}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </section>
 
-        {/* Results */}
-        <section className="py-10 sm:py-12">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            {filtered.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-amber-500/30 bg-gray-900/60 p-8 text-center text-sm text-gray-300">
-                No matching content yet. Try a different search term or switch
-                the type filter.
-              </div>
-            ) : view === "grid" ? (
-              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((doc) => (
-                  <Link key={`${doc.type}:${doc.slug}`} href={doc.href}>
-                    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-800 bg-gray-950/70 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-400/60 hover:shadow-lg">
-                      {doc.coverImage && (
-                        <div className="relative h-40 w-full overflow-hidden border-b border-gray-800">
-                          <Image
-                            src={doc.coverImage}
-                            alt={doc.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                            className="object-cover object-center"
-                          />
-                        </div>
-                      )}
-                      <div className="flex flex-1 flex-col gap-3 p-4">
-                        <div className="flex items-center justify-between gap-2">
-                          <span
-                            className={[
-                              "rounded-full border px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.16em]",
-                              typeAccent[doc.type],
-                            ].join(" ")}
-                          >
-                            {typeLabel[doc.type]}
-                          </span>
-                          {doc.date && (
-                            <span className="text-[0.7rem] text-gray-400">
-                              {new Date(doc.date).toLocaleDateString("en-GB", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </span>
-                          )}
-                        </div>
-                        <h2 className="line-clamp-2 font-serif text-base font-semibold text-cream">
-                          {doc.title}
-                        </h2>
-                        {doc.excerpt && (
-                          <p className="line-clamp-3 text-sm text-gray-300">
-                            {doc.excerpt}
-                          </p>
-                        )}
-                        {doc.tags && doc.tags.length > 0 && (
-                          <div className="mt-auto flex flex-wrap gap-1">
-                            {doc.tags.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full bg-gray-800 px-2 py-0.5 text-[0.65rem] text-gray-300"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  </Link>
-                ))}
+        {/* Content Grid */}
+        <section className="py-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {filteredDocs.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-gray-700 bg-gray-900/20 p-12 text-center">
+                <div className="mb-4 text-4xl">🔍</div>
+                <h3 className="mb-2 font-serif text-xl text-cream">No content found</h3>
+                <p className="text-gray-400">
+                  Try adjusting your search or filter to discover available materials.
+                </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {filtered.map((doc) => (
-                  <Link key={`${doc.type}:${doc.slug}`} href={doc.href}>
-                    <article className="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-950/70 p-4 transition hover:border-amber-400/60 hover:bg-gray-900">
-                      <div className="flex items-center justify-between gap-2">
-                        <span
-                          className={[
-                            "rounded-full border px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.16em]",
-                            typeAccent[doc.type],
-                          ].join(" ")}
-                        >
-                          {typeLabel[doc.type]}
-                        </span>
-                        {doc.date && (
-                          <span className="text-[0.7rem] text-gray-400">
-                            {new Date(doc.date).toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </span>
-                        )}
+              <>
+                {/* Active Category Header */}
+                {activeCategory !== "all" && (
+                  <div className={`mb-8 rounded-xl border ${categoryConfig[activeCategory].color} bg-gradient-to-r ${categoryConfig[activeCategory].gradient} p-6`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{categoryConfig[activeCategory].icon}</span>
+                      <div>
+                        <h2 className="font-serif text-2xl text-cream">{categoryConfig[activeCategory].label}</h2>
+                        <p className="text-gray-300">{categoryConfig[activeCategory].description}</p>
                       </div>
-                      <div className="space-y-1">
-                        <h2 className="font-serif text-base font-semibold text-cream">
-                          {doc.title}
-                        </h2>
-                        {doc.excerpt && (
-                          <p className="text-sm text-gray-300">
-                            {doc.excerpt}
-                          </p>
-                        )}
-                      </div>
-                      {doc.tags && doc.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 text-[0.65rem]">
-                          {doc.tags.slice(0, 4).map((tag) => (
-                            <span
-                              key={tag}
-                              className="rounded-full bg-gray-800 px-2 py-0.5 text-gray-300"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </article>
-                  </Link>
-                ))}
-              </div>
+                      <span className="ml-auto rounded-full bg-black/30 px-3 py-1 text-sm text-gray-300">
+                        {filteredDocs.length} {filteredDocs.length === 1 ? 'item' : 'items'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Grid Layout */}
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {filteredDocs.map((doc) => {
+                    const config = typeConfig[doc.type];
+                    return (
+                      <Link key={`${doc.type}:${doc.slug}`} href={doc.href}>
+                        <article className="group relative h-full overflow-hidden rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950 transition-all duration-300 hover:scale-[1.02] hover:border-gray-700 hover:shadow-2xl">
+                          {/* Background accent */}
+                          <div className={`absolute inset-0 bg-gradient-to-br ${config.color.gradient} opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
+                          
+                          {/* Image Container - Improved aspect ratio */}
+                          {doc.coverImage && (
+                            <div className="relative h-48 w-full overflow-hidden">
+                              <Image
+                                src={doc.coverImage}
+                                alt={doc.title}
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                priority={false}
+                              />
+                              {/* Gradient overlay for better text readability */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/50 to-transparent" />
+                            </div>
+                          )}
+
+                          <div className="relative p-5">
+                            {/* Type badge */}
+                            <div className="mb-3 flex items-center justify-between">
+                              <span className={`inline-flex items-center gap-1.5 rounded-full ${config.color.bg} border ${config.color.border} px-3 py-1 text-xs font-medium ${config.color.text}`}>
+                                <span>{config.icon}</span>
+                                <span>{config.label}</span>
+                              </span>
+                              {doc.date && (
+                                <span className="text-xs text-gray-500">
+                                  {new Date(doc.date).toLocaleDateString("en-GB", {
+                                    day: "2-digit",
+                                    month: "short",
+                                  })}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="mb-2 font-serif text-lg font-light leading-tight text-cream group-hover:text-amber-100 transition-colors">
+                              {doc.title}
+                            </h3>
+
+                            {/* Description */}
+                            {doc.excerpt && (
+                              <p className="mb-4 line-clamp-2 text-sm text-gray-300 leading-relaxed">
+                                {doc.excerpt}
+                              </p>
+                            )}
+
+                            {/* Tags */}
+                            {doc.tags && doc.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5">
+                                {doc.tags.slice(0, 3).map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="rounded-full bg-gray-800/50 px-2.5 py-1 text-[0.7rem] text-gray-300"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                                {doc.tags.length > 3 && (
+                                  <span className="rounded-full bg-gray-800/50 px-2.5 py-1 text-[0.7rem] text-gray-300">
+                                    +{doc.tags.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Hover indicator */}
+                          <div className="absolute bottom-4 right-4 h-2 w-2 rounded-full bg-amber-400/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </article>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
             )}
+          </div>
+        </section>
+
+        {/* Stats Footer */}
+        <section className="border-t border-gray-800 bg-black/30 py-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+              {Object.entries(categoryConfig).map(([key, category]) => {
+                const count = getCategoryStats(key);
+                const color = key === 'insights' ? 'blue' : key === 'frameworks' ? 'amber' : key === 'tools' ? 'emerald' : 'purple';
+                return (
+                  <div key={key} className="text-center">
+                    <div className={`mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full bg-${color}-500/10`}>
+                      <span className="text-xl">{category.icon}</span>
+                    </div>
+                    <div className="text-2xl font-light text-cream">{count}</div>
+                    <div className="text-xs uppercase tracking-wider text-gray-400">
+                      {category.label}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {category.description}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
       </main>
