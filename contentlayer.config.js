@@ -1,121 +1,102 @@
 import path from "node:path";
-import { defineDocumentType, makeSource } from "contentlayer2/source-files";
+import {
+  defineDocumentType,
+  makeSource,
+} from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* HELPERS                                                                    */
+/* -------------------------------------------------------------------------- */
 
-function escapeForRegExp(input) {
-  return String(input).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+const escapeForRegExp = (input: string) =>
+  String(input).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-function generateSlug(flattenedPath, prefix) {
-  if (!flattenedPath) return "untitled";
+const generateSlug = (flattened: string, prefix: string) => {
+  if (!flattened) return "untitled";
   try {
     const safePrefix = escapeForRegExp(prefix);
     return (
-      String(flattenedPath)
+      flattened
         .replace(new RegExp(`^${safePrefix}/`, "u"), "")
         .replace(/\/index$/u, "") || "untitled"
     );
   } catch {
     return "untitled";
   }
-}
+};
 
-function generateUrl(slug, basePath) {
+const generateUrl = (slug: string, base: string) => {
   const cleanSlug = String(slug).replace(/^\/+|\/+$/gu, "");
-  const cleanBase = String(basePath).replace(/^\/+|\/+$/gu, "");
-  if (!cleanSlug) return `/${cleanBase}`;
-  return `/${cleanBase}/${cleanSlug}`.replace(/\/+/gu, "/");
-}
+  const cleanBase = String(base).replace(/^\/+|\/+$/gu, "");
+  return cleanSlug ? `/${cleanBase}/${cleanSlug}` : `/${cleanBase}`;
+};
 
-// Helper to ensure fields have proper defaults (not undefined)
-function withDefaults(fields) {
-  const defaultedFields = {};
-  for (const [key, config] of Object.entries(fields)) {
-    if (config.type === "string") {
-      defaultedFields[key] = {
-        ...config,
-        default: config.required ? "" : (config.default || ""),
-      };
-    } else if (config.type === "list") {
-      defaultedFields[key] = {
-        ...config,
-        default: config.required ? [] : (config.default || []),
-      };
-    } else if (config.type === "boolean") {
-      defaultedFields[key] = {
-        ...config,
-        default: config.required ? false : (config.default || false),
-      };
-    } else if (config.type === "json") {
-      defaultedFields[key] = {
-        ...config,
-        default: config.required ? null : (config.default || null),
-      };
+// Ensure safe defaults for all fields
+const withDefaults = (fields: Record<string, any>) => {
+  const out: Record<string, any> = {};
+  for (const [key, cfg] of Object.entries(fields)) {
+    if (cfg.type === "string") {
+      out[key] = { ...cfg, default: cfg.default ?? "" };
+    } else if (cfg.type === "list") {
+      out[key] = { ...cfg, default: cfg.default ?? [] };
+    } else if (cfg.type === "boolean") {
+      out[key] = { ...cfg, default: cfg.default ?? false };
+    } else if (cfg.type === "json") {
+      out[key] = { ...cfg, default: cfg.default ?? null };
     } else {
-      defaultedFields[key] = config;
+      out[key] = cfg;
     }
   }
-  return defaultedFields;
-}
+  return out;
+};
 
-// -----------------------------------------------------------------------------
-// Document types
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* DOCUMENT TYPES                                                             */
+/* -------------------------------------------------------------------------- */
 
+/* ---------------------------------- POST ---------------------------------- */
 export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    slug: { type: "string", required: false },
-    description: { type: "string", required: false },
-    author: { type: "string", required: false },
-    authorTitle: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    category: { type: "string", required: false },
-    ogTitle: { type: "string", required: false },
-    ogDescription: { type: "string", required: false },
-    socialCaption: { type: "string", required: false },
-    coverAspect: { type: "string", required: false },
-    coverFit: { type: "string", required: false },
-    coverPosition: { type: "string", required: false },
-    relatedDownloads: {
-      type: "list",
-      of: { type: "string" },
-      required: false,
-    },
-    resources: { type: "json", required: false },
-    keyInsights: { type: "json", required: false },
-    authorNote: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    draft: { type: "boolean", required: false },
-    featured: { type: "boolean", required: false },
-    layout: { type: "string", required: false },
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    slug: { type: "string" },
+    description: { type: "string" },
+    author: { type: "string" },
+    authorTitle: { type: "string" },
+    readTime: { type: "string" },
+    category: { type: "string" },
+    ogTitle: { type: "string" },
+    ogDescription: { type: "string" },
+    socialCaption: { type: "string" },
+    coverAspect: { type: "string" },
+    coverFit: { type: "string" },
+    coverPosition: { type: "string" },
+    relatedDownloads: { type: "list", of: { type: "string" } },
+    resources: { type: "json" },
+    keyInsights: { type: "json" },
+    authorNote: { type: "string" },
+    excerpt: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    draft: { type: "boolean" },
+    featured: { type: "boolean" },
+    layout: { type: "string" },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
+      resolve: doc => doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
           "blog"
@@ -123,369 +104,350 @@ export const Post = defineDocumentType(() => ({
     },
     readingTime: {
       type: "number",
-      resolve: (doc) => {
-        const wordsPerMinute = 200;
-        const wordCount = String(doc.body.raw).split(/\s+/u).length;
-        return Math.ceil(wordCount / wordsPerMinute);
+      resolve: doc => {
+        const words = String(doc.body.raw).split(/\s+/u).length;
+        return Math.ceil(words / 200);
       },
     },
   },
 }));
 
+/* -------------------------------- DOWNLOAD -------------------------------- */
 export const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    slug: { type: "string", required: false },
-    author: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    readtime: { type: "string", required: false },
-    category: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    file: { type: "string", required: false },
-    pdfPath: { type: "string", required: false },
-    layout: { type: "string", required: false },
-    description: { type: "string", required: false },
-    fileSize: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    downloadFile: { type: "string", required: false },
-    fileUrl: { type: "string", required: false },
-    type: { type: "string", required: false },
-    featured: { type: "boolean", required: false },
-    draft: { type: "boolean", required: false },
-    downloadUrl: { type: "string", required: false },
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    slug: { type: "string" },
+    subtitle: { type: "string" },
+    description: { type: "string" },
+    file: { type: "string" },
+    pdfPath: { type: "string" },
+    fileSize: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    type: { type: "string" },
+    readTime: { type: "string" },
+    featured: { type: "boolean" },
+    draft: { type: "boolean" },
+    downloadFile: { type: "string" },
+    downloadUrl: { type: "string" },
+    fileUrl: { type: "string" },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug || generateSlug(doc._raw.flattenedPath, "downloads"),
+      resolve: doc =>
+        doc.slug ||
+        generateSlug(doc._raw.flattenedPath, "downloads"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
-          doc.slug || generateSlug(doc._raw.flattenedPath, "downloads"),
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "downloads"),
           "downloads"
         ),
     },
     downloadHref: {
       type: "string",
-      resolve: (doc) => {
+      resolve: doc => {
         if (doc.downloadUrl) return doc.downloadUrl;
         if (doc.fileUrl) return doc.fileUrl;
-
-        const candidate = doc.pdfPath || doc.downloadFile || doc.file || "";
-        if (!candidate) return "";
-
-        if (candidate.startsWith("/")) return candidate;
-        return `/downloads/${candidate}`.replace(/\/+/g, "/");
+        const c = doc.pdfPath || doc.downloadFile || doc.file || "";
+        return c.startsWith("/") ? c : `/downloads/${c}`;
       },
     },
   },
 }));
 
+/* ---------------------------------- BOOK ---------------------------------- */
 export const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    slug: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    description: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    author: { type: "string", required: false },
-    publisher: { type: "string", required: false },
-    isbn: { type: "string", required: false },
-    draft: { type: "boolean", required: false },
-    featured: { type: "boolean", required: false },
-    category: { type: "string", required: false }, // Added missing category field
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    slug: { type: "string" },
+    subtitle: { type: "string" },
+    description: { type: "string" },
+    excerpt: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    readTime: { type: "string" },
+    author: { type: "string" },
+    publisher: { type: "string" },
+    isbn: { type: "string" },
+    draft: { type: "boolean" },
+    featured: { type: "boolean" },
+    category: { type: "string" },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
-          doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "books"),
           "books"
         ),
     },
   },
 }));
 
+/* ---------------------------------- EVENT --------------------------------- */
 export const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    slug: { type: "string", required: false },
-    time: { type: "string", required: false },
-    description: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    eventDate: {
-      type: "date",
-      required: false,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    location: { type: "string", required: false },
-    registrationUrl: { type: "string", required: false },
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    slug: { type: "string" },
+    time: { type: "string" },
+    description: { type: "string" },
+    excerpt: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    eventDate: { type: "date" },
+    location: { type: "string" },
+    registrationUrl: { type: "string" },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
+      resolve: doc =>
+        doc.slug ||
+        generateSlug(doc._raw.flattenedPath, "events"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
-          doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "events"),
           "events"
         ),
     },
     isUpcoming: {
       type: "boolean",
-      resolve: (doc) => {
-        const eventDate = new Date(doc.eventDate || doc.date);
+      resolve: doc => {
+        const d = new Date(doc.eventDate || doc.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        return eventDate >= today;
+        return d >= today;
       },
     },
   },
 }));
 
+/* ---------------------------------- PRINT --------------------------------- */
 export const Print = defineDocumentType(() => ({
   name: "Print",
   filePathPattern: "prints/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    slug: { type: "string", required: false },
-    description: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    dimensions: { type: "string", required: false },
-    downloadFile: { type: "string", required: false },
-    price: { type: "string", required: false },
-    available: { type: "boolean", required: false },
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    slug: { type: "string" },
+    description: { type: "string" },
+    excerpt: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    dimensions: { type: "string" },
+    downloadFile: { type: "string" },
+    price: { type: "string" },
+    available: { type: "boolean" },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         doc.slug || generateSlug(doc._raw.flattenedPath, "prints"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
-          doc.slug || generateSlug(doc._raw.flattenedPath, "prints"),
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "prints"),
           "prints"
         ),
     },
   },
 }));
 
+/* -------------------------------- STRATEGY -------------------------------- */
 export const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    slug: { type: "string", required: false },
-    author: { type: "string", required: false },
-    description: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    slug: { type: "string" },
+    author: { type: "string" },
+    description: { type: "string" },
+    excerpt: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         doc.slug || generateSlug(doc._raw.flattenedPath, "strategy"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
-          doc.slug || generateSlug(doc._raw.flattenedPath, "strategy"),
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "strategy"),
           "strategy"
         ),
     },
   },
 }));
 
+/* -------------------------------- RESOURCE -------------------------------- */
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: "resources/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    description: { type: "string", required: false },
-    slug: { type: "string", required: false },
-    author: { type: "string", required: false },
-    readtime: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    resourceType: { type: "string", required: false },
-    fileUrl: { type: "string", required: false },
-    downloadUrl: { type: "string", required: false },
-    featured: { type: "boolean", required: false },
-    draft: { type: "boolean", required: false },
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    description: { type: "string" },
+    slug: { type: "string" },
+    author: { type: "string" },
+    readTime: { type: "string" },
+    subtitle: { type: "string" },
+    excerpt: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    resourceType: { type: "string" },
+    fileUrl: { type: "string" },
+    downloadUrl: { type: "string" },
+    featured: { type: "boolean" },
+    draft: { type: "boolean" },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug || generateSlug(doc._raw.flattenedPath, "resources"),
+      resolve: doc =>
+        doc.slug ||
+        generateSlug(doc._raw.flattenedPath, "resources"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
-          doc.slug || generateSlug(doc._raw.flattenedPath, "resources"),
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "resources"),
           "resources"
         ),
     },
   },
 }));
 
+/* ---------------------------------- CANON --------------------------------- */
 export const Canon = defineDocumentType(() => ({
   name: "Canon",
   filePathPattern: "canon/**/*.{md,mdx}",
   contentType: "mdx",
   fields: withDefaults({
     title: { type: "string", required: true },
-    date: {
-      type: "date",
-      required: true,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    slug: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    description: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    author: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    coverAspect: { type: "string", required: false },
-    coverFit: { type: "string", required: false },
-    volumeNumber: { type: "string", required: false },
-    order: { type: "number", required: false },
-    featured: { type: "boolean", required: false },
-    draft: { type: "boolean", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    readTime: { type: "string", required: false },
-    accessLevel: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
+    date: { type: "date", required: true },
+    slug: { type: "string" },
+    subtitle: { type: "string" },
+    description: { type: "string" },
+    excerpt: { type: "string" },
+    author: { type: "string" },
+    coverImage: { type: "string" },
+    coverAspect: { type: "string" },
+    coverFit: { type: "string" },
+    volumeNumber: { type: "string" },
+    order: { type: "number" },
+    featured: { type: "boolean" },
+    draft: { type: "boolean" },
+    tags: { type: "list", of: { type: "string" } },
+    readTime: { type: "string" },
+    accessLevel: { type: "string" },
+    lockMessage: { type: "string" },
   }),
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         doc.slug || generateSlug(doc._raw.flattenedPath, "canon"),
     },
     url: {
       type: "string",
-      resolve: (doc) =>
+      resolve: doc =>
         generateUrl(
-          doc.slug || generateSlug(doc._raw.flattenedPath, "canon"),
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "canon"),
           "canon"
         ),
     },
   },
 }));
 
-const Short = defineDocumentType(() => ({
+/* ----------------------------------- SHORT -------------------------------- */
+export const Short = defineDocumentType(() => ({
   name: "Short",
   filePathPattern: "shorts/**/*.mdx",
   contentType: "mdx",
-  fields: {
-    // existing fields...
+  fields: withDefaults({
     title: { type: "string", required: true },
-    theme: { type: "string", required: false },
-    audience: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-
-    // ✅ add this:
-    slug: { type: "string", required: false },
-  },
+    theme: { type: "string" },
+    audience: { type: "string" },
+    readTime: { type: "string" },
+    slug: { type: "string" }, // MUST exist to avoid warnings
+  }),
   computedFields: {
-    // if you have a computed slug, keep that too – they can co-exist
+    slug: {
+      type: "string",
+      resolve: doc =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "shorts"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => `/shorts/${doc._raw.flattenedPath}`,
+      resolve: doc =>
+        generateUrl(
+          doc.slug ||
+            generateSlug(doc._raw.flattenedPath, "shorts"),
+          "shorts"
+        ),
     },
   },
 }));
 
-// -----------------------------------------------------------------------------
-// makeSource
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* MAKE SOURCE                                                                */
+/* -------------------------------------------------------------------------- */
 
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
@@ -504,14 +466,8 @@ export default makeSource({
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
     esbuildOptions: (options) => {
-      options.loader = {
-        ...(options.loader || {}),
-        ".mdx": "tsx",
-      };
-      options.alias = {
-        ...(options.alias || {}),
-        "@": process.cwd(),
-      };
+      options.loader = { ...(options.loader || {}), ".mdx": "tsx" };
+      options.alias = { ...(options.alias || {}), "@": process.cwd() };
       return options;
     },
   },
