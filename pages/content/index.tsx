@@ -1,4 +1,3 @@
-// pages/content/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -7,38 +6,20 @@ import Image from "next/image";
 
 import {
   Search,
-  Calendar,
-  ArrowRight,
-  FileText,
-  Download,
-  Star,
-  Layers,
-  BookOpen,
-  Lock,
-  Eye,
-  Sparkles,
-  Wrench,
-  FolderTree,
   Grid3x3,
   List,
-  Award,
-  Clock,
+  BookOpen,
+  FileText,
+  Download as DownloadIcon,
+  Layers,
+  Star,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import SilentSurface from "@/components/ui/SilentSurface";
 
-// Contentlayer helper to unify all docs
 import {
   getAllContentlayerDocs,
-  isPost,
-  isBook,
-  isCanon,
-  isDownload,
-  isResource,
-  isPrint,
-  isStrategy,
-  isShort,
   getCardPropsForDocument,
   type ContentlayerCardProps,
 } from "@/lib/contentlayer-helper";
@@ -60,7 +41,6 @@ type ContentKind =
 
 type FilterKey = ContentKind | "all" | "featured";
 type ViewMode = "grid" | "list";
-type CategoryMode = "type" | "year" | "featured";
 
 interface ContentResource extends ContentlayerCardProps {
   kind: ContentKind;
@@ -92,7 +72,14 @@ const mapToResource = (card: ContentlayerCardProps): ContentResource => {
   else if (card.type === "Event") kind = "event";
   else if (card.tags?.some((t) => t.toLowerCase() === "essay")) kind = "essay";
 
-  const href = `/${kind === "canon" ? "canon" : kind === "short" ? "shorts" : `${kind}s`}/${card.slug}`;
+  const hrefBase =
+    kind === "canon"
+      ? "/canon"
+      : kind === "short"
+      ? "/shorts"
+      : `/${kind}s`;
+
+  const href = `${hrefBase}/${card.slug}`;
 
   const year =
     card.date != null
@@ -115,7 +102,7 @@ const mapToResource = (card: ContentlayerCardProps): ContentResource => {
 };
 
 /* -------------------------------------------------------------------------- */
-/* GROUPING BY TYPE & YEAR                                                    */
+/* GROUPING / STATS                                                           */
 /* -------------------------------------------------------------------------- */
 
 const organizeByCategories = (items: ContentResource[]) => {
@@ -142,7 +129,6 @@ const organizeByCategories = (items: ContentResource[]) => {
     const year = item.year || "Undated";
     if (!byYear[year]) byYear[year] = [];
     byYear[year].push(item);
-
     if (item.featured) featured.push(item);
   });
 
@@ -185,6 +171,7 @@ export const getStaticProps: GetStaticProps = async () => {
           featured: categories.featured,
         },
       },
+      revalidate: 3600,
     };
   } catch (e) {
     console.error("Error generating /content:", e);
@@ -227,28 +214,185 @@ export const getStaticProps: GetStaticProps = async () => {
 };
 
 /* -------------------------------------------------------------------------- */
-/* UI COMPONENTS (STAT CARD / BADGES / CARDS)                                 */
+/* UI COMPONENTS                                                              */
 /* -------------------------------------------------------------------------- */
 
-/* ——— StatItem, ContentTypeBadge and UnifiedContentCard remain EXACTLY the
-      same as your current design. I am *not* replacing your UI styling.
-      Only logic beneath is aligned to new data model. 
-      (I already have your definitions from previous messages.)                 */
+type StatItemProps = {
+  label: string;
+  value: number | string;
+  helper?: string;
+};
+
+const StatItem: React.FC<StatItemProps> = ({ label, value, helper }) => (
+  <div className="flex flex-col gap-1 rounded-md border border-white/10 bg-black/30 px-3 py-2 sm:px-4 sm:py-3">
+    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
+      {label}
+    </span>
+    <span className="text-lg font-semibold text-[#F5F1E8] sm:text-2xl">
+      {value}
+    </span>
+    {helper && (
+      <span className="text-[0.7rem] text-white/50">{helper}</span>
+    )}
+  </div>
+);
+
+const kindLabel: Record<ContentKind, string> = {
+  essay: "Essay",
+  book: "Book",
+  download: "Download",
+  event: "Event",
+  print: "Print",
+  resource: "Resource",
+  canon: "Canon",
+  strategy: "Strategy",
+  short: "Short",
+};
+
+const kindIcon: Partial<Record<ContentKind, React.ReactNode>> = {
+  book: <BookOpen className="h-3 w-3" />,
+  download: <DownloadIcon className="h-3 w-3" />,
+  canon: <Layers className="h-3 w-3" />,
+};
+
+const ContentTypeBadge: React.FC<{ kind: ContentKind }> = ({ kind }) => {
+  const base =
+    "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.16em]";
+  let color =
+    "border-white/20 bg-white/5 text-white/70"; // default neutral
+
+  if (kind === "canon")
+    color = "border-amber-400/50 bg-amber-500/10 text-amber-300";
+  else if (kind === "book")
+    color = "border-amber-300/40 bg-amber-400/5 text-amber-200";
+  else if (kind === "download")
+    color = "border-emerald-300/40 bg-emerald-400/5 text-emerald-200";
+  else if (kind === "short")
+    color = "border-sky-300/40 bg-sky-400/5 text-sky-200";
+
+  return (
+    <span className={`${base} ${color}`}>
+      {kindIcon[kind]}
+      <span>{kindLabel[kind]}</span>
+    </span>
+  );
+};
+
+type UnifiedContentCardProps = {
+  item: ContentResource;
+  viewMode: ViewMode;
+};
+
+const UnifiedContentCard: React.FC<UnifiedContentCardProps> = ({
+  item,
+  viewMode,
+}) => {
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <Link href={item.href} className="block h-full">
+      <SilentSurface className="h-full">
+        <article className="flex h-full flex-col gap-3 rounded-lg border border-white/10 bg-black/60 p-3 text-[#F5F1E8] transition hover:border-amber-400/60 hover:bg-black/80 sm:p-4">
+          {children}
+        </article>
+      </SilentSurface>
+    </Link>
+  );
+
+  if (viewMode === "list") {
+    return (
+      <Wrapper>
+        <div className="flex gap-3 sm:gap-4">
+          {item.coverImage && (
+            <div className="relative h-16 w-12 flex-shrink-0 overflow-hidden rounded border border-white/10 bg-black">
+              <Image
+                src={item.coverImage}
+                alt={item.title ?? ""}
+                fill
+                sizes="64px"
+                className="object-cover"
+              />
+            </div>
+          )}
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <ContentTypeBadge kind={item.kind} />
+              {item.featured && (
+                <span className="inline-flex items-center gap-1 text-[0.65rem] text-amber-300">
+                  <Star className="h-3 w-3" />
+                  Featured
+                </span>
+              )}
+            </div>
+            <h2 className="truncate font-serif text-base font-semibold">
+              {item.title}
+            </h2>
+            {item.excerpt && (
+              <p className="line-clamp-2 text-xs text-white/70">
+                {item.excerpt}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-2 text-[0.7rem] text-white/50">
+              {item.author && <span>{item.author}</span>}
+              {item.year && <span>· {item.year}</span>}
+              {item.readTime && <span>· {item.readTime}</span>}
+            </div>
+          </div>
+        </div>
+      </Wrapper>
+    );
+  }
+
+  // grid mode
+  return (
+    <Wrapper>
+      {item.coverImage && (
+        <div className="relative mb-2 h-36 w-full overflow-hidden rounded-md border border-white/10 bg-black">
+          <Image
+            src={item.coverImage}
+            alt={item.title ?? ""}
+            fill
+            sizes="(max-width:768px) 100vw, 33vw"
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <ContentTypeBadge kind={item.kind} />
+        {item.featured && (
+          <span className="inline-flex items-center gap-1 text-[0.65rem] text-amber-300">
+            <Star className="h-3 w-3" />
+            Featured
+          </span>
+        )}
+      </div>
+      <h2 className="mb-1 line-clamp-2 font-serif text-sm font-semibold sm:text-base">
+        {item.title}
+      </h2>
+      {item.excerpt && (
+        <p className="mb-2 line-clamp-3 text-xs text-white/70 sm:text-sm">
+          {item.excerpt}
+        </p>
+      )}
+      <div className="mt-auto flex flex-wrap items-center gap-2 text-[0.7rem] text-white/50">
+        {item.author && <span>{item.author}</span>}
+        {item.year && <span>· {item.year}</span>}
+        {item.readTime && <span>· {item.readTime}</span>}
+      </div>
+    </Wrapper>
+  );
+};
 
 /* -------------------------------------------------------------------------- */
 /* MAIN PAGE COMPONENT                                                        */
 /* -------------------------------------------------------------------------- */
 
-const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
+const ContentPage: NextPage<any> = ({ items, contentStats }) => {
   const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
-  const [categoryMode, setCategoryMode] =
-    React.useState<CategoryMode>("type");
   const [activeFilter, setActiveFilter] =
     React.useState<FilterKey>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const filtered = React.useMemo(() => {
-    let results = items;
+    let results = items as ContentResource[];
 
     if (activeFilter !== "all") {
       results =
@@ -277,11 +421,19 @@ const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
     return results;
   }, [items, activeFilter, searchQuery]);
 
-  const sortedYears = React.useMemo(() => {
-    return Object.keys(categories.year)
-      .filter((y) => y !== "Undated")
-      .sort((a, b) => parseInt(b) - parseInt(a));
-  }, [categories.year]);
+  const filterCounts: Record<FilterKey, number> = {
+    all: contentStats.total,
+    featured: contentStats.featured,
+    essay: contentStats.essay,
+    book: contentStats.book,
+    download: contentStats.download,
+    event: contentStats.event,
+    print: contentStats.print,
+    resource: contentStats.resource,
+    canon: contentStats.canon,
+    strategy: contentStats.strategy,
+    short: contentStats.short,
+  };
 
   return (
     <Layout
@@ -293,7 +445,7 @@ const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
         <title>Content Library | Abraham of London</title>
       </Head>
 
-      {/* ------------------------------ HERO ------------------------------ */}
+      {/* HERO */}
       <div className="relative overflow-hidden border-b border-white/10 bg-gradient-to-b from-black via-[#050608] to-black">
         <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
@@ -308,14 +460,35 @@ const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
         </div>
       </div>
 
-      {/* ------------------------------ STATS ------------------------------ */}
+      {/* STATS */}
       <div className="border-b border-white/10 bg-white/5">
-        <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-          {/* You already provided the StatItem UI — it plugs here unchanged */}
+        <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatItem
+              label="Total pieces"
+              value={contentStats.total}
+              helper={`${contentStats.canon} canon · ${contentStats.book} books`}
+            />
+            <StatItem
+              label="Essays & strategy"
+              value={contentStats.essay + contentStats.strategy}
+              helper={`${contentStats.essay} essays · ${contentStats.strategy} strategy notes`}
+            />
+            <StatItem
+              label="Downloads & tools"
+              value={contentStats.download}
+              helper="PDFs, frameworks & checklists"
+            />
+            <StatItem
+              label="With visuals"
+              value={contentStats.withImages}
+              helper="Cards with cover art or diagrams"
+            />
+          </div>
         </div>
       </div>
 
-      {/* ------------------------------ MAIN ------------------------------ */}
+      {/* MAIN */}
       <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Search + View Controls */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -325,7 +498,7 @@ const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search content..."
-              className="w-full rounded-sm border border-white/15 bg-black/40 py-2 pl-10 pr-4 text-sm text-[#F5F1E8]"
+              className="w-full rounded-sm border border-white/15 bg-black/40 py-2 pl-10 pr-4 text-sm text-[#F5F1E8] placeholder:text-white/40"
             />
           </div>
 
@@ -339,6 +512,7 @@ const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
                     ? "bg-white/20 text-[#F5F1E8]"
                     : "text-white/50"
                 }`}
+                aria-label="Grid view"
               >
                 <Grid3x3 className="h-3 w-3" />
               </button>
@@ -349,6 +523,7 @@ const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
                     ? "bg-white/20 text-[#F5F1E8]"
                     : "text-white/50"
                 }`}
+                aria-label="List view"
               >
                 <List className="h-3 w-3" />
               </button>
@@ -356,12 +531,84 @@ const ContentPage: NextPage<any> = ({ items, contentStats, categories }) => {
           </div>
         </div>
 
-        {/* Filters / Tabs */}
-        {/* (unchanged — uses your previous structure) */}
+        {/* Filters */}
+        <div className="mb-6 flex flex-wrap gap-2 text-[0.7rem]">
+          {(
+            [
+              "all",
+              "featured",
+              "canon",
+              "book",
+              "essay",
+              "strategy",
+              "short",
+              "download",
+              "resource",
+              "print",
+            ] as FilterKey[]
+          ).map((key) => {
+            const count = filterCounts[key] ?? 0;
+            if (count === 0 && key !== "all" && key !== "featured") {
+              return null;
+            }
 
-        {/* --------------------- CONTENT RENDER --------------------- */}
-        {/* (Uses UnifiedContentCard exactly as before) */}
+            const isActive = activeFilter === key;
+            const label =
+              key === "all"
+                ? "All"
+                : key === "featured"
+                ? "Featured"
+                : kindLabel[key as ContentKind];
 
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveFilter(key)}
+                className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-[0.16em] ${
+                  isActive
+                    ? "border-amber-400 bg-amber-400 text-black"
+                    : "border-white/20 bg-black/40 text-white/70 hover:border-amber-400 hover:text-amber-300"
+                }`}
+              >
+                {label}
+                {key !== "all" && (
+                  <span className="ml-1 text-[0.65rem] opacity-80">
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* RESULTS */}
+        {filtered.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-white/20 bg-black/40 p-6 text-center text-sm text-white/60">
+            No content matches this filter yet. Clear the search or choose a
+            different category.
+          </div>
+        ) : viewMode === "grid" ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((item: ContentResource) => (
+              <UnifiedContentCard
+                key={`${item.kind}:${item.slug}`}
+                item={item}
+                viewMode="grid"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((item: ContentResource) => (
+              <UnifiedContentCard
+                key={`${item.kind}:${item.slug}`}
+                item={item}
+                viewMode="list"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );
