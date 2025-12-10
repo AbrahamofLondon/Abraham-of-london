@@ -1,4 +1,4 @@
-// pages/_app.tsx - CORRECTED VERSION
+// pages/_app.tsx
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -6,16 +6,12 @@ import { useEffect } from "react";
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
 
-// Remove content initialization from _app.tsx
-// Content should be loaded per-page via getStaticProps or API routes
-
 function usePageView() {
   const router = useRouter();
 
   useEffect(() => {
     const handleRouteChange = (_url: string) => {
-      // Hook in GA / Plausible etc later
-      // console.log("Page view:", _url);
+      // Hook in GA / Plausible later if needed
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);

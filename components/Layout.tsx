@@ -1,10 +1,8 @@
-// components/Layout.tsx - MODERNIZED RESPONSIVE VERSION
-"use client";
-
+// components/Layout.tsx - COMPLETE FIXED VERSION
 import * as React from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
-import { usePathname } from "next/navigation";
 
 // Dynamically import components for better performance
 const LuxuryNavbar = dynamic(() => import("@/components/LuxuryNavbar"), {
@@ -60,26 +58,6 @@ export type LayoutProps = {
   mobileFriendly?: boolean;
 };
 
-// Device detection hook
-const useDeviceType = () => {
-  const [deviceType, setDeviceType] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-
-  React.useEffect(() => {
-    const checkDevice = () => {
-      const width = window.innerWidth;
-      if (width < 768) setDeviceType('mobile');
-      else if (width < 1024) setDeviceType('tablet');
-      else setDeviceType('desktop');
-    };
-
-    checkDevice();
-    window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
-  }, []);
-
-  return deviceType;
-};
-
 // Helper function to get page title
 const getPageTitle = (title?: string): string => {
   const baseTitle = "Abraham of London";
@@ -116,9 +94,12 @@ export default function Layout({
   additionalHead,
   mobileFriendly = true,
 }: LayoutProps): JSX.Element {
-  const pathname = usePathname();
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const router = useRouter();
+  const [isClient, setIsClient] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   // Get the effective title
   const effectiveTitle = getPageTitle(title ?? pageTitle);
@@ -127,7 +108,7 @@ export default function Layout({
   const fullDescription = description || DEFAULT_SEO.defaultDescription;
   
   // Build canonical URL with default
-  const fullCanonicalUrl = canonicalUrl || `${DEFAULT_SEO.siteUrl}${pathname}`;
+  const fullCanonicalUrl = canonicalUrl || `${DEFAULT_SEO.siteUrl}${router.asPath}`;
   
   // Build ogImage URL
   const fullOgImage = ogImage 
@@ -199,18 +180,13 @@ export default function Layout({
         
         {/* Additional head elements */}
         {additionalHead}
-        
-        {/* Preload critical resources */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preload" as="image" href={fullOgImage} />
       </Head>
 
       {/* Header */}
       <LuxuryNavbar variant="dark" transparent={transparentHeader} />
 
       {/* Main Content */}
-      <main className={`flex-1 ${containerClass} ${isMobile ? 'pt-4' : 'pt-8'}`}>
+      <main className={`flex-1 ${containerClass} pt-8`}>
         {children}
       </main>
 
@@ -218,162 +194,78 @@ export default function Layout({
       <Footer />
 
       {/* Mobile optimizations */}
-      <style jsx global>{`
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-          /* Prevent zoom on iOS inputs */
-          input, 
-          select,
-          textarea {
-            font-size: 16px !important;
+      {isClient && (
+        <style jsx global>{`
+          /* Mobile optimizations */
+          @media (max-width: 768px) {
+            /* Prevent zoom on iOS inputs */
+            input, 
+            select,
+            textarea {
+              font-size: 16px !important;
+            }
+            
+            /* Better touch targets */
+            button,
+            a[role="button"],
+            .touch-target {
+              min-height: 44px;
+              min-width: 44px;
+            }
           }
           
-          /* Better touch targets */
-          button,
-          a[role="button"],
-          .touch-target {
-            min-height: 44px;
-            min-width: 44px;
+          /* Reduce motion for accessibility */
+          @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+              animation-duration: 0.01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: 0.01ms !important;
+            }
           }
           
-          /* Smooth scrolling for iOS */
+          /* Smooth scrolling */
           html {
-            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
           }
           
-          /* Prevent overscroll on body */
-          body {
-            overscroll-behavior-y: none;
-          }
-        }
-        
-        /* Reduce motion for accessibility */
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
-        
-        /* Smooth scrolling */
-        html {
-          scroll-behavior: smooth;
-        }
-        
-        /* Focus styles for accessibility */
-        *:focus-visible {
-          outline: 2px solid #f59e0b;
-          outline-offset: 2px;
-        }
-        
-        /* Improve text rendering */
-        * {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          text-rendering: optimizeLegibility;
-        }
-        
-        /* Dark mode transitions */
-        * {
-          transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-        }
-        
-        /* Line clamp utilities */
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        
-        .line-clamp-3 {
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        
-        .line-clamp-4 {
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        
-        /* Safe area support for iPhone notches */
-        .safe-top {
-          padding-top: env(safe-area-inset-top);
-        }
-        
-        .safe-bottom {
-          padding-bottom: env(safe-area-inset-bottom);
-        }
-        
-        .safe-left {
-          padding-left: env(safe-area-inset-left);
-        }
-        
-        .safe-right {
-          padding-right: env(safe-area-inset-right);
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-          background: #c1c1c1;
-          border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-          background: #a1a1a1;
-        }
-        
-        /* Dark mode scrollbar */
-        @media (prefers-color-scheme: dark) {
-          ::-webkit-scrollbar-track {
-            background: #2d3748;
+          /* Focus styles for accessibility */
+          *:focus-visible {
+            outline: 2px solid #f59e0b;
+            outline-offset: 2px;
           }
           
-          ::-webkit-scrollbar-thumb {
-            background: #4a5568;
-          }
-          
-          ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
-          }
-        }
-        
-        /* Print styles */
-        @media print {
-          nav,
-          footer,
-          .no-print {
-            display: none !important;
-          }
-          
+          /* Improve text rendering */
           * {
-            background: white !important;
-            color: black !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
           }
           
-          a {
-            color: black !important;
-            text-decoration: underline !important;
+          /* Line clamp utilities */
+          .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
           }
-        }
-      `}</style>
+          
+          .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          
+          .line-clamp-4 {
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+        `}</style>
+      )}
     </div>
   );
 }
