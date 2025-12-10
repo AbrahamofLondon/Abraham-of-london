@@ -74,7 +74,8 @@ const footerSections = [
       { label: "Founder Tools", href: "/founders" },
       { label: "Leadership Resources", href: "/leadership" },
       { label: "Strategy Guides", href: "/strategy" },
-      { label: "Canon Campaign", href: "/canon-campaign" },
+      // ✅ FIXED – correct Canon Campaign route
+      { label: "Canon Campaign", href: "/canon/canon-campaign" },
     ],
   },
   {

@@ -1,58 +1,17 @@
 // pages/fatherhood/index.tsx
 import * as React from "react";
-import type { NextPage, GetStaticProps } from "next";
+import type { NextPage } from "next";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import { BlogPostCard, BookCard } from "@/components/Cards";
-import {
-  getPublishedPosts,
-  getAllBooks,
-  getAllCanons,
-} from "@/lib/contentlayer-helper";
-import type { Post, Book, Canon } from "contentlayer/generated";
 
-type FatherhoodPageProps = {
-  posts: Post[];
-  books: Book[];
-  canons: Canon[];
-};
-
-function hasTagLike(doc: { tags?: string[] }, needles: string[]): boolean {
-  const tags = (doc.tags || []).map((t) => t.toLowerCase());
-  return needles.some((needle) =>
-    tags.some((t) => t.includes(needle.toLowerCase())),
-  );
-}
-
-export const getStaticProps: GetStaticProps<FatherhoodPageProps> = async () => {
-  const posts = getPublishedPosts().filter((p) =>
-    hasTagLike(p, ["father", "fatherhood", "family"]),
-  );
-  const books = getAllBooks().filter((b) =>
-    hasTagLike(b, ["father", "fatherhood"]),
-  );
-  const canons = getAllCanons().filter((c) =>
-    hasTagLike(c, ["father", "fatherhood"]),
-  );
-
-  return {
-    props: { posts, books, canons },
-    revalidate: 3600,
-  };
-};
-
-const FatherhoodPage: NextPage<FatherhoodPageProps> = ({
-  posts,
-  books,
-  canons,
-}) => {
+const FatherhoodPage: NextPage = () => {
   return (
     <Layout
       title="Fatherhood Frameworks"
       description="Faith-rooted frameworks and tools for men carrying the weight of fatherhood."
     >
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <header className="mb-10 space-y-4 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-500">
             Fatherhood · Frameworks
@@ -61,110 +20,108 @@ const FatherhoodPage: NextPage<FatherhoodPageProps> = ({
             Fatherhood without disappearing
           </h1>
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-gray-200">
-            A focused stream of essays, canon entries, and long-form projects
-            for men who want to carry fatherhood with courage, clarity, and
-            conviction — not sentimentality.
+            A focused doorway into the Canon, essays, and tools for men who
+            want to carry fatherhood with courage, clarity, and conviction —
+            not sentimentality.
           </p>
         </header>
 
-        {/* Canon section */}
-        <section className="mb-12 space-y-4">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-serif text-xl sm:text-2xl text-cream">
-              Canon &amp; structural pieces
+        <section className="space-y-8">
+          <article className="rounded-xl border border-gold/20 bg-night/60 p-5 shadow-sm">
+            <h2 className="font-serif text-xl text-cream mb-2">
+              Start with the Canon
             </h2>
-            <Link
-              href="/canon"
-              className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 underline-offset-4 hover:underline"
-            >
-              Enter the Canon ↠
-            </Link>
-          </div>
-          {canons.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              Canon entries touching fatherhood will surface here as they go
-              live.
+            <p className="text-sm text-gray-200 mb-3">
+              The deep work sits inside the Canon volumes and field letters.
+              If you&apos;re a father under pressure, begin here.
             </p>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {canons.map((canon) => (
-                <article
-                  key={canon._id}
-                  className="rounded-xl border border-gold/20 bg-night/60 p-4 shadow-sm"
+            <ul className="list-disc space-y-2 pl-5 text-sm text-gray-200">
+              <li>
+                <Link
+                  href="/books/the-architecture-of-human-purpose"
+                  className="text-amber-300 underline-offset-2 hover:underline"
                 >
-                  <h3 className="font-serif text-lg text-cream">
-                    <Link href={`/canon/${canon.slug}`}>{canon.title}</Link>
-                  </h3>
-                  {canon.excerpt && (
-                    <p className="mt-2 text-sm text-gray-300 line-clamp-3">
-                      {canon.excerpt}
-                    </p>
-                  )}
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+                  The Architecture of Human Purpose · Prelude
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/canon/volume-i-foundations-of-purpose"
+                  className="text-amber-300 underline-offset-2 hover:underline"
+                >
+                  Volume I – Foundations of Purpose
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/when-the-storm-finds-you"
+                  className="text-amber-300 underline-offset-2 hover:underline"
+                >
+                  When the Storm Finds You
+                </Link>{" "}
+                (field letter on delay, loss, and staying present as a father)
+              </li>
+            </ul>
+          </article>
 
-        {/* Books */}
-        <section className="mb-12 space-y-4">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-serif text-xl sm:text-2xl text-cream">
-              Books in development
-            </h2>
-            <Link
-              href="/books"
-              className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 underline-offset-4 hover:underline"
-            >
-              View all books ↠
-            </Link>
-          </div>
-          {books.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              Fatherhood-focused book projects will surface here as they’re
-              registered in the Canon.
-            </p>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {books.map((book) => (
-                <BookCard key={book._id} book={book} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Essays */}
-        <section className="space-y-4">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-serif text-xl sm:text-2xl text-cream">
+          <article className="rounded-xl border border-gold/20 bg-night/60 p-5 shadow-sm">
+            <h2 className="font-serif text-xl text-cream mb-2">
               Essays &amp; field notes
             </h2>
-            <Link
-              href="/blog"
-              className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 underline-offset-4 hover:underline"
-            >
-              All essays ↠
-            </Link>
-          </div>
-          {posts.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              Fatherhood essays will appear here as they are published. For now,
-              explore the wider{" "}
+            <p className="text-sm text-gray-200 mb-3">
+              Shorter, high-protein pieces on fatherhood, legacy, and raising
+              sons who can stand in the open.
+            </p>
+            <p className="text-sm text-gray-300">
+              Browse the{" "}
               <Link
                 href="/content"
                 className="text-amber-300 underline-offset-2 hover:underline"
               >
-                content library
+                Content Library
+              </Link>{" "}
+              and look for pieces tagged with{" "}
+              <span className="font-semibold text-amber-300">
+                fatherhood
+              </span>
+              ,{" "}
+              <span className="font-semibold text-amber-300">
+                family
+              </span>
+              , or{" "}
+              <span className="font-semibold text-amber-300">
+                legacy
+              </span>
+              .
+            </p>
+          </article>
+
+          <article className="rounded-xl border border-gold/20 bg-night/60 p-5 shadow-sm">
+            <h2 className="font-serif text-xl text-cream mb-2">
+              Rooms &amp; cohorts
+            </h2>
+            <p className="text-sm text-gray-200 mb-3">
+              From time to time there will be closed rooms specifically for
+              fathers — part workshop, part confessional, part strategy lab.
+            </p>
+            <p className="text-sm text-gray-300">
+              When those open, they&apos;ll be listed on the{" "}
+              <Link
+                href="/events"
+                className="text-amber-300 underline-offset-2 hover:underline"
+              >
+                Events
+              </Link>{" "}
+              page and through the{" "}
+              <Link
+                href="/newsletter"
+                className="text-amber-300 underline-offset-2 hover:underline"
+              >
+                newsletter
               </Link>
               .
             </p>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
-                <BlogPostCard key={post._id} post={post} />
-              ))}
-            </div>
-          )}
+          </article>
         </section>
       </main>
     </Layout>
