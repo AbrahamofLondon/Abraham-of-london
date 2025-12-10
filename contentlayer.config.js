@@ -460,41 +460,25 @@ export const Canon = defineDocumentType(() => ({
   },
 }));
 
-export const Short = defineDocumentType(() => ({
+const Short = defineDocumentType(() => ({
   name: "Short",
-  filePathPattern: "shorts/**/*.mdx", // Changed to match nested structure
+  filePathPattern: "shorts/**/*.mdx",
   contentType: "mdx",
-  fields: withDefaults({
+  fields: {
+    // existing fields...
     title: { type: "string", required: true },
-    date: { 
-      type: "date", 
-      required: false,
-      default: () => new Date().toISOString().split("T")[0],
-    },
-    excerpt: { type: "string", required: false },
     theme: { type: "string", required: false },
     audience: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    published: { type: "boolean", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    // Add common fields for consistency
-    description: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    draft: { type: "boolean", required: false },
-    author: { type: "string", required: false },
-  }),
+
+    // ✅ add this:
+    slug: { type: "string", required: false },
+  },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "shorts"),
-    },
+    // if you have a computed slug, keep that too – they can co-exist
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(
-          generateSlug(doc._raw.flattenedPath, "shorts"),
-          "shorts"
-        ),
+      resolve: (doc) => `/shorts/${doc._raw.flattenedPath}`,
     },
   },
 }));
