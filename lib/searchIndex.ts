@@ -1,18 +1,22 @@
 // lib/searchIndex.ts
 import {
-  allPosts,
-  allBooks,
-  allDownloads,
-  allPrints,
-  allResources,
-  allCanons,
-  type PostDocument,
-  type BookDocument,
-  type DownloadDocument,
-  type PrintDocument,
-  type ResourceDocument,
-  type CanonDocument
+  getPublishedPosts,
+  getAllBooks,
+  getAllDownloads,
+  getAllPrints,
+  getAllResources,
+  getAllCanons,
 } from "./contentlayer-helper";
+
+import type {
+  Post,
+  Book,
+  Download,
+  Print,
+  Resource,
+  Canon,
+} from "contentlayer/generated";
+
 import { absUrl } from "@/lib/siteConfig";
 
 // ----------------- Shared types & helpers -----------------
@@ -29,9 +33,7 @@ export type BasicDoc = {
 export function indexBySlug<T extends BasicDoc>(docs: T[]): Record<string, T> {
   const out: Record<string, T> = {};
   for (const d of docs || []) {
-    const key = String(d.slug || "")
-      .trim()
-      .toLowerCase();
+    const key = String(d.slug || "").trim().toLowerCase();
     if (key) out[key] = d;
   }
   return out;
@@ -39,7 +41,7 @@ export function indexBySlug<T extends BasicDoc>(docs: T[]): Record<string, T> {
 
 export function sortByDate<T extends { date?: string }>(docs: T[]): T[] {
   return [...(docs || [])].sort(
-    (a, b) => +new Date(b.date || 0) - +new Date(a.date || 0)
+    (a, b) => +new Date(b.date || 0) - +new Date(a.date || 0),
   );
 }
 
@@ -68,39 +70,41 @@ export interface SearchDoc {
 // ----------------- Builders per collection -----------------
 
 function mapPosts(): SearchDoc[] {
-  return sortByDate(allPosts)
-    .filter((p: PostDocument) => !p.draft)
-    .map((p: PostDocument) => ({
-      type: "post" as const,
-      slug: p.slug,
-      href: p.url || `/blog/${p.slug}`,
-      url: absUrl(p.url || `/blog/${p.slug}`),
-      title: p.title ?? "Untitled",
-      date: p.date ?? null,
-      excerpt: p.excerpt ?? p.description ?? null,
-      tags: p.tags ?? [],
-      coverImage: p.coverImage || null,
-    }));
+  const posts = getPublishedPosts() as Post[];
+
+  return sortByDate(posts).map((p) => ({
+    type: "post" as const,
+    slug: p.slug,
+    href: p.url || `/blog/${p.slug}`,
+    url: absUrl(p.url || `/blog/${p.slug}`),
+    title: p.title ?? "Untitled",
+    date: p.date ?? null,
+    excerpt: p.excerpt ?? p.description ?? null,
+    tags: p.tags ?? [],
+    coverImage: p.coverImage || null,
+  }));
 }
 
 function mapBooks(): SearchDoc[] {
-  return sortByDate(allBooks)
-    .filter((b: BookDocument) => !b.draft)
-    .map((b: BookDocument) => ({
-      type: "book" as const,
-      slug: b.slug,
-      href: b.url || `/books/${b.slug}`,
-      url: absUrl(b.url || `/books/${b.slug}`),
-      title: b.title ?? "Untitled Book",
-      date: b.date ?? null,
-      excerpt: b.excerpt ?? b.description ?? null,
-      tags: b.tags ?? [],
-      coverImage: b.coverImage || null,
-    }));
+  const books = getAllBooks().filter((b) => !(b as any).draft) as Book[];
+
+  return sortByDate(books).map((b) => ({
+    type: "book" as const,
+    slug: b.slug,
+    href: b.url || `/books/${b.slug}`,
+    url: absUrl(b.url || `/books/${b.slug}`),
+    title: b.title ?? "Untitled Book",
+    date: b.date ?? null,
+    excerpt: b.excerpt ?? b.description ?? null,
+    tags: b.tags ?? [],
+    coverImage: b.coverImage || null,
+  }));
 }
 
 function mapDownloads(): SearchDoc[] {
-  return sortByDate(allDownloads).map((d: DownloadDocument) => ({
+  const downloads = getAllDownloads() as Download[];
+
+  return sortByDate(downloads).map((d) => ({
     type: "download" as const,
     slug: d.slug,
     href: d.url || `/downloads/${d.slug}`,
@@ -114,9 +118,11 @@ function mapDownloads(): SearchDoc[] {
 }
 
 function mapPrints(): SearchDoc[] {
-  return sortByDate(allPrints)
-    .filter((p: PrintDocument) => p.available !== false)
-    .map((p: PrintDocument) => ({
+  const prints = getAllPrints() as Print[];
+
+  return sortByDate(prints)
+    .filter((p) => (p as any).available !== false)
+    .map((p) => ({
       type: "print" as const,
       slug: p.slug,
       href: p.url || `/prints/${p.slug}`,
@@ -130,7 +136,9 @@ function mapPrints(): SearchDoc[] {
 }
 
 function mapResources(): SearchDoc[] {
-  return sortByDate(allResources).map((r: ResourceDocument) => ({
+  const resources = getAllResources() as Resource[];
+
+  return sortByDate(resources).map((r) => ({
     type: "resource" as const,
     slug: r.slug,
     href: r.url || `/resources/${r.slug}`,
@@ -144,19 +152,19 @@ function mapResources(): SearchDoc[] {
 }
 
 function mapCanons(): SearchDoc[] {
-  return sortByDate(allCanons)
-    .filter((c: CanonDocument) => !c.draft)
-    .map((c: CanonDocument) => ({
-      type: "canon" as const,
-      slug: c.slug,
-      href: c.url || `/canon/${c.slug}`,
-      url: absUrl(c.url || `/canon/${c.slug}`),
-      title: c.title ?? "Untitled Canon",
-      date: c.date ?? null,
-      excerpt: c.excerpt ?? c.description ?? null,
-      tags: c.tags ?? [],
-      coverImage: c.coverImage || null,
-    }));
+  const canons = getAllCanons().filter((c) => !(c as any).draft) as Canon[];
+
+  return sortByDate(canons).map((c) => ({
+    type: "canon" as const,
+    slug: c.slug,
+    href: c.url || `/canon/${c.slug}`,
+    url: absUrl(c.url || `/canon/${c.slug}`),
+    title: c.title ?? "Untitled Canon",
+    date: c.date ?? null,
+    excerpt: c.excerpt ?? c.description ?? null,
+    tags: c.tags ?? [],
+    coverImage: c.coverImage || null,
+  }));
 }
 
 // ----------------- Main search index -----------------
@@ -176,19 +184,18 @@ export function buildSearchIndex(): SearchDoc[] {
 export const searchIndex: SearchDoc[] = buildSearchIndex();
 
 // Helper to search the index
-export function searchDocuments(query: string, limit: number = 20): SearchDoc[] {
+export function searchDocuments(
+  query: string,
+  limit: number = 20,
+): SearchDoc[] {
   const searchTerm = query.toLowerCase().trim();
   if (!searchTerm) return searchIndex.slice(0, limit);
 
   return searchIndex
-    .filter(doc => {
-      const searchableText = [
-        doc.title,
-        doc.excerpt,
-        doc.tags?.join(' '),
-      ]
+    .filter((doc) => {
+      const searchableText = [doc.title, doc.excerpt, doc.tags?.join(" ")]
         .filter(Boolean)
-        .join(' ')
+        .join(" ")
         .toLowerCase();
 
       return searchableText.includes(searchTerm);

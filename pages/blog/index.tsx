@@ -1,34 +1,25 @@
-// pages/blog/index.tsx
 import * as React from "react";
 import type {
   GetStaticProps,
   InferGetStaticPropsType,
   NextPage,
 } from "next";
+
 import Layout from "@/components/Layout";
-
-// Centralised Contentlayer access
-import {
-  allPosts,
-  getPublishedDocuments,
-  type PostDocument as Post,
-} from "@/lib/contentlayer-helper";
-
-// Use the correct import from BlogPostCard
 import { BlogPostCard } from "@/components/BlogPostCard";
+import { getPublishedPosts } from "@/lib/contentlayer-helper";
+import type { Post } from "contentlayer/generated";
 
 type Props = {
   posts: Post[];
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const posts = getPublishedDocuments(allPosts as Post[]);
+  const posts = getPublishedPosts();
 
   return {
-    props: {
-      posts,
-    },
-    revalidate: 3600, // 1 hour
+    props: { posts },
+    revalidate: 3600,
   };
 };
 
@@ -51,21 +42,16 @@ const BlogIndexPage: NextPage<
           </p>
         </header>
 
-        {(!posts || posts.length === 0) && (
+        {posts.length === 0 && (
           <p className="text-sm text-gray-400">
             No posts are published yet. The Canon is still loading.
           </p>
         )}
 
-        {posts && posts.length > 0 && (
+        {posts.length > 0 && (
           <div className="grid gap-6 md:grid-cols-2">
             {posts.map((post) => (
-              <BlogPostCard
-                // We know your Contentlayer IDs are stable
-                key={post._id}
-                // Cast at the boundary so we don’t guess the internal props shape
-                post={post as any}
-              />
+              <BlogPostCard key={post._id} post={post as any} />
             ))}
           </div>
         )}

@@ -1,12 +1,14 @@
 // pages/shorts/[slug].tsx
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps } from "next";import Head from "next/head";
-import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import Head from "next/head";
+import { useMDXComponent } from "next-contentlayer2/hooks";
 
+import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 
-// We define a local, serialisable type instead of importing from contentlayer2
+// Local, serialisable type instead of importing from contentlayer2
 type ShortDoc = {
   _id: string;
   slug: string;
@@ -58,12 +60,14 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
                   })}
                 </span>
               )}
+
               {short.readTime && (
                 <>
                   <span className="h-[1px] w-4 bg-gray-300 dark:bg-gray-700" />
                   <span>{short.readTime}</span>
                 </>
               )}
+
               {short.theme && (
                 <>
                   <span className="h-[1px] w-4 bg-gray-300 dark:bg-gray-700" />
@@ -106,33 +110,30 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps<ShortPageProps> = async ({
+  params,
+}) => {
   const slug = params?.slug as string;
 
-  // Pull raw doc from helper
   const raw = getShortBySlug(slug);
 
   if (!raw) {
     return { notFound: true };
   }
 
-  // Normalise to a serialisable object (no undefined)
-  const short = {
+  const short: ShortDoc = {
     ...raw,
     title: raw.title ?? "Untitled short",
     excerpt: raw.excerpt ?? null,
     date: raw.date ?? null,
     tags: raw.tags ?? [],
-    readTime:
-      (raw as any).readTime ??
-      (raw as any).readingTime ??
-      null,
+    readTime: (raw as any).readTime ?? (raw as any).readingTime ?? null,
     theme: (raw as any).theme ?? null,
   };
 
   return {
     props: { short },
-    revalidate: 1800, // 30 mins ISR if you want it
+    revalidate: 1800, // 30 mins
   };
 };
 

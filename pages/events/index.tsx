@@ -1,14 +1,14 @@
-// pages/events/index.tsx
 import * as React from "react";
-import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+import type {
+  GetStaticProps,
+  InferGetStaticPropsType,
+  NextPage,
+} from "next";
 import Link from "next/link";
-import Layout from "@/components/Layout";
 
-import {
-  allEvents,
-  getPublishedDocuments,
-  type EventDocument as Event,
-} from "@/lib/contentlayer-helper";
+import Layout from "@/components/Layout";
+import { getAllEvents } from "@/lib/contentlayer-helper";
+import type { Event } from "contentlayer/generated";
 
 type Props = {
   upcoming: Event[];
@@ -16,8 +16,7 @@ type Props = {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const events = getPublishedDocuments(allEvents as Event[]);
-
+  const events = getAllEvents().filter((e) => !(e as any).draft);
   const now = new Date();
 
   const upcoming = events
@@ -37,11 +36,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     );
 
   return {
-    props: {
-      upcoming,
-      past,
-    },
-    revalidate: 1800, // 30 mins
+    props: { upcoming, past },
+    revalidate: 1800,
   };
 };
 
@@ -64,12 +60,13 @@ const EventsIndexPage: NextPage<
           </p>
         </header>
 
+        {/* Upcoming */}
         <section className="space-y-4">
           <h2 className="text-sm font-semibold uppercase tracking-[0.25em] text-gold/70">
             Upcoming
           </h2>
 
-          {(!upcoming || upcoming.length === 0) && (
+          {upcoming.length === 0 && (
             <p className="text-sm text-gray-400">
               No upcoming events announced yet. Join the newsletter to hear
               first when the next room opens.
@@ -116,12 +113,13 @@ const EventsIndexPage: NextPage<
           )}
         </section>
 
+        {/* Archive */}
         <section className="mt-10 space-y-4">
           <h2 className="text-sm font-semibold uppercase tracking-[0.25em] text-gold/70">
             Archive
           </h2>
 
-          {(!past || past.length === 0) && (
+          {past.length === 0 && (
             <p className="text-sm text-gray-400">
               Once the first rooms have run, they’ll live here as part of the
               Canon archive.
