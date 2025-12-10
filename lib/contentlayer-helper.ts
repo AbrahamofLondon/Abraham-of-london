@@ -1,3 +1,5 @@
+// lib/contentlayer-helper.ts:
+
 // lib/contentlayer-helper.ts
 // Unified helpers around Contentlayer2-generated docs
 
@@ -252,4 +254,49 @@ export function getAllStrategies(): Strategy[] {
   return (allStrategies as Strategy[]).slice().sort((a, b) => {
     return getDateValue(b) - getDateValue(a);
   });
+}
+
+/**
+ * Get any document by its slug
+ */
+export function getDocumentBySlug(slug: string): AnyDoc | undefined {
+  const target = slug.replace(/^\/+|\/+$/g, "");
+  return getAllContentlayerDocs().find((doc) => {
+    const s = normaliseSlug(doc);
+    return s === target;
+  });
+}
+
+/**
+ * Get featured documents (any type)
+ */
+export function getFeaturedDocuments(): AnyDoc[] {
+  return getAllContentlayerDocs().filter((doc) => 
+    (doc as any).featured === true && isPublished(doc)
+  );
+}
+
+/**
+ * Get published documents (any type)
+ */
+export function getPublishedDocuments(): AnyDoc[] {
+  return getAllContentlayerDocs().filter(isPublished);
+}
+
+/**
+ * Get document by slug with type checking
+ */
+export function getContentlayerDocBySlug<T extends AnyDoc>(
+  slug: string,
+  typeGuard: (doc: AnyDoc) => doc is T
+): T | undefined {
+  const doc = getDocumentBySlug(slug);
+  return doc && typeGuard(doc) ? doc : undefined;
+}
+
+/**
+ * Check if Contentlayer is loaded
+ */
+export function isContentlayerLoaded(): boolean {
+  return allDocuments.length > 0;
 }

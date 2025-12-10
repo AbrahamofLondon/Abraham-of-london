@@ -154,14 +154,10 @@ export const Download = defineDocumentType(() => ({
       default: () => new Date().toISOString().split("T")[0],
     },
     slug: { type: "string", required: false },
-
-    // 🔽 These are the ones Contentlayer is currently complaining about:
     author: { type: "string", required: false },
     category: { type: "string", required: false },
     excerpt: { type: "string", required: false },
     layout: { type: "string", required: false },
-
-    // Rest of your download meta
     readTime: { type: "string", required: false },
     readtime: { type: "string", required: false },
     subtitle: { type: "string", required: false },
@@ -406,11 +402,8 @@ export const Resource = defineDocumentType(() => ({
     description: { type: "string", required: false },
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
-
-    // 🔽 Both spellings supported
     readtime: { type: "string", required: false },
     readTime: { type: "string", required: false },
-
     subtitle: { type: "string", required: false },
     excerpt: { type: "string", required: false },
     coverImage: { type: "string", required: false },
@@ -497,9 +490,7 @@ export const Short = defineDocumentType(() => ({
     theme: { type: "string", required: false },
     audience: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    // optional front-matter slug; we'll still compute one if it's missing
     slug: { type: "string", required: false },
-    // keep these flexible – they may exist in your mdx even if not always used
     description: { type: "string", required: false },
     excerpt: { type: "string", required: false },
     tags: { type: "list", of: { type: "string" }, required: false },
@@ -507,6 +498,12 @@ export const Short = defineDocumentType(() => ({
       type: "date",
       required: false,
       default: () => new Date().toISOString().split("T")[0],
+    },
+    // FIX: Added published field to match your MDX files
+    published: { 
+      type: "boolean", 
+      required: false,
+      default: true 
     },
     draft: { type: "boolean", required: false },
     featured: { type: "boolean", required: false },

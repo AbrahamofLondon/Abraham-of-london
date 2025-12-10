@@ -1,5 +1,4 @@
-// pages/index.tsx – MASTER HOMEPAGE (Ventures + Canon + Strategic Story)
-
+// pages/index.tsx – FIXED HOMEPAGE
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -25,31 +24,6 @@ import type { Post, Book, Short } from "contentlayer/generated";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
-
-// -----------------------------------------------------------------------------
-// Device detection hook (client-only)
-// -----------------------------------------------------------------------------
-
-const useDeviceType = () => {
-  const [deviceType, setDeviceType] = React.useState<
-    "mobile" | "tablet" | "desktop"
-  >("desktop");
-
-  React.useEffect(() => {
-    const checkDevice = () => {
-      const width = window.innerWidth;
-      if (width < 768) setDeviceType("mobile");
-      else if (width < 1024) setDeviceType("tablet");
-      else setDeviceType("desktop");
-    };
-
-    checkDevice();
-    window.addEventListener("resize", checkDevice);
-    return () => window.removeEventListener("resize", checkDevice);
-  }, []);
-
-  return deviceType;
-};
 
 // -----------------------------------------------------------------------------
 // Section divider
@@ -122,13 +96,15 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
         className={`flex items-center gap-3 rounded-xl border ${colors.border} ${colors.bg} p-3 transition-all hover:-translate-y-0.5 hover:shadow-lg md:gap-4 md:rounded-2xl md:p-4`}
       >
         <div className="relative h-16 w-12 overflow-hidden rounded border border-gray-200/60 bg-white/60 dark:border-gray-700/70 dark:bg-gray-900/40 md:h-20 md:w-14">
-          <Image
-            src={imageSrc}
-            alt={title}
-            fill
-            sizes="(max-width: 768px) 60px, 80px"
-            className="object-cover object-center"
-          />
+          <div className="relative h-full w-full">
+            <Image
+              src={imageSrc}
+              alt={title}
+              fill
+              sizes="(max-width: 768px) 60px, 80px"
+              className="object-cover object-center"
+            />
+          </div>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -167,12 +143,16 @@ const CanonEntryCard: React.FC<CanonEntryProps> = ({
 };
 
 // -----------------------------------------------------------------------------
-// Canon primary card
+// Canon primary card - FIXED (SSR compatible)
 // -----------------------------------------------------------------------------
 
 const CanonPrimaryCard: React.FC = () => {
-  const deviceType = useDeviceType();
-
+  const [isClient, setIsClient] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   return (
     <Link
       href="/books/the-architecture-of-human-purpose"
@@ -180,117 +160,115 @@ const CanonPrimaryCard: React.FC = () => {
     >
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-br from-white via-[#FDF9F1] to-gray-50 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:border-amber-900/40 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
         <div className="p-4 md:p-6 lg:p-8">
-          {deviceType === "mobile" ? (
-            // Mobile layout – vertical
-            <div className="space-y-4">
-              <div className="flex items-center justify-center">
-                <div className="relative aspect-[3/4] w-40 rounded-xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800 sm:w-48">
-                  <div className="absolute inset-[4%] overflow-hidden rounded-lg border border-amber-200/80 dark:border-amber-800/60">
-                    <Image
-                      src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                      alt="The Architecture of Human Purpose — Prelude MiniBook"
-                      fill
-                      sizes="(max-width: 768px) 80vw"
-                      className="object-contain"
-                      priority
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">
-                    Entry into the Canon
-                  </span>
-                  <span className="rounded-full border border-amber-300/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:border-amber-800/70 dark:text-amber-300/80">
-                    Volume I · Prelude
-                  </span>
-                </div>
-
-                <h3 className="font-serif text-xl font-semibold text-gray-900 dark:text-white">
-                  The Architecture of Human Purpose
-                </h3>
-
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80">
-                  Canon · Foundations of Purpose
-                </p>
-
-                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  A distilled prelude to the Canon — for men who know human
-                  flourishing is designed, not accidental.
-                </p>
-
-                <div className="flex items-center justify-between border-top border-amber-200/80 pt-3 dark:border-amber-900/40">
-                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
-                    Foundational Text
-                  </span>
-                  <div className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
-                    <span className="text-sm font-semibold">Open Prelude</span>
-                    <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
-                      ↠
-                    </span>
-                  </div>
+          {/* Mobile layout - always render both, hide/show with CSS */}
+          <div className="block space-y-4 md:hidden">
+            <div className="flex items-center justify-center">
+              <div className="relative aspect-[3/4] w-40 rounded-xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800 sm:w-48">
+                <div className="absolute inset-[4%] overflow-hidden rounded-lg border border-amber-200/80 dark:border-amber-800/60">
+                  <Image
+                    src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+                    alt="The Architecture of Human Purpose — Prelude MiniBook"
+                    fill
+                    sizes="(max-width: 768px) 80vw"
+                    className="object-contain"
+                    priority
+                  />
                 </div>
               </div>
             </div>
-          ) : (
-            // Desktop / tablet layout – horizontal
-            <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-              <div className="relative flex items-center justify-center">
-                <div className="relative aspect-[3/4] w-full max-w-sm rounded-2xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800">
-                  <div className="absolute inset-[5%] overflow-hidden rounded-xl border border-amber-200/80 dark:border-amber-800/70">
-                    <Image
-                      src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                      alt="The Architecture of Human Purpose — Prelude MiniBook"
-                      fill
-                      sizes="(max-width: 768px) 90vw, 40vw"
-                      className="object-contain"
-                      priority
-                    />
-                  </div>
-                </div>
+
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">
+                  Entry into the Canon
+                </span>
+                <span className="rounded-full border border-amber-300/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:border-amber-800/70 dark:text-amber-300/80">
+                  Volume I · Prelude
+                </span>
               </div>
 
-              <div className="flex flex-col justify-center space-y-4 md:space-y-6">
-                <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                  <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">
-                    Entry into the Canon
+              <h3 className="font-serif text-xl font-semibold text-gray-900 dark:text-white">
+                The Architecture of Human Purpose
+              </h3>
+
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80">
+                Canon · Foundations of Purpose
+              </p>
+
+              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                A distilled prelude to the Canon — for men who know human
+                flourishing is designed, not accidental.
+              </p>
+
+              <div className="flex items-center justify-between border-top border-amber-200/80 pt-3 dark:border-amber-900/40">
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+                  Foundational Text
+                </span>
+                <div className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
+                  <span className="text-sm font-semibold">Open Prelude</span>
+                  <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
+                    ↠
                   </span>
-                  <span className="rounded-full border border-amber-300/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:border-amber-800/70 dark:text-amber-300/80">
-                    Volume I · Prelude
-                  </span>
-                </div>
-
-                <h3 className="font-serif text-2xl font-light text-gray-900 dark:text-white md:text-3xl">
-                  The Architecture of Human Purpose
-                </h3>
-
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80 md:text-sm">
-                  Canon · Foundations of Purpose
-                </p>
-
-                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 md:text-base">
-                  A distilled, high-level prelude to the Canon — written for men
-                  who understand that history, family, and institutions are
-                  shaped by design, not by accident. This is the reference point
-                  for everything else on the site.
-                </p>
-
-                <div className="flex items-center justify-between border-t border-amber-200/80 pt-4 dark:border-amber-900/40">
-                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
-                    Foundational Text · Limited Release
-                  </span>
-                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                    <span className="text-sm font-semibold">Open Prelude</span>
-                    <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">
-                      ↠
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Desktop layout */}
+          <div className="hidden grid-cols-1 gap-6 md:grid md:grid-cols-2">
+            <div className="relative flex items-center justify-center">
+              <div className="relative aspect-[3/4] w-full max-w-sm rounded-2xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800">
+                <div className="absolute inset-[5%] overflow-hidden rounded-xl border border-amber-200/80 dark:border-amber-800/70">
+                  <Image
+                    src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+                    alt="The Architecture of Human Purpose — Prelude MiniBook"
+                    fill
+                    sizes="(max-width: 768px) 90vw, 40vw"
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-center space-y-4 md:space-y-6">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">
+                  Entry into the Canon
+                </span>
+                <span className="rounded-full border border-amber-300/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:border-amber-800/70 dark:text-amber-300/80">
+                  Volume I · Prelude
+                </span>
+              </div>
+
+              <h3 className="font-serif text-2xl font-light text-gray-900 dark:text-white md:text-3xl">
+                The Architecture of Human Purpose
+              </h3>
+
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80 md:text-sm">
+                Canon · Foundations of Purpose
+              </p>
+
+              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 md:text-base">
+                A distilled, high-level prelude to the Canon — written for men
+                who understand that history, family, and institutions are
+                shaped by design, not by accident. This is the reference point
+                for everything else on the site.
+              </p>
+
+              <div className="flex items-center justify-between border-t border-amber-200/80 pt-4 dark:border-amber-900/40">
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+                  Foundational Text · Limited Release
+                </span>
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                  <span className="text-sm font-semibold">Open Prelude</span>
+                  <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">
+                    ↠
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </article>
     </Link>
@@ -308,18 +286,30 @@ type HomePageProps = {
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  const publishedPosts = getPublishedPosts();
-  const allBooks = getAllBooks().filter((b) => !(b as any).draft);
-  const publishedShorts = getPublishedShorts();
+  try {
+    const publishedPosts = getPublishedPosts();
+    const allBooks = getAllBooks().filter((b) => !(b as any).draft);
+    const publishedShorts = getPublishedShorts();
 
-  return {
-    props: {
-      latestPosts: publishedPosts.slice(0, 3),
-      featuredBooks: allBooks.slice(0, 2), // smaller, under-development footprint
-      latestShorts: publishedShorts.slice(0, 3),
-    },
-    revalidate: 3600,
-  };
+    return {
+      props: {
+        latestPosts: publishedPosts.slice(0, 3),
+        featuredBooks: allBooks.slice(0, 2),
+        latestShorts: publishedShorts.slice(0, 3),
+      },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error("Error in getStaticProps:", error);
+    return {
+      props: {
+        latestPosts: [],
+        featuredBooks: [],
+        latestShorts: [],
+      },
+      revalidate: 3600,
+    };
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -327,13 +317,18 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 // -----------------------------------------------------------------------------
 
 const HomePage: NextPage<HomePageProps> = ({
-  latestPosts,
-  featuredBooks,
-  latestShorts,
+  latestPosts = [],
+  featuredBooks = [],
+  latestShorts = [],
 }) => {
   const siteTitle = "Abraham of London";
   const siteTagline =
     "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
+
+  // Ensure we have valid data
+  const safeLatestPosts = Array.isArray(latestPosts) ? latestPosts : [];
+  const safeFeaturedBooks = Array.isArray(featuredBooks) ? featuredBooks : [];
+  const safeLatestShorts = Array.isArray(latestShorts) ? latestShorts : [];
 
   return (
     <Layout
@@ -554,14 +549,14 @@ const HomePage: NextPage<HomePageProps> = ({
             </div>
           </div>
 
-          {latestShorts.length === 0 ? (
+          {safeLatestShorts.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Shorts are being prepared. Once live, this will be the easiest
               place to start when you&apos;re exhausted but still hungry.
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
-              {latestShorts.map((short) => (
+              {safeLatestShorts.map((short) => (
                 <ShortCard key={short._id} short={short} />
               ))}
             </div>
@@ -598,13 +593,13 @@ const HomePage: NextPage<HomePageProps> = ({
             </Link>
           </div>
 
-          {latestPosts.length === 0 ? (
+          {safeLatestPosts.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               No essays are published yet.
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-              {latestPosts.map((post) => (
+              {safeLatestPosts.map((post) => (
                 <BlogPostCard key={post._id} post={post} />
               ))}
             </div>
@@ -642,13 +637,13 @@ const HomePage: NextPage<HomePageProps> = ({
             </Link>
           </div>
 
-          {featuredBooks.length === 0 ? (
+          {safeFeaturedBooks.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               No books are registered yet.
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 md:gap-6">
-              {featuredBooks.map((book) => (
+              {safeFeaturedBooks.map((book) => (
                 <BookCard key={book._id} book={book} />
               ))}
             </div>
@@ -713,57 +708,6 @@ const HomePage: NextPage<HomePageProps> = ({
       <VenturesSection />
       <StrategicFunnelStrip />
       <AboutSection />
-
-      {/* Global tweaks */}
-      <style jsx global>{`
-        @media (max-width: 768px) {
-          input,
-          textarea,
-          select {
-            font-size: 16px !important;
-          }
-
-          a[role='button'],
-          button,
-          .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-          }
-
-          img {
-            content-visibility: auto;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
-
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .line-clamp-3 {
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        html {
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-        }
-      `}</style>
     </Layout>
   );
 };

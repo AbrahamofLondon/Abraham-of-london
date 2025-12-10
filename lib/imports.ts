@@ -1,11 +1,10 @@
-// lib/imports.ts - FIXED VERSION (no duplicate exports)
+// lib/imports.ts - CORRECTED VERSION
 // Centralized imports for Abraham of London
 
 // =============================================================================
 // SITE CONFIGURATION - VALUES from siteConfig
 // =============================================================================
 
-// Export all site configuration VALUES from siteConfig
 export {
   siteConfig,
   getPageTitle,
@@ -22,7 +21,7 @@ export {
   brand,
   routes,
   ventures,
-  socialLinks,           // VALUE: Array of social link objects
+  socialLinks,
   brandConfig,
   siteRoutes,
   siteVentures
@@ -32,24 +31,20 @@ export {
 // SITE CONFIGURATION - TYPES from siteConfig
 // =============================================================================
 
-// Export types defined IN siteConfig.ts
 export type {
   FullSiteConfig,
   Venture,
   RouteConfig,
   RouteId,
   BrandConfig
-  // Note: SocialLink type is NOT here - it comes from @/types/config
 } from "./siteConfig";
 
 // =============================================================================
 // SITE CONFIGURATION - TYPES from @/types/config
 // =============================================================================
 
-// Export additional types from your types file
 export type {
-  // SiteConfig type is already exported from ./siteConfig above
-  SocialLink,          // TYPE: SocialLink interface
+  SocialLink,
   ContactInfo,
   SEOConfig,
   SocialPlatform,
@@ -59,7 +54,6 @@ export type {
   SiteConfigValidation
 } from "@/types/config";
 
-// Export default social links (VALUE)
 export { defaultSocialLinks } from "@/types/config";
 
 // =============================================================================
@@ -120,11 +114,11 @@ export {
 } from "@/components/Cards";
 
 // =============================================================================
-// CARD SYSTEM - TYPES - UPDATED (PostLike is now available in Cards)
+// CARD SYSTEM - TYPES
 // =============================================================================
 
 export type {
-  PostLike,           // Now exported from Cards/index.tsx
+  PostLike,
   BaseCardProps,
   DocumentCardProps,
   BookCardProps,
@@ -134,40 +128,47 @@ export type {
 } from "@/components/Cards";
 
 // =============================================================================
-// CONTENTLAYER/MDX EXPORTS
+// CONTENTLAYER EXPORTS - CORRECTED
 // =============================================================================
 
-// Export from mdx.ts for content handling
-export type { PostDocument } from "./mdx";
-export { getAllContent, getContentBySlug } from "./mdx";
-
-// Export from contentlayer-helper
 export {
   getAllContentlayerDocs,
-  getContentlayerDocBySlug,
-  getPublishedDocuments,
-  getDocumentBySlug,
-  getFeaturedDocuments,
-  isContentlayerLoaded,
+  getPublishedPosts,
+  getPublishedShorts,
+  getShortBySlug,
+  getCardPropsForDocument,
+  getAllBooks,
+  getAllDownloads,
+  getAllEvents,
+  getAllPrints,
+  getAllResources,
+  getAllCanons,
+  getAllStrategies,
+  isBook,
+  isCanon,
+  isDownload,
+  isEvent,
+  isPost,
+  isPrint,
+  isResource,
+  isShort,
+  isStrategy,
 } from "./contentlayer-helper";
 
 export type {
-  ContentlayerDocument,
-  PostDocument as ContentlayerPostDocument,
-  BookDocument,
-  CanonDocument,
+  AnyDoc,
+  ContentlayerCardProps,
 } from "./contentlayer-helper";
 
 // =============================================================================
+// MDX EXPORTS
+// =============================================================================
+
+export type { PostDocument } from "./mdx";
+export { getAllContent, getContentBySlug } from "./mdx";
+
+// =============================================================================
 // ADDITIONAL UTILITY EXPORTS
-// =============================================================================
-
-// Optional: Export commonly used utilities from other files
-// export { formatDate, truncateText, slugify } from "./string-utils";
-// export { isServer, isClient, isProduction } from "./env-utils";
-
-// =============================================================================
-// RE-EXPORT FOR BACKWARD COMPATIBILITY
 // =============================================================================
 
 // Re-export PostMeta from types/post for compatibility
@@ -175,7 +176,3 @@ export type { PostMeta } from "@/types/post";
 
 // Re-export common React utilities if needed
 export type { FC, ReactNode, ComponentProps } from "react";
-
-// =============================================================================
-// REMOVED DUPLICATE EXPORTS - Lines 182-183 were duplicates
-// =============================================================================
