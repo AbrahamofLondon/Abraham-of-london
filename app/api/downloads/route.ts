@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 // Use a RELATIVE import so we completely bypass the "@/lib" alias here
-import { allDownloads } from "../../../lib/contentlayer-helper";
+import { getAllDownloads } from '../../../lib/contentlayer-helper';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -104,7 +104,7 @@ export async function GET(
   // Single download
   if (slugParam && typeof slugParam === "string") {
     const slug = slugParam.trim();
-    const found = allDownloads.find((d) => d.slug === slug) as
+    const found = getallDownloads.find((d) => d.slug === slug) as
       | DownloadDocument
       | undefined;
 

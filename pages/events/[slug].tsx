@@ -9,10 +9,7 @@ import type {
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
-import {
-  allEvents,
-  type EventDocument as Event,
-} from "@/lib/contentlayer-helper";
+import { getAllEvents } from '@/lib/contentlayer-helper';
 
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
@@ -41,7 +38,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = params?.slug as string;
 
-  const event = (allEvents as Event[]).find((e) => e.slug === slug);
+  const event = (getallEvents as Event[]).find((e) => e.slug === slug);
 
   if (!event) {
     return {
