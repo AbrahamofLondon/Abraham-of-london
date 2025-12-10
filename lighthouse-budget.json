@@ -1,0 +1,33 @@
+{
+  "performance": 90,
+  "accessibility": 95,
+  "best-practices": 90,
+  "seo": 90,
+  "pwa": 70,
+  "budgets": [
+    {
+      "resourceType": "document",
+      "budget": 15
+    },
+    {
+      "resourceType": "script",
+      "budget": 150
+    },
+    {
+      "resourceType": "stylesheet",
+      "budget": 15
+    },
+    {
+      "resourceType": "image",
+      "budget": 70
+    },
+    {
+      "resourceType": "font",
+      "budget": 30
+    },
+    {
+      "resourceType": "total",
+      "budget": 300
+    }
+  ]
+}

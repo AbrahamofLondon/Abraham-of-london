@@ -1,0 +1,314 @@
+name: Uptime, Headers, E2E & PageSpeed
+
+on:
+  workflow_dispatch:
+    inputs:
+      use_preview:
+        description: "Use latest Netlify preview deploy URL"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      preview_branch:
+        description: "Restrict to this branch’s latest preview (optional)"
+        required: false
+        default: ""
+        type: string
+      pr_number:
+        description: "Restrict to this PR number’s latest preview (optional)"
+        required: false
+        default: ""
+        type: string
+      abort_if_missing_preview:
+        description: "Fail if preview URL cannot be resolved"
+        required: false
+        default: "true"
+        type: choice
+        options: ["false", "true"]
+      base_url:
+        description: "Base URL when not using preview (or fallback)"
+        required: false
+        default: "https://www.abrahamoflondon.org"
+        type: string
+      run_pagespeed:
+        description: "Also run Lighthouse/PageSpeed"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+  schedule:
+    - cron: "*/30 * * * *"
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+  NODE_VERSION: "20"
+
+concurrency:
+  group: uptime-and-e2e-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resolve-base-url:
+    runs-on: ubuntu-latest
+    outputs:
+      BASE_URL: ${{ steps.resolve.outputs.BASE_URL }}
+      USED_PREVIEW: ${{ steps.resolve.outputs.USED_PREVIEW }}
+      USED_BRANCH: ${{ steps.resolve.outputs.USED_BRANCH }}
+      USED_PR: ${{ steps.resolve.outputs.USED_PR }}
+      PROD_URL: ${{ steps.resolve.outputs.PROD_URL }}
+      RUN_PAGESPEED: ${{ steps.resolve.outputs.RUN_PAGESPEED }}
+    steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Decide BASE_URLs (prod/preview), branch/PR filters, abort policy
+        id: resolve
+        env:
+          USE_PREVIEW: ${{ github.event.inputs.use_preview || 'false' }}
+          PREVIEW_BRANCH: ${{ github.event.inputs.preview_branch || '' }}
+          PR_NUMBER: ${{ github.event.inputs.pr_number || '' }}
+          ABORT_IF_MISSING: ${{ github.event.inputs.abort_if_missing_preview || 'true' }}
+          FALLBACK_URL: ${{ github.event.inputs.base_url || 'https://www.abrahamoflondon.org' }}
+          RUN_PAGESPEED: ${{ github.event.inputs.run_pagespeed || 'false' }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          set -euo pipefail
+          echo "PROD_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
+
+          use_preview="${USE_PREVIEW}"
+          preview_branch="${PREVIEW_BRANCH}"
+          pr_number="${PR_NUMBER}"
+          abort_missing="${ABORT_IF_MISSING}"
+
+          if [ "$use_preview" = "true" ]; then
+            if [ -z "${NETLIFY_AUTH_TOKEN:-}" ] || [ -z "${NETLIFY_SITE_ID:-}" ]; then
+              echo "❌ Missing NETLIFY_* secrets while use_preview=true."
+              if [ "$abort_missing" = "true" ]; then exit 1; fi
+              echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
+              echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
+              echo "USED_BRANCH=" >> "$GITHUB_OUTPUT"
+              echo "USED_PR=" >> "$GITHUB_OUTPUT"
+              echo "RUN_PAGESPEED=${RUN_PAGESPEED}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            api="https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys?state=ready&context=deploy-preview&per_page=50"
+            json="$(curl -fsSL -H "Authorization: Bearer ${NETLIFY_AUTH_TOKEN}" "$api" || true)"
+            if [ -z "$json" ] || [ "$json" = "[]" ]; then
+              echo "⚠️ No ready previews."
+              if [ "$abort_missing" = "true" ]; then exit 1; fi
+              echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
+              echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
+              echo "USED_BRANCH=" >> "$GITHUB_OUTPUT"
+              echo "USED_PR=" >> "$GITHUB_OUTPUT"
+              echo "RUN_PAGESPEED=${RUN_PAGESPEED}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            jq_filter='.[] | select(.deploy_url != null)'
+            if [ -n "$preview_branch" ]; then
+              jq_filter="$jq_filter | select(.branch == \"$preview_branch\")"
+            fi
+            if [ -n "$pr_number" ]; then
+              jq_filter="$jq_filter | select(.deploy_url | test(\"deploy-preview-$pr_number--\"))"
+            fi
+            selection="$(printf '%s' "$json" | jq -r "[$jq_filter] | sort_by(.created_at) | reverse | .[0] // empty")"
+            deploy_url="$(printf '%s' "$selection" | jq -r '.deploy_url // empty')"
+            branch_used="$(printf '%s' "$selection" | jq -r '.branch // empty')"
+            if [ -n "$deploy_url" ]; then
+              echo "Using preview: $deploy_url (branch=${branch_used:-?}, pr=${pr_number:-any})"
+              echo "BASE_URL=${deploy_url}" >> "$GITHUB_OUTPUT"
+              echo "USED_PREVIEW=true" >> "$GITHUB_OUTPUT"
+              echo "USED_BRANCH=${branch_used}" >> "$GITHUB_OUTPUT"
+              echo "USED_PR=${pr_number}" >> "$GITHUB_OUTPUT"
+            else
+              echo "⚠️ No matching preview found."
+              if [ "$abort_missing" = "true" ]; then exit 1; fi
+              echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
+              echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
+              echo "USED_BRANCH=${preview_branch}" >> "$GITHUB_OUTPUT"
+              echo "USED_PR=${pr_number}" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
+            echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
+            echo "USED_BRANCH=" >> "$GITHUB_OUTPUT"
+            echo "USED_PR=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "RUN_PAGESPEED=${RUN_PAGESPEED}" >> "$GITHUB_OUTPUT"
+
+      - name: Write summary
+        run: |
+          {
+            echo "### Target Resolution"
+            echo ""
+            echo "| Key | Value |"
+            echo "| --- | ----- |"
+            echo "| PROD_URL | ${{ steps.resolve.outputs.PROD_URL }} |"
+            echo "| PREVIEW_URL | ${{ steps.resolve.outputs.BASE_URL }} |"
+            echo "| USED_PREVIEW | ${{ steps.resolve.outputs.USED_PREVIEW }} |"
+            echo "| USED_BRANCH | ${{ steps.resolve.outputs.USED_BRANCH }} |"
+            echo "| USED_PR | ${{ steps.resolve.outputs.USED_PR }} |"
+            echo "| RUN_PAGESPEED | ${{ steps.resolve.outputs.RUN_PAGESPEED }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  probe_prod:
+    needs: [resolve-base-url]
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ needs.resolve-base-url.outputs.PROD_URL }}
+    steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Health 200 + no-store
+        run: |
+          set -euo pipefail
+          resp="$(curl -fsS -i "$BASE_URL/api/health")"
+          code="$(printf '%s' "$resp" | head -n1 | awk '{print $2}')"
+          cache="$(printf '%s' "$resp" | awk 'BEGIN{IGNORECASE=1}/^Cache-Control:/ {sub(/\r/,""); $1=""; print tolower($0)}')"
+          test "$code" = "200"
+          echo "$cache" | grep -qi "no-store"
+      - name: /assets/sample.txt has 7d cache
+        run: |
+          set -euo pipefail
+          resp="$(curl -fsS -I "$BASE_URL/assets/sample.txt")"
+          cache="$(printf '%s' "$resp" | awk 'BEGIN{IGNORECASE=1}/^Cache-Control:/ {sub(/\r/,""); $1=""; print tolower($0)}')"
+          echo "$cache" | grep -qi "max-age=604800"
+      - name: legacy PDF alias is no-store
+        run: |
+          set -euo pipefail
+          resp="$(curl -fsS -I "$BASE_URL/downloads/fathering-without-fear.pdf")"
+          cache="$(printf '%s' "$resp" | awk 'BEGIN{IGNORECASE=1}/^Cache-Control:/ {sub(/\r/,""); $1=""; print tolower($0)}')"
+          echo "$cache" | grep -qi "no-store"
+
+  e2e_prod:
+    needs: [probe_prod, resolve-base-url]
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ needs.resolve-base-url.outputs.PROD_URL }}
+      PLAYWRIGHT_BROWSERS_PATH: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm dlx playwright install --with-deps
+      - name: Run E2E (PROD)
+        run: pnpm run test:e2e
+      - name: Upload Playwright report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-prod
+          path: playwright-report
+          retention-days: 7
+
+  probe_preview:
+    needs: [resolve-base-url]
+    if: needs.resolve-base-url.outputs.USED_PREVIEW == 'true'
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ needs.resolve-base-url.outputs.BASE_URL }}
+    steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Health 200 + no-store
+        run: |
+          set -euo pipefail
+          resp="$(curl -fsS -i "$BASE_URL/api/health")"
+          code="$(printf '%s' "$resp" | head -n1 | awk '{print $2}')"
+          cache="$(printf '%s' "$resp" | awk 'BEGIN{IGNORECASE=1}/^Cache-Control:/ {sub(/\r/,""); $1=""; print tolower($0)}')"
+          test "$code" = "200"
+          echo "$cache" | grep -qi "no-store"
+      - name: /assets/sample.txt has 7d cache
+        run: |
+          set -euo pipefail
+          resp="$(curl -fsS -I "$BASE_URL/assets/sample.txt")"
+          cache="$(printf '%s' "$resp" | awk 'BEGIN{IGNORECASE=1}/^Cache-Control:/ {sub(/\r/,""); $1=""; print tolower($0)}')"
+          echo "$cache" | grep -qi "max-age=604800"
+      - name: legacy PDF alias is no-store
+        run: |
+          set -euo pipefail
+          resp="$(curl -fsS -I "$BASE_URL/downloads/fathering-without-fear.pdf")"
+          cache="$(printf '%s' "$resp" | awk 'BEGIN{IGNORECASE=1}/^Cache-Control:/ {sub(/\r/,""); $1=""; print tolower($0)}')"
+          echo "$cache" | grep -qi "no-store"
+
+  e2e_preview:
+    needs: [probe_preview, resolve-base-url]
+    if: needs.resolve-base-url.outputs.USED_PREVIEW == 'true'
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ needs.resolve-base-url.outputs.BASE_URL }}
+      PLAYWRIGHT_BROWSERS_PATH: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm dlx playwright install --with-deps
+      - name: Run E2E (PREVIEW)
+        run: pnpm run test:e2e
+      - name: Upload Playwright report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-preview
+          path: playwright-report
+          retention-days: 7
+
+  pagespeed_prod:
+    needs: [resolve-base-url, e2e_prod]
+    if: needs.resolve-base-url.outputs.RUN_PAGESPEED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: PageSpeed on PROD
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            ${{ needs.resolve-base-url.outputs.PROD_URL }}/
+            ${{ needs.resolve-base-url.outputs.PROD_URL }}/downloads
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  pagespeed_preview:
+    needs: [resolve-base-url, e2e_preview]
+    if: needs.resolve-base-url.outputs.RUN_PAGESPEED == 'true' && needs.resolve-base-url.outputs.USED_PREVIEW == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: PageSpeed on PREVIEW
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            ${{ needs.resolve-base-url.outputs.BASE_URL }}/
+            ${{ needs.resolve-base-url.outputs.BASE_URL }}/downloads
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  notify:
+    name: Notify (Slack/Discord)
+    needs:
+      - resolve-base-url
+      - probe_prod
+      - e2e_prod
+      - probe_preview
+      - e2e_preview
+      - pagespeed_prod
+      - pagespeed_preview
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compose & print summary
+        run: |
+          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_STEP_SUMMARY"

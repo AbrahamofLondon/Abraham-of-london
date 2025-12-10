@@ -1,0 +1,53 @@
+name: TW Autofix (manual)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  tw-autofix:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Prettier write (code + content only)
+        run: |
+          pnpm dlx prettier \
+            "app/**/*.{js,jsx,ts,tsx,css,scss,md,mdx}" \
+            "pages/**/*.{js,jsx,ts,tsx,css,scss,md,mdx}" \
+            "components/**/*.{js,jsx,ts,tsx,css,scss,md,mdx}" \
+            "lib/**/*.{js,jsx,ts,tsx,md,mdx}" \
+            "content/**/*.{md,mdx}" \
+            --write
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: formatting (prettier + tailwind) [skip ci]"
+            git push
+          else
+            echo "No changes."
+          fi

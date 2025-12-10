@@ -1,0 +1,12 @@
+{
+  "reject": [
+    "@types/react",
+    "@types/react-dom",
+    "react",
+    "react-dom",
+    "typescript"
+  ],
+  "deprecated": false,
+  "upgrade": true,
+  "target": "minor"
+}

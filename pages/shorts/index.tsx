@@ -28,7 +28,7 @@ import {
 
 import Layout from "@/components/Layout";
 import { getPublishedShorts } from "@/lib/contentlayer-helper";
-import type { Short } from "contentlayer/generated";
+import type { Short } from "contentlayer2/generated";
 
 type ShortsIndexProps = {
   shorts: Short[];

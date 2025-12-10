@@ -1,0 +1,161 @@
+// src/components/Navbar.tsx
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { motion, AnimatePresence } from "framer-motion";
+
+type NavLink = {
+  name: string;
+  href: string;
+};
+
+const NAV_LINKS: NavLink[] = [
+  { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
+  { name: "Books", href: "/books" },
+  { name: "Blog", href: "/blog" },
+  { name: "Contact", href: "/contact" },
+];
+
+export default function Navbar(): JSX.Element {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const router = useRouter();
+
+  const toggleMenu = () => setIsOpen((prev) => !prev);
+
+  const isActive = (href: string) => {
+    if (href === "/") return router.pathname === "/";
+    return router.pathname.startsWith(href);
+  };
+
+  return (
+    <motion.nav
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="fixed inset-x-0 top-0 z-50 bg-neutral-dark/90 backdrop-blur-sm shadow-lg py-4"
+      aria-label="Primary"
+    >
+      <div className="container-custom flex items-center justify-between">
+        {/* Logo / Brand */}
+        <Link
+          href="/"
+          className="flex items-center space-x-2 text-2xl font-serif font-bold text-deep-gold transition-colors duration-200 hover:text-warm-gold"
+        >
+          <Image
+            src="/logo-placeholder.png" // swap to your real logo when ready
+            alt="Fathering Without Fear Logo"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
+          <span>Fathering Without Fear</span>
+        </Link>
+
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center space-x-8">
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={[
+                  "text-lg font-sans transition-colors duration-200",
+                  active
+                    ? "text-warm-gold"
+                    : "text-off-white hover:text-warm-gold",
+                ].join(" ")}
+                aria-current={active ? "page" : undefined}
+              >
+                {link.name}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button
+            type="button"
+            onClick={toggleMenu}
+            className="rounded p-2 text-off-white transition-colors duration-200 hover:text-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold"
+            aria-label="Toggle navigation"
+            aria-expanded={isOpen}
+          >
+            {isOpen ? (
+              <svg
+                className="h-8 w-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="h-8 w-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16m-7 6h7"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="mobile-nav"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden border-t border-deep-navy/50 bg-neutral-dark pt-4 pb-8"
+          >
+            <div className="flex flex-col items-center space-y-6">
+              {NAV_LINKS.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={toggleMenu}
+                    className={[
+                      "py-2 text-xl font-sans transition-colors duration-200",
+                      active
+                        ? "text-warm-gold"
+                        : "text-off-white hover:text-warm-gold",
+                    ].join(" ")}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
+  );
+}

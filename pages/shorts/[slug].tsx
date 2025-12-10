@@ -2,12 +2,11 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useMDXComponent } from "next-contentlayer/hooks";
+import { useMDXComponent } from "next-contentlayer2/hooks";
 
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
 import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
-import type { Short } from "contentlayer/generated";
+import type { Short } from "contentlayer2/generated";
 
 type ShortPageProps = {
   short: Short;

@@ -1,0 +1,740 @@
+// components/Cards/index.tsx
+/**
+ * Unified Card Components System
+ * 
+ * Provides a consistent, accessible, and performant card system
+ * with luxury/intellectual aesthetics and robust error handling.
+ */
+
+export { default as BookCard } from '../books/BookCard';
+export { default as BlogPostCard } from '../BlogPostCard';
+export { default as CanonResourceCard } from '../canon/CanonResourceCard';
+export { default as ArticleHero } from '../ArticleHero';
+
+/* -------------------------------------------------------------------------- */
+/* CORE TYPES                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Base properties shared across all card components
+ */
+export interface BaseCardProps {
+  /** Unique identifier for the card */
+  _id?: string;
+  /** URL-friendly identifier */
+  slug?: string;
+  /** Primary title/headline */
+  title: string;
+  /** Subtitle or short description */
+  subtitle?: string | null;
+  /** Full description or excerpt */
+  description?: string | null;
+  /** Excerpt for preview cards */
+  excerpt?: string | null;
+  /** Cover image URL */
+  coverImage?: string | null;
+  /** Alternative image sources */
+  heroImage?: string | null;
+  /** Additional image URL */
+  image?: string | null;
+  /** Publication/posting date */
+  date?: string | null;
+  /** Estimated reading time */
+  readTime?: string | number | null;
+  /** Content tags */
+  tags?: string[] | null;
+  /** Content category */
+  category?: string | null;
+  /** Author information */
+  author?: string | { name?: string | null; picture?: string | null } | null;
+  /** Publication status */
+  status?: 'published' | 'draft' | 'scheduled' | 'archived';
+  /** Whether this is featured content */
+  featured?: boolean;
+  /** Priority loading for above-fold content */
+  priority?: boolean;
+  /** Access level for gated content */
+  accessLevel?: 'public' | 'inner-circle';
+}
+
+/**
+ * Book-specific card properties
+ */
+export interface BookCardProps extends BaseCardProps {
+  /** Book format (hardcover, paperback, etc.) */
+  format?: string | null;
+  /** Publisher information */
+  publisher?: string | null;
+  /** Original publication date */
+  publishedDate?: string | null;
+  /** Number of pages */
+  pages?: number | null;
+  /** ISBN identifier */
+  isbn?: string | null;
+  /** Volume number for series */
+  volumeNumber?: string | null;
+}
+
+/**
+ * Canon-specific card properties
+ */
+export interface CanonCardProps extends BaseCardProps {
+  /** Canon volume label */
+  label?: string | null;
+  /** Volume number */
+  volumeNumber?: string | null;
+}
+
+/**
+ * Blog post-specific card properties
+ */
+export interface BlogPostCardProps extends BaseCardProps {
+  /** No additional unique properties currently */
+}
+
+/**
+ * Hero-specific card properties
+ */
+export interface HeroCardProps extends BaseCardProps {
+  /** Cover aspect ratio */
+  coverAspect?: 'book' | 'square' | 'landscape' | 'portrait';
+  /** Image fit mode */
+  coverFit?: 'cover' | 'contain';
+}
+
+/* -------------------------------------------------------------------------- */
+/* CARD COMPONENT PROPS                                                       */
+/* -------------------------------------------------------------------------- */
+
+export interface CardComponentProps<T extends BaseCardProps = BaseCardProps> {
+  /** The data object to display */
+  data: T;
+  /** Optional custom href (defaults to /[type]/[slug]) */
+  href?: string;
+  /** Visual size variant */
+  size?: 'compact' | 'default' | 'featured' | 'hero';
+  /** Whether to show category badge */
+  showCategory?: boolean;
+  /** Whether to show author info */
+  showAuthor?: boolean;
+  /** Whether to show tags */
+  showTags?: boolean;
+  /** Additional CSS classes */
+  className?: string;
+  /** Whether card is visually highlighted */
+  highlight?: boolean;
+  /** Loading priority for images */
+  priority?: boolean;
+}
+
+/* -------------------------------------------------------------------------- */
+/* STYLING CONSTANTS                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Color palette for consistent theming
+ */
+export const CARD_COLORS = {
+  // Primary brand colors
+  primary: {
+    light: '#D6B26A', // softGold
+    DEFAULT: '#B89446', // gold
+    dark: '#9A7A38', // darkGold
+  },
+  // Secondary brand colors
+  secondary: {
+    light: '#0b2e1f', // forest light
+    DEFAULT: '#083020', // forest
+    dark: '#052115', // darkForest
+  },
+  // Neutral colors
+  neutral: {
+    50: '#F9FAFB',
+    100: '#F3F4F6',
+    200: '#E5E7EB',
+    300: '#D1D5DB',
+    400: '#9CA3AF',
+    500: '#6B7280',
+    600: '#4B5563',
+    700: '#374151',
+    800: '#1F2937',
+    900: '#111827',
+  },
+  // Status colors
+  status: {
+    draft: {
+      bg: '#F3F4F6',
+      text: '#374151',
+      border: '#D1D5DB',
+    },
+    scheduled: {
+      bg: '#DBEAFE',
+      text: '#1E40AF',
+      border: '#93C5FD',
+    },
+    published: {
+      bg: '#D1FAE5',
+      text: '#065F46',
+      border: '#A7F3D0',
+    },
+    archived: {
+      bg: '#FEF3C7',
+      text: '#92400E',
+      border: '#FDE68A',
+    },
+  },
+} as const;
+
+/**
+ * Size-based styling configurations
+ */
+export const CARD_SIZES = {
+  compact: {
+    container: 'rounded-2xl',
+    title: 'text-lg md:text-xl',
+    content: 'p-4',
+    image: 'aspect-[16/9]',
+    excerpt: 'line-clamp-2 text-sm',
+    meta: 'text-xs',
+  },
+  default: {
+    container: 'rounded-3xl',
+    title: 'text-xl md:text-2xl',
+    content: 'p-6',
+    image: 'aspect-[16/9]',
+    excerpt: 'line-clamp-3',
+    meta: 'text-sm',
+  },
+  featured: {
+    container: 'rounded-4xl',
+    title: 'text-2xl md:text-3xl lg:text-4xl',
+    content: 'p-8',
+    image: 'aspect-[16/10]',
+    excerpt: 'line-clamp-4 text-base',
+    meta: 'text-base',
+  },
+  hero: {
+    container: 'rounded-4xl',
+    title: 'text-3xl md:text-4xl lg:text-5xl',
+    content: 'p-10',
+    image: 'aspect-[21/9]',
+    excerpt: 'line-clamp-5 text-lg',
+    meta: 'text-base',
+  },
+} as const;
+
+/**
+ * Animation and transition constants
+ */
+export const CARD_ANIMATIONS = {
+  hover: {
+    translate: '-translate-y-1',
+    shadow: 'shadow-2xl',
+    scale: 'scale-[1.02]',
+  },
+  transition: 'transition-all duration-300 ease-out',
+  glow: {
+    base: 'shadow-lg shadow-black/10',
+    hover: 'shadow-xl shadow-primary/20',
+  },
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* UTILITY FUNCTIONS                                                          */
+/* -------------------------------------------------------------------------- */
+
+import { getSafeImageProps, createFallbackSequence } from '@/lib/image-utils';
+import { safeString } from '@/lib/utils';
+
+/**
+ * Safely extracts image URL from card data
+ */
+export function getCardImage(data: BaseCardProps): string | null {
+  const sources = [data.coverImage, data.heroImage, data.image];
+  for (const src of sources) {
+    if (src && typeof src === 'string' && src.trim().length > 0) {
+      return src.trim();
+    }
+  }
+  return null;
+}
+
+/**
+ * Determines appropriate fallback configuration based on card data
+ */
+export function getCardFallbackConfig(data: BaseCardProps) {
+  // Determine content type based on available properties
+  let type: 'book' | 'post' | 'project' | 'avatar' = 'post';
+  
+  if ('format' in data && data.format) type = 'book';
+  if ('volumeNumber' in data && data.volumeNumber) type = 'book';
+  if ('publisher' in data && data.publisher) type = 'book';
+  if ('isbn' in data && data.isbn) type = 'book';
+  
+  // Determine theme based on category/tags
+  let theme: 'light' | 'dark' | 'gradient' = 'gradient';
+  if (data.category?.toLowerCase().includes('philosophy')) theme = 'dark';
+  if (data.category?.toLowerCase().includes('business')) theme = 'light';
+  
+  // Determine category for fallback images
+  let category = 'default';
+  if (data.category) {
+    const cat = data.category.toLowerCase();
+    if (cat.includes('essay')) category = 'essay';
+    else if (cat.includes('article')) category = 'article';
+    else if (cat.includes('thought')) category = 'thought';
+    else if (cat.includes('philosophy')) category = 'philosophy';
+    else if (cat.includes('fiction')) category = 'fiction';
+    else if (cat.includes('non-fiction') || cat.includes('nonfiction')) category = 'nonFiction';
+    else if (cat.includes('business')) category = 'business';
+    else category = cat;
+  }
+
+  return { type, theme, category };
+}
+
+/**
+ * Formats date for display
+ */
+export function formatCardDate(dateString?: string | null): string {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return '';
+    
+    return date.toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Formats reading time for display
+ */
+export function formatReadTime(readTime?: string | number | null): string {
+  if (!readTime) return '';
+  
+  if (typeof readTime === 'number') {
+    return `${readTime} min read`;
+  }
+  
+  if (typeof readTime === 'string') {
+    if (readTime.includes('min')) return readTime;
+    const num = parseInt(readTime);
+    if (!isNaN(num)) return `${num} min read`;
+    return readTime;
+  }
+  
+  return '';
+}
+
+/**
+ * Gets author name from card data
+ */
+export function getAuthorName(author?: BaseCardProps['author']): string {
+  if (typeof author === 'string') return author;
+  if (author && typeof author === 'object' && author.name) {
+    return safeString(author.name, 'Abraham of London');
+  }
+  return 'Abraham of London';
+}
+
+/**
+ * Gets author picture URL from card data
+ */
+export function getAuthorPicture(
+  author?: BaseCardProps['author'],
+  fallback?: string
+): string {
+  const defaultFallback = '/assets/images/profile-portrait.webp';
+  
+  if (author && typeof author === 'object' && author.picture) {
+    return safeString(author.picture, fallback || defaultFallback);
+  }
+  
+  return fallback || defaultFallback;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ACCESSIBILITY UTILITIES                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Gets ARIA label for a card
+ */
+export function getCardAriaLabel(data: BaseCardProps): string {
+  const title = safeString(data.title, 'Untitled');
+  const author = getAuthorName(data.author);
+  const date = formatCardDate(data.date);
+  
+  let label = title;
+  if (author) label += ` by ${author}`;
+  if (date) label += `, published ${date}`;
+  if (data.readTime) label += `, ${formatReadTime(data.readTime)}`;
+  
+  return label;
+}
+
+/**
+ * Gets ARIA description for a card
+ */
+export function getCardAriaDescription(data: BaseCardProps): string {
+  const description = safeString(data.description || data.excerpt, '');
+  if (description) return description;
+  
+  // Fallback description based on content type
+  if ('format' in data) return 'A book available for reading';
+  if ('volumeNumber' in data) return 'A volume from the canon collection';
+  return 'An article or piece of content';
+}
+
+/* -------------------------------------------------------------------------- */
+/* BASE CARD COMPONENT                                                        */
+/* -------------------------------------------------------------------------- */
+
+import Link from 'next/link';
+import Image from 'next/image';
+import { useState, useMemo } from 'react';
+
+/**
+ * Base card component with shared functionality
+ * This is an internal component - specific cards should extend or compose with this
+ */
+export function BaseCard({
+  data,
+  href,
+  size = 'default',
+  showCategory = true,
+  showAuthor = true,
+  showTags = true,
+  className = '',
+  highlight = false,
+  priority = false,
+  children,
+}: CardComponentProps & { children?: React.ReactNode }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [fallbackIndex, setFallbackIndex] = useState(0);
+  
+  // Extract and normalize data
+  const safeTitle = safeString(data.title, 'Untitled');
+  const safeSlug = safeString(data.slug);
+  const safeExcerpt = safeString(data.excerpt || data.description, '');
+  const safeDate = formatCardDate(data.date);
+  const safeReadTime = formatReadTime(data.readTime);
+  const safeAuthorName = getAuthorName(data.author);
+  const safeAuthorPicture = getAuthorPicture(data.author);
+  
+  // Generate href if not provided
+  const targetHref = href || (safeSlug ? `/${safeSlug}` : '#');
+  
+  // Get fallback configuration
+  const fallbackConfig = useMemo(() => 
+    getCardFallbackConfig(data), 
+    [data]
+  );
+  
+  // Create fallback sequence
+  const fallbackSequence = useMemo(() => {
+    const mainImage = getCardImage(data);
+    const sequence: string[] = [];
+    
+    if (mainImage) {
+      sequence.push(mainImage);
+    }
+    
+    // Add intelligent fallbacks
+    const seed = `${data.slug || ''}${data.title || ''}${data._id || ''}`;
+    const additionalFallbacks = createFallbackSequence(seed, fallbackConfig);
+    
+    return [...sequence, ...additionalFallbacks];
+  }, [data, fallbackConfig]);
+  
+  // Get current image URL
+  const currentImage = fallbackSequence[Math.min(fallbackIndex, fallbackSequence.length - 1)];
+  
+  // Get safe image props
+  const imageProps = getSafeImageProps(currentImage, safeTitle, {
+    priority,
+    fallbackConfig,
+  });
+  
+  // Get size classes
+  const sizeClass = CARD_SIZES[size];
+  
+  // Handle image events
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageError(false);
+  };
+  
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(false);
+    if (fallbackIndex < fallbackSequence.length - 1) {
+      setFallbackIndex(prev => prev + 1);
+    }
+  };
+  
+  // ARIA attributes
+  const ariaLabel = getCardAriaLabel(data);
+  const ariaDescription = getCardAriaDescription(data);
+  
+  return (
+    <article
+      className={`
+        group relative overflow-hidden
+        bg-white/95 backdrop-blur-sm
+        border border-white/20
+        ${sizeClass.container}
+        ${CARD_ANIMATIONS.transition}
+        ${CARD_ANIMATIONS.glow.base}
+        hover:${CARD_ANIMATIONS.hover.translate}
+        hover:${CARD_ANIMATIONS.glow.hover}
+        ${highlight ? 'ring-2 ring-primary/30' : ''}
+        ${className}
+      `}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescription ? undefined : undefined}
+    >
+      {/* Background glow effect */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-br from-white via-gray-50/80 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        aria-hidden="true"
+      />
+      
+      {/* Animated border glow */}
+      <div 
+        className={`absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${sizeClass.container}`}
+        aria-hidden="true"
+      />
+      
+      <Link
+        href={targetHref}
+        className="block relative z-10 h-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        prefetch={false}
+        aria-label={`Read more about ${safeTitle}`}
+      >
+        <div className="flex h-full flex-col">
+          {/* Image section */}
+          {imageProps.src && (
+            <div className={`relative w-full overflow-hidden ${sizeClass.image}`}>
+              {/* Gradient overlays */}
+              <div 
+                className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-60"
+                aria-hidden="true"
+              />
+              <div 
+                className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                aria-hidden="true"
+              />
+              
+              {/* Loading state */}
+              {!imageLoaded && !imageError && (
+                <div 
+                  className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200"
+                  aria-hidden="true"
+                />
+              )}
+              
+              {/* Main image */}
+              <Image
+                src={imageProps.src}
+                alt={imageProps.alt}
+                fill
+                className={`
+                  object-cover transition-all duration-700
+                  ${imageLoaded ? 'opacity-100 group-hover:scale-105' : 'opacity-0'}
+                `}
+                sizes="(min-width: 1024px) 600px, (min-width: 768px) 400px, 100vw"
+                priority={imageProps.priority}
+                loading={imageProps.loading}
+                onLoad={handleImageLoad}
+                onError={handleImageError}
+                quality={85}
+              />
+              
+              {/* Content badges/overlays */}
+              {children}
+            </div>
+          )}
+          
+          {/* Content section - can be customized by children */}
+          <div className={`relative flex flex-col flex-1 ${sizeClass.content}`}>
+            {/* Default content can be overridden */}
+            <h3 className={`mb-3 line-clamp-2 font-serif font-light leading-tight text-neutral-900 group-hover:text-primary transition-colors duration-300 ${sizeClass.title}`}>
+              {safeTitle}
+            </h3>
+            
+            {safeExcerpt && (
+              <p className={`mb-4 flex-1 font-light leading-relaxed text-neutral-600 ${sizeClass.excerpt}`}>
+                {safeExcerpt}
+              </p>
+            )}
+            
+            {/* Metadata section */}
+            <div className="mt-auto space-y-4">
+              {(showAuthor || safeDate || safeReadTime) && (
+                <div className="flex items-center justify-between border-t border-neutral-100/50 pt-4">
+                  {showAuthor && (
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div 
+                          className="absolute inset-0 rounded-full bg-primary/20 transform transition-transform duration-300 group-hover:scale-110"
+                          aria-hidden="true"
+                        />
+                        <Image
+                          src={safeAuthorPicture}
+                          alt={`${safeAuthorName}'s profile picture`}
+                          width={40}
+                          height={40}
+                          className="relative z-10 h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm"
+                          sizes="40px"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-neutral-900">
+                          {safeAuthorName}
+                        </span>
+                        <div className="flex items-center gap-2 text-xs text-neutral-500">
+                          {safeDate && (
+                            <time dateTime={data.date || undefined} className="font-light">
+                              {safeDate}
+                            </time>
+                          )}
+                          {safeReadTime && safeDate && (
+                            <span className="text-primary">•</span>
+                          )}
+                          {safeReadTime && (
+                            <span className="font-light">{safeReadTime}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Read more indicator */}
+                  <div 
+                    className="transform translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                    aria-hidden="true"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
+                      <svg
+                        className="h-4 w-4 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 8l4 4m0 0l-4 4m4-4H3"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Tags section */}
+              {showTags && data.tags && data.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {data.tags
+                    .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
+                    .slice(0, 3)
+                    .map((tag, index) => (
+                      <span
+                        key={`${tag}-${index}`}
+                        className="rounded-full border border-neutral-200/50 bg-neutral-100/80 px-2 py-1 text-xs font-light text-neutral-600 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:bg-primary/10 hover:text-primary"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  {data.tags.length > 3 && (
+                    <span className="rounded-full border border-neutral-200/50 bg-neutral-100/80 px-2 py-1 text-xs font-light text-neutral-500 backdrop-blur-sm">
+                      +{data.tags.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Animated bottom border */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-1 origin-left transform scale-x-0 bg-gradient-to-r from-primary/0 via-primary to-secondary/0 transition-transform duration-500 group-hover:scale-x-100"
+          aria-hidden="true"
+        />
+      </Link>
+    </article>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* EXPORT TYPES                                                               */
+/* -------------------------------------------------------------------------- */
+
+export type {
+  BaseCardProps,
+  BookCardProps,
+  CanonCardProps,
+  BlogPostCardProps,
+  HeroCardProps,
+  CardComponentProps,
+};
+
+/* -------------------------------------------------------------------------- */
+/* RE-EXPORT UTILITIES                                                        */
+/* -------------------------------------------------------------------------- */
+
+// Note: We don't re-export siteConfig here - it belongs in lib/imports.ts
+// Card utilities should be exported separately
+export {
+  getCardImage,
+  getCardFallbackConfig,
+  formatCardDate,
+  formatReadTime,
+  getAuthorName,
+  getAuthorPicture,
+  getCardAriaLabel,
+  getCardAriaDescription,
+  CARD_COLORS,
+  CARD_SIZES,
+  CARD_ANIMATIONS,
+};
+
+/**
+ * Default export for convenience
+ * Provides a single import point for all card-related components
+ */
+export default {
+  // Components
+  BookCard,
+  BlogPostCard,
+  CanonResourceCard,
+  ArticleHero,
+  BaseCard,
+  
+  // Utilities
+  getCardImage,
+  getCardFallbackConfig,
+  formatCardDate,
+  formatReadTime,
+  getAuthorName,
+  getAuthorPicture,
+  getCardAriaLabel,
+  getCardAriaDescription,
+  
+  // Constants
+  CARD_COLORS,
+  CARD_SIZES,
+  CARD_ANIMATIONS,
+};
