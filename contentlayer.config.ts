@@ -497,10 +497,17 @@ export const Short = defineDocumentType(() => ({
     theme: { type: "string", required: false },
     audience: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    slug: { type: "string", required: false }, // fixes the "extra field slug" warnings
+    // optional front-matter slug; we'll still compute one if it's missing
+    slug: { type: "string", required: false },
+    // keep these flexible – they may exist in your mdx even if not always used
+    description: { type: "string", required: false },
     excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
     tags: { type: "list", of: { type: "string" }, required: false },
+    date: {
+      type: "date",
+      required: false,
+      default: () => new Date().toISOString().split("T")[0],
+    },
     draft: { type: "boolean", required: false },
     featured: { type: "boolean", required: false },
     accessLevel: { type: "string", required: false },
@@ -510,15 +517,13 @@ export const Short = defineDocumentType(() => ({
     slug: {
       type: "string",
       resolve: (doc) =>
-        (doc as any).slug ||
-        generateSlug(doc._raw.flattenedPath, "shorts"),
+        doc.slug || generateSlug(doc._raw.flattenedPath, "shorts"),
     },
     url: {
       type: "string",
       resolve: (doc) =>
         generateUrl(
-          (doc as any).slug ||
-            generateSlug(doc._raw.flattenedPath, "shorts"),
+          doc.slug || generateSlug(doc._raw.flattenedPath, "shorts"),
           "shorts"
         ),
     },
