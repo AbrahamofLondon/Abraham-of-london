@@ -101,12 +101,17 @@ export async function GET(
   const url = new URL(request.url);
   const slugParam = url.searchParams.get("slug");
 
+  // Get all downloads from the helper function
+  const allDownloads = getAllDownloads();
+
   // Single download
   if (slugParam && typeof slugParam === "string") {
     const slug = slugParam.trim();
-    const found = getallDownloads.find((d) => d.slug === slug) as
-      | DownloadDocument
-      | undefined;
+    const found = allDownloads.find((d) => {
+      // Try multiple ways to match slug
+      const docSlug = d.slug || (d as any)._raw?.flattenedPath?.split('/').pop();
+      return docSlug === slug;
+    }) as DownloadDocument | undefined;
 
     if (!found) {
       return NextResponse.json(
@@ -121,15 +126,8 @@ export async function GET(
     );
   }
 
-  // Full list
-  const items = allDownloads
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date((b as any).date || 0).getTime() -
-        new Date((a as any).date || 0).getTime()
-    )
-    .map((doc) => mapDownload(doc as DownloadDocument));
+  // Full list - already sorted by getAllDownloads()
+  const items = allDownloads.map((doc) => mapDownload(doc as DownloadDocument));
 
   return NextResponse.json(
     { ok: true, count: items.length, items },
@@ -150,9 +148,15 @@ export async function GET(
 export async function POST() {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
+
 export async function PUT() {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
+
 export async function DELETE() {
+  return jsonError({ ok: false, error: "Method not allowed" }, 405);
+}
+
+export async function PATCH() {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
