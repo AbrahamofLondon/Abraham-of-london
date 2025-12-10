@@ -1,16 +1,20 @@
-// pages/index.tsx – MASTER HOMEPAGE (Hero A, Ventures Narrative)
+// pages/index.tsx – MASTER HOMEPAGE (Ventures + Canon + Strategic Story)
 
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import type { NextPage, GetStaticProps } from "next";
-import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
 import { BookCard, BlogPostCard } from "@/components/Cards";
 import ShortCard from "@/components/ShortCard";
+
+import VenturesSection from "@/components/homepage/VenturesSection";
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import StatsBar from "@/components/homepage/StatsBar";
+import AboutSection from "@/components/homepage/AboutSection";
 
 import {
   getPublishedPosts,
@@ -46,35 +50,6 @@ const useDeviceType = () => {
 
   return deviceType;
 };
-
-// -----------------------------------------------------------------------------
-// Dynamic homepage sections
-// -----------------------------------------------------------------------------
-
-const VenturesSection = dynamic(
-  () => import("@/components/homepage/VenturesSection"),
-  {
-    ssr: false,
-  },
-);
-
-const StrategicFunnelStrip = dynamic(
-  () => import("@/components/homepage/StrategicFunnelStrip"),
-  {
-    ssr: false,
-  },
-);
-
-const StatsBar = dynamic(() => import("@/components/homepage/StatsBar"), {
-  ssr: false,
-});
-
-const AboutSection = dynamic(
-  () => import("@/components/homepage/AboutSection"),
-  {
-    ssr: false,
-  },
-);
 
 // -----------------------------------------------------------------------------
 // Section divider
@@ -246,7 +221,7 @@ const CanonPrimaryCard: React.FC = () => {
                   flourishing is designed, not accidental.
                 </p>
 
-                <div className="flex items-center justify-between border-t border-amber-200/80 pt-3 dark:border-amber-900/40">
+                <div className="flex items-center justify-between border-top border-amber-200/80 pt-3 dark:border-amber-900/40">
                   <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
                     Foundational Text
                   </span>
@@ -340,7 +315,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   return {
     props: {
       latestPosts: publishedPosts.slice(0, 3),
-      featuredBooks: allBooks.slice(0, 2), // medium footprint
+      featuredBooks: allBooks.slice(0, 2), // smaller, under-development footprint
       latestShorts: publishedShorts.slice(0, 3),
     },
     revalidate: 3600,
@@ -396,7 +371,7 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta name="theme-color" content="#050608" />
       </Head>
 
-      {/* HERO – Cinematic, banner on right */}
+      {/* HERO – Canon spine + ventures narrative */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#050608] via-[#0B0C10] to-[#050608]">
         <div className="absolute inset-0">
           <div className="pointer-events-none absolute -top-40 -right-32 h-64 w-64 rounded-full bg-amber-500/15 blur-3xl sm:h-80 sm:w-80" />
@@ -418,8 +393,9 @@ const HomePage: NextPage<HomePageProps> = ({
                 <h1 className="mb-4 font-serif text-3xl font-semibold leading-tight text-[#F5F1E8] sm:text-4xl lg:text-5xl xl:text-6xl">
                   Abraham of London
                   <span className="mt-3 block text-lg font-normal text-amber-100/90 sm:text-xl lg:text-2xl">
-                    Structural thinking for fathers, founders, and
-                    builders of legacy.
+                    Structural thinking for fathers, founders,
+                    <br className="hidden sm:block" />
+                    and builders of legacy.
                   </span>
                 </h1>
 
@@ -456,7 +432,7 @@ const HomePage: NextPage<HomePageProps> = ({
               </p>
             </div>
 
-            {/* Right – banner image */}
+            {/* Right – hero banner */}
             <div className="relative lg:col-span-2 xl:col-span-3">
               <div className="relative overflow-hidden rounded-xl border border-white/10 bg-black/60 shadow-2xl">
                 <div className="relative aspect-video w-full">
@@ -483,7 +459,7 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </section>
 
-      {/* STATS BAR – quiet authority */}
+      {/* STATS */}
       <section className="border-y border-gray-200/60 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <StatsBar />
@@ -543,7 +519,7 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <SectionDivider />
 
-      {/* SHORTS STRIP – outer court */}
+      {/* SHORTS */}
       <section className="bg-gray-50 py-10 dark:bg-gray-900 md:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-6 space-y-4 md:mb-8">
@@ -595,7 +571,7 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <SectionDivider />
 
-      {/* LATEST ESSAYS – Canon in motion */}
+      {/* ESSAYS */}
       <section className="bg-white py-12 dark:bg-gray-950 md:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 space-y-4 md:mb-10">
@@ -638,7 +614,7 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <SectionDivider />
 
-      {/* BOOKS – under development, medium footprint */}
+      {/* BOOKS – in development */}
       <section className="bg-gradient-to-b from-gray-50 to-white py-12 dark:from-gray-950 dark:to-gray-900 md:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 space-y-4 md:mb-10">
@@ -682,7 +658,7 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <SectionDivider />
 
-      {/* STRATEGIC SESSIONS / ENGAGEMENT STRIP */}
+      {/* STRATEGIC SESSIONS STRIP */}
       <section className="bg-black py-10 text-white md:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] md:items-center">
@@ -725,7 +701,7 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <SectionDivider />
 
-      {/* MANDATE / ABOUT / VENTURES */}
+      {/* MANDATE / VENTURES / ABOUT */}
       <section className="bg-white py-12 dark:bg-gray-950 md:py-16">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <MandateStatement />
@@ -734,16 +710,11 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <SectionDivider />
 
-      {/* Ventures (working arm) */}
       <VenturesSection />
-
-      {/* Funnel strip – pathway into ecosystem */}
       <StrategicFunnelStrip />
-
-      {/* About Abraham / ecosystem */}
       <AboutSection />
 
-      {/* Global tweaks for mobile & clamping */}
+      {/* Global tweaks */}
       <style jsx global>{`
         @media (max-width: 768px) {
           input,
