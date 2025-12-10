@@ -1,4 +1,4 @@
-// components/Layout.tsx – PAGES-ROUTER SAFE VERSION
+// components/Layout.tsx – FIXED FOR PAGES ROUTER
 
 import * as React from "react";
 import Head from "next/head";
@@ -30,7 +30,6 @@ export interface StructuredData {
 // Extended Layout props to support all use cases
 export type LayoutProps = {
   children: React.ReactNode;
-
   // Title options
   title?: string;
   pageTitle?: string;
@@ -56,8 +55,29 @@ export type LayoutProps = {
   // Additional head elements
   additionalHead?: React.ReactNode;
 
-  // Mobile optimisations
+  // Mobile optimizations
   mobileFriendly?: boolean;
+};
+
+// Device detection hook
+const useDeviceType = () => {
+  const [deviceType, setDeviceType] =
+    React.useState<"mobile" | "tablet" | "desktop">("desktop");
+
+  React.useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      if (width < 768) setDeviceType("mobile");
+      else if (width < 1024) setDeviceType("tablet");
+      else setDeviceType("desktop");
+    };
+
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
+
+  return deviceType;
 };
 
 // Helper function to get page title
@@ -72,11 +92,10 @@ const getPageTitle = (title?: string): string => {
 const DEFAULT_SEO = {
   siteName: "Abraham of London",
   siteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://www.abrahamoflondon.org",
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
   defaultDescription:
     "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
-  // Use real static OG image, not a 404-ing API route
+  // Use real static OG asset, not /api/og/default
   defaultOgImage: "/assets/images/social/og-image.jpg",
   defaultOgType: "website",
   defaultTwitterCard: "summary_large_image",
@@ -101,36 +120,39 @@ export default function Layout({
   mobileFriendly = true,
 }: LayoutProps): JSX.Element {
   const router = useRouter();
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === "mobile";
 
-  // Effective title
+  // Get the effective title
   const effectiveTitle = getPageTitle(title ?? pageTitle);
 
-  // Description
+  // Build full description with fallback
   const fullDescription = description || DEFAULT_SEO.defaultDescription;
 
-  // Canonical URL (pages router safe)
+  // Build canonical URL with default
   const path =
-    typeof router.asPath === "string" ? router.asPath : "/";
-  const fullCanonicalUrl =
-    canonicalUrl || `${DEFAULT_SEO.siteUrl}${path}`;
+    typeof router.asPath === "string"
+      ? router.asPath.split("#")[0].split("?")[0]
+      : "/";
+  const fullCanonicalUrl = canonicalUrl || `${DEFAULT_SEO.siteUrl}${path}`;
 
-  // OG image
+  // Build ogImage URL
   const fullOgImage = ogImage
     ? ogImage.startsWith("http")
       ? ogImage
       : `${DEFAULT_SEO.siteUrl}${ogImage}`
     : `${DEFAULT_SEO.siteUrl}${DEFAULT_SEO.defaultOgImage}`;
 
-  // Width container
+  // Responsive container classes
   const containerClass = fullWidth
     ? "w-full"
     : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white text-gray-900 dark:from-gray-950 dark:to-black dark:text-white ${
+      className={`min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white text-gray-900 dark:from-gray-950 dark:to-black dark:text-white ${className} ${
         mobileFriendly ? "touch-manipulation" : ""
-      } ${className}`}
+      }`}
     >
       <Head>
         {/* Viewport for responsive design */}
@@ -174,14 +196,8 @@ export default function Layout({
 
         {/* Twitter */}
         <meta name="twitter:card" content={twitterCard} />
-        <meta
-          name="twitter:site"
-          content={DEFAULT_SEO.twitterHandle}
-        />
-        <meta
-          name="twitter:creator"
-          content={DEFAULT_SEO.twitterHandle}
-        />
+        <meta name="twitter:site" content={DEFAULT_SEO.twitterHandle} />
+        <meta name="twitter:creator" content={DEFAULT_SEO.twitterHandle} />
         <meta name="twitter:title" content={effectiveTitle} />
         <meta name="twitter:description" content={fullDescription} />
         <meta name="twitter:image" content={fullOgImage} />
@@ -200,10 +216,7 @@ export default function Layout({
         {/* Additional head elements */}
         {additionalHead}
 
-        {/* Preload critical OG image */}
-        <link rel="preload" as="image" href={fullOgImage} />
-
-        {/* Fonts preconnect */}
+        {/* Preconnects only – removed problematic preload */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -216,14 +229,14 @@ export default function Layout({
       <LuxuryNavbar variant="dark" transparent={transparentHeader} />
 
       {/* Main Content */}
-      <main className={`flex-1 w-full pt-6 sm:pt-10 ${containerClass}`}>
+      <main className={`flex-1 ${containerClass} ${isMobile ? "pt-4" : "pt-8"}`}>
         {children}
       </main>
 
       {/* Footer */}
       <Footer />
 
-      {/* Global utility + accessibility styles */}
+      {/* Global styles / mobile optimisations */}
       <style jsx global>{`
         @media (max-width: 768px) {
           input,
@@ -273,52 +286,21 @@ export default function Layout({
           text-rendering: optimizeLegibility;
         }
 
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .line-clamp-3 {
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .line-clamp-4 {
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .safe-top {
-          padding-top: env(safe-area-inset-top);
-        }
-        .safe-bottom {
-          padding-bottom: env(safe-area-inset-bottom);
-        }
-        .safe-left {
-          padding-left: env(safe-area-inset-left);
-        }
-        .safe-right {
-          padding-right: env(safe-area-inset-right);
-        }
-
         ::-webkit-scrollbar {
           width: 8px;
           height: 8px;
         }
+
         ::-webkit-scrollbar-track {
           background: #f1f1f1;
           border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb {
           background: #c1c1c1;
           border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
           background: #a1a1a1;
         }
@@ -327,9 +309,11 @@ export default function Layout({
           ::-webkit-scrollbar-track {
             background: #2d3748;
           }
+
           ::-webkit-scrollbar-thumb {
             background: #4a5568;
           }
+
           ::-webkit-scrollbar-thumb:hover {
             background: #718096;
           }
@@ -357,7 +341,7 @@ export default function Layout({
   );
 }
 
-// Helper exports stay the same
+// Helper functions for common Layout configurations
 export const LayoutHelpers = {
   article: (config: {
     title: string;
@@ -374,8 +358,7 @@ export const LayoutHelpers = {
       "@context": "https://schema.org",
       "@type": "Article",
       headline: config.title,
-      description:
-        config.description || DEFAULT_SEO.defaultDescription,
+      description: config.description || DEFAULT_SEO.defaultDescription,
       datePublished: config.datePublished,
       dateModified: config.dateModified || config.datePublished,
       author: {
@@ -395,8 +378,7 @@ export const LayoutHelpers = {
       },
       mainEntityOfPage: {
         "@type": "WebPage",
-        "@id":
-          config.canonicalUrl || `${DEFAULT_SEO.siteUrl}`,
+        "@id:": config.canonicalUrl || `${DEFAULT_SEO.siteUrl}`,
       },
       ...(config.image
         ? {
@@ -405,9 +387,7 @@ export const LayoutHelpers = {
               : `${DEFAULT_SEO.siteUrl}${config.image}`,
           }
         : {}),
-      ...(config.tags
-        ? { keywords: config.tags.join(", ") }
-        : {}),
+      ...(config.tags ? { keywords: config.tags.join(", ") } : {}),
     };
 
     return {
@@ -431,8 +411,7 @@ export const LayoutHelpers = {
       "@context": "https://schema.org",
       "@type": "WebSite",
       name: config.title,
-      description:
-        config.description || DEFAULT_SEO.defaultDescription,
+      description: config.description || DEFAULT_SEO.defaultDescription,
       url: config.canonicalUrl || DEFAULT_SEO.siteUrl,
       potentialAction: {
         "@type": "SearchAction",
@@ -465,8 +444,7 @@ export const LayoutHelpers = {
       "@context": "https://schema.org",
       "@type": "Book",
       name: config.title,
-      description:
-        config.description || DEFAULT_SEO.defaultDescription,
+      description: config.description || DEFAULT_SEO.defaultDescription,
       author: {
         "@type": "Person",
         name: config.author,
@@ -511,8 +489,7 @@ export const LayoutHelpers = {
       "@context": "https://schema.org",
       "@type": "Event",
       name: config.title,
-      description:
-        config.description || DEFAULT_SEO.defaultDescription,
+      description: config.description || DEFAULT_SEO.defaultDescription,
       startDate: config.startDate,
       ...(config.endDate ? { endDate: config.endDate } : {}),
       location: {
@@ -545,4 +522,5 @@ export const LayoutHelpers = {
   },
 };
 
+// Export helper for page titles
 export { getPageTitle };
