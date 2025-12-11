@@ -1,152 +1,132 @@
-// hooks/useShortInteractions.ts
-import * as React from 'react';
+// pages/api/shorts/[slug]/interactions.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  checkRateLimit,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/rate-limit";
+import { getInteractionStats } from "@/lib/db/interactions";
 
-interface InteractionState {
+interface SuccessResponse {
+  slug: string;
   likes: number;
   saves: number;
   userLiked: boolean;
   userSaved: boolean;
 }
 
-export function useShortInteractions(slug: string) {
-  const [state, setState] = React.useState<InteractionState>({
-    likes: 0,
-    saves: 0,
-    userLiked: false,
-    userSaved: false,
-  });
-  const [loading, setLoading] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
-
-  // Load initial interactions
-  React.useEffect(() => {
-    setMounted(true);
-    
-    const loadInteractions = async () => {
-      try {
-        // First try to load from localStorage
-        const loadFromLocalStorage = () => {
-          if (typeof window === 'undefined') return null;
-          
-          try {
-            const userLiked = localStorage.getItem(`short_${slug}_liked`) === 'true';
-            const userSaved = localStorage.getItem(`short_${slug}_saved`) === 'true';
-            const savedLikes = localStorage.getItem(`short_${slug}_likes_count`);
-            const savedSaves = localStorage.getItem(`short_${slug}_saves_count`);
-            
-            return {
-              likes: savedLikes ? parseInt(savedLikes, 10) : null,
-              saves: savedSaves ? parseInt(savedSaves, 10) : null,
-              userLiked,
-              userSaved,
-            };
-          } catch {
-            return null;
-          }
-        };
-
-        const localStorageData = loadFromLocalStorage();
-        
-        // Try to fetch from API
-        const response = await fetch(`/api/shorts/${slug}/interactions`);
-        if (response.ok) {
-          const data = await response.json();
-          
-          // Use localStorage values if they exist, otherwise use API values
-          setState({
-            likes: localStorageData?.likes ?? data.likes ?? 25,
-            saves: localStorageData?.saves ?? data.saves ?? 12,
-            userLiked: localStorageData?.userLiked ?? data.userLiked ?? false,
-            userSaved: localStorageData?.userSaved ?? data.userSaved ?? false,
-          });
-        } else {
-          // Fallback to localStorage or defaults
-          setState({
-            likes: localStorageData?.likes ?? 25,
-            saves: localStorageData?.saves ?? 12,
-            userLiked: localStorageData?.userLiked ?? false,
-            userSaved: localStorageData?.userSaved ?? false,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to load interactions:', error);
-        // Use defaults
-        setState({
-          likes: 25,
-          saves: 12,
-          userLiked: false,
-          userSaved: false,
-        });
-      }
-    };
-
-    loadInteractions();
-  }, [slug]);
-
-  const handleInteraction = async (action: 'like' | 'save') => {
-    if (!mounted || loading) return;
-    
-    setLoading(true);
-    
-    // Optimistic update
-    const wasInteracted = action === 'like' ? state.userLiked : state.userSaved;
-    
-    setState(prev => ({
-      ...prev,
-      [action === 'like' ? 'likes' : 'saves']: 
-        prev[action === 'like' ? 'likes' : 'saves'] + (wasInteracted ? -1 : 1),
-      [action === 'like' ? 'userLiked' : 'userSaved']: !wasInteracted,
-    }));
-
-    try {
-      const method = wasInteracted ? 'DELETE' : 'POST';
-      const response = await fetch(`/api/shorts/${slug}/${action}`, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to ${action}`);
-      }
-
-      const data = await response.json();
-      
-      // Update with server response
-      setState({
-        likes: data.likes || state.likes + (wasInteracted ? -1 : 1),
-        saves: data.saves || state.saves,
-        userLiked: data.userLiked !== undefined ? data.userLiked : !wasInteracted,
-        userSaved: data.userSaved !== undefined ? data.userSaved : state.userSaved,
-      });
-
-      // Persist in localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`short_${slug}_${action}ed`, (!wasInteracted).toString());
-        localStorage.setItem(`short_${slug}_${action}s_count`, 
-          String(data.likes || state.likes + (wasInteracted ? -1 : 1)));
-      }
-      
-    } catch (error) {
-      console.error(`${action} action failed:`, error);
-      
-      // Revert optimistic update on error
-      setState(prev => ({
-        ...prev,
-        [action === 'like' ? 'likes' : 'saves']: 
-          prev[action === 'like' ? 'likes' : 'saves'] + (wasInteracted ? 1 : -1),
-        [action === 'like' ? 'userLiked' : 'userSaved']: wasInteracted,
-      }));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return {
-    ...state,
-    loading,
-    handleLike: () => handleInteraction('like'),
-    handleSave: () => handleInteraction('save'),
-  };
+interface ErrorResponse {
+  error: string;
+  message?: string;
 }
+
+function getOrCreateSessionId(
+  req: NextApiRequest,
+  res: NextApiResponse
+): string {
+  const existing = req.cookies?.aofl_session;
+  if (existing) return existing;
+
+  const sessionId = `sess_${Math.random()
+    .toString(36)
+    .slice(2)}_${Date.now().toString(36)}`;
+
+  const oneYear = 60 * 60 * 24 * 365;
+
+  const cookie = [
+    `aofl_session=${sessionId}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${oneYear}`,
+    process.env.NODE_ENV === "production" ? "Secure" : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
+
+  res.setHeader("Set-Cookie", cookie);
+
+  return sessionId;
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<SuccessResponse | ErrorResponse>
+) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
+    return res.status(405).json({
+      error: `Method ${req.method} Not Allowed`,
+      message: "Use GET to fetch interactions",
+    });
+  }
+
+  const { slug } = req.query;
+
+  if (!slug || typeof slug !== "string") {
+    return res.status(400).json({
+      error: "Invalid request",
+      message: "Short slug is required",
+    });
+  }
+
+  const sessionId = getOrCreateSessionId(req, res);
+
+  // Rate limit by IP (from checkRateLimit)
+  const rl = await checkRateLimit(
+    req,
+    res,
+    RATE_LIMIT_CONFIGS.SHORTS_INTERACTIONS
+  );
+  if (!rl.allowed) {
+    if (rl.headers) {
+      Object.entries(rl.headers).forEach(([k, v]) =>
+        res.setHeader(k, v)
+      );
+    }
+    return res.status(429).json({
+      error: "Too Many Requests",
+      message: "Rate limit exceeded for interactions",
+    });
+  }
+
+  try {
+    const stats = await getInteractionStats(slug, sessionId);
+
+    if (rl.headers) {
+      Object.entries(rl.headers).forEach(([k, v]) =>
+        res.setHeader(k, v)
+      );
+    }
+
+    // Prevent caching
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate"
+    );
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
+    return res.status(200).json({
+      slug,
+      likes: stats.likes,
+      saves: stats.saves,
+      userLiked: stats.userLiked,
+      userSaved: stats.userSaved,
+    });
+  } catch (error) {
+    console.error("Error in interactions API:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+      message: "Failed to load interaction stats",
+    });
+  }
+}
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "1kb",
+    },
+  },
+};

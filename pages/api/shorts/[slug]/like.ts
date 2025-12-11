@@ -4,6 +4,7 @@ import {
   checkRateLimit,
   RATE_LIMIT_CONFIGS,
 } from "@/lib/rate-limit";
+import { toggleInteraction } from "@/lib/db/interactions";
 
 interface SuccessResponse {
   likes: number;
@@ -16,6 +17,35 @@ interface SuccessResponse {
 interface ErrorResponse {
   error: string;
   message?: string;
+}
+
+function getOrCreateSessionId(
+  req: NextApiRequest,
+  res: NextApiResponse
+): string {
+  const existing = req.cookies?.aofl_session;
+  if (existing) return existing;
+
+  const sessionId = `sess_${Math.random()
+    .toString(36)
+    .slice(2)}_${Date.now().toString(36)}`;
+
+  const oneYear = 60 * 60 * 24 * 365;
+
+  const cookie = [
+    `aofl_session=${sessionId}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${oneYear}`,
+    process.env.NODE_ENV === "production" ? "Secure" : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
+
+  res.setHeader("Set-Cookie", cookie);
+
+  return sessionId;
 }
 
 export default async function handler(
@@ -39,49 +69,53 @@ export default async function handler(
     });
   }
 
-  // Rate limit – treat like/save as "write" under SHORTS_INTERACTIONS
-  const { allowed, headers } = await checkRateLimit(
+  const sessionId = getOrCreateSessionId(req, res);
+
+  const rl = await checkRateLimit(
     req,
     res,
     RATE_LIMIT_CONFIGS.SHORTS_INTERACTIONS
   );
-
-  if (headers) {
-    for (const [k, v] of Object.entries(headers)) {
-      res.setHeader(k, v);
+  if (!rl.allowed) {
+    if (rl.headers) {
+      Object.entries(rl.headers).forEach(([k, v]) =>
+        res.setHeader(k, v)
+      );
     }
-  }
-
-  if (!allowed) {
     return res.status(429).json({
-      error: "Too many requests",
+      error: "Too Many Requests",
       message: "Rate limit exceeded for like action",
     });
   }
 
   try {
-    const isLikeAction = req.method === "POST";
+    const stats = await toggleInteraction(slug, "like", sessionId);
 
-    // For now: simulated response.
-    // When you hook DB, replace these with real counts/value from DB.
-    const likes = isLikeAction ? 26 : 25;
-    const saves = 12;
+    if (rl.headers) {
+      Object.entries(rl.headers).forEach(([k, v]) =>
+        res.setHeader(k, v)
+      );
+    }
 
-    const response: SuccessResponse = {
-      likes,
-      saves,
-      userLiked: isLikeAction,
-      userSaved: false,
-      message: isLikeAction
-        ? "Short liked successfully"
-        : "Like removed successfully",
-    };
-
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate"
+    );
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
 
-    return res.status(200).json(response);
+    const userLiked = stats.userLiked;
+    const message = userLiked
+      ? "Short liked successfully"
+      : "Like removed successfully";
+
+    return res.status(200).json({
+      likes: stats.likes,
+      saves: stats.saves,
+      userLiked: stats.userLiked,
+      userSaved: stats.userSaved,
+      message,
+    });
   } catch (error) {
     console.error("Error in like API:", error);
 
