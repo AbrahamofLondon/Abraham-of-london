@@ -1,14 +1,7 @@
 // hooks/useShortInteractions.ts
-import * as React from 'react';
+import * as React from "react";
 
 interface InteractionState {
-  likes: number;
-  saves: number;
-  userLiked: boolean;
-  userSaved: boolean;
-}
-
-interface ApiInteractionStats {
   likes: number;
   saves: number;
   userLiked: boolean;
@@ -28,70 +21,96 @@ export function useShortInteractions(slug: string) {
   // Load initial interactions
   React.useEffect(() => {
     setMounted(true);
-    
+
     const loadInteractions = async () => {
       try {
+        // First try to load from localStorage
+        const loadFromLocalStorage = () => {
+          if (typeof window === "undefined") return null;
+
+          try {
+            const userLiked =
+              localStorage.getItem(`short_${slug}_liked`) === "true";
+            const userSaved =
+              localStorage.getItem(`short_${slug}_saved`) === "true";
+            const savedLikes = localStorage.getItem(
+              `short_${slug}_likes_count`
+            );
+            const savedSaves = localStorage.getItem(
+              `short_${slug}_saves_count`
+            );
+
+            return {
+              likes: savedLikes ? parseInt(savedLikes, 10) : null,
+              saves: savedSaves ? parseInt(savedSaves, 10) : null,
+              userLiked,
+              userSaved,
+            };
+          } catch {
+            return null;
+          }
+        };
+
+        const localStorageData = loadFromLocalStorage();
+
         const response = await fetch(`/api/shorts/${slug}/interactions`);
         if (response.ok) {
-          const data: ApiInteractionStats = await response.json();
+          const data = await response.json();
+
           setState({
-            likes: data.likes || 0,
-            saves: data.saves || 0,
-            userLiked: data.userLiked || false,
-            userSaved: data.userSaved || false,
+            likes: localStorageData?.likes ?? data.likes ?? 25,
+            saves: localStorageData?.saves ?? data.saves ?? 12,
+            userLiked:
+              localStorageData?.userLiked ?? data.userLiked ?? false,
+            userSaved:
+              localStorageData?.userSaved ?? data.userSaved ?? false,
+          });
+        } else {
+          // Fallback to localStorage or defaults
+          setState({
+            likes: localStorageData?.likes ?? 25,
+            saves: localStorageData?.saves ?? 12,
+            userLiked: localStorageData?.userLiked ?? false,
+            userSaved: localStorageData?.userSaved ?? false,
           });
         }
       } catch (error) {
-        console.error('Failed to load interactions:', error);
-        // Fallback to localStorage
-        fallbackToLocalStorage();
-      }
-    };
-
-    const fallbackToLocalStorage = () => {
-      if (typeof window === 'undefined') return;
-      
-      try {
-        const userLiked = localStorage.getItem(`short_${slug}_liked`) === 'true';
-        const userSaved = localStorage.getItem(`short_${slug}_saved`) === 'true';
-        const savedLikes = localStorage.getItem(`short_${slug}_likes_count`);
-        const savedSaves = localStorage.getItem(`short_${slug}_saves_count`);
-        
+        console.error("Failed to load interactions:", error);
         setState({
-          likes: savedLikes ? parseInt(savedLikes, 10) : Math.floor(Math.random() * 50) + 10,
-          saves: savedSaves ? parseInt(savedSaves, 10) : Math.floor(Math.random() * 30) + 5,
-          userLiked,
-          userSaved,
+          likes: 25,
+          saves: 12,
+          userLiked: false,
+          userSaved: false,
         });
-      } catch (localStorageError) {
-        console.error('LocalStorage fallback failed:', localStorageError);
       }
     };
 
-    loadInteractions();
+    void loadInteractions();
   }, [slug]);
 
-  const handleInteraction = async (action: 'like' | 'save') => {
+  const handleInteraction = async (action: "like" | "save") => {
     if (!mounted || loading) return;
-    
+
     setLoading(true);
-    
-    // Optimistic update
-    const wasInteracted = action === 'like' ? state.userLiked : state.userSaved;
-    
-    setState(prev => ({
+
+    const wasInteracted =
+      action === "like" ? state.userLiked : state.userSaved;
+
+    // optimistic update
+    setState((prev) => ({
       ...prev,
-      [action === 'like' ? 'likes' : 'saves']: 
-        prev[action === 'like' ? 'likes' : 'saves'] + (wasInteracted ? -1 : 1),
-      [action === 'like' ? 'userLiked' : 'userSaved']: !wasInteracted,
+      [action === "like" ? "likes" : "saves"]:
+        prev[action === "like" ? "likes" : "saves"] +
+        (wasInteracted ? -1 : 1),
+      [action === "like" ? "userLiked" : "userSaved"]: !wasInteracted,
     }));
 
     try {
-      const method = wasInteracted ? 'DELETE' : 'POST';
+      const method = wasInteracted ? "DELETE" : "POST";
       const response = await fetch(`/api/shorts/${slug}/${action}`, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -99,32 +118,68 @@ export function useShortInteractions(slug: string) {
         throw new Error(`Failed to ${action}`);
       }
 
-      const data: ApiInteractionStats = await response.json();
-      
-      // Update with server response
+      const data = await response.json();
+
+      const nextLikes =
+        typeof data.likes === "number"
+          ? data.likes
+          : state.likes + (action === "like" ? (wasInteracted ? -1 : 1) : 0);
+      const nextSaves =
+        typeof data.saves === "number"
+          ? data.saves
+          : state.saves + (action === "save" ? (wasInteracted ? -1 : 1) : 0);
+
+      const nextUserLiked =
+        typeof data.userLiked === "boolean"
+          ? data.userLiked
+          : action === "like"
+          ? !wasInteracted
+          : state.userLiked;
+      const nextUserSaved =
+        typeof data.userSaved === "boolean"
+          ? data.userSaved
+          : action === "save"
+          ? !wasInteracted
+          : state.userSaved;
+
       setState({
-        likes: data.likes || 0,
-        saves: data.saves || 0,
-        userLiked: data.userLiked || false,
-        userSaved: data.userSaved || false,
+        likes: nextLikes,
+        saves: nextSaves,
+        userLiked: nextUserLiked,
+        userSaved: nextUserSaved,
       });
 
-      // Also persist in localStorage as backup
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`short_${slug}_${action}ed`, (!wasInteracted).toString());
-        localStorage.setItem(`short_${slug}_${action}s_count`, 
-          String(action === 'like' ? data.likes : data.saves));
+      // Persist in localStorage (browser only)
+      if (typeof window !== "undefined") {
+        if (action === "like") {
+          localStorage.setItem(
+            `short_${slug}_liked`,
+            nextUserLiked.toString()
+          );
+          localStorage.setItem(
+            `short_${slug}_likes_count`,
+            String(nextLikes)
+          );
+        } else {
+          localStorage.setItem(
+            `short_${slug}_saved`,
+            nextUserSaved.toString()
+          );
+          localStorage.setItem(
+            `short_${slug}_saves_count`,
+            String(nextSaves)
+          );
+        }
       }
-      
     } catch (error) {
       console.error(`${action} action failed:`, error);
-      
-      // Revert optimistic update on error
-      setState(prev => ({
+      // revert optimistic update
+      setState((prev) => ({
         ...prev,
-        [action === 'like' ? 'likes' : 'saves']: 
-          prev[action === 'like' ? 'likes' : 'saves'] + (wasInteracted ? 1 : -1),
-        [action === 'like' ? 'userLiked' : 'userSaved']: wasInteracted,
+        [action === "like" ? "likes" : "saves"]:
+          prev[action === "like" ? "likes" : "saves"] +
+          (wasInteracted ? 1 : -1),
+        [action === "like" ? "userLiked" : "userSaved"]: wasInteracted,
       }));
     } finally {
       setLoading(false);
@@ -134,7 +189,7 @@ export function useShortInteractions(slug: string) {
   return {
     ...state,
     loading,
-    handleLike: () => handleInteraction('like'),
-    handleSave: () => handleInteraction('save'),
+    handleLike: () => handleInteraction("like"),
+    handleSave: () => handleInteraction("save"),
   };
 }
