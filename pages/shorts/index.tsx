@@ -19,12 +19,7 @@ import {
   Grid,
   List,
   MessageCircle,
-  ThumbsUp,
   ChevronRight,
-  Users,
-  Target,
-  Brain,
-  Crown,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -104,29 +99,33 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTheme, setSelectedTheme] = React.useState<string>("all");
+
+  // NOTE: interactions are now keyed by SHORT SLUG (was _id before, causing bugs)
   const [interactions, setInteractions] = React.useState<
     Record<string, { likes: number; shares: number; reads: number; saves: number }>
   >({});
   const [bookmarks, setBookmarks] = React.useState<Set<string>>(new Set());
 
-  // Initialize interactions with realistic data
+  // Initialize interactions with realistic data – CLIENT SIDE ONLY
   React.useEffect(() => {
     const mockInteractions: Record<
       string,
       { likes: number; shares: number; reads: number; saves: number }
     > = {};
+
     shorts.forEach((short, index) => {
       const baseReads = 100 + index * 50 + Math.floor(Math.random() * 100);
       const baseLikes = Math.floor(baseReads * 0.15) + Math.floor(Math.random() * 30);
       const baseShares = Math.floor(baseLikes * 0.3) + Math.floor(Math.random() * 10);
 
-      mockInteractions[short._id] = {
+      mockInteractions[short.slug] = {
         reads: baseReads,
         likes: baseLikes,
         shares: baseShares,
         saves: Math.floor(baseReads * 0.08) + Math.floor(Math.random() * 5),
       };
     });
+
     setInteractions(mockInteractions);
   }, [shorts]);
 
@@ -156,48 +155,48 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
   const totalReads = Object.values(interactions).reduce(
     (sum, i) => sum + i.reads,
-    0,
+    0
   );
   const totalLikes = Object.values(interactions).reduce(
     (sum, i) => sum + i.likes,
-    0,
+    0
   );
   const totalSaves = Object.values(interactions).reduce(
     (sum, i) => sum + i.saves,
-    0,
+    0
   );
 
-  const handleLike = (id: string, e: React.MouseEvent) => {
+  const handleLike = (slug: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setInteractions((prev) => ({
       ...prev,
-      [id]: {
-        ...prev[id],
-        likes: (prev[id]?.likes ?? 0) + 1,
+      [slug]: {
+        ...prev[slug],
+        likes: (prev[slug]?.likes ?? 0) + 1,
       },
     }));
   };
 
-  const handleBookmark = (id: string, e: React.MouseEvent) => {
+  const handleBookmark = (slug: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setBookmarks((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
+      if (next.has(slug)) {
+        next.delete(slug);
         setInteractions((prev) => ({
           ...prev,
-          [id]: {
-            ...prev[id],
-            saves: Math.max(0, (prev[id]?.saves ?? 1) - 1),
+          [slug]: {
+            ...prev[slug],
+            saves: Math.max(0, (prev[slug]?.saves ?? 1) - 1),
           },
         }));
       } else {
-        next.add(id);
+        next.add(slug);
         setInteractions((prev) => ({
           ...prev,
-          [id]: {
-            ...prev[id],
-            saves: (prev[id]?.saves ?? 0) + 1,
+          [slug]: {
+            ...prev[slug],
+            saves: (prev[slug]?.saves ?? 0) + 1,
           },
         }));
       }
@@ -205,21 +204,23 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     });
   };
 
-  // Working share function
-  const handleShare = async (slug: string, title: string, e: React.MouseEvent) => {
+  // Working share function – now correctly updates shares keyed by slug
+  const handleShare = async (
+    slug: string,
+    title: string,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation();
     const url = `${window.location.origin}/shorts/${slug}`;
     const text = `"${title}" - A short from Abraham of London.`;
 
-    // Try native share first (mobile)
     if (navigator.share) {
       try {
         await navigator.share({
           title: `${title} · Abraham of London`,
-          text: text,
-          url: url,
+          text,
+          url,
         });
-        // Update share count on successful share
         setInteractions((prev) => ({
           ...prev,
           [slug]: {
@@ -228,12 +229,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
           },
         }));
         return;
-      } catch (err) {
-        // User cancelled or error - continue to fallback
+      } catch {
+        // fall through to clipboard
       }
     }
 
-    // Fallback: Copy to clipboard
     try {
       await navigator.clipboard.writeText(`${text}\n\n${url}`);
       const btn = e.currentTarget as HTMLButtonElement;
@@ -243,7 +243,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         if (btn) btn.textContent = originalText;
       }, 2000);
 
-      // Update share count
       setInteractions((prev) => ({
         ...prev,
         [slug]: {
@@ -251,23 +250,22 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
           shares: (prev[slug]?.shares || 0) + 1,
         },
       }));
-    } catch (err) {
-      // Final fallback: Open Twitter
+    } catch {
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        text,
+        text
       )}&url=${encodeURIComponent(url)}`;
       window.open(twitterUrl, "_blank", "noopener,noreferrer");
     }
   };
 
-  // Share entire page
   const sharePage = async (platform?: string) => {
     const url = window.location.href;
-    const text = "Insightful shorts for busy minds - Abraham of London";
+    const text =
+      "Insightful shorts for busy minds – Abraham of London";
 
     if (platform === "twitter") {
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        text,
+        text
       )}&url=${encodeURIComponent(url)}`;
       window.open(twitterUrl, "_blank", "noopener,noreferrer");
       return;
@@ -275,7 +273,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
     if (platform === "whatsapp") {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
-        text + " " + url,
+        text + " " + url
       )}`;
       window.open(whatsappUrl, "_blank", "noopener,noreferrer");
       return;
@@ -285,15 +283,13 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       try {
         await navigator.share({
           title: "Shorts · Abraham of London",
-          text: text,
-          url: url,
+          text,
+          url,
         });
-      } catch (err) {
-        // Fallback to clipboard
+      } catch {
         navigator.clipboard.writeText(`${text}\n${url}`);
       }
     } else {
-      // Desktop fallback
       navigator.clipboard.writeText(`${text}\n${url}`);
       alert("Link copied to clipboard!");
     }
@@ -344,7 +340,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
             <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500/40 to-transparent" />
           </div>
 
-          {/* Original hero content */}
+          {/* Hero content */}
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -374,6 +370,10 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 <span className="mt-2 block text-lg font-normal text-gray-600 dark:text-gray-300">
                   Bite-sized wisdom for scrolling brains
                 </span>
+                {/* Brand hook: the tagline you’re building around */}
+                <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/90 dark:text-amber-400/90">
+                  Sharp. Brief. Undeniable.
+                </span>
               </motion.h1>
 
               <motion.p
@@ -382,7 +382,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 transition={{ delay: 0.4 }}
                 className="mx-auto mb-8 max-w-2xl text-lg text-gray-600 dark:text-gray-300"
               >
-                For when your brain is fried, your feed is empty, and you still want to
+                For when your brain is fried, your feed is empty, and you still
+                want to
                 <span className="font-semibold text-amber-600 dark:text-amber-400">
                   {" "}
                   think meaningfully
@@ -584,6 +585,13 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       const icon =
                         themeIcons[themeKey as keyof typeof themeIcons] || "💭";
 
+                      const stats = interactions[short.slug] || {
+                        likes: 0,
+                        reads: 0,
+                        shares: 0,
+                        saves: 0,
+                      };
+
                       return (
                         <motion.article
                           key={short._id}
@@ -619,29 +627,29 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                             <div className="flex items-center gap-4">
                               <button
                                 type="button"
-                                onClick={(e) => handleLike(short._id, e)}
+                                onClick={(e) => handleLike(short.slug, e)}
                                 className="group/like flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-red-500 dark:text-gray-400"
                               >
                                 <Heart
                                   className={`h-4 w-4 transition-transform group-hover/like:scale-110 ${
-                                    (interactions[short._id]?.likes ?? 0) > 0
+                                    stats.likes > 0
                                       ? "fill-red-500 text-red-500"
                                       : ""
                                   }`}
                                 />
-                                <span>{interactions[short._id]?.likes ?? 0}</span>
+                                <span>{stats.likes}</span>
                               </button>
                               <button
                                 type="button"
-                                onClick={(e) => handleBookmark(short._id, e)}
+                                onClick={(e) => handleBookmark(short.slug, e)}
                                 className={`group/bookmark flex items-center gap-1.5 text-xs transition-colors ${
-                                  bookmarks.has(short._id)
+                                  bookmarks.has(short.slug)
                                     ? "text-amber-500"
                                     : "text-gray-500 hover:text-amber-500 dark:text-gray-400"
                                 }`}
                               >
                                 <Bookmark className="h-4 w-4 transition-transform group-hover/bookmark:scale-110" />
-                                <span>{interactions[short._id]?.saves ?? 0}</span>
+                                <span>{stats.saves}</span>
                               </button>
                               <button
                                 type="button"
@@ -651,7 +659,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                                 className="group/share flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-blue-500 dark:text-gray-400"
                               >
                                 <Share2 className="h-4 w-4 transition-transform group-hover/share:scale-110" />
-                                <span>{interactions[short._id]?.shares ?? 0}</span>
+                                <span>{stats.shares}</span>
                               </button>
                             </div>
 
@@ -691,14 +699,19 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       Make it consistent
                     </h3>
                     <p className="text-gray-300">
-                      Read one short every day. Small, consistent effort creates
-                      real change.
-                      Join others who make this part of their daily routine.
+                      Read one short every day. Let five minutes of clarity cut
+                      through twenty-four hours of noise. Quietly join the
+                      cohort of fathers, founders, and thinkers who refuse to
+                      outsource their minds.
                     </p>
                   </div>
                   <div className="flex flex-col gap-3">
                     <button
                       type="button"
+                      onClick={() => {
+                        const el = document.getElementById("shorts-grid");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      }}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25"
                     >
                       <RefreshCw className="h-4 w-4" />
@@ -729,16 +742,16 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                   <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1">
                     <Share2 className="h-3 w-3 text-amber-500" />
                     <span className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-600 dark:text-amber-400">
-                      Shared {totalSaves.toLocaleString()}+ Times
+                      Shared {totalSaves.toLocaleString()}+ times
                     </span>
                   </div>
 
                   <h4 className="mb-3 font-serif text-xl font-semibold text-gray-900 dark:text-white">
-                    When something resonates, it spreads
+                    When something lands, people pass it on
                   </h4>
                   <p className="mx-auto mb-6 max-w-md text-gray-600 dark:text-gray-400">
-                    People share what matters. These are the shorts that get passed
-                    around.
+                    These are the pieces people forward to the one friend who
+                    needs a nudge, a warning, or a word in season.
                   </p>
 
                   <div className="flex flex-wrap justify-center gap-3">
@@ -765,7 +778,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                   </div>
 
                   <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                    Each share helps someone discover meaningful perspective
+                    Each share quietly pulls one more person out of the scroll
+                    and back into reality.
                   </p>
                 </div>
               </motion.div>

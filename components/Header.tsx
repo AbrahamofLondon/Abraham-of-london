@@ -35,7 +35,8 @@ type NavItem = {
 
 // Device detection for optimal styling
 const useDeviceType = () => {
-  const [deviceType, setDeviceType] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
+  const [deviceType, setDeviceType] =
+    React.useState<"mobile" | "tablet" | "desktop">("desktop");
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -78,41 +79,42 @@ const getRoutePath = (route: RouteId): string => {
 };
 
 // Enhanced navigation items with better mobile descriptions
+// ORDER MATTERS – Shorts is now central
 const NAV_ITEMS: NavItem[] = [
-  { 
-    route: "booksIndex", 
-    label: "Books", 
-    description: "Curated volumes & works"
+  {
+    route: "booksIndex",
+    label: "Books",
+    description: "Curated volumes & works",
   },
-  { 
-    route: "canonIndex", 
-    label: "Canon", 
-    description: "The 10-volume system"
+  {
+    route: "canonIndex",
+    label: "Canon",
+    description: "The 10-volume system",
   },
-  { 
-    route: "blogIndex", 
-    label: "Insights", 
-    description: "Strategic wisdom"
+  {
+    route: "shorts",
+    label: "Shorts",
+    description: "Quick hits, zero fluff",
   },
-  { 
-    route: "ventures", 
-    label: "Ventures", 
-    description: "Business pursuits"
+  {
+    route: "blogIndex",
+    label: "Insights",
+    description: "Strategic wisdom",
   },
-  { 
-    route: "about", 
-    label: "About", 
-    description: "My journey"
+  {
+    route: "ventures",
+    label: "Ventures",
+    description: "Business pursuits",
   },
-  { 
-    route: "contact", 
-    label: "Contact", 
-    description: "Get in touch"
+  {
+    route: "about",
+    label: "About",
+    description: "My journey",
   },
-  { 
-    route: "shorts", 
-    label: "Shorts", 
-    description: "Quick insights"
+  {
+    route: "contact",
+    label: "Contact",
+    description: "Get in touch",
   },
 ];
 
@@ -129,7 +131,8 @@ const HEADER_HEIGHTS = {
 const COLOR_SYSTEM = {
   light: {
     shell: {
-      normal: "bg-white/98 border-b border-gray-100 shadow-sm backdrop-blur-md",
+      normal:
+        "bg-white/98 border-b border-gray-100 shadow-sm backdrop-blur-md",
       transparent: "bg-transparent border-transparent",
     },
     text: {
@@ -144,7 +147,8 @@ const COLOR_SYSTEM = {
   },
   dark: {
     shell: {
-      normal: "bg-gray-900/98 border-b border-gray-800 shadow-sm backdrop-blur-md",
+      normal:
+        "bg-gray-900/98 border-b border-gray-800 shadow-sm backdrop-blur-md",
       transparent: "bg-transparent border-transparent",
     },
     text: {
@@ -183,7 +187,7 @@ const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
 
     window.addEventListener("scroll", throttledScroll, { passive: true });
     handleScroll(); // Initial check
-    
+
     return () => window.removeEventListener("scroll", throttledScroll);
   }, [threshold]);
 
@@ -195,16 +199,22 @@ const useSafeArea = () => {
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     const updateSafeArea = () => {
-      const top = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0');
-      const bottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
+      const top = parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue("--sat") ||
+          "0"
+      );
+      const bottom = parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue("--sab") ||
+          "0"
+      );
       setSafeArea({ top, bottom });
     };
 
     updateSafeArea();
-    window.addEventListener('resize', updateSafeArea);
-    return () => window.removeEventListener('resize', updateSafeArea);
+    window.addEventListener("resize", updateSafeArea);
+    return () => window.removeEventListener("resize", updateSafeArea);
   }, []);
 
   return safeArea;
@@ -213,19 +223,19 @@ const useSafeArea = () => {
 const useBodyScrollLock = (isLocked: boolean) => {
   React.useEffect(() => {
     if (typeof document === "undefined") return;
-    
+
     const body = document.body;
     if (isLocked) {
       const scrollY = window.scrollY;
-      body.style.position = 'fixed';
+      body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
-      body.style.width = '100%';
-      body.style.overflowY = 'hidden';
+      body.style.width = "100%";
+      body.style.overflowY = "hidden";
       return () => {
-        body.style.position = '';
-        body.style.top = '';
-        body.style.width = '';
-        body.style.overflowY = '';
+        body.style.position = "";
+        body.style.top = "";
+        body.style.width = "";
+        body.style.overflowY = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -250,21 +260,58 @@ const NavLink: React.FC<NavLinkProps> = ({
 }) => {
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
+  const isShorts = item.route === "shorts";
 
+  // SPECIAL DESKTOP TREATMENT FOR SHORTS
+  if (!isMobile && isShorts) {
+    const activeClasses =
+      theme === "dark"
+        ? "border-amber-400/80 bg-amber-400/15 text-amber-200 shadow-amber-500/30"
+        : "border-amber-600/80 bg-amber-50 text-amber-700 shadow-amber-500/20";
+
+    const baseClasses =
+      theme === "dark"
+        ? "border-amber-400/50 bg-transparent text-amber-200"
+        : "border-amber-600/60 bg-transparent text-amber-700";
+
+    return (
+      <li>
+        <Link
+          href={getRoutePath("shorts")}
+          onClick={onClick}
+          prefetch
+          className={`
+            inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em]
+            transition-all duration-200 hover:scale-105 active:scale-95
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
+            shadow-sm
+            ${isActive ? activeClasses : baseClasses}
+          `}
+          aria-current={isActive ? "page" : undefined}
+        >
+          <span>Shorts</span>
+          <ChevronRight className="h-3 w-3" />
+        </Link>
+      </li>
+    );
+  }
+
+  // Standard nav link (desktop + mobile)
   const baseClasses = `
     transition-all duration-200 ease-out
-    ${isMobile 
-      ? "text-lg py-3 px-4 rounded-xl active:scale-95" 
-      : "text-sm lg:text-base py-1"
-    }
+    ${isMobile ? "text-lg py-3 px-4 rounded-xl active:scale-95" : "text-sm lg:text-base py-1"}
     ${colors.text.primary}
     ${isActive ? colors.interactive.active : colors.interactive.base}
     focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
     ${isMobile ? "touch-manipulation" : ""}
   `;
 
-  const activeBg = isActive ? 
-    (theme === "dark" ? "bg-white/10" : "bg-gray-100") : "";
+  const activeBg =
+    isMobile && isActive
+      ? theme === "dark"
+        ? "bg-white/10"
+        : "bg-gray-100"
+      : "";
 
   return (
     <li className={isMobile ? "w-full" : ""}>
@@ -273,9 +320,13 @@ const NavLink: React.FC<NavLinkProps> = ({
         onClick={onClick}
         className={`${baseClasses} ${isMobile ? activeBg : ""} block`}
         aria-current={isActive ? "page" : undefined}
-        prefetch={true}
+        prefetch
       >
-        <div className={`flex ${isMobile ? "flex-col" : "items-center gap-1"}`}>
+        <div
+          className={`flex ${
+            isMobile ? "flex-col" : "items-center gap-1"
+          }`}
+        >
           <span className={`${isMobile ? "font-semibold" : ""}`}>
             {item.label}
           </span>
@@ -315,10 +366,11 @@ const ContactButton: React.FC<ContactButtonProps> = ({
 }) => {
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
-  
-  const href = type === "email" 
-    ? `mailto:${value}`
-    : `tel:${value.replace(/\s+/g, "")}`;
+
+  const href =
+    type === "email"
+      ? `mailto:${value}`
+      : `tel:${value.replace(/\s+/g, "")}`;
   const label = type === "email" ? "Email" : "Call";
   const Icon = type === "email" ? Mail : Phone;
 
@@ -336,7 +388,11 @@ const ContactButton: React.FC<ContactButtonProps> = ({
       `}
       aria-label={`${label} Abraham`}
     >
-      <Icon className={`${isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} flex-shrink-0`} />
+      <Icon
+        className={`${
+          isMobile ? "h-4 w-4" : "h-3.5 w-3.5"
+        } flex-shrink-0`}
+      />
       <span className="font-medium">{label}</span>
     </a>
   );
@@ -352,10 +408,10 @@ export default function Header({
   const currentPath = usePathname();
   const deviceType = useDeviceType();
   const safeArea = useSafeArea();
-  
+
   // Theme detection
   const [theme, setTheme] = React.useState<"light" | "dark">(initialTheme);
-  
+
   React.useEffect(() => {
     if (typeof document !== "undefined") {
       const isDark = document.documentElement.classList.contains("dark");
@@ -365,23 +421,27 @@ export default function Header({
 
   useBodyScrollLock(isOpen);
 
-  const isActive = React.useCallback((route: RouteId) => {
-    const href = getRoutePath(route);
-    if (href === "/") return currentPath === "/";
-    return currentPath === href || currentPath?.startsWith(`${href}/`);
-  }, [currentPath]);
+  const isActive = React.useCallback(
+    (route: RouteId) => {
+      const href = getRoutePath(route);
+      if (href === "/") return currentPath === "/";
+      return currentPath === href || currentPath?.startsWith(`${href}/`);
+    },
+    [currentPath]
+  );
 
   const colors = COLOR_SYSTEM[theme];
-  
+
   // Responsive header height
-  const headerHeight = scrolled 
-    ? HEADER_HEIGHTS[deviceType].scrolled 
+  const headerHeight = scrolled
+    ? HEADER_HEIGHTS[deviceType].scrolled
     : HEADER_HEIGHTS[deviceType].normal;
 
   // Shell styling
-  const shellStyle = scrolled || !transparent 
-    ? colors.shell.normal 
-    : colors.shell.transparent;
+  const shellStyle =
+    scrolled || !transparent
+      ? colors.shell.normal
+      : colors.shell.transparent;
 
   // Brand styling with responsive sizing
   const brandSize = {
@@ -396,7 +456,8 @@ export default function Header({
         className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${shellStyle}`}
         style={{
           height: headerHeight,
-          paddingTop: safeArea.top > 0 ? `${safeArea.top}px` : undefined,
+          paddingTop:
+            safeArea.top > 0 ? `${safeArea.top}px` : undefined,
         }}
         role="banner"
         aria-label="Primary navigation"
@@ -415,7 +476,7 @@ export default function Header({
                 rounded-lg touch-manipulation
               `}
               aria-label="Abraham of London - Home"
-              prefetch={true}
+              prefetch
             >
               Abraham of London
             </Link>
@@ -423,7 +484,7 @@ export default function Header({
             {/* Desktop Navigation */}
             <div className="hidden items-center gap-6 lg:flex lg:gap-8">
               <ul className="flex items-center gap-6 lg:gap-8">
-                {NAV_ITEMS.filter(item => item.route !== "shorts").map((item) => (
+                {NAV_ITEMS.map((item) => (
                   <NavLink
                     key={item.route}
                     item={item}
@@ -432,14 +493,6 @@ export default function Header({
                     variant="desktop"
                   />
                 ))}
-                
-                {/* Special Shorts link in desktop */}
-                <NavLink
-                  item={{ route: "shorts", label: "Shorts", description: "Quick insights" }}
-                  isActive={isActive("shorts")}
-                  theme={theme}
-                  variant="desktop"
-                />
               </ul>
 
               {/* Desktop Actions */}
@@ -467,13 +520,14 @@ export default function Header({
                     transition-all duration-200 hover:scale-105 active:scale-95
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                     xl:inline-block touch-manipulation
-                    ${theme === "dark" 
-                      ? "border-amber-400/50 text-amber-400 hover:bg-amber-400/10" 
-                      : "border-amber-600/50 text-amber-600 hover:bg-amber-600/10"
+                    ${
+                      theme === "dark"
+                        ? "border-amber-400/50 text-amber-400 hover:bg-amber-400/10"
+                        : "border-amber-600/50 text-amber-600 hover:bg-amber-600/10"
                     }
                   `}
                   aria-label="The Canon Prelude – Architecture of Human Purpose"
-                  prefetch={true}
+                  prefetch
                 >
                   Canon Prelude
                 </Link>
@@ -485,13 +539,14 @@ export default function Header({
                     transition-all duration-200 hover:scale-105 active:scale-95
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                     touch-manipulation
-                    ${theme === "dark" 
-                      ? "bg-amber-400 text-gray-900 hover:bg-amber-300" 
-                      : "bg-amber-600 text-white hover:bg-amber-700"
+                    ${
+                      theme === "dark"
+                        ? "bg-amber-400 text-gray-900 hover:bg-amber-300"
+                        : "bg-amber-600 text-white hover:bg-amber-700"
                     }
                   `}
                   aria-label="Go to contact form"
-                  prefetch={true}
+                  prefetch
                 >
                   Enquire
                 </Link>
@@ -511,9 +566,10 @@ export default function Header({
                   transition-all duration-200 active:scale-95
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                   touch-manipulation
-                  ${theme === "dark" 
-                    ? "bg-white/10 hover:bg-white/20" 
-                    : "bg-black/5 hover:bg-black/10"
+                  ${
+                    theme === "dark"
+                      ? "bg-white/10 hover:bg白/20"
+                      : "bg-black/5 hover:bg-black/10"
                   }
                 `}
                 aria-expanded={isOpen}
@@ -546,19 +602,17 @@ export default function Header({
             aria-label="Mobile navigation menu"
           >
             {/* Backdrop */}
-            <div 
+            <div
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
-            
+
             {/* Drawer Content */}
             <motion.div
-              className={`
-                absolute right-0 top-0 h-full w-[85vw] max-w-sm
-                overflow-y-auto overscroll-contain
-                ${theme === "dark" ? "bg-gray-900" : "bg-white"}
-              `}
+              className={`absolute right-0 top-0 h-full w-[85vw] max-w-sm overflow-y-auto overscroll-contain ${
+                theme === "dark" ? "bg-gray-900" : "bg-white"
+              }`}
               style={{
                 paddingTop: `calc(${headerHeight} + ${safeArea.top}px)`,
                 paddingBottom: `${safeArea.bottom}px`,
@@ -585,7 +639,9 @@ export default function Header({
                 {/* Mobile Contact Actions */}
                 <div className="mt-8 space-y-6">
                   <div className="space-y-4">
-                    <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text.secondary}`}>
+                    <h3
+                      className={`text-sm font-semibold uppercase tracking-wider ${colors.text.secondary}`}
+                    >
                       Get in Touch
                     </h3>
                     <div className="flex gap-4">
@@ -615,12 +671,13 @@ export default function Header({
                         transition-all duration-200 active:scale-95
                         focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                         touch-manipulation
-                        ${theme === "dark" 
-                          ? "border-amber-400/50 text-amber-400 active:bg-amber-400/10" 
-                          : "border-amber-600/50 text-amber-600 active:bg-amber-600/10"
+                        ${
+                          theme === "dark"
+                            ? "border-amber-400/50 text-amber-400 active:bg-amber-400/10"
+                            : "border-amber-600/50 text-amber-600 active:bg-amber-600/10"
                         }
                       `}
-                      prefetch={true}
+                      prefetch
                     >
                       Canon Prelude
                     </Link>
@@ -633,12 +690,13 @@ export default function Header({
                         transition-all duration-200 active:scale-95
                         focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                         touch-manipulation
-                        ${theme === "dark" 
-                          ? "bg-amber-400 text-gray-900 active:bg-amber-300" 
-                          : "bg-amber-600 text-white active:bg-amber-700"
+                        ${
+                          theme === "dark"
+                            ? "bg-amber-400 text-gray-900 active:bg-amber-300"
+                            : "bg-amber-600 text-white active:bg-amber-700"
                         }
                       `}
-                      prefetch={true}
+                      prefetch
                     >
                       Enquire Now
                     </Link>
@@ -664,9 +722,8 @@ export default function Header({
           padding-top: calc(var(--header-height) + var(--sat, 0px));
         }
 
-        /* Enhanced touch targets */
         @media (max-width: 768px) {
-          button, 
+          button,
           a[role="button"],
           .touch-manipulation {
             min-height: 44px;
@@ -674,22 +731,19 @@ export default function Header({
           }
         }
 
-        /* Improved text rendering */
         * {
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
           text-rendering: optimizeLegibility;
         }
 
-        /* Prevent zoom on iOS inputs */
         @supports (-webkit-touch-callout: none) {
-          input, 
+          input,
           textarea {
             font-size: 16px !important;
           }
         }
 
-        /* Reduce motion preferences */
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,
