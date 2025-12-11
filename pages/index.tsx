@@ -11,29 +11,54 @@ import VenturesSection from "@/components/homepage/VenturesSection";
 import { Calendar, Compass, Users, Sparkles } from "lucide-react";
 import { getPublishedShorts } from "@/lib/contentlayer-helper";
 import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
+import type { Short } from "contentlayer/generated";
 
-// BOOKS IN DEVELOPMENT array - add your actual book data here
+// -----------------------------------------------------------------------------
+// BOOKS IN DEVELOPMENT – update covers & slugs
+// -----------------------------------------------------------------------------
+
 const BOOKS_IN_DEV = [
-  {
-    slug: "ultimate-purpose-of-man",
-    title: "The Ultimate Purpose of Man",
-    tag: "Foundational · Canon",
-    blurb: "A systematic exploration of man's purpose beyond productivity — rooted in scripture, history, and observable reality.",
-    cover: "/assets/images/books/ultimate-purpose-of-man-cover.jpg",
-  },
   {
     slug: "fathering-without-fear",
     title: "Fathering Without Fear",
     tag: "Fatherhood · Household",
-    blurb: "Standards, rituals, and household architecture for men building families that outlast culture wars.",
-    cover: "/assets/images/books/fathering-without-fear-cover.jpg",
+    blurb:
+      "Standards, rituals, and household architecture for men building families that outlast culture wars.",
+    cover: "/assets/images/books/fathering-without-fear.jpg",
+  },
+  {
+    slug: "the-fiction-adaptation",
+    title: "The Fiction Adaptation",
+    tag: "Fiction · Drama",
+    blurb:
+      "A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact.",
+    cover: "/assets/images/books/the-fiction-adaptation.jpg",
   },
 ];
 
-// Take a few shorts for homepage spotlight (no runtime fetch, just static data)
-const featuredShorts: any[] = (getPublishedShorts?.() ?? []).slice(0, 3);
+// -----------------------------------------------------------------------------
+// SHORTS – pull a few at build time
+// -----------------------------------------------------------------------------
 
+const featuredShorts: Short[] = (getPublishedShorts?.() ?? []).slice(0, 3);
+
+// Safely derive the URL for a Short document
+const getShortUrl = (short: Short): string => {
+  const rawPath = (short as any)._raw?.flattenedPath as string | undefined;
+
+  if (rawPath && typeof rawPath === "string") {
+    // e.g. "shorts/when-you-feel-too-busy-to-care" -> "/shorts/when-you-feel-too-busy-to-care"
+    return `/${rawPath.replace(/^\/+/, "")}`;
+  }
+
+  // Fallback if _raw is missing for some reason
+  return `/shorts/${short.slug}`;
+};
+
+// -----------------------------------------------------------------------------
 // Simple visual divider
+// -----------------------------------------------------------------------------
+
 const SectionDivider: React.FC = () => (
   <div className="relative h-12 overflow-hidden md:h-16">
     <div className="absolute inset-0 flex items-center justify-center">
@@ -48,7 +73,10 @@ const SectionDivider: React.FC = () => (
   </div>
 );
 
-// SHORTS STRIP – homepage spotlight
+// -----------------------------------------------------------------------------
+// SHORTS STRIP – homepage spotlight (now links to actual shorts)
+// -----------------------------------------------------------------------------
+
 const ShortsStrip: React.FC = () => {
   if (!featuredShorts || featuredShorts.length === 0) {
     return null;
@@ -72,17 +100,18 @@ const ShortsStrip: React.FC = () => {
             </p>
           </div>
           <Link
-            href="/insights"
+            href="/shorts"
             className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200"
           >
-            View all insights
+            View all shorts
           </Link>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {featuredShorts.map((short: any) => (
-            <article
-              key={short._id ?? short.title}
+          {featuredShorts.map((short) => (
+            <Link
+              key={short._id}
+              href={getShortUrl(short)}
               className="group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-lg transition hover:-translate-y-1 hover:border-amber-400/70 hover:shadow-2xl"
             >
               <div className="mb-3 flex items-center justify-between gap-3">
@@ -101,9 +130,9 @@ const ShortsStrip: React.FC = () => {
                 {short.title}
               </h3>
 
-              {short.excerpt || short.description ? (
+              {short.excerpt || (short as any).description ? (
                 <p className="mb-4 flex-1 text-sm leading-relaxed text-cream/75">
-                  {short.excerpt ?? short.description}
+                  {short.excerpt ?? (short as any).description}
                 </p>
               ) : null}
 
@@ -111,17 +140,14 @@ const ShortsStrip: React.FC = () => {
                 <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
                   Field note
                 </span>
-                <Link
-                  href="/insights"
-                  className="inline-flex items-center text-xs font-semibold text-amber-300 transition group-hover:text-amber-200"
-                >
+                <span className="inline-flex items-center text-xs font-semibold text-amber-300 transition group-hover:text-amber-200">
                   Read inside
                   <span className="ml-1 transition-transform group-hover:translate-x-1">
                     ↠
                   </span>
-                </Link>
+                </span>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </div>
@@ -129,7 +155,10 @@ const ShortsStrip: React.FC = () => {
   );
 };
 
+// -----------------------------------------------------------------------------
 // BOOKS IN DEVELOPMENT – medium-sized cards with covers
+// -----------------------------------------------------------------------------
+
 const BooksInDevelopment: React.FC = () => (
   <section className="bg-gradient-to-b from-[#F9F5EC] via-white to-gray-50 py-16 dark:from-[#050608] dark:via-[#050608] dark:to-[#050608]">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -205,7 +234,10 @@ const BooksInDevelopment: React.FC = () => (
   </section>
 );
 
-// STRATEGIC SESSIONS – tweaked for stronger dark-mode readability
+// -----------------------------------------------------------------------------
+// STRATEGIC SESSIONS – dark-mode readability
+// -----------------------------------------------------------------------------
+
 const StrategicSessions: React.FC = () => (
   <section className="bg-gradient-to-b from-gray-950 via-black to-gray-950 py-16">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -294,6 +326,10 @@ const StrategicSessions: React.FC = () => (
     </div>
   </section>
 );
+
+// -----------------------------------------------------------------------------
+// PAGE
+// -----------------------------------------------------------------------------
 
 const HomePage: NextPage = () => {
   const siteTitle = "Abraham of London";
@@ -440,11 +476,8 @@ const HomePage: NextPage = () => {
             </Link>
           </div>
 
-          <CanonPrimaryCard 
-            title="The Canon: Foundations"
-            excerpt="Foundational principles and long-term thinking for builders of legacy."
-            href="/canon"
-          />
+          {/* Updated CanonPrimaryCard – new component, no props */}
+          <CanonPrimaryCard />
         </div>
       </section>
 
