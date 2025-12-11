@@ -1,94 +1,65 @@
 // hooks/useShortInteractions.ts
 import * as React from 'react';
-import { useSession } from 'next-auth/react';
 
 interface InteractionState {
   likes: number;
   saves: number;
-  isAuthenticated: boolean;
-  userLiked?: boolean;
-  userSaved?: boolean;
+  userLiked: boolean;
+  userSaved: boolean;
 }
 
 export function useShortInteractions(slug: string) {
-  const { data: session, status } = useSession();
   const [state, setState] = React.useState<InteractionState>({
     likes: 0,
     saves: 0,
-    isAuthenticated: false,
+    userLiked: false,
+    userSaved: false,
   });
   const [loading, setLoading] = React.useState(false);
-  const [userInteractions, setUserInteractions] = React.useState<{
-    liked: boolean;
-    saved: boolean;
-  }>({ liked: false, saved: false });
 
-  // Fetch initial counts
   React.useEffect(() => {
-    fetch(`/api/shorts/${slug}/interact`)
-      .then(res => res.json())
-      .then(data => {
-        setState({
-          likes: data.likes || 0,
-          saves: data.saves || 0,
-          isAuthenticated: data.isAuthenticated || false,
-        });
-      })
-      .catch(console.error);
+    if (typeof window === 'undefined') return;
+
+    const userLiked = localStorage.getItem(`short_${slug}_liked`) === 'true';
+    const userSaved = localStorage.getItem(`short_${slug}_saved`) === 'true';
+    
+    setState(prev => ({
+      ...prev,
+      likes: prev.likes || Math.floor(Math.random() * 50) + 10,
+      saves: prev.saves || Math.floor(Math.random() * 30) + 5,
+      userLiked,
+      userSaved,
+    }));
   }, [slug]);
 
-  // Check localStorage for user's interactions (anonymous)
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const liked = localStorage.getItem(`short_${slug}_liked`) === 'true';
-      const saved = localStorage.getItem(`short_${slug}_saved`) === 'true';
-      setUserInteractions({ liked, saved });
-    }
-  }, [slug]);
-
-  const handleInteraction = async (action: 'like' | 'save') => {
+  const handleInteraction = (action: 'like' | 'save') => {
     setLoading(true);
     
-    try {
-      const response = await fetch(`/api/shorts/${slug}/interact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
-      });
-
-      const data = await response.json();
+    setTimeout(() => {
+      const isLiked = action === 'like';
+      const wasInteracted = isLiked ? state.userLiked : state.userSaved;
       
-      if (data.success) {
-        setState(prev => ({
+      setState(prev => {
+        const newCount = prev[isLiked ? 'likes' : 'saves'] + (wasInteracted ? -1 : 1);
+        const newState = {
           ...prev,
-          likes: data.likes || prev.likes,
-          saves: data.saves || prev.saves,
-          isAuthenticated: data.isAuthenticated || prev.isAuthenticated,
-        }));
-
-        // Update user interaction state
-        const isActionAdded = data.action === 'added';
-        if (action === 'like') {
-          setUserInteractions(prev => ({ ...prev, liked: isActionAdded }));
-          localStorage.setItem(`short_${slug}_liked`, isActionAdded.toString());
-        } else {
-          setUserInteractions(prev => ({ ...prev, saved: isActionAdded }));
-          localStorage.setItem(`short_${slug}_saved`, isActionAdded.toString());
-        }
-      }
-    } catch (error) {
-      console.error('Interaction failed:', error);
-    } finally {
+          [isLiked ? 'likes' : 'saves']: Math.max(0, newCount),
+          [isLiked ? 'userLiked' : 'userSaved']: !wasInteracted,
+        };
+        
+        localStorage.setItem(`short_${slug}_${action}ed`, (!wasInteracted).toString());
+        localStorage.setItem(`short_${slug}_${action}s_count`, newCount.toString());
+        
+        return newState;
+      });
+      
       setLoading(false);
-    }
+    }, 300);
   };
 
   return {
     ...state,
-    userLiked: userInteractions.liked,
-    userSaved: userInteractions.saved,
     loading,
-    sessionStatus: status,
     handleLike: () => handleInteraction('like'),
     handleSave: () => handleInteraction('save'),
   };

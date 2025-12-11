@@ -10,6 +10,25 @@ import StatsBar from "@/components/homepage/StatsBar";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import { Calendar, Compass, Users, Sparkles } from "lucide-react";
 import { getPublishedShorts } from "@/lib/contentlayer-helper";
+import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
+
+// BOOKS IN DEVELOPMENT array - add your actual book data here
+const BOOKS_IN_DEV = [
+  {
+    slug: "ultimate-purpose-of-man",
+    title: "The Ultimate Purpose of Man",
+    tag: "Foundational · Canon",
+    blurb: "A systematic exploration of man's purpose beyond productivity — rooted in scripture, history, and observable reality.",
+    cover: "/assets/images/books/ultimate-purpose-of-man-cover.jpg",
+  },
+  {
+    slug: "fathering-without-fear",
+    title: "Fathering Without Fear",
+    tag: "Fatherhood · Household",
+    blurb: "Standards, rituals, and household architecture for men building families that outlast culture wars.",
+    cover: "/assets/images/books/fathering-without-fear-cover.jpg",
+  },
+];
 
 // Take a few shorts for homepage spotlight (no runtime fetch, just static data)
 const featuredShorts: any[] = (getPublishedShorts?.() ?? []).slice(0, 3);
@@ -28,35 +47,6 @@ const SectionDivider: React.FC = () => (
     </div>
   </div>
 );
-
-{/* CANON SPOTLIGHT */}
-<section className="bg-gradient-to-b from-white via-[#F7F3EB] to-gray-50 py-12 dark:from-[#050608] dark:via-[#050608] dark:to-[#050608]">
-  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/85 dark:text-amber-300/90">
-          Canon · Foundations
-        </p>
-        <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-cream sm:text-4xl">
-          The philosophical spine
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-800 dark:text-cream/85">
-          The Canon is the long-term work: purpose, governance, civilisation,
-          and destiny — written from a father&apos;s vantage point, not an
-          academic desk.
-        </p>
-      </div>
-      <Link
-        href="/canon"
-        className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-200"
-      >
-        Browse Canon entries
-      </Link>
-    </div>
-
-    <CanonPrimaryCard />
-  </div>
-</section>
 
 // SHORTS STRIP – homepage spotlight
 const ShortsStrip: React.FC = () => {
@@ -450,7 +440,11 @@ const HomePage: NextPage = () => {
             </Link>
           </div>
 
-          <CanonPrimaryCard />
+          <CanonPrimaryCard 
+            title="The Canon: Foundations"
+            excerpt="Foundational principles and long-term thinking for builders of legacy."
+            href="/canon"
+          />
         </div>
       </section>
 
