@@ -15,7 +15,8 @@ type ContentPageProps = {
   docs: SearchDoc[];
 };
 
-// Type configuration: visual + semantic
+// ---------- TYPE & CATEGORY CONFIG ----------
+
 const typeConfig: Record<
   SearchDocType,
   {
@@ -27,6 +28,7 @@ const typeConfig: Record<
       border: string;
       gradient: string;
       accent: string;
+      subtle: string;
     };
     icon: string;
     category: "insights" | "frameworks" | "tools" | "archives";
@@ -37,10 +39,11 @@ const typeConfig: Record<
     description: "Thoughtful essays and perspectives",
     color: {
       bg: "bg-blue-500/10",
-      text: "text-blue-400",
+      text: "text-blue-300",
       border: "border-blue-500/30",
-      gradient: "from-blue-500/30 via-blue-600/10 to-blue-900/10",
+      gradient: "from-blue-500/30 via-blue-700/15 to-slate-900/80",
       accent: "bg-blue-500/30",
+      subtle: "from-blue-900/40 via-slate-950/70 to-black",
     },
     icon: "💭",
     category: "insights",
@@ -50,10 +53,11 @@ const typeConfig: Record<
     description: "Comprehensive volumes and collections",
     color: {
       bg: "bg-amber-500/10",
-      text: "text-amber-400",
-      border: "border-amber-500/30",
-      gradient: "from-amber-500/40 via-amber-600/15 to-amber-900/10",
+      text: "text-amber-300",
+      border: "border-amber-500/35",
+      gradient: "from-amber-500/35 via-amber-700/20 to-zinc-900/85",
       accent: "bg-amber-500/30",
+      subtle: "from-amber-900/45 via-zinc-950/70 to-black",
     },
     icon: "📚",
     category: "frameworks",
@@ -63,10 +67,11 @@ const typeConfig: Record<
     description: "Practical tools and templates",
     color: {
       bg: "bg-emerald-500/10",
-      text: "text-emerald-400",
+      text: "text-emerald-300",
       border: "border-emerald-500/30",
-      gradient: "from-emerald-500/30 via-emerald-600/10 to-emerald-900/10",
+      gradient: "from-emerald-500/30 via-emerald-700/20 to-slate-900/85",
       accent: "bg-emerald-500/30",
+      subtle: "from-emerald-900/45 via-slate-950/70 to-black",
     },
     icon: "📥",
     category: "tools",
@@ -76,10 +81,11 @@ const typeConfig: Record<
     description: "Curated prints and editions",
     color: {
       bg: "bg-purple-500/10",
-      text: "text-purple-400",
+      text: "text-purple-300",
       border: "border-purple-500/30",
-      gradient: "from-purple-500/30 via-purple-600/10 to-purple-900/10",
+      gradient: "from-purple-500/30 via-purple-700/20 to-zinc-900/85",
       accent: "bg-purple-500/30",
+      subtle: "from-purple-900/45 via-zinc-950/70 to-black",
     },
     icon: "🖨️",
     category: "archives",
@@ -89,10 +95,11 @@ const typeConfig: Record<
     description: "Guides and reference materials",
     color: {
       bg: "bg-sky-500/10",
-      text: "text-sky-400",
+      text: "text-sky-300",
       border: "border-sky-500/30",
-      gradient: "from-sky-500/30 via-sky-600/10 to-sky-900/10",
+      gradient: "from-sky-500/30 via-sky-700/20 to-slate-900/85",
       accent: "bg-sky-500/30",
+      subtle: "from-sky-900/45 via-slate-950/70 to-black",
     },
     icon: "📋",
     category: "tools",
@@ -102,10 +109,11 @@ const typeConfig: Record<
     description: "Foundational principles and systems",
     color: {
       bg: "bg-rose-500/10",
-      text: "text-rose-400",
-      border: "border-rose-500/30",
-      gradient: "from-rose-500/35 via-rose-600/10 to-rose-900/10",
+      text: "text-rose-300",
+      border: "border-rose-500/35",
+      gradient: "from-rose-500/35 via-rose-700/20 to-zinc-900/85",
       accent: "bg-rose-500/30",
+      subtle: "from-rose-900/45 via-zinc-950/70 to-black",
     },
     icon: "⚖️",
     category: "frameworks",
@@ -169,7 +177,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   };
 };
 
-// ---------- Card: single, luxury, image-controlled ----------
+// ---------- CARD HELPERS: HREF, ASPECT, FIT ----------
 
 const getHrefForDoc = (doc: SearchDoc): string => {
   if (doc.href) return doc.href;
@@ -178,59 +186,115 @@ const getHrefForDoc = (doc: SearchDoc): string => {
 };
 
 const getAspectClassForDoc = (doc: SearchDoc): string => {
-  // Portrait for books/prints, cinematic for everything else
-  if (doc.type === "book" || doc.type === "print") {
-    return "aspect-[3/4]";
+  const raw = doc as any;
+  const explicitAspect = raw.coverAspect ?? raw.aspect;
+
+  // If you ever set coverAspect in MDX (book | wide | square | portrait | landscape),
+  // this will respect it first.
+  switch (explicitAspect) {
+    case "book":
+    case "portrait":
+      return "aspect-[3/4]";
+    case "square":
+      return "aspect-square";
+    case "wide":
+    case "landscape":
+      return "aspect-[16/9] md:aspect-[3/2]";
+    default:
+      // Fallback by type
+      if (doc.type === "book" || doc.type === "print") {
+        return "aspect-[3/4]";
+      }
+      return "aspect-[16/9] md:aspect-[3/2]";
   }
-  return "aspect-[16/9] md:aspect-[3/2]";
 };
+
+const getObjectFitForDoc = (doc: SearchDoc): "object-cover" | "object-contain" => {
+  const raw = doc as any;
+  const fit = raw.coverFit ?? raw.fit;
+  if (fit === "contain") return "object-contain";
+  return "object-cover";
+};
+
+// ---------- SINGLE LUXURY CARD (ONE CARD TO RULE THEM ALL) ----------
 
 const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
   const config = typeConfig[doc.type];
   const href = getHrefForDoc(doc);
   const aspectClass = getAspectClassForDoc(doc);
+  const fitClass = getObjectFitForDoc(doc);
+
+  const safeTitle = doc.title;
+  const safeExcerpt = doc.excerpt;
 
   return (
     <Link href={href} className="group block h-full">
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gold/15 bg-gradient-to-b from-[#050509]/95 via-black/95 to-[#050509]/98 shadow-[0_22px_60px_rgba(0,0,0,0.75)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]">
+      <article
+        className={[
+          "relative flex h-full flex-col overflow-hidden rounded-2xl",
+          "border border-gray-800/80 bg-gradient-to-b from-[#050509]/95 via-black/96 to-[#020308]/98",
+          "shadow-[0_24px_70px_rgba(0,0,0,0.85)] transition-transform duration-300",
+          "group-hover:-translate-y-1 group-hover:shadow-[0_32px_90px_rgba(0,0,0,0.95)]",
+          "group-hover:border-gray-700/80",
+        ].join(" ")}
+      >
         {/* Image frame */}
-        <div className={`relative w-full overflow-hidden ${aspectClass}`}>
+        <div
+          className={[
+            "relative w-full overflow-hidden",
+            "bg-gradient-to-br",
+            config.color.gradient,
+            aspectClass,
+          ].join(" ")}
+        >
           {doc.coverImage ? (
             <>
               <Image
                 src={doc.coverImage}
-                alt={doc.title}
+                alt={safeTitle}
                 fill
                 sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
-                className="object-cover transition-transform duration-[900ms] group-hover:scale-[1.04]"
+                className={[
+                  "transition-transform duration-[900ms]",
+                  "group-hover:scale-[1.04]",
+                  fitClass,
+                ].join(" ")}
               />
-              {/* subtle overlay to keep type and title legible */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/0" />
+              {/* Gradient mask to keep text readable if the image is busy */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/0" />
             </>
           ) : (
-            <div
-              className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${config.color.gradient}`}
-            >
-              <span className="text-4xl">{config.icon}</span>
+            <div className="flex h-full w-full items-center justify-center">
+              <div
+                className={[
+                  "flex h-14 w-14 items-center justify-center rounded-xl",
+                  "bg-black/60 border border-white/10 backdrop-blur-sm",
+                ].join(" ")}
+              >
+                <span className="text-2xl">{config.icon}</span>
+              </div>
             </div>
           )}
 
-          {/* Type pill */}
-          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/18 bg-black/55 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
+          {/* Type pill – colour-coded by type */}
+          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/18 bg-black/60 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
             <span>{config.icon}</span>
             <span>{config.label}</span>
           </div>
+
+          {/* Subtle corner glint */}
+          <div className="pointer-events-none absolute -right-4 -top-4 h-10 w-10 rounded-full bg-gradient-to-br from-amber-400/70 to-amber-700/40 opacity-0 blur-[3px] transition-opacity duration-300 group-hover:opacity-100" />
         </div>
 
         {/* Body */}
         <div className="flex flex-1 flex-col gap-3 p-5">
           <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
-            {doc.title}
+            {safeTitle}
           </h3>
 
-          {doc.excerpt && (
-            <p className="line-clamp-3 text-sm text-gray-300">
-              {doc.excerpt}
+          {safeExcerpt && (
+            <p className="line-clamp-3 text-sm text-gray-300/90">
+              {safeExcerpt}
             </p>
           )}
 
@@ -245,7 +309,14 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
                   {tag}
                 </span>
               ))}
-              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em] text-amber-300/90">
+              <span
+                className={[
+                  "rounded-full px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em]",
+                  "border border-white/10",
+                  config.color.bg,
+                  config.color.text,
+                ].join(" ")}
+              >
                 {config.label}
               </span>
             </div>
@@ -261,15 +332,12 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
             </div>
           </div>
         </div>
-
-        {/* Corner glint */}
-        <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/60 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
       </article>
     </Link>
   );
 };
 
-// ---------- Page ----------
+// ---------- PAGE ----------
 
 const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
   const [query, setQuery] = React.useState("");
@@ -330,11 +398,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
     "A curated chamber of insights, frameworks, and tools for fathers, founders, and leaders who build with depth.";
 
   return (
-    <Layout
-      title={title}
-      description={description}
-      fullWidth
-    >
+    <Layout title={title} description={description} fullWidth>
       <div className="min-h-screen bg-gradient-to-b from-black via-[#050509] to-black text-cream">
         {/* HERO */}
         <section className="relative overflow-hidden border-b border-gray-800">
@@ -342,8 +406,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-b from-amber-500/6 via-transparent to-emerald-500/6" />
             <div className="absolute inset-0 opacity-[0.14] mix-blend-soft-light bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.35),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(45,212,191,0.35),_transparent_58%)]" />
-            <div className="absolute inset-0 opacity-[0.18] bg-[linear-gradient(to_right,rgba(148,163,184,0.35)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.35)_1px,transparent_1px)] bg-[size:120px_120px]" />
-            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500/60 to-transparent" />
+            <div className="absolute inset-0 opacity-[0.14] bg-[linear-gradient(to_right,rgba(148,163,184,0.28)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.28)_1px,transparent_1px)] bg-[size:120px_120px]" />
+            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500/65 to-transparent" />
           </div>
 
           <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
@@ -359,10 +423,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                 Content Library
               </h1>
 
-              <p className="mx-auto max-w-2xl text-sm sm:text-base font-light leading-relaxed text-gray-200">
+              <p className="mx-auto max-w-2xl text-sm font-light leading-relaxed text-gray-200 sm:text-base">
                 One doorway into the whole house of Abraham of London – essays,
-                canon volumes, tools, and artefacts arranged for slow, deliberate
-                reading.
+                canon volumes, tools, and artefacts arranged for slow,
+                deliberate reading.
               </p>
             </div>
           </div>
