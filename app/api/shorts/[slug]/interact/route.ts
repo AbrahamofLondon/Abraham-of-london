@@ -1,17 +1,19 @@
 // app/api/shorts/[slug]/interact/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-
-// Simple in-memory store for demo purposes
-// In production, use a database like Supabase, Firebase, or Vercel KV
-const interactionStore = new Map<string, { likes: Set<string>; saves: Set<string> }>();
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { handleInteraction, getInteractionCount } from "@/lib/short-interactions";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id || `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     const slug = params.slug;
-    const { action, userId } = await request.json();
+    const { action } = await request.json();
     
     if (!['like', 'save'].includes(action)) {
       return NextResponse.json(
@@ -20,32 +22,14 @@ export async function POST(
       );
     }
 
-    // Initialize store for this slug if not exists
-    if (!interactionStore.has(slug)) {
-      interactionStore.set(slug, {
-        likes: new Set(),
-        saves: new Set(),
-      });
-    }
+    const result = await handleInteraction(slug, action, session?.user?.id);
+    const counts = await getInteractionCount(slug);
 
-    const store = interactionStore.get(slug)!;
-    const userSet = action === 'like' ? store.likes : store.saves;
-    
-    let currentAction = 'removed';
-    
-    if (userSet.has(userId)) {
-      // Remove interaction
-      userSet.delete(userId);
-    } else {
-      // Add interaction
-      userSet.add(userId);
-      currentAction = 'added';
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      action: currentAction,
-      [action]: userSet.size
+    return NextResponse.json({
+      success: true,
+      ...result,
+      ...counts,
+      isAuthenticated: !!session?.user,
     });
   } catch (error) {
     console.error('Interaction error:', error);
@@ -61,21 +45,19 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
     const slug = params.slug;
     
-    const store = interactionStore.get(slug) || {
-      likes: new Set(),
-      saves: new Set(),
-    };
-    
+    const counts = await getInteractionCount(slug);
+
     return NextResponse.json({
-      likes: store.likes.size,
-      saves: store.saves.size
+      ...counts,
+      isAuthenticated: !!session?.user,
     });
   } catch (error) {
     console.error('Fetch error:', error);
     return NextResponse.json(
-      { likes: 0, saves: 0 }
+      { likes: 0, saves: 0, isAuthenticated: false }
     );
   }
 }
