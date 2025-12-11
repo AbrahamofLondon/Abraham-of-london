@@ -15,7 +15,7 @@ type ContentPageProps = {
   docs: SearchDoc[];
 };
 
-// ---------- TYPE & CATEGORY CONFIG ----------
+// ---------- VISUAL + SEMANTIC TYPE CONFIG ----------
 
 const typeConfig: Record<
   SearchDocType,
@@ -28,7 +28,6 @@ const typeConfig: Record<
       border: string;
       gradient: string;
       accent: string;
-      subtle: string;
     };
     icon: string;
     category: "insights" | "frameworks" | "tools" | "archives";
@@ -39,11 +38,10 @@ const typeConfig: Record<
     description: "Thoughtful essays and perspectives",
     color: {
       bg: "bg-blue-500/10",
-      text: "text-blue-300",
+      text: "text-blue-400",
       border: "border-blue-500/30",
-      gradient: "from-blue-500/30 via-blue-700/15 to-slate-900/80",
+      gradient: "from-blue-500/30 via-blue-600/10 to-blue-900/10",
       accent: "bg-blue-500/30",
-      subtle: "from-blue-900/40 via-slate-950/70 to-black",
     },
     icon: "💭",
     category: "insights",
@@ -53,11 +51,10 @@ const typeConfig: Record<
     description: "Comprehensive volumes and collections",
     color: {
       bg: "bg-amber-500/10",
-      text: "text-amber-300",
-      border: "border-amber-500/35",
-      gradient: "from-amber-500/35 via-amber-700/20 to-zinc-900/85",
+      text: "text-amber-400",
+      border: "border-amber-500/30",
+      gradient: "from-amber-500/40 via-amber-600/15 to-amber-900/10",
       accent: "bg-amber-500/30",
-      subtle: "from-amber-900/45 via-zinc-950/70 to-black",
     },
     icon: "📚",
     category: "frameworks",
@@ -67,11 +64,10 @@ const typeConfig: Record<
     description: "Practical tools and templates",
     color: {
       bg: "bg-emerald-500/10",
-      text: "text-emerald-300",
+      text: "text-emerald-400",
       border: "border-emerald-500/30",
-      gradient: "from-emerald-500/30 via-emerald-700/20 to-slate-900/85",
+      gradient: "from-emerald-500/30 via-emerald-600/10 to-emerald-900/10",
       accent: "bg-emerald-500/30",
-      subtle: "from-emerald-900/45 via-slate-950/70 to-black",
     },
     icon: "📥",
     category: "tools",
@@ -81,11 +77,10 @@ const typeConfig: Record<
     description: "Curated prints and editions",
     color: {
       bg: "bg-purple-500/10",
-      text: "text-purple-300",
+      text: "text-purple-400",
       border: "border-purple-500/30",
-      gradient: "from-purple-500/30 via-purple-700/20 to-zinc-900/85",
+      gradient: "from-purple-500/30 via-purple-600/10 to-purple-900/10",
       accent: "bg-purple-500/30",
-      subtle: "from-purple-900/45 via-zinc-950/70 to-black",
     },
     icon: "🖨️",
     category: "archives",
@@ -95,11 +90,10 @@ const typeConfig: Record<
     description: "Guides and reference materials",
     color: {
       bg: "bg-sky-500/10",
-      text: "text-sky-300",
+      text: "text-sky-400",
       border: "border-sky-500/30",
-      gradient: "from-sky-500/30 via-sky-700/20 to-slate-900/85",
+      gradient: "from-sky-500/30 via-sky-600/10 to-sky-900/10",
       accent: "bg-sky-500/30",
-      subtle: "from-sky-900/45 via-slate-950/70 to-black",
     },
     icon: "📋",
     category: "tools",
@@ -109,11 +103,10 @@ const typeConfig: Record<
     description: "Foundational principles and systems",
     color: {
       bg: "bg-rose-500/10",
-      text: "text-rose-300",
-      border: "border-rose-500/35",
-      gradient: "from-rose-500/35 via-rose-700/20 to-zinc-900/85",
+      text: "text-rose-400",
+      border: "border-rose-500/30",
+      gradient: "from-rose-500/35 via-rose-600/10 to-rose-900/10",
       accent: "bg-rose-500/30",
-      subtle: "from-rose-900/45 via-zinc-950/70 to-black",
     },
     icon: "⚖️",
     category: "frameworks",
@@ -189,8 +182,6 @@ const getAspectClassForDoc = (doc: SearchDoc): string => {
   const raw = doc as any;
   const explicitAspect = raw.coverAspect ?? raw.aspect;
 
-  // If you ever set coverAspect in MDX (book | wide | square | portrait | landscape),
-  // this will respect it first.
   switch (explicitAspect) {
     case "book":
     case "portrait":
@@ -201,7 +192,6 @@ const getAspectClassForDoc = (doc: SearchDoc): string => {
     case "landscape":
       return "aspect-[16/9]";
     default: {
-      // sensible defaults by type
       if (doc.type === "book" || doc.type === "print" || doc.type === "canon") {
         return "aspect-[3/4]";
       }
@@ -228,7 +218,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
           "group-hover:-translate-y-[3px] group-hover:shadow-[0_32px_90px_rgba(0,0,0,0.95)]",
         ].join(" ")}
       >
-        {/* Top accent line per type */}
+        {/* top accent */}
         <div
           className={[
             "pointer-events-none absolute inset-x-0 top-0 h-[3px]",
@@ -268,7 +258,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
             </div>
           )}
 
-          {/* Type pill */}
+          {/* TYPE PILL */}
           <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/70 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
             <span className="opacity-90">{config.icon}</span>
             <span className={config.color.text}>{config.label}</span>
@@ -319,157 +309,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/70 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
-      </article>
-    </Link>
-  );
-};
-
-const getObjectFitForDoc = (doc: SearchDoc): "object-cover" | "object-contain" => {
-  const raw = doc as any;
-  const fit = raw.coverFit ?? raw.fit;
-  if (fit === "contain") return "object-contain";
-  return "object-cover";
-};
-
-// ---------- Card: single, luxury, image-controlled ----------
-
-const getHrefForDoc = (doc: SearchDoc): string => {
-  if (doc.href) return doc.href;
-  if (doc.type === "post") return `/blog/${doc.slug}`;
-  return `/${doc.type}/${doc.slug}`;
-};
-
-const getAspectClassForDoc = (doc: SearchDoc): string => {
-  // Portrait for books/prints, cinematic for everything else
-  if (doc.type === "book" || doc.type === "print" || doc.type === "canon") {
-    return "aspect-[3/4]"; // bookish feel
-  }
-  return "aspect-[16/9] md:aspect-[3/2]";
-};
-
-const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
-  const config = typeConfig[doc.type];
-  const href = getHrefForDoc(doc);
-  const aspectClass = getAspectClassForDoc(doc);
-
-  return (
-    <Link href={href} className="group block h-full">
-      <article
-        className={[
-          "relative flex h-full flex-col overflow-hidden rounded-2xl",
-          "border border-gray-800/80 bg-gradient-to-b from-[#050509]/98 via-black to-[#020309]",
-          "shadow-[0_22px_60px_rgba(0,0,0,0.80)]",
-          "transition-transform duration-300 ease-out",
-          "group-hover:-translate-y-[3px] group-hover:shadow-[0_32px_90px_rgba(0,0,0,0.95)]",
-        ].join(" ")}
-      >
-        {/* Top accent line per type */}
-        <div
-          className={[
-            "pointer-events-none absolute inset-x-0 top-0 h-[3px]",
-            "bg-gradient-to-r from-transparent via-amber-300/70 to-transparent",
-            config.color.accent,
-          ].join(" ")}
-        />
-
-        {/* IMAGE FRAME */}
-        <div
-          className={[
-            "relative w-full overflow-hidden border-b border-gray-800/80",
-            "bg-gradient-to-br",
-            config.color.gradient,
-            aspectClass,
-          ].join(" ")}
-        >
-          {doc.coverImage ? (
-            <>
-              {/* subtle inner frame so odd aspect ratios still feel intentional */}
-              <div className="absolute inset-3 rounded-[1.1rem] border border-white/6 bg-black/40" />
-
-              <div className="absolute inset-3 rounded-[1.1rem] overflow-hidden">
-                <Image
-                  src={doc.coverImage}
-                  alt={doc.title}
-                  fill
-                  sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
-                  className="object-contain transition-transform duration-[900ms] ease-out group-hover:scale-[1.02]"
-                />
-              </div>
-
-              {/* Vignette so title text never fights with the image */}
-              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-black/70 via-black/10 to-black/0" />
-            </>
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/40 shadow-inner">
-                <span className="text-3xl">{config.icon}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Type pill */}
-          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/70 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
-            <span className="opacity-90">{config.icon}</span>
-            <span className={config.color.text}>{config.label}</span>
-          </div>
-        </div>
-
-        {/* BODY */}
-        <div className="flex flex-1 flex-col gap-3 p-5">
-          {/* Title */}
-          <h3 className="line-clamp-2 font-serif text-[1.02rem] font-semibold text-cream">
-            {doc.title}
-          </h3>
-
-          {/* Excerpt */}
-          {doc.excerpt && (
-            <p className="line-clamp-3 text-[0.78rem] leading-relaxed text-gray-300/90">
-              {doc.excerpt}
-            </p>
-          )}
-
-          {/* Meta */}
-          <div className="mt-auto border-t border-gray-800/80 pt-3 text-[0.7rem]">
-            {/* Tags */}
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {doc.tags?.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className={[
-                    "rounded-full px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.14em]",
-                    "bg-black/75 text-gray-400 border border-gray-700/70",
-                  ].join(" ")}
-                >
-                  {tag}
-                </span>
-              ))}
-              <span
-                className={[
-                  "rounded-full px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.14em]",
-                  "border",
-                  config.color.bg,
-                  config.color.border,
-                  config.color.text,
-                ].join(" ")}
-              >
-                {config.label}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-[0.68rem] text-gray-400">
-              <span className="line-clamp-1">
-                {config.description}
-              </span>
-              <span className="inline-flex items-center gap-1 text-amber-300">
-                <span className="tracking-[0.18em]">OPEN</span>
-                <span aria-hidden="true">↗</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Corner glint */}
+        {/* corner glint */}
         <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/70 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
       </article>
     </Link>
@@ -484,7 +324,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
   const [activeType, setActiveType] =
     React.useState<SearchDocType | "all">("all");
 
-  // Organise docs by category
   const docsByCategory = React.useMemo(() => {
     const organized: Record<string, SearchDoc[]> = {
       insights: [],
@@ -502,7 +341,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
     return organized;
   }, [docs]);
 
-  // Filtering
   const filteredDocs = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     const source =
@@ -541,12 +379,11 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
       <div className="min-h-screen bg-gradient-to-b from-black via-[#050509] to-black text-cream">
         {/* HERO */}
         <section className="relative overflow-hidden border-b border-gray-800">
-          {/* Subliminal backdrop */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-b from-amber-500/6 via-transparent to-emerald-500/6" />
             <div className="absolute inset-0 opacity-[0.14] mix-blend-soft-light bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.35),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(45,212,191,0.35),_transparent_58%)]" />
-            <div className="absolute inset-0 opacity-[0.14] bg-[linear-gradient(to_right,rgba(148,163,184,0.28)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.28)_1px,transparent_1px)] bg-[size:120px_120px]" />
-            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500/65 to-transparent" />
+            <div className="absolute inset-0 opacity-[0.18] bg-[linear-gradient(to_right,rgba(148,163,184,0.35)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.35)_1px,transparent_1px)] bg-[size:120px_120px]" />
+            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500/60 to-transparent" />
           </div>
 
           <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
@@ -562,10 +399,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                 Content Library
               </h1>
 
-              <p className="mx-auto max-w-2xl text-sm font-light leading-relaxed text-gray-200 sm:text-base">
+              <p className="mx-auto max-w-2xl text-sm sm:text-base font-light leading-relaxed text-gray-200">
                 One doorway into the whole house of Abraham of London – essays,
-                canon volumes, tools, and artefacts arranged for slow,
-                deliberate reading.
+                canon volumes, tools, and artefacts arranged for slow, deliberate
+                reading.
               </p>
             </div>
           </div>
