@@ -36,10 +36,10 @@ const typeConfig: Record<SearchDocType, {
     label: "Insight",
     description: "Thoughtful essays and perspectives",
     color: {
-      bg: "bg-blue-500/5",
-      text: "text-blue-300",
-      border: "border-blue-500/20",
-      gradient: "from-blue-500/10 via-blue-600/5 to-transparent",
+      bg: "bg-blue-500/10",
+      text: "text-blue-400",
+      border: "border-blue-500/30",
+      gradient: "from-blue-500/20 via-blue-600/10 to-blue-700/5",
       accent: "bg-blue-500/20"
     },
     icon: "💭",
@@ -50,10 +50,10 @@ const typeConfig: Record<SearchDocType, {
     label: "Book",
     description: "Comprehensive volumes and collections",
     color: {
-      bg: "bg-amber-500/5",
-      text: "text-amber-300",
-      border: "border-amber-500/20",
-      gradient: "from-amber-500/10 via-amber-600/5 to-transparent",
+      bg: "bg-amber-500/10",
+      text: "text-amber-400",
+      border: "border-amber-500/30",
+      gradient: "from-amber-500/20 via-amber-600/10 to-amber-700/5",
       accent: "bg-amber-500/20"
     },
     icon: "📚",
@@ -64,10 +64,10 @@ const typeConfig: Record<SearchDocType, {
     label: "Download",
     description: "Practical tools and templates",
     color: {
-      bg: "bg-emerald-500/5",
-      text: "text-emerald-300",
-      border: "border-emerald-500/20",
-      gradient: "from-emerald-500/10 via-emerald-600/5 to-transparent",
+      bg: "bg-emerald-500/10",
+      text: "text-emerald-400",
+      border: "border-emerald-500/30",
+      gradient: "from-emerald-500/20 via-emerald-600/10 to-emerald-700/5",
       accent: "bg-emerald-500/20"
     },
     icon: "📥",
@@ -78,10 +78,10 @@ const typeConfig: Record<SearchDocType, {
     label: "Print",
     description: "Curated prints and editions",
     color: {
-      bg: "bg-purple-500/5",
-      text: "text-purple-300",
-      border: "border-purple-500/20",
-      gradient: "from-purple-500/10 via-purple-600/5 to-transparent",
+      bg: "bg-purple-500/10",
+      text: "text-purple-400",
+      border: "border-purple-500/30",
+      gradient: "from-purple-500/20 via-purple-600/10 to-purple-700/5",
       accent: "bg-purple-500/20"
     },
     icon: "🖨️",
@@ -92,10 +92,10 @@ const typeConfig: Record<SearchDocType, {
     label: "Resource",
     description: "Guides and reference materials",
     color: {
-      bg: "bg-sky-500/5",
-      text: "text-sky-300",
-      border: "border-sky-500/20",
-      gradient: "from-sky-500/10 via-sky-600/5 to-transparent",
+      bg: "bg-sky-500/10",
+      text: "text-sky-400",
+      border: "border-sky-500/30",
+      gradient: "from-sky-500/20 via-sky-600/10 to-sky-700/5",
       accent: "bg-sky-500/20"
     },
     icon: "📋",
@@ -106,10 +106,10 @@ const typeConfig: Record<SearchDocType, {
     label: "Canon",
     description: "Foundational principles and systems",
     color: {
-      bg: "bg-rose-500/5",
-      text: "text-rose-300",
-      border: "border-rose-500/20",
-      gradient: "from-rose-500/10 via-rose-600/5 to-transparent",
+      bg: "bg-rose-500/10",
+      text: "text-rose-400",
+      border: "border-rose-500/30",
+      gradient: "from-rose-500/20 via-rose-600/10 to-rose-700/5",
       accent: "bg-rose-500/20"
     },
     icon: "⚖️",
@@ -125,37 +125,42 @@ const categoryConfig: Record<string, {
   gradient: string;
   icon: string;
   bgGradient: string;
+  badgeColor: string;
 }> = {
   insights: {
     label: "Insights",
     description: "Essays and perspectives",
-    color: "border-blue-500/30",
-    gradient: "from-blue-900/10 to-blue-950/5",
-    bgGradient: "bg-gradient-to-br from-blue-900/5 via-black to-blue-950/5",
+    color: "border-blue-500/40",
+    gradient: "from-blue-900/20 via-blue-950/10 to-black",
+    bgGradient: "bg-gradient-to-br from-blue-900/10 via-black/40 to-blue-950/5",
+    badgeColor: "bg-blue-500/20 text-blue-400 border-blue-500/40",
     icon: "💭"
   },
   frameworks: {
     label: "Frameworks",
     description: "Systems and principles",
-    color: "border-amber-500/30",
-    gradient: "from-amber-900/10 to-amber-950/5",
-    bgGradient: "bg-gradient-to-br from-amber-900/5 via-black to-amber-950/5",
+    color: "border-amber-500/40",
+    gradient: "from-amber-900/20 via-amber-950/10 to-black",
+    bgGradient: "bg-gradient-to-br from-amber-900/10 via-black/40 to-amber-950/5",
+    badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40",
     icon: "⚙️"
   },
   tools: {
     label: "Tools",
     description: "Resources and downloads",
-    color: "border-emerald-500/30",
-    gradient: "from-emerald-900/10 to-emerald-950/5",
-    bgGradient: "bg-gradient-to-br from-emerald-900/5 via-black to-emerald-950/5",
+    color: "border-emerald-500/40",
+    gradient: "from-emerald-900/20 via-emerald-950/10 to-black",
+    bgGradient: "bg-gradient-to-br from-emerald-900/10 via-black/40 to-emerald-950/5",
+    badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
     icon: "🛠️"
   },
   archives: {
     label: "Archives",
     description: "Prints and collections",
-    color: "border-purple-500/30",
-    gradient: "from-purple-900/10 to-purple-950/5",
-    bgGradient: "bg-gradient-to-br from-purple-900/5 via-black to-purple-950/5",
+    color: "border-purple-500/40",
+    gradient: "from-purple-900/20 via-purple-950/10 to-black",
+    bgGradient: "bg-gradient-to-br from-purple-900/10 via-black/40 to-purple-950/5",
+    badgeColor: "bg-purple-500/20 text-purple-400 border-purple-500/40",
     icon: "📦"
   },
 };
@@ -170,7 +175,6 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 
 // Helper function to get all properties from SearchDoc
 const getDocProperties = (doc: SearchDoc) => {
-  // Cast to any to access all properties, then filter out undefined
   const rawDoc = doc as any;
   return {
     // Core properties
@@ -202,10 +206,34 @@ const getDocProperties = (doc: SearchDoc) => {
     isbn: rawDoc.isbn || null,
     rating: rawDoc.rating || null,
     
-    // Blog-specific properties (author could be object or string)
+    // Blog-specific properties
     authorName: typeof rawDoc.author === 'object' ? rawDoc.author?.name : rawDoc.author || null,
     authorPicture: typeof rawDoc.author === 'object' ? rawDoc.author?.picture : null,
   };
+};
+
+// Custom card wrapper for consistent styling
+const CardWrapper: React.FC<{
+  children: React.ReactNode;
+  category: string;
+  type: SearchDocType;
+}> = ({ children, category, type }) => {
+  const config = typeConfig[type];
+  
+  return (
+    <div className="group relative h-full">
+      {/* Background gradient overlay on hover */}
+      <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${config.color.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10`} />
+      
+      {/* Main card container */}
+      <div className="relative h-full rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/80 to-gray-950/80 backdrop-blur-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:border-gray-700 group-hover:shadow-2xl">
+        {children}
+        
+        {/* Corner accent */}
+        <div className="absolute -right-2 -top-2 h-4 w-4 rounded-full bg-gradient-to-br from-amber-400/40 to-amber-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+    </div>
+  );
 };
 
 // Render the appropriate card component based on document type
@@ -216,74 +244,19 @@ const ContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
   // Common href logic
   const href = doc.href || `/${doc.type === 'post' ? 'blog' : doc.type}/${doc.slug}`;
 
+  // Add custom className to each card for consistent styling
+  const cardClassName = "h-full";
+
   switch (config.cardComponent) {
     case 'blog':
-      // Handle author as string or object
       const blogAuthor = props.authorName ? {
         name: props.authorName,
         picture: props.authorPicture || undefined
       } : null;
 
       return (
-        <BlogPostCard
-          slug={props.slug}
-          title={props.title}
-          subtitle={props.subtitle}
-          excerpt={props.excerpt}
-          description={props.description}
-          coverImage={props.coverImage}
-          date={props.date}
-          author={blogAuthor}
-          tags={props.tags}
-          featured={props.featured}
-          readTime={props.readTime}
-          category={props.category}
-          href={href}
-        />
-      );
-    case 'book':
-      return (
-        <BookCard
-          slug={props.slug}
-          title={props.title}
-          subtitle={props.subtitle}
-          author={props.authorName}
-          excerpt={props.excerpt}
-          description={props.description}
-          coverImage={props.coverImage}
-          publishDate={props.publishDate}
-          isbn={props.isbn}
-          tags={props.tags}
-          featured={props.featured}
-          rating={props.rating}
-          href={href}
-        />
-      );
-    case 'canon':
-      return (
-        <CanonResourceCard
-          canon={{
-            slug: props.slug,
-            title: props.title,
-            subtitle: props.subtitle,
-            excerpt: props.excerpt,
-            description: props.description,
-            coverImage: props.coverImage,
-            volumeNumber: props.volumeNumber,
-            date: props.date,
-            tags: props.tags,
-            featured: props.featured,
-            accessLevel: props.accessLevel,
-            lockMessage: props.lockMessage,
-          }}
-        />
-      );
-    case 'base':
-    default:
-      // Use the DocumentCard wrapper from BaseCard if available, otherwise use BaseCard directly
-      return (
-        <div className="h-full">
-          <BaseCard
+        <CardWrapper category={config.category} type={doc.type}>
+          <BlogPostCard
             slug={props.slug}
             title={props.title}
             subtitle={props.subtitle}
@@ -291,16 +264,84 @@ const ContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
             description={props.description}
             coverImage={props.coverImage}
             date={props.date}
+            author={blogAuthor}
             tags={props.tags}
             featured={props.featured}
-            accessLevel={props.accessLevel}
-            lockMessage={props.lockMessage}
+            readTime={props.readTime}
             category={props.category}
-            readingTime={props.readingTime}
-            isNew={props.isNew}
             href={href}
+            className={cardClassName}
           />
-        </div>
+        </CardWrapper>
+      );
+    case 'book':
+      return (
+        <CardWrapper category={config.category} type={doc.type}>
+          <BookCard
+            slug={props.slug}
+            title={props.title}
+            subtitle={props.subtitle}
+            author={props.authorName}
+            excerpt={props.excerpt}
+            description={props.description}
+            coverImage={props.coverImage}
+            publishDate={props.publishDate}
+            isbn={props.isbn}
+            tags={props.tags}
+            featured={props.featured}
+            rating={props.rating}
+            href={href}
+            className={cardClassName}
+          />
+        </CardWrapper>
+      );
+    case 'canon':
+      return (
+        <CardWrapper category={config.category} type={doc.type}>
+          <CanonResourceCard
+            canon={{
+              slug: props.slug,
+              title: props.title,
+              subtitle: props.subtitle,
+              excerpt: props.excerpt,
+              description: props.description,
+              coverImage: props.coverImage,
+              volumeNumber: props.volumeNumber,
+              date: props.date,
+              tags: props.tags,
+              featured: props.featured,
+              accessLevel: props.accessLevel,
+              lockMessage: props.lockMessage,
+            }}
+            className={cardClassName}
+          />
+        </CardWrapper>
+      );
+    case 'base':
+    default:
+      return (
+        <CardWrapper category={config.category} type={doc.type}>
+          <div className="h-full">
+            <BaseCard
+              slug={props.slug}
+              title={props.title}
+              subtitle={props.subtitle}
+              excerpt={props.excerpt}
+              description={props.description}
+              coverImage={props.coverImage}
+              date={props.date}
+              tags={props.tags}
+              featured={props.featured}
+              accessLevel={props.accessLevel}
+              lockMessage={props.lockMessage}
+              category={props.category}
+              readingTime={props.readingTime}
+              isNew={props.isNew}
+              href={href}
+              className={cardClassName}
+            />
+          </div>
+        </CardWrapper>
       );
   }
 };
@@ -385,14 +426,9 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
           .animate-fade-in-up {
             animation: fadeInUp 0.5s ease-out forwards;
           }
-          .category-section {
-            opacity: 0;
+          .grid-item-animation {
             animation: fadeInUp 0.5s ease-out forwards;
           }
-          .stagger-delay-1 { animation-delay: 0.1s; }
-          .stagger-delay-2 { animation-delay: 0.2s; }
-          .stagger-delay-3 { animation-delay: 0.3s; }
-          .stagger-delay-4 { animation-delay: 0.4s; }
         `}</style>
       </Head>
 
@@ -424,7 +460,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
         </section>
 
         {/* Controls Section */}
-        <section className="sticky top-0 z-40 border-b border-gray-800 bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/60">
+        <section className="sticky top-0 z-40 border-b border-gray-800 bg-black/90 backdrop-blur-xl supports-[backdrop-filter]:bg-black/80">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               {/* Search */}
@@ -438,7 +474,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search across the collection..."
-                  className="w-full rounded-xl border border-gray-700 bg-gray-900/50 py-3 pl-12 pr-4 text-cream placeholder:text-gray-500 backdrop-blur-sm transition-all duration-200 hover:border-gray-600 focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/20"
+                  className="w-full rounded-xl border border-gray-700 bg-gray-900/60 py-3 pl-12 pr-4 text-cream placeholder:text-gray-500 backdrop-blur-sm transition-all duration-200 hover:border-gray-600 focus:border-amber-400/60 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
                 />
                 {query && (
                   <button
@@ -454,10 +490,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setActiveCategory("all")}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
                     activeCategory === "all"
-                      ? "bg-amber-500 text-black shadow-lg shadow-amber-500/25"
-                      : "border border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/50"
+                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/25"
+                      : "border border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/60"
                   }`}
                 >
                   All ({docs.length})
@@ -465,16 +501,16 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                 {Object.entries(categoryConfig).map(([key, category], index) => {
                   const count = getCategoryStats(key);
                   if (count === 0) return null;
-                  const color = key === 'insights' ? 'blue' : key === 'frameworks' ? 'amber' : key === 'tools' ? 'emerald' : 'purple';
                   return (
                     <button
                       key={key}
                       onClick={() => setActiveCategory(key)}
-                      className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 animate-fade-in-up stagger-delay-${index + 1} ${
+                      className={`rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-200 animate-fade-in-up ${
                         activeCategory === key
-                          ? `bg-gradient-to-r ${category.gradient} border-${color}-500/50 text-cream shadow-lg shadow-${color}-500/10`
-                          : "border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/50"
+                          ? `bg-gradient-to-r ${category.gradient} ${category.color} text-cream shadow-lg`
+                          : "border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/60"
                       }`}
+                      style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <span className="flex items-center gap-2">
                         <span>{category.icon}</span>
@@ -491,10 +527,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 onClick={() => setActiveType("all")}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
                   activeType === "all"
                     ? "bg-gray-700 text-cream"
-                    : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/30"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
                 }`}
               >
                 All Types
@@ -507,11 +543,12 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                   <button
                     key={type}
                     onClick={() => setActiveType(type)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 animate-fade-in-up stagger-delay-${index + 1} ${
+                    className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 animate-fade-in-up ${
                       activeType === type
                         ? `${config.color.bg} ${config.color.border} ${config.color.text}`
                         : "border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200"
                     }`}
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <span className="flex items-center gap-1.5">
                       <span>{config.icon}</span>
@@ -528,7 +565,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {filteredDocs.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-gray-700 bg-gray-900/20 p-12 text-center animate-fade-in-up">
+              <div className="rounded-2xl border border-dashed border-gray-700 bg-gradient-to-b from-gray-900/30 to-gray-950/20 p-12 text-center animate-fade-in-up">
                 <div className="mb-4 text-4xl">🔍</div>
                 <h3 className="mb-2 font-serif text-xl text-cream">No content found</h3>
                 <p className="text-gray-400">
@@ -546,7 +583,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                         <h2 className="font-serif text-2xl text-cream">{categoryConfig[activeCategory].label}</h2>
                         <p className="text-gray-300">{categoryConfig[activeCategory].description}</p>
                       </div>
-                      <span className="ml-auto rounded-full bg-black/30 px-3 py-1 text-sm text-gray-300">
+                      <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-sm text-gray-300">
                         {filteredDocs.length} {filteredDocs.length === 1 ? 'item' : 'items'}
                       </span>
                     </div>
@@ -567,8 +604,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                       return (
                         <div 
                           key={key} 
-                          className={`category-section ${category.bgGradient} rounded-2xl border ${category.color} p-6 stagger-delay-${catIndex + 1}`}
-                          style={{ animationDelay: `${(catIndex + 1) * 0.1}s` }}
+                          className={`category-section ${category.bgGradient} rounded-2xl border ${category.color} p-6 animate-fade-in-up`}
+                          style={{ animationDelay: `${catIndex * 100}ms` }}
                         >
                           <div className="mb-6 flex items-center gap-3">
                             <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${category.gradient}`}>
@@ -587,8 +624,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                             {filteredCategoryDocs.map((doc, index) => (
                               <div 
                                 key={`${doc.type}:${doc.slug}`}
-                                className="animate-fade-in-up h-full"
-                                style={{ animationDelay: `${(index * 0.05) + (catIndex * 0.1)}s` }}
+                                className="grid-item-animation h-full"
+                                style={{ animationDelay: `${(index * 50) + (catIndex * 100)}ms` }}
                               >
                                 <ContentCard doc={doc} />
                               </div>
@@ -604,8 +641,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                     {filteredDocs.map((doc, index) => (
                       <div 
                         key={`${doc.type}:${doc.slug}`}
-                        className="animate-fade-in-up h-full"
-                        style={{ animationDelay: `${index * 0.05}s` }}
+                        className="grid-item-animation h-full"
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <ContentCard doc={doc} />
                       </div>
@@ -618,23 +655,22 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
         </section>
 
         {/* Stats Footer */}
-        <section className="border-t border-gray-800 bg-black/30 py-10">
+        <section className="border-t border-gray-800 bg-gradient-to-b from-black/40 to-gray-950/30 py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
               {Object.entries(categoryConfig).map(([key, category], index) => {
                 const count = getCategoryStats(key);
-                const color = key === 'insights' ? 'blue' : key === 'frameworks' ? 'amber' : key === 'tools' ? 'emerald' : 'purple';
                 return (
                   <div 
                     key={key} 
                     className="text-center animate-fade-in-up"
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-${color}-500/20 to-${color}-600/10`}>
+                    <div className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${category.gradient} ${category.color}`}>
                       <span className="text-2xl">{category.icon}</span>
                     </div>
-                    <div className="text-3xl font-light text-cream mb-1">{count}</div>
-                    <div className="text-sm font-medium uppercase tracking-wider text-gray-300 mb-1">
+                    <div className="text-3xl font-light text-cream mb-2">{count}</div>
+                    <div className="text-sm font-medium uppercase tracking-wider text-gray-300 mb-2">
                       {category.label}
                     </div>
                     <div className="text-xs text-gray-500">
@@ -644,9 +680,9 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                 );
               })}
             </div>
-            <div className="mt-10 text-center">
-              <p className="text-sm text-gray-500">
-                Total collection: <span className="text-amber-300">{docs.length}</span> curated items
+            <div className="mt-12 text-center">
+              <p className="text-sm text-gray-400">
+                Total collection: <span className="text-amber-300 font-medium">{docs.length}</span> curated items across all categories
               </p>
             </div>
           </div>
