@@ -1,4 +1,3 @@
-// pages/content/index.tsx
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Link from "next/link";
@@ -15,7 +14,7 @@ type ContentPageProps = {
   docs: SearchDoc[];
 };
 
-// ---------- VISUAL + SEMANTIC TYPE CONFIG ----------
+// ---------- TYPE + CATEGORY CONFIG ----------
 
 const typeConfig: Record<
   SearchDocType,
@@ -170,7 +169,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   };
 };
 
-// ---------- CARD HELPERS: HREF, ASPECT ----------
+// ---------- CARD HELPERS: HREF & ASPECT ----------
 
 const getHrefForDoc = (doc: SearchDoc): string => {
   if (doc.href) return doc.href;
@@ -184,12 +183,10 @@ const inferAspectFromPath = (doc: SearchDoc): CoverAspectHint | null => {
   const src = doc.coverImage || "";
   if (!src) return null;
 
-  // Treat any book/canon art as a vertical cover
   if (src.includes("/books/") || src.includes("canon") || src.includes("fathering-without-fear")) {
     return "book";
   }
 
-  // Banners / shorts → cinematic
   if (src.includes("/shorts/") || src.includes("banner") || src.includes("hero")) {
     return "wide";
   }
@@ -220,7 +217,7 @@ const getAspectClassForDoc = (doc: SearchDoc): string => {
   }
 };
 
-// ---------- SINGLE LUXURY CARD ----------
+// ---------- SINGLE LUXURY CARD (USED FOR ALL TYPES) ----------
 
 const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
   const config = typeConfig[doc.type];
@@ -230,16 +227,9 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
   return (
     <Link href={href} className="group block h-full">
       <article
-        className={`
-          relative flex h-full flex-col overflow-hidden rounded-2xl 
-          border ${config.color.border}
-          bg-gradient-to-b from-[#050509]/96 via-black/96 to-[#050509]/99
-          shadow-[0_22px_60px_rgba(0,0,0,0.75)]
-          transition-transform duration-300
-          group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]
-        `}
+        className={`relative flex h-full flex-col overflow-hidden rounded-2xl border ${config.color.border} bg-gradient-to-b from-[#050509]/96 via-black/96 to-[#050509]/99 shadow-[0_22px_60px_rgba(0,0,0,0.75)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]`}
       >
-        {/* Image frame */}
+        {/* IMAGE */}
         <div className={`relative w-full overflow-hidden ${aspectClass}`}>
           {doc.coverImage ? (
             <>
@@ -260,7 +250,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
             </div>
           )}
 
-          {/* Inner frame line */}
+          {/* Inner frame */}
           <div className="pointer-events-none absolute inset-2 rounded-[1rem] border border-white/10" />
 
           {/* Type pill */}
@@ -270,7 +260,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
           </div>
         </div>
 
-        {/* Body */}
+        {/* BODY */}
         <div className="flex flex-1 flex-col gap-3 p-5">
           <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
             {doc.title}
@@ -282,7 +272,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
             </p>
           )}
 
-          {/* Meta */}
+          {/* META */}
           <div className="mt-auto border-t border-gray-800/80 pt-3 text-xs">
             <div className="mb-2 flex flex-wrap gap-1.5">
               {doc.tags?.slice(0, 3).map((tag) => (
@@ -314,8 +304,9 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
               </span>
             </div>
           </div>
+        </div>
 
-        {/* Corner glint */}
+        {/* CORNER GLINT */}
         <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/70 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
       </article>
     </Link>
@@ -330,6 +321,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
   const [activeType, setActiveType] =
     React.useState<SearchDocType | "all">("all");
 
+  // group by category
   const docsByCategory = React.useMemo(() => {
     const organized: Record<string, SearchDoc[]> = {
       insights: [],
@@ -347,6 +339,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
     return organized;
   }, [docs]);
 
+  // filtering
   const filteredDocs = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     const source =
