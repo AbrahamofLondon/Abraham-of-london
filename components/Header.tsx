@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone, Mail, ChevronRight } from "lucide-react";
+import { Menu, X, Phone, Mail } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 // --- Types & Constants -------------------------------------------------------
@@ -30,7 +30,6 @@ type NavItem = {
   route: RouteId;
   label: string;
   description?: string;
-  icon?: React.ReactNode;
 };
 
 // Device detection for optimal styling
@@ -74,48 +73,19 @@ const LOCAL_SITE_CONFIG = {
   },
 } as const;
 
-const getRoutePath = (route: RouteId): string => {
-  return LOCAL_SITE_CONFIG.routes[route]?.path || "/";
-};
+const getRoutePath = (route: RouteId): string =>
+  LOCAL_SITE_CONFIG.routes[route]?.path || "/";
 
-// Enhanced navigation items with better mobile descriptions
-// ORDER MATTERS – Shorts is now central
+// *** CENTRAL, ORDERED NAV ITEMS ***
+// Shorts is in the middle and will always render.
 const NAV_ITEMS: NavItem[] = [
-  {
-    route: "booksIndex",
-    label: "Books",
-    description: "Curated volumes & works",
-  },
-  {
-    route: "canonIndex",
-    label: "Canon",
-    description: "The 10-volume system",
-  },
-  {
-    route: "shorts",
-    label: "Shorts",
-    description: "Quick hits, zero fluff",
-  },
-  {
-    route: "blogIndex",
-    label: "Insights",
-    description: "Strategic wisdom",
-  },
-  {
-    route: "ventures",
-    label: "Ventures",
-    description: "Business pursuits",
-  },
-  {
-    route: "about",
-    label: "About",
-    description: "My journey",
-  },
-  {
-    route: "contact",
-    label: "Contact",
-    description: "Get in touch",
-  },
+  { route: "booksIndex", label: "Books", description: "Curated volumes" },
+  { route: "canonIndex", label: "Canon", description: "The 10-volume system" },
+  { route: "blogIndex", label: "Insights", description: "Strategic wisdom" },
+  { route: "shorts", label: "Shorts", description: "Sharp. Brief. Undeniable." },
+  { route: "ventures", label: "Ventures", description: "Business pursuits" },
+  { route: "about", label: "About", description: "My journey" },
+  { route: "contact", label: "Contact", description: "Get in touch" },
 ];
 
 const SCROLL_THRESHOLD = 5;
@@ -163,17 +133,13 @@ const COLOR_SYSTEM = {
   },
 } as const;
 
-// --- Enhanced Hooks ---------------------------------------------------------
+// --- Hooks ---------------------------------------------------------
 const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
   const [scrolled, setScrolled] = React.useState(false);
 
   React.useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > threshold;
-      setScrolled(isScrolled);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > threshold);
 
-    // Throttle scroll events
     let ticking = false;
     const throttledScroll = () => {
       if (!ticking) {
@@ -186,7 +152,7 @@ const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
     };
 
     window.addEventListener("scroll", throttledScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
 
     return () => window.removeEventListener("scroll", throttledScroll);
   }, [threshold]);
@@ -203,11 +169,11 @@ const useSafeArea = () => {
     const updateSafeArea = () => {
       const top = parseInt(
         getComputedStyle(document.documentElement).getPropertyValue("--sat") ||
-          "0"
+          "0",
       );
       const bottom = parseInt(
         getComputedStyle(document.documentElement).getPropertyValue("--sab") ||
-          "0"
+          "0",
       );
       setSafeArea({ top, bottom });
     };
@@ -242,10 +208,11 @@ const useBodyScrollLock = (isLocked: boolean) => {
   }, [isLocked]);
 };
 
-// --- Optimized Components ---------------------------------------------------
+// --- Nav & Buttons ---------------------------------------------------
 interface NavLinkProps {
   item: NavItem;
   isActive: boolean;
+  isHighlight?: boolean;
   theme: "light" | "dark";
   onClick?: () => void;
   variant?: "desktop" | "mobile";
@@ -254,49 +221,19 @@ interface NavLinkProps {
 const NavLink: React.FC<NavLinkProps> = ({
   item,
   isActive,
+  isHighlight = false,
   theme,
   onClick,
   variant = "desktop",
 }) => {
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
-  const isShorts = item.route === "shorts";
 
-  // SPECIAL DESKTOP TREATMENT FOR SHORTS
-  if (!isMobile && isShorts) {
-    const activeClasses =
-      theme === "dark"
-        ? "border-amber-400/80 bg-amber-400/15 text-amber-200 shadow-amber-500/30"
-        : "border-amber-600/80 bg-amber-50 text-amber-700 shadow-amber-500/20";
+  const highlightClasses =
+    !isMobile && isHighlight
+      ? "rounded-full px-3 py-1 border border-amber-500/40 bg-amber-500/10 text-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.35)]"
+      : "";
 
-    const baseClasses =
-      theme === "dark"
-        ? "border-amber-400/50 bg-transparent text-amber-200"
-        : "border-amber-600/60 bg-transparent text-amber-700";
-
-    return (
-      <li>
-        <Link
-          href={getRoutePath("shorts")}
-          onClick={onClick}
-          prefetch
-          className={`
-            inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em]
-            transition-all duration-200 hover:scale-105 active:scale-95
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
-            shadow-sm
-            ${isActive ? activeClasses : baseClasses}
-          `}
-          aria-current={isActive ? "page" : undefined}
-        >
-          <span>Shorts</span>
-          <ChevronRight className="h-3 w-3" />
-        </Link>
-      </li>
-    );
-  }
-
-  // Standard nav link (desktop + mobile)
   const baseClasses = `
     transition-all duration-200 ease-out
     ${isMobile ? "text-lg py-3 px-4 rounded-xl active:scale-95" : "text-sm lg:text-base py-1"}
@@ -304,6 +241,7 @@ const NavLink: React.FC<NavLinkProps> = ({
     ${isActive ? colors.interactive.active : colors.interactive.base}
     focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
     ${isMobile ? "touch-manipulation" : ""}
+    ${highlightClasses}
   `;
 
   const activeBg =
@@ -320,16 +258,10 @@ const NavLink: React.FC<NavLinkProps> = ({
         onClick={onClick}
         className={`${baseClasses} ${isMobile ? activeBg : ""} block`}
         aria-current={isActive ? "page" : undefined}
-        prefetch
+        prefetch={true}
       >
-        <div
-          className={`flex ${
-            isMobile ? "flex-col" : "items-center gap-1"
-          }`}
-        >
-          <span className={`${isMobile ? "font-semibold" : ""}`}>
-            {item.label}
-          </span>
+        <div className={`flex ${isMobile ? "flex-col" : "items-center gap-1"}`}>
+          <span className={isMobile ? "font-semibold" : ""}>{item.label}</span>
           {isMobile && item.description && (
             <span className={`mt-0.5 text-sm ${colors.text.secondary}`}>
               {item.description}
@@ -337,7 +269,7 @@ const NavLink: React.FC<NavLinkProps> = ({
           )}
         </div>
       </Link>
-      {!isMobile && (
+      {!isMobile && !isHighlight && (
         <motion.div
           className={`h-0.5 ${isActive ? "bg-amber-500" : "bg-transparent"}`}
           initial={{ width: 0 }}
@@ -368,9 +300,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({
   const isMobile = variant === "mobile";
 
   const href =
-    type === "email"
-      ? `mailto:${value}`
-      : `tel:${value.replace(/\s+/g, "")}`;
+    type === "email" ? `mailto:${value}` : `tel:${value.replace(/\s+/g, "")}`;
   const label = type === "email" ? "Email" : "Call";
   const Icon = type === "email" ? Mail : Phone;
 
@@ -389,9 +319,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({
       aria-label={`${label} Abraham`}
     >
       <Icon
-        className={`${
-          isMobile ? "h-4 w-4" : "h-3.5 w-3.5"
-        } flex-shrink-0`}
+        className={`${isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} flex-shrink-0`}
       />
       <span className="font-medium">{label}</span>
     </a>
@@ -427,23 +355,18 @@ export default function Header({
       if (href === "/") return currentPath === "/";
       return currentPath === href || currentPath?.startsWith(`${href}/`);
     },
-    [currentPath]
+    [currentPath],
   );
 
   const colors = COLOR_SYSTEM[theme];
 
-  // Responsive header height
   const headerHeight = scrolled
     ? HEADER_HEIGHTS[deviceType].scrolled
     : HEADER_HEIGHTS[deviceType].normal;
 
-  // Shell styling
   const shellStyle =
-    scrolled || !transparent
-      ? colors.shell.normal
-      : colors.shell.transparent;
+    scrolled || !transparent ? colors.shell.normal : colors.shell.transparent;
 
-  // Brand styling with responsive sizing
   const brandSize = {
     mobile: scrolled ? "text-xl" : "text-2xl",
     tablet: scrolled ? "text-2xl" : "text-3xl",
@@ -456,8 +379,7 @@ export default function Header({
         className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${shellStyle}`}
         style={{
           height: headerHeight,
-          paddingTop:
-            safeArea.top > 0 ? `${safeArea.top}px` : undefined,
+          paddingTop: safeArea.top > 0 ? `${safeArea.top}px` : undefined,
         }}
         role="banner"
         aria-label="Primary navigation"
@@ -476,7 +398,7 @@ export default function Header({
                 rounded-lg touch-manipulation
               `}
               aria-label="Abraham of London - Home"
-              prefetch
+              prefetch={true}
             >
               Abraham of London
             </Link>
@@ -489,6 +411,7 @@ export default function Header({
                     key={item.route}
                     item={item}
                     isActive={isActive(item.route)}
+                    isHighlight={item.route === "shorts"}
                     theme={theme}
                     variant="desktop"
                   />
@@ -512,7 +435,6 @@ export default function Header({
                   />
                 </div>
 
-                {/* Canon Prelude CTA */}
                 <Link
                   href="/books/the-architecture-of-human-purpose-landing"
                   className={`
@@ -527,7 +449,7 @@ export default function Header({
                     }
                   `}
                   aria-label="The Canon Prelude – Architecture of Human Purpose"
-                  prefetch
+                  prefetch={true}
                 >
                   Canon Prelude
                 </Link>
@@ -546,7 +468,7 @@ export default function Header({
                     }
                   `}
                   aria-label="Go to contact form"
-                  prefetch
+                  prefetch={true}
                 >
                   Enquire
                 </Link>
@@ -576,11 +498,7 @@ export default function Header({
                 aria-controls="mobile-nav"
                 aria-label={isOpen ? "Close menu" : "Open menu"}
               >
-                {isOpen ? (
-                  <X className="h-5 w-5" aria-hidden="true" />
-                ) : (
-                  <Menu className="h-5 w-5" aria-hidden="true" />
-                )}
+                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             </div>
           </nav>
@@ -601,14 +519,11 @@ export default function Header({
             aria-modal="true"
             aria-label="Mobile navigation menu"
           >
-            {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
-
-            {/* Drawer Content */}
             <motion.div
               className={`absolute right-0 top-0 h-full w-[85vw] max-w-sm overflow-y-auto overscroll-contain ${
                 theme === "dark" ? "bg-gray-900" : "bg-white"
@@ -629,6 +544,7 @@ export default function Header({
                       key={item.route}
                       item={item}
                       isActive={isActive(item.route)}
+                      isHighlight={item.route === "shorts"}
                       theme={theme}
                       onClick={() => setIsOpen(false)}
                       variant="mobile"
@@ -636,7 +552,6 @@ export default function Header({
                   ))}
                 </ul>
 
-                {/* Mobile Contact Actions */}
                 <div className="mt-8 space-y-6">
                   <div className="space-y-4">
                     <h3
@@ -677,7 +592,7 @@ export default function Header({
                             : "border-amber-600/50 text-amber-600 active:bg-amber-600/10"
                         }
                       `}
-                      prefetch
+                      prefetch={true}
                     >
                       Canon Prelude
                     </Link>
@@ -696,7 +611,7 @@ export default function Header({
                             : "bg-amber-600 text-white active:bg-amber-700"
                         }
                       `}
-                      prefetch
+                      prefetch={true}
                     >
                       Enquire Now
                     </Link>
@@ -708,7 +623,7 @@ export default function Header({
         )}
       </AnimatePresence>
 
-      {/* Global styles for header spacing */}
+      {/* Global spacing for header */}
       <style jsx global>{`
         :root {
           --header-height: ${headerHeight};
@@ -720,38 +635,6 @@ export default function Header({
 
         main {
           padding-top: calc(var(--header-height) + var(--sat, 0px));
-        }
-
-        @media (max-width: 768px) {
-          button,
-          a[role="button"],
-          .touch-manipulation {
-            min-height: 44px;
-            min-width: 44px;
-          }
-        }
-
-        * {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          text-rendering: optimizeLegibility;
-        }
-
-        @supports (-webkit-touch-callout: none) {
-          input,
-          textarea {
-            font-size: 16px !important;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
         }
       `}</style>
     </>

@@ -15,6 +15,7 @@ type RouteId =
   | "contentIndex"
   | "booksIndex"
   | "canonIndex"
+  | "shorts"
   | "ventures"
   | "downloadsIndex"
   | "strategyLanding"
@@ -33,6 +34,7 @@ const LOCAL_ROUTES: Record<RouteId, string> = {
   contentIndex: "/content",
   booksIndex: "/books",
   canonIndex: "/canon",
+  shorts: "/shorts",
   ventures: "/ventures",
   downloadsIndex: "/downloads",
   strategyLanding: "/strategy",
@@ -51,8 +53,12 @@ const getRoutePath = (route: RouteId): string => {
   return LOCAL_ROUTES[route] || "/";
 };
 
+// *** Central navigation items ***
+// Shorts is explicitly present and will be highlighted.
 const NAV_ITEMS: { route: RouteId; label: string }[] = [
   { route: "booksIndex", label: "Books" },
+  { route: "canonIndex", label: "Canon" },
+  { route: "shorts", label: "Shorts" },
   { route: "blogIndex", label: "Insights" },
   { route: "ventures", label: "Ventures" },
   { route: "about", label: "About" },
@@ -182,26 +188,41 @@ export default function LuxuryNavbar({
             {/* Desktop nav */}
             <div className="hidden items-center gap-8 lg:flex">
               <ul className="flex items-center gap-8">
-                {NAV_ITEMS.map((item) => (
-                  <li key={item.route} className="relative">
-                    <Link
-                      href={getRoutePath(item.route)}
-                      className={`text-sm font-semibold tracking-wide ${linkBase} focus:outline-none focus:ring-2 focus:ring-amber-500/50 rounded-lg px-2 py-1`}
-                      aria-current={isActive(item.route) ? "page" : undefined}
-                      prefetch={true}
-                    >
-                      {item.label}
-                    </Link>
-                    <span
-                      aria-hidden="true"
-                      className={`pointer-events-none absolute -bottom-1 left-0 block h-0.5 transition-all duration-300 ${
-                        isActive(item.route)
-                          ? `w-full ${activeUnderline}`
-                          : "w-0 opacity-0"
-                      }`}
-                    />
-                  </li>
-                ))}
+                {NAV_ITEMS.map((item) => {
+                  const active = isActive(item.route);
+                  const isShorts = item.route === "shorts";
+
+                  const baseClasses = `text-sm font-semibold tracking-wide px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${linkBase}`;
+
+                  const shortsClasses = isShorts
+                    ? isDarkVariant
+                      ? "rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 shadow-[0_0_18px_rgba(251,191,36,0.45)] px-4 py-1"
+                      : "rounded-full border border-amber-500/40 bg-amber-100 text-amber-800 px-4 py-1"
+                    : "";
+
+                  return (
+                    <li key={item.route} className="relative">
+                      <Link
+                        href={getRoutePath(item.route)}
+                        className={`${baseClasses} ${shortsClasses}`}
+                        aria-current={active ? "page" : undefined}
+                        prefetch={true}
+                      >
+                        {item.label}
+                      </Link>
+                      {!isShorts && (
+                        <span
+                          aria-hidden="true"
+                          className={`pointer-events-none absolute -bottom-1 left-0 block h-0.5 transition-all duration-300 ${
+                            active
+                              ? `w-full ${activeUnderline}`
+                              : "w-0 opacity-0"
+                          }`}
+                        />
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -262,26 +283,31 @@ export default function LuxuryNavbar({
               className={`lg:hidden border-t backdrop-blur-xl transition-all duration-300 ${mobileNavBackground}`}
             >
               <div className="space-y-1 px-4 py-6">
-                {NAV_ITEMS.map((item) => (
-                  <Link
-                    key={item.route}
-                    href={getRoutePath(item.route)}
-                    onClick={() => setIsOpen(false)}
-                    className={`block rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${
-                      isActive(item.route)
-                        ? isDarkVariant
-                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                          : "bg-amber-500/10 text-gray-900 border border-amber-500/20"
-                        : isDarkVariant
-                          ? "text-gray-100 hover:text-amber-400 hover:bg-white/10 border border-transparent"
-                          : "text-gray-700 hover:text-gray-900 hover:bg-black/5 border border-transparent"
-                    } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
-                    aria-current={isActive(item.route) ? "page" : undefined}
-                    prefetch={true}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {NAV_ITEMS.map((item) => {
+                  const active = isActive(item.route);
+                  const isShorts = item.route === "shorts";
+
+                  return (
+                    <Link
+                      key={item.route}
+                      href={getRoutePath(item.route)}
+                      onClick={() => setIsOpen(false)}
+                      className={`block rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${
+                        active
+                          ? isDarkVariant
+                            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                            : "bg-amber-500/10 text-gray-900 border border-amber-500/20"
+                          : isDarkVariant
+                            ? "text-gray-100 hover:text-amber-400 hover:bg-white/10 border border-transparent"
+                            : "text-gray-700 hover:text-gray-900 hover:bg-black/5 border border-transparent"
+                      } ${isShorts ? "border-amber-500/40" : ""}`}
+                      aria-current={active ? "page" : undefined}
+                      prefetch={true}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
 
                 <div className="pt-4 space-y-3">
                   <a
@@ -334,28 +360,13 @@ export default function LuxuryNavbar({
           }
         }
 
-        /* Smooth scrolling for the whole site */
         html {
           scroll-behavior: smooth;
         }
 
-        /* Focus styles for accessibility */
         *:focus-visible {
           outline: 2px solid #f59e0b;
           outline-offset: 2px;
-        }
-
-        /* Reduced motion for accessibility */
-        @media (prefers-reduced-motion: reduce) {
-          * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-          
-          html {
-            scroll-behavior: auto;
-          }
         }
       `}</style>
     </>

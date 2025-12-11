@@ -4,6 +4,8 @@ import * as React from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import Header from "@/components/Header";
+
 
 // Dynamically import components for better performance
 const LuxuryNavbar = dynamic(() => import("@/components/LuxuryNavbar"), {
