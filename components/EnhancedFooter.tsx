@@ -24,19 +24,20 @@ import {
 
 // Device detection hook
 const useDeviceType = () => {
-  const [deviceType, setDeviceType] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [deviceType, setDeviceType] =
+    React.useState<"mobile" | "tablet" | "desktop">("desktop");
 
   React.useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
-      if (width < 768) setDeviceType('mobile');
-      else if (width < 1024) setDeviceType('tablet');
-      else setDeviceType('desktop');
+      if (width < 768) setDeviceType("mobile");
+      else if (width < 1024) setDeviceType("tablet");
+      else setDeviceType("desktop");
     };
 
     checkDevice();
-    window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
   return deviceType;
@@ -45,24 +46,65 @@ const useDeviceType = () => {
 // Simplified site configuration (removed external dependencies)
 const SITE_CONFIG = {
   title: "Abraham of London",
-  description: "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
+  description:
+    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
   contact: {
     email: "info@abrahamoflondon.org",
     phone: "+44 20 8622 5909",
-    location: "Based in London, working globally"
+    location: "Based in London, working globally",
   },
   socialLinks: [
-    { href: "https://twitter.com/abrahamoflondon", label: "Twitter", kind: "twitter" },
-    { href: "https://linkedin.com/company/abraham-of-london", label: "LinkedIn", kind: "linkedin" },
-    { href: "https://instagram.com/abrahamoflondon", label: "Instagram", kind: "instagram" },
-    { href: "https://youtube.com/@abrahamoflondon", label: "YouTube", kind: "youtube" },
-    { href: "mailto:info@abrahamoflondon.org", label: "Email", kind: "email" },
-  ]
+    {
+      href: "https://x.com/AbrahamAda48634",
+      label: "X (Twitter)",
+      kind: "twitter",
+    },
+    {
+      href: "https://www.tiktok.com/@abrahamoflondon?is_",
+      label: "TikTok",
+      kind: "tiktok",
+    },
+    {
+      href: "https://www.facebook.com/share/1Gvu4ZunTq/",
+      label: "Facebook",
+      kind: "facebook",
+    },
+    {
+      href: "https://www.instagram.com/abraham_of_london_?igsh=MWw3bjFxMmlwaDd0Mw==",
+      label: "Instagram",
+      kind: "instagram",
+    },
+    {
+      href: "https://www.linkedin.com/in/abraham-adaramola-06630321?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+      label: "LinkedIn",
+      kind: "linkedin",
+    },
+    {
+      href: "mailto:info@abrahamoflondon.org",
+      label: "Email",
+      kind: "email",
+    },
+  ],
 } as const;
 
-type SocialPlatform = "twitter" | "linkedin" | "github" | "instagram" | "youtube" | "website" | "tiktok" | "facebook" | "email" | "phone" | "whatsapp" | "medium";
+type SocialPlatform =
+  | "twitter"
+  | "linkedin"
+  | "github"
+  | "instagram"
+  | "youtube"
+  | "website"
+  | "tiktok"
+  | "facebook"
+  | "email"
+  | "phone"
+  | "whatsapp"
+  | "medium";
 
-const iconMap: Record<SocialPlatform, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+const iconMap: Record<
+  SocialPlatform,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
   twitter: Twitter,
   linkedin: Linkedin,
   github: Github,
@@ -85,6 +127,7 @@ const footerSections = [
     links: [
       { label: "Home", href: "/" },
       { label: "Content", href: "/content" },
+      { label: "Shorts", href: "/shorts" }, // << Added Shorts
       { label: "The Canon", href: "/canon" },
       { label: "Books", href: "/books" },
       { label: "Downloads", href: "/downloads" },
@@ -142,8 +185,8 @@ const FadeIn: React.FC<{
 
 export default function EnhancedFooter() {
   const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
-  const isTablet = deviceType === 'tablet';
+  const isMobile = deviceType === "mobile";
+  const isTablet = deviceType === "tablet";
   const [currentYear, setCurrentYear] = React.useState<number>(2024);
 
   React.useEffect(() => {
@@ -161,27 +204,34 @@ export default function EnhancedFooter() {
 
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.location.href = `tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, '')}`;
+    window.location.href = `tel:${SITE_CONFIG.contact.phone.replace(
+      /\s+/g,
+      ""
+    )}`;
   };
 
   // Responsive grid columns
-  const gridCols = isMobile ? '1' : isTablet ? '2' : '4';
+  const gridCols = isMobile ? "1" : isTablet ? "2" : "4";
 
   return (
     <footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-amber-500/10">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
-      
+
       {/* Glow effect */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className={`grid grid-cols-${gridCols} gap-8`}>
           {/* Brand Column */}
-          <div className={isMobile ? 'col-span-1' : isTablet ? 'col-span-2' : 'col-span-1'}>
+          <div
+            className={
+              isMobile ? "col-span-1" : isTablet ? "col-span-2" : "col-span-1"
+            }
+          >
             <FadeIn delay={0.1} direction="up">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="group inline-block mb-4 lg:mb-6"
                 aria-label="Go to homepage"
               >
@@ -204,7 +254,9 @@ export default function EnhancedFooter() {
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 text-amber-400/70 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-300">{SITE_CONFIG.contact.location}</span>
+                  <span className="text-sm text-gray-300">
+                    {SITE_CONFIG.contact.location}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
@@ -220,7 +272,10 @@ export default function EnhancedFooter() {
                 <div className="flex items-center gap-3">
                   <Phone className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
                   <a
-                    href={`tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, '')}`}
+                    href={`tel:${SITE_CONFIG.contact.phone.replace(
+                      /\s+/g,
+                      ""
+                    )}`}
                     onClick={handlePhoneClick}
                     className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
                     aria-label="Call phone number"
@@ -234,17 +289,25 @@ export default function EnhancedFooter() {
               <div className="mb-6">
                 <p className="mb-3 text-sm font-semibold text-white">Follow</p>
                 <div className="flex flex-wrap gap-2">
-                  {SITE_CONFIG.socialLinks.map((social, index) => {
-                    const Icon = social.kind && iconMap[social.kind as SocialPlatform] 
-                      ? iconMap[social.kind as SocialPlatform] 
-                      : Globe;
-                    
+                  {SITE_CONFIG.socialLinks.map((social) => {
+                    const Icon =
+                      social.kind &&
+                      iconMap[social.kind as SocialPlatform]
+                        ? iconMap[social.kind as SocialPlatform]
+                        : Globe;
+
                     return (
                       <motion.a
                         key={social.label}
                         href={social.href}
-                        target={social.href.startsWith('http') ? '_blank' : '_self'}
-                        rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        target={
+                          social.href.startsWith("http") ? "_blank" : "_self"
+                        }
+                        rel={
+                          social.href.startsWith("http")
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
                         className="group flex items-center gap-2 rounded-lg px-3 py-2 text-xs border border-amber-400/20 bg-amber-400/5 transition-all duration-200 hover:border-amber-400/40 hover:bg-amber-400/10"
                         whileHover={{ x: 2 }}
                         whileTap={{ scale: 0.98 }}
@@ -264,12 +327,18 @@ export default function EnhancedFooter() {
 
           {/* Navigation Sections */}
           {footerSections.map((section, index) => (
-            <div key={section.title} className={isMobile ? 'col-span-1' : ''}>
+            <div key={section.title} className={isMobile ? "col-span-1" : ""}>
               <FadeIn delay={0.1 + index * 0.1} direction="up">
-                <div className={isMobile ? 'border-t border-gray-800 pt-6 first:pt-0 first:border-t-0' : ''}>
+                <div
+                  className={
+                    isMobile
+                      ? "border-t border-gray-800 pt-6 first:pt-0 first:border-t-0"
+                      : ""
+                  }
+                >
                   <div className="flex items-center gap-2 mb-4">
-                    {React.createElement(section.icon, { 
-                      className: "h-4 w-4 text-amber-400" 
+                    {React.createElement(section.icon, {
+                      className: "h-4 w-4 text-amber-400",
                     })}
                     <h3 className="text-lg font-semibold text-white">
                       {section.title}
@@ -305,39 +374,40 @@ export default function EnhancedFooter() {
                   © {currentYear} {SITE_CONFIG.title}. All rights reserved.
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
-                  Built for those who still believe in duty, consequence, and legacy.
+                  Built for those who still believe in duty, consequence, and
+                  legacy.
                 </p>
               </div>
 
               {/* Legal Links */}
               <div className="flex-1">
                 <div className="flex flex-wrap justify-center gap-4 lg:gap-6 text-xs">
-                  <Link 
-                    href="/privacy" 
+                  <Link
+                    href="/privacy"
                     className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
                   >
                     Privacy Policy
                   </Link>
-                  <Link 
-                    href="/terms" 
+                  <Link
+                    href="/terms"
                     className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
                   >
                     Terms of Service
                   </Link>
-                  <Link 
-                    href="/cookies" 
+                  <Link
+                    href="/cookies"
                     className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
                   >
                     Cookie Policy
                   </Link>
-                  <Link 
-                    href="/accessibility" 
+                  <Link
+                    href="/accessibility"
                     className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
                   >
                     Accessibility
                   </Link>
-                  <Link 
-                    href="/security" 
+                  <Link
+                    href="/security"
                     className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap"
                   >
                     Security
@@ -370,46 +440,39 @@ export default function EnhancedFooter() {
 
       {/* Mobile-specific optimizations */}
       <style jsx global>{`
-        /* Mobile optimizations */
         @media (max-width: 768px) {
-          /* Better touch targets */
           a[role="button"],
           button,
           .touch-target {
             min-height: 44px;
             min-width: 44px;
           }
-          
-          /* Optimize grid columns for mobile */
+
           .grid {
             grid-template-columns: 1fr !important;
           }
-          
-          /* Ensure proper spacing on mobile */
+
           .col-span-1 {
             grid-column: span 1;
           }
         }
-        
-        /* Tablet optimizations */
+
         @media (min-width: 768px) and (max-width: 1023px) {
           .grid {
             grid-template-columns: repeat(2, 1fr) !important;
           }
-          
+
           .col-span-2 {
             grid-column: span 2;
           }
         }
-        
-        /* Desktop optimizations */
+
         @media (min-width: 1024px) {
           .grid {
             grid-template-columns: repeat(4, 1fr) !important;
           }
         }
-        
-        /* Reduce motion for accessibility */
+
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,
@@ -419,8 +482,7 @@ export default function EnhancedFooter() {
             transition-duration: 0.01ms !important;
           }
         }
-        
-        /* Smooth scrolling */
+
         html {
           scroll-behavior: smooth;
           -webkit-overflow-scrolling: touch;

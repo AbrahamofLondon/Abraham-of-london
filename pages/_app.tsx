@@ -24,9 +24,29 @@ function usePageView() {
 export default function MyApp({ Component, pageProps }: AppProps) {
   usePageView();
 
-  return (
+  // Only wrap with SessionProvider if we're sure it exists
+  let content = (
     <ThemeProvider defaultTheme="dark">
       <Component {...pageProps} />
     </ThemeProvider>
   );
+
+  // Try to add SessionProvider, but don't break if it fails
+  if (typeof window !== 'undefined') {
+    try {
+      const { SessionProvider } = require('next-auth/react');
+      content = (
+        <SessionProvider session={pageProps.session}>
+          <ThemeProvider defaultTheme="dark">
+            <Component {...pageProps} />
+          </ThemeProvider>
+        </SessionProvider>
+      );
+    } catch (error) {
+      console.warn('SessionProvider not available, continuing without it');
+      // Use the content without SessionProvider
+    }
+  }
+
+  return content;
 }
