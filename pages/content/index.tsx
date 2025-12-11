@@ -1,3 +1,4 @@
+// pages/content/index.tsx
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Link from "next/link";
@@ -14,7 +15,7 @@ type ContentPageProps = {
   docs: SearchDoc[];
 };
 
-// ---------- TYPE + CATEGORY CONFIG ----------
+// ---------- TYPE & CATEGORY CONFIG ----------
 
 const typeConfig: Record<
   SearchDocType,
@@ -161,6 +162,8 @@ const categoryConfig: Record<
   },
 };
 
+// ---------- DATA ----------
+
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   const docs = buildSearchIndex();
   return {
@@ -169,35 +172,44 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   };
 };
 
-// ---------- CARD HELPERS: HREF & ASPECT ----------
+// ---------- CARD HELPERS: HREF, ASPECT, FOCUS ----------
 
+/**
+ * Routing helper.
+ * If you set `href` in front-matter, that will be used.
+ * Otherwise we infer from type.
+ */
 const getHrefForDoc = (doc: SearchDoc): string => {
   if (doc.href) return doc.href;
-  if (doc.type === "post") return `/blog/${doc.slug}`;
-  return `/${doc.type}/${doc.slug}`;
+
+  switch (doc.type) {
+    case "post":
+      // If your posts live at /blog/[slug]
+      return `/blog/${doc.slug}`;
+    case "book":
+      // Adjust if your shop route is different
+      return `/book/${doc.slug}`;
+    case "download":
+      return `/downloads/${doc.slug}`;
+    case "resource":
+      return `/resources/${doc.slug}`;
+    case "print":
+      return `/prints/${doc.slug}`;
+    case "canon":
+      return `/canon/${doc.slug}`;
+    default:
+      return `/${doc.slug}`;
+  }
 };
 
-type CoverAspectHint = "book" | "portrait" | "wide" | "landscape" | "square";
-
-const inferAspectFromPath = (doc: SearchDoc): CoverAspectHint | null => {
-  const src = doc.coverImage || "";
-  if (!src) return null;
-
-  if (src.includes("/books/") || src.includes("canon") || src.includes("fathering-without-fear")) {
-    return "book";
-  }
-
-  if (src.includes("/shorts/") || src.includes("banner") || src.includes("hero")) {
-    return "wide";
-  }
-
-  return null;
-};
-
+/**
+ * Aspect helper.
+ * Optional front-matter:
+ *  - coverAspect: "book" | "wide" | "square" | "portrait" | "landscape"
+ */
 const getAspectClassForDoc = (doc: SearchDoc): string => {
   const raw = doc as any;
-  const explicitAspect: CoverAspectHint | undefined =
-    raw.coverAspect ?? raw.aspect ?? inferAspectFromPath(doc) ?? undefined;
+  const explicitAspect = raw.coverAspect ?? raw.aspect;
 
   switch (explicitAspect) {
     case "book":
@@ -217,19 +229,38 @@ const getAspectClassForDoc = (doc: SearchDoc): string => {
   }
 };
 
-// ---------- SINGLE LUXURY CARD (USED FOR ALL TYPES) ----------
+/**
+ * Focus helper so some covers don't crop badly.
+ * Optional front-matter:
+ *  - coverFocus: "top" | "center" | "bottom"
+ */
+const getObjectPositionClassForDoc = (doc: SearchDoc): string => {
+  const raw = doc as any;
+  const focus = raw.coverFocus as "top" | "center" | "bottom" | undefined;
+
+  switch (focus) {
+    case "top":
+      return "object-[50%_15%]";
+    case "bottom":
+      return "object-[50%_85%]";
+    case "center":
+    default:
+      return "object-center";
+  }
+};
+
+// ---------- LUX CARD COMPONENT ----------
 
 const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
   const config = typeConfig[doc.type];
   const href = getHrefForDoc(doc);
   const aspectClass = getAspectClassForDoc(doc);
+  const objectPositionClass = getObjectPositionClassForDoc(doc);
 
   return (
     <Link href={href} className="group block h-full">
-      <article
-        className={`relative flex h-full flex-col overflow-hidden rounded-2xl border ${config.color.border} bg-gradient-to-b from-[#050509]/96 via-black/96 to-[#050509]/99 shadow-[0_22px_60px_rgba(0,0,0,0.75)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]`}
-      >
-        {/* IMAGE */}
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gold/15 bg-gradient-to-b from-[#050509]/95 via-black/95 to-[#050509]/98 shadow-[0_22px_60px_rgba(0,0,0,0.75)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]">
+        {/* IMAGE / TOP PANEL */}
         <div className={`relative w-full overflow-hidden ${aspectClass}`}>
           {doc.coverImage ? (
             <>
@@ -238,9 +269,9 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
                 alt={doc.title}
                 fill
                 sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
-                className="object-cover transition-transform duration-[900ms] group-hover:scale-[1.04]"
+                className={`object-cover ${objectPositionClass} transition-transform duration-[900ms] group-hover:scale-[1.04]`}
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/5" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/0" />
             </>
           ) : (
             <div
@@ -250,11 +281,8 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
             </div>
           )}
 
-          {/* Inner frame */}
-          <div className="pointer-events-none absolute inset-2 rounded-[1rem] border border-white/10" />
-
-          {/* Type pill */}
-          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/22 bg-black/65 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
+          {/* TYPE PILL */}
+          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/18 bg-black/55 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
             <span>{config.icon}</span>
             <span>{config.label}</span>
           </div>
@@ -283,21 +311,13 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
                   {tag}
                 </span>
               ))}
-
-              <span
-                className={`
-                  rounded-full px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em]
-                  border ${config.color.border} ${config.color.accent} text-cream
-                `}
-              >
+              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em] text-amber-300/90">
                 {config.label}
               </span>
             </div>
 
             <div className="flex items-center justify-between text-[0.7rem] text-gray-400">
-              <span className="line-clamp-1">
-                {config.description}
-              </span>
+              <span className="line-clamp-1">{config.description}</span>
               <span className="inline-flex items-center gap-1 text-amber-300">
                 <span className="tracking-[0.18em]">OPEN</span>
                 <span aria-hidden="true">↗</span>
@@ -307,7 +327,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
         </div>
 
         {/* CORNER GLINT */}
-        <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/70 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/60 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
       </article>
     </Link>
   );
@@ -321,7 +341,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
   const [activeType, setActiveType] =
     React.useState<SearchDocType | "all">("all");
 
-  // group by category
   const docsByCategory = React.useMemo(() => {
     const organized: Record<string, SearchDoc[]> = {
       insights: [],
@@ -330,16 +349,13 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
       archives: [],
       all: docs,
     };
-
     docs.forEach((doc) => {
       const category = typeConfig[doc.type].category;
       organized[category].push(doc);
     });
-
     return organized;
   }, [docs]);
 
-  // filtering
   const filteredDocs = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     const source =
@@ -458,7 +474,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                 >
                   All ({docs.length})
                 </button>
-                {Object.entries(categoryConfig).map(([key, cat], idx) => {
+                {Object.entries(categoryConfig).map(([key, cat]) => {
                   const count = getCategoryStats(key);
                   if (!count) return null;
                   return (
@@ -471,7 +487,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                           ? `bg-gradient-to-r ${cat.gradient} ${cat.color} text-cream shadow-lg`
                           : "border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-900/70"
                       }`}
-                      style={{ animationDelay: `${idx * 40}ms` }}
                     >
                       <span className="flex items-center gap-2">
                         <span>{cat.icon}</span>
@@ -499,7 +514,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
               >
                 All Types
               </button>
-              {(Object.keys(typeConfig) as SearchDocType[]).map((type, idx) => {
+              {(Object.keys(typeConfig) as SearchDocType[]).map((type) => {
                 const cfg = typeConfig[type];
                 const count = docs.filter((d) => d.type === type).length;
                 if (!count) return null;
@@ -513,7 +528,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
                         ? `${cfg.color.bg} ${cfg.color.border} ${cfg.color.text}`
                         : "border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-100"
                     }`}
-                    style={{ animationDelay: `${idx * 40}ms` }}
                   >
                     <span className="flex items-center gap-1.5">
                       <span>{cfg.icon}</span>
@@ -575,52 +589,47 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
 
                 {activeCategory === "all" ? (
                   <div className="space-y-12">
-                    {Object.entries(categoryConfig).map(
-                      ([key, cat], catIndex) => {
-                        const filteredCategoryDocs = filteredDocs.filter(
-                          (doc) => typeConfig[doc.type].category === key,
-                        );
-                        if (!filteredCategoryDocs.length) return null;
+                    {Object.entries(categoryConfig).map(([key, cat]) => {
+                      const filteredCategoryDocs = filteredDocs.filter(
+                        (doc) => typeConfig[doc.type].category === key,
+                      );
+                      if (!filteredCategoryDocs.length) return null;
 
-                        return (
-                          <div
-                            key={key}
-                            className={`rounded-2xl border ${cat.color} ${cat.bgGradient} p-6`}
-                            style={{
-                              animationDelay: `${catIndex * 80}ms`,
-                            }}
-                          >
-                            <div className="mb-6 flex items-center gap-3">
-                              <div
-                                className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${cat.gradient}`}
-                              >
-                                <span className="text-xl">{cat.icon}</span>
-                              </div>
-                              <div>
-                                <h2 className="font-serif text-2xl text-cream">
-                                  {cat.label}
-                                </h2>
-                                <p className="text-sm text-gray-300">
-                                  {cat.description}
-                                </p>
-                              </div>
-                              <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-xs text-gray-300">
-                                {filteredCategoryDocs.length} items
-                              </span>
+                      return (
+                        <div
+                          key={key}
+                          className={`rounded-2xl border ${cat.color} ${cat.bgGradient} p-6`}
+                        >
+                          <div className="mb-6 flex items-center gap-3">
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${cat.gradient}`}
+                            >
+                              <span className="text-xl">{cat.icon}</span>
                             </div>
-
-                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                              {filteredCategoryDocs.map((doc) => (
-                                <LuxContentCard
-                                  key={`${doc.type}:${doc.slug}`}
-                                  doc={doc}
-                                />
-                              ))}
+                            <div>
+                              <h2 className="font-serif text-2xl text-cream">
+                                {cat.label}
+                              </h2>
+                              <p className="text-sm text-gray-300">
+                                {cat.description}
+                              </p>
                             </div>
+                            <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-xs text-gray-300">
+                              {filteredCategoryDocs.length} items
+                            </span>
                           </div>
-                        );
-                      },
-                    )}
+
+                          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {filteredCategoryDocs.map((doc) => (
+                              <LuxContentCard
+                                key={`${doc.type}:${doc.slug}`}
+                                doc={doc}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -641,14 +650,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
         <section className="border-t border-gray-800 bg-gradient-to-b from-black/60 to-[#020308] py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-              {Object.entries(categoryConfig).map(([key, cat], index) => {
+              {Object.entries(categoryConfig).map(([key, cat]) => {
                 const count = getCategoryStats(key);
                 return (
-                  <div
-                    key={key}
-                    className="text-center"
-                    style={{ animationDelay: `${index * 80}ms` }}
-                  >
+                  <div key={key} className="text-center">
                     <div
                       className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${cat.gradient} ${cat.color}`}
                     >
