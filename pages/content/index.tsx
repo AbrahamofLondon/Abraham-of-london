@@ -170,7 +170,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   };
 };
 
-// ---------- CARD HELPERS: HREF, ASPECT, FIT ----------
+// ---------- CARD HELPERS: HREF, ASPECT ----------
 
 const getHrefForDoc = (doc: SearchDoc): string => {
   if (doc.href) return doc.href;
@@ -178,19 +178,18 @@ const getHrefForDoc = (doc: SearchDoc): string => {
   return `/${doc.type}/${doc.slug}`;
 };
 
-// Heuristic: try to infer aspect from metadata or path
 type CoverAspectHint = "book" | "portrait" | "wide" | "landscape" | "square";
 
 const inferAspectFromPath = (doc: SearchDoc): CoverAspectHint | null => {
   const src = doc.coverImage || "";
   if (!src) return null;
 
-  // Anything using book / canon art should be treated like a book cover
+  // Treat any book/canon art as a vertical cover
   if (src.includes("/books/") || src.includes("canon") || src.includes("fathering-without-fear")) {
     return "book";
   }
 
-  // Shorts / banners are usually cinematic
+  // Banners / shorts → cinematic
   if (src.includes("/shorts/") || src.includes("banner") || src.includes("hero")) {
     return "wide";
   }
@@ -213,11 +212,9 @@ const getAspectClassForDoc = (doc: SearchDoc): string => {
     case "landscape":
       return "aspect-[16/9]";
     default: {
-      // Sensible defaults by type
       if (doc.type === "book" || doc.type === "print" || doc.type === "canon") {
         return "aspect-[3/4]";
       }
-      // Posts + resources default to cinematic, but can be overridden by coverAspect/path above
       return "aspect-[16/9] md:aspect-[3/2]";
     }
   }
@@ -230,21 +227,16 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
   const href = getHrefForDoc(doc);
   const aspectClass = getAspectClassForDoc(doc);
 
-  // Type-specific border + glow
-  const borderColor = config.color.border.replace("border-", "");
-  const accentBg = config.color.accent.replace("bg-", "");
-
   return (
     <Link href={href} className="group block h-full">
       <article
         className={`
           relative flex h-full flex-col overflow-hidden rounded-2xl 
-          border bg-gradient-to-b from-[#050509]/96 via-black/96 to-[#050509]/99
+          border ${config.color.border}
+          bg-gradient-to-b from-[#050509]/96 via-black/96 to-[#050509]/99
           shadow-[0_22px_60px_rgba(0,0,0,0.75)]
           transition-transform duration-300
-          group-hover:-translate-y-1
-          group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]
-          border-${borderColor}
+          group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]
         `}
       >
         {/* Image frame */}
@@ -258,7 +250,6 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
                 sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
                 className="object-cover transition-transform duration-[900ms] group-hover:scale-[1.04]"
               />
-              {/* readability overlay */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/5" />
             </>
           ) : (
@@ -306,7 +297,7 @@ const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
               <span
                 className={`
                   rounded-full px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em]
-                  border border-${borderColor} bg-${accentBg} text-cream
+                  border ${config.color.border} ${config.color.accent} text-cream
                 `}
               >
                 {config.label}
