@@ -1,6 +1,9 @@
 // app/api/shorts/[slug]/interact/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv'; // Or your preferred KV store
+
+// Simple in-memory store for demo purposes
+// In production, use a database like Supabase, Firebase, or Vercel KV
+const interactionStore = new Map<string, { likes: Set<string>; saves: Set<string> }>();
 
 export async function POST(
   request: NextRequest,
@@ -17,35 +20,33 @@ export async function POST(
       );
     }
 
-    // Generate a session ID for anonymous users
-    const sessionId = userId || `anon_${Date.now()}`;
-    
-    // Use KV store to track interactions
-    const key = `short:${slug}:${action}`;
-    const userKey = `short:${slug}:${action}:${sessionId}`;
-    
-    // Check if user already performed this action
-    const hasInteracted = await kv.get(userKey);
-    
-    if (hasInteracted) {
-      // Remove the interaction
-      await kv.decr(key);
-      await kv.del(userKey);
-      return NextResponse.json({ 
-        success: true, 
-        action: 'removed',
-        [action]: await kv.get(key) || 0
-      });
-    } else {
-      // Add the interaction
-      await kv.incr(key);
-      await kv.setex(userKey, 86400 * 30, '1'); // Store for 30 days
-      return NextResponse.json({ 
-        success: true, 
-        action: 'added',
-        [action]: await kv.get(key) || 1
+    // Initialize store for this slug if not exists
+    if (!interactionStore.has(slug)) {
+      interactionStore.set(slug, {
+        likes: new Set(),
+        saves: new Set(),
       });
     }
+
+    const store = interactionStore.get(slug)!;
+    const userSet = action === 'like' ? store.likes : store.saves;
+    
+    let currentAction = 'removed';
+    
+    if (userSet.has(userId)) {
+      // Remove interaction
+      userSet.delete(userId);
+    } else {
+      // Add interaction
+      userSet.add(userId);
+      currentAction = 'added';
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      action: currentAction,
+      [action]: userSet.size
+    });
   } catch (error) {
     console.error('Interaction error:', error);
     return NextResponse.json(
@@ -62,13 +63,14 @@ export async function GET(
   try {
     const slug = params.slug;
     
-    // Get counts for this short
-    const likes = await kv.get(`short:${slug}:like`) || 0;
-    const saves = await kv.get(`short:${slug}:save`) || 0;
+    const store = interactionStore.get(slug) || {
+      likes: new Set(),
+      saves: new Set(),
+    };
     
     return NextResponse.json({
-      likes: Number(likes),
-      saves: Number(saves)
+      likes: store.likes.size,
+      saves: store.saves.size
     });
   } catch (error) {
     console.error('Fetch error:', error);

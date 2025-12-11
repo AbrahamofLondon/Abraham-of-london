@@ -7,7 +7,6 @@ import { useMDXComponent } from "next-contentlayer2/hooks";
 import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import { useShortInteractions } from "@/hooks/useShortInteractions";
 
 // Local, serialisable type instead of importing from contentlayer2
 type ShortDoc = {
@@ -24,6 +23,99 @@ type ShortDoc = {
 
 type ShortPageProps = {
   short: ShortDoc;
+};
+
+// Simple interaction hook for this component
+const useShortInteractions = (slug: string) => {
+  const [state, setState] = React.useState({
+    likes: 0,
+    saves: 0,
+    userLiked: false,
+    userSaved: false,
+  });
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    // Fetch initial counts
+    fetch(`/api/shorts/${slug}/interact`)
+      .then(res => res.json())
+      .then(data => {
+        setState(prev => ({
+          ...prev,
+          likes: data.likes || 0,
+          saves: data.saves || 0,
+        }));
+      })
+      .catch(console.error);
+
+    // Check localStorage for user's previous interactions
+    if (typeof window !== 'undefined') {
+      const userLiked = localStorage.getItem(`short_${slug}_liked`) === 'true';
+      const userSaved = localStorage.getItem(`short_${slug}_saved`) === 'true';
+      
+      setState(prev => ({
+        ...prev,
+        userLiked,
+        userSaved,
+      }));
+    }
+  }, [slug]);
+
+  const handleInteraction = async (action: 'like' | 'save') => {
+    setLoading(true);
+    const userId = localStorage.getItem('anon_id') || `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    if (!localStorage.getItem('anon_id')) {
+      localStorage.setItem('anon_id', userId);
+    }
+
+    try {
+      const response = await fetch(`/api/shorts/${slug}/interact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, userId }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setState(prev => ({
+          ...prev,
+          [action]: data[action],
+          [`user${action.charAt(0).toUpperCase() + action.slice(1)}`]: data.action === 'added',
+        }));
+        
+        localStorage.setItem(
+          `short_${slug}_${action}ed`,
+          data.action === 'added' ? 'true' : 'false'
+        );
+      }
+    } catch (error) {
+      console.error('Interaction failed:', error);
+      // Fallback to optimistic update
+      setState(prev => {
+        const newValue = !prev[`user${action.charAt(0).toUpperCase() + action.slice(1)}`];
+        const countChange = newValue ? 1 : -1;
+        
+        localStorage.setItem(`short_${slug}_${action}ed`, newValue.toString());
+        
+        return {
+          ...prev,
+          [action]: Math.max(0, prev[action] + countChange),
+          [`user${action.charAt(0).toUpperCase() + action.slice(1)}`]: newValue,
+        };
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    ...state,
+    loading,
+    handleLike: () => handleInteraction('like'),
+    handleSave: () => handleInteraction('save'),
+  };
 };
 
 const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
@@ -50,27 +142,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
         <meta name="description" content={description} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": title,
-            "description": description,
-            "datePublished": short.date,
-            "interactionStatistic": [
-              {
-                "@type": "InteractionCounter",
-                "interactionType": "https://schema.org/LikeAction",
-                "userInteractionCount": likes
-              },
-              {
-                "@type": "InteractionCounter",
-                "interactionType": "https://schema.org/SaveAction",
-                "userInteractionCount": saves
-              }
-            ]
-          })}
-        </script>
       </Head>
 
       <main className="bg-white py-12 dark:bg-gray-950">
@@ -179,7 +250,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Share button */}
               <button
                 onClick={() => {
                   if (navigator.share) {
@@ -190,7 +260,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
                     });
                   } else {
                     navigator.clipboard.writeText(window.location.href);
-                    // Show toast notification
                     alert("Link copied to clipboard!");
                   }
                 }}
@@ -231,7 +300,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
                 into the structural patterns behind days like this.
               </p>
               
-              {/* Quick stats */}
               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-1">
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -261,7 +329,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     paths: shorts.map((short) => ({
       params: { slug: short.slug },
     })),
-    fallback: false,
+    fallback: 'blocking',
   };
 };
 
@@ -288,7 +356,7 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({
 
   return {
     props: { short },
-    revalidate: 1800, // 30 mins
+    revalidate: 60, // 1 minute for faster interaction updates
   };
 };
 

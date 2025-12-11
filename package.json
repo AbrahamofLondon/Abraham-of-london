@@ -64,6 +64,7 @@
     "@netlify/functions": "5.1.0",
     "@react-email/components": "0.0.23",
     "@react-pdf/renderer": "4.3.1",
+    "@supabase/supabase-js": "2.87.1",
     "@tailwindcss/typography": "0.5.19",
     "@types/node": "20.11.30",
     "@types/react": "18.3.12",

@@ -29,74 +29,34 @@ const SectionDivider: React.FC = () => (
   </div>
 );
 
-// Canon spotlight card – purely static, no data dependencies
-const CanonPrimaryCard: React.FC = () => (
-  <Link
-    href="/books/the-architecture-of-human-purpose"
-    className="group block h-full"
-  >
-    <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-br from-white via-[#FDF9F1] to-gray-50 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:border-amber-900/40 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <div className="p-4 md:p-6 lg:p-8">
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Cover */}
-          <div className="relative flex items-center justify-center">
-            <div className="relative aspect-[3/4] w-full max-w-sm rounded-2xl bg-gradient-to-br from-amber-500/10 via-transparent to-gray-200 dark:from-amber-500/5 dark:to-gray-800">
-              <div className="absolute inset-[5%] overflow-hidden rounded-xl border border-amber-200/80 dark:border-amber-800/70">
-                <Image
-                  src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                  alt="The Architecture of Human Purpose — Prelude MiniBook"
-                  fill
-                  sizes="(max-width: 768px) 90vw, 40vw"
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Copy */}
-          <div className="flex flex-col justify-center space-y-4 md:space-y-6">
-            <div className="flex flex-wrap items-center gap-2 md:gap-3">
-              <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">
-                Entry into the Canon
-              </span>
-              <span className="rounded-full border border-amber-300/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:border-amber-800/70 dark:text-amber-300/80">
-                Volume I · Prelude
-              </span>
-            </div>
-
-            <h3 className="font-serif text-2xl font-light text-gray-900 dark:text-cream md:text-3xl">
-              The Architecture of Human Purpose
-            </h3>
-
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80 md:text-sm">
-              Canon · Foundations of Purpose
-            </p>
-
-            <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 md:text-base">
-              A distilled, high-level prelude to the Canon — written for men
-              who understand that history, family, and institutions are shaped
-              by design, not accident. This is the reference point for
-              everything else here.
-            </p>
-
-            <div className="flex items-center justify-between border-t border-amber-200/80 pt-4 dark:border-amber-900/40">
-              <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
-                Foundational text · Limited release
-              </span>
-              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                <span className="text-sm font-semibold">Open Prelude</span>
-                <span className="text-xl transition-transform duration-300 group-hover:translate-x-2">
-                  ↠
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+{/* CANON SPOTLIGHT */}
+<section className="bg-gradient-to-b from-white via-[#F7F3EB] to-gray-50 py-12 dark:from-[#050608] dark:via-[#050608] dark:to-[#050608]">
+  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/85 dark:text-amber-300/90">
+          Canon · Foundations
+        </p>
+        <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-cream sm:text-4xl">
+          The philosophical spine
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-800 dark:text-cream/85">
+          The Canon is the long-term work: purpose, governance, civilisation,
+          and destiny — written from a father&apos;s vantage point, not an
+          academic desk.
+        </p>
       </div>
-    </article>
-  </Link>
-);
+      <Link
+        href="/canon"
+        className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-200"
+      >
+        Browse Canon entries
+      </Link>
+    </div>
+
+    <CanonPrimaryCard />
+  </div>
+</section>
 
 // SHORTS STRIP – homepage spotlight
 const ShortsStrip: React.FC = () => {
@@ -180,39 +140,20 @@ const ShortsStrip: React.FC = () => {
 };
 
 // BOOKS IN DEVELOPMENT – medium-sized cards with covers
-const BOOKS_IN_DEV = [
-  {
-    title: "Fathering Without Fear",
-    slug: "fathering-without-fear",
-    cover: "/assets/images/books/fathering-without-fear.jpg",
-    tag: "Memoir · Fatherhood · Justice",
-    blurb:
-      "The untold memoir of a father who refused to disappear — faith tested, legacy defined, history reclaimed.",
-  },
-  {
-    title: "The Fiction Adaptation",
-    slug: "the-fiction-adaptation",
-    cover: "/assets/images/books/the-fiction-adaptation.jpg",
-    tag: "Fiction · Drama · Spiritual warfare",
-    blurb:
-      "A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact.",
-  },
-];
-
 const BooksInDevelopment: React.FC = () => (
-  <section className="bg-gradient-to-b from-white to-gray-50 py-16 dark:from-gray-950 dark:to-black">
+  <section className="bg-gradient-to-b from-[#F9F5EC] via-white to-gray-50 py-16 dark:from-[#050608] dark:via-[#050608] dark:to-[#050608]">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-500/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/85 dark:text-amber-300/90">
             Books in development
           </p>
-          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-gray-900 dark:text-cream sm:text-4xl">
+          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-cream sm:text-4xl">
             Long-form work that underwrites everything else
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-            These projects sit behind the posts, shorts, and rooms —
-            slow-cooked work that outlives algorithms and platform cycles.
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-800 dark:text-cream/85">
+            These projects sit behind the posts, shorts, and rooms — slow-cooked
+            work that outlives algorithms and platform cycles.
           </p>
         </div>
         <Link
@@ -230,7 +171,7 @@ const BooksInDevelopment: React.FC = () => (
             href={`/books/${book.slug}`}
             className="group block"
           >
-            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white/90 shadow-md transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-gray-900/90">
+            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white/95 shadow-md transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-gray-900/95">
               <div className="grid gap-0 md:grid-cols-[auto,1fr]">
                 <div className="relative aspect-[3/4] w-full max-w-[8rem] flex-shrink-0 md:max-w-[9rem]">
                   <Image
@@ -243,21 +184,21 @@ const BooksInDevelopment: React.FC = () => (
                 </div>
                 <div className="flex flex-col justify-between p-5 md:p-6">
                   <div>
-                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-300">
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
                       In development
                     </p>
-                    <h3 className="mt-2 font-serif text-xl font-semibold text-gray-900 dark:text-cream">
+                    <h3 className="mt-2 font-serif text-xl font-semibold text-slate-900 dark:text-cream">
                       {book.title}
                     </h3>
-                    <p className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-600 dark:text-cream/70">
                       {book.tag}
                     </p>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    <p className="mt-3 text-sm leading-relaxed text-slate-800 dark:text-cream/85">
                       {book.blurb}
                     </p>
                   </div>
                   <div className="mt-4 flex items-center justify-between pt-2">
-                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-600 dark:text-cream/70">
                       Canon bookshelf
                     </span>
                     <span className="text-xs font-semibold text-amber-700 transition group-hover:translate-x-1 group-hover:text-amber-500 dark:text-amber-300">
