@@ -1,0 +1,21 @@
+-- Create shorts interactions table
+CREATE TABLE IF NOT EXISTS short_interactions (
+  id SERIAL PRIMARY KEY,
+  short_slug VARCHAR(255) NOT NULL,
+  user_id VARCHAR(255), -- NULL for anonymous users, string for auth providers
+  action VARCHAR(50) NOT NULL CHECK (action IN ('like', 'save')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  
+  -- Ensure unique interaction per user per short per action
+  UNIQUE(short_slug, user_id, action) WHERE user_id IS NOT NULL,
+  
+  -- For anonymous users, we'll use session/cookie or IP (implemented differently)
+  UNIQUE(short_slug, session_id, action) WHERE user_id IS NULL
+);
+
+-- Create indexes for performance
+CREATE INDEX idx_short_interactions_slug ON short_interactions(short_slug);
+CREATE INDEX idx_short_interactions_user ON short_interactions(user_id);
+CREATE INDEX idx_short_interactions_action ON short_interactions(action);
+CREATE INDEX idx_short_interactions_created ON short_interactions(created_at);

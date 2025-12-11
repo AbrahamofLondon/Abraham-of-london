@@ -34,6 +34,13 @@ export const RATE_LIMIT_CONFIGS = {
     keyPrefix: "content",
   },
   
+  // NEW: Shorts interactions
+  SHORTS_INTERACTIONS: {
+    windowMs: 60_000, // 1 minute
+    max: 30,          // 30 interaction requests/minute
+    keyPrefix: "shorts_interactions",
+  },
+  
   // Teaser system
   TEASER_REQUEST: {
     windowMs: 60_000, // 1 minute
@@ -186,6 +193,41 @@ class RateLimiter {
     };
   }
 
+  checkSync(
+    key: string,
+    config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ
+  ): RateLimitResult {
+    const now = Date.now();
+    const existing = this.buckets.get(key);
+
+    let bucket: Bucket;
+
+    if (!existing || existing.resetAt <= now) {
+      // Create new bucket
+      bucket = {
+        count: 0,
+        resetAt: now + config.windowMs,
+        firstRequestAt: now,
+      };
+    } else {
+      bucket = existing;
+    }
+
+    // Increment count
+    bucket.count += 1;
+    this.buckets.set(key, bucket);
+
+    const allowed = bucket.count <= config.max;
+    const remaining = Math.max(config.max - bucket.count, 0);
+
+    return {
+      allowed,
+      remaining,
+      limit: config.max,
+      resetAt: bucket.resetAt,
+    };
+  }
+
   getStatus(key: string): RateLimitResult | null {
     const bucket = this.buckets.get(key);
     if (!bucket) return null;
@@ -193,10 +235,14 @@ class RateLimiter {
     const now = Date.now();
     if (bucket.resetAt <= now) return null;
 
+    const config = Object.values(RATE_LIMIT_CONFIGS).find(
+      c => c.keyPrefix && key.startsWith(c.keyPrefix)
+    ) || RATE_LIMIT_CONFIGS.API_READ;
+
     return {
-      allowed: bucket.count <= 1000000, // Always "allowed" for status check
-      remaining: Math.max(0, 1000000 - bucket.count), // Large number for display
-      limit: 1000000,
+      allowed: bucket.count <= config.max,
+      remaining: Math.max(0, config.max - bucket.count),
+      limit: config.max,
       resetAt: bucket.resetAt,
     };
   }
@@ -228,35 +274,7 @@ export function rateLimit(
   key: string,
   config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ
 ): RateLimitResult {
-  const now = Date.now();
-  const existing = rateLimiter['buckets'].get(key);
-
-  let bucket: Bucket;
-
-  if (!existing || existing.resetAt <= now) {
-    // Create new bucket
-    bucket = {
-      count: 0,
-      resetAt: now + config.windowMs,
-      firstRequestAt: now,
-    };
-  } else {
-    bucket = existing;
-  }
-
-  // Increment count
-  bucket.count += 1;
-  rateLimiter['buckets'].set(key, bucket);
-
-  const allowed = bucket.count <= config.max;
-  const remaining = Math.max(config.max - bucket.count, 0);
-
-  return {
-    allowed,
-    remaining,
-    limit: config.max,
-    resetAt: bucket.resetAt,
-  };
+  return rateLimiter.checkSync(key, config);
 }
 
 export function createRateLimitHeaders(
@@ -280,6 +298,7 @@ export function resetRateLimit(key: string): boolean {
 export function getClientIpFromRequest(req: { 
   headers: Record<string, string | string[] | undefined>;
   socket?: { remoteAddress?: string };
+  connection?: { remoteAddress?: string };
 }): string {
   // Check common proxy headers
   const headers = [
@@ -295,7 +314,7 @@ export function getClientIpFromRequest(req: {
     if (value) {
       const ip = Array.isArray(value) 
         ? value[0]?.split(',')[0]?.trim()
-        : value.split(',')[0]?.trim();
+        : value.toString().split(',')[0]?.trim();
       
       if (ip && isValidIp(ip)) {
         return ip;
@@ -304,19 +323,38 @@ export function getClientIpFromRequest(req: {
   }
   
   // Fallback to socket address
-  return req.socket?.remoteAddress || 'unknown';
+  const socket = req.socket || req.connection;
+  const remoteAddress = socket?.remoteAddress;
+  
+  if (remoteAddress && isValidIp(remoteAddress)) {
+    return remoteAddress;
+  }
+  
+  return 'unknown';
 }
 
 export function isValidIp(ip: string): boolean {
   if (!ip || ip === 'unknown') return false;
   
+  // Remove port if present
+  const cleanIp = ip.split(':')[0];
+  
   // IPv4
   const ipv4Regex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
-  if (ipv4Regex.test(ip)) return true;
+  if (ipv4Regex.test(cleanIp)) return true;
   
   // IPv6 (simplified)
-  if (ip.includes(':')) {
-    const parts = ip.split(':');
+  if (cleanIp.includes(':')) {
+    // Handle IPv6 with scope
+    const ipWithoutScope = cleanIp.split('%')[0];
+    const parts = ipWithoutScope.split(':');
+    
+    // Check for IPv4-mapped IPv6
+    if (parts.length >= 2 && parts[parts.length - 1].includes('.')) {
+      const lastPart = parts[parts.length - 1];
+      return ipv4Regex.test(lastPart);
+    }
+    
     if (parts.length > 8) return false;
     return parts.every(part => 
       part === '' || /^[0-9a-fA-F]{1,4}$/.test(part)
@@ -329,28 +367,79 @@ export function isValidIp(ip: string): boolean {
 export function anonymizeIp(ip: string): string {
   if (!isValidIp(ip) || ip === 'unknown') return 'unknown';
   
+  // Remove port
+  const cleanIp = ip.split(':')[0];
+  
   // IPv6
-  if (ip.includes(':')) {
-    const parts = ip.split(':');
-    if (parts.length <= 3) return ip;
-    return `${parts.slice(0, 3).join(':')}::`;
+  if (cleanIp.includes(':')) {
+    const parts = cleanIp.split(':');
+    if (parts.length <= 3) return cleanIp;
+    // Anonymize last 80 bits for IPv6
+    return `${parts.slice(0, Math.min(2, parts.length)).join(':')}::`;
   }
   
-  // IPv4
-  const parts = ip.split('.');
-  if (parts.length !== 4) return ip;
+  // IPv4 - anonymize last octet
+  const parts = cleanIp.split('.');
+  if (parts.length !== 4) return cleanIp;
   return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
+}
+
+export function generateRateLimitKey(
+  prefix: string,
+  identifier: string,
+  req?: { headers?: Record<string, string | string[] | undefined> }
+): string {
+  let key = `${prefix}_${identifier}`;
+  
+  // Add IP if available for additional identification
+  if (req) {
+    const ip = getClientIpFromRequest(req);
+    if (ip && ip !== 'unknown') {
+      const anonymizedIp = anonymizeIp(ip);
+      key = `${prefix}_${anonymizedIp}_${identifier}`;
+    }
+  }
+  
+  return key;
+}
+
+// Helper function for API routes
+export async function checkRateLimit(
+  req: any,
+  res: any,
+  config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ
+): Promise<{ allowed: boolean; headers?: Record<string, string> }> {
+  const ip = getClientIpFromRequest(req);
+  const key = generateRateLimitKey(config.keyPrefix || 'default', ip, req);
+  
+  try {
+    const result = await rateLimitAsync(key, config);
+    
+    // Add rate limit headers to response
+    const headers = createRateLimitHeaders(result);
+    
+    if (!result.allowed) {
+      res.setHeader('Retry-After', Math.ceil((result.resetAt - Date.now()) / 1000));
+      return { allowed: false, headers };
+    }
+    
+    return { allowed: true, headers };
+  } catch (error) {
+    console.error('Rate limit check failed:', error);
+    // Allow request if rate limiting fails
+    return { allowed: true };
+  }
 }
 
 // Cleanup on process exit
 if (typeof process !== 'undefined') {
-  process.on('SIGTERM', () => {
+  const cleanup = () => {
     rateLimiter.destroy();
-  });
+  };
   
-  process.on('SIGINT', () => {
-    rateLimiter.destroy();
-  });
+  process.on('SIGTERM', cleanup);
+  process.on('SIGINT', cleanup);
+  process.on('beforeExit', cleanup);
 }
 
 export default {
@@ -362,5 +451,7 @@ export default {
   getClientIpFromRequest,
   isValidIp,
   anonymizeIp,
+  generateRateLimitKey,
+  checkRateLimit,
   RATE_LIMIT_CONFIGS,
 };
