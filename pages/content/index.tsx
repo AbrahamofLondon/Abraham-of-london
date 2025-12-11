@@ -170,7 +170,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   };
 };
 
-// ---------- CARD HELPERS: HREF, ASPECT ----------
+// ---------- CARD HELPERS: HREF, ASPECT, FIT ----------
 
 const getHrefForDoc = (doc: SearchDoc): string => {
   if (doc.href) return doc.href;
@@ -178,9 +178,30 @@ const getHrefForDoc = (doc: SearchDoc): string => {
   return `/${doc.type}/${doc.slug}`;
 };
 
+// Heuristic: try to infer aspect from metadata or path
+type CoverAspectHint = "book" | "portrait" | "wide" | "landscape" | "square";
+
+const inferAspectFromPath = (doc: SearchDoc): CoverAspectHint | null => {
+  const src = doc.coverImage || "";
+  if (!src) return null;
+
+  // Anything using book / canon art should be treated like a book cover
+  if (src.includes("/books/") || src.includes("canon") || src.includes("fathering-without-fear")) {
+    return "book";
+  }
+
+  // Shorts / banners are usually cinematic
+  if (src.includes("/shorts/") || src.includes("banner") || src.includes("hero")) {
+    return "wide";
+  }
+
+  return null;
+};
+
 const getAspectClassForDoc = (doc: SearchDoc): string => {
   const raw = doc as any;
-  const explicitAspect = raw.coverAspect ?? raw.aspect;
+  const explicitAspect: CoverAspectHint | undefined =
+    raw.coverAspect ?? raw.aspect ?? inferAspectFromPath(doc) ?? undefined;
 
   switch (explicitAspect) {
     case "book":
@@ -192,124 +213,118 @@ const getAspectClassForDoc = (doc: SearchDoc): string => {
     case "landscape":
       return "aspect-[16/9]";
     default: {
+      // Sensible defaults by type
       if (doc.type === "book" || doc.type === "print" || doc.type === "canon") {
         return "aspect-[3/4]";
       }
+      // Posts + resources default to cinematic, but can be overridden by coverAspect/path above
       return "aspect-[16/9] md:aspect-[3/2]";
     }
   }
 };
 
-// ---------- LUXURY CONTENT CARD ----------
+// ---------- SINGLE LUXURY CARD ----------
 
 const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
   const config = typeConfig[doc.type];
   const href = getHrefForDoc(doc);
   const aspectClass = getAspectClassForDoc(doc);
 
+  // Type-specific border + glow
+  const borderColor = config.color.border.replace("border-", "");
+  const accentBg = config.color.accent.replace("bg-", "");
+
   return (
     <Link href={href} className="group block h-full">
       <article
-        className={[
-          "relative flex h-full flex-col overflow-hidden rounded-2xl",
-          "border border-gray-800/80 bg-gradient-to-b from-[#050509]/98 via-black to-[#020309]",
-          "shadow-[0_22px_60px_rgba(0,0,0,0.80)]",
-          "transition-transform duration-300 ease-out",
-          "group-hover:-translate-y-[3px] group-hover:shadow-[0_32px_90px_rgba(0,0,0,0.95)]",
-        ].join(" ")}
+        className={`
+          relative flex h-full flex-col overflow-hidden rounded-2xl 
+          border bg-gradient-to-b from-[#050509]/96 via-black/96 to-[#050509]/99
+          shadow-[0_22px_60px_rgba(0,0,0,0.75)]
+          transition-transform duration-300
+          group-hover:-translate-y-1
+          group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]
+          border-${borderColor}
+        `}
       >
-        {/* top accent */}
-        <div
-          className={[
-            "pointer-events-none absolute inset-x-0 top-0 h-[3px]",
-            "bg-gradient-to-r from-transparent via-amber-300/70 to-transparent",
-            config.color.accent,
-          ].join(" ")}
-        />
-
-        {/* IMAGE FRAME */}
-        <div
-          className={[
-            "relative w-full overflow-hidden border-b border-gray-800/80",
-            "bg-gradient-to-br",
-            config.color.gradient,
-            aspectClass,
-          ].join(" ")}
-        >
+        {/* Image frame */}
+        <div className={`relative w-full overflow-hidden ${aspectClass}`}>
           {doc.coverImage ? (
             <>
-              <div className="absolute inset-3 rounded-[1.1rem] border border-white/6 bg-black/40" />
-              <div className="absolute inset-3 rounded-[1.1rem] overflow-hidden">
-                <Image
-                  src={doc.coverImage}
-                  alt={doc.title}
-                  fill
-                  sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
-                  className="object-contain transition-transform duration-[900ms] ease-out group-hover:scale-[1.02]"
-                />
-              </div>
-              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-black/70 via-black/10 to-black/0" />
+              <Image
+                src={doc.coverImage}
+                alt={doc.title}
+                fill
+                sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
+                className="object-cover transition-transform duration-[900ms] group-hover:scale-[1.04]"
+              />
+              {/* readability overlay */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/5" />
             </>
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/40 shadow-inner">
-                <span className="text-3xl">{config.icon}</span>
-              </div>
+            <div
+              className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${config.color.gradient}`}
+            >
+              <span className="text-4xl">{config.icon}</span>
             </div>
           )}
 
-          {/* TYPE PILL */}
-          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/70 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
-            <span className="opacity-90">{config.icon}</span>
-            <span className={config.color.text}>{config.label}</span>
+          {/* Inner frame line */}
+          <div className="pointer-events-none absolute inset-2 rounded-[1rem] border border-white/10" />
+
+          {/* Type pill */}
+          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/22 bg-black/65 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
+            <span>{config.icon}</span>
+            <span>{config.label}</span>
           </div>
         </div>
 
-        {/* BODY */}
+        {/* Body */}
         <div className="flex flex-1 flex-col gap-3 p-5">
-          <h3 className="line-clamp-2 font-serif text-[1.02rem] font-semibold text-cream">
+          <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
             {doc.title}
           </h3>
 
           {doc.excerpt && (
-            <p className="line-clamp-3 text-[0.78rem] leading-relaxed text-gray-300/90">
+            <p className="line-clamp-3 text-sm text-gray-300">
               {doc.excerpt}
             </p>
           )}
 
-          <div className="mt-auto border-t border-gray-800/80 pt-3 text-[0.7rem]">
+          {/* Meta */}
+          <div className="mt-auto border-t border-gray-800/80 pt-3 text-xs">
             <div className="mb-2 flex flex-wrap gap-1.5">
               {doc.tags?.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-gray-700/70 bg-black/75 px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.14em] text-gray-400"
+                  className="rounded-full bg-black/70 px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em] text-gray-400"
                 >
                   {tag}
                 </span>
               ))}
+
               <span
-                className={[
-                  "rounded-full border px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.14em]",
-                  config.color.bg,
-                  config.color.border,
-                  config.color.text,
-                ].join(" ")}
+                className={`
+                  rounded-full px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em]
+                  border border-${borderColor} bg-${accentBg} text-cream
+                `}
               >
                 {config.label}
               </span>
             </div>
 
-            <div className="flex items-center justify-between text-[0.68rem] text-gray-400">
-              <span className="line-clamp-1">{config.description}</span>
+            <div className="flex items-center justify-between text-[0.7rem] text-gray-400">
+              <span className="line-clamp-1">
+                {config.description}
+              </span>
               <span className="inline-flex items-center gap-1 text-amber-300">
                 <span className="tracking-[0.18em]">OPEN</span>
                 <span aria-hidden="true">↗</span>
               </span>
             </div>
           </div>
-        </div>
 
-        {/* corner glint */}
+        {/* Corner glint */}
         <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/70 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
       </article>
     </Link>
