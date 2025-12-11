@@ -1,5 +1,5 @@
 [build]
-  command = "CI=false pnpm install && pnpm run build:netlify"
+  command = "pnpm run build:netlify"
   publish = ".next"
 
 [build.environment]
@@ -8,8 +8,6 @@
   NODE_ENV = "production"
   CI = "false"
   HUSKY = "0"
-  NEXT_DISABLE_ESLINT = "1"
-  NEXT_DISABLE_TYPECHECK = "1"
   NEXT_TELEMETRY_DISABLED = "1"
   DISABLE_ESLINT_PLUGIN = "true"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
