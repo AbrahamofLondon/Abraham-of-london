@@ -1,12 +1,10 @@
 // pages/content/index.tsx
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
-import Head from "next/head";
+import Link from "next/link";
+import Image from "next/image";
+
 import Layout from "@/components/Layout";
-import BlogPostCard from "@/components/Cards/BlogPostCard";
-import BookCard from "@/components/Cards/BookCard";
-import CanonResourceCard from "@/components/Cards/CanonResourceCard";
-import BaseCard from "@/components/Cards/BaseCard";
 import {
   buildSearchIndex,
   type SearchDoc,
@@ -17,21 +15,23 @@ type ContentPageProps = {
   docs: SearchDoc[];
 };
 
-// Enhanced type configurations with distinct color palettes
-const typeConfig: Record<SearchDocType, {
-  label: string;
-  description: string;
-  color: {
-    bg: string;
-    text: string;
-    border: string;
-    gradient: string;
-    accent: string;
-  };
-  icon: string;
-  category: 'insights' | 'frameworks' | 'tools' | 'archives';
-  cardComponent: 'blog' | 'book' | 'canon' | 'base';
-}> = {
+// Type configuration: visual + semantic
+const typeConfig: Record<
+  SearchDocType,
+  {
+    label: string;
+    description: string;
+    color: {
+      bg: string;
+      text: string;
+      border: string;
+      gradient: string;
+      accent: string;
+    };
+    icon: string;
+    category: "insights" | "frameworks" | "tools" | "archives";
+  }
+> = {
   post: {
     label: "Insight",
     description: "Thoughtful essays and perspectives",
@@ -39,12 +39,11 @@ const typeConfig: Record<SearchDocType, {
       bg: "bg-blue-500/10",
       text: "text-blue-400",
       border: "border-blue-500/30",
-      gradient: "from-blue-500/20 via-blue-600/10 to-blue-700/5",
-      accent: "bg-blue-500/20"
+      gradient: "from-blue-500/30 via-blue-600/10 to-blue-900/10",
+      accent: "bg-blue-500/30",
     },
     icon: "💭",
-    category: 'insights',
-    cardComponent: 'blog'
+    category: "insights",
   },
   book: {
     label: "Book",
@@ -53,12 +52,11 @@ const typeConfig: Record<SearchDocType, {
       bg: "bg-amber-500/10",
       text: "text-amber-400",
       border: "border-amber-500/30",
-      gradient: "from-amber-500/20 via-amber-600/10 to-amber-700/5",
-      accent: "bg-amber-500/20"
+      gradient: "from-amber-500/40 via-amber-600/15 to-amber-900/10",
+      accent: "bg-amber-500/30",
     },
     icon: "📚",
-    category: 'frameworks',
-    cardComponent: 'book'
+    category: "frameworks",
   },
   download: {
     label: "Download",
@@ -67,12 +65,11 @@ const typeConfig: Record<SearchDocType, {
       bg: "bg-emerald-500/10",
       text: "text-emerald-400",
       border: "border-emerald-500/30",
-      gradient: "from-emerald-500/20 via-emerald-600/10 to-emerald-700/5",
-      accent: "bg-emerald-500/20"
+      gradient: "from-emerald-500/30 via-emerald-600/10 to-emerald-900/10",
+      accent: "bg-emerald-500/30",
     },
     icon: "📥",
-    category: 'tools',
-    cardComponent: 'base'
+    category: "tools",
   },
   print: {
     label: "Print",
@@ -81,12 +78,11 @@ const typeConfig: Record<SearchDocType, {
       bg: "bg-purple-500/10",
       text: "text-purple-400",
       border: "border-purple-500/30",
-      gradient: "from-purple-500/20 via-purple-600/10 to-purple-700/5",
-      accent: "bg-purple-500/20"
+      gradient: "from-purple-500/30 via-purple-600/10 to-purple-900/10",
+      accent: "bg-purple-500/30",
     },
     icon: "🖨️",
-    category: 'archives',
-    cardComponent: 'base'
+    category: "archives",
   },
   resource: {
     label: "Resource",
@@ -95,12 +91,11 @@ const typeConfig: Record<SearchDocType, {
       bg: "bg-sky-500/10",
       text: "text-sky-400",
       border: "border-sky-500/30",
-      gradient: "from-sky-500/20 via-sky-600/10 to-sky-700/5",
-      accent: "bg-sky-500/20"
+      gradient: "from-sky-500/30 via-sky-600/10 to-sky-900/10",
+      accent: "bg-sky-500/30",
     },
     icon: "📋",
-    category: 'tools',
-    cardComponent: 'base'
+    category: "tools",
   },
   canon: {
     label: "Canon",
@@ -109,59 +104,60 @@ const typeConfig: Record<SearchDocType, {
       bg: "bg-rose-500/10",
       text: "text-rose-400",
       border: "border-rose-500/30",
-      gradient: "from-rose-500/20 via-rose-600/10 to-rose-700/5",
-      accent: "bg-rose-500/20"
+      gradient: "from-rose-500/35 via-rose-600/10 to-rose-900/10",
+      accent: "bg-rose-500/30",
     },
     icon: "⚖️",
-    category: 'frameworks',
-    cardComponent: 'canon'
+    category: "frameworks",
   },
 };
 
-const categoryConfig: Record<string, {
-  label: string;
-  description: string;
-  color: string;
-  gradient: string;
-  icon: string;
-  bgGradient: string;
-  badgeColor: string;
-}> = {
+const categoryConfig: Record<
+  string,
+  {
+    label: string;
+    description: string;
+    color: string;
+    gradient: string;
+    icon: string;
+    bgGradient: string;
+  }
+> = {
   insights: {
     label: "Insights",
     description: "Essays and perspectives",
     color: "border-blue-500/40",
-    gradient: "from-blue-900/20 via-blue-950/10 to-black",
-    bgGradient: "bg-gradient-to-br from-blue-900/10 via-black/40 to-blue-950/5",
-    badgeColor: "bg-blue-500/20 text-blue-400 border-blue-500/40",
-    icon: "💭"
+    gradient: "from-blue-900/50 via-slate-950/70 to-black",
+    bgGradient:
+      "bg-gradient-to-br from-blue-950/60 via-black/80 to-slate-900/40",
+    icon: "💭",
   },
   frameworks: {
     label: "Frameworks",
     description: "Systems and principles",
     color: "border-amber-500/40",
-    gradient: "from-amber-900/20 via-amber-950/10 to-black",
-    bgGradient: "bg-gradient-to-br from-amber-900/10 via-black/40 to-amber-950/5",
-    badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40",
-    icon: "⚙️"
+    gradient: "from-amber-900/50 via-zinc-950/70 to-black",
+    bgGradient:
+      "bg-gradient-to-br from-amber-950/60 via-black/80 to-zinc-900/40",
+    icon: "⚙️",
   },
   tools: {
     label: "Tools",
     description: "Resources and downloads",
     color: "border-emerald-500/40",
-    gradient: "from-emerald-900/20 via-emerald-950/10 to-black",
-    bgGradient: "bg-gradient-to-br from-emerald-900/10 via-black/40 to-emerald-950/5",
-    badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
-    icon: "🛠️"
+    gradient: "from-emerald-900/50 via-slate-950/70 to-black",
+    bgGradient:
+      "bg-gradient-to-br from-emerald-950/60 via-black/80 to-slate-900/40",
+    icon: "🛠️",
   },
   archives: {
     label: "Archives",
     description: "Prints and collections",
     color: "border-purple-500/40",
-    gradient: "from-purple-900/20 via-purple-950/10 to-black",
-    bgGradient: "bg-gradient-to-br from-purple-900/10 via-black/40 to-purple-950/5",
-    badgeColor: "bg-purple-500/20 text-purple-400 border-purple-500/40",
-    icon: "📦"
+    gradient: "from-purple-900/50 via-zinc-950/70 to-black",
+    bgGradient:
+      "bg-gradient-to-br from-purple-950/60 via-black/80 to-zinc-900/40",
+    icon: "📦",
   },
 };
 
@@ -173,195 +169,125 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   };
 };
 
-// Helper function to get all properties from SearchDoc
-const getDocProperties = (doc: SearchDoc) => {
-  const rawDoc = doc as any;
-  return {
-    // Core properties
-    slug: doc.slug,
-    title: doc.title,
-    subtitle: rawDoc.subtitle || null,
-    excerpt: doc.excerpt || null,
-    description: rawDoc.description || null,
-    coverImage: doc.coverImage || null,
-    date: doc.date || null,
-    tags: doc.tags || [],
-    
-    // Card-specific properties
-    featured: rawDoc.featured || false,
-    accessLevel: rawDoc.accessLevel || null,
-    lockMessage: rawDoc.lockMessage || null,
-    category: rawDoc.category || null,
-    readingTime: rawDoc.readingTime || rawDoc.readTime || null,
-    isNew: rawDoc.isNew || false,
-    readTime: rawDoc.readTime || null,
-    author: rawDoc.author || null,
-    pages: rawDoc.pages || null,
-    volumeNumber: rawDoc.volumeNumber || null,
-    resourceType: rawDoc.resourceType || null,
-    applications: rawDoc.applications || [],
-    
-    // Book-specific properties
-    publishDate: rawDoc.publishDate || rawDoc.date || null,
-    isbn: rawDoc.isbn || null,
-    rating: rawDoc.rating || null,
-    
-    // Blog-specific properties
-    authorName: typeof rawDoc.author === 'object' ? rawDoc.author?.name : rawDoc.author || null,
-    authorPicture: typeof rawDoc.author === 'object' ? rawDoc.author?.picture : null,
-  };
+// ---------- Card: single, luxury, image-controlled ----------
+
+const getHrefForDoc = (doc: SearchDoc): string => {
+  if (doc.href) return doc.href;
+  if (doc.type === "post") return `/blog/${doc.slug}`;
+  return `/${doc.type}/${doc.slug}`;
 };
 
-// Custom card wrapper for consistent styling
-const CardWrapper: React.FC<{
-  children: React.ReactNode;
-  category: string;
-  type: SearchDocType;
-}> = ({ children, category, type }) => {
-  const config = typeConfig[type];
-  
+const getAspectClassForDoc = (doc: SearchDoc): string => {
+  // Portrait for books/prints, cinematic for everything else
+  if (doc.type === "book" || doc.type === "print") {
+    return "aspect-[3/4]";
+  }
+  return "aspect-[16/9] md:aspect-[3/2]";
+};
+
+const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
+  const config = typeConfig[doc.type];
+  const href = getHrefForDoc(doc);
+  const aspectClass = getAspectClassForDoc(doc);
+
   return (
-    <div className="group relative h-full">
-      {/* Background gradient overlay on hover */}
-      <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${config.color.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10`} />
-      
-      {/* Main card container */}
-      <div className="relative h-full rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/80 to-gray-950/80 backdrop-blur-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:border-gray-700 group-hover:shadow-2xl">
-        {children}
-        
-        {/* Corner accent */}
-        <div className="absolute -right-2 -top-2 h-4 w-4 rounded-full bg-gradient-to-br from-amber-400/40 to-amber-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
-    </div>
+    <Link href={href} className="group block h-full">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gold/15 bg-gradient-to-b from-[#050509]/95 via-black/95 to-[#050509]/98 shadow-[0_22px_60px_rgba(0,0,0,0.75)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]">
+        {/* Image frame */}
+        <div className={`relative w-full overflow-hidden ${aspectClass}`}>
+          {doc.coverImage ? (
+            <>
+              <Image
+                src={doc.coverImage}
+                alt={doc.title}
+                fill
+                sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
+                className="object-cover transition-transform duration-[900ms] group-hover:scale-[1.04]"
+              />
+              {/* subtle overlay to keep type and title legible */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/0" />
+            </>
+          ) : (
+            <div
+              className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${config.color.gradient}`}
+            >
+              <span className="text-4xl">{config.icon}</span>
+            </div>
+          )}
+
+          {/* Type pill */}
+          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/18 bg-black/55 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
+            <span>{config.icon}</span>
+            <span>{config.label}</span>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex flex-1 flex-col gap-3 p-5">
+          <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
+            {doc.title}
+          </h3>
+
+          {doc.excerpt && (
+            <p className="line-clamp-3 text-sm text-gray-300">
+              {doc.excerpt}
+            </p>
+          )}
+
+          {/* Meta */}
+          <div className="mt-auto border-t border-gray-800/80 pt-3 text-xs">
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {doc.tags?.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-black/70 px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em] text-gray-400"
+                >
+                  {tag}
+                </span>
+              ))}
+              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em] text-amber-300/90">
+                {config.label}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-[0.7rem] text-gray-400">
+              <span className="line-clamp-1">
+                {config.description}
+              </span>
+              <span className="inline-flex items-center gap-1 text-amber-300">
+                <span className="tracking-[0.18em]">OPEN</span>
+                <span aria-hidden="true">↗</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Corner glint */}
+        <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/60 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
+      </article>
+    </Link>
   );
 };
 
-// Render the appropriate card component based on document type
-const ContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
-  const config = typeConfig[doc.type];
-  const props = getDocProperties(doc);
-  
-  // Common href logic
-  const href = doc.href || `/${doc.type === 'post' ? 'blog' : doc.type}/${doc.slug}`;
-
-  // Add custom className to each card for consistent styling
-  const cardClassName = "h-full";
-
-  switch (config.cardComponent) {
-    case 'blog':
-      const blogAuthor = props.authorName ? {
-        name: props.authorName,
-        picture: props.authorPicture || undefined
-      } : null;
-
-      return (
-        <CardWrapper category={config.category} type={doc.type}>
-          <BlogPostCard
-            slug={props.slug}
-            title={props.title}
-            subtitle={props.subtitle}
-            excerpt={props.excerpt}
-            description={props.description}
-            coverImage={props.coverImage}
-            date={props.date}
-            author={blogAuthor}
-            tags={props.tags}
-            featured={props.featured}
-            readTime={props.readTime}
-            category={props.category}
-            href={href}
-            className={cardClassName}
-          />
-        </CardWrapper>
-      );
-    case 'book':
-      return (
-        <CardWrapper category={config.category} type={doc.type}>
-          <BookCard
-            slug={props.slug}
-            title={props.title}
-            subtitle={props.subtitle}
-            author={props.authorName}
-            excerpt={props.excerpt}
-            description={props.description}
-            coverImage={props.coverImage}
-            publishDate={props.publishDate}
-            isbn={props.isbn}
-            tags={props.tags}
-            featured={props.featured}
-            rating={props.rating}
-            href={href}
-            className={cardClassName}
-          />
-        </CardWrapper>
-      );
-    case 'canon':
-      return (
-        <CardWrapper category={config.category} type={doc.type}>
-          <CanonResourceCard
-            canon={{
-              slug: props.slug,
-              title: props.title,
-              subtitle: props.subtitle,
-              excerpt: props.excerpt,
-              description: props.description,
-              coverImage: props.coverImage,
-              volumeNumber: props.volumeNumber,
-              date: props.date,
-              tags: props.tags,
-              featured: props.featured,
-              accessLevel: props.accessLevel,
-              lockMessage: props.lockMessage,
-            }}
-            className={cardClassName}
-          />
-        </CardWrapper>
-      );
-    case 'base':
-    default:
-      return (
-        <CardWrapper category={config.category} type={doc.type}>
-          <div className="h-full">
-            <BaseCard
-              slug={props.slug}
-              title={props.title}
-              subtitle={props.subtitle}
-              excerpt={props.excerpt}
-              description={props.description}
-              coverImage={props.coverImage}
-              date={props.date}
-              tags={props.tags}
-              featured={props.featured}
-              accessLevel={props.accessLevel}
-              lockMessage={props.lockMessage}
-              category={props.category}
-              readingTime={props.readingTime}
-              isNew={props.isNew}
-              href={href}
-              className={cardClassName}
-            />
-          </div>
-        </CardWrapper>
-      );
-  }
-};
+// ---------- Page ----------
 
 const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
   const [query, setQuery] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState<string>("all");
-  const [activeType, setActiveType] = React.useState<SearchDocType | "all">("all");
+  const [activeType, setActiveType] =
+    React.useState<SearchDocType | "all">("all");
 
-  // Organize docs by category
+  // Organise docs by category
   const docsByCategory = React.useMemo(() => {
     const organized: Record<string, SearchDoc[]> = {
       insights: [],
       frameworks: [],
       tools: [],
       archives: [],
-      all: docs
+      all: docs,
     };
 
-    docs.forEach(doc => {
+    docs.forEach((doc) => {
       const category = typeConfig[doc.type].category;
       organized[category].push(doc);
     });
@@ -369,17 +295,15 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
     return organized;
   }, [docs]);
 
-  // Filter docs based on search and active filters
+  // Filtering
   const filteredDocs = React.useMemo(() => {
     const q = query.trim().toLowerCase();
-    
-    const sourceDocs = activeCategory === "all" ? docs : docsByCategory[activeCategory];
-    
-    if (!q && activeType === "all") {
-      return sourceDocs;
-    }
+    const source =
+      activeCategory === "all" ? docs : docsByCategory[activeCategory];
 
-    return sourceDocs.filter(doc => {
+    if (!q && activeType === "all") return source;
+
+    return source.filter((doc) => {
       if (activeType !== "all" && doc.type !== activeType) return false;
       if (!q) return true;
 
@@ -398,124 +322,124 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
     });
   }, [docs, docsByCategory, query, activeCategory, activeType]);
 
-  // Get category statistics
-  const getCategoryStats = (category: string) => {
-    const categoryDocs = docsByCategory[category];
-    return categoryDocs.length;
-  };
+  const getCategoryStats = (category: string) =>
+    docsByCategory[category]?.length ?? 0;
 
   const title = "Content Library";
-  const description = "A curated collection of insights, frameworks, and tools for systematic thinkers.";
+  const description =
+    "A curated chamber of insights, frameworks, and tools for fathers, founders, and leaders who build with depth.";
 
   return (
-    <Layout title={title} description={description}>
-      <Head>
-        <title>{title} | Abraham of London</title>
-        <meta name="description" content={description} />
-        <style>{`
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-          }
-          .grid-item-animation {
-            animation: fadeInUp 0.5s ease-out forwards;
-          }
-        `}</style>
-      </Head>
-
-      <main className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black text-cream">
-        {/* Hero Section */}
+    <Layout
+      title={title}
+      description={description}
+      fullWidth
+    >
+      <div className="min-h-screen bg-gradient-to-b from-black via-[#050509] to-black text-cream">
+        {/* HERO */}
         <section className="relative overflow-hidden border-b border-gray-800">
-          {/* Subtle background pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent" />
-          <div className="absolute inset-0 opacity-5">
-            <div className="h-full w-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+          {/* Subliminal backdrop */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-b from-amber-500/6 via-transparent to-emerald-500/6" />
+            <div className="absolute inset-0 opacity-[0.14] mix-blend-soft-light bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.35),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(45,212,191,0.35),_transparent_58%)]" />
+            <div className="absolute inset-0 opacity-[0.18] bg-[linear-gradient(to_right,rgba(148,163,184,0.35)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.35)_1px,transparent_1px)] bg-[size:120px_120px]" />
+            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500/60 to-transparent" />
           </div>
-          
+
           <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
-            <div className="text-center animate-fade-in-up">
-              <div className="inline-flex items-center gap-3 rounded-full border border-amber-500/20 bg-amber-500/5 px-5 py-2 mb-8 backdrop-blur-sm">
-                <span className="text-sm font-medium uppercase tracking-[0.25em] text-amber-300">
-                  Library
+            <div className="text-center">
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-500/35 bg-black/60 px-5 py-2 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.9)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
+                  Curated Chamber
                 </span>
               </div>
-              <h1 className="mb-6 font-serif text-5xl font-light tracking-tight text-cream sm:text-6xl lg:text-7xl">
+
+              <h1 className="mb-4 font-serif text-4xl font-light tracking-tight text-cream sm:text-5xl lg:text-6xl">
                 Content Library
               </h1>
-              <p className="mx-auto max-w-2xl text-lg font-light leading-relaxed text-gray-300">
-                An organized collection of insights, frameworks, and resources for 
-                those who build with depth and intention.
+
+              <p className="mx-auto max-w-2xl text-sm sm:text-base font-light leading-relaxed text-gray-200">
+                One doorway into the whole house of Abraham of London – essays,
+                canon volumes, tools, and artefacts arranged for slow, deliberate
+                reading.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Controls Section */}
-        <section className="sticky top-0 z-40 border-b border-gray-800 bg-black/90 backdrop-blur-xl supports-[backdrop-filter]:bg-black/80">
+        {/* CONTROLS */}
+        <section className="sticky top-0 z-40 border-b border-gray-800 bg-black/92 backdrop-blur-xl supports-[backdrop-filter]:bg-black/85">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               {/* Search */}
               <div className="relative flex-1">
                 <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-                  <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="h-5 w-5 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </div>
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search across the collection..."
-                  className="w-full rounded-xl border border-gray-700 bg-gray-900/60 py-3 pl-12 pr-4 text-cream placeholder:text-gray-500 backdrop-blur-sm transition-all duration-200 hover:border-gray-600 focus:border-amber-400/60 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
+                  placeholder="Search across the library..."
+                  className="w-full rounded-xl border border-gray-700 bg-gray-950/80 py-3 pl-12 pr-10 text-sm text-cream placeholder:text-gray-500 backdrop-blur-sm transition-all duration-200 hover:border-gray-600 focus:border-amber-400/70 focus:outline-none focus:ring-1 focus:ring-amber-400/40"
                 />
                 {query && (
                   <button
+                    type="button"
                     onClick={() => setQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 transition-colors hover:text-gray-300"
                   >
                     ✕
                   </button>
                 )}
               </div>
 
-              {/* Category Filter */}
+              {/* Category filter */}
               <div className="flex flex-wrap gap-2">
                 <button
+                  type="button"
                   onClick={() => setActiveCategory("all")}
-                  className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  className={`rounded-lg px-4 py-2.5 text-xs font-semibold tracking-wide transition-all duration-200 ${
                     activeCategory === "all"
-                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/25"
-                      : "border border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/60"
+                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/30"
+                      : "border border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-900/70"
                   }`}
                 >
                   All ({docs.length})
                 </button>
-                {Object.entries(categoryConfig).map(([key, category], index) => {
+                {Object.entries(categoryConfig).map(([key, cat], idx) => {
                   const count = getCategoryStats(key);
-                  if (count === 0) return null;
+                  if (!count) return null;
                   return (
                     <button
                       key={key}
+                      type="button"
                       onClick={() => setActiveCategory(key)}
-                      className={`rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-200 animate-fade-in-up ${
+                      className={`rounded-lg border px-4 py-2.5 text-xs font-semibold tracking-wide transition-all duration-200 ${
                         activeCategory === key
-                          ? `bg-gradient-to-r ${category.gradient} ${category.color} text-cream shadow-lg`
-                          : "border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800/60"
+                          ? `bg-gradient-to-r ${cat.gradient} ${cat.color} text-cream shadow-lg`
+                          : "border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-900/70"
                       }`}
-                      style={{ animationDelay: `${index * 50}ms` }}
+                      style={{ animationDelay: `${idx * 40}ms` }}
                     >
                       <span className="flex items-center gap-2">
-                        <span>{category.icon}</span>
-                        <span>{category.label}</span>
-                        <span className="text-xs opacity-60">({count})</span>
+                        <span>{cat.icon}</span>
+                        <span>{cat.label}</span>
+                        <span className="text-[0.7rem] opacity-70">
+                          ({count})
+                        </span>
                       </span>
                     </button>
                   );
@@ -523,36 +447,41 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
               </div>
             </div>
 
-            {/* Type Filter */}
+            {/* Type filter */}
             <div className="mt-4 flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() => setActiveType("all")}
-                className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                className={`rounded-full px-3.5 py-1.5 text-[0.7rem] font-medium uppercase tracking-[0.14em] transition-all duration-200 ${
                   activeType === "all"
                     ? "bg-gray-700 text-cream"
-                    : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-gray-900/70"
                 }`}
               >
                 All Types
               </button>
-              {(Object.keys(typeConfig) as SearchDocType[]).map((type, index) => {
-                const config = typeConfig[type];
-                const count = docs.filter(d => d.type === type).length;
-                if (count === 0) return null;
+              {(Object.keys(typeConfig) as SearchDocType[]).map((type, idx) => {
+                const cfg = typeConfig[type];
+                const count = docs.filter((d) => d.type === type).length;
+                if (!count) return null;
                 return (
                   <button
                     key={type}
+                    type="button"
                     onClick={() => setActiveType(type)}
-                    className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 animate-fade-in-up ${
+                    className={`rounded-full border px-3.5 py-1.5 text-[0.7rem] font-medium uppercase tracking-[0.14em] transition-all duration-200 ${
                       activeType === type
-                        ? `${config.color.bg} ${config.color.border} ${config.color.text}`
-                        : "border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200"
+                        ? `${cfg.color.bg} ${cfg.color.border} ${cfg.color.text}`
+                        : "border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-100"
                     }`}
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    style={{ animationDelay: `${idx * 40}ms` }}
                   >
                     <span className="flex items-center gap-1.5">
-                      <span>{config.icon}</span>
-                      <span>{config.label}</span>
+                      <span>{cfg.icon}</span>
+                      <span>{cfg.label}</span>
+                      <span className="text-[0.65rem] opacity-60">
+                        ({count})
+                      </span>
                     </span>
                   </button>
                 );
@@ -561,91 +490,106 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
           </div>
         </section>
 
-        {/* Content Grid */}
+        {/* GRID */}
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {filteredDocs.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-gray-700 bg-gradient-to-b from-gray-900/30 to-gray-950/20 p-12 text-center animate-fade-in-up">
-                <div className="mb-4 text-4xl">🔍</div>
-                <h3 className="mb-2 font-serif text-xl text-cream">No content found</h3>
-                <p className="text-gray-400">
-                  Try adjusting your search or filter to discover available materials.
+              <div className="rounded-2xl border border-dashed border-gray-700 bg-gradient-to-b from-gray-950/70 to-black/70 p-12 text-center">
+                <div className="mb-4 text-3xl">🔍</div>
+                <h3 className="mb-2 font-serif text-xl text-cream">
+                  Nothing surfaced… yet.
+                </h3>
+                <p className="text-sm text-gray-400">
+                  Adjust your filters or clear the search to see the full
+                  collection.
                 </p>
               </div>
             ) : (
               <>
-                {/* Active Category Header */}
                 {activeCategory !== "all" && (
-                  <div className={`mb-8 rounded-xl border ${categoryConfig[activeCategory].color} bg-gradient-to-r ${categoryConfig[activeCategory].gradient} p-6 animate-fade-in-up`}>
+                  <div
+                    className={`mb-8 rounded-2xl border ${categoryConfig[activeCategory].color} ${categoryConfig[activeCategory].bgGradient} p-6`}
+                  >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{categoryConfig[activeCategory].icon}</span>
-                      <div>
-                        <h2 className="font-serif text-2xl text-cream">{categoryConfig[activeCategory].label}</h2>
-                        <p className="text-gray-300">{categoryConfig[activeCategory].description}</p>
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${categoryConfig[activeCategory].gradient}`}
+                      >
+                        <span className="text-xl">
+                          {categoryConfig[activeCategory].icon}
+                        </span>
                       </div>
-                      <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-sm text-gray-300">
-                        {filteredDocs.length} {filteredDocs.length === 1 ? 'item' : 'items'}
+                      <div>
+                        <h2 className="font-serif text-2xl text-cream">
+                          {categoryConfig[activeCategory].label}
+                        </h2>
+                        <p className="text-sm text-gray-300">
+                          {categoryConfig[activeCategory].description}
+                        </p>
+                      </div>
+                      <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-xs text-gray-300">
+                        {filteredDocs.length}{" "}
+                        {filteredDocs.length === 1 ? "item" : "items"}
                       </span>
                     </div>
                   </div>
                 )}
 
-                {/* If showing all categories, display them separately */}
                 {activeCategory === "all" ? (
                   <div className="space-y-12">
-                    {Object.entries(categoryConfig).map(([key, category], catIndex) => {
-                      const categoryDocs = docsByCategory[key];
-                      const filteredCategoryDocs = filteredDocs.filter(doc => 
-                        typeConfig[doc.type].category === key
-                      );
-                      
-                      if (filteredCategoryDocs.length === 0) return null;
+                    {Object.entries(categoryConfig).map(
+                      ([key, cat], catIndex) => {
+                        const filteredCategoryDocs = filteredDocs.filter(
+                          (doc) => typeConfig[doc.type].category === key,
+                        );
+                        if (!filteredCategoryDocs.length) return null;
 
-                      return (
-                        <div 
-                          key={key} 
-                          className={`category-section ${category.bgGradient} rounded-2xl border ${category.color} p-6 animate-fade-in-up`}
-                          style={{ animationDelay: `${catIndex * 100}ms` }}
-                        >
-                          <div className="mb-6 flex items-center gap-3">
-                            <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${category.gradient}`}>
-                              <span className="text-xl">{category.icon}</span>
-                            </div>
-                            <div>
-                              <h2 className="font-serif text-2xl text-cream">{category.label}</h2>
-                              <p className="text-sm text-gray-300">{category.description}</p>
-                            </div>
-                            <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-sm text-gray-300">
-                              {filteredCategoryDocs.length} items
-                            </span>
-                          </div>
-
-                          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {filteredCategoryDocs.map((doc, index) => (
-                              <div 
-                                key={`${doc.type}:${doc.slug}`}
-                                className="grid-item-animation h-full"
-                                style={{ animationDelay: `${(index * 50) + (catIndex * 100)}ms` }}
+                        return (
+                          <div
+                            key={key}
+                            className={`rounded-2xl border ${cat.color} ${cat.bgGradient} p-6`}
+                            style={{
+                              animationDelay: `${catIndex * 80}ms`,
+                            }}
+                          >
+                            <div className="mb-6 flex items-center gap-3">
+                              <div
+                                className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${cat.gradient}`}
                               >
-                                <ContentCard doc={doc} />
+                                <span className="text-xl">{cat.icon}</span>
                               </div>
-                            ))}
+                              <div>
+                                <h2 className="font-serif text-2xl text-cream">
+                                  {cat.label}
+                                </h2>
+                                <p className="text-sm text-gray-300">
+                                  {cat.description}
+                                </p>
+                              </div>
+                              <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-xs text-gray-300">
+                                {filteredCategoryDocs.length} items
+                              </span>
+                            </div>
+
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                              {filteredCategoryDocs.map((doc) => (
+                                <LuxContentCard
+                                  key={`${doc.type}:${doc.slug}`}
+                                  doc={doc}
+                                />
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      },
+                    )}
                   </div>
                 ) : (
-                  /* Single category view */
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredDocs.map((doc, index) => (
-                      <div 
+                    {filteredDocs.map((doc) => (
+                      <LuxContentCard
                         key={`${doc.type}:${doc.slug}`}
-                        className="grid-item-animation h-full"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <ContentCard doc={doc} />
-                      </div>
+                        doc={doc}
+                      />
                     ))}
                   </div>
                 )}
@@ -654,40 +598,46 @@ const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
           </div>
         </section>
 
-        {/* Stats Footer */}
-        <section className="border-t border-gray-800 bg-gradient-to-b from-black/40 to-gray-950/30 py-12">
+        {/* STATS FOOTER */}
+        <section className="border-t border-gray-800 bg-gradient-to-b from-black/60 to-[#020308] py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-              {Object.entries(categoryConfig).map(([key, category], index) => {
+              {Object.entries(categoryConfig).map(([key, cat], index) => {
                 const count = getCategoryStats(key);
                 return (
-                  <div 
-                    key={key} 
-                    className="text-center animate-fade-in-up"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                  <div
+                    key={key}
+                    className="text-center"
+                    style={{ animationDelay: `${index * 80}ms` }}
                   >
-                    <div className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${category.gradient} ${category.color}`}>
-                      <span className="text-2xl">{category.icon}</span>
+                    <div
+                      className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${cat.gradient} ${cat.color}`}
+                    >
+                      <span className="text-2xl">{cat.icon}</span>
                     </div>
-                    <div className="text-3xl font-light text-cream mb-2">{count}</div>
-                    <div className="text-sm font-medium uppercase tracking-wider text-gray-300 mb-2">
-                      {category.label}
+                    <div className="mb-1 text-3xl font-light text-cream">
+                      {count}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {category.description}
+                    <div className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gray-300">
+                      {cat.label}
+                    </div>
+                    <div className="text-[0.7rem] text-gray-500">
+                      {cat.description}
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-12 text-center">
-              <p className="text-sm text-gray-400">
-                Total collection: <span className="text-amber-300 font-medium">{docs.length}</span> curated items across all categories
-              </p>
+            <div className="mt-10 text-center text-sm text-gray-400">
+              Total collection:{" "}
+              <span className="font-semibold text-amber-300">
+                {docs.length}
+              </span>{" "}
+              curated items across all categories.
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </Layout>
   );
 };
