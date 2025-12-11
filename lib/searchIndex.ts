@@ -1,200 +1,119 @@
 // lib/searchIndex.ts
+
+// IMPORTANT:
+// If your existing file imports from a different path (e.g. "contentlayer2/generated"),
+// keep that path. Just replace the body of the file, not the import line.
 import {
-  getPublishedPosts,
-  getAllBooks,
-  getAllDownloads,
-  getAllPrints,
-  getAllResources,
-  getAllCanons,
-  type Post as PostDocument,
-  type Book as BookDocument,
-  type Download as DownloadDocument,
-  type Print as PrintDocument,
-  type Resource as ResourceDocument,
-  type Canon as CanonDocument,
-} from "./contentlayer-helper";
-import { absUrl } from "@/lib/siteConfig";
+  allPosts,
+  allBooks,
+  allDownloads,
+  allPrints,
+  allResources,
+} from "contentlayer/generated";
 
-// ----------------- Shared types & helpers -----------------
-
-export type BasicDoc = {
-  slug: string;
-  title?: string;
-  date?: string;
-  excerpt?: string | null;
-  tags?: string[] | null;
-  coverImage?: string | null;
-};
-
-export function indexBySlug<T extends BasicDoc>(docs: T[]): Record<string, T> {
-  const out: Record<string, T> = {};
-  for (const d of docs || []) {
-    const key = String(d.slug || "").trim().toLowerCase();
-    if (key) out[key] = d;
-  }
-  return out;
-}
-
-export function sortByDate<T extends { date?: string }>(docs: T[]): T[] {
-  return [...(docs || [])].sort(
-    (a, b) => +new Date(b.date || 0) - +new Date(a.date || 0),
-  );
-}
-
-// ----------------- Search index shape -----------------
+// -------------------------------------------------------
+// Types
+// -------------------------------------------------------
 
 export type SearchDocType =
   | "post"
   | "book"
   | "download"
-  | "print"
   | "resource"
-  | "canon";
+  | "canon"
+  | "print";
 
-export interface SearchDoc {
+export type SearchDoc = {
   type: SearchDocType;
   slug: string;
-  href: string;
-  url: string;
   title: string;
-  date?: string | null;
-  excerpt?: string | null;
-  tags?: string[] | null;
-  coverImage?: string | null;
-}
+  excerpt?: string;
+  coverImage?: string;
+  tags?: string[];
+  href?: string;
+  date?: string;
+};
 
-// ----------------- Builders per collection -----------------
+// -------------------------------------------------------
+// Helpers
+// -------------------------------------------------------
 
-function mapPosts(): SearchDoc[] {
-  const posts = getPublishedPosts();
-  return sortByDate(posts)
-    .filter((p: PostDocument) => !(p as any).draft)
-    .map((p: PostDocument) => ({
-      type: "post" as const,
-      slug: p.slug,
-      href: (p as any).url || `/blog/${p.slug}`,
-      url: absUrl((p as any).url || `/blog/${p.slug}`),
-      title: p.title ?? "Untitled",
-      date: (p as any).date ?? null,
-      excerpt: (p as any).excerpt ?? (p as any).description ?? null,
-      tags: (p as any).tags ?? [],
-      coverImage: (p as any).coverImage || null,
-    }));
-}
+const normaliseTags = (tags?: string[] | null): string[] =>
+  (tags ?? []).map((t) => t.trim()).filter(Boolean);
 
-function mapBooks(): SearchDoc[] {
-  const books = getAllBooks();
-  return sortByDate(books)
-    .filter((b: BookDocument) => !(b as any).draft)
-    .map((b: BookDocument) => ({
-      type: "book" as const,
-      slug: b.slug,
-      href: (b as any).url || `/books/${b.slug}`,
-      url: absUrl((b as any).url || `/books/${b.slug}`),
-      title: b.title ?? "Untitled Book",
-      date: (b as any).date ?? null,
-      excerpt: (b as any).excerpt ?? (b as any).description ?? null,
-      tags: (b as any).tags ?? [],
-      coverImage: (b as any).coverImage || null,
-    }));
-}
+const isCanonTagged = (tags?: string[] | null): boolean =>
+  normaliseTags(tags).some((t) => t.toLowerCase() === "canon");
 
-function mapDownloads(): SearchDoc[] {
-  const downloads = getAllDownloads();
-  return sortByDate(downloads).map((d: DownloadDocument) => ({
-    type: "download" as const,
-    slug: d.slug,
-    href: (d as any).url || `/downloads/${d.slug}`,
-    url: absUrl((d as any).url || `/downloads/${d.slug}`),
-    title: d.title ?? "Untitled Download",
-    date: (d as any).date ?? null,
-    excerpt: (d as any).excerpt ?? (d as any).description ?? null,
-    tags: (d as any).tags ?? [],
-    coverImage: (d as any).coverImage || null,
-  }));
-}
+const toSearchDoc = (
+  item: any,
+  type: SearchDocType,
+  overrides: Partial<SearchDoc> = {},
+): SearchDoc => ({
+  type,
+  slug: item.slug,
+  title: item.title,
+  excerpt: item.excerpt ?? item.description ?? "",
+  coverImage: item.coverImage ?? item.image ?? undefined,
+  tags: normaliseTags(item.tags),
+  href: item.href ?? undefined,
+  date: item.date ?? undefined,
+  ...overrides,
+});
 
-function mapPrints(): SearchDoc[] {
-  const prints = getAllPrints();
-  return sortByDate(prints)
-    .filter((p: PrintDocument) => (p as any).available !== false)
-    .map((p: PrintDocument) => ({
-      type: "print" as const,
-      slug: p.slug,
-      href: (p as any).url || `/prints/${p.slug}`,
-      url: absUrl((p as any).url || `/prints/${p.slug}`),
-      title: p.title ?? "Untitled Print",
-      date: (p as any).date ?? null,
-      excerpt: (p as any).excerpt ?? (p as any).description ?? null,
-      tags: (p as any).tags ?? [],
-      coverImage: (p as any).coverImage || null,
-    }));
-}
+// Sort newest → oldest, then alpha by title as a stable tie-breaker
+const sortDocs = (a: SearchDoc, b: SearchDoc): number => {
+  const da = a.date ? Date.parse(a.date) : 0;
+  const db = b.date ? Date.parse(b.date) : 0;
 
-function mapResources(): SearchDoc[] {
-  const resources = getAllResources();
-  return sortByDate(resources).map((r: ResourceDocument) => ({
-    type: "resource" as const,
-    slug: r.slug,
-    href: (r as any).url || `/resources/${r.slug}`,
-    url: absUrl((r as any).url || `/resources/${r.slug}`),
-    title: r.title ?? "Untitled Resource",
-    date: (r as any).date ?? null,
-    excerpt: (r as any).excerpt ?? (r as any).description ?? null,
-    tags: (r as any).tags ?? [],
-    coverImage: (r as any).coverImage || null,
-  }));
-}
+  if (da !== db) return db - da;
+  return a.title.localeCompare(b.title);
+};
 
-function mapCanons(): SearchDoc[] {
-  const canons = getAllCanons();
-  return sortByDate(canons)
-    .filter((c: CanonDocument) => !(c as any).draft)
-    .map((c: CanonDocument) => ({
-      type: "canon" as const,
-      slug: c.slug,
-      href: (c as any).url || `/canon/${c.slug}`,
-      url: absUrl((c as any).url || `/canon/${c.slug}`),
-      title: c.title ?? "Untitled Canon",
-      date: (c as any).date ?? null,
-      excerpt: (c as any).excerpt ?? (c as any).description ?? null,
-      tags: (c as any).tags ?? [],
-      coverImage: (c as any).coverImage || null,
-    }));
-}
+// -------------------------------------------------------
+// Build index
+// -------------------------------------------------------
 
-// ----------------- Main search index -----------------
+export const buildSearchIndex = (): SearchDoc[] => {
+  // 1. Posts → Insights
+  const postDocs: SearchDoc[] = allPosts
+    .filter((p: any) => !p.draft)
+    .map((p: any) => toSearchDoc(p, "post"));
 
-export function buildSearchIndex(): SearchDoc[] {
-  return [
-    ...mapPosts(),
-    ...mapBooks(),
-    ...mapDownloads(),
-    ...mapPrints(),
-    ...mapResources(),
-    ...mapCanons(),
-  ];
-}
+  // 2. Books → split into Canon vs regular Books
+  const bookRaw = allBooks.filter((b: any) => !b.draft);
 
-// Pre-built search index
-export const searchIndex: SearchDoc[] = buildSearchIndex();
+  const canonDocs: SearchDoc[] = bookRaw
+    .filter((b: any) => isCanonTagged(b.tags))
+    .map((b: any) => toSearchDoc(b, "canon"));
 
-// Helper to search the index
-export function searchDocuments(
-  query: string,
-  limit: number = 20,
-): SearchDoc[] {
-  const searchTerm = query.toLowerCase().trim();
-  if (!searchTerm) return searchIndex.slice(0, limit);
+  const bookDocs: SearchDoc[] = bookRaw
+    .filter((b: any) => !isCanonTagged(b.tags))
+    .map((b: any) => toSearchDoc(b, "book"));
 
-  return searchIndex
-    .filter((doc) => {
-      const searchableText = [doc.title, doc.excerpt, doc.tags?.join(" ")]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+  // 3. Downloads → Tools
+  const downloadDocs: SearchDoc[] = allDownloads
+    .filter((d: any) => !d.draft)
+    .map((d: any) => toSearchDoc(d, "download"));
 
-      return searchableText.includes(searchTerm);
-    })
-    .slice(0, limit);
-}
+  // 4. Resources → Tools
+  const resourceDocs: SearchDoc[] = allResources
+    .filter((r: any) => !r.draft)
+    .map((r: any) => toSearchDoc(r, "resource"));
+
+  // 5. Prints → Archives
+  const printDocs: SearchDoc[] = allPrints
+    .filter((p: any) => !p.draft)
+    .map((p: any) => toSearchDoc(p, "print"));
+
+  // Merge & sort
+  const docs: SearchDoc[] = [
+    ...postDocs,
+    ...bookDocs,
+    ...canonDocs,
+    ...downloadDocs,
+    ...resourceDocs,
+    ...printDocs,
+  ].sort(sortDocs);
+
+  return docs;
+};
