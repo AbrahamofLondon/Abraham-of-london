@@ -264,10 +264,26 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
   try {
-    // Use Contentlayer's getAllResources - make sure this function exists in @/lib/content
-    const resourcesData = getAllResources();
+    let resourcesData;
     
-    const resources: ResourceMeta[] = resourcesData.map((r: ResourceType) => ({
+    // Try main import
+    try {
+      const contentModule = await import("@/lib/content");
+      if (contentModule.getAllResources && typeof contentModule.getAllResources === 'function') {
+        resourcesData = contentModule.getAllResources();
+      } else {
+        // Try fallback
+        const fallbackModule = await import("@/lib/content-fallback");
+        resourcesData = fallbackModule.getAllResourcesDirect();
+      }
+    } catch (error) {
+      console.log("Trying direct import from contentlayer...");
+      // Last resort: direct import
+      const { allResources } = await import('contentlayer/generated');
+      resourcesData = allResources.filter(r => !r.draft);
+    }
+    
+    const resources: ResourceMeta[] = resourcesData.map((r: any) => ({
       slug: r.slug || r._raw?.flattenedPath?.split('/').pop() || '',
       title: r.title || "Untitled Resource",
       description: r.description ?? null,

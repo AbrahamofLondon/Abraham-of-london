@@ -1,5 +1,4 @@
 // pages/index.tsx – MASTER HOMEPAGE WITH SHORTS & BOOKS
-
 import * as React from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
@@ -9,9 +8,13 @@ import Layout from "@/components/Layout";
 import StatsBar from "@/components/homepage/StatsBar";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import { Calendar, Compass, Users, Sparkles } from "lucide-react";
-import { getPublishedShorts } from "@/lib/contentlayer-helper";
+import { 
+  getPublishedShorts, 
+  getRecentShorts,
+  getShortUrl,
+  type Short 
+} from "@/lib/contentlayer-helper";
 import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
-import type { Short } from "contentlayer/generated";
 
 // -----------------------------------------------------------------------------
 // BOOKS IN DEVELOPMENT – update covers & slugs
@@ -37,23 +40,35 @@ const BOOKS_IN_DEV = [
 ];
 
 // -----------------------------------------------------------------------------
-// SHORTS – pull a few at build time
+// SHORTS – get at build time with fallback
 // -----------------------------------------------------------------------------
 
-const featuredShorts: Short[] = (getPublishedShorts?.() ?? []).slice(0, 3);
-
-// Safely derive the URL for a Short document
-const getShortUrl = (short: Short): string => {
-  const rawPath = (short as any)._raw?.flattenedPath as string | undefined;
-
-  if (rawPath && typeof rawPath === "string") {
-    // e.g. "shorts/when-you-feel-too-busy-to-care" -> "/shorts/when-you-feel-too-busy-to-care"
-    return `/${rawPath.replace(/^\/+/, "")}`;
+// Safe function to get shorts with fallback
+const getFeaturedShortsSafely = (): Short[] => {
+  try {
+    // Try getting recent shorts first (most reliable)
+    const shorts = getRecentShorts(3);
+    
+    // If we got shorts, return them
+    if (shorts && shorts.length > 0) {
+      return shorts;
+    }
+    
+    // Fallback: try getPublishedShorts directly
+    const allShorts = getPublishedShorts();
+    if (allShorts && allShorts.length > 0) {
+      return allShorts.slice(0, 3);
+    }
+    
+    // Return empty array as final fallback
+    return [];
+  } catch (error) {
+    console.error("Error loading shorts for homepage:", error);
+    return [];
   }
-
-  // Fallback if _raw is missing for some reason
-  return `/shorts/${short.slug}`;
 };
+
+const featuredShorts: Short[] = getFeaturedShortsSafely();
 
 // -----------------------------------------------------------------------------
 // Simple visual divider
@@ -77,8 +92,9 @@ const SectionDivider: React.FC = () => (
 // SHORTS STRIP – homepage spotlight (now links to actual shorts)
 // -----------------------------------------------------------------------------
 
-const ShortsStrip: React.FC = () => {
-  if (!featuredShorts || featuredShorts.length === 0) {
+const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
+  if (!shorts || shorts.length === 0) {
+    // Don't render anything if no shorts
     return null;
   }
 
@@ -101,54 +117,58 @@ const ShortsStrip: React.FC = () => {
           </div>
           <Link
             href="/shorts"
-            className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200"
+            className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
           >
             View all shorts
           </Link>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {featuredShorts.map((short) => (
-            <Link
-              key={short._id}
-              href={getShortUrl(short)}
-              className="group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-lg transition hover:-translate-y-1 hover:border-amber-400/70 hover:shadow-2xl"
-            >
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-300">
-                  <Sparkles className="h-3 w-3" />
-                  Short
-                </span>
-                {short.readTime && (
+          {shorts.map((short) => {
+            const url = getShortUrl(short);
+            const readTime = short.readTime || "Quick read";
+            const excerpt = short.excerpt || short.description || "";
+
+            return (
+              <Link
+                key={short._id}
+                href={url}
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-amber-400/70 hover:shadow-2xl"
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-300">
+                    <Sparkles className="h-3 w-3" />
+                    Short
+                  </span>
                   <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
-                    {short.readTime}
+                    {readTime}
                   </span>
+                </div>
+
+                <h3 className="mb-2 line-clamp-2 font-serif text-lg font-semibold text-cream">
+                  {short.title}
+                </h3>
+
+                {excerpt && (
+                  <p className="mb-4 flex-1 text-sm leading-relaxed text-cream/75 line-clamp-3">
+                    {excerpt}
+                  </p>
                 )}
-              </div>
 
-              <h3 className="mb-2 line-clamp-2 font-serif text-lg font-semibold text-cream">
-                {short.title}
-              </h3>
-
-              {short.excerpt || (short as any).description ? (
-                <p className="mb-4 flex-1 text-sm leading-relaxed text-cream/75">
-                  {short.excerpt ?? (short as any).description}
-                </p>
-              ) : null}
-
-              <div className="mt-auto flex items-center justify-between pt-3">
-                <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
-                  Field note
-                </span>
-                <span className="inline-flex items-center text-xs font-semibold text-amber-300 transition group-hover:text-amber-200">
-                  Read inside
-                  <span className="ml-1 transition-transform group-hover:translate-x-1">
-                    ↠
+                <div className="mt-auto flex items-center justify-between pt-3">
+                  <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
+                    Field note
                   </span>
-                </span>
-              </div>
-            </Link>
-          ))}
+                  <span className="inline-flex items-center text-xs font-semibold text-amber-300 transition group-hover:text-amber-200">
+                    Read inside
+                    <span className="ml-1 transition-transform group-hover:translate-x-1">
+                      ↠
+                    </span>
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -177,7 +197,7 @@ const BooksInDevelopment: React.FC = () => (
         </div>
         <Link
           href="/books"
-          className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-200"
+          className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-400/10 hover:border-amber-300 dark:text-amber-200"
         >
           View all books
         </Link>
@@ -190,7 +210,7 @@ const BooksInDevelopment: React.FC = () => (
             href={`/books/${book.slug}`}
             className="group block"
           >
-            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white/95 shadow-md transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-gray-900/95">
+            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white/95 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-gray-900/95">
               <div className="grid gap-0 md:grid-cols-[auto,1fr]">
                 <div className="relative aspect-[3/4] w-full max-w-[8rem] flex-shrink-0 md:max-w-[9rem]">
                   <Image
@@ -199,6 +219,7 @@ const BooksInDevelopment: React.FC = () => (
                     fill
                     sizes="(max-width: 768px) 35vw, 20vw"
                     className="object-cover"
+                    priority={false}
                   />
                 </div>
                 <div className="flex flex-col justify-between p-5 md:p-6">
@@ -255,16 +276,16 @@ const StrategicSessions: React.FC = () => (
             household.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/consulting"
-            className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-md shadow-amber-900/40 transition hover:scale-105"
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-md shadow-amber-900/40 transition-all hover:scale-105 hover:shadow-xl"
           >
             Book a strategic conversation
           </Link>
           <Link
             href="/events"
-            className="inline-flex items-center rounded-full border border-amber-200/60 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100"
+            className="inline-flex items-center justify-center rounded-full border border-amber-200/60 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition-all hover:bg-amber-400/10 hover:border-amber-300"
           >
             Upcoming rooms
           </Link>
@@ -273,7 +294,7 @@ const StrategicSessions: React.FC = () => (
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* 1. Board / founders */}
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl">
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
           <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15 text-amber-400">
             <Compass className="h-5 w-5" />
           </div>
@@ -290,7 +311,7 @@ const StrategicSessions: React.FC = () => (
         </article>
 
         {/* 2. Fathers / households */}
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl">
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
           <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
             <Users className="h-5 w-5" />
           </div>
@@ -307,7 +328,7 @@ const StrategicSessions: React.FC = () => (
         </article>
 
         {/* 3. Inner-circle / leaders */}
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl">
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
           <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/15 text-blue-300">
             <Calendar className="h-5 w-5" />
           </div>
@@ -328,7 +349,7 @@ const StrategicSessions: React.FC = () => (
 );
 
 // -----------------------------------------------------------------------------
-// PAGE
+// PAGE COMPONENT
 // -----------------------------------------------------------------------------
 
 const HomePage: NextPage = () => {
@@ -470,7 +491,7 @@ const HomePage: NextPage = () => {
             </div>
             <Link
               href="/canon"
-              className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-200"
+              className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-400/10 hover:border-amber-300 dark:text-amber-200"
             >
               Browse Canon entries
             </Link>
@@ -481,10 +502,13 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* SHORTS STRIP */}
-      <ShortsStrip />
-
-      <SectionDivider />
+      {/* SHORTS STRIP - Only render if we have shorts */}
+      {featuredShorts.length > 0 && (
+        <>
+          <ShortsStrip shorts={featuredShorts} />
+          <SectionDivider />
+        </>
+      )}
 
       {/* VENTURES – working arms */}
       <section className="bg-gradient-to-b from-gray-950 via-black to-gray-950 py-16">

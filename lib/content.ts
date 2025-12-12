@@ -1,8 +1,8 @@
-// lib/content.ts
+// lib/content.ts - UPDATED WITH ERROR HANDLING
 // Centralised content exports - Contentlayer-based
 
 // ============================================
-// CONTENTLAYER HELPER (main source) - RE-EXPORT ALL
+// CONTENTLAYER HELPER (main source)
 // ============================================
 import {
   // Document getters
@@ -13,7 +13,7 @@ import {
   getCardPropsForDocument,
   getPublishedDocumentsByType,
   
-  // Type-specific getters (imported with different names)
+  // Type-specific getters - IMPORTANT: Check if these exist
   getPublishedPosts as getPublishedPostsInternal,
   getPostBySlug as getPostBySlugInternal,
   getAllBooks as getAllBooksInternal,
@@ -56,6 +56,128 @@ import {
 } from "./contentlayer-helper";
 
 // ============================================
+// SAFE FUNCTION WRAPPERS
+// ============================================
+// Create safe versions of all functions that won't break if contentlayer-helper is missing
+
+const safeGetAllResources = (): ResourceType[] => {
+  try {
+    if (typeof getAllResourcesInternal === 'function') {
+      return getAllResourcesInternal();
+    }
+    console.warn('getAllResourcesInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getAllResources:', error);
+    return [];
+  }
+};
+
+const safeGetAllBooks = (): BookType[] => {
+  try {
+    if (typeof getAllBooksInternal === 'function') {
+      return getAllBooksInternal();
+    }
+    console.warn('getAllBooksInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getAllBooks:', error);
+    return [];
+  }
+};
+
+const safeGetAllDownloads = (): DownloadType[] => {
+  try {
+    if (typeof getAllDownloadsInternal === 'function') {
+      return getAllDownloadsInternal();
+    }
+    console.warn('getAllDownloadsInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getAllDownloads:', error);
+    return [];
+  }
+};
+
+const safeGetAllEvents = (): EventType[] => {
+  try {
+    if (typeof getAllEventsInternal === 'function') {
+      return getAllEventsInternal();
+    }
+    console.warn('getAllEventsInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getAllEvents:', error);
+    return [];
+  }
+};
+
+const safeGetAllPrints = (): PrintType[] => {
+  try {
+    if (typeof getAllPrintsInternal === 'function') {
+      return getAllPrintsInternal();
+    }
+    console.warn('getAllPrintsInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getAllPrints:', error);
+    return [];
+  }
+};
+
+const safeGetAllStrategies = (): StrategyType[] => {
+  try {
+    if (typeof getAllStrategiesInternal === 'function') {
+      return getAllStrategiesInternal();
+    }
+    console.warn('getAllStrategiesInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getAllStrategies:', error);
+    return [];
+  }
+};
+
+const safeGetAllCanons = (): CanonType[] => {
+  try {
+    if (typeof getAllCanonsInternal === 'function') {
+      return getAllCanonsInternal();
+    }
+    console.warn('getAllCanonsInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getAllCanons:', error);
+    return [];
+  }
+};
+
+const safeGetPublishedPosts = (): PostType[] => {
+  try {
+    if (typeof getPublishedPostsInternal === 'function') {
+      return getPublishedPostsInternal();
+    }
+    console.warn('getPublishedPostsInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getPublishedPosts:', error);
+    return [];
+  }
+};
+
+const safeGetPublishedShorts = (): ShortType[] => {
+  try {
+    if (typeof getPublishedShortsInternal === 'function') {
+      return getPublishedShortsInternal();
+    }
+    console.warn('getPublishedShortsInternal is not a function, returning empty array');
+    return [];
+  } catch (error) {
+    console.error('Error in getPublishedShorts:', error);
+    return [];
+  }
+};
+
+// ============================================
 // TYPE ALIASES for backward compatibility
 // ============================================
 export type Post = PostType;
@@ -91,79 +213,105 @@ export type {
 };
 
 // ============================================
-// MAIN CONTENT GETTERS (re-exported with proper names)
+// MAIN CONTENT GETTERS (safe versions)
 // ============================================
 
 // Posts
-export const getAllPosts = getPublishedPostsInternal;
-export const getPostBySlug = getPostBySlugInternal;
+export const getAllPosts = safeGetPublishedPosts;
+export const getPostBySlug = (slug: string): PostType | undefined => {
+  try {
+    if (typeof getPostBySlugInternal === 'function') {
+      return getPostBySlugInternal(slug);
+    }
+    return getAllPosts().find(post => 
+      post.slug === slug || 
+      post._raw?.flattenedPath?.replace('blog/', '') === slug
+    );
+  } catch (error) {
+    console.error('Error in getPostBySlug:', error);
+    return undefined;
+  }
+};
 
 // Books
-export const getAllBooks = getAllBooksInternal;
+export const getAllBooks = safeGetAllBooks;
 export const getBookBySlug = (slug: string): BookType | undefined => {
   return getAllBooks().find(book => 
     book.slug === slug || 
-    book._raw.flattenedPath.replace('books/', '') === slug
+    book._raw?.flattenedPath?.replace('books/', '') === slug
   );
 };
 
 // Downloads
-export const getAllDownloads = getAllDownloadsInternal;
+export const getAllDownloads = safeGetAllDownloads;
 export const getDownloadBySlug = (slug: string): DownloadType | undefined => {
   return getAllDownloads().find(download => 
     download.slug === slug || 
-    download._raw.flattenedPath.replace('downloads/', '') === slug
+    download._raw?.flattenedPath?.replace('downloads/', '') === slug
   );
 };
 
 // Events
-export const getAllEvents = getAllEventsInternal;
+export const getAllEvents = safeGetAllEvents;
 export const getEventBySlug = (slug: string): EventType | undefined => {
   return getAllEvents().find(event => 
     event.slug === slug || 
-    event._raw.flattenedPath.replace('events/', '') === slug
+    event._raw?.flattenedPath?.replace('events/', '') === slug
   );
 };
 
 // Prints
-export const getAllPrints = getAllPrintsInternal;
+export const getAllPrints = safeGetAllPrints;
 export const getPrintBySlug = (slug: string): PrintType | undefined => {
   return getAllPrints().find(print => 
     print.slug === slug || 
-    print._raw.flattenedPath.replace('prints/', '') === slug
+    print._raw?.flattenedPath?.replace('prints/', '') === slug
   );
 };
 
 // Resources
-export const getAllResources = getAllResourcesInternal;
+export const getAllResources = safeGetAllResources;
 export const getResourceBySlug = (slug: string): ResourceType | undefined => {
   return getAllResources().find(resource => 
     resource.slug === slug || 
-    resource._raw.flattenedPath.replace('resources/', '') === slug
+    resource._raw?.flattenedPath?.replace('resources/', '') === slug
   );
 };
 
 // Strategies
-export const getAllStrategies = getAllStrategiesInternal;
+export const getAllStrategies = safeGetAllStrategies;
 export const getStrategyBySlug = (slug: string): StrategyType | undefined => {
   return getAllStrategies().find(strategy => 
     strategy.slug === slug || 
-    strategy._raw.flattenedPath.replace('strategy/', '') === slug
+    strategy._raw?.flattenedPath?.replace('strategy/', '') === slug
   );
 };
 
 // Canon
-export const getAllCanon = getAllCanonsInternal;
+export const getAllCanon = safeGetAllCanons;
 export const getCanonBySlug = (slug: string): CanonType | undefined => {
   return getAllCanon().find(canon => 
     canon.slug === slug || 
-    canon._raw.flattenedPath.replace('canon/', '') === slug
+    canon._raw?.flattenedPath?.replace('canon/', '') === slug
   );
 };
 
 // Shorts
-export const getAllShorts = getPublishedShortsInternal;
-export const getShortBySlug = getShortBySlugInternal;
+export const getAllShorts = safeGetPublishedShorts;
+export const getShortBySlug = (slug: string): ShortType | undefined => {
+  try {
+    if (typeof getShortBySlugInternal === 'function') {
+      return getShortBySlugInternal(slug);
+    }
+    return getAllShorts().find(short => 
+      short.slug === slug || 
+      short._raw?.flattenedPath?.replace('shorts/', '') === slug
+    );
+  } catch (error) {
+    console.error('Error in getShortBySlug:', error);
+    return undefined;
+  }
+};
 
 // ============================================
 // POST-SPECIFIC UTILITIES
@@ -471,8 +619,7 @@ export async function loadAndInitializeContent() {
 }
 
 // ============================================
-// BACKWARD-COMPATIBILITY EXPORTS
-// Arrays – safe for .length, .map, etc.
+// BACKWARD-COMPATIBILITY EXPORTS - SAFE VERSIONS
 // ============================================
 export const posts = getAllPosts();
 export const books = getAllBooks();
@@ -485,7 +632,7 @@ export const downloads = getAllDownloads();
 export const shorts = getAllShorts();
 
 // ============================================
-// RE-EXPORT EVERYTHING FROM HELPER
+// RE-EXPORT EVERYTHING FROM HELPER - SAFE VERSIONS
 // ============================================
 export {
   // From contentlayer-helper
