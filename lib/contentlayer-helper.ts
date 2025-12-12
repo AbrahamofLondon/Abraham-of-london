@@ -36,7 +36,7 @@ export const isContentlayerAvailable = (): boolean => {
 // ============================================
 // SLUG HELPER FUNCTION (Robust)
 // ============================================
-export function getDocSlug(doc: any): string {
+function getDocSlug(doc: any): string {
   if (!doc) return 'untitled';
   
   // Priority 1: Explicit slug field
@@ -501,7 +501,4 @@ export const getFeaturedShorts = (limit: number = 3): ShortType[] => {
 // EXPORT ALL UTILITIES
 // ============================================
 
-export {
-  getDocSlug,
-  isContentlayerAvailable as isContentlayerLoaded,
-};
+export { isContentlayerAvailable as isContentlayerLoaded };
