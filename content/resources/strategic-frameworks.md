@@ -1,7 +1,6 @@
 ---
 title: "Strategic Frameworks"
 type: "Resource"
-title: "Getting Started"
 date: "2024-01-10"
 description: "Collection of strategic frameworks for decision-making."
 excerpt: "Tools and models for thinking strategically about complex challenges."

@@ -3,7 +3,6 @@ import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   ChevronRight,
@@ -35,124 +34,78 @@ type ContentPageProps = {
 // Type Configuration
 // -----------------------------
 
-const TYPE_CONFIG: Record<
-  DocKind,
-  {
-    label: string;
-    icon: React.ReactNode;
-    gradient: string;
-    accent: string;
-    bg: string;
-    border: string;
-  }
-> = {
+const TYPE_CONFIG = {
   post: {
     label: "Essays",
-    icon: <FileText className="h-4 w-4" />,
-    gradient: "from-amber-50 to-amber-100/50",
+    icon: FileText,
     accent: "text-amber-800",
     bg: "bg-amber-50/80",
     border: "border-amber-200/60",
   },
   canon: {
     label: "Canon",
-    icon: <Crown className="h-4 w-4" />,
-    gradient: "from-yellow-50 to-yellow-100/50",
+    icon: Crown,
     accent: "text-yellow-900",
     bg: "bg-yellow-50/80",
     border: "border-yellow-300/60",
   },
   resource: {
     label: "Resources",
-    icon: <Layers className="h-4 w-4" />,
-    gradient: "from-emerald-50 to-emerald-100/50",
+    icon: Layers,
     accent: "text-emerald-800",
     bg: "bg-emerald-50/80",
     border: "border-emerald-200/60",
   },
   download: {
     label: "Downloads",
-    icon: <Download className="h-4 w-4" />,
-    gradient: "from-blue-50 to-blue-100/50",
+    icon: Download,
     accent: "text-blue-800",
     bg: "bg-blue-50/80",
     border: "border-blue-200/60",
   },
   print: {
     label: "Prints",
-    icon: <Palette className="h-4 w-4" />,
-    gradient: "from-rose-50 to-rose-100/50",
+    icon: Palette,
     accent: "text-rose-800",
     bg: "bg-rose-50/80",
     border: "border-rose-200/60",
   },
   book: {
     label: "Books",
-    icon: <BookMarked className="h-4 w-4" />,
-    gradient: "from-violet-50 to-violet-100/50",
+    icon: BookMarked,
     accent: "text-violet-800",
     bg: "bg-violet-50/80",
     border: "border-violet-200/60",
   },
   event: {
     label: "Events",
-    icon: <Calendar className="h-4 w-4" />,
-    gradient: "from-cyan-50 to-cyan-100/50",
+    icon: Calendar,
     accent: "text-cyan-800",
     bg: "bg-cyan-50/80",
     border: "border-cyan-200/60",
   },
   short: {
     label: "Shorts",
-    icon: <Zap className="h-4 w-4" />,
-    gradient: "from-orange-50 to-orange-100/50",
+    icon: Zap,
     accent: "text-orange-800",
     bg: "bg-orange-50/80",
     border: "border-orange-200/60",
   },
   strategy: {
     label: "Strategy",
-    icon: <Target className="h-4 w-4" />,
-    gradient: "from-teal-50 to-teal-100/50",
+    icon: Target,
     accent: "text-teal-800",
     bg: "bg-teal-50/80",
     border: "border-teal-200/60",
   },
-};
+} as const;
 
-// -----------------------------
-// Intelligent Image Component
-// -----------------------------
-
-interface AdaptiveImageProps {
-  src: string;
-  alt: string;
-  aspectRatio?: string;
-}
-
-const AdaptiveImage: React.FC<AdaptiveImageProps> = ({
-  src,
-  alt,
-  aspectRatio = "16/10",
-}) => {
-  const [imageError, setImageError] = React.useState(false);
-  const fallbackSrc = "/assets/images/writing-desk.webp";
-  const displaySrc = imageError ? fallbackSrc : src;
-
-  return (
-    <div className="relative h-full w-full bg-gradient-to-br from-neutral-50 to-neutral-100">
-      <Image
-        src={displaySrc}
-        alt={alt}
-        fill
-        className="object-cover transition-all duration-700 group-hover:scale-[1.03]"
-        sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-        onError={() => setImageError(true)}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-    </div>
-  );
-};
+// Client-only component with animations
+const AnimatedContentGrid = React.lazy(() => 
+  import('@/components/AnimatedContentGrid').then(mod => ({
+    default: mod.AnimatedContentGrid
+  }))
+);
 
 // -----------------------------
 // Page Component
@@ -161,6 +114,11 @@ const AdaptiveImage: React.FC<AdaptiveImageProps> = ({
 const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
   const [filter, setFilter] = React.useState<DocKind | "all">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const allDocs = React.useMemo(() => {
     return (Object.keys(docsByType) as DocKind[]).flatMap((k) => docsByType[k]);
@@ -181,7 +139,7 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
   }, [allDocs, docsByType, filter, searchQuery]);
 
   const typeCounts = React.useMemo(() => {
-    const counts: Record<DocKind | "all", number> = { all: allDocs.length };
+    const counts: Record<string, number> = { all: allDocs.length };
     (Object.keys(docsByType) as DocKind[]).forEach((k) => {
       counts[k] = docsByType[k].length;
     });
@@ -279,9 +237,11 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
                   {allKinds.map((kind) => {
                     const config = TYPE_CONFIG[kind];
                     const active = filter === kind;
-                    const count = typeCounts[kind];
+                    const count = typeCounts[kind] || 0;
 
                     if (count === 0) return null;
+
+                    const IconComponent = config.icon;
 
                     return (
                       <button
@@ -300,12 +260,9 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
                               : "bg-neutral-50 group-hover:bg-neutral-100"
                           }`}
                         >
-                          {React.cloneElement(
-                            config.icon as React.ReactElement,
-                            {
-                              className: `h-4 w-4 ${active ? config.accent : "text-neutral-500"}`,
-                            }
-                          )}
+                          <IconComponent
+                            className={`h-4 w-4 ${active ? config.accent : "text-neutral-500"}`}
+                          />
                         </div>
                         <span className="font-medium">{config.label}</span>
                         <span
@@ -332,157 +289,156 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
             </div>
           </div>
 
-          {/* Content Grid */}
-          <AnimatePresence mode="wait">
-            {filteredDocs.length > 0 ? (
-              <motion.div
-                key={filter}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
-              >
-                {filteredDocs.map((doc) => {
-                  const config = TYPE_CONFIG[doc.type as DocKind];
-                  const dateObj = doc.date ? new Date(doc.date) : null;
+          {/* Content Grid - Client-only with fallback */}
+          {isClient ? (
+            <React.Suspense fallback={<StaticContentGrid docs={filteredDocs} />}>
+              <AnimatedContentGrid 
+                filteredDocs={filteredDocs} 
+                filter={filter}
+                TYPE_CONFIG={TYPE_CONFIG}
+              />
+            </React.Suspense>
+          ) : (
+            <StaticContentGrid docs={filteredDocs} />
+          )}
 
-                  return (
-                    <motion.div
-                      key={`${doc.type}:${doc.slug}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                    >
-                      <Link href={doc.href} className="group block h-full">
-                        <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-xl">
-                          {/* Image Container */}
-                          <div className="relative aspect-[16/10] w-full overflow-hidden">
-                            <AdaptiveImage
-                              src={
-                                doc.image || "/assets/images/writing-desk.webp"
-                              }
-                              alt={doc.title}
-                              aspectRatio="16/10"
-                            />
-                          </div>
-
-                          {/* Card Content */}
-                          <div className="flex flex-1 flex-col p-6">
-                            {/* Meta Row */}
-                            <div className="mb-4 flex items-center justify-between gap-3">
-                              <span
-                                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium ${config.bg} ${config.accent} ${config.border}`}
-                              >
-                                <div className="h-1.5 w-1.5 rounded-full bg-current" />
-                                {config.label}
-                              </span>
-                              {dateObj && (
-                                <time className="text-xs font-medium text-neutral-500">
-                                  {dateObj.toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
-                                </time>
-                              )}
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="mb-3 font-serif text-xl font-normal leading-snug text-neutral-900 transition-colors group-hover:text-neutral-700">
-                              {doc.title}
-                            </h3>
-
-                            {/* Excerpt */}
-                            {(doc.excerpt || doc.description) && (
-                              <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-neutral-600">
-                                {doc.excerpt || doc.description}
-                              </p>
-                            )}
-
-                            {/* Tags */}
-                            {doc.tags && doc.tags.length > 0 && (
-                              <div className="mb-5 flex flex-wrap gap-2">
-                                {doc.tags.slice(0, 3).map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-600"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                                {doc.tags.length > 3 && (
-                                  <span className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-400">
-                                    +{doc.tags.length - 3}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Footer */}
-                            <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4">
-                              {doc.downloadUrl ? (
-                                <div className="flex items-center gap-2 text-xs font-medium text-blue-700">
-                                  <Download className="h-3.5 w-3.5" />
-                                  <span>Available</span>
-                                </div>
-                              ) : (
-                                <div />
-                              )}
-
-                              <div
-                                className={`flex items-center gap-1.5 text-sm font-medium transition-all group-hover:gap-2 ${config.accent}`}
-                              >
-                                <span className="text-xs">View</span>
-                                <ChevronRight className="h-4 w-4" />
-                              </div>
-                            </div>
-                          </div>
-                        </article>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            ) : (
-              // Empty State
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="flex items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/30 p-16"
-              >
-                <div className="max-w-md text-center">
-                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm">
-                    <Search className="h-10 w-10 text-neutral-300" />
-                  </div>
-                  <h3 className="mb-3 font-serif text-2xl font-light text-neutral-900">
-                    No results found
-                  </h3>
-                  <p className="mb-8 text-neutral-600">
-                    Try adjusting your search terms or selected filter.
-                  </p>
-                  {(searchQuery || filter !== "all") && (
-                    <button
-                      onClick={() => {
-                        setSearchQuery("");
-                        setFilter("all");
-                      }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-6 py-3 text-sm font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:shadow"
-                    >
-                      <X className="h-4 w-4" />
-                      Clear all filters
-                    </button>
-                  )}
+          {/* Empty State */}
+          {filteredDocs.length === 0 && (
+            <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/30 p-16">
+              <div className="max-w-md text-center">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm">
+                  <Search className="h-10 w-10 text-neutral-300" />
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <h3 className="mb-3 font-serif text-2xl font-light text-neutral-900">
+                  No results found
+                </h3>
+                <p className="mb-8 text-neutral-600">
+                  Try adjusting your search terms or selected filter.
+                </p>
+                {(searchQuery || filter !== "all") && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setFilter("all");
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-6 py-3 text-sm font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:shadow"
+                  >
+                    <X className="h-4 w-4" />
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </Layout>
   );
 };
+
+// Static fallback grid component
+function StaticContentGrid({ docs }: { docs: ContentlayerCardProps[] }) {
+  return (
+    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {docs.map((doc) => {
+        const config = TYPE_CONFIG[doc.type as DocKind];
+        const dateObj = doc.date ? new Date(doc.date) : null;
+
+        return (
+          <div key={`${doc.type}-${doc.slug}`}>
+            <Link href={doc.href} className="group block h-full">
+              <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-xl">
+                {/* Image Container */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-neutral-50 to-neutral-100">
+                  <Image
+                    src={doc.image || "/assets/images/writing-desk.webp"}
+                    alt={doc.title}
+                    fill
+                    className="object-cover transition-all duration-700 group-hover:scale-[1.03]"
+                    sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                </div>
+
+                {/* Card Content */}
+                <div className="flex flex-1 flex-col p-6">
+                  {/* Meta Row */}
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <span
+                      className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium ${config.bg} ${config.accent} ${config.border}`}
+                    >
+                      <div className="h-1.5 w-1.5 rounded-full bg-current" />
+                      {config.label}
+                    </span>
+                    {dateObj && (
+                      <time className="text-xs font-medium text-neutral-500">
+                        {dateObj.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </time>
+                    )}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mb-3 font-serif text-xl font-normal leading-snug text-neutral-900 transition-colors group-hover:text-neutral-700">
+                    {doc.title}
+                  </h3>
+
+                  {/* Excerpt */}
+                  {(doc.excerpt || doc.description) && (
+                    <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-neutral-600">
+                      {doc.excerpt || doc.description}
+                    </p>
+                  )}
+
+                  {/* Tags */}
+                  {doc.tags && doc.tags.length > 0 && (
+                    <div className="mb-5 flex flex-wrap gap-2">
+                      {doc.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-600"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {doc.tags.length > 3 && (
+                        <span className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-400">
+                          +{doc.tags.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4">
+                    {doc.downloadUrl ? (
+                      <div className="flex items-center gap-2 text-xs font-medium text-blue-700">
+                        <Download className="h-3.5 w-3.5" />
+                        <span>Available</span>
+                      </div>
+                    ) : (
+                      <div />
+                    )}
+
+                    <div
+                      className={`flex items-center gap-1.5 text-sm font-medium transition-all group-hover:gap-2 ${config.accent}`}
+                    >
+                      <span className="text-xs">View</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // -----------------------------
 // Data Fetching
@@ -506,22 +462,6 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   (Object.keys(publishedBuckets) as DocKind[]).forEach((kind) => {
     docsByType[kind] = publishedBuckets[kind].map(getCardPropsForDocument);
   });
-
-  // Production logging
-  if (process.env.NODE_ENV === "development") {
-    console.log("[Archive] Content summary:", {
-      posts: docsByType.post.length,
-      canon: docsByType.canon.length,
-      resources: docsByType.resource.length,
-      downloads: docsByType.download.length,
-      prints: docsByType.print.length,
-      books: docsByType.book.length,
-      events: docsByType.event.length,
-      shorts: docsByType.short.length,
-      strategies: docsByType.strategy.length,
-      total: Object.values(docsByType).flat().length,
-    });
-  }
 
   return {
     props: { docsByType },
