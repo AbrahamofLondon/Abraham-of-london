@@ -1,15 +1,15 @@
 ---
 title: "Strategic Frameworks"
+type: "Resource"
+title: "Getting Started"
 date: "2024-01-10"
 description: "Collection of strategic frameworks for decision-making."
 excerpt: "Tools and models for thinking strategically about complex challenges."
 author: "Abraham of London"
-coverImage: "/assets/images/resources/strategic-frameworks.jpg"
+coverImage: "/assets/images/canon/canon-resources.jpg"
 tags: ["strategic", "frameworks", "tools", "decision-making"]
-resourceType: "document"
-featured: true
+href: "/resources/strategic-frameworks"  # adjust to your actual page route
 draft: false
-accessLevel: "public"
 ---
 
 # Strategic Frameworks Collection

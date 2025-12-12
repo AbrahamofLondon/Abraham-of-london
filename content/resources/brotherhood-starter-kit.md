@@ -1,10 +1,12 @@
 ---
 date: "2025-01-01"
+type: "Resource"
 title: "Brotherhood Starter Kit"
 description: "Essential resources for building strong brotherhood connections"
 type: Resource
 slug: "brotherhood-starter-kit"
 author: "Abraham of London"
+href: "/resources/brotherhood-starter-kit"  # adjust to your actual page route
 readtime: "2 mins"
 coverImage: "/assets/images/resources/brotherhood-starter-kit.jpg"
 downloadUrl: "/assets/resources/pdfs/brotherhood-starter-kit.pdf"
