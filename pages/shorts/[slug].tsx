@@ -4,12 +4,46 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useMDXComponent } from "next-contentlayer2/hooks";
 
-import { getPublishedShorts, getShortBySlug } from "@/lib/contentlayer-helper";
+// Import directly from contentlayer/generated to avoid import issues
+import { allShorts } from 'contentlayer/generated';
+import type { Short as ShortType } from 'contentlayer/generated';
+
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { useShortInteractions } from "@/hooks/useShortInteractions";
 
-// Local, serialisable type instead of importing from contentlayer2
+// Local slug helper function to avoid import issues
+function getShortSlug(short: ShortType): string {
+  // First try the slug field
+  if (short.slug && typeof short.slug === 'string' && short.slug.trim()) {
+    return short.slug.trim();
+  }
+  
+  // Fallback to flattened path
+  if (short._raw?.flattenedPath) {
+    const path = short._raw.flattenedPath;
+    const parts = path.split('/');
+    if (parts.length > 1) {
+      const lastPart = parts[parts.length - 1];
+      return lastPart === 'index' ? parts[parts.length - 2] || lastPart : lastPart;
+    }
+    return path;
+  }
+  
+  // Last resort: use title as slug
+  if (short.title) {
+    return short.title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
+  
+  console.warn('Short has no slug or title:', short);
+  return 'untitled';
+}
+
+// Local, serialisable type
 type ShortDoc = {
   _id: string;
   slug: string;
@@ -231,12 +265,21 @@ const ShortPage: NextPage<ShortPageProps> = ({ short }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const shorts = getPublishedShorts();
+  // Filter out draft shorts
+  const publishedShorts = allShorts.filter(short => !short.draft);
+  
+  // Get slugs safely
+  const paths = publishedShorts
+    .map((short) => {
+      const slug = getShortSlug(short);
+      return slug && slug !== 'untitled' ? { params: { slug } } : null;
+    })
+    .filter((path): path is { params: { slug: string } } => path !== null);
+
+  console.log(`Generated ${paths.length} paths for shorts`);
 
   return {
-    paths: shorts.map((short) => ({
-      params: { slug: short.slug },
-    })),
+    paths,
     fallback: 'blocking',
   };
 };
@@ -246,15 +289,25 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({
 }) => {
   const slug = params?.slug as string;
 
-  const raw = getShortBySlug(slug);
+  if (!slug) {
+    return { notFound: true };
+  }
+
+  // Find the short by comparing slugs
+  const raw = allShorts.find(short => {
+    const shortSlug = getShortSlug(short);
+    return shortSlug === slug && !short.draft;
+  });
 
   if (!raw) {
     return { notFound: true };
   }
 
   const short: ShortDoc = {
-    ...raw,
+    _id: raw._id,
+    slug: getShortSlug(raw),
     title: raw.title ?? "Untitled short",
+    body: raw.body,
     excerpt: raw.excerpt ?? null,
     date: raw.date ?? null,
     tags: raw.tags ?? [],

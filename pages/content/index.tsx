@@ -522,7 +522,11 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   const publishedBuckets = getPublishedDocumentsByType();
 
-  // Convert AnyDoc buckets -> CardProps buckets
+  // TEMP DEBUG (remove later)
+  console.log("[archive] counts", Object.fromEntries(
+    Object.entries(publishedBuckets).map(([k,v]) => [k, v.length])
+  ));
+
   const docsByType: Record<DocKind, ContentlayerCardProps[]> = {
     post: [],
     canon: [],
@@ -539,10 +543,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
     docsByType[kind] = (publishedBuckets[kind] ?? []).map(getCardPropsForDocument);
   });
 
-  return {
-    props: { docsByType },
-    revalidate: 60,
-  };
+  return { props: { docsByType }, revalidate: 60 };
 };
 
 export default ContentIndexPage;

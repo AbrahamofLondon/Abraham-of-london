@@ -1,5 +1,5 @@
 // contentlayer.config.ts - UPDATED with YAML fix
-import path from "node:path";
+import path from "path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";

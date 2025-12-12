@@ -1,4 +1,4 @@
-// pages/resources/[slug].tsx - COMPLETE FIXED VERSION
+// pages/resources/[slug].tsx - FIXED with conflict resolution
 import type { GetStaticPaths, GetStaticProps } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -9,7 +9,15 @@ import Image from "next/image";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug, type PostDocument } from "@/lib/mdx";
+
+// IMPORTANT: Import from our fixed content system
+import { getAllResources, getResourceBySlug, type Resource as ResourceType } from "@/lib/content";
+
+interface ResourcePageProps {
+  meta: ResourceMeta;
+  mdxSource: MDXRemoteSerializeResult;
+  type: 'resource'; // Add this to distinguish from other pages
+}
 
 interface ResourceMeta {
   slug: string;
@@ -23,11 +31,8 @@ interface ResourceMeta {
   tags?: string[] | null;
   downloadUrl?: string | null;
   excerpt?: string | null;
-}
-
-interface ResourcePageProps {
-  meta: ResourceMeta;
-  mdxSource: MDXRemoteSerializeResult;
+  type?: string | null;
+  resourceType?: string | null;
 }
 
 const SITE_URL =
@@ -45,6 +50,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
     tags,
     downloadUrl,
     slug,
+    resourceType,
   } = meta;
 
   const pageTitle = `${title} | Strategic Resource`;
@@ -74,7 +80,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
           {/* Header */}
           <header className="mb-8 border-b border-softGold/20 pb-6">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
-              Strategic Resource
+              {resourceType || "Strategic Resource"}
             </p>
             <h1 className="mb-3 font-serif text-3xl font-bold tracking-tight sm:text-4xl">
               {title}
@@ -204,27 +210,42 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
 }
 
 /* ------------------------------------------
- *  STATIC GENERATION - FIXED
+ *  STATIC GENERATION - USING CONTENTLAYER
  * ------------------------------------------ */
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    // FIXED: getAllContent returns a Promise, so we need to await it
-    const all = await getAllContent("resources");
+    const resources = getAllResources();
     
-    const paths = Array.isArray(all) 
-      ? all.map((r) => ({ params: { slug: r.slug } }))
-      : [];
+    // Filter out any resource that might conflict with '/resources' index page
+    // IMPORTANT: Exclude any resource with slug 'index' or empty
+    const paths = resources
+      .map((resource) => {
+        const slug = resource.slug || resource._raw?.flattenedPath?.split('/').pop();
+        return slug && slug !== 'index' && slug !== '' 
+          ? { params: { slug } } 
+          : null;
+      })
+      .filter((path): path is { params: { slug: string } } => path !== null);
+
+    console.log(`Generated ${paths.length} paths for resources`);
+    
+    // Check for conflicts
+    const slugs = paths.map(p => p.params.slug);
+    const uniqueSlugs = new Set(slugs);
+    if (slugs.length !== uniqueSlugs.size) {
+      console.warn('Duplicate slugs found in resources!', slugs);
+    }
 
     return {
       paths,
-      fallback: false,
+      fallback: 'blocking', // Use blocking fallback for safety
     };
   } catch (error) {
     console.error("Error generating static paths for resources:", error);
     return {
       paths: [],
-      fallback: false,
+      fallback: 'blocking',
     };
   }
 };
@@ -235,42 +256,87 @@ export const getStaticProps: GetStaticProps<ResourcePageProps> = async ({
   try {
     const slug = String(params?.slug);
 
-    // FIXED: Use PostDocument type instead of RawContentEntry
-    const doc = await getContentBySlug("resources", slug);
+    // Check if this is trying to access the index page
+    if (slug === 'index' || slug === '') {
+      return {
+        redirect: {
+          destination: '/resources',
+          permanent: true,
+        },
+      };
+    }
 
-    if (!doc) {
+    const resource = getResourceBySlug(slug);
+
+    if (!resource) {
       return { notFound: true };
     }
 
-    const { content, ...rawMeta } = doc;
+    // Check if this resource has content (MDX)
+    if (!resource.body?.code) {
+      // If no MDX content, check for description/excerpt
+      if (resource.description) {
+        const mdxSource = await serialize(resource.description, {
+          mdxOptions: {
+            remarkPlugins: [remarkGfm],
+          },
+        });
 
-    const mdxSource = await serialize(content || "", {
+        const meta: ResourceMeta = {
+          slug: resource.slug || slug,
+          title: resource.title || "Untitled Resource",
+          description: resource.description ?? null,
+          subtitle: resource.subtitle ?? null,
+          date: resource.date ?? null,
+          author: resource.author ?? null,
+          readtime: resource.readTime ?? resource.readtime ?? null,
+          coverImage: resource.coverImage ?? null,
+          tags: resource.tags ?? null,
+          downloadUrl: resource.downloadUrl ?? resource.fileUrl ?? null,
+          excerpt: resource.excerpt ?? null,
+          resourceType: resource.resourceType ?? null,
+        };
+
+        return {
+          props: {
+            meta,
+            mdxSource,
+            type: 'resource' as const,
+          },
+          revalidate: 60,
+        };
+      }
+      
+      return { notFound: true };
+    }
+
+    // Has MDX content
+    const mdxSource = await serialize(resource.body.code, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
       },
     });
 
-    // Convert PostDocument to ResourceMeta
-    const typedMeta: ResourceMeta = {
-      slug: rawMeta.slug || slug,
-      title: rawMeta.title || "Untitled Resource",
-      description: rawMeta.description ?? null,
-      subtitle: rawMeta.subtitle ?? null,
-      date: rawMeta.date ?? null,
-      author: rawMeta.author ?? null,
-      readtime: rawMeta.readTime ?? rawMeta.readtime ?? null,
-      coverImage: typeof rawMeta.coverImage === 'string' 
-        ? rawMeta.coverImage 
-        : (rawMeta.coverImage as any)?.src ?? null,
-      tags: Array.isArray(rawMeta.tags) ? rawMeta.tags : null,
-      downloadUrl: rawMeta.downloadUrl ?? null,
-      excerpt: rawMeta.excerpt ?? null,
+    const meta: ResourceMeta = {
+      slug: resource.slug || slug,
+      title: resource.title || "Untitled Resource",
+      description: resource.description ?? null,
+      subtitle: resource.subtitle ?? null,
+      date: resource.date ?? null,
+      author: resource.author ?? null,
+      readtime: resource.readTime ?? resource.readtime ?? null,
+      coverImage: resource.coverImage ?? null,
+      tags: resource.tags ?? null,
+      downloadUrl: resource.downloadUrl ?? resource.fileUrl ?? null,
+      excerpt: resource.excerpt ?? null,
+      resourceType: resource.resourceType ?? null,
     };
 
     return {
       props: {
-        meta: typedMeta,
+        meta,
         mdxSource,
+        type: 'resource' as const,
       },
       revalidate: 60,
     };

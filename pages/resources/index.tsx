@@ -1,4 +1,4 @@
-// pages/resources/index.tsx - COMPLETE FIXED VERSION
+// pages/resources/index.tsx - UPDATED TO USE CONTENTLAYER
 import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -6,7 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-import { getAllContent, type PostDocument } from "@/lib/mdx";
+// Use the Contentlayer system
+import { getAllResources, type Resource as ResourceType } from "@/lib/content";
 
 interface ResourceMeta {
   slug: string;
@@ -14,11 +15,13 @@ interface ResourceMeta {
   description?: string | null;
   subtitle?: string | null;
   date?: string | null;
-  readtime?: string | null;
+  readTime?: string | null;
   coverImage?: string | null;
   tags?: string[] | null;
   author?: string | null;
-  draft?: boolean; // Add draft field for filtering
+  draft?: boolean;
+  resourceType?: string | null;
+  excerpt?: string | null;
 }
 
 interface ResourcesPageProps {
@@ -30,15 +33,15 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
   const pageDescription =
     "Curated frameworks and tools for fathers, founders, and institutional architects who are building for generations.";
 
-  // Filter out drafts and sort by date (newest first) or title
-  const publishedResources = resources.filter(r => !r.draft);
-  
-  const sortedResources = [...publishedResources].sort((a, b) => {
-    if (a.date && b.date) {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    }
-    return (a.title || "").localeCompare(b.title || "");
-  });
+  // Filter out drafts and sort by date (newest first)
+  const publishedResources = resources
+    .filter(r => !r.draft)
+    .sort((a, b) => {
+      if (a.date && b.date) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+      return (a.title || "").localeCompare(b.title || "");
+    });
 
   return (
     <Layout pageTitle={pageTitle}>
@@ -77,16 +80,16 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 
             <div className="mt-6 flex justify-center">
               <p className="max-w-2xl text-sm text-gray-400">
-                {sortedResources.length} curated resources for builders,
+                {publishedResources.length} curated resources for builders,
                 leaders, and legacy architects.
               </p>
             </div>
           </header>
 
           {/* Resources Grid */}
-          {sortedResources.length > 0 ? (
+          {publishedResources.length > 0 ? (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
-              {sortedResources.map((res) => {
+              {publishedResources.map((res) => {
                 const href = `/resources/${res.slug}`;
                 return (
                   <article
@@ -113,11 +116,11 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
                       <div className="mb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold uppercase tracking-[0.15em] text-softGold">
-                            Resource
+                            {res.resourceType || "Resource"}
                           </span>
-                          {res.readtime && (
+                          {res.readTime && (
                             <span className="text-xs text-gray-500">
-                              • {res.readtime}
+                              • {res.readTime}
                             </span>
                           )}
                         </div>
@@ -237,7 +240,7 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
           )}
 
           {/* Footer Note */}
-          {sortedResources.length > 0 && (
+          {publishedResources.length > 0 && (
             <div className="mt-16 border-t border-white/10 pt-10 text-center">
               <p className="text-sm text-gray-400">
                 These resources are designed for practical application, not
@@ -261,30 +264,29 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
   try {
-    // FIXED: getAllContent returns a Promise, await it and use PostDocument type
-    const all = await getAllContent("resources");
-
-    const resources: ResourceMeta[] = (all || []).map((r: PostDocument) => ({
-      slug: r.slug || "",
+    // Use Contentlayer's getAllResources
+    const resourcesData = getAllResources();
+    
+    const resources: ResourceMeta[] = resourcesData.map((r: ResourceType) => ({
+      slug: r.slug || r._raw?.flattenedPath?.split('/').pop() || '',
       title: r.title || "Untitled Resource",
       description: r.description ?? null,
       subtitle: r.subtitle ?? null,
       date: r.date ?? null,
-      readtime: r.readTime ?? null,
-      coverImage: typeof r.coverImage === 'string' 
-        ? r.coverImage 
-        : (r.coverImage as any)?.src ?? null,
-      tags: Array.isArray(r.tags) ? r.tags : r.tags ? [r.tags] : null,
+      readTime: r.readTime ?? r.readtime ?? null,
+      coverImage: r.coverImage ?? null,
+      tags: r.tags ?? null,
       author: r.author ?? null,
-      draft: r.draft ?? false, // Get draft status
+      draft: r.draft ?? false,
+      resourceType: r.resourceType ?? null,
+      excerpt: r.excerpt ?? null,
     }));
 
-    // Filter out drafts - now done in the component
     return {
       props: {
         resources,
       },
-      revalidate: 60, // Revalidate every minute
+      revalidate: 60,
     };
   } catch (error) {
     console.error("Error loading resources:", error);
