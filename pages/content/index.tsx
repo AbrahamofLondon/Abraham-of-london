@@ -5,13 +5,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, Filter, ChevronRight, BookOpen, Download, Calendar,
-  FileText, Crown, Layers, BookMarked, Gem, Scroll,
-  Feather, Briefcase, Palette, Trophy, Zap, Globe,
-  Star, Award, Sparkles, Target, Lightbulb, Users, Clock,
-  PenTool, Archive, Box, Printer, FileCode, CheckCircle,
-  ArrowRight, Eye, TrendingUp, Shield, Heart, Target as TargetIcon,
-  Grid, List, Sparkle
+  Search,
+  Filter,
+  ChevronRight,
+  BookOpen,
+  Download,
+  Calendar,
+  FileText,
+  Crown,
+  BookMarked,
+  Sparkles,
+  Palette,
+  Target,
+  Zap,
+  Layers,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -23,313 +30,161 @@ import {
 } from "@/lib/contentlayer-helper";
 
 type ContentPageProps = {
-  cards: ContentlayerCardProps[];
-  typeCounts: Record<DocKind | "all", number>;
+  docsByType: Record<DocKind, ContentlayerCardProps[]>;
 };
 
-type OverrideMap = Record<string, string>;
-
 // -----------------------------
-// Marketing-Driven Type Configuration
+// Premium Type Configuration
 // -----------------------------
 
-type ContentTypeConfig = {
+const TYPE_CONFIG: Record<DocKind, {
   label: string;
   icon: React.ReactNode;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  gradient: string;
-  badgeStyle: string;
-  tagline: string;
-  valueProp: string;
-  ctaText: string;
-  visualPriority: number;
-};
-
-const TYPE_CONFIG: Record<DocKind, ContentTypeConfig> = {
+  color: string;
+  lightBg: string;
+  casing: 'normal' | 'small-caps';
+}> = {
   post: {
-    label: "Insights",
-    icon: <Lightbulb className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-amber-500 to-orange-500",
-    secondaryColor: "bg-amber-50",
-    accentColor: "text-amber-700",
-    gradient: "from-amber-50 to-orange-50",
-    badgeStyle: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
-    tagline: "Strategic Perspectives",
-    valueProp: "Actionable intelligence",
-    ctaText: "Read Insight",
-    visualPriority: 1
+    label: "Essays",
+    icon: <FileText className="h-4 w-4" />,
+    color: "text-amber-700",
+    lightBg: "bg-amber-50",
+    casing: 'normal',
   },
   canon: {
     label: "Canon",
-    icon: <Crown className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-gold to-yellow-600",
-    secondaryColor: "bg-yellow-50",
-    accentColor: "text-yellow-700",
-    gradient: "from-yellow-50 to-amber-50",
-    badgeStyle: "bg-gradient-to-r from-gold to-yellow-600 text-black",
-    tagline: "Foundational Wisdom",
-    valueProp: "Timeless principles",
-    ctaText: "Study Canon",
-    visualPriority: 1
+    icon: <Crown className="h-4 w-4" />,
+    color: "text-gold",
+    lightBg: "bg-gold/10",
+    casing: 'small-caps',
   },
   resource: {
     label: "Resources",
-    icon: <Briefcase className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-emerald-500 to-green-600",
-    secondaryColor: "bg-emerald-50",
-    accentColor: "text-emerald-700",
-    gradient: "from-emerald-50 to-green-50",
-    badgeStyle: "bg-gradient-to-r from-emerald-500 to-green-600 text-white",
-    tagline: "Practical Tools",
-    valueProp: "Ready-to-use assets",
-    ctaText: "Get Resource",
-    visualPriority: 2
+    icon: <Layers className="h-4 w-4" />,
+    color: "text-emerald-700",
+    lightBg: "bg-emerald-50",
+    casing: 'normal',
   },
   download: {
     label: "Downloads",
-    icon: <Download className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-blue-500 to-indigo-600",
-    secondaryColor: "bg-blue-50",
-    accentColor: "text-blue-700",
-    gradient: "from-blue-50 to-indigo-50",
-    badgeStyle: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white",
-    tagline: "Digital Assets",
-    valueProp: "Instant access",
-    ctaText: "Download Now",
-    visualPriority: 2
+    icon: <Download className="h-4 w-4" />,
+    color: "text-blue-700",
+    lightBg: "bg-blue-50",
+    casing: 'normal',
   },
   print: {
     label: "Prints",
-    icon: <Printer className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-rose-500 to-pink-600",
-    secondaryColor: "bg-rose-50",
-    accentColor: "text-rose-700",
-    gradient: "from-rose-50 to-pink-50",
-    badgeStyle: "bg-gradient-to-r from-rose-500 to-pink-600 text-white",
-    tagline: "Premium Physical",
-    valueProp: "Tangible quality",
-    ctaText: "View Prints",
-    visualPriority: 3
+    icon: <Palette className="h-4 w-4" />,
+    color: "text-rose-700",
+    lightBg: "bg-rose-50",
+    casing: 'normal',
   },
   book: {
     label: "Books",
-    icon: <BookMarked className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-purple-500 to-violet-600",
-    secondaryColor: "bg-purple-50",
-    accentColor: "text-purple-700",
-    gradient: "from-purple-50 to-violet-50",
-    badgeStyle: "bg-gradient-to-r from-purple-500 to-violet-600 text-white",
-    tagline: "Complete Volumes",
-    valueProp: "Definitive works",
-    ctaText: "Explore Book",
-    visualPriority: 1
+    icon: <BookMarked className="h-4 w-4" />,
+    color: "text-violet-700",
+    lightBg: "bg-violet-50",
+    casing: 'normal',
   },
   event: {
     label: "Events",
-    icon: <Calendar className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-cyan-500 to-teal-600",
-    secondaryColor: "bg-cyan-50",
-    accentColor: "text-cyan-700",
-    gradient: "from-cyan-50 to-teal-50",
-    badgeStyle: "bg-gradient-to-r from-cyan-500 to-teal-600 text-white",
-    tagline: "Live Experiences",
-    valueProp: "Exclusive access",
-    ctaText: "Join Event",
-    visualPriority: 3
+    icon: <Calendar className="h-4 w-4" />,
+    color: "text-cyan-700",
+    lightBg: "bg-cyan-50",
+    casing: 'normal',
   },
   short: {
     label: "Shorts",
-    icon: <Zap className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-orange-500 to-red-500",
-    secondaryColor: "bg-orange-50",
-    accentColor: "text-orange-700",
-    gradient: "from-orange-50 to-red-50",
-    badgeStyle: "bg-gradient-to-r from-orange-500 to-red-500 text-white",
-    tagline: "Quick Insights",
-    valueProp: "Time-efficient value",
-    ctaText: "Read Short",
-    visualPriority: 2
+    icon: <Zap className="h-4 w-4" />,
+    color: "text-orange-700",
+    lightBg: "bg-orange-50",
+    casing: 'normal',
   },
   strategy: {
     label: "Strategy",
-    icon: <Target className="h-5 w-5" />,
-    primaryColor: "bg-gradient-to-br from-teal-500 to-emerald-600",
-    secondaryColor: "bg-teal-50",
-    accentColor: "text-teal-700",
-    gradient: "from-teal-50 to-emerald-50",
-    badgeStyle: "bg-gradient-to-r from-teal-500 to-emerald-600 text-white",
-    tagline: "Action Plans",
-    valueProp: "Proven frameworks",
-    ctaText: "Implement Strategy",
-    visualPriority: 1
-  }
+    icon: <Target className="h-4 w-4" />,
+    color: "text-teal-700",
+    lightBg: "bg-teal-50",
+    casing: 'normal',
+  },
 };
 
 // -----------------------------
-// Cover Overrides - EXPANDED FOR PRINTS
+// Page Component
 // -----------------------------
 
-const COVER_OVERRIDES: OverrideMap = {
-  // Blog
-  "christianity-not-extremism": "/assets/images/blog/christianity-not-extremism.jpg",
-  "leadership-begins-at-home": "/assets/images/blog/leadership-begins-at-home.jpg",
-  "ultimate-purpose-of-man": "/assets/images/blog/purpose-cover.jpg",
-  "out-of-context-truth": "/assets/images/blog/out-of-context-truth.jpg",
-  "principles-for-my-son": "/assets/images/blog/principles-for-my-son.jpg",
-  "reclaiming-the-narrative": "/assets/images/blog/reclaiming-the-narrative.jpg",
-  "the-brotherhood-code": "/assets/images/blog/the-brotherhood-code.jpg",
-  "when-gods-sovereignty-collides-with-our-pain": "/assets/images/blog/sovereignty-truth-fathers.jpg",
-  "when-the-foundation-is-destroyed": "/assets/images/blog/when-the-foundation-is-destroyed.jpg",
-  "when-the-storm-finds-you": "/assets/images/blog/when-the-storm-finds-you.jpg",
-  "when-the-system-breaks-you": "/assets/images/blog/when-the-system-breaks-you.jpg",
-  "in-my-fathers-house": "/assets/images/blog/in-my-fathers-house.jpg",
-  "lessons-from-noah": "/assets/images/blog/lessons-from-noah-hero.jpg",
-  "kingdom-strategies-for-a-loving-legacy": "/assets/images/blog/kingdom-strategies-for-a-loving-legacy.jpg",
-
-  // Books
-  "fathering-without-fear": "/assets/images/books/fathering-without-fear.jpg",
-  "the-fiction-adaptation": "/assets/images/books/the-fiction-adaptation.jpg",
-  "the-architecture-of-human-purpose": "/assets/images/books/the-architecture-of-human-purpose.jpg",
-  "the-builders-catechism": "/assets/images/canon/builders-catechism-cover.jpg",
-
-  // Canon
-  "builders-catechism": "/assets/images/canon/builders-catechism-cover.jpg",
-  "canon-campaign": "/assets/images/canon/canon-campaign-cover.jpg",
-  "canon-introduction-letter": "/assets/images/canon/canon-intro-letter-cover.jpg",
-  "canon-intro-letter": "/assets/images/canon/canon-intro-letter-cover.jpg",
-  "canon-resources": "/assets/images/canon/canon-resources.jpg",
-  "volume-i-foundations-of-purpose": "/assets/images/canon/vol-i-foundations-for-purpose.jpg",
-  "volume-ii-governance-and-formation": "/assets/images/canon/vol-ii-governance-and-formation.jpg",
-  "volume-i-teaching-edition": "/assets/images/canon/vol-i-teaching-edition.jpg",
-  "volume-ii-teaching-edition": "/assets/images/canon/vol-ii-teaching-edition.jpg",
-  "volume-iii-teaching-edition": "/assets/images/canon/vol-iii-teaching-edition.jpg",
-  "volume-iv-teaching-edition": "/assets/images/canon/vol-iv-teaching-edition.jpg",
-  "volume-x-filename": "/assets/images/canon/volume-x-cover.jpg",
-  "volume-x-the-arc-of-future-civilisation": "/assets/images/canon/volume-x-cover.jpg",
-
-  // Resources
-  "canon-council-table-agenda": "/assets/images/canon/canon-resources.jpg",
-  "canon-household-charter": "/assets/images/canon/canon-resources.jpg",
-  "canon-reading-plan-year-one": "/assets/images/canon/canon-resources.jpg",
-  "destiny-mapping-worksheet": "/assets/images/canon/canon-resources.jpg",
-  "institutional-health-scorecard": "/assets/images/canon/canon-resources.jpg",
-  "multi-generational-legacy-ledger": "/assets/images/canon/canon-resources.jpg",
-  "purpose-alignment-checklist": "/assets/images/canon/canon-resources.jpg",
-
-  // PRINTS - ESSENTIAL: Add your actual print documents here
-  "canon-prints": "/assets/images/prints/canon-prints.jpg",
-  "limited-edition-prints": "/assets/images/prints/limited-edition.jpg",
-  "foundational-documents": "/assets/images/prints/foundational-docs.jpg",
-  "executive-prints": "/assets/images/prints/executive-prints.jpg",
-  "legacy-prints": "/assets/images/prints/legacy-prints.jpg",
-
-  // Events
-  "founders-salon": "/assets/images/events/founders-salon.jpg",
-  "leadership-workshop": "/assets/images/events/leadership-workshop.jpg",
-};
-
-function applyCoverOverrides(card: ContentlayerCardProps): ContentlayerCardProps {
-  const slug = String(card.slug || "").toLowerCase();
-  const override = COVER_OVERRIDES[slug];
-  if (override) return { ...card, image: override };
-
-  if (card.image === "/assets/images/canon-resources.jpg") {
-    return { ...card, image: "/assets/images/canon/canon-resources.jpg" };
-  }
-
-  return card;
-}
-
-// -----------------------------
-// Marketing-Optimized Page Component
-// -----------------------------
-
-const ContentIndexPage: NextPage<ContentPageProps> = ({ cards, typeCounts }) => {
+const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
   const [filter, setFilter] = React.useState<DocKind | "all">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
-  const filtered = React.useMemo(() => {
-    let result = cards;
-    
-    if (filter !== "all") {
-      result = result.filter((c) => String(c.type || "").toLowerCase() === filter);
-    }
-    
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter((c) =>
-        c.title.toLowerCase().includes(query) ||
-        (c.excerpt || "").toLowerCase().includes(query) ||
-        (c.tags || []).some(tag => tag.toLowerCase().includes(query))
-      );
-    }
-    
-    return result;
-  }, [cards, filter, searchQuery]);
+  // Flatten all documents for counting and 'all' filter
+  const allDocs = React.useMemo(() => {
+    return (Object.keys(docsByType) as DocKind[]).flatMap((k) => docsByType[k]);
+  }, [docsByType]);
 
-  const kinds: DocKind[] = ["post", "canon", "resource", "download", "print", "book", "event", "short", "strategy"];
-  const currentType = filter === "all" ? undefined : TYPE_CONFIG[filter];
+  // Get current filtered documents
+  const filteredDocs = React.useMemo(() => {
+    const source = filter === "all" ? allDocs : docsByType[filter];
+    if (!searchQuery.trim()) return source;
+
+    const query = searchQuery.toLowerCase();
+    return source.filter((doc) =>
+      doc.title.toLowerCase().includes(query) ||
+      (doc.excerpt || "").toLowerCase().includes(query) ||
+      (doc.tags || []).some(tag => tag.toLowerCase().includes(query))
+    );
+  }, [allDocs, docsByType, filter, searchQuery]);
+
+  // Counts for UI
+  const typeCounts = React.useMemo(() => {
+    const counts: Record<DocKind | "all", number> = { all: allDocs.length };
+    (Object.keys(docsByType) as DocKind[]).forEach((k) => {
+      counts[k] = docsByType[k].length;
+    });
+    return counts;
+  }, [docsByType, allDocs]);
+
+  const allKinds: DocKind[] = ["post", "canon", "resource", "download", "print", "book", "event", "short", "strategy"];
 
   return (
-    <Layout title="Content Library">
+    <Layout title="The Archive">
       <main className="min-h-screen bg-white">
-        {/* Marketing Hero Section - CLEAR & CRISP */}
-        <div className="relative overflow-hidden bg-gradient-to-b from-white to-gray-50">
-          <div className="absolute top-0 right-0 h-64 w-64 bg-gradient-to-bl from-blue-50/50 to-purple-50/50 rounded-full -translate-y-32 translate-x-32" />
-          <div className="absolute bottom-0 left-0 h-64 w-64 bg-gradient-to-tr from-amber-50/50 to-orange-50/50 rounded-full translate-y-32 -translate-x-32" />
-          
-          <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
-              {/* Value Proposition Header */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 mb-6">
-                <Sparkle className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-semibold text-blue-700">
-                  Curated Collection
+        {/* Premium Hero Section */}
+        <div className="relative overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-white to-neutral-50/50">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(212,175,55,0.03)_0%,transparent_70%)]" />
+          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-black/5 px-3 py-1.5">
+                <Sparkles className="h-3 w-3 text-gold" />
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-600">
+                  Curated Library
                 </span>
               </div>
-              
-              <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl lg:text-6xl mb-4">
-                Discover Premium Content
+
+              <h1 className="mb-4 font-serif text-5xl font-light text-neutral-900 sm:text-6xl">
+                The Archive
               </h1>
-              
-              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                Access our complete library of insights, tools, and resources designed for exceptional results.
+
+              <p className="mb-8 text-lg text-neutral-600 leading-relaxed">
+                A complete collection of essays, canon, resources, and exclusive materials.
+                Designed for depth and clarity.
               </p>
 
-              {/* Marketing Stats */}
-              <div className="flex justify-center gap-8 mb-10">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">{cards.length}</div>
-                  <div className="text-sm text-gray-500">Total Resources</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">{kinds.length}</div>
-                  <div className="text-sm text-gray-500">Content Types</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">100%</div>
-                  <div className="text-sm text-gray-500">Premium Quality</div>
-                </div>
-              </div>
-
-              {/* Clean Search */}
-              <div className="relative max-w-2xl mx-auto">
+              {/* Premium Search */}
+              <div className="relative max-w-2xl">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                  <Search className="h-5 w-5 text-gray-400" />
+                  <Search className="h-5 w-5 text-neutral-400" />
                 </div>
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search titles, topics, or keywords..."
-                  className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                  placeholder="Search across titles, excerpts, and tags..."
+                  className="w-full rounded-xl border border-neutral-200 bg-white py-3.5 pl-12 pr-4 text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-neutral-400 focus:shadow-sm"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                   >
                     ✕
                   </button>
@@ -339,57 +194,45 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards, typeCounts }) => 
           </div>
         </div>
 
-        {/* Main Content Area - CRISP & ORGANIZED */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {/* Marketing Filter Bar */}
-          <div className="mb-8">
+        {/* Main Content Area */}
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          {/* Premium Filter Bar */}
+          <div className="mb-10">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              {/* View Toggle */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
-                >
-                  <Grid className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-lg ${viewMode === "list" ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
-                >
-                  <List className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Clean Filter Buttons */}
-              <div className="flex-1 overflow-x-auto">
+              <div className="flex-1 overflow-x-auto pb-2">
                 <div className="flex gap-2 min-w-max">
+                  {/* All Filter */}
                   <button
                     onClick={() => setFilter("all")}
-                    className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-                      filter === "all" 
-                        ? "bg-gray-900 text-white" 
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    className={`group relative rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${filter === "all"
+                        ? "bg-neutral-900 text-white shadow-sm"
+                        : "bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-200"
+                      }`}
                   >
-                    All Content ({typeCounts.all})
+                    All ({typeCounts.all})
                   </button>
-                  
-                  {kinds.map((kind) => {
+
+                  {/* Type Filters */}
+                  {allKinds.map((kind) => {
                     const config = TYPE_CONFIG[kind];
                     const active = filter === kind;
-                    
                     return (
                       <button
                         key={kind}
                         onClick={() => setFilter(kind)}
-                        className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${
-                          active 
-                            ? `${config.secondaryColor} ${config.accentColor} border-2 ${config.accentColor.replace('text-', 'border-')}` 
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                        className={`group relative flex items-center gap-2.5 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${active
+                            ? `${config.lightBg} ${config.color} border border-current/20`
+                            : "bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-200"
+                          }`}
                       >
-                        {config.icon}
-                        {config.label} ({typeCounts[kind]})
+                        <div className={`flex h-6 w-6 items-center justify-center rounded-md ${active ? config.lightBg : "bg-neutral-100"}`}>
+                          {React.cloneElement(config.icon as React.ReactElement, {
+                            className: `h-3.5 w-3.5 ${active ? config.color : "text-neutral-500"}`
+                          })}
+                        </div>
+                        <span className={config.casing === 'small-caps' ? "tracking-widest" : ""}>
+                          {config.label} ({typeCounts[kind]})
+                        </span>
                       </button>
                     );
                   })}
@@ -397,310 +240,153 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards, typeCounts }) => 
               </div>
 
               {/* Results Counter */}
-              <div className="text-sm text-gray-500">
-                Showing <span className="font-semibold text-gray-900">{filtered.length}</span> of <span className="font-semibold text-gray-900">{cards.length}</span> items
+              <div className="flex items-center gap-3 text-sm text-neutral-500">
+                <span>Viewing</span>
+                <span className="font-semibold text-neutral-900">{filteredDocs.length}</span>
+                <span>of</span>
+                <span className="font-semibold text-neutral-900">{typeCounts.all}</span>
+                <span>items</span>
               </div>
             </div>
           </div>
 
-          {/* Active Category Banner - MARKETING FOCUS */}
-          {currentType && (
-            <div className={`mb-8 rounded-2xl ${currentType.secondaryColor} p-6`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${currentType.primaryColor} text-white`}>
-                    {currentType.icon}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{currentType.label}</h2>
-                    <p className="text-gray-600">{currentType.tagline} • {typeCounts[filter]} premium resources</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setFilter("all")}
-                  className="px-4 py-2 rounded-lg bg-white text-gray-700 font-medium hover:bg-gray-50"
-                >
-                  View All Types
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* MARKETING-OPTIMIZED CONTENT CARDS */}
+          {/* Premium Content Grid */}
           <AnimatePresence mode="wait">
-            {filtered.length > 0 ? (
-              viewMode === "grid" ? (
-                <motion.div
-                  key="grid"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                >
-                  {filtered.map((card) => {
-                    const config = TYPE_CONFIG[card.type as DocKind];
-                    const hasDownload = card.downloadUrl;
-                    const isPopular = card.tags?.includes("popular") || card.tags?.includes("featured");
-                    
-                    return (
-                      <motion.div
-                        key={`${card.type}:${card.slug}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        whileHover={{ y: -4 }}
-                        className="group"
+            {filteredDocs.length > 0 ? (
+              <motion.div
+                key={filter}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              >
+                {filteredDocs.map((doc) => {
+                  const config = TYPE_CONFIG[doc.type as DocKind];
+                  const dateObj = doc.date ? new Date(doc.date) : null;
+
+                  return (
+                    <motion.div
+                      key={`${doc.type}:${doc.slug}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileHover={{ y: -4 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Link
+                        href={doc.href}
+                        className="group block overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg"
                       >
-                        <Link
-                          href={card.href}
-                          className="block bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100"
-                        >
-                          {/* Card Header with Marketing Badges */}
-                          <div className="relative h-48 overflow-hidden">
-                            <Image
-                              src={card.image || "/assets/images/writing-desk.webp"}
-                              alt={card.title}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-500"
-                              sizes="(min-width: 1280px) 384px, (min-width: 1024px) 320px, (min-width: 768px) 50vw, 100vw"
-                            />
-                            
-                            {/* Marketing Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                            
-                            {/* Top Badges */}
-                            <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-                              <span className={`${config.badgeStyle} px-3 py-1 rounded-full text-xs font-semibold`}>
-                                {config.label}
-                              </span>
-                              
-                              {isPopular && (
-                                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                                  <TrendingUp className="h-3 w-3" />
-                                  Popular
-                                </span>
-                              )}
-                            </div>
-                            
-                            {/* Download Indicator */}
-                            {hasDownload && (
-                              <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                                <Download className="h-4 w-4 text-blue-600" />
-                              </div>
+                        {/* Intelligent Image Container - Respects your covers */}
+                        <div className="relative aspect-[16/11] w-full overflow-hidden bg-neutral-100">
+                          <Image
+                            src={doc.image || "/assets/images/writing-desk.webp"}
+                            alt={doc.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                            sizes="(min-width: 1280px) 384px, (min-width: 1024px) 320px, (min-width: 768px) 50vw, 100vw"
+                          />
+                          {/* Minimal overlay for text legibility */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+
+                        {/* Premium Card Content */}
+                        <div className="p-5">
+                          {/* Type indicator */}
+                          <div className="mb-3 flex items-center justify-between">
+                            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${config.lightBg} ${config.color}`}>
+                              <div className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                              {config.label}
+                            </span>
+                            {dateObj && (
+                              <time className="text-xs text-neutral-500">
+                                {dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </time>
                             )}
                           </div>
 
-                          {/* Card Content - MARKETING FOCUS */}
-                          <div className="p-6">
-                            {/* Title with Clear Hierarchy */}
-                            <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                              {card.title}
-                            </h3>
-                            
-                            {/* Excerpt with Value Focus */}
-                            {card.excerpt && (
-                              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                {card.excerpt}
-                              </p>
-                            )}
-                            
-                            {/* Benefit Tags */}
-                            {(card.tags && card.tags.length > 0) && (
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {card.tags.slice(0, 3).map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md font-medium"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                            
-                            {/* Action Footer */}
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm text-gray-500">
-                                  {card.date ? new Date(card.date).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                  }) : 'Recently added'}
+                          {/* Title with premium typography */}
+                          <h3 className="mb-2 font-serif text-xl font-light text-neutral-900 leading-tight group-hover:text-neutral-700 transition-colors">
+                            {doc.title}
+                          </h3>
+
+                          {/* Excerpt */}
+                          {doc.excerpt && (
+                            <p className="mb-4 text-sm text-neutral-600 leading-relaxed line-clamp-2">
+                              {doc.excerpt}
+                            </p>
+                          )}
+
+                          {/* Tags */}
+                          {(doc.tags && doc.tags.length > 0) && (
+                            <div className="mb-4 flex flex-wrap gap-1.5">
+                              {doc.tags.slice(0, 3).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="rounded-full bg-neutral-100 px-2 py-1 text-xs text-neutral-600"
+                                >
+                                  {tag}
                                 </span>
-                              </div>
-                              
-                              <button className="flex items-center gap-2 text-blue-600 font-semibold text-sm group/btn">
-                                {config.ctaText}
-                                <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                              </button>
-                            </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-              ) : (
-                // LIST VIEW - For power users
-                <motion.div
-                  key="list"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-4"
-                >
-                  {filtered.map((card) => {
-                    const config = TYPE_CONFIG[card.type as DocKind];
-                    
-                    return (
-                      <motion.div
-                        key={`${card.type}:${card.slug}`}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        whileHover={{ x: 4 }}
-                      >
-                        <Link
-                          href={card.href}
-                          className="block bg-white rounded-xl shadow hover:shadow-md transition-all duration-300 border border-gray-100 p-6"
-                        >
-                          <div className="flex items-start gap-6">
-                            {/* Type Indicator */}
-                            <div className={`p-3 rounded-lg ${config.secondaryColor}`}>
-                              <div className={`p-2 rounded ${config.primaryColor} text-white`}>
-                                {config.icon}
-                              </div>
-                            </div>
-                            
-                            {/* Content */}
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between mb-2">
-                                <div>
-                                  <h3 className="text-lg font-bold text-gray-900 mb-1">
-                                    {card.title}
-                                  </h3>
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <span className={`text-xs font-semibold ${config.accentColor}`}>
-                                      {config.label}
-                                    </span>
-                                    <span className="text-xs text-gray-500">•</span>
-                                    <span className="text-sm text-gray-500">
-                                      {config.valueProp}
-                                    </span>
-                                  </div>
-                                </div>
-                                
-                                {card.downloadUrl && (
-                                  <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">
-                                    <Download className="h-4 w-4" />
-                                    Download
-                                  </div>
-                                )}
-                              </div>
-                              
-                              {card.excerpt && (
-                                <p className="text-gray-600 mb-3">
-                                  {card.excerpt}
-                                </p>
+                              ))}
+                              {doc.tags.length > 3 && (
+                                <span className="rounded-full bg-neutral-100 px-2 py-1 text-xs text-neutral-400">
+                                  +{doc.tags.length - 3}
+                                </span>
                               )}
-                              
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                  {(card.tags && card.tags.length > 0) && (
-                                    <div className="flex gap-2">
-                                      {card.tags.slice(0, 2).map((tag) => (
-                                        <span
-                                          key={tag}
-                                          className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                                        >
-                                          {tag}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                  
-                                  {card.date && (
-                                    <span className="text-sm text-gray-500">
-                                      {new Date(card.date).toLocaleDateString('en-US', {
-                                        month: 'short',
-                                        day: 'numeric'
-                                      })}
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                <button className="text-blue-600 font-medium text-sm flex items-center gap-2">
-                                  View Details
-                                  <ChevronRight className="h-4 w-4" />
-                                </button>
+                            </div>
+                          )}
+
+                          {/* Footer with subtle CTA */}
+                          <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
+                            {doc.downloadUrl && (
+                              <div className="flex items-center gap-1.5 text-xs text-blue-600">
+                                <Download className="h-3.5 w-3.5" />
+                                <span>Download available</span>
                               </div>
+                            )}
+                            <div className={`flex items-center gap-1 text-sm font-medium ${config.color}`}>
+                              <span className="text-xs">View</span>
+                              <ChevronRight className="h-3.5 w-3.5" />
                             </div>
                           </div>
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-              )
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
             ) : (
-              // MARKETING EMPTY STATE
+              // Premium Empty State
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-16 px-4"
+                className="rounded-2xl border border-neutral-200 bg-gradient-to-b from-white to-neutral-50/50 p-16 text-center"
               >
-                <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 mb-6">
-                  <Search className="h-12 w-12 text-blue-600" />
+                <div className="mx-auto max-w-sm">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+                    <Search className="h-8 w-8 text-neutral-400" />
+                  </div>
+                  <h3 className="mb-2 font-serif text-xl font-light text-neutral-900">
+                    No matches found
+                  </h3>
+                  <p className="mb-6 text-neutral-600">
+                    Try adjusting your search or filter terms.
+                  </p>
+                  {(searchQuery || filter !== "all") && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery("");
+                        setFilter("all");
+                      }}
+                      className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                    >
+                      Clear filters
+                    </button>
+                  )}
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  No results found
-                </h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                  Try adjusting your search or filters to find what you're looking for.
-                </p>
-                {(searchQuery || filter !== "all") && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilter("all");
-                    }}
-                    className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800"
-                  >
-                    Reset all filters
-                  </button>
-                )}
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* PRINT-SPECIFIC MESSAGE - If prints are empty */}
-          {filter === "print" && typeCounts.print === 0 && (
-            <div className="mt-12 text-center bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-8">
-              <div className="inline-flex p-4 rounded-2xl bg-white shadow-lg mb-4">
-                <Printer className="h-12 w-12 text-rose-600" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Prints Collection Coming Soon
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Our premium print collection is being prepared. Check back soon for exclusive physical materials.
-              </p>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => setFilter("download")}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:shadow-lg"
-                >
-                  Browse Digital Downloads
-                </button>
-                <button
-                  onClick={() => setFilter("all")}
-                  className="px-6 py-3 bg-white text-gray-700 font-medium rounded-lg border hover:bg-gray-50"
-                >
-                  View All Content
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </Layout>
@@ -708,55 +394,39 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards, typeCounts }) => 
 };
 
 // -----------------------------
-// Data Fetching - FIXED PRINTS HANDLING
+// Data Fetching - USING YOUR HELPER
 // -----------------------------
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  const buckets = getPublishedDocumentsByType();
+  // 1. Get ALL published documents, grouped by type (includes 'print')
+  const publishedBuckets = getPublishedDocumentsByType();
 
-  console.log('DEBUG - Available documents by type:', Object.keys(buckets).map(k => ({
-    type: k,
-    count: buckets[k as DocKind]?.length || 0
-  })));
+  // 2. Convert each document to card props for the UI
+  const docsByType: Record<DocKind, ContentlayerCardProps[]> = {
+    post: [], canon: [], resource: [], download: [], print: [],
+    book: [], event: [], short: [], strategy: [],
+  };
 
-  // ALL TYPES INCLUDED
-  const orderedKinds: DocKind[] = [
-    "post",
-    "canon",
-    "resource",
-    "download",
-    "print", // PRINTS ARE INCLUDED
-    "book",
-    "event",
-    "short",
-    "strategy",
-  ];
-
-  const cards = orderedKinds
-    .flatMap((k) => {
-      const docs = buckets[k] || [];
-      console.log(`Processing ${k}: ${docs.length} documents`);
-      return docs;
-    })
-    .map((doc) => getCardPropsForDocument(doc))
-    .map((c) => ({
-      ...c,
-      type: String(c.type || "").toLowerCase() as DocKind,
-    }))
-    .map(applyCoverOverrides);
-
-  // Calculate type counts for stats
-  const typeCounts: Record<DocKind | "all", number> = { all: cards.length };
-  orderedKinds.forEach(kind => {
-    typeCounts[kind] = cards.filter(c => c.type === kind).length;
+  (Object.keys(publishedBuckets) as DocKind[]).forEach((kind) => {
+    docsByType[kind] = publishedBuckets[kind].map(getCardPropsForDocument);
   });
 
-  console.log('DEBUG - Final type counts:', typeCounts);
+  // DEBUG: Log to console to verify prints are being sourced
+  console.log('[Content Index] Documents by type:', {
+    posts: docsByType.post.length,
+    canon: docsByType.canon.length,
+    resources: docsByType.resource.length,
+    downloads: docsByType.download.length,
+    prints: docsByType.print.length, // <-- CHECK THIS
+    books: docsByType.book.length,
+    events: docsByType.event.length,
+    shorts: docsByType.short.length,
+    strategies: docsByType.strategy.length,
+  });
 
   return {
-    props: { 
-      cards,
-      typeCounts 
+    props: {
+      docsByType,
     },
     revalidate: 60,
   };
