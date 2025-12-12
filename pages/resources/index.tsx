@@ -1,4 +1,4 @@
-// pages/resources/index.tsx - UPDATED TO USE CONTENTLAYER
+// pages/resources/index.tsx - FIXED VERSION
 import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-// Use the Contentlayer system
+// Import from the correct place
 import { getAllResources, type Resource as ResourceType } from "@/lib/content";
 
 interface ResourceMeta {
@@ -264,7 +264,7 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
   try {
-    // Use Contentlayer's getAllResources
+    // Use Contentlayer's getAllResources - make sure this function exists in @/lib/content
     const resourcesData = getAllResources();
     
     const resources: ResourceMeta[] = resourcesData.map((r: ResourceType) => ({

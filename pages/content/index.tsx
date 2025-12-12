@@ -522,10 +522,15 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   const publishedBuckets = getPublishedDocumentsByType();
 
-  // TEMP DEBUG (remove later)
-  console.log("[archive] counts", Object.fromEntries(
-    Object.entries(publishedBuckets).map(([k,v]) => [k, v.length])
-  ));
+  // DEBUG (leave until fixed)
+  console.log("[archive] contentlayerLoaded:", isContentlayerLoaded());
+  console.log("[archive] allDocuments:", getAllContentlayerDocs().length);
+  console.log(
+    "[archive] buckets:",
+    Object.fromEntries(
+      Object.entries(publishedBuckets).map(([k, v]) => [k, v.length]),
+    ),
+  );
 
   const docsByType: Record<DocKind, ContentlayerCardProps[]> = {
     post: [],
