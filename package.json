@@ -22,7 +22,7 @@
     "clean:build": "rimraf .next .contentlayer",
     "clean:functions": "rimraf netlify/functions/*.js",
     "fix:prints": "node scripts/fix-print-types.mjs",
-    "content:build": "contentlayer2 build",
+    "build": "contentlayer2 build && next build",
     "content:dev": "contentlayer2 build --watch",
     "guard:conflicts": "node scripts/check-conflicts.js",
     "build": "pnpm run content:build && next build",
