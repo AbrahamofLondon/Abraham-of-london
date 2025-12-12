@@ -3,6 +3,7 @@ import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   ChevronRight,
@@ -16,6 +17,7 @@ import {
   Zap,
   Layers,
   X,
+  Sparkles,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -30,82 +32,130 @@ type ContentPageProps = {
   docsByType: Record<DocKind, ContentlayerCardProps[]>;
 };
 
+const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
+
 // -----------------------------
 // Type Configuration
 // -----------------------------
 
-const TYPE_CONFIG = {
+const TYPE_CONFIG: Record<
+  DocKind,
+  {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    accent: string;
+    pillBg: string;
+    pillBorder: string;
+
+    // cover strategy
+    coverAspect: "wide" | "portrait";
+    coverFit: "cover" | "contain";
+  }
+> = {
   post: {
     label: "Essays",
     icon: FileText,
-    accent: "text-amber-800",
-    bg: "bg-amber-50/80",
-    border: "border-amber-200/60",
+    accent: "text-amber-700",
+    pillBg: "bg-amber-50/80",
+    pillBorder: "border-amber-200/70",
+    coverAspect: "wide",
+    coverFit: "cover",
   },
   canon: {
     label: "Canon",
     icon: Crown,
-    accent: "text-yellow-900",
-    bg: "bg-yellow-50/80",
-    border: "border-yellow-300/60",
+    accent: "text-yellow-700",
+    pillBg: "bg-yellow-50/80",
+    pillBorder: "border-yellow-200/70",
+    coverAspect: "wide",
+    coverFit: "cover",
   },
   resource: {
     label: "Resources",
     icon: Layers,
-    accent: "text-emerald-800",
-    bg: "bg-emerald-50/80",
-    border: "border-emerald-200/60",
+    accent: "text-emerald-700",
+    pillBg: "bg-emerald-50/80",
+    pillBorder: "border-emerald-200/70",
+    coverAspect: "wide",
+    coverFit: "cover",
   },
   download: {
     label: "Downloads",
     icon: Download,
-    accent: "text-blue-800",
-    bg: "bg-blue-50/80",
-    border: "border-blue-200/60",
+    accent: "text-blue-700",
+    pillBg: "bg-blue-50/80",
+    pillBorder: "border-blue-200/70",
+    coverAspect: "wide",
+    coverFit: "cover",
   },
   print: {
     label: "Prints",
     icon: Palette,
-    accent: "text-rose-800",
-    bg: "bg-rose-50/80",
-    border: "border-rose-200/60",
+    accent: "text-rose-700",
+    pillBg: "bg-rose-50/80",
+    pillBorder: "border-rose-200/70",
+    coverAspect: "portrait",
+    coverFit: "contain",
   },
   book: {
     label: "Books",
     icon: BookMarked,
-    accent: "text-violet-800",
-    bg: "bg-violet-50/80",
-    border: "border-violet-200/60",
+    accent: "text-violet-700",
+    pillBg: "bg-violet-50/80",
+    pillBorder: "border-violet-200/70",
+    coverAspect: "portrait",
+    coverFit: "contain",
   },
   event: {
     label: "Events",
     icon: Calendar,
-    accent: "text-cyan-800",
-    bg: "bg-cyan-50/80",
-    border: "border-cyan-200/60",
+    accent: "text-cyan-700",
+    pillBg: "bg-cyan-50/80",
+    pillBorder: "border-cyan-200/70",
+    coverAspect: "wide",
+    coverFit: "cover",
   },
   short: {
     label: "Shorts",
     icon: Zap,
-    accent: "text-orange-800",
-    bg: "bg-orange-50/80",
-    border: "border-orange-200/60",
+    accent: "text-orange-700",
+    pillBg: "bg-orange-50/80",
+    pillBorder: "border-orange-200/70",
+    coverAspect: "wide",
+    coverFit: "cover",
   },
   strategy: {
     label: "Strategy",
     icon: Target,
-    accent: "text-teal-800",
-    bg: "bg-teal-50/80",
-    border: "border-teal-200/60",
+    accent: "text-teal-700",
+    pillBg: "bg-teal-50/80",
+    pillBorder: "border-teal-200/70",
+    coverAspect: "wide",
+    coverFit: "cover",
   },
-} as const;
+};
 
-// Client-only component with animations
-const AnimatedContentGrid = React.lazy(() => 
-  import('@/components/AnimatedContentGrid').then(mod => ({
-    default: mod.AnimatedContentGrid
-  }))
-);
+// -----------------------------
+// helpers
+// -----------------------------
+
+function fmtDate(d?: string | null) {
+  if (!d) return null;
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return null;
+  return dt.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function scoreDoc(doc: ContentlayerCardProps) {
+  // Featured first; then newest first where date exists
+  const featuredBoost = doc.featured ? 10_000_000_000 : 0;
+  const dateScore = doc.date ? Date.parse(doc.date) || 0 : 0;
+  return featuredBoost + dateScore;
+}
 
 // -----------------------------
 // Page Component
@@ -114,331 +164,356 @@ const AnimatedContentGrid = React.lazy(() =>
 const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
   const [filter, setFilter] = React.useState<DocKind | "all">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [isClient, setIsClient] = React.useState(false);
+  const [featuredFirst, setFeaturedFirst] = React.useState(true);
 
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const allKinds: DocKind[] = React.useMemo(
+    () => [
+      "post",
+      "canon",
+      "resource",
+      "download",
+      "print",
+      "book",
+      "event",
+      "short",
+      "strategy",
+    ],
+    [],
+  );
 
   const allDocs = React.useMemo(() => {
-    return (Object.keys(docsByType) as DocKind[]).flatMap((k) => docsByType[k]);
-  }, [docsByType]);
-
-  const filteredDocs = React.useMemo(() => {
-    const source = filter === "all" ? allDocs : docsByType[filter];
-    if (!searchQuery.trim()) return source;
-
-    const query = searchQuery.toLowerCase();
-    return source.filter(
-      (doc) =>
-        doc.title.toLowerCase().includes(query) ||
-        (doc.excerpt || "").toLowerCase().includes(query) ||
-        (doc.description || "").toLowerCase().includes(query) ||
-        (doc.tags || []).some((tag) => tag.toLowerCase().includes(query))
-    );
-  }, [allDocs, docsByType, filter, searchQuery]);
+    const merged = allKinds.flatMap((k) => docsByType[k] ?? []);
+    // stable sort
+    return merged.slice().sort((a, b) => {
+      if (!featuredFirst) return 0;
+      return scoreDoc(b) - scoreDoc(a);
+    });
+  }, [docsByType, allKinds, featuredFirst]);
 
   const typeCounts = React.useMemo(() => {
     const counts: Record<string, number> = { all: allDocs.length };
-    (Object.keys(docsByType) as DocKind[]).forEach((k) => {
-      counts[k] = docsByType[k].length;
+    allKinds.forEach((k) => {
+      counts[k] = (docsByType[k] ?? []).length;
     });
     return counts;
-  }, [docsByType, allDocs]);
+  }, [docsByType, allDocs, allKinds]);
 
-  const allKinds: DocKind[] = [
-    "post",
-    "canon",
-    "resource",
-    "download",
-    "print",
-    "book",
-    "event",
-    "short",
-    "strategy",
-  ];
+  const filteredDocs = React.useMemo(() => {
+    const source = filter === "all" ? allDocs : docsByType[filter] ?? [];
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return source;
+
+    return source.filter((doc) => {
+      const hay = [
+        doc.title,
+        doc.subtitle ?? "",
+        doc.excerpt ?? "",
+        doc.description ?? "",
+        (doc.tags ?? []).join(" "),
+        doc.type,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return hay.includes(q);
+    });
+  }, [allDocs, docsByType, filter, searchQuery]);
 
   return (
     <Layout title="Archive">
       <main className="min-h-screen bg-white">
-        {/* Hero Section */}
-        <div className="relative border-b border-neutral-200/80 bg-white">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.04)_0%,transparent_50%)]" />
-
-          <div className="relative mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
+        {/* HERO */}
+        <section className="relative border-b border-neutral-200/70 bg-white">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.06)_0%,transparent_55%)]" />
+          <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
             <div className="max-w-3xl">
-              <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-neutral-200/60 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-sm">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-neutral-900" />
-                <span className="text-xs font-medium uppercase tracking-[0.15em] text-neutral-700">
-                  Complete Archive
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-neutral-200/70 bg-white/80 px-4 py-2 shadow-sm backdrop-blur">
+                <Sparkles className="h-4 w-4 text-neutral-800" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-700">
+                  The Archive
+                </span>
+                <span className="text-xs text-neutral-400">
+                  ({typeCounts.all})
                 </span>
               </div>
 
-              <h1 className="mb-6 font-serif text-6xl font-light tracking-tight text-neutral-900 lg:text-7xl">
-                The Archive
+              <h1 className="font-serif text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
+                Everything. Organised.
               </h1>
 
-              <p className="mb-10 text-lg leading-relaxed text-neutral-600">
-                A comprehensive collection of writings, resources, and
-                materials. Everything organized and accessible in one place.
+              <p className="mt-4 text-base leading-relaxed text-neutral-600 sm:text-lg">
+                Essays, Canon volumes, resources, downloads, prints, books,
+                events, shorts, strategy — searchable and cleanly indexed.
               </p>
 
-              {/* Search Bar */}
-              <div className="relative">
-                <div className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2">
-                  <Search className="h-5 w-5 text-neutral-400" />
-                </div>
-                <input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search titles, content, and tags..."
-                  className="w-full rounded-2xl border border-neutral-300/80 bg-white py-4 pl-14 pr-14 text-base text-neutral-900 shadow-sm outline-none transition-all placeholder:text-neutral-400 focus:border-neutral-400 focus:shadow-md focus:ring-4 focus:ring-neutral-100/50"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-700"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+              {/* SEARCH */}
+              <div className="mt-8">
+                <div className="relative">
+                  <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
+                    <Search className="h-5 w-5 text-neutral-400" />
+                  </div>
 
-        {/* Main Content */}
-        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
-          {/* Filter System */}
-          <div className="mb-12">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              {/* Filter Pills */}
-              <div className="flex-1">
-                <div className="flex flex-wrap gap-2.5">
-                  {/* All */}
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search titles, tags, descriptions…"
+                    className="w-full rounded-2xl border border-neutral-300/80 bg-white py-4 pl-12 pr-12 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                  />
+
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-800"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Toggles */}
+                <div className="mt-4 flex flex-wrap items-center gap-3">
                   <button
-                    onClick={() => setFilter("all")}
-                    className={`group relative rounded-xl px-5 py-3 text-sm font-medium transition-all duration-200 ${
-                      filter === "all"
-                        ? "bg-neutral-900 text-white shadow-lg shadow-neutral-900/20"
-                        : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:shadow-sm"
+                    onClick={() => setFeaturedFirst((v) => !v)}
+                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition ${
+                      featuredFirst
+                        ? "border-neutral-300 bg-neutral-900 text-white shadow-sm"
+                        : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300"
                     }`}
                   >
-                    <span className="relative z-10">All Content</span>
-                    <span
-                      className={`ml-2 text-xs ${filter === "all" ? "text-neutral-300" : "text-neutral-400"}`}
-                    >
-                      {typeCounts.all}
-                    </span>
+                    <Sparkles className="h-4 w-4" />
+                    Featured first
                   </button>
 
-                  {/* Type Filters */}
-                  {allKinds.map((kind) => {
-                    const config = TYPE_CONFIG[kind];
-                    const active = filter === kind;
-                    const count = typeCounts[kind] || 0;
-
-                    if (count === 0) return null;
-
-                    const IconComponent = config.icon;
-
-                    return (
-                      <button
-                        key={kind}
-                        onClick={() => setFilter(kind)}
-                        className={`group relative flex items-center gap-3 rounded-xl px-5 py-3 text-sm font-medium transition-all duration-200 ${
-                          active
-                            ? `${config.bg} ${config.accent} ${config.border} border shadow-sm`
-                            : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:shadow-sm"
-                        }`}
-                      >
-                        <div
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-                            active
-                              ? config.bg
-                              : "bg-neutral-50 group-hover:bg-neutral-100"
-                          }`}
-                        >
-                          <IconComponent
-                            className={`h-4 w-4 ${active ? config.accent : "text-neutral-500"}`}
-                          />
-                        </div>
-                        <span className="font-medium">{config.label}</span>
-                        <span
-                          className={`text-xs ${active ? "opacity-70" : "text-neutral-400"}`}
-                        >
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
+                  <div className="text-xs text-neutral-500">
+                    Showing{" "}
+                    <span className="font-semibold text-neutral-900">
+                      {filteredDocs.length}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold text-neutral-900">
+                      {typeCounts.all}
+                    </span>
+                  </div>
                 </div>
-              </div>
-
-              {/* Results Summary */}
-              <div className="flex items-center gap-2 border-l border-neutral-200 pl-6 text-sm text-neutral-500">
-                <span className="font-semibold text-neutral-900">
-                  {filteredDocs.length}
-                </span>
-                <span>of</span>
-                <span className="font-semibold text-neutral-900">
-                  {typeCounts.all}
-                </span>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Content Grid - Client-only with fallback */}
-          {isClient ? (
-            <React.Suspense fallback={<StaticContentGrid docs={filteredDocs} />}>
-              <AnimatedContentGrid 
-                filteredDocs={filteredDocs} 
-                filter={filter}
-                TYPE_CONFIG={TYPE_CONFIG}
-              />
-            </React.Suspense>
-          ) : (
-            <StaticContentGrid docs={filteredDocs} />
-          )}
+        {/* FILTERS + GRID */}
+        <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+          {/* Filter pills */}
+          <div className="mb-8 flex flex-wrap gap-2.5">
+            <button
+              onClick={() => setFilter("all")}
+              className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                filter === "all"
+                  ? "bg-neutral-900 text-white shadow-sm"
+                  : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300"
+              }`}
+            >
+              All <span className="opacity-70">({typeCounts.all})</span>
+            </button>
 
-          {/* Empty State */}
-          {filteredDocs.length === 0 && (
-            <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/30 p-16">
-              <div className="max-w-md text-center">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm">
-                  <Search className="h-10 w-10 text-neutral-300" />
+            {allKinds.map((kind) => {
+              const count = typeCounts[kind] || 0;
+              if (!count) return null;
+
+              const cfg = TYPE_CONFIG[kind];
+              const Icon = cfg.icon;
+              const active = filter === kind;
+
+              return (
+                <button
+                  key={kind}
+                  onClick={() => setFilter(kind)}
+                  className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition ${
+                    active
+                      ? `${cfg.pillBg} ${cfg.accent} ${cfg.pillBorder} shadow-sm`
+                      : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300"
+                  }`}
+                >
+                  <Icon className={`h-4 w-4 ${active ? cfg.accent : "text-neutral-500"}`} />
+                  {cfg.label}
+                  <span className="text-neutral-400">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Grid */}
+          <AnimatePresence mode="wait">
+            {filteredDocs.length ? (
+              <motion.div
+                key={`${filter}-${featuredFirst}-${searchQuery}`}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              >
+                {filteredDocs.map((doc) => {
+                  const cfg = TYPE_CONFIG[doc.type];
+                  const Icon = cfg.icon;
+
+                  const coverAspectClass =
+                    cfg.coverAspect === "portrait"
+                      ? "aspect-[3/4]"
+                      : "aspect-[16/10]";
+
+                  const objectClass =
+                    cfg.coverFit === "contain" ? "object-contain" : "object-cover";
+
+                  const date = fmtDate(doc.date);
+                  const img = doc.image || FALLBACK_IMAGE;
+
+                  return (
+                    <motion.div
+                      key={`${doc.type}-${doc.slug}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <Link href={doc.href} className="group block h-full">
+                        <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/70 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-lg">
+                          {/* cover */}
+                          <div
+                            className={`relative ${coverAspectClass} w-full overflow-hidden bg-gradient-to-br from-neutral-50 to-neutral-100`}
+                          >
+                            <Image
+                              src={img}
+                              alt={doc.title}
+                              fill
+                              className={`${objectClass} p-0 transition duration-500 group-hover:scale-[1.02]`}
+                              sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                            />
+                            {/* subtle overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                            {/* type pill */}
+                            <div className="absolute left-3 top-3">
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-[11px] font-semibold ${cfg.pillBg} ${cfg.accent} ${cfg.pillBorder}`}
+                              >
+                                <Icon className="h-3.5 w-3.5" />
+                                {cfg.label}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* body */}
+                          <div className="flex flex-1 flex-col p-5">
+                            <div className="flex items-start justify-between gap-3">
+                              <h3 className="font-serif text-base font-semibold leading-snug text-neutral-900 transition group-hover:text-neutral-700">
+                                {doc.title}
+                              </h3>
+                              {doc.featured && (
+                                <span className="shrink-0 rounded-full border border-neutral-200 bg-white px-2 py-1 text-[10px] font-semibold text-neutral-700">
+                                  Featured
+                                </span>
+                              )}
+                            </div>
+
+                            {(doc.subtitle || doc.excerpt || doc.description) && (
+                              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-neutral-600">
+                                {doc.subtitle || doc.excerpt || doc.description}
+                              </p>
+                            )}
+
+                            {/* tags */}
+                            {doc.tags?.length ? (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {doc.tags.slice(0, 3).map((t) => (
+                                  <span
+                                    key={t}
+                                    className="rounded-lg border border-neutral-200/60 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600"
+                                  >
+                                    {t}
+                                  </span>
+                                ))}
+                                {doc.tags.length > 3 && (
+                                  <span className="rounded-lg border border-neutral-200/60 bg-neutral-50 px-2.5 py-1 text-[11px] text-neutral-400">
+                                    +{doc.tags.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            ) : null}
+
+                            {/* footer */}
+                            <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-4">
+                              <div className="flex items-center gap-2">
+                                {date ? (
+                                  <span className="text-[11px] font-medium text-neutral-500">
+                                    {date}
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] text-neutral-400">
+                                    —
+                                  </span>
+                                )}
+
+                                {doc.downloadUrl ? (
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-blue-700">
+                                    <Download className="h-3.5 w-3.5" />
+                                    PDF
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              <span
+                                className={`inline-flex items-center gap-1.5 text-xs font-semibold ${cfg.accent}`}
+                              >
+                                View <ChevronRight className="h-4 w-4" />
+                              </span>
+                            </div>
+                          </div>
+                        </article>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/40 p-14"
+              >
+                <div className="mx-auto max-w-md text-center">
+                  <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm">
+                    <Search className="h-7 w-7 text-neutral-300" />
+                  </div>
+                  <h3 className="font-serif text-2xl font-semibold text-neutral-900">
+                    No results
+                  </h3>
+                  <p className="mt-2 text-sm text-neutral-600">
+                    Adjust your search or switch the content type filter.
+                  </p>
+
+                  <div className="mt-7 flex justify-center">
+                    <button
+                      onClick={() => {
+                        setSearchQuery("");
+                        setFilter("all");
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-5 py-2.5 text-xs font-semibold text-neutral-700 shadow-sm transition hover:bg-neutral-50"
+                    >
+                      <X className="h-4 w-4" />
+                      Reset
+                    </button>
+                  </div>
                 </div>
-                <h3 className="mb-3 font-serif text-2xl font-light text-neutral-900">
-                  No results found
-                </h3>
-                <p className="mb-8 text-neutral-600">
-                  Try adjusting your search terms or selected filter.
-                </p>
-                {(searchQuery || filter !== "all") && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilter("all");
-                    }}
-                    className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-6 py-3 text-sm font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:shadow"
-                  >
-                    <X className="h-4 w-4" />
-                    Clear all filters
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
       </main>
     </Layout>
   );
 };
-
-// Static fallback grid component
-function StaticContentGrid({ docs }: { docs: ContentlayerCardProps[] }) {
-  return (
-    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {docs.map((doc) => {
-        const config = TYPE_CONFIG[doc.type as DocKind];
-        const dateObj = doc.date ? new Date(doc.date) : null;
-
-        return (
-          <div key={`${doc.type}-${doc.slug}`}>
-            <Link href={doc.href} className="group block h-full">
-              <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-xl">
-                {/* Image Container */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-neutral-50 to-neutral-100">
-                  <Image
-                    src={doc.image || "/assets/images/writing-desk.webp"}
-                    alt={doc.title}
-                    fill
-                    className="object-cover transition-all duration-700 group-hover:scale-[1.03]"
-                    sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                </div>
-
-                {/* Card Content */}
-                <div className="flex flex-1 flex-col p-6">
-                  {/* Meta Row */}
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span
-                      className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium ${config.bg} ${config.accent} ${config.border}`}
-                    >
-                      <div className="h-1.5 w-1.5 rounded-full bg-current" />
-                      {config.label}
-                    </span>
-                    {dateObj && (
-                      <time className="text-xs font-medium text-neutral-500">
-                        {dateObj.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </time>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="mb-3 font-serif text-xl font-normal leading-snug text-neutral-900 transition-colors group-hover:text-neutral-700">
-                    {doc.title}
-                  </h3>
-
-                  {/* Excerpt */}
-                  {(doc.excerpt || doc.description) && (
-                    <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-neutral-600">
-                      {doc.excerpt || doc.description}
-                    </p>
-                  )}
-
-                  {/* Tags */}
-                  {doc.tags && doc.tags.length > 0 && (
-                    <div className="mb-5 flex flex-wrap gap-2">
-                      {doc.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-600"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {doc.tags.length > 3 && (
-                        <span className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-400">
-                          +{doc.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Footer */}
-                  <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4">
-                    {doc.downloadUrl ? (
-                      <div className="flex items-center gap-2 text-xs font-medium text-blue-700">
-                        <Download className="h-3.5 w-3.5" />
-                        <span>Available</span>
-                      </div>
-                    ) : (
-                      <div />
-                    )}
-
-                    <div
-                      className={`flex items-center gap-1.5 text-sm font-medium transition-all group-hover:gap-2 ${config.accent}`}
-                    >
-                      <span className="text-xs">View</span>
-                      <ChevronRight className="h-4 w-4" />
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </Link>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 // -----------------------------
 // Data Fetching
@@ -447,6 +522,7 @@ function StaticContentGrid({ docs }: { docs: ContentlayerCardProps[] }) {
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   const publishedBuckets = getPublishedDocumentsByType();
 
+  // Convert AnyDoc buckets -> CardProps buckets
   const docsByType: Record<DocKind, ContentlayerCardProps[]> = {
     post: [],
     canon: [],
@@ -459,8 +535,8 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
     strategy: [],
   };
 
-  (Object.keys(publishedBuckets) as DocKind[]).forEach((kind) => {
-    docsByType[kind] = publishedBuckets[kind].map(getCardPropsForDocument);
+  (Object.keys(docsByType) as DocKind[]).forEach((kind) => {
+    docsByType[kind] = (publishedBuckets[kind] ?? []).map(getCardPropsForDocument);
   });
 
   return {
