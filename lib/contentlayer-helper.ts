@@ -1,41 +1,57 @@
 // lib/contentlayer-helper.ts
-// COMPLETE with all required exports
+// COMPLETE VERSION without problematic .contentlayer/generated import
 
-// SAFE IMPORT PATTERN
-let contentlayerData: any = null;
-
-try {
-  contentlayerData = require(".contentlayer/generated");
-} catch (error) {
-  console.warn("⚠️ Contentlayer data not available - using empty collections");
-  contentlayerData = {
-    allDocuments: [],
-    allPosts: [],
-    allDownloads: [],
-    allBooks: [],
-    allEvents: [],
-    allPrints: [],
-    allResources: [],
-    allCanons: [],
-    allShorts: [],
-    allStrategies: [],
+// Type definitions (no imports from .contentlayer/generated)
+export type AnyDoc = {
+  type: string;
+  title: string;
+  slug?: string;
+  date?: string;
+  description?: string;
+  excerpt?: string;
+  subtitle?: string;
+  coverImage?: string;
+  image?: string;
+  tags?: string[];
+  draft?: boolean;
+  featured?: boolean;
+  accessLevel?: string;
+  author?: string;
+  readTime?: string;
+  readtime?: string;
+  category?: string;
+  resourceType?: string;
+  applications?: string[];
+  downloadUrl?: string;
+  fileUrl?: string;
+  href?: string;
+  url?: string;
+  _raw?: {
+    flattenedPath: string;
   };
-}
-
-// Export with fallbacks
-export const allDocuments = contentlayerData.allDocuments || [];
-export const allPosts = contentlayerData.allPosts || [];
-export const allDownloads = contentlayerData.allDownloads || [];
-export const allBooks = contentlayerData.allBooks || [];
-export const allEvents = contentlayerData.allEvents || [];
-export const allPrints = contentlayerData.allPrints || [];
-export const allResources = contentlayerData.allResources || [];
-export const allCanons = contentlayerData.allCanons || [];
-export const allShorts = contentlayerData.allShorts || [];
-export const allStrategies = contentlayerData.allStrategies || [];
-
-// Type definitions
-export type AnyDoc = any;
+  // Print specific
+  dimensions?: string;
+  downloadFile?: string;
+  price?: string;
+  available?: boolean;
+  // Event specific
+  time?: string;
+  eventDate?: string;
+  location?: string;
+  registrationUrl?: string;
+  // Book specific
+  publisher?: string;
+  isbn?: string;
+  // Canon specific
+  coverAspect?: string;
+  coverFit?: string;
+  volumeNumber?: string;
+  order?: number;
+  // Short specific
+  theme?: string;
+  audience?: string;
+  published?: boolean;
+};
 
 export type DocKind =
   | "post"
@@ -49,7 +65,80 @@ export type DocKind =
   | "strategy";
 
 // ---------------------------------------------------------
-// ALL TYPE GUARDS (EXPORTED)
+// SAFE CONTENTLAYER DATA LOADING
+// ---------------------------------------------------------
+
+let contentlayerData: any = null;
+let isInitialized = false;
+
+function loadContentlayerData(): any {
+  if (isInitialized) return contentlayerData;
+  
+  try {
+    // Dynamic require to avoid TypeScript errors
+    const generated = require(".contentlayer/generated");
+    contentlayerData = {
+      allDocuments: generated.allDocuments || [],
+      allPosts: generated.allPosts || [],
+      allDownloads: generated.allDownloads || [],
+      allBooks: generated.allBooks || [],
+      allEvents: generated.allEvents || [],
+      allPrints: generated.allPrints || [],
+      allResources: generated.allResources || [],
+      allCanons: generated.allCanons || [],
+      allShorts: generated.allShorts || [],
+      allStrategies: generated.allStrategies || [],
+    };
+  } catch (error) {
+    console.warn("⚠️ Contentlayer data not available - using empty collections");
+    contentlayerData = {
+      allDocuments: [],
+      allPosts: [],
+      allDownloads: [],
+      allBooks: [],
+      allEvents: [],
+      allPrints: [],
+      allResources: [],
+      allCanons: [],
+      allShorts: [],
+      allStrategies: [],
+    };
+  }
+  
+  isInitialized = true;
+  return contentlayerData;
+}
+
+// Export the data arrays
+export const allDocuments: AnyDoc[] = [];
+export const allPosts: AnyDoc[] = [];
+export const allDownloads: AnyDoc[] = [];
+export const allBooks: AnyDoc[] = [];
+export const allEvents: AnyDoc[] = [];
+export const allPrints: AnyDoc[] = [];
+export const allResources: AnyDoc[] = [];
+export const allCanons: AnyDoc[] = [];
+export const allShorts: AnyDoc[] = [];
+export const allStrategies: AnyDoc[] = [];
+
+// Initialize on module load
+if (typeof window === 'undefined') {
+  const data = loadContentlayerData();
+  // Populate the arrays
+  allDocuments.push(...(data.allDocuments || []));
+  allPosts.push(...(data.allPosts || []));
+  allDownloads.push(...(data.allDownloads || []));
+  allBooks.push(...(data.allBooks || []));
+  allEvents.push(...(data.allEvents || []));
+  allPrints.push(...(data.allPrints || []));
+  allResources.push(...(data.allResources || []));
+  allCanons.push(...(data.allCanons || []));
+  allShorts.push(...(data.allShorts || []));
+  allStrategies.push(...(data.allStrategies || []));
+}
+
+// ---------------------------------------------------------
+// TYPE GUARDS
 // ---------------------------------------------------------
 export function isPost(doc: AnyDoc): boolean {
   return doc?.type === "Post";
@@ -88,13 +177,15 @@ export function isShort(doc: AnyDoc): boolean {
 }
 
 // ---------------------------------------------------------
-// NORMALISATION HELPERS
+// HELPER FUNCTIONS
 // ---------------------------------------------------------
 function normaliseSlug(doc: AnyDoc): string {
-  const explicit = doc?.slug as string | undefined;
-  if (explicit && explicit.trim()) return explicit.trim().toLowerCase();
+  const explicit = doc?.slug;
+  if (explicit && typeof explicit === 'string' && explicit.trim()) {
+    return explicit.trim().toLowerCase();
+  }
 
-  const flattened = doc?._raw?.flattenedPath as string | undefined;
+  const flattened = doc?._raw?.flattenedPath;
   if (!flattened) return "untitled";
 
   const parts = flattened.split("/");
@@ -105,26 +196,16 @@ function normaliseKind(doc: AnyDoc): DocKind {
   const t = String(doc?.type ?? "").toLowerCase().trim();
   
   switch (t) {
-    case "post":
-      return "post";
-    case "download":
-      return "download";
-    case "book":
-      return "book";
-    case "event":
-      return "event";
-    case "print":
-      return "print";
-    case "resource":
-      return "resource";
-    case "canon":
-      return "canon";
-    case "short":
-      return "short";
-    case "strategy":
-      return "strategy";
-    default:
-      return "post";
+    case "post": return "post";
+    case "download": return "download";
+    case "book": return "book";
+    case "event": return "event";
+    case "print": return "print";
+    case "resource": return "resource";
+    case "canon": return "canon";
+    case "short": return "short";
+    case "strategy": return "strategy";
+    default: return "post";
   }
 }
 
@@ -139,69 +220,65 @@ export function isPublished(doc: AnyDoc): boolean {
 }
 
 function getDateValue(doc: AnyDoc): number {
-  const raw = doc?.date as string | undefined;
-  if (!raw) return 0;
+  const raw = doc?.date;
+  if (!raw || typeof raw !== 'string') return 0;
   const t = Date.parse(raw);
   return Number.isNaN(t) ? 0 : t;
 }
 
 // ---------------------------------------------------------
-// ALL CORE COLLECTIONS (EXPORTED)
+// CONTENT GETTERS
 // ---------------------------------------------------------
 export function getAllContentlayerDocs(): AnyDoc[] {
-  return allDocuments || [];
+  return allDocuments;
 }
 
 export function getPublishedPosts(): AnyDoc[] {
-  return (allPosts || []).filter(isPublished).sort((a, b) => {
-    return getDateValue(b) - getDateValue(a);
-  });
+  return allPosts.filter(isPublished).sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getPublishedShorts(): AnyDoc[] {
-  return (allShorts || []).filter(isPublished).sort((a, b) => {
-    return getDateValue(b) - getDateValue(a);
-  });
+  return allShorts.filter(isPublished).sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getShortBySlug(slug: string): AnyDoc | undefined {
   const target = slug.replace(/^\/+|\/+$/g, "").toLowerCase();
-  return (allShorts || []).find((short: AnyDoc) => {
+  return allShorts.find((short) => {
     const s = normaliseSlug(short);
     return s === target;
   });
 }
 
 export function getAllBooks(): AnyDoc[] {
-  return (allBooks || []).slice().sort((a, b) => getDateValue(b) - getDateValue(a));
+  return [...allBooks].sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getAllDownloads(): AnyDoc[] {
-  return (allDownloads || []).slice().sort((a, b) => getDateValue(b) - getDateValue(a));
+  return [...allDownloads].sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getAllEvents(): AnyDoc[] {
-  return (allEvents || []).slice().sort((a, b) => getDateValue(b) - getDateValue(a));
+  return [...allEvents].sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getAllPrints(): AnyDoc[] {
-  return (allPrints || []).slice().sort((a, b) => getDateValue(b) - getDateValue(a));
+  return [...allPrints].sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getAllResources(): AnyDoc[] {
-  return (allResources || []).slice().sort((a, b) => getDateValue(b) - getDateValue(a));
+  return [...allResources].sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getAllCanons(): AnyDoc[] {
-  return (allCanons || []).slice().sort((a, b) => getDateValue(b) - getDateValue(a));
+  return [...allCanons].sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 export function getAllStrategies(): AnyDoc[] {
-  return (allStrategies || []).slice().sort((a, b) => getDateValue(b) - getDateValue(a));
+  return [...allStrategies].sort((a, b) => getDateValue(b) - getDateValue(a));
 }
 
 // ---------------------------------------------------------
-// GENERIC CARD PROPS
+// CARD PROPS INTERFACE
 // ---------------------------------------------------------
 export interface ContentlayerCardProps {
   type: DocKind;
@@ -229,36 +306,34 @@ export interface ContentlayerCardProps {
 export function getCardPropsForDocument(doc: AnyDoc): ContentlayerCardProps {
   const slug = normaliseSlug(doc);
   const kind = normaliseKind(doc);
-  const href = doc?.url || `/${kind}s/${slug}`;
+  const href = doc?.url || doc?.href || `/${kind}s/${slug}`;
 
-  const base: ContentlayerCardProps = {
+  return {
     type: kind,
     slug,
-    title: doc?.title ?? "Untitled",
+    title: doc?.title || "Untitled",
     href,
     url: doc?.url || href,
-    description: doc?.description ?? doc?.summary ?? null,
-    excerpt: doc?.excerpt ?? null,
-    subtitle: doc?.subtitle ?? null,
-    date: doc?.date ?? null,
-    readTime: doc?.readTime ?? doc?.readtime ?? null,
-    image: doc?.coverImage ?? doc?.image ?? null,
-    tags: doc?.tags ?? [],
-    category: doc?.category ?? null,
-    author: doc?.author ?? null,
-    accessLevel: doc?.accessLevel ?? null,
+    description: doc?.description || doc?.summary || null,
+    excerpt: doc?.excerpt || null,
+    subtitle: doc?.subtitle || null,
+    date: doc?.date || null,
+    readTime: doc?.readTime || doc?.readtime || null,
+    image: doc?.coverImage || doc?.image || null,
+    tags: doc?.tags || [],
+    category: doc?.category || null,
+    author: doc?.author || null,
+    accessLevel: doc?.accessLevel || null,
     featured: doc?.featured === true,
-    resourceType: doc?.resourceType ?? null,
-    applications: doc?.applications ?? null,
-    downloadUrl: doc?.downloadUrl ?? null,
-    fileUrl: doc?.fileUrl ?? null,
+    resourceType: doc?.resourceType || null,
+    applications: doc?.applications || null,
+    downloadUrl: doc?.downloadUrl || null,
+    fileUrl: doc?.fileUrl || null,
   };
-
-  return base;
 }
 
 // ---------------------------------------------------------
-// GROUP PUBLISHED DOCS BY TYPE
+// GROUPING FUNCTIONS
 // ---------------------------------------------------------
 export function getPublishedDocumentsByType(): Record<DocKind, AnyDoc[]> {
   const buckets: Record<DocKind, AnyDoc[]> = {
@@ -273,7 +348,7 @@ export function getPublishedDocumentsByType(): Record<DocKind, AnyDoc[]> {
     strategy: [],
   };
 
-  for (const doc of getAllContentlayerDocs()) {
+  for (const doc of allDocuments) {
     if (!isPublished(doc)) continue;
     const kind = normaliseKind(doc);
     buckets[kind].push(doc);
@@ -286,22 +361,17 @@ export function getPublishedDocumentsByType(): Record<DocKind, AnyDoc[]> {
   return buckets;
 }
 
-// ---------------------------------------------------------
-// SLUG ACCESS (EXPORTED)
-// ---------------------------------------------------------
 export function getDocumentBySlug(slug: string): AnyDoc | undefined {
   const target = slug.replace(/^\/+|\/+$/g, "").toLowerCase();
-  return getAllContentlayerDocs().find((doc) => normaliseSlug(doc) === target);
+  return allDocuments.find((doc) => normaliseSlug(doc) === target);
 }
 
 export function getFeaturedDocuments(): AnyDoc[] {
-  return getAllContentlayerDocs().filter(
-    (doc) => doc?.featured === true && isPublished(doc)
-  );
+  return allDocuments.filter((doc) => doc?.featured === true && isPublished(doc));
 }
 
 export function getPublishedDocuments(): AnyDoc[] {
-  return getAllContentlayerDocs().filter(isPublished);
+  return allDocuments.filter(isPublished);
 }
 
 export function getContentlayerDocBySlug(
@@ -317,5 +387,5 @@ export function getDocKind(doc: AnyDoc): DocKind {
 }
 
 export function isContentlayerLoaded(): boolean {
-  return (allDocuments?.length ?? 0) > 0;
+  return allDocuments.length > 0;
 }
