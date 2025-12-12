@@ -1,689 +1,334 @@
 // pages/content/index.tsx
 import * as React from "react";
-import type { NextPage, GetStaticProps } from "next";
-import Link from "next/link";
+import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
-
+import Link from "next/link";
 import Layout from "@/components/Layout";
+
 import {
-  buildSearchIndex,
-  type SearchDoc,
-  type SearchDocType,
-} from "@/lib/searchIndex";
+  getPublishedDocuments,
+  getCardPropsForDocument,
+  type ContentlayerCardProps,
+} from "@/lib/contentlayer-helper";
 
-type ContentPageProps = {
-  docs: SearchDoc[];
+// -----------------------------
+// Types
+// -----------------------------
+
+type UiDocType =
+  | "post"
+  | "short"
+  | "book"
+  | "download"
+  | "print"
+  | "resource"
+  | "canon"
+  | "event"
+  | "strategy";
+
+type UiDoc = ContentlayerCardProps & {
+  uiType: UiDocType;
 };
 
-// ---------- TYPE & CATEGORY CONFIG ----------
+// -----------------------------
+// Cover resolver (PERMANENT FIX)
+// -----------------------------
 
-const typeConfig: Record<
-  SearchDocType,
-  {
-    label: string;
-    description: string;
-    color: {
-      bg: string;
-      text: string;
-      border: string;
-      gradient: string;
-      accent: string;
-    };
-    icon: string;
-    category: "insights" | "frameworks" | "tools" | "archives";
+type CoverKey = `${UiDocType}:${string}`;
+
+/**
+ * Only use this for exceptions.
+ * Everything else should be resolved automatically by convention.
+ *
+ * Convention:
+ *  - posts   => /assets/images/blog/<slug>.(jpg|webp|png)
+ *  - shorts  => /assets/images/blog/<slug>.(jpg|webp|png)  (or /shorts if you create it)
+ *  - books   => /assets/images/books/<slug>.(jpg|webp|png)
+ *  - canon   => /assets/images/canon/<slug>.(jpg|webp|png)
+ *  - downloads => /assets/images/downloads/<slug>.(jpg|webp|png)
+ *  - prints  => /assets/images/prints/<slug>.(jpg|webp|png) (or map to downloads art)
+ *  - resources => /assets/images/resources/<slug>.(jpg|webp|png) (or map to canon art)
+ *  - events  => /assets/images/events/<slug>.(jpg|webp|png)
+ *  - strategy => /assets/images/strategy/<slug>.(jpg|webp|png)
+ */
+const COVER_OVERRIDES: Record<CoverKey, string> = {
+  // EVENTS you mentioned are missing in “register” but must exist:
+  "event:founders-salon": "/assets/images/events/founders-salon.jpg",
+  "event:leadership-workshop": "/assets/images/events/leadership-workshop.jpg",
+
+  // If any canon resources share a single “canon resources” cover:
+  "resource:canon-master-index-preview": "/assets/images/canon/canon-resources.jpg",
+  "resource:canon-campaign": "/assets/images/canon/canon-campaign-cover.jpg",
+  "resource:canon-introduction-letter": "/assets/images/canon/canon-intro-letter-cover.jpg",
+
+  // Add only true exceptions here (wrong filename, legacy file, etc.)
+};
+
+const TYPE_FOLDER: Record<UiDocType, string> = {
+  post: "/assets/images/blog",
+  short: "/assets/images/blog",
+  book: "/assets/images/books",
+  download: "/assets/images/downloads",
+  print: "/assets/images/prints",
+  resource: "/assets/images/resources",
+  canon: "/assets/images/canon",
+  event: "/assets/images/events",
+  strategy: "/assets/images/strategy",
+};
+
+const TYPE_DEFAULT_COVER: Record<UiDocType, string> = {
+  post: "/assets/images/blog/default-blog-cover.jpg",
+  short: "/assets/images/blog/default-blog-cover.jpg",
+  book: "/assets/images/default-book.jpg",
+  download: "/assets/images/downloads/downloadsgrid.jpg",
+  print: "/assets/images/downloads/downloadsgrid.jpg",
+  resource: "/assets/images/canon/canon-resources.jpg",
+  canon: "/assets/images/canon/canon-resources.jpg",
+  event: "/assets/images/blog/default-blog-cover.jpg",
+  strategy: "/assets/images/blog/default-blog-cover.jpg",
+};
+
+function normalisePublicPath(input: string): string {
+  let s = String(input || "").trim();
+  if (!s) return s;
+
+  // If someone accidentally stored "public/assets/..." then strip leading "public"
+  if (s.startsWith("public/")) s = s.replace(/^public\//, "");
+  if (!s.startsWith("/")) s = `/${s}`;
+  return s;
+}
+
+function stripExtension(path: string): string {
+  return path.replace(/\.(png|jpg|jpeg|webp)$/i, "");
+}
+
+function resolveCover(doc: UiDoc): string {
+  const key = `${doc.uiType}:${doc.slug}` as CoverKey;
+
+  // 1) explicit override wins
+  const forced = COVER_OVERRIDES[key];
+  if (forced) return normalisePublicPath(forced);
+
+  // 2) Use doc image if present (but normalise it)
+  const raw = doc.image ? normalisePublicPath(doc.image) : "";
+  if (raw) return raw;
+
+  // 3) Convention-based guess by type folder and slug.
+  // Try common extensions in order (we can’t fs-check at runtime here;
+  // Next/Image will 404 if truly absent, so keep defaults tight).
+  const base = `${TYPE_FOLDER[doc.uiType]}/${doc.slug}`;
+  // Prefer webp first if you standardise later
+  const candidates = [`${base}.webp`, `${base}.jpg`, `${base}.png`];
+
+  // We return the first candidate; if you want ZERO 404s, keep your assets in sync
+  // with the convention, and put exceptions into COVER_OVERRIDES.
+  return candidates[0] || TYPE_DEFAULT_COVER[doc.uiType];
+}
+
+function toUiType(type: string): UiDocType {
+  switch (type) {
+    case "Post":
+      return "post";
+    case "Short":
+      return "short";
+    case "Book":
+      return "book";
+    case "Download":
+      return "download";
+    case "Print":
+      return "print";
+    case "Resource":
+      return "resource";
+    case "Canon":
+      return "canon";
+    case "Event":
+      return "event";
+    case "Strategy":
+      return "strategy";
+    default:
+      return "post";
   }
-> = {
-  post: {
-    label: "Insight",
-    description: "Thoughtful essays and perspectives",
-    color: {
-      bg: "bg-blue-500/10",
-      text: "text-blue-400",
-      border: "border-blue-500/30",
-      gradient: "from-blue-500/30 via-blue-600/10 to-blue-900/10",
-      accent: "bg-blue-500/30",
-    },
-    icon: "💭",
-    category: "insights",
-  },
-  book: {
-    label: "Book",
-    description: "Comprehensive volumes and collections",
-    color: {
-      bg: "bg-amber-500/10",
-      text: "text-amber-400",
-      border: "border-amber-500/30",
-      gradient: "from-amber-500/40 via-amber-600/15 to-amber-900/10",
-      accent: "bg-amber-500/30",
-    },
-    icon: "📚",
-    category: "frameworks",
-  },
-  download: {
-    label: "Download",
-    description: "Practical tools and templates",
-    color: {
-      bg: "bg-emerald-500/10",
-      text: "text-emerald-400",
-      border: "border-emerald-500/30",
-      gradient: "from-emerald-500/30 via-emerald-600/10 to-emerald-900/10",
-      accent: "bg-emerald-500/30",
-    },
-    icon: "📥",
-    category: "tools",
-  },
-  print: {
-    label: "Print",
-    description: "Curated prints and editions",
-    color: {
-      bg: "bg-purple-500/10",
-      text: "text-purple-400",
-      border: "border-purple-500/30",
-      gradient: "from-purple-500/30 via-purple-600/10 to-purple-900/10",
-      accent: "bg-purple-500/30",
-    },
-    icon: "🖨️",
-    category: "archives",
-  },
-  resource: {
-    label: "Resource",
-    description: "Guides and reference materials",
-    color: {
-      bg: "bg-sky-500/10",
-      text: "text-sky-400",
-      border: "border-sky-500/30",
-      gradient: "from-sky-500/30 via-sky-600/10 to-sky-900/10",
-      accent: "bg-sky-500/30",
-    },
-    icon: "📋",
-    category: "tools",
-  },
-  canon: {
-    label: "Canon",
-    description: "Foundational principles and systems",
-    color: {
-      bg: "bg-rose-500/10",
-      text: "text-rose-400",
-      border: "border-rose-500/30",
-      gradient: "from-rose-500/35 via-rose-600/10 to-rose-900/10",
-      accent: "bg-rose-500/30",
-    },
-    icon: "⚖️",
-    category: "frameworks",
-  },
+}
+
+// -----------------------------
+// Page
+// -----------------------------
+
+type Props = {
+  docs: UiDoc[];
 };
 
-const categoryConfig: Record<
-  string,
-  {
-    label: string;
-    description: string;
-    color: string;
-    gradient: string;
-    icon: string;
-    bgGradient: string;
-  }
-> = {
-  insights: {
-    label: "Insights",
-    description: "Essays and perspectives",
-    color: "border-blue-500/40",
-    gradient: "from-blue-900/50 via-slate-950/70 to-black",
-    bgGradient:
-      "bg-gradient-to-br from-blue-950/60 via-black/80 to-slate-900/40",
-    icon: "💭",
-  },
-  frameworks: {
-    label: "Frameworks",
-    description: "Systems and principles",
-    color: "border-amber-500/40",
-    gradient: "from-amber-900/50 via-zinc-950/70 to-black",
-    bgGradient:
-      "bg-gradient-to-br from-amber-950/60 via-black/80 to-zinc-900/40",
-    icon: "⚙️",
-  },
-  tools: {
-    label: "Tools",
-    description: "Resources and downloads",
-    color: "border-emerald-500/40",
-    gradient: "from-emerald-900/50 via-slate-950/70 to-black",
-    bgGradient:
-      "bg-gradient-to-br from-emerald-950/60 via-black/80 to-slate-900/40",
-    icon: "🛠️",
-  },
-  archives: {
-    label: "Archives",
-    description: "Prints and collections",
-    color: "border-purple-500/40",
-    gradient: "from-purple-900/50 via-zinc-950/70 to-black",
-    bgGradient:
-      "bg-gradient-to-br from-purple-950/60 via-black/80 to-zinc-900/40",
-    icon: "📦",
-  },
-};
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const docs = getPublishedDocuments()
+    .map(getCardPropsForDocument)
+    .map((d) => ({
+      ...d,
+      uiType: toUiType(d.type),
+    }))
+    // ensure url fallback exists
+    .map((d) => ({
+      ...d,
+      url: d.url || `/content/${d.slug}`,
+      image: d.image ? normalisePublicPath(d.image) : null,
+    }));
 
-// ---------- DATA ----------
-
-export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  const docs = buildSearchIndex();
   return {
-    props: { docs },
-    revalidate: 3600,
+    props: {
+      docs: docs as UiDoc[],
+    },
   };
 };
 
-// ---------- CARD HELPERS: HREF, ASPECT, FOCUS ----------
+const FILTERS: Array<{ key: "all" | UiDocType; label: string }> = [
+  { key: "all", label: "All Types" },
+  { key: "post", label: "Essays" },
+  { key: "short", label: "Shorts" },
+  { key: "book", label: "Books" },
+  { key: "canon", label: "Canon" },
+  { key: "resource", label: "Resources" },
+  { key: "download", label: "Downloads" },
+  { key: "print", label: "Prints" },
+  { key: "event", label: "Events" },
+  { key: "strategy", label: "Strategy" },
+];
 
-/**
- * Routing helper.
- * If you set `href` in front-matter, that will be used.
- * Otherwise we infer from type.
- */
-const getHrefForDoc = (doc: SearchDoc): string => {
-  if (doc.href) return doc.href;
+const ContentIndexPage: NextPage<Props> = ({ docs }) => {
+  const [q, setQ] = React.useState("");
+  const [filter, setFilter] = React.useState<"all" | UiDocType>("all");
 
-  switch (doc.type) {
-    case "post":
-      // If your posts live at /blog/[slug]
-      return `/blog/${doc.slug}`;
-    case "book":
-      // Adjust if your shop route is different
-      return `/book/${doc.slug}`;
-    case "download":
-      return `/downloads/${doc.slug}`;
-    case "resource":
-      return `/resources/${doc.slug}`;
-    case "print":
-      return `/prints/${doc.slug}`;
-    case "canon":
-      return `/canon/${doc.slug}`;
-    default:
-      return `/${doc.slug}`;
-  }
-};
+  const items = React.useMemo(() => {
+    const query = q.trim().toLowerCase();
 
-/**
- * Aspect helper.
- * Optional front-matter:
- *  - coverAspect: "book" | "wide" | "square" | "portrait" | "landscape"
- */
-const getAspectClassForDoc = (doc: SearchDoc): string => {
-  const raw = doc as any;
-  const explicitAspect = raw.coverAspect ?? raw.aspect;
-
-  switch (explicitAspect) {
-    case "book":
-    case "portrait":
-      return "aspect-[3/4]";
-    case "square":
-      return "aspect-square";
-    case "wide":
-    case "landscape":
-      return "aspect-[16/9]";
-    default: {
-      if (doc.type === "book" || doc.type === "print" || doc.type === "canon") {
-        return "aspect-[3/4]";
-      }
-      return "aspect-[16/9] md:aspect-[3/2]";
-    }
-  }
-};
-
-/**
- * Focus helper so some covers don't crop badly.
- * Optional front-matter:
- *  - coverFocus: "top" | "center" | "bottom"
- */
-const getObjectPositionClassForDoc = (doc: SearchDoc): string => {
-  const raw = doc as any;
-  const focus = raw.coverFocus as "top" | "center" | "bottom" | undefined;
-
-  switch (focus) {
-    case "top":
-      return "object-[50%_15%]";
-    case "bottom":
-      return "object-[50%_85%]";
-    case "center":
-    default:
-      return "object-center";
-  }
-};
-
-// ---------- LUX CARD COMPONENT ----------
-
-const LuxContentCard: React.FC<{ doc: SearchDoc }> = ({ doc }) => {
-  const config = typeConfig[doc.type];
-  const href = getHrefForDoc(doc);
-  const aspectClass = getAspectClassForDoc(doc);
-  const objectPositionClass = getObjectPositionClassForDoc(doc);
+    return docs
+      .filter((d) => (filter === "all" ? true : d.uiType === filter))
+      .filter((d) => {
+        if (!query) return true;
+        const text = [
+          d.title,
+          d.subtitle,
+          d.description,
+          d.excerpt,
+          (d.tags || []).join(" "),
+          d.slug,
+          d.type,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return text.includes(query);
+      });
+  }, [docs, q, filter]);
 
   return (
-    <Link href={href} className="group block h-full">
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gold/15 bg-gradient-to-b from-[#050509]/95 via-black/95 to-[#050509]/98 shadow-[0_22px_60px_rgba(0,0,0,0.75)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_32px_80px_rgba(0,0,0,0.95)]">
-        {/* IMAGE / TOP PANEL */}
-        <div className={`relative w-full overflow-hidden ${aspectClass}`}>
-          {doc.coverImage ? (
-            <>
-              <Image
-                src={doc.coverImage}
-                alt={doc.title}
-                fill
-                sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
-                className={`object-cover ${objectPositionClass} transition-transform duration-[900ms] group-hover:scale-[1.04]`}
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/0" />
-            </>
-          ) : (
-            <div
-              className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${config.color.gradient}`}
-            >
-              <span className="text-4xl">{config.icon}</span>
-            </div>
-          )}
+    <Layout title="Content Library">
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+        <header className="mb-6 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Library
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            Content
+          </h1>
+          <p className="max-w-2xl text-sm text-gray-200">
+            Essays, Canon, resources, downloads, prints, events — one unified index.
+          </p>
+        </header>
 
-          {/* TYPE PILL */}
-          <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/18 bg-black/55 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream">
-            <span>{config.icon}</span>
-            <span>{config.label}</span>
-          </div>
-        </div>
-
-        {/* BODY */}
-        <div className="flex flex-1 flex-col gap-3 p-5">
-          <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
-            {doc.title}
-          </h3>
-
-          {doc.excerpt && (
-            <p className="line-clamp-3 text-sm text-gray-300">
-              {doc.excerpt}
-            </p>
-          )}
-
-          {/* META */}
-          <div className="mt-auto border-t border-gray-800/80 pt-3 text-xs">
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {doc.tags?.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-black/70 px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em] text-gray-400"
-                >
-                  {tag}
-                </span>
-              ))}
-              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[0.64rem] uppercase tracking-[0.14em] text-amber-300/90">
-                {config.label}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-[0.7rem] text-gray-400">
-              <span className="line-clamp-1">{config.description}</span>
-              <span className="inline-flex items-center gap-1 text-amber-300">
-                <span className="tracking-[0.18em]">OPEN</span>
-                <span aria-hidden="true">↗</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* CORNER GLINT */}
-        <div className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/60 to-amber-700/40 opacity-0 blur-[1px] transition-opacity duration-300 group-hover:opacity-100" />
-      </article>
-    </Link>
-  );
-};
-
-// ---------- PAGE ----------
-
-const ContentPage: NextPage<ContentPageProps> = ({ docs }) => {
-  const [query, setQuery] = React.useState("");
-  const [activeCategory, setActiveCategory] = React.useState<string>("all");
-  const [activeType, setActiveType] =
-    React.useState<SearchDocType | "all">("all");
-
-  const docsByCategory = React.useMemo(() => {
-    const organized: Record<string, SearchDoc[]> = {
-      insights: [],
-      frameworks: [],
-      tools: [],
-      archives: [],
-      all: docs,
-    };
-    docs.forEach((doc) => {
-      const category = typeConfig[doc.type].category;
-      organized[category].push(doc);
-    });
-    return organized;
-  }, [docs]);
-
-  const filteredDocs = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const source =
-      activeCategory === "all" ? docs : docsByCategory[activeCategory];
-
-    if (!q && activeType === "all") return source;
-
-    return source.filter((doc) => {
-      if (activeType !== "all" && doc.type !== activeType) return false;
-      if (!q) return true;
-
-      const searchable = [
-        doc.title,
-        doc.excerpt,
-        doc.tags?.join(" "),
-        typeConfig[doc.type].label,
-        typeConfig[doc.type].description,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return searchable.includes(q);
-    });
-  }, [docs, docsByCategory, query, activeCategory, activeType]);
-
-  const getCategoryStats = (category: string) =>
-    docsByCategory[category]?.length ?? 0;
-
-  const title = "Content Library";
-  const description =
-    "A curated chamber of insights, frameworks, and tools for fathers, founders, and leaders who build with depth.";
-
-  return (
-    <Layout title={title} description={description} fullWidth>
-      <div className="min-h-screen bg-gradient-to-b from-black via-[#050509] to-black text-cream">
-        {/* HERO */}
-        <section className="relative overflow-hidden border-b border-gray-800">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-500/6 via-transparent to-emerald-500/6" />
-            <div className="absolute inset-0 opacity-[0.14] mix-blend-soft-light bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.35),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(45,212,191,0.35),_transparent_58%)]" />
-            <div className="absolute inset-0 opacity-[0.18] bg-[linear-gradient(to_right,rgba(148,163,184,0.35)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.35)_1px,transparent_1px)] bg-[size:120px_120px]" />
-            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500/60 to-transparent" />
-          </div>
-
-          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
-            <div className="text-center">
-              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-500/35 bg-black/60 px-5 py-2 backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.9)]" />
-                <span className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
-                  Curated Chamber
-                </span>
-              </div>
-
-              <h1 className="mb-4 font-serif text-4xl font-light tracking-tight text-cream sm:text-5xl lg:text-6xl">
-                Content Library
-              </h1>
-
-              <p className="mx-auto max-w-2xl text-sm sm:text-base font-light leading-relaxed text-gray-200">
-                One doorway into the whole house of Abraham of London – essays,
-                canon volumes, tools, and artefacts arranged for slow, deliberate
-                reading.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* CONTROLS */}
-        <section className="sticky top-0 z-40 border-b border-gray-800 bg-black/92 backdrop-blur-xl supports-[backdrop-filter]:bg-black/85">
-          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              {/* Search */}
-              <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-                  <svg
-                    className="h-5 w-5 text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search across the library..."
-                  className="w-full rounded-xl border border-gray-700 bg-gray-950/80 py-3 pl-12 pr-10 text-sm text-cream placeholder:text-gray-500 backdrop-blur-sm transition-all duration-200 hover:border-gray-600 focus:border-amber-400/70 focus:outline-none focus:ring-1 focus:ring-amber-400/40"
-                />
-                {query && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 transition-colors hover:text-gray-300"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-
-              {/* Category filter */}
-              <div className="flex flex-wrap gap-2">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => {
+              const active = f.key === filter;
+              return (
                 <button
+                  key={f.key}
+                  onClick={() => setFilter(f.key)}
+                  className={[
+                    "rounded-full px-3 py-1 text-xs font-semibold tracking-wide transition",
+                    active
+                      ? "bg-gold text-black"
+                      : "bg-white/5 text-gray-200 hover:bg-white/10",
+                  ].join(" ")}
                   type="button"
-                  onClick={() => setActiveCategory("all")}
-                  className={`rounded-lg px-4 py-2.5 text-xs font-semibold tracking-wide transition-all duration-200 ${
-                    activeCategory === "all"
-                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/30"
-                      : "border border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-900/70"
-                  }`}
                 >
-                  All ({docs.length})
+                  {f.label}
                 </button>
-                {Object.entries(categoryConfig).map(([key, cat]) => {
-                  const count = getCategoryStats(key);
-                  if (!count) return null;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setActiveCategory(key)}
-                      className={`rounded-lg border px-4 py-2.5 text-xs font-semibold tracking-wide transition-all duration-200 ${
-                        activeCategory === key
-                          ? `bg-gradient-to-r ${cat.gradient} ${cat.color} text-cream shadow-lg`
-                          : "border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-900/70"
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <span>{cat.icon}</span>
-                        <span>{cat.label}</span>
-                        <span className="text-[0.7rem] opacity-70">
-                          ({count})
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Type filter */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setActiveType("all")}
-                className={`rounded-full px-3.5 py-1.5 text-[0.7rem] font-medium uppercase tracking-[0.14em] transition-all duration-200 ${
-                  activeType === "all"
-                    ? "bg-gray-700 text-cream"
-                    : "text-gray-400 hover:text-gray-200 hover:bg-gray-900/70"
-                }`}
-              >
-                All Types
-              </button>
-              {(Object.keys(typeConfig) as SearchDocType[]).map((type) => {
-                const cfg = typeConfig[type];
-                const count = docs.filter((d) => d.type === type).length;
-                if (!count) return null;
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setActiveType(type)}
-                    className={`rounded-full border px-3.5 py-1.5 text-[0.7rem] font-medium uppercase tracking-[0.14em] transition-all duration-200 ${
-                      activeType === type
-                        ? `${cfg.color.bg} ${cfg.color.border} ${cfg.color.text}`
-                        : "border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-100"
-                    }`}
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <span>{cfg.icon}</span>
-                      <span>{cfg.label}</span>
-                      <span className="text-[0.65rem] opacity-60">
-                        ({count})
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+              );
+            })}
           </div>
-        </section>
 
-        {/* GRID */}
-        <section className="py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {filteredDocs.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-gray-700 bg-gradient-to-b from-gray-950/70 to-black/70 p-12 text-center">
-                <div className="mb-4 text-3xl">🔍</div>
-                <h3 className="mb-2 font-serif text-xl text-cream">
-                  Nothing surfaced… yet.
-                </h3>
-                <p className="text-sm text-gray-400">
-                  Adjust your filters or clear the search to see the full
-                  collection.
-                </p>
-              </div>
-            ) : (
-              <>
-                {activeCategory !== "all" && (
-                  <div
-                    className={`mb-8 rounded-2xl border ${categoryConfig[activeCategory].color} ${categoryConfig[activeCategory].bgGradient} p-6`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${categoryConfig[activeCategory].gradient}`}
+          <div className="w-full sm:w-[360px]">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search titles, tags, excerpts…"
+              className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-sm text-gray-100 placeholder:text-gray-400 outline-none focus:border-gold/60"
+            />
+          </div>
+        </div>
+
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((doc) => {
+            const cover = resolveCover(doc);
+
+            return (
+              <Link
+                key={`${doc.uiType}:${doc.slug}`}
+                href={doc.url || `/content/${doc.slug}`}
+                className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-sm transition hover:border-gold/40"
+              >
+                <div className="relative aspect-[16/10] w-full overflow-hidden">
+                  <Image
+                    src={cover}
+                    alt={doc.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    sizes="(min-width: 1024px) 320px, (min-width: 768px) 50vw, 100vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                  <div className="absolute left-3 top-3 inline-flex items-center rounded-full bg-black/50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-gold">
+                    {doc.uiType}
+                  </div>
+                </div>
+
+                <div className="space-y-2 p-4">
+                  <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
+                    {doc.title}
+                  </h3>
+
+                  {doc.excerpt || doc.description ? (
+                    <p className="line-clamp-3 text-sm text-gray-200">
+                      {doc.excerpt || doc.description}
+                    </p>
+                  ) : (
+                    <p className="line-clamp-2 text-sm text-gray-400">
+                      {doc.slug}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {(doc.tags || []).slice(0, 4).map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full bg-white/5 px-2 py-1 text-[11px] text-gold/80"
                       >
-                        <span className="text-xl">
-                          {categoryConfig[activeCategory].icon}
-                        </span>
-                      </div>
-                      <div>
-                        <h2 className="font-serif text-2xl text-cream">
-                          {categoryConfig[activeCategory].label}
-                        </h2>
-                        <p className="text-sm text-gray-300">
-                          {categoryConfig[activeCategory].description}
-                        </p>
-                      </div>
-                      <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-xs text-gray-300">
-                        {filteredDocs.length}{" "}
-                        {filteredDocs.length === 1 ? "item" : "items"}
+                        {t}
                       </span>
-                    </div>
-                  </div>
-                )}
-
-                {activeCategory === "all" ? (
-                  <div className="space-y-12">
-                    {Object.entries(categoryConfig).map(([key, cat]) => {
-                      const filteredCategoryDocs = filteredDocs.filter(
-                        (doc) => typeConfig[doc.type].category === key,
-                      );
-                      if (!filteredCategoryDocs.length) return null;
-
-                      return (
-                        <div
-                          key={key}
-                          className={`rounded-2xl border ${cat.color} ${cat.bgGradient} p-6`}
-                        >
-                          <div className="mb-6 flex items-center gap-3">
-                            <div
-                              className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${cat.gradient}`}
-                            >
-                              <span className="text-xl">{cat.icon}</span>
-                            </div>
-                            <div>
-                              <h2 className="font-serif text-2xl text-cream">
-                                {cat.label}
-                              </h2>
-                              <p className="text-sm text-gray-300">
-                                {cat.description}
-                              </p>
-                            </div>
-                            <span className="ml-auto rounded-full bg-black/40 px-3 py-1 text-xs text-gray-300">
-                              {filteredCategoryDocs.length} items
-                            </span>
-                          </div>
-
-                          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {filteredCategoryDocs.map((doc) => (
-                              <LuxContentCard
-                                key={`${doc.type}:${doc.slug}`}
-                                doc={doc}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredDocs.map((doc) => (
-                      <LuxContentCard
-                        key={`${doc.type}:${doc.slug}`}
-                        doc={doc}
-                      />
                     ))}
                   </div>
-                )}
-              </>
-            )}
-          </div>
+                </div>
+              </Link>
+            );
+          })}
         </section>
 
-        {/* STATS FOOTER */}
-        <section className="border-t border-gray-800 bg-gradient-to-b from-black/60 to-[#020308] py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-              {Object.entries(categoryConfig).map(([key, cat]) => {
-                const count = getCategoryStats(key);
-                return (
-                  <div key={key} className="text-center">
-                    <div
-                      className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${cat.gradient} ${cat.color}`}
-                    >
-                      <span className="text-2xl">{cat.icon}</span>
-                    </div>
-                    <div className="mb-1 text-3xl font-light text-cream">
-                      {count}
-                    </div>
-                    <div className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gray-300">
-                      {cat.label}
-                    </div>
-                    <div className="text-[0.7rem] text-gray-500">
-                      {cat.description}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-10 text-center text-sm text-gray-400">
-              Total collection:{" "}
-              <span className="font-semibold text-amber-300">
-                {docs.length}
-              </span>{" "}
-              curated items across all categories.
-            </div>
+        {items.length === 0 && (
+          <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-gray-200">
+            No matches. Adjust filters or search terms.
           </div>
-        </section>
-      </div>
+        )}
+      </main>
     </Layout>
   );
 };
 
-export default ContentPage;
+export default ContentIndexPage;
