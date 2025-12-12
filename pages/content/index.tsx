@@ -9,7 +9,8 @@ import {
   FileText, Crown, Layers, BookMarked, Gem, Scroll,
   Feather, Briefcase, Palette, Trophy, Zap, Globe, Lock,
   Star, Award, Sparkles, Castle, Compass, Shield, Target,
-  Lightbulb, Coffee, Users, Clock, MapPin, Gift
+  Lightbulb, Coffee, Users, Clock, MapPin, Gift,
+  PenTool, Archive, Box, FileBox, Printer, FileCode
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -27,209 +28,178 @@ type ContentPageProps = {
 type OverrideMap = Record<string, string>;
 
 // -----------------------------
-// Premium Type Configuration System
+// Premium Type Configuration System - NO STATUS WORDS
 // -----------------------------
 
 type ContentTypeConfig = {
   label: string;
   icon: React.ReactNode;
   primaryColor: string;
-  secondaryColor: string;
-  gradient: string;
-  texture: string;
-  badgeVariant: "gold" | "silver" | "bronze" | "platinum" | "emerald" | "sapphire" | "ruby" | "amber" | "onyx";
+  borderColor: string;
+  gradientFrom: string;
+  gradientTo: string;
   casing: "uppercase" | "titlecase" | "smallcaps";
-  accentElement: React.ReactNode;
-  description: string;
-  status: "premier" | "exclusive" | "limited" | "archival" | "foundational";
+  texture: React.ReactNode;
+  frameStyle: string;
+  indicatorElement: React.ReactNode;
 };
 
-const TYPE_CONFIG: Record<DocKind | "all", ContentTypeConfig> = {
-  all: {
-    label: "The Complete Archive",
-    icon: <Castle className="h-5 w-5" />,
-    primaryColor: "text-gold",
-    secondaryColor: "text-gold/70",
-    gradient: "from-gold/20 via-amber-900/10 to-transparent",
-    texture: "bg-[url('/assets/textures/damask-pattern.svg')]",
-    badgeVariant: "platinum",
-    casing: "titlecase",
-    accentElement: <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-gold/2" />,
-    description: "The entire curated collection",
-    status: "archival"
-  },
+const TYPE_CONFIG: Record<DocKind, ContentTypeConfig> = {
   post: {
-    label: "Insights",
-    icon: <Lightbulb className="h-5 w-5" />,
+    label: "Essays",
+    icon: <PenTool className="h-4 w-4" />,
     primaryColor: "text-amber-300",
-    secondaryColor: "text-amber-200/70",
-    gradient: "from-amber-900/30 via-amber-800/15 to-transparent",
-    texture: "bg-[url('/assets/textures/parchment-texture.svg')]",
-    badgeVariant: "amber",
+    borderColor: "border-amber-500/20",
+    gradientFrom: "from-amber-900/20",
+    gradientTo: "to-amber-800/5",
     casing: "titlecase",
-    accentElement: (
-      <div className="absolute top-0 right-0 h-24 w-24 bg-gradient-to-br from-amber-600/10 to-transparent rounded-full blur-2xl" />
+    texture: (
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,191,36,0.03)_0%,transparent_50%)]" />
     ),
-    description: "Illuminating essays and reflections",
-    status: "premier"
+    frameStyle: "before:absolute before:inset-0 before:border before:border-amber-500/10 before:rounded-3xl before:pointer-events-none",
+    indicatorElement: (
+      <div className="absolute -top-2 -right-2 h-16 w-16 bg-gradient-to-br from-amber-600/10 to-amber-400/5 rounded-full blur-xl" />
+    )
   },
   canon: {
     label: "Canon",
-    icon: <Crown className="h-5 w-5" />,
+    icon: <Crown className="h-4 w-4" />,
     primaryColor: "text-gold",
-    secondaryColor: "text-gold/80",
-    gradient: "from-gold/25 via-yellow-900/15 to-transparent",
-    texture: "bg-[url('/assets/textures/gold-filigree.svg')]",
-    badgeVariant: "gold",
+    borderColor: "border-gold/30",
+    gradientFrom: "from-gold/15",
+    gradientTo: "to-yellow-900/5",
     casing: "uppercase",
-    accentElement: (
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 h-32 w-32 bg-gradient-to-br from-gold/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 h-24 w-24 bg-gradient-to-tr from-gold/10 to-transparent rounded-full blur-2xl" />
-      </div>
+    texture: (
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.08)_0%,transparent_60%)]" />
     ),
-    description: "Foundational principles and doctrine",
-    status: "foundational"
+    frameStyle: "before:absolute before:inset-0 before:border-2 before:border-gold/10 before:rounded-3xl before:pointer-events-none before:bg-gradient-to-br before:from-gold/5 before:via-transparent before:to-transparent",
+    indicatorElement: (
+      <>
+        <div className="absolute top-1/4 left-1/4 h-20 w-20 bg-gradient-to-br from-gold/8 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-1/4 right-1/4 h-16 w-16 bg-gradient-to-tl from-gold/6 to-transparent rounded-full blur-xl" />
+      </>
+    )
   },
   resource: {
     label: "Resources",
-    icon: <Briefcase className="h-5 w-5" />,
+    icon: <Briefcase className="h-4 w-4" />,
     primaryColor: "text-emerald-300",
-    secondaryColor: "text-emerald-200/70",
-    gradient: "from-emerald-900/25 via-emerald-800/10 to-transparent",
-    texture: "bg-[url('/assets/textures/leather-texture.svg')]",
-    badgeVariant: "emerald",
+    borderColor: "border-emerald-500/20",
+    gradientFrom: "from-emerald-900/20",
+    gradientTo: "to-emerald-800/5",
     casing: "titlecase",
-    accentElement: <div className="absolute bottom-0 left-0 h-20 w-20 bg-gradient-to-tr from-emerald-700/10 to-transparent blur-xl" />,
-    description: "Tools and practical materials",
-    status: "exclusive"
+    texture: (
+      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_95%,rgba(16,185,129,0.02)_100%)]" />
+    ),
+    frameStyle: "before:absolute before:inset-0 before:border before:border-emerald-500/10 before:rounded-3xl before:pointer-events-none before:border-dashed",
+    indicatorElement: (
+      <div className="absolute -bottom-3 -left-3 h-24 w-24 bg-gradient-to-tr from-emerald-700/8 to-emerald-600/4 blur-2xl" />
+    )
   },
   download: {
     label: "Downloads",
-    icon: <Download className="h-5 w-5" />,
+    icon: <Download className="h-4 w-4" />,
     primaryColor: "text-cyan-300",
-    secondaryColor: "text-cyan-200/70",
-    gradient: "from-cyan-900/25 via-blue-800/10 to-transparent",
-    texture: "bg-[url('/assets/textures/blueprint-texture.svg')]",
-    badgeVariant: "sapphire",
+    borderColor: "border-cyan-500/20",
+    gradientFrom: "from-cyan-900/20",
+    gradientTo: "to-blue-800/5",
     casing: "titlecase",
-    accentElement: <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-40 bg-gradient-to-r from-cyan-600/5 to-blue-600/5 rounded-full blur-3xl" />,
-    description: "Digital assets and files",
-    status: "limited"
+    texture: (
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_70%,rgba(6,182,212,0.02)_100%)]" />
+    ),
+    frameStyle: "before:absolute before:inset-0 before:border before:border-cyan-500/10 before:rounded-3xl before:pointer-events-none before:border-double before:border-t-0 before:border-r-0",
+    indicatorElement: (
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-32 bg-gradient-to-r from-cyan-600/6 to-blue-600/4 rounded-full blur-3xl" />
+    )
   },
   print: {
     label: "Prints",
-    icon: <Palette className="h-5 w-5" />,
+    icon: <Printer className="h-4 w-4" />,
     primaryColor: "text-rose-300",
-    secondaryColor: "text-rose-200/70",
-    gradient: "from-rose-900/25 via-pink-800/10 to-transparent",
-    texture: "bg-[url('/assets/textures/watercolor-texture.svg')]",
-    badgeVariant: "ruby",
+    borderColor: "border-rose-500/20",
+    gradientFrom: "from-rose-900/20",
+    gradientTo: "to-pink-800/5",
     casing: "titlecase",
-    accentElement: <div className="absolute -right-4 top-4 h-32 w-32 bg-gradient-to-bl from-rose-600/10 to-pink-600/5 rounded-full blur-2xl" />,
-    description: "Premium printed materials",
-    status: "limited"
+    texture: (
+      <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_80%,rgba(244,63,94,0.02)_100%)]" />
+    ),
+    frameStyle: "before:absolute before:inset-0 before:border before:border-rose-500/10 before:rounded-3xl before:pointer-events-none before:border-t before:border-b before:border-r-0 before:border-l-0",
+    indicatorElement: (
+      <div className="absolute -right-4 top-4 h-28 w-28 bg-gradient-to-bl from-rose-600/8 to-pink-600/4 rounded-full blur-2xl" />
+    )
   },
   book: {
     label: "Books",
-    icon: <BookMarked className="h-5 w-5" />,
+    icon: <BookMarked className="h-4 w-4" />,
     primaryColor: "text-violet-300",
-    secondaryColor: "text-violet-200/70",
-    gradient: "from-violet-900/25 via-purple-800/10 to-transparent",
-    texture: "bg-[url('/assets/textures/velvet-texture.svg')]",
-    badgeVariant: "amethyst",
+    borderColor: "border-violet-500/20",
+    gradientFrom: "from-violet-900/20",
+    gradientTo: "to-purple-800/5",
     casing: "titlecase",
-    accentElement: <div className="absolute top-0 left-4 h-20 w-20 bg-gradient-to-br from-violet-700/15 to-purple-600/10 blur-xl" />,
-    description: "Definitive collected works",
-    status: "premier"
+    texture: (
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(139,92,246,0.03)_0%,transparent_60%)]" />
+    ),
+    frameStyle: "before:absolute before:inset-0 before:border before:border-violet-500/10 before:rounded-3xl before:pointer-events-none before:shadow-inner before:shadow-violet-500/5",
+    indicatorElement: (
+      <div className="absolute top-0 left-4 h-24 w-24 bg-gradient-to-br from-violet-700/10 to-purple-600/5 blur-2xl" />
+    )
   },
   event: {
     label: "Events",
-    icon: <Calendar className="h-5 w-5" />,
+    icon: <Calendar className="h-4 w-4" />,
     primaryColor: "text-blue-300",
-    secondaryColor: "text-blue-200/70",
-    gradient: "from-blue-900/25 via-indigo-800/10 to-transparent",
-    texture: "bg-[url('/assets/textures/marble-texture.svg')]",
-    badgeVariant: "sapphire",
+    borderColor: "border-blue-500/20",
+    gradientFrom: "from-blue-900/20",
+    gradientTo: "to-indigo-800/5",
     casing: "titlecase",
-    accentElement: <div className="absolute bottom-4 right-4 h-24 w-24 bg-gradient-to-tr from-blue-600/15 to-indigo-600/10 rounded-full blur-2xl" />,
-    description: "Exclusive gatherings and experiences",
-    status: "exclusive"
+    texture: (
+      <div className="absolute inset-0 bg-[linear-gradient(15deg,transparent_85%,rgba(59,130,246,0.02)_100%)]" />
+    ),
+    frameStyle: "before:absolute before:inset-0 before:border before:border-blue-500/10 before:rounded-3xl before:pointer-events-none before:border-dotted",
+    indicatorElement: (
+      <div className="absolute bottom-4 right-4 h-20 w-20 bg-gradient-to-tr from-blue-600/10 to-indigo-600/5 rounded-full blur-xl" />
+    )
   },
   short: {
     label: "Shorts",
-    icon: <Zap className="h-5 w-5" />,
+    icon: <Zap className="h-4 w-4" />,
     primaryColor: "text-orange-300",
-    secondaryColor: "text-orange-200/70",
-    gradient: "from-orange-900/25 via-amber-800/10 to-transparent",
-    texture: "bg-[url('/assets/textures/silk-texture.svg')]",
-    badgeVariant: "amber",
+    borderColor: "border-orange-500/20",
+    gradientFrom: "from-orange-900/20",
+    gradientTo: "to-amber-800/5",
     casing: "titlecase",
-    accentElement: <div className="absolute -top-2 -left-2 h-16 w-16 bg-gradient-to-br from-orange-600/20 to-amber-500/10 rounded-full blur-xl" />,
-    description: "Concise insights and thoughts",
-    status: "premier"
+    texture: (
+      <div className="absolute inset-0 bg-[linear-gradient(-15deg,transparent_75%,rgba(249,115,22,0.02)_100%)]" />
+    ),
+    frameStyle: "before:absolute before:inset-0 before:border before:border-orange-500/10 before:rounded-3xl before:pointer-events-none before:border-b-2 before:border-t-0",
+    indicatorElement: (
+      <div className="absolute -top-2 -left-2 h-20 w-20 bg-gradient-to-br from-orange-600/12 to-amber-500/6 rounded-full blur-xl" />
+    )
   },
   strategy: {
     label: "Strategy",
-    icon: <Target className="h-5 w-5" />,
+    icon: <Target className="h-4 w-4" />,
     primaryColor: "text-teal-300",
-    secondaryColor: "text-teal-200/70",
-    gradient: "from-teal-900/25 via-emerald-800/10 to-transparent",
-    texture: "bg-[url('/assets/textures/grid-texture.svg')]",
-    badgeVariant: "emerald",
+    borderColor: "border-teal-500/20",
+    gradientFrom: "from-teal-900/20",
+    gradientTo: "to-emerald-800/5",
     casing: "titlecase",
-    accentElement: <div className="absolute top-1/2 left-0 h-32 w-32 bg-gradient-to-r from-teal-600/10 to-emerald-600/5 blur-2xl" />,
-    description: "Strategic frameworks and planning",
-    status: "foundational"
-  }
-};
-
-// Badge Variant Styles
-const BADGE_VARIANTS = {
-  gold: "bg-gradient-to-br from-gold/20 to-gold/10 border-gold/30 text-gold",
-  platinum: "bg-gradient-to-br from-gray-300/20 to-gray-400/10 border-gray-400/30 text-gray-300",
-  emerald: "bg-gradient-to-br from-emerald-600/20 to-emerald-500/10 border-emerald-500/30 text-emerald-300",
-  sapphire: "bg-gradient-to-br from-blue-600/20 to-blue-500/10 border-blue-500/30 text-blue-300",
-  ruby: "bg-gradient-to-br from-rose-600/20 to-rose-500/10 border-rose-500/30 text-rose-300",
-  amber: "bg-gradient-to-br from-amber-600/20 to-amber-500/10 border-amber-500/30 text-amber-300",
-  amethyst: "bg-gradient-to-br from-purple-600/20 to-purple-500/10 border-purple-500/30 text-purple-300",
-  onyx: "bg-gradient-to-br from-gray-800/20 to-gray-900/10 border-gray-700/30 text-gray-400"
-};
-
-// Status Badge Styles
-const STATUS_BADGES = {
-  premier: {
-    label: "Premier",
-    icon: <Crown className="h-3 w-3" />,
-    style: "bg-gradient-to-br from-gold/20 to-amber-900/20 border-gold/40 text-gold"
-  },
-  exclusive: {
-    label: "Exclusive",
-    icon: <Lock className="h-3 w-3" />,
-    style: "bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/40 text-cyan-300"
-  },
-  limited: {
-    label: "Limited",
-    icon: <Clock className="h-3 w-3" />,
-    style: "bg-gradient-to-br from-rose-900/20 to-pink-900/20 border-rose-500/40 text-rose-300"
-  },
-  archival: {
-    label: "Archival",
-    icon: <Scroll className="h-3 w-3" />,
-    style: "bg-gradient-to-br from-gray-800/20 to-gray-900/20 border-gray-600/40 text-gray-300"
-  },
-  foundational: {
-    label: "Foundational",
-    icon: <Shield className="h-3 w-3" />,
-    style: "bg-gradient-to-br from-emerald-900/20 to-green-900/20 border-emerald-500/40 text-emerald-300"
+    texture: (
+      <div className="absolute inset-0 bg-[linear-gradient(60deg,transparent_90%,rgba(20,184,166,0.02)_100%)]" />
+    ),
+    frameStyle: "before:absolute before:inset-0 before:border before:border-teal-500/10 before:rounded-3xl before:pointer-events-none before:border-2 before:border-t-0 before:border-b-2",
+    indicatorElement: (
+      <div className="absolute top-1/2 left-0 h-28 w-28 bg-gradient-to-r from-teal-600/8 to-emerald-600/4 blur-2xl" />
+    )
   }
 };
 
 // -----------------------------
-// Cover Overrides
+// Cover Overrides - INCLUDING PRINTS
 // -----------------------------
 
 const COVER_OVERRIDES: OverrideMap = {
+  // Blog
   "christianity-not-extremism": "/assets/images/blog/christianity-not-extremism.jpg",
   "leadership-begins-at-home": "/assets/images/blog/leadership-begins-at-home.jpg",
   "ultimate-purpose-of-man": "/assets/images/blog/purpose-cover.jpg",
@@ -245,11 +215,13 @@ const COVER_OVERRIDES: OverrideMap = {
   "lessons-from-noah": "/assets/images/blog/lessons-from-noah-hero.jpg",
   "kingdom-strategies-for-a-loving-legacy": "/assets/images/blog/kingdom-strategies-for-a-loving-legacy.jpg",
 
+  // Books
   "fathering-without-fear": "/assets/images/books/fathering-without-fear.jpg",
   "the-fiction-adaptation": "/assets/images/books/the-fiction-adaptation.jpg",
   "the-architecture-of-human-purpose": "/assets/images/books/the-architecture-of-human-purpose.jpg",
   "the-builders-catechism": "/assets/images/canon/builders-catechism-cover.jpg",
 
+  // Canon
   "builders-catechism": "/assets/images/canon/builders-catechism-cover.jpg",
   "canon-campaign": "/assets/images/canon/canon-campaign-cover.jpg",
   "canon-introduction-letter": "/assets/images/canon/canon-intro-letter-cover.jpg",
@@ -264,6 +236,7 @@ const COVER_OVERRIDES: OverrideMap = {
   "volume-x-filename": "/assets/images/canon/volume-x-cover.jpg",
   "volume-x-the-arc-of-future-civilisation": "/assets/images/canon/volume-x-cover.jpg",
 
+  // Resources
   "canon-council-table-agenda": "/assets/images/canon/canon-resources.jpg",
   "canon-household-charter": "/assets/images/canon/canon-resources.jpg",
   "canon-reading-plan-year-one": "/assets/images/canon/canon-resources.jpg",
@@ -272,8 +245,16 @@ const COVER_OVERRIDES: OverrideMap = {
   "multi-generational-legacy-ledger": "/assets/images/canon/canon-resources.jpg",
   "purpose-alignment-checklist": "/assets/images/canon/canon-resources.jpg",
 
-  "founders-salon": "/assets/images/writing-desk.webp",
-  "leadership-workshop": "/assets/images/writing-desk.webp",
+  // Prints (CRITICAL - Ensure prints have covers)
+  "sample-print-1": "/assets/images/prints/print-sample-1.jpg",
+  "sample-print-2": "/assets/images/prints/print-sample-2.jpg",
+  "sample-print-3": "/assets/images/prints/print-sample-3.jpg",
+  "canon-prints-collection": "/assets/images/prints/canon-prints.jpg",
+  "exclusive-prints": "/assets/images/prints/exclusive-prints.jpg",
+
+  // Events
+  "founders-salon": "/assets/images/events/founders-salon.jpg",
+  "leadership-workshop": "/assets/images/events/leadership-workshop.jpg",
 };
 
 function applyCoverOverrides(card: ContentlayerCardProps): ContentlayerCardProps {
@@ -289,7 +270,7 @@ function applyCoverOverrides(card: ContentlayerCardProps): ContentlayerCardProps
 }
 
 // -----------------------------
-// Page Component
+// Page Component - EXQUISITE DESIGN FOCUS
 // -----------------------------
 
 const ContentIndexPage: NextPage<ContentPageProps> = ({ cards }) => {
@@ -315,81 +296,81 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards }) => {
     return result;
   }, [cards, filter, searchQuery]);
 
-  const kinds: Array<{ key: DocKind | "all"; config: ContentTypeConfig }> = [
-    { key: "all", config: TYPE_CONFIG.all },
-    { key: "post", config: TYPE_CONFIG.post },
-    { key: "canon", config: TYPE_CONFIG.canon },
-    { key: "resource", config: TYPE_CONFIG.resource },
-    { key: "download", config: TYPE_CONFIG.download },
-    { key: "print", config: TYPE_CONFIG.print },
-    { key: "book", config: TYPE_CONFIG.book },
-    { key: "event", config: TYPE_CONFIG.event },
-    { key: "short", config: TYPE_CONFIG.short },
-    { key: "strategy", config: TYPE_CONFIG.strategy },
-  ];
+  const kinds: DocKind[] = ["post", "canon", "resource", "download", "print", "book", "event", "short", "strategy"];
+  
+  // Count items per type
+  const typeCounts = React.useMemo(() => {
+    const counts: Record<DocKind | "all", number> = { all: cards.length };
+    kinds.forEach(kind => {
+      counts[kind] = cards.filter(c => String(c.type || "").toLowerCase() === kind).length;
+    });
+    return counts;
+  }, [cards]);
 
-  const currentConfig = TYPE_CONFIG[filter];
+  const currentType = filter === "all" ? undefined : TYPE_CONFIG[filter];
 
   return (
     <Layout title="The Archive">
       <main className="min-h-screen bg-black">
-        {/* Premium Hero Section */}
-        <div className="relative overflow-hidden border-b border-white/[0.08]">
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900/20 to-black" />
-          <div className={`absolute inset-0 ${currentConfig.texture} opacity-5`} />
-          {currentConfig.accentElement}
+        {/* Exquisite Hero Section */}
+        <div className="relative overflow-hidden">
+          {/* Background Architecture */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900/10 to-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.03)_0%,transparent_70%)]" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          
+          {currentType && currentType.indicatorElement}
           
           <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              {/* Premium Collection Indicator */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.03] px-4 py-2 backdrop-blur-sm">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-white/10 to-transparent">
-                  <Lock className="h-3 w-3 text-white/70" />
+            <div className="max-w-4xl">
+              {/* Exquisite Collection Indicator */}
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.02] px-4 py-2 backdrop-blur-sm">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-white/5 to-transparent">
+                  <Archive className="h-3 w-3 text-white/70" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-gold">
+                  <span className="text-xs font-medium uppercase tracking-[0.3em] text-gold/80">
                     Curated Collection
                   </span>
                   <span className="h-1 w-1 rounded-full bg-white/20" />
                   <span className="text-xs text-gray-400">
-                    {cards.length} exclusive pieces
+                    {cards.length} pieces
                   </span>
                 </div>
               </div>
 
-              {/* Premium Title with Type Indicator */}
+              {/* Title Architecture */}
               <div className="mb-8">
                 <div className="mb-4 flex items-center gap-3">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${currentConfig.primaryColor.replace('text-', 'bg-')}/10 backdrop-blur-sm`}>
-                    {currentConfig.icon}
-                  </div>
+                  {currentType && (
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${currentType.gradientFrom} ${currentType.gradientTo} backdrop-blur-sm`}>
+                      {currentType.icon}
+                    </div>
+                  )}
                   <div>
-                    <h1 className={`font-serif text-5xl font-light tracking-tight ${currentConfig.primaryColor} sm:text-6xl`}>
-                      {currentConfig.label}
+                    <h1 className={`font-serif text-5xl font-light tracking-tight ${currentType?.primaryColor || 'text-cream'} sm:text-6xl`}>
+                      {currentType?.label || 'The Archive'}
                     </h1>
-                    <div className="mt-2 h-px w-24 bg-gradient-to-r from-current to-transparent opacity-50" />
+                    <div className="mt-3 h-px w-32 bg-gradient-to-r from-current to-transparent opacity-40" />
                   </div>
                 </div>
-                <p className="max-w-2xl text-lg text-gray-300 leading-relaxed">
-                  {currentConfig.description}
-                </p>
               </div>
 
-              {/* Premium Search */}
+              {/* Exquisite Search */}
               <div className="relative max-w-2xl">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2">
-                  <Search className="h-5 w-5 text-gray-400" />
+                  <Search className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search titles, topics, tags..."
-                  className="w-full rounded-2xl border border-white/[0.12] bg-white/[0.03] py-4 pl-12 pr-4 text-sm text-cream placeholder:text-gray-400 outline-none backdrop-blur-sm transition-all focus:border-gold/50 focus:bg-white/[0.05] focus:shadow-[0_0_40px_rgba(212,175,55,0.15)]"
+                  placeholder="Search the collection..."
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] py-3 pl-12 pr-4 text-sm text-cream placeholder:text-gray-400 outline-none backdrop-blur-sm transition-all focus:border-white/20 focus:bg-white/[0.03]"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-5 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-gray-400 hover:bg-white/5 hover:text-gray-200"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-200"
                   >
                     ✕
                   </button>
@@ -401,39 +382,61 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards }) => {
 
         {/* Main Content Area */}
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          {/* Premium Filter Bar */}
-          <div className="mb-10">
+          {/* Exquisite Filter Bar */}
+          <div className="mb-12">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <div className="flex flex-wrap gap-2">
-                  {kinds.map(({ key, config }) => {
-                    const active = filter === key;
-                    const count = key === "all" 
-                      ? cards.length 
-                      : cards.filter(c => String(c.type || "").toLowerCase() === key).length;
+              <div className="flex-1 overflow-x-auto pb-2">
+                <div className="flex gap-2 min-w-max">
+                  {/* All Filter */}
+                  <button
+                    onClick={() => setFilter("all")}
+                    className={`group relative flex items-center gap-3 rounded-xl border px-4 py-2.5 transition-all duration-300 ${
+                      filter === "all" 
+                        ? "border-white/30 bg-white/10" 
+                        : "border-white/[0.08] hover:border-white/20 hover:bg-white/[0.03]"
+                    }`}
+                    type="button"
+                  >
+                    {filter === "all" && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-30 rounded-xl" />
+                    )}
+                    <div className="relative z-10 flex items-center gap-3">
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                        filter === "all" ? "bg-white/20" : "bg-white/[0.05]"
+                      }`}>
+                        <Globe className="h-4 w-4 text-gray-300" />
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-medium text-gray-200">All</div>
+                        <div className="text-xs text-gray-400">{typeCounts.all} items</div>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Type Filters */}
+                  {kinds.map((kind) => {
+                    const config = TYPE_CONFIG[kind];
+                    const active = filter === kind;
                     
                     return (
                       <button
-                        key={key}
-                        onClick={() => setFilter(key)}
-                        className={`group relative overflow-hidden rounded-xl border px-4 py-2.5 transition-all duration-300 ${
-                          active 
-                            ? `border-white/[0.2] ${config.primaryColor.replace('text-', 'bg-')}/10` 
-                            : 'border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.03]'
+                        key={kind}
+                        onClick={() => setFilter(kind)}
+                        className={`group relative flex items-center gap-3 rounded-xl border px-4 py-2.5 transition-all duration-300 ${active ? config.borderColor : 'border-white/[0.08] hover:border-white/20'} ${
+                          active ? 'bg-white/5' : 'hover:bg-white/[0.03]'
                         }`}
                         type="button"
                       >
-                        {/* Active glow */}
                         {active && (
-                          <div className={`absolute inset-0 ${config.gradient} opacity-30`} />
+                          <div className={`absolute inset-0 bg-gradient-to-r ${config.gradientFrom} ${config.gradientTo} opacity-20 rounded-xl`} />
                         )}
                         
                         <div className="relative z-10 flex items-center gap-3">
                           <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                             active 
-                              ? `${config.primaryColor.replace('text-', 'bg-')}/20 backdrop-blur-sm` 
+                              ? `${config.primaryColor.replace('text-', 'bg-')}/20` 
                               : 'bg-white/[0.05]'
-                          }`}>
+                          } backdrop-blur-sm`}>
                             {React.cloneElement(config.icon as React.ReactElement, {
                               className: `h-4 w-4 ${active ? config.primaryColor : 'text-gray-400 group-hover:text-gray-300'}`
                             })}
@@ -443,7 +446,7 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards }) => {
                               {config.label}
                             </div>
                             <div className="text-xs text-gray-400">
-                              {count} items
+                              {typeCounts[kind]} items
                             </div>
                           </div>
                         </div>
@@ -453,12 +456,13 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards }) => {
                 </div>
               </div>
               
-              {/* Stats Indicator */}
-              <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 backdrop-blur-sm">
-                <div className="flex items-center gap-4">
+              {/* Visual Counter */}
+              <div className="flex items-center gap-4">
+                <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+                <div className="flex items-center gap-3">
                   <div className="text-sm text-gray-400">Viewing</div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-medium text-cream">{filtered.length}</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-light text-cream">{filtered.length}</span>
                     <span className="text-gray-500">/</span>
                     <span className="text-gray-400">{cards.length}</span>
                   </div>
@@ -467,136 +471,145 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards }) => {
             </div>
           </div>
 
-          {/* Premium Content Grid */}
+          {/* Exquisite Content Grid - DESIGN SPEAKS LOUDEST */}
           <AnimatePresence mode="wait">
             <motion.div
               key={filter}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
             >
               {filtered.map((card) => {
                 const config = TYPE_CONFIG[card.type as DocKind];
-                const status = config?.status || "premier";
-                const statusConfig = STATUS_BADGES[status];
-
+                const hasDownload = card.downloadUrl;
+                
                 return (
                   <motion.div
                     key={`${card.type}:${card.slug}`}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.2 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="group"
                   >
                     <Link
                       href={card.href}
-                      className="group relative block overflow-hidden rounded-3xl border border-white/[0.08] transition-all duration-500 hover:scale-[1.02] hover:border-current/[0.3] hover:shadow-2xl"
-                      style={{ 
-                        background: `linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)`,
-                        borderColor: config?.primaryColor.replace('text-', 'rgba(') + ', 0.1)'
-                      }}
+                      className={`relative block overflow-hidden rounded-3xl ${config.borderColor} transition-all duration-500 hover:scale-[1.02]`}
                     >
-                      {/* Type-specific Background Glow */}
-                      {config?.accentElement}
+                      {/* Card Architecture - Multiple Visual Layers */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900/20 to-black" />
+                      {config.texture}
+                      <div className={`absolute inset-0 ${config.gradientFrom} ${config.gradientTo} opacity-10`} />
+                      {config.indicatorElement}
+                      <div className={config.frameStyle} />
                       
-                      {/* Status Badge */}
-                      <div className="absolute left-4 top-4 z-20">
-                        <div className={`flex items-center gap-2 rounded-full ${statusConfig.style} border px-3 py-1.5 backdrop-blur-sm`}>
-                          {statusConfig.icon}
-                          <span className="text-xs font-semibold tracking-wider">
-                            {statusConfig.label}
+                      {/* Type Indicator Corner */}
+                      <div className={`absolute top-0 left-0 z-20 ${config.primaryColor.replace('text-', 'bg-')}/10 backdrop-blur-sm rounded-br-3xl rounded-tl-3xl px-3 py-2`}>
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full bg-current" />
+                          <span className={`text-xs font-medium ${config.casing === 'uppercase' ? 'tracking-[0.2em]' : ''}`}>
+                            {config.label}
                           </span>
                         </div>
                       </div>
-
-                      {/* Type Badge */}
-                      <div className="absolute right-4 top-4 z-20">
-                        <div className={`flex items-center gap-2 rounded-full ${BADGE_VARIANTS[config?.badgeVariant || 'onyx']} border px-3 py-1.5 backdrop-blur-sm`}>
-                          <div className="h-2 w-2 rounded-full bg-current opacity-70" />
-                          <span className={`text-xs font-semibold ${config?.casing === 'uppercase' ? 'uppercase tracking-[0.2em]' : ''}`}>
-                            {config?.label}
-                          </span>
+                      
+                      {/* Download Indicator (Visual Only) */}
+                      {hasDownload && (
+                        <div className="absolute top-0 right-0 z-20 bg-gradient-to-bl from-emerald-500/10 to-emerald-600/5 backdrop-blur-sm rounded-bl-3xl rounded-tr-3xl px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                            <Download className="h-3 w-3 text-emerald-400" />
+                          </div>
                         </div>
+                      )}
+
+                      {/* Image Container - EXQUISITE DETAILS */}
+                      <div className="relative aspect-[16/11] w-full overflow-hidden">
+                        {/* Image Frame */}
+                        <div className="absolute inset-4 z-10 rounded-2xl border border-white/[0.1] bg-black/20" />
+                        <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                        
+                        {/* Image with Layers */}
+                        <div className="absolute inset-0 z-0">
+                          <Image
+                            src={card.image || "/assets/images/writing-desk.webp"}
+                            alt={card.title}
+                            fill
+                            className="object-cover transition-all duration-700 group-hover:scale-110"
+                            sizes="(min-width: 1280px) 384px, (min-width: 1024px) 320px, (min-width: 768px) 50vw, 100vw"
+                          />
+                        </div>
+                        
+                        {/* Animated Shimmer */}
+                        <div className="absolute inset-0 z-30 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" style={{
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 2s infinite'
+                        }} />
+                        
+                        {/* Corner Accents */}
+                        <div className="absolute top-0 left-0 h-8 w-8 border-t border-l border-white/10 rounded-tl-3xl" />
+                        <div className="absolute top-0 right-0 h-8 w-8 border-t border-r border-white/10 rounded-tr-3xl" />
                       </div>
 
-                      {/* Image Container */}
-                      <div className="relative aspect-[16/10] w-full overflow-hidden">
-                        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <Image
-                          src={card.image || "/assets/images/writing-desk.webp"}
-                          alt={card.title}
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
-                          sizes="(min-width: 1280px) 384px, (min-width: 1024px) 320px, (min-width: 768px) 50vw, 100vw"
-                        />
-                        {/* Shimmer Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                      </div>
-
-                      {/* Content */}
+                      {/* Content Area - ARCHITECTURAL DETAILING */}
                       <div className="relative z-10 p-6">
                         {/* Title with Type Color */}
-                        <h2 className={`mb-3 font-serif text-xl font-light leading-tight ${config?.primaryColor} group-hover:opacity-90 transition-opacity`}>
-                          {card.title}
-                        </h2>
+                        <div className="mb-4">
+                          <h2 className={`font-serif text-xl font-light leading-tight ${config.primaryColor} mb-2`}>
+                            {card.title}
+                          </h2>
+                          <div className={`h-0.5 w-12 ${config.primaryColor.replace('text-', 'bg-')}/30 rounded-full`} />
+                        </div>
 
-                        {/* Excerpt */}
+                        {/* Excerpt with Careful Typography */}
                         {card.excerpt && (
-                          <p className="mb-4 line-clamp-2 text-sm text-gray-300 leading-relaxed">
-                            {card.excerpt}
-                          </p>
+                          <div className="mb-5">
+                            <p className="text-sm text-gray-300 leading-relaxed line-clamp-2">
+                              {card.excerpt}
+                            </p>
+                          </div>
                         )}
 
-                        {/* Premium Tags */}
+                        {/* Tags - Visual Indicators Only */}
                         {(card.tags && card.tags.length > 0) && (
                           <div className="mb-5 flex flex-wrap gap-2">
-                            {card.tags.slice(0, 3).map((tag) => (
+                            {card.tags.slice(0, 3).map((tag, index) => (
                               <span
                                 key={tag}
-                                className="rounded-full border border-white/[0.1] bg-white/[0.05] px-2.5 py-1 text-xs text-gray-300 backdrop-blur-sm"
+                                className={`rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-gray-300 backdrop-blur-sm transition-colors ${
+                                  index === 0 ? config.primaryColor.replace('text-', 'text-') + '/80' : ''
+                                }`}
                               >
                                 {tag}
                               </span>
                             ))}
-                            {card.tags.length > 3 && (
-                              <span className="rounded-full border border-white/[0.1] bg-white/[0.05] px-2.5 py-1 text-xs text-gray-400 backdrop-blur-sm">
-                                +{card.tags.length - 3}
+                          </div>
+                        )}
+
+                        {/* Footer - Pure Visual Communication */}
+                        <div className="flex items-center justify-between border-t border-white/[0.08] pt-4">
+                          <div className="flex items-center gap-2">
+                            <div className={`h-1.5 w-1.5 rounded-full ${config.primaryColor.replace('text-', 'bg-')}`} />
+                            {card.date && (
+                              <span className="text-xs text-gray-400">
+                                {new Date(card.date).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
                               </span>
                             )}
                           </div>
-                        )}
-
-                        {/* Footer with Date and CTA */}
-                        <div className="flex items-center justify-between border-t border-white/[0.1] pt-4">
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-3 w-3 text-gray-500" />
-                            <span className="text-xs text-gray-400">
-                              {card.date ? new Date(card.date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
-                              }) : 'Undated'}
-                            </span>
-                          </div>
-                          <div className={`flex items-center gap-2 text-sm font-medium ${config?.primaryColor}`}>
-                            <span className="text-xs">Explore</span>
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-current/10">
-                              <ChevronRight className="h-3 w-3" />
-                            </div>
+                          
+                          {/* Visual CTA - No Words */}
+                          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${config.primaryColor.replace('text-', 'bg-')}/10 transition-transform duration-300 group-hover:scale-110 group-hover:${config.primaryColor.replace('text-', 'bg-')}/20`}>
+                            <ChevronRight className={`h-3 w-3 ${config.primaryColor}`} />
                           </div>
                         </div>
-
-                        {/* Download Indicator */}
-                        {card.downloadUrl && (
-                          <div className="mt-4 rounded-lg border border-white/[0.1] bg-white/[0.02] p-3">
-                            <div className="flex items-center gap-2">
-                              <Gift className="h-4 w-4 text-emerald-400" />
-                              <span className="text-xs text-emerald-300">Includes Download</span>
-                            </div>
-                          </div>
-                        )}
                       </div>
+                      
+                      {/* Bottom Border Accent */}
+                      <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${config.primaryColor.replace('text-', 'bg-')}/20 rounded-b-3xl transition-all duration-500 group-hover:${config.primaryColor.replace('text-', 'bg-')}/40`} />
                     </Link>
                   </motion.div>
                 );
@@ -604,68 +617,94 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ cards }) => {
             </motion.div>
           </AnimatePresence>
 
-          {/* Empty State */}
+          {/* Exquisite Empty State */}
           {filtered.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.02] to-transparent p-16 text-center backdrop-blur-sm"
+              className="rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.02] to-transparent p-20 text-center"
             >
               <div className="mx-auto max-w-md">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent">
-                  <Search className="h-10 w-10 text-gray-400" />
+                {/* Visual Empty State - No Explanatory Text */}
+                <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent">
+                  <div className="relative">
+                    <Search className="h-12 w-12 text-white/10" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="h-6 w-6 rounded-full border-2 border-white/20" />
+                    </div>
+                  </div>
                 </div>
-                <h3 className="mb-3 font-serif text-2xl font-light text-cream">
-                  No matches found
-                </h3>
-                <p className="mb-8 text-gray-400">
-                  Your search didn't match any items in our curated collection.
-                </p>
+                <div className="space-y-4">
+                  <div className="h-4 w-48 mx-auto bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-full" />
+                  <div className="h-3 w-32 mx-auto bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-full" />
+                </div>
                 {(searchQuery || filter !== "all") && (
                   <button
                     onClick={() => {
                       setSearchQuery("");
                       setFilter("all");
                     }}
-                    className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-6 py-3 text-sm text-gray-300 hover:bg-white/[0.05]"
+                    className="mt-8 rounded-xl border border-white/[0.08] bg-white/[0.02] px-6 py-3 text-sm text-gray-300 transition-colors hover:bg-white/[0.05]"
                   >
-                    Reset all filters
+                    Clear
                   </button>
                 )}
               </div>
             </motion.div>
           )}
         </div>
+        
+        {/* CSS for shimmer animation */}
+        <style jsx global>{`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+        `}</style>
       </main>
     </Layout>
   );
 };
 
 // -----------------------------
-// Data Fetching
+// Data Fetching - INCLUDING PRINTS
 // -----------------------------
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   const buckets = getPublishedDocumentsByType();
 
+  // CRITICAL: Include 'print' in the ordered kinds
   const orderedKinds: DocKind[] = [
     "post",
     "canon",
     "resource",
     "download",
-    "print",
+    "print", // PRINT IS INCLUDED
     "book",
     "event",
     "short",
     "strategy",
   ];
 
+  // DEBUG: Log available documents per type
+  console.log('Available document types:', {
+    post: buckets.post?.length || 0,
+    canon: buckets.canon?.length || 0,
+    resource: buckets.resource?.length || 0,
+    download: buckets.download?.length || 0,
+    print: buckets.print?.length || 0, // CHECK PRINT COUNT
+    book: buckets.book?.length || 0,
+    event: buckets.event?.length || 0,
+    short: buckets.short?.length || 0,
+    strategy: buckets.strategy?.length || 0,
+  });
+
   const cards = orderedKinds
-    .flatMap((k) => buckets[k])
+    .flatMap((k) => buckets[k] || []) // Handle missing types gracefully
     .map((doc) => getCardPropsForDocument(doc))
     .map((c) => ({
       ...c,
-      type: String(c.type || "").toLowerCase() as any,
+      type: String(c.type || "").toLowerCase() as DocKind,
     }))
     .map(applyCoverOverrides);
 
