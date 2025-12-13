@@ -1,554 +1,527 @@
-// pages/content/index.tsx
+// pages/index.tsx – THE PALACE HOMEPAGE
 import * as React from "react";
-import type { GetStaticProps, NextPage } from "next";
-import Link from "next/link";
+import type { NextPage } from "next";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Search,
-  ChevronRight,
-  Download,
-  Calendar,
-  FileText,
-  Crown,
-  BookMarked,
-  Palette,
-  Target,
-  Zap,
-  Layers,
-  X,
-  Sparkles,
-} from "lucide-react";
+import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import StatsBar from "@/components/homepage/StatsBar";
+import VenturesSection from "@/components/homepage/VenturesSection";
+import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import { Calendar, Compass, Users, Sparkles, BookOpen, Scroll } from "lucide-react";
 import {
-  getPublishedDocumentsByType,
-  getCardPropsForDocument,
-  type ContentlayerCardProps,
-  type DocKind,
+  getPublishedShorts,
+  getRecentShorts,
+  getShortUrl,
+  type Short,
 } from "@/lib/contentlayer-helper";
 
-type ContentPageProps = {
-  docsByType: Record<DocKind, ContentlayerCardProps[]>;
-};
+// -----------------------------------------------------------------------------
+// BOOKS IN DEVELOPMENT
+// -----------------------------------------------------------------------------
 
-const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
-
-// -----------------------------
-// Type Configuration
-// -----------------------------
-
-const TYPE_CONFIG: Record<
-  DocKind,
+const BOOKS_IN_DEV = [
   {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    accent: string;
-    pillBg: string;
-    pillBorder: string;
+    slug: "fathering-without-fear",
+    title: "Fathering Without Fear",
+    tag: "Fatherhood · Household",
+    blurb:
+      "Standards, rituals, and household architecture for men building families that outlast culture wars.",
+    cover: "/assets/images/books/fathering-without-fear.jpg",
+  },
+  {
+    slug: "the-fiction-adaptation",
+    title: "The Fiction Adaptation",
+    tag: "Fiction · Drama",
+    blurb:
+      "A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact.",
+    cover: "/assets/images/books/the-fiction-adaptation.jpg",
+  },
+];
 
-    // cover strategy
-    coverAspect: "wide" | "portrait";
-    coverFit: "cover" | "contain";
+// -----------------------------------------------------------------------------
+// SHORTS – Get at build time with fallback
+// -----------------------------------------------------------------------------
+
+const getFeaturedShortsSafely = (): Short[] => {
+  try {
+    const shorts = getRecentShorts(3);
+    if (shorts && shorts.length > 0) return shorts;
+
+    const allShorts = getPublishedShorts();
+    if (allShorts && allShorts.length > 0) return allShorts.slice(0, 3);
+
+    return [];
+  } catch (error) {
+    console.error("Error loading shorts for homepage:", error);
+    return [];
   }
-> = {
-  post: {
-    label: "Essays",
-    icon: FileText,
-    accent: "text-amber-700",
-    pillBg: "bg-amber-50/80",
-    pillBorder: "border-amber-200/70",
-    coverAspect: "wide",
-    coverFit: "cover",
-  },
-  canon: {
-    label: "Canon",
-    icon: Crown,
-    accent: "text-yellow-700",
-    pillBg: "bg-yellow-50/80",
-    pillBorder: "border-yellow-200/70",
-    coverAspect: "wide",
-    coverFit: "cover",
-  },
-  resource: {
-    label: "Resources",
-    icon: Layers,
-    accent: "text-emerald-700",
-    pillBg: "bg-emerald-50/80",
-    pillBorder: "border-emerald-200/70",
-    coverAspect: "wide",
-    coverFit: "cover",
-  },
-  download: {
-    label: "Downloads",
-    icon: Download,
-    accent: "text-blue-700",
-    pillBg: "bg-blue-50/80",
-    pillBorder: "border-blue-200/70",
-    coverAspect: "wide",
-    coverFit: "cover",
-  },
-  print: {
-    label: "Prints",
-    icon: Palette,
-    accent: "text-rose-700",
-    pillBg: "bg-rose-50/80",
-    pillBorder: "border-rose-200/70",
-    coverAspect: "portrait",
-    coverFit: "contain",
-  },
-  book: {
-    label: "Books",
-    icon: BookMarked,
-    accent: "text-violet-700",
-    pillBg: "bg-violet-50/80",
-    pillBorder: "border-violet-200/70",
-    coverAspect: "portrait",
-    coverFit: "contain",
-  },
-  event: {
-    label: "Events",
-    icon: Calendar,
-    accent: "text-cyan-700",
-    pillBg: "bg-cyan-50/80",
-    pillBorder: "border-cyan-200/70",
-    coverAspect: "wide",
-    coverFit: "cover",
-  },
-  short: {
-    label: "Shorts",
-    icon: Zap,
-    accent: "text-orange-700",
-    pillBg: "bg-orange-50/80",
-    pillBorder: "border-orange-200/70",
-    coverAspect: "wide",
-    coverFit: "cover",
-  },
-  strategy: {
-    label: "Strategy",
-    icon: Target,
-    accent: "text-teal-700",
-    pillBg: "bg-teal-50/80",
-    pillBorder: "border-teal-200/70",
-    coverAspect: "wide",
-    coverFit: "cover",
-  },
 };
 
-// -----------------------------
-// helpers
-// -----------------------------
+const featuredShorts: Short[] = getFeaturedShortsSafely();
 
-function fmtDate(d?: string | null) {
-  if (!d) return null;
-  const dt = new Date(d);
-  if (Number.isNaN(dt.getTime())) return null;
-  return dt.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
+// -----------------------------------------------------------------------------
+// REFINED DIVIDER – Palace ornament
+// -----------------------------------------------------------------------------
 
-function scoreDoc(doc: ContentlayerCardProps) {
-  // Featured first; then newest first where date exists
-  const featuredBoost = doc.featured ? 10_000_000_000 : 0;
-  const dateScore = doc.date ? Date.parse(doc.date) || 0 : 0;
-  return featuredBoost + dateScore;
-}
+const SectionDivider: React.FC = () => (
+  <div className="relative h-20 overflow-hidden">
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-300/30 to-transparent" />
+      <div className="mx-8 flex items-center gap-3">
+        <div className="h-2 w-2 rotate-45 border border-amber-400/50 bg-amber-500/20" />
+        <div className="h-1.5 w-1.5 rounded-full bg-amber-400/60" />
+        <div className="h-2 w-2 rotate-45 border border-amber-400/50 bg-amber-500/20" />
+      </div>
+      <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-300/30 to-transparent" />
+    </div>
+  </div>
+);
 
-// -----------------------------
-// Page Component
-// -----------------------------
+// -----------------------------------------------------------------------------
+// SHORTS STRIP
+// -----------------------------------------------------------------------------
 
-const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
-  const [filter, setFilter] = React.useState<DocKind | "all">("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [featuredFirst, setFeaturedFirst] = React.useState(true);
-
-  const allKinds: DocKind[] = React.useMemo(
-    () => [
-      "post",
-      "canon",
-      "resource",
-      "download",
-      "print",
-      "book",
-      "event",
-      "short",
-      "strategy",
-    ],
-    [],
-  );
-
-  const allDocs = React.useMemo(() => {
-    const merged = allKinds.flatMap((k) => docsByType[k] ?? []);
-    // stable sort
-    return merged.slice().sort((a, b) => {
-      if (!featuredFirst) return 0;
-      return scoreDoc(b) - scoreDoc(a);
-    });
-  }, [docsByType, allKinds, featuredFirst]);
-
-  const typeCounts = React.useMemo(() => {
-    const counts: Record<string, number> = { all: allDocs.length };
-    allKinds.forEach((k) => {
-      counts[k] = (docsByType[k] ?? []).length;
-    });
-    return counts;
-  }, [docsByType, allDocs, allKinds]);
-
-  const filteredDocs = React.useMemo(() => {
-    const source = filter === "all" ? allDocs : docsByType[filter] ?? [];
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return source;
-
-    return source.filter((doc) => {
-      const hay = [
-        doc.title,
-        doc.subtitle ?? "",
-        doc.excerpt ?? "",
-        doc.description ?? "",
-        (doc.tags ?? []).join(" "),
-        doc.type,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return hay.includes(q);
-    });
-  }, [allDocs, docsByType, filter, searchQuery]);
+const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
+  if (!shorts || shorts.length === 0) return null;
 
   return (
-    <Layout title="Archive">
-      <main className="min-h-screen bg-white">
-        {/* HERO */}
-        <section className="relative border-b border-neutral-200/70 bg-white">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.06)_0%,transparent_55%)]" />
-          <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
-            <div className="max-w-3xl">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-neutral-200/70 bg-white/80 px-4 py-2 shadow-sm backdrop-blur">
-                <Sparkles className="h-4 w-4 text-neutral-800" />
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-700">
-                  The Archive
-                </span>
-                <span className="text-xs text-neutral-400">
-                  ({typeCounts.all})
-                </span>
-              </div>
+    <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+              Shorts · Field signals
+            </p>
+            <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
+              Quick hits for men who don&apos;t scroll all day
+            </h2>
+            <p className="max-w-2xl text-base leading-relaxed text-gray-300">
+              Concise field notes on work, fatherhood, and building under
+              pressure — designed to be read between meetings, not instead of
+              them.
+            </p>
+          </div>
+          <Link
+            href="/shorts"
+            className="inline-flex shrink-0 items-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
+          >
+            View all shorts
+          </Link>
+        </div>
 
-              <h1 className="font-serif text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
-                Everything. Organised.
-              </h1>
+        <div className="grid gap-6 md:grid-cols-3">
+          {shorts.map((short) => {
+            const url = getShortUrl(short);
+            const readTime = short.readTime || "Quick read";
+            const excerpt = short.excerpt || short.description || "";
 
-              <p className="mt-4 text-base leading-relaxed text-neutral-600 sm:text-lg">
-                Essays, Canon volumes, resources, downloads, prints, books,
-                events, shorts, strategy — searchable and cleanly indexed.
-              </p>
-
-              {/* SEARCH */}
-              <div className="mt-8">
-                <div className="relative">
-                  <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
-                    <Search className="h-5 w-5 text-neutral-400" />
-                  </div>
-
-                  <input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search titles, tags, descriptions…"
-                    className="w-full rounded-2xl border border-neutral-300/80 bg-white py-4 pl-12 pr-12 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
-                  />
-
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-800"
-                      aria-label="Clear search"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
+            return (
+              <Link
+                key={short._id}
+                href={url}
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/40 hover:bg-slate-800/80 hover:shadow-2xl"
+              >
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
+                    <Sparkles className="h-3 w-3" />
+                    Short
+                  </span>
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                    {readTime}
+                  </span>
                 </div>
 
-                {/* Toggles */}
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => setFeaturedFirst((v) => !v)}
-                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition ${
-                      featuredFirst
-                        ? "border-neutral-300 bg-neutral-900 text-white shadow-sm"
-                        : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300"
-                    }`}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Featured first
-                  </button>
+                <h3 className="mb-3 line-clamp-2 font-serif text-xl font-semibold text-white">
+                  {short.title}
+                </h3>
 
-                  <div className="text-xs text-neutral-500">
-                    Showing{" "}
-                    <span className="font-semibold text-neutral-900">
-                      {filteredDocs.length}
-                    </span>{" "}
-                    of{" "}
-                    <span className="font-semibold text-neutral-900">
-                      {typeCounts.all}
+                {excerpt && (
+                  <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-300">
+                    {excerpt}
+                  </p>
+                )}
+
+                <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
+                    Field note
+                  </span>
+                  <span className="inline-flex items-center text-sm font-semibold text-amber-300 transition-all group-hover:gap-2">
+                    Read
+                    <span className="ml-1 transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// -----------------------------------------------------------------------------
+// BOOKS IN DEVELOPMENT
+// -----------------------------------------------------------------------------
+
+const BooksInDevelopment: React.FC = () => (
+  <section className="bg-white py-20 dark:bg-slate-950">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+            Books in development
+          </p>
+          <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+            Long-form work that underwrites everything else
+          </h2>
+          <p className="max-w-3xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
+            These projects sit behind the posts, shorts, and rooms — slow-cooked
+            work that outlives algorithms and platform cycles.
+          </p>
+        </div>
+        <Link
+          href="/books"
+          className="inline-flex shrink-0 items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
+        >
+          View all books
+        </Link>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        {BOOKS_IN_DEV.map((book) => (
+          <Link
+            key={book.slug}
+            href={`/books/${book.slug}`}
+            className="group block"
+          >
+            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+              <div className="grid gap-0 md:grid-cols-[auto,1fr]">
+                <div className="relative aspect-[3/4] w-full max-w-[10rem] flex-shrink-0">
+                  <Image
+                    src={book.cover}
+                    alt={book.title}
+                    fill
+                    sizes="(max-width: 768px) 35vw, 20vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                </div>
+                <div className="flex flex-col justify-between p-7">
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+                      In development
+                    </p>
+                    <h3 className="mb-2 font-serif text-2xl font-semibold text-slate-900 dark:text-white">
+                      {book.title}
+                    </h3>
+                    <p className="mb-4 text-xs font-medium uppercase tracking-[0.15em] text-slate-600 dark:text-gray-400">
+                      {book.tag}
+                    </p>
+                    <p className="text-base leading-relaxed text-slate-700 dark:text-gray-300">
+                      {book.blurb}
+                    </p>
+                  </div>
+                  <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-5 dark:border-slate-800">
+                    <span className="text-xs font-medium uppercase tracking-[0.15em] text-slate-500 dark:text-gray-500">
+                      Canon bookshelf
+                    </span>
+                    <span className="text-base font-semibold text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400">
+                      View project →
                     </span>
                   </div>
                 </div>
               </div>
+            </article>
+          </Link>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// -----------------------------------------------------------------------------
+// STRATEGIC SESSIONS
+// -----------------------------------------------------------------------------
+
+const StrategicSessions: React.FC = () => (
+  <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            Strategic sessions
+          </p>
+          <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
+            Where we do the work in the room
+          </h2>
+          <p className="max-w-3xl text-base leading-relaxed text-gray-300">
+            Not inspirational talks. Working sessions built for people carrying
+            real responsibility — for a boardroom, a founding team, or a
+            household.
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+          <Link
+            href="/consulting"
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-lg shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-xl"
+          >
+            Book a conversation
+          </Link>
+          <Link
+            href="/events"
+            className="inline-flex items-center justify-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
+          >
+            Upcoming rooms
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-7 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
+            <Compass className="h-7 w-7" />
+          </div>
+          <h3 className="mb-3 font-serif text-xl font-semibold text-white">
+            Strategy rooms for founders & boards
+          </h3>
+          <p className="mb-5 text-base leading-relaxed text-gray-300">
+            Clarify mandate, markets, and operating rhythm so your decisions
+            stop fighting your design.
+          </p>
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
+            Alomarada · InfraNova Africa · Governance diagnostics
+          </p>
+        </article>
+
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-7 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+            <Users className="h-7 w-7" />
+          </div>
+          <h3 className="mb-3 font-serif text-xl font-semibold text-white">
+            Fatherhood & household architecture
+          </h3>
+          <p className="mb-5 text-base leading-relaxed text-gray-300">
+            Standards, rituals, and structures that let men show up for their
+            sons without outsourcing conviction to the culture.
+          </p>
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
+            Fathering Without Fear · Canon household tools
+          </p>
+        </article>
+
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-7 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-blue-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400">
+            <Calendar className="h-7 w-7" />
+          </div>
+          <h3 className="mb-3 font-serif text-xl font-semibold text-white">
+            Leadership salons & inner-circle work
+          </h3>
+          <p className="mb-5 text-base leading-relaxed text-gray-300">
+            Small, closed rooms where we test ideas, frameworks, and Canon tools
+            against real lives and real P&Ls.
+          </p>
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
+            Chatham rooms · Inner Circle · Builders&apos; tables
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+);
+
+// -----------------------------------------------------------------------------
+// PAGE COMPONENT – THE PALACE
+// -----------------------------------------------------------------------------
+
+const HomePage: NextPage = () => {
+  const siteTitle = "Abraham of London";
+  const siteTagline =
+    "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
+
+  return (
+    <Layout
+      title={siteTitle}
+      description={siteTagline}
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: siteTitle,
+        description: siteTagline,
+        url:
+          process.env.NEXT_PUBLIC_SITE_URL ||
+          "https://www.abrahamoflondon.org",
+        publisher: {
+          "@type": "Person",
+          name: "Abraham of London",
+        },
+      }}
+    >
+      {/* GRAND ENTRANCE – Hero with commanding presence */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        {/* Atmospheric lighting */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="pointer-events-none absolute -top-40 right-0 h-[600px] w-[600px] rounded-full bg-amber-500/8 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-40 left-0 h-[600px] w-[600px] rounded-full bg-emerald-500/6 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+            {/* Left – Philosophy & Command */}
+            <div className="max-w-2xl">
+              <div className="mb-10">
+                {/* Royal seal */}
+                <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-amber-400/40 bg-amber-500/10 px-5 py-2.5 shadow-lg shadow-amber-900/20 backdrop-blur-sm">
+                  <span className="text-2xl text-amber-400">𓆓</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-200">
+                    Canon · Ventures · Field tools
+                  </span>
+                </div>
+
+                <h1 className="mb-6 font-serif text-5xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
+                  Abraham of London
+                </h1>
+
+                <p className="mb-6 font-serif text-2xl font-light leading-snug text-amber-100 sm:text-3xl">
+                  Structural thinking for fathers, founders, and builders of
+                  legacy.
+                </p>
+
+                <p className="text-lg leading-relaxed text-gray-300">
+                  For men who carry responsibility for a family, a company, or a
+                  community — this is where faith, history, and strategy are
+                  turned into operating systems, not slogans.
+                </p>
+              </div>
+
+              {/* Primary CTAs */}
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/canon"
+                  className="group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-base font-semibold text-black shadow-xl shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-2xl"
+                >
+                  <BookOpen className="h-5 w-5" />
+                  <span>Enter the Canon</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+                <Link
+                  href="/consulting"
+                  className="group inline-flex items-center gap-2.5 rounded-xl border-2 border-amber-400/60 bg-amber-400/5 px-8 py-4 text-base font-semibold text-amber-100 backdrop-blur-sm transition-all hover:scale-105 hover:bg-amber-500/10"
+                >
+                  <Scroll className="h-5 w-5" />
+                  <span>Work with Abraham</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+              </div>
+
+              <p className="mt-8 text-xs uppercase tracking-[0.22em] text-gray-500">
+                Canon · Essays · Field letters · Tools · Inner circle
+              </p>
+            </div>
+
+            {/* Right – Hero Banner */}
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-sm">
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src="/assets/images/abraham-of-london-banner.webp"
+                    alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                </div>
+                <div className="border-t border-white/10 bg-gradient-to-r from-slate-900/95 via-slate-900/90 to-slate-900/95 px-6 py-5 backdrop-blur-md">
+                  <p className="text-base font-medium leading-relaxed text-gray-200">
+                    The Canon is the philosophical spine. The ventures are the
+                    working arms. Together they exist to build men, families,
+                    and institutions that outlast headlines.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* FILTERS + GRID */}
-        <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
-          {/* Filter pills */}
-          <div className="mb-8 flex flex-wrap gap-2.5">
-            <button
-              onClick={() => setFilter("all")}
-              className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
-                filter === "all"
-                  ? "bg-neutral-900 text-white shadow-sm"
-                  : "border border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300"
-              }`}
+      {/* STATS BAR – Social proof */}
+      <section className="border-y border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <StatsBar />
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* CANON SPOTLIGHT – The foundation */}
+      <section className="bg-white py-20 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+                Canon · Foundations
+              </p>
+              <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+                The philosophical spine
+              </h2>
+              <p className="max-w-3xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
+                The Canon is the long-term work: purpose, governance,
+                civilisation, and destiny — written from a father&apos;s
+                vantage point, not an academic desk.
+              </p>
+            </div>
+            <Link
+              href="/canon"
+              className="inline-flex shrink-0 items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
             >
-              All <span className="opacity-70">({typeCounts.all})</span>
-            </button>
-
-            {allKinds.map((kind) => {
-              const count = typeCounts[kind] || 0;
-              if (!count) return null;
-
-              const cfg = TYPE_CONFIG[kind];
-              const Icon = cfg.icon;
-              const active = filter === kind;
-
-              return (
-                <button
-                  key={kind}
-                  onClick={() => setFilter(kind)}
-                  className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition ${
-                    active
-                      ? `${cfg.pillBg} ${cfg.accent} ${cfg.pillBorder} shadow-sm`
-                      : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300"
-                  }`}
-                >
-                  <Icon className={`h-4 w-4 ${active ? cfg.accent : "text-neutral-500"}`} />
-                  {cfg.label}
-                  <span className="text-neutral-400">({count})</span>
-                </button>
-              );
-            })}
+              Browse Canon entries
+            </Link>
           </div>
 
-          {/* Grid */}
-          <AnimatePresence mode="wait">
-            {filteredDocs.length ? (
-              <motion.div
-                key={`${filter}-${featuredFirst}-${searchQuery}`}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -14 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              >
-                {filteredDocs.map((doc) => {
-                  const cfg = TYPE_CONFIG[doc.type];
-                  const Icon = cfg.icon;
+          <CanonPrimaryCard />
+        </div>
+      </section>
 
-                  const coverAspectClass =
-                    cfg.coverAspect === "portrait"
-                      ? "aspect-[3/4]"
-                      : "aspect-[16/10]";
+      <SectionDivider />
 
-                  const objectClass =
-                    cfg.coverFit === "contain" ? "object-contain" : "object-cover";
+      {/* STRATEGIC FUNNEL – The conversion path */}
+      <StrategicFunnelStrip />
 
-                  const date = fmtDate(doc.date);
-                  const img = doc.image || FALLBACK_IMAGE;
+      <SectionDivider />
 
-                  return (
-                    <motion.div
-                      key={`${doc.type}-${doc.slug}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="h-full"
-                    >
-                      <Link href={doc.href} className="group block h-full">
-                        <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/70 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-lg">
-                          {/* cover */}
-                          <div
-                            className={`relative ${coverAspectClass} w-full overflow-hidden bg-gradient-to-br from-neutral-50 to-neutral-100`}
-                          >
-                            <Image
-                              src={img}
-                              alt={doc.title}
-                              fill
-                              className={`${objectClass} p-0 transition duration-500 group-hover:scale-[1.02]`}
-                              sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                            />
-                            {/* subtle overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      {/* SHORTS STRIP – Quick value */}
+      {featuredShorts.length > 0 && (
+        <>
+          <ShortsStrip shorts={featuredShorts} />
+          <SectionDivider />
+        </>
+      )}
 
-                            {/* type pill */}
-                            <div className="absolute left-3 top-3">
-                              <span
-                                className={`inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-[11px] font-semibold ${cfg.pillBg} ${cfg.accent} ${cfg.pillBorder}`}
-                              >
-                                <Icon className="h-3.5 w-3.5" />
-                                {cfg.label}
-                              </span>
-                            </div>
-                          </div>
+      {/* VENTURES – Working arms */}
+      <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
+        <VenturesSection />
+      </section>
 
-                          {/* body */}
-                          <div className="flex flex-1 flex-col p-5">
-                            <div className="flex items-start justify-between gap-3">
-                              <h3 className="font-serif text-base font-semibold leading-snug text-neutral-900 transition group-hover:text-neutral-700">
-                                {doc.title}
-                              </h3>
-                              {doc.featured && (
-                                <span className="shrink-0 rounded-full border border-neutral-200 bg-white px-2 py-1 text-[10px] font-semibold text-neutral-700">
-                                  Featured
-                                </span>
-                              )}
-                            </div>
+      <SectionDivider />
 
-                            {(doc.subtitle || doc.excerpt || doc.description) && (
-                              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-neutral-600">
-                                {doc.subtitle || doc.excerpt || doc.description}
-                              </p>
-                            )}
+      {/* BOOKS IN DEVELOPMENT */}
+      <BooksInDevelopment />
 
-                            {/* tags */}
-                            {doc.tags?.length ? (
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {doc.tags.slice(0, 3).map((t) => (
-                                  <span
-                                    key={t}
-                                    className="rounded-lg border border-neutral-200/60 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600"
-                                  >
-                                    {t}
-                                  </span>
-                                ))}
-                                {doc.tags.length > 3 && (
-                                  <span className="rounded-lg border border-neutral-200/60 bg-neutral-50 px-2.5 py-1 text-[11px] text-neutral-400">
-                                    +{doc.tags.length - 3}
-                                  </span>
-                                )}
-                              </div>
-                            ) : null}
+      <SectionDivider />
 
-                            {/* footer */}
-                            <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-4">
-                              <div className="flex items-center gap-2">
-                                {date ? (
-                                  <span className="text-[11px] font-medium text-neutral-500">
-                                    {date}
-                                  </span>
-                                ) : (
-                                  <span className="text-[11px] text-neutral-400">
-                                    —
-                                  </span>
-                                )}
-
-                                {doc.downloadUrl ? (
-                                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-blue-700">
-                                    <Download className="h-3.5 w-3.5" />
-                                    PDF
-                                  </span>
-                                ) : null}
-                              </div>
-
-                              <span
-                                className={`inline-flex items-center gap-1.5 text-xs font-semibold ${cfg.accent}`}
-                              >
-                                View <ChevronRight className="h-4 w-4" />
-                              </span>
-                            </div>
-                          </div>
-                        </article>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2 }}
-                className="rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/40 p-14"
-              >
-                <div className="mx-auto max-w-md text-center">
-                  <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm">
-                    <Search className="h-7 w-7 text-neutral-300" />
-                  </div>
-                  <h3 className="font-serif text-2xl font-semibold text-neutral-900">
-                    No results
-                  </h3>
-                  <p className="mt-2 text-sm text-neutral-600">
-                    Adjust your search or switch the content type filter.
-                  </p>
-
-                  <div className="mt-7 flex justify-center">
-                    <button
-                      onClick={() => {
-                        setSearchQuery("");
-                        setFilter("all");
-                      }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-5 py-2.5 text-xs font-semibold text-neutral-700 shadow-sm transition hover:bg-neutral-50"
-                    >
-                      <X className="h-4 w-4" />
-                      Reset
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
-      </main>
+      {/* STRATEGIC SESSIONS */}
+      <StrategicSessions />
     </Layout>
   );
 };
 
-// -----------------------------
-// Data Fetching
-// -----------------------------
-
-export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  const publishedBuckets = getPublishedDocumentsByType();
-
-  // DEBUG (leave until fixed)
-  console.log("[archive] contentlayerLoaded:", isContentlayerLoaded());
-  console.log("[archive] allDocuments:", getAllContentlayerDocs().length);
-  console.log(
-    "[archive] buckets:",
-    Object.fromEntries(
-      Object.entries(publishedBuckets).map(([k, v]) => [k, v.length]),
-    ),
-  );
-
-  const docsByType: Record<DocKind, ContentlayerCardProps[]> = {
-    post: [],
-    canon: [],
-    resource: [],
-    download: [],
-    print: [],
-    book: [],
-    event: [],
-    short: [],
-    strategy: [],
-  };
-
-  (Object.keys(docsByType) as DocKind[]).forEach((kind) => {
-    docsByType[kind] = (publishedBuckets[kind] ?? []).map(getCardPropsForDocument);
-  });
-
-  return { props: { docsByType }, revalidate: 60 };
-};
-
-export default ContentIndexPage;
+export default HomePage;
