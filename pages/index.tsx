@@ -1,4 +1,4 @@
-// pages/index.tsx – MASTER HOMEPAGE WITH SHORTS & BOOKS
+// pages/index.tsx – REFINED HOMEPAGE WITH STRATEGIC FLOW
 import * as React from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
@@ -7,17 +7,18 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import StatsBar from "@/components/homepage/StatsBar";
 import VenturesSection from "@/components/homepage/VenturesSection";
+import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 import { Calendar, Compass, Users, Sparkles } from "lucide-react";
-import { 
-  getPublishedShorts, 
+import {
+  getPublishedShorts,
   getRecentShorts,
   getShortUrl,
-  type Short 
+  type Short,
 } from "@/lib/contentlayer-helper";
-import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
 
 // -----------------------------------------------------------------------------
-// BOOKS IN DEVELOPMENT – update covers & slugs
+// BOOKS IN DEVELOPMENT
 // -----------------------------------------------------------------------------
 
 const BOOKS_IN_DEV = [
@@ -40,27 +41,17 @@ const BOOKS_IN_DEV = [
 ];
 
 // -----------------------------------------------------------------------------
-// SHORTS – get at build time with fallback
+// SHORTS – Get at build time with fallback
 // -----------------------------------------------------------------------------
 
-// Safe function to get shorts with fallback
 const getFeaturedShortsSafely = (): Short[] => {
   try {
-    // Try getting recent shorts first (most reliable)
     const shorts = getRecentShorts(3);
-    
-    // If we got shorts, return them
-    if (shorts && shorts.length > 0) {
-      return shorts;
-    }
-    
-    // Fallback: try getPublishedShorts directly
+    if (shorts && shorts.length > 0) return shorts;
+
     const allShorts = getPublishedShorts();
-    if (allShorts && allShorts.length > 0) {
-      return allShorts.slice(0, 3);
-    }
-    
-    // Return empty array as final fallback
+    if (allShorts && allShorts.length > 0) return allShorts.slice(0, 3);
+
     return [];
   } catch (error) {
     console.error("Error loading shorts for homepage:", error);
@@ -71,45 +62,42 @@ const getFeaturedShortsSafely = (): Short[] => {
 const featuredShorts: Short[] = getFeaturedShortsSafely();
 
 // -----------------------------------------------------------------------------
-// Simple visual divider
+// SECTION DIVIDER – Refined visual separator
 // -----------------------------------------------------------------------------
 
 const SectionDivider: React.FC = () => (
-  <div className="relative h-12 overflow-hidden md:h-16">
+  <div className="relative h-16 overflow-hidden">
     <div className="absolute inset-0 flex items-center justify-center">
-      <div className="h-px w-16 bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700 md:w-32" />
-      <div className="mx-4 flex items-center gap-2 md:mx-6">
-        <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 md:h-2 md:w-2" />
-        <div className="h-1 w-1 rounded-full bg-gradient-to-r from-amber-300 to-amber-500" />
-        <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 md:h-2 md:w-2" />
+      <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-200/40 to-transparent dark:via-amber-500/30" />
+      <div className="mx-6 flex items-center gap-2">
+        <div className="h-2 w-2 rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
+        <div className="h-1 w-1 rounded-full bg-amber-400/60" />
+        <div className="h-2 w-2 rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
       </div>
-      <div className="h-px w-16 bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700 md:w-32" />
+      <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-200/40 to-transparent dark:via-amber-500/30" />
     </div>
   </div>
 );
 
 // -----------------------------------------------------------------------------
-// SHORTS STRIP – homepage spotlight (now links to actual shorts)
+// SHORTS STRIP – Homepage spotlight
 // -----------------------------------------------------------------------------
 
 const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
-  if (!shorts || shorts.length === 0) {
-    // Don't render anything if no shorts
-    return null;
-  }
+  if (!shorts || shorts.length === 0) return null;
 
   return (
-    <section className="bg-gradient-to-b from-gray-950 via-black to-gray-950 py-14">
+    <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
               Shorts · Field signals
             </p>
-            <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-cream sm:text-4xl">
+            <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-white sm:text-4xl">
               Quick hits for men who don&apos;t scroll all day
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cream/80">
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
               Concise field notes on work, fatherhood, and building under
               pressure — designed to be read between meetings, not instead of
               them.
@@ -117,7 +105,7 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
           </div>
           <Link
             href="/shorts"
-            className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
+            className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
           >
             View all shorts
           </Link>
@@ -133,36 +121,36 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
               <Link
                 key={short._id}
                 href={url}
-                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-amber-400/70 hover:shadow-2xl"
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 shadow-lg backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/50 hover:bg-slate-800/80 hover:shadow-2xl"
               >
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-300">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
                     <Sparkles className="h-3 w-3" />
                     Short
                   </span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
                     {readTime}
                   </span>
                 </div>
 
-                <h3 className="mb-2 line-clamp-2 font-serif text-lg font-semibold text-cream">
+                <h3 className="mb-3 line-clamp-2 font-serif text-xl font-semibold text-white">
                   {short.title}
                 </h3>
 
                 {excerpt && (
-                  <p className="mb-4 flex-1 text-sm leading-relaxed text-cream/75 line-clamp-3">
+                  <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-300">
                     {excerpt}
                   </p>
                 )}
 
-                <div className="mt-auto flex items-center justify-between pt-3">
-                  <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
+                <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
                     Field note
                   </span>
-                  <span className="inline-flex items-center text-xs font-semibold text-amber-300 transition group-hover:text-amber-200">
-                    Read inside
+                  <span className="inline-flex items-center text-sm font-semibold text-amber-300 transition-all group-hover:gap-2 group-hover:text-amber-200">
+                    Read
                     <span className="ml-1 transition-transform group-hover:translate-x-1">
-                      ↠
+                      →
                     </span>
                   </span>
                 </div>
@@ -176,28 +164,28 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
 };
 
 // -----------------------------------------------------------------------------
-// BOOKS IN DEVELOPMENT – medium-sized cards with covers
+// BOOKS IN DEVELOPMENT – Refined cards with better contrast
 // -----------------------------------------------------------------------------
 
 const BooksInDevelopment: React.FC = () => (
-  <section className="bg-gradient-to-b from-[#F9F5EC] via-white to-gray-50 py-16 dark:from-[#050608] dark:via-[#050608] dark:to-[#050608]">
+  <section className="bg-white py-16 dark:bg-slate-950">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/85 dark:text-amber-300/90">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
             Books in development
           </p>
-          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-cream sm:text-4xl">
+          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             Long-form work that underwrites everything else
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-800 dark:text-cream/85">
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
             These projects sit behind the posts, shorts, and rooms — slow-cooked
             work that outlives algorithms and platform cycles.
           </p>
         </div>
         <Link
           href="/books"
-          className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-400/10 hover:border-amber-300 dark:text-amber-200"
+          className="inline-flex items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
         >
           View all books
         </Link>
@@ -210,39 +198,38 @@ const BooksInDevelopment: React.FC = () => (
             href={`/books/${book.slug}`}
             className="group block"
           >
-            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white/95 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-gray-900/95">
+            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
               <div className="grid gap-0 md:grid-cols-[auto,1fr]">
-                <div className="relative aspect-[3/4] w-full max-w-[8rem] flex-shrink-0 md:max-w-[9rem]">
+                <div className="relative aspect-[3/4] w-full max-w-[9rem] flex-shrink-0">
                   <Image
                     src={book.cover}
                     alt={book.title}
                     fill
                     sizes="(max-width: 768px) 35vw, 20vw"
                     className="object-cover"
-                    priority={false}
                   />
                 </div>
-                <div className="flex flex-col justify-between p-5 md:p-6">
+                <div className="flex flex-col justify-between p-6">
                   <div>
-                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
                       In development
                     </p>
-                    <h3 className="mt-2 font-serif text-xl font-semibold text-slate-900 dark:text-cream">
+                    <h3 className="mt-2 font-serif text-xl font-semibold text-slate-900 dark:text-white">
                       {book.title}
                     </h3>
-                    <p className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-600 dark:text-cream/70">
+                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.15em] text-slate-600 dark:text-gray-400">
                       {book.tag}
                     </p>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-800 dark:text-cream/85">
+                    <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-gray-300">
                       {book.blurb}
                     </p>
                   </div>
-                  <div className="mt-4 flex items-center justify-between pt-2">
-                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-600 dark:text-cream/70">
+                  <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <span className="text-xs font-medium uppercase tracking-[0.15em] text-slate-500 dark:text-gray-500">
                       Canon bookshelf
                     </span>
-                    <span className="text-xs font-semibold text-amber-700 transition group-hover:translate-x-1 group-hover:text-amber-500 dark:text-amber-300">
-                      View project ↠
+                    <span className="text-sm font-semibold text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400">
+                      View project →
                     </span>
                   </div>
                 </div>
@@ -256,21 +243,21 @@ const BooksInDevelopment: React.FC = () => (
 );
 
 // -----------------------------------------------------------------------------
-// STRATEGIC SESSIONS – dark-mode readability
+// STRATEGIC SESSIONS – Improved readability
 // -----------------------------------------------------------------------------
 
 const StrategicSessions: React.FC = () => (
-  <section className="bg-gradient-to-b from-gray-950 via-black to-gray-950 py-16">
+  <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400/90">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
             Strategic sessions
           </p>
-          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-cream sm:text-4xl">
+          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-white sm:text-4xl">
             Where we do the work in the room
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cream/80">
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
             Not inspirational talks. Working sessions built for people carrying
             real responsibility — for a boardroom, a founding team, or a
             household.
@@ -279,13 +266,13 @@ const StrategicSessions: React.FC = () => (
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/consulting"
-            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-md shadow-amber-900/40 transition-all hover:scale-105 hover:shadow-xl"
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-lg shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-xl"
           >
-            Book a strategic conversation
+            Book a conversation
           </Link>
           <Link
             href="/events"
-            className="inline-flex items-center justify-center rounded-full border border-amber-200/60 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition-all hover:bg-amber-400/10 hover:border-amber-300"
+            className="inline-flex items-center justify-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
           >
             Upcoming rooms
           </Link>
@@ -293,53 +280,50 @@ const StrategicSessions: React.FC = () => (
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {/* 1. Board / founders */}
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
-          <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15 text-amber-400">
-            <Compass className="h-5 w-5" />
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
+            <Compass className="h-6 w-6" />
           </div>
-          <h3 className="mb-2 font-serif text-lg font-semibold text-cream">
+          <h3 className="mb-3 font-serif text-lg font-semibold text-white">
             Strategy rooms for founders & boards
           </h3>
-          <p className="mb-3 text-sm leading-relaxed text-cream/80">
+          <p className="mb-4 text-sm leading-relaxed text-gray-300">
             Clarify mandate, markets, and operating rhythm so your decisions
             stop fighting your design.
           </p>
-          <p className="mt-auto text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
             Alomarada · InfraNova Africa · Governance diagnostics
           </p>
         </article>
 
-        {/* 2. Fathers / households */}
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
-          <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
-            <Users className="h-5 w-5" />
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+            <Users className="h-6 w-6" />
           </div>
-          <h3 className="mb-2 font-serif text-lg font-semibold text-cream">
+          <h3 className="mb-3 font-serif text-lg font-semibold text-white">
             Fatherhood & household architecture
           </h3>
-          <p className="mb-3 text-sm leading-relaxed text-cream/80">
+          <p className="mb-4 text-sm leading-relaxed text-gray-300">
             Standards, rituals, and structures that let men show up for their
             sons without outsourcing conviction to the culture.
           </p>
-          <p className="mt-auto text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
             Fathering Without Fear · Canon household tools
           </p>
         </article>
 
-        {/* 3. Inner-circle / leaders */}
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
-          <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/15 text-blue-300">
-            <Calendar className="h-5 w-5" />
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-blue-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20 text-blue-400">
+            <Calendar className="h-6 w-6" />
           </div>
-          <h3 className="mb-2 font-serif text-lg font-semibold text-cream">
+          <h3 className="mb-3 font-serif text-lg font-semibold text-white">
             Leadership salons & inner-circle work
           </h3>
-          <p className="mb-3 text-sm leading-relaxed text-cream/80">
+          <p className="mb-4 text-sm leading-relaxed text-gray-300">
             Small, closed rooms where we test ideas, frameworks, and Canon tools
             against real lives and real P&Ls.
           </p>
-          <p className="mt-auto text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-cream/60">
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
             Chatham rooms · Inner Circle · Builders&apos; tables
           </p>
         </article>
@@ -367,7 +351,7 @@ const HomePage: NextPage = () => {
         name: siteTitle,
         description: siteTagline,
         url:
-          process.env.NEXT_PUBLIC_SITE_URL ??
+          process.env.NEXT_PUBLIC_SITE_URL ||
           "https://www.abrahamoflondon.org",
         publisher: {
           "@type": "Person",
@@ -376,69 +360,68 @@ const HomePage: NextPage = () => {
       }}
     >
       {/* HERO – Canon spine + ventures narrative */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#050608] via-[#0B0C10] to-[#050608]">
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
         <div className="absolute inset-0">
-          <div className="pointer-events-none absolute -top-40 -right-32 h-64 w-64 rounded-full bg-amber-500/15 blur-3xl sm:h-80 sm:w-80" />
-          <div className="pointer-events-none absolute -bottom-40 -left-32 h-64 w-64 rounded-full bg-emerald-500/12 blur-3xl sm:h-80 sm:w-80" />
+          <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-40 left-0 h-96 w-96 rounded-full bg-emerald-500/8 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
-          <div className="grid items-center gap-10 lg:grid-cols-5 lg:gap-16">
-            {/* Left – philosophy & CTAs */}
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+          <div className="grid items-center gap-12 lg:grid-cols-5 lg:gap-16">
+            {/* Left – Philosophy & CTAs */}
             <div className="max-w-xl lg:col-span-3 xl:col-span-2">
-              <div className="mb-7">
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 sm:px-4 sm:py-2">
-                  <span className="text-base text-amber-400">𓆓</span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-200">
+              <div className="mb-8">
+                <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-amber-400/50 bg-amber-500/10 px-4 py-2">
+                  <span className="text-lg text-amber-400">𓆓</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
                     Canon · Ventures · Field tools
                   </span>
                 </div>
 
-                <h1 className="mb-4 font-serif text-3xl font-semibold leading-tight text-[#F5F1E8] sm:text-4xl lg:text-5xl xl:text-6xl">
+                <h1 className="mb-5 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
                   Abraham of London
-                  <span className="mt-3 block text-lg font-normal text-amber-100/90 sm:text-xl lg:text-2xl">
-                    Structural thinking for fathers, founders,
-                    <br className="hidden sm:block" />
-                    and builders of legacy.
+                  <span className="mt-4 block text-xl font-normal text-amber-100 sm:text-2xl lg:text-3xl">
+                    Structural thinking for fathers, founders, and builders of
+                    legacy.
                   </span>
                 </h1>
 
-                <p className="mb-8 text-sm leading-relaxed text-gray-200 sm:text-base">
+                <p className="mb-8 text-base leading-relaxed text-gray-300 sm:text-lg">
                   For men who carry responsibility for a family, a company, or a
                   community — this is where faith, history, and strategy are
                   turned into operating systems, not slogans.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4">
                 <Link
                   href="/canon"
-                  className="group inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-2.5 text-sm font-semibold text-black shadow-lg shadow-amber-900/40 transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                  className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-7 py-3.5 text-sm font-semibold text-black shadow-lg shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-xl"
                 >
                   <span>Enter the Canon</span>
                   <span className="transition-transform group-hover:translate-x-1">
-                    ↠
+                    →
                   </span>
                 </Link>
                 <Link
                   href="/consulting"
-                  className="group inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-amber-400/50 bg-transparent px-6 py-2.5 text-sm font-semibold text-amber-100 transition-all hover:scale-105 hover:bg-amber-500/10 active:scale-95"
+                  className="group inline-flex items-center gap-2 rounded-xl border border-amber-400/60 bg-amber-400/5 px-7 py-3.5 text-sm font-semibold text-amber-100 transition-all hover:scale-105 hover:bg-amber-500/10"
                 >
-                  <span>Strategic work with Abraham</span>
+                  <span>Work with Abraham</span>
                   <span className="transition-transform group-hover:translate-x-1">
                     →
                   </span>
                 </Link>
               </div>
 
-              <p className="mt-5 text-[0.7rem] uppercase tracking-[0.22em] text-gray-400">
+              <p className="mt-6 text-xs uppercase tracking-[0.2em] text-gray-500">
                 Canon · Essays · Field letters · Tools · Inner circle
               </p>
             </div>
 
-            {/* Right – hero banner */}
+            {/* Right – Hero Banner */}
             <div className="relative lg:col-span-2 xl:col-span-3">
-              <div className="relative overflow-hidden rounded-xl border border-white/10 bg-black/60 shadow-2xl">
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-sm">
                 <div className="relative aspect-video w-full">
                   <Image
                     src="/assets/images/abraham-of-london-banner.webp"
@@ -448,10 +431,10 @@ const HomePage: NextPage = () => {
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover object-center"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 </div>
-                <div className="border-t border-white/10 bg-gradient-to-r from-black/90 via-black/80 to-black/90 px-4 py-4 text-center sm:px-5">
-                  <p className="text-xs font-medium text-gray-200 sm:text-sm">
+                <div className="border-t border-white/10 bg-slate-900/90 px-5 py-4 backdrop-blur-sm">
+                  <p className="text-sm font-medium leading-relaxed text-gray-200">
                     The Canon is the philosophical spine. The ventures are the
                     working arms. Together they exist to build men, families,
                     and institutions that outlast headlines.
@@ -463,8 +446,8 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="border-y border-gray-200/60 bg-white dark:border-gray-800 dark:bg-gray-900">
+      {/* STATS BAR */}
+      <section className="border-y border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <StatsBar />
         </div>
@@ -473,17 +456,17 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* CANON SPOTLIGHT */}
-      <section className="bg-gradient-to-b from-white to-gray-50 py-12 dark:from-black dark:via-gray-950 dark:to-gray-900">
+      <section className="bg-white py-16 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-500/80">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
                 Canon · Foundations
               </p>
-              <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-gray-900 dark:text-cream sm:text-4xl">
+              <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-white sm:text-4xl">
                 The philosophical spine
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
                 The Canon is the long-term work: purpose, governance,
                 civilisation, and destiny — written from a father&apos;s
                 vantage point, not an academic desk.
@@ -491,18 +474,24 @@ const HomePage: NextPage = () => {
             </div>
             <Link
               href="/canon"
-              className="inline-flex items-center rounded-full border border-amber-400/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-400/10 hover:border-amber-300 dark:text-amber-200"
+              className="inline-flex items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
             >
               Browse Canon entries
             </Link>
           </div>
 
-          {/* Updated CanonPrimaryCard – new component, no props */}
           <CanonPrimaryCard />
         </div>
       </section>
 
-      {/* SHORTS STRIP - Only render if we have shorts */}
+      <SectionDivider />
+
+      {/* STRATEGIC FUNNEL STRIP */}
+      <StrategicFunnelStrip />
+
+      <SectionDivider />
+
+      {/* SHORTS STRIP */}
       {featuredShorts.length > 0 && (
         <>
           <ShortsStrip shorts={featuredShorts} />
@@ -510,8 +499,8 @@ const HomePage: NextPage = () => {
         </>
       )}
 
-      {/* VENTURES – working arms */}
-      <section className="bg-gradient-to-b from-gray-950 via-black to-gray-950 py-16">
+      {/* VENTURES */}
+      <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
         <VenturesSection />
       </section>
 
