@@ -1,4 +1,3 @@
-// components/ContentlayerDocPage.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -25,9 +24,9 @@ type ContentlayerDoc = {
 
 type Props = {
   doc: ContentlayerDoc;
-  canonicalPath: string; // e.g. "/content/slug" or "/downloads/slug"
-  backHref?: string; // e.g. "/content"
-  label?: string; // e.g. "Reading Room"
+  canonicalPath: string; // "/content/slug" | "/downloads/slug" | absolute URL
+  backHref?: string; // "/content"
+  label?: string; // "Reading Room"
   components?: Record<string, React.ComponentType<any>>;
 };
 
@@ -43,6 +42,16 @@ function safeDate(date?: string | null) {
     month: "short",
     year: "numeric",
   }).format(d);
+}
+
+function toAbsoluteUrl(pathOrUrl?: string | null) {
+  if (!pathOrUrl) return null;
+  const s = String(pathOrUrl);
+  if (!s) return null;
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  if (s.startsWith("/")) return `${SITE_URL}${s}`;
+  // last resort — treat as relative asset path
+  return `${SITE_URL}/${s}`;
 }
 
 export default function ContentlayerDocPage({
@@ -62,6 +71,8 @@ export default function ContentlayerDocPage({
     ? canonicalPath
     : `${SITE_URL}${canonicalPath}`;
 
+  const ogImage = toAbsoluteUrl(doc.coverImage);
+
   const code = doc?.body?.code ?? "";
   const MDXContent = useMDXComponent(code);
 
@@ -75,7 +86,6 @@ export default function ContentlayerDocPage({
     }
 
     navigator.clipboard.writeText(url).catch(() => {});
-    // Optional: toast later
   }, [canonicalUrl, title, description]);
 
   const displayDate = safeDate(doc.date);
@@ -88,17 +98,18 @@ export default function ContentlayerDocPage({
         <meta property="og:type" content="article" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        {doc.coverImage ? <meta property="og:image" content={doc.coverImage} /> : null}
+        {ogImage ? <meta property="og:image" content={ogImage} /> : null}
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <main className="bg-white">
+      {/* Theme-aware surface (fixes washed-out dark mode) */}
+      <main className="min-h-[70vh] bg-transparent">
         {/* Top bar */}
-        <nav className="sticky top-0 z-10 border-b border-neutral-200 bg-white/95 backdrop-blur">
+        <nav className="sticky top-0 z-10 border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-black/35">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 lg:px-8">
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-neutral-900"
+              className="inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-950 dark:text-cream/80 dark:hover:text-cream"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>{label}</span>
@@ -107,7 +118,7 @@ export default function ContentlayerDocPage({
             <button
               type="button"
               onClick={onShare}
-              className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50 dark:border-white/10 dark:bg-black/20 dark:text-cream/90 dark:hover:bg-white/5"
             >
               <Share2 className="h-4 w-4" />
               <span className="hidden sm:inline">Share</span>
@@ -117,22 +128,22 @@ export default function ContentlayerDocPage({
 
         <article className="mx-auto max-w-4xl px-6 py-14 lg:px-8 lg:py-20">
           <header className="mb-10">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-softGold/70">
               {doc.category || label}
             </p>
 
-            <h1 className="font-serif text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
+            <h1 className="font-serif text-4xl font-semibold tracking-tight text-neutral-950 dark:text-cream sm:text-5xl">
               {title}
             </h1>
 
             {doc.excerpt ? (
-              <p className="mt-5 text-lg leading-relaxed text-neutral-700">
+              <p className="mt-5 text-lg leading-relaxed text-neutral-700 dark:text-cream/80">
                 {doc.excerpt}
               </p>
             ) : null}
 
             {(displayDate || doc.readTime) && (
-              <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-neutral-500">
+              <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-neutral-500 dark:text-softGold/70">
                 {displayDate ? <span>{displayDate}</span> : null}
                 {doc.readTime ? <span>• {doc.readTime}</span> : null}
               </div>
@@ -143,7 +154,7 @@ export default function ContentlayerDocPage({
                 {doc.tags.map((t) => (
                   <span
                     key={t}
-                    className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11px] font-medium text-neutral-700"
+                    className="rounded-full border border-black/10 bg-black/5 px-3 py-1 text-[11px] font-medium text-neutral-700 dark:border-white/10 dark:bg-white/5 dark:text-cream/80"
                   >
                     {t}
                   </span>
@@ -152,8 +163,8 @@ export default function ContentlayerDocPage({
             ) : null}
           </header>
 
-          {/* ✅ This is the critical line: ALWAYS pass components */}
-          <div className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif">
+          {/* ✅ Always pass components (prevents “Expected component X to be defined”) */}
+          <div className="prose max-w-none dark:prose-invert prose-headings:font-serif">
             {code?.trim() ? (
               <MDXContent components={components} />
             ) : (

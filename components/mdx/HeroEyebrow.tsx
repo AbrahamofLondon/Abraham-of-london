@@ -1,24 +1,28 @@
-// components/mdx/HeroEyebrow.tsx
 import * as React from "react";
 
-export type HeroEyebrowProps = React.PropsWithChildren<{
-  className?: string;
-  as?: "p" | "div" | "span";
-  tone?: "gold" | "neutral";
-}>;
+type AsTag = "p" | "div" | "span";
 
-export default function HeroEyebrow({
+export type HeroEyebrowProps<T extends AsTag = "p"> =
+  React.PropsWithChildren<{
+    className?: string;
+    as?: T;
+    tone?: "gold" | "neutral";
+  }> &
+    Omit<
+      React.ComponentPropsWithoutRef<T>,
+      "as" | "children" | "className" | "color"
+    >;
+
+export default function HeroEyebrow<T extends AsTag = "p">({
   children,
   className = "",
-  as = "p",
+  as,
   tone = "gold",
-}: HeroEyebrowProps) {
-  const Tag = as as any;
+  ...rest
+}: HeroEyebrowProps<T>) {
+  const Tag = (as ?? "p") as T;
 
-  const toneClass =
-    tone === "neutral"
-      ? "text-slate-300/80"
-      : "text-softGold/80";
+  const toneClass = tone === "neutral" ? "text-slate-300/80" : "text-softGold/80";
 
   return (
     <Tag
@@ -31,8 +35,9 @@ export default function HeroEyebrow({
       ]
         .filter(Boolean)
         .join(" ")}
+      {...rest}
     >
-      <span className="h-[1px] w-6 bg-current opacity-60" />
+      <span aria-hidden className="h-[1px] w-6 bg-current opacity-60" />
       <span>{children}</span>
     </Tag>
   );

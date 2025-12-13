@@ -1,8 +1,9 @@
 import * as React from "react";
+
 import BrandFrame from "@/components/print/BrandFrame";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
-// REMOVED: import HeroEyebrow from "@/components/mdx/HeroEyebrow";
+
 import GlossaryTerm from "@/components/GlossaryTerm";
 import CanonReference from "@/components/CanonReference";
 
@@ -17,7 +18,7 @@ export type MdxComponentProps = React.PropsWithChildren<
 
 const H1 = ({ children, ...rest }: MdxComponentProps) => (
   <h1
-    className="mb-6 mt-10 font-serif text-3xl font-semibold tracking-tight text-gray-50 sm:text-4xl"
+    className="mt-10 mb-6 font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-gray-50"
     {...rest}
   >
     {children}
@@ -26,7 +27,7 @@ const H1 = ({ children, ...rest }: MdxComponentProps) => (
 
 const H2 = ({ children, ...rest }: MdxComponentProps) => (
   <h2
-    className="mb-4 mt-8 font-serif text-2xl font-semibold tracking-tight text-gray-50 sm:text-3xl"
+    className="mt-8 mb-4 font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-gray-50"
     {...rest}
   >
     {children}
@@ -35,7 +36,7 @@ const H2 = ({ children, ...rest }: MdxComponentProps) => (
 
 const H3 = ({ children, ...rest }: MdxComponentProps) => (
   <h3
-    className="mb-3 mt-7 font-serif text-xl font-semibold text-gray-50 sm:text-2xl"
+    className="mt-7 mb-3 font-serif text-xl sm:text-2xl font-semibold text-gray-50"
     {...rest}
   >
     {children}
@@ -43,14 +44,14 @@ const H3 = ({ children, ...rest }: MdxComponentProps) => (
 );
 
 const H4 = ({ children, ...rest }: MdxComponentProps) => (
-  <h4 className="mb-3 mt-6 text-base font-semibold text-gray-100" {...rest}>
+  <h4 className="mt-6 mb-3 text-base font-semibold text-gray-100" {...rest}>
     {children}
   </h4>
 );
 
 const P = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
-    className={`my-5 text-[1.02rem] leading-[1.9] text-gray-100 sm:text-[1.06rem] ${className}`.trim()}
+    className={`my-5 text-[1.02rem] sm:text-[1.06rem] leading-[1.9] text-gray-100 ${className}`.trim()}
     {...rest}
   >
     {children}
@@ -97,7 +98,7 @@ const Li = ({ children, ...rest }: MdxComponentProps) => (
 
 const Blockquote = ({ children, ...rest }: MdxComponentProps) => (
   <blockquote
-    className="my-8 rounded-r-2xl border-l-4 border-softGold/70 bg-white/5 px-5 py-4 text-[1rem] leading-relaxed italic text-gray-100"
+    className="my-8 border-l-4 border-softGold/70 bg-white/5 px-5 py-4 text-[1rem] leading-relaxed italic text-gray-100 rounded-r-2xl"
     {...rest}
   >
     {children}
@@ -108,7 +109,7 @@ const Blockquote = ({ children, ...rest }: MdxComponentProps) => (
 
 const Code = ({ children, ...rest }: MdxComponentProps) => (
   <code
-    className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-[0.8rem] text-amber-200"
+    className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] font-mono text-amber-200"
     {...rest}
   >
     {children}
@@ -144,7 +145,6 @@ interface ImageProps extends MdxComponentProps {
 
 const MdxImage = (props: ImageProps) => {
   const { src, alt, className = "", ...rest } = props;
-
   if (!src) return null;
 
   return (
@@ -179,14 +179,13 @@ const Grid = ({ children, className = "", ...rest }: MdxComponentProps) => (
 
 const PullLine = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
-    className={`my-8 border-y border-softGold/50 py-4 text-center font-serif text-lg italic text-softGold sm:text-xl ${className}`.trim()}
+    className={`my-8 border-y border-softGold/50 py-4 text-center font-serif text-lg sm:text-xl italic text-softGold ${className}`.trim()}
     {...rest}
   >
     {children}
   </p>
 );
 
-// Eyebrow component for blog heroes used in MDX
 const HeroEyebrow = ({
   children,
   className = "",
@@ -215,6 +214,7 @@ const JsonLdBlock = ({ children, ...rest }: MdxComponentProps) => {
   return (
     <script
       type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: json }}
     />
   );
@@ -304,9 +304,7 @@ const NoteBlock = ({
 
 const RuleBlock = ({ className = "", ...rest }: MdxComponentProps) => (
   <hr
-    className={(
-      "mx-auto my-10 w-full border-t border-softGold/40 " + className
-    ).trim()}
+    className={("my-10 mx-auto w-full border-t border-softGold/40 " + className).trim()}
     {...rest}
   />
 );
@@ -317,9 +315,7 @@ const CaptionBlock = ({
   ...rest
 }: MdxComponentProps) => (
   <p
-    className={(
-      "mt-2 text-center text-[0.8rem] italic text-gray-500 " + className
-    ).trim()}
+    className={("mt-2 text-center text-[0.8rem] italic text-gray-400 " + className).trim()}
     {...rest}
   >
     {children}
@@ -363,10 +359,7 @@ const BadgeRowBlock = ({
   className = "",
   ...rest
 }: MdxComponentProps) => (
-  <div
-    className={("mt-4 flex flex-wrap items-center gap-2 " + className).trim()}
-    {...rest}
-  >
+  <div className={("mt-4 flex flex-wrap items-center gap-2 " + className).trim()} {...rest}>
     {children}
   </div>
 );
@@ -376,10 +369,7 @@ interface QuoteProps extends MdxComponentProps {
 }
 
 const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
-  <figure
-    className="my-7 border-l-2 border-softGold/80 pl-4 text-sm text-gray-200"
-    {...rest}
-  >
+  <figure className="my-7 border-l-2 border-softGold/80 pl-4 text-sm text-gray-200" {...rest}>
     <div className="italic">{children}</div>
     {author != null && author !== false && (
       <figcaption className="mt-2 text-xs uppercase tracking-wide text-gray-400">
@@ -398,10 +388,7 @@ const VerseBlock = ({ children, refText, cite, ...rest }: VerseProps) => {
   const reference = refText ?? cite;
 
   return (
-    <div
-      className="my-5 rounded-lg bg-slate-900/80 px-4 py-3 text-sm text-gray-100"
-      {...rest}
-    >
+    <div className="my-5 rounded-lg bg-slate-900/80 px-4 py-3 text-sm text-gray-100" {...rest}>
       <p className="italic">{children}</p>
       {reference != null && reference !== false && (
         <p className="mt-1 text-xs font-medium uppercase tracking-wide text-softGold">
@@ -431,10 +418,7 @@ const ShareRow = ({ children, text, hashtags, ...rest }: ShareRowProps) => {
       : [];
 
   return (
-    <div
-      className="mt-8 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm"
-      {...rest}
-    >
+    <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm" {...rest}>
       {hasChildren && !text && !hashtags ? (
         children
       ) : (
@@ -532,10 +516,7 @@ const ResourcesCTABlock = ({
   const buttonText = buttonLabel || label || "Explore resources";
 
   return (
-    <section
-      className="mt-12 rounded-2xl border border-softGold/40 bg-black/60 p-6"
-      {...rest}
-    >
+    <section className="mt-12 rounded-2xl border border-softGold/40 bg-black/60 p-6" {...rest}>
       <h3 className="font-serif text-lg font-semibold text-slate-50">
         {displayTitle}
       </h3>
@@ -559,14 +540,8 @@ const ResourcesCTABlock = ({
 
 /* ----------------------- Brand-specific MDX components -------------------- */
 
-interface BrandFrameWrapperProps extends MdxComponentProps {
-  children?: React.ReactNode;
-}
-
-const BrandFrameWrapper = (props: BrandFrameWrapperProps) => {
-  const { children, ...rest } = props;
-  const hasChildren = React.Children.count(children) > 0;
-  if (!hasChildren) return null;
+const BrandFrameWrapper = ({ children, ...rest }: MdxComponentProps) => {
+  if (React.Children.count(children) === 0) return null;
   return <BrandFrame {...rest}>{children}</BrandFrame>;
 };
 
@@ -593,8 +568,7 @@ const EmbossedSignWrapper = (props: EmbossedSignWrapperProps) => {
   return <EmbossedSign {...props} />;
 };
 
-// Build the components map
-const mdxComponents = {
+export const mdxComponents = {
   // Headings & text
   h1: H1,
   h2: H2,
@@ -628,7 +602,7 @@ const mdxComponents = {
   Callout: CalloutBlock,
   Note: NoteBlock,
   Rule: RuleBlock,
-  Divider: RuleBlock,
+  Divider: RuleBlock, // <Divider /> in MDX
   hr: RuleBlock,
   Caption: CaptionBlock,
   Badge: BadgeBlock,
@@ -649,6 +623,4 @@ const mdxComponents = {
   CanonReference,
 };
 
-// Export both named and default for maximum compatibility
-export { mdxComponents };
 export default mdxComponents;
