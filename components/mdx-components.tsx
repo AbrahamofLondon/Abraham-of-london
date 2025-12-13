@@ -1,7 +1,8 @@
 import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
-import EmbossedBrandMark from "@/components/EmbossedBrandMark";
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
+// REMOVED: import HeroEyebrow from "@/components/mdx/HeroEyebrow";
 import GlossaryTerm from "@/components/GlossaryTerm";
 import CanonReference from "@/components/CanonReference";
 
@@ -16,7 +17,7 @@ export type MdxComponentProps = React.PropsWithChildren<
 
 const H1 = ({ children, ...rest }: MdxComponentProps) => (
   <h1
-    className="mt-10 mb-6 font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-gray-50"
+    className="mb-6 mt-10 font-serif text-3xl font-semibold tracking-tight text-gray-50 sm:text-4xl"
     {...rest}
   >
     {children}
@@ -25,7 +26,7 @@ const H1 = ({ children, ...rest }: MdxComponentProps) => (
 
 const H2 = ({ children, ...rest }: MdxComponentProps) => (
   <h2
-    className="mt-8 mb-4 font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-gray-50"
+    className="mb-4 mt-8 font-serif text-2xl font-semibold tracking-tight text-gray-50 sm:text-3xl"
     {...rest}
   >
     {children}
@@ -34,7 +35,7 @@ const H2 = ({ children, ...rest }: MdxComponentProps) => (
 
 const H3 = ({ children, ...rest }: MdxComponentProps) => (
   <h3
-    className="mt-7 mb-3 font-serif text-xl sm:text-2xl font-semibold text-gray-50"
+    className="mb-3 mt-7 font-serif text-xl font-semibold text-gray-50 sm:text-2xl"
     {...rest}
   >
     {children}
@@ -42,14 +43,14 @@ const H3 = ({ children, ...rest }: MdxComponentProps) => (
 );
 
 const H4 = ({ children, ...rest }: MdxComponentProps) => (
-  <h4 className="mt-6 mb-3 text-base font-semibold text-gray-100" {...rest}>
+  <h4 className="mb-3 mt-6 text-base font-semibold text-gray-100" {...rest}>
     {children}
   </h4>
 );
 
 const P = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
-    className={`my-5 text-[1.02rem] sm:text-[1.06rem] leading-[1.9] text-gray-100 ${className}`.trim()}
+    className={`my-5 text-[1.02rem] leading-[1.9] text-gray-100 sm:text-[1.06rem] ${className}`.trim()}
     {...rest}
   >
     {children}
@@ -96,7 +97,7 @@ const Li = ({ children, ...rest }: MdxComponentProps) => (
 
 const Blockquote = ({ children, ...rest }: MdxComponentProps) => (
   <blockquote
-    className="my-8 border-l-4 border-softGold/70 bg-white/5 px-5 py-4 text-[1rem] leading-relaxed italic text-gray-100 rounded-r-2xl"
+    className="my-8 rounded-r-2xl border-l-4 border-softGold/70 bg-white/5 px-5 py-4 text-[1rem] leading-relaxed italic text-gray-100"
     {...rest}
   >
     {children}
@@ -107,7 +108,7 @@ const Blockquote = ({ children, ...rest }: MdxComponentProps) => (
 
 const Code = ({ children, ...rest }: MdxComponentProps) => (
   <code
-    className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] font-mono text-amber-200"
+    className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-[0.8rem] text-amber-200"
     {...rest}
   >
     {children}
@@ -176,12 +177,9 @@ const Grid = ({ children, className = "", ...rest }: MdxComponentProps) => (
   </div>
 );
 
-/**
- * PullLine – used for those single-line "punch" quotes in downloads/posts.
- */
 const PullLine = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
-    className={`my-8 border-y border-softGold/50 py-4 text-center font-serif text-lg sm:text-xl italic text-softGold ${className}`.trim()}
+    className={`my-8 border-y border-softGold/50 py-4 text-center font-serif text-lg italic text-softGold sm:text-xl ${className}`.trim()}
     {...rest}
   >
     {children}
@@ -217,7 +215,6 @@ const JsonLdBlock = ({ children, ...rest }: MdxComponentProps) => {
   return (
     <script
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: json }}
     />
   );
@@ -308,7 +305,7 @@ const NoteBlock = ({
 const RuleBlock = ({ className = "", ...rest }: MdxComponentProps) => (
   <hr
     className={(
-      "my-10 mx-auto w-full border-t border-softGold/40 " + className
+      "mx-auto my-10 w-full border-t border-softGold/40 " + className
     ).trim()}
     {...rest}
   />
@@ -566,15 +563,10 @@ interface BrandFrameWrapperProps extends MdxComponentProps {
   children?: React.ReactNode;
 }
 
-/**
- * BrandFrameWrapper – guard against empty usage in MDX.
- */
 const BrandFrameWrapper = (props: BrandFrameWrapperProps) => {
   const { children, ...rest } = props;
-
   const hasChildren = React.Children.count(children) > 0;
   if (!hasChildren) return null;
-
   return <BrandFrame {...rest}>{children}</BrandFrame>;
 };
 
@@ -601,8 +593,8 @@ const EmbossedSignWrapper = (props: EmbossedSignWrapperProps) => {
   return <EmbossedSign {...props} />;
 };
 
-// Export the components map with the safely imported components
-export const mdxComponents = {
+// Build the components map
+const mdxComponents = {
   // Headings & text
   h1: H1,
   h2: H2,
@@ -636,7 +628,7 @@ export const mdxComponents = {
   Callout: CalloutBlock,
   Note: NoteBlock,
   Rule: RuleBlock,
-  Divider: RuleBlock, // <Divider /> in MDX
+  Divider: RuleBlock,
   hr: RuleBlock,
   Caption: CaptionBlock,
   Badge: BadgeBlock,
@@ -657,4 +649,6 @@ export const mdxComponents = {
   CanonReference,
 };
 
+// Export both named and default for maximum compatibility
+export { mdxComponents };
 export default mdxComponents;

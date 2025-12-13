@@ -1,9 +1,6 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import {
-  getAllContentlayerDocs,
-  getDocHref,
-} from "@/lib/contentlayer-helper";
+import { getAllContentlayerDocs, getDocHref } from "@/lib/contentlayer-helper";
 
 type Props = { doc: any; canonicalPath: string; label?: string };
 
@@ -18,14 +15,22 @@ const ContentReadingRoom: NextPage<Props> = ({ doc, canonicalPath, label }) => {
   );
 };
 
+function getDocSlug(doc: any): string {
+  // Keep the “full slug” coming from frontmatter/contentlayer when present.
+  // Only fallback to flattenedPath last resort.
+  return String(doc?.slug ?? doc?._raw?.flattenedPath?.split("/").pop() ?? "");
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  // IMPORTANT: content/[slug] is a “generic” route.
-  // We must generate paths for ALL docs, but avoid conflict with dedicated routes.
-  const docs = getAllContentlayerDocs().filter((d: any) => !d.draft);
+  // This route is the generic “content reading room”.
+  // Only generate paths for docs that *actually* belong under /content/*
+  const docs = getAllContentlayerDocs()
+    .filter((d: any) => !d?.draft)
+    .filter((d: any) => String(getDocHref(d) || "").startsWith("/content/"));
 
   const paths = docs
     .map((d: any) => {
-      const slug = String(d.slug ?? d._raw?.flattenedPath?.split("/").pop() ?? "");
+      const slug = getDocSlug(d);
       if (!slug || slug === "index") return null;
       return { params: { slug } };
     })
@@ -36,15 +41,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "");
-  const docs = getAllContentlayerDocs().filter((d: any) => !d.draft);
+
+  const docs = getAllContentlayerDocs()
+    .filter((d: any) => !d?.draft)
+    .filter((d: any) => String(getDocHref(d) || "").startsWith("/content/"));
 
   const doc =
-    docs.find((d: any) => String(d.slug ?? d._raw?.flattenedPath?.split("/").pop()) === slug) ??
+    docs.find((d: any) => getDocSlug(d) === slug) ??
     null;
 
   if (!doc) return { notFound: true };
 
-  // Optional: label derived from type
   const docType = String(doc.type ?? doc._type ?? "").toLowerCase();
   const label =
     docType === "post"
