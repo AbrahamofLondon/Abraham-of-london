@@ -1,527 +1,650 @@
-// pages/index.tsx – THE PALACE HOMEPAGE
+// pages/content/index.tsx – THE KINGDOM VAULT
 import * as React from "react";
-import type { NextPage } from "next";
-import Image from "next/image";
+import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  ChevronRight,
+  Download,
+  Calendar,
+  FileText,
+  Crown,
+  BookMarked,
+  Palette,
+  Target,
+  Zap,
+  Layers,
+  X,
+  Sparkles,
+  Archive,
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
-import StatsBar from "@/components/homepage/StatsBar";
-import VenturesSection from "@/components/homepage/VenturesSection";
-import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
-import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
-import { Calendar, Compass, Users, Sparkles, BookOpen, Scroll } from "lucide-react";
 import {
-  getPublishedShorts,
-  getRecentShorts,
-  getShortUrl,
-  type Short,
+  getPublishedDocumentsByType,
+  getCardPropsForDocument,
+  type ContentlayerCardProps,
+  type DocKind,
 } from "@/lib/contentlayer-helper";
 
-// -----------------------------------------------------------------------------
-// BOOKS IN DEVELOPMENT
-// -----------------------------------------------------------------------------
-
-const BOOKS_IN_DEV = [
-  {
-    slug: "fathering-without-fear",
-    title: "Fathering Without Fear",
-    tag: "Fatherhood · Household",
-    blurb:
-      "Standards, rituals, and household architecture for men building families that outlast culture wars.",
-    cover: "/assets/images/books/fathering-without-fear.jpg",
-  },
-  {
-    slug: "the-fiction-adaptation",
-    title: "The Fiction Adaptation",
-    tag: "Fiction · Drama",
-    blurb:
-      "A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact.",
-    cover: "/assets/images/books/the-fiction-adaptation.jpg",
-  },
-];
-
-// -----------------------------------------------------------------------------
-// SHORTS – Get at build time with fallback
-// -----------------------------------------------------------------------------
-
-const getFeaturedShortsSafely = (): Short[] => {
-  try {
-    const shorts = getRecentShorts(3);
-    if (shorts && shorts.length > 0) return shorts;
-
-    const allShorts = getPublishedShorts();
-    if (allShorts && allShorts.length > 0) return allShorts.slice(0, 3);
-
-    return [];
-  } catch (error) {
-    console.error("Error loading shorts for homepage:", error);
-    return [];
-  }
+type ContentPageProps = {
+  docsByType: Record<DocKind, ContentlayerCardProps[]>;
 };
 
-const featuredShorts: Short[] = getFeaturedShortsSafely();
+const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
 
-// -----------------------------------------------------------------------------
-// REFINED DIVIDER – Palace ornament
-// -----------------------------------------------------------------------------
+// -----------------------------
+// Type Configuration – Palace aesthetic
+// -----------------------------
 
-const SectionDivider: React.FC = () => (
-  <div className="relative h-20 overflow-hidden">
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-300/30 to-transparent" />
-      <div className="mx-8 flex items-center gap-3">
-        <div className="h-2 w-2 rotate-45 border border-amber-400/50 bg-amber-500/20" />
-        <div className="h-1.5 w-1.5 rounded-full bg-amber-400/60" />
-        <div className="h-2 w-2 rotate-45 border border-amber-400/50 bg-amber-500/20" />
-      </div>
-      <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-300/30 to-transparent" />
-    </div>
-  </div>
-);
+const TYPE_CONFIG: Record<
+  DocKind,
+  {
+    label: string;
+    pluralLabel: string;
+    icon: React.ComponentType<{ className?: string }>;
+    description: string;
+    gradient: string;
+    accentText: string;
+    accentBg: string;
+    accentBorder: string;
+    pillBg: string;
+    coverAspect: "wide" | "portrait";
+    coverFit: "cover" | "contain";
+  }
+> = {
+  post: {
+    label: "Essay",
+    pluralLabel: "Essays",
+    icon: FileText,
+    description: "Long-form thinking on strategy, purpose, and legacy.",
+    gradient: "from-amber-50 to-amber-100/50",
+    accentText: "text-amber-700",
+    accentBg: "bg-amber-500/10",
+    accentBorder: "border-amber-400/30",
+    pillBg: "bg-amber-50/90",
+    coverAspect: "wide",
+    coverFit: "cover",
+  },
+  canon: {
+    label: "Canon",
+    pluralLabel: "Canon Entries",
+    icon: Crown,
+    description: "The philosophical spine. Foundation texts on governance and civilisation.",
+    gradient: "from-yellow-50 to-yellow-100/50",
+    accentText: "text-yellow-800",
+    accentBg: "bg-yellow-500/10",
+    accentBorder: "border-yellow-400/30",
+    pillBg: "bg-yellow-50/90",
+    coverAspect: "wide",
+    coverFit: "cover",
+  },
+  resource: {
+    label: "Resource",
+    pluralLabel: "Resources",
+    icon: Layers,
+    description: "Templates, frameworks, and tools for builders.",
+    gradient: "from-emerald-50 to-emerald-100/50",
+    accentText: "text-emerald-700",
+    accentBg: "bg-emerald-500/10",
+    accentBorder: "border-emerald-400/30",
+    pillBg: "bg-emerald-50/90",
+    coverAspect: "wide",
+    coverFit: "cover",
+  },
+  download: {
+    label: "Download",
+    pluralLabel: "Downloads",
+    icon: Download,
+    description: "PDFs, guides, and reference materials.",
+    gradient: "from-blue-50 to-blue-100/50",
+    accentText: "text-blue-700",
+    accentBg: "bg-blue-500/10",
+    accentBorder: "border-blue-400/30",
+    pillBg: "bg-blue-50/90",
+    coverAspect: "wide",
+    coverFit: "cover",
+  },
+  print: {
+    label: "Print",
+    pluralLabel: "Prints",
+    icon: Palette,
+    description: "Art, typography, and visual artifacts.",
+    gradient: "from-rose-50 to-rose-100/50",
+    accentText: "text-rose-700",
+    accentBg: "bg-rose-500/10",
+    accentBorder: "border-rose-400/30",
+    pillBg: "bg-rose-50/90",
+    coverAspect: "portrait",
+    coverFit: "contain",
+  },
+  book: {
+    label: "Book",
+    pluralLabel: "Books",
+    icon: BookMarked,
+    description: "Published works and books in development.",
+    gradient: "from-violet-50 to-violet-100/50",
+    accentText: "text-violet-700",
+    accentBg: "bg-violet-500/10",
+    accentBorder: "border-violet-400/30",
+    pillBg: "bg-violet-50/90",
+    coverAspect: "portrait",
+    coverFit: "contain",
+  },
+  event: {
+    label: "Event",
+    pluralLabel: "Events",
+    icon: Calendar,
+    description: "Rooms, sessions, and gatherings.",
+    gradient: "from-cyan-50 to-cyan-100/50",
+    accentText: "text-cyan-700",
+    accentBg: "bg-cyan-500/10",
+    accentBorder: "border-cyan-400/30",
+    pillBg: "bg-cyan-50/90",
+    coverAspect: "wide",
+    coverFit: "cover",
+  },
+  short: {
+    label: "Short",
+    pluralLabel: "Shorts",
+    icon: Zap,
+    description: "Quick field notes for men who don't scroll all day.",
+    gradient: "from-orange-50 to-orange-100/50",
+    accentText: "text-orange-700",
+    accentBg: "bg-orange-500/10",
+    accentBorder: "border-orange-400/30",
+    pillBg: "bg-orange-50/90",
+    coverAspect: "wide",
+    coverFit: "cover",
+  },
+  strategy: {
+    label: "Strategy",
+    pluralLabel: "Strategy",
+    icon: Target,
+    description: "Operating frameworks and strategic tools.",
+    gradient: "from-teal-50 to-teal-100/50",
+    accentText: "text-teal-700",
+    accentBg: "bg-teal-500/10",
+    accentBorder: "border-teal-400/30",
+    pillBg: "bg-teal-50/90",
+    coverAspect: "wide",
+    coverFit: "cover",
+  },
+};
 
-// -----------------------------------------------------------------------------
-// SHORTS STRIP
-// -----------------------------------------------------------------------------
+// -----------------------------
+// Helper functions
+// -----------------------------
 
-const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
-  if (!shorts || shorts.length === 0) return null;
+function fmtDate(d?: string | null) {
+  if (!d) return null;
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return null;
+  return dt.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+// -----------------------------
+// Section Divider
+// -----------------------------
+
+const SectionDivider: React.FC<{ accent?: string }> = ({ accent = "amber" }) => {
+  const colorClass =
+    accent === "amber"
+      ? "bg-amber-400/40"
+      : accent === "emerald"
+      ? "bg-emerald-400/40"
+      : "bg-neutral-400/40";
 
   return (
-    <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-              Shorts · Field signals
-            </p>
-            <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
-              Quick hits for men who don&apos;t scroll all day
-            </h2>
-            <p className="max-w-2xl text-base leading-relaxed text-gray-300">
-              Concise field notes on work, fatherhood, and building under
-              pressure — designed to be read between meetings, not instead of
-              them.
-            </p>
+    <div className="relative h-16 overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-px w-24 bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
+        <div className="mx-6 flex items-center gap-2.5">
+          <div className={`h-1.5 w-1.5 rounded-full ${colorClass}`} />
+          <div className="h-1 w-1 rounded-full bg-neutral-300/60" />
+          <div className={`h-1.5 w-1.5 rounded-full ${colorClass}`} />
+        </div>
+        <div className="h-px w-24 bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
+      </div>
+    </div>
+  );
+};
+
+// -----------------------------
+// Type Section Component
+// -----------------------------
+
+interface TypeSectionProps {
+  kind: DocKind;
+  docs: ContentlayerCardProps[];
+  config: (typeof TYPE_CONFIG)[DocKind];
+}
+
+const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
+  const IconComponent = config.icon;
+
+  if (docs.length === 0) return null;
+
+  return (
+    <section id={kind} className="scroll-mt-20">
+      {/* Section Header */}
+      <div className="mb-10">
+        <div className="mb-4 flex items-center gap-3">
+          <div className={`rounded-xl p-3 ${config.accentBg}`}>
+            <IconComponent className={`h-6 w-6 ${config.accentText}`} />
           </div>
-          <Link
-            href="/shorts"
-            className="inline-flex shrink-0 items-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
-          >
-            View all shorts
-          </Link>
+          <div>
+            <h2 className="font-serif text-3xl font-semibold tracking-tight text-neutral-900">
+              {config.pluralLabel}
+            </h2>
+            <p className="text-sm text-neutral-600">{docs.length} items</p>
+          </div>
         </div>
+        <p className="max-w-2xl text-base leading-relaxed text-neutral-700">
+          {config.description}
+        </p>
+      </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {shorts.map((short) => {
-            const url = getShortUrl(short);
-            const readTime = short.readTime || "Quick read";
-            const excerpt = short.excerpt || short.description || "";
+      {/* Grid */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {docs.map((doc) => {
+          const coverAspectClass =
+            config.coverAspect === "portrait" ? "aspect-[3/4]" : "aspect-[16/10]";
 
-            return (
-              <Link
-                key={short._id}
-                href={url}
-                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/40 hover:bg-slate-800/80 hover:shadow-2xl"
-              >
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
-                    <Sparkles className="h-3 w-3" />
-                    Short
-                  </span>
-                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
-                    {readTime}
-                  </span>
-                </div>
+          const objectClass =
+            config.coverFit === "contain" ? "object-contain" : "object-cover";
 
-                <h3 className="mb-3 line-clamp-2 font-serif text-xl font-semibold text-white">
-                  {short.title}
-                </h3>
+          const date = fmtDate(doc.date);
+          const img = doc.image || FALLBACK_IMAGE;
 
-                {excerpt && (
-                  <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-300">
-                    {excerpt}
-                  </p>
-                )}
+          return (
+            <motion.div
+              key={`${doc.type}-${doc.slug}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="h-full"
+            >
+              <Link href={doc.href} className="group block h-full">
+                <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-neutral-300 hover:shadow-xl">
+                  {/* Cover */}
+                  <div
+                    className={`relative ${coverAspectClass} w-full overflow-hidden bg-gradient-to-br from-neutral-50 to-neutral-100`}
+                  >
+                    <Image
+                      src={img}
+                      alt={doc.title}
+                      fill
+                      className={`${objectClass} transition duration-500 group-hover:scale-[1.03]`}
+                      sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
-                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
-                    Field note
-                  </span>
-                  <span className="inline-flex items-center text-sm font-semibold text-amber-300 transition-all group-hover:gap-2">
-                    Read
-                    <span className="ml-1 transition-transform group-hover:translate-x-1">
-                      →
-                    </span>
-                  </span>
-                </div>
+                    {/* Type pill */}
+                    <div className="absolute left-3 top-3">
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold backdrop-blur-sm ${config.pillBg} ${config.accentText} ${config.accentBorder}`}
+                      >
+                        <IconComponent className="h-3.5 w-3.5" />
+                        {config.label}
+                      </span>
+                    </div>
+
+                    {/* Featured badge */}
+                    {doc.featured && (
+                      <div className="absolute right-3 top-3">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/60 bg-amber-500/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                          <Sparkles className="h-3 w-3" />
+                          Featured
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Body */}
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="mb-2 line-clamp-2 font-serif text-lg font-semibold leading-snug text-neutral-900 transition group-hover:text-neutral-700">
+                      {doc.title}
+                    </h3>
+
+                    {(doc.subtitle || doc.excerpt || doc.description) && (
+                      <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-neutral-600">
+                        {doc.subtitle || doc.excerpt || doc.description}
+                      </p>
+                    )}
+
+                    {/* Tags */}
+                    {doc.tags && doc.tags.length > 0 && (
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {doc.tags.slice(0, 3).map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-600"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                        {doc.tags.length > 3 && (
+                          <span className="rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-400">
+                            +{doc.tags.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4">
+                      <div className="flex items-center gap-3">
+                        {date && (
+                          <span className="text-xs font-medium text-neutral-500">
+                            {date}
+                          </span>
+                        )}
+                        {doc.downloadUrl && (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700">
+                            <Download className="h-3.5 w-3.5" />
+                            PDF
+                          </span>
+                        )}
+                      </div>
+
+                      <span
+                        className={`inline-flex items-center gap-1 text-sm font-semibold ${config.accentText}`}
+                      >
+                        View
+                        <ChevronRight className="h-4 w-4" />
+                      </span>
+                    </div>
+                  </div>
+                </article>
               </Link>
-            );
-          })}
-        </div>
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );
 };
 
-// -----------------------------------------------------------------------------
-// BOOKS IN DEVELOPMENT
-// -----------------------------------------------------------------------------
+// -----------------------------
+// Page Component
+// -----------------------------
 
-const BooksInDevelopment: React.FC = () => (
-  <section className="bg-white py-20 dark:bg-slate-950">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
-            Books in development
-          </p>
-          <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-slate-900 dark:text-white sm:text-5xl">
-            Long-form work that underwrites everything else
-          </h2>
-          <p className="max-w-3xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
-            These projects sit behind the posts, shorts, and rooms — slow-cooked
-            work that outlives algorithms and platform cycles.
-          </p>
-        </div>
-        <Link
-          href="/books"
-          className="inline-flex shrink-0 items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
-        >
-          View all books
-        </Link>
-      </div>
+const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [activeType, setActiveType] = React.useState<DocKind | "all">("all");
 
-      <div className="grid gap-8 md:grid-cols-2">
-        {BOOKS_IN_DEV.map((book) => (
-          <Link
-            key={book.slug}
-            href={`/books/${book.slug}`}
-            className="group block"
-          >
-            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-              <div className="grid gap-0 md:grid-cols-[auto,1fr]">
-                <div className="relative aspect-[3/4] w-full max-w-[10rem] flex-shrink-0">
-                  <Image
-                    src={book.cover}
-                    alt={book.title}
-                    fill
-                    sizes="(max-width: 768px) 35vw, 20vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                </div>
-                <div className="flex flex-col justify-between p-7">
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
-                      In development
-                    </p>
-                    <h3 className="mb-2 font-serif text-2xl font-semibold text-slate-900 dark:text-white">
-                      {book.title}
-                    </h3>
-                    <p className="mb-4 text-xs font-medium uppercase tracking-[0.15em] text-slate-600 dark:text-gray-400">
-                      {book.tag}
-                    </p>
-                    <p className="text-base leading-relaxed text-slate-700 dark:text-gray-300">
-                      {book.blurb}
-                    </p>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-5 dark:border-slate-800">
-                    <span className="text-xs font-medium uppercase tracking-[0.15em] text-slate-500 dark:text-gray-500">
-                      Canon bookshelf
-                    </span>
-                    <span className="text-base font-semibold text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400">
-                      View project →
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </Link>
-        ))}
-      </div>
-    </div>
-  </section>
-);
+  const allKinds: DocKind[] = React.useMemo(
+    () => [
+      "post",
+      "canon",
+      "resource",
+      "download",
+      "print",
+      "book",
+      "event",
+      "short",
+      "strategy",
+    ],
+    []
+  );
 
-// -----------------------------------------------------------------------------
-// STRATEGIC SESSIONS
-// -----------------------------------------------------------------------------
+  const allDocs = React.useMemo(() => {
+    return allKinds.flatMap((k) => docsByType[k] ?? []);
+  }, [docsByType, allKinds]);
 
-const StrategicSessions: React.FC = () => (
-  <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-            Strategic sessions
-          </p>
-          <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
-            Where we do the work in the room
-          </h2>
-          <p className="max-w-3xl text-base leading-relaxed text-gray-300">
-            Not inspirational talks. Working sessions built for people carrying
-            real responsibility — for a boardroom, a founding team, or a
-            household.
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-          <Link
-            href="/consulting"
-            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-lg shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-xl"
-          >
-            Book a conversation
-          </Link>
-          <Link
-            href="/events"
-            className="inline-flex items-center justify-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
-          >
-            Upcoming rooms
-          </Link>
-        </div>
-      </div>
+  const typeCounts = React.useMemo(() => {
+    const counts: Record<string, number> = { all: allDocs.length };
+    allKinds.forEach((k) => {
+      counts[k] = (docsByType[k] ?? []).length;
+    });
+    return counts;
+  }, [docsByType, allDocs, allKinds]);
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-7 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
-          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
-            <Compass className="h-7 w-7" />
-          </div>
-          <h3 className="mb-3 font-serif text-xl font-semibold text-white">
-            Strategy rooms for founders & boards
-          </h3>
-          <p className="mb-5 text-base leading-relaxed text-gray-300">
-            Clarify mandate, markets, and operating rhythm so your decisions
-            stop fighting your design.
-          </p>
-          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
-            Alomarada · InfraNova Africa · Governance diagnostics
-          </p>
-        </article>
+  const filteredTypes = React.useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const result: Record<DocKind, ContentlayerCardProps[]> = {} as any;
 
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-7 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
-          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
-            <Users className="h-7 w-7" />
-          </div>
-          <h3 className="mb-3 font-serif text-xl font-semibold text-white">
-            Fatherhood & household architecture
-          </h3>
-          <p className="mb-5 text-base leading-relaxed text-gray-300">
-            Standards, rituals, and structures that let men show up for their
-            sons without outsourcing conviction to the culture.
-          </p>
-          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
-            Fathering Without Fear · Canon household tools
-          </p>
-        </article>
+    allKinds.forEach((kind) => {
+      const docs = docsByType[kind] ?? [];
+      if (docs.length === 0) return;
 
-        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-7 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-blue-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
-          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400">
-            <Calendar className="h-7 w-7" />
-          </div>
-          <h3 className="mb-3 font-serif text-xl font-semibold text-white">
-            Leadership salons & inner-circle work
-          </h3>
-          <p className="mb-5 text-base leading-relaxed text-gray-300">
-            Small, closed rooms where we test ideas, frameworks, and Canon tools
-            against real lives and real P&Ls.
-          </p>
-          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
-            Chatham rooms · Inner Circle · Builders&apos; tables
-          </p>
-        </article>
-      </div>
-    </div>
-  </section>
-);
+      if (!q) {
+        result[kind] = docs;
+        return;
+      }
 
-// -----------------------------------------------------------------------------
-// PAGE COMPONENT – THE PALACE
-// -----------------------------------------------------------------------------
+      const filtered = docs.filter((doc) => {
+        const hay = [
+          doc.title,
+          doc.subtitle ?? "",
+          doc.excerpt ?? "",
+          doc.description ?? "",
+          (doc.tags ?? []).join(" "),
+        ]
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(q);
+      });
 
-const HomePage: NextPage = () => {
-  const siteTitle = "Abraham of London";
-  const siteTagline =
-    "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
+      if (filtered.length > 0) {
+        result[kind] = filtered;
+      }
+    });
+
+    return result;
+  }, [allKinds, docsByType, searchQuery]);
+
+  const totalFiltered = React.useMemo(() => {
+    return Object.values(filteredTypes).reduce((sum, docs) => sum + docs.length, 0);
+  }, [filteredTypes]);
+
+  const visibleKinds = React.useMemo(() => {
+    return allKinds.filter((k) => (filteredTypes[k]?.length ?? 0) > 0);
+  }, [allKinds, filteredTypes]);
+
+  // Scroll to type section
+  const scrollToType = (kind: DocKind) => {
+    const element = document.getElementById(kind);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
-    <Layout
-      title={siteTitle}
-      description={siteTagline}
-      structuredData={{
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: siteTitle,
-        description: siteTagline,
-        url:
-          process.env.NEXT_PUBLIC_SITE_URL ||
-          "https://www.abrahamoflondon.org",
-        publisher: {
-          "@type": "Person",
-          name: "Abraham of London",
-        },
-      }}
-    >
-      {/* GRAND ENTRANCE – Hero with commanding presence */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        {/* Atmospheric lighting */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="pointer-events-none absolute -top-40 right-0 h-[600px] w-[600px] rounded-full bg-amber-500/8 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-40 left-0 h-[600px] w-[600px] rounded-full bg-emerald-500/6 blur-3xl" />
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
-            {/* Left – Philosophy & Command */}
-            <div className="max-w-2xl">
-              <div className="mb-10">
-                {/* Royal seal */}
-                <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-amber-400/40 bg-amber-500/10 px-5 py-2.5 shadow-lg shadow-amber-900/20 backdrop-blur-sm">
-                  <span className="text-2xl text-amber-400">𓆓</span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-200">
-                    Canon · Ventures · Field tools
-                  </span>
-                </div>
-
-                <h1 className="mb-6 font-serif text-5xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
-                  Abraham of London
-                </h1>
-
-                <p className="mb-6 font-serif text-2xl font-light leading-snug text-amber-100 sm:text-3xl">
-                  Structural thinking for fathers, founders, and builders of
-                  legacy.
-                </p>
-
-                <p className="text-lg leading-relaxed text-gray-300">
-                  For men who carry responsibility for a family, a company, or a
-                  community — this is where faith, history, and strategy are
-                  turned into operating systems, not slogans.
-                </p>
+    <Layout title="Archive">
+      <main className="min-h-screen bg-white">
+        {/* HERO */}
+        <section className="relative border-b border-neutral-200 bg-gradient-to-b from-white to-neutral-50/50">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.05)_0%,transparent_60%)]" />
+          
+          <div className="relative mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
+            <div className="max-w-4xl">
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-neutral-200 bg-white/80 px-4 py-2.5 shadow-sm backdrop-blur-sm">
+                <Archive className="h-4 w-4 text-neutral-700" />
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-700">
+                  The Kingdom Vault
+                </span>
+                <span className="rounded-full bg-neutral-900 px-2 py-0.5 text-xs font-bold text-white">
+                  {typeCounts.all}
+                </span>
               </div>
 
-              {/* Primary CTAs */}
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/canon"
-                  className="group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-base font-semibold text-black shadow-xl shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-2xl"
-                >
-                  <BookOpen className="h-5 w-5" />
-                  <span>Enter the Canon</span>
-                  <span className="transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </Link>
-                <Link
-                  href="/consulting"
-                  className="group inline-flex items-center gap-2.5 rounded-xl border-2 border-amber-400/60 bg-amber-400/5 px-8 py-4 text-base font-semibold text-amber-100 backdrop-blur-sm transition-all hover:scale-105 hover:bg-amber-500/10"
-                >
-                  <Scroll className="h-5 w-5" />
-                  <span>Work with Abraham</span>
-                  <span className="transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </Link>
-              </div>
+              <h1 className="mb-5 font-serif text-5xl font-semibold tracking-tight text-neutral-900 sm:text-6xl">
+                Everything. Organised.
+              </h1>
 
-              <p className="mt-8 text-xs uppercase tracking-[0.22em] text-gray-500">
-                Canon · Essays · Field letters · Tools · Inner circle
+              <p className="mb-10 text-lg leading-relaxed text-neutral-700">
+                Essays, Canon volumes, resources, downloads, prints, books,
+                events, shorts, strategy — each with its place, each with its
+                purpose.
               </p>
-            </div>
 
-            {/* Right – Hero Banner */}
-            <div className="relative">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-sm">
-                <div className="relative aspect-video w-full">
-                  <Image
-                    src="/assets/images/abraham-of-london-banner.webp"
-                    alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
-                    fill
-                    priority
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover object-center"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              {/* SEARCH */}
+              <div className="relative">
+                <div className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2">
+                  <Search className="h-5 w-5 text-neutral-400" />
                 </div>
-                <div className="border-t border-white/10 bg-gradient-to-r from-slate-900/95 via-slate-900/90 to-slate-900/95 px-6 py-5 backdrop-blur-md">
-                  <p className="text-base font-medium leading-relaxed text-gray-200">
-                    The Canon is the philosophical spine. The ventures are the
-                    working arms. Together they exist to build men, families,
-                    and institutions that outlast headlines.
-                  </p>
-                </div>
+
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search across all collections..."
+                  className="w-full rounded-2xl border border-neutral-300 bg-white py-4 pl-14 pr-14 text-base text-neutral-900 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                />
+
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-800"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
+
+              {searchQuery && (
+                <div className="mt-4 text-sm text-neutral-600">
+                  Showing{" "}
+                  <span className="font-semibold text-neutral-900">
+                    {totalFiltered}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-semibold text-neutral-900">
+                    {typeCounts.all}
+                  </span>{" "}
+                  items
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* STATS BAR – Social proof */}
-      <section className="border-y border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <StatsBar />
-        </div>
-      </section>
+        {/* QUICK NAVIGATION */}
+        <section className="sticky top-0 z-10 border-b border-neutral-200 bg-white/95 backdrop-blur-md">
+          <div className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {allKinds.map((kind) => {
+                const count = typeCounts[kind] || 0;
+                if (count === 0) return null;
 
-      <SectionDivider />
+                const cfg = TYPE_CONFIG[kind];
+                const IconComponent = cfg.icon;
+                const isVisible = visibleKinds.includes(kind);
 
-      {/* CANON SPOTLIGHT – The foundation */}
-      <section className="bg-white py-20 dark:bg-slate-950">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
-                Canon · Foundations
-              </p>
-              <h2 className="mb-4 font-serif text-4xl font-light tracking-tight text-slate-900 dark:text-white sm:text-5xl">
-                The philosophical spine
-              </h2>
-              <p className="max-w-3xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
-                The Canon is the long-term work: purpose, governance,
-                civilisation, and destiny — written from a father&apos;s
-                vantage point, not an academic desk.
-              </p>
+                return (
+                  <button
+                    key={kind}
+                    onClick={() => scrollToType(kind)}
+                    disabled={!isVisible}
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
+                      isVisible
+                        ? `${cfg.pillBg} ${cfg.accentText} ${cfg.accentBorder} hover:shadow-sm`
+                        : "border-neutral-200 bg-neutral-50 text-neutral-400"
+                    }`}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    {cfg.pluralLabel}
+                    <span className="text-xs opacity-70">
+                      ({isVisible ? filteredTypes[kind]?.length ?? 0 : count})
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <Link
-              href="/canon"
-              className="inline-flex shrink-0 items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
+          </div>
+        </section>
+
+        {/* CONTENT SECTIONS */}
+        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+          {visibleKinds.length > 0 ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={searchQuery}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-16"
+              >
+                {visibleKinds.map((kind, index) => (
+                  <React.Fragment key={kind}>
+                    <TypeSection
+                      kind={kind}
+                      docs={filteredTypes[kind] ?? []}
+                      config={TYPE_CONFIG[kind]}
+                    />
+                    {index < visibleKinds.length - 1 && <SectionDivider />}
+                  </React.Fragment>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+              className="rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/40 p-16"
             >
-              Browse Canon entries
-            </Link>
-          </div>
-
-          <CanonPrimaryCard />
+              <div className="mx-auto max-w-md text-center">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm">
+                  <Search className="h-8 w-8 text-neutral-300" />
+                </div>
+                <h3 className="mb-3 font-serif text-2xl font-semibold text-neutral-900">
+                  No results found
+                </h3>
+                <p className="mb-8 text-neutral-600">
+                  Try adjusting your search terms or browse all collections.
+                </p>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 shadow-sm transition hover:bg-neutral-50"
+                >
+                  <X className="h-4 w-4" />
+                  Clear search
+                </button>
+              </div>
+            </motion.div>
+          )}
         </div>
-      </section>
-
-      <SectionDivider />
-
-      {/* STRATEGIC FUNNEL – The conversion path */}
-      <StrategicFunnelStrip />
-
-      <SectionDivider />
-
-      {/* SHORTS STRIP – Quick value */}
-      {featuredShorts.length > 0 && (
-        <>
-          <ShortsStrip shorts={featuredShorts} />
-          <SectionDivider />
-        </>
-      )}
-
-      {/* VENTURES – Working arms */}
-      <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
-        <VenturesSection />
-      </section>
-
-      <SectionDivider />
-
-      {/* BOOKS IN DEVELOPMENT */}
-      <BooksInDevelopment />
-
-      <SectionDivider />
-
-      {/* STRATEGIC SESSIONS */}
-      <StrategicSessions />
+      </main>
     </Layout>
   );
 };
 
-export default HomePage;
+// -----------------------------
+// Data Fetching
+// -----------------------------
+
+export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
+  const publishedBuckets = getPublishedDocumentsByType();
+
+  const docsByType: Record<DocKind, ContentlayerCardProps[]> = {
+    post: [],
+    canon: [],
+    resource: [],
+    download: [],
+    print: [],
+    book: [],
+    event: [],
+    short: [],
+    strategy: [],
+  };
+
+  (Object.keys(docsByType) as DocKind[]).forEach((kind) => {
+    docsByType[kind] = (publishedBuckets[kind] ?? []).map(
+      getCardPropsForDocument
+    );
+  });
+
+  return { props: { docsByType }, revalidate: 60 };
+};
+
+export default ContentIndexPage;
