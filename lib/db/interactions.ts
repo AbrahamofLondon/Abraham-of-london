@@ -21,62 +21,40 @@ export async function getInteractionStats(
   sessionId?: string | null
 ): Promise<InteractionStats> {
   const client = await pool.connect();
-  
   try {
-    // Get total likes and saves (excluding deleted)
     const totalsQuery = `
-      SELECT 
-        action,
-        COUNT(*) as count
-      FROM short_interactions 
-      WHERE short_slug = $1 
+      SELECT action, COUNT(*)::int as count
+      FROM short_interactions
+      WHERE short_slug = $1
         AND deleted_at IS NULL
-        AND (session_id IS NOT NULL OR user_id IS NOT NULL)
       GROUP BY action
     `;
-    
     const totalsResult = await client.query(totalsQuery, [shortSlug]);
-    
-    // Get user's interactions if sessionId provided
+
     let userLiked = false;
     let userSaved = false;
-    
+
     if (sessionId) {
-      const userInteractionsQuery = `
-        SELECT action 
-        FROM short_interactions 
-        WHERE short_slug = $1 
+      const userQuery = `
+        SELECT action
+        FROM short_interactions
+        WHERE short_slug = $1
           AND deleted_at IS NULL
           AND session_id = $2
       `;
-      
-      const userResult = await client.query(userInteractionsQuery, [shortSlug, sessionId]);
-      userLiked = userResult.rows.some(r => r.action === 'like');
-      userSaved = userResult.rows.some(r => r.action === 'save');
+      const userResult = await client.query(userQuery, [shortSlug, sessionId]);
+      userLiked = userResult.rows.some((r) => r.action === "like");
+      userSaved = userResult.rows.some((r) => r.action === "save");
     }
-    
-    // Transform results
-    const likesRow = totalsResult.rows.find(r => r.action === 'like');
-    const savesRow = totalsResult.rows.find(r => r.action === 'save');
-    
-    const likes = likesRow ? parseInt(likesRow.count) : 0;
-    const saves = savesRow ? parseInt(savesRow.count) : 0;
-    
+
+    const likesRow = totalsResult.rows.find((r) => r.action === "like");
+    const savesRow = totalsResult.rows.find((r) => r.action === "save");
+
     return {
-      likes,
-      saves,
+      likes: likesRow?.count ?? 0,
+      saves: savesRow?.count ?? 0,
       userLiked,
       userSaved,
-    };
-    
-  } catch (error) {
-    console.error('Error getting interaction stats:', error);
-    // Return defaults on error
-    return {
-      likes: 0,
-      saves: 0,
-      userLiked: false,
-      userSaved: false,
     };
   } finally {
     client.release();
