@@ -74,6 +74,8 @@ export interface ContentlayerCardProps {
   author?: string | null;
   featured?: boolean;
   downloadUrl?: string | null;
+  coverAspect?: string | null; // ✅ Added
+  coverFit?: string | null; // ✅ Added
 }
 
 // ============================================
@@ -501,6 +503,8 @@ export function getCardPropsForDocument(doc: AnyDoc): ContentlayerCardProps {
     author: (doc as any).author ?? null,
     featured: (doc as any).featured === true,
     downloadUrl: resolveDocDownloadUrl(doc),
+    coverAspect: (doc as any).coverAspect ?? null, // ✅ Pass through
+    coverFit: (doc as any).coverFit ?? null, // ✅ Pass through
   };
 }
 

@@ -78,8 +78,8 @@ const TYPE_CONFIG: Record<
     accentBg: "bg-yellow-500/10",
     accentBorder: "border-yellow-400/30",
     pillBg: "bg-yellow-50/90",
-    coverAspect: "wide",
-    coverFit: "cover",
+    coverAspect: "portrait",
+    coverFit: "contain",
   },
   resource: {
     label: "Resource",
@@ -254,11 +254,26 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
       {/* Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {docs.map((doc) => {
-          const coverAspectClass =
-            config.coverAspect === "portrait" ? "aspect-[3/4]" : "aspect-[16/10]";
+          // Smart aspect ratio detection - check doc metadata first
+          const docAspect = (doc as any).coverAspect;
+          let coverAspectClass: string;
+          let objectClass: string;
 
-          const objectClass =
-            config.coverFit === "contain" ? "object-contain" : "object-cover";
+          if (docAspect === "book" || docAspect === "portrait") {
+            // Book/portrait style (3:4 ratio)
+            coverAspectClass = "aspect-[3/4]";
+            objectClass = "object-contain";
+          } else if (docAspect === "wide") {
+            // Wide style (16:10 ratio)
+            coverAspectClass = "aspect-[16/10]";
+            objectClass = "object-cover";
+          } else {
+            // Fallback to config defaults
+            coverAspectClass =
+              config.coverAspect === "portrait" ? "aspect-[3/4]" : "aspect-[16/10]";
+            objectClass =
+              config.coverFit === "contain" ? "object-contain" : "object-cover";
+          }
 
           const date = fmtDate(doc.date);
           const img = doc.image || FALLBACK_IMAGE;
