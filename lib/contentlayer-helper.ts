@@ -1,4 +1,4 @@
-// lib/contentlayer-helper.ts - FIXED VERSION with proper type mapping
+// lib/contentlayer-helper.ts - FIXED VERSION with correct URLs
 import {
   allPosts,
   allBooks,
@@ -150,7 +150,17 @@ export const isCanon = (doc: AnyDoc): doc is CanonType =>
 export const isShort = (doc: AnyDoc): doc is ShortType =>
   doc.type === "Short" || doc._type === "Short";
 
-export const isDraft = (doc: AnyDoc): boolean => Boolean(doc.draft);
+// Bulletproof draft detection - handles string "false", boolean false, undefined, null
+export const isDraft = (doc: AnyDoc): boolean => {
+  const d = doc.draft;
+  // Explicitly false values
+  if (d === false || d === "false" || d === null || d === undefined) return false;
+  // Explicitly true values
+  if (d === true || d === "true") return true;
+  // Default to not draft
+  return false;
+};
+
 export const isPublished = (doc: AnyDoc): boolean => !isDraft(doc);
 
 // ============================================
@@ -185,16 +195,18 @@ export function getDocKind(doc: AnyDoc): DocKind {
 }
 
 // ============================================
-// URL HELPERS
+// URL HELPERS - FIXED FOR YOUR SITE STRUCTURE
 // ============================================
 
 export function getDocHref(doc: AnyDoc): string {
   const slug = normalizeSlug(doc);
   const kind = getDocKind(doc);
 
+  // CRITICAL FIX: All content types go through /content/[slug]
+  // except downloads, shorts, and a few specific routes
   switch (kind) {
     case "post":
-      return `/blog/${slug}`;
+      return `/content/${slug}`; // ✅ FIXED: was /blog/
     case "short":
       return `/shorts/${slug}`;
     case "book":
@@ -208,9 +220,9 @@ export function getDocHref(doc: AnyDoc): string {
     case "print":
       return `/prints/${slug}`;
     case "resource":
-      return `/resources/${slug}`;
+      return `/content/${slug}`; // ✅ FIXED: was /resources/
     case "strategy":
-      return `/strategy/${slug}`;
+      return `/content/${slug}`; // ✅ FIXED: was /strategy/
     default:
       return `/content/${slug}`;
   }
@@ -232,7 +244,6 @@ export function resolveDocCoverImage(doc: AnyDoc): string {
     return explicit.trim();
   }
 
-  // Fallback
   return "/assets/images/writing-desk.webp";
 }
 
@@ -283,7 +294,11 @@ export const getPublishedDocuments = (): AnyDoc[] => {
 
 export const getFeaturedDocuments = (): AnyDoc[] => {
   try {
-    return getPublishedDocuments().filter((doc) => doc.featured === true);
+    return getPublishedDocuments().filter((doc) => {
+      const f = doc.featured;
+      // Only return true if explicitly featured: true (not "true" string, not undefined)
+      return f === true || f === "true";
+    });
   } catch (error) {
     console.error("Error getting featured documents:", error);
     return [];
@@ -309,7 +324,6 @@ export function getPublishedDocumentsByType(): Record<DocKind, AnyDoc[]> {
     short: [],
   };
 
-  // Group documents by their UI type (lowercase)
   for (const doc of published) {
     const kind = getDocKind(doc);
     buckets[kind].push(doc);
