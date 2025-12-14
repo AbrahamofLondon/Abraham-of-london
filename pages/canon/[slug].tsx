@@ -1,4 +1,4 @@
-// pages/canon/[slug].tsx
+// pages/canon/[slug].tsx - FIXED VERSION
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -11,9 +11,9 @@ import mdxComponents from "@/components/mdx-components";
 import LockClosedIcon from "@/components/icons/LockClosedIcon";
 
 import {
-  getPublicCanon, // Changed from getAllCanon
+  getPublicCanon,
   getCanonBySlug,
-  type Canon, // Changed from CanonDoc
+  type Canon,
 } from "@/lib/canon";
 
 // ---------------------------------------------------------------------------
@@ -34,6 +34,7 @@ type CanonPageMeta = {
   featured?: boolean;
   accessLevel?: string | null;
   lockMessage?: string | null;
+  draft?: boolean; // ✅ Added
 };
 
 type PageProps = {
@@ -62,6 +63,13 @@ function hasInnerCircleCookie(): boolean {
     .some((part) => part.startsWith("innerCircleAccess=true"));
 }
 
+// ✅ Bulletproof draft detection
+function isDraftValue(value: unknown): boolean {
+  if (value === false || value === "false" || value === null || value === undefined) return false;
+  if (value === true || value === "true") return true;
+  return false;
+}
+
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
@@ -80,6 +88,7 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
     featured,
     accessLevel,
     lockMessage,
+    draft, // ✅ Added
   } = meta;
 
   const [hasAccess, setHasAccess] = React.useState(false);
@@ -92,6 +101,7 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
 
   const isInnerCircle = accessLevel === "inner-circle";
   const isLocked = isInnerCircle && (!checkedAccess || !hasAccess);
+  const isDraft = isDraftValue(draft); // ✅ Use helper
 
   const displaySubtitle =
     subtitle || description || excerpt || "Canon Volume";
@@ -196,6 +206,15 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
                     </span>
                   </>
                 )}
+                {/* ✅ Show draft status if draft */}
+                {isDraft && (
+                  <>
+                    <span className="h-4 w-px bg-white/20" />
+                    <span className="inline-flex items-center gap-1 text-amber-400">
+                      ⚠ Draft
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -221,6 +240,13 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
                     {tags.join(" · ")}
                   </p>
                 )}
+                {/* ✅ Show status */}
+                <p>
+                  <span className="text-softGold/80">Status:</span>{" "}
+                  <span className={isDraft ? "text-amber-400" : "text-emerald-400"}>
+                    {isDraft ? "Draft" : "Published"}
+                  </span>
+                </p>
               </div>
 
               {isInnerCircle && (
@@ -289,15 +315,25 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
 
           <div className="mt-16 border-t border-white/10 pt-8 text-xs text-gray-400">
             <p>
-              Catalogued as part of the{" "}
-              <Link
-                href="/canon"
-                className="text-softGold hover:text-softGold/80"
-              >
-                Abraham of London Canon
-              </Link>
-              . Built for fathers, founders, and stewards who think in
-              generations.
+              {/* ✅ Only show "Draft" footer if actually draft */}
+              {isDraft ? (
+                <>
+                  <span className="text-amber-400">Draft Canon Entry.</span>{" "}
+                  This volume is being prepared for publication.
+                </>
+              ) : (
+                <>
+                  Catalogued as part of the{" "}
+                  <Link
+                    href="/canon"
+                    className="text-softGold hover:text-softGold/80"
+                  >
+                    Abraham of London Canon
+                  </Link>
+                  . Built for fathers, founders, and stewards who think in
+                  generations.
+                </>
+              )}
             </p>
           </div>
         </section>
@@ -313,7 +349,7 @@ export default CanonPage;
 // ---------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs: Canon[] = getPublicCanon(); // Changed from getAllCanon({ includeDrafts: false })
+  const docs: Canon[] = getPublicCanon();
 
   const paths =
     docs
@@ -346,6 +382,9 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     (match as unknown as { volumeNumber?: unknown }).volumeNumber
   );
 
+  // ✅ Extract draft value
+  const draftValue = (match as any).draft;
+
   const meta: CanonPageMeta = {
     slug: match.slug,
     title: match.title ?? "Canon Volume",
@@ -361,12 +400,18 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     featured: Boolean((match as any).featured),
     accessLevel: (match as any).accessLevel ?? null,
     lockMessage: (match as any).lockMessage ?? null,
+    draft: isDraftValue(draftValue), // ✅ Pass through helper
   };
 
   const raw = (match as any).body?.raw ?? "";
   const clean = raw.trim();
 
-  const mdxSource = await serialize(clean || "# Draft Canon Entry", {
+  // ✅ Fixed fallback - no longer says "Draft" when published
+  const fallbackContent = meta.draft 
+    ? "# Draft Canon Entry\n\nThis volume is being prepared for publication."
+    : "# Canon Entry\n\nContent is being compiled.";
+
+  const mdxSource = await serialize(clean || fallbackContent, {
     mdxOptions: {
       remarkPlugins: [],
       rehypePlugins: [],
