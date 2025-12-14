@@ -1,43 +1,56 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import { allPosts } from "contentlayer/generated";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { getDocHref } from "@/lib/contentlayer-helper";
+import { getAllContentlayerDocs, getDocHref } from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string };
+type Props = { doc: any; canonicalPath: string; label?: string };
 
-const BlogSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
+function joinSlugParam(slug: string | string[] | undefined) {
+  if (!slug) return "";
+  return Array.isArray(slug) ? slug.join("/") : slug;
+}
+
+const BlogDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
       canonicalPath={canonicalPath}
-      backHref="/blog"
+      backHref="/content"
       label="Essay"
     />
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = (allPosts ?? [])
-    .filter((p) => !p.draft)
-    .map((p) => ({ params: { slug: String(p.slug) } }))
-    .filter((p) => p.params.slug && p.params.slug !== "index");
+  const docs = getAllContentlayerDocs()
+    .filter((d: any) => !d?.draft)
+    .filter((d: any) => String(getDocHref(d) || "").startsWith("/blog/"));
+
+  const paths = docs.map((d: any) => {
+    const href = String(getDocHref(d));
+    const parts = href.replace(/^\/blog\//, "").split("/").filter(Boolean);
+    return { params: { slug: parts } };
+  });
 
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "");
-  const doc = (allPosts ?? []).find((p) => !p.draft && String(p.slug) === slug) ?? null;
+  const slugPath = joinSlugParam((params as any)?.slug);
+  if (!slugPath) return { notFound: true };
+
+  const docs = getAllContentlayerDocs()
+    .filter((d: any) => !d?.draft)
+    .filter((d: any) => String(getDocHref(d) || "").startsWith("/blog/"));
+
+  const canonicalPath = `/blog/${slugPath}`;
+  const doc = docs.find((d: any) => String(getDocHref(d)) === canonicalPath) ?? null;
 
   if (!doc) return { notFound: true };
 
   return {
-    props: {
-      doc,
-      canonicalPath: getDocHref(doc), // will be /blog/slug from your helper
-    },
+    props: { doc, canonicalPath, label: "Essay" },
     revalidate: 60,
   };
 };
 
-export default BlogSlugPage;
+export default BlogDocPage;

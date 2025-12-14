@@ -1,11 +1,15 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import { allResources } from "contentlayer/generated";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { getDocHref } from "@/lib/contentlayer-helper";
+import { getAllContentlayerDocs, getDocHref } from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string };
+type Props = { doc: any; canonicalPath: string; label?: string };
 
-const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
+function joinSlugParam(slug: string | string[] | undefined) {
+  if (!slug) return "";
+  return Array.isArray(slug) ? slug.join("/") : slug;
+}
+
+const ResourceDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
@@ -17,25 +21,36 @@ const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = (allResources ?? [])
-    .filter((r) => !r.draft)
-    .map((r) => ({ params: { slug: String(r.slug) } }))
-    .filter((p) => p.params.slug && p.params.slug !== "index");
+  const docs = getAllContentlayerDocs()
+    .filter((d: any) => !d?.draft)
+    .filter((d: any) => String(getDocHref(d) || "").startsWith("/resources/"));
+
+  const paths = docs.map((d: any) => {
+    const href = String(getDocHref(d));
+    const parts = href.replace(/^\/resources\//, "").split("/").filter(Boolean);
+    return { params: { slug: parts } };
+  });
 
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "");
-  const doc =
-    (allResources ?? []).find((r) => !r.draft && String(r.slug) === slug) ?? null;
+  const slugPath = joinSlugParam((params as any)?.slug);
+  if (!slugPath) return { notFound: true };
+
+  const docs = getAllContentlayerDocs()
+    .filter((d: any) => !d?.draft)
+    .filter((d: any) => String(getDocHref(d) || "").startsWith("/resources/"));
+
+  const canonicalPath = `/resources/${slugPath}`;
+  const doc = docs.find((d: any) => String(getDocHref(d)) === canonicalPath) ?? null;
 
   if (!doc) return { notFound: true };
 
   return {
-    props: { doc, canonicalPath: getDocHref(doc) },
+    props: { doc, canonicalPath, label: "Resource" },
     revalidate: 60,
   };
 };
 
-export default ResourceSlugPage;
+export default ResourceDocPage;
