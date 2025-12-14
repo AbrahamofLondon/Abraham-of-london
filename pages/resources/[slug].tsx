@@ -1,56 +1,93 @@
+// pages/resources/[...slug].tsx
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { getAllContentlayerDocs, getDocHref } from "@/lib/contentlayer-helper";
+import {
+  getAllContentlayerDocs,
+  getDocHref,
+  getDocKind,
+  isDraft,
+} from "@/lib/contentlayer-helper";
 
 type Props = { doc: any; canonicalPath: string; label?: string };
 
-function joinSlugParam(slug: string | string[] | undefined) {
-  if (!slug) return "";
-  return Array.isArray(slug) ? slug.join("/") : slug;
-}
-
-const ResourceDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
+const ResourcePage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
       canonicalPath={canonicalPath}
       backHref="/resources"
-      label="Resource"
+      label="Resources"
     />
   );
 };
 
+function lastSegment(input: string[] | string | undefined): string {
+  if (!input) return "";
+  if (Array.isArray(input)) return String(input[input.length - 1] ?? "").trim();
+  return String(input).trim();
+}
+
+function slugOf(d: any): string {
+  const s = typeof d?.slug === "string" ? d.slug.trim() : "";
+  if (s) return s;
+
+  const fp = typeof d?._raw?.flattenedPath === "string" ? d._raw.flattenedPath : "";
+  if (fp) {
+    const parts = fp.split("/");
+    const last = parts[parts.length - 1];
+    if (last && last !== "index") return last;
+    return parts[parts.length - 2] ?? "";
+  }
+  return "";
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllContentlayerDocs()
-    .filter((d: any) => !d?.draft)
-    .filter((d: any) => String(getDocHref(d) || "").startsWith("/resources/"));
+  try {
+    // We generate resources as /resources/<slug> (single segment),
+    // but we also ACCEPT nested incoming URLs via [...slug] and map last segment.
+    const docs = getAllContentlayerDocs()
+      .filter((d: any) => !isDraft(d))
+      .filter((d: any) => getDocKind(d) === "resource");
 
-  const paths = docs.map((d: any) => {
-    const href = String(getDocHref(d));
-    const parts = href.replace(/^\/resources\//, "").split("/").filter(Boolean);
-    return { params: { slug: parts } };
-  });
+    const paths = docs
+      .map((d: any) => {
+        const slug = slugOf(d);
+        return slug ? { params: { slug: [slug] } } : null;
+      })
+      .filter(Boolean) as { params: { slug: string[] } }[];
 
-  return { paths, fallback: false };
+    return { paths, fallback: false };
+  } catch (e) {
+    console.error("[resources/[...slug]] getStaticPaths failed:", e);
+    return { paths: [], fallback: false };
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slugPath = joinSlugParam((params as any)?.slug);
-  if (!slugPath) return { notFound: true };
+  try {
+    const slugParam = (params as any)?.slug as string[] | string | undefined;
+    const slug = lastSegment(slugParam);
+    if (!slug) return { notFound: true };
 
-  const docs = getAllContentlayerDocs()
-    .filter((d: any) => !d?.draft)
-    .filter((d: any) => String(getDocHref(d) || "").startsWith("/resources/"));
+    const docs = getAllContentlayerDocs()
+      .filter((d: any) => !isDraft(d))
+      .filter((d: any) => getDocKind(d) === "resource");
 
-  const canonicalPath = `/resources/${slugPath}`;
-  const doc = docs.find((d: any) => String(getDocHref(d)) === canonicalPath) ?? null;
+    const doc = docs.find((d: any) => slugOf(d) === slug) ?? null;
+    if (!doc) return { notFound: true };
 
-  if (!doc) return { notFound: true };
-
-  return {
-    props: { doc, canonicalPath, label: "Resource" },
-    revalidate: 60,
-  };
+    return {
+      props: {
+        doc,
+        canonicalPath: getDocHref(doc), // your helper currently returns /content/<slug> for resource
+        label: "Resources",
+      },
+      revalidate: 3600,
+    };
+  } catch (e) {
+    console.error("[resources/[...slug]] getStaticProps failed:", e);
+    return { notFound: true };
+  }
 };
 
-export default ResourceDocPage;
+export default ResourcePage;

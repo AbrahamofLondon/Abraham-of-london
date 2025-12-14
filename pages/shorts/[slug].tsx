@@ -8,37 +8,30 @@ import {
   isDraft,
 } from "@/lib/contentlayer-helper";
 
-type Props = {
-  doc: any;
-  canonicalPath: string;
-  label?: string;
-};
+type Props = { doc: any; canonicalPath: string; label?: string };
 
-const ShortReadingPage: NextPage<Props> = ({ doc, canonicalPath, label }) => {
+const ShortReadingPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
       canonicalPath={canonicalPath}
       backHref="/shorts"
-      label={label ?? "Shorts"}
+      label="Shorts"
     />
   );
 };
 
-function normalizeSlugFromDoc(d: any): string {
-  const fromField = typeof d?.slug === "string" ? d.slug.trim() : "";
-  if (fromField) return fromField;
+function slugOf(d: any): string {
+  const s = typeof d?.slug === "string" ? d.slug.trim() : "";
+  if (s) return s;
 
-  const fp =
-    typeof d?._raw?.flattenedPath === "string" ? d._raw.flattenedPath : "";
+  const fp = typeof d?._raw?.flattenedPath === "string" ? d._raw.flattenedPath : "";
   if (fp) {
     const parts = fp.split("/");
     const last = parts[parts.length - 1];
     if (last && last !== "index") return last;
-    const prev = parts[parts.length - 2];
-    if (prev) return prev;
+    return parts[parts.length - 2] ?? "";
   }
-
   return "";
 }
 
@@ -50,15 +43,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     const paths = docs
       .map((d: any) => {
-        const slug = normalizeSlugFromDoc(d);
-        if (!slug) return null;
-        return { params: { slug } };
+        const slug = slugOf(d);
+        return slug ? { params: { slug } } : null;
       })
       .filter(Boolean) as { params: { slug: string } }[];
 
     return { paths, fallback: false };
-  } catch (err) {
-    console.error("[shorts/[slug]] getStaticPaths failed:", err);
+  } catch (e) {
+    console.error("[shorts/[slug]] getStaticPaths failed:", e);
     return { paths: [], fallback: false };
   }
 };
@@ -72,21 +64,19 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       .filter((d: any) => !isDraft(d))
       .filter((d: any) => getDocKind(d) === "short");
 
-    const doc =
-      docs.find((d: any) => normalizeSlugFromDoc(d) === slug) ?? null;
-
+    const doc = docs.find((d: any) => slugOf(d) === slug) ?? null;
     if (!doc) return { notFound: true };
 
     return {
       props: {
         doc,
-        canonicalPath: getDocHref(doc), // should be /shorts/<slug> from your helper
+        canonicalPath: getDocHref(doc), // /shorts/<slug>
         label: "Shorts",
       },
       revalidate: 3600,
     };
-  } catch (err) {
-    console.error("[shorts/[slug]] getStaticProps failed:", err);
+  } catch (e) {
+    console.error("[shorts/[slug]] getStaticProps failed:", e);
     return { notFound: true };
   }
 };
