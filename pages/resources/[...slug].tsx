@@ -3,14 +3,14 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 import {
   getAllContentlayerDocs,
-  getDocHref,
   getDocKind,
+  getDocHref,
   isDraft,
 } from "@/lib/contentlayer-helper";
 
 type Props = { doc: any; canonicalPath: string; label?: string };
 
-const ResourcePage: NextPage<Props> = ({ doc, canonicalPath }) => {
+const ResourceDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
@@ -43,8 +43,6 @@ function slugOf(d: any): string {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    // We generate resources as /resources/<slug> (single segment),
-    // but we also ACCEPT nested incoming URLs via [...slug] and map last segment.
     const docs = getAllContentlayerDocs()
       .filter((d: any) => !isDraft(d))
       .filter((d: any) => getDocKind(d) === "resource");
@@ -79,7 +77,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return {
       props: {
         doc,
-        canonicalPath: getDocHref(doc), // your helper currently returns /content/<slug> for resource
+        canonicalPath: getDocHref(doc),
         label: "Resources",
       },
       revalidate: 3600,
@@ -90,4 +88,4 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 };
 
-export default ResourcePage;
+export default ResourceDocPage;
