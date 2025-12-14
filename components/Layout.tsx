@@ -1,37 +1,43 @@
-// components/Layout.tsx – FIXED FOR PAGES ROUTER
+// components/Layout.tsx – HARDENED FOR PAGES ROUTER + NEXT EXPORT
 
 import * as React from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import Header from "@/components/Header";
 
+// NOTE: If you don't use this, remove it to avoid extra imports.
+// import Header from "@/components/Header";
 
-// Dynamically import components for better performance
+// ---------------------------------------------------------------------
+// Dynamic imports (HARD MODE)
+// ---------------------------------------------------------------------
+// Export/SSG dies if these components touch window/document at import time.
+// To be absolutely resilient, do NOT SSR them. Use lightweight shells.
 const LuxuryNavbar = dynamic(() => import("@/components/LuxuryNavbar"), {
-  ssr: true,
+  ssr: false,
   loading: () => (
-    <div className="h-16 bg-gradient-to-b from-gray-900 to-black border-b border-gray-800" />
+    <div className="h-16 border-b border-gray-800 bg-gradient-to-b from-gray-900 to-black" />
   ),
 });
 
 const Footer = dynamic(() => import("@/components/Footer"), {
-  ssr: true,
-  loading: () => (
-    <div className="h-64 bg-gradient-to-b from-black to-gray-900" />
-  ),
+  ssr: false,
+  loading: () => <div className="h-64 bg-gradient-to-b from-black to-gray-900" />,
 });
 
-// Types for structured data (JSON-LD)
+// ---------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------
+
 export interface StructuredData {
   "@context": string;
   "@type": string;
   [key: string]: any;
 }
 
-// Extended Layout props to support all use cases
 export type LayoutProps = {
   children: React.ReactNode;
+
   // Title options
   title?: string;
   pageTitle?: string;
@@ -39,14 +45,14 @@ export type LayoutProps = {
   // SEO metadata
   description?: string;
   keywords?: string[];
-  canonicalUrl?: string;
+  canonicalUrl?: string; // absolute or relative
 
-  // Open Graph / Twitter metadata
-  ogImage?: string;
+  // Open Graph / Twitter
+  ogImage?: string; // absolute or relative
   ogType?: string;
   twitterCard?: string;
 
-  // Structured data (JSON-LD)
+  // Structured data
   structuredData?: StructuredData;
 
   // Layout options
@@ -61,14 +67,77 @@ export type LayoutProps = {
   mobileFriendly?: boolean;
 };
 
-// Device detection hook
+// ---------------------------------------------------------------------
+// Safe helpers (NO throws, EVER)
+// ---------------------------------------------------------------------
+
+const DEFAULT_SEO = {
+  siteName: "Abraham of London",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
+  defaultDescription:
+    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
+  defaultOgImage: "/assets/images/social/og-image.jpg",
+  defaultOgType: "website",
+  defaultTwitterCard: "summary_large_image",
+  twitterHandle: "@abrahamoflondon",
+} as const;
+
+function safeStr(v: unknown, fallback = ""): string {
+  return typeof v === "string" ? v : fallback;
+}
+
+function safeTrim(v: unknown, fallback = ""): string {
+  const s = safeStr(v, fallback);
+  return s ? s.trim() : fallback;
+}
+
+function isAbsHttpUrl(v: string): boolean {
+  return v.startsWith("http://") || v.startsWith("https://");
+}
+
+function toAbsoluteUrl(pathOrUrl: unknown): string | null {
+  const s = safeTrim(pathOrUrl, "");
+  if (!s) return null;
+
+  if (isAbsHttpUrl(s)) return s;
+
+  // If it's a proper absolute path
+  if (s.startsWith("/")) return `${DEFAULT_SEO.siteUrl}${s}`;
+
+  // If it's a relative asset path, normalize safely
+  return `${DEFAULT_SEO.siteUrl}/${s.replace(/^\/+/, "")}`;
+}
+
+function safeCanonicalFromPath(path: unknown): string {
+  const p = safeTrim(path, "/");
+  if (!p) return DEFAULT_SEO.siteUrl;
+
+  if (isAbsHttpUrl(p)) return p;
+
+  if (p.startsWith("/")) return `${DEFAULT_SEO.siteUrl}${p}`;
+
+  return `${DEFAULT_SEO.siteUrl}/${p}`;
+}
+
+// Helper function to get page title
+const getPageTitle = (title?: string): string => {
+  const baseTitle = DEFAULT_SEO.siteName;
+  const t = safeTrim(title, "");
+  if (!t) return baseTitle;
+  if (t.includes(baseTitle)) return t;
+  return `${t} | ${baseTitle}`;
+};
+
+// Device type (safe; never touches window outside useEffect)
 const useDeviceType = () => {
   const [deviceType, setDeviceType] =
     React.useState<"mobile" | "tablet" | "desktop">("desktop");
 
   React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const checkDevice = () => {
-      const width = window.innerWidth;
+      const width = window.innerWidth || 1024;
       if (width < 768) setDeviceType("mobile");
       else if (width < 1024) setDeviceType("tablet");
       else setDeviceType("desktop");
@@ -82,27 +151,9 @@ const useDeviceType = () => {
   return deviceType;
 };
 
-// Helper function to get page title
-const getPageTitle = (title?: string): string => {
-  const baseTitle = "Abraham of London";
-  if (!title) return baseTitle;
-  if (title.includes(baseTitle)) return title;
-  return `${title} | ${baseTitle}`;
-};
-
-// Default SEO configuration
-const DEFAULT_SEO = {
-  siteName: "Abraham of London",
-  siteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
-  defaultDescription:
-    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
-  // Use real static OG asset, not /api/og/default
-  defaultOgImage: "/assets/images/social/og-image.jpg",
-  defaultOgType: "website",
-  defaultTwitterCard: "summary_large_image",
-  twitterHandle: "@abrahamoflondon",
-} as const;
+// ---------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------
 
 export default function Layout({
   children,
@@ -125,39 +176,47 @@ export default function Layout({
   const deviceType = useDeviceType();
   const isMobile = deviceType === "mobile";
 
-  // Get the effective title
+  // Title/description always safe
   const effectiveTitle = getPageTitle(title ?? pageTitle);
+  const fullDescription = safeTrim(description, DEFAULT_SEO.defaultDescription);
 
-  // Build full description with fallback
-  const fullDescription = description || DEFAULT_SEO.defaultDescription;
-
-  // Build canonical URL with default
-  const path =
-    typeof router.asPath === "string"
+  // Canonical:
+  // - prefer prop canonicalUrl (page knows best)
+  // - else use router.asPath if available
+  // - else fallback to site root
+  const asPath =
+    typeof router?.asPath === "string" && router.asPath
       ? router.asPath.split("#")[0].split("?")[0]
       : "/";
-  const fullCanonicalUrl = canonicalUrl || `${DEFAULT_SEO.siteUrl}${path}`;
 
-  // Build ogImage URL
-  const fullOgImage = ogImage
-    ? ogImage.startsWith("http")
-      ? ogImage
-      : `${DEFAULT_SEO.siteUrl}${ogImage}`
-    : `${DEFAULT_SEO.siteUrl}${DEFAULT_SEO.defaultOgImage}`;
+  const fullCanonicalUrl = canonicalUrl
+    ? safeCanonicalFromPath(canonicalUrl)
+    : safeCanonicalFromPath(asPath);
 
-  // Responsive container classes
+  // OG image: always absolute, always safe
+  const fullOgImage =
+    toAbsoluteUrl(ogImage) ??
+    toAbsoluteUrl(DEFAULT_SEO.defaultOgImage) ??
+    `${DEFAULT_SEO.siteUrl}${DEFAULT_SEO.defaultOgImage}`;
+
   const containerClass = fullWidth
     ? "w-full"
     : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white text-gray-900 dark:from-gray-950 dark:to-black dark:text-white ${className} ${
-        mobileFriendly ? "touch-manipulation" : ""
-      }`}
+      className={[
+        "min-h-screen flex flex-col",
+        "bg-gradient-to-b from-gray-50 to-white text-gray-900",
+        "dark:from-gray-950 dark:to-black dark:text-white",
+        mobileFriendly ? "touch-manipulation" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <Head>
-        {/* Viewport for responsive design */}
+        {/* Viewport */}
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"
@@ -178,17 +237,17 @@ export default function Layout({
         />
 
         {/* Keywords */}
-        {keywords.length > 0 && (
-          <meta name="keywords" content={keywords.join(", ")} />
-        )}
+        {Array.isArray(keywords) && keywords.length > 0 ? (
+          <meta name="keywords" content={keywords.filter(Boolean).join(", ")} />
+        ) : null}
 
-        {/* Canonical URL */}
+        {/* Canonical */}
         <link rel="canonical" href={fullCanonicalUrl} />
 
         {/* Open Graph */}
         <meta property="og:title" content={effectiveTitle} />
         <meta property="og:description" content={fullDescription} />
-        <meta property="og:type" content={ogType} />
+        <meta property="og:type" content={safeTrim(ogType, DEFAULT_SEO.defaultOgType)} />
         <meta property="og:url" content={fullCanonicalUrl} />
         <meta property="og:image" content={fullOgImage} />
         <meta property="og:image:width" content="1200" />
@@ -197,15 +256,15 @@ export default function Layout({
         <meta property="og:locale" content="en_GB" />
 
         {/* Twitter */}
-        <meta name="twitter:card" content={twitterCard} />
+        <meta name="twitter:card" content={safeTrim(twitterCard, DEFAULT_SEO.defaultTwitterCard)} />
         <meta name="twitter:site" content={DEFAULT_SEO.twitterHandle} />
         <meta name="twitter:creator" content={DEFAULT_SEO.twitterHandle} />
         <meta name="twitter:title" content={effectiveTitle} />
         <meta name="twitter:description" content={fullDescription} />
         <meta name="twitter:image" content={fullOgImage} />
 
-        {/* Structured data (JSON-LD) */}
-        {structuredData && (
+        {/* Structured data */}
+        {structuredData ? (
           <script
             type="application/ld+json"
             // eslint-disable-next-line react/no-danger
@@ -213,12 +272,11 @@ export default function Layout({
               __html: JSON.stringify(structuredData),
             }}
           />
-        )}
+        ) : null}
 
-        {/* Additional head elements */}
         {additionalHead}
 
-        {/* Preconnects only – removed problematic preload */}
+        {/* Preconnects */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -230,7 +288,7 @@ export default function Layout({
       {/* Header */}
       <LuxuryNavbar variant="dark" transparent={transparentHeader} />
 
-      {/* Main Content */}
+      {/* Main */}
       <main className={`flex-1 ${containerClass} ${isMobile ? "pt-4" : "pt-8"}`}>
         {children}
       </main>
@@ -238,7 +296,7 @@ export default function Layout({
       {/* Footer */}
       <Footer />
 
-      {/* Global styles / mobile optimisations */}
+      {/* Global styles */}
       <style jsx global>{`
         @media (max-width: 768px) {
           input,
@@ -246,18 +304,15 @@ export default function Layout({
           textarea {
             font-size: 16px !important;
           }
-
           button,
           a[role="button"],
           .touch-target {
             min-height: 44px;
             min-width: 44px;
           }
-
           html {
             -webkit-overflow-scrolling: touch;
           }
-
           body {
             overscroll-behavior-y: none;
           }
@@ -292,17 +347,14 @@ export default function Layout({
           width: 8px;
           height: 8px;
         }
-
         ::-webkit-scrollbar-track {
           background: #f1f1f1;
           border-radius: 4px;
         }
-
         ::-webkit-scrollbar-thumb {
           background: #c1c1c1;
           border-radius: 4px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
           background: #a1a1a1;
         }
@@ -311,11 +363,9 @@ export default function Layout({
           ::-webkit-scrollbar-track {
             background: #2d3748;
           }
-
           ::-webkit-scrollbar-thumb {
             background: #4a5568;
           }
-
           ::-webkit-scrollbar-thumb:hover {
             background: #718096;
           }
@@ -327,12 +377,10 @@ export default function Layout({
           .no-print {
             display: none !important;
           }
-
           * {
             background: white !important;
             color: black !important;
           }
-
           a {
             color: black !important;
             text-decoration: underline !important;
@@ -343,7 +391,13 @@ export default function Layout({
   );
 }
 
-// Helper functions for common Layout configurations
+// Export helper for page titles
+export { getPageTitle };
+
+// ---------------------------------------------------------------------
+// Layout helpers (kept, but hardened)
+// ---------------------------------------------------------------------
+
 export const LayoutHelpers = {
   article: (config: {
     title: string;
@@ -356,40 +410,32 @@ export const LayoutHelpers = {
     canonicalUrl?: string;
     tags?: string[];
   }) => {
+    const canonical = safeCanonicalFromPath(config.canonicalUrl ?? "");
+    const imageAbs = toAbsoluteUrl(config.image);
+
     const structuredData: StructuredData = {
       "@context": "https://schema.org",
       "@type": "Article",
       headline: config.title,
-      description: config.description || DEFAULT_SEO.defaultDescription,
+      description: safeTrim(config.description, DEFAULT_SEO.defaultDescription),
       datePublished: config.datePublished,
       dateModified: config.dateModified || config.datePublished,
       author: {
         "@type": "Person",
-        name: config.authorName || DEFAULT_SEO.siteName,
+        name: safeTrim(config.authorName, DEFAULT_SEO.siteName),
         ...(config.authorUrl ? { url: config.authorUrl } : {}),
       },
       publisher: {
         "@type": "Organization",
         name: DEFAULT_SEO.siteName,
-        logo: {
-          "@type": "ImageObject",
-          url: `${DEFAULT_SEO.siteUrl}/images/logo.png`,
-          width: 512,
-          height: 512,
-        },
       },
       mainEntityOfPage: {
         "@type": "WebPage",
-        "@id": config.canonicalUrl || `${DEFAULT_SEO.siteUrl}`,
+        "@id": canonical || DEFAULT_SEO.siteUrl,
       },
-      ...(config.image
-        ? {
-            image: config.image.startsWith("http")
-              ? config.image
-              : `${DEFAULT_SEO.siteUrl}${config.image}`,
-          }
-        : {}),
-      ...(config.tags ? { keywords: config.tags.join(", ") } : {}),
+      ...(imageAbs ? { image: imageAbs } : {}),
+      ...(config.tags?.length ? { keywords: config.tags.join(", ") } : {}),
+      inLanguage: "en-GB",
     };
 
     return {
@@ -413,13 +459,9 @@ export const LayoutHelpers = {
       "@context": "https://schema.org",
       "@type": "WebSite",
       name: config.title,
-      description: config.description || DEFAULT_SEO.defaultDescription,
-      url: config.canonicalUrl || DEFAULT_SEO.siteUrl,
-      potentialAction: {
-        "@type": "SearchAction",
-        target: `${DEFAULT_SEO.siteUrl}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string",
-      },
+      description: safeTrim(config.description, DEFAULT_SEO.defaultDescription),
+      url: safeCanonicalFromPath(config.canonicalUrl ?? DEFAULT_SEO.siteUrl),
+      inLanguage: "en-GB",
     };
 
     return {
@@ -442,28 +484,21 @@ export const LayoutHelpers = {
     canonicalUrl?: string;
     publisher?: string;
   }) => {
+    const imageAbs = toAbsoluteUrl(config.image);
+
     const structuredData: StructuredData = {
       "@context": "https://schema.org",
       "@type": "Book",
       name: config.title,
-      description: config.description || DEFAULT_SEO.defaultDescription,
-      author: {
-        "@type": "Person",
-        name: config.author,
-      },
+      description: safeTrim(config.description, DEFAULT_SEO.defaultDescription),
+      author: { "@type": "Person", name: config.author },
       datePublished: config.datePublished,
       publisher: {
         "@type": "Organization",
-        name: config.publisher || DEFAULT_SEO.siteName,
+        name: safeTrim(config.publisher, DEFAULT_SEO.siteName),
       },
       ...(config.isbn ? { isbn: config.isbn } : {}),
-      ...(config.image
-        ? {
-            image: config.image.startsWith("http")
-              ? config.image
-              : `${DEFAULT_SEO.siteUrl}${config.image}`,
-          }
-        : {}),
+      ...(imageAbs ? { image: imageAbs } : {}),
       inLanguage: "en-GB",
     };
 
@@ -476,53 +511,4 @@ export const LayoutHelpers = {
       ogImage: config.image,
     };
   },
-
-  event: (config: {
-    title: string;
-    description?: string;
-    startDate: string;
-    endDate?: string;
-    location: string;
-    image?: string;
-    canonicalUrl?: string;
-    organizer?: string;
-  }) => {
-    const structuredData: StructuredData = {
-      "@context": "https://schema.org",
-      "@type": "Event",
-      name: config.title,
-      description: config.description || DEFAULT_SEO.defaultDescription,
-      startDate: config.startDate,
-      ...(config.endDate ? { endDate: config.endDate } : {}),
-      location: {
-        "@type": "Place",
-        name: config.location,
-        address: config.location,
-      },
-      organizer: {
-        "@type": "Organization",
-        name: config.organizer || DEFAULT_SEO.siteName,
-        url: DEFAULT_SEO.siteUrl,
-      },
-      ...(config.image
-        ? {
-            image: config.image.startsWith("http")
-              ? config.image
-              : `${DEFAULT_SEO.siteUrl}${config.image}`,
-          }
-        : {}),
-    };
-
-    return {
-      title: config.title,
-      description: config.description,
-      canonicalUrl: config.canonicalUrl,
-      ogType: "event" as const,
-      structuredData,
-      ogImage: config.image,
-    };
-  },
 };
-
-// Export helper for page titles
-export { getPageTitle };
