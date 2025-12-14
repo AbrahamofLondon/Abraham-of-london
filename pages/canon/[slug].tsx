@@ -1,15 +1,10 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { getAllContentlayerDocs, getDocHref } from "@/lib/contentlayer-helper";
+import { getCanonDocBySlug } from "@/lib/canon";
 
 type Props = { doc: any; canonicalPath: string; label?: string };
 
-function joinSlugParam(slug: string | string[] | undefined) {
-  if (!slug) return "";
-  return Array.isArray(slug) ? slug.join("/") : slug;
-}
-
-const CanonDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
+const CanonSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
@@ -21,36 +16,37 @@ const CanonDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllContentlayerDocs()
-    .filter((d: any) => !d?.draft)
-    .filter((d: any) => String(getDocHref(d) || "").startsWith("/canon/"));
+  // Import here to avoid any edge bundling weirdness
+  const { allCanons } = await import("contentlayer/generated");
 
-  const paths = docs.map((d: any) => {
-    const href = String(getDocHref(d));
-    const parts = href.replace(/^\/canon\//, "").split("/").filter(Boolean);
-    return { params: { slug: parts } };
-  });
+  const paths = (allCanons || [])
+    .filter((c: any) => c && c.draft !== true && c.draft !== "true")
+    .map((c: any) => ({ params: { slug: String(c.slug) } }));
 
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slugPath = joinSlugParam((params as any)?.slug);
-  if (!slugPath) return { notFound: true };
+  try {
+    const slug = String(params?.slug ?? "");
+    if (!slug) return { notFound: true };
 
-  const docs = getAllContentlayerDocs()
-    .filter((d: any) => !d?.draft)
-    .filter((d: any) => String(getDocHref(d) || "").startsWith("/canon/"));
+    const doc = getCanonDocBySlug(slug);
+    if (!doc) return { notFound: true };
 
-  const canonicalPath = `/canon/${slugPath}`;
-  const doc = docs.find((d: any) => String(getDocHref(d)) === canonicalPath) ?? null;
-
-  if (!doc) return { notFound: true };
-
-  return {
-    props: { doc, canonicalPath, label: "Canon" },
-    revalidate: 60,
-  };
+    return {
+      props: {
+        doc, // ✅ full doc including body.code
+        canonicalPath: `/canon/${slug}`,
+        label: "Canon",
+      },
+      revalidate: 3600,
+    };
+  } catch (e) {
+    // This prevents Netlify's "Failed to collect page data"
+    console.error("Canon slug getStaticProps error:", e);
+    return { notFound: true };
+  }
 };
 
-export default CanonDocPage;
+export default CanonSlugPage;
