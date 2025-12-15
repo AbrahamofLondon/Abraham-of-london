@@ -1,63 +1,121 @@
+// pages/blog/index.tsx
 import * as React from "react";
-import type {
-  GetStaticProps,
-  InferGetStaticPropsType,
-  NextPage,
-} from "next";
+import type { GetStaticProps, NextPage } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { BlogPostCard } from "@/components/BlogPostCard";
-import { getPublishedPosts } from "@/lib/contentlayer-helper";
-import type { Post } from "contentlayer/generated";
+import { allPosts } from "contentlayer/generated";
 
-type Props = {
-  posts: Post[];
+function normalizeSlug(doc: any): string {
+  if (doc?.slug) return String(doc.slug).trim().toLowerCase();
+  const fp = doc?._raw?.flattenedPath;
+  if (fp) {
+    const parts = String(fp).split("/");
+    const last = parts[parts.length - 1];
+    return (last === "index" ? parts[parts.length - 2] : last) || "untitled";
+  }
+  return "untitled";
+}
+
+function isDraft(doc: any): boolean {
+  const d = doc?.draft;
+  return d === true || d === "true";
+}
+
+type Item = {
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  date?: string | null;
+  readTime?: string | null;
+  coverImage?: string | null;
+  tags?: string[] | null;
 };
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const posts = getPublishedPosts();
+type Props = { items: Item[] };
 
-  return {
-    props: { posts },
-    revalidate: 3600,
-  };
-};
-
-const BlogIndexPage: NextPage<
-  InferGetStaticPropsType<typeof getStaticProps>
-> = ({ posts }) => {
+const BlogIndex: NextPage<Props> = ({ items }) => {
   return (
-    <Layout title="Blog">
-      <main className="mx-auto max-w-5xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-8 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Canon · Commentary
+    <Layout title="Essays">
+      <Head>
+        <link rel="canonical" href="https://www.abrahamoflondon.org/blog" />
+      </Head>
+
+      <section className="py-10 sm:py-14">
+        <header className="mb-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-softGold/70">
+            Essays · Abraham of London
           </p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-            Blog & Essays
+          <h1 className="mt-3 font-serif text-4xl font-semibold text-neutral-950 dark:text-cream">
+            Essays
           </h1>
-          <p className="text-sm text-gray-300">
-            Long-form thinking on purpose, governance, fatherhood and the
-            builder’s life.
+          <p className="mt-3 max-w-2xl text-neutral-700 dark:text-cream/80">
+            Field notes, convictions, and strategic clarity — written for builders who refuse drift.
           </p>
         </header>
 
-        {posts.length === 0 && (
-          <p className="text-sm text-gray-400">
-            No posts are published yet. The Canon is still loading.
-          </p>
-        )}
+        <div className="grid gap-6 md:grid-cols-2">
+          {items.map((p) => (
+            <Link
+              key={p.slug}
+              href={`/blog/${p.slug}`}
+              className="group overflow-hidden rounded-2xl border border-black/10 bg-white/60 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-black/25"
+            >
+              <div className="relative aspect-[16/9] bg-black/5 dark:bg-white/5">
+                <Image
+                  src={p.coverImage || "/assets/images/writing-desk.webp"}
+                  alt={p.title}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+              </div>
 
-        {posts.length > 0 && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {posts.map((post) => (
-              <BlogPostCard key={post._id} post={post as any} />
-            ))}
-          </div>
-        )}
-      </main>
+              <div className="p-5">
+                <h2 className="font-serif text-xl font-semibold text-neutral-950 dark:text-cream">
+                  {p.title}
+                </h2>
+
+                {p.excerpt ? (
+                  <p className="mt-2 line-clamp-2 text-sm text-neutral-700 dark:text-cream/80">
+                    {p.excerpt}
+                  </p>
+                ) : null}
+
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-neutral-500 dark:text-softGold/70">
+                  {p.date ? <span>{new Date(p.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span> : null}
+                  {p.readTime ? <span>• {p.readTime}</span> : null}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
     </Layout>
   );
 };
 
-export default BlogIndexPage;
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const published = (allPosts ?? []).filter((p: any) => !isDraft(p));
+
+  const items: Item[] = published
+    .map((p: any) => ({
+      slug: normalizeSlug(p),
+      title: p.title ?? "Untitled",
+      excerpt: p.excerpt ?? null,
+      date: p.date ?? null,
+      readTime: p.readTime ?? null,
+      coverImage: p.coverImage ?? null,
+      tags: p.tags ?? null,
+    }))
+    .sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    });
+
+  return { props: { items }, revalidate: 3600 };
+};
+
+export default BlogIndex;

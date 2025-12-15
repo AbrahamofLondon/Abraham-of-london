@@ -1,9 +1,17 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import { allDownloads } from "contentlayer/generated";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { getDocHref } from "@/lib/contentlayer-helper";
+import {
+  getAllContentlayerDocs,
+  getDocHref,
+  getDocKind,
+  isDraft,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string };
+type Props = {
+  doc: any;
+  canonicalPath: string;
+};
 
 const DownloadSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
@@ -17,24 +25,37 @@ const DownloadSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = (allDownloads ?? [])
-    .filter((d) => !d.draft)
-    .map((d) => ({ params: { slug: String(d.slug) } }))
-    .filter((p) => p.params.slug && p.params.slug !== "index");
+  const paths = getAllContentlayerDocs()
+    .filter((d) => !isDraft(d))
+    .filter((d) => getDocKind(d) === "download")
+    .map((d) => getDocHref(d))
+    .map((href) => ({
+      params: { slug: href.replace("/downloads/", "") },
+    }));
 
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "");
-  const doc =
-    (allDownloads ?? []).find((d) => !d.draft && String(d.slug) === slug) ?? null;
+  const slug = String(params?.slug ?? "").trim();
+  if (!slug) return { notFound: true };
+
+  const doc = getAllContentlayerDocs()
+    .filter((d) => !isDraft(d))
+    .find(
+      (d) =>
+        getDocKind(d) === "download" &&
+        normalizeSlug(d) === slug
+    );
 
   if (!doc) return { notFound: true };
 
   return {
-    props: { doc, canonicalPath: getDocHref(doc) },
-    revalidate: 60,
+    props: {
+      doc,
+      canonicalPath: getDocHref(doc),
+    },
+    revalidate: 3600,
   };
 };
 

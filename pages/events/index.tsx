@@ -1,3 +1,4 @@
+// pages/events/index.tsx
 import * as React from "react";
 import type {
   GetStaticProps,
@@ -5,18 +6,16 @@ import type {
   NextPage,
 } from "next";
 import Link from "next/link";
-
 import Layout from "@/components/Layout";
-import { getAllEvents } from "@/lib/contentlayer-helper";
-import type { Event } from "contentlayer/generated";
+import { getAllEvents, type EventDocument } from "@/lib/contentlayer-helper";
 
 type Props = {
-  upcoming: Event[];
-  past: Event[];
+  upcoming: EventDocument[];
+  past: EventDocument[];
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const events = getAllEvents().filter((e) => !(e as any).draft);
+  const events = getAllEvents();
   const now = new Date();
 
   const upcoming = events
@@ -121,7 +120,7 @@ const EventsIndexPage: NextPage<
 
           {past.length === 0 && (
             <p className="text-sm text-gray-400">
-              Once the first rooms have run, they’ll live here as part of the
+              Once the first rooms have run, they'll live here as part of the
               Canon archive.
             </p>
           )}

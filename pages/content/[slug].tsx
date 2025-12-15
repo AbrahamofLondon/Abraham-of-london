@@ -1,8 +1,18 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { getAllContentlayerDocs, getDocHref } from "@/lib/contentlayer-helper";
+import {
+  getAllContentlayerDocs,
+  getDocHref,
+  getDocKind,
+  isDraft,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string; label?: string };
+type Props = {
+  doc: any;
+  canonicalPath: string;
+  label: string;
+};
 
 const ContentReadingRoom: NextPage<Props> = ({ doc, canonicalPath, label }) => {
   return (
@@ -10,75 +20,57 @@ const ContentReadingRoom: NextPage<Props> = ({ doc, canonicalPath, label }) => {
       doc={doc}
       canonicalPath={canonicalPath}
       backHref="/content"
-      label={label ?? "Reading Room"}
+      label={label}
     />
   );
 };
 
-function getDocSlug(doc: any): string {
-  // Keep the “full slug” coming from frontmatter/contentlayer when present.
-  // Only fallback to flattenedPath last resort.
-  return String(doc?.slug ?? doc?._raw?.flattenedPath?.split("/").pop() ?? "");
+function labelFor(doc: any): string {
+  switch (getDocKind(doc)) {
+    case "strategy":
+      return "Strategy";
+    case "resource":
+      return "Resource";
+    case "print":
+      return "Print";
+    default:
+      return "Reading Room";
+  }
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // This route is the generic “content reading room”.
-  // Only generate paths for docs that *actually* belong under /content/*
-  const docs = getAllContentlayerDocs()
-    .filter((d: any) => !d?.draft)
-    .filter((d: any) => String(getDocHref(d) || "").startsWith("/content/"));
-
-  const paths = docs
-    .map((d: any) => {
-      const slug = getDocSlug(d);
-      if (!slug || slug === "index") return null;
-      return { params: { slug } };
-    })
-    .filter(Boolean) as { params: { slug: string } }[];
+  const paths = getAllContentlayerDocs()
+    .filter((d) => !isDraft(d))
+    .map((d) => getDocHref(d))
+    .filter((href) => href.startsWith("/content/"))
+    .map((href) => ({
+      params: { slug: href.replace("/content/", "") },
+    }));
 
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "");
+  const slug = String(params?.slug ?? "").trim();
+  if (!slug) return { notFound: true };
 
-  const docs = getAllContentlayerDocs()
-    .filter((d: any) => !d?.draft)
-    .filter((d: any) => String(getDocHref(d) || "").startsWith("/content/"));
-
-  const doc =
-    docs.find((d: any) => getDocSlug(d) === slug) ??
-    null;
+  const doc = getAllContentlayerDocs()
+    .filter((d) => !isDraft(d))
+    .find(
+      (d) =>
+        getDocHref(d) === `/content/${slug}` &&
+        normalizeSlug(d) === slug
+    );
 
   if (!doc) return { notFound: true };
-
-  const docType = String(doc.type ?? doc._type ?? "").toLowerCase();
-  const label =
-    docType === "post"
-      ? "Essay"
-      : docType === "download"
-      ? "Download"
-      : docType === "resource"
-      ? "Resource"
-      : docType === "print"
-      ? "Print"
-      : docType === "short"
-      ? "Short"
-      : docType === "strategy"
-      ? "Strategy"
-      : docType === "canon"
-      ? "Canon"
-      : docType === "book"
-      ? "Book"
-      : "Reading Room";
 
   return {
     props: {
       doc,
       canonicalPath: getDocHref(doc),
-      label,
+      label: labelFor(doc),
     },
-    revalidate: 60,
+    revalidate: 3600,
   };
 };
 

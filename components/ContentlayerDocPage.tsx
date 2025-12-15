@@ -1,12 +1,21 @@
-// components/ContentlayerDocPage.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { useMDXComponent } from "next-contentlayer2/hooks";
+import dynamic from "next/dynamic";
 import { ArrowLeft, Share2 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
+
+// Dynamic import for MDX - SSR: FALSE to prevent build crashes
+const MDXClient = dynamic(() => import("@/components/MDXClient"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[200px] flex items-center justify-center">
+      <p className="text-sm opacity-80">Loading content…</p>
+    </div>
+  ),
+});
 
 type ContentlayerDoc = {
   title?: string | null;
@@ -17,9 +26,9 @@ type ContentlayerDoc = {
   date?: string | null;
   readTime?: string | null;
   tags?: string[] | null;
-  draft?: boolean | string | null;
+  draft?: boolean | null;
   slug?: string | null;
-  body?: { code?: string | null };
+  body?: { code?: string | null; raw?: string | null };
   _raw?: { flattenedPath?: string };
 };
 
@@ -47,7 +56,7 @@ function safeDate(date?: string | null) {
 
 function toAbsoluteUrl(pathOrUrl?: string | null) {
   if (!pathOrUrl) return null;
-  const s = String(pathOrUrl).trim();
+  const s = String(pathOrUrl);
   if (!s) return null;
   if (s.startsWith("http://") || s.startsWith("https://")) return s;
   if (s.startsWith("/")) return `${SITE_URL}${s}`;
@@ -61,21 +70,21 @@ export default function ContentlayerDocPage({
   label = "Reading Room",
   components = mdxComponents,
 }: Props) {
-  const title = (doc.title?.trim() || "Untitled") + "";
-  const description =
+  // SAFE string conversions
+  const title = String(doc.title?.trim() || "Untitled");
+  const description = String(
     doc.excerpt?.trim() ||
     doc.description?.trim() ||
-    "Strategic reading from Abraham of London.";
+    "Strategic reading from Abraham of London."
+  );
 
   const canonicalUrl = canonicalPath.startsWith("http")
     ? canonicalPath
     : `${SITE_URL}${canonicalPath}`;
 
   const ogImage = toAbsoluteUrl(doc.coverImage);
-  const displayDate = safeDate(doc.date);
-
-  const code = (doc?.body?.code ?? "").trim();
-  const MDXContent = useMDXComponent(code || ""); // safe
+  const code = String(doc?.body?.code ?? "").trim();
+  const raw = String(doc?.body?.raw ?? "").trim();
 
   const onShare = React.useCallback(() => {
     if (typeof window === "undefined") return;
@@ -85,11 +94,18 @@ export default function ContentlayerDocPage({
       navigator.share({ title, text: description, url }).catch(() => {});
       return;
     }
-    navigator.clipboard?.writeText?.(url).catch(() => {});
+
+    navigator.clipboard.writeText(url).catch(() => {});
   }, [canonicalUrl, title, description]);
 
+  const displayDate = safeDate(doc.date);
+
   return (
-    <Layout title={title} description={description} image={doc.coverImage ?? undefined}>
+    <Layout 
+      title={title} 
+      description={description} 
+      ogImage={doc.coverImage ?? undefined}
+    >
       <Head>
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:url" content={canonicalUrl} />
@@ -160,7 +176,15 @@ export default function ContentlayerDocPage({
           </header>
 
           <div className="prose max-w-none dark:prose-invert prose-headings:font-serif">
-            {code ? <MDXContent components={components} /> : <p>Content is being prepared.</p>}
+            {code ? (
+              <MDXClient code={code} components={components} />
+            ) : raw ? (
+              <pre className="max-h-[520px] overflow-auto rounded-lg bg-black/40 p-4 text-xs">
+                {raw}
+              </pre>
+            ) : (
+              <p className="text-gray-500 italic">Content is being prepared.</p>
+            )}
           </div>
         </article>
       </main>

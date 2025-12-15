@@ -1,55 +1,76 @@
-// lib/books.ts
-// Robust books data facade with book-specific utilities
+// lib/books.ts - FIXED VERSION
+// Direct ContentLayer access without server-side dependencies
 
-import booksData from "@/lib/server/books-data";
-import type { Book as ServerBook, BookWithContent as ServerBookWithContent } from "@/lib/server/books-data";
+import { allBooks } from "contentlayer/generated";
+import type { Book as ContentlayerBook } from "contentlayer/generated";
 
-// Re-export the types with their original names
-export type Book = ServerBook;
-export type BookWithContent = ServerBookWithContent;
+export type Book = ContentlayerBook;
+export type BookWithContent = Book;
 
-// Type definitions
-export type BookMeta = Book;
-export type BookFieldKey = keyof BookMeta;
+// SAFE string helper
+function safeString(value: any): string {
+  if (typeof value === "string") return value;
+  return String(value || "");
+}
 
-// Helper to get server-side function
-function getBookBySlugServer(slug: string): BookWithContent | null {
-  try {
-    return booksData.getBookBySlug(slug);
-  } catch {
-    return null;
-  }
+// SAFE lowercase helper
+function safeToLowerCase(value: any): string {
+  return safeString(value).toLowerCase();
+}
+
+// Helper to check if book is draft
+function isDraft(book: any): boolean {
+  if (book.draft === true || book.draft === "true") return true;
+  if (book.published === false) return true;
+  if (book.status === 'draft') return true;
+  return false;
+}
+
+// Helper to normalize slug
+function normalizeSlug(slug: string): string {
+  return safeString(slug).trim().toLowerCase();
 }
 
 /**
- * Get all books metadata
+ * Get all books metadata (non-draft only)
  */
-export function getAllBooksMeta(): BookMeta[] {
+export function getAllBooksMeta(): Book[] {
   try {
-    const books = booksData.getAllBooksMeta();
-    return Array.isArray(books) ? books : [];
-  } catch {
+    return (allBooks || []).filter(book => !isDraft(book));
+  } catch (error) {
+    console.error("Error in getAllBooksMeta:", error);
     return [];
   }
 }
 
 /**
- * Get all books (including content)
+ * Get all books
  */
 export function getAllBooks(): BookWithContent[] {
-  try {
-    const books = booksData.getAllBooks();
-    return Array.isArray(books) ? books : [];
-  } catch {
-    return [];
-  }
+  return getAllBooksMeta();
 }
 
 /**
  * Get book by slug
  */
 export function getBookBySlug(slug: string): BookWithContent | null {
-  return getBookBySlugServer(slug);
+  try {
+    if (!slug) return null;
+    
+    const normalizedSlug = normalizeSlug(slug);
+    
+    const book = (allBooks || []).find(b => {
+      if (isDraft(b)) return false;
+      
+      const bookSlug = b.slug || b._raw?.flattenedPath?.split('/').pop() || '';
+      return normalizeSlug(bookSlug) === normalizedSlug;
+    });
+    
+    return book || null;
+  } catch (error) {
+    console.error(`Error in getBookBySlug(${slug}):`, error);
+    return null;
+  }
 }
 
 /**
@@ -57,26 +78,28 @@ export function getBookBySlug(slug: string): BookWithContent | null {
  */
 export function getBookSlugs(): string[] {
   const books = getAllBooksMeta();
-  return books.map(b => b.slug).filter((slug): slug is string => typeof slug === "string" && slug.length > 0);
+  return books
+    .map(b => safeString(b.slug || b._raw?.flattenedPath?.split('/').pop()))
+    .filter(slug => slug && slug !== "index");
 }
 
 /**
  * Get public books (filter out drafts)
  */
-export function getPublicBooks(): BookMeta[] {
+export function getPublicBooks(): Book[] {
   const books = getAllBooksMeta();
   return books.filter(book => {
-    const isDraft = book.draft === true;
+    const isDraftBook = book.draft === true;
     const isNotPublished = book.published === false;
     const isStatusDraft = book.status === 'draft';
-    return !(isDraft || isNotPublished || isStatusDraft);
+    return !(isDraftBook || isNotPublished || isStatusDraft);
   });
 }
 
 /**
  * Get featured books
  */
-export function getFeaturedBooks(limit?: number): BookMeta[] {
+export function getFeaturedBooks(limit?: number): Book[] {
   const books = getPublicBooks();
   const featured = books.filter(b => b.featured === true);
   return limit ? featured.slice(0, limit) : featured;
@@ -85,7 +108,7 @@ export function getFeaturedBooks(limit?: number): BookMeta[] {
 /**
  * Get recent books
  */
-export function getRecentBooks(limit?: number): BookMeta[] {
+export function getRecentBooks(limit?: number): Book[] {
   const books = getPublicBooks();
   
   // Sort by date (newest first)
@@ -99,33 +122,35 @@ export function getRecentBooks(limit?: number): BookMeta[] {
 }
 
 /**
- * Search books
+ * SAFE search books - FIXED
  */
-export function searchBooks(query: string): BookMeta[] {
+export function searchBooks(query: string): Book[] {
   const books = getPublicBooks();
   
   if (!query?.trim()) {
     return books;
   }
   
-  const searchTerm = query.toLowerCase().trim();
+  const searchTerm = safeToLowerCase(query);
   
   return books.filter(book => {
-    // Search in various fields
-    if (book.title?.toLowerCase().includes(searchTerm)) return true;
-    if (book.subtitle?.toLowerCase().includes(searchTerm)) return true;
-    if (book.description?.toLowerCase().includes(searchTerm)) return true;
-    if (book.excerpt?.toLowerCase().includes(searchTerm)) return true;
-    if (book.author?.toLowerCase().includes(searchTerm)) return true;
+    // SAFE: Use safeToLowerCase for all fields
+    if (safeToLowerCase(book.title).includes(searchTerm)) return true;
+    if (safeToLowerCase(book.subtitle).includes(searchTerm)) return true;
+    if (safeToLowerCase(book.description).includes(searchTerm)) return true;
+    if (safeToLowerCase(book.excerpt).includes(searchTerm)) return true;
+    if (safeToLowerCase(book.author).includes(searchTerm)) return true;
     
-    // Search in tags
-    if (book.tags?.some(tag => tag.toLowerCase().includes(searchTerm))) return true;
+    // SAFE: Search in tags
+    if (Array.isArray(book.tags)) {
+      if (book.tags.some(tag => safeToLowerCase(tag).includes(searchTerm))) return true;
+    }
     
-    // Search in category
-    if (book.category?.toLowerCase().includes(searchTerm)) return true;
+    // SAFE: Search in category
+    if (safeToLowerCase(book.category).includes(searchTerm)) return true;
     
-    // Search in series
-    if (book.series?.toLowerCase().includes(searchTerm)) return true;
+    // SAFE: Search in series
+    if (safeToLowerCase(book.series).includes(searchTerm)) return true;
     
     return false;
   });
@@ -134,35 +159,36 @@ export function searchBooks(query: string): BookMeta[] {
 /**
  * Get books by category
  */
-export function getBooksByCategory(category: string): BookMeta[] {
+export function getBooksByCategory(category: string): Book[] {
   const books = getPublicBooks();
   
   if (!category) {
     return books;
   }
   
-  const normalizedCategory = category.toLowerCase().trim();
+  const normalizedCategory = safeToLowerCase(category);
   
   return books.filter(book => 
-    book.category?.toLowerCase().trim() === normalizedCategory
+    safeToLowerCase(book.category) === normalizedCategory
   );
 }
 
 /**
  * Get books by tag
  */
-export function getBooksByTag(tag: string): BookMeta[] {
+export function getBooksByTag(tag: string): Book[] {
   const books = getPublicBooks();
   
   if (!tag) {
     return books;
   }
   
-  const normalizedTag = tag.toLowerCase().trim();
+  const normalizedTag = safeToLowerCase(tag);
   
-  return books.filter(book => 
-    book.tags?.some(t => t.toLowerCase().trim() === normalizedTag)
-  );
+  return books.filter(book => {
+    if (!Array.isArray(book.tags)) return false;
+    return book.tags.some(t => safeToLowerCase(t) === normalizedTag);
+  });
 }
 
 /**
@@ -171,10 +197,8 @@ export function getBooksByTag(tag: string): BookMeta[] {
 export function getAllCategories(): string[] {
   const books = getPublicBooks();
   const categories = books
-    .map(book => book.category)
-    .filter((category): category is string => 
-      typeof category === "string" && category.trim().length > 0
-    );
+    .map(book => safeString(book.category))
+    .filter(category => category.trim().length > 0);
   
   // Remove duplicates and sort
   return [...new Set(categories)].sort();
@@ -186,8 +210,8 @@ export function getAllCategories(): string[] {
 export function getAllTags(): string[] {
   const books = getPublicBooks();
   const allTags = books
-    .flatMap(book => book.tags || [])
-    .filter((tag): tag is string => typeof tag === "string");
+    .flatMap(book => Array.isArray(book.tags) ? book.tags : [])
+    .map(tag => safeString(tag));
   
   // Remove duplicates and sort
   return [...new Set(allTags)].sort();
@@ -199,10 +223,8 @@ export function getAllTags(): string[] {
 export function getAllAuthors(): string[] {
   const books = getPublicBooks();
   const authors = books
-    .map(book => book.author)
-    .filter((author): author is string => 
-      typeof author === "string" && author.trim().length > 0
-    );
+    .map(book => safeString(book.author))
+    .filter(author => author.trim().length > 0);
   
   // Remove duplicates and sort
   return [...new Set(authors)].sort();
@@ -212,19 +234,42 @@ export function getAllAuthors(): string[] {
  * Get book statistics
  */
 export function getBookStats() {
-  try {
-    return booksData.getBookStats();
-  } catch {
-    return {
-      total: 0,
-      published: 0,
-      drafts: 0,
-      featured: 0,
-      byFormat: {},
-      byCategory: {},
-      byYear: {},
-    };
-  }
+  const books = getAllBooksMeta();
+  const published = getPublicBooks();
+  
+  const stats = {
+    total: books.length,
+    published: published.length,
+    drafts: books.length - published.length,
+    featured: published.filter(b => b.featured === true).length,
+    byFormat: {} as Record<string, number>,
+    byCategory: {} as Record<string, number>,
+    byYear: {} as Record<string, number>,
+  };
+  
+  published.forEach(book => {
+    // Count by format
+    const format = safeString(book.format);
+    if (format) {
+      stats.byFormat[format] = (stats.byFormat[format] || 0) + 1;
+    }
+    
+    // Count by category
+    const category = safeString(book.category);
+    if (category) {
+      stats.byCategory[category] = (stats.byCategory[category] || 0) + 1;
+    }
+    
+    // Count by year
+    if (book.date) {
+      const year = new Date(book.date).getFullYear().toString();
+      if (year !== "NaN") {
+        stats.byYear[year] = (stats.byYear[year] || 0) + 1;
+      }
+    }
+  });
+  
+  return stats;
 }
 
 // Default export with all functions

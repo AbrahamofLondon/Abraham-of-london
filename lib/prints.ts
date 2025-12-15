@@ -1,7 +1,18 @@
-// lib/prints.ts
+// lib/prints.ts - FIXED VERSION
 // Prints data facade
 
 import { getAllPrintsMeta } from "@/lib/server/prints-data";
+
+// SAFE string helper
+function safeString(value: any): string {
+  if (typeof value === "string") return value;
+  return String(value || "");
+}
+
+// SAFE lowercase helper
+function safeLowerCase(value: any): string {
+  return safeString(value).toLowerCase();
+}
 
 // Server types (what comes from prints-data)
 type PrintFromServer = {
@@ -84,8 +95,18 @@ function transformPrintForClient(print: PrintFromServer): PrintMeta {
     }
   }
   
+  // SAFE transform all string fields
   return {
     ...print,
+    slug: safeString(print.slug),
+    title: safeString(print.title),
+    excerpt: safeString(print.excerpt),
+    description: safeString(print.description),
+    date: safeString(print.date),
+    category: safeString(print.category),
+    format: safeString(print.format),
+    dimensions: safeString(print.dimensions),
+    tags: Array.isArray(print.tags) ? print.tags.map(t => safeString(t)) : [],
     price,
   };
 }
@@ -117,7 +138,7 @@ export function getPrintBySlug(slug: string): PrintDocument | null {
     // Convert PrintMeta to PrintDocument (add content field)
     return {
       ...printMeta,
-      content: '', // You might want to fetch actual content here
+      content: '',
     };
   } catch {
     return null;
@@ -129,7 +150,7 @@ export function getPrintBySlug(slug: string): PrintDocument | null {
  */
 export function getAllPrintSlugs(): string[] {
   const prints = getAllPrints();
-  return prints.map(p => p.slug).filter(Boolean);
+  return prints.map(p => safeString(p.slug)).filter(Boolean);
 }
 
 /**
@@ -164,17 +185,22 @@ export function getFeaturedPrints(limit?: number): PrintMeta[] {
  */
 export function getPrintsByCategory(category: string): PrintMeta[] {
   const prints = getPublicPrints();
-  return prints.filter(print => print.category === category);
+  return prints.filter(print => 
+    safeString(print.category) === safeString(category)
+  );
 }
 
 /**
- * Get prints by tag
+ * Get prints by tag - FIXED
  */
 export function getPrintsByTag(tag: string): PrintMeta[] {
   const prints = getPublicPrints();
-  return prints.filter(print => 
-    print.tags?.some(t => t.toLowerCase() === tag.toLowerCase())
-  );
+  const normalizedTag = safeLowerCase(tag);
+  
+  return prints.filter(print => {
+    if (!Array.isArray(print.tags)) return false;
+    return print.tags.some(t => safeLowerCase(t) === normalizedTag);
+  });
 }
 
 /**
@@ -191,7 +217,7 @@ export function getPrintsByDate(): PrintMeta[] {
   return prints.sort((a, b) => {
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
-    return dateB - dateA; // Newest first
+    return dateB - dateA;
   });
 }
 

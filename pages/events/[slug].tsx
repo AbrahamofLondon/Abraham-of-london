@@ -8,7 +8,7 @@ import type {
 } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { getAllEvents, type Event as EventType } from '@/lib/contentlayer-helper';
+import { getAllEvents, type EventDocument } from '@/lib/contentlayer-helper';
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
@@ -17,14 +17,14 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
 
 type Props = {
-  event: EventType;
+  event: EventDocument;
   source: MDXRemoteSerializeResult;
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const events = getAllEvents();
   const paths = events.map((event) => ({
-    params: { slug: event.slug },
+    params: { slug: event.slug || (event as any)._raw?.flattenedPath?.split('/').pop() || '' },
   }));
 
   return {
@@ -44,7 +44,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const events = getAllEvents();
   const event = events.find((e) => {
-    // Handle slug comparison - might need to check _raw.flattenedPath or other slug properties
+    // Handle slug comparison
     const eventSlug = e.slug || (e as any)._raw?.flattenedPath?.split('/').pop();
     return eventSlug === slug;
   });

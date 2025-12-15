@@ -1,4 +1,6 @@
 // components/Cards/index.tsx
+import * as React from "react";
+
 // =============================================================================
 // TYPE DEFINITIONS
 // =============================================================================
@@ -27,6 +29,7 @@ export interface PostLike {
   fileSize?: string | null;
   price?: string | null;
   dimensions?: string | null;
+  type?: string;
 }
 
 // =============================================================================
@@ -264,4 +267,66 @@ export function renderCardDate(
       })()}
     </time>
   );
+}
+
+// =============================================================================
+// DOCUMENT CARD PROPS FUNCTION
+// =============================================================================
+
+/**
+ * Get card props for any document type
+ */
+export function getCardPropsForDocument(doc: any): PostLike {
+  // Helper function to get document href based on type
+  const getDocHref = (doc: any): string => {
+    const slug = doc.slug || '';
+    const type = doc.type?.toLowerCase() || 'content';
+    
+    switch (type) {
+      case 'post':
+        return `/blog/${slug}`;
+      case 'short':
+        return `/shorts/${slug}`;
+      case 'book':
+        return `/books/${slug}`;
+      case 'canon':
+        return `/canon/${slug}`;
+      case 'download':
+        return `/downloads/${slug}`;
+      case 'event':
+        return `/events/${slug}`;
+      case 'print':
+        return `/prints/${slug}`;
+      case 'resource':
+        return `/resources/${slug}`;
+      case 'strategy':
+        return `/content/${slug}`;
+      default:
+        return `/content/${slug}`;
+    }
+  };
+
+  return {
+    slug: doc.slug || '',
+    title: doc.title || 'Untitled',
+    subtitle: doc.subtitle || null,
+    excerpt: doc.excerpt || null,
+    description: doc.description || null,
+    coverImage: doc.coverImage || null,
+    date: doc.date || null,
+    tags: Array.isArray(doc.tags) ? doc.tags : [],
+    featured: Boolean(doc.featured),
+    accessLevel: doc.accessLevel || null,
+    lockMessage: doc.lockMessage || null,
+    category: doc.category || null,
+    readingTime: doc.readTime || doc.readingTime || null,
+    href: doc.url || getDocHref(doc),
+    author: doc.author || null,
+    volumeNumber: doc.volumeNumber || null,
+    downloadUrl: doc.downloadUrl || doc.fileUrl || null,
+    fileSize: doc.fileSize || null,
+    price: doc.price || null,
+    dimensions: doc.dimensions || null,
+    type: doc.type || null,
+  };
 }

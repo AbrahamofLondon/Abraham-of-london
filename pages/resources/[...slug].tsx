@@ -1,16 +1,43 @@
-// pages/resources/[...slug].tsx
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import {
-  getAllContentlayerDocs,
-  getDocKind,
-  getDocHref,
-  isDraft,
-} from "@/lib/contentlayer-helper";
+import { allResources } from "contentlayer/generated";
 
-type Props = { doc: any; canonicalPath: string; label?: string };
+type Props = { 
+  doc: any; 
+  canonicalPath: string;
+  error?: string;
+};
 
-const ResourceDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
+// SAFE helpers
+function safeString(value: any): string {
+  if (typeof value === "string") return value;
+  if (value == null) return "";
+  return String(value);
+}
+
+function safeSlug(value: any): string {
+  const str = safeString(value);
+  return str.replace(/\/index$/, "").replace(/^resources\//, "");
+}
+
+function normalizeSlug(slug: any): string[] {
+  if (!slug) return [];
+  if (Array.isArray(slug)) return slug.map(s => safeString(s));
+  return [safeString(slug)];
+}
+
+const ResourceDocPage: NextPage<Props> = ({ doc, canonicalPath, error }) => {
+  if (error || !doc) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600">Error Loading Resource</h1>
+          <p className="mt-2 text-gray-600">{error || "Document not found"}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ContentlayerDocPage
       doc={doc}
@@ -21,70 +48,106 @@ const ResourceDocPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   );
 };
 
-function lastSegment(input: string[] | string | undefined): string {
-  if (!input) return "";
-  if (Array.isArray(input)) return String(input[input.length - 1] ?? "").trim();
-  return String(input).trim();
-}
-
-function slugOf(d: any): string {
-  const s = typeof d?.slug === "string" ? d.slug.trim() : "";
-  if (s) return s;
-
-  const fp = typeof d?._raw?.flattenedPath === "string" ? d._raw.flattenedPath : "";
-  if (fp) {
-    const parts = fp.split("/");
-    const last = parts[parts.length - 1];
-    if (last && last !== "index") return last;
-    return parts[parts.length - 2] ?? "";
-  }
-  return "";
-}
-
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const docs = getAllContentlayerDocs()
-      .filter((d: any) => !isDraft(d))
-      .filter((d: any) => getDocKind(d) === "resource");
+    // Get valid resources only
+    const validResources = (allResources || []).filter(resource => {
+      // Skip drafts in production
+      if (process.env.NODE_ENV === 'production') {
+        if (resource.draft === true || resource.draft === "true") return false;
+      }
+      
+      // Must have a valid slug
+      const slug = safeSlug(resource.slug || resource._raw?.flattenedPath);
+      return !!slug && slug !== "index" && slug !== "";
+    });
 
-    const paths = docs
-      .map((d: any) => {
-        const slug = slugOf(d);
-        return slug ? { params: { slug: [slug] } } : null;
-      })
-      .filter(Boolean) as { params: { slug: string[] } }[];
+    const paths = validResources.map(resource => {
+      const slug = safeSlug(resource.slug || resource._raw?.flattenedPath);
+      const slugParts = slug.split('/').filter(part => part && part !== 'index');
+      
+      return {
+        params: { slug: slugParts }
+      };
+    });
 
-    return { paths, fallback: false };
-  } catch (e) {
-    console.error("[resources/[...slug]] getStaticPaths failed:", e);
+    console.log(`✅ Generated ${paths.length} paths for resources`);
+    return { 
+      paths, 
+      fallback: false
+    };
+  } catch (error) {
+    console.error("❌ Error generating static paths for resources:", error);
     return { paths: [], fallback: false };
   }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
-    const slugParam = (params as any)?.slug as string[] | string | undefined;
-    const slug = lastSegment(slugParam);
-    if (!slug) return { notFound: true };
+    const slugParam = normalizeSlug(params?.slug);
+    
+    if (!slugParam.length) {
+      return {
+        props: {
+          doc: null,
+          canonicalPath: "",
+          error: "No slug provided"
+        }
+      };
+    }
 
-    const docs = getAllContentlayerDocs()
-      .filter((d: any) => !isDraft(d))
-      .filter((d: any) => getDocKind(d) === "resource");
+    const targetSlug = slugParam.join('/');
+    
+    // Find resource
+    let resource = (allResources || []).find(r => {
+      if (process.env.NODE_ENV === 'production') {
+        if (r.draft === true || r.draft === "true") return false;
+      }
+      
+      const docSlug = safeSlug(r.slug || r._raw?.flattenedPath);
+      return docSlug === targetSlug;
+    });
 
-    const doc = docs.find((d: any) => slugOf(d) === slug) ?? null;
-    if (!doc) return { notFound: true };
+    if (!resource) {
+      console.warn(`❌ Resource not found for slug: ${targetSlug}`);
+      return {
+        props: {
+          doc: null,
+          canonicalPath: `/resources/${targetSlug}`,
+          error: `Resource "${targetSlug}" not found`
+        }
+      };
+    }
 
+    // Create a clean, safe document
+    const cleanDoc = {
+      ...resource,
+      slug: safeString(resource.slug || targetSlug),
+      title: safeString(resource.title || "Untitled Resource"),
+      date: safeString(resource.date || ""),
+      excerpt: safeString(resource.excerpt || resource.description || ""),
+      description: safeString(resource.description || resource.excerpt || ""),
+      // Ensure body.code exists
+      body: resource.body?.code ? resource.body : { code: "" }
+    };
+
+    console.log(`✅ Serving resource: ${cleanDoc.title} (${targetSlug})`);
+    
     return {
       props: {
-        doc,
-        canonicalPath: getDocHref(doc),
-        label: "Resources",
-      },
-      revalidate: 3600,
+        doc: cleanDoc,
+        canonicalPath: `/resources/${targetSlug}`,
+      }
     };
-  } catch (e) {
-    console.error("[resources/[...slug]] getStaticProps failed:", e);
-    return { notFound: true };
+  } catch (error) {
+    console.error(`💥 Error in getStaticProps for resources/${params?.slug}:`, error);
+    return {
+      props: {
+        doc: null,
+        canonicalPath: "",
+        error: `Server error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      }
+    };
   }
 };
 
