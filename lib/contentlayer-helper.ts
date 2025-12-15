@@ -1,168 +1,214 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// lib/contentlayer-helper.ts - FIXED VERSION with correct URLs
+import {
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allResources,
+  allStrategies,
+  allCanons,
+  allShorts,
+} from "contentlayer/generated";
+import type {
+  Post as PostType,
+  Book as BookType,
+  Download as DownloadType,
+  Event as EventType,
+  Print as PrintType,
+  Resource as ResourceType,
+  Strategy as StrategyType,
+  Canon as CanonType,
+  Short as ShortType,
+} from "contentlayer/generated";
+
+// ============================================
+// TYPE DEFINITIONS - LOWERCASE FOR UI CONSISTENCY
+// ============================================
 
 export type DocKind =
   | "post"
-  | "canon"
-  | "resource"
-  | "download"
-  | "print"
   | "book"
+  | "download"
   | "event"
-  | "short"
-  | "strategy";
+  | "print"
+  | "resource"
+  | "strategy"
+  | "canon"
+  | "short";
 
-export type AnyDoc = {
-  type?: string; // "Post" | "Book" | ...
-  _type?: string; // some setups
-  slug?: string;
-  title?: string;
-  excerpt?: string;
-  description?: string;
-  subtitle?: string;
-  date?: string;
-  tags?: string[];
-  coverImage?: string;
-  draft?: boolean;
-  featured?: boolean;
+export type Post = PostType;
+export type Short = ShortType;
+export type Book = BookType;
+export type Canon = CanonType;
+export type Download = DownloadType;
+export type Event = EventType;
+export type Print = PrintType;
+export type Resource = ResourceType;
+export type Strategy = StrategyType;
 
-  // common meta
-  author?: string;
-  readTime?: string;
-  category?: string;
+export type AnyDoc =
+  | PostType
+  | BookType
+  | DownloadType
+  | EventType
+  | PrintType
+  | ResourceType
+  | StrategyType
+  | CanonType
+  | ShortType;
 
-  // downloads/resources
-  downloadUrl?: string;
-  fileUrl?: string;
-  pdfPath?: string;
-  downloadFile?: string;
-
-  // contentlayer
-  body?: { code?: string; raw?: string };
-  _raw?: { flattenedPath?: string; sourceFilePath?: string };
-};
-
-export type ContentlayerCardProps = {
-  type: DocKind;
+export interface ContentlayerCardProps {
+  type: string;
   slug: string;
-  href: string;
   title: string;
-  subtitle?: string | null;
-  excerpt?: string | null;
+  href: string;
   description?: string | null;
-  image?: string | null;
+  excerpt?: string | null;
+  subtitle?: string | null;
   date?: string | null;
+  readTime?: string | null;
+  image?: string | null;
   tags?: string[];
+  category?: string | null;
+  author?: string | null;
   featured?: boolean;
   downloadUrl?: string | null;
-  coverAspect?: "wide" | "portrait" | "book";
-};
-
-type Generated = {
-  allDocuments?: AnyDoc[];
-  allPosts?: AnyDoc[];
-  allBooks?: AnyDoc[];
-  allDownloads?: AnyDoc[];
-  allEvents?: AnyDoc[];
-  allPrints?: AnyDoc[];
-  allResources?: AnyDoc[];
-  allCanons?: AnyDoc[];
-  allShorts?: AnyDoc[];
-  allStrategies?: AnyDoc[];
-};
-
-function asArray<T = any>(v: any): T[] {
-  return Array.isArray(v) ? (v as T[]) : [];
+  coverAspect?: string | null; // ✅ Added
+  coverFit?: string | null; // ✅ Added
 }
 
-function loadGenerated(): Generated {
+// ============================================
+// CONTENTLAYER STATUS CHECK
+// ============================================
+
+export const isContentlayerLoaded = (): boolean => {
   try {
-    // ✅ stable build import
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require("contentlayer/generated") as Generated;
-  } catch (e) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("[contentlayer-helper] Failed to load contentlayer/generated.", e);
-    }
-    return {};
+    return (
+      Array.isArray(allPosts) &&
+      Array.isArray(allBooks) &&
+      Array.isArray(allShorts)
+    );
+  } catch {
+    return false;
   }
-}
+};
 
-// ----------------------------------------------------------------------------
-// Slug helpers
-// ----------------------------------------------------------------------------
-export function normalizeSlug(doc: AnyDoc): string {
+// ============================================
+// SLUG HELPER (Robust)
+// ============================================
+
+function normalizeSlug(doc: any): string {
   if (!doc) return "untitled";
 
-  const s = typeof doc.slug === "string" ? doc.slug.trim() : "";
-  if (s) return s.toLowerCase();
-
-  const fp =
-    typeof doc?._raw?.flattenedPath === "string" ? doc._raw.flattenedPath : "";
-  if (fp) {
-    const parts = fp.split("/").filter(Boolean);
-    const last = parts[parts.length - 1];
-    const pick = last === "index" ? parts[parts.length - 2] : last;
-    if (pick) return String(pick).trim().toLowerCase();
+  // Priority 1: Explicit slug field
+  if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
+    return doc.slug.trim().toLowerCase();
   }
 
-  const t = typeof doc.title === "string" ? doc.title.trim() : "";
-  if (t) {
-    return t
+  // Priority 2: Flattened path from _raw
+  if (doc._raw?.flattenedPath) {
+    const path = doc._raw.flattenedPath;
+    const parts = path.split("/");
+    const lastPart = parts[parts.length - 1];
+    return lastPart === "index"
+      ? parts[parts.length - 2] || lastPart
+      : lastPart;
+  }
+
+  // Priority 3: Title-based slug
+  if (doc.title) {
+    return doc.title
       .toLowerCase()
       .replace(/[^\w\s-]/g, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
-      .slice(0, 120);
+      .substring(0, 100);
   }
 
   return "untitled";
 }
 
-export function isDraft(doc: AnyDoc): boolean {
-  return Boolean(doc?.draft);
-}
+// ============================================
+// TYPE GUARDS
+// ============================================
 
-// ----------------------------------------------------------------------------
-// Kind mapping (single source of truth)
-// ----------------------------------------------------------------------------
+export const isPost = (doc: AnyDoc): doc is PostType =>
+  doc.type === "Post" || doc._type === "Post";
+export const isBook = (doc: AnyDoc): doc is BookType =>
+  doc.type === "Book" || doc._type === "Book";
+export const isDownload = (doc: AnyDoc): doc is DownloadType =>
+  doc.type === "Download" || doc._type === "Download";
+export const isEvent = (doc: AnyDoc): doc is EventType =>
+  doc.type === "Event" || doc._type === "Event";
+export const isPrint = (doc: AnyDoc): doc is PrintType =>
+  doc.type === "Print" || doc._type === "Print";
+export const isResource = (doc: AnyDoc): doc is ResourceType =>
+  doc.type === "Resource" || doc._type === "Resource";
+export const isStrategy = (doc: AnyDoc): doc is StrategyType =>
+  doc.type === "Strategy" || doc._type === "Strategy";
+export const isCanon = (doc: AnyDoc): doc is CanonType =>
+  doc.type === "Canon" || doc._type === "Canon";
+export const isShort = (doc: AnyDoc): doc is ShortType =>
+  doc.type === "Short" || doc._type === "Short";
+
+// Bulletproof draft detection - handles string "false", boolean false, undefined, null
+export const isDraft = (doc: AnyDoc): boolean => {
+  const d = doc.draft;
+  // Explicitly false values
+  if (d === false || d === "false" || d === null || d === undefined) return false;
+  // Explicitly true values
+  if (d === true || d === "true") return true;
+  // Default to not draft
+  return false;
+};
+
+export const isPublished = (doc: AnyDoc): boolean => !isDraft(doc);
+
+// ============================================
+// DOCUMENT KIND MAPPER (Contentlayer -> UI)
+// ============================================
+
 export function getDocKind(doc: AnyDoc): DocKind {
-  const raw = String(doc?.type ?? doc?._type ?? "").toLowerCase();
+  const docType = doc.type || doc._type;
 
-  if (raw.includes("post")) return "post";
-  if (raw.includes("canon")) return "canon";
-  if (raw.includes("resource")) return "resource";
-  if (raw.includes("download")) return "download";
-  if (raw.includes("print")) return "print";
-  if (raw.includes("book")) return "book";
-  if (raw.includes("event")) return "event";
-  if (raw.includes("short")) return "short";
-  if (raw.includes("strategy")) return "strategy";
-
-  // fallback from flattenedPath
-  const fp = String(doc?._raw?.flattenedPath ?? "").toLowerCase();
-  if (fp.includes("posts/")) return "post";
-  if (fp.includes("canon/")) return "canon";
-  if (fp.includes("resources/")) return "resource";
-  if (fp.includes("downloads/")) return "download";
-  if (fp.includes("prints/")) return "print";
-  if (fp.includes("books/")) return "book";
-  if (fp.includes("events/")) return "event";
-  if (fp.includes("shorts/")) return "short";
-  if (fp.includes("strategy/")) return "strategy";
-
-  return "post";
+  switch (docType) {
+    case "Post":
+      return "post";
+    case "Book":
+      return "book";
+    case "Download":
+      return "download";
+    case "Event":
+      return "event";
+    case "Print":
+      return "print";
+    case "Resource":
+      return "resource";
+    case "Strategy":
+      return "strategy";
+    case "Canon":
+      return "canon";
+    case "Short":
+      return "short";
+    default:
+      return "post";
+  }
 }
 
-// ----------------------------------------------------------------------------
-// Href mapping (single source of truth)
-// ----------------------------------------------------------------------------
+// ============================================
+// URL HELPERS - FIXED FOR YOUR SITE STRUCTURE
+// ============================================
+
 export function getDocHref(doc: AnyDoc): string {
   const slug = normalizeSlug(doc);
   const kind = getDocKind(doc);
 
+  // CRITICAL FIX: All content types go through /content/[slug]
+  // except downloads, shorts, and a few specific routes
   switch (kind) {
     case "post":
-      return `/blog/${slug}`; // ✅ posts live here now
+      return `/content/${slug}`; // ✅ FIXED: was /blog/
     case "short":
       return `/shorts/${slug}`;
     case "book":
@@ -176,232 +222,328 @@ export function getDocHref(doc: AnyDoc): string {
     case "print":
       return `/prints/${slug}`;
     case "resource":
-      return `/resources/${slug}`;
+      return `/content/${slug}`; // ✅ FIXED: was /resources/
     case "strategy":
-      return `/strategy/${slug}`;
+      return `/content/${slug}`; // ✅ FIXED: was /strategy/
     default:
       return `/content/${slug}`;
   }
 }
 
-// ----------------------------------------------------------------------------
-// Collections (compat exports)
-// ----------------------------------------------------------------------------
-const gen = loadGenerated();
+export const getShortUrl = (short: ShortType): string => getDocHref(short);
 
-export const allPosts = asArray<AnyDoc>(gen.allPosts);
-export const allBooks = asArray<AnyDoc>(gen.allBooks);
-export const allDownloads = asArray<AnyDoc>(gen.allDownloads);
-export const allEvents = asArray<AnyDoc>(gen.allEvents);
-export const allPrints = asArray<AnyDoc>(gen.allPrints);
-export const allResources = asArray<AnyDoc>(gen.allResources);
-export const allCanons = asArray<AnyDoc>(gen.allCanons);
-export const allShorts = asArray<AnyDoc>(gen.allShorts);
-export const allStrategies = asArray<AnyDoc>(gen.allStrategies);
+// ============================================
+// IMAGE HELPERS
+// ============================================
 
-// Prefer allDocuments; otherwise merge everything
-export const allDocuments: AnyDoc[] = (() => {
-  const docs = asArray<AnyDoc>(gen.allDocuments);
-  if (docs.length > 0) return docs;
+export function resolveDocCoverImage(doc: AnyDoc): string {
+  const explicit =
+    ((doc as any).coverImage as string | undefined) ||
+    ((doc as any).image as string | undefined) ||
+    "";
 
-  return [
-    ...allPosts,
-    ...allBooks,
-    ...allDownloads,
-    ...allEvents,
-    ...allPrints,
-    ...allResources,
-    ...allCanons,
-    ...allShorts,
-    ...allStrategies,
-  ].filter(Boolean);
-})();
+  if (explicit && explicit.trim()) {
+    return explicit.trim();
+  }
 
-export const allContent: AnyDoc[] = [...allDocuments];
-
-export const allPublished: AnyDoc[] = allDocuments.filter((d) => !isDraft(d));
-
-// ----------------------------------------------------------------------------
-// “Old API” helpers your codebase expects
-// ----------------------------------------------------------------------------
-export function getAllContentlayerDocs(): AnyDoc[] {
-  return allDocuments;
+  return "/assets/images/writing-desk.webp";
 }
 
-export function getDocumentsByType(type: string): AnyDoc[] {
-  return allDocuments.filter(
-    (d) => String(d.type ?? d._type ?? "").toLowerCase() === type.toLowerCase()
-  );
+export function resolveDocDownloadUrl(doc: AnyDoc): string | null {
+  const explicit =
+    ((doc as any).downloadUrl as string | undefined) ||
+    ((doc as any).fileUrl as string | undefined) ||
+    "";
+
+  if (explicit && explicit.trim()) {
+    return explicit.trim();
+  }
+
+  return null;
 }
 
-export function getDocumentBySlug(slug: string, type?: string): AnyDoc | undefined {
-  const s = String(slug ?? "").trim().toLowerCase();
-  const pool = type ? getDocumentsByType(type) : allDocuments;
-  return pool.find((d) => normalizeSlug(d) === s);
-}
+// ============================================
+// SAFE CONTENT GETTERS
+// ============================================
 
-export function getBySlugAndKind(slug: string, kind: DocKind): AnyDoc | undefined {
-  const s = String(slug ?? "").trim().toLowerCase();
-  return allDocuments
-    .filter((d) => getDocKind(d) === kind)
-    .find((d) => normalizeSlug(d) === s);
-}
+export const getAllContentlayerDocs = (): AnyDoc[] => {
+  try {
+    return [
+      ...(allPosts || []),
+      ...(allBooks || []),
+      ...(allDownloads || []),
+      ...(allEvents || []),
+      ...(allPrints || []),
+      ...(allResources || []),
+      ...(allStrategies || []),
+      ...(allCanons || []),
+      ...(allShorts || []),
+    ] as AnyDoc[];
+  } catch (error) {
+    console.error("Error getting all contentlayer docs:", error);
+    return [];
+  }
+};
 
-export function getDocByHref(href: string): AnyDoc | undefined {
-  const h = String(href ?? "").trim();
-  return allDocuments.find((d) => getDocHref(d) === h);
-}
+export const getPublishedDocuments = (): AnyDoc[] => {
+  try {
+    return getAllContentlayerDocs().filter(isPublished);
+  } catch (error) {
+    console.error("Error getting published documents:", error);
+    return [];
+  }
+};
 
-export function getPublishedDocuments<T extends AnyDoc>(docs: T[] = allDocuments as T[]): T[] {
-  return docs
-    .filter((d) => !isDraft(d))
-    .sort((a, b) => {
-      const ad = a.date ? new Date(a.date).getTime() : 0;
-      const bd = b.date ? new Date(b.date).getTime() : 0;
-      if (bd !== ad) return bd - ad;
-      return String(a.title ?? "").localeCompare(String(b.title ?? ""));
+export const getFeaturedDocuments = (): AnyDoc[] => {
+  try {
+    return getPublishedDocuments().filter((doc) => {
+      const f = doc.featured;
+      // Only return true if explicitly featured: true (not "true" string, not undefined)
+      return f === true || f === "true";
     });
-}
+  } catch (error) {
+    console.error("Error getting featured documents:", error);
+    return [];
+  }
+};
 
-export function getPublishedPosts(): AnyDoc[] {
-  return getPublishedDocuments(allPosts);
-}
+// ============================================
+// GROUPED BY TYPE (CRITICAL FIX)
+// ============================================
 
-export function getPublishedShorts(): AnyDoc[] {
-  return getPublishedDocuments(allShorts);
-}
-
-export function getRecentShorts(limit = 6): AnyDoc[] {
-  return getPublishedShorts().slice(0, Math.max(0, limit));
-}
-
-export function getShortBySlug(slug: string): AnyDoc | undefined {
-  return getBySlugAndKind(slug, "short");
-}
-
-export function getShortUrl(doc: AnyDoc): string {
-  // keep legacy name
-  return getDocHref(doc);
-}
-
-export function getAllBooks(): AnyDoc[] {
-  return allBooks;
-}
-export function getAllDownloads(): AnyDoc[] {
-  return allDownloads;
-}
-export function getAllEvents(): AnyDoc[] {
-  return allEvents;
-}
-export function getAllPrints(): AnyDoc[] {
-  return allPrints;
-}
-export function getAllResources(): AnyDoc[] {
-  return allResources;
-}
-export function getAllStrategies(): AnyDoc[] {
-  return allStrategies;
-}
-
-export function isContentlayerLoaded(): boolean {
-  // “loaded” means we can see at least one known collection or any docs
-  return (
-    allDocuments.length > 0 ||
-    allPosts.length > 0 ||
-    allBooks.length > 0 ||
-    allDownloads.length > 0
-  );
-}
-
-// ----------------------------------------------------------------------------
-// Type guards (compat)
-// ----------------------------------------------------------------------------
-export function isPost(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "post";
-}
-export function isBook(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "book";
-}
-export function isDownload(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "download";
-}
-export function isEvent(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "event";
-}
-export function isPrint(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "print";
-}
-export function isResource(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "resource";
-}
-export function isShort(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "short";
-}
-export function isStrategy(doc: AnyDoc): boolean {
-  return getDocKind(doc) === "strategy";
-}
-
-// ----------------------------------------------------------------------------
-// Bucketing for The Kingdom Vault
-// ----------------------------------------------------------------------------
 export function getPublishedDocumentsByType(): Record<DocKind, AnyDoc[]> {
-  const docs = allDocuments.filter((d) => !isDraft(d));
+  const published = getPublishedDocuments();
 
   const buckets: Record<DocKind, AnyDoc[]> = {
     post: [],
-    canon: [],
-    resource: [],
-    download: [],
-    print: [],
     book: [],
+    download: [],
     event: [],
-    short: [],
+    print: [],
+    resource: [],
     strategy: [],
+    canon: [],
+    short: [],
   };
 
-  for (const d of docs) {
-    const k = getDocKind(d);
-    buckets[k].push(d);
+  for (const doc of published) {
+    const kind = getDocKind(doc);
+    buckets[kind].push(doc);
   }
 
-  (Object.keys(buckets) as DocKind[]).forEach((k) => {
-    buckets[k] = buckets[k].sort((a, b) => {
-      const ad = a.date ? new Date(a.date).getTime() : 0;
-      const bd = b.date ? new Date(b.date).getTime() : 0;
-      if (bd !== ad) return bd - ad;
-      return String(a.title ?? "").localeCompare(String(b.title ?? ""));
+  // Sort each bucket by date (newest first)
+  const kinds: DocKind[] = [
+    "post",
+    "book",
+    "download",
+    "event",
+    "print",
+    "resource",
+    "strategy",
+    "canon",
+    "short",
+  ];
+
+  for (const kind of kinds) {
+    buckets[kind].sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
     });
-  });
+  }
 
   return buckets;
 }
 
-// ----------------------------------------------------------------------------
-// Card props mapping (Vault + cards)
-// ----------------------------------------------------------------------------
+// ============================================
+// INDIVIDUAL TYPE GETTERS
+// ============================================
+
+export const getPublishedPosts = (): PostType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allPosts || []).filter((post) => !post.draft) as PostType[];
+  } catch (error) {
+    console.error("Error getting published posts:", error);
+    return [];
+  }
+};
+
+export const getPublishedShorts = (): ShortType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allShorts || []).filter((short) => !short.draft) as ShortType[];
+  } catch (error) {
+    console.error("Error getting published shorts:", error);
+    return [];
+  }
+};
+
+export const getAllBooks = (): BookType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allBooks || []).filter((book) => !book.draft) as BookType[];
+  } catch (error) {
+    console.error("Error getting all books:", error);
+    return [];
+  }
+};
+
+export const getAllCanons = (): CanonType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allCanons || []).filter((canon) => !canon.draft) as CanonType[];
+  } catch (error) {
+    console.error("Error getting all canon entries:", error);
+    return [];
+  }
+};
+
+export const getAllDownloads = (): DownloadType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allDownloads || []).filter(
+      (download) => !download.draft
+    ) as DownloadType[];
+  } catch (error) {
+    console.error("Error getting all downloads:", error);
+    return [];
+  }
+};
+
+export const getAllEvents = (): EventType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allEvents || []).filter((event) => !event.draft) as EventType[];
+  } catch (error) {
+    console.error("Error getting all events:", error);
+    return [];
+  }
+};
+
+export const getAllPrints = (): PrintType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allPrints || []).filter((print) => !print.draft) as PrintType[];
+  } catch (error) {
+    console.error("Error getting all prints:", error);
+    return [];
+  }
+};
+
+export const getAllResources = (): ResourceType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allResources || []).filter(
+      (resource) => !resource.draft
+    ) as ResourceType[];
+  } catch (error) {
+    console.error("Error getting all resources:", error);
+    return [];
+  }
+};
+
+export const getAllStrategies = (): StrategyType[] => {
+  if (!isContentlayerLoaded()) return [];
+  try {
+    return (allStrategies || []).filter(
+      (strategy) => !strategy.draft
+    ) as StrategyType[];
+  } catch (error) {
+    console.error("Error getting all strategies:", error);
+    return [];
+  }
+};
+
+// ============================================
+// BY SLUG GETTERS
+// ============================================
+
+export const getPostBySlug = (slug: string): PostType | undefined => {
+  return getPublishedPosts().find((post) => normalizeSlug(post) === slug);
+};
+
+export const getShortBySlug = (slug: string): ShortType | undefined => {
+  return getPublishedShorts().find((short) => normalizeSlug(short) === slug);
+};
+
+export const getBookBySlug = (slug: string): BookType | undefined => {
+  return getAllBooks().find((book) => normalizeSlug(book) === slug);
+};
+
+export const getCanonBySlug = (slug: string): CanonType | undefined => {
+  return getAllCanons().find((canon) => normalizeSlug(canon) === slug);
+};
+
+export const getDocumentBySlug = (slug: string): AnyDoc | undefined => {
+  return getAllContentlayerDocs().find((doc) => normalizeSlug(doc) === slug);
+};
+
+// ============================================
+// CARD PROPS GENERATOR
+// ============================================
+
 export function getCardPropsForDocument(doc: AnyDoc): ContentlayerCardProps {
-  const kind = getDocKind(doc);
   const slug = normalizeSlug(doc);
-
-  const downloadUrl =
-    doc.downloadUrl || doc.fileUrl || doc.pdfPath || doc.downloadFile || null;
-
-  const coverAspect: ContentlayerCardProps["coverAspect"] =
-    kind === "book" || kind === "canon" || kind === "print" ? "portrait" : "wide";
+  const kind = getDocKind(doc);
 
   return {
-    type: kind,
+    type: kind, // CRITICAL: lowercase for UI
     slug,
+    title: (doc as any).title ?? "Untitled",
     href: getDocHref(doc),
-    title: String(doc.title ?? "Untitled"),
+    description: (doc as any).description ?? (doc as any).summary ?? null,
+    excerpt: (doc as any).excerpt ?? null,
     subtitle: (doc as any).subtitle ?? null,
-    excerpt: doc.excerpt ?? null,
-    description: doc.description ?? null,
-    image: doc.coverImage ?? null,
-    date: doc.date ?? null,
-    tags: doc.tags ?? [],
-    featured: Boolean((doc as any).featured),
-    downloadUrl,
-    coverAspect,
+    date: (doc as any).date ?? null,
+    readTime: (doc as any).readTime ?? (doc as any).readtime ?? null,
+    image: resolveDocCoverImage(doc),
+    tags: ((doc as any).tags as string[] | undefined) ?? [],
+    category: (doc as any).category ?? null,
+    author: (doc as any).author ?? null,
+    featured: (doc as any).featured === true,
+    downloadUrl: resolveDocDownloadUrl(doc),
+    coverAspect: (doc as any).coverAspect ?? null, // ✅ Pass through
+    coverFit: (doc as any).coverFit ?? null, // ✅ Pass through
   };
 }
+
+// ============================================
+// EXPORTS FOR pages/content/[slug].tsx
+// ============================================
+
+export { normalizeSlug }; // ✅ Export the helper
+export { getAllContentlayerDocs, getDocHref, getDocKind, isDraft };
+
+export const getRecentShorts = (limit: number = 3): ShortType[] => {
+  try {
+    const shorts = getPublishedShorts();
+    return shorts
+      .sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, limit);
+  } catch (error) {
+    console.error("Error getting recent shorts:", error);
+    return [];
+  }
+};
+
+export const getFeaturedShorts = (limit: number = 3): ShortType[] => {
+  try {
+    const shorts = getPublishedShorts();
+    return shorts
+      .filter((short) => short.featured)
+      .sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, limit);
+  } catch (error) {
+    console.error("Error getting featured shorts:", error);
+    return [];
+  }
+};
