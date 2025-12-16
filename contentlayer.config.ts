@@ -1,38 +1,69 @@
-// contentlayer.config.ts - UPDATED with YAML fix
+// contentlayer.config.ts
 import path from "path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
 // -----------------------------------------------------------------------------
-// COMMON FIELDS
+// COMMON FIELDS (single source of truth)
 // -----------------------------------------------------------------------------
 const commonFields = {
   title: { type: "string", required: true },
   date: { type: "date", required: true },
+
+  // optional overrides / routing helpers
   slug: { type: "string", required: false },
+  href: { type: "string", required: false },
+
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
   coverImage: { type: "string", required: false },
+
   tags: { type: "list", of: { type: "string" }, required: false },
+
   draft: { type: "boolean", required: false, default: false },
   featured: { type: "boolean", required: false, default: false },
+
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
-  href: { type: "string", required: false },
 } as const;
 
 // -----------------------------------------------------------------------------
-// URL HELPER
+// URL HELPER (robust + consistent)
 // -----------------------------------------------------------------------------
+function normalizeSlugFromFlattenedPath(
+  flattenedPath: string,
+  basePath: string
+): string {
+  // flattenedPath examples:
+  // - "shorts/my-post"
+  // - "shorts/index" (we treat as "/shorts")
+  // - "blog/some-slug"
+  const withoutBase = flattenedPath.startsWith(`${basePath}/`)
+    ? flattenedPath.slice(basePath.length + 1)
+    : flattenedPath;
+
+  // Remove trailing "/index"
+  return withoutBase.replace(/\/index$/, "");
+}
+
 function getDocUrl(doc: any, basePath: string): string {
+  // hard override
   if (doc.href && typeof doc.href === "string" && doc.href.trim()) {
     const href = doc.href.trim();
     return href.startsWith("/") ? href : `/${href}`;
   }
-  
-  const slug = doc.slug || doc._raw.flattenedPath.replace(`${basePath}/`, "").replace(/\/index$/, "");
-  return `/${basePath}/${slug}`;
+
+  // slug override
+  if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
+    const s = doc.slug.trim().replace(/^\/+/, "");
+    // If user provides "shorts/foo" we don't double-prefix
+    return s.startsWith(`${basePath}/`) ? `/${s}` : `/${basePath}/${s}`;
+  }
+
+  // fallback: derive from file path
+  const derived = normalizeSlugFromFlattenedPath(doc._raw.flattenedPath, basePath);
+  return derived ? `/${basePath}/${derived}` : `/${basePath}`;
 }
 
 // -----------------------------------------------------------------------------
@@ -61,10 +92,7 @@ export const Post = defineDocumentType(() => ({
     layout: { type: "string", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "blog"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "blog") },
   },
 }));
 
@@ -83,10 +111,7 @@ export const Resource = defineDocumentType(() => ({
     downloadUrl: { type: "string", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "resources"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "resources") },
   },
 }));
 
@@ -111,10 +136,7 @@ export const Download = defineDocumentType(() => ({
     downloadUrl: { type: "string", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "downloads"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "downloads") },
   },
 }));
 
@@ -132,10 +154,7 @@ export const Book = defineDocumentType(() => ({
     category: { type: "string", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "books"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "books") },
   },
 }));
 
@@ -151,10 +170,7 @@ export const Event = defineDocumentType(() => ({
     registrationUrl: { type: "string", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "events"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "events") },
   },
 }));
 
@@ -170,10 +186,7 @@ export const Print = defineDocumentType(() => ({
     available: { type: "boolean", required: false, default: true },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "prints"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "prints") },
   },
 }));
 
@@ -186,10 +199,7 @@ export const Strategy = defineDocumentType(() => ({
     author: { type: "string", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "strategy"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "strategy") },
   },
 }));
 
@@ -208,35 +218,28 @@ export const Canon = defineDocumentType(() => ({
     readTime: { type: "string", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "canon"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "canon") },
   },
 }));
 
+// ✅ SHORTS: aligned with the others (no conflicting date rules, consistent pattern, consistent url)
 export const Short = defineDocumentType(() => ({
   name: "Short",
-  filePathPattern: "shorts/**/*.mdx",
+  filePathPattern: "shorts/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
     ...commonFields,
     theme: { type: "string", required: false },
     audience: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    published: { type: "boolean", required: false, default: true },
-    date: { type: "date", required: false },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "shorts"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "shorts") },
   },
 }));
 
 // -----------------------------------------------------------------------------
-// MAKESOURCE CONFIGURATION - WITH YAML FIX
+// MAKESOURCE CONFIGURATION
 // -----------------------------------------------------------------------------
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
@@ -255,19 +258,17 @@ export default makeSource({
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
   },
-  
-  // CRITICAL: Fix duplicate YAML keys in print files
-  onContent: (content, filePath) => {
-    // Fix duplicate slug and date fields (line 6 issue)
+
+  // Fix duplicate YAML keys if they exist (safe + minimal)
+  onContent: (content) => {
+    // Only remove immediate duplicate key lines (slug/date) inside frontmatter-like structures
+    // This prevents "YAMLException: duplicated mapping key" without touching normal body content.
     const fixed = content
-      .replace(/(slug:\s*"[^"]+"\s*\n)(slug:\s*"[^"]+")/g, '$1')
-      .replace(/(date:\s*"[^"]+"\s*\n)(date:\s*"[^"]+")/g, '$1')
-      .replace(/(slug:\s*"[^"]+"\s*\r?\n)(slug:\s*"[^"]+")/g, '$1')
-      .replace(/(date:\s*"[^"]+"\s*\r?\n)(date:\s*"[^"]+")/g, '$1');
-    
+      .replace(/(^|\n)(slug:\s*.+)\r?\nslug:\s*.+(\r?\n)/g, "$1$2$3")
+      .replace(/(^|\n)(date:\s*.+)\r?\ndate:\s*.+(\r?\n)/g, "$1$2$3");
     return fixed;
   },
-  
+
   onUnknownDocuments: "skip",
   disableImportAliasWarning: true,
 });

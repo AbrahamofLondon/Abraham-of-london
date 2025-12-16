@@ -8,21 +8,11 @@ import { BookOpen, Calendar, Clock, Sparkles, ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import SilentSurface from "@/components/ui/SilentSurface";
-import { getAllBooksMeta } from "@/lib/server/books-data";
-
-type RawBookMeta = {
-  slug: string;
-  title: string;
-  subtitle?: string;
-  excerpt?: string;
-  description?: string;
-  coverImage?: string;
-  readTime?: string;
-  tags?: string[];
-  featured?: boolean;
-  author?: string;
-  publishedDate?: string | Date | null;
-};
+import {
+  assertContentlayerHasDocs,
+  getAllBooks,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
 
 export type BookListItem = {
   slug: string;
@@ -43,36 +33,23 @@ interface BooksPageProps {
 }
 
 export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
-  let rawBooks: RawBookMeta[] = [];
+  assertContentlayerHasDocs("pages/books/index.tsx getStaticProps");
 
-  try {
-    const result = await getAllBooksMeta();
-    rawBooks = (result ?? []) as RawBookMeta[];
-  } catch (err) {
-    console.error("getAllBooksMeta() failed in /books:", err);
-    rawBooks = [];
-  }
+  const raw = getAllBooks();
 
-  const books: BookListItem[] = rawBooks.map((b) => {
-    let publishedDate: string | null = null;
-
-    if (b.publishedDate instanceof Date) {
-      publishedDate = b.publishedDate.toISOString();
-    } else if (typeof b.publishedDate === "string") {
-      publishedDate = b.publishedDate;
-    } else {
-      publishedDate = null;
-    }
+  const books: BookListItem[] = raw.map((b: any) => {
+    const publishedDate =
+      typeof b.date === "string" ? b.date : typeof b.publishedDate === "string" ? b.publishedDate : null;
 
     return {
-      slug: b.slug,
-      title: b.title,
+      slug: normalizeSlug(b),
+      title: b.title ?? "Untitled",
       subtitle: b.subtitle ?? null,
       excerpt: (b.excerpt ?? b.description) ?? null,
       description: b.description ?? null,
-      coverImage: b.coverImage ?? null,
+      coverImage: b.coverImage ?? b.image ?? null,
       readTime: b.readTime ?? null,
-      tags: b.tags ?? [],
+      tags: Array.isArray(b.tags) ? b.tags : [],
       featured: Boolean(b.featured),
       author: b.author ?? null,
       publishedDate,
@@ -80,22 +57,17 @@ export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
   });
 
   books.sort((a, b) => {
-    if (a.publishedDate && b.publishedDate) {
-      return (
-        new Date(b.publishedDate).getTime() -
-        new Date(a.publishedDate).getTime()
-      );
-    }
-    if (a.publishedDate && !b.publishedDate) return -1;
-    if (!a.publishedDate && b.publishedDate) return 1;
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+
+    const da = a.publishedDate ? new Date(a.publishedDate).getTime() : 0;
+    const db = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
+    if (da !== db) return db - da;
+
     return a.title.localeCompare(b.title);
   });
 
-  return {
-    props: {
-      books,
-    },
-  };
+  return { props: { books }, revalidate: 3600 };
 };
 
 const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
@@ -118,7 +90,6 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
         />
       </Head>
 
-      {/* Hero */}
       <div className="relative overflow-hidden border-b border-white/[0.06] bg-gradient-to-b from-black via-[#050608] to-black">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(212,175,55,0.12),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(205,127,50,0.09),_transparent_55%)]" />
         <div className="container relative mx-auto px-4 py-14 sm:px-6 lg:px-8">
@@ -130,15 +101,13 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
               Books & Volumes
             </h1>
             <p className="mx-auto max-w-2xl text-sm leading-relaxed text-white/70">
-              Long-form works that sit behind the shorts, posts, and
-              soundbites: the manuscripts where the arguments are built
-              properly.
+              Long-form works that sit behind the shorts, posts, and soundbites:
+              the manuscripts where the arguments are built properly.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Content */}
       <div className="container mx-auto px-4 py-10 sm:px-6 lg:px-8">
         {books.length === 0 ? (
           <div className="py-16 text-center text-white/50">
@@ -146,14 +115,11 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
           </div>
         ) : (
           <>
-            {/* Stats bar */}
             <div className="mb-8 flex flex-col items-center justify-between gap-4 border-b border-white/5 pb-4 text-sm text-white/50 md:flex-row">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-gold/80" />
                 <span>
-                  {books.length}{" "}
-                  {books.length === 1 ? "volume" : "volumes"} currently
-                  available
+                  {books.length} {books.length === 1 ? "volume" : "volumes"} currently available
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs">
@@ -163,16 +129,11 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3 text-white/40" />
-                  {
-                    books.filter((b) => b.publishedDate !== null)
-                      .length
-                  }{" "}
-                  with dates
+                  {books.filter((b) => b.publishedDate !== null).length} with dates
                 </span>
               </div>
             </div>
 
-            {/* Grid */}
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
               {books.map((book) => (
                 <Link
@@ -181,11 +142,7 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
                   className="group block h-full"
                   aria-label={`View ${book.title}`}
                 >
-                  <SilentSurface
-                    className="flex h-full flex-col overflow-hidden"
-                    hover
-                  >
-                    {/* Cover image */}
+                  <SilentSurface className="flex h-full flex-col overflow-hidden" hover>
                     {book.coverImage ? (
                       <div className="relative aspect-[3/4] overflow-hidden">
                         <Image
@@ -213,14 +170,11 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
                           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
                             <BookOpen className="h-6 w-6 text-white/30" />
                           </div>
-                          <p className="text-xs text-white/40">
-                            Cover in preparation
-                          </p>
+                          <p className="text-xs text-white/40">Cover in preparation</p>
                         </div>
                       </div>
                     )}
 
-                    {/* Body */}
                     <div className="flex flex-1 flex-col p-4">
                       <div className="mb-2 flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -247,9 +201,7 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
                             {book.publishedDate && (
                               <span className="inline-flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {new Date(
-                                  book.publishedDate
-                                ).toLocaleDateString("en-GB", {
+                                {new Date(book.publishedDate).toLocaleDateString("en-GB", {
                                   month: "short",
                                   year: "numeric",
                                 })}
@@ -267,10 +219,7 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
                         <div className="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-white/45">
                           <div className="flex flex-wrap gap-1">
                             {book.tags.slice(0, 2).map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full bg-white/5 px-2 py-0.5"
-                              >
+                              <span key={tag} className="rounded-full bg-white/5 px-2 py-0.5">
                                 #{tag}
                               </span>
                             ))}

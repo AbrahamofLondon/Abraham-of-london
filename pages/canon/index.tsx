@@ -1,39 +1,17 @@
-// pages/canon/index.tsx - MODERNIZED RESPONSIVE VERSION
+// pages/canon/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { BookOpen, Lock, Star, Search, Filter, ChevronRight } from "lucide-react";
+import { BookOpen, Star, Search, ChevronRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CanonCard from "@/components/CanonCard";
 import { getPublicCanon, type Canon } from "@/lib/canon";
 
-// Device detection hook
-const useDeviceType = () => {
-  const [deviceType, setDeviceType] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-
-  React.useEffect(() => {
-    const checkDevice = () => {
-      const width = window.innerWidth;
-      if (width < 768) setDeviceType('mobile');
-      else if (width < 1024) setDeviceType('tablet');
-      else setDeviceType('desktop');
-    };
-
-    checkDevice();
-    window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
-  }, []);
-
-  return deviceType;
-};
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+type DeviceType = "mobile" | "tablet" | "desktop";
+type ViewMode = "grid" | "list";
 
 type CanonIndexItem = {
   slug: string;
@@ -55,12 +33,12 @@ type PageProps = {
   maxVolume: number;
 };
 
-// ---------------------------------------------------------------------------
+// -----------------------------
 // Helpers
-// ---------------------------------------------------------------------------
+// -----------------------------
 
 function toNumberOrNull(value: unknown): number | null {
-  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
     const n = Number(value.trim());
     return Number.isFinite(n) ? n : null;
@@ -68,75 +46,109 @@ function toNumberOrNull(value: unknown): number | null {
   return null;
 }
 
+function useDeviceType(): DeviceType {
+  const [deviceType, setDeviceType] = React.useState<DeviceType>("desktop");
+
+  React.useEffect(() => {
+    const check = () => {
+      const w = window.innerWidth;
+      if (w < 768) setDeviceType("mobile");
+      else if (w < 1024) setDeviceType("tablet");
+      else setDeviceType("desktop");
+    };
+
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  return deviceType;
+}
+
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(Boolean(mq.matches));
+    onChange();
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+  return reduced;
+}
+
 // Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
+  visible: (reduced: boolean) => ({
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    }
-  }
+    transition: reduced
+      ? { duration: 0.01 }
+      : { staggerChildren: 0.08, delayChildren: 0.12 },
+  }),
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
+  hidden: { opacity: 0, y: 14 },
+  visible: (reduced: boolean) => ({
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
+    transition: reduced ? { duration: 0.01 } : { duration: 0.45, ease: "easeOut" },
+  }),
 };
-
-// ---------------------------------------------------------------------------
-// Page Component
-// ---------------------------------------------------------------------------
 
 const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
   const deviceType = useDeviceType();
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [showFeaturedOnly, setShowFeaturedOnly] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<'grid' | 'list'>(deviceType === 'mobile' ? 'list' : 'grid');
+  const reducedMotion = useReducedMotion();
 
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [showFeaturedOnly, setShowFeaturedOnly] = React.useState(false);
+  const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
+
+  // set viewMode based on device after mount (SSR-safe)
   React.useEffect(() => {
-    // Auto-adjust view mode based on device
-    if (deviceType === 'mobile') {
-      setViewMode('list');
-    } else {
-      setViewMode('grid');
-    }
+    setViewMode(deviceType === "mobile" ? "list" : "grid");
   }, [deviceType]);
 
-  // Filter items based on search and featured filter
   const filteredItems = React.useMemo(() => {
-    return items.filter(item => {
-      // Search filter
-      const matchesSearch = searchQuery === '' || 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.subtitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = searchQuery.trim().toLowerCase();
 
-      // Featured filter
-      const matchesFeatured = !showFeaturedOnly || item.featured;
+    return items.filter((item) => {
+      const matchesFeatured = !showFeaturedOnly || Boolean(item.featured);
 
-      return matchesSearch && matchesFeatured;
+      if (!q) return matchesFeatured;
+
+      const hay = [
+        item.title,
+        item.subtitle ?? "",
+        item.excerpt ?? "",
+        item.description ?? "",
+        (item.tags ?? []).join(" "),
+        item.accessLevel ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return matchesFeatured && hay.includes(q);
     });
   }, [items, searchQuery, showFeaturedOnly]);
 
   const hasItems = filteredItems.length > 0;
+
   const totalSegments = 5;
-  const activeSegments = Math.max(0, Math.min(totalSegments, maxVolume || filteredItems.length || 0));
-  const segments = Array.from({ length: totalSegments }, (_, i) => i + 1);
+  const activeSegments = Math.max(
+    0,
+    Math.min(totalSegments, maxVolume || filteredItems.length || 0),
+  );
+  const segments = React.useMemo(
+    () => Array.from({ length: totalSegments }, (_, i) => i + 1),
+    [],
+  );
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
   return (
-    <Layout 
+    <Layout
       title="The Canon"
       description="A curated canon of strategic, theological, and civilisational volumes — catalogued for serious builders and fathers who think in generations, not news cycles."
     >
@@ -146,56 +158,48 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
           name="description"
           content="A curated canon of strategic, theological, and civilisational volumes — catalogued for serious builders and fathers who think in generations, not news cycles."
         />
-        <link
-          rel="canonical"
-          href={`${siteUrl}/canon`}
-        />
+        <link rel="canonical" href={`${siteUrl}/canon`} />
         <meta property="og:title" content="The Canon | Abraham of London" />
         <meta
           property="og:description"
           content="Harrods-library atmosphere. Ancient Near Eastern gravitas. Modern strategic intelligence. A living canon for men who build."
         />
-        <meta
-          property="og:url"
-          content={`${siteUrl}/canon`}
-        />
+        <meta property="og:url" content={`${siteUrl}/canon`} />
         <meta property="og:type" content="website" />
-        <meta 
-          property="og:image" 
-          content={`${siteUrl}/api/og/canon?title=The%20Canon`} 
-        />
+        <meta property="og:image" content={`${siteUrl}/api/og/canon?title=The%20Canon`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="The Canon | Abraham of London" />
-        <meta name="twitter:description" content="A living library for men who build, father, and lead with purpose." />
+        <meta
+          name="twitter:description"
+          content="A living library for men who build, father, and lead with purpose."
+        />
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-950">
-        {/* Hero Section */}
+        {/* HERO */}
         <section className="relative overflow-hidden border-b border-gray-800">
-          {/* Background effects */}
           <div className="absolute inset-0">
             <div className="absolute inset-x-0 -top-32 h-64 bg-[radial-gradient(circle_at_top,rgba(226,197,120,0.15),transparent_65%)]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80" />
-            {/* Subtle grid pattern */}
-            <div className="absolute inset-0 opacity-5"
+            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/85" />
+            <div
+              className="absolute inset-0 opacity-[0.06]"
               style={{
                 backgroundImage: `
-                  linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                  linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
                 `,
-                backgroundSize: '40px 40px'
+                backgroundSize: "44px 44px",
               }}
             />
           </div>
 
           <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+              animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+              transition={reducedMotion ? { duration: 0.01 } : { duration: 0.6 }}
               className="space-y-8"
             >
-              {/* Badge */}
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
                 <BookOpen className="h-4 w-4 text-amber-400" />
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
@@ -203,37 +207,37 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                 </span>
               </div>
 
-              {/* Title */}
               <div className="space-y-4">
                 <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl md:text-5xl lg:text-6xl">
                   The Canon
-                  <span className="block mt-2 text-amber-400 font-semibold">
-                    of Purpose, Power & Stewardship
+                  <span className="mt-2 block font-semibold text-amber-400">
+                    of Purpose, Power &amp; Stewardship
                   </span>
                 </h1>
-                
-                {/* Progress indicator - only on desktop */}
-                {deviceType !== 'mobile' && (
+
+                {deviceType !== "mobile" && (
                   <div className="flex items-center gap-4 pt-4">
-                    <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full"
+                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-gray-800">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600"
                         style={{ width: `${(activeSegments / totalSegments) * 100}%` }}
                       />
                     </div>
                     <div className="text-sm text-gray-400">
-                      <span className="text-amber-400 font-semibold">Volume {activeSegments}</span> of {totalSegments}
+                      <span className="font-semibold text-amber-400">
+                        Volume {activeSegments}
+                      </span>{" "}
+                      of {totalSegments}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Description */}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="lg:col-span-2 space-y-4">
+                <div className="space-y-4 lg:col-span-2">
                   <p className="text-lg leading-relaxed text-gray-300">
-                    This is not a blog roll. It is a living library — volumes
-                    that sit at the intersection of{" "}
+                    This is not a blog roll. It is a living library — volumes that sit at the
+                    intersection of{" "}
                     <span className="font-medium text-amber-400">
                       theology, strategy, civilisation, and human destiny
                     </span>
@@ -241,19 +245,18 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                   </p>
 
                   <p className="text-sm leading-relaxed text-gray-400">
-                    Think of it as <strong className="text-white">Harrods Library</strong> meets{" "}
+                    Think <strong className="text-white">Harrods Library</strong> meets{" "}
                     <strong className="text-white">Ancient Near Eastern gravitas</strong>, wrapped in{" "}
-                    <strong className="text-white">modern strategic intelligence</strong>. It&apos;s built for
-                    men who lead, fathers who refuse to disappear, and builders who
-                    understand that ideas outlive news cycles.
+                    <strong className="text-white">modern strategic intelligence</strong>. Built for men
+                    who lead, fathers who refuse to disappear, and builders who understand that
+                    ideas outlive news cycles.
                   </p>
                 </div>
 
-                {/* Stats card */}
                 <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
+                  initial={reducedMotion ? false : { opacity: 0, x: 18 }}
+                  animate={reducedMotion ? {} : { opacity: 1, x: 0 }}
+                  transition={reducedMotion ? { duration: 0.01 } : { delay: 0.25 }}
                   className="rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900/80 to-black/80 p-6 backdrop-blur-sm"
                 >
                   <div className="space-y-4">
@@ -262,11 +265,10 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                         Catalogued Volumes
                       </p>
                       <p className="mt-2 text-3xl font-bold text-white">
-                        {items.length.toString().padStart(2, "0")}
+                        {String(items.length).padStart(2, "0")}
                       </p>
                     </div>
-                    
-                    {/* Volume segments - simplified for mobile */}
+
                     <div className="space-y-2">
                       <div className="flex items-center gap-1.5">
                         {segments.map((seg) => {
@@ -294,12 +296,16 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
           </div>
         </section>
 
-        {/* Controls Section - Sticky on desktop, normal on mobile */}
-        <section className={`sticky top-0 z-10 border-b border-gray-800 bg-black/95 backdrop-blur-sm py-4 ${deviceType === 'mobile' ? 'relative' : ''}`}>
+        {/* CONTROLS */}
+        <section
+          className={[
+            "z-10 border-b border-gray-800 bg-black/95 backdrop-blur-sm py-4",
+            deviceType === "mobile" ? "relative" : "sticky top-0",
+          ].join(" ")}
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              {/* Search */}
-              <div className="relative flex-1 max-w-md">
+              <div className="relative w-full max-w-md flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   type="search"
@@ -311,53 +317,49 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                 />
               </div>
 
-              {/* Filters */}
               <div className="flex flex-wrap items-center gap-3">
-                {/* Featured filter */}
                 <button
-                  onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                  onClick={() => setShowFeaturedOnly((s) => !s)}
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
                     showFeaturedOnly
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50 border border-gray-700'
+                      ? "border-amber-500/30 bg-amber-500/20 text-amber-400"
+                      : "border-gray-700 text-gray-400 hover:bg-gray-800/50 hover:text-gray-300"
                   }`}
-                  aria-label={showFeaturedOnly ? "Show all volumes" : "Show featured only"}
+                  aria-pressed={showFeaturedOnly}
                 >
                   <Star className="h-4 w-4" />
                   <span>Featured</span>
                 </button>
 
-                {/* View toggle - hidden on mobile (defaults to list) */}
-                {deviceType !== 'mobile' && (
+                {deviceType !== "mobile" && (
                   <div className="flex rounded-lg border border-gray-700 bg-gray-900/50 p-1">
                     <button
-                      onClick={() => setViewMode('grid')}
+                      onClick={() => setViewMode("grid")}
                       className={`rounded-md p-2 transition-colors ${
-                        viewMode === 'grid' 
-                          ? 'bg-amber-500 text-white' 
-                          : 'text-gray-400 hover:text-gray-300'
+                        viewMode === "grid" ? "bg-amber-500 text-white" : "text-gray-400 hover:text-gray-300"
                       }`}
                       aria-label="Grid view"
+                      aria-pressed={viewMode === "grid"}
                     >
-                      <div className="h-4 w-4 grid grid-cols-2 gap-0.5">
-                        {[1,2,3,4].map(i => (
-                          <div key={i} className="bg-current rounded-sm" />
+                      <div className="grid h-4 w-4 grid-cols-2 gap-0.5">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div key={i} className="rounded-sm bg-current" />
                         ))}
                       </div>
                     </button>
+
                     <button
-                      onClick={() => setViewMode('list')}
+                      onClick={() => setViewMode("list")}
                       className={`rounded-md p-2 transition-colors ${
-                        viewMode === 'list' 
-                          ? 'bg-amber-500 text-white' 
-                          : 'text-gray-400 hover:text-gray-300'
+                        viewMode === "list" ? "bg-amber-500 text-white" : "text-gray-400 hover:text-gray-300"
                       }`}
                       aria-label="List view"
+                      aria-pressed={viewMode === "list"}
                     >
-                      <div className="h-4 w-4 flex flex-col justify-between">
-                        <div className="h-0.5 w-full bg-current rounded" />
-                        <div className="h-0.5 w-full bg-current rounded" />
-                        <div className="h-0.5 w-full bg-current rounded" />
+                      <div className="flex h-4 w-4 flex-col justify-between">
+                        <div className="h-0.5 w-full rounded bg-current" />
+                        <div className="h-0.5 w-full rounded bg-current" />
+                        <div className="h-0.5 w-full rounded bg-current" />
                       </div>
                     </button>
                   </div>
@@ -367,31 +369,28 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
           </div>
         </section>
 
-        {/* Main Content */}
+        {/* CONTENT */}
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {!hasItems ? (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={reducedMotion ? false : { opacity: 0 }}
+                animate={reducedMotion ? {} : { opacity: 1 }}
                 className="rounded-2xl border border-dashed border-gray-700 bg-gray-900/30 p-8 text-center"
               >
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
                   <Search className="h-6 w-6 text-gray-400" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-white">
-                  No volumes found
-                </h3>
+                <h3 className="mb-2 text-lg font-semibold text-white">No volumes found</h3>
                 <p className="text-gray-400">
                   {searchQuery || showFeaturedOnly
-                    ? 'Try adjusting your search or filter criteria'
-                    : 'The catalogue is being prepared. Check back soon or join the Inner Circle for early access.'
-                  }
+                    ? "Try adjusting your search or filter criteria."
+                    : "The catalogue is being prepared. Check back soon — or join the Inner Circle for early access."}
                 </p>
                 {(searchQuery || showFeaturedOnly) && (
                   <button
                     onClick={() => {
-                      setSearchQuery('');
+                      setSearchQuery("");
                       setShowFeaturedOnly(false);
                     }}
                     className="mt-4 text-sm font-medium text-amber-400 hover:text-amber-300"
@@ -402,21 +401,21 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
               </motion.div>
             ) : (
               <>
-                {/* Results header */}
                 <div className="mb-8 flex items-center justify-between">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white sm:text-3xl">
                       Catalogued Volumes
                     </h2>
                     <p className="mt-1 text-sm text-gray-400">
-                      Showing <span className="font-semibold text-white">{filteredItems.length}</span> of{' '}
+                      Showing{" "}
+                      <span className="font-semibold text-white">{filteredItems.length}</span> of{" "}
                       <span className="font-semibold text-white">{items.length}</span> volumes
                     </p>
                   </div>
                   {filteredItems.length < items.length && (
                     <button
                       onClick={() => {
-                        setSearchQuery('');
+                        setSearchQuery("");
                         setShowFeaturedOnly(false);
                       }}
                       className="text-sm font-medium text-amber-400 hover:text-amber-300"
@@ -426,40 +425,37 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                   )}
                 </div>
 
-                {/* Canon Cards */}
                 <motion.div
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className={`${
-                    viewMode === 'grid' 
-                      ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3' 
-                      : 'space-y-4'
-                  }`}
+                  custom={reducedMotion}
+                  className={
+                    viewMode === "grid"
+                      ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                      : "space-y-4"
+                  }
                 >
                   {filteredItems.map((item) => (
                     <motion.div
                       key={item.slug}
                       variants={itemVariants}
-                      className={viewMode === 'list' ? 'max-w-3xl' : ''}
+                      custom={reducedMotion}
+                      className={viewMode === "list" ? "max-w-3xl" : ""}
                     >
-                      <CanonCard
-                        canon={item}
-                        variant={viewMode}
-                      />
+                      <CanonCard canon={item} variant={viewMode} />
                     </motion.div>
                   ))}
                 </motion.div>
               </>
             )}
 
-            {/* CTA Section */}
             {hasItems && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="mt-16 rounded-2xl bg-gradient-to-r from-gray-900 to-black border border-gray-800 p-8"
+                initial={reducedMotion ? false : { opacity: 0, y: 14 }}
+                animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+                transition={reducedMotion ? { duration: 0.01 } : { delay: 0.25 }}
+                className="mt-16 rounded-2xl border border-gray-800 bg-gradient-to-r from-gray-900 to-black p-8"
               >
                 <div className="grid gap-6 md:grid-cols-2 md:items-center">
                   <div>
@@ -467,8 +463,8 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                       Want deeper access?
                     </h3>
                     <p className="text-gray-300">
-                      Some volumes are reserved for the Inner Circle — early drafts, 
-                      advanced frameworks, and direct dialogue with Abraham.
+                      Some volumes are reserved for the Inner Circle — early drafts, advanced
+                      frameworks, and direct dialogue with Abraham.
                     </p>
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row">
@@ -493,77 +489,18 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
           </div>
         </section>
       </main>
-
-      {/* Mobile optimizations */}
-      <style jsx global>{`
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-          /* Prevent zoom on iOS inputs */
-          input, 
-          select,
-          textarea {
-            font-size: 16px !important;
-          }
-          
-          /* Better touch targets */
-          button,
-          .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-          }
-          
-          /* Optimize sticky header */
-          .sticky {
-            position: -webkit-sticky;
-            position: sticky;
-          }
-        }
-        
-        /* Reduce motion for accessibility */
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
-        
-        /* Smooth scrolling */
-        html {
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Focus styles */
-        *:focus-visible {
-          outline: 2px solid #f59e0b;
-          outline-offset: 2px;
-        }
-        
-        /* Improve text rendering */
-        * {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-      `}</style>
     </Layout>
   );
 };
 
 export default CanonIndexPage;
 
-// ---------------------------------------------------------------------------
-// Static Generation
-// ---------------------------------------------------------------------------
-
 export const getStaticProps: GetStaticProps<PageProps> = async () => {
   try {
     const docs: Canon[] = getPublicCanon();
 
     const items: CanonIndexItem[] = docs.map((doc) => {
-      const vol = toNumberOrNull(doc.volumeNumber);
+      const vol = toNumberOrNull((doc as any).volumeNumber);
       const safeTitle = doc.title ?? "Untitled Canon Volume";
       const safeSlug = doc.slug ?? "";
 
@@ -571,56 +508,45 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
         slug: safeSlug,
         title: safeTitle,
         subtitle: doc.subtitle ?? null,
-        excerpt: doc.excerpt ?? null,
-        description: doc.description ?? null,
-        coverImage: doc.coverImage ?? null,
+        excerpt: (doc as any).excerpt ?? null,
+        description: (doc as any).description ?? null,
+        coverImage: (doc as any).coverImage ?? null,
         volumeNumber: vol,
-        date: doc.date ?? null,
-        tags: Array.isArray(doc.tags) ? doc.tags : [],
-        featured: Boolean(doc.featured),
-        accessLevel: doc.accessLevel ?? null,
-        lockMessage: doc.lockMessage ?? null,
+        date: (doc as any).date ?? null,
+        tags: Array.isArray((doc as any).tags) ? (doc as any).tags : [],
+        featured: Boolean((doc as any).featured),
+        accessLevel: (doc as any).accessLevel ?? null,
+        lockMessage: (doc as any).lockMessage ?? null,
       };
     });
 
-    // Sort items: featured first, then by volume number, then by date
     items.sort((a, b) => {
-      // Featured items first
       if (a.featured && !b.featured) return -1;
       if (!a.featured && b.featured) return 1;
-      
-      // Then by volume number (lower first)
+
       const volA = a.volumeNumber ?? Infinity;
       const volB = b.volumeNumber ?? Infinity;
       if (volA !== volB) return volA - volB;
-      
-      // Then by date (newer first)
+
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
 
     const volumeNumbers = items
-      .map((item) => item.volumeNumber)
-      .filter((v): v is number => typeof v === "number");
+      .map((it) => it.volumeNumber)
+      .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
 
-    const maxVolume: number =
-      volumeNumbers.length > 0 ? Math.max(...volumeNumbers) : 0;
+    const maxVolume = volumeNumbers.length ? Math.max(...volumeNumbers) : 0;
 
     return {
-      props: {
-        items,
-        maxVolume,
-      },
+      props: { items, maxVolume },
       revalidate: 3600,
     };
   } catch (err) {
     console.error("Error in getStaticProps for /canon:", err);
     return {
-      props: {
-        items: [],
-        maxVolume: 0,
-      },
+      props: { items: [], maxVolume: 0 },
       revalidate: 600,
     };
   }

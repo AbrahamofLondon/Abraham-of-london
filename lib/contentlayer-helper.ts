@@ -2,13 +2,26 @@
 
 // lib/contentlayer-helper.ts
 // SINGLE SOURCE OF TRUTH for Contentlayer docs, URLs, and card props.
-// Works with Contentlayer2 (.contentlayer/generated) and classic contentlayer/generated.
+// ✅ ESM-safe (project is "type": "module")
+// ✅ Next-safe (no require hacks)
+// ✅ Contentlayer2-safe (uses contentlayer/generated output)
+// ✅ Exports ALL names your codebase expects
 
-import path from "path";
+import {
+  allPosts as _allPosts,
+  allBooks as _allBooks,
+  allDownloads as _allDownloads,
+  allEvents as _allEvents,
+  allPrints as _allPrints,
+  allResources as _allResources,
+  allStrategies as _allStrategies,
+  allCanons as _allCanons,
+  allShorts as _allShorts,
+} from "contentlayer/generated";
 
-// ============================================
-// 1) Types (UI kinds are lowercase)
-// ============================================
+// --------------------------------------------
+// Types
+// --------------------------------------------
 
 export type DocKind =
   | "post"
@@ -42,105 +55,59 @@ export interface ContentlayerCardProps {
 
   downloadUrl?: string | null;
 
-  // for smart cards
   coverAspect?: string | null;
   coverFit?: string | null;
 }
 
-// ============================================
-// 2) Robust generated loader (Contentlayer + Contentlayer2)
-// ============================================
+// --------------------------------------------
+// Collections (exports your app expects)
+// --------------------------------------------
 
-type Generated = Record<string, any>;
+export const allPosts = Array.isArray(_allPosts) ? _allPosts : [];
+export const allBooks = Array.isArray(_allBooks) ? _allBooks : [];
+export const allDownloads = Array.isArray(_allDownloads) ? _allDownloads : [];
+export const allEvents = Array.isArray(_allEvents) ? _allEvents : [];
+export const allPrints = Array.isArray(_allPrints) ? _allPrints : [];
+export const allResources = Array.isArray(_allResources) ? _allResources : [];
+export const allStrategies = Array.isArray(_allStrategies) ? _allStrategies : [];
+export const allCanons = Array.isArray(_allCanons) ? _allCanons : [];
+export const allShorts = Array.isArray(_allShorts) ? _allShorts : [];
 
-function tryRequire(id: string): any {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require(id);
-  } catch {
-    return null;
-  }
-}
-
-function loadGenerated(): Generated {
-  // 1) Sometimes works
-  const a = tryRequire("contentlayer/generated");
-  if (a) return a as Generated;
-
-  // 2) Contentlayer2 common output
-  const b = tryRequire(path.join(process.cwd(), ".contentlayer", "generated"));
-  if (b) return b as Generated;
-
-  // 3) Explicit file fallbacks
-  const c = tryRequire(
-    path.join(process.cwd(), ".contentlayer", "generated", "index.js")
-  );
-  if (c) return c as Generated;
-
-  const d = tryRequire(
-    path.join(process.cwd(), ".contentlayer", "generated", "index.cjs")
-  );
-  if (d) return d as Generated;
-
-  if (process.env.NODE_ENV !== "production") {
-    console.warn(
-      "[contentlayer-helper] Could not load generated exports from known locations."
-    );
-  }
-  return {};
-}
-
-const gen = loadGenerated();
-
-function asArray<T = any>(v: unknown): T[] {
-  return Array.isArray(v) ? (v as T[]) : [];
-}
-
-// ============================================
-// 3) Collections (EXPORTS your app expects)
-// ============================================
-
-export const allPosts = asArray(gen.allPosts);
-export const allBooks = asArray(gen.allBooks);
-export const allDownloads = asArray(gen.allDownloads);
-export const allEvents = asArray(gen.allEvents);
-export const allPrints = asArray(gen.allPrints);
-export const allResources = asArray(gen.allResources);
-export const allStrategies = asArray(gen.allStrategies);
-export const allCanons = asArray(gen.allCanons);
-export const allShorts = asArray(gen.allShorts);
-
-export const allDocuments: any[] = (() => {
-  const docs = asArray(gen.allDocuments);
-  if (docs.length) return docs;
-
-  // Fallback: merge everything
-  return [
-    ...allPosts,
-    ...allBooks,
-    ...allDownloads,
-    ...allEvents,
-    ...allPrints,
-    ...allResources,
-    ...allStrategies,
-    ...allCanons,
-    ...allShorts,
-  ].filter(Boolean);
-})();
+// Some code expects “allDocuments / allContent / allPublished”
+export const allDocuments: any[] = [
+  ...allPosts,
+  ...allBooks,
+  ...allDownloads,
+  ...allEvents,
+  ...allPrints,
+  ...allResources,
+  ...allStrategies,
+  ...allCanons,
+  ...allShorts,
+].filter(Boolean);
 
 export const allContent: any[] = [...allDocuments];
 export const allPublished: any[] = allDocuments.filter((d) => !isDraft(d));
 
-// ============================================
-// 4) Status helpers
-// ============================================
+// --------------------------------------------
+// Build-time guard: fail loudly if content is missing
+// --------------------------------------------
 
-export const isContentlayerLoaded = (): boolean => {
-  // If content exists, we are loaded.
-  return allDocuments.length > 0;
-};
+export function assertContentlayerHasDocs(where: string) {
+  if (allDocuments.length === 0) {
+    throw new Error(
+      `[Contentlayer] 0 documents at "${where}". ` +
+        `This means contentlayer2 build did not run (or produced nothing) before Next build.`
+    );
+  }
+}
 
-// Bulletproof draft detection (supports boolean/string)
+// --------------------------------------------
+// Status helpers
+// --------------------------------------------
+
+export const isContentlayerLoaded = (): boolean => allDocuments.length > 0;
+
 export const isDraft = (doc: any): boolean => {
   const d = doc?.draft;
   if (d === true || d === "true") return true;
@@ -150,9 +117,9 @@ export const isDraft = (doc: any): boolean => {
 
 export const isPublished = (doc: any): boolean => !isDraft(doc);
 
-// ============================================
-// 5) Kind / slug / URL helpers (SINGLE SOURCE OF TRUTH)
-// ============================================
+// --------------------------------------------
+// Kind / slug / URL helpers
+// --------------------------------------------
 
 export function getDocKind(doc: any): DocKind {
   const t = String(doc?.type ?? doc?._type ?? "").trim();
@@ -177,7 +144,6 @@ export function getDocKind(doc: any): DocKind {
     case "Short":
       return "short";
     default:
-      // Don’t lie; default to post only if unknown
       return "post";
   }
 }
@@ -188,7 +154,8 @@ export function normalizeSlug(doc: any): string {
   const s = typeof doc.slug === "string" ? doc.slug.trim() : "";
   if (s) return s.toLowerCase();
 
-  const fp = typeof doc?._raw?.flattenedPath === "string" ? doc._raw.flattenedPath : "";
+  const fp =
+    typeof doc?._raw?.flattenedPath === "string" ? doc._raw.flattenedPath : "";
   if (fp) {
     const parts = fp.split("/").filter(Boolean);
     const last = parts[parts.length - 1];
@@ -210,7 +177,7 @@ export function normalizeSlug(doc: any): string {
 }
 
 /**
- * SITE ROUTES (your stated structure):
+ * SITE ROUTES (matches what you showed):
  * - Posts:      /blog/[slug]
  * - Books:      /books/[slug]
  * - Canon:      /canon/[slug]
@@ -218,9 +185,9 @@ export function normalizeSlug(doc: any): string {
  * - Events:     /events/[slug]
  * - Prints:     /prints/[slug]
  * - Shorts:     /shorts/[slug]
- * - Resources:  /resources/[...slug]   (you have that route)
- * - Strategy:   /strategy/[slug]        (if you have it) OR /content
- * - ReadingRoom: /content/[slug]        (fallback home)
+ * - Resources:  /resources/[...slug]
+ * - Strategy:   /strategy/[slug]
+ * - ReadingRoom: /content/[slug] fallback
  */
 export function getDocHref(doc: any): string {
   const slug = normalizeSlug(doc);
@@ -228,7 +195,7 @@ export function getDocHref(doc: any): string {
 
   switch (kind) {
     case "post":
-      return `/blog/${slug}`; // ✅ per your instruction
+      return `/blog/${slug}`;
     case "short":
       return `/shorts/${slug}`;
     case "book":
@@ -242,10 +209,8 @@ export function getDocHref(doc: any): string {
     case "print":
       return `/prints/${slug}`;
     case "resource":
-      // your route is /resources/[...slug] but you often use single slugs
       return `/resources/${slug}`;
     case "strategy":
-      // if you have /strategy/[slug] keep it
       return `/strategy/${slug}`;
     default:
       return `/content/${slug}`;
@@ -254,9 +219,9 @@ export function getDocHref(doc: any): string {
 
 export const getShortUrl = (short: any): string => getDocHref(short);
 
-// ============================================
-// 6) Image / download helpers (cards “fit intelligently”)
-// ============================================
+// --------------------------------------------
+// Image / download helpers
+// --------------------------------------------
 
 const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
 
@@ -265,7 +230,6 @@ export function resolveDocCoverImage(doc: any): string {
     (typeof doc?.coverImage === "string" && doc.coverImage.trim()) ||
     (typeof doc?.image === "string" && doc.image.trim()) ||
     "";
-
   return img ? String(img) : FALLBACK_IMAGE;
 }
 
@@ -274,27 +238,20 @@ export function resolveDocDownloadUrl(doc: any): string | null {
     (typeof doc?.downloadUrl === "string" && doc.downloadUrl.trim()) ||
     (typeof doc?.fileUrl === "string" && doc.fileUrl.trim()) ||
     (typeof doc?.pdfPath === "string" && doc.pdfPath.trim()) ||
-    (typeof doc?.downloadFile === "string" && doc.downloadFile.trim()) ||
     "";
-
   return url ? String(url) : null;
 }
 
-// ============================================
-// 7) Safe getters
-// ============================================
+// --------------------------------------------
+// Safe getters
+// --------------------------------------------
 
-export const getAllContentlayerDocs = (): any[] => {
-  return allDocuments;
-};
+export const getAllContentlayerDocs = (): any[] => allDocuments;
 
-export const getPublishedDocuments = (): any[] => {
-  return allDocuments.filter(isPublished);
-};
+export const getPublishedDocuments = (): any[] => allDocuments.filter(isPublished);
 
-export const getFeaturedDocuments = (): any[] => {
-  return getPublishedDocuments().filter((doc) => doc?.featured === true || doc?.featured === "true");
-};
+export const getFeaturedDocuments = (): any[] =>
+  getPublishedDocuments().filter((doc) => doc?.featured === true || doc?.featured === "true");
 
 export function getPublishedDocumentsByType(): Record<DocKind, any[]> {
   const published = getPublishedDocuments();
@@ -311,9 +268,7 @@ export function getPublishedDocumentsByType(): Record<DocKind, any[]> {
     short: [],
   };
 
-  for (const doc of published) {
-    buckets[getDocKind(doc)].push(doc);
-  }
+  for (const doc of published) buckets[getDocKind(doc)].push(doc);
 
   (Object.keys(buckets) as DocKind[]).forEach((k) => {
     buckets[k].sort((a, b) => {
@@ -326,45 +281,45 @@ export function getPublishedDocumentsByType(): Record<DocKind, any[]> {
   return buckets;
 }
 
-// Individual “getAllX” exports expected by your codebase
-export const getPublishedPosts = (): any[] => asArray(allPosts).filter(isPublished);
-export const getPublishedShorts = (): any[] => asArray(allShorts).filter(isPublished);
+// Individual getters expected by routes/pages
+export const getPublishedPosts = (): any[] => allPosts.filter(isPublished);
+export const getPublishedShorts = (): any[] => allShorts.filter(isPublished);
 
-export const getAllBooks = (): any[] => asArray(allBooks).filter(isPublished);
-export const getAllCanons = (): any[] => asArray(allCanons).filter(isPublished);
-export const getAllDownloads = (): any[] => asArray(allDownloads).filter(isPublished);
-export const getAllEvents = (): any[] => asArray(allEvents).filter(isPublished);
-export const getAllPrints = (): any[] => asArray(allPrints).filter(isPublished);
-export const getAllResources = (): any[] => asArray(allResources).filter(isPublished);
-export const getAllStrategies = (): any[] => asArray(allStrategies).filter(isPublished);
+export const getAllBooks = (): any[] => allBooks.filter(isPublished);
+export const getAllCanons = (): any[] => allCanons.filter(isPublished);
+export const getAllDownloads = (): any[] => allDownloads.filter(isPublished);
+export const getAllEvents = (): any[] => allEvents.filter(isPublished);
+export const getAllPrints = (): any[] => allPrints.filter(isPublished);
+export const getAllResources = (): any[] => allResources.filter(isPublished);
+export const getAllStrategies = (): any[] => allStrategies.filter(isPublished);
 
 // By-slug getters
+const norm = (s: string) => String(s ?? "").trim().toLowerCase();
+
 export const getPostBySlug = (slug: string): any | undefined =>
-  getPublishedPosts().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
+  getPublishedPosts().find((d) => normalizeSlug(d) === norm(slug));
 
 export const getShortBySlug = (slug: string): any | undefined =>
-  getPublishedShorts().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
+  getPublishedShorts().find((d) => normalizeSlug(d) === norm(slug));
 
 export const getBookBySlug = (slug: string): any | undefined =>
-  getAllBooks().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
+  getAllBooks().find((d) => normalizeSlug(d) === norm(slug));
 
 export const getCanonBySlug = (slug: string): any | undefined =>
-  getAllCanons().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
+  getAllCanons().find((d) => normalizeSlug(d) === norm(slug));
 
 export const getDocumentBySlug = (slug: string): any | undefined =>
-  getAllContentlayerDocs().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
+  getAllContentlayerDocs().find((d) => normalizeSlug(d) === norm(slug));
 
-// Doc-by-href (useful for debugging)
 export const getDocByHref = (href: string): any | undefined =>
   getAllContentlayerDocs().find((d) => getDocHref(d) === href);
 
-// Convenience
 export const getBySlugAndKind = (slug: string, kind: DocKind): any | undefined =>
-  getPublishedDocumentsByType()[kind].find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
+  getPublishedDocumentsByType()[kind].find((d) => normalizeSlug(d) === norm(slug));
 
-// ============================================
-// 8) Type guards (for compatibility)
-// ============================================
+// --------------------------------------------
+// Type guards (compat)
+// --------------------------------------------
 
 export const isPost = (doc: any): boolean => getDocKind(doc) === "post";
 export const isBook = (doc: any): boolean => getDocKind(doc) === "book";
@@ -376,9 +331,9 @@ export const isStrategy = (doc: any): boolean => getDocKind(doc) === "strategy";
 export const isCanon = (doc: any): boolean => getDocKind(doc) === "canon";
 export const isShort = (doc: any): boolean => getDocKind(doc) === "short";
 
-// ============================================
-// 9) Cards
-// ============================================
+// --------------------------------------------
+// Cards
+// --------------------------------------------
 
 export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
   const kind = getDocKind(doc);
@@ -405,15 +360,14 @@ export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
 
     downloadUrl: resolveDocDownloadUrl(doc),
 
-    // Pass-through for intelligent card sizing
     coverAspect: doc?.coverAspect ?? null,
     coverFit: doc?.coverFit ?? null,
   };
 }
 
-// ============================================
-// 10) Shorts helpers used by index pages
-// ============================================
+// --------------------------------------------
+// Shorts helpers used by index pages
+// --------------------------------------------
 
 export const getRecentShorts = (limit: number = 3): any[] => {
   const shorts = getPublishedShorts();

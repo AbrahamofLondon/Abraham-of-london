@@ -1,29 +1,49 @@
 // pages/events/index.tsx
 import * as React from "react";
-import type {
-  GetStaticProps,
-  InferGetStaticPropsType,
-  NextPage,
-} from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { getAllEvents, type EventDocument } from "@/lib/contentlayer-helper";
+import {
+  assertContentlayerHasDocs,
+  getAllEvents,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
+
+type EventItem = {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  eventDate: string | null;
+  location: string | null;
+};
 
 type Props = {
-  upcoming: EventDocument[];
-  past: EventDocument[];
+  upcoming: EventItem[];
+  past: EventItem[];
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const events = getAllEvents();
+  assertContentlayerHasDocs("pages/events/index.tsx getStaticProps");
+
+  const eventsRaw = getAllEvents();
   const now = new Date();
+
+  const events: EventItem[] = eventsRaw.map((e: any) => ({
+    _id: String(e._id ?? `${normalizeSlug(e)}-${e.date ?? ""}`),
+    slug: normalizeSlug(e),
+    title: e.title ?? "Untitled Event",
+    excerpt: e.excerpt ?? e.description ?? null,
+    eventDate: (e.eventDate ?? e.date ?? null) as any,
+    location: e.location ?? null,
+  }));
 
   const upcoming = events
     .filter((e) => e.eventDate && new Date(e.eventDate) >= now)
     .sort(
       (a, b) =>
         new Date(a.eventDate || "").getTime() -
-        new Date(b.eventDate || "").getTime(),
+        new Date(b.eventDate || "").getTime()
     );
 
   const past = events
@@ -31,18 +51,13 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     .sort(
       (a, b) =>
         new Date(b.eventDate || "").getTime() -
-        new Date(a.eventDate || "").getTime(),
+        new Date(a.eventDate || "").getTime()
     );
 
-  return {
-    props: { upcoming, past },
-    revalidate: 1800,
-  };
+  return { props: { upcoming, past }, revalidate: 1800 };
 };
 
-const EventsIndexPage: NextPage<
-  InferGetStaticPropsType<typeof getStaticProps>
-> = ({ upcoming, past }) => {
+const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
   return (
     <Layout title="Events">
       <main className="mx-auto max-w-5xl px-4 py-12 sm:py-16 lg:py-20">
@@ -59,7 +74,6 @@ const EventsIndexPage: NextPage<
           </p>
         </header>
 
-        {/* Upcoming */}
         <section className="space-y-4">
           <h2 className="text-sm font-semibold uppercase tracking-[0.25em] text-gold/70">
             Upcoming
@@ -87,7 +101,7 @@ const EventsIndexPage: NextPage<
                       {event.location || "Private Room"}
                     </p>
                     <h3 className="font-serif text-lg font-semibold text-cream">
-                      {event.title ?? "Untitled Event"}
+                      {event.title}
                     </h3>
                     <p className="text-xs text-gray-300">
                       {event.eventDate
@@ -112,7 +126,6 @@ const EventsIndexPage: NextPage<
           )}
         </section>
 
-        {/* Archive */}
         <section className="mt-10 space-y-4">
           <h2 className="text-sm font-semibold uppercase tracking-[0.25em] text-gold/70">
             Archive
@@ -142,7 +155,7 @@ const EventsIndexPage: NextPage<
                     href={`/events/${event.slug}`}
                     className="flex-1 text-cream hover:text-gold"
                   >
-                    {event.title ?? "Untitled Event"}
+                    {event.title}
                   </Link>
                 </li>
               ))}

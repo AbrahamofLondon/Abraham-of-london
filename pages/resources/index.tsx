@@ -7,10 +7,10 @@ import Image from "next/image";
 
 import Layout from "@/components/Layout";
 import {
-  getAllContentlayerDocs,
-  getDocKind,
+  assertContentlayerHasDocs,
+  getAllResources,
   getDocHref,
-  isDraft,
+  normalizeSlug,
 } from "@/lib/contentlayer-helper";
 
 type ResourceMeta = {
@@ -29,20 +29,6 @@ type ResourceMeta = {
 type Props = {
   resources: ResourceMeta[];
 };
-
-function slugOf(d: any): string {
-  const s = typeof d?.slug === "string" ? d.slug.trim() : "";
-  if (s) return s;
-
-  const fp = typeof d?._raw?.flattenedPath === "string" ? d._raw.flattenedPath : "";
-  if (fp) {
-    const parts = fp.split("/");
-    const last = parts[parts.length - 1];
-    if (last && last !== "index") return last;
-    return parts[parts.length - 2] ?? "";
-  }
-  return "";
-}
 
 const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
   const pageTitle = "Strategic Resources | Abraham of London";
@@ -79,9 +65,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
               Structural assets for builders.
             </p>
 
-            <p className="mt-6 text-sm text-gray-400">
-              {resources.length} curated resources.
-            </p>
+            <p className="mt-6 text-sm text-gray-400">{resources.length} curated resources.</p>
           </header>
 
           {resources.length ? (
@@ -120,10 +104,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
                       </h2>
                     </div>
 
-                    {res.subtitle ? (
-                      <p className="mb-3 text-sm text-gray-300">{res.subtitle}</p>
-                    ) : null}
-
+                    {res.subtitle ? <p className="mb-3 text-sm text-gray-300">{res.subtitle}</p> : null}
                     {res.description ? (
                       <p className="mb-4 text-sm text-gray-400 line-clamp-2">{res.description}</p>
                     ) : null}
@@ -148,9 +129,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 
                     <div className="flex items-center justify-between border-t border-white/10 pt-4">
                       <div className="flex flex-col gap-1">
-                        {res.author ? (
-                          <span className="text-xs text-gray-300">By {res.author}</span>
-                        ) : null}
+                        {res.author ? <span className="text-xs text-gray-300">By {res.author}</span> : null}
                         {res.date ? (
                           <time dateTime={res.date} className="text-xs text-gray-500">
                             {new Date(res.date).toLocaleDateString("en-GB", {
@@ -163,11 +142,10 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
                       </div>
 
                       <Link
-                        href={`/resources/${res.slug}`}
+                        href={res.href}
                         className="inline-flex items-center gap-1.5 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-1.5 text-xs font-semibold text-softGold transition-colors hover:bg-softGold/20"
                       >
-                        Open
-                        <span aria-hidden>→</span>
+                        Open <span aria-hidden>→</span>
                       </Link>
                     </div>
                   </div>
@@ -187,43 +165,30 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  try {
-    const resourcesDocs = getAllContentlayerDocs()
-      .filter((d: any) => !isDraft(d))
-      .filter((d: any) => getDocKind(d) === "resource");
+  assertContentlayerHasDocs("pages/resources/index.tsx getStaticProps");
 
-    const resources: ResourceMeta[] = resourcesDocs
-      .map((r: any) => {
-        const slug = slugOf(r);
-        if (!slug) return null;
+  const docs = getAllResources();
 
-        return {
-          slug,
-          title: r.title ?? "Untitled Resource",
-          description: r.description ?? r.excerpt ?? null,
-          subtitle: r.subtitle ?? null,
-          date: r.date ?? null,
-          readTime: r.readTime ?? null,
-          coverImage: r.coverImage ?? null,
-          tags: Array.isArray(r.tags) ? r.tags : null,
-          author: r.author ?? null,
-          href: getDocHref(r),
-        };
-      })
-      .filter(Boolean) as ResourceMeta[];
-
-    resources.sort((a, b) => {
+  const resources: ResourceMeta[] = docs
+    .map((r: any) => ({
+      slug: normalizeSlug(r),
+      title: r.title ?? "Untitled Resource",
+      description: r.description ?? r.excerpt ?? null,
+      subtitle: r.subtitle ?? null,
+      date: r.date ?? null,
+      readTime: r.readTime ?? null,
+      coverImage: r.coverImage ?? r.image ?? null,
+      tags: Array.isArray(r.tags) ? r.tags : null,
+      author: r.author ?? null,
+      href: getDocHref(r),
+    }))
+    .sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
-      if (da !== db) return db - da;
-      return (a.title || "").localeCompare(b.title || "");
+      return db - da;
     });
 
-    return { props: { resources }, revalidate: 3600 };
-  } catch (e) {
-    console.error("[resources/index] getStaticProps failed:", e);
-    return { props: { resources: [] }, revalidate: 600 };
-  }
+  return { props: { resources }, revalidate: 3600 };
 };
 
 export default ResourcesIndexPage;

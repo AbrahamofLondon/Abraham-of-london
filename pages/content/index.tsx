@@ -23,6 +23,7 @@ import {
 
 import Layout from "@/components/Layout";
 import {
+  assertContentlayerHasDocs,
   getPublishedDocumentsByType,
   getCardPropsForDocument,
   type ContentlayerCardProps,
@@ -34,10 +35,6 @@ type ContentPageProps = {
 };
 
 const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
-
-// -----------------------------
-// Type Configuration – Palace aesthetic
-// -----------------------------
 
 const TYPE_CONFIG: Record<
   DocKind,
@@ -72,7 +69,8 @@ const TYPE_CONFIG: Record<
     label: "Canon",
     pluralLabel: "Canon Entries",
     icon: Crown,
-    description: "The philosophical spine. Foundation texts on governance and civilisation.",
+    description:
+      "The philosophical spine. Foundation texts on governance and civilisation.",
     gradient: "from-yellow-50 to-yellow-100/50",
     accentText: "text-yellow-800",
     accentBg: "bg-yellow-500/10",
@@ -174,10 +172,6 @@ const TYPE_CONFIG: Record<
   },
 };
 
-// -----------------------------
-// Helper functions
-// -----------------------------
-
 function fmtDate(d?: string | null) {
   if (!d) return null;
   const dt = new Date(d);
@@ -189,17 +183,13 @@ function fmtDate(d?: string | null) {
   });
 }
 
-// -----------------------------
-// Section Divider
-// -----------------------------
-
 const SectionDivider: React.FC<{ accent?: string }> = ({ accent = "amber" }) => {
   const colorClass =
     accent === "amber"
       ? "bg-amber-400/40"
       : accent === "emerald"
-      ? "bg-emerald-400/40"
-      : "bg-neutral-400/40";
+        ? "bg-emerald-400/40"
+        : "bg-neutral-400/40";
 
   return (
     <div className="relative h-16 overflow-hidden">
@@ -216,10 +206,6 @@ const SectionDivider: React.FC<{ accent?: string }> = ({ accent = "amber" }) => 
   );
 };
 
-// -----------------------------
-// Type Section Component
-// -----------------------------
-
 interface TypeSectionProps {
   kind: DocKind;
   docs: ContentlayerCardProps[];
@@ -228,12 +214,10 @@ interface TypeSectionProps {
 
 const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
   const IconComponent = config.icon;
-
   if (docs.length === 0) return null;
 
   return (
     <section id={kind} className="scroll-mt-20">
-      {/* Section Header */}
       <div className="mb-10">
         <div className="mb-4 flex items-center gap-3">
           <div className={`rounded-xl p-3 ${config.accentBg}`}>
@@ -251,26 +235,23 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
         </p>
       </div>
 
-      {/* Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {docs.map((doc) => {
-          // Smart aspect ratio detection - check doc metadata first
           const docAspect = (doc as any).coverAspect;
           let coverAspectClass: string;
           let objectClass: string;
 
           if (docAspect === "book" || docAspect === "portrait") {
-            // Book/portrait style (3:4 ratio)
             coverAspectClass = "aspect-[3/4]";
             objectClass = "object-contain";
           } else if (docAspect === "wide") {
-            // Wide style (16:10 ratio)
             coverAspectClass = "aspect-[16/10]";
             objectClass = "object-cover";
           } else {
-            // Fallback to config defaults
             coverAspectClass =
-              config.coverAspect === "portrait" ? "aspect-[3/4]" : "aspect-[16/10]";
+              config.coverAspect === "portrait"
+                ? "aspect-[3/4]"
+                : "aspect-[16/10]";
             objectClass =
               config.coverFit === "contain" ? "object-contain" : "object-cover";
           }
@@ -288,7 +269,6 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
             >
               <Link href={doc.href} className="group block h-full">
                 <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-neutral-300 hover:shadow-xl">
-                  {/* Cover */}
                   <div
                     className={`relative ${coverAspectClass} w-full overflow-hidden bg-gradient-to-br from-neutral-50 to-neutral-100`}
                   >
@@ -301,7 +281,6 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                    {/* Type pill */}
                     <div className="absolute left-3 top-3">
                       <span
                         className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold backdrop-blur-sm ${config.pillBg} ${config.accentText} ${config.accentBorder}`}
@@ -311,7 +290,6 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
                       </span>
                     </div>
 
-                    {/* Featured badge */}
                     {doc.featured && (
                       <div className="absolute right-3 top-3">
                         <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/60 bg-amber-500/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
@@ -322,7 +300,6 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
                     )}
                   </div>
 
-                  {/* Body */}
                   <div className="flex flex-1 flex-col p-5">
                     <h3 className="mb-2 line-clamp-2 font-serif text-lg font-semibold leading-snug text-neutral-900 transition group-hover:text-neutral-700">
                       {doc.title}
@@ -334,7 +311,6 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
                       </p>
                     )}
 
-                    {/* Tags */}
                     {doc.tags && doc.tags.length > 0 && (
                       <div className="mb-4 flex flex-wrap gap-2">
                         {doc.tags.slice(0, 3).map((t) => (
@@ -353,7 +329,6 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
                       </div>
                     )}
 
-                    {/* Footer */}
                     <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4">
                       <div className="flex items-center gap-3">
                         {date && (
@@ -387,13 +362,8 @@ const TypeSection: React.FC<TypeSectionProps> = ({ kind, docs, config }) => {
   );
 };
 
-// -----------------------------
-// Page Component
-// -----------------------------
-
 const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [activeType, setActiveType] = React.useState<DocKind | "all">("all");
 
   const allKinds: DocKind[] = React.useMemo(
     () => [
@@ -416,9 +386,7 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
 
   const typeCounts = React.useMemo(() => {
     const counts: Record<string, number> = { all: allDocs.length };
-    allKinds.forEach((k) => {
-      counts[k] = (docsByType[k] ?? []).length;
-    });
+    allKinds.forEach((k) => (counts[k] = (docsByType[k] ?? []).length));
     return counts;
   }, [docsByType, allDocs, allKinds]);
 
@@ -448,9 +416,7 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
         return hay.includes(q);
       });
 
-      if (filtered.length > 0) {
-        result[kind] = filtered;
-      }
+      if (filtered.length > 0) result[kind] = filtered;
     });
 
     return result;
@@ -464,21 +430,17 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
     return allKinds.filter((k) => (filteredTypes[k]?.length ?? 0) > 0);
   }, [allKinds, filteredTypes]);
 
-  // Scroll to type section
   const scrollToType = (kind: DocKind) => {
     const element = document.getElementById(kind);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
     <Layout title="Archive">
       <main className="min-h-screen bg-white">
-        {/* HERO */}
         <section className="relative border-b border-neutral-200 bg-gradient-to-b from-white to-neutral-50/50">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.05)_0%,transparent_60%)]" />
-          
+
           <div className="relative mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
             <div className="max-w-4xl">
               <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-neutral-200 bg-white/80 px-4 py-2.5 shadow-sm backdrop-blur-sm">
@@ -501,7 +463,6 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
                 purpose.
               </p>
 
-              {/* SEARCH */}
               <div className="relative">
                 <div className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2">
                   <Search className="h-5 w-5 text-neutral-400" />
@@ -542,7 +503,6 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
           </div>
         </section>
 
-        {/* QUICK NAVIGATION */}
         <section className="sticky top-0 z-10 border-b border-neutral-200 bg-white/95 backdrop-blur-md">
           <div className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
             <div className="flex gap-2 overflow-x-auto pb-2">
@@ -577,7 +537,6 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
           </div>
         </section>
 
-        {/* CONTENT SECTIONS */}
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
           {visibleKinds.length > 0 ? (
             <AnimatePresence mode="wait">
@@ -634,11 +593,9 @@ const ContentIndexPage: NextPage<ContentPageProps> = ({ docsByType }) => {
   );
 };
 
-// -----------------------------
-// Data Fetching
-// -----------------------------
-
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
+  assertContentlayerHasDocs("pages/content/index.tsx getStaticProps");
+
   const publishedBuckets = getPublishedDocumentsByType();
 
   const docsByType: Record<DocKind, ContentlayerCardProps[]> = {
@@ -654,9 +611,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   };
 
   (Object.keys(docsByType) as DocKind[]).forEach((kind) => {
-    docsByType[kind] = (publishedBuckets[kind] ?? []).map(
-      getCardPropsForDocument
-    );
+    docsByType[kind] = (publishedBuckets[kind] ?? []).map(getCardPropsForDocument);
   });
 
   return { props: { docsByType }, revalidate: 60 };

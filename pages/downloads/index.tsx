@@ -4,7 +4,13 @@ import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import DownloadCard from "@/components/downloads/DownloadCard";
-import { getAllDownloads } from "@/lib/downloads";
+import {
+  assertContentlayerHasDocs,
+  getAllDownloads,
+  normalizeSlug,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl,
+} from "@/lib/contentlayer-helper";
 
 type NormalisedDownload = {
   slug: string;
@@ -19,117 +25,63 @@ type NormalisedDownload = {
   featured?: boolean;
 };
 
-type DownloadsIndexProps = {
-  downloads: NormalisedDownload[];
-};
+export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }> = async () => {
+  assertContentlayerHasDocs("pages/downloads/index.tsx getStaticProps");
 
-interface RawDownload {
-  slug?: unknown;
-  title?: unknown;
-  excerpt?: unknown;
-  description?: unknown;
-  coverImage?: unknown;
-  downloadFile?: unknown;
-  fileUrl?: unknown;
-  fileSize?: unknown;
-  category?: unknown;
-  type?: unknown;
-  tags?: unknown;
-  date?: unknown;
-  featured?: unknown;
-}
+  const all = getAllDownloads();
 
-function normaliseDownload(raw: RawDownload): NormalisedDownload {
-  const slug = String(raw?.slug ?? "").trim() || "untitled";
-  const title = String(raw?.title ?? "Untitled download");
+  const downloads: NormalisedDownload[] = all.map((d: any) => {
+    const slug = normalizeSlug(d);
+    const title = d.title ?? "Untitled download";
 
-  const excerpt =
-    typeof raw?.excerpt === "string" && raw.excerpt.trim().length
-      ? raw.excerpt
-      : typeof raw?.description === "string" && raw.description.trim().length
-        ? raw.description
-        : null;
+    const excerpt =
+      (typeof d.excerpt === "string" && d.excerpt.trim().length ? d.excerpt : null) ??
+      (typeof d.description === "string" && d.description.trim().length ? d.description : null);
 
-  const coverImage =
-    typeof raw?.coverImage === "string" && raw.coverImage.trim().length
-      ? raw.coverImage
-      : null;
+    const coverImage = resolveDocCoverImage(d) || null;
+    const fileHref = resolveDocDownloadUrl(d);
 
-  const fileHrefCandidate =
-    typeof raw?.downloadFile === "string" && raw.downloadFile.trim().length
-      ? raw.downloadFile
-      : typeof raw?.fileUrl === "string" && raw.fileUrl.trim().length
-        ? raw.fileUrl
-        : null;
+    const category =
+      (typeof d.category === "string" && d.category.trim().length ? d.category : null) ??
+      (typeof d.type === "string" && d.type.trim().length ? d.type : null);
 
-  const fileHref =
-    fileHrefCandidate && fileHrefCandidate.startsWith("/")
-      ? fileHrefCandidate
-      : fileHrefCandidate;
+    const size = typeof d.fileSize === "string" && d.fileSize.trim().length ? d.fileSize : null;
 
-  const size =
-    typeof raw?.fileSize === "string" && raw.fileSize.trim().length
-      ? raw.fileSize
-      : null;
-
-  const category =
-    typeof raw?.category === "string" && raw.category.trim().length
-      ? raw.category
-      : typeof raw?.type === "string" && raw.type.trim().length
-        ? raw.type
-        : null;
-
-  const tags = Array.isArray(raw?.tags)
-    ? raw.tags.filter((t: unknown) => typeof t === "string" && t.trim().length)
-    : [];
-
-  const date =
-    typeof raw?.date === "string" && raw.date.trim().length ? raw.date : null;
-
-  const featured = Boolean(raw?.featured);
-
-  return {
-    slug,
-    title,
-    excerpt,
-    coverImage,
-    fileHref,
-    category,
-    size,
-    tags,
-    date,
-    featured,
-  };
-}
-
-export const getStaticProps: GetStaticProps<DownloadsIndexProps> = async () => {
-  try {
-    const all = getAllDownloads();
-    const downloads = all.map((d) => normaliseDownload(d));
+    const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
+    const date = typeof d.date === "string" ? d.date : null;
+    const featured = Boolean(d.featured);
 
     return {
-      props: {
-        downloads,
-      },
-      revalidate: 3600,
+      slug,
+      title,
+      excerpt: excerpt ?? null,
+      coverImage,
+      fileHref,
+      category,
+      size,
+      tags,
+      date,
+      featured,
     };
-  } catch (error) {
-    console.error("Error in getStaticProps for /downloads:", error);
-    return {
-      props: {
-        downloads: [],
-      },
-      revalidate: 3600,
-    };
-  }
+  });
+
+  downloads.sort((a, b) => {
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+
+    const da = a.date ? new Date(a.date).getTime() : 0;
+    const db = b.date ? new Date(b.date).getTime() : 0;
+    return db - da;
+  });
+
+  return { props: { downloads }, revalidate: 3600 };
 };
 
 export default function DownloadsIndexPage(
   props: InferGetStaticPropsType<typeof getStaticProps>
 ) {
   const title = "Curated Resources";
-  const description =
-    "Essential tools and strategic assets for visionary leaders.";
+  const description = "Essential tools and strategic assets for visionary leaders.";
 
   const featuredDownloads = props.downloads.filter((d) => d.featured);
   const regularDownloads = props.downloads.filter((d) => !d.featured);
@@ -145,7 +97,6 @@ export default function DownloadsIndexPage(
 
       <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          {/* Enhanced Header */}
           <header className="mb-16 text-center">
             <div className="mb-6">
               <span className="rounded-full bg-amber-100 px-4 py-2 text-sm font-medium text-amber-800">
@@ -156,36 +107,18 @@ export default function DownloadsIndexPage(
               Strategic Assets
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-8 text-slate-600">
-              Curated tools, frameworks, and resources designed for exceptional
-              leaders. Each asset is crafted for immediate impact and lasting
-              value.
+              Curated tools, frameworks, and resources designed for exceptional leaders.
             </p>
           </header>
 
           {props.downloads.length === 0 ? (
             <section className="rounded-2xl border border-slate-200 bg-white/60 p-8 backdrop-blur-sm">
               <div className="text-center">
-                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-amber-100 p-2.5">
-                  <svg
-                    className="h-7 w-7 text-amber-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
                 <h2 className="mb-3 text-xl font-semibold text-slate-900">
                   Access Premium Resources
                 </h2>
                 <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                  Our curated assets are integrated throughout the site. Explore
-                  blog posts and book pages to discover relevant resources.
+                  Resources are being prepared for publication.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
@@ -205,7 +138,6 @@ export default function DownloadsIndexPage(
             </section>
           ) : (
             <div className="space-y-16">
-              {/* Featured Downloads Section */}
               {featuredDownloads.length > 0 && (
                 <section>
                   <div className="mb-8 flex items-center justify-between">
@@ -216,11 +148,6 @@ export default function DownloadsIndexPage(
                       <p className="mt-2 text-slate-600">
                         Hand-selected resources of exceptional quality
                       </p>
-                    </div>
-                    <div className="hidden sm:block">
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
-                        Premium
-                      </span>
                     </div>
                   </div>
                   <div className="grid gap-8 lg:grid-cols-2">
@@ -241,16 +168,13 @@ export default function DownloadsIndexPage(
                 </section>
               )}
 
-              {/* All Downloads Section */}
               {regularDownloads.length > 0 && (
                 <section>
                   <div className="mb-8">
                     <h2 className="font-serif text-3xl font-light text-slate-900">
                       Complete Collection
                     </h2>
-                    <p className="mt-2 text-slate-600">
-                      All strategic tools and resources
-                    </p>
+                    <p className="mt-2 text-slate-600">All strategic tools and resources</p>
                   </div>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {regularDownloads.map((dl) => (

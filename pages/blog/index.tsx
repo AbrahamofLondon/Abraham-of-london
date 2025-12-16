@@ -6,23 +6,11 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { allPosts } from "contentlayer/generated";
-
-function normalizeSlug(doc: any): string {
-  if (doc?.slug) return String(doc.slug).trim().toLowerCase();
-  const fp = doc?._raw?.flattenedPath;
-  if (fp) {
-    const parts = String(fp).split("/");
-    const last = parts[parts.length - 1];
-    return (last === "index" ? parts[parts.length - 2] : last) || "untitled";
-  }
-  return "untitled";
-}
-
-function isDraft(doc: any): boolean {
-  const d = doc?.draft;
-  return d === true || d === "true";
-}
+import {
+  assertContentlayerHasDocs,
+  getPublishedPosts,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
 
 type Item = {
   slug: string;
@@ -69,6 +57,7 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
                   alt={p.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  sizes="(min-width: 1024px) 40vw, 100vw"
                 />
               </div>
 
@@ -84,7 +73,15 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
                 ) : null}
 
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-neutral-500 dark:text-softGold/70">
-                  {p.date ? <span>{new Date(p.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span> : null}
+                  {p.date ? (
+                    <span>
+                      {new Date(p.date).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  ) : null}
                   {p.readTime ? <span>• {p.readTime}</span> : null}
                 </div>
               </div>
@@ -97,7 +94,9 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const published = (allPosts ?? []).filter((p: any) => !isDraft(p));
+  assertContentlayerHasDocs("pages/blog/index.tsx getStaticProps");
+
+  const published = getPublishedPosts();
 
   const items: Item[] = published
     .map((p: any) => ({
@@ -106,8 +105,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       excerpt: p.excerpt ?? null,
       date: p.date ?? null,
       readTime: p.readTime ?? null,
-      coverImage: p.coverImage ?? null,
-      tags: p.tags ?? null,
+      coverImage: p.coverImage ?? p.image ?? null,
+      tags: Array.isArray(p.tags) ? p.tags : null,
     }))
     .sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;
