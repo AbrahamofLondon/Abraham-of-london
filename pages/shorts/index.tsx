@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { allShorts } from "contentlayer/generated";
+import { getPublicShorts, type ShortIndexItem } from "@/lib/shorts";
 
 type ShortDoc = {
   _id: string;
@@ -37,7 +37,7 @@ type ShortDoc = {
 };
 
 type ShortsIndexProps = {
-  shorts: ShortDoc[];
+  shorts: ShortIndexItem[];
 };
 
 const themeGradients = {
@@ -1096,23 +1096,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 };
 
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
-  const shorts = allShorts
-    .filter((s) => !s.draft)
-    .sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0;
-      const db = b.date ? new Date(b.date).getTime() : 0;
-      return db - da;
-    })
-    .map((s) => ({
-      _id: s._id,
-      slug: s.slug,
-      title: s.title,
-      excerpt: s.excerpt ?? null,
-      date: s.date ?? null,
-      readTime: s.readTime ?? null,
-      tags: Array.isArray(s.tags) ? s.tags : [],
-      theme: s.theme ?? null,
-    }));
+  const shorts = getPublicShorts();
 
   return {
     props: { shorts },

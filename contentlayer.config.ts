@@ -225,16 +225,21 @@ export const Canon = defineDocumentType(() => ({
 // ✅ SHORTS: aligned with the others (no conflicting date rules, consistent pattern, consistent url)
 export const Short = defineDocumentType(() => ({
   name: "Short",
-  filePathPattern: "shorts/**/*.{md,mdx}",
+  filePathPattern: "shorts/**/*.mdx",
   contentType: "mdx",
   fields: {
     ...commonFields,
     theme: { type: "string", required: false },
     audience: { type: "string", required: false },
     readTime: { type: "string", required: false },
+    published: { type: "boolean", required: false, default: true },
+    // REMOVE date override here
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "shorts") },
+    url: {
+      type: "string",
+      resolve: (doc) => getDocUrl(doc, "shorts"),
+    },
   },
 }));
 
