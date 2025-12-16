@@ -7,6 +7,8 @@
 // ✅ Contentlayer2-safe
 // ✅ Resilient to generated export naming (singular/plural)
 // ✅ Avoids TDZ by not executing helper logic at module scope
+// ✅ URL/TRUTH: prefers doc.url computed field to avoid dead links
+// ✅ Shorts covers: theme-driven + global fallback /assets/images/shorts/cover.jpg
 
 import * as generated from "contentlayer/generated";
 
@@ -74,7 +76,6 @@ function safeDateValue(v: any): string | null {
   if (!v) return null;
   if (typeof v === "string") return v;
   try {
-    // contentlayer date fields sometimes come as Date objects
     if (v instanceof Date) return v.toISOString();
   } catch {
     // ignore
@@ -82,11 +83,38 @@ function safeDateValue(v: any): string | null {
   return null;
 }
 
-const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
+function toCleanPath(s: string): string {
+  const v = String(s ?? "").trim();
+  if (!v) return "";
+  return v.startsWith("/") ? v : `/${v}`;
+}
+
+function isNonEmptyString(v: any): v is string {
+  return typeof v === "string" && v.trim().length > 0;
+}
+
+// --------------------------------------------
+// SHORTS COVER POLICY (Option 4)
+// --------------------------------------------
+// Global fallback for shorts:
+const SHORTS_GLOBAL_FALLBACK = "/assets/images/shorts/cover.jpg";
+
+// Theme → cover mapping (you requested these exact themes)
+const SHORT_THEME_COVERS: Record<string, string> = {
+  "inner-life": "/assets/images/shorts/inner-life.jpg",
+  "outer-life": "/assets/images/shorts/outer-life.jpg",
+  "hard-truths": "/assets/images/shorts/hard-truths.jpg",
+  gentle: "/assets/images/shorts/gentle.jpg",
+  purpose: "/assets/images/shorts/purpose.jpg",
+  relationships: "/assets/images/shorts/relationships.jpg",
+  faith: "/assets/images/shorts/faith.jpg",
+};
+
+// Non-shorts fallback (keep your current site fallback)
+const GLOBAL_FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
 
 // --------------------------------------------
 // Collections (exports your app expects)
-// NOTE: These are direct references to generated arrays (no computed work here).
 // --------------------------------------------
 
 export const allPosts = pickArrayExport("allPosts", "allPost");
@@ -96,10 +124,6 @@ export const allEvents = pickArrayExport("allEvents", "allEvent");
 export const allPrints = pickArrayExport("allPrints", "allPrint");
 export const allResources = pickArrayExport("allResources", "allResource");
 export const allStrategies = pickArrayExport("allStrategies", "allStrategy");
-
-// Contentlayer doc type you defined is "Canon" and "Short"
-// Generated exports may be `allCanons`/`allCanon` OR `allCanon` depending on versions/config.
-// We accept both.
 export const allCanons = pickArrayExport("allCanons", "allCanon");
 export const allShorts = pickArrayExport("allShorts", "allShort");
 
@@ -115,6 +139,7 @@ export const isPublished = (doc: any): boolean => !isDraft(doc);
 // --------------------------------------------
 
 export function getDocKind(doc: any): DocKind {
+  // Prefer Contentlayer’s internal type info when available
   const t = String(doc?.type ?? doc?._type ?? "").trim();
 
   switch (t) {
@@ -144,22 +169,25 @@ export function getDocKind(doc: any): DocKind {
 export function normalizeSlug(doc: any): string {
   if (!doc) return "untitled";
 
-  const s = typeof doc.slug === "string" ? doc.slug.trim() : "";
+  const s = isNonEmptyString(doc.slug) ? doc.slug.trim() : "";
   if (s) return s.toLowerCase();
 
-  const fp =
-    typeof doc?._raw?.flattenedPath === "string" ? doc._raw.flattenedPath : "";
+  const fp = isNonEmptyString(doc?._raw?.flattenedPath)
+    ? String(doc._raw.flattenedPath)
+    : "";
 
   if (fp) {
-    // Remove known base folders, preserve nesting for resources if any
+    // Remove known base folders; preserve nesting for resources if any
     const cleaned = fp
-      .replace(/^(content\/)?(blog|books|downloads|events|prints|resources|strategy|canon|shorts)\//, "")
+      .replace(
+        /^(content\/)?(blog|books|downloads|events|prints|resources|strategy|canon|shorts)\//,
+        ""
+      )
       .replace(/\/index$/, "");
-
     if (cleaned) return cleaned.trim().toLowerCase();
   }
 
-  const title = typeof doc.title === "string" ? doc.title.trim() : "";
+  const title = isNonEmptyString(doc.title) ? doc.title.trim() : "";
   if (title) {
     return title
       .toLowerCase()
@@ -181,19 +209,29 @@ export function normalizeSlug(doc: any): string {
  * - Events:     /events/[slug]
  * - Prints:     /prints/[slug]
  * - Shorts:     /shorts/[slug]
- * - Resources:  /resources/[...slug] (supports nested)
+ * - Resources:  /resources/[...slug]
  * - Strategy:   /strategy/[slug]
  * - Fallback:   /content/[slug]
+ *
+ * IMPORTANT:
+ * ✅ First choice: doc.url (computedFields from contentlayer.config.ts)
+ * ✅ Second: doc.href (author override)
+ * ✅ Third: reconstruction fallback
  */
 export function getDocHref(doc: any): string {
+  // 0) Contentlayer computed URL wins
+  if (isNonEmptyString(doc?.url)) return toCleanPath(doc.url);
+
+  // 1) Author override wins
+  if (isNonEmptyString(doc?.href)) return toCleanPath(doc.href);
+
+  // 2) Reconstruct
   const slug = normalizeSlug(doc);
   const kind = getDocKind(doc);
 
   switch (kind) {
     case "post":
       return `/blog/${slug}`;
-    case "short":
-      return `/shorts/${slug}`;
     case "book":
       return `/books/${slug}`;
     case "canon":
@@ -204,9 +242,10 @@ export function getDocHref(doc: any): string {
       return `/events/${slug}`;
     case "print":
       return `/prints/${slug}`;
+    case "short":
+      return `/shorts/${slug}`;
     case "resource":
-      // allow nested paths: /resources/a/b/c
-      return `/resources/${slug}`;
+      return `/resources/${slug}`; // supports nested via slug containing "/"
     case "strategy":
       return `/strategy/${slug}`;
     default:
@@ -221,26 +260,32 @@ export const getShortUrl = (short: any): string => getDocHref(short);
 // --------------------------------------------
 
 export function resolveDocCoverImage(doc: any): string {
-  const img =
-    (typeof doc?.coverImage === "string" && doc.coverImage.trim()) ||
-    (typeof doc?.image === "string" && doc.image.trim()) ||
-    "";
-  return img ? String(img) : FALLBACK_IMAGE;
+  // Explicit cover wins (all types)
+  if (isNonEmptyString(doc?.coverImage)) return doc.coverImage.trim();
+  if (isNonEmptyString(doc?.image)) return doc.image.trim();
+
+  // Shorts: theme-driven
+  if (getDocKind(doc) === "short") {
+    const theme = String(doc?.theme ?? "").trim().toLowerCase();
+    return SHORT_THEME_COVERS[theme] ?? SHORTS_GLOBAL_FALLBACK;
+  }
+
+  // Non-shorts fallback
+  return GLOBAL_FALLBACK_IMAGE;
 }
 
 export function resolveDocDownloadUrl(doc: any): string | null {
   const url =
-    (typeof doc?.downloadUrl === "string" && doc.downloadUrl.trim()) ||
-    (typeof doc?.fileUrl === "string" && doc.fileUrl.trim()) ||
-    (typeof doc?.pdfPath === "string" && doc.pdfPath.trim()) ||
-    (typeof doc?.file === "string" && doc.file.trim()) ||
+    (isNonEmptyString(doc?.downloadUrl) && doc.downloadUrl.trim()) ||
+    (isNonEmptyString(doc?.fileUrl) && doc.fileUrl.trim()) ||
+    (isNonEmptyString(doc?.pdfPath) && doc.pdfPath.trim()) ||
+    (isNonEmptyString(doc?.file) && doc.file.trim()) ||
     "";
   return url ? String(url) : null;
 }
 
 // --------------------------------------------
-// SAFE getters (computed at call-time, not import-time)
-// This avoids TDZ/circular-import pain.
+// SAFE getters (computed at call-time)
 // --------------------------------------------
 
 export const getAllContentlayerDocs = (): any[] =>
@@ -260,18 +305,15 @@ export const getPublishedDocuments = (): any[] =>
   getAllContentlayerDocs().filter(isPublished);
 
 export const getFeaturedDocuments = (): any[] =>
-  getPublishedDocuments().filter(
-    (doc) => doc?.featured === true || doc?.featured === "true"
-  );
+  getPublishedDocuments().filter((doc) => toBool(doc?.featured));
 
-// Some code expects these names as constants.
-// We keep them as functions-backed exports (no import-time computation).
+// These are function-backed exports (avoid import-time computation)
 export const allDocuments = getAllContentlayerDocs;
 export const allContent = getAllContentlayerDocs;
 export const allPublished = getPublishedDocuments;
 
 // --------------------------------------------
-// Build-time guard (call this inside getStaticProps/Paths if you want hard failure)
+// Guard
 // --------------------------------------------
 
 export function assertContentlayerHasDocs(where: string) {
@@ -333,7 +375,7 @@ export const getAllPrints = (): any[] => allPrints.filter(isPublished);
 export const getAllResources = (): any[] => allResources.filter(isPublished);
 export const getAllStrategies = (): any[] => allStrategies.filter(isPublished);
 
-// By-slug getters
+// By-slug getters (slug-only convenience)
 const norm = (s: string) => String(s ?? "").trim().toLowerCase();
 
 export const getPostBySlug = (slug: string): any | undefined =>
@@ -351,16 +393,15 @@ export const getCanonBySlug = (slug: string): any | undefined =>
 export const getDocumentBySlug = (slug: string): any | undefined =>
   getAllContentlayerDocs().find((d) => normalizeSlug(d) === norm(slug));
 
-export const getDocByHref = (href: string): any | undefined =>
-  getAllContentlayerDocs().find((d) => getDocHref(d) === href);
+export const getDocByHref = (href: string): any | undefined => {
+  const h = toCleanPath(href);
+  return getAllContentlayerDocs().find((d) => getDocHref(d) === h);
+};
 
 export const getBySlugAndKind = (slug: string, kind: DocKind): any | undefined =>
   getPublishedDocumentsByType()[kind]?.find((d) => normalizeSlug(d) === norm(slug));
 
-// --------------------------------------------
-// Type guards (compat)
-// --------------------------------------------
-
+// Type guards
 export const isPost = (doc: any): boolean => getDocKind(doc) === "post";
 export const isBook = (doc: any): boolean => getDocKind(doc) === "book";
 export const isDownload = (doc: any): boolean => getDocKind(doc) === "download";
@@ -371,10 +412,7 @@ export const isStrategy = (doc: any): boolean => getDocKind(doc) === "strategy";
 export const isCanon = (doc: any): boolean => getDocKind(doc) === "canon";
 export const isShort = (doc: any): boolean => getDocKind(doc) === "short";
 
-// --------------------------------------------
 // Cards
-// --------------------------------------------
-
 export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
   const kind = getDocKind(doc);
   const slug = normalizeSlug(doc);
@@ -388,7 +426,7 @@ export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
     description: doc?.description ?? doc?.summary ?? null,
     excerpt: doc?.excerpt ?? null,
     subtitle: doc?.subtitle ?? null,
-    date: safeDateValue(doc?.date) ?? doc?.date ?? null,
+    date: safeDateValue(doc?.date) ?? (doc?.date ? String(doc.date) : null),
     readTime: doc?.readTime ?? doc?.readtime ?? null,
 
     image: resolveDocCoverImage(doc),
@@ -405,10 +443,7 @@ export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
   };
 }
 
-// --------------------------------------------
-// Shorts helpers used by index pages
-// --------------------------------------------
-
+// Shorts helpers
 export const getRecentShorts = (limit: number = 3): any[] => {
   const shorts = getPublishedShorts();
   return shorts
@@ -424,7 +459,7 @@ export const getRecentShorts = (limit: number = 3): any[] => {
 export const getFeaturedShorts = (limit: number = 3): any[] => {
   const shorts = getPublishedShorts();
   return shorts
-    .filter((s) => s?.featured === true || s?.featured === "true")
+    .filter((s) => toBool(s?.featured))
     .slice()
     .sort((a, b) => {
       const da = a?.date ? new Date(a.date).getTime() : 0;

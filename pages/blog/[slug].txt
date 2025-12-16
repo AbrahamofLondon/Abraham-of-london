@@ -1,52 +1,47 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 import {
+  assertContentlayerHasDocs,
   getAllContentlayerDocs,
-  getDocKind,
   getDocHref,
+  getDocKind,
   isDraft,
-  normalizeSlug,
 } from "@/lib/contentlayer-helper";
 
 type Props = { doc: any; canonicalPath: string };
 
-const BlogPostPage: NextPage<Props> = ({ doc, canonicalPath }) => {
-  return (
-    <ContentlayerDocPage
-      doc={doc}
-      canonicalPath={canonicalPath}
-      backHref="/blog"
-      label="Essays"
-    />
-  );
-};
+const BlogPostPage: NextPage<Props> = ({ doc, canonicalPath }) => (
+  <ContentlayerDocPage doc={doc} canonicalPath={canonicalPath} backHref="/blog" label="Essays" />
+);
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  assertContentlayerHasDocs("pages/blog/[slug].tsx:getStaticPaths");
+
   const paths = getAllContentlayerDocs()
-    .filter(d => !isDraft(d) && getDocKind(d) === "post")
-    .map(d => normalizeSlug(d))
-    .filter(Boolean)
-    .map(slug => ({ params: { slug } }));
+    .filter((d) => !isDraft(d) && getDocKind(d) === "post")
+    .map((d) => getDocHref(d))
+    .filter((href) => href.startsWith("/blog/"))
+    .map((href) => ({ params: { slug: href.replace("/blog/", "") } }));
 
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").toLowerCase();
+  assertContentlayerHasDocs("pages/blog/[slug].tsx:getStaticProps");
 
-  const doc = getAllContentlayerDocs()
-    .filter(d => !isDraft(d) && getDocKind(d) === "post")
-    .find(d => normalizeSlug(d) === slug);
+  const slug = String(params?.slug ?? "").trim();
+  if (!slug) return { notFound: true };
+
+  const targetUrl = `/blog/${slug}`;
+
+  const doc =
+    getAllContentlayerDocs()
+      .filter((d) => !isDraft(d) && getDocKind(d) === "post")
+      .find((d) => getDocHref(d) === targetUrl) ?? null;
 
   if (!doc) return { notFound: true };
 
-  return {
-    props: {
-      doc,
-      canonicalPath: getDocHref(doc),
-    },
-    revalidate: 3600,
-  };
+  return { props: { doc, canonicalPath: getDocHref(doc) }, revalidate: 3600 };
 };
 
 export default BlogPostPage;
