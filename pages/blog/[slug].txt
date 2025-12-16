@@ -1,84 +1,52 @@
-// pages/blog/[slug].tsx
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 import {
   getAllContentlayerDocs,
-  getDocHref,
   getDocKind,
+  getDocHref,
   isDraft,
+  normalizeSlug,
 } from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string; label?: string };
+type Props = { doc: any; canonicalPath: string };
 
 const BlogPostPage: NextPage<Props> = ({ doc, canonicalPath }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
-      canonicalPath={canonicalPath}          // canonical stays /content/...
+      canonicalPath={canonicalPath}
       backHref="/blog"
       label="Essays"
     />
   );
 };
 
-function slugOf(d: any): string {
-  const s = typeof d?.slug === "string" ? d.slug.trim() : "";
-  if (s) return s;
-
-  const fp = typeof d?._raw?.flattenedPath === "string" ? d._raw.flattenedPath : "";
-  if (fp) {
-    const parts = fp.split("/");
-    const last = parts[parts.length - 1];
-    if (last && last !== "index") return last;
-    return parts[parts.length - 2] ?? "";
-  }
-  return "";
-}
-
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const docs = getAllContentlayerDocs()
-      .filter((d: any) => !isDraft(d))
-      .filter((d: any) => getDocKind(d) === "post");
+  const paths = getAllContentlayerDocs()
+    .filter(d => !isDraft(d) && getDocKind(d) === "post")
+    .map(d => normalizeSlug(d))
+    .filter(Boolean)
+    .map(slug => ({ params: { slug } }));
 
-    const paths = docs
-      .map((d: any) => {
-        const slug = slugOf(d);
-        return slug ? { params: { slug } } : null;
-      })
-      .filter(Boolean) as { params: { slug: string } }[];
-
-    return { paths, fallback: false };
-  } catch (e) {
-    console.error("[blog/[slug]] getStaticPaths failed:", e);
-    return { paths: [], fallback: false };
-  }
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  try {
-    const slug = String(params?.slug ?? "").trim();
-    if (!slug) return { notFound: true };
+  const slug = String(params?.slug ?? "").toLowerCase();
 
-    const docs = getAllContentlayerDocs()
-      .filter((d: any) => !isDraft(d))
-      .filter((d: any) => getDocKind(d) === "post");
+  const doc = getAllContentlayerDocs()
+    .filter(d => !isDraft(d) && getDocKind(d) === "post")
+    .find(d => normalizeSlug(d) === slug);
 
-    const doc = docs.find((d: any) => slugOf(d) === slug) ?? null;
-    if (!doc) return { notFound: true };
+  if (!doc) return { notFound: true };
 
-    return {
-      props: {
-        doc,
-        canonicalPath: getDocHref(doc), // your helper returns /content/<slug> for posts
-        label: "Essays",
-      },
-      revalidate: 3600,
-    };
-  } catch (e) {
-    console.error("[blog/[slug]] getStaticProps failed:", e);
-    return { notFound: true };
-  }
+  return {
+    props: {
+      doc,
+      canonicalPath: getDocHref(doc),
+    },
+    revalidate: 3600,
+  };
 };
 
 export default BlogPostPage;

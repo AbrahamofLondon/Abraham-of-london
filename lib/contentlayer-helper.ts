@@ -1,29 +1,13 @@
-// lib/contentlayer-helper.ts - FIXED VERSION with correct URLs
-import {
-  allPosts,
-  allBooks,
-  allDownloads,
-  allEvents,
-  allPrints,
-  allResources,
-  allStrategies,
-  allCanons,
-  allShorts,
-} from "contentlayer/generated";
-import type {
-  Post as PostType,
-  Book as BookType,
-  Download as DownloadType,
-  Event as EventType,
-  Print as PrintType,
-  Resource as ResourceType,
-  Strategy as StrategyType,
-  Canon as CanonType,
-  Short as ShortType,
-} from "contentlayer/generated";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// lib/contentlayer-helper.ts
+// SINGLE SOURCE OF TRUTH for Contentlayer docs, URLs, and card props.
+// Works with Contentlayer2 (.contentlayer/generated) and classic contentlayer/generated.
+
+import path from "path";
 
 // ============================================
-// TYPE DEFINITIONS - LOWERCASE FOR UI CONSISTENCY
+// 1) Types (UI kinds are lowercase)
 // ============================================
 
 export type DocKind =
@@ -37,142 +21,143 @@ export type DocKind =
   | "canon"
   | "short";
 
-export type Post = PostType;
-export type Short = ShortType;
-export type Book = BookType;
-export type Canon = CanonType;
-export type Download = DownloadType;
-export type Event = EventType;
-export type Print = PrintType;
-export type Resource = ResourceType;
-export type Strategy = StrategyType;
-
-export type AnyDoc =
-  | PostType
-  | BookType
-  | DownloadType
-  | EventType
-  | PrintType
-  | ResourceType
-  | StrategyType
-  | CanonType
-  | ShortType;
-
 export interface ContentlayerCardProps {
-  type: string;
+  type: string; // lowercase DocKind
   slug: string;
   title: string;
   href: string;
+
   description?: string | null;
   excerpt?: string | null;
   subtitle?: string | null;
   date?: string | null;
   readTime?: string | null;
+
   image?: string | null;
   tags?: string[];
+
   category?: string | null;
   author?: string | null;
   featured?: boolean;
+
   downloadUrl?: string | null;
-  coverAspect?: string | null; // ✅ Added
-  coverFit?: string | null; // ✅ Added
+
+  // for smart cards
+  coverAspect?: string | null;
+  coverFit?: string | null;
 }
 
 // ============================================
-// CONTENTLAYER STATUS CHECK
+// 2) Robust generated loader (Contentlayer + Contentlayer2)
+// ============================================
+
+type Generated = Record<string, any>;
+
+function tryRequire(id: string): any {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require(id);
+  } catch {
+    return null;
+  }
+}
+
+function loadGenerated(): Generated {
+  // 1) Sometimes works
+  const a = tryRequire("contentlayer/generated");
+  if (a) return a as Generated;
+
+  // 2) Contentlayer2 common output
+  const b = tryRequire(path.join(process.cwd(), ".contentlayer", "generated"));
+  if (b) return b as Generated;
+
+  // 3) Explicit file fallbacks
+  const c = tryRequire(
+    path.join(process.cwd(), ".contentlayer", "generated", "index.js")
+  );
+  if (c) return c as Generated;
+
+  const d = tryRequire(
+    path.join(process.cwd(), ".contentlayer", "generated", "index.cjs")
+  );
+  if (d) return d as Generated;
+
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(
+      "[contentlayer-helper] Could not load generated exports from known locations."
+    );
+  }
+  return {};
+}
+
+const gen = loadGenerated();
+
+function asArray<T = any>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
+}
+
+// ============================================
+// 3) Collections (EXPORTS your app expects)
+// ============================================
+
+export const allPosts = asArray(gen.allPosts);
+export const allBooks = asArray(gen.allBooks);
+export const allDownloads = asArray(gen.allDownloads);
+export const allEvents = asArray(gen.allEvents);
+export const allPrints = asArray(gen.allPrints);
+export const allResources = asArray(gen.allResources);
+export const allStrategies = asArray(gen.allStrategies);
+export const allCanons = asArray(gen.allCanons);
+export const allShorts = asArray(gen.allShorts);
+
+export const allDocuments: any[] = (() => {
+  const docs = asArray(gen.allDocuments);
+  if (docs.length) return docs;
+
+  // Fallback: merge everything
+  return [
+    ...allPosts,
+    ...allBooks,
+    ...allDownloads,
+    ...allEvents,
+    ...allPrints,
+    ...allResources,
+    ...allStrategies,
+    ...allCanons,
+    ...allShorts,
+  ].filter(Boolean);
+})();
+
+export const allContent: any[] = [...allDocuments];
+export const allPublished: any[] = allDocuments.filter((d) => !isDraft(d));
+
+// ============================================
+// 4) Status helpers
 // ============================================
 
 export const isContentlayerLoaded = (): boolean => {
-  try {
-    return (
-      Array.isArray(allPosts) &&
-      Array.isArray(allBooks) &&
-      Array.isArray(allShorts)
-    );
-  } catch {
-    return false;
-  }
+  // If content exists, we are loaded.
+  return allDocuments.length > 0;
 };
 
-// ============================================
-// SLUG HELPER (Robust)
-// ============================================
-
-function normalizeSlug(doc: any): string {
-  if (!doc) return "untitled";
-
-  // Priority 1: Explicit slug field
-  if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
-    return doc.slug.trim().toLowerCase();
-  }
-
-  // Priority 2: Flattened path from _raw
-  if (doc._raw?.flattenedPath) {
-    const path = doc._raw.flattenedPath;
-    const parts = path.split("/");
-    const lastPart = parts[parts.length - 1];
-    return lastPart === "index"
-      ? parts[parts.length - 2] || lastPart
-      : lastPart;
-  }
-
-  // Priority 3: Title-based slug
-  if (doc.title) {
-    return doc.title
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .substring(0, 100);
-  }
-
-  return "untitled";
-}
-
-// ============================================
-// TYPE GUARDS
-// ============================================
-
-export const isPost = (doc: AnyDoc): doc is PostType =>
-  doc.type === "Post" || doc._type === "Post";
-export const isBook = (doc: AnyDoc): doc is BookType =>
-  doc.type === "Book" || doc._type === "Book";
-export const isDownload = (doc: AnyDoc): doc is DownloadType =>
-  doc.type === "Download" || doc._type === "Download";
-export const isEvent = (doc: AnyDoc): doc is EventType =>
-  doc.type === "Event" || doc._type === "Event";
-export const isPrint = (doc: AnyDoc): doc is PrintType =>
-  doc.type === "Print" || doc._type === "Print";
-export const isResource = (doc: AnyDoc): doc is ResourceType =>
-  doc.type === "Resource" || doc._type === "Resource";
-export const isStrategy = (doc: AnyDoc): doc is StrategyType =>
-  doc.type === "Strategy" || doc._type === "Strategy";
-export const isCanon = (doc: AnyDoc): doc is CanonType =>
-  doc.type === "Canon" || doc._type === "Canon";
-export const isShort = (doc: AnyDoc): doc is ShortType =>
-  doc.type === "Short" || doc._type === "Short";
-
-// Bulletproof draft detection - handles string "false", boolean false, undefined, null
-export const isDraft = (doc: AnyDoc): boolean => {
-  const d = doc.draft;
-  // Explicitly false values
-  if (d === false || d === "false" || d === null || d === undefined) return false;
-  // Explicitly true values
+// Bulletproof draft detection (supports boolean/string)
+export const isDraft = (doc: any): boolean => {
+  const d = doc?.draft;
   if (d === true || d === "true") return true;
-  // Default to not draft
+  if (d === false || d === "false" || d == null) return false;
   return false;
 };
 
-export const isPublished = (doc: AnyDoc): boolean => !isDraft(doc);
+export const isPublished = (doc: any): boolean => !isDraft(doc);
 
 // ============================================
-// DOCUMENT KIND MAPPER (Contentlayer -> UI)
+// 5) Kind / slug / URL helpers (SINGLE SOURCE OF TRUTH)
 // ============================================
 
-export function getDocKind(doc: AnyDoc): DocKind {
-  const docType = doc.type || doc._type;
+export function getDocKind(doc: any): DocKind {
+  const t = String(doc?.type ?? doc?._type ?? "").trim();
 
-  switch (docType) {
+  switch (t) {
     case "Post":
       return "post";
     case "Book":
@@ -192,23 +177,58 @@ export function getDocKind(doc: AnyDoc): DocKind {
     case "Short":
       return "short";
     default:
+      // Don’t lie; default to post only if unknown
       return "post";
   }
 }
 
-// ============================================
-// URL HELPERS - FIXED FOR YOUR SITE STRUCTURE
-// ============================================
+export function normalizeSlug(doc: any): string {
+  if (!doc) return "untitled";
 
-export function getDocHref(doc: AnyDoc): string {
+  const s = typeof doc.slug === "string" ? doc.slug.trim() : "";
+  if (s) return s.toLowerCase();
+
+  const fp = typeof doc?._raw?.flattenedPath === "string" ? doc._raw.flattenedPath : "";
+  if (fp) {
+    const parts = fp.split("/").filter(Boolean);
+    const last = parts[parts.length - 1];
+    const pick = last === "index" ? parts[parts.length - 2] : last;
+    if (pick) return String(pick).trim().toLowerCase();
+  }
+
+  const title = typeof doc.title === "string" ? doc.title.trim() : "";
+  if (title) {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .slice(0, 120);
+  }
+
+  return "untitled";
+}
+
+/**
+ * SITE ROUTES (your stated structure):
+ * - Posts:      /blog/[slug]
+ * - Books:      /books/[slug]
+ * - Canon:      /canon/[slug]
+ * - Downloads:  /downloads/[slug]
+ * - Events:     /events/[slug]
+ * - Prints:     /prints/[slug]
+ * - Shorts:     /shorts/[slug]
+ * - Resources:  /resources/[...slug]   (you have that route)
+ * - Strategy:   /strategy/[slug]        (if you have it) OR /content
+ * - ReadingRoom: /content/[slug]        (fallback home)
+ */
+export function getDocHref(doc: any): string {
   const slug = normalizeSlug(doc);
   const kind = getDocKind(doc);
 
-  // CRITICAL FIX: All content types go through /content/[slug]
-  // except downloads, shorts, and a few specific routes
   switch (kind) {
     case "post":
-      return `/content/${slug}`; // ✅ FIXED: was /blog/
+      return `/blog/${slug}`; // ✅ per your instruction
     case "short":
       return `/shorts/${slug}`;
     case "book":
@@ -222,99 +242,64 @@ export function getDocHref(doc: AnyDoc): string {
     case "print":
       return `/prints/${slug}`;
     case "resource":
-      return `/content/${slug}`; // ✅ FIXED: was /resources/
+      // your route is /resources/[...slug] but you often use single slugs
+      return `/resources/${slug}`;
     case "strategy":
-      return `/content/${slug}`; // ✅ FIXED: was /strategy/
+      // if you have /strategy/[slug] keep it
+      return `/strategy/${slug}`;
     default:
       return `/content/${slug}`;
   }
 }
 
-export const getShortUrl = (short: ShortType): string => getDocHref(short);
+export const getShortUrl = (short: any): string => getDocHref(short);
 
 // ============================================
-// IMAGE HELPERS
+// 6) Image / download helpers (cards “fit intelligently”)
 // ============================================
 
-export function resolveDocCoverImage(doc: AnyDoc): string {
-  const explicit =
-    ((doc as any).coverImage as string | undefined) ||
-    ((doc as any).image as string | undefined) ||
+const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
+
+export function resolveDocCoverImage(doc: any): string {
+  const img =
+    (typeof doc?.coverImage === "string" && doc.coverImage.trim()) ||
+    (typeof doc?.image === "string" && doc.image.trim()) ||
     "";
 
-  if (explicit && explicit.trim()) {
-    return explicit.trim();
-  }
-
-  return "/assets/images/writing-desk.webp";
+  return img ? String(img) : FALLBACK_IMAGE;
 }
 
-export function resolveDocDownloadUrl(doc: AnyDoc): string | null {
-  const explicit =
-    ((doc as any).downloadUrl as string | undefined) ||
-    ((doc as any).fileUrl as string | undefined) ||
+export function resolveDocDownloadUrl(doc: any): string | null {
+  const url =
+    (typeof doc?.downloadUrl === "string" && doc.downloadUrl.trim()) ||
+    (typeof doc?.fileUrl === "string" && doc.fileUrl.trim()) ||
+    (typeof doc?.pdfPath === "string" && doc.pdfPath.trim()) ||
+    (typeof doc?.downloadFile === "string" && doc.downloadFile.trim()) ||
     "";
 
-  if (explicit && explicit.trim()) {
-    return explicit.trim();
-  }
-
-  return null;
+  return url ? String(url) : null;
 }
 
 // ============================================
-// SAFE CONTENT GETTERS
+// 7) Safe getters
 // ============================================
 
-export const getAllContentlayerDocs = (): AnyDoc[] => {
-  try {
-    return [
-      ...(allPosts || []),
-      ...(allBooks || []),
-      ...(allDownloads || []),
-      ...(allEvents || []),
-      ...(allPrints || []),
-      ...(allResources || []),
-      ...(allStrategies || []),
-      ...(allCanons || []),
-      ...(allShorts || []),
-    ] as AnyDoc[];
-  } catch (error) {
-    console.error("Error getting all contentlayer docs:", error);
-    return [];
-  }
+export const getAllContentlayerDocs = (): any[] => {
+  return allDocuments;
 };
 
-export const getPublishedDocuments = (): AnyDoc[] => {
-  try {
-    return getAllContentlayerDocs().filter(isPublished);
-  } catch (error) {
-    console.error("Error getting published documents:", error);
-    return [];
-  }
+export const getPublishedDocuments = (): any[] => {
+  return allDocuments.filter(isPublished);
 };
 
-export const getFeaturedDocuments = (): AnyDoc[] => {
-  try {
-    return getPublishedDocuments().filter((doc) => {
-      const f = doc.featured;
-      // Only return true if explicitly featured: true (not "true" string, not undefined)
-      return f === true || f === "true";
-    });
-  } catch (error) {
-    console.error("Error getting featured documents:", error);
-    return [];
-  }
+export const getFeaturedDocuments = (): any[] => {
+  return getPublishedDocuments().filter((doc) => doc?.featured === true || doc?.featured === "true");
 };
 
-// ============================================
-// GROUPED BY TYPE (CRITICAL FIX)
-// ============================================
-
-export function getPublishedDocumentsByType(): Record<DocKind, AnyDoc[]> {
+export function getPublishedDocumentsByType(): Record<DocKind, any[]> {
   const published = getPublishedDocuments();
 
-  const buckets: Record<DocKind, AnyDoc[]> = {
+  const buckets: Record<DocKind, any[]> = {
     post: [],
     book: [],
     download: [],
@@ -327,223 +312,130 @@ export function getPublishedDocumentsByType(): Record<DocKind, AnyDoc[]> {
   };
 
   for (const doc of published) {
-    const kind = getDocKind(doc);
-    buckets[kind].push(doc);
+    buckets[getDocKind(doc)].push(doc);
   }
 
-  // Sort each bucket by date (newest first)
-  const kinds: DocKind[] = [
-    "post",
-    "book",
-    "download",
-    "event",
-    "print",
-    "resource",
-    "strategy",
-    "canon",
-    "short",
-  ];
-
-  for (const kind of kinds) {
-    buckets[kind].sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+  (Object.keys(buckets) as DocKind[]).forEach((k) => {
+    buckets[k].sort((a, b) => {
+      const da = a?.date ? new Date(a.date).getTime() : 0;
+      const db = b?.date ? new Date(b.date).getTime() : 0;
+      return db - da;
     });
-  }
+  });
 
   return buckets;
 }
 
-// ============================================
-// INDIVIDUAL TYPE GETTERS
-// ============================================
+// Individual “getAllX” exports expected by your codebase
+export const getPublishedPosts = (): any[] => asArray(allPosts).filter(isPublished);
+export const getPublishedShorts = (): any[] => asArray(allShorts).filter(isPublished);
 
-export const getPublishedPosts = (): PostType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allPosts || []).filter((post) => !post.draft) as PostType[];
-  } catch (error) {
-    console.error("Error getting published posts:", error);
-    return [];
-  }
-};
+export const getAllBooks = (): any[] => asArray(allBooks).filter(isPublished);
+export const getAllCanons = (): any[] => asArray(allCanons).filter(isPublished);
+export const getAllDownloads = (): any[] => asArray(allDownloads).filter(isPublished);
+export const getAllEvents = (): any[] => asArray(allEvents).filter(isPublished);
+export const getAllPrints = (): any[] => asArray(allPrints).filter(isPublished);
+export const getAllResources = (): any[] => asArray(allResources).filter(isPublished);
+export const getAllStrategies = (): any[] => asArray(allStrategies).filter(isPublished);
 
-export const getPublishedShorts = (): ShortType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allShorts || []).filter((short) => !short.draft) as ShortType[];
-  } catch (error) {
-    console.error("Error getting published shorts:", error);
-    return [];
-  }
-};
+// By-slug getters
+export const getPostBySlug = (slug: string): any | undefined =>
+  getPublishedPosts().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
 
-export const getAllBooks = (): BookType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allBooks || []).filter((book) => !book.draft) as BookType[];
-  } catch (error) {
-    console.error("Error getting all books:", error);
-    return [];
-  }
-};
+export const getShortBySlug = (slug: string): any | undefined =>
+  getPublishedShorts().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
 
-export const getAllCanons = (): CanonType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allCanons || []).filter((canon) => !canon.draft) as CanonType[];
-  } catch (error) {
-    console.error("Error getting all canon entries:", error);
-    return [];
-  }
-};
+export const getBookBySlug = (slug: string): any | undefined =>
+  getAllBooks().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
 
-export const getAllDownloads = (): DownloadType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allDownloads || []).filter(
-      (download) => !download.draft
-    ) as DownloadType[];
-  } catch (error) {
-    console.error("Error getting all downloads:", error);
-    return [];
-  }
-};
+export const getCanonBySlug = (slug: string): any | undefined =>
+  getAllCanons().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
 
-export const getAllEvents = (): EventType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allEvents || []).filter((event) => !event.draft) as EventType[];
-  } catch (error) {
-    console.error("Error getting all events:", error);
-    return [];
-  }
-};
+export const getDocumentBySlug = (slug: string): any | undefined =>
+  getAllContentlayerDocs().find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
 
-export const getAllPrints = (): PrintType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allPrints || []).filter((print) => !print.draft) as PrintType[];
-  } catch (error) {
-    console.error("Error getting all prints:", error);
-    return [];
-  }
-};
+// Doc-by-href (useful for debugging)
+export const getDocByHref = (href: string): any | undefined =>
+  getAllContentlayerDocs().find((d) => getDocHref(d) === href);
 
-export const getAllResources = (): ResourceType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allResources || []).filter(
-      (resource) => !resource.draft
-    ) as ResourceType[];
-  } catch (error) {
-    console.error("Error getting all resources:", error);
-    return [];
-  }
-};
-
-export const getAllStrategies = (): StrategyType[] => {
-  if (!isContentlayerLoaded()) return [];
-  try {
-    return (allStrategies || []).filter(
-      (strategy) => !strategy.draft
-    ) as StrategyType[];
-  } catch (error) {
-    console.error("Error getting all strategies:", error);
-    return [];
-  }
-};
+// Convenience
+export const getBySlugAndKind = (slug: string, kind: DocKind): any | undefined =>
+  getPublishedDocumentsByType()[kind].find((d) => normalizeSlug(d) === String(slug).trim().toLowerCase());
 
 // ============================================
-// BY SLUG GETTERS
+// 8) Type guards (for compatibility)
 // ============================================
 
-export const getPostBySlug = (slug: string): PostType | undefined => {
-  return getPublishedPosts().find((post) => normalizeSlug(post) === slug);
-};
-
-export const getShortBySlug = (slug: string): ShortType | undefined => {
-  return getPublishedShorts().find((short) => normalizeSlug(short) === slug);
-};
-
-export const getBookBySlug = (slug: string): BookType | undefined => {
-  return getAllBooks().find((book) => normalizeSlug(book) === slug);
-};
-
-export const getCanonBySlug = (slug: string): CanonType | undefined => {
-  return getAllCanons().find((canon) => normalizeSlug(canon) === slug);
-};
-
-export const getDocumentBySlug = (slug: string): AnyDoc | undefined => {
-  return getAllContentlayerDocs().find((doc) => normalizeSlug(doc) === slug);
-};
+export const isPost = (doc: any): boolean => getDocKind(doc) === "post";
+export const isBook = (doc: any): boolean => getDocKind(doc) === "book";
+export const isDownload = (doc: any): boolean => getDocKind(doc) === "download";
+export const isEvent = (doc: any): boolean => getDocKind(doc) === "event";
+export const isPrint = (doc: any): boolean => getDocKind(doc) === "print";
+export const isResource = (doc: any): boolean => getDocKind(doc) === "resource";
+export const isStrategy = (doc: any): boolean => getDocKind(doc) === "strategy";
+export const isCanon = (doc: any): boolean => getDocKind(doc) === "canon";
+export const isShort = (doc: any): boolean => getDocKind(doc) === "short";
 
 // ============================================
-// CARD PROPS GENERATOR
+// 9) Cards
 // ============================================
 
-export function getCardPropsForDocument(doc: AnyDoc): ContentlayerCardProps {
-  const slug = normalizeSlug(doc);
+export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
   const kind = getDocKind(doc);
+  const slug = normalizeSlug(doc);
 
   return {
-    type: kind, // CRITICAL: lowercase for UI
+    type: kind,
     slug,
-    title: (doc as any).title ?? "Untitled",
+    title: String(doc?.title ?? "Untitled"),
     href: getDocHref(doc),
-    description: (doc as any).description ?? (doc as any).summary ?? null,
-    excerpt: (doc as any).excerpt ?? null,
-    subtitle: (doc as any).subtitle ?? null,
-    date: (doc as any).date ?? null,
-    readTime: (doc as any).readTime ?? (doc as any).readtime ?? null,
+
+    description: doc?.description ?? doc?.summary ?? null,
+    excerpt: doc?.excerpt ?? null,
+    subtitle: doc?.subtitle ?? null,
+    date: doc?.date ?? null,
+    readTime: doc?.readTime ?? doc?.readtime ?? null,
+
     image: resolveDocCoverImage(doc),
-    tags: ((doc as any).tags as string[] | undefined) ?? [],
-    category: (doc as any).category ?? null,
-    author: (doc as any).author ?? null,
-    featured: (doc as any).featured === true,
+    tags: Array.isArray(doc?.tags) ? doc.tags : [],
+
+    category: doc?.category ?? null,
+    author: doc?.author ?? null,
+    featured: doc?.featured === true,
+
     downloadUrl: resolveDocDownloadUrl(doc),
-    coverAspect: (doc as any).coverAspect ?? null, // ✅ Pass through
-    coverFit: (doc as any).coverFit ?? null, // ✅ Pass through
+
+    // Pass-through for intelligent card sizing
+    coverAspect: doc?.coverAspect ?? null,
+    coverFit: doc?.coverFit ?? null,
   };
 }
 
 // ============================================
-// EXPORTS FOR pages/content/[slug].tsx
+// 10) Shorts helpers used by index pages
 // ============================================
 
-export { normalizeSlug }; // ✅ Export the helper
-export { getAllContentlayerDocs, getDocHref, getDocKind, isDraft };
-
-export const getRecentShorts = (limit: number = 3): ShortType[] => {
-  try {
-    const shorts = getPublishedShorts();
-    return shorts
-      .sort((a, b) => {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return dateB - dateA;
-      })
-      .slice(0, limit);
-  } catch (error) {
-    console.error("Error getting recent shorts:", error);
-    return [];
-  }
+export const getRecentShorts = (limit: number = 3): any[] => {
+  const shorts = getPublishedShorts();
+  return shorts
+    .slice()
+    .sort((a, b) => {
+      const da = a?.date ? new Date(a.date).getTime() : 0;
+      const db = b?.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    })
+    .slice(0, limit);
 };
 
-export const getFeaturedShorts = (limit: number = 3): ShortType[] => {
-  try {
-    const shorts = getPublishedShorts();
-    return shorts
-      .filter((short) => short.featured)
-      .sort((a, b) => {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return dateB - dateA;
-      })
-      .slice(0, limit);
-  } catch (error) {
-    console.error("Error getting featured shorts:", error);
-    return [];
-  }
+export const getFeaturedShorts = (limit: number = 3): any[] => {
+  const shorts = getPublishedShorts();
+  return shorts
+    .filter((s) => s?.featured === true || s?.featured === "true")
+    .slice()
+    .sort((a, b) => {
+      const da = a?.date ? new Date(a.date).getTime() : 0;
+      const db = b?.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    })
+    .slice(0, limit);
 };

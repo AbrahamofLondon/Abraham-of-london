@@ -1,6 +1,7 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { allResources } from "contentlayer/generated";
+import { getAllResources } from "@/lib/contentlayer-helper";
+
 
 type Props = { 
   doc: any; 
