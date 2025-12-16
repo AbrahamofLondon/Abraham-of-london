@@ -2,22 +2,13 @@
 
 // lib/contentlayer-helper.ts
 // SINGLE SOURCE OF TRUTH for Contentlayer docs, URLs, and card props.
-// ✅ ESM-safe (project is "type": "module")
-// ✅ Next-safe (no require hacks)
-// ✅ Contentlayer2-safe (uses contentlayer/generated output)
-// ✅ Exports ALL names your codebase expects
+// ✅ ESM-safe
+// ✅ Next-safe
+// ✅ Contentlayer2-safe
+// ✅ Resilient to generated export naming (singular/plural)
+// ✅ Avoids TDZ by not executing helper logic at module scope
 
-import {
-  allPosts as _allPosts,
-  allBooks as _allBooks,
-  allDownloads as _allDownloads,
-  allEvents as _allEvents,
-  allPrints as _allPrints,
-  allResources as _allResources,
-  allStrategies as _allStrategies,
-  allCanons as _allCanons,
-  allShorts as _allShorts,
-} from "contentlayer/generated";
+import * as generated from "contentlayer/generated";
 
 // --------------------------------------------
 // Types
@@ -32,7 +23,8 @@ export type DocKind =
   | "resource"
   | "strategy"
   | "canon"
-  | "short";
+  | "short"
+  | "unknown";
 
 export interface ContentlayerCardProps {
   type: string; // lowercase DocKind
@@ -60,65 +52,66 @@ export interface ContentlayerCardProps {
 }
 
 // --------------------------------------------
-// Collections (exports your app expects)
+// Internal helpers
 // --------------------------------------------
 
-export const allPosts = Array.isArray(_allPosts) ? _allPosts : [];
-export const allBooks = Array.isArray(_allBooks) ? _allBooks : [];
-export const allDownloads = Array.isArray(_allDownloads) ? _allDownloads : [];
-export const allEvents = Array.isArray(_allEvents) ? _allEvents : [];
-export const allPrints = Array.isArray(_allPrints) ? _allPrints : [];
-export const allResources = Array.isArray(_allResources) ? _allResources : [];
-export const allStrategies = Array.isArray(_allStrategies) ? _allStrategies : [];
-export const allCanons = Array.isArray(_allCanons) ? _allCanons : [];
-export const allShorts = Array.isArray(_allShorts) ? _allShorts : [];
-
-// Some code expects “allDocuments / allContent / allPublished”
-export const allDocuments: any[] = [
-  ...allPosts,
-  ...allBooks,
-  ...allDownloads,
-  ...allEvents,
-  ...allPrints,
-  ...allResources,
-  ...allStrategies,
-  ...allCanons,
-  ...allShorts,
-].filter(Boolean);
-
-export const allContent: any[] = [...allDocuments];
-export const allPublished: any[] = allDocuments.filter((d) => !isDraft(d));
-
-// --------------------------------------------
-// Build-time guard: fail loudly if content is missing
-// --------------------------------------------
-
-export function assertContentlayerHasDocs(where: string) {
-  if (allDocuments.length === 0) {
-    throw new Error(
-      `[Contentlayer] 0 documents at "${where}". ` +
-        `This means contentlayer2 build did not run (or produced nothing) before Next build.`
-    );
+function pickArrayExport(...names: string[]): any[] {
+  for (const n of names) {
+    const v = (generated as any)[n];
+    if (Array.isArray(v)) return v;
   }
+  return [];
 }
+
+function toBool(v: any): boolean {
+  if (v === true) return true;
+  if (v === false) return false;
+  if (typeof v === "string") return v.trim().toLowerCase() === "true";
+  return false;
+}
+
+function safeDateValue(v: any): string | null {
+  if (!v) return null;
+  if (typeof v === "string") return v;
+  try {
+    // contentlayer date fields sometimes come as Date objects
+    if (v instanceof Date) return v.toISOString();
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
+
+// --------------------------------------------
+// Collections (exports your app expects)
+// NOTE: These are direct references to generated arrays (no computed work here).
+// --------------------------------------------
+
+export const allPosts = pickArrayExport("allPosts", "allPost");
+export const allBooks = pickArrayExport("allBooks", "allBook");
+export const allDownloads = pickArrayExport("allDownloads", "allDownload");
+export const allEvents = pickArrayExport("allEvents", "allEvent");
+export const allPrints = pickArrayExport("allPrints", "allPrint");
+export const allResources = pickArrayExport("allResources", "allResource");
+export const allStrategies = pickArrayExport("allStrategies", "allStrategy");
+
+// Contentlayer doc type you defined is "Canon" and "Short"
+// Generated exports may be `allCanons`/`allCanon` OR `allCanon` depending on versions/config.
+// We accept both.
+export const allCanons = pickArrayExport("allCanons", "allCanon");
+export const allShorts = pickArrayExport("allShorts", "allShort");
 
 // --------------------------------------------
 // Status helpers
 // --------------------------------------------
 
-export const isContentlayerLoaded = (): boolean => allDocuments.length > 0;
-
-export const isDraft = (doc: any): boolean => {
-  const d = doc?.draft;
-  if (d === true || d === "true") return true;
-  if (d === false || d === "false" || d == null) return false;
-  return false;
-};
-
+export const isDraft = (doc: any): boolean => toBool(doc?.draft);
 export const isPublished = (doc: any): boolean => !isDraft(doc);
 
 // --------------------------------------------
-// Kind / slug / URL helpers
+// Doc kind / slug / URL helpers
 // --------------------------------------------
 
 export function getDocKind(doc: any): DocKind {
@@ -144,7 +137,7 @@ export function getDocKind(doc: any): DocKind {
     case "Short":
       return "short";
     default:
-      return "post";
+      return "unknown";
   }
 }
 
@@ -156,11 +149,14 @@ export function normalizeSlug(doc: any): string {
 
   const fp =
     typeof doc?._raw?.flattenedPath === "string" ? doc._raw.flattenedPath : "";
+
   if (fp) {
-    const parts = fp.split("/").filter(Boolean);
-    const last = parts[parts.length - 1];
-    const pick = last === "index" ? parts[parts.length - 2] : last;
-    if (pick) return String(pick).trim().toLowerCase();
+    // Remove known base folders, preserve nesting for resources if any
+    const cleaned = fp
+      .replace(/^(content\/)?(blog|books|downloads|events|prints|resources|strategy|canon|shorts)\//, "")
+      .replace(/\/index$/, "");
+
+    if (cleaned) return cleaned.trim().toLowerCase();
   }
 
   const title = typeof doc.title === "string" ? doc.title.trim() : "";
@@ -177,7 +173,7 @@ export function normalizeSlug(doc: any): string {
 }
 
 /**
- * SITE ROUTES (matches what you showed):
+ * SITE ROUTES:
  * - Posts:      /blog/[slug]
  * - Books:      /books/[slug]
  * - Canon:      /canon/[slug]
@@ -185,9 +181,9 @@ export function normalizeSlug(doc: any): string {
  * - Events:     /events/[slug]
  * - Prints:     /prints/[slug]
  * - Shorts:     /shorts/[slug]
- * - Resources:  /resources/[...slug]
+ * - Resources:  /resources/[...slug] (supports nested)
  * - Strategy:   /strategy/[slug]
- * - ReadingRoom: /content/[slug] fallback
+ * - Fallback:   /content/[slug]
  */
 export function getDocHref(doc: any): string {
   const slug = normalizeSlug(doc);
@@ -209,6 +205,7 @@ export function getDocHref(doc: any): string {
     case "print":
       return `/prints/${slug}`;
     case "resource":
+      // allow nested paths: /resources/a/b/c
       return `/resources/${slug}`;
     case "strategy":
       return `/strategy/${slug}`;
@@ -223,8 +220,6 @@ export const getShortUrl = (short: any): string => getDocHref(short);
 // Image / download helpers
 // --------------------------------------------
 
-const FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
-
 export function resolveDocCoverImage(doc: any): string {
   const img =
     (typeof doc?.coverImage === "string" && doc.coverImage.trim()) ||
@@ -238,20 +233,63 @@ export function resolveDocDownloadUrl(doc: any): string | null {
     (typeof doc?.downloadUrl === "string" && doc.downloadUrl.trim()) ||
     (typeof doc?.fileUrl === "string" && doc.fileUrl.trim()) ||
     (typeof doc?.pdfPath === "string" && doc.pdfPath.trim()) ||
+    (typeof doc?.file === "string" && doc.file.trim()) ||
     "";
   return url ? String(url) : null;
 }
 
 // --------------------------------------------
-// Safe getters
+// SAFE getters (computed at call-time, not import-time)
+// This avoids TDZ/circular-import pain.
 // --------------------------------------------
 
-export const getAllContentlayerDocs = (): any[] => allDocuments;
+export const getAllContentlayerDocs = (): any[] =>
+  [
+    ...allPosts,
+    ...allBooks,
+    ...allDownloads,
+    ...allEvents,
+    ...allPrints,
+    ...allResources,
+    ...allStrategies,
+    ...allCanons,
+    ...allShorts,
+  ].filter(Boolean);
 
-export const getPublishedDocuments = (): any[] => allDocuments.filter(isPublished);
+export const getPublishedDocuments = (): any[] =>
+  getAllContentlayerDocs().filter(isPublished);
 
 export const getFeaturedDocuments = (): any[] =>
-  getPublishedDocuments().filter((doc) => doc?.featured === true || doc?.featured === "true");
+  getPublishedDocuments().filter(
+    (doc) => doc?.featured === true || doc?.featured === "true"
+  );
+
+// Some code expects these names as constants.
+// We keep them as functions-backed exports (no import-time computation).
+export const allDocuments = getAllContentlayerDocs;
+export const allContent = getAllContentlayerDocs;
+export const allPublished = getPublishedDocuments;
+
+// --------------------------------------------
+// Build-time guard (call this inside getStaticProps/Paths if you want hard failure)
+// --------------------------------------------
+
+export function assertContentlayerHasDocs(where: string) {
+  const count = getAllContentlayerDocs().length;
+  if (count === 0) {
+    throw new Error(
+      `[Contentlayer] 0 documents at "${where}". ` +
+        `Contentlayer2 build likely did not run (or produced nothing) before Next build.`
+    );
+  }
+}
+
+export const isContentlayerLoaded = (): boolean =>
+  getAllContentlayerDocs().length > 0;
+
+// --------------------------------------------
+// Buckets
+// --------------------------------------------
 
 export function getPublishedDocumentsByType(): Record<DocKind, any[]> {
   const published = getPublishedDocuments();
@@ -266,6 +304,7 @@ export function getPublishedDocumentsByType(): Record<DocKind, any[]> {
     strategy: [],
     canon: [],
     short: [],
+    unknown: [],
   };
 
   for (const doc of published) buckets[getDocKind(doc)].push(doc);
@@ -283,7 +322,8 @@ export function getPublishedDocumentsByType(): Record<DocKind, any[]> {
 
 // Individual getters expected by routes/pages
 export const getPublishedPosts = (): any[] => allPosts.filter(isPublished);
-export const getPublishedShorts = (): any[] => allShorts.filter(isPublished);
+export const getPublishedShorts = (): any[] =>
+  allShorts.filter((d) => isPublished(d) && (d?.published == null || toBool(d?.published)));
 
 export const getAllBooks = (): any[] => allBooks.filter(isPublished);
 export const getAllCanons = (): any[] => allCanons.filter(isPublished);
@@ -315,7 +355,7 @@ export const getDocByHref = (href: string): any | undefined =>
   getAllContentlayerDocs().find((d) => getDocHref(d) === href);
 
 export const getBySlugAndKind = (slug: string, kind: DocKind): any | undefined =>
-  getPublishedDocumentsByType()[kind].find((d) => normalizeSlug(d) === norm(slug));
+  getPublishedDocumentsByType()[kind]?.find((d) => normalizeSlug(d) === norm(slug));
 
 // --------------------------------------------
 // Type guards (compat)
@@ -348,7 +388,7 @@ export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
     description: doc?.description ?? doc?.summary ?? null,
     excerpt: doc?.excerpt ?? null,
     subtitle: doc?.subtitle ?? null,
-    date: doc?.date ?? null,
+    date: safeDateValue(doc?.date) ?? doc?.date ?? null,
     readTime: doc?.readTime ?? doc?.readtime ?? null,
 
     image: resolveDocCoverImage(doc),
@@ -356,7 +396,7 @@ export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
 
     category: doc?.category ?? null,
     author: doc?.author ?? null,
-    featured: doc?.featured === true,
+    featured: toBool(doc?.featured),
 
     downloadUrl: resolveDocDownloadUrl(doc),
 
