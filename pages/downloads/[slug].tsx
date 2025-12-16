@@ -1,47 +1,93 @@
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import {
-  assertContentlayerHasDocs,
-  getAllContentlayerDocs,
-  getDocHref,
-  getDocKind,
-  isDraft,
-} from "@/lib/contentlayer-helper";
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+import Head from "next/head";
+import Layout from "@/components/Layout";
+import { getAllDownloads } from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string };
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import mdxComponents from "@/components/mdx-components";
 
-const DownloadSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => (
-  <ContentlayerDocPage doc={doc} canonicalPath={canonicalPath} backHref="/downloads" label="Download" />
-);
+type Props = { download: any; source: MDXRemoteSerializeResult };
+
+function docSlug(d: any): string {
+  return d?.slug ?? d?._raw?.flattenedPath?.split("/").pop() ?? "";
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs("pages/downloads/[slug].tsx:getStaticPaths");
-
-  const paths = getAllContentlayerDocs()
-    .filter((d) => !isDraft(d) && getDocKind(d) === "download")
-    .map((d) => getDocHref(d))
-    .filter((href) => href.startsWith("/downloads/"))
-    .map((href) => ({ params: { slug: href.replace("/downloads/", "") } }));
-
-  return { paths, fallback: false };
+  const docs = getAllDownloads();
+  const paths = docs.map((d) => ({ params: { slug: docSlug(d) } }));
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  assertContentlayerHasDocs("pages/downloads/[slug].tsx:getStaticProps");
-
   const slug = String(params?.slug ?? "").trim();
   if (!slug) return { notFound: true };
 
-  const targetUrl = `/downloads/${slug}`;
+  const docs = getAllDownloads();
+  const download = docs.find((d) => docSlug(d) === slug);
+  if (!download) return { notFound: true };
 
-  const doc =
-    getAllContentlayerDocs()
-      .filter((d) => !isDraft(d) && getDocKind(d) === "download")
-      .find((d) => getDocHref(d) === targetUrl) ?? null;
+  const raw = download?.body?.raw ?? "";
+  const source = await serialize(raw, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, { behavior: "wrap" }],
+      ],
+    },
+  });
 
-  if (!doc) return { notFound: true };
-
-  return { props: { doc, canonicalPath: getDocHref(doc) }, revalidate: 3600 };
+  return { props: { download, source }, revalidate: 1800 };
 };
 
-export default DownloadSlugPage;
+const DownloadPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
+  download,
+  source,
+}) => {
+  const title = download.title ?? "Download";
+
+  const fileUrl =
+    download.downloadUrl ?? download.fileUrl ?? download.pdfPath ?? download.file ?? null;
+
+  return (
+    <Layout title={title}>
+      <Head>
+        {download.excerpt && <meta name="description" content={download.excerpt} />}
+      </Head>
+
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+        <header className="mb-8 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Download
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            {title}
+          </h1>
+          {download.excerpt ? <p className="text-sm text-gray-300">{download.excerpt}</p> : null}
+
+          {fileUrl ? (
+            <div className="pt-2">
+              <a
+                href={fileUrl}
+                className="inline-flex items-center justify-center rounded-full bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black transition hover:bg-gold/90"
+              >
+                Download
+              </a>
+            </div>
+          ) : null}
+        </header>
+
+        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
+      </main>
+    </Layout>
+  );
+};
+
+export default DownloadPage;

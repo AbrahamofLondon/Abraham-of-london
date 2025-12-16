@@ -1,47 +1,88 @@
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import {
-  assertContentlayerHasDocs,
-  getAllContentlayerDocs,
-  getDocHref,
-  getDocKind,
-  isDraft,
-} from "@/lib/contentlayer-helper";
+import * as React from "react";
+import type {
+  GetStaticPaths,
+  GetStaticProps,
+  InferGetStaticPropsType,
+  NextPage,
+} from "next";
+import Head from "next/head";
+import Layout from "@/components/Layout";
 
-type Props = { doc: any; canonicalPath: string };
+import { getAllBooks } from "@/lib/contentlayer-helper";
 
-const BookSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => (
-  <ContentlayerDocPage doc={doc} canonicalPath={canonicalPath} backHref="/books" label="Book" />
-);
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import mdxComponents from "@/components/mdx-components";
+
+type Props = {
+  book: any;
+  source: MDXRemoteSerializeResult;
+};
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs("pages/books/[slug].tsx:getStaticPaths");
+  const books = getAllBooks();
 
-  const paths = getAllContentlayerDocs()
-    .filter((d) => !isDraft(d) && getDocKind(d) === "book")
-    .map((d) => getDocHref(d))
-    .filter((href) => href.startsWith("/books/"))
-    .map((href) => ({ params: { slug: href.replace("/books/", "") } }));
+  const paths = books.map((book) => ({
+    params: {
+      slug:
+        book.slug ??
+        book._raw?.flattenedPath?.split("/").pop() ??
+        "",
+    },
+  }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  assertContentlayerHasDocs("pages/books/[slug].tsx:getStaticProps");
-
-  const slug = String(params?.slug ?? "").trim();
+  const slug = params?.slug as string;
   if (!slug) return { notFound: true };
 
-  const targetUrl = `/books/${slug}`;
+  const books = getAllBooks();
 
-  const doc =
-    getAllContentlayerDocs()
-      .filter((d) => !isDraft(d) && getDocKind(d) === "book")
-      .find((d) => getDocHref(d) === targetUrl) ?? null;
+  const book = books.find((b) => {
+    const s =
+      b.slug ?? b._raw?.flattenedPath?.split("/").pop();
+    return s === slug;
+  });
 
-  if (!doc) return { notFound: true };
+  if (!book) return { notFound: true };
 
-  return { props: { doc, canonicalPath: getDocHref(doc) }, revalidate: 3600 };
+  const raw = book.body?.raw ?? "";
+
+  const source = await serialize(raw, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, { behavior: "wrap" }],
+      ],
+    },
+  });
+
+  return {
+    props: { book, source },
+    revalidate: 1800,
+  };
 };
 
-export default BookSlugPage;
+const BookPage: NextPage<
+  InferGetStaticPropsType<typeof getStaticProps>
+> = ({ book, source }) => (
+  <Layout title={book.title}>
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <h1 className="font-serif text-3xl text-cream">
+        {book.title}
+      </h1>
+
+      <article className="prose prose-invert mt-8">
+        <MDXRemote {...source} components={mdxComponents} />
+      </article>
+    </main>
+  </Layout>
+);
+
+export default BookPage;

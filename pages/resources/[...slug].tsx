@@ -1,56 +1,96 @@
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import {
-  assertContentlayerHasDocs,
-  getAllContentlayerDocs,
-  getDocHref,
-  getDocKind,
-  isDraft,
-} from "@/lib/contentlayer-helper";
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+import Head from "next/head";
+import Layout from "@/components/Layout";
+import { getAllResources } from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string };
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import mdxComponents from "@/components/mdx-components";
 
-const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => (
-  <ContentlayerDocPage doc={doc} canonicalPath={canonicalPath} backHref="/resources" label="Resource" />
-);
+type Props = { resource: any; source: MDXRemoteSerializeResult };
+
+function resourceSlugParts(d: any): string[] {
+  // Prefer explicit slug which might already contain "a/b"
+  const s = typeof d?.slug === "string" ? d.slug.trim() : "";
+  if (s) return s.split("/").filter(Boolean);
+
+  const fp = typeof d?._raw?.flattenedPath === "string" ? d._raw.flattenedPath : "";
+  // content/resources/foo/bar -> we want ["foo","bar"]
+  const cleaned = fp.replace(/^content\//, "").replace(/^resources\//, "").replace(/\/index$/, "");
+  return cleaned.split("/").filter(Boolean);
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs("pages/resources/[...slug].tsx:getStaticPaths");
+  const docs = getAllResources();
 
-  const paths = getAllContentlayerDocs()
-    .filter((d) => !isDraft(d) && getDocKind(d) === "resource")
-    .map((d) => getDocHref(d))
-    .filter((href) => href.startsWith("/resources/"))
-    .map((href) => {
-      const rest = href.replace("/resources/", "");
-      const parts = rest.split("/").filter(Boolean);
-      return { params: { slug: parts } };
-    });
+  const paths = docs.map((d) => ({
+    params: { slug: resourceSlugParts(d) },
+  }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  assertContentlayerHasDocs("pages/resources/[...slug].tsx:getStaticProps");
+  const parts = (params?.slug as string[] | string | undefined);
+  const slugParts = Array.isArray(parts)
+    ? parts.map((p) => String(p).trim()).filter(Boolean)
+    : String(parts ?? "").split("/").map((p) => p.trim()).filter(Boolean);
 
-  const slugParam = params?.slug;
-  const parts = Array.isArray(slugParam)
-    ? slugParam.map(String)
-    : [String(slugParam ?? "")];
+  if (slugParts.length === 0) return { notFound: true };
 
-  const rest = parts.filter(Boolean).join("/").trim();
-  if (!rest) return { notFound: true };
+  const wanted = slugParts.join("/");
 
-  const targetUrl = `/resources/${rest}`;
+  const docs = getAllResources();
+  const resource = docs.find((d) => resourceSlugParts(d).join("/") === wanted);
 
-  const doc =
-    getAllContentlayerDocs()
-      .filter((d) => !isDraft(d) && getDocKind(d) === "resource")
-      .find((d) => getDocHref(d) === targetUrl) ?? null;
+  if (!resource) return { notFound: true };
 
-  if (!doc) return { notFound: true };
+  const raw = resource?.body?.raw ?? "";
+  const source = await serialize(raw, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, { behavior: "wrap" }],
+      ],
+    },
+  });
 
-  return { props: { doc, canonicalPath: getDocHref(doc) }, revalidate: 3600 };
+  return { props: { resource, source }, revalidate: 1800 };
 };
 
-export default ResourceSlugPage;
+const ResourcePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
+  resource,
+  source,
+}) => {
+  const title = resource.title ?? "Resource";
+
+  return (
+    <Layout title={title}>
+      <Head>
+        {resource.excerpt && <meta name="description" content={resource.excerpt} />}
+      </Head>
+
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+        <header className="mb-8 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Resource
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            {title}
+          </h1>
+        </header>
+
+        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
+      </main>
+    </Layout>
+  );
+};
+
+export default ResourcePage;

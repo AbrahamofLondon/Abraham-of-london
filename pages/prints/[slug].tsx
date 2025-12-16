@@ -1,52 +1,77 @@
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import {
-  getAllContentlayerDocs,
-  getDocHref,
-  getDocKind,
-  isDraft,
-  normalizeSlug,
-} from "@/lib/contentlayer-helper";
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+import Head from "next/head";
+import Layout from "@/components/Layout";
+import { getAllPrints } from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string };
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import mdxComponents from "@/components/mdx-components";
 
-const PrintSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
-  return (
-    <ContentlayerDocPage
-      doc={doc}
-      canonicalPath={canonicalPath}
-      backHref="/prints"
-      label="Print"
-    />
-  );
-};
+type Props = { print: any; source: MDXRemoteSerializeResult };
+
+function docSlug(d: any): string {
+  return d?.slug ?? d?._raw?.flattenedPath?.split("/").pop() ?? "";
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = getAllContentlayerDocs()
-    .filter((d) => !isDraft(d))
-    .filter((d) => getDocKind(d) === "print")
-    .map((d) => getDocHref(d))
-    .filter((href) => href.startsWith("/prints/"))
-    .map((href) => ({ params: { slug: href.replace("/prints/", "") } }));
-
-  return { paths, fallback: false };
+  const docs = getAllPrints();
+  const paths = docs.map((d) => ({ params: { slug: docSlug(d) } }));
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim();
   if (!slug) return { notFound: true };
 
-  const doc =
-    getAllContentlayerDocs()
-      .filter((d) => !isDraft(d))
-      .find((d) => getDocKind(d) === "print" && normalizeSlug(d) === slug) ?? null;
+  const docs = getAllPrints();
+  const print = docs.find((d) => docSlug(d) === slug);
+  if (!print) return { notFound: true };
 
-  if (!doc) return { notFound: true };
+  const raw = print?.body?.raw ?? "";
+  const source = await serialize(raw, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, { behavior: "wrap" }],
+      ],
+    },
+  });
 
-  return {
-    props: { doc, canonicalPath: getDocHref(doc) },
-    revalidate: 3600,
-  };
+  return { props: { print, source }, revalidate: 1800 };
 };
 
-export default PrintSlugPage;
+const PrintPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
+  print,
+  source,
+}) => {
+  const title = print.title ?? "Print";
+  return (
+    <Layout title={title}>
+      <Head>
+        {print.excerpt && <meta name="description" content={print.excerpt} />}
+      </Head>
+
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+        <header className="mb-8 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Print
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            {title}
+          </h1>
+        </header>
+
+        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
+      </main>
+    </Layout>
+  );
+};
+
+export default PrintPage;
