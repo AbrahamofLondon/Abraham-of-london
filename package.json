@@ -8,80 +8,56 @@
     "pnpm": ">=9 <10"
   },
   "scripts": {
-  "preinstall": "npx only-allow pnpm",
-
-  "dev": "next dev",
-  "dev:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next dev",
-  "dev:content": "contentlayer2 build --watch",
-
-  "start": "next start",
-  "start:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next start",
-
-  "typecheck": "pnpm exec tsc --project tsconfig.json --noEmit",
-  "typecheck:safe": "pnpm exec tsc --project tsconfig.json --noEmit --skipLibCheck",
-
-  "lint": "next lint",
-  "lint:fix": "next lint --fix",
-
-  "clean": "rimraf .next .turbo .reports .contentlayer node_modules/.cache *.tsbuildinfo",
-  "clean:build": "rimraf .next .contentlayer",
-  "clean:functions": "rimraf netlify/functions/*.js",
-
-  "fix:prints": "node scripts/fix-print-types.mjs",
-
-  "content:build": "contentlayer2 build",
-  "content:dev": "contentlayer2 build --watch",
-
-  "content:fix": "node scripts/fix-contentlayer-issues.mjs",
-  "content:validate": "node scripts/validate-content.mjs",
-  "content:check": "node scripts/check-contentlayer-output.mjs",
-
-  "prepare:content": "pnpm run clean:build && pnpm run content:fix && pnpm run content:validate && pnpm run content:build && pnpm run content:check",
-
-  "build": "pnpm run prepare:content && next build",
-  "build:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run prepare:content && next build",
-
-  "build:netlify": "pnpm run build:safe",
-
-  "ci": "pnpm install --frozen-lockfile",
-  "check": "pnpm run typecheck",
-  "check:safe": "pnpm run typecheck:safe",
-  "check:ci": "pnpm run ci && pnpm run check:safe",
-
-  "postbuild": "echo '✓ Build completed successfully'",
-
-  "assets:scan": "node scripts/scan-content-assets.mjs",
-  "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.tsx",
-  "pdfs": "pnpm run pdf:purpose",
-  "downloads:validate": "node scripts/validate-downloads.mjs",
-
-  "debug:content": "node scripts/debug-content-routes.mjs",
-  "debug:contentlayer": "cross-env CONTENTLAYER_DEBUG=true contentlayer2 build --verbose",
-  "debug:content:windows": "set CONTENTLAYER_DEBUG=true && contentlayer2 build --verbose",
-  "content:diagnose": "node scripts/diagnose-contentlayer.mjs",
-  "content:test": "cross-env CONTENTLAYER_DEBUG=true pnpm run content:build && pnpm run content:check",
-  "build:test": "pnpm run clean:build && pnpm run content:test",
-
-  "debug:prints": "node scripts/debug-prints.mjs",
-
-  "test:e2e": "pnpm dlx playwright test",
-
-  "build:functions": "pnpm exec tsc --project tsconfig.functions.json --noEmit",
-  "email:test": "tsx scripts/test-email.ts",
-
-  "build:prod": "pnpm run build:safe",
-
-  "install:ci": "pnpm run ci",
-  "ts-reset": "pnpm run clean-ts-cache",
-  "clean-ts-cache": "rimraf node_modules/.cache .next .tsbuildinfo *.tsbuildinfo",
-
-  "gitattributes:validate": "node scripts/validate-gitattributes.js",
-
-  "build:all": "pnpm run prepare:content && next build",
-
-  "prepare": "node -e \"if (process.env.CI !== 'true' && process.env.HUSKY !== '0') { require('child_process').execSync('npx husky install', { stdio: 'inherit' }) } else { console.log('Skipping husky install in CI') }\"",
-
-  "format": "prettier --write ."
+    "preinstall": "npx only-allow pnpm",
+    "dev": "next dev",
+    "dev:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next dev",
+    "dev:content": "contentlayer2 build --watch",
+    "start": "next start",
+    "start:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next start",
+    "typecheck": "pnpm exec tsc --project tsconfig.json --noEmit",
+    "typecheck:safe": "pnpm exec tsc --project tsconfig.json --noEmit --skipLibCheck",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "clean": "rimraf .next .turbo .reports .contentlayer node_modules/.cache *.tsbuildinfo",
+    "clean:build": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true}); require('fs').rmSync('.contentlayer',{recursive:true,force:true});\"",
+    "clean:functions": "rimraf netlify/functions/*.js",
+    "fix:prints": "node scripts/fix-print-types.mjs",
+    "content:build": "contentlayer2 build",
+    "content:dev": "contentlayer2 build --watch",
+    "content:fix": "node scripts/fix-contentlayer-issues.mjs",
+    "content:validate": "node scripts/validate-content.mjs",
+    "content:check": "node scripts/check-contentlayer-output.mjs",
+    "prepare:content": "pnpm run clean:build && pnpm run content:fix && pnpm run content:validate && pnpm run content:build && pnpm run content:check",
+    "build": "pnpm run prepare:content && next build",
+    "build:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run prepare:content && next build",
+    "build:netlify": "pnpm run build:safe",
+    "ci": "pnpm install --frozen-lockfile",
+    "check": "pnpm run typecheck",
+    "check:safe": "pnpm run typecheck:safe",
+    "check:ci": "pnpm run ci && pnpm run check:safe",
+    "postbuild": "echo '✓ Build completed successfully'",
+    "assets:scan": "node scripts/scan-content-assets.mjs",
+    "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.tsx",
+    "pdfs": "pnpm run pdf:purpose",
+    "downloads:validate": "node scripts/validate-downloads.mjs",
+    "debug:content": "node scripts/debug-content-routes.mjs",
+    "debug:contentlayer": "cross-env CONTENTLAYER_DEBUG=true contentlayer2 build --verbose",
+    "debug:content:windows": "set CONTENTLAYER_DEBUG=true && contentlayer2 build --verbose",
+    "content:diagnose": "node scripts/diagnose-contentlayer.mjs",
+    "content:test": "cross-env CONTENTLAYER_DEBUG=true pnpm run content:build && pnpm run content:check",
+    "build:test": "pnpm run clean:build && pnpm run content:test",
+    "debug:prints": "node scripts/debug-prints.mjs",
+    "test:e2e": "pnpm dlx playwright test",
+    "build:functions": "pnpm exec tsc --project tsconfig.functions.json --noEmit",
+    "email:test": "tsx scripts/test-email.ts",
+    "build:prod": "pnpm run build:safe",
+    "install:ci": "pnpm run ci",
+    "ts-reset": "pnpm run clean-ts-cache",
+    "clean-ts-cache": "rimraf node_modules/.cache .next .tsbuildinfo *.tsbuildinfo",
+    "gitattributes:validate": "node scripts/validate-gitattributes.js",
+    "build:all": "pnpm run prepare:content && next build",
+    "prepare": "node -e \"if (process.env.CI !== 'true' && process.env.HUSKY !== '0') { require('child_process').execSync('npx husky install', { stdio: 'inherit' }) } else { console.log('Skipping husky install in CI') }\"",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@contentlayer2/core": "0.5.8",
@@ -166,9 +142,7 @@
       "react-dom": "18.3.1"
     },
     "peerDependencyRules": {
-      "ignoreMissing": [
-        "@opentelemetry/*"
-      ],
+      "ignoreMissing": ["@opentelemetry/*"],
       "allowedVersions": {
         "react": "18.3.1",
         "react-dom": "18.3.1"
