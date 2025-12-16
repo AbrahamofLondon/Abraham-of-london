@@ -56,7 +56,6 @@
     "clean-ts-cache": "rimraf node_modules/.cache .next .tsbuildinfo *.tsbuildinfo",
     "gitattributes:validate": "node scripts/validate-gitattributes.js",
     "build:all": "pnpm run prepare:content && next build",
-    "prepare:content": "pnpm run clean:build && pnpm run content:fix && pnpm run content:validate && pnpm run content:build",
     "format": "prettier --write ."
   },
   "dependencies": {
