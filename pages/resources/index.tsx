@@ -1,4 +1,3 @@
-// pages/resources/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -11,6 +10,7 @@ import {
   getAllResources,
   getDocHref,
   normalizeSlug,
+  resolveDocCoverImage,
 } from "@/lib/contentlayer-helper";
 
 type ResourceMeta = {
@@ -20,7 +20,7 @@ type ResourceMeta = {
   subtitle?: string | null;
   date?: string | null;
   readTime?: string | null;
-  coverImage?: string | null;
+  image?: string | null;
   tags?: string[] | null;
   author?: string | null;
   href: string;
@@ -31,131 +31,129 @@ type Props = {
 };
 
 const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
-  const pageTitle = "Strategic Resources | Abraham of London";
+  const pageTitle = "The Resource Vault | Abraham of London";
   const pageDescription =
-    "Curated frameworks and tools for fathers, founders, and institutional architects building for generations.";
+    "Structural assets, frameworks, and tools for fathers, founders, and institutional architects.";
 
   return (
-    <Layout title={pageTitle} description={pageDescription}>
+    <Layout title="Resource Vault" description={pageDescription}>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.abrahamoflondon.org/resources" />
-        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <main className="min-h-screen bg-charcoal text-cream">
+      <main className="min-h-screen bg-black text-cream">
         <section className="mx-auto max-w-5xl px-6 py-16 lg:py-24">
-          <header className="mb-10 border-b border-softGold/20 pb-8 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-1.5">
-              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-softGold">
-                Strategic Resources · Abraham of London
+          <header className="mb-16 border-b border-gold/10 pb-12 text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
+                Strategic Assets
               </span>
             </div>
 
-            <h1 className="bg-gradient-to-b from-cream to-softGold bg-clip-text font-serif text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
+            <h1 className="font-serif text-4xl font-semibold tracking-tight text-cream sm:text-5xl lg:text-6xl">
               The Resource Vault
             </h1>
 
-            <p className="mx-auto mt-4 max-w-2xl text-base text-gray-300 sm:text-lg">
-              Curated tools, frameworks, and primers. Not pop-content. Not fluff.
-              Structural assets for builders.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-400 sm:text-lg">
+              Curated frameworks and structural primers. These are not general insights, 
+              but architectural tools for those building legacies.
             </p>
 
-            <p className="mt-6 text-sm text-gray-400">{resources.length} curated resources.</p>
+            <div className="mt-8 flex justify-center items-center gap-3">
+               <div className="h-px w-8 bg-gold/30" />
+               <p className="text-[11px] font-mono uppercase tracking-widest text-gold/60">
+                 {resources.length} Compiled Volumes
+               </p>
+               <div className="h-px w-8 bg-gold/30" />
+            </div>
           </header>
 
-          {resources.length ? (
-            <div className="grid gap-8 md:grid-cols-2">
+          {resources.length > 0 ? (
+            <div className="grid gap-10 md:grid-cols-2">
               {resources.map((res) => (
                 <article
                   key={res.slug}
-                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-softGold/40 hover:shadow-softGold/20"
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] transition-all duration-500 hover:border-gold/30 hover:bg-white/[0.04]"
                 >
-                  {res.coverImage ? (
-                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
-                      <Image
-                        src={res.coverImage}
-                        alt={res.title}
-                        width={800}
-                        height={600}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                    </div>
-                  ) : null}
-
-                  <div className={`flex flex-1 flex-col p-6 ${res.coverImage ? "" : "pt-8"}`}>
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold uppercase tracking-[0.15em] text-softGold">
-                          Resource
-                        </span>
-                        {res.readTime ? (
-                          <span className="text-xs text-gray-500">• {res.readTime}</span>
-                        ) : null}
+                  <Link href={res.href} className="flex h-full flex-col">
+                    {res.image ? (
+                      <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-white/5">
+                        <Image
+                          src={res.image}
+                          alt={res.title}
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/20 transition-opacity group-hover:opacity-0" />
                       </div>
+                    ) : (
+                      <div className="aspect-[16/10] w-full bg-zinc-900/50 flex items-center justify-center border-b border-white/5">
+                         <span className="font-serif text-gold/20 text-4xl italic">Vault</span>
+                      </div>
+                    )}
 
-                      <h2 className="mt-2 font-serif text-xl font-semibold tracking-tight text-cream">
-                        {res.title}
-                      </h2>
-                    </div>
-
-                    {res.subtitle ? <p className="mb-3 text-sm text-gray-300">{res.subtitle}</p> : null}
-                    {res.description ? (
-                      <p className="mb-4 text-sm text-gray-400 line-clamp-2">{res.description}</p>
-                    ) : null}
-
-                    {res.tags?.length ? (
-                      <div className="mb-4 mt-auto flex flex-wrap gap-2">
-                        {res.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={`${res.slug}-${tag}`}
-                            className="rounded-full bg-softGold/10 px-2.5 py-0.5 text-xs text-softGold"
-                          >
-                            {tag}
+                    <div className="flex flex-1 flex-col p-8">
+                      <div className="mb-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gold/80 bg-gold/10 px-2 py-0.5 rounded">
+                            Framework
                           </span>
-                        ))}
-                        {res.tags.length > 3 ? (
-                          <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs text-gray-400">
-                            +{res.tags.length - 3}
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : null}
+                          {res.readTime && (
+                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-tighter">
+                              {res.readTime}
+                            </span>
+                          )}
+                        </div>
 
-                    <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                      <div className="flex flex-col gap-1">
-                        {res.author ? <span className="text-xs text-gray-300">By {res.author}</span> : null}
-                        {res.date ? (
-                          <time dateTime={res.date} className="text-xs text-gray-500">
-                            {new Date(res.date).toLocaleDateString("en-GB", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </time>
-                        ) : null}
+                        <h2 className="font-serif text-2xl font-semibold text-cream group-hover:text-gold transition-colors duration-300">
+                          {res.title}
+                        </h2>
                       </div>
 
-                      <Link
-                        href={res.href}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-1.5 text-xs font-semibold text-softGold transition-colors hover:bg-softGold/20"
-                      >
-                        Open <span aria-hidden>→</span>
-                      </Link>
+                      {res.subtitle && (
+                        <p className="mb-4 text-sm font-medium text-gray-400 italic">
+                          {res.subtitle}
+                        </p>
+                      )}
+                      
+                      {res.description && (
+                        <p className="mb-6 text-sm leading-relaxed text-gray-500 line-clamp-2">
+                          {res.description}
+                        </p>
+                      )}
+
+                      <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                        <div className="flex flex-col gap-0.5">
+                          {res.author && (
+                             <span className="text-[10px] text-gray-400 uppercase tracking-wide">
+                               By {res.author}
+                             </span>
+                          )}
+                          {res.date && (
+                            <time className="text-[10px] font-mono text-gray-600">
+                              {new Date(res.date).toLocaleDateString("en-GB", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </time>
+                          )}
+                        </div>
+
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/20 bg-gold/5 text-gold transition-all duration-300 group-hover:bg-gold group-hover:text-black">
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="py-20 text-center">
-              <h3 className="mb-2 font-serif text-2xl font-bold text-cream">Resources Coming Soon</h3>
-              <p className="text-gray-400">Strategic frameworks are being prepared for publication.</p>
+            <div className="py-32 text-center">
+              <h3 className="font-serif text-2xl text-cream opacity-50 italic">Resources are being initialized...</h3>
             </div>
           )}
         </section>
@@ -165,7 +163,8 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  assertContentlayerHasDocs("pages/resources/index.tsx getStaticProps");
+  // Build safety check
+  assertContentlayerHasDocs("pages/resources/index.tsx");
 
   const docs = getAllResources();
 
@@ -175,9 +174,9 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       title: r.title ?? "Untitled Resource",
       description: r.description ?? r.excerpt ?? null,
       subtitle: r.subtitle ?? null,
-      date: r.date ?? null,
-      readTime: r.readTime ?? null,
-      coverImage: r.coverImage ?? r.image ?? null,
+      date: r.date ? String(r.date) : null,
+      readTime: r.readTime ?? r.readtime ?? null,
+      image: resolveDocCoverImage(r),
       tags: Array.isArray(r.tags) ? r.tags : null,
       author: r.author ?? null,
       href: getDocHref(r),
@@ -188,7 +187,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       return db - da;
     });
 
-  return { props: { resources }, revalidate: 3600 };
+  return { 
+    props: { resources }, 
+    revalidate: 1800 
+  };
 };
 
 export default ResourcesIndexPage;

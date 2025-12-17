@@ -251,15 +251,15 @@ export const Short = defineDocumentType(() => ({
 // MAKESOURCE CONFIGURATION
 // -----------------------------------------------------------------------------
 export default makeSource({
-  contentDirPath: path.join(process.cwd(), "content"),
+  contentDirPath: "content",
   documentTypes: [
     Post,
     Download,
     Book,
     Event,
     Print,
-    Strategy,
-    Resource,
+    Strategy,  // Ensure this is here
+    Resource,  // Ensure this is here
     Canon,
     Short,
   ],
