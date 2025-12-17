@@ -1,52 +1,163 @@
+// pages/blog/[slug].tsx
+import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import Head from "next/head";
+import dynamic from "next/dynamic";
+
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
+
 import {
-  assertContentlayerHasDocs,
-  findDocByKindAndSlug,
+  getAllContentlayerDocs,
+  getDocKind,
   getDocHref,
-  getPublishedPosts,
+  isDraft,
+  normalizeSlug,
 } from "@/lib/contentlayer-helper";
 
-type Props = { doc: any; canonicalPath: string };
+// Legacy MDX (your project already has these in multiple places)
+import { getAllPosts, getPostBySlug } from "@/lib/posts";
+import { serialize } from "next-mdx-remote/serialize";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-const BlogPostPage: NextPage<Props> = ({ doc, canonicalPath }) => {
+// If you prefer your MDXClient path, keep it; MDXRemote is stable for build-time.
+const MDXClient = dynamic(() => import("@/components/MDXClient"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[200px] flex items-center justify-center">
+      <p className="text-sm opacity-80">Loading content…</p>
+    </div>
+  ),
+});
+
+type Props =
+  | {
+      mode: "contentlayer";
+      doc: any;
+      canonicalPath: string;
+    }
+  | {
+      mode: "mdx";
+      meta: any;
+      source: MDXRemoteSerializeResult;
+      canonicalPath: string;
+    };
+
+const BlogSlugPage: NextPage<Props> = (props) => {
+  if (props.mode === "contentlayer") {
+    return (
+      <ContentlayerDocPage
+        doc={props.doc}
+        canonicalPath={props.canonicalPath}
+        backHref="/blog"
+        label="Essays"
+      />
+    );
+  }
+
+  const title = props.meta?.title ?? "Essay";
+  const excerpt = props.meta?.excerpt ?? props.meta?.description ?? "";
+
   return (
-    <ContentlayerDocPage
-      doc={doc}
-      canonicalPath={canonicalPath}
-      backHref="/blog"
-      label="Essays"
-    />
+    <Layout title={title} description={excerpt}>
+      <Head>
+        <meta property="og:type" content="article" />
+      </Head>
+
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+        <header className="mb-10 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Essays
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            {title}
+          </h1>
+          {excerpt ? (
+            <p className="text-sm text-gray-300">{excerpt}</p>
+          ) : null}
+        </header>
+
+        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-a:text-gold">
+          {/* build-safe rendering */}
+          <MDXRemote {...props.source} components={mdxComponents} />
+          {/* client-only renderer (optional) */}
+          {/* <MDXClient code={props.meta?.body?.code ?? ""} components={mdxComponents} /> */}
+        </article>
+      </main>
+    </Layout>
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs("pages/blog/[slug].tsx getStaticPaths");
+  // Contentlayer posts
+  const clSlugs = getAllContentlayerDocs()
+    .filter((d) => !isDraft(d) && getDocKind(d) === "post")
+    .map((d) => normalizeSlug(d))
+    .filter(Boolean);
 
-  const posts = getPublishedPosts();
+  // Legacy MDX posts
+  const mdxSlugs = getAllPosts()
+    .map((p: any) => String(p?.slug ?? "").trim().toLowerCase())
+    .filter(Boolean);
 
-  // IMPORTANT: slug param must be ONLY the tail segment, not "/blog/..."
-  const paths = posts
-    .map((p) => getDocHref(p))
-    .filter((href) => href.startsWith("/blog/"))
-    .map((href) => ({ params: { slug: href.replace("/blog/", "") } }));
+  // Merge unique
+  const slugs = Array.from(new Set([...clSlugs, ...mdxSlugs]));
 
-  return { paths, fallback: "blocking" };
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  assertContentlayerHasDocs("pages/blog/[slug].tsx getStaticProps");
-
   const slug = String(params?.slug ?? "").trim().toLowerCase();
   if (!slug) return { notFound: true };
 
-  const doc = findDocByKindAndSlug("post", slug);
-  if (!doc) return { notFound: true };
+  // 1) Try Contentlayer
+  const doc =
+    getAllContentlayerDocs()
+      .filter((d) => !isDraft(d) && getDocKind(d) === "post")
+      .find((d) => normalizeSlug(d) === slug) ?? null;
+
+  if (doc) {
+    return {
+      props: {
+        mode: "contentlayer",
+        doc,
+        canonicalPath: getDocHref(doc),
+      },
+      revalidate: 3600,
+    };
+  }
+
+  // 2) Fallback to legacy MDX
+  const mdx = getPostBySlug(slug);
+  if (!mdx) return { notFound: true };
+
+  const raw = String((mdx as any)?.content ?? (mdx as any)?.body?.raw ?? "");
+  const source = await serialize(raw, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, { behavior: "wrap" }],
+      ],
+    },
+  });
 
   return {
-    props: { doc, canonicalPath: getDocHref(doc) },
+    props: {
+      mode: "mdx",
+      meta: mdx,
+      source,
+      canonicalPath: `/blog/${slug}`,
+    },
     revalidate: 3600,
   };
 };
 
-export default BlogPostPage;
+export default BlogSlugPage;
