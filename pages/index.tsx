@@ -95,7 +95,7 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
               Shorts · Field signals
             </p>
             <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-white sm:text-4xl">
-              Quick hits for men who don&apos;t scroll all day
+              Quick hits for women and men who don&apos;t scroll all day
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
               Concise field notes on work, fatherhood, and building under
