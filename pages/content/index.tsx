@@ -1,6 +1,8 @@
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, ArrowRight, Box, Terminal } from "lucide-react";
 import Layout from "@/components/Layout";
 import {
   getPublishedDocuments,
@@ -23,21 +25,20 @@ type Item = {
 type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  // Use the unified published documents fetcher
+  // Fetches using the immutable Core Engine logic
   const docs = getPublishedDocuments();
 
   const items: Item[] = docs
     .map((d) => ({
       key: d._id ?? `${getDocKind(d)}:${normalizeSlug(d)}`,
       kind: getDocKind(d),
-      title: d.title ?? "Untitled",
+      title: d.title ?? "Untitled Framework",
       href: getDocHref(d),
       excerpt: d.excerpt ?? d.description ?? null,
       date: d.date ? String(d.date) : null,
       image: resolveDocCoverImage(d),
     }))
     .filter((x) => x.href && x.title)
-    // Sort globally by date (newest first)
     .sort((a, b) => (b.date ? new Date(b.date).getTime() : 0) - (a.date ? new Date(a.date).getTime() : 0));
 
   return { props: { items }, revalidate: 1800 };
@@ -63,80 +64,103 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
       if (!map[groupName]) map[groupName] = [];
       map[groupName].push(it);
     });
-    // Sort groups alphabetically (Books, Canons, Downloads, etc.)
     return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
   }, [filtered]);
 
   return (
-    <Layout title="The Kingdom Vault" description="Strategic Resources. Organised.">
-      <main className="mx-auto max-w-5xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-12 space-y-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">The Kingdom Vault</p>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">Everything. Organised.</h1>
-            <p className="mt-4 text-gray-400 max-w-2xl">
-              A centralized repository of strategic frameworks, theological volumes, and 
-              practical resources for the intentional builder.
-            </p>
-          </div>
+    <Layout title="The Kingdom Vault" description="Centralized Strategic Repository.">
+      <main className="min-h-screen bg-[#050505] text-cream">
+        
+        {/* Header Section */}
+        <section className="relative overflow-hidden border-b border-white/5 pb-16 pt-32 lg:pt-40">
+          <div className="absolute inset-0 opacity-[0.02] [background-image:radial-gradient(circle_at_center,_#d4af37_1px,_transparent_1px)] [background-size:32px_32px]" />
           
-          <div className="relative group">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search across all collections..."
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-5 py-4 text-cream outline-none focus:border-gold/60 focus:ring-1 focus:ring-gold/20 transition-all"
-            />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 font-mono tracking-tighter opacity-0 group-focus-within:opacity-100 transition-opacity">
-              ESC TO CLEAR
+          <div className="relative z-10 mx-auto max-w-5xl px-6">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1">
+              <Terminal size={12} className="text-gold" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">System: Central Vault</span>
+            </div>
+            
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-white sm:text-6xl">
+              Everything. <span className="italic text-gold/80">Organised.</span>
+            </h1>
+            
+            <div className="mt-12 relative group max-w-2xl">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-gold" size={18} />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search collections, themes, or keywords..."
+                className="w-full rounded-2xl border border-white/10 bg-white/5 py-5 pl-14 pr-6 text-base text-cream outline-none transition-all focus:border-gold/40 focus:ring-4 focus:ring-gold/5"
+              />
+              {q && (
+                <button 
+                  onClick={() => setQ("")}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-gold"
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
-        </header>
+        </section>
 
-        {groups.length === 0 ? (
-          <div className="py-20 text-center border border-dashed border-white/10 rounded-3xl">
-            <p className="text-gray-500">No matching frameworks or resources found.</p>
-          </div>
-        ) : (
-          <div className="space-y-20">
-            {groups.map(([kind, kindItems]) => (
-              <section key={kind} className="space-y-8">
-                <div className="flex items-center gap-4">
-                  <h2 className="font-serif text-2xl font-medium text-gold/90 capitalize">
-                    {kind === 'post' ? 'Essays' : `${kind}s`}
-                  </h2>
-                  <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-                  <span className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium">{kindItems.length} items</span>
-                </div>
-                
-                <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {kindItems.map((it) => (
-                    <li key={it.key} className="group relative rounded-2xl border border-white/5 bg-black/40 p-5 hover:border-gold/50 hover:bg-black/60 transition-all duration-300">
-                      <Link href={it.href} className="block space-y-3">
-                        <div className="flex justify-between items-start">
-                           <h3 className="font-serif text-lg font-semibold text-cream group-hover:text-gold transition-colors leading-tight">
+        {/* Unified Collections Grid */}
+        <section className="mx-auto max-w-5xl px-6 py-20">
+          {groups.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }}
+              className="rounded-3xl border border-dashed border-white/10 py-32 text-center"
+            >
+              <Box className="mx-auto mb-4 text-gray-700" size={40} />
+              <p className="font-serif text-xl italic text-gray-500">No assets matching the current query.</p>
+            </motion.div>
+          ) : (
+            <div className="space-y-24">
+              {groups.map(([kind, kindItems]) => (
+                <div key={kind} className="space-y-10">
+                  <div className="flex items-center gap-6">
+                    <h2 className="font-serif text-2xl font-bold uppercase tracking-tight text-gold/90 sm:text-3xl">
+                      {kind === 'post' ? 'Essays' : `${kind}s`}
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-gold/20 to-transparent" />
+                    <span className="font-mono text-[10px] text-gray-600 uppercase tracking-widest">{kindItems.length} Volumes</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    {kindItems.map((it) => (
+                      <motion.div
+                        key={it.key}
+                        whileHover={{ y: -4 }}
+                        className="group relative flex flex-col justify-between rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent p-8 transition-all hover:border-gold/30 hover:shadow-2xl hover:shadow-gold/5"
+                      >
+                        <Link href={it.href} className="flex h-full flex-col">
+                          <h3 className="mb-4 font-serif text-2xl font-semibold leading-tight text-cream group-hover:text-gold transition-colors">
                             {it.title}
                           </h3>
-                        </div>
-                        {it.excerpt && (
-                          <p className="text-xs text-gray-400 line-clamp-3 leading-relaxed">
-                            {it.excerpt}
-                          </p>
-                        )}
-                        <div className="pt-2 flex items-center justify-between">
-                           <p className="text-[9px] text-gray-600 font-mono uppercase tracking-tighter group-hover:text-gold/50 transition-colors">
-                            {it.href}
-                          </p>
-                          <span className="text-gold opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        )}
+                          
+                          {it.excerpt && (
+                            <p className="mb-8 text-sm leading-relaxed text-gray-400 line-clamp-2">
+                              {it.excerpt}
+                            </p>
+                          )}
+                          
+                          <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-gray-600 group-hover:text-gold/50 transition-colors">
+                              {it.href.replace(/^\//, '').replace(/\//g, ' · ')}
+                            </span>
+                            <ArrowRight size={16} className="text-gold opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                          </div>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </Layout>
   );

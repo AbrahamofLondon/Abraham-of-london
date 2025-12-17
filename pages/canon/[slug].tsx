@@ -4,9 +4,8 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { 
   getAllCanons, 
-  getDocHref, 
-  normalizeSlug, 
-  isPublished 
+  getCanonBySlug,
+  normalizeSlug 
 } from "@/lib/contentlayer-helper";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
@@ -18,9 +17,7 @@ import SafeMDXRemote from "@/components/SafeMDXRemote";
 type Props = { canon: any; source: any };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Use the helper to get all canons (published)
   const canons = getAllCanons();
-  
   const paths = canons
     .map((doc) => {
       const slug = normalizeSlug(doc);
@@ -33,52 +30,49 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
-  
-  // Find the canon using the helper's normalizeSlug logic to ensure a match
-  const canons = getAllCanons();
-  const canon = canons.find((d) => normalizeSlug(d) === slug);
+  const canon = getCanonBySlug(slug);
 
-  if (!canon) {
-    return { notFound: true };
-  }
+  if (!canon) return { notFound: true };
 
-  const raw = String(canon?.body?.raw ?? "");
-  let source;
-  
   try {
-    source = await serialize(raw, {
+    const source = await serialize(canon.body.raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [
-          rehypeSlug,
-          [rehypeAutolinkHeadings, { behavior: "wrap" }],
-        ],
+        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
       },
     });
+    return { props: { canon, source }, revalidate: 1800 };
   } catch (err) {
-    source = await serialize("Content is being prepared.");
+    const fallbackSource = await serialize("Vault volume is being initialized.");
+    return { props: { canon, source: fallbackSource }, revalidate: 1800 };
   }
-
-  return { props: { canon, source }, revalidate: 1800 };
 };
 
 const CanonPage: NextPage<Props> = ({ canon, source }) => {
-  const title = canon.title ?? "Canon";
+  const title = canon.title ?? "Canon Volume";
   return (
     <Layout title={title}>
       <Head>
-        <title>{title}</title>
+        <title>{title} | The Canon | Abraham of London</title>
         {canon.excerpt && <meta name="description" content={canon.excerpt} />}
       </Head>
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-8 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Canon</p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{title}</h1>
-          {canon.subtitle && <p className="text-lg text-gray-300">{canon.subtitle}</p>}
+
+      <main className="mx-auto max-w-3xl px-6 py-12 sm:py-16 lg:py-24">
+        <header className="mb-12 space-y-4 border-b border-gold/10 pb-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1">
+             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">The Canon</span>
+          </div>
+          <h1 className="font-serif text-4xl font-semibold text-cream sm:text-5xl lg:text-6xl">{title}</h1>
+          {canon.subtitle && <p className="text-xl text-gray-400 font-light italic leading-relaxed">{canon.subtitle}</p>}
         </header>
-        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
+
+        <article className="prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-headings:text-cream prose-p:text-gray-300 prose-a:text-gold prose-strong:text-gold/90">
           <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
+
+        <footer className="mt-20 border-t border-white/5 pt-10">
+           <p className="text-[10px] font-mono uppercase tracking-widest text-gray-600">Abraham of London · Private Library</p>
+        </footer>
       </main>
     </Layout>
   );

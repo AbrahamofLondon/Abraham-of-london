@@ -1,41 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-/**
- * lib/contentlayer-helper.ts
- * THE CORE ENGINE for Contentlayer document handling.
- * - Resilient Named Exports for Next.js Prerendering.
- * - Robust error handling for slug matching and date sorting.
- */
-
 import * as generated from "contentlayer/generated";
 
-// --- Types ---
+/**
+ * THE CORE ENGINE - Robust, centralized document handling.
+ * Synchronizes file paths, slugs, and complex metadata (SEO, Visuals, Assets).
+ */
 
 export type DocKind =
   | "post" | "book" | "download" | "event" | "print" 
   | "resource" | "strategy" | "canon" | "short" | "unknown";
 
-export interface ContentlayerCardProps {
+/**
+ * Enhanced return type for Vault components to ensure 
+ * complete data delivery including new SEO/Social fields.
+ */
+export interface ContentlayerDocBase {
+  _id: string;
   type: string;
-  slug: string;
   title: string;
-  href: string;
-  description?: string | null;
-  excerpt?: string | null;
-  subtitle?: string | null;
-  date?: string | null;
-  readTime?: string | null;
-  image?: string | null;
+  date: string;
+  slug: string;
+  url: string;
+  excerpt?: string;
+  description?: string;
+  coverImage?: string;
+  coverAspect?: string;
+  coverFit?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  socialCaption?: string;
+  readTime?: string;
+  category?: string;
   tags?: string[];
-  category?: string | null;
-  author?: string | null;
   featured?: boolean;
-  downloadUrl?: string | null;
-  coverAspect?: string | null;
-  coverFit?: string | null;
 }
-
-// --- Maps ---
 
 const KIND_URL_MAP: Record<DocKind, string> = {
   post: "/blog",
@@ -51,14 +49,14 @@ const KIND_URL_MAP: Record<DocKind, string> = {
 };
 
 const GLOBAL_FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
-
-// --- Collection Safe-Extractors ---
+const SHORT_GLOBAL_FALLBACK = "/assets/images/shorts/cover.jpg";
 
 function pickArray(name: string): any[] {
   const v = (generated as any)[name];
   return Array.isArray(v) ? v : [];
 }
 
+// Collections
 export const allPosts = pickArray("allPosts");
 export const allBooks = pickArray("allBooks");
 export const allDownloads = pickArray("allDownloads");
@@ -69,55 +67,60 @@ export const allStrategies = pickArray("allStrategies");
 export const allCanons = pickArray("allCanons");
 export const allShorts = pickArray("allShorts");
 
-export const allEssays = allPosts;
-export const allCanon = allCanons;
-
-// --- Logic & Normalization ---
-
-export const isDraft = (doc: any): boolean => {
-  if (!doc) return true;
-  return doc.draft === true || String(doc.draft).toLowerCase() === "true";
-};
-
+// Logic & Status
+export const isDraft = (doc: any): boolean => doc?.draft === true || String(doc?.draft).toLowerCase() === "true";
 export const isPublished = (doc: any): boolean => !isDraft(doc);
 
-export function getDocKind(doc: any): DocKind {
-  if (!doc) return "unknown";
-  const type = (doc.type || doc._type || "").toLowerCase();
-  if (KIND_URL_MAP[type as DocKind]) return type as DocKind;
-  const dir = (doc._raw?.sourceFileDir || "").toLowerCase();
-  const match = Object.keys(KIND_URL_MAP).find((k) => dir.includes(k));
-  return (match as DocKind) || "unknown";
-}
-
+/**
+ * normalizeSlug: THE central authority for URL generation and file matching.
+ * Synchronized with contentlayer.config.ts logic.
+ */
 export function normalizeSlug(doc: any): string {
   if (!doc) return "";
   if (doc.slug && typeof doc.slug === "string") {
     return doc.slug.trim().toLowerCase().replace(/\/$/, "");
   }
   const fp = doc._raw?.flattenedPath || "";
-  const parts = fp.split("/");
-  const last = parts[parts.length - 1];
-  return (last === "index" ? parts[parts.length - 2] : last) || "untitled";
+  if (fp) {
+    const parts = fp.split("/");
+    const last = parts[parts.length - 1];
+    return (last === "index" ? parts[parts.length - 2] : last) || "untitled";
+  }
+  return "untitled";
+}
+
+export function getDocKind(doc: any): DocKind {
+  const type = (doc?.type || doc?._type || "").toLowerCase();
+  if (KIND_URL_MAP[type as DocKind]) return type as DocKind;
+  const dir = (doc._raw?.sourceFileDir || "").toLowerCase();
+  if (dir.includes("shorts")) return "short";
+  const match = Object.keys(KIND_URL_MAP).find(k => dir.includes(k)) as DocKind;
+  return match || "unknown";
 }
 
 export function getDocHref(doc: any): string {
-  if (!doc) return "/";
-  if (doc.url && typeof doc.url === "string") return doc.url;
   const kind = getDocKind(doc);
   const slug = normalizeSlug(doc);
-  return `${KIND_URL_MAP[kind]}/${slug}`;
+  return `${KIND_URL_MAP[kind] || "/content"}/${slug}`;
 }
 
-// --- Getter Engine ---
+// Asset Resolvers
+export function resolveDocCoverImage(doc: any): string {
+  const explicit = doc?.coverImage || doc?.image;
+  if (typeof explicit === "string" && explicit.trim()) return explicit;
+  return getDocKind(doc) === "short" ? SHORT_GLOBAL_FALLBACK : GLOBAL_FALLBACK_IMAGE;
+}
 
-export const getAllContentlayerDocs = (): any[] => {
-  return [
-    ...allPosts, ...allBooks, ...allDownloads, ...allEvents, 
-    ...allPrints, ...allResources, ...allStrategies, 
-    ...allCanons, ...allShorts
-  ].filter(Boolean);
-};
+export function resolveDocDownloadUrl(doc: any): string | null {
+  const url = doc?.downloadUrl || doc?.fileUrl || doc?.pdfPath || doc?.file || doc?.downloadFile;
+  return (typeof url === "string" && url.trim()) ? url : null;
+}
+
+// Global Getters
+export const getAllContentlayerDocs = () => [
+  ...allPosts, ...allBooks, ...allDownloads, ...allEvents, 
+  ...allPrints, ...allResources, ...allStrategies, ...allCanons, ...allShorts
+].filter(Boolean);
 
 export const getPublishedDocuments = () => getAllContentlayerDocs().filter(isPublished);
 
@@ -128,7 +131,7 @@ export function getPublishedDocumentsByType(kind: DocKind, limit?: number): any[
   return limit ? items.slice(0, limit) : items;
 }
 
-// --- Resilient Named Exports (Fixes Build Errors) ---
+// --- SYSTEM-WIDE NAMED EXPORTS ---
 
 export const getPublishedPosts = () => getPublishedDocumentsByType("post");
 export const getAllCanons = () => getPublishedDocumentsByType("canon");
@@ -138,45 +141,22 @@ export const getAllEvents = () => getPublishedDocumentsByType("event");
 export const getAllResources = () => getPublishedDocumentsByType("resource");
 export const getAllStrategies = () => getPublishedDocumentsByType("strategy");
 export const getAllPrints = () => getPublishedDocumentsByType("print");
+export const getPublishedShorts = () => getPublishedDocumentsByType("short");
 
-/** Fixes build error: getRecentShorts */
-export const getRecentShorts = (limit = 3) => getPublishedDocumentsByType("short", limit);
+// --- BY-SLUG LOOKUP ENGINE ---
 
-/** Fixes build error: getShortUrl */
-export const getShortUrl = (short: any) => `/shorts/${normalizeSlug(short)}`;
+const cleanMatch = (s: string) => String(s ?? "").trim().toLowerCase();
 
-// --- By-Slug Search Engine ---
-
-const cleanMatch = (s: string) => (s || "").trim().toLowerCase().replace(/\/$/, "");
-
-export const getPostBySlug = (s: string) => getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s));
-export const getCanonBySlug = (s: string) => getAllCanons().find((d) => normalizeSlug(d) === cleanMatch(s));
-export const getStrategyBySlug = (s: string) => getAllStrategies().find((d) => normalizeSlug(d) === cleanMatch(s));
-export const getResourceBySlug = (s: string) => getAllResources().find((d) => normalizeSlug(d) === cleanMatch(s));
-export const getBookBySlug = (s: string) => getAllBooks().find((d) => normalizeSlug(d) === cleanMatch(s));
-export const getShortBySlug = (s: string) => getPublishedDocumentsByType("short").find((d) => normalizeSlug(d) === cleanMatch(s));
-
-/** Fixes build error: getPrintBySlug */
-export const getPrintBySlug = (s: string) => getAllPrints().find((d) => normalizeSlug(d) === cleanMatch(s));
-
-// --- Safety & Utility ---
+export const getPostBySlug = (s: string) => getPublishedPosts().find(d => normalizeSlug(d) === cleanMatch(s));
+export const getBookBySlug = (s: string) => getAllBooks().find(d => normalizeSlug(d) === cleanMatch(s));
+export const getCanonBySlug = (s: string) => getAllCanons().find(d => normalizeSlug(d) === cleanMatch(s));
+export const getShortBySlug = (s: string) => getPublishedShorts().find(d => normalizeSlug(d) === cleanMatch(s));
+export const getPrintBySlug = (s: string) => getAllPrints().find(d => normalizeSlug(d) === cleanMatch(s));
+export const getResourceBySlug = (s: string) => getAllResources().find(d => normalizeSlug(d) === cleanMatch(s));
+export const getDownloadBySlug = (s: string) => getAllDownloads().find(d => normalizeSlug(d) === cleanMatch(s));
 
 export function assertContentlayerHasDocs(where: string) {
   if (getAllContentlayerDocs().length === 0) {
-    throw new Error(`[Contentlayer] 0 documents found in ${where}. Check CI configuration.`);
+    throw new Error(`[Build Failure] 0 documents detected in ${where}. Check CI content path.`);
   }
-}
-
-export function getCardPropsForDocument(doc: any): ContentlayerCardProps {
-  return {
-    type: getDocKind(doc),
-    slug: normalizeSlug(doc),
-    title: doc.title || "Untitled",
-    href: getDocHref(doc),
-    description: doc.description || doc.excerpt || null,
-    date: doc.date ? String(doc.date) : null,
-    image: doc.coverImage || doc.image || GLOBAL_FALLBACK_IMAGE,
-    tags: Array.isArray(doc.tags) ? doc.tags : [],
-    featured: !!doc.featured,
-  };
 }

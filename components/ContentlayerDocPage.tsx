@@ -2,17 +2,19 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowLeft, Share2 } from "lucide-react";
+import { ArrowLeft, Share2, Clock, Calendar, Tag } from "lucide-react";
+import { motion } from "framer-motion";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 
-// Dynamic import for MDX - SSR: FALSE to prevent build crashes
+// Dynamic import for MDX - SSR: FALSE is critical to avoid hydration mismatch with complex MDX
 const MDXClient = dynamic(() => import("@/components/MDXClient"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[200px] flex items-center justify-center">
-      <p className="text-sm opacity-80">Loading content…</p>
+    <div className="min-h-[400px] flex flex-col items-center justify-center space-y-4 opacity-50">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+      <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Initializing Vault Content</p>
     </div>
   ),
 });
@@ -26,10 +28,8 @@ type ContentlayerDoc = {
   date?: string | null;
   readTime?: string | null;
   tags?: string[] | null;
-  draft?: boolean | null;
   slug?: string | null;
   body?: { code?: string | null; raw?: string | null };
-  _raw?: { flattenedPath?: string };
 };
 
 type Props = {
@@ -40,28 +40,7 @@ type Props = {
   components?: Record<string, React.ComponentType<any>>;
 };
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
-
-function safeDate(date?: string | null) {
-  if (!date) return null;
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return null;
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-}
-
-function toAbsoluteUrl(pathOrUrl?: string | null) {
-  if (!pathOrUrl) return null;
-  const s = String(pathOrUrl);
-  if (!s) return null;
-  if (s.startsWith("http://") || s.startsWith("https://")) return s;
-  if (s.startsWith("/")) return `${SITE_URL}${s}`;
-  return `${SITE_URL}/${s}`;
-}
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export default function ContentlayerDocPage({
   doc,
@@ -70,122 +49,127 @@ export default function ContentlayerDocPage({
   label = "Reading Room",
   components = mdxComponents,
 }: Props) {
-  // SAFE string conversions
-  const title = String(doc.title?.trim() || "Untitled");
-  const description = String(
-    doc.excerpt?.trim() ||
-    doc.description?.trim() ||
-    "Strategic reading from Abraham of London."
-  );
-
-  const canonicalUrl = canonicalPath.startsWith("http")
-    ? canonicalPath
-    : `${SITE_URL}${canonicalPath}`;
-
-  const ogImage = toAbsoluteUrl(doc.coverImage);
-  const code = String(doc?.body?.code ?? "").trim();
-  const raw = String(doc?.body?.raw ?? "").trim();
+  
+  // Logical Fallbacks for metadata
+  const title = doc.title?.trim() || "Untitled Volume";
+  const description = doc.excerpt?.trim() || doc.description?.trim() || "Strategic assets for institutional architects.";
+  const canonicalUrl = `${SITE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
+  
+  // Format Date for en-GB standards
+  const displayDate = React.useMemo(() => {
+    if (!doc.date) return null;
+    const d = new Date(doc.date);
+    return isNaN(d.getTime()) ? null : d.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }, [doc.date]);
 
   const onShare = React.useCallback(() => {
     if (typeof window === "undefined") return;
-    const url = canonicalUrl;
-
     if (navigator.share) {
-      navigator.share({ title, text: description, url }).catch(() => {});
-      return;
+      navigator.share({ title, text: description, url: canonicalUrl }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(canonicalUrl);
     }
-
-    navigator.clipboard.writeText(url).catch(() => {});
   }, [canonicalUrl, title, description]);
 
-  const displayDate = safeDate(doc.date);
-
   return (
-    <Layout 
-      title={title} 
-      description={description} 
-      ogImage={doc.coverImage ?? undefined}
-    >
+    <Layout title={title} description={description} ogImage={doc.coverImage ?? undefined}>
       <Head>
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        {ogImage ? <meta property="og:image" content={ogImage} /> : null}
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <main className="min-h-[70vh] bg-transparent">
-        <nav className="sticky top-0 z-10 border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-black/35">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 lg:px-8">
+      <main className="min-h-screen bg-black text-cream">
+        {/* Navigation Bar - Sticky for readability */}
+        <nav className="sticky top-0 z-[60] border-b border-white/5 bg-black/80 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-950 dark:text-cream/80 dark:hover:text-cream"
+              className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 transition-colors hover:text-gold"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span>{label}</span>
+              <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
+              <span>Back to {label}</span>
             </Link>
 
             <button
-              type="button"
               onClick={onShare}
-              className="inline-flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50 dark:border-white/10 dark:bg-black/20 dark:text-cream/90 dark:hover:bg-white/5"
+              className="flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-gold transition-all hover:bg-gold hover:text-black"
             >
-              <Share2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Share</span>
+              <Share2 className="h-3 w-3" />
+              <span>Share Asset</span>
             </button>
           </div>
         </nav>
 
-        <article className="mx-auto max-w-4xl px-6 py-14 lg:px-8 lg:py-20">
-          <header className="mb-10">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-softGold/70">
+        {/* Content Layout */}
+        <article className="mx-auto max-w-4xl px-6 py-16 lg:py-24">
+          <header className="mb-16 border-b border-gold/10 pb-12">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[9px] font-black uppercase tracking-[0.3em] text-gold/80"
+            >
+              <div className="h-1 w-1 rounded-full bg-gold animate-pulse" />
               {doc.category || label}
-            </p>
+            </motion.div>
 
-            <h1 className="font-serif text-4xl font-semibold tracking-tight text-neutral-950 dark:text-cream sm:text-5xl">
+            <h1 className="font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
               {title}
             </h1>
 
-            {doc.excerpt ? (
-              <p className="mt-5 text-lg leading-relaxed text-neutral-700 dark:text-cream/80">
+            {doc.excerpt && (
+              <p className="mt-8 text-xl font-light leading-relaxed text-gray-400 italic">
                 {doc.excerpt}
               </p>
-            ) : null}
-
-            {(displayDate || doc.readTime) && (
-              <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-neutral-500 dark:text-softGold/70">
-                {displayDate ? <span>{displayDate}</span> : null}
-                {doc.readTime ? <span>• {doc.readTime}</span> : null}
-              </div>
             )}
 
-            {doc.tags?.length ? (
-              <div className="mt-5 flex flex-wrap gap-2">
-                {doc.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-black/10 bg-black/5 px-3 py-1 text-[11px] font-medium text-neutral-700 dark:border-white/10 dark:bg-white/5 dark:text-cream/80"
-                  >
-                    {t}
+            <div className="mt-10 flex flex-wrap items-center gap-6 font-mono text-[10px] uppercase tracking-widest text-gray-500">
+              {displayDate && (
+                <div className="flex items-center gap-2">
+                  <Calendar size={12} className="text-gold/40" />
+                  <span>{displayDate}</span>
+                </div>
+              )}
+              {doc.readTime && (
+                <div className="flex items-center gap-2">
+                  <Clock size={12} className="text-gold/40" />
+                  <span>{doc.readTime}</span>
+                </div>
+              )}
+            </div>
+
+            {doc.tags && doc.tags.length > 0 && (
+              <div className="mt-8 flex flex-wrap gap-2">
+                {doc.tags.map((tag) => (
+                  <span key={tag} className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-tighter text-gray-600">
+                    <Tag size={10} /> {tag}
                   </span>
                 ))}
               </div>
-            ) : null}
+            )}
           </header>
 
-          <div className="prose max-w-none dark:prose-invert prose-headings:font-serif">
-            {code ? (
-              <MDXClient code={code} components={components} />
-            ) : raw ? (
-              <pre className="max-h-[520px] overflow-auto rounded-lg bg-black/40 p-4 text-xs">
-                {raw}
-              </pre>
+          {/* MDX Content Area */}
+          <div className="prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-gold/90 prose-a:text-gold prose-a:no-underline hover:prose-a:underline">
+            {doc.body?.code ? (
+              <MDXClient code={doc.body.code} components={components} />
             ) : (
-              <p className="text-gray-500 italic">Content is being prepared.</p>
+              <div className="rounded-2xl border border-dashed border-white/10 p-12 text-center">
+                <p className="font-serif text-xl italic text-gray-500">Content is being prepared for the Vault.</p>
+              </div>
             )}
           </div>
+          
+          <footer className="mt-24 border-t border-white/5 pt-12 text-center">
+            <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-gray-700">
+              Abraham of London · Strategic Archives · Established London
+            </p>
+          </footer>
         </article>
       </main>
     </Layout>

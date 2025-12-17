@@ -4,8 +4,8 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { 
   getPublishedPosts, 
-  normalizeSlug, 
-  getDocHref 
+  getPostBySlug,
+  normalizeSlug 
 } from "@/lib/contentlayer-helper";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
@@ -17,9 +17,7 @@ import SafeMDXRemote from "@/components/SafeMDXRemote";
 type Props = { post: any; source: any };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Use helper to get all published essays
   const posts = getPublishedPosts();
-  
   const paths = posts
     .map((doc) => {
       const slug = normalizeSlug(doc);
@@ -27,40 +25,28 @@ export const getStaticPaths: GetStaticPaths = async () => {
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
-  console.log(`📝 Generated ${paths.length} essay paths`);
-  
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
-  
-  // Lookup using the same normalizeSlug logic as paths
-  const posts = getPublishedPosts();
-  const post = posts.find((p) => normalizeSlug(p) === slug);
+  const post = getPostBySlug(slug);
 
-  if (!post) {
-    return { notFound: true };
-  }
+  if (!post) return { notFound: true };
 
-  const raw = String(post?.body?.raw ?? "");
-  let source;
-  
   try {
-    source = await serialize(raw, {
+    const source = await serialize(post.body.raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [
-          rehypeSlug,
-          [rehypeAutolinkHeadings, { behavior: "wrap" }],
-        ],
+        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
       },
     });
+    return { props: { post, source }, revalidate: 1800 };
   } catch (err) {
-    source = await serialize("Content is being prepared.");
+    console.error(`❌ MDX Error [Post: ${slug}]:`, err);
+    const fallbackSource = await serialize("Content is being prepared for the vault.");
+    return { props: { post, source: fallbackSource }, revalidate: 1800 };
   }
-
-  return { props: { post, source }, revalidate: 1800 };
 };
 
 const PostPage: NextPage<Props> = ({ post, source }) => {
@@ -68,22 +54,25 @@ const PostPage: NextPage<Props> = ({ post, source }) => {
   return (
     <Layout title={title}>
       <Head>
-        <title>{title}</title>
+        <title>{title} | Abraham of London</title>
         {post.excerpt && <meta name="description" content={post.excerpt} />}
       </Head>
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-8 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Essay</p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{title}</h1>
-          {post.date && (
-             <p className="text-sm text-gray-500">
-               {new Date(post.date).toLocaleDateString('en-US', { 
-                 month: 'long', day: 'numeric', year: 'numeric' 
-               })}
-             </p>
-          )}
+
+      <main className="mx-auto max-w-3xl px-6 py-12 sm:py-16 lg:py-24">
+        <header className="mb-10 space-y-4 border-b border-gold/10 pb-10">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Insight & Reflection</p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">{title}</h1>
+          <div className="flex items-center gap-4 text-[11px] font-mono uppercase tracking-widest text-gray-500">
+            {post.date && <span>{new Date(post.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+            {post.author && (
+              <>
+                <span className="h-1 w-1 rounded-full bg-gold/30" />
+                <span>{post.author}</span>
+              </>
+            )}
+          </div>
         </header>
-        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
+        <article className="prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-p:text-gray-300">
           <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
       </main>

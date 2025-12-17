@@ -1,102 +1,61 @@
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { getPublishedShorts } from "@/lib/contentlayer-helper";
-
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { 
+  getPublishedShorts, 
+  getShortBySlug, 
+  normalizeSlug, 
+  resolveDocCoverImage 
+} from "@/lib/contentlayer-helper";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
+import SafeMDXRemote from "@/components/SafeMDXRemote";
 
-type Props = { short: any; source: MDXRemoteSerializeResult };
-
-function docSlug(d: any): string {
-  return d?.slug ?? d?._raw?.flattenedPath?.split("/").pop() ?? "";
-}
-
-// THEME → COVER MAPPING (your exact themes)
-const SHORT_THEME_COVERS: Record<string, string> = {
-  "inner-life": "/assets/images/shorts/default-cover-1.jpg",
-  "outer-life": "/assets/images/shorts/default-cover-2.jpg",
-  "hard-truths": "/assets/images/shorts/default-cover-3.jpg",
-  "gentle": "/assets/images/shorts/default-cover.jpg",
-  "purpose": "/assets/images/shorts/cover-linkedin.jpg",
-  "relationships": "/assets/images/shorts/cover-instagram.jpg",
-  "faith": "/assets/images/shorts/cover.jpg",
-};
-
-// Global fallback you demanded
-const SHORT_GLOBAL_FALLBACK = "/assets/images/shorts/cover.jpg";
-
-function resolveShortCover(short: any): string {
-  // explicit coverImage always wins if provided
-  const explicit = typeof short?.coverImage === "string" ? short.coverImage.trim() : "";
-  if (explicit) return explicit.startsWith("/") ? explicit : `/${explicit}`;
-
-  const theme = String(short?.theme ?? "").trim().toLowerCase();
-  return SHORT_THEME_COVERS[theme] ?? SHORT_GLOBAL_FALLBACK;
-}
+type Props = { short: any; source: any };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getPublishedShorts();
-  const paths = docs.map((d) => ({ params: { slug: docSlug(d) } }));
+  const paths = getPublishedShorts().map((s) => ({
+    params: { slug: normalizeSlug(s) }
+  }));
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").trim();
-  if (!slug) return { notFound: true };
+  const slug = String(params?.slug ?? "").trim().toLowerCase();
+  const short = getShortBySlug(slug);
 
-  const docs = getPublishedShorts();
-  const short = docs.find((d) => docSlug(d) === slug);
   if (!short) return { notFound: true };
 
-  const raw = short?.body?.raw ?? "";
-  const source = await serialize(raw, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [
-        rehypeSlug,
-        [rehypeAutolinkHeadings, { behavior: "wrap" }],
-      ],
-    },
-  });
-
-  return { props: { short, source }, revalidate: 1800 };
+  try {
+    const source = await serialize(short.body.raw, {
+      mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
+    });
+    return { props: { short, source }, revalidate: 1800 };
+  } catch (err) {
+    const fallbackSource = await serialize("Short content is being optimized.");
+    return { props: { short, source: fallbackSource }, revalidate: 1800 };
+  }
 };
 
-const ShortPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
-  short,
-  source,
-}) => {
-  const title = short.title ?? "Short";
-  const cover = resolveShortCover(short);
+const ShortPage: NextPage<Props> = ({ short, source }) => {
+  const title = short.title ?? "Strategic Short";
+  const cover = resolveDocCoverImage(short);
 
   return (
     <Layout title={title} ogImage={cover}>
       <Head>
-        {short.excerpt && <meta name="description" content={short.excerpt} />}
-        <meta property="og:title" content={title} />
-        {short.excerpt && <meta property="og:description" content={short.excerpt} />}
-        {cover ? <meta property="og:image" content={cover} /> : null}
+        <title>{title} | Shorts | Abraham of London</title>
       </Head>
-
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-8 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Short · {short.theme ?? "General"}
-          </p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-            {title}
-          </h1>
-          {short.excerpt ? <p className="text-sm text-gray-300">{short.excerpt}</p> : null}
+      <main className="mx-auto max-w-2xl px-6 py-20 lg:py-32">
+        <header className="mb-12 border-b border-gold/10 pb-10 text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">{short.theme || "Reflection"}</p>
+          <h1 className="mt-4 font-serif text-4xl font-bold text-white sm:text-5xl">{title}</h1>
         </header>
-
-        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
-          <MDXRemote {...source} components={mdxComponents} />
+        <article className="prose prose-invert prose-gold max-w-none prose-p:text-gray-300">
+          <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
       </main>
     </Layout>
