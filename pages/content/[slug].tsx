@@ -1,4 +1,3 @@
-// pages/content/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
@@ -17,13 +16,13 @@ const ContentSlugPage: NextPage<Props> = ({ doc, canonicalPath }) => {
       doc={doc}
       canonicalPath={canonicalPath}
       backHref="/content"
-      label="Reading Room"
+      label="Kingdom Vault"
     />
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Only generate /content/* pages (the ones whose computed href is /content/...)
+  // Filters to only include items that belong under the /content/ route
   const paths = getAllContentlayerDocs()
     .filter((d) => !isDraft(d))
     .filter((d) => getDocHref(d).startsWith("/content/"))
@@ -39,10 +38,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
   if (!slug) return { notFound: true };
 
-  const doc =
-    getAllContentlayerDocs()
-      .filter((d) => !isDraft(d))
-      .find((d) => getDocHref(d) === `/content/${slug}`) ?? null;
+  const doc = getAllContentlayerDocs()
+    .filter((d) => !isDraft(d))
+    .find((d) => getDocHref(d) === `/content/${slug}`) ?? null;
 
   if (!doc) return { notFound: true };
 

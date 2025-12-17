@@ -1,169 +1,89 @@
-// pages/blog/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-import { serialize } from "next-mdx-remote/serialize";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import SafeMDXRemote from "@/components/SafeMDXRemote";
+import { 
+  getPublishedPosts, 
+  normalizeSlug, 
+  getDocHref 
+} from "@/lib/contentlayer-helper";
+import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import { allPosts, isDraft } from "@/lib/contentlayer-helper";
+import mdxComponents from "@/components/mdx-components";
+import SafeMDXRemote from "@/components/SafeMDXRemote";
 
-type Props = {
-  title: string;
-  excerpt?: string | null;
-  description?: string | null;
-  coverImage?: string | null;
-  date?: string | null;
-  readTime?: string | null;
-  source: MDXRemoteSerializeResult;
-  canonicalUrl: string;
-};
-
-const SITE = "https://www.abrahamoflondon.org";
-
-/**
- * Extract the final slug from a post's URL
- * Handles URLs like "/blog/my-post" -> "my-post"
- */
-function getPostSlug(post: any): string {
-  // First try the computed URL field
-  if (post.url) {
-    const parts = post.url.split('/').filter(Boolean);
-    // Remove 'blog' prefix if present, return last part
-    return parts[parts.length - 1] || '';
-  }
-  
-  // Fallback to slug field
-  if (post.slug) {
-    return post.slug.split('/').pop() || post.slug;
-  }
-  
-  // Final fallback to flattenedPath
-  if (post._raw?.flattenedPath) {
-    const path = post._raw.flattenedPath;
-    // Remove 'blog/' prefix if present
-    const withoutBlog = path.startsWith('blog/') ? path.slice(5) : path;
-    return withoutBlog.split('/').pop() || withoutBlog;
-  }
-  
-  return '';
-}
+type Props = { post: any; source: any };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const publishedPosts = allPosts.filter((p: any) => !isDraft(p));
+  // Use helper to get all published essays
+  const posts = getPublishedPosts();
   
-  const paths = publishedPosts
-    .map((post: any) => {
-      const slug = getPostSlug(post);
-      if (!slug) {
-        console.warn(`⚠️ Post missing slug:`, post.title || post._id);
-        return null;
-      }
-      return { params: { slug } };
+  const paths = posts
+    .map((doc) => {
+      const slug = normalizeSlug(doc);
+      return slug ? { params: { slug } } : null;
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
-  console.log(`📝 Generated ${paths.length} blog paths:`, paths.map(p => p.params.slug));
+  console.log(`📝 Generated ${paths.length} essay paths`);
   
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\/$/, ""); // Remove trailing slash for comparison
+  const slug = String(params?.slug ?? "").trim().toLowerCase();
   
-  if (!slug) {
-    console.warn(`⚠️ Blog page called with empty slug`);
-    return { notFound: true };
-  }
-
-  const post = allPosts.find(
-    (p: any) => !isDraft(p) && getPostSlug(p).toLowerCase().replace(/\/$/, "") === slug
-  );
+  // Lookup using the same normalizeSlug logic as paths
+  const posts = getPublishedPosts();
+  const post = posts.find((p) => normalizeSlug(p) === slug);
 
   if (!post) {
-    console.warn(`⚠️ Post not found for slug: ${slug}`);
-    console.log(`Available posts:`, allPosts
-      .filter((p: any) => !isDraft(p))
-      .map(p => ({
-        title: p.title,
-        slug: getPostSlug(p),
-        url: p.url
-      }))
-    );
     return { notFound: true };
   }
 
-  console.log(`✅ Found post: ${post.title} (slug: ${slug})`);
-
   const raw = String(post?.body?.raw ?? "");
-  let source: MDXRemoteSerializeResult;
+  let source;
   
   try {
     source = await serialize(raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
+        rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: "wrap" }],
+        ],
       },
     });
-  } catch (e) {
-    console.error(`❌ Failed to serialize MDX for post: ${post.title}`, e);
+  } catch (err) {
     source = await serialize("Content is being prepared.");
   }
 
-  const canonicalUrl = `${SITE}/blog/${slug}`;
-  
-  return {
-    props: {
-      title: String(post.title ?? "Essay"),
-      excerpt: post.excerpt ?? null,
-      description: post.description ?? null,
-      coverImage: post.coverImage ?? null,
-      date: post.date ?? null,
-      readTime: post.readTime ?? null,
-      source,
-      canonicalUrl,
-    },
-    revalidate: 3600,
-  };
+  return { props: { post, source }, revalidate: 1800 };
 };
 
-const BlogSlugPage: NextPage<Props> = ({
-  title,
-  excerpt,
-  description,
-  coverImage,
-  source,
-  canonicalUrl,
-}) => {
-  const desc = description || excerpt || "";
+const PostPage: NextPage<Props> = ({ post, source }) => {
+  const title = post.title ?? "Essay";
   return (
-    <Layout
-      title={title}
-      description={desc}
-      canonicalUrl={canonicalUrl}
-      ogImage={coverImage ?? undefined}
-      ogType="article"
-    >
+    <Layout title={title}>
       <Head>
-        <link rel="canonical" href={canonicalUrl} />
+        <title>{title}</title>
+        {post.excerpt && <meta name="description" content={post.excerpt} />}
       </Head>
-      <main className="mx-auto max-w-4xl px-4 py-14">
-        <Link href="/blog" className="text-sm text-gold hover:underline">
-          ← Back to Essays
-        </Link>
-        <h1 className="mt-4 font-serif text-3xl sm:text-4xl font-semibold text-cream">
-          {title}
-        </h1>
-        {excerpt ? <p className="mt-4 text-gray-300">{excerpt}</p> : null}
-        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-a:text-gold mt-10">
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+        <header className="mb-8 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Essay</p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{title}</h1>
+          {post.date && (
+             <p className="text-sm text-gray-500">
+               {new Date(post.date).toLocaleDateString('en-US', { 
+                 month: 'long', day: 'numeric', year: 'numeric' 
+               })}
+             </p>
+          )}
+        </header>
+        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
           <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
       </main>
@@ -171,4 +91,4 @@ const BlogSlugPage: NextPage<Props> = ({
   );
 };
 
-export default BlogSlugPage;
+export default PostPage;
