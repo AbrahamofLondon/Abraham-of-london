@@ -1,31 +1,35 @@
-// pages/events/[slug].tsx
 import * as React from "react";
-import type {
-  GetStaticPaths,
-  GetStaticProps,
-  InferGetStaticPropsType,
-  NextPage,
-} from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { getAllEvents, type EventDocument } from '@/lib/contentlayer-helper';
+import { 
+  getAllEvents, 
+  normalizeSlug, 
+  isPublished 
+} from "@/lib/contentlayer-helper";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
+import SafeMDXRemote from "@/components/SafeMDXRemote";
 
 type Props = {
-  event: EventDocument;
+  event: any;
   source: MDXRemoteSerializeResult;
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  // Use the robust helper to get all published events
   const events = getAllEvents();
-  const paths = events.map((event) => ({
-    params: { slug: event.slug || (event as any)._raw?.flattenedPath?.split('/').pop() || '' },
-  }));
+  
+  const paths = events
+    .map((event) => {
+      const slug = normalizeSlug(event);
+      return slug ? { params: { slug } } : null;
+    })
+    .filter(Boolean) as { params: { slug: string } }[];
 
   return {
     paths,
@@ -34,123 +38,107 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = params?.slug as string;
+  const slug = String(params?.slug ?? "").trim().toLowerCase();
   
-  if (!slug) {
-    return {
-      notFound: true,
-    };
-  }
+  if (!slug) return { notFound: true };
 
   const events = getAllEvents();
-  const event = events.find((e) => {
-    // Handle slug comparison
-    const eventSlug = e.slug || (e as any)._raw?.flattenedPath?.split('/').pop();
-    return eventSlug === slug;
-  });
+  // Lookup using the centralized normalization logic to ensure a match
+  const event = events.find((e) => normalizeSlug(e) === slug);
 
   if (!event) {
-    return {
-      notFound: true,
-    };
+    return { notFound: true };
   }
 
-  // Check if event.body exists and has raw property
-  const rawContent = event.body?.raw || event.body || "";
+  // Ensure we have raw content for serialization
+  const rawContent = event.body?.raw ?? "";
   
-  const mdxSource = await serialize(rawContent, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [
-        rehypeSlug,
-        [
-          rehypeAutolinkHeadings,
-          {
-            behavior: "wrap",
-          },
+  let source: MDXRemoteSerializeResult;
+  try {
+    source = await serialize(rawContent, {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: "wrap" }],
         ],
-      ],
-    },
-  });
+      },
+    });
+  } catch (err) {
+    console.error(`[Events Serialize Error] ${slug}:`, err);
+    source = await serialize("Event details are being updated.");
+  }
 
   return {
     props: {
       event,
-      source: mdxSource,
+      source,
     },
     revalidate: 1800, // 30 mins
   };
 };
 
-const EventPage: NextPage<
-  InferGetStaticPropsType<typeof getStaticProps>
-> = ({ event, source }) => {
+const EventPage: NextPage<Props> = ({ event, source }) => {
   const title = event.title ?? "Event";
   
-  // Parse eventDate - handle various date formats
-  let formattedDate: string | undefined;
-  if (event.eventDate) {
-    try {
-      const date = new Date(event.eventDate);
-      if (!isNaN(date.getTime())) {
-        formattedDate = date.toLocaleString("en-GB", {
+  // Robust Date Parsing
+  const formattedDate = React.useMemo(() => {
+    if (!event.eventDate) return null;
+    const date = new Date(event.eventDate);
+    return isNaN(date.getTime()) 
+      ? null 
+      : date.toLocaleString("en-GB", {
           day: "2-digit",
           month: "short",
           year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
         });
-      }
-    } catch (error) {
-      console.warn('Failed to parse event date:', error);
-    }
-  }
+  }, [event.eventDate]);
 
   return (
     <Layout title={title}>
       <Head>
-        {event.excerpt && (
-          <meta name="description" content={event.excerpt} />
-        )}
-        <meta name="og:title" content={title} />
-        {event.excerpt && (
-          <meta name="og:description" content={event.excerpt} />
-        )}
+        {event.excerpt && <meta name="description" content={event.excerpt} />}
+        <meta property="og:title" content={`${title} | Abraham of London`} />
+        <title>{title} | Events | Abraham of London</title>
       </Head>
 
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-8 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Event
+      <main className="mx-auto max-w-3xl px-6 py-12 sm:py-16 lg:py-20">
+        <header className="mb-12 space-y-4 border-b border-gold/10 pb-10">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
+            Private Gathering
           </p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">
             {title}
           </h1>
 
-          <div className="flex flex-wrap gap-4 text-xs text-gray-400">
+          <div className="flex flex-wrap gap-3 pt-2">
             {formattedDate && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-[11px] font-medium text-gray-300">
                 {formattedDate}
               </span>
             )}
             {event.location && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-[11px] font-medium text-gray-300">
                 {event.location}
               </span>
             )}
           </div>
 
           {event.excerpt && (
-            <p className="mt-2 text-sm text-gray-300">{event.excerpt}</p>
+            <p className="mt-6 text-base leading-relaxed text-gray-400">
+              {event.excerpt}
+            </p>
           )}
 
           {event.registrationUrl && (
-            <div className="mt-4">
+            <div className="pt-6">
               <a
                 href={event.registrationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-full bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black transition hover:bg-gold/90"
+                className="inline-flex items-center justify-center rounded-xl bg-gold px-8 py-3 text-sm font-bold uppercase tracking-widest text-black transition-all hover:bg-gold/80 hover:scale-[1.02]"
               >
                 Request a Seat
               </a>
@@ -159,7 +147,7 @@ const EventPage: NextPage<
         </header>
 
         <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
-          <MDXRemote {...source} components={mdxComponents} />
+          <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
       </main>
     </Layout>
