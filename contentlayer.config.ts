@@ -51,19 +51,24 @@ function getDocUrl(doc: any, basePath: string): string {
   // hard override
   if (doc.href && typeof doc.href === "string" && doc.href.trim()) {
     const href = doc.href.trim();
-    return href.startsWith("/") ? href : `/${href}`;
+    // Remove trailing slash
+    const cleanHref = href.replace(/\/$/, "");
+    return cleanHref.startsWith("/") ? cleanHref : `/${cleanHref}`;
   }
 
   // slug override
   if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
-    const s = doc.slug.trim().replace(/^\/+/, "");
+    const s = doc.slug.trim().replace(/^\/+/, "").replace(/\/$/, "");
     // If user provides "shorts/foo" we don't double-prefix
-    return s.startsWith(`${basePath}/`) ? `/${s}` : `/${basePath}/${s}`;
+    const url = s.startsWith(`${basePath}/`) ? `/${s}` : `/${basePath}/${s}`;
+    return url.replace(/\/$/, "");
   }
 
   // fallback: derive from file path
   const derived = normalizeSlugFromFlattenedPath(doc._raw.flattenedPath, basePath);
-  return derived ? `/${basePath}/${derived}` : `/${basePath}`;
+  const url = derived ? `/${basePath}/${derived}` : `/${basePath}`;
+  // Remove any trailing slash
+  return url.replace(/\/$/, "");
 }
 
 // -----------------------------------------------------------------------------
@@ -222,7 +227,6 @@ export const Canon = defineDocumentType(() => ({
   },
 }));
 
-// ✅ SHORTS: aligned with the others (no conflicting date rules, consistent pattern, consistent url)
 export const Short = defineDocumentType(() => ({
   name: "Short",
   filePathPattern: "shorts/**/*.mdx",
@@ -233,7 +237,6 @@ export const Short = defineDocumentType(() => ({
     audience: { type: "string", required: false },
     readTime: { type: "string", required: false },
     published: { type: "boolean", required: false, default: true },
-    // REMOVE date override here
   },
   computedFields: {
     url: {
