@@ -51,24 +51,25 @@ function getDocUrl(doc: any, basePath: string): string {
   // hard override
   if (doc.href && typeof doc.href === "string" && doc.href.trim()) {
     const href = doc.href.trim();
-    // Remove trailing slash
-    const cleanHref = href.replace(/\/$/, "");
-    return cleanHref.startsWith("/") ? cleanHref : `/${cleanHref}`;
+    // Ensure trailing slash for consistency with Next.js config
+    const withSlash = href.endsWith("/") ? href : `${href}/`;
+    return withSlash.startsWith("/") ? withSlash : `/${withSlash}`;
   }
 
   // slug override
   if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
-    const s = doc.slug.trim().replace(/^\/+/, "").replace(/\/$/, "");
+    const s = doc.slug.trim().replace(/^\/+/, "");
     // If user provides "shorts/foo" we don't double-prefix
     const url = s.startsWith(`${basePath}/`) ? `/${s}` : `/${basePath}/${s}`;
-    return url.replace(/\/$/, "");
+    // Ensure trailing slash
+    return url.endsWith("/") ? url : `${url}/`;
   }
 
   // fallback: derive from file path
   const derived = normalizeSlugFromFlattenedPath(doc._raw.flattenedPath, basePath);
   const url = derived ? `/${basePath}/${derived}` : `/${basePath}`;
-  // Remove any trailing slash
-  return url.replace(/\/$/, "");
+  // Ensure trailing slash
+  return url.endsWith("/") ? url : `${url}/`;
 }
 
 // -----------------------------------------------------------------------------

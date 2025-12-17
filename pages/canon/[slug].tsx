@@ -67,7 +67,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").trim().toLowerCase();
+  const slug = String(params?.slug ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\/$/, ""); // Remove trailing slash for comparison
   
   if (!slug) {
     console.warn(`⚠️ Canon page called with empty slug`);
@@ -75,7 +78,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
   const canons = getAllCanons();
-  const canon = canons.find((d) => getCanonSlug(d).toLowerCase() === slug);
+  const canon = canons.find((d) => getCanonSlug(d).toLowerCase().replace(/\/$/, "") === slug);
 
   if (!canon) {
     console.warn(`⚠️ Canon not found for slug: ${slug}`);

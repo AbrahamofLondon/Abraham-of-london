@@ -74,7 +74,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").trim().toLowerCase();
+  const slug = String(params?.slug ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\/$/, ""); // Remove trailing slash for comparison
   
   if (!slug) {
     console.warn(`⚠️ Blog page called with empty slug`);
@@ -82,7 +85,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
   const post = allPosts.find(
-    (p: any) => !isDraft(p) && getPostSlug(p).toLowerCase() === slug
+    (p: any) => !isDraft(p) && getPostSlug(p).toLowerCase().replace(/\/$/, "") === slug
   );
 
   if (!post) {
