@@ -1,3 +1,4 @@
+// pages/canon/[slug].tsx
 import * as React from "react";
 import type {
   GetStaticPaths,
@@ -16,7 +17,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
-import SafeMDXRemote from "@/components/SafeMDXRemote"; // ✅ REQUIRED
+import SafeMDXRemote from "@/components/SafeMDXRemote";
 
 type Props = { canon: any; source: MDXRemoteSerializeResult };
 
@@ -24,12 +25,18 @@ function docSlug(d: any): string {
   return d?.slug ?? d?._raw?.flattenedPath?.split("/").pop() ?? "";
 }
 
+/* -------------------------------------------------------------------------- */
+/* ✅ REQUIRED FOR DYNAMIC SSG ROUTES                                          */
+/* -------------------------------------------------------------------------- */
 export const getStaticPaths: GetStaticPaths = async () => {
   const canons = getAllCanons();
+
   const paths = canons
-    .map((d) => docSlug(d))
-    .filter(Boolean)
-    .map((slug) => ({ params: { slug } }));
+    .map((d) => {
+      const slug = docSlug(d);
+      return slug ? { params: { slug } } : null;
+    })
+    .filter(Boolean) as { params: { slug: string } }[];
 
   return { paths, fallback: "blocking" };
 };
@@ -42,11 +49,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const canon = canons.find((d) => docSlug(d) === slug);
   if (!canon) return { notFound: true };
 
-  const raw = canon?.body?.raw ?? "";
+  const raw = String(canon?.body?.raw ?? "");
 
   let source: MDXRemoteSerializeResult;
   try {
-    source = await serialize(String(raw), {
+    source = await serialize(raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
         rehypePlugins: [
@@ -55,12 +62,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         ],
       },
     });
-  } catch (e) {
-    // ✅ DO NOT crash export. Log the exact failing slug so you can fix the MDX file.
-    console.error(`[canon serialize failed] slug=${slug}`, e);
-    source = await serialize(
-      `# Content is being prepared\n\nThis Canon page failed to compile during export.`
-    );
+  } catch {
+    // Never crash export/build because one MDX file is malformed
+    source = await serialize("Content is being prepared.");
   }
 
   return { props: { canon, source }, revalidate: 1800 };
@@ -75,11 +79,9 @@ const CanonPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   return (
     <Layout title={title}>
       <Head>
-        {canon.excerpt && <meta name="description" content={canon.excerpt} />}
+        {canon.excerpt ? <meta name="description" content={canon.excerpt} /> : null}
         <meta property="og:title" content={title} />
-        {canon.excerpt && (
-          <meta property="og:description" content={canon.excerpt} />
-        )}
+        {canon.excerpt ? <meta property="og:description" content={canon.excerpt} /> : null}
       </Head>
 
       <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">

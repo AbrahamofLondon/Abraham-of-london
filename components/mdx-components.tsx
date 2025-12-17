@@ -1,6 +1,66 @@
-// components/mdx-components.tsx
 import * as React from "react";
+import * as Lucide from "lucide-react";
 
+/**
+ * IMPORTANT:
+ * - No dynamic require()
+ * - No runtime import()
+ * - Unknown MDX components render a safe fallback instead of crashing the client.
+ */
+
+type AnyProps = Record<string, any>;
+
+const createMissingComponent = (componentName: string): React.FC<AnyProps> => {
+  return function MissingComponentWrapper({ children, ...props }) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn(`MDX component "${componentName}" is not defined. Using fallback.`);
+    }
+
+    // Lightweight special-cases (safe + useful)
+    switch (componentName.toLowerCase()) {
+      case "grid":
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6" {...props}>
+            {children}
+          </div>
+        );
+
+      case "quote":
+        return (
+          <blockquote className="my-8 border-l-4 border-gold pl-6 py-4 italic text-gray-300" {...props}>
+            {children}
+          </blockquote>
+        );
+
+      case "callout":
+      case "note":
+        return (
+          <div className="my-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5" {...props}>
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20">
+                <span className="text-xs font-bold text-amber-400">!</span>
+              </div>
+              <div className="flex-1 text-amber-300/90">{children}</div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="my-4 rounded-lg border border-red-500/20 bg-red-500/5 p-4" {...props}>
+            <p className="text-sm font-medium text-red-400 mb-2">
+              Component{" "}
+              <code className="rounded bg-red-500/10 px-2 py-1">{componentName}</code>
+            </p>
+            {children ? <div className="text-gray-300">{children}</div> : null}
+          </div>
+        );
+    }
+  };
+};
+
+// HTML Elements
 export type MdxComponentProps = React.PropsWithChildren<
   Omit<React.HTMLAttributes<HTMLElement>, "title"> & { className?: string }
 >;
@@ -89,10 +149,9 @@ const A = ({ children, ...rest }: MdxComponentProps) => (
   </a>
 );
 
-interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface ImageProps extends MdxComponentProps {
   src?: string;
   alt?: string;
-  className?: string;
 }
 const MdxImage = ({ src, alt, className = "", ...rest }: ImageProps) => {
   if (!src) return null;
@@ -103,7 +162,8 @@ const MdxImage = ({ src, alt, className = "", ...rest }: ImageProps) => {
         src={String(src)}
         alt={alt ? String(alt) : ""}
         className={(
-          "block h-auto w-auto max-w-full max-h-[500px] " +
+          "block h-auto w-auto max-w-full " +
+          "max-h-[420px] sm:max-h-[460px] md:max-h-[500px] " +
           "rounded-2xl border border-slate-800/70 bg-slate-900/60 " +
           "object-contain shadow-soft-elevated " +
           className
@@ -114,22 +174,16 @@ const MdxImage = ({ src, alt, className = "", ...rest }: ImageProps) => {
   );
 };
 
-// Minimal safe “blocks”
-const Callout = ({ children, ...props }: React.PropsWithChildren<any>) => (
-  <div className="my-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5" {...props}>
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20">
-        <span className="text-xs font-bold text-amber-400">!</span>
-      </div>
-      <div className="flex-1 text-amber-300/90">{children}</div>
-    </div>
-  </div>
-);
+// Optional: safe Icon component (no dynamic imports)
+const iconMap = Lucide as unknown as Record<string, React.FC<any>>;
+const Icon = ({ name, ...props }: { name: string } & AnyProps) => {
+  const Cmp = iconMap[name];
+  if (!Cmp) return null;
+  return <Cmp {...props} />;
+};
 
-const Note = Callout;
-const Rule = (props: any) => <hr className="my-10 border-white/10" {...props} />;
-
-const components = {
+// Base components + safe proxy fallback
+const baseComponents: Record<string, any> = {
   h1: H1,
   h2: H2,
   h3: H3,
@@ -146,11 +200,15 @@ const components = {
   a: A,
   img: MdxImage,
 
-  Callout,
-  Note,
-  Rule,
-  Divider: Rule,
+  Icon,
 };
+
+const components = new Proxy(baseComponents, {
+  get(target, prop: string) {
+    if (prop in target) return target[prop];
+    return createMissingComponent(prop);
+  },
+});
 
 export default components;
 export { components as mdxComponents };

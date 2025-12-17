@@ -21,11 +21,22 @@ function bookSlug(b: any): string {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const books = getAllBooks();
+
   const paths = books
-    .map((b) => bookSlug(b))
-    .filter(Boolean)
-    .map((slug) => ({ params: { slug } }));
-  return { paths, fallback: "blocking" };
+    .map((b) => {
+      const slug =
+        b.slug ??
+        b?._raw?.flattenedPath?.split("/").pop() ??
+        "";
+
+      return slug ? { params: { slug } } : null;
+    })
+    .filter(Boolean) as { params: { slug: string } }[];
+
+  return {
+    paths,
+    fallback: "blocking",
+  };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
