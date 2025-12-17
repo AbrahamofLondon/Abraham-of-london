@@ -3,50 +3,35 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
 /**
- * -----------------------------------------------------------------------------
  * 1. RESILIENT COMMON FIELDS
- * Expanded to absorb SEO and structural metadata found in existing documents.
- * -----------------------------------------------------------------------------
+ * Promotes extra metadata (ogTitle, coverAspect, etc.) to valid system properties.
  */
 const commonFields = {
   title: { type: "string", required: true },
   date: { type: "date", required: true },
-  
-  // Logical Routing
   slug: { type: "string", required: false },
   href: { type: "string", required: false },
-
-  // Content Descriptors
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
-  
-  // Image & Visual Integrity (Forgiving Schema)
   coverImage: { type: "string", required: false },
-  coverAspect: { type: "string", required: false }, // Absorbs "wide", "book", etc.
-  coverFit: { type: "string", required: false },    // Absorbs "cover", "contain", "fit"
+  coverAspect: { type: "string", required: false },
+  coverFit: { type: "string", required: false },
   coverPosition: { type: "string", required: false },
-
-  // System Flags
   tags: { type: "list", of: { type: "string" }, required: false },
   draft: { type: "boolean", required: false, default: false },
   featured: { type: "boolean", required: false, default: false },
-  layout: { type: "string", required: false }, // Absorbs "article" layout overrides
-
-  // Access & Membership
+  layout: { type: "string", required: false },
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
-
-  // SEO & Social (The "Marketing" Block)
   ogTitle: { type: "string", required: false },
   ogDescription: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
+  readTime: { type: "string", required: false },
 } as const;
 
 /**
- * -----------------------------------------------------------------------------
- * 2. SHARED LOGIC
- * Ensures slugs generated here match exactly with getStaticPaths logic.
- * -----------------------------------------------------------------------------
+ * 2. SHARED NORMALIZATION LOGIC
+ * Ensures URLs never have trailing slashes and match local file logic.
  */
 function normalizeSlug(doc: any): string {
   if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
@@ -59,11 +44,8 @@ function normalizeSlug(doc: any): string {
 }
 
 /**
- * -----------------------------------------------------------------------------
  * 3. DOCUMENT DEFINITIONS
- * -----------------------------------------------------------------------------
  */
-
 export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
@@ -71,11 +53,10 @@ export const Post = defineDocumentType(() => ({
   fields: {
     ...commonFields,
     author: { type: "string", required: false },
-    authorTitle: { type: "string", required: false }, // Absorbs Abraham of London title
-    readTime: { type: "string", required: false },
+    authorTitle: { type: "string", required: false },
     category: { type: "string", required: false },
     relatedDownloads: { type: "list", of: { type: "string" }, required: false },
-    resources: { type: "json", required: false }, // Absorbs custom resource JSON
+    resources: { type: "json", required: false },
     authorNote: { type: "string", required: false },
   },
   computedFields: {
@@ -91,8 +72,7 @@ export const Canon = defineDocumentType(() => ({
   fields: {
     ...commonFields,
     subtitle: { type: "string", required: false },
-    author: { type: "string", required: false }, // Absorbs specific author fields
-    readTime: { type: "string", required: false },
+    author: { type: "string", required: false },
     volumeNumber: { type: "string", required: false },
     order: { type: "number", required: false },
   },
@@ -112,7 +92,6 @@ export const Book = defineDocumentType(() => ({
     author: { type: "string", required: false },
     publisher: { type: "string", required: false },
     isbn: { type: "string", required: false },
-    readTime: { type: "string", required: false },
   },
   computedFields: {
     url: { type: "string", resolve: (doc) => `/books/${normalizeSlug(doc)}` },
@@ -127,7 +106,6 @@ export const Short = defineDocumentType(() => ({
   fields: {
     ...commonFields,
     theme: { type: "string", required: false },
-    readTime: { type: "string", required: false },
     published: { type: "boolean", required: false, default: true },
   },
   computedFields: {
@@ -147,6 +125,7 @@ export const Download = defineDocumentType(() => ({
     pdfPath: { type: "string", required: false },
     fileSize: { type: "string", required: false },
     downloadUrl: { type: "string", required: false },
+    downloadFile: { type: "string", required: false },
   },
   computedFields: {
     url: { type: "string", resolve: (doc) => `/downloads/${normalizeSlug(doc)}` },
@@ -164,7 +143,6 @@ export const Resource = defineDocumentType(() => ({
     resourceType: { type: "string", required: false },
     fileUrl: { type: "string", required: false },
     downloadUrl: { type: "string", required: false },
-    readTime: { type: "string", required: false },
   },
   computedFields: {
     url: { type: "string", resolve: (doc) => `/resources/${normalizeSlug(doc)}` },
@@ -195,8 +173,8 @@ export const Print = defineDocumentType(() => ({
   fields: {
     ...commonFields,
     dimensions: { type: "string", required: false },
-    available: { type: "boolean", default: true },
     price: { type: "string", required: false },
+    available: { type: "boolean", default: true },
   },
   computedFields: {
     url: { type: "string", resolve: (doc) => `/prints/${normalizeSlug(doc)}` },
@@ -208,28 +186,17 @@ export const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    ...commonFields,
-    author: { type: "string", required: false },
-  },
+  fields: { ...commonFields, author: { type: "string", required: false } },
   computedFields: {
     url: { type: "string", resolve: (doc) => `/strategy/${normalizeSlug(doc)}` },
     slug: { type: "string", resolve: normalizeSlug },
   },
 }));
 
-/**
- * -----------------------------------------------------------------------------
- * 4. SYSTEM SOURCE
- * -----------------------------------------------------------------------------
- */
 export default makeSource({
   contentDirPath: "content",
   documentTypes: [Post, Book, Canon, Short, Resource, Download, Event, Print, Strategy],
-  mdx: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeSlug],
-  },
+  mdx: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
   onUnknownDocuments: "skip",
   disableImportAliasWarning: true,
 });

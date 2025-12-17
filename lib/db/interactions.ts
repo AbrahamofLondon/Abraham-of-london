@@ -1,13 +1,5 @@
-// lib/db/interactions.ts
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || process.env.INNER_CIRCLE_DB_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 export interface InteractionStats {
   likes: number;
@@ -16,120 +8,99 @@ export interface InteractionStats {
   userSaved: boolean;
 }
 
+/**
+ * DATA HYGIENE: getInteractionStats
+ * Retrieves global aggregates and session-specific states.
+ */
 export async function getInteractionStats(
   shortSlug: string,
   sessionId?: string | null
 ): Promise<InteractionStats> {
-  const client = await pool.connect();
-  try {
-    const totalsQuery = `
-      SELECT action, COUNT(*)::int as count
-      FROM short_interactions
-      WHERE short_slug = $1
-        AND deleted_at IS NULL
-      GROUP BY action
-    `;
-    const totalsResult = await client.query(totalsQuery, [shortSlug]);
+  // 1. Fetch aggregates for 'like' and 'save' actions that are not deleted
+  const aggregates = await prisma.shortInteraction.groupBy({
+    by: ['action'],
+    where: {
+      shortSlug,
+      deletedAt: null,
+    },
+    _count: true,
+  });
 
-    let userLiked = false;
-    let userSaved = false;
+  let userLiked = false;
+  let userSaved = false;
 
-    if (sessionId) {
-      const userQuery = `
-        SELECT action
-        FROM short_interactions
-        WHERE short_slug = $1
-          AND deleted_at IS NULL
-          AND session_id = $2
-      `;
-      const userResult = await client.query(userQuery, [shortSlug, sessionId]);
-      userLiked = userResult.rows.some((r) => r.action === "like");
-      userSaved = userResult.rows.some((r) => r.action === "save");
-    }
+  // 2. Determine if the current session has active interactions
+  if (sessionId) {
+    const userInteractions = await prisma.shortInteraction.findMany({
+      where: {
+        shortSlug,
+        sessionId,
+        deletedAt: null,
+      },
+      select: { action: true },
+    });
 
-    const likesRow = totalsResult.rows.find((r) => r.action === "like");
-    const savesRow = totalsResult.rows.find((r) => r.action === "save");
-
-    return {
-      likes: likesRow?.count ?? 0,
-      saves: savesRow?.count ?? 0,
-      userLiked,
-      userSaved,
-    };
-  } finally {
-    client.release();
+    userLiked = userInteractions.some((i) => i.action === 'like');
+    userSaved = userInteractions.some((i) => i.action === 'save');
   }
+
+  const likesCount = aggregates.find((a) => a.action === 'like')?._count ?? 0;
+  const savesCount = aggregates.find((a) => a.action === 'save')?._count ?? 0;
+
+  return {
+    likes: likesCount,
+    saves: savesCount,
+    userLiked,
+    userSaved,
+  };
 }
 
+/**
+ * ATOMIC MUTATION: toggleInteraction
+ * Uses a transactional approach to flip the state of an interaction.
+ */
 export async function toggleInteraction(
   shortSlug: string,
   action: 'like' | 'save',
   sessionId: string
 ): Promise<InteractionStats> {
-  const client = await pool.connect();
-  
-  try {
-    await client.query('BEGIN');
-    
-    // Check if active interaction exists for this session
-    const checkQuery = `
-      SELECT id, deleted_at 
-      FROM short_interactions 
-      WHERE short_slug = $1 
-        AND action = $2 
-        AND session_id = $3
-    `;
-    
-    const existing = await client.query(checkQuery, [shortSlug, action, sessionId]);
-    
-    if (existing.rows.length > 0) {
-      const interaction = existing.rows[0];
-      
-      if (interaction.deleted_at) {
-        // Restore deleted interaction
-        await client.query(
-          `UPDATE short_interactions 
-           SET deleted_at = NULL, updated_at = CURRENT_TIMESTAMP 
-           WHERE id = $1`,
-          [interaction.id]
-        );
+  // We use a transaction to ensure the 'check and update' is atomic
+  return await prisma.$transaction(async (tx) => {
+    // 1. Look for an existing record (even if soft-deleted)
+    const existing = await tx.shortInteraction.findFirst({
+      where: {
+        shortSlug,
+        sessionId,
+        action,
+      },
+    });
+
+    if (existing) {
+      if (existing.deletedAt) {
+        // Restore: Builder re-engaged
+        await tx.shortInteraction.update({
+          where: { id: existing.id },
+          data: { deletedAt: null },
+        });
       } else {
-        // Soft delete existing interaction
-        await client.query(
-          `UPDATE short_interactions 
-           SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
-           WHERE id = $1`,
-          [interaction.id]
-        );
+        // Soft Delete: Builder withdrew engagement
+        await tx.shortInteraction.update({
+          where: { id: existing.id },
+          data: { deletedAt: new Date() },
+        });
       }
     } else {
-      // Create new interaction with session_id
-      await client.query(
-        `INSERT INTO short_interactions (short_slug, session_id, action) 
-         VALUES ($1, $2, $3)`,
-        [shortSlug, sessionId, action]
-      );
+      // Create: Initial engagement
+      await tx.shortInteraction.create({
+        data: {
+          shortSlug,
+          sessionId,
+          action,
+        },
+      });
     }
-    
-    await client.query('COMMIT');
-    
-    // Return updated stats
+
+    // Return the updated state for immediate UI feedback
     return await getInteractionStats(shortSlug, sessionId);
-    
-  } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error toggling interaction:', error);
-    
-    // If it's a unique constraint violation, the user already interacted
-    if (error instanceof Error && 
-        (error.message.includes('unique constraint') || 
-         error.message.includes('duplicate key'))) {
-      // Return current stats
-      return await getInteractionStats(shortSlug, sessionId);
-    }
-    
-    throw error;
-  } finally {
-    client.release();
-  }
+  });
 }

@@ -8,140 +8,84 @@ interface PageViewParams {
   [key: string]: unknown;
 }
 
+/**
+ * Unified Analytics Engine
+ * Synchronizes GA4 with internal System Logs for the Kingdom Vault.
+ */
 export function useAnalytics() {
-  // Initialise analytics + auto page-view tracking
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Ensure dataLayer exists with proper type checking
-    if (!("dataLayer" in window)) {
-      (window as any).dataLayer = [];
+    // 1. Initialize dataLayer and gtag shim
+    const win = window as any;
+    win.dataLayer = win.dataLayer || [];
+    if (!win.gtag) {
+      win.gtag = function() { win.dataLayer.push(arguments); };
+      win.gtag('js', new Date());
+      // Configuration is typically handled in _document or _app via Script tag
     }
 
-    // Define a basic gtag shim if GA hasn't injected one yet
-    if (!("gtag" in window)) {
-      (window as any).gtag = (...args: unknown[]) => {
-        // Push into dataLayer in GA-compatible format
-        (window as any).dataLayer.push(args);
-      };
-    }
-
-    const trackPageView = () => {
-      if (typeof document === "undefined" || typeof window === "undefined") {
-        return;
-      }
-
-      const pageParams: PageViewParams = {
+    // 2. Automated Page View Tracking
+    const track = () => {
+      const params: PageViewParams = {
         page_title: document.title,
         page_location: window.location.href,
         page_path: window.location.pathname,
       };
-
-      (window as any).gtag("event", "page_view", pageParams);
+      win.gtag("event", "page_view", params);
     };
 
-    // Initial page view
-    trackPageView();
+    track(); // Initial load
 
-    // SPA-style navigation: basic support via popstate
-    const handleRouteChange = () => {
-      // Small delay so title / URL stabilise
-      setTimeout(trackPageView, 100);
-    };
-
-    window.addEventListener("popstate", handleRouteChange);
-
-    return () => {
-      window.removeEventListener("popstate", handleRouteChange);
-    };
+    // 3. SPA Navigation Support
+    const handlePopState = () => setTimeout(track, 150);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  const trackEvent = useCallback(
-    (event: string, params: Record<string, unknown> = {}) => {
-      if (typeof window === "undefined" || !(window as any).gtag) {
-        if (process.env.NODE_ENV === "development") {
-          // Fallback logging in dev so you still see signals
-          console.log("📊 Analytics Event (fallback):", event, params);
-        }
-        return;
-      }
+  /**
+   * Universal Event Tracker
+   * Sends data to both GA4 and a private internal API in production.
+   */
+  const trackEvent = useCallback((event: string, params: Record<string, unknown> = {}) => {
+    if (typeof window === "undefined") return;
+    const win = window as any;
 
-      const enhancedParams: Record<string, unknown> = {
-        ...params,
-        event_timestamp: new Date().toISOString(),
-        user_agent:
-          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-      };
+    const enhancedParams = {
+      ...params,
+      timestamp: new Date().toISOString(),
+      platform: "web",
+    };
 
-      (window as any).gtag("event", event, enhancedParams);
+    // GA4 Tracking
+    if (win.gtag) {
+      win.gtag("event", event, enhancedParams);
+    }
 
-      // Optional: also send to a custom analytics endpoint in production
-      if (process.env.NODE_ENV === "production") {
-        fetch("/api/analytics", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            event,
-            ...enhancedParams,
-          }),
-        }).catch(() => {
-          // Silent fail – analytics must never break UX
-        });
-      }
-    },
-    []
-  );
+    // Internal System Log (Production Only)
+    if (process.env.NODE_ENV === "production") {
+      fetch("/api/analytics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event, ...enhancedParams }),
+        keepalive: true, // Ensures the request finishes even if the page unloads
+      }).catch(() => {}); // Fail silently
+    } else {
+      console.log(`📊 [Analytics] ${event}`, enhancedParams);
+    }
+  }, []);
 
-  const trackPageView = useCallback(
-    (pageName: string, additionalParams: Record<string, unknown> = {}) => {
-      if (typeof window === "undefined" || !(window as any).gtag) return;
-
-      const pageParams: PageViewParams = {
-        page_title: pageName,
-        page_location: window.location.href,
-        page_path: window.location.pathname,
-        ...additionalParams,
-      };
-
-      (window as any).gtag("event", "page_view", pageParams);
-    },
-    []
-  );
-
-  const trackError = useCallback(
-    (error: Error, context: Record<string, unknown> = {}) => {
-      trackEvent("error_occurred", {
-        error_message: error.message,
-        error_stack: error.stack,
-        error_name: error.name,
-        ...context,
-      });
-    },
-    [trackEvent]
-  );
-
-  const trackPerformance = useCallback(
-    (
-      metricName: string,
-      value: number,
-      context: Record<string, unknown> = {}
-    ) => {
-      trackEvent("performance_metric", {
-        metric_name: metricName,
-        metric_value: value,
-        ...context,
-      });
-    },
-    [trackEvent]
-  );
+  const trackError = useCallback((error: Error, context: Record<string, unknown> = {}) => {
+    trackEvent("system_error", {
+      message: error.message,
+      name: error.name,
+      ...context,
+    });
+  }, [trackEvent]);
 
   return {
     trackEvent,
-    trackPageView,
     trackError,
-    trackPerformance,
   };
 }
 

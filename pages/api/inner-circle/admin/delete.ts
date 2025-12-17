@@ -7,87 +7,94 @@ import {
   getClientIp 
 } from '@/lib/server/rateLimit';
 
-// Admin auth helper (same as above)
+/**
+ * ADMIN AUTHORITY CHECK
+ * Synchronized with the System Admin master key.
+ */
 function isAdminAuthenticated(req: NextApiRequest): boolean {
-  const adminToken = req.headers['x-admin-token'] || req.headers['authorization'];
-  return adminToken === process.env.ADMIN_API_KEY || 
-         process.env.NODE_ENV === 'development';
+  const adminToken = req.headers['x-inner-circle-admin-key'] || req.headers['authorization'];
+  if (!adminToken || typeof adminToken !== 'string') return false;
+  
+  return adminToken === process.env.INNER_CIRCLE_ADMIN_KEY;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+type DeleteResponse = {
+  ok: boolean;
+  message?: string;
+  deletedAt?: string;
+  error?: string;
+  note?: string;
+};
+
+/**
+ * IDENTITY TERMINATION ENGINE - Unified Production Version
+ * Hardened for administrative surgical deletions and data privacy compliance.
+ */
+export default async function handler(
+  req: NextApiRequest, 
+  res: NextApiResponse<DeleteResponse>
+) {
+  // 1. Method Authority
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ 
-      ok: false, 
-      error: 'Method not allowed. Use POST.' 
-    });
+    return res.status(405).json({ ok: false, error: 'Surgical deletion requires POST authorization.' });
   }
 
+  // 2. Authentication Perimeter
   if (!isAdminAuthenticated(req)) {
-    return res.status(401).json({ 
-      ok: false, 
-      error: 'Unauthorized. Admin access required.' 
-    });
+    console.error(`[Security Alert] Unauthorized deletion attempt for IP: ${getClientIp(req)}`);
+    return res.status(401).json({ ok: false, error: 'Unauthorized. System Admin key required.' });
   }
 
-  // Rate limiting
-  const ip = getClientIp(req);
+  // 3. Administrative Rate Limiting
   const rateLimitResult = rateLimitForRequestIp(
     req, 
     'inner-circle-admin-delete', 
     RATE_LIMIT_CONFIGS.ADMIN_OPERATIONS
   );
 
+  // Apply headers for operational transparency
+  const headers = createRateLimitHeaders(rateLimitResult.result);
+  Object.entries(headers).forEach(([key, value]) => res.setHeader(key, value));
+
   if (!rateLimitResult.result.allowed) {
-    const headers = createRateLimitHeaders(rateLimitResult.result);
-    Object.entries(headers).forEach(([key, value]) => {
-      res.setHeader(key, value);
-    });
-    
     return res.status(429).json({ 
       ok: false, 
-      error: 'Too many admin requests. Please try again later.' 
+      error: 'Operational limit reached. Administrative actions are throttled.' 
     });
   }
 
   try {
     const { email, reason } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: 'Email address is required.' 
-      });
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ ok: false, error: 'Target identity (email) is required.' });
     }
 
-    const success = await deleteMemberByEmail(email);
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 4. Surgical Deletion Execution
+    // This removes the member and all associated cryptographic keys.
+    const success = await deleteMemberByEmail(normalizedEmail);
 
     if (!success) {
       return res.status(404).json({ 
         ok: false, 
-        error: 'Member not found.' 
+        error: 'Identity not found in the Vault store.' 
       });
     }
 
-    // Add rate limit headers
-    const headers = createRateLimitHeaders(rateLimitResult.result);
-    Object.entries(headers).forEach(([key, value]) => {
-      res.setHeader(key, value);
-    });
+    console.info(`[Admin Action] Member deleted: ${normalizedEmail}${reason ? ` | Reason: ${reason}` : ''}`);
 
     return res.status(200).json({ 
       ok: true, 
-      message: 'Member successfully deleted.',
+      message: 'Identity and associated keys successfully purged.',
       deletedAt: new Date().toISOString(),
-      note: reason ? `Reason: ${reason}` : undefined
+      note: reason ? `Reason provided: ${reason}` : undefined
     });
 
   } catch (error) {
-    console.error('[Admin Delete] Error:', error);
-    
-    return res.status(500).json({ 
-      ok: false, 
-      error: 'Deletion failed. Please try again.' 
-    });
+    console.error('[Admin Action] Exception during surgical deletion:', error);
+    return res.status(500).json({ ok: false, error: 'Purge subsystem failure. Action aborted.' });
   }
 }

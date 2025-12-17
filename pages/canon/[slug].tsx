@@ -1,12 +1,11 @@
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { 
-  getAllCanons, 
-  getCanonBySlug,
-  normalizeSlug 
-} from "@/lib/contentlayer-helper";
+
+import { getAllCanons, normalizeSlug, isDraft } from "@/lib/contentlayer-helper";
+
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -14,65 +13,68 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
 import SafeMDXRemote from "@/components/SafeMDXRemote";
 
-type Props = { canon: any; source: any };
+type Props = { canon: any; source: MDXRemoteSerializeResult };
+
+const SITE = "https://www.abrahamoflondon.org";
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const canons = getAllCanons();
+  const canons = getAllCanons().filter((d: any) => !isDraft(d));
+
   const paths = canons
-    .map((doc) => {
-      const slug = normalizeSlug(doc);
-      return slug ? { params: { slug } } : null;
-    })
-    .filter(Boolean) as { params: { slug: string } }[];
+    .map((d: any) => normalizeSlug(d))
+    .filter(Boolean)
+    .map((slug: string) => ({ params: { slug } }));
 
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
-  const canon = getCanonBySlug(slug);
+  if (!slug) return { notFound: true };
 
+  const canons = getAllCanons().filter((d: any) => !isDraft(d));
+  const canon = canons.find((d: any) => normalizeSlug(d) === slug);
   if (!canon) return { notFound: true };
 
+  const raw = String(canon?.body?.raw ?? "");
+
+  let source: MDXRemoteSerializeResult;
   try {
-    const source = await serialize(canon.body.raw, {
+    source = await serialize(raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
         rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
       },
     });
-    return { props: { canon, source }, revalidate: 1800 };
-  } catch (err) {
-    const fallbackSource = await serialize("Vault volume is being initialized.");
-    return { props: { canon, source: fallbackSource }, revalidate: 1800 };
+  } catch {
+    source = await serialize("Content is being prepared.");
   }
+
+  return { props: { canon, source }, revalidate: 1800 };
 };
 
-const CanonPage: NextPage<Props> = ({ canon, source }) => {
-  const title = canon.title ?? "Canon Volume";
+const CanonPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ canon, source }) => {
+  const title = String(canon?.title ?? "Canon");
+  const desc = String(canon?.description ?? canon?.excerpt ?? "");
+  const canonicalUrl = `${SITE}/canon/${normalizeSlug(canon)}`;
+
   return (
-    <Layout title={title}>
+    <Layout title={title} description={desc} canonicalUrl={canonicalUrl} ogImage={canon?.coverImage ?? undefined} ogType="article">
       <Head>
-        <title>{title} | The Canon | Abraham of London</title>
-        {canon.excerpt && <meta name="description" content={canon.excerpt} />}
+        <link rel="canonical" href={canonicalUrl} />
+        {canon?.excerpt ? <meta name="description" content={canon.excerpt} /> : null}
       </Head>
 
-      <main className="mx-auto max-w-3xl px-6 py-12 sm:py-16 lg:py-24">
-        <header className="mb-12 space-y-4 border-b border-gold/10 pb-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1">
-             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">The Canon</span>
-          </div>
-          <h1 className="font-serif text-4xl font-semibold text-cream sm:text-5xl lg:text-6xl">{title}</h1>
-          {canon.subtitle && <p className="text-xl text-gray-400 font-light italic leading-relaxed">{canon.subtitle}</p>}
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+        <header className="mb-8 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Canon</p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{title}</h1>
+          {canon?.excerpt ? <p className="text-sm text-gray-300">{canon.excerpt}</p> : null}
         </header>
 
-        <article className="prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-headings:text-cream prose-p:text-gray-300 prose-a:text-gold prose-strong:text-gold/90">
+        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
           <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
-
-        <footer className="mt-20 border-t border-white/5 pt-10">
-           <p className="text-[10px] font-mono uppercase tracking-widest text-gray-600">Abraham of London · Private Library</p>
-        </footer>
       </main>
     </Layout>
   );

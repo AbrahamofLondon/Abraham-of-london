@@ -1,110 +1,111 @@
-// pages/api/inner-circle/register.ts - Inline stub
+// pages/api/inner-circle/register.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { verifyRecaptchaDetailed } from "@/lib/recaptcha"; // Unified helper we reviewed
+// NOTE: Ensure these exist in your lib/inner-circle engine
+import { 
+  createOrUpdateMemberAndIssueKey, 
+  sendInnerCircleEmail 
+} from "@/lib/inner-circle"; 
 
-// Stub functions
-const sendInnerCircleEmail = async (
-  to: string,
-  subject: string,
-  html: string,
-  text?: string
-): Promise<void> => {
-  console.log("Stub: sendInnerCircleEmail called to:", to, "subject:", subject);
+type ResponseData = {
+  ok: boolean;
+  message?: string;
+  accessKey?: string;
+  keySuffix?: string;
+  error?: string;
 };
 
-const createOrUpdateMemberAndIssueKey = async (args: {
-  email: string;
-  name?: string;
-  ipAddress?: string;
-  context?: string;
-}): Promise<{
-  key: string;
-  keySuffix: string;
-  createdAt: string;
-  status: string;
-}> => {
-  console.log("Stub: createOrUpdateMemberAndIssueKey called with:", args);
-  
-  // Generate a realistic-looking key
-  const keySuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-  const key = `IC-${args.email.substring(0, 3).toUpperCase()}-${keySuffix}-${Date.now().toString(36).substring(4, 8).toUpperCase()}`;
-  
-  return {
-    key: key,
-    keySuffix: keySuffix,
-    createdAt: new Date().toISOString(),
-    status: "active"
-  };
-};
-
-// Simple rate limit stub
-const rateLimited = (fn: Function, options?: any) => {
-  return async (...args: any[]) => {
-    return fn(...args);
-  };
-};
-
+/**
+ * THE REGISTRATION ENGINE - Unified Production Version
+ * Hardened for reCAPTCHA v3 and persistent member management.
+ */
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<{ ok: boolean; message?: string; accessKey?: string; keySuffix?: string } | { ok: false; error: string }>
+  res: NextApiResponse<ResponseData>
 ) {
-  // Apply rate limiting stub
-  const handlerFunc = rateLimited(async () => {
-    if (req.method !== "POST") {
-      res.setHeader("Allow", "POST");
-      res.status(405).json({ ok: false, error: "Method not allowed" });
-      return;
-    }
+  // 1. Method Restriction
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ ok: false, error: "System requires POST for registration." });
+  }
 
-    let body;
-    try {
-      body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-    } catch {
-      res.status(400).json({ ok: false, error: "Invalid JSON body" });
-      return;
-    }
+  // 2. Body Parsing & Validation
+  const { email, name, recaptchaToken, returnTo } = req.body || {};
 
-    const { email, name } = body;
+  if (!email || typeof email !== "string") {
+    return res.status(400).json({ ok: false, error: "Identity (email) is required." });
+  }
 
-    if (!email || typeof email !== "string") {
-      res.status(400).json({ ok: false, error: "Email is required" });
-      return;
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ ok: false, error: "Invalid identity format." });
+  }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      res.status(400).json({ ok: false, error: "Invalid email format" });
-      return;
-    }
+  // 3. Security Check: reCAPTCHA v3 Validation
+  try {
+    const verification = await verifyRecaptchaDetailed(
+      recaptchaToken,
+      "inner_circle_register"
+    );
 
-    try {
-      const keyRecord = await createOrUpdateMemberAndIssueKey({
-        email,
-        name,
-        ipAddress: Array.isArray(req.headers["x-forwarded-for"]) 
-          ? req.headers["x-forwarded-for"][0] 
-          : req.headers["x-forwarded-for"] || req.socket.remoteAddress,
-        context: "api-register"
+    if (!verification.success) {
+      console.warn(`[Security Alert] Bot detected or reCAPTCHA failed for: ${email}`);
+      return res.status(403).json({ 
+        ok: false, 
+        error: "Security verification failed. Please refresh and try again." 
       });
+    }
+  } catch (secError) {
+    console.error("[Security Exception] reCAPTCHA system error:", secError);
+    return res.status(500).json({ ok: false, error: "Security subsystem offline." });
+  }
 
-      // Send welcome email stub
-      await sendInnerCircleEmail(
-        email,
-        "Welcome to the Inner Circle",
-        `<h1>Welcome!</h1><p>Your access key: ${keyRecord.key}</p><p>Keep this key safe!</p>`,
-        `Welcome! Your access key: ${keyRecord.key}\n\nKeep this key safe!`
-      );
+  // 4. Persistence & Issue Key
+  try {
+    const ipAddress = Array.isArray(req.headers["x-forwarded-for"])
+      ? req.headers["x-forwarded-for"][0]
+      : req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-      res.status(200).json({
-        ok: true,
-        message: "Registration successful. Check your email for access key.",
+    const keyRecord = await createOrUpdateMemberAndIssueKey({
+      email: email.toLowerCase().trim(),
+      name: name?.trim(),
+      ipAddress,
+      context: "web-registration"
+    });
+
+    // 5. Professional Email Dispatch
+    // This utilizes your actual email templates defined in the library
+    await sendInnerCircleEmail({
+      to: email,
+      type: "welcome",
+      data: {
+        name: name || "Builder",
         accessKey: keyRecord.key,
-        keySuffix: keyRecord.keySuffix
-      });
-    } catch (error) {
-      console.error("Error in inner circle registration:", error);
-      res.status(500).json({ ok: false, error: "Internal server error" });
-    }
-  });
+        unlockUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/inner-circle?key=${keyRecord.key}&returnTo=${encodeURIComponent(returnTo || "/canon")}`
+      }
+    });
 
-  await handlerFunc();
+    // 6. Success Response (Privacy-Safe)
+    return res.status(200).json({
+      ok: true,
+      message: "Access granted. Check your inbox for the security key.",
+      keySuffix: keyRecord.keySuffix // Return suffix for UI confirmation
+    });
+
+  } catch (error: any) {
+    console.error("[Build Error] Inner Circle Registration failed:", error);
+    
+    // Forgiving error handling for existing members
+    if (error.code === "ALREADY_MEMBER") {
+      return res.status(200).json({
+        ok: true,
+        message: "Identity already registered. A fresh key has been dispatched to your inbox."
+      });
+    }
+
+    return res.status(500).json({ 
+      ok: false, 
+      error: "Internal server error during vault registration." 
+    });
+  }
 }

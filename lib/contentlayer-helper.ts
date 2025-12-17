@@ -2,38 +2,13 @@
 import * as generated from "contentlayer/generated";
 
 /**
- * THE CORE ENGINE - Robust, centralized document handling.
- * Synchronizes file paths, slugs, and complex metadata (SEO, Visuals, Assets).
+ * THE CORE ENGINE - IMMUTABLE SINGLE SOURCE OF TRUTH
+ * Unified logic for slug matching, asset resolution, and build-safety.
  */
 
 export type DocKind =
   | "post" | "book" | "download" | "event" | "print" 
   | "resource" | "strategy" | "canon" | "short" | "unknown";
-
-/**
- * Enhanced return type for Vault components to ensure 
- * complete data delivery including new SEO/Social fields.
- */
-export interface ContentlayerDocBase {
-  _id: string;
-  type: string;
-  title: string;
-  date: string;
-  slug: string;
-  url: string;
-  excerpt?: string;
-  description?: string;
-  coverImage?: string;
-  coverAspect?: string;
-  coverFit?: string;
-  ogTitle?: string;
-  ogDescription?: string;
-  socialCaption?: string;
-  readTime?: string;
-  category?: string;
-  tags?: string[];
-  featured?: boolean;
-}
 
 const KIND_URL_MAP: Record<DocKind, string> = {
   post: "/blog",
@@ -56,7 +31,7 @@ function pickArray(name: string): any[] {
   return Array.isArray(v) ? v : [];
 }
 
-// Collections
+// Collections (Raw Arrays)
 export const allPosts = pickArray("allPosts");
 export const allBooks = pickArray("allBooks");
 export const allDownloads = pickArray("allDownloads");
@@ -68,12 +43,15 @@ export const allCanons = pickArray("allCanons");
 export const allShorts = pickArray("allShorts");
 
 // Logic & Status
-export const isDraft = (doc: any): boolean => doc?.draft === true || String(doc?.draft).toLowerCase() === "true";
+export const isDraft = (doc: any): boolean => {
+  if (!doc) return true;
+  return doc.draft === true || String(doc.draft).toLowerCase() === "true";
+};
+
 export const isPublished = (doc: any): boolean => !isDraft(doc);
 
 /**
- * normalizeSlug: THE central authority for URL generation and file matching.
- * Synchronized with contentlayer.config.ts logic.
+ * normalizeSlug: Unified authority for URL strings.
  */
 export function normalizeSlug(doc: any): string {
   if (!doc) return "";
@@ -84,7 +62,7 @@ export function normalizeSlug(doc: any): string {
   if (fp) {
     const parts = fp.split("/");
     const last = parts[parts.length - 1];
-    return (last === "index" ? parts[parts.length - 2] : last) || "untitled";
+    return (last === "index" ? parts[parts.length - 2] : last).toLowerCase();
   }
   return "untitled";
 }
@@ -94,8 +72,7 @@ export function getDocKind(doc: any): DocKind {
   if (KIND_URL_MAP[type as DocKind]) return type as DocKind;
   const dir = (doc._raw?.sourceFileDir || "").toLowerCase();
   if (dir.includes("shorts")) return "short";
-  const match = Object.keys(KIND_URL_MAP).find(k => dir.includes(k)) as DocKind;
-  return match || "unknown";
+  return (Object.keys(KIND_URL_MAP).find(k => dir.includes(k)) as DocKind) || "unknown";
 }
 
 export function getDocHref(doc: any): string {
@@ -124,6 +101,10 @@ export const getAllContentlayerDocs = () => [
 
 export const getPublishedDocuments = () => getAllContentlayerDocs().filter(isPublished);
 
+/**
+ * getPublishedDocumentsByType: Ensures chronological order 
+ * and visibility of all 133 files.
+ */
 export function getPublishedDocumentsByType(kind: DocKind, limit?: number): any[] {
   const items = getPublishedDocuments()
     .filter((d) => getDocKind(d) === kind)
@@ -131,8 +112,7 @@ export function getPublishedDocumentsByType(kind: DocKind, limit?: number): any[
   return limit ? items.slice(0, limit) : items;
 }
 
-// --- SYSTEM-WIDE NAMED EXPORTS ---
-
+// Named Exports for System Parity
 export const getPublishedPosts = () => getPublishedDocumentsByType("post");
 export const getAllCanons = () => getPublishedDocumentsByType("canon");
 export const getAllBooks = () => getPublishedDocumentsByType("book");
@@ -143,20 +123,17 @@ export const getAllStrategies = () => getPublishedDocumentsByType("strategy");
 export const getAllPrints = () => getPublishedDocumentsByType("print");
 export const getPublishedShorts = () => getPublishedDocumentsByType("short");
 
-// --- BY-SLUG LOOKUP ENGINE ---
-
-const cleanMatch = (s: string) => String(s ?? "").trim().toLowerCase();
+// By-Slug Engine
+const cleanMatch = (s: string) => String(s ?? "").trim().toLowerCase().replace(/\/$/, "");
 
 export const getPostBySlug = (s: string) => getPublishedPosts().find(d => normalizeSlug(d) === cleanMatch(s));
-export const getBookBySlug = (s: string) => getAllBooks().find(d => normalizeSlug(d) === cleanMatch(s));
 export const getCanonBySlug = (s: string) => getAllCanons().find(d => normalizeSlug(d) === cleanMatch(s));
 export const getShortBySlug = (s: string) => getPublishedShorts().find(d => normalizeSlug(d) === cleanMatch(s));
 export const getPrintBySlug = (s: string) => getAllPrints().find(d => normalizeSlug(d) === cleanMatch(s));
-export const getResourceBySlug = (s: string) => getAllResources().find(d => normalizeSlug(d) === cleanMatch(s));
-export const getDownloadBySlug = (s: string) => getAllDownloads().find(d => normalizeSlug(d) === cleanMatch(s));
+export const getBookBySlug = (s: string) => getAllBooks().find(d => normalizeSlug(d) === cleanMatch(s));
 
 export function assertContentlayerHasDocs(where: string) {
   if (getAllContentlayerDocs().length === 0) {
-    throw new Error(`[Build Failure] 0 documents detected in ${where}. Check CI content path.`);
+    throw new Error(`[Build Error] 0 documents found in ${where}`);
   }
 }

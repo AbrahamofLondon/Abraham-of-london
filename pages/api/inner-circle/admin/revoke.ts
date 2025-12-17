@@ -7,95 +7,94 @@ import {
   getClientIp 
 } from '@/lib/server/rateLimit';
 
-// Admin auth helper (you should replace with your actual admin auth)
+/**
+ * ADMIN AUTHORITY CHECK
+ * Strictly validates against the system master key.
+ */
 function isAdminAuthenticated(req: NextApiRequest): boolean {
-  // TODO: Implement your actual admin authentication
-  // Example: check for admin session, JWT, or API key
-  const adminToken = req.headers['x-admin-token'] || req.headers['authorization'];
-  return adminToken === process.env.ADMIN_API_KEY || 
-         process.env.NODE_ENV === 'development'; // Allow in dev for testing
+  const adminToken = req.headers['x-inner-circle-admin-key'] || req.headers['authorization'];
+  if (!adminToken || typeof adminToken !== 'string') return false;
+  
+  return adminToken === process.env.INNER_CIRCLE_ADMIN_KEY;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Only allow POST requests
+type RevokeResponse = {
+  ok: boolean;
+  message?: string;
+  revokedAt?: string;
+  error?: string;
+};
+
+/**
+ * ACCESS REVOCATION ENGINE - Unified Production Version
+ * Hardened for immediate invalidation of cryptographic keys and audit logging.
+ */
+export default async function handler(
+  req: NextApiRequest, 
+  res: NextApiResponse<RevokeResponse>
+) {
+  // 1. Method Authority
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ 
-      ok: false, 
-      error: 'Method not allowed. Use POST.' 
-    });
+    return res.status(405).json({ ok: false, error: 'Revocation requires POST authorization.' });
   }
 
-  // Admin authentication check
+  // 2. Authentication Perimeter
   if (!isAdminAuthenticated(req)) {
-    return res.status(401).json({ 
-      ok: false, 
-      error: 'Unauthorized. Admin access required.' 
-    });
+    console.error(`[Security Alert] Unauthorized revocation attempt from IP: ${getClientIp(req)}`);
+    return res.status(401).json({ ok: false, error: 'Unauthorized. System Admin key required.' });
   }
 
-  // Rate limiting for admin operations
-  const ip = getClientIp(req);
+  // 3. Administrative Rate Limiting
   const rateLimitResult = rateLimitForRequestIp(
     req, 
     'inner-circle-admin-revoke', 
     RATE_LIMIT_CONFIGS.ADMIN_OPERATIONS
   );
 
+  // Apply operational transparency headers
+  const headers = createRateLimitHeaders(rateLimitResult.result);
+  Object.entries(headers).forEach(([key, value]) => res.setHeader(key, value));
+
   if (!rateLimitResult.result.allowed) {
-    const headers = createRateLimitHeaders(rateLimitResult.result);
-    Object.entries(headers).forEach(([key, value]) => {
-      res.setHeader(key, value);
-    });
-    
     return res.status(429).json({ 
       ok: false, 
-      error: 'Too many admin requests. Please try again later.' 
+      error: 'Operational limit reached. Administrative actions are throttled.' 
     });
   }
 
   try {
     const { key, reason, revokedBy } = req.body;
 
-    if (!key) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: 'Access key is required.' 
-      });
+    if (!key || typeof key !== 'string') {
+      return res.status(400).json({ ok: false, error: 'Target access key is required.' });
     }
 
+    // 4. Cryptographic Invalidation
+    // This flips the status in the persistent store and adds an audit record.
     const success = await revokeInnerCircleKey(
-      key, 
-      revokedBy || 'admin_api', 
-      reason || 'admin_revocation'
+      key.trim(), 
+      revokedBy || 'system_admin_console', 
+      reason || 'Administrative revocation'
     );
 
     if (!success) {
       return res.status(404).json({ 
         ok: false, 
-        error: 'Key not found or already revoked.' 
+        error: 'Key not found or already in an invalid state.' 
       });
     }
 
-    // Add rate limit headers to response
-    const headers = createRateLimitHeaders(rateLimitResult.result);
-    Object.entries(headers).forEach(([key, value]) => {
-      res.setHeader(key, value);
-    });
+    console.info(`[Admin Action] Key Revoked: ${key.slice(-4)} | Reason: ${reason}`);
 
     return res.status(200).json({ 
       ok: true, 
-      message: 'Key successfully revoked.',
+      message: 'Access key has been successfully invalidated.',
       revokedAt: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('[Admin Revoke] Error:', error);
-    
-    // Don't expose internal errors
-    return res.status(500).json({ 
-      ok: false, 
-      error: 'Revocation failed. Please try again.' 
-    });
+    console.error('[Admin Action] Exception during revocation:', error);
+    return res.status(500).json({ ok: false, error: 'Revocation subsystem failure.' });
   }
 }

@@ -1,0 +1,29 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url property removed to comply with Prisma 7.2.0 validation (P1012)
+}
+
+model ShortInteraction {
+  id         Int       @id @default(autoincrement())
+  shortSlug  String    @map("short_slug") @db.VarChar(255)
+  sessionId  String?   @map("session_id") @db.VarChar(255)
+  userId     String?   @map("user_id") @db.VarChar(255)
+  action     String    @db.VarChar(50)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz
+
+  @@index([shortSlug], name: "idx_short_interactions_slug")
+  @@index([sessionId], name: "idx_short_interactions_session")
+  @@index([userId], name: "idx_short_interactions_user")
+  @@index([action], name: "idx_short_interactions_action")
+  @@index([createdAt], name: "idx_short_interactions_created")
+
+  @@map("short_interactions")
+}

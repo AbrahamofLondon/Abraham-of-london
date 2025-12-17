@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { checkRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
 import { toggleInteraction } from "@/lib/db/interactions";
+import { getOrSetSessionId, getSlugParam } from "@/lib/session";
 
 interface SuccessResponse {
   likes: number;
@@ -14,53 +15,17 @@ interface SuccessResponse {
 interface ErrorResponse {
   error: string;
   message?: string;
-  details?: string;
 }
 
-function getSlug(req: NextApiRequest): string | null {
-  const raw = req.query.slug;
-  if (!raw) return null;
-  const s = Array.isArray(raw) ? raw[0] : raw;
-  if (typeof s !== "string" || !s.trim()) return null;
-  return s.trim();
-}
-
-function appendSetCookie(res: NextApiResponse, cookie: string) {
-  const prev = res.getHeader("Set-Cookie");
-  if (!prev) {
-    res.setHeader("Set-Cookie", cookie);
-    return;
-  }
-  const next = Array.isArray(prev) ? [...prev, cookie] : [String(prev), cookie];
-  res.setHeader("Set-Cookie", next);
-}
-
-function getOrCreateSessionId(req: NextApiRequest, res: NextApiResponse): string {
-  const existing = req.cookies?.aofl_session;
-  if (existing) return existing;
-
-  const sessionId = `sess_${Math.random().toString(36).slice(2)}_${Date.now().toString(36)}`;
-  const oneYear = 60 * 60 * 24 * 365;
-
-  const cookie = [
-    `aofl_session=${sessionId}`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Lax",
-    `Max-Age=${oneYear}`,
-    process.env.NODE_ENV === "production" ? "Secure" : "",
-  ]
-    .filter(Boolean)
-    .join("; ");
-
-  appendSetCookie(res, cookie);
-  return sessionId;
-}
-
+/**
+ * THE BOOKMARK MUTATION ENGINE - Unified Production Version
+ * Hardened for atomic "Save" toggling and persistent session integrity.
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SuccessResponse | ErrorResponse>
 ) {
+  // 1. Preflight & Method Authority
   if (req.method === "OPTIONS") {
     res.setHeader("Allow", "POST,DELETE,OPTIONS");
     return res.status(204).end();
@@ -69,60 +34,74 @@ export default async function handler(
   if (!["POST", "DELETE"].includes(req.method || "")) {
     res.setHeader("Allow", "POST,DELETE,OPTIONS");
     return res.status(405).json({
-      error: `Method ${req.method} Not Allowed`,
-      message: "Use POST to save or DELETE to unsave",
+      error: "Method Restriction",
+      message: "System requires POST to save or DELETE to unsave.",
     });
   }
 
-  const slug = getSlug(req);
+  // 2. Slug Integrity Check
+  const slug = getSlugParam(req);
   if (!slug) {
     return res.status(400).json({
-      error: "Invalid request",
-      message: "Short slug is required",
+      error: "Request Malformed",
+      message: "Identifier (slug) is required for bookmarking.",
     });
   }
 
-  const rl = await checkRateLimit(req, res, RATE_LIMIT_CONFIGS.SHORTS_INTERACTIONS);
-  if (!rl.allowed) {
-    if (rl.headers) Object.entries(rl.headers).forEach(([k, v]) => res.setHeader(k, v));
-    return res.status(429).json({
-      error: "Too Many Requests",
-      message: "Rate limit exceeded for save action",
-    });
+  // 3. Institutional Rate Limiting
+  try {
+    const rl = await checkRateLimit(req, res, RATE_LIMIT_CONFIGS.SHORTS_INTERACTIONS);
+    
+    if (rl.headers) {
+      Object.entries(rl.headers).forEach(([k, v]) => res.setHeader(k, v));
+    }
+
+    if (!rl.allowed) {
+      return res.status(429).json({
+        error: "Throttling Active",
+        message: "Interaction limit reached. Please wait.",
+      });
+    }
+  } catch (rlError) {
+    console.warn("[System Warning] Rate limiting subsystem silent.");
   }
 
-  const sessionId = getOrCreateSessionId(req, res);
+  // 4. Session Authority
+  // Utilizes a unified session handler to ensure cookie consistency.
+  const sessionId = getOrSetSessionId(req, res);
 
   try {
+    // 5. Atomic Interaction Toggle
+    // Specifically targets the "save" interaction type for this endpoint.
     const stats = await toggleInteraction(slug, "save", sessionId);
 
-    if (rl.headers) Object.entries(rl.headers).forEach(([k, v]) => res.setHeader(k, v));
-
+    // 6. Cache Policy: Invalidate to ensure immediate UI feedback
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
 
-    const message = stats.userSaved ? "Short saved successfully" : "Save removed successfully";
+    const message = stats.userSaved ? "Short bookmarked." : "Bookmark removed.";
 
     return res.status(200).json({
-      likes: stats.likes,
-      saves: stats.saves,
-      userLiked: stats.userLiked,
-      userSaved: stats.userSaved,
+      likes: stats.likes || 0,
+      saves: stats.saves || 0,
+      userLiked: !!stats.userLiked,
+      userSaved: !!stats.userSaved,
       message,
     });
+
   } catch (error: any) {
-    console.error("Error in save API:", error);
+    console.error(`[System Exception] Bookmark failure for ${slug}:`, error);
+    
     return res.status(500).json({
-      error: "Internal server error",
-      message: "Failed to process save action",
-      details: process.env.NODE_ENV === "production" ? undefined : String(error?.message || error),
+      error: "Vault Write Failure",
+      message: "Failed to record bookmark. Please try again shortly.",
     });
   }
 }
 
 export const config = {
-  api: {
-    bodyParser: { sizeLimit: "1kb" },
+  api: { 
+    bodyParser: { sizeLimit: "1kb" }, 
   },
 };

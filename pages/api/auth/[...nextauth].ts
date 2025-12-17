@@ -1,22 +1,27 @@
-// pages/api/auth/[...nextauth].ts
 import NextAuth, { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
+/**
+ * THE SECURITY AUTHORITY - NextAuth Configuration
+ * Hardened for administrative access and session integrity.
+ */
 export const authOptions: NextAuthOptions = {
-  // Use JWT strategy (works without database)
+  // Use JWT strategy for stateless performance in static-leaning environments
   session: {
-    strategy: "jwt" as const,
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  
-  // Secret for signing tokens - REQUIRED
-  secret: process.env.NEXTAUTH_SECRET || "development-secret-change-this",
-  
-  // Callbacks
+
+  // Encryption Authority - REQUIRED in production
+  secret: process.env.NEXTAUTH_SECRET,
+
+  // Callbacks: Synchronizes identity across the JWT lifecycle
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.role = (user as any).role || "user"; // Prepared for RBAC
       }
       return token;
     },
@@ -25,40 +30,62 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id as string;
         (session.user as any).email = token.email as string;
+        (session.user as any).role = token.role as string;
       }
       return session;
     },
   },
-  
-  // Debug mode in development
+
+  // Security Hardening: Fail-closed in production
   debug: process.env.NODE_ENV === "development",
-  
-  // Theme
+
+  // Visual Authority: Synchronized with the Kingdom Vault brand
   theme: {
-    colorScheme: "auto" as const,
-    brandColor: "#F59E0B",
-    logo: "/logo.png",
+    colorScheme: "dark",
+    brandColor: "#d4af37", // Official Gold Hex
+    logo: "/assets/images/logo.png", // Ensure absolute path for reliability
   },
-  
-  // Providers - for now, use a simple credentials provider
+
   providers: [
-    // This is a minimal provider that will allow the API to exist
-    // You can replace this with real providers later
-    {
+    CredentialsProvider({
       id: "credentials",
-      name: "Credentials",
-      type: "credentials",
+      name: "Vault Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: "Identity", type: "email", placeholder: "advisory@firm.com" },
+        password: { label: "Passkey", type: "password" }
       },
-      async authorize() {
-        // Return null to disable actual authentication for now
-        // You can implement real auth later
+      async authorize(credentials) {
+        /**
+         * PRODUCTION AUTHORITY LOGIC:
+         * For the current architecture, we use a single Admin account 
+         * managed via environment variables to prevent database complexity.
+         */
+        const ADMIN_EMAIL = process.env.ADMIN_USER_EMAIL;
+        const ADMIN_PASS = process.env.ADMIN_USER_PASSWORD;
+
+        if (
+          credentials?.email === ADMIN_EMAIL && 
+          credentials?.password === ADMIN_PASS &&
+          ADMIN_EMAIL && ADMIN_PASS // Fail-closed if ENV is missing
+        ) {
+          return {
+            id: "system-admin",
+            email: ADMIN_EMAIL,
+            name: "Vault Administrator",
+            role: "admin",
+          };
+        }
+
+        // Return null strictly on failure - prevents unauthorized entry
         return null;
       }
-    } as any,
+    }),
   ],
+
+  pages: {
+    signIn: "/inner-circle/admin/login", // Custom high-end login page
+    error: "/inner-circle/error",
+  },
 };
 
 export default NextAuth(authOptions);

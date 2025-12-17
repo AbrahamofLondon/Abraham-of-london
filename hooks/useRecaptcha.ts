@@ -5,11 +5,6 @@ const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 type RecaptchaState = "idle" | "loading" | "ready" | "error";
 
-interface RecaptchaConfig {
-  enabled: boolean;
-  siteKey?: string;
-}
-
 interface UseRecaptchaResult {
   state: RecaptchaState;
   error: string | null;
@@ -18,21 +13,18 @@ interface UseRecaptchaResult {
   isEnabled: boolean;
 }
 
+/**
+ * World-Class reCAPTCHA v3 Hook
+ * Optimized for Next.js Static Export and Resilient Execution.
+ */
 export function useRecaptcha(): UseRecaptchaResult {
-  const [state, setState] = React.useState<RecaptchaState>(() =>
-    SITE_KEY ? "idle" : "error"
-  );
+  const [state, setState] = React.useState<RecaptchaState>("idle");
   const [error, setError] = React.useState<string | null>(null);
 
-  const config = React.useMemo((): RecaptchaConfig => {
-    return {
-      enabled: !!SITE_KEY,
-      siteKey: SITE_KEY,
-    };
-  }, []);
+  const isEnabled = !!SITE_KEY;
 
   React.useEffect(() => {
-    if (!config.enabled) {
+    if (!isEnabled) {
       setState("error");
       setError("Missing NEXT_PUBLIC_RECAPTCHA_SITE_KEY");
       return;
@@ -40,113 +32,71 @@ export function useRecaptcha(): UseRecaptchaResult {
 
     if (typeof window === "undefined") return;
 
-    // Use type assertion
-    const win = window as Window & {
-      grecaptcha?: {
-        ready(cb: () => void): void;
-        execute(siteKey: string, options: { action: string }): Promise<string>;
-      };
-    };
+    const win = window as any;
 
-    // Check if grecaptcha is already available
-    if (win.grecaptcha) {
-      win.grecaptcha.ready(() => setState("ready"));
+    // 1. If already loaded, transition to ready
+    if (win.grecaptcha?.execute) {
+      setState("ready");
       return;
     }
 
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[data-recaptcha="v3"]'
-    );
-    if (existing) {
+    // 2. Prevent duplicate script injection
+    const existingScript = document.querySelector('script[src*="recaptcha/api.js"]');
+    if (existingScript) {
       setState("loading");
-      const onLoad = () => {
-        const win = window as Window & {
-          grecaptcha?: { ready(cb: () => void): void };
-        };
-        win.grecaptcha?.ready(() => setState("ready"));
-      };
-      existing.addEventListener("load", onLoad);
-      return () => existing.removeEventListener("load", onLoad);
+      existingScript.addEventListener("load", () => setState("ready"));
+      return;
     }
 
+    // 3. Inject Script with Production Guardrails
     setState("loading");
     const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(
-      config.siteKey!
-    )}`;
+    script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(SITE_KEY!)}`;
     script.async = true;
     script.defer = true;
-    script.dataset.recaptcha = "v3";
-
-    const onLoad = () => {
-      const win = window as Window & {
-        grecaptcha?: { ready(cb: () => void): void };
-      };
-      win.grecaptcha?.ready(() => setState("ready"));
+    
+    const handleLoad = () => {
+      win.grecaptcha.ready(() => setState("ready"));
     };
 
-    const onError = () => {
+    const handleError = () => {
       setState("error");
-      setError("Failed to load reCAPTCHA script.");
+      setError("Security script failed to load.");
     };
 
-    script.addEventListener("load", onLoad);
-    script.addEventListener("error", onError);
-
+    script.addEventListener("load", handleLoad);
+    script.addEventListener("error", handleError);
     document.head.appendChild(script);
 
     return () => {
-      script.removeEventListener("load", onLoad);
-      script.removeEventListener("error", onError);
+      script.removeEventListener("load", handleLoad);
+      script.removeEventListener("error", handleError);
     };
-  }, [config.enabled, config.siteKey]);
+  }, [isEnabled]);
 
-  const execute = React.useCallback(
-    async (action: string): Promise<string | null> => {
-      if (!config.enabled || !config.siteKey) {
-        console.warn("reCAPTCHA not enabled or missing site key");
-        return null;
-      }
+  const execute = React.useCallback(async (action: string): Promise<string | null> => {
+    const win = window as any;
+    if (!isEnabled || !win.grecaptcha?.execute) {
+      console.error("[reCAPTCHA] System not ready for action:", action);
+      return null;
+    }
 
-      if (typeof window === "undefined") {
-        console.warn("reCAPTCHA not available on server");
-        return null;
-      }
+    try {
+      // execute returns a promise with the token
+      return await win.grecaptcha.execute(SITE_KEY, { action });
+    } catch (err) {
+      console.error("[reCAPTCHA] Execution failed:", err);
+      return null;
+    }
+  }, [isEnabled]);
 
-      const win = window as Window & {
-        grecaptcha?: {
-          execute(
-            siteKey: string,
-            options: { action: string }
-          ): Promise<string>;
-        };
-      };
-
-      if (!win.grecaptcha) {
-        console.warn("reCAPTCHA not loaded");
-        return null;
-      }
-
-      try {
-        const token = await win.grecaptcha.execute(config.siteKey, { action });
-        return token;
-      } catch (err) {
-        console.error("reCAPTCHA execution failed:", err);
-        return null;
-      }
-    },
-    [config.enabled, config.siteKey]
-  );
-
-  return React.useMemo(() => {
-    return {
-      state,
-      error,
-      execute,
-      isReady: state === "ready",
-      isEnabled: config.enabled,
-    };
-  }, [state, error, execute, config.enabled]);
+  return React.useMemo(() => ({
+    state,
+    error,
+    execute,
+    isReady: state === "ready",
+    isEnabled,
+  }), [state, error, execute, isEnabled]);
 }
 
 export default useRecaptcha;
