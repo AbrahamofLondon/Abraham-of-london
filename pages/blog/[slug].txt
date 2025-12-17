@@ -2,11 +2,7 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { 
-  getPublishedPosts, 
-  getPostBySlug,
-  normalizeSlug 
-} from "@/lib/contentlayer-helper";
+import { getPublishedPosts } from "@/lib/contentlayer-helper";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -16,11 +12,20 @@ import SafeMDXRemote from "@/components/SafeMDXRemote";
 
 type Props = { post: any; source: any };
 
+const SITE = "https://www.abrahamoflondon.org";
+
+function slugFromUrl(url?: string): string | null {
+  if (!url) return null;
+  const parts = url.split("/").filter(Boolean);
+  return parts[parts.length - 1] ?? null;
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getPublishedPosts();
+
   const paths = posts
-    .map((doc) => {
-      const slug = normalizeSlug(doc);
+    .map((post: any) => {
+      const slug = slugFromUrl(post.url);
       return slug ? { params: { slug } } : null;
     })
     .filter(Boolean) as { params: { slug: string } }[];
@@ -30,7 +35,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
-  const post = getPostBySlug(slug);
+  if (!slug) return { notFound: true };
+
+  const posts = getPublishedPosts();
+  const post = posts.find(
+    (p: any) => slugFromUrl(p.url)?.toLowerCase() === slug
+  );
 
   if (!post) return { notFound: true };
 
@@ -38,32 +48,57 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const source = await serialize(post.body.raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
+        rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: "wrap" }],
+        ],
       },
     });
+
     return { props: { post, source }, revalidate: 1800 };
   } catch (err) {
-    console.error(`❌ MDX Error [Post: ${slug}]:`, err);
-    const fallbackSource = await serialize("Content is being prepared for the vault.");
+    console.error(`❌ MDX Error [Post: ${slug}]`, err);
+    const fallbackSource = await serialize(
+      "Content is being prepared for the vault."
+    );
     return { props: { post, source: fallbackSource }, revalidate: 1800 };
   }
 };
 
 const PostPage: NextPage<Props> = ({ post, source }) => {
   const title = post.title ?? "Essay";
+  const canonicalUrl = `${SITE}${post.url}`;
+
   return (
-    <Layout title={title}>
+    <Layout
+      title={title}
+      description={post.excerpt ?? ""}
+      canonicalUrl={canonicalUrl}
+      ogType="article"
+      ogImage={post.coverImage ?? undefined}
+    >
       <Head>
-        <title>{title} | Abraham of London</title>
-        {post.excerpt && <meta name="description" content={post.excerpt} />}
+        <link rel="canonical" href={canonicalUrl} />
       </Head>
 
       <main className="mx-auto max-w-3xl px-6 py-12 sm:py-16 lg:py-24">
         <header className="mb-10 space-y-4 border-b border-gold/10 pb-10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Insight & Reflection</p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">{title}</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
+            Insight & Reflection
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">
+            {title}
+          </h1>
           <div className="flex items-center gap-4 text-[11px] font-mono uppercase tracking-widest text-gray-500">
-            {post.date && <span>{new Date(post.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+            {post.date && (
+              <span>
+                {new Date(post.date).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+            )}
             {post.author && (
               <>
                 <span className="h-1 w-1 rounded-full bg-gold/30" />
@@ -72,6 +107,7 @@ const PostPage: NextPage<Props> = ({ post, source }) => {
             )}
           </div>
         </header>
+
         <article className="prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-p:text-gray-300">
           <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
