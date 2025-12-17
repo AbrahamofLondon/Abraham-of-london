@@ -98,7 +98,7 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
               Quick hits for women and men who don&apos;t scroll all day
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
-              Concise field notes on work, fatherhood, and building under
+              Concise field notes on work, livelyhood, and building under
               pressure — designed to be read between meetings, not instead of
               them.
             </p>
