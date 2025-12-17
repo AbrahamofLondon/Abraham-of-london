@@ -2,90 +2,68 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import dynamic from "next/dynamic";
+import Link from "next/link";
+import { serialize } from "next-mdx-remote/serialize";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import ContentlayerDocPage from "@/components/ContentlayerDocPage";
+import SafeMDXRemote from "@/components/SafeMDXRemote";
 
-import {
-  getAllContentlayerDocs,
-  getDocKind,
-  getDocHref,
-  isDraft,
-  normalizeSlug,
-} from "@/lib/contentlayer-helper";
-
-// Legacy MDX (your project already has these in multiple places)
-import { getAllPosts, getPostBySlug } from "@/lib/posts";
-import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-// If you prefer your MDXClient path, keep it; MDXRemote is stable for build-time.
-const MDXClient = dynamic(() => import("@/components/MDXClient"), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-[200px] flex items-center justify-center">
-      <p className="text-sm opacity-80">Loading content…</p>
-    </div>
-  ),
-});
+import { allPosts, normalizeSlug, isDraft } from "@/lib/contentlayer-helper";
 
-type Props =
-  | {
-      mode: "contentlayer";
-      doc: any;
-      canonicalPath: string;
-    }
-  | {
-      mode: "mdx";
-      meta: any;
-      source: MDXRemoteSerializeResult;
-      canonicalPath: string;
-    };
+type Props = {
+  title: string;
+  excerpt?: string | null;
+  description?: string | null;
+  coverImage?: string | null;
+  date?: string | null;
+  readTime?: string | null;
+  source: MDXRemoteSerializeResult;
+  canonicalUrl: string;
+};
 
-const BlogSlugPage: NextPage<Props> = (props) => {
-  if (props.mode === "contentlayer") {
-    return (
-      <ContentlayerDocPage
-        doc={props.doc}
-        canonicalPath={props.canonicalPath}
-        backHref="/blog"
-        label="Essays"
-      />
-    );
-  }
+const SITE = "https://www.abrahamoflondon.org";
 
-  const title = props.meta?.title ?? "Essay";
-  const excerpt = props.meta?.excerpt ?? props.meta?.description ?? "";
+const BlogSlugPage: NextPage<Props> = ({
+  title,
+  excerpt,
+  description,
+  coverImage,
+  source,
+  canonicalUrl,
+}) => {
+  const desc = description || excerpt || "";
 
   return (
-    <Layout title={title} description={excerpt}>
+    <Layout
+      title={title}
+      description={desc}
+      canonicalUrl={canonicalUrl}
+      ogImage={coverImage ?? undefined}
+      ogType="article"
+    >
       <Head>
-        <meta property="og:type" content="article" />
+        <link rel="canonical" href={canonicalUrl} />
       </Head>
 
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-10 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Essays
-          </p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-            {title}
-          </h1>
-          {excerpt ? (
-            <p className="text-sm text-gray-300">{excerpt}</p>
-          ) : null}
-        </header>
+      <main className="mx-auto max-w-4xl px-4 py-14">
+        <Link href="/blog" className="text-sm text-gold hover:underline">
+          ← Back to Essays
+        </Link>
 
-        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-a:text-gold">
-          {/* build-safe rendering */}
-          <MDXRemote {...props.source} components={mdxComponents} />
-          {/* client-only renderer (optional) */}
-          {/* <MDXClient code={props.meta?.body?.code ?? ""} components={mdxComponents} /> */}
+        <h1 className="mt-4 font-serif text-3xl sm:text-4xl font-semibold text-cream">
+          {title}
+        </h1>
+
+        {excerpt ? <p className="mt-4 text-gray-300">{excerpt}</p> : null}
+
+        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-a:text-gold mt-10">
+          <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
       </main>
     </Layout>
@@ -93,68 +71,49 @@ const BlogSlugPage: NextPage<Props> = (props) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Contentlayer posts
-  const clSlugs = getAllContentlayerDocs()
-    .filter((d) => !isDraft(d) && getDocKind(d) === "post")
-    .map((d) => normalizeSlug(d))
-    .filter(Boolean);
+  const paths = allPosts
+    .filter((p: any) => !isDraft(p))
+    .map((p: any) => normalizeSlug(p))
+    .filter(Boolean)
+    .map((slug: string) => ({ params: { slug } }));
 
-  // Legacy MDX posts
-  const mdxSlugs = getAllPosts()
-    .map((p: any) => String(p?.slug ?? "").trim().toLowerCase())
-    .filter(Boolean);
-
-  // Merge unique
-  const slugs = Array.from(new Set([...clSlugs, ...mdxSlugs]));
-
-  return {
-    paths: slugs.map((slug) => ({ params: { slug } })),
-    fallback: false,
-  };
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
   if (!slug) return { notFound: true };
 
-  // 1) Try Contentlayer
-  const doc =
-    getAllContentlayerDocs()
-      .filter((d) => !isDraft(d) && getDocKind(d) === "post")
-      .find((d) => normalizeSlug(d) === slug) ?? null;
+  const post = allPosts.find((p: any) => !isDraft(p) && normalizeSlug(p) === slug);
+  if (!post) return { notFound: true };
 
-  if (doc) {
-    return {
-      props: {
-        mode: "contentlayer",
-        doc,
-        canonicalPath: getDocHref(doc),
+  const raw = String(post?.body?.raw ?? "");
+
+  let source: MDXRemoteSerializeResult;
+  try {
+    source = await serialize(raw, {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
       },
-      revalidate: 3600,
-    };
+    });
+  } catch (e) {
+    console.error(`[blog serialize failed] slug=${slug}`, e);
+    source = await serialize("Content is being prepared.");
   }
 
-  // 2) Fallback to legacy MDX
-  const mdx = getPostBySlug(slug);
-  if (!mdx) return { notFound: true };
-
-  const raw = String((mdx as any)?.content ?? (mdx as any)?.body?.raw ?? "");
-  const source = await serialize(raw, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [
-        rehypeSlug,
-        [rehypeAutolinkHeadings, { behavior: "wrap" }],
-      ],
-    },
-  });
+  const canonicalUrl = `${SITE}/blog/${slug}`;
 
   return {
     props: {
-      mode: "mdx",
-      meta: mdx,
+      title: String(post.title ?? "Essay"),
+      excerpt: post.excerpt ?? null,
+      description: post.description ?? null,
+      coverImage: post.coverImage ?? null,
+      date: post.date ?? null,
+      readTime: post.readTime ?? null,
       source,
-      canonicalPath: `/blog/${slug}`,
+      canonicalUrl,
     },
     revalidate: 3600,
   };

@@ -6,28 +6,19 @@ export type MdxComponentProps = React.PropsWithChildren<
 >;
 
 const H1 = ({ children, ...rest }: MdxComponentProps) => (
-  <h1
-    className="mt-10 mb-6 font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-gray-50"
-    {...rest}
-  >
+  <h1 className="mt-10 mb-6 font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-gray-50" {...rest}>
     {children}
   </h1>
 );
 
 const H2 = ({ children, ...rest }: MdxComponentProps) => (
-  <h2
-    className="mt-8 mb-4 font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-gray-50"
-    {...rest}
-  >
+  <h2 className="mt-8 mb-4 font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-gray-50" {...rest}>
     {children}
   </h2>
 );
 
 const H3 = ({ children, ...rest }: MdxComponentProps) => (
-  <h3
-    className="mt-7 mb-3 font-serif text-xl sm:text-2xl font-semibold text-gray-50"
-    {...rest}
-  >
+  <h3 className="mt-7 mb-3 font-serif text-xl sm:text-2xl font-semibold text-gray-50" {...rest}>
     {children}
   </h3>
 );
@@ -39,10 +30,7 @@ const H4 = ({ children, ...rest }: MdxComponentProps) => (
 );
 
 const P = ({ children, className = "", ...rest }: MdxComponentProps) => (
-  <p
-    className={`my-5 text-[1.02rem] sm:text-[1.06rem] leading-[1.9] text-gray-100 ${className}`.trim()}
-    {...rest}
-  >
+  <p className={`my-5 text-[1.02rem] sm:text-[1.06rem] leading-[1.9] text-gray-100 ${className}`.trim()} {...rest}>
     {children}
   </p>
 );
@@ -60,19 +48,13 @@ const Em = ({ children, ...rest }: MdxComponentProps) => (
 );
 
 const Ul = ({ children, ...rest }: MdxComponentProps) => (
-  <ul
-    className="my-5 ml-6 list-disc space-y-2 text-[1.02rem] leading-relaxed text-gray-100"
-    {...rest}
-  >
+  <ul className="my-5 ml-6 list-disc space-y-2 text-[1.02rem] leading-relaxed text-gray-100" {...rest}>
     {children}
   </ul>
 );
 
 const Ol = ({ children, ...rest }: MdxComponentProps) => (
-  <ol
-    className="my-5 ml-6 list-decimal space-y-2 text-[1.02rem] leading-relaxed text-gray-100"
-    {...rest}
-  >
+  <ol className="my-5 ml-6 list-decimal space-y-2 text-[1.02rem] leading-relaxed text-gray-100" {...rest}>
     {children}
   </ol>
 );
@@ -84,37 +66,25 @@ const Li = ({ children, ...rest }: MdxComponentProps) => (
 );
 
 const Blockquote = ({ children, ...rest }: MdxComponentProps) => (
-  <blockquote
-    className="my-8 border-l-4 border-softGold/70 bg-white/5 px-5 py-4 text-[1rem] leading-relaxed italic text-gray-100 rounded-r-2xl"
-    {...rest}
-  >
+  <blockquote className="my-8 border-l-4 border-softGold/70 bg-white/5 px-5 py-4 text-[1rem] leading-relaxed italic text-gray-100 rounded-r-2xl" {...rest}>
     {children}
   </blockquote>
 );
 
 const Code = ({ children, ...rest }: MdxComponentProps) => (
-  <code
-    className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] font-mono text-amber-200"
-    {...rest}
-  >
+  <code className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] font-mono text-amber-200" {...rest}>
     {children}
   </code>
 );
 
 const Pre = ({ children, ...rest }: MdxComponentProps) => (
-  <pre
-    className="my-6 overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-950/90 p-4 text-[0.85rem] text-slate-100"
-    {...rest}
-  >
+  <pre className="my-6 overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-950/90 p-4 text-[0.85rem] text-slate-100" {...rest}>
     {children}
   </pre>
 );
 
 const A = ({ children, ...rest }: MdxComponentProps) => (
-  <a
-    className="font-medium text-softGold underline-offset-2 hover:text-amber-200 hover:underline"
-    {...rest}
-  >
+  <a className="font-medium text-softGold underline-offset-2 hover:text-amber-200 hover:underline" {...rest}>
     {children}
   </a>
 );
@@ -133,8 +103,7 @@ const MdxImage = ({ src, alt, className = "", ...rest }: ImageProps) => {
         src={String(src)}
         alt={alt ? String(alt) : ""}
         className={(
-          "block h-auto w-auto max-w-full " +
-          "max-h-[420px] sm:max-h-[460px] md:max-h-[500px] " +
+          "block h-auto w-auto max-w-full max-h-[500px] " +
           "rounded-2xl border border-slate-800/70 bg-slate-900/60 " +
           "object-contain shadow-soft-elevated " +
           className
@@ -145,12 +114,9 @@ const MdxImage = ({ src, alt, className = "", ...rest }: ImageProps) => {
   );
 };
 
-// --- Minimal, safe “MDX blocks” (no external imports) ---
+// Minimal safe “blocks”
 const Callout = ({ children, ...props }: React.PropsWithChildren<any>) => (
-  <div
-    className="my-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5"
-    {...props}
-  >
+  <div className="my-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5" {...props}>
     <div className="flex items-start gap-3">
       <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20">
         <span className="text-xs font-bold text-amber-400">!</span>
@@ -161,37 +127,9 @@ const Callout = ({ children, ...props }: React.PropsWithChildren<any>) => (
 );
 
 const Note = Callout;
-
-const Rule = (props: any) => (
-  <hr className="my-10 border-white/10" {...props} />
-);
-
-const Badge = ({ children, ...props }: React.PropsWithChildren<any>) => (
-  <span
-    className="inline-block rounded-full bg-gray-800 px-3 py-1 text-xs font-medium text-gray-300"
-    {...props}
-  >
-    {children}
-  </span>
-);
-
-const Quote = ({ children, ...props }: React.PropsWithChildren<any>) => (
-  <blockquote
-    className="my-8 border-l-4 border-gold pl-6 py-4 italic text-gray-300"
-    {...props}
-  >
-    {children}
-  </blockquote>
-);
-
-const Grid = ({ children, ...props }: React.PropsWithChildren<any>) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6" {...props}>
-    {children}
-  </div>
-);
+const Rule = (props: any) => <hr className="my-10 border-white/10" {...props} />;
 
 const components = {
-  // HTML
   h1: H1,
   h2: H2,
   h3: H3,
@@ -208,14 +146,10 @@ const components = {
   a: A,
   img: MdxImage,
 
-  // “MDX blocks”
   Callout,
   Note,
   Rule,
   Divider: Rule,
-  Badge,
-  Quote,
-  Grid,
 };
 
 export default components;

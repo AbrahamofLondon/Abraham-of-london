@@ -10,26 +10,27 @@ import Layout from "@/components/Layout";
 
 import { getAllCanons } from "@/lib/contentlayer-helper";
 
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
+import SafeMDXRemote from "@/components/SafeMDXRemote"; // ✅ REQUIRED
 
 type Props = { canon: any; source: MDXRemoteSerializeResult };
 
 function docSlug(d: any): string {
-  return (
-    d?.slug ??
-    d?._raw?.flattenedPath?.split("/").pop() ??
-    ""
-  );
+  return d?.slug ?? d?._raw?.flattenedPath?.split("/").pop() ?? "";
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const canons = getAllCanons();
-  const paths = canons.map((d) => ({ params: { slug: docSlug(d) } }));
+  const paths = canons
+    .map((d) => docSlug(d))
+    .filter(Boolean)
+    .map((slug) => ({ params: { slug } }));
+
   return { paths, fallback: "blocking" };
 };
 
@@ -42,15 +43,25 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (!canon) return { notFound: true };
 
   const raw = canon?.body?.raw ?? "";
-  const source = await serialize(raw, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [
-        rehypeSlug,
-        [rehypeAutolinkHeadings, { behavior: "wrap" }],
-      ],
-    },
-  });
+
+  let source: MDXRemoteSerializeResult;
+  try {
+    source = await serialize(String(raw), {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: "wrap" }],
+        ],
+      },
+    });
+  } catch (e) {
+    // ✅ DO NOT crash export. Log the exact failing slug so you can fix the MDX file.
+    console.error(`[canon serialize failed] slug=${slug}`, e);
+    source = await serialize(
+      `# Content is being prepared\n\nThis Canon page failed to compile during export.`
+    );
+  }
 
   return { props: { canon, source }, revalidate: 1800 };
 };
@@ -60,12 +71,15 @@ const CanonPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   source,
 }) => {
   const title = canon.title ?? "Canon";
+
   return (
     <Layout title={title}>
       <Head>
         {canon.excerpt && <meta name="description" content={canon.excerpt} />}
         <meta property="og:title" content={title} />
-        {canon.excerpt && <meta property="og:description" content={canon.excerpt} />}
+        {canon.excerpt && (
+          <meta property="og:description" content={canon.excerpt} />
+        )}
       </Head>
 
       <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
@@ -76,11 +90,13 @@ const CanonPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
           <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
             {title}
           </h1>
-          {canon.excerpt ? <p className="text-sm text-gray-300">{canon.excerpt}</p> : null}
+          {canon.excerpt ? (
+            <p className="text-sm text-gray-300">{canon.excerpt}</p>
+          ) : null}
         </header>
 
         <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
-          <MDXRemote {...source} components={mdxComponents} />
+          <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
       </main>
     </Layout>

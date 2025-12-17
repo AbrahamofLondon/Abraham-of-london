@@ -1,15 +1,17 @@
+// pages/downloads/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 import { getAllDownloads } from "@/lib/contentlayer-helper";
 
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
+import SafeMDXRemote from "@/components/SafeMDXRemote";
 
 type Props = { download: any; source: MDXRemoteSerializeResult };
 
@@ -19,7 +21,10 @@ function docSlug(d: any): string {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const docs = getAllDownloads();
-  const paths = docs.map((d) => ({ params: { slug: docSlug(d) } }));
+  const paths = docs
+    .map((d) => docSlug(d))
+    .filter(Boolean)
+    .map((slug) => ({ params: { slug } }));
   return { paths, fallback: "blocking" };
 };
 
@@ -32,15 +37,19 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (!download) return { notFound: true };
 
   const raw = download?.body?.raw ?? "";
-  const source = await serialize(raw, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [
-        rehypeSlug,
-        [rehypeAutolinkHeadings, { behavior: "wrap" }],
-      ],
-    },
-  });
+
+  let source: MDXRemoteSerializeResult;
+  try {
+    source = await serialize(String(raw), {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
+      },
+    });
+  } catch (e) {
+    console.error(`[downloads serialize failed] slug=${slug}`, e);
+    source = await serialize("This download description is being prepared.");
+  }
 
   return { props: { download, source }, revalidate: 1800 };
 };
@@ -50,24 +59,16 @@ const DownloadPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (
   source,
 }) => {
   const title = download.title ?? "Download";
-
-  const fileUrl =
-    download.downloadUrl ?? download.fileUrl ?? download.pdfPath ?? download.file ?? null;
+  const fileUrl = download.downloadUrl ?? download.fileUrl ?? download.pdfPath ?? download.file ?? null;
 
   return (
     <Layout title={title}>
-      <Head>
-        {download.excerpt && <meta name="description" content={download.excerpt} />}
-      </Head>
+      <Head>{download.excerpt && <meta name="description" content={download.excerpt} />}</Head>
 
       <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
         <header className="mb-8 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Download
-          </p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-            {title}
-          </h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Download</p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{title}</h1>
           {download.excerpt ? <p className="text-sm text-gray-300">{download.excerpt}</p> : null}
 
           {fileUrl ? (
@@ -83,7 +84,7 @@ const DownloadPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (
         </header>
 
         <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
-          <MDXRemote {...source} components={mdxComponents} />
+          <SafeMDXRemote source={source} components={mdxComponents} />
         </article>
       </main>
     </Layout>
