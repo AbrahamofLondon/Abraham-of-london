@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { deleteMemberByEmail } from '@/lib/server/innerCircleStore';
+import { deleteMemberByEmail } from '@/lib/server/inner-circle-store';
 import { 
   rateLimitForRequestIp, 
   RATE_LIMIT_CONFIGS,

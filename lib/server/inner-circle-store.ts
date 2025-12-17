@@ -1,4 +1,4 @@
-// lib/server/innerCircleStore.ts
+// lib/server/inner-circle-store.ts
 // ---------------------------------------------------------------------------
 // Server-only Inner Circle store with persistence and enhanced features
 // ---------------------------------------------------------------------------
@@ -394,7 +394,7 @@ class FileStorage implements StorageBackend {
 }
 
 // Enhanced Inner Circle store with persistence and concurrency protection
-class EnhancedInnerCircleStore {
+class Enhancedinner-circle-store {
   private members: Map<string, InnerCircleMember> = new Map();
   private keys: Map<string, InnerCircleKey> = new Map();
   private emailToMember: Map<string, string> = new Map();
@@ -1152,11 +1152,11 @@ class EnhancedInnerCircleStore {
 }
 
 // Create and export singleton instance
-let storeInstance: EnhancedInnerCircleStore | null = null;
+let storeInstance: Enhancedinner-circle-store | null = null;
 
-export async function getInnerCircleStore(): Promise<EnhancedInnerCircleStore> {
+export async function getinner-circle-store(): Promise<Enhancedinner-circle-store> {
   if (!storeInstance) {
-    storeInstance = new EnhancedInnerCircleStore();
+    storeInstance = new Enhancedinner-circle-store();
     await storeInstance.initialize();
   }
   return storeInstance;
@@ -1166,14 +1166,14 @@ export async function getInnerCircleStore(): Promise<EnhancedInnerCircleStore> {
 export async function createOrUpdateMemberAndIssueKey(
   args: CreateOrUpdateMemberArgs
 ): Promise<IssuedKey> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.createOrUpdateMemberAndIssueKey(args);
 }
 
 export async function verifyInnerCircleKey(
   key: string
 ): Promise<VerifyInnerCircleKeyResult> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.verifyInnerCircleKey(key);
 }
 
@@ -1182,7 +1182,7 @@ export async function recordInnerCircleUnlock(
   ipAddress?: string,
   unlockContext?: Record<string, any>
 ): Promise<VerifyInnerCircleKeyResult> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.recordInnerCircleUnlock(key, ipAddress, unlockContext);
 }
 
@@ -1191,12 +1191,12 @@ export async function revokeInnerCircleKey(
   revokedBy?: string,
   reason?: string
 ): Promise<boolean> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.revokeInnerCircleKey(key, revokedBy, reason);
 }
 
 export async function deleteMemberByEmail(email: string): Promise<boolean> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.deleteMemberByEmail(email);
 }
 
@@ -1205,24 +1205,24 @@ export async function cleanupOldData(): Promise<{
   deletedKeys: number;
   expiredKeys: number;
 }> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.cleanupOldData();
 }
 
 export async function getPrivacySafeStats(): Promise<PrivacySafeStats> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.getPrivacySafeStats();
 }
 
 export async function exportInnerCircleAdminSummary(): Promise<
   InnerCircleAdminExportRow[]
 > {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.exportInnerCircleAdminSummary();
 }
 
 export async function getMemberByEmail(email: string): Promise<InnerCircleMember | null> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.getMemberByEmail(email);
 }
 
@@ -1234,7 +1234,7 @@ export async function searchMembers(
     offset?: number;
   }
 ): Promise<InnerCircleMember[]> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.searchMembers(query, options);
 }
 
@@ -1242,16 +1242,16 @@ export async function rotateMemberKeys(
   email: string,
   options?: { revokeOldKeys?: boolean; maxKeys?: number }
 ): Promise<{ oldKeysRevoked: number; newKey: string }> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.rotateMemberKeys(email, options);
 }
 
 export async function getStoreMetrics(): Promise<StoreMetrics> {
-  const store = await getInnerCircleStore();
+  const store = await getinner-circle-store();
   return store.getMetrics();
 }
 
-export async function shutdownInnerCircleStore(): Promise<void> {
+export async function shutdowninner-circle-store(): Promise<void> {
   if (storeInstance) {
     await storeInstance.shutdown();
     storeInstance = null;
@@ -1260,11 +1260,11 @@ export async function shutdownInnerCircleStore(): Promise<void> {
 
 // Graceful shutdown handler
 process.on('SIGTERM', async () => {
-  await shutdownInnerCircleStore();
+  await shutdowninner-circle-store();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  await shutdownInnerCircleStore();
+  await shutdowninner-circle-store();
   process.exit(0);
 });

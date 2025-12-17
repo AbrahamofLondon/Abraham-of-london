@@ -5,7 +5,7 @@ import {
   createRateLimitHeaders,
   getClientIp 
 } from '@/lib/server/rateLimit';
-import { getMemberByEmail, getActiveKeysForMember } from '@/lib/server/innerCircleStore';
+import { getMemberByEmail, getActiveKeysForMember } from '@/lib/server/inner-circle-store';
 import { sendInnerCircleEmail } from '@/lib/inner-circle'; // Unified email dispatcher
 
 type ResponseData = {

@@ -70,7 +70,7 @@ export interface PrivacySafeStats {
   lastCleanup: string;
 }
 
-export interface InnerCircleStore {
+export interface inner-circle-store {
   createOrUpdateMemberAndIssueKey(
     args: CreateOrUpdateMemberArgs
   ): Promise<IssuedKey>;
@@ -135,7 +135,7 @@ function logPrivacyAction(
 // Memory implementation (used in dev / fallback)
 // ---------------------------------------------------------------------------
 
-class MemoryInnerCircleStore implements InnerCircleStore {
+class Memoryinner-circle-store implements inner-circle-store {
   private members: InnerCircleMember[] = [];
   private keyHashIndex = new Map<
     string,
@@ -456,7 +456,7 @@ function getPool(): Pool {
   return sharedPool;
 }
 
-class PostgresInnerCircleStore implements InnerCircleStore {
+class Postgresinner-circle-store implements inner-circle-store {
   private async withClient<T>(
     fn: (client: PoolClient) => Promise<T>
   ): Promise<T> {
@@ -807,18 +807,18 @@ class PostgresInnerCircleStore implements InnerCircleStore {
 // Store selection + public facade
 // ---------------------------------------------------------------------------
 
-let storeInstance: InnerCircleStore | null = null;
+let storeInstance: inner-circle-store | null = null;
 
-function getStore(): InnerCircleStore {
+function getStore(): inner-circle-store {
   if (storeInstance) return storeInstance;
 
   const mode = process.env.INNER_CIRCLE_STORE ?? "memory";
 
   if (mode === "postgres") {
-    storeInstance = new PostgresInnerCircleStore();
+    storeInstance = new Postgresinner-circle-store();
     logPrivacyAction("store_init", { mode: "postgres" });
   } else {
-    storeInstance = new MemoryInnerCircleStore();
+    storeInstance = new Memoryinner-circle-store();
     logPrivacyAction("store_init", { mode: "memory" });
   }
 

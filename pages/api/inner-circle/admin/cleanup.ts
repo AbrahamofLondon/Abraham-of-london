@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { cleanupOldData } from '@/lib/server/innerCircleStore';
+import { cleanupOldData } from '@/lib/server/inner-circle-store';
 import { 
   rateLimitForRequestIp, 
   RATE_LIMIT_CONFIGS,

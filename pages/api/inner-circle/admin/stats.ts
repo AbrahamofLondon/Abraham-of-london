@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getPrivacySafeStats, getPrivacySafeKeyExport } from '@/lib/server/innerCircleStore';
+import { getPrivacySafeStats, getPrivacySafeKeyExport } from '@/lib/server/inner-circle-store';
 import { 
   rateLimitForRequestIp, 
   RATE_LIMIT_CONFIGS,
