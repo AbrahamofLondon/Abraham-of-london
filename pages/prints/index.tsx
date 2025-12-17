@@ -1,4 +1,3 @@
-// pages/prints/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -11,6 +10,7 @@ import {
   assertContentlayerHasDocs,
   getAllPrints,
   normalizeSlug,
+  getDocHref,
   resolveDocCoverImage,
 } from "@/lib/contentlayer-helper";
 
@@ -22,6 +22,7 @@ type PrintItem = {
   tags: string[];
   featured: boolean;
   date: string | null;
+  href: string;
 };
 
 type Props = {
@@ -29,7 +30,8 @@ type Props = {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  assertContentlayerHasDocs("pages/prints/index.tsx getStaticProps");
+  // Build safety check to ensure Contentlayer has processed the files
+  assertContentlayerHasDocs("pages/prints/index.tsx");
 
   const raw = getAllPrints();
 
@@ -38,12 +40,14 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       slug: normalizeSlug(p),
       title: p.title ?? "Untitled Print",
       excerpt: p.excerpt ?? p.description ?? null,
-      coverImage: resolveDocCoverImage(p) ?? null,
+      coverImage: resolveDocCoverImage(p),
       tags: Array.isArray(p.tags) ? p.tags : [],
       featured: Boolean(p.featured),
-      date: typeof p.date === "string" ? p.date : null,
+      date: p.date ? String(p.date) : null,
+      href: getDocHref(p),
     }))
     .sort((a, b) => {
+      // Prioritize featured items, then sort by date (newest first)
       if (a.featured && !b.featured) return -1;
       if (!a.featured && b.featured) return 1;
       const da = a.date ? new Date(a.date).getTime() : 0;
@@ -51,91 +55,105 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       return db - da;
     });
 
-  return { props: { prints }, revalidate: 3600 };
+  return { props: { prints }, revalidate: 1800 };
 };
 
 const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
-  const title = "Prints";
-  const description =
-    "Visual artefacts — typography, posters, statements. Designed like heirlooms, not social noise.";
+  const pageTitle = "Visual Artefacts";
+  const pageDescription =
+    "Typography, posters, and statements. Designed like heirlooms to anchor the physical space with strategic truth.";
 
   return (
-    <Layout title={title} description={description} className="bg-charcoal">
+    <Layout title={pageTitle} description={pageDescription}>
       <Head>
-        <title>{title} | Abraham of London</title>
-        <meta name="description" content={description} />
-        <meta property="og:title" content={`${title} | Abraham of London`} />
-        <meta property="og:description" content={description} />
+        <title>{pageTitle} | Abraham of London</title>
       </Head>
 
-      <main className="min-h-screen">
-        <section className="border-b border-white/10 bg-gradient-to-b from-black to-charcoal">
-          <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
+      <main className="min-h-screen bg-black">
+        {/* Hero Header */}
+        <section className="relative border-b border-gold/10 bg-gradient-to-b from-black to-zinc-950/50">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
             <div className="max-w-3xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-                <Palette className="h-4 w-4" />
-                Prints · Visual Artefacts
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
+                <Palette className="h-3.5 w-3.5" />
+                Visual Artefacts
               </div>
-              <h1 className="font-serif text-4xl font-semibold text-cream sm:text-5xl">
+              <h1 className="font-serif text-4xl font-semibold text-cream sm:text-5xl lg:text-6xl">
                 Prints
               </h1>
-              <p className="mt-4 text-sm leading-relaxed text-white/70">
-                {description}
+              <p className="mt-6 text-base leading-relaxed text-gray-400 sm:text-lg">
+                {pageDescription}
               </p>
-              <p className="mt-4 text-xs text-white/50">{prints.length} items</p>
+              <div className="mt-8 flex items-center gap-4 text-[11px] font-mono uppercase tracking-widest text-gray-500">
+                <span className="text-gold/60">{prints.length} Pieces in Collection</span>
+                <div className="h-1 w-1 rounded-full bg-gold/30" />
+                <span>London Edition</span>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
+        {/* Prints Grid */}
+        <section className="mx-auto max-w-6xl px-6 py-16 lg:px-8 lg:py-24">
           {prints.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-10 text-center text-white/60">
-              Prints are being prepared for release.
+            <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] py-24 text-center">
+              <p className="font-serif text-xl italic text-gray-500">
+                The gallery is currently being curated.
+              </p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {prints.map((p) => (
                 <Link
                   key={p.slug}
-                  href={`/prints/${p.slug}`}
-                  className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10"
+                  href={p.href}
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/30 transition-all duration-500 hover:border-gold/30 hover:bg-zinc-900/50"
                 >
-                  <div className="relative aspect-[3/4] bg-black/40">
+                  {/* Image Container - Aspect 3:4 for vertical art style */}
+                  <div className="relative aspect-[3/4] overflow-hidden bg-black/40">
                     <Image
                       src={p.coverImage || "/assets/images/writing-desk.webp"}
                       alt={p.title}
                       fill
-                      className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
-                      sizes="(min-width: 1024px) 30vw, 100vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                     />
+                    
+                    {/* Dark Overlay for depth */}
+                    <div className="absolute inset-0 bg-black/10 transition-opacity group-hover:opacity-0" />
+
                     {p.featured && (
-                      <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-200">
+                      <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-black/60 backdrop-blur-md px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-gold shadow-2xl">
                         <Sparkles className="h-3 w-3" /> Featured
                       </div>
                     )}
                   </div>
 
-                  <div className="p-5">
-                    <h2 className="font-serif text-lg font-semibold text-cream line-clamp-2">
+                  {/* Content Container */}
+                  <div className="flex flex-1 flex-col p-6">
+                    <h2 className="font-serif text-xl font-semibold text-cream transition-colors duration-300 group-hover:text-gold">
                       {p.title}
                     </h2>
-                    {p.excerpt ? (
-                      <p className="mt-2 text-sm text-white/65 line-clamp-2">
+                    
+                    {p.excerpt && (
+                      <p className="mt-3 text-sm leading-relaxed text-gray-400 line-clamp-2">
                         {p.excerpt}
                       </p>
-                    ) : null}
+                    )}
 
-                    <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs text-white/50">
-                      <div className="flex flex-wrap gap-2">
-                        {p.tags.slice(0, 2).map((t) => (
-                          <span key={t} className="rounded-full bg-white/5 px-2 py-0.5">
-                            #{t}
-                          </span>
-                        ))}
+                    <div className="mt-auto pt-6">
+                      <div className="flex items-center justify-between border-t border-white/5 pt-4">
+                        <div className="flex flex-wrap gap-2">
+                          {p.tags.slice(0, 2).map((t) => (
+                            <span key={t} className="text-[10px] font-medium uppercase tracking-wider text-gray-500">
+                              #{t}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/20 bg-gold/5 text-gold transition-all duration-300 group-hover:bg-gold group-hover:text-black">
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
                       </div>
-                      <span className="inline-flex items-center gap-1 text-amber-200">
-                        Open <ArrowRight className="h-3 w-3" />
-                      </span>
                     </div>
                   </div>
                 </Link>

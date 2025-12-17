@@ -1,9 +1,7 @@
-// pages/consulting/index.tsx
-
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle, Users, Target, Globe } from "lucide-react";
+import { ArrowRight, CheckCircle, Users, Target, Globe, ShieldCheck } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
@@ -12,291 +10,188 @@ import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 export default function ConsultingPage(): JSX.Element {
   return (
     <Layout
-      title="Consulting & Advisory - Abraham of London"
-      transparentHeader
-      className="bg-deepCharcoal text-white"
+      title="Advisory & Strategy"
+      description="Strategic counsel for founders and boards who refuse to outsource responsibility."
+      className="bg-black text-cream"
     >
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-softGold/10 via-transparent to-amber-200/10" />
-
-        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+      <section className="relative overflow-hidden border-b border-gold/10 bg-gradient-to-b from-black via-zinc-950 to-black pt-24 pb-16 lg:pt-32 lg:pb-24">
+        <div className="absolute inset-0 bg-[url('/assets/images/texture-grain.png')] opacity-20 mix-blend-overlay" />
+        
+        <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
           <motion.header
-            className="mb-8 max-w-3xl md:mb-12"
+            className="max-w-3xl"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <motion.p
-              className="text-xs font-semibold uppercase tracking-[0.25em] text-softGold/80"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              Advisory & Consulting
-            </motion.p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">
+              Private Advisory
+            </p>
 
-            <motion.h1
-              className="mt-4 font-serif text-3xl font-semibold text-white sm:text-4xl lg:text-5xl xl:text-6xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              Data-inspired strategy for
-              <span className="block bg-gradient-to-r from-softGold to-amber-200 bg-clip-text text-transparent">
-                founders, boards, and builders.
-              </span>
-            </motion.h1>
+            <h1 className="mt-6 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+              Strategy for those who 
+              <span className="block text-gold/90">carry the weight.</span>
+            </h1>
 
-            <motion.p
-              className="mt-4 text-base leading-relaxed text-softGold/90 sm:text-lg md:mt-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              I work with leaders who refuse to outsource responsibility — men
-              and women who carry weight for families, organisations, and
-              nations. The work sits at the intersection of strategy,
-              governance, and character.
-            </motion.p>
+            <p className="mt-8 text-lg leading-relaxed text-gray-400 sm:text-xl">
+              I work with leaders who refuse to outsource responsibility — founders, boards, and builders 
+              who carry weight for families, organisations, and nations. The work sits at the intersection 
+              of high-stakes strategy and personal character.
+            </p>
 
-            <motion.div
-              className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4 md:mt-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
               <Link
                 href="/contact"
-                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-softGold to-amber-200 px-6 py-3 text-base font-semibold text-charcoal shadow-2xl transition-all hover:shadow-3xl sm:px-8 sm:py-4 sm:text-lg"
+                className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gold px-8 py-4 text-sm font-bold uppercase tracking-widest text-black transition-all hover:bg-gold/80"
               >
-                <span className="relative z-10">Request a consultation</span>
-                <motion.div
-                  className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.8 }}
-                />
+                Request Consultation
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
 
               <Link
                 href="/events"
-                className="rounded-xl border border-softGold/60 px-6 py-3 text-base font-semibold text-softGold transition-all hover:border-softGold hover:bg-softGold/10 sm:px-8 sm:py-4 sm:text-lg"
+                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-bold uppercase tracking-widest text-cream transition-colors hover:bg-white/10"
               >
-                View upcoming salons
+                View Salons
               </Link>
-            </motion.div>
+            </div>
           </motion.header>
         </div>
       </section>
 
       {/* Mandate + Strategic Funnel */}
-      <section className="border-t border-softGold/20 bg-deepCharcoal">
-        <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 md:pb-10 md:pt-10 lg:px-8">
+      <section className="bg-black py-16 lg:py-24">
+        <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <MandateStatement />
         </div>
-
-        <StrategicFunnelStrip />
+        <div className="mt-16">
+           <StrategicFunnelStrip />
+        </div>
       </section>
 
       {/* Service Pillars */}
-      <section className="relative bg-deepCharcoal py-12 md:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <section className="relative bg-zinc-950 py-20 lg:py-32">
+        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+          <div className="mb-16 max-w-2xl">
+            <h2 className="font-serif text-3xl font-semibold text-white sm:text-4xl">Areas of Engagement</h2>
+            <p className="mt-4 text-gray-400">Formal advisory focused on consequence, culture, and long-term legitimacy.</p>
+          </div>
+
           <motion.div
-            className="grid gap-6 md:gap-8 lg:grid-cols-3"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            className="grid gap-8 lg:grid-cols-3"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
             {[
               {
                 icon: Users,
-                title: "Board & executive strategy",
-                description:
-                  "Support for boards, founders, and C-suite on strategy, governance, and execution — with an eye on consequence, culture, and long-term legitimacy.",
-                points: [
-                  "Strategy clarification and scenario thinking",
-                  "Board-level challenge, not flattery",
-                  "Market, political, and stakeholder mapping",
-                ],
+                title: "Board & Executive Strategy",
+                description: "Deep support for C-suite and boards on governance and execution with an eye on multi-generational impact.",
+                points: ["Scenario thinking & clarification", "Board-level challenge (not flattery)", "Political & stakeholder mapping"],
               },
               {
                 icon: Target,
-                title: "Founder & leadership advisory",
-                description:
-                  "One-to-one advisory for founders and senior leaders: decision support, crisis navigation, and building strategy that honours both calling and commercial reality.",
-                points: [
-                  "Confidential sounding board",
-                  "Decision frameworks & escalation ladders",
-                  "Personal disciplines, not just business hacks",
-                ],
+                title: "Founder Advisory",
+                description: "One-to-one confidential support for decision makers navigating crises or scaling significant mandates.",
+                points: ["Confidential sounding board", "Decision frameworks", "Escalation discipline"],
               },
               {
                 icon: Globe,
-                title: "Africa & frontier markets",
-                description:
-                  "Advisory for investors and operators engaging Nigeria and wider Africa — with honest context on risk, opportunity, and political reality.",
-                points: [
-                  "Go-to-market and partnership strategy",
-                  "Public–private and stakeholder navigation",
-                  "Governance and execution discipline",
-                ],
+                title: "Frontier Market Strategy",
+                description: "Specialist advisory for operators engaging Nigeria and wider Africa with honest context on risk and reality.",
+                points: ["Partnership & Entry strategy", "Stakeholder navigation", "Execution discipline"],
               },
             ].map((service, index) => (
-              <motion.div
+              <div
                 key={service.title}
-                className="group rounded-2xl border border-softGold/30 bg-charcoal/80 p-6 text-white backdrop-blur transition-all hover:border-softGold/50 hover:bg-charcoal/90 md:p-8"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
+                className="group rounded-2xl border border-white/5 bg-white/[0.02] p-8 transition-all hover:border-gold/30 hover:bg-white/[0.04]"
               >
-                <service.icon className="mb-4 h-10 w-10 text-softGold md:h-12 md:w-12" />
-                <h3 className="mb-4 font-serif text-lg font-semibold text-white md:text-xl">
+                <service.icon className="mb-6 h-10 w-10 text-gold/80" />
+                <h3 className="mb-4 font-serif text-xl font-semibold text-cream group-hover:text-gold transition-colors">
                   {service.title}
                 </h3>
-                <p className="mb-6 text-sm leading-relaxed text-white/90 md:text-base">
+                <p className="mb-8 text-sm leading-relaxed text-gray-400">
                   {service.description}
                 </p>
                 <ul className="space-y-3">
                   {service.points.map((point, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-3 text-sm text-white/90"
-                    >
-                      <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-softGold" />
-                      <span className="text-xs md:text-sm">{point}</span>
+                    <li key={idx} className="flex items-start gap-3 text-xs text-gray-300">
+                      <CheckCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-gold/60" />
+                      <span>{point}</span>
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="bg-deepCharcoal py-12 md:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="grid gap-8 md:gap-12 lg:grid-cols-[3fr,2fr]"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
+      {/* Methodology & Qualification */}
+      <section className="bg-black py-20 lg:py-32">
+        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+          <div className="grid gap-16 lg:grid-cols-2">
             <div>
-              <motion.h2
-                className="mb-6 font-serif text-2xl font-semibold text-white md:text-3xl"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                How I work
-              </motion.h2>
+              <h2 className="font-serif text-3xl font-semibold text-white">How I Work</h2>
+              <p className="mt-6 text-lg text-gray-400 leading-relaxed">
+                I am not a motivational coach. I am a strategist and advisor. The work is structured, 
+                documented, and accountable — anchored in conviction and integrity.
+              </p>
 
-              <motion.p
-                className="mb-6 text-base leading-relaxed text-white/90 md:mb-8 md:text-lg"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                viewport={{ once: true }}
-              >
-                I am not a motivational coach. I am a strategist and advisor.
-                The work is structured, documented, and accountable — but always
-                anchored in conviction and integrity.
-              </motion.p>
-
-              <motion.ol
-                className="space-y-4 md:space-y-6"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                viewport={{ once: true }}
-              >
+              <div className="mt-12 space-y-8">
                 {[
-                  {
-                    step: "Initial call",
-                    description:
-                      "30–45 minutes to understand context, stakes, and fit.",
-                  },
-                  {
-                    step: "Diagnostic",
-                    description:
-                      "Clear articulation of the real problem, not the fashionable one.",
-                  },
-                  {
-                    step: "Engagement",
-                    description:
-                      "Defined scope, cadence, and measures of success.",
-                  },
-                ].map((item, index) => (
-                  <motion.li
-                    key={item.step}
-                    className="flex items-start gap-4"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                  >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-softGold text-sm font-semibold text-deepCharcoal md:h-8 md:w-8">
-                      {index + 1}
+                  { step: "Initial Call", desc: "45 minutes to understand context, stakes, and fit." },
+                  { step: "Diagnostic", desc: "Clear articulation of the real problem, not the fashionable one." },
+                  { step: "Engagement", desc: "Defined scope, cadence, and clear measures of success." },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-6">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/10 font-mono text-sm font-bold text-gold border border-gold/20">
+                      0{i + 1}
                     </div>
                     <div>
-                      <h4 className="text-base font-semibold text-white md:text-lg">
-                        {item.step}
-                      </h4>
-                      <p className="mt-1 text-sm text-white/90 md:text-base">
-                        {item.description}
-                      </p>
+                      <h4 className="font-bold uppercase tracking-widest text-cream">{item.step}</h4>
+                      <p className="mt-1 text-sm text-gray-500">{item.desc}</p>
                     </div>
-                  </motion.li>
+                  </div>
                 ))}
-              </motion.ol>
+              </div>
             </div>
 
-            <motion.aside
-              className="rounded-2xl border border-softGold/40 bg-gradient-to-br from-softGold/10 to-softGold/15 p-6 text-white md:p-8"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 className="mb-4 font-serif text-lg font-semibold md:text-xl">
-                Is this for you?
-              </h3>
-              <p className="mb-4 text-sm leading-relaxed text-white/90 md:mb-6 md:text-base">
-                This advisory is for leaders who:
-              </p>
-              <ul className="mb-4 space-y-2 text-sm text-white/90 md:mb-6 md:space-y-3 md:text-base">
+            <div className="rounded-3xl border border-gold/20 bg-gold/5 p-8 lg:p-12">
+              <ShieldCheck className="mb-6 h-10 w-10 text-gold" />
+              <h3 className="font-serif text-2xl font-semibold text-cream">Is this for you?</h3>
+              <p className="mt-4 text-gray-400">This advisory is reserved for leaders who:</p>
+              
+              <ul className="mt-8 space-y-4">
                 {[
                   "Carry responsibility for others' livelihoods",
-                  "Want strategy that respects both God and data",
+                  "Want strategy that respects both Faith and Data",
                   "Are willing to be challenged, not entertained",
-                ].map((item, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-softGold" />
-                    <span>{item}</span>
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-cream/90">
+                    <div className="h-1.5 w-1.5 rounded-full bg-gold" />
+                    {item}
                   </li>
                 ))}
               </ul>
-              <p className="mb-4 text-sm text-white/90 md:mb-6 md:text-base">
-                If that sounds like you, send a short context note and we will
-                decide — together — if there is a serious mandate.
-              </p>
-              <Link
-                href="/contact"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-softGold/70 px-4 py-2 text-sm font-semibold text-softGold transition-all hover:bg-softGold hover:text-charcoal md:px-6 md:py-3 md:text-base sm:w-auto"
-              >
-                Share context
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.aside>
-          </motion.div>
+
+              <div className="mt-12">
+                <Link
+                  href="/contact"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold/50 py-4 text-sm font-bold uppercase tracking-widest text-gold transition-all hover:bg-gold hover:text-black"
+                >
+                  Share Context Note
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <p className="mt-4 text-center text-[10px] uppercase tracking-tighter text-gray-500">
+                  strictly confidential · limited mandates available
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </Layout>
