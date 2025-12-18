@@ -1,7 +1,7 @@
 [build]
   # We use 'next build' which handles 'next export' automatically via next.config.mjs
   command = "pnpm run build"
-  publish = "out" # Changed from .next to 'out' to match output: 'export' logic
+  publish = ".next" # Changed from .next to 'out' to match output: 'export' logic
 
 [build.environment]
   NODE_VERSION = "20.11.1"
