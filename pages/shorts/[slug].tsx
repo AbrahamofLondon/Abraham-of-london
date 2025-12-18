@@ -33,25 +33,36 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").trim().toLowerCase();
-  const shortDoc = getShortBySlug(slug);
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = String(params?.slug ?? "").toLowerCase();
+  const rawShort = getShortBySlug(slug);
 
-  if (!shortDoc) return { notFound: true };
+  if (!rawShort) return { notFound: true };
+
+  // 1. Manually "Flatten" the object to remove non-serializable Contentlayer proxies
+  const short = {
+    title: rawShort.title || null,
+    date: rawShort.date || null,
+    excerpt: rawShort.excerpt || null,
+    theme: rawShort.theme || rawShort.category || "Reflection",
+    slug: rawShort.slug || slug,
+    readTime: rawShort.readTime || null,
+    body: { raw: rawShort.body.raw }
+  };
 
   try {
-    // Extract only the raw body to avoid serializing complex Contentlayer objects
-    const content = shortDoc.body?.raw || shortDoc.content || "";
-    
-    const mdxSource = await serialize(content, {
-      mdxOptions: { 
-        remarkPlugins: [remarkGfm], 
-        rehypePlugins: [rehypeSlug] 
-      },
-      // This ensures frontmatter isn't accidentally re-parsed inside the body
-      parseFrontmatter: false 
+    const mdxSource = await serialize(short.body.raw, {
+      mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
     });
 
+    return { 
+      props: { short, source: mdxSource }, 
+      revalidate: 1800 
+    };
+  } catch (err) {
+    return { notFound: true };
+  }
+};
     return { 
       props: { 
         // Create a plain object to avoid Next.js serialization errors
