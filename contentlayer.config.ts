@@ -100,8 +100,9 @@ export const Short = defineDocumentType(() => ({
   filePathPattern: "shorts/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
-    ...commonFields,
+    ...commonFields, // Ensure commonFields has title, date, excerpt, slug
     theme: { type: "string", required: false },
+    audience: { type: "string", required: false },
     published: { type: "boolean", required: false, default: true },
   },
   computedFields: {
