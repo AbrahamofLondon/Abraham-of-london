@@ -7,84 +7,98 @@ import {
   normalizeSlug, 
   resolveDocDownloadUrl 
 } from "@/lib/contentlayer-helper";
-
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdxComponents from "@/components/mdx-components";
-import SafeMDXRemote from "@/components/SafeMDXRemote";
+import { MDXRemote } from "next-mdx-remote";
 
-type Props = { download: any; source: any };
+type Props = { 
+  download: {
+    title: string;
+    excerpt: string | null;
+    category: string;
+    fileUrl: string | null;
+    slug: string;
+  }; 
+  source: any; 
+};
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllDownloads();
-  const paths = docs
-    .map((d) => ({ params: { slug: normalizeSlug(d) } }))
-    .filter((p) => p.params.slug !== "");
-
-  return { paths, fallback: "blocking" };
+  const paths = getAllDownloads().map((d) => ({ 
+    params: { slug: normalizeSlug(d) } 
+  }));
+  
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
-  if (!slug) return { notFound: true };
+  const rawDoc = getAllDownloads().find((d) => normalizeSlug(d) === slug);
 
-  const docs = getAllDownloads();
-  const download = docs.find((d) => normalizeSlug(d) === slug);
-  if (!download) return { notFound: true };
+  if (!rawDoc) return { notFound: true };
 
-  const raw = download?.body?.raw ?? "";
-  let source;
+  // 1. SURGICAL EXTRACTION: Explicitly define a plain object.
+  // This is the ONLY way to guarantee no Proxy logic leaks into the Next.js export worker.
+  const download = {
+    title: rawDoc.title || "Download",
+    excerpt: rawDoc.excerpt || null,
+    category: rawDoc.category || "Vault Resource",
+    fileUrl: resolveDocDownloadUrl(rawDoc),
+    slug: slug,
+  };
+
   try {
-    source = await serialize(raw, {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
+    const mdxSource = await serialize(rawDoc.body.raw, {
+      mdxOptions: { 
+        remarkPlugins: [remarkGfm], 
+        rehypePlugins: [rehypeSlug] 
       },
     });
-  } catch (e) {
-    console.error(`[Download Serialize Error] ${slug}:`, e);
-    source = await serialize("This download information is being prepared.");
-  }
 
-  return { props: { download, source }, revalidate: 1800 };
+    return { 
+      props: { 
+        download, 
+        // Force source to be a plain object to prevent serialization crashes
+        source: JSON.parse(JSON.stringify(mdxSource)) 
+      }, 
+      revalidate: 1800 
+    };
+  } catch (e) {
+    console.error(`[Build Error] Export failed for download slug: ${slug}`, e);
+    return { notFound: true };
+  }
 };
 
 const DownloadPage: NextPage<Props> = ({ download, source }) => {
-  const title = download.title ?? "Download";
-  const fileUrl = resolveDocDownloadUrl(download);
+  const title = download.title;
 
   return (
     <Layout title={title}>
       <Head>
-        {download.excerpt && <meta name="description" content={download.excerpt} />}
         <title>{title} | Downloads | Abraham of London</title>
+        {download.excerpt && <meta name="description" content={download.excerpt} />}
       </Head>
 
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-10 space-y-4 border-b border-gold/10 pb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Vault Resource</p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{title}</h1>
-          
-          {fileUrl && (
-            <div className="pt-4">
-              <a
-                href={fileUrl}
-                download
-                className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-black transition-all hover:bg-gold/80 hover:scale-105"
-              >
-                <span>Download Document</span>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-              </a>
-            </div>
+      <main className="mx-auto max-w-3xl px-6 py-20">
+        <header className="mb-10 border-b border-gold/10 pb-10">
+          <p className="text-xs font-bold uppercase tracking-widest text-gold/70">
+            {download.category}
+          </p>
+          <h1 className="mt-2 font-serif text-4xl text-cream">{title}</h1>
+          {download.fileUrl && (
+            <a 
+              href={download.fileUrl} 
+              download 
+              className="mt-6 inline-block rounded-full bg-gold px-8 py-3 text-xs font-bold uppercase text-black transition-transform hover:scale-105"
+            >
+              Download Document
+            </a>
           )}
         </header>
 
-        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
-          <SafeMDXRemote source={source} components={mdxComponents} />
+        <article className="prose prose-invert max-w-none prose-gold prose-p:text-gray-300">
+          <MDXRemote {...source} components={mdxComponents} />
         </article>
       </main>
     </Layout>

@@ -4,8 +4,8 @@ import rehypeSlug from "rehype-slug";
 
 /**
  * 1. RESILIENT COMMON FIELDS
- * Included globally. We add 'category' and 'author' here because 
- * almost all your document types are using them in their frontmatter.
+ * We include both camelCase and lowercase versions of common metadata 
+ * to handle inconsistent frontmatter across the 103 documents.
  */
 const commonFields = {
   title: { type: "string", required: true },
@@ -27,10 +27,13 @@ const commonFields = {
   ogTitle: { type: "string", required: false },
   ogDescription: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
+  // FIX: Added 'readtime' (lowercase) to satisfy the 11 resource warnings
   readTime: { type: "string", required: false },
-  // ADDED: These were causing warnings across multiple types
+  readtime: { type: "string", required: false },
   category: { type: "string", required: false },
   author: { type: "string", required: false },
+  audience: { type: "string", required: false },
+  theme: { type: "string", required: false },
 } as const;
 
 function normalizeSlug(doc: any): string {
@@ -100,9 +103,7 @@ export const Short = defineDocumentType(() => ({
   filePathPattern: "shorts/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
-    ...commonFields, // Ensure commonFields has title, date, excerpt, slug
-    theme: { type: "string", required: false },
-    audience: { type: "string", required: false },
+    ...commonFields,
     published: { type: "boolean", required: false, default: true },
   },
   computedFields: {
@@ -156,7 +157,6 @@ export const Event = defineDocumentType(() => ({
     eventDate: { type: "date", required: false },
     location: { type: "string", required: false },
     time: { type: "string", required: false },
-    // ADDED: Based on your CLI warnings
     registrationUrl: { type: "string", required: false },
   },
   computedFields: {
