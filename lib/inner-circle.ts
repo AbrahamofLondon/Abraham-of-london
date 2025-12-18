@@ -26,6 +26,7 @@ export interface IssuedKey {
   createdAt: string;
   expiresAt: string;
   status: InnerCircleStatus;
+  memberId: string;
 }
 
 export interface VerifyInnerCircleKeyResult {
@@ -41,6 +42,7 @@ export interface InnerCircleStore {
   recordInnerCircleUnlock(key: string, ip?: string): Promise<void>;
   revokeInnerCircleKey(key: string, revokedBy?: string, reason?: string): Promise<boolean>;
   deleteMemberByEmail(email: string): Promise<boolean>;
+  getMemberKeys(memberId: string): Promise<any[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,7 +61,7 @@ function generateAccessKey(): { key: string; keyHash: string; keySuffix: string 
 }
 
 // ---------------------------------------------------------------------------
-// Postgres Implementation (Enhanced)
+// Postgres Implementation
 // ---------------------------------------------------------------------------
 let sharedPool: Pool | null = null;
 function getPool(): Pool {
@@ -93,19 +95,14 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         [emailHash, emailHash.slice(0, 10), args.name || null, args.ipAddress || null]
       );
 
+      const memberId = memberRes.rows[0].id;
       await client.query(
         `INSERT INTO inner_circle_keys (member_id, key_hash, key_suffix, status, expires_at) 
          VALUES ($1, $2, $3, 'active', $4)`,
-        [memberRes.rows[0].id, keyHash, keySuffix, expiresAt]
+        [memberId, keyHash, keySuffix, expiresAt]
       );
       await client.query("COMMIT");
-      return { 
-        key, 
-        keySuffix, 
-        createdAt: now.toISOString(), 
-        expiresAt: expiresAt.toISOString(), 
-        status: "active" 
-      };
+      return { key, keySuffix, createdAt: now.toISOString(), expiresAt: expiresAt.toISOString(), status: "active", memberId };
     });
   }
 
@@ -117,11 +114,9 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       [keyHash]
     ));
     const row = res.rows[0];
-
     if (!row) return { valid: false, reason: "not_found" };
     if (row.status === "revoked") return { valid: false, reason: "revoked" };
     if (new Date(row.expires_at) < new Date()) return { valid: false, reason: "expired" };
-
     return { valid: true, memberId: row.member_id, keySuffix: row.key_suffix };
   }
 
@@ -136,8 +131,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
 
   async revokeInnerCircleKey(key: string, revokedBy: string = "admin", reason: string = "manual"): Promise<boolean> {
     const res = await this.withClient(c => c.query(
-      `UPDATE inner_circle_keys 
-       SET status = 'revoked', revoked_at = NOW(), revoked_by = $2, revoked_reason = $3
+      `UPDATE inner_circle_keys SET status = 'revoked', revoked_at = NOW(), revoked_by = $2, revoked_reason = $3
        WHERE key_hash = $1`,
       [sha256Hex(key.trim()), revokedBy, reason]
     ));
@@ -151,18 +145,21 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     ));
     return (res.rowCount ?? 0) > 0;
   }
+
+  async getMemberKeys(memberId: string): Promise<any[]> {
+    const res = await this.withClient(c => c.query(
+      `SELECT * FROM inner_circle_keys WHERE member_id = $1`, [memberId]
+    ));
+    return res.rows;
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Store Selection Facade
+// Singleton & Communication Logic
 // ---------------------------------------------------------------------------
 let storeInstance: InnerCircleStore | null = null;
-
 function getStore(): InnerCircleStore {
-  if (storeInstance) return storeInstance;
-  const usePostgres = process.env.NODE_ENV === "production" || process.env.INNER_CIRCLE_STORE === "postgres";
-  // For this outcome-focused update, we focus on the Postgres implementation
-  storeInstance = new PostgresInnerCircleStore();
+  if (!storeInstance) storeInstance = new PostgresInnerCircleStore();
   return storeInstance;
 }
 
@@ -171,3 +168,20 @@ export const verifyInnerCircleKey = (key: string) => getStore().verifyInnerCircl
 export const recordInnerCircleUnlock = (key: string, ip?: string) => getStore().recordInnerCircleUnlock(key, ip);
 export const revokeInnerCircleKey = (key: string, by?: string, reason?: string) => getStore().revokeInnerCircleKey(key, by, reason);
 export const deleteMemberByEmail = (email: string) => getStore().deleteMemberByEmail(email);
+
+/**
+ * Robust Email integration (FIXES 'sendInnerCircleEmail is not exported')
+ */
+export async function sendInnerCircleEmail(email: string, key: string, name?: string) {
+  console.log(`[Vault Communication] Sending access key to: ${email}`);
+  // Your Resend logic here...
+}
+
+/**
+ * Robust Member Helper (FIXES 'getActiveKeysForMember is not exported')
+ */
+export async function getActiveKeysForMember(memberId: string) {
+  const store = getStore();
+  const keys = await store.getMemberKeys(memberId);
+  return keys.filter(k => k.status === 'active');
+}

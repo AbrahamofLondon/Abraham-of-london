@@ -4,7 +4,8 @@ import rehypeSlug from "rehype-slug";
 
 /**
  * 1. RESILIENT COMMON FIELDS
- * Promotes extra metadata (ogTitle, coverAspect, etc.) to valid system properties.
+ * Included globally. We add 'category' and 'author' here because 
+ * almost all your document types are using them in their frontmatter.
  */
 const commonFields = {
   title: { type: "string", required: true },
@@ -27,12 +28,11 @@ const commonFields = {
   ogDescription: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
   readTime: { type: "string", required: false },
+  // ADDED: These were causing warnings across multiple types
+  category: { type: "string", required: false },
+  author: { type: "string", required: false },
 } as const;
 
-/**
- * 2. SHARED NORMALIZATION LOGIC
- * Ensures URLs never have trailing slashes and match local file logic.
- */
 function normalizeSlug(doc: any): string {
   if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
     return doc.slug.trim().toLowerCase().replace(/\/$/, "");
@@ -44,7 +44,7 @@ function normalizeSlug(doc: any): string {
 }
 
 /**
- * 3. DOCUMENT DEFINITIONS
+ * 2. DOCUMENT DEFINITIONS
  */
 export const Post = defineDocumentType(() => ({
   name: "Post",
@@ -52,9 +52,7 @@ export const Post = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...commonFields,
-    author: { type: "string", required: false },
     authorTitle: { type: "string", required: false },
-    category: { type: "string", required: false },
     relatedDownloads: { type: "list", of: { type: "string" }, required: false },
     resources: { type: "json", required: false },
     authorNote: { type: "string", required: false },
@@ -72,7 +70,6 @@ export const Canon = defineDocumentType(() => ({
   fields: {
     ...commonFields,
     subtitle: { type: "string", required: false },
-    author: { type: "string", required: false },
     volumeNumber: { type: "string", required: false },
     order: { type: "number", required: false },
   },
@@ -89,7 +86,6 @@ export const Book = defineDocumentType(() => ({
   fields: {
     ...commonFields,
     subtitle: { type: "string", required: false },
-    author: { type: "string", required: false },
     publisher: { type: "string", required: false },
     isbn: { type: "string", required: false },
   },
@@ -159,6 +155,8 @@ export const Event = defineDocumentType(() => ({
     eventDate: { type: "date", required: false },
     location: { type: "string", required: false },
     time: { type: "string", required: false },
+    // ADDED: Based on your CLI warnings
+    registrationUrl: { type: "string", required: false },
   },
   computedFields: {
     url: { type: "string", resolve: (doc) => `/events/${normalizeSlug(doc)}` },
@@ -186,7 +184,7 @@ export const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: { ...commonFields, author: { type: "string", required: false } },
+  fields: { ...commonFields },
   computedFields: {
     url: { type: "string", resolve: (doc) => `/strategy/${normalizeSlug(doc)}` },
     slug: { type: "string", resolve: normalizeSlug },

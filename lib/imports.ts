@@ -1,7 +1,9 @@
+// lib/imports.ts
 export * from "./siteConfig";
 export * from "./utils";
 
 export {
+  // Raw Collections
   allPosts,
   allBooks,
   allDownloads,
@@ -10,11 +12,16 @@ export {
   allResources,
   allStrategies,
   allCanons,
-  allCanon,
+  allCanon, // Alias
+  allShorts,
+
+  // Retrieval Getters
   getAllContentlayerDocs,
   getPublishedDocuments,
   getPublishedDocumentsByType,
   getPublishedPosts,
+  getPublishedShorts,
+  getRecentShorts,
   getAllCanons,
   getAllBooks,
   getAllDownloads,
@@ -22,6 +29,19 @@ export {
   getAllStrategies,
   getAllResources,
   getAllPrints,
+
+  // By-Slug Getters
+  getPostBySlug,
+  getBookBySlug,
+  getCanonBySlug,
+  getShortBySlug,
+  getDownloadBySlug,
+  getResourceBySlug,
+  getEventBySlug,
+  getPrintBySlug,
+  getStrategyBySlug,
+
+  // Logic Helpers
   normalizeSlug,
   getDocHref,
   getDocKind,
@@ -30,4 +50,4 @@ export {
   assertContentlayerHasDocs
 } from "./contentlayer-helper";
 
-export type { DocKind, ContentlayerCardProps } from "./contentlayer-helper";
+export type { DocKind } from "./contentlayer-helper";

@@ -1,29 +1,53 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  // url property removed to comply with Prisma 7.2.0 validation (P1012)
+  provider = "sqlite"
+  // url is intentionally removed here to satisfy Prisma 7 validation
 }
 
 model ShortInteraction {
-  id         Int       @id @default(autoincrement())
-  shortSlug  String    @map("short_slug") @db.VarChar(255)
-  sessionId  String?   @map("session_id") @db.VarChar(255)
-  userId     String?   @map("user_id") @db.VarChar(255)
-  action     String    @db.VarChar(50)
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz
-
-  @@index([shortSlug], name: "idx_short_interactions_slug")
-  @@index([sessionId], name: "idx_short_interactions_session")
-  @@index([userId], name: "idx_short_interactions_user")
-  @@index([action], name: "idx_short_interactions_action")
-  @@index([createdAt], name: "idx_short_interactions_created")
+  id        Int       @id @default(autoincrement())
+  shortSlug String    @map("short_slug")
+  sessionId String?   @map("session_id")
+  userId    String?   @map("user_id")
+  action    String    
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("short_interactions")
+}
+
+model InnerCircleMember {
+  id              String   @id @default(uuid())
+  emailHash       String   @unique @map("email_hash")
+  emailHashPrefix String   @map("email_hash_prefix")
+  name            String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  lastSeenAt      DateTime @default(now()) @map("last_seen_at")
+  lastIp          String?  @map("last_ip")
+  keys            InnerCircleKey[]
+
+  @@map("inner_circle_members")
+}
+
+model InnerCircleKey {
+  id            String   @id @default(uuid())
+  memberId      String   @map("member_id")
+  member        InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  keyHash       String   @unique @map("key_hash")
+  keySuffix     String   @map("key_suffix")
+  status        String   @default("active") 
+  totalUnlocks  Int      @default(0) @map("total_unlocks")
+  createdAt     DateTime @default(now()) @map("created_at")
+  lastUsedAt    DateTime? @map("last_used_at")
+  lastIp        String?  @map("last_ip")
+  expiresAt     DateTime @map("expires_at")
+  revokedAt     DateTime? @map("revoked_at")
+  revokedBy     String?   @map("revoked_by")
+  revokedReason String?   @map("revoked_reason")
+
+  @@map("inner_circle_keys")
 }
