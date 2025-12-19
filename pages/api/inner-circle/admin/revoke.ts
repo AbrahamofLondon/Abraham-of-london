@@ -1,33 +1,46 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { revokeInnerCircleKey } from '@/lib/server/inner-circle-store';
-import { getKeySuffix, auditLog } from '@/lib/server/utils';
+import type { NextApiRequest, NextApiResponse } from "next";
+import { revokeInnerCircleKey } from "@/lib/inner-circle";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).end();
+type RevokeResponse = { ok: boolean; message?: string; error?: string };
 
-  const { key, adminSecret, reason } = req.body;
+function isAdmin(req: NextApiRequest): boolean {
+  const raw =
+    (req.headers["x-inner-circle-admin-key"] as string | undefined) ||
+    (req.headers["authorization"] as string | undefined) ||
+    (req.body?.adminSecret as string | undefined);
 
-  // 1. Strict Authorization
-  if (adminSecret !== process.env.INNER_CIRCLE_ADMIN_KEY) {
-    auditLog("unauthorized_admin_attempt", { ip: req.headers['x-forwarded-for'] });
-    return res.status(401).json({ message: 'Unauthorized' });
+  const token = raw?.replace(/^Bearer\s+/i, "").trim();
+  const expected = process.env.INNER_CIRCLE_ADMIN_KEY;
+  return !!token && !!expected && token === expected;
+}
+
+function keySuffix(key: string): string {
+  return key.slice(-6);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<RevokeResponse>) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({ ok: false, error: "POST required" });
   }
 
-  if (!key) return res.status(400).json({ error: 'Key required' });
+  if (!isAdmin(req)) {
+    return res.status(401).json({ ok: false, error: "Unauthorized" });
+  }
+
+  const key = typeof req.body?.key === "string" ? req.body.key.trim() : "";
+  if (!key) return res.status(400).json({ ok: false, error: "Key required" });
 
   try {
-    // 2. Perform Revocation
-    const success = await revokeInnerCircleKey(key.trim());
+    const success = await revokeInnerCircleKey(key, "admin", req.body?.reason || "manual");
+    if (!success) return res.status(404).json({ ok: false, error: "Key not found" });
 
-    if (success) {
-      const suffix = getKeySuffix(key);
-      auditLog("key_revoked_manually", { suffix, reason: reason || 'none' });
-      return res.status(200).json({ ok: true, message: `Key ending in ${suffix} revoked.` });
-    }
-
-    return res.status(404).json({ ok: false, error: 'Key not found in store' });
-  } catch (error) {
-    console.error('[Admin API Error]:', error);
-    return res.status(500).json({ error: 'Internal storage failure' });
+    return res.status(200).json({
+      ok: true,
+      message: `Key ending in ${keySuffix(key)} revoked.`,
+    });
+  } catch (e) {
+    console.error("[InnerCircle] revoke error:", e);
+    return res.status(500).json({ ok: false, error: "Internal storage failure" });
   }
 }

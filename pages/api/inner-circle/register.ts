@@ -1,111 +1,75 @@
-// pages/api/inner-circle/register.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyRecaptchaDetailed } from "@/lib/recaptcha"; // Unified helper we reviewed
-// NOTE: Ensure these exist in your lib/inner-circle engine
-import { 
-  createOrUpdateMemberAndIssueKey, 
-  sendInnerCircleEmail 
-} from "@/lib/inner-circle"; 
+import { verifyRecaptchaDetailed } from "@/lib/recaptcha";
+import {
+  createOrUpdateMemberAndIssueKey,
+  sendInnerCircleEmail,
+  getClientIp,
+} from "@/lib/inner-circle";
 
-type ResponseData = {
-  ok: boolean;
-  message?: string;
-  accessKey?: string;
-  keySuffix?: string;
-  error?: string;
-};
+type ResponseData =
+  | { ok: true; message: string; keySuffix?: string }
+  | { ok: false; error: string };
 
-/**
- * THE REGISTRATION ENGINE - Unified Production Version
- * Hardened for reCAPTCHA v3 and persistent member management.
- */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<ResponseData>
-) {
-  // 1. Method Restriction
+function safeReturnTo(v: unknown): string {
+  if (typeof v !== "string") return "/canon";
+  const trimmed = v.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return "/canon";
+  return trimmed;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "System requires POST for registration." });
   }
 
-  // 2. Body Parsing & Validation
   const { email, name, recaptchaToken, returnTo } = req.body || {};
-
   if (!email || typeof email !== "string") {
     return res.status(400).json({ ok: false, error: "Identity (email) is required." });
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (!emailRegex.test(normalizedEmail)) {
     return res.status(400).json({ ok: false, error: "Invalid identity format." });
   }
 
-  // 3. Security Check: reCAPTCHA v3 Validation
   try {
-    const verification = await verifyRecaptchaDetailed(
-      recaptchaToken,
-      "inner_circle_register"
-    );
-
+    const verification = await verifyRecaptchaDetailed(recaptchaToken, "inner_circle_register");
     if (!verification.success) {
-      console.warn(`[Security Alert] Bot detected or reCAPTCHA failed for: ${email}`);
-      return res.status(403).json({ 
-        ok: false, 
-        error: "Security verification failed. Please refresh and try again." 
-      });
+      return res.status(403).json({ ok: false, error: "Security verification failed. Please refresh and try again." });
     }
-  } catch (secError) {
-    console.error("[Security Exception] reCAPTCHA system error:", secError);
+  } catch {
     return res.status(500).json({ ok: false, error: "Security subsystem offline." });
   }
 
-  // 4. Persistence & Issue Key
   try {
-    const ipAddress = Array.isArray(req.headers["x-forwarded-for"])
-      ? req.headers["x-forwarded-for"][0]
-      : req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
     const keyRecord = await createOrUpdateMemberAndIssueKey({
-      email: email.toLowerCase().trim(),
-      name: name?.trim(),
-      ipAddress,
-      context: "web-registration"
+      email: normalizedEmail,
+      name: typeof name === "string" ? name.trim() : undefined,
+      ipAddress: getClientIp(req),
+      context: "web-registration",
     });
 
-    // 5. Professional Email Dispatch
-    // This utilizes your actual email templates defined in the library
+    const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const safeTo = safeReturnTo(returnTo);
+
     await sendInnerCircleEmail({
-      to: email,
+      to: normalizedEmail,
       type: "welcome",
       data: {
-        name: name || "Builder",
+        name: (typeof name === "string" && name.trim()) ? name.trim() : "Builder",
         accessKey: keyRecord.key,
-        unlockUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/inner-circle?key=${keyRecord.key}&returnTo=${encodeURIComponent(returnTo || "/canon")}`
-      }
+        unlockUrl: `${site}/inner-circle?key=${encodeURIComponent(keyRecord.key)}&returnTo=${encodeURIComponent(safeTo)}`,
+      },
     });
 
-    // 6. Success Response (Privacy-Safe)
     return res.status(200).json({
       ok: true,
       message: "Access granted. Check your inbox for the security key.",
-      keySuffix: keyRecord.keySuffix // Return suffix for UI confirmation
+      keySuffix: keyRecord.keySuffix,
     });
-
-  } catch (error: any) {
-    console.error("[Build Error] Inner Circle Registration failed:", error);
-    
-    // Forgiving error handling for existing members
-    if (error.code === "ALREADY_MEMBER") {
-      return res.status(200).json({
-        ok: true,
-        message: "Identity already registered. A fresh key has been dispatched to your inbox."
-      });
-    }
-
-    return res.status(500).json({ 
-      ok: false, 
-      error: "Internal server error during vault registration." 
-    });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: "Internal server error during vault registration." });
   }
 }

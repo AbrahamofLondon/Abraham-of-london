@@ -1,93 +1,86 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { cleanupOldData } from '@/lib/server/inner-circle-store';
-import { 
-  rateLimitForRequestIp, 
-  RATE_LIMIT_CONFIGS,
-  createRateLimitHeaders,
-  getClientIp 
-} from '@/lib/server/rateLimit';
-
-/**
- * ADMIN AUTHORITY CHECK
- * Strictly validates the administrative key against environment secrets.
- */
-function isAdminAuthenticated(req: NextApiRequest): boolean {
-  const adminToken = req.headers['x-inner-circle-admin-key'] || req.headers['authorization'];
-  if (!adminToken || typeof adminToken !== 'string') return false;
-  
-  // Direct comparison with the system-level master key
-  return adminToken === process.env.INNER_CIRCLE_ADMIN_KEY;
-}
+import type { NextApiRequest, NextApiResponse } from "next";
+import { cleanupOldData } from "@/lib/inner-circle";
 
 type CleanupResponse = {
   ok: boolean;
   message?: string;
-  stats?: {
-    deletedMembers: number;
-    deletedKeys: number;
-  };
+  stats?: { deletedMembers: number; deletedKeys: number };
   error?: string;
   cleanedAt?: string;
 };
 
-/**
- * THE MAINTENANCE ENGINE - Unified Production Version
- * Hardened for system integrity and periodic data hygiene.
- */
-export default async function handler(
-  req: NextApiRequest, 
-  res: NextApiResponse<CleanupResponse>
-) {
-  // 1. Method Authority
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ ok: false, error: 'Maintenance requires POST authorization.' });
+function getClientIp(req: NextApiRequest): string {
+  const xf = req.headers["x-forwarded-for"];
+  if (typeof xf === "string") return xf.split(",")[0].trim();
+  return (req.socket as any)?.remoteAddress || "unknown";
+}
+
+function isAdminAuthenticated(req: NextApiRequest): boolean {
+  const headerKey =
+    (req.headers["x-inner-circle-admin-key"] as string | undefined) ||
+    (req.headers["authorization"] as string | undefined);
+
+  const token = headerKey?.replace(/^Bearer\s+/i, "").trim();
+  if (!token) return false;
+
+  const expected = process.env.INNER_CIRCLE_ADMIN_KEY;
+  if (!expected) return false;
+
+  return token === expected;
+}
+
+// small limiter: 3/hour per IP
+const BUCKET = new Map<string, { count: number; resetAt: number }>();
+function rateLimit(ip: string, limit = 3, windowSec = 3600) {
+  const now = Date.now();
+  const resetAt = now + windowSec * 1000;
+  const cur = BUCKET.get(ip);
+
+  if (!cur || cur.resetAt < now) {
+    BUCKET.set(ip, { count: 1, resetAt });
+    return { allowed: true, remaining: limit - 1, resetAt };
   }
 
-  // 2. Authentication Perimeter
+  cur.count += 1;
+  BUCKET.set(ip, cur);
+
+  return {
+    allowed: cur.count <= limit,
+    remaining: Math.max(0, limit - cur.count),
+    resetAt: cur.resetAt,
+  };
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<CleanupResponse>) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({ ok: false, error: "Maintenance requires POST." });
+  }
+
   if (!isAdminAuthenticated(req)) {
-    console.error(`[Security Alert] Unauthorized cleanup attempt from IP: ${getClientIp(req)}`);
-    return res.status(401).json({ ok: false, error: 'Unauthorized. System Admin key required.' });
+    return res.status(401).json({ ok: false, error: "Unauthorized. Admin key required." });
   }
 
-  // 3. Administrative Rate Limiting
-  // Only 3 cleanup operations allowed per hour to prevent accidental database thrashing.
-  const rateLimitResult = rateLimitForRequestIp(
-    req, 
-    'inner-circle-admin-cleanup', 
-    { ...RATE_LIMIT_CONFIGS.ADMIN_OPERATIONS, limit: 3 }
-  );
+  const ip = getClientIp(req);
+  const rl = rateLimit(`inner-circle-cleanup:${ip}`, 3, 3600);
+  res.setHeader("X-RateLimit-Limit", "3");
+  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+  res.setHeader("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
 
-  // Apply headers for operational transparency
-  const headers = createRateLimitHeaders(rateLimitResult.result);
-  Object.entries(headers).forEach(([key, value]) => res.setHeader(key, value));
-
-  if (!rateLimitResult.result.allowed) {
-    return res.status(429).json({ 
-      ok: false, 
-      error: 'Operational limit reached. Cleanup is restricted to 3 runs per hour.' 
-    });
+  if (!rl.allowed) {
+    return res.status(429).json({ ok: false, error: "Cleanup limited to 3 runs per hour." });
   }
 
   try {
-    // 4. Execution of Hygiene Logic
-    // This removes expired keys and members who have exceeded the data retention period.
     const result = await cleanupOldData();
-
-    console.info(`[System Maintenance] Cleanup successful: ${result.deletedMembers} members removed.`);
-
-    return res.status(200).json({ 
-      ok: true, 
-      message: 'Vault hygiene completed successfully.',
-      stats: {
-        deletedMembers: result.deletedMembers,
-        deletedKeys: result.deletedKeys
-      },
-      cleanedAt: new Date().toISOString()
+    return res.status(200).json({
+      ok: true,
+      message: "Vault hygiene completed successfully.",
+      stats: { deletedMembers: result.deletedMembers, deletedKeys: result.deletedKeys },
+      cleanedAt: new Date().toISOString(),
     });
-
-  } catch (error) {
-    console.error('[System Maintenance] Exception during cleanup:', error);
-    return res.status(500).json({ ok: false, error: 'hygiene subsystem failure. Maintenance aborted.' });
+  } catch (e) {
+    console.error("[InnerCircle] cleanup error:", e);
+    return res.status(500).json({ ok: false, error: "hygiene subsystem failure." });
   }
 }

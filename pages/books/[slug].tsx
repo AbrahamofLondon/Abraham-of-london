@@ -20,58 +20,32 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: false };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
-  const rawBook = getAllBooks().find((b) => normalizeSlug(b) === slug);
+  const rawDoc = getAllBooks().find((b) => normalizeSlug(b) === slug);
 
-  if (!rawBook || isDraft(rawBook)) return { notFound: true };
+  if (!rawDoc || isDraft(rawDoc)) return { notFound: true };
 
-  // SURGICAL EXTRACTION: Explicitly define primitives to bypass Proxy issues
   const book = {
-    title: rawBook.title || "Book",
-    description: rawBook.description || rawBook.excerpt || "",
-    excerpt: rawBook.excerpt || null,
-    coverImage: rawBook.coverImage || null,
+    title: rawDoc.title || "Book",
+    excerpt: rawDoc.excerpt || null,
+    coverImage: rawDoc.coverImage || null,
     slug: slug,
-    date: rawBook.date ? new Date(rawBook.date).toISOString() : null,
+    body: { raw: String(rawDoc.body.raw) }
   };
 
   try {
-    const source = await serialize(rawBook.body.raw, {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
-      },
-    });
-
+    const mdxSource = await serialize(book.body.raw);
     return { 
       props: { 
         book, 
-        source: JSON.parse(JSON.stringify(source)) // Final POJO safety
+        source: JSON.parse(JSON.stringify(mdxSource)) 
       }, 
       revalidate: 1800 
     };
-  } catch (e) {
-    console.error(`[Build Error] Serialization failed for book: ${slug}`);
+  } catch (err) {
     return { notFound: true };
   }
-};
-
-const BookPage: NextPage<Props> = ({ book, source }) => {
-  const title = book.title;
-  const canonicalUrl = `${SITE}/books/${book.slug}`;
-
-  return (
-    <Layout title={title} description={book.description} canonicalUrl={canonicalUrl} ogImage={book.coverImage} ogType="article">
-      <Head><link rel="canonical" href={canonicalUrl} /></Head>
-      <main className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="font-serif text-4xl text-cream border-b border-gold/10 pb-6">{title}</h1>
-        <article className="prose prose-invert mt-8 max-w-none">
-          <MDXRemote {...source} components={mdxComponents} />
-        </article>
-      </main>
-    </Layout>
-  );
 };
 
 export default BookPage;

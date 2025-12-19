@@ -2,53 +2,55 @@ import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
-/**
- * 1. RESILIENT COMMON FIELDS
- * We include both camelCase and lowercase versions of common metadata 
- * to handle inconsistent frontmatter across the 103 documents.
- */
 const commonFields = {
   title: { type: "string", required: true },
   date: { type: "date", required: true },
+
+  // Frontmatter override; do NOT also compute slug field
   slug: { type: "string", required: false },
+
   href: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
+
   coverImage: { type: "string", required: false },
   coverAspect: { type: "string", required: false },
   coverFit: { type: "string", required: false },
   coverPosition: { type: "string", required: false },
+
   tags: { type: "list", of: { type: "string" }, required: false },
   draft: { type: "boolean", required: false, default: false },
   featured: { type: "boolean", required: false, default: false },
+
   layout: { type: "string", required: false },
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
+
   ogTitle: { type: "string", required: false },
   ogDescription: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
-  // FIX: Added 'readtime' (lowercase) to satisfy the 11 resource warnings
+
+  // allow both variants used in legacy docs
   readTime: { type: "string", required: false },
   readtime: { type: "string", required: false },
+
   category: { type: "string", required: false },
   author: { type: "string", required: false },
   audience: { type: "string", required: false },
   theme: { type: "string", required: false },
 } as const;
 
-function normalizeSlug(doc: any): string {
-  if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
-    return doc.slug.trim().toLowerCase().replace(/\/$/, "");
-  }
-  const flattened = doc._raw.flattenedPath;
-  const parts = flattened.split("/");
+function normalizedSlug(doc: any): string {
+  const s = typeof doc.slug === "string" ? doc.slug.trim() : "";
+  if (s) return s.toLowerCase().replace(/\/+$/, "");
+
+  const fp: string = doc._raw.flattenedPath;
+  const parts = fp.split("/");
   const last = parts[parts.length - 1];
-  return (last === "index" ? parts[parts.length - 2] : last).toLowerCase();
+  const slug = last === "index" ? parts[parts.length - 2] : last;
+  return String(slug).toLowerCase().replace(/\/+$/, "");
 }
 
-/**
- * 2. DOCUMENT DEFINITIONS
- */
 export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
@@ -61,8 +63,7 @@ export const Post = defineDocumentType(() => ({
     authorNote: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/blog/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/blog/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -77,8 +78,7 @@ export const Canon = defineDocumentType(() => ({
     order: { type: "number", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/canon/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/canon/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -93,8 +93,7 @@ export const Book = defineDocumentType(() => ({
     isbn: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/books/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/books/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -107,8 +106,7 @@ export const Short = defineDocumentType(() => ({
     published: { type: "boolean", required: false, default: true },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/shorts/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/shorts/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -126,8 +124,7 @@ export const Download = defineDocumentType(() => ({
     downloadFile: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/downloads/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/downloads/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -143,8 +140,7 @@ export const Resource = defineDocumentType(() => ({
     downloadUrl: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/resources/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/resources/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -160,8 +156,7 @@ export const Event = defineDocumentType(() => ({
     registrationUrl: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/events/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/events/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -173,11 +168,10 @@ export const Print = defineDocumentType(() => ({
     ...commonFields,
     dimensions: { type: "string", required: false },
     price: { type: "string", required: false },
-    available: { type: "boolean", default: true },
+    available: { type: "boolean", required: false, default: true },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/prints/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/prints/${normalizedSlug(doc)}` },
   },
 }));
 
@@ -187,8 +181,7 @@ export const Strategy = defineDocumentType(() => ({
   contentType: "mdx",
   fields: { ...commonFields },
   computedFields: {
-    url: { type: "string", resolve: (doc) => `/strategy/${normalizeSlug(doc)}` },
-    slug: { type: "string", resolve: normalizeSlug },
+    url: { type: "string", resolve: (doc) => `/strategy/${normalizedSlug(doc)}` },
   },
 }));
 
