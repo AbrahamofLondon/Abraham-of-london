@@ -384,3 +384,21 @@ export async function sendInnerCircleEmail(
   console.log(`[Email] Dispatching key to ${email} (${name || "unknown"})`);
   console.log(`[Email] Key: ${key}`);
 }
+
+export function getClientIp(req: NextApiRequest): string | undefined {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    const ips = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+    return ips.split(',')[0].trim();
+  }
+  const realIp = req.headers['x-real-ip'];
+  if (realIp) return Array.isArray(realIp) ? realIp[0] : realIp;
+  const cfConnectingIp = req.headers['cf-connecting-ip'];
+  if (cfConnectingIp) return Array.isArray(cfConnectingIp) ? cfConnectingIp[0] : cfConnectingIp;
+  return req.socket?.remoteAddress;
+}
+
+export function getPrivacySafeKeyExport(key: string): string {
+  if (!key || key.length < 6) return '***';
+  return `***${key.slice(-6)}`;
+}
