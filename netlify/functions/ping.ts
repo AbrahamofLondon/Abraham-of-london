@@ -1,21 +1,15 @@
 // netlify/functions/ping.ts
-import type { Handler } from "@netlify/functions";
-import {
-  ok,
-  bad,
-  handleOptions,
-  readJson,
-} from "./_utils";
+import type { Handler, HandlerResponse } from "@netlify/functions";
+import { ok, bad, handleOptions, readJson } from "./_utils";
 
 type PingBody = {
   ping?: unknown;
 };
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event): Promise<HandlerResponse> => {
   const origin = event.headers.origin || event.headers.Origin || "*";
   const timestamp = new Date().toISOString();
 
-  // CORS preflight
   if (event.httpMethod === "OPTIONS") {
     return handleOptions(origin);
   }
@@ -43,7 +37,7 @@ export const handler: Handler = async (event) => {
       "Ping OK",
       {
         method: "POST",
-        received: body.ping ?? null,
+        received: body?.ping ?? null,
         timestamp,
         environment: process.env.NODE_ENV || "development",
       },

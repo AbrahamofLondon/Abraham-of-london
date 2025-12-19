@@ -254,6 +254,15 @@ export async function verifyRecaptcha(
   token: string,
   expectedAction?: string,
   clientIp?: string
+): Promise<boolean> {
+  const result = await verifyRecaptchaDetailed(token, expectedAction, clientIp);
+  return result.success;
+}
+
+export async function verifyRecaptchaDetailed(
+  token: string,
+  expectedAction?: string,
+  clientIp?: string
 ): Promise<RecaptchaVerificationResult> {
   const config = DEFAULT_CONFIG;
 
@@ -443,44 +452,22 @@ export async function verifyRecaptcha(
 }
 
 // -------------------------------------------------------------------------
-// Convenience wrappers
+// Configuration validation helper
 // -------------------------------------------------------------------------
 
-// Simplified version for boolean responses
-export async function isRecaptchaValid(
-  token: string,
-  expectedAction?: string,
-  clientIp?: string
-): Promise<boolean> {
-  try {
-    const result = await verifyRecaptcha(token, expectedAction, clientIp);
-    return result.success;
-  } catch (error: unknown) {
-    console.error("reCAPTCHA validation error:", error);
-    return false;
-  }
-}
-
-// Utility function to check if reCAPTCHA is configured
-export function isRecaptchaConfigured(): boolean {
-  return !!(
-    process.env.RECAPTCHA_SECRET_KEY &&
-    process.env.RECAPTCHA_SECRET_KEY.length > 10
-  );
-}
-
-// Health check function
-export async function checkRecaptchaHealth(): Promise<boolean> {
-  if (!isRecaptchaConfigured()) {
-    return false;
-  }
-
-  try {
-    // This will fail token-format validation; we only care that the
-    // plumbing is wired, so treat "invalid-input-response" as success.
-    const result = await verifyRecaptcha("test-token", "healthcheck");
-    return result.errorCodes.includes("invalid-input-response");
-  } catch {
-    return false;
-  }
+export function validateRecaptchaConfig(): {
+  hasSecret: boolean;
+  minScore: number;
+  enabled: boolean;
+  configured: boolean;
+} {
+  return {
+    hasSecret: !!process.env.RECAPTCHA_SECRET_KEY?.trim(),
+    minScore: DEFAULT_CONFIG.minScore,
+    enabled: DEFAULT_CONFIG.enabled,
+    configured: !!(
+      process.env.RECAPTCHA_SECRET_KEY &&
+      process.env.RECAPTCHA_SECRET_KEY.length > 10
+    ),
+  };
 }

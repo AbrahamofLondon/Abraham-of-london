@@ -1,45 +1,26 @@
-/* lib/server/inner-circle-store.ts */
-import crypto from "crypto";
-import fs from "fs/promises";
-import path from "path";
-import { existsSync, mkdirSync } from "fs";
-import { Mutex } from 'async-mutex';
+/* eslint-disable no-console */
+import crypto from "node:crypto";
+import { Pool, type PoolClient } from "pg";
 
-// --- Types ---
+/* -------------------------------------------------------------------------- */
+/* Config                                                                     */
+/* -------------------------------------------------------------------------- */
+
+const CONFIG = {
+  KEY_EXPIRY_DAYS: Number(process.env.INNER_CIRCLE_KEY_EXPIRY_DAYS || 90),
+  KEY_PREFIX: "icl_",
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
+
 export type InnerCircleStatus = "pending" | "active" | "revoked" | "expired";
 
 export interface CreateOrUpdateMemberArgs {
   email: string;
   name?: string;
   ipAddress?: string;
-  context?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface InnerCircleMember {
-  id: string;
-  emailHash: string;
-  emailHashPrefix: string;
-  name?: string;
-  createdAt: string;
-  lastSeenAt: string;
-  lastIp?: string;
-  status: InnerCircleStatus;
-  totalUnlocks: number;
-  keys: string[]; 
-  metadata?: Record<string, any>;
-  context?: string;
-}
-
-export interface InnerCircleKey {
-  keyHash: string;
-  keySuffix: string;
-  createdAt: string;
-  expiresAt: string;
-  status: InnerCircleStatus;
-  totalUnlocks: number;
-  lastUsedAt?: string;
-  memberId: string;
 }
 
 export interface IssuedKey {
@@ -51,134 +32,184 @@ export interface IssuedKey {
   memberId: string;
 }
 
-// --- Configuration ---
-const CONFIG = {
-  DATA_RETENTION_DAYS: parseInt(process.env.INNER_CIRCLE_DATA_RETENTION_DAYS || '365', 10),
-  KEY_EXPIRY_DAYS: parseInt(process.env.INNER_CIRCLE_KEY_EXPIRY_DAYS || '90', 10),
-  STORAGE_DIR: path.join(process.cwd(), process.env.INNER_CIRCLE_STORAGE_DIR || '.data/inner-circle'),
-};
+export interface VerifyInnerCircleKeyResult {
+  valid: boolean;
+  reason?: string;
+  memberId?: string;
+  keySuffix?: string;
+}
 
-// --- Helpers ---
-const normaliseEmail = (email: string) => email.trim().toLowerCase();
-const sha256Hex = (value: string) => crypto.createHash("sha256").update(value, "utf8").digest("hex");
-const nowIso = () => new Date().toISOString();
-const addDays = (date: Date, days: number) => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
+export interface InnerCircleMember {
+  id: string;
+  name: string | null;
+}
 
-// --- Persistence ---
-class FileStorage {
-  private paths = {
-    members: path.join(CONFIG.STORAGE_DIR, "members.json"),
-    keys: path.join(CONFIG.STORAGE_DIR, "keys.json"),
-    emailMap: path.join(CONFIG.STORAGE_DIR, "emailMap.json"),
+/* -------------------------------------------------------------------------- */
+/* Crypto                                                                     */
+/* -------------------------------------------------------------------------- */
+
+function sha256Hex(value: string): string {
+  return crypto.createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function generateAccessKey() {
+  const raw = crypto.randomBytes(32).toString("base64url");
+  const key = `${CONFIG.KEY_PREFIX}${raw.slice(0, 28)}`;
+  return {
+    key,
+    keyHash: sha256Hex(key),
+    keySuffix: key.slice(-6),
   };
-
-  constructor() {
-    if (!existsSync(CONFIG.STORAGE_DIR)) mkdirSync(CONFIG.STORAGE_DIR, { recursive: true });
-  }
-
-  async save(members: Map<string, any>, keys: Map<string, any>, emailMap: Map<string, any>) {
-    await fs.writeFile(this.paths.members, JSON.stringify(Object.fromEntries(members), null, 2));
-    await fs.writeFile(this.paths.keys, JSON.stringify(Object.fromEntries(keys), null, 2));
-    await fs.writeFile(this.paths.emailMap, JSON.stringify(Object.fromEntries(emailMap), null, 2));
-  }
-
-  async load() {
-    const loadFile = async (p: string) => {
-      try { return JSON.parse(await fs.readFile(p, "utf-8")); }
-      catch { return {}; }
-    };
-    const data = await Promise.all([
-        loadFile(this.paths.members),
-        loadFile(this.paths.keys),
-        loadFile(this.paths.emailMap)
-    ]);
-    return {
-      members: new Map(Object.entries(data[0])),
-      keys: new Map(Object.entries(data[1])),
-      emailMap: new Map(Object.entries(data[2])),
-    };
-  }
 }
 
-// --- Store ---
-class EnhancedInnerCircleStore {
-  private members = new Map<string, InnerCircleMember>();
-  private keys = new Map<string, InnerCircleKey>();
-  private emailToMember = new Map<string, string>();
-  private storage = new FileStorage();
-  private mutex = new Mutex();
+/* -------------------------------------------------------------------------- */
+/* DB                                                                         */
+/* -------------------------------------------------------------------------- */
 
-  async initialize() {
-    return this.mutex.runExclusive(async () => {
-      const data = await this.storage.load();
-      this.members = data.members as Map<string, InnerCircleMember>;
-      this.keys = data.keys as Map<string, InnerCircleKey>;
-      this.emailToMember = data.emailMap as Map<string, string>;
-    });
+let sharedPool: Pool | null = null;
+
+function getPool(): Pool | null {
+  if (sharedPool) return sharedPool;
+
+  const conn = process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL;
+  if (!conn) {
+    console.warn("[InnerCircle] No DB configured.");
+    return null;
   }
 
-  private async persist() {
-    await this.storage.save(this.members, this.keys, this.emailToMember);
-  }
+  sharedPool = new Pool({
+    connectionString: conn,
+    max: 5,
+    ssl: conn.includes("localhost")
+      ? undefined
+      : { rejectUnauthorized: false },
+  });
 
-  async getMemberByEmail(email: string): Promise<InnerCircleMember | null> {
-    const emailHash = sha256Hex(normaliseEmail(email));
-    const memberId = this.emailToMember.get(emailHash);
-    return memberId ? this.members.get(memberId) || null : null;
-  }
+  return sharedPool;
+}
 
-  async getActiveKeysForMember(memberId: string): Promise<InnerCircleKey[]> {
-    const member = this.members.get(memberId);
-    if (!member) return [];
-    const now = new Date();
-    return member.keys
-      .map(hash => this.keys.get(hash))
-      .filter((k): k is InnerCircleKey => !!k && k.status === "active" && new Date(k.expiresAt) > now);
-  }
+/* -------------------------------------------------------------------------- */
+/* Store                                                                      */
+/* -------------------------------------------------------------------------- */
 
-  async createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
-    return this.mutex.runExclusive(async () => {
-      const emailHash = sha256Hex(normaliseEmail(args.email));
-      let memberId = this.emailToMember.get(emailHash);
+class Store {
+  private async withClient<T>(
+    fn: (c: PoolClient) => Promise<T>,
+    fallback: T
+  ): Promise<T> {
+    const pool = getPool();
+    if (!pool) return fallback;
 
-      if (!memberId) {
-        memberId = crypto.randomUUID();
-        this.members.set(memberId, {
-          id: memberId, emailHash, emailHashPrefix: emailHash.slice(0, 10),
-          name: args.name, createdAt: nowIso(), lastSeenAt: nowIso(),
-          status: "active", totalUnlocks: 0, keys: []
-        });
-        this.emailToMember.set(emailHash, memberId);
+    try {
+      const client = await pool.connect();
+      try {
+        return await fn(client);
+      } finally {
+        client.release();
       }
+    } catch {
+      return fallback;
+    }
+  }
 
-      const raw = crypto.randomBytes(32).toString("base64url");
-      const key = `icl_${raw.slice(0, 28)}`;
-      const keyHash = sha256Hex(key);
-      const expiresAt = addDays(new Date(), CONFIG.KEY_EXPIRY_DAYS).toISOString();
-      
-      const keyRecord: InnerCircleKey = { 
-        keyHash, keySuffix: key.slice(-6), createdAt: nowIso(), 
-        expiresAt, status: "active", totalUnlocks: 0, memberId 
+  async createOrUpdateMemberAndIssueKey(
+    args: CreateOrUpdateMemberArgs
+  ): Promise<IssuedKey> {
+    const emailHash = sha256Hex(args.email.toLowerCase());
+    const { key, keyHash, keySuffix } = generateAccessKey();
+
+    const now = new Date();
+    const expires = new Date(now);
+    expires.setDate(now.getDate() + CONFIG.KEY_EXPIRY_DAYS);
+
+    return this.withClient(async (c) => {
+      await c.query("BEGIN");
+
+      const m = await c.query(
+        `INSERT INTO inner_circle_members (email_hash, name, last_ip)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (email_hash)
+         DO UPDATE SET last_seen_at = NOW(), name = COALESCE($2, name)
+         RETURNING id`,
+        [emailHash, args.name ?? null, args.ipAddress ?? null]
+      );
+
+      const memberId = m.rows[0].id;
+
+      await c.query(
+        `INSERT INTO inner_circle_keys
+         (member_id, key_hash, key_suffix, status, expires_at)
+         VALUES ($1, $2, $3, 'active', $4)`,
+        [memberId, keyHash, keySuffix, expires]
+      );
+
+      await c.query("COMMIT");
+
+      return {
+        key,
+        keySuffix,
+        createdAt: now.toISOString(),
+        expiresAt: expires.toISOString(),
+        status: "active",
+        memberId,
       };
-
-      this.keys.set(keyHash, keyRecord);
-      this.members.get(memberId)!.keys.push(keyHash);
-      await this.persist();
-      return { key, keySuffix: keyRecord.keySuffix, createdAt: keyRecord.createdAt, expiresAt, status: "active", memberId };
+    }, {
+      key,
+      keySuffix,
+      createdAt: now.toISOString(),
+      expiresAt: expires.toISOString(),
+      status: "pending",
+      memberId: "no-db",
     });
+  }
+
+  async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
+    const hash = sha256Hex(key.trim());
+
+    return this.withClient(async (c) => {
+      const r = await c.query(
+        `SELECT member_id, status, expires_at, key_suffix
+         FROM inner_circle_keys WHERE key_hash = $1`,
+        [hash]
+      );
+
+      const row = r.rows[0];
+      if (!row) return { valid: false, reason: "not_found" };
+      if (row.status !== "active") return { valid: false, reason: row.status };
+      if (new Date(row.expires_at) < new Date())
+        return { valid: false, reason: "expired" };
+
+      return {
+        valid: true,
+        memberId: row.member_id,
+        keySuffix: row.key_suffix,
+      };
+    }, { valid: false, reason: "no_db" });
+  }
+
+  async getPrivacySafeStats() {
+    return this.withClient(async (c) => {
+      const m = await c.query(`SELECT COUNT(*) FROM inner_circle_members`);
+      const k = await c.query(`SELECT COUNT(*) FROM inner_circle_keys`);
+      return {
+        totalMembers: Number(m.rows[0].count),
+        totalKeys: Number(k.rows[0].count),
+      };
+    }, { totalMembers: 0, totalKeys: 0 });
   }
 }
 
-let instance: EnhancedInnerCircleStore | null = null;
-async function getStore() {
-  if (!instance) { instance = new EnhancedInnerCircleStore(); await instance.initialize(); }
-  return instance;
-}
+const store = new Store();
 
-export const getMemberByEmail = async (email: string) => (await getStore()).getMemberByEmail(email);
-export const getActiveKeysForMember = async (memberId: string) => (await getStore()).getActiveKeysForMember(memberId);
-export const createOrUpdateMemberAndIssueKey = async (args: CreateOrUpdateMemberArgs) => (await getStore()).createOrUpdateMemberAndIssueKey(args);
+/* -------------------------------------------------------------------------- */
+/* Exports                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const createOrUpdateMemberAndIssueKey = (a: CreateOrUpdateMemberArgs) =>
+  store.createOrUpdateMemberAndIssueKey(a);
+
+export const verifyInnerCircleKey = (k: string) =>
+  store.verifyInnerCircleKey(k);
+
+export const getPrivacySafeStats = () =>
+  store.getPrivacySafeStats();

@@ -1,5 +1,9 @@
+/* eslint-disable no-console */
 /**
- * Server-side reCAPTCHA v3 verification helper.
+ * Server-side reCAPTCHA v3 verification helper (canonical).
+ * - verifyRecaptchaDetailed(): returns rich result
+ * - verifyRecaptcha(): returns boolean for legacy call-sites
+ * - validateRecaptchaConfig(): small config health snapshot
  */
 
 export type RecaptchaVerificationResult = {
@@ -15,27 +19,37 @@ const VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
 function getSecret(): string | null {
   const secret = process.env.RECAPTCHA_SECRET_KEY;
-  if (!secret || secret.trim().length < 10) {
-    return null;
-  }
+  if (!secret || secret.trim().length < 10) return null;
   return secret.trim();
 }
 
-export async function verifyRecaptcha(
+function getMinScore(): number {
+  const n = Number(process.env.RECAPTCHA_MIN_SCORE);
+  if (Number.isFinite(n)) return n;
+  return DEFAULT_MIN_SCORE;
+}
+
+function normalizeErrorCodes(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((x) => typeof x === "string") as string[];
+  return [];
+}
+
+export async function verifyRecaptchaDetailed(
   token: string,
   expectedAction?: string,
   remoteIp?: string
-): Promise<boolean | RecaptchaVerificationResult> {
-  // Get the secret first
+): Promise<RecaptchaVerificationResult> {
   const secret = getSecret();
 
-  // If no secret configured:
+  // Fail closed unless explicitly bypassing in dev
   if (!secret) {
     const isDev = process.env.NODE_ENV !== "production";
     const allowBypass = process.env.ALLOW_RECAPTCHA_BYPASS === "true";
 
     if (isDev && allowBypass) {
-      console.warn("[reCAPTCHA] RECAPTCHA_SECRET_KEY missing – bypass enabled.");
+      console.warn(
+        "[reCAPTCHA] RECAPTCHA_SECRET_KEY missing – bypass enabled via ALLOW_RECAPTCHA_BYPASS (development only)."
+      );
       return {
         success: true,
         score: 1,
@@ -44,7 +58,7 @@ export async function verifyRecaptcha(
       };
     }
 
-    console.error("[reCAPTCHA] RECAPTCHA_SECRET_KEY not set.");
+    console.error("[reCAPTCHA] RECAPTCHA_SECRET_KEY not set – verification will fail.");
     return {
       success: false,
       score: 0,
@@ -64,10 +78,7 @@ export async function verifyRecaptcha(
     };
   }
 
-  const minScore =
-    Number.isFinite(Number(process.env.RECAPTCHA_MIN_SCORE))
-      ? Number(process.env.RECAPTCHA_MIN_SCORE)
-      : DEFAULT_MIN_SCORE;
+  const minScore = getMinScore();
 
   try {
     const controller = new AbortController();
@@ -76,15 +87,11 @@ export async function verifyRecaptcha(
     const params = new URLSearchParams();
     params.set("secret", secret);
     params.set("response", token);
-    if (remoteIp) {
-      params.set("remoteip", remoteIp);
-    }
+    if (remoteIp) params.set("remoteip", remoteIp);
 
     const response = await fetch(VERIFY_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),
       signal: controller.signal,
     });
@@ -112,31 +119,29 @@ export async function verifyRecaptcha(
     const success = Boolean(data.success);
     const score = typeof data.score === "number" ? data.score : 0;
     const action = typeof data.action === "string" ? data.action : undefined;
-    const errorCodes = data["error-codes"];
+    const errorCodes = normalizeErrorCodes(data["error-codes"]);
 
-    // Optional: action match check
+    // Action mismatch = failure (security boundary)
     if (expectedAction && action && expectedAction !== action) {
-      console.warn(`[reCAPTCHA] Action mismatch: expected="${expectedAction}" got="${action}"`);
+      console.warn(
+        `[reCAPTCHA] Action mismatch: expected="${expectedAction}" got="${action}"`
+      );
       return {
         success: false,
         score: 0,
         action,
-        errorCodes: errorCodes || ["action_mismatch"],
+        errorCodes: errorCodes.length ? errorCodes : ["action_mismatch"],
         raw: data,
       };
     }
 
     if (!success) {
-      console.warn("[reCAPTCHA] Verification failed:", {
-        action,
-        score,
-        errorCodes,
-      });
+      console.warn("[reCAPTCHA] Verification failed:", { action, score, errorCodes });
       return {
         success: false,
         score,
         action,
-        errorCodes: errorCodes || ["verification_failed"],
+        errorCodes: errorCodes.length ? errorCodes : ["verification_failed"],
         raw: data,
       };
     }
@@ -147,18 +152,9 @@ export async function verifyRecaptcha(
         success: false,
         score,
         action,
-        errorCodes: errorCodes || ["low_score"],
+        errorCodes: errorCodes.length ? errorCodes : ["low_score"],
         raw: data,
       };
-    }
-
-    if (score < 0.3) {
-      console.warn(`[reCAPTCHA] Low but passing score: ${score} (min: ${minScore})`, { action });
-    }
-
-    // For legacy mode, return boolean
-    if (process.env.RECAPTCHA_LEGACY_MODE === "true") {
-      return success;
     }
 
     return {
@@ -169,11 +165,12 @@ export async function verifyRecaptcha(
       raw: data,
     };
   } catch (error: unknown) {
-    if (
+    const isAbort =
       typeof error === "object" &&
       error !== null &&
-      (error as { name?: string }).name === "AbortError"
-    ) {
+      (error as { name?: string }).name === "AbortError";
+
+    if (isAbort) {
       console.error("[reCAPTCHA] Verification timed out.");
       return {
         success: false,
@@ -191,4 +188,28 @@ export async function verifyRecaptcha(
       errorCodes: ["exception"],
     };
   }
+}
+
+/**
+ * Backward-compatible boolean verifier.
+ */
+export async function verifyRecaptcha(
+  token: string,
+  expectedAction?: string,
+  remoteIp?: string
+): Promise<boolean> {
+  const result = await verifyRecaptchaDetailed(token, expectedAction, remoteIp);
+  return result.success;
+}
+
+export function validateRecaptchaConfig(): {
+  hasSecret: boolean;
+  minScore: number;
+  bypassEnabled: boolean;
+} {
+  return {
+    hasSecret: Boolean(getSecret()),
+    minScore: getMinScore(),
+    bypassEnabled: process.env.ALLOW_RECAPTCHA_BYPASS === "true",
+  };
 }

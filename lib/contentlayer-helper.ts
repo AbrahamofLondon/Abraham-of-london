@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as generated from "contentlayer/generated";
 
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
+
 export type DocKind =
   | "post"
   | "book"
@@ -12,6 +16,12 @@ export type DocKind =
   | "canon"
   | "short"
   | "unknown";
+
+export type ContentDoc = any;
+
+/* -------------------------------------------------------------------------- */
+/* Routing                                                                    */
+/* -------------------------------------------------------------------------- */
 
 const KIND_URL_MAP: Record<DocKind, string> = {
   post: "/blog",
@@ -29,10 +39,18 @@ const KIND_URL_MAP: Record<DocKind, string> = {
 const GLOBAL_FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
 const SHORT_GLOBAL_FALLBACK = "/assets/images/shorts/cover.jpg";
 
-function pickArray(name: string): any[] {
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function pickArray(name: string): ContentDoc[] {
   const v = (generated as any)[name];
   return Array.isArray(v) ? v : [];
 }
+
+/* -------------------------------------------------------------------------- */
+/* Collections                                                                */
+/* -------------------------------------------------------------------------- */
 
 export const allPosts = pickArray("allPosts");
 export const allBooks = pickArray("allBooks");
@@ -44,59 +62,99 @@ export const allStrategies = pickArray("allStrategies");
 export const allCanons = pickArray("allCanons");
 export const allShorts = pickArray("allShorts");
 
-// Aliases (if old imports exist)
+/* Aliases (legacy safety) */
 export { allCanons as allCanon, allPosts as allPost };
 
-export const isDraft = (doc: any) =>
-  doc?.draft === true || doc?._raw?.sourceFileName?.startsWith("_");
+/* -------------------------------------------------------------------------- */
+/* Draft / Publish                                                            */
+/* -------------------------------------------------------------------------- */
 
-export const isPublished = (doc: any) => !isDraft(doc);
+export const isDraft = (doc: ContentDoc): boolean =>
+  doc?.draft === true ||
+  String(doc?._raw?.sourceFileName || "").startsWith("_");
 
-export function normalizeSlug(doc: any): string {
+export const isPublished = (doc: ContentDoc): boolean => !isDraft(doc);
+
+/* -------------------------------------------------------------------------- */
+/* Slug + Kind                                                                */
+/* -------------------------------------------------------------------------- */
+
+export function normalizeSlug(doc: ContentDoc): string {
   if (!doc) return "";
-  const s = typeof doc.slug === "string" ? doc.slug.trim() : "";
-  if (s) return s.toLowerCase().replace(/\/+$/, "");
+  if (typeof doc.slug === "string" && doc.slug.trim()) {
+    return doc.slug.trim().toLowerCase().replace(/\/+$/, "");
+  }
+
   const fp = String(doc._raw?.flattenedPath ?? "");
   if (!fp) return "";
+
   const parts = fp.split("/");
   const last = parts[parts.length - 1];
   const slug = last === "index" ? parts[parts.length - 2] : last;
+
   return String(slug).toLowerCase().replace(/\/+$/, "");
 }
 
-export function getDocKind(doc: any): DocKind {
-  // Contentlayer sets `_type` to document name (Post, Canon, etc.)
+export function getDocKind(doc: ContentDoc): DocKind {
   const t = String(doc?._type ?? doc?.type ?? "").toLowerCase();
-  if (t === "post") return "post";
-  if (t === "book") return "book";
-  if (t === "canon") return "canon";
-  if (t === "short") return "short";
-  if (t === "download") return "download";
-  if (t === "resource") return "resource";
-  if (t === "event") return "event";
-  if (t === "print") return "print";
-  if (t === "strategy") return "strategy";
-  return "unknown";
+
+  switch (t) {
+    case "post":
+    case "book":
+    case "canon":
+    case "short":
+    case "download":
+    case "resource":
+    case "event":
+    case "print":
+    case "strategy":
+      return t;
+    default:
+      return "unknown";
+  }
 }
 
-export function getDocHref(doc: any): string {
+/* -------------------------------------------------------------------------- */
+/* URLs                                                                       */
+/* -------------------------------------------------------------------------- */
+
+export function getDocHref(doc: ContentDoc): string {
   const kind = getDocKind(doc);
   const slug = normalizeSlug(doc);
   return `${KIND_URL_MAP[kind]}/${slug}`;
 }
 
-export function resolveDocCoverImage(doc: any): string {
-  const explicit = doc?.coverImage || doc?.image || doc?.cover;
-  if (typeof explicit === "string" && explicit.trim()) return explicit;
-  return getDocKind(doc) === "short" ? SHORT_GLOBAL_FALLBACK : GLOBAL_FALLBACK_IMAGE;
+export function getShortUrl(doc: ContentDoc): string {
+  return getDocHref(doc);
 }
 
-export function resolveDocDownloadUrl(doc: any): string | null {
-  const url = doc?.downloadUrl || doc?.fileUrl || doc?.pdfPath || doc?.file || doc?.downloadFile;
+/* -------------------------------------------------------------------------- */
+/* Media                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export function resolveDocCoverImage(doc: ContentDoc): string {
+  const explicit = doc?.coverImage || doc?.image || doc?.cover;
+  if (typeof explicit === "string" && explicit.trim()) return explicit;
+  return getDocKind(doc) === "short"
+    ? SHORT_GLOBAL_FALLBACK
+    : GLOBAL_FALLBACK_IMAGE;
+}
+
+export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
+  const url =
+    doc?.downloadUrl ||
+    doc?.fileUrl ||
+    doc?.pdfPath ||
+    doc?.file ||
+    doc?.downloadFile;
   return typeof url === "string" && url.trim() ? url : null;
 }
 
-export const getAllContentlayerDocs = () =>
+/* -------------------------------------------------------------------------- */
+/* Aggregation                                                                */
+/* -------------------------------------------------------------------------- */
+
+export const getAllContentlayerDocs = (): ContentDoc[] =>
   [
     ...allPosts,
     ...allBooks,
@@ -109,27 +167,66 @@ export const getAllContentlayerDocs = () =>
     ...allShorts,
   ].filter(Boolean);
 
-export const getPublishedDocuments = () => getAllContentlayerDocs().filter(isPublished);
+export const getPublishedDocuments = (): ContentDoc[] =>
+  getAllContentlayerDocs().filter(isPublished);
 
-export function getPublishedDocumentsByType(kind: DocKind, limit?: number): any[] {
+export function getPublishedDocumentsByType(
+  kind: DocKind,
+  limit?: number
+): ContentDoc[] {
   const items = getPublishedDocuments()
     .filter((d) => getDocKind(d) === kind)
-    .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
-  return limit ? items.slice(0, limit) : items;
+    .sort(
+      (a, b) =>
+        new Date(b.date || 0).getTime() -
+        new Date(a.date || 0).getTime()
+    );
+
+  return typeof limit === "number" ? items.slice(0, limit) : items;
 }
 
-// Named exports
-export const getPublishedPosts = () => getPublishedDocumentsByType("post");
-export const getAllBooks = () => getPublishedDocumentsByType("book");
-export const getAllCanons = () => getPublishedDocumentsByType("canon");
-export const getAllDownloads = () => getPublishedDocumentsByType("download");
-export const getAllEvents = () => getPublishedDocumentsByType("event");
-export const getAllPrints = () => getPublishedDocumentsByType("print");
-export const getAllResources = () => getPublishedDocumentsByType("resource");
-export const getAllStrategies = () => getPublishedDocumentsByType("strategy");
-export const getPublishedShorts = () => getPublishedDocumentsByType("short");
+/* -------------------------------------------------------------------------- */
+/* Named Queries                                                              */
+/* -------------------------------------------------------------------------- */
 
-const cleanMatch = (s: string) => String(s || "").trim().toLowerCase().replace(/\/+$/, "");
+export const getPublishedPosts = () =>
+  getPublishedDocumentsByType("post");
+
+export const getAllBooks = () =>
+  getPublishedDocumentsByType("book");
+
+export const getAllCanons = () =>
+  getPublishedDocumentsByType("canon");
+
+export const getAllDownloads = () =>
+  getPublishedDocumentsByType("download");
+
+export const getAllEvents = () =>
+  getPublishedDocumentsByType("event");
+
+export const getAllPrints = () =>
+  getPublishedDocumentsByType("print");
+
+export const getAllResources = () =>
+  getPublishedDocumentsByType("resource");
+
+export const getAllStrategies = () =>
+  getPublishedDocumentsByType("strategy");
+
+export const getPublishedShorts = () =>
+  getPublishedDocumentsByType("short");
+
+/* Recent Shorts (homepage dependency) */
+export function getRecentShorts(limit = 3): ContentDoc[] {
+  return getPublishedShorts().slice(0, Math.max(0, limit));
+}
+
+/* -------------------------------------------------------------------------- */
+/* By Slug                                                                    */
+/* -------------------------------------------------------------------------- */
+
+const cleanMatch = (s: string) =>
+  String(s || "").trim().toLowerCase().replace(/\/+$/, "");
 
 export const getPostBySlug = (s: string) =>
   getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
@@ -158,7 +255,14 @@ export const getPrintBySlug = (s: string) =>
 export const getStrategyBySlug = (s: string) =>
   getAllStrategies().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
 
+/* -------------------------------------------------------------------------- */
+/* Build Guard                                                                */
+/* -------------------------------------------------------------------------- */
+
 export function assertContentlayerHasDocs(where: string) {
-  const count = getAllContentlayerDocs().length;
-  if (count === 0) throw new Error(`[Critical Build Error] 0 documents found in ${where}`);
+  if (getAllContentlayerDocs().length === 0) {
+    throw new Error(
+      `[Critical Build Error] No Contentlayer documents found at ${where}`
+    );
+  }
 }

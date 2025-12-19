@@ -1,188 +1,227 @@
+/* eslint-disable no-console */
+
+import type { ReactElement } from "react";
 import { Resend } from "resend";
-import { InnerCircleEmail } from "./templates/InnerCircleEmail";
 
-const resendApiKey = process.env.RESEND_API_KEY;
+// If you use the React Email template file you posted:
+import InnerCircleEmail from "./templates/InnerCircleEmail";
 
-if (!resendApiKey && process.env.NODE_ENV === "production") {
-  console.warn("[InnerCircleEmail] RESEND_API_KEY is not configured.");
+type Mode = "welcome" | "resend";
+
+type NewPayload = {
+  to: string | string[];
+  type: Mode;
+  data: {
+    name: string;
+    accessKey: string;
+    unlockUrl: string;
+  };
+};
+
+// Old signature support: sendInnerCircleEmail(email, key, name?)
+type OldSig = [string, string, string?];
+
+function isProd(): boolean {
+  return process.env.NODE_ENV === "production";
 }
 
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
-export interface SendInnerCircleEmailArgs {
-  email: string;
-  name?: string;
-  accessKey: string;
-  unlockUrl: string;
-  mode?: "register" | "resend";
+function provider(): string {
+  return (process.env.EMAIL_PROVIDER || "console").trim().toLowerCase();
 }
 
-export async function sendInnerCircleEmail(
-  args: SendInnerCircleEmailArgs
-): Promise<{ success: boolean; error?: string }> {
-  // Validate inputs
-  if (!args.email || !args.accessKey || !args.unlockUrl) {
-    return {
-      success: false,
-      error: "Missing required email parameters"
-    };
-  }
+function fromAddress(): string {
+  return (
+    process.env.INNER_CIRCLE_FROM_EMAIL ??
+    process.env.MAIL_FROM ??
+    "Inner Circle <innercircle@abrahamoflondon.org>"
+  );
+}
 
-  // Email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(args.email)) {
-    return {
-      success: false,
-      error: "Invalid email address"
-    };
-  }
+function normalizeRecipients(to: string | string[]): string[] {
+  const arr = Array.isArray(to) ? to : [to];
+  return arr.map((x) => String(x || "").trim()).filter(Boolean);
+}
 
-  // Development mode - simulate sending
-  if (!resend) {
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[InnerCircleEmail] Simulated email:", {
-        to: args.email,
-        name: args.name || "User",
-        unlockUrl: args.unlockUrl,
-        accessKey: args.accessKey,
-        mode: args.mode || "register"
-      });
-      return { success: true };
-    }
-    
-    return {
-      success: false,
-      error: "Email sending is not configured (missing RESEND_API_KEY)"
-    };
-  }
+/**
+ * Non-prod safety:
+ * If MAIL_TO or MAIL_TO_FALLBACK is set, redirect ALL emails there in dev/preview.
+ * This prevents accidentally emailing real users during testing.
+ */
+function applyNonProdRecipientOverride(actual: string[]): string[] {
+  if (isProd()) return actual;
 
-  try {
-    const fromAddress =
-      process.env.INNER_CIRCLE_FROM_EMAIL ??
-      process.env.MAIL_FROM ??
-      "Inner Circle <innercircle@abrahamoflondon.org>";
+  const forced =
+    (process.env.MAIL_TO && process.env.MAIL_TO.trim()) ||
+    (process.env.MAIL_TO_FALLBACK && process.env.MAIL_TO_FALLBACK.trim());
 
-    const subject =
-      args.mode === "resend"
-        ? "Your Canon Inner Circle access link (resent)"
-        : "Your Canon Inner Circle access key";
+  if (!forced) return actual;
+  return [forced];
+}
 
-    // Generate plain text version
-    const textVersion = `
-${args.name ? `Dear ${args.name},` : 'Hello,'}
+function subjectFor(type: Mode): string {
+  return type === "resend"
+    ? "Your Canon Inner Circle access link (resent)"
+    : "Your Canon Inner Circle access key";
+}
 
-${args.mode === 'resend' 
-  ? 'As requested, here is your access link to the Canon Inner Circle:' 
-  : 'Thank you for registering for the Inner Circle. This is your personal access key:'}
+function buildText(type: Mode, data: NewPayload["data"]): string {
+  const greeting = data.name ? `Dear ${data.name},` : "Hello,";
+  const body =
+    type === "resend"
+      ? "As requested, here is your access link to the Canon Inner Circle:"
+      : "Thank you for registering for the Inner Circle. This is your personal access key:";
 
-${args.accessKey}
+  return `
+${greeting}
+
+${body}
+
+${data.accessKey}
 
 To activate your access, visit this URL:
-${args.unlockUrl}
+${data.unlockUrl}
 
-This access key is personal and should not be shared. It will grant you access to exclusive Canon content and features.
+This access key is personal and should not be shared.
 
-${args.mode === 'resend' 
-  ? 'This link was resent at your request. If you did not request a new link, please contact support immediately.' 
-  : 'If you did not request this access, please ignore this email.'}
+${
+  type === "resend"
+    ? "This link was resent at your request. If you did not request a new link, please contact support."
+    : "If you did not request this access, please ignore this email."
+}
 
 Best regards,
 The Abraham of London Team
-    `.trim();
+`.trim();
+}
 
-    // Generate HTML version using React
-    const React = await import('react');
-    const { renderToString } = await import('react-dom/server');
-    
-    const emailElement = React.createElement(InnerCircleEmail, {
-      name: args.name,
-      accessKey: args.accessKey,
-      unlockUrl: args.unlockUrl,
-      mode: args.mode ?? "register",
-    });
-    
-    const htmlVersion = renderToString(emailElement);
+async function renderHtmlEmail(props: {
+  name?: string;
+  accessKey: string;
+  unlockUrl: string;
+  mode: "register" | "resend";
+}): Promise<string> {
+  // Avoid bundling surprises: import renderToString only when needed.
+  const React = await import("react");
+  const { renderToString } = await import("react-dom/server");
 
-    const result = await resend.emails.send({
-      from: fromAddress,
-      to: args.email,
-      subject,
-      html: htmlVersion,
-      text: textVersion,
-    });
+  const el: ReactElement = React.createElement(InnerCircleEmail as any, props);
+  return renderToString(el);
+}
 
-    if (result.error) {
-      console.error("[InnerCircleEmail] Resend error:", result.error);
-      return {
-        success: false,
-        error: `Email sending failed: ${result.error.message || 'Unknown error'}`
-      };
+function getResendClient(): Resend | null {
+  const key = (process.env.RESEND_API_KEY || "").trim();
+  if (!key) return null;
+  return new Resend(key);
+}
+
+/**
+ * The only real sender.
+ * - Provider "console": logs
+ * - Provider "resend": sends via Resend if configured, else falls back to console
+ * - Any other provider: falls back to console (fail-safe)
+ */
+async function dispatchEmail(args: {
+  to: string[];
+  subject: string;
+  text: string;
+  html?: string;
+}): Promise<void> {
+  const safeTo = applyNonProdRecipientOverride(args.to);
+  const p = provider();
+
+  if (p === "console") {
+    console.log("📧 [InnerCircle Email] (console)", { to: safeTo, subject: args.subject });
+    console.log(args.text);
+    return;
+  }
+
+  if (p === "resend") {
+    const resend = getResendClient();
+    if (!resend) {
+      console.warn("⚠️ [InnerCircle Email] EMAIL_PROVIDER=resend but RESEND_API_KEY missing. Falling back to console.");
+      console.log("📧 [InnerCircle Email] (fallback)", { to: safeTo, subject: args.subject });
+      console.log(args.text);
+      return;
     }
 
-    console.log(`[InnerCircleEmail] Sent successfully to ${args.email}, ID: ${result.data?.id}`);
-    
-    return { success: true };
-  } catch (error) {
-    console.error("[InnerCircleEmail] Unexpected error:", error);
-    
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown email sending error"
-    };
+    const result = await resend.emails.send({
+      from: fromAddress(),
+      to: safeTo,
+      subject: args.subject,
+      text: args.text,
+      html: args.html,
+    });
+
+    if ((result as any)?.error) {
+      console.warn("⚠️ [InnerCircle Email] Resend send failed. Falling back to console.", (result as any).error);
+      console.log("📧 [InnerCircle Email] (fallback)", { to: safeTo, subject: args.subject });
+      console.log(args.text);
+      return;
+    }
+
+    console.log("✅ [InnerCircle Email] Sent", { to: safeTo, id: (result as any)?.data?.id });
+    return;
   }
+
+  // Unknown provider → fail-safe
+  console.warn(`⚠️ [InnerCircle Email] EMAIL_PROVIDER=${p} not wired. Falling back to console.`);
+  console.log("📧 [InnerCircle Email] (fallback)", { to: safeTo, subject: args.subject });
+  console.log(args.text);
 }
 
-// Helper function to test email configuration
-export function checkEmailConfiguration(): {
-  configured: boolean;
-  apiKeyPresent: boolean;
-  fromAddress: string;
-  environment: string;
-} {
-  const apiKeyPresent = !!process.env.RESEND_API_KEY;
-  const fromAddress = 
-    process.env.INNER_CIRCLE_FROM_EMAIL ??
-    process.env.MAIL_FROM ??
-    "Inner Circle <innercircle@abrahamoflondon.org>";
-  const environment = process.env.NODE_ENV || "development";
-  
-  return {
-    configured: apiKeyPresent || environment !== "production",
-    apiKeyPresent,
-    fromAddress,
-    environment,
-  };
+function isNewPayload(x: any): x is NewPayload {
+  return x && typeof x === "object" && "to" in x && "type" in x && "data" in x;
 }
 
-// Test function for development
-export async function testEmailSending(): Promise<boolean> {
-  console.log("Testing email configuration...");
-  
-  const config = checkEmailConfiguration();
-  console.log("Configuration:", config);
-  
-  if (!config.configured) {
-    console.warn("⚠️ Email is not properly configured for production!");
-    return false;
+/**
+ * sendInnerCircleEmail supports:
+ *  A) New signature:
+ *     sendInnerCircleEmail({ to, type, data })
+ *  B) Old signature:
+ *     sendInnerCircleEmail(email, key, name?)
+ */
+export async function sendInnerCircleEmail(
+  a: NewPayload | OldSig[0],
+  b?: OldSig[1],
+  c?: OldSig[2]
+): Promise<void> {
+  // New signature
+  if (isNewPayload(a)) {
+    const to = normalizeRecipients(a.to);
+    const subject = subjectFor(a.type);
+    const text = buildText(a.type, a.data);
+
+    // Only render HTML if provider needs it (resend) — else skip cost.
+    let html: string | undefined;
+    if (provider() === "resend") {
+      html = await renderHtmlEmail({
+        name: a.data.name,
+        accessKey: a.data.accessKey,
+        unlockUrl: a.data.unlockUrl,
+        mode: a.type === "resend" ? "resend" : "register",
+      });
+    }
+
+    await dispatchEmail({ to, subject, text, html });
+    return;
   }
-  
-  const testArgs: SendInnerCircleEmailArgs = {
-    email: "test@example.com",
-    name: "Test User",
-    accessKey: "TEST-1234-ABCD-5678",
-    unlockUrl: "https://abrahamoflondon.org/api/inner-circle/unlock?key=TEST-1234-ABCD-5678&returnTo=/canon",
-    mode: "register"
-  };
-  
-  console.log("Sending test email...");
-  
-  const result = await sendInnerCircleEmail(testArgs);
-  
-  if (result.success) {
-    console.log("✅ Email test successful!");
-    return true;
-  } else {
-    console.error("❌ Email test failed:", result.error);
-    return false;
+
+  // Old signature
+  const email = String(a || "").trim();
+  const key = String(b || "").trim();
+  const name = c ? String(c).trim() : "Builder";
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const unlockUrl = `${site}/inner-circle?key=${encodeURIComponent(key)}`;
+
+  const to = normalizeRecipients(email);
+  const subject = subjectFor("resend");
+  const text = buildText("resend", { name, accessKey: key, unlockUrl });
+
+  let html: string | undefined;
+  if (provider() === "resend") {
+    html = await renderHtmlEmail({ name, accessKey: key, unlockUrl, mode: "resend" });
   }
+
+  await dispatchEmail({ to, subject, text, html });
 }

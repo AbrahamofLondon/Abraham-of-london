@@ -1,5 +1,10 @@
 // lib/server/recaptchaUtils.ts
-import { verifyRecaptcha, type RecaptchaVerificationResult } from "@/lib/recaptchaServer";
+import { 
+  verifyRecaptcha, 
+  verifyRecaptchaDetailed, 
+  type RecaptchaVerificationResult 
+} from "@/lib/recaptchaServer";
+
 export type RecaptchaProcessedResult = {
   success: boolean;
   score: number;
@@ -10,27 +15,27 @@ export type RecaptchaProcessedResult = {
 export async function processRecaptchaToken(
   token: string,
   expectedAction?: string,
-  ip?: string
+  ip?: string,
+  useDetailed: boolean = true
 ): Promise<RecaptchaProcessedResult | null> {
   try {
-    const result = await verifyRecaptcha(token, expectedAction, ip);
-
-    if (typeof result === "boolean") {
+    if (useDetailed) {
+      // Use detailed version for full data
+      const result = await verifyRecaptchaDetailed(token, expectedAction, ip);
       return {
-        success: result,
-        score: result ? 1.0 : 0.0,
+        success: result.success,
+        score: result.score,
+        action: result.action,
+        errorCodes: result.errorCodes,
       };
-    } else if (result && typeof result === "object") {
-      const typedResult = result as RecaptchaVerificationResult;
+    } else {
+      // Use simple boolean version
+      const success = await verifyRecaptcha(token, expectedAction, ip);
       return {
-        success: typedResult.success || false,
-        score: typeof typedResult.score === "number" ? typedResult.score : 0.0,
-        action: typedResult.action,
-        errorCodes: typedResult.errorCodes,
+        success,
+        score: success ? 1.0 : 0.0,
       };
     }
-    
-    return null;
   } catch (error) {
     console.error("[reCAPTCHA] Processing error:", error);
     return null;

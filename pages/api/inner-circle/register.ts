@@ -1,10 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptchaDetailed } from "@/lib/recaptcha";
-import {
-  createOrUpdateMemberAndIssueKey,
-  sendInnerCircleEmail,
-  getClientIp,
-} from "@/lib/inner-circle";
+import { createOrUpdateMemberAndIssueKey, sendInnerCircleEmail } from "@/lib/inner-circle";
+import { getClientIp } from "@/lib/server/ip";
+import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";
 
 type ResponseData =
   | { ok: true; message: string; keySuffix?: string }
@@ -23,6 +21,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ ok: false, error: "System requires POST for registration." });
   }
 
+  // IP rate limit (tight, protects endpoints)
+  const ipLimit = limitIp(req, "inner-circle-register", { windowMs: 60_000, max: 20 });
+  setRateLimitHeaders(res, ipLimit);
+  if (!ipLimit.allowed) {
+    return res.status(429).json({ ok: false, error: "Too many requests. Please wait and try again." });
+  }
+
   const { email, name, recaptchaToken, returnTo } = req.body || {};
   if (!email || typeof email !== "string") {
     return res.status(400).json({ ok: false, error: "Identity (email) is required." });
@@ -34,20 +39,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(400).json({ ok: false, error: "Invalid identity format." });
   }
 
-  try {
-    const verification = await verifyRecaptchaDetailed(recaptchaToken, "inner_circle_register");
-    if (!verification.success) {
-      return res.status(403).json({ ok: false, error: "Security verification failed. Please refresh and try again." });
-    }
-  } catch {
-    return res.status(500).json({ ok: false, error: "Security subsystem offline." });
+  // Email rate limit (prevents abuse / enumeration attempts)
+  const emailLimit = limitEmail(normalizedEmail, "inner-circle-register", { windowMs: 10 * 60_000, max: 10 });
+  if (!emailLimit.allowed) {
+    return res.status(429).json({ ok: false, error: "Too many attempts for this identity. Please wait and try again." });
+  }
+
+  // reCAPTCHA (hard boundary)
+  const token = typeof recaptchaToken === "string" ? recaptchaToken : "";
+  const ip = getClientIp(req);
+
+  const verification = await verifyRecaptchaDetailed(token, "inner_circle_register", ip);
+  if (!verification.success) {
+    return res.status(403).json({ ok: false, error: "Security verification failed. Please refresh and try again." });
   }
 
   try {
     const keyRecord = await createOrUpdateMemberAndIssueKey({
       email: normalizedEmail,
       name: typeof name === "string" ? name.trim() : undefined,
-      ipAddress: getClientIp(req),
+      ipAddress: ip,
       context: "web-registration",
     });
 

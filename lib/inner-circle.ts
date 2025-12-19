@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import crypto from "node:crypto";
 import { Pool, type PoolClient } from "pg";
-import type { NextApiRequest } from "next";
 
 const CONFIG = {
   KEY_EXPIRY_DAYS: Number(process.env.INNER_CIRCLE_KEY_EXPIRY_DAYS || 90),
@@ -43,18 +42,6 @@ export interface InnerCircleStore {
   getPrivacySafeStats(): Promise<{ totalMembers: number; totalKeys: number }>;
 }
 
-/** ✅ matches your API usage */
-export type InnerCircleEmailType = "welcome" | "resend";
-export type SendInnerCircleEmailArgs = {
-  to: string;
-  type: InnerCircleEmailType;
-  data: {
-    name: string;
-    accessKey: string;
-    unlockUrl: string;
-  };
-};
-
 function sha256Hex(value: string): string {
   return crypto.createHash("sha256").update(value, "utf8").digest("hex");
 }
@@ -79,7 +66,6 @@ let sharedPool: Pool | null = null;
 
 function getPool(): Pool | null {
   if (isBuildTime()) return null;
-
   if (sharedPool) return sharedPool;
 
   const conn = process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL;
@@ -103,6 +89,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
   private async withClient<T>(fn: (client: PoolClient) => Promise<T>, fallback: T): Promise<T> {
     const pool = getPool();
     if (!pool) return fallback;
+
     try {
       const client = await pool.connect();
       try {
@@ -192,19 +179,17 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     const cleaned = key.trim();
     if (!cleaned) return;
 
-    await this.withClient(
-      async (client) => {
-        await client.query(
-          `UPDATE inner_circle_keys
-           SET total_unlocks = total_unlocks + 1,
-               last_used_at = NOW(),
-               last_ip = $2
-           WHERE key_hash = $1`,
-          [sha256Hex(cleaned), ip || null]
-        );
-      },
-      undefined
-    );
+    await this.withClient(async (client) => {
+      await client.query(
+        `UPDATE inner_circle_keys
+         SET total_unlocks = total_unlocks + 1,
+             last_used_at = NOW(),
+             last_ip = $2
+         WHERE key_hash = $1`,
+        [sha256Hex(cleaned), ip || null]
+      );
+      return;
+    }, undefined);
   }
 
   async revokeInnerCircleKey(key: string, revokedBy = "admin", reason = "manual"): Promise<boolean> {
@@ -284,36 +269,118 @@ export async function getActiveKeysForMember(memberId: string) {
   return keys.filter((k: any) => k?.status === "active");
 }
 
-/** ✅ used by unlock/register/resend */
-export function getClientIp(req: NextApiRequest): string | undefined {
-  const xf = req.headers["x-forwarded-for"];
-  const ip =
-    (Array.isArray(xf) ? xf[0] : xf)?.split(",")[0]?.trim() ||
-    req.socket.remoteAddress ||
-    undefined;
-  return ip;
+// ---------------------------------------------------------------------------
+// Email: unified + backward compatible (THIS is what you were missing)
+// ---------------------------------------------------------------------------
+
+type InnerCircleEmailPayload =
+  | {
+      to: string | string[];
+      type: "welcome" | "resend";
+      data: {
+        name: string;
+        accessKey: string;
+        unlockUrl: string;
+      };
+    }
+  | string;
+
+function normalizeRecipients(to: string | string[]): string[] {
+  const arr = Array.isArray(to) ? to : [to];
+  return arr.map((x) => String(x || "").trim()).filter(Boolean);
+}
+
+function buildInnerCircleEmail(
+  type: "welcome" | "resend",
+  data: { name: string; accessKey: string; unlockUrl: string }
+) {
+  const siteName = "Abraham of London";
+  const subject =
+    type === "welcome"
+      ? `Your Inner Circle access key`
+      : `Your Inner Circle access key (resend)`;
+
+  const text =
+`Hello ${data.name},
+
+Here is your Inner Circle access key:
+
+${data.accessKey}
+
+Unlock here:
+${data.unlockUrl}
+
+— ${siteName}
+`;
+
+  const html =
+`<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.5">
+  <p>Hello <strong>${escapeHtml(data.name)}</strong>,</p>
+  <p>Here is your Inner Circle access key:</p>
+  <p style="font-size:18px"><code>${escapeHtml(data.accessKey)}</code></p>
+  <p>Unlock here:<br/>
+    <a href="${escapeAttr(data.unlockUrl)}">${escapeHtml(data.unlockUrl)}</a>
+  </p>
+  <p style="color:#666">— ${siteName}</p>
+</div>`;
+
+  return { subject, text, html };
+}
+
+function escapeHtml(s: string) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(s: string) {
+  return escapeHtml(s).replace(/'/g, "&#39;");
 }
 
 /**
- * ✅ REAL email contract (no stub shape mismatch)
- * Implementation: plug into your existing email engine.
- *
- * If you already have Resend helpers somewhere else, import + call them here.
- * This file is the single choke-point so all APIs stay consistent.
+ * sendInnerCircleEmail() supports:
+ *  A) New signature:
+ *     sendInnerCircleEmail({ to, type, data })
+ *  B) Old signature:
+ *     sendInnerCircleEmail(email, key, name?)
  */
-export async function sendInnerCircleEmail(args: SendInnerCircleEmailArgs): Promise<void> {
-  const { to, type, data } = args;
+export async function sendInnerCircleEmail(
+  a: any,
+  b?: any,
+  c?: any
+): Promise<void> {
+  // --- New signature ---
+  if (a && typeof a === "object" && "to" in a && "type" in a && "data" in a) {
+    const payload = a as Exclude<InnerCircleEmailPayload, string>;
+    const to = normalizeRecipients(payload.to);
 
-  // ---- Replace this section with your actual provider call ----
-  // Example (pseudo):
-  // await sendEmail({
-  //   to,
-  //   from: process.env.MAIL_FROM!,
-  //   subject: type === "welcome" ? "Your Inner Circle access key" : "Your refreshed Inner Circle access key",
-  //   html: renderTemplate(type, data),
-  // });
+    const { subject, text, html } = buildInnerCircleEmail(payload.type, payload.data);
 
-  // Until wired, keep log output *minimal* and safe:
-  console.info(`[InnerCircleEmail] type=${type} -> ${to}`);
-  console.info(`[InnerCircleEmail] unlockUrl=${data.unlockUrl}`);
+    // Provider switch (keep it simple + reliable)
+    const provider = process.env.EMAIL_PROVIDER || "console";
+    if (provider === "console") {
+      console.log("📧 [InnerCircle Email] (console)", { to, subject });
+      console.log(text);
+      return;
+    }
+
+    // If you later wire a real provider, plug it here.
+    // For now, fail-safe to console rather than silently dropping.
+    console.warn(
+      "⚠️ [InnerCircle Email] EMAIL_PROVIDER set but no provider wired. Falling back to console."
+    );
+    console.log("📧 [InnerCircle Email] (fallback)", { to, subject });
+    console.log(text);
+    return;
+  }
+
+  // --- Old signature call (email, key, name?) ---
+  const email = String(a);
+  const key = String(b || "");
+  const name = c;
+
+  console.log(`[Email] Dispatching key to ${email} (${name || "unknown"})`);
+  console.log(`[Email] Key: ${key}`);
 }

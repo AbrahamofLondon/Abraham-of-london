@@ -9,7 +9,6 @@ type StatusResponse =
         nodeEnv: string;
         siteUrl: string | null;
         hasDbUrl: boolean;
-        context: string | null;
       };
       stats: { totalMembers: number; totalKeys: number };
     }
@@ -32,7 +31,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         nodeEnv: process.env.NODE_ENV || "unknown",
         siteUrl: process.env.NEXT_PUBLIC_SITE_URL || null,
         hasDbUrl,
-        context: process.env.CONTEXT || null,
       },
       stats,
     });
