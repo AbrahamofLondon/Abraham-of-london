@@ -1,204 +1,160 @@
 // scripts/fix-contentlayer-issues.mjs
-import fs from "node:fs";
-import path from "node:path";
+import { readFileSync, writeFileSync, readdirSync } from "fs";
+import { join } from "path";
 
-const ROOT = process.cwd();
-const CONTENT_DIR = path.join(ROOT, "content");
+const contentDir = join(process.cwd(), "content");
 
-function walk(dir, out = []) {
-  if (!fs.existsSync(dir)) return out;
-
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(full, out);
-    else if (entry.isFile() && /\.(md|mdx)$/i.test(entry.name)) out.push(full);
+function getAllFiles(dir, out = []) {
+  const entries = readdirSync(dir, { withFileTypes: true });
+  for (const ent of entries) {
+    const full = join(dir, ent.name);
+    if (ent.isDirectory()) getAllFiles(full, out);
+    else if (ent.isFile() && /\.(md|mdx)$/i.test(ent.name)) out.push(full);
   }
   return out;
 }
 
-function normalizeNewlines(s) {
-  // Normalize Windows CRLF to LF, and strip stray CRs
-  return s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+function isFrontmatterStart(line) {
+  return line.trim() === "---";
 }
 
-function isIsoDate(s) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s);
-}
+function parseFrontmatterBlock(text) {
+  // Must start with --- on first non-empty line
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
 
-function toIsoDateLoose(value) {
-  const raw = String(value ?? "").trim().replace(/^["']|["']$/g, "");
-  if (!raw) return null;
-  if (isIsoDate(raw)) return raw;
+  // Find first '---' at top
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === "") i++;
+  if (i >= lines.length || !isFrontmatterStart(lines[i])) {
+    return { hasFrontmatter: false, lines, fmStart: -1, fmEnd: -1 };
+  }
 
-  const d = new Date(raw);
-  if (!Number.isFinite(d.getTime())) return null;
-  return d.toISOString().slice(0, 10);
-}
-
-function normalizeBooleanYaml(value) {
-  const v = String(value ?? "").trim();
-  const unquoted = v.replace(/^["']|["']$/g, "").trim();
-
-  if (unquoted.toLowerCase() === "true") return "true";
-  if (unquoted.toLowerCase() === "false") return "false";
-  return null;
-}
-
-function parseFrontmatter(src) {
-  if (!src.startsWith("---")) return null;
-
-  // Find closing --- on its own line
-  const match = src.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
-  if (!match) return null;
-
-  const fmRaw = match[1] ?? "";
-  const body = src.slice(match[0].length);
-  return { frontmatter: fmRaw, body, fmBlock: match[0] };
-}
-
-function fixFrontmatter(frontmatter) {
-  const lines = frontmatter.split("\n");
-
-  const seen = new Set();
-  const fixed = [];
-
-  let hasDateKey = false;
-
-  for (const originalLine of lines) {
-    const line = originalLine;
-
-    // Preserve empty lines and comments as-is
-    if (!line.trim() || line.trim().startsWith("#")) {
-      fixed.push(line);
-      continue;
+  const fmStart = i;
+  let fmEnd = -1;
+  for (let j = fmStart + 1; j < lines.length; j++) {
+    if (isFrontmatterStart(lines[j])) {
+      fmEnd = j;
+      break;
     }
+  }
+  if (fmEnd === -1) {
+    return { hasFrontmatter: false, lines, fmStart: -1, fmEnd: -1 };
+  }
 
-    // YAML key line? (simple mapping only)
-    const m = line.match(/^([A-Za-z0-9_]+)\s*:\s*(.*)$/);
+  return { hasFrontmatter: true, lines, fmStart, fmEnd };
+}
+
+function toYyyyMmDd(value) {
+  // Accept: YYYY-MM-DD, "YYYY-MM-DD", Date.toString(), Date.toISOString()
+  const raw = String(value || "").trim().replace(/^"(.*)"$/, "$1");
+
+  // Already YYYY-MM-DD?
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+
+  // ISO?
+  const iso = raw.match(/^(\d{4}-\d{2}-\d{2})T/);
+  if (iso) return iso[1];
+
+  // JS Date string (Thu Feb 01 2024 00:00:00 GMT+0000 ...)
+  const d = new Date(raw);
+  if (!Number.isNaN(d.getTime())) {
+    const yyyy = String(d.getUTCFullYear()).padStart(4, "0");
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Give up
+  return raw;
+}
+
+function normalizeFrontmatter(fmLines) {
+  // Operate only on YAML key-value lines at top-level: key: value
+  // Remove duplicate keys, keep FIRST occurrence (stable).
+  const seen = new Set();
+  const out = [];
+
+  for (const line of fmLines) {
+    const m = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
     if (!m) {
-      fixed.push(line);
+      out.push(line);
       continue;
     }
 
     const key = m[1];
-    const rest = m[2] ?? "";
+    let value = m[2];
 
-    // If this key has already appeared in frontmatter, drop duplicates (first wins)
+    // Drop duplicate keys
     if (seen.has(key)) continue;
     seen.add(key);
 
-    if (key === "date") {
-      hasDateKey = true;
-
-      // ✅ ALWAYS write quoted ISO date to prevent YAML date coercion
-      const iso = toIsoDateLoose(rest);
-      if (iso) {
-        fixed.push(`date: "${iso}"`);
-      } else {
-        // If cannot normalise, keep as a quoted string anyway
-        const safe = String(rest).trim().replace(/^["']|["']$/g, "");
-        fixed.push(`date: "${safe}"`);
-      }
-      continue;
+    // Normalize draft booleans
+    if (key === "draft") {
+      const v = String(value).trim().replace(/^"(.*)"$/, "$1");
+      if (v === "true") value = "true";
+      else if (v === "false") value = "false";
     }
 
-    if (
-      key === "draft" ||
-      key === "featured" ||
-      key === "available" ||
-      key === "published"
-    ) {
-      const boolVal = normalizeBooleanYaml(rest);
-      if (boolVal) {
-        fixed.push(`${key}: ${boolVal}`);
-        continue;
-      }
+    // Normalize date fields
+    if (key === "date" || key === "eventDate") {
+      const normalized = toYyyyMmDd(value);
+      value = `"${normalized}"`;
     }
 
-    // Strip stray CR artifacts if any made it in
-    fixed.push(`${key}: ${String(rest).replace(/\r/g, "").trimEnd()}`);
+    out.push(`${key}: ${value}`);
   }
 
-  // Ensure date exists and is quoted ISO
-  if (!hasDateKey) {
-    const today = new Date().toISOString().slice(0, 10);
-    const dateLine = `date: "${today}"`;
-
-    // Insert after title if possible, otherwise at top
-    const idx = fixed.findIndex((l) => /^title\s*:/i.test(l.trim()));
-    if (idx >= 0) fixed.splice(idx + 1, 0, dateLine);
-    else fixed.unshift(dateLine);
-  }
-
-  while (fixed.length && !fixed[fixed.length - 1].trim()) fixed.pop();
-  return fixed.join("\n");
+  return out;
 }
 
-function fixOneFile(filePath) {
-  const raw = fs.readFileSync(filePath, "utf8");
-  const src = normalizeNewlines(raw);
-
-  const parsed = parseFrontmatter(src);
-  if (!parsed) {
-    if (raw !== src) {
-      fs.writeFileSync(filePath, src, "utf8");
-      return { changed: true, reason: "newline-normalized-no-frontmatter" };
-    }
-    return { changed: false };
+function fixFileText(text) {
+  const { hasFrontmatter, lines, fmStart, fmEnd } = parseFrontmatterBlock(text);
+  if (!hasFrontmatter) {
+    // Still normalize line endings
+    return text.replace(/\r\n/g, "\n");
   }
 
-  const fixedFm = fixFrontmatter(parsed.frontmatter);
-  const rebuilt = `---\n${fixedFm}\n---\n${parsed.body.replace(/^\n+/, "")}`;
+  const before = lines.slice(0, fmStart + 1); // includes opening ---
+  const fm = lines.slice(fmStart + 1, fmEnd);
+  const after = lines.slice(fmEnd); // includes closing --- and rest
 
-  if (rebuilt !== src) {
-    fs.writeFileSync(filePath, rebuilt, "utf8");
-    return { changed: true, reason: "frontmatter-fixed" };
-  }
+  const fixedFm = normalizeFrontmatter(fm);
 
-  if (raw !== src) {
-    fs.writeFileSync(filePath, src, "utf8");
-    return { changed: true, reason: "newline-normalized" };
-  }
-
-  return { changed: false };
+  return [...before, ...fixedFm, ...after].join("\n");
 }
 
-function main() {
+function rel(p) {
+  return p.replace(contentDir + "\\", "content\\").replace(contentDir + "/", "content/");
+}
+
+async function run() {
   console.log("🔧 Fixing Contentlayer issues (frontmatter-safe, date-quoted)...");
 
-  const files = walk(CONTENT_DIR);
-  let fixedCount = 0;
-
+  const files = getAllFiles(contentDir);
+  let fixed = 0;
   const touched = [];
-  const errors = [];
 
-  for (const f of files) {
+  for (const file of files) {
     try {
-      const res = fixOneFile(f);
-      if (res.changed) {
-        fixedCount++;
-        touched.push(path.relative(ROOT, f));
+      const original = readFileSync(file, "utf8");
+      const next = fixFileText(original);
+
+      if (next !== original) {
+        writeFileSync(file, next, "utf8");
+        fixed++;
+        touched.push(rel(file));
       }
-    } catch (err) {
-      errors.push({
-        file: path.relative(ROOT, f),
-        message: err?.message ?? String(err),
-      });
+    } catch (e) {
+      console.error(`  ✗ Error fixing ${rel(file)}:`, e?.message || e);
     }
   }
 
-  console.log(`\n✅ Fixed ${fixedCount} file(s).`);
-  if (touched.length) {
-    for (const t of touched.slice(0, 40)) console.log(`  ✓ ${t}`);
-    if (touched.length > 40) console.log(`  …and ${touched.length - 40} more`);
-  }
-
-  if (errors.length) {
-    console.log(`\n⚠️ Errors (${errors.length}):`);
-    for (const e of errors.slice(0, 20)) console.log(`  ✗ ${e.file}: ${e.message}`);
-    if (errors.length > 20) console.log(`  …and ${errors.length - 20} more`);
-    process.exitCode = 1;
-  }
+  console.log(`\n✅ Fixed ${fixed} file(s).`);
+  for (const f of touched.slice(0, 40)) console.log(`  ✓ ${f}`);
+  if (touched.length > 40) console.log(`  …and ${touched.length - 40} more`);
 }
 
-main();
+run().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
