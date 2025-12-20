@@ -21,14 +21,10 @@ import {
   MessageCircle,
   ThumbsUp,
   ChevronRight,
-  Users,
-  Target,
-  Brain,
-  Crown,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { allShorts, getPublishedShorts } from "@/lib/contentlayer-helper";
+import { getPublishedShorts } from "@/lib/contentlayer-helper";
 
 type ShortDoc = {
   _id: string;
@@ -100,6 +96,23 @@ const cardVariants = {
   },
 };
 
+function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, n));
+}
+
+function formatShortDateISO(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function safeParseInt(v: string | null): number | null {
+  if (!v) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.trunc(n) : null;
+}
+
 const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -109,17 +122,29 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   >({});
   const [bookmarks, setBookmarks] = React.useState<Set<string>>(new Set());
 
+  // Subliminal / minimal-engagement states (ethical: noticeable, dismissible)
+  const [heroRewardVisible, setHeroRewardVisible] = React.useState(false);
+  const [heroHintVisible, setHeroHintVisible] = React.useState(false);
+  const [streakDays, setStreakDays] = React.useState<number>(0);
+  const [streakLabel, setStreakLabel] = React.useState<string>("");
+
+  const [todayPick, setTodayPick] = React.useState<ShortDoc | null>(null);
+  const [rotatingLine, setRotatingLine] = React.useState<string>(
+    "Bite-sized wisdom for scrolling brains",
+  );
+
   // Initialize interactions with realistic data
   React.useEffect(() => {
     const mockInteractions: Record<
       string,
       { likes: number; shares: number; reads: number; saves: number }
     > = {};
+
     shorts.forEach((short, index) => {
       const baseReads = 100 + index * 50 + Math.floor(Math.random() * 100);
       const baseLikes = Math.floor(baseReads * 0.15) + Math.floor(Math.random() * 30);
       const baseShares = Math.floor(baseLikes * 0.3) + Math.floor(Math.random() * 10);
-      
+
       mockInteractions[short._id] = {
         reads: baseReads,
         likes: baseLikes,
@@ -127,6 +152,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         saves: Math.floor(baseReads * 0.08) + Math.floor(Math.random() * 5),
       };
     });
+
     setInteractions(mockInteractions);
   }, [shorts]);
 
@@ -147,25 +173,86 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         short.excerpt?.toLowerCase().includes(q) ||
         short.tags?.some((tag) => tag.toLowerCase().includes(q));
 
-      const matchesTheme =
-        selectedTheme === "all" || short.theme === selectedTheme;
+      const matchesTheme = selectedTheme === "all" || short.theme === selectedTheme;
 
       return matchesSearch && matchesTheme;
     });
   }, [shorts, searchQuery, selectedTheme]);
 
-  const totalReads = Object.values(interactions).reduce(
-    (sum, i) => sum + i.reads,
-    0,
-  );
-  const totalLikes = Object.values(interactions).reduce(
-    (sum, i) => sum + i.likes,
-    0,
-  );
-  const totalSaves = Object.values(interactions).reduce(
-    (sum, i) => sum + i.saves,
-    0,
-  );
+  const totalReads = Object.values(interactions).reduce((sum, i) => sum + i.reads, 0);
+  const totalLikes = Object.values(interactions).reduce((sum, i) => sum + i.likes, 0);
+  const totalSaves = Object.values(interactions).reduce((sum, i) => sum + i.saves, 0);
+
+  // Minimal “return hook” streak (local, privacy-safe, no tracking)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const today = new Date();
+    const todayKey = formatShortDateISO(today);
+
+    const lastKey = window.localStorage.getItem("aol_shorts_last_seen");
+    const streak = safeParseInt(window.localStorage.getItem("aol_shorts_streak"));
+    const last = lastKey ? lastKey : null;
+
+    let nextStreak = streak ?? 0;
+    let label = "";
+
+    if (!last) {
+      nextStreak = 1;
+      label = "New ritual";
+      window.localStorage.setItem("aol_shorts_last_seen", todayKey);
+      window.localStorage.setItem("aol_shorts_streak", String(nextStreak));
+    } else if (last === todayKey) {
+      nextStreak = Math.max(1, nextStreak);
+      label = nextStreak >= 2 ? "Streak held" : "Good return";
+    } else {
+      const lastDate = new Date(`${last}T00:00:00`);
+      const diffDays = Math.round(
+        (new Date(`${todayKey}T00:00:00`).getTime() - lastDate.getTime()) / 86400000,
+      );
+
+      if (diffDays === 1) {
+        nextStreak = nextStreak + 1;
+        label = "Streak +1";
+      } else {
+        nextStreak = 1;
+        label = "Fresh start";
+      }
+
+      window.localStorage.setItem("aol_shorts_last_seen", todayKey);
+      window.localStorage.setItem("aol_shorts_streak", String(nextStreak));
+    }
+
+    setStreakDays(clamp(nextStreak, 1, 3650));
+    setStreakLabel(label);
+
+    // Quiet “6-second reveal”: show after user has actually stayed.
+    const t1 = window.setTimeout(() => setHeroHintVisible(true), 1400);
+    const t2 = window.setTimeout(() => setHeroRewardVisible(true), 6000);
+
+    // Today’s pick (deterministic enough, not noisy)
+    const pick = filteredShorts.length > 0 ? filteredShorts[0] : (shorts[0] ?? null);
+    setTodayPick(pick);
+
+    // Micro-rotation line (slow, subtle)
+    const lines = [
+      "Bite-sized wisdom for scrolling brains",
+      "High-protein ideas. Low-friction reading.",
+      "Small words. Big alignment.",
+    ];
+    let idx = 0;
+    const t3 = window.setInterval(() => {
+      idx = (idx + 1) % lines.length;
+      setRotatingLine(lines[idx]);
+    }, 8500);
+
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearInterval(t3);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
 
   const handleLike = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -184,20 +271,20 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
-        setInteractions((prev) => ({
-          ...prev,
+        setInteractions((p) => ({
+          ...p,
           [id]: {
-            ...prev[id],
-            saves: Math.max(0, (prev[id]?.saves ?? 1) - 1),
+            ...p[id],
+            saves: Math.max(0, (p[id]?.saves ?? 1) - 1),
           },
         }));
       } else {
         next.add(id);
-        setInteractions((prev) => ({
-          ...prev,
+        setInteractions((p) => ({
+          ...p,
           [id]: {
-            ...prev[id],
-            saves: (prev[id]?.saves ?? 0) + 1,
+            ...p[id],
+            saves: (p[id]?.saves ?? 0) + 1,
           },
         }));
       }
@@ -205,91 +292,96 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     });
   };
 
-  // Working share function
-  const handleShare = async (slug: string, title: string, e: React.MouseEvent) => {
+  const handleShare = async (id: string, slug: string, title: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/shorts/${slug}`;
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/shorts/${slug}`
+        : `https://www.abrahamoflondon.org/shorts/${slug}`;
     const text = `"${title}" - A short from Abraham of London.`;
 
-    // Try native share first (mobile)
-    if (navigator.share) {
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
-        await navigator.share({
+        await (navigator as any).share({
           title: `${title} · Abraham of London`,
-          text: text,
-          url: url,
+          text,
+          url,
         });
-        // Update share count on successful share
-        setInteractions(prev => ({
+        setInteractions((prev) => ({
           ...prev,
-          [slug]: {
-            ...prev[slug],
-            shares: (prev[slug]?.shares || 0) + 1
-          }
+          [id]: {
+            ...prev[id],
+            shares: (prev[id]?.shares ?? 0) + 1,
+          },
         }));
         return;
-      } catch (err) {
-        // User cancelled or error - continue to fallback
+      } catch {
+        // ignore, fall back
       }
     }
 
-    // Fallback: Copy to clipboard
     try {
-      await navigator.clipboard.writeText(`${text}\n\n${url}`);
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(`${text}\n\n${url}`);
+      }
       const btn = e.currentTarget as HTMLButtonElement;
-      const originalText = btn.textContent;
-      btn.textContent = '✓ Copied';
-      setTimeout(() => {
-        if (btn) btn.textContent = originalText;
-      }, 2000);
-      
-      // Update share count
-      setInteractions(prev => ({
+      const original = btn.textContent;
+      btn.textContent = "✓ Copied";
+      window.setTimeout(() => {
+        if (btn) btn.textContent = original;
+      }, 1800);
+
+      setInteractions((prev) => ({
         ...prev,
-        [slug]: {
-          ...prev[slug],
-          shares: (prev[slug]?.shares || 0) + 1
-        }
+        [id]: {
+          ...prev[id],
+          shares: (prev[id]?.shares ?? 0) + 1,
+        },
       }));
-    } catch (err) {
-      // Final fallback: Open Twitter
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-      window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        text,
+      )}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, "_blank", "noopener,noreferrer");
     }
   };
 
-  // Share entire page
   const sharePage = async (platform?: string) => {
+    if (typeof window === "undefined") return;
+
     const url = window.location.href;
     const text = "Insightful shorts for busy minds - Abraham of London";
 
-    if (platform === 'twitter') {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-      window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+    if (platform === "twitter") {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        text,
+      )}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, "_blank", "noopener,noreferrer");
       return;
     }
 
-    if (platform === 'whatsapp') {
+    if (platform === "whatsapp") {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
       return;
     }
 
-    if (navigator.share) {
+    if ((navigator as any).share) {
       try {
-        await navigator.share({
-          title: 'Shorts · Abraham of London',
-          text: text,
-          url: url,
+        await (navigator as any).share({
+          title: "Shorts · Abraham of London",
+          text,
+          url,
         });
-      } catch (err) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(`${text}\n${url}`);
+      } catch {
+        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(`${text}\n${url}`);
       }
-    } else {
-      // Desktop fallback
-      navigator.clipboard.writeText(`${text}\n${url}`);
-      alert('Link copied to clipboard!');
+      return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      alert("Link copied to clipboard!");
     }
   };
 
@@ -304,19 +396,13 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
           name="description"
           content="Quick, powerful reflections for the TikTok generation who still want depth. Read one daily to stay sharp."
         />
-        <meta
-          property="og:title"
-          content="Shorts · Wisdom for Short Attention Spans"
-        />
+        <meta property="og:title" content="Shorts · Wisdom for Short Attention Spans" />
         <meta
           property="og:description"
           content="Daily micro-wisdom for busy people who still want to think deeply. Perfect for coffee breaks."
         />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:image"
-          content="https://www.abrahamoflondon.org/api/og/shorts"
-        />
+        <meta property="og:image" content="https://www.abrahamoflondon.org/api/og/shorts" />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
@@ -324,25 +410,60 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         {/* Hero Section */}
         <section className="relative overflow-hidden border-b border-gray-200 dark:border-gray-800">
           <div className="absolute inset-0">
+            {/* Existing backdrop */}
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-purple-500/5" />
             <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
             <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
+
+            {/* Minimal “subliminal” add-ons: ultra-soft motion + micro-glint */}
+            <motion.div
+              aria-hidden="true"
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+            >
+              <motion.div
+                className="absolute -left-1/3 top-1/3 h-40 w-40 rounded-full bg-white/5 blur-3xl dark:bg-white/4"
+                animate={{
+                  x: [0, 120, 0],
+                  y: [0, -30, 0],
+                }}
+                transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                style={{ willChange: "transform" }}
+              />
+              <motion.div
+                className="absolute -right-1/3 bottom-1/3 h-40 w-40 rounded-full bg-amber-400/7 blur-3xl"
+                animate={{
+                  x: [0, -110, 0],
+                  y: [0, 25, 0],
+                }}
+                transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                style={{ willChange: "transform" }}
+              />
+              <motion.div
+                className="absolute -top-12 left-1/2 h-28 w-[560px] -translate-x-1/2 rotate-[-8deg] bg-gradient-to-r from-transparent via-white/10 to-transparent blur-md dark:via-white/8"
+                animate={{ opacity: [0.0, 0.55, 0.0], x: ["-8%", "8%", "-8%"] }}
+                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+                style={{ willChange: "transform, opacity" }}
+              />
+            </motion.div>
           </div>
 
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.65, ease: "easeOut" }}
               className="text-center"
             >
               <motion.div
-                initial={{ scale: 0.8 }}
+                initial={{ scale: 0.86 }}
                 animate={{ scale: 1 }}
-                transition={{ type: "spring", delay: 0.2 }}
+                transition={{ type: "spring", stiffness: 160, damping: 14, delay: 0.15 }}
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-4 py-2 backdrop-blur-sm"
               >
-                <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />
+                <Sparkles className="h-4 w-4 animate-pulse text-amber-500" />
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
                   Scrollable Wisdom
                 </span>
@@ -351,36 +472,41 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.22 }}
                 className="mb-4 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl"
               >
                 Shorts
-                <span className="mt-2 block text-lg font-normal text-gray-600 dark:text-gray-300">
-                  Bite-sized wisdom for scrolling brains
-                </span>
+                <motion.span
+                  className="mt-2 block text-lg font-normal text-gray-600 dark:text-gray-300"
+                  initial={{ opacity: 0.0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.35 }}
+                >
+                  {rotatingLine}
+                </motion.span>
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.38 }}
                 className="mx-auto mb-8 max-w-2xl text-lg text-gray-600 dark:text-gray-300"
               >
-                For when your brain is fried, your feed is empty, and you still want to
+                For when your brain is fried, your feed is empty, and you still want to{" "}
                 <span className="font-semibold text-amber-600 dark:text-amber-400">
-                  {" "}
                   think meaningfully
                 </span>
                 . No fluff, just fuel.
               </motion.p>
 
+              {/* Minimal “reward loop” chips (compact, not busy) */}
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="mx-auto mb-8 flex max-w-md flex-wrap justify-center gap-6"
+                transition={{ delay: 0.45 }}
+                className="mx-auto mb-8 flex max-w-xl flex-wrap justify-center gap-2"
               >
-                <div className="rounded-xl border border-gray-200 bg-white/50 px-4 py-2 dark:border-gray-800 dark:bg-gray-900/50">
+                <div className="rounded-full border border-gray-200 bg-white/55 px-4 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/45">
                   <div className="flex items-center gap-2">
                     <Eye className="h-4 w-4 text-gray-500" />
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -389,7 +515,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     <span className="text-xs text-gray-500">reads</span>
                   </div>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white/50 px-4 py-2 dark:border-gray-800 dark:bg-gray-900/50">
+
+                <div className="rounded-full border border-gray-200 bg-white/55 px-4 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/45">
                   <div className="flex items-center gap-2">
                     <Heart className="h-4 w-4 text-red-500" />
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -398,7 +525,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     <span className="text-xs text-gray-500">likes</span>
                   </div>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white/50 px-4 py-2 dark:border-gray-800 dark:bg-gray-900/50">
+
+                <div className="rounded-full border border-gray-200 bg-white/55 px-4 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/45">
                   <div className="flex items-center gap-2">
                     <Bookmark className="h-4 w-4 text-amber-500" />
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -407,12 +535,24 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     <span className="text-xs text-gray-500">saved</span>
                   </div>
                 </div>
+
+                <div className="rounded-full border border-amber-500/25 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-4 py-2 backdrop-blur-sm">
+                  <div className="flex items-center gap-2">
+                    <ThumbsUp className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {streakDays > 0 ? `${streakDays} day` : "1 day"}
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                      {streakLabel || "streak"}
+                    </span>
+                  </div>
+                </div>
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.55 }}
                 className="inline-block"
               >
                 <Link
@@ -424,7 +564,96 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                   <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
                 </Link>
               </motion.div>
+
+              {/* Subtle scroll cue (tiny, non-crowding) */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.75 }}
+                className="mt-10 flex justify-center"
+              >
+                <motion.a
+                  href="#shorts-grid"
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/40 px-4 py-2 text-xs text-gray-600 backdrop-blur-sm hover:bg-white/55 dark:border-gray-800 dark:bg-gray-900/35 dark:text-gray-300"
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Clock className="h-3.5 w-3.5 text-gray-500" />
+                  <span>One short takes under 60 seconds</span>
+                  <ChevronRight className="h-3.5 w-3.5 opacity-70" />
+                </motion.a>
+              </motion.div>
             </motion.div>
+
+            {/* 6-second “reward” reveal: tiny, dismissible, pulls user to “Today’s pick” */}
+            <AnimatePresence>
+              {heroRewardVisible && todayPick ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  className="pointer-events-none absolute left-1/2 top-[78%] w-full max-w-xl -translate-x-1/2 px-4"
+                >
+                  <div className="pointer-events-auto relative overflow-hidden rounded-2xl border border-amber-500/25 bg-white/80 p-4 shadow-xl shadow-amber-500/10 backdrop-blur-md dark:bg-gray-950/75">
+                    <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-500/10 blur-2xl" />
+                    <div className="relative flex items-start justify-between gap-3">
+                      <div>
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-700 dark:text-amber-400">
+                            Unlocked
+                          </span>
+                        </div>
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          Today’s pick:
+                          <span className="ml-2 font-serif font-semibold">
+                            {todayPick.title}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                          A quick win for your mindset — then you can get back to life.
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/shorts/${todayPick.slug}`}
+                          className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-amber-500/20 hover:opacity-95"
+                        >
+                          Read it
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => setHeroRewardVisible(false)}
+                          className="rounded-full border border-gray-200 bg-white/60 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-white dark:border-gray-800 dark:bg-gray-900/50 dark:text-gray-200"
+                          aria-label="Dismiss"
+                        >
+                          Not now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+
+            {/* Subtle early hint (fast, unobtrusive) */}
+            <AnimatePresence>
+              {heroHintVisible && !heroRewardVisible ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.35 }}
+                  className="pointer-events-none absolute left-1/2 top-[72%] -translate-x-1/2 px-4"
+                >
+                  <div className="pointer-events-none rounded-full border border-gray-200 bg-white/45 px-4 py-2 text-[11px] text-gray-600 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/35 dark:text-gray-300">
+                    Stay a moment — a “today’s pick” unlocks in a few seconds.
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
           </div>
         </section>
 
@@ -472,6 +701,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                         : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                     }`}
                     aria-label="Grid view"
+                    type="button"
                   >
                     <Grid className="h-4 w-4" />
                   </button>
@@ -483,6 +713,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                         : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                     }`}
                     aria-label="List view"
+                    type="button"
                   >
                     <List className="h-4 w-4" />
                   </button>
@@ -496,17 +727,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         <section id="shorts-grid" className="py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {filteredShorts.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="py-12 text-center"
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-12 text-center">
                 <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
                   <Search className="h-6 w-6 text-gray-400" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                  No shorts found
-                </h3>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No shorts found</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   {searchQuery || selectedTheme !== "all"
                     ? "Try adjusting your search or filter criteria"
@@ -519,6 +744,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       setSelectedTheme("all");
                     }}
                     className="mt-4 text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                    type="button"
                   >
                     Clear all filters
                   </button>
@@ -542,6 +768,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                         setSelectedTheme("all");
                       }}
                       className="text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                      type="button"
                     >
                       Clear filters
                     </button>
@@ -584,11 +811,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                             {short.title}
                           </h3>
 
-                          {short.excerpt && (
+                          {short.excerpt ? (
                             <p className="mb-4 line-clamp-3 text-sm text-gray-600 dark:text-gray-300">
                               {short.excerpt}
                             </p>
-                          )}
+                          ) : null}
 
                           <div className="mb-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                             <Clock className="h-3 w-3" />
@@ -609,10 +836,9 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                                       : ""
                                   }`}
                                 />
-                                <span>
-                                  {interactions[short._id]?.likes ?? 0}
-                                </span>
+                                <span>{interactions[short._id]?.likes ?? 0}</span>
                               </button>
+
                               <button
                                 type="button"
                                 onClick={(e) => handleBookmark(short._id, e)}
@@ -625,9 +851,10 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                                 <Bookmark className="h-4 w-4 transition-transform group-hover/bookmark:scale-110" />
                                 <span>{interactions[short._id]?.saves ?? 0}</span>
                               </button>
+
                               <button
                                 type="button"
-                                onClick={(e) => handleShare(short.slug, short.title, e)}
+                                onClick={(e) => handleShare(short._id, short.slug, short.title, e)}
                                 className="group/share flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-blue-500 dark:text-gray-400"
                               >
                                 <Share2 className="h-4 w-4 transition-transform group-hover/share:scale-110" />
@@ -652,11 +879,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
             )}
 
             {/* Daily Habit */}
-            {filteredShorts.length > 0 && (
+            {filteredShorts.length > 0 ? (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.45 }}
                 className="mt-16 rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900 to-black p-8"
               >
                 <div className="grid gap-6 md:grid-cols-2 md:items-center">
@@ -671,18 +898,24 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       Make it consistent
                     </h3>
                     <p className="text-gray-300">
-                      Read one short every day. Small, consistent effort creates real change. 
+                      Read one short every day. Small, consistent effort creates real change.
                       Join others who make this part of their daily routine.
                     </p>
+                    <p className="mt-3 text-sm text-gray-400">
+                      Current streak:{" "}
+                      <span className="font-semibold text-amber-300">{streakDays} day</span>
+                    </p>
                   </div>
+
                   <div className="flex flex-col gap-3">
-                    <button
-                      type="button"
+                    <a
+                      href="#shorts-grid"
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25"
                     >
                       <RefreshCw className="h-4 w-4" />
                       Start Daily Reading
-                    </button>
+                    </a>
+
                     <button
                       onClick={() => sharePage()}
                       type="button"
@@ -694,14 +927,14 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                   </div>
                 </div>
               </motion.div>
-            )}
+            ) : null}
 
-            {/* Working Share Section */}
-            {filteredShorts.length > 0 && (
+            {/* Share Section */}
+            {filteredShorts.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.55 }}
                 className="mt-12 rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900"
               >
                 <div className="text-center">
@@ -711,24 +944,26 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       Shared {totalSaves.toLocaleString()}+ Times
                     </span>
                   </div>
-                  
+
                   <h4 className="mb-3 font-serif text-xl font-semibold text-gray-900 dark:text-white">
                     When something resonates, it spreads
                   </h4>
                   <p className="mx-auto mb-6 max-w-md text-gray-600 dark:text-gray-400">
                     People share what matters. These are the shorts that get passed around.
                   </p>
-                  
+
                   <div className="flex flex-wrap justify-center gap-3">
                     <button
-                      onClick={() => sharePage('twitter')}
+                      onClick={() => sharePage("twitter")}
                       className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:scale-105 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                      type="button"
                     >
                       Share on Twitter
                     </button>
                     <button
-                      onClick={() => sharePage('whatsapp')}
+                      onClick={() => sharePage("whatsapp")}
                       className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:scale-105 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                      type="button"
                     >
                       <MessageCircle className="h-4 w-4" />
                       Share on WhatsApp
@@ -736,18 +971,19 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     <button
                       onClick={() => sharePage()}
                       className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-2.5 text-sm font-medium text-amber-600 transition-all hover:scale-105 hover:bg-amber-500/10 dark:text-amber-400"
+                      type="button"
                     >
                       <Share2 className="h-4 w-4" />
                       Share Anywhere
                     </button>
                   </div>
-                  
+
                   <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                    Each share helps someone discover meaningful perspective
+                    Each share helps someone discover meaningful perspective.
                   </p>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </div>
         </section>
       </main>
