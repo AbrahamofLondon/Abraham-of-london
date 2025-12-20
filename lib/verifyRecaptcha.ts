@@ -41,7 +41,7 @@ interface GoogleRecaptchaResponse {
   score?: number;
   action?: string;
   hostname?: string;
-  "error-codes"?: string[];
+  "error-codes"?: unknown;
   challenge_ts?: string;
 }
 
@@ -171,7 +171,6 @@ class RecaptchaRateLimiter {
     this.globalBucket.count += 1;
   }
 
-  // Optional: simple snapshot for debugging / observability
   snapshot() {
     return {
       global: { ...this.globalBucket },
@@ -206,6 +205,11 @@ function isNodeLikeError(error: unknown): error is NodeLikeError {
     error instanceof Error &&
     Object.prototype.hasOwnProperty.call(error, "code")
   );
+}
+
+function normalizeErrorCodes(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.filter((x): x is string => typeof x === "string");
 }
 
 // -------------------------------------------------------------------------
@@ -247,10 +251,24 @@ function validateTokenFormat(token: string): void {
 }
 
 // -------------------------------------------------------------------------
-// Core verification
+// Public API (stable contracts)
 // -------------------------------------------------------------------------
 
+/**
+ * Returns a *detailed* result object (matches your Netlify guard logging).
+ */
 export async function verifyRecaptcha(
+  token: string,
+  expectedAction?: string,
+  clientIp?: string
+): Promise<RecaptchaVerificationResult> {
+  return verifyRecaptchaDetailed(token, expectedAction, clientIp);
+}
+
+/**
+ * Boolean helper for legacy call-sites.
+ */
+export async function verifyRecaptchaOk(
   token: string,
   expectedAction?: string,
   clientIp?: string
@@ -259,6 +277,21 @@ export async function verifyRecaptcha(
   return result.success;
 }
 
+/**
+ * Backwards-compatible alias for older imports.
+ * (Fixes Netlify bundler error when _utils imports isRecaptchaValid.)
+ */
+export async function isRecaptchaValid(
+  token: string,
+  expectedAction?: string,
+  clientIp?: string
+): Promise<boolean> {
+  return verifyRecaptchaOk(token, expectedAction, clientIp);
+}
+
+/**
+ * Core verifier returning the detailed result.
+ */
 export async function verifyRecaptchaDetailed(
   token: string,
   expectedAction?: string,
@@ -288,21 +321,7 @@ export async function verifyRecaptchaDetailed(
   validateTokenFormat(token);
 
   // Apply process-local rate limiting by IP / global
-  try {
-    rateLimiter.check(clientIp);
-  } catch (e) {
-    if (e instanceof RecaptchaError && e.code === "RATE_LIMIT") {
-      // Log minimal context, no raw IPs in production logs
-      if (process.env.NODE_ENV !== "production") {
-        console.warn("[reCAPTCHA] Rate limit hit", {
-          clientIp,
-          details: e.details,
-        });
-      }
-      throw e;
-    }
-    throw e;
-  }
+  rateLimiter.check(clientIp);
 
   // Check for token reuse (replay attack protection)
   if (tokenCache.has(token)) {
@@ -319,21 +338,18 @@ export async function verifyRecaptchaDetailed(
     const params = new URLSearchParams();
     params.append("secret", config.secretKey);
     params.append("response", token);
+
+    // Only pass remoteip if it's plausibly an IP literal (avoid garbage)
     if (clientIp && /^[a-fA-F0-9.:]+$/.test(clientIp)) {
       params.append("remoteip", clientIp);
     }
 
-    const response = await fetch(
-      "https://www.google.com/recaptcha/api/siteverify",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params.toString(),
-        signal: controller.signal,
-      }
-    );
+    const response = await fetch(VERIFY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+      signal: controller.signal,
+    });
 
     clearTimeout(timeoutId);
 
@@ -352,11 +368,10 @@ export async function verifyRecaptchaDetailed(
 
     const success = data.success;
     const score = Number(data.score ?? 0);
-    const action = data.action;
-    const hostname = data.hostname;
-    const errorCodes = Array.isArray(data["error-codes"])
-      ? data["error-codes"]
-      : [];
+    const action = typeof data.action === "string" ? data.action : undefined;
+    const hostname =
+      typeof data.hostname === "string" ? data.hostname : undefined;
+    const errorCodes = normalizeErrorCodes(data["error-codes"]);
 
     Object.assign(result, { success, score, action, hostname, errorCodes });
 
@@ -366,29 +381,39 @@ export async function verifyRecaptchaDetailed(
       reasons.push("API reported failure");
     }
 
+    // Score threshold check
     if (score < config.minScore) {
       reasons.push(`Low score: ${score} < ${config.minScore}`);
-      console.warn(
-        `Low reCAPTCHA score detected: ${score} from IP: ${clientIp}`
-      );
     }
 
+    // Action check (strict)
     if (expectedAction && action !== expectedAction) {
       reasons.push(
-        `Action mismatch: expected ${expectedAction}, got ${action}`
+        `Action mismatch: expected ${expectedAction}, got ${action ?? "none"}`
       );
-      throw new RecaptchaError("Action mismatch", "ACTION_MISMATCH");
+      result.reasons = reasons;
+      result.success = false;
+      throw new RecaptchaError("Action mismatch", "ACTION_MISMATCH", {
+        expectedAction,
+        action,
+      });
     }
 
+    // Hostname allowlist check (strict)
     if (
       config.allowedHostnames?.length &&
       hostname &&
       !config.allowedHostnames.includes(hostname)
     ) {
       reasons.push(`Hostname not allowed: ${hostname}`);
-      throw new RecaptchaError("Hostname mismatch", "HOSTNAME_MISMATCH");
+      result.reasons = reasons;
+      result.success = false;
+      throw new RecaptchaError("Hostname mismatch", "HOSTNAME_MISMATCH", {
+        hostname,
+      });
     }
 
+    // Required actions allowlist (soft fail -> mark invalid, do not throw)
     if (
       config.requiredActions?.length &&
       action &&
@@ -405,31 +430,32 @@ export async function verifyRecaptchaDetailed(
       result.reasons = reasons;
       result.success = false;
 
-      console.warn(`reCAPTCHA verification failed: ${reasons.join(", ")}`, {
-        clientIp,
-        action,
-        score,
-        hostname,
-      });
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`[reCAPTCHA] verification failed: ${reasons.join(", ")}`, {
+          clientIp,
+          action,
+          score,
+          hostname,
+        });
+      }
 
       return result;
     }
 
+    // Mark token as used after a clean pass
     tokenCache.add(token);
 
-    console.info(`reCAPTCHA verification successful`, {
-      score,
-      action,
-      hostname,
-      clientIp,
-      timestamp: result.timestamp,
-    });
+    if (process.env.NODE_ENV !== "production") {
+      console.info(`[reCAPTCHA] verification successful`, {
+        score,
+        action,
+        hostname,
+      });
+    }
 
     return result;
   } catch (error: unknown) {
-    if (error instanceof RecaptchaError) {
-      throw error;
-    }
+    if (error instanceof RecaptchaError) throw error;
 
     if (error instanceof Error && error.name === "AbortError") {
       throw new RecaptchaError("Verification timeout", "TIMEOUT");

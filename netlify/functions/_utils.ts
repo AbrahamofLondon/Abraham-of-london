@@ -5,7 +5,7 @@ import type {
   HandlerEvent,
   HandlerContext,
 } from "@netlify/functions";
-import { isRecaptchaValid, verifyRecaptcha } from "../../lib/verifyRecaptcha";
+import { verifyRecaptcha } from "../../lib/verifyRecaptcha";
 
 /* ============================================================================
    SECURITY CONSTANTS & TYPES
@@ -58,7 +58,8 @@ export function getClientIp(event: {
 
   const forwardedFor = headers["x-forwarded-for"];
   if (Array.isArray(forwardedFor)) return forwardedFor[0];
-  if (typeof forwardedFor === "string") return forwardedFor.split(",")[0]?.trim();
+  if (typeof forwardedFor === "string")
+    return forwardedFor.split(",")[0]?.trim();
 
   const realIp = headers["x-real-ip"];
   if (typeof realIp === "string") return realIp;
@@ -67,7 +68,7 @@ export function getClientIp(event: {
 }
 
 /* ============================================================================
-   SECURITY: API GUARD WRAPPER - INTEGRATED WITH YOUR RECAPTCHA SYSTEM
+   SECURITY: API GUARD WRAPPER
    ============================================================================ */
 
 export function withSecurity(
@@ -89,24 +90,24 @@ export function withSecurity(
     const allowedOrigins = getAllowedOrigins();
 
     if (event.httpMethod === "OPTIONS") {
-      return {
-        statusCode: 204,
-        headers: corsHeaders(origin),
-        body: "",
-      };
-    }
-
-    if (origin && allowedOrigins[0] !== "*" && !allowedOrigins.includes(origin)) {
-      return json({ ok: false, message: "Forbidden" }, 403, "null");
+      return { statusCode: 204, headers: corsHeaders(origin), body: "" };
     }
 
     if (
+      origin &&
+      allowedOrigins[0] !== "*" &&
+      !allowedOrigins.includes(origin)
+    ) {
+      return json({ ok: false, message: "Forbidden" }, 403, "null");
+    }
+
+    // Honeypot (silent pass if bot filled it)
+    if (
       requireHoneypot &&
       event.body &&
-      (event.headers["content-type"] ||
-        event.headers["Content-Type"] ||
-        ""
-      ).toString().includes("application/json")
+      (event.headers["content-type"] || event.headers["Content-Type"] || "")
+        .toString()
+        .includes("application/json")
     ) {
       try {
         const body = JSON.parse(event.body) as Record<string, unknown>;
@@ -117,20 +118,23 @@ export function withSecurity(
           }
         }
       } catch {
-        // soft-fail on honeypot parsing
+        // soft-fail
       }
     }
 
+    // reCAPTCHA guard
     if (requireRecaptcha) {
       let token: string | undefined;
 
-      if (
-        event.body &&
-        (event.headers["content-type"] ||
-          event.headers["Content-Type"] ||
-          ""
-        ).toString().includes("application/json")
-      ) {
+      const ct = (
+        event.headers["content-type"] ||
+        event.headers["Content-Type"] ||
+        ""
+      )
+        .toString()
+        .toLowerCase();
+
+      if (event.body && ct.includes("application/json")) {
         try {
           const body = JSON.parse(event.body) as ApiRequestBody;
           token = body.recaptchaToken || body.token;
@@ -150,30 +154,33 @@ export function withSecurity(
       const clientIp = getClientIp(event);
 
       try {
-        const isValid = await isRecaptchaValid(token, expectedAction, clientIp);
+        // SINGLE verification call
+        const detailed = await verifyRecaptcha(token, expectedAction, clientIp);
 
-        if (!isValid) {
-          console.warn(
-            `reCAPTCHA validation failed for action: ${expectedAction}, IP: ${clientIp}`
-          );
+        if (!detailed.success) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("[reCAPTCHA] failed", {
+              expectedAction,
+              clientIp,
+              score: detailed.score,
+              action: detailed.action,
+              hostname: detailed.hostname,
+              reasons: detailed.reasons,
+              errorCodes: detailed.errorCodes,
+            });
+          }
           return bad("Security verification failed", 403, origin);
         }
 
         if (process.env.NODE_ENV === "production") {
-          const detailedResult = await verifyRecaptcha(
-            token,
-            expectedAction,
-            clientIp
-          );
-          console.info(`reCAPTCHA verification passed`, {
-            score: detailedResult.score,
-            action: detailedResult.action,
-            clientIp,
-            timestamp: new Date().toISOString(),
+          console.info("[reCAPTCHA] passed", {
+            score: detailed.score,
+            action: detailed.action,
+            hostname: detailed.hostname,
           });
         }
       } catch (error) {
-        console.error("reCAPTCHA verification error:", error);
+        console.error("[reCAPTCHA] verification error:", error);
         return bad("Security verification error", 500, origin);
       }
     }
@@ -263,13 +270,7 @@ export function methodNotAllowed(origin = "*"): HandlerResponse {
 }
 
 export function handleOptions(origin = "*"): HandlerResponse {
-  return {
-    statusCode: 204,
-    headers: {
-      ...corsHeaders(origin),
-    },
-    body: "",
-  };
+  return { statusCode: 204, headers: { ...corsHeaders(origin) }, body: "" };
 }
 
 /* ============================================================================
@@ -290,11 +291,8 @@ export async function readJson<T = Record<string, unknown>>(req: {
   const isJson = !!ct && /^application\/json/i.test(ct);
 
   let raw = "";
-  if (typeof req.body === "string") {
-    raw = req.body;
-  } else if (req.body) {
-    raw = String(req.body);
-  }
+  if (typeof req.body === "string") raw = req.body;
+  else if (req.body) raw = String(req.body);
 
   if (!raw || !isJson) return {} as T;
 
@@ -303,8 +301,7 @@ export async function readJson<T = Record<string, unknown>>(req: {
   }
 
   try {
-    const parsed = JSON.parse(raw);
-    return parsed as T;
+    return JSON.parse(raw) as T;
   } catch {
     throw new Error("Invalid JSON payload");
   }
@@ -347,8 +344,5 @@ export function validateRequiredFields(
   requiredFields: string[]
 ): { isValid: boolean; missing: string[] } {
   const missing = missingKeys(data, requiredFields);
-  return {
-    isValid: missing.length === 0,
-    missing,
-  };
+  return { isValid: missing.length === 0, missing };
 }
