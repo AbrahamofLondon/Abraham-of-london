@@ -110,7 +110,7 @@ export function detectXss(input: string): boolean {
 export function detectPathTraversal(input: string): boolean {
   const patterns = [
     /\.\.\//g,
-    /\.\.\\\/g,
+    /\.\.\\/g,
     /%2e%2e\//gi,
     /%252e%252e\//gi,
     /\.\.\%2f/gi,
