@@ -1,12 +1,11 @@
-// contentlayer.config.ts
 import path from "path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
-// -----------------------------------------------------------------------------
-// COMMON FIELDS (single source of truth)
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+ * COMMON FIELDS (single source of truth)
+ * -------------------------------------------------------------------------- */
 const commonFields = {
   title: { type: "string", required: true },
   date: { type: "date", required: true },
@@ -28,50 +27,117 @@ const commonFields = {
   lockMessage: { type: "string", required: false },
 } as const;
 
-// -----------------------------------------------------------------------------
-// URL HELPER (robust + consistent)
-// -----------------------------------------------------------------------------
-function normalizeSlugFromFlattenedPath(
-  flattenedPath: string,
-  basePath: string
-): string {
-  // flattenedPath examples:
-  // - "shorts/my-post"
-  // - "shorts/index" (we treat as "/shorts")
-  // - "blog/some-slug"
-  const withoutBase = flattenedPath.startsWith(`${basePath}/`)
-    ? flattenedPath.slice(basePath.length + 1)
-    : flattenedPath;
+/* -----------------------------------------------------------------------------
+ * SLUG + URL HELPERS (robust + consistent)
+ * -------------------------------------------------------------------------- */
 
-  // Remove trailing "/index"
-  return withoutBase.replace(/\/index$/, "");
+/**
+ * Canonical slug normaliser.
+ * Accepts:
+ *  - "my-post"
+ *  - "/blog/my-post"
+ *  - "blog/my-post/"
+ *  - "https://www.site.com/blog/my-post?x=y#z"
+ * Returns:
+ *  - "my-post"
+ */
+function toCanonicalSlug(input: unknown): string {
+  let s = String(input ?? "").trim();
+  if (!s) return "";
+
+  // strip query/hash
+  s = s.split("#")[0]?.split("?")[0] ?? s;
+
+  // strip protocol+domain if present
+  s = s.replace(/^https?:\/\/[^/]+/i, "");
+
+  // normalise slashes + casing
+  s = s.toLowerCase();
+  s = s.replace(/\/+$/, ""); // trailing
+  s = s.replace(/^\/+/, ""); // leading
+
+  if (!s) return "";
+
+  // take last segment if a path is provided
+  const parts = s.split("/").filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : s;
 }
 
+/**
+ * Derive a stable "relative slug" from flattenedPath for a given basePath.
+ * Examples:
+ *  - flattenedPath="blog/alpha" basePath="blog" -> "alpha"
+ *  - flattenedPath="blog/index" basePath="blog" -> ""  (means /blog)
+ *  - flattenedPath="canon/volume-i/index" basePath="canon" -> "volume-i"
+ */
+function deriveRelativeSlug(flattenedPath: string, basePath: string): string {
+  const fp = String(flattenedPath ?? "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
+  if (!fp) return "";
+
+  const base = String(basePath ?? "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
+  const withoutBase = fp.startsWith(`${base}/`) ? fp.slice(base.length + 1) : fp;
+
+  // remove trailing /index
+  const cleaned = withoutBase.replace(/\/index$/i, "");
+  return cleaned;
+}
+
+/**
+ * Ensures a string starts with exactly one leading slash.
+ */
+function ensureLeadingSlash(s: string): string {
+  return `/${String(s ?? "").replace(/^\/+/, "")}`;
+}
+
+/**
+ * Join basePath + relativeSlug safely:
+ *  - basePath="blog", rel="alpha" -> "/blog/alpha"
+ *  - basePath="blog", rel=""      -> "/blog"
+ */
+function joinBase(basePath: string, rel: string): string {
+  const base = `/${String(basePath).replace(/^\/+|\/+$/g, "")}`;
+  const r = String(rel ?? "").replace(/^\/+|\/+$/g, "");
+  return r ? `${base}/${r}` : base;
+}
+
+/**
+ * Robust + consistent URL generator.
+ * Priority:
+ *  1) doc.href (hard override)
+ *  2) doc.slug (canonicalised, last segment)
+ *  3) derived from _raw.flattenedPath (relative to basePath)
+ */
 function getDocUrl(doc: any, basePath: string): string {
-  // hard override
-  if (doc.href && typeof doc.href === "string" && doc.href.trim()) {
-    const href = doc.href.trim();
-    // Remove trailing slash for consistency
-    const cleanHref = href.replace(/\/$/, "");
-    return cleanHref.startsWith("/") ? cleanHref : `/${cleanHref}`;
+  // 1) hard override href
+  if (doc?.href && typeof doc.href === "string" && doc.href.trim()) {
+    const raw = doc.href.trim();
+    // remove trailing slash for consistency
+    const noTrail = raw.replace(/\/+$/, "");
+    return ensureLeadingSlash(noTrail);
   }
 
-  // slug override
-  if (doc.slug && typeof doc.slug === "string" && doc.slug.trim()) {
-    const s = doc.slug.trim().replace(/^\/+/, "").replace(/\/$/, "");
-    // If user provides "shorts/foo" we don't double-prefix
-    const url = s.startsWith(`${basePath}/`) ? `/${s}` : `/${basePath}/${s}`;
-    return url;
+  // 2) slug override
+  if (doc?.slug && typeof doc.slug === "string" && doc.slug.trim()) {
+    const canonical = toCanonicalSlug(doc.slug);
+    // slug can be empty if someone set "/blog/" by mistake
+    return joinBase(basePath, canonical);
   }
 
-  // fallback: derive from file path
-  const derived = normalizeSlugFromFlattenedPath(doc._raw.flattenedPath, basePath);
-  return derived ? `/${basePath}/${derived}` : `/${basePath}`;
+  // 3) fallback: derive from file path
+  const rel = deriveRelativeSlug(doc?._raw?.flattenedPath, basePath);
+
+  // If rel points to nested folders ("volume-i/intro"), we take last segment for URL
+  // but preserve index behaviour by allowing rel="".
+  if (!rel) return joinBase(basePath, "");
+
+  const last = toCanonicalSlug(rel); // last segment, lowercased
+  return joinBase(basePath, last);
 }
 
-// -----------------------------------------------------------------------------
-// DOCUMENT TYPES
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+ * DOCUMENT TYPES
+ * -------------------------------------------------------------------------- */
+
 export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
@@ -237,16 +303,58 @@ export const Short = defineDocumentType(() => ({
     published: { type: "boolean", required: false, default: true },
   },
   computedFields: {
-    url: {
-      type: "string",
-      resolve: (doc) => getDocUrl(doc, "shorts"),
-    },
+    url: { type: "string", resolve: (doc) => getDocUrl(doc, "shorts") },
   },
 }));
 
-// -----------------------------------------------------------------------------
-// MAKESOURCE CONFIGURATION
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+ * FRONTMATTER SAFETY GUARD
+ * - only modifies real YAML frontmatter blocks
+ * - removes duplicated slug/date keys inside the block
+ * -------------------------------------------------------------------------- */
+
+function fixDuplicateKeysInFrontmatter(raw: string): string {
+  // Only act if the file starts with a frontmatter fence.
+  if (!raw.startsWith("---")) return raw;
+
+  const end = raw.indexOf("\n---", 3);
+  if (end === -1) return raw;
+
+  const fm = raw.slice(0, end + 4); // include closing --- line
+  const body = raw.slice(end + 4);
+
+  // Remove duplicate slug/date lines (keep the first occurrence only)
+  const lines = fm.split(/\r?\n/);
+  const seen = new Set<string>();
+  const out: string[] = [];
+
+  for (const line of lines) {
+    const keyMatch = line.match(/^([a-zA-Z0-9_]+):\s*/);
+    if (!keyMatch) {
+      out.push(line);
+      continue;
+    }
+
+    const key = keyMatch[1];
+    if ((key === "slug" || key === "date") && seen.has(key)) {
+      // drop duplicates
+      continue;
+    }
+
+    if (key === "slug" || key === "date") {
+      seen.add(key);
+    }
+
+    out.push(line);
+  }
+
+  return out.join("\n") + body;
+}
+
+/* -----------------------------------------------------------------------------
+ * MAKE SOURCE
+ * -------------------------------------------------------------------------- */
+
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
   documentTypes: [
@@ -264,17 +372,7 @@ export default makeSource({
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
   },
-
-  // Fix duplicate YAML keys if they exist (safe + minimal)
-  onContent: (content) => {
-    // Only remove immediate duplicate key lines (slug/date) inside frontmatter-like structures
-    // This prevents "YAMLException: duplicated mapping key" without touching normal body content.
-    const fixed = content
-      .replace(/(^|\n)(slug:\s*.+)\r?\nslug:\s*.+(\r?\n)/g, "$1$2$3")
-      .replace(/(^|\n)(date:\s*.+)\r?\ndate:\s*.+(\r?\n)/g, "$1$2$3");
-    return fixed;
-  },
-
+  onContent: (content) => fixDuplicateKeysInFrontmatter(content),
   onUnknownDocuments: "skip",
   disableImportAliasWarning: true,
 });

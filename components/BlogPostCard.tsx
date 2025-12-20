@@ -170,7 +170,7 @@ function BlogPostCard({
   const [authorImageError, setAuthorImageError] = useState(false);
 
   const slug = useMemo(() => normalizePostSlug(post.slug), [post.slug]);
-  const href = useMemo(() => `/${slug}`, [slug]);
+  const href = useMemo(() => `/blog/${slug}`, [slug]);
   const fallbackConfig = useMemo(() => getPostFallbackConfig(post), [post]);
 
   // Create fallback sequence

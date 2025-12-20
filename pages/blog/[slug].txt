@@ -6,12 +6,17 @@ import Link from "next/link";
 import { serialize } from "next-mdx-remote/serialize";
 import { MDXRemote } from "next-mdx-remote";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
-import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import { getPublishedPosts, getPostBySlug, normalizeSlug } from "@/lib/contentlayer-helper";
+
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import {
+  getPublishedPosts,
+  getPostBySlug,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
 
 type Props = {
   post: {
@@ -27,14 +32,39 @@ type Props = {
 
 const SITE = "https://www.abrahamoflondon.org";
 
+/**
+ * Canonicalise any incoming slug-like value into the "last path segment" format
+ * your Contentlayer helper expects (and that your content uses).
+ */
+function toCanonicalSlug(input: unknown): string {
+  let s = String(input ?? "").trim();
+  if (!s) return "";
+
+  // Strip query/hash
+  s = s.split("#")[0]?.split("?")[0] ?? s;
+
+  // Strip protocol+domain
+  s = s.replace(/^https?:\/\/[^/]+/i, "");
+
+  // Normalise casing and slashes
+  s = s.toLowerCase();
+  s = s.replace(/\/+$/, "");
+  s = s.replace(/^\/+/, "");
+  if (!s) return "";
+
+  // Use last segment if it's a path
+  const parts = s.split("/").filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : s;
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getPublishedPosts();
-  
+
   const paths = posts
     .map((post: any) => {
-      const slug = normalizeSlug(post);
+      const slug = toCanonicalSlug(normalizeSlug(post));
       if (!slug) {
-        console.warn(`⚠️ Post missing slug:`, post.title);
+        console.warn(`⚠️ Post missing slug:`, post?.title);
         return null;
       }
       return { params: { slug } };
@@ -46,33 +76,34 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\/$/, "");
-  
-  if (!slug) {
+  const requested = toCanonicalSlug(params?.slug);
+
+  if (!requested) {
     console.warn(`⚠️ Blog page called with empty slug`);
     return { notFound: true };
   }
 
-  const rawDoc = getPostBySlug(slug);
+  // IMPORTANT:
+  // getPostBySlug in your helper matches against normalizeSlug(doc) which is
+  // canonical last-segment. So we must pass canonical last-segment too.
+  const rawDoc = getPostBySlug(requested);
 
   if (!rawDoc) {
-    console.warn(`⚠️ Post not found for slug: ${slug}`);
+    console.warn(`⚠️ Post not found for slug: ${requested}`);
     return { notFound: true };
   }
 
-  console.log(`✅ Found post: ${rawDoc.title} (slug: ${slug})`);
+  const canonicalSlug = toCanonicalSlug(normalizeSlug(rawDoc)) || requested;
 
-  // Create serializable props
+  console.log(`✅ Found post: ${rawDoc.title} (slug: ${canonicalSlug})`);
+
   const post = {
     title: rawDoc.title || "Insight",
     excerpt: rawDoc.excerpt || null,
     author: rawDoc.author || null,
     coverImage: rawDoc.coverImage || null,
     date: rawDoc.date ? new Date(rawDoc.date).toISOString() : null,
-    slug: slug,
+    slug: canonicalSlug,
   };
 
   const raw = String(rawDoc?.body?.raw ?? "");
@@ -94,10 +125,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
   return {
-    props: {
-      post,
-      source,
-    },
+    props: { post, source },
     revalidate: 3600,
   };
 };
@@ -106,8 +134,8 @@ const PostPage: NextPage<Props> = ({ post, source }) => {
   const canonicalUrl = `${SITE}/blog/${post.slug}`;
 
   return (
-    <Layout 
-      title={post.title} 
+    <Layout
+      title={post.title}
       description={post.excerpt || undefined}
       ogImage={post.coverImage || undefined}
       ogType="article"
@@ -116,33 +144,39 @@ const PostPage: NextPage<Props> = ({ post, source }) => {
       <Head>
         <link rel="canonical" href={canonicalUrl} />
       </Head>
+
       <main className="mx-auto max-w-3xl px-6 py-12 lg:py-24">
         <Link href="/blog" className="text-sm text-gold hover:underline">
           ← Back to Essays
         </Link>
+
         <header className="mt-6 mb-10 border-b border-gold/10 pb-10">
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
             Insight & Reflection
           </p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-5xl mt-4">
+
+          <h1 className="mt-4 font-serif text-3xl font-semibold text-cream sm:text-5xl">
             {post.title}
           </h1>
+
           {post.excerpt ? (
             <p className="mt-4 text-gray-300">{post.excerpt}</p>
           ) : null}
+
           <div className="mt-4 flex gap-4 text-sm text-gray-400">
-            {post.author && <span>{post.author}</span>}
-            {post.date && (
+            {post.author ? <span>{post.author}</span> : null}
+            {post.date ? (
               <span>
-                {new Date(post.date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                {new Date(post.date).toLocaleDateString("en-GB", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </span>
-            )}
+            ) : null}
           </div>
         </header>
+
         <article className="prose prose-invert prose-gold max-w-none">
           <MDXRemote {...source} components={mdxComponents} />
         </article>

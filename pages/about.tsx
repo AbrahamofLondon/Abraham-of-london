@@ -1,4 +1,4 @@
-// pages/about.tsx - FIXED IMPORTS
+// pages/about.tsx — ADULT / EXECUTIVE ABOUT (FOCUSED ON WORKSTREAMS)
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -14,7 +14,9 @@ import {
   BookOpen,
   ArrowRight,
   Star,
-  Award,
+  Briefcase,
+  Landmark,
+  ScrollText,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -29,76 +31,106 @@ const containerVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut",
-      when: "beforeChildren",
-      staggerChildren: 0.15,
-    },
+    transition: { duration: 0.6, ease: "easeOut", when: "beforeChildren", staggerChildren: 0.12 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
-  },
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
 };
 
 // ---------------------------------------------------------------------------
-// Types & data
+// Workstreams (adult framing, not “downloads”)
 // ---------------------------------------------------------------------------
 
-interface Achievement {
+type Workstream = {
   title: string;
   description: string;
-  year: number;
+  outcomes: string[];
   href: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-}
+  tag: string;
+};
 
-const achievements: Achievement[] = [
+const workstreams: Workstream[] = [
   {
-    title: "Founded Fathering Without Fear Movement",
+    title: "Canon — the philosophical spine",
     description:
-      "Launched a global initiative helping men embrace intentional fatherhood and legacy building.",
-    year: 2023,
+      "Long-form doctrine, strategy, and civilisation analysis designed to outlive platform cycles. Not vibes. Architecture.",
+    outcomes: [
+      "Clear worldview + operating philosophy",
+      "Decision frameworks for leadership under pressure",
+      "Language for conviction in hostile cultural climates",
+    ],
+    href: "/canon",
+    icon: ScrollText,
+    tag: "Ideas → Institutions",
+  },
+  {
+    title: "Fatherhood & household architecture",
+    description:
+      "Tools and standards for men building homes that don’t outsource authority to trends. Practical fathering under modern pressure.",
+    outcomes: [
+      "Household rhythms, roles, and boundaries",
+      "Father-led legacy planning (values + systems)",
+      "Mentorship-grade discipline and formation",
+    ],
     href: "/brands/fathering-without-fear",
     icon: Users,
+    tag: "Men → Families",
   },
   {
-    title: "Published Entrepreneur Operating System",
+    title: "Strategy rooms for founders & boards",
     description:
-      "Developed strategic operating frameworks used by founders and business leaders.",
-    year: 2023,
-    href: "/downloads/entrepreneur-operating-pack",
-    icon: Target,
+      "Market positioning, narrative, operating cadence, and execution design. Built for builders, not spectators.",
+    outcomes: [
+      "Sharper mandate + market focus",
+      "Governance and operating rhythm",
+      "Execution strategy that survives reality",
+    ],
+    href: "/consulting",
+    icon: Briefcase,
+    tag: "Vision → Execution",
   },
   {
-    title: "Established Brotherhood Covenant Network",
+    title: "Resources — templates, playbooks, toolkits",
     description:
-      "Built accountability structures that foster authentic brotherhood among Christian men.",
-    year: 2022,
-    href: "/downloads/brotherhood-covenant",
-    icon: Shield,
-  },
-  {
-    title: "Created Family Altar Liturgy",
-    description:
-      "Designed practical tools for integrating faith into daily family rhythms.",
-    year: 2022,
-    href: "/downloads/family-altar-liturgy",
+      "Practical assets you can deploy immediately: diagnostics, operating packs, and field-ready frameworks.",
+    outcomes: [
+      "Faster implementation cycles",
+      "Reusable frameworks for teams and households",
+      "Consistency without bureaucracy",
+    ],
+    href: "/downloads",
     icon: BookOpen,
+    tag: "Tools → Deployment",
   },
   {
-    title: "Launched Strategic Leadership Playbook",
+    title: "Inner Circle — closed rooms & applied work",
     description:
-      "Authored leadership frameworks for executives and organisational leaders.",
-    year: 2021,
-    href: "/downloads/leadership-playbook",
-    icon: Award,
+      "Small rooms, higher signal. A tighter layer for serious builders who want accountability, not applause.",
+    outcomes: [
+      "Direct access to selective work and releases",
+      "Closed-room discussions and working sessions",
+      "Applied thinking with feedback loops",
+    ],
+    href: "/inner-circle",
+    icon: Shield,
+    tag: "Access → Accountability",
+  },
+  {
+    title: "Civic & institutional thinking",
+    description:
+      "Governance, nation-building, and institutional design — the upstream work behind downstream outcomes.",
+    outcomes: [
+      "Institutional patterns and reform logic",
+      "Cultural analysis with strategic implications",
+      "Economic and governance frameworks (macro lens)",
+    ],
+    href: "/strategy",
+    icon: Landmark,
+    tag: "Principles → Policy",
   },
 ];
 
@@ -110,7 +142,6 @@ const AboutPage: NextPage = () => {
   const [isDark, setIsDark] = React.useState(true);
   const [mounted, setMounted] = React.useState(false);
 
-  // Theme management
   React.useEffect(() => {
     setMounted(true);
     try {
@@ -119,12 +150,10 @@ const AboutPage: NextPage = () => {
         setIsDark(stored === "dark");
         return;
       }
-      const prefersDark = window.matchMedia?.(
-        "(prefers-color-scheme: dark)"
-      ).matches;
+      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
       setIsDark(prefersDark);
     } catch {
-      // ignore localStorage errors
+      // ignore
     }
   }, []);
 
@@ -134,13 +163,12 @@ const AboutPage: NextPage = () => {
       try {
         localStorage.setItem("aof-theme", next ? "dark" : "light");
       } catch {
-        // ignore localStorage errors
+        // ignore
       }
       return next;
     });
   };
 
-  // Avoid hydration mismatch
   if (!mounted) {
     return (
       <Layout title="About">
@@ -149,7 +177,6 @@ const AboutPage: NextPage = () => {
     );
   }
 
-  // Theme classes
   const shellClass = isDark
     ? "min-h-screen bg-gradient-to-br from-deepCharcoal via-gray-900 to-black text-cream"
     : "min-h-screen bg-gradient-to-br from-warmWhite via-cream to-white text-ink";
@@ -170,7 +197,6 @@ const AboutPage: NextPage = () => {
     ? "border-white/20 bg-transparent text-cream hover:bg-white/10"
     : "border-lightGrey bg-white text-ink hover:bg-warmWhite";
 
-    // Brand values from siteConfig (tolerant of older SiteConfig typings)
   const brandCfg = (siteConfig as unknown as { brand?: { values?: string[] } }).brand;
   const brandValues = brandCfg?.values ?? [];
   const leftValues = brandValues.slice(0, Math.ceil(brandValues.length / 2));
@@ -179,39 +205,29 @@ const AboutPage: NextPage = () => {
   return (
     <Layout title="About">
       <Head>
-        <title>
-          About | Abraham of London — Strategic Stewardship & Legacy Building
-        </title>
+        <title>About | Abraham of London — Strategy, Fatherhood, Legacy</title>
         <meta
           name="description"
-          content="Learn about Abraham of London's mission to equip men with faith-rooted strategy, fatherhood tools, and legacy-building frameworks."
+          content="Abraham of London builds faith-rooted strategy, fatherhood tools, and legacy frameworks for serious men, founders, and leaders."
         />
-        <meta
-          property="og:title"
-          content="About Abraham of London — Strategic Stewardship & Legacy Building"
-        />
+        <meta property="og:title" content="About Abraham of London — Strategy, Fatherhood, Legacy" />
         <meta
           property="og:description"
-          content="Equipping serious men and builders with faith-rooted strategy, fatherhood tools, and legacy frameworks for generational impact."
+          content="High-signal workstreams: Canon, strategy rooms, household architecture, tools, and Inner Circle accountability."
         />
-        <meta
-          property="og:url"
-          content="https://www.abrahamoflondon.org/about"
-        />
+        <meta property="og:url" content="https://www.abrahamoflondon.org/about" />
         <meta property="og:type" content="website" />
         <meta name="theme-color" content={isDark ? "#0f172a" : "#f7f5ee"} />
         <link rel="canonical" href="https://www.abrahamoflondon.org/about" />
       </Head>
 
       <div className={shellClass}>
-        {/* Header with theme toggle */}
+        {/* Top bar */}
         <div className="mx-auto max-w-6xl px-4 pt-12">
-          <div className="mb-12 flex items-start justify-between gap-4">
+          <div className="mb-10 flex items-start justify-between gap-4">
             <div>
-              <p
-                className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentTextClass}`}
-              >
-                Strategic Stewardship
+              <p className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentTextClass}`}>
+                Strategic stewardship — adult work, durable outcomes
               </p>
             </div>
 
@@ -228,221 +244,163 @@ const AboutPage: NextPage = () => {
               {isDark ? (
                 <>
                   <SunMedium className="h-4 w-4" />
-                  <span>Light Mode</span>
+                  <span>Light</span>
                 </>
               ) : (
                 <>
                   <Moon className="h-4 w-4" />
-                  <span>Dark Mode</span>
+                  <span>Dark</span>
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* Hero Section */}
+        {/* Hero */}
         <section
-          className={`py-20 ${
-            isDark
-              ? "bg-gradient-to-b from-black to-deepCharcoal"
-              : "bg-gradient-to-b from-warmWhite to-cream"
+          className={`py-18 sm:py-20 ${
+            isDark ? "bg-gradient-to-b from-black to-deepCharcoal" : "bg-gradient-to-b from-warmWhite to-cream"
           }`}
         >
           <div className="mx-auto max-w-6xl px-4">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="text-center"
-            >
+            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="text-center">
               <motion.h1
                 variants={itemVariants}
                 className={`mb-6 font-serif text-4xl font-semibold md:text-5xl lg:text-6xl ${primaryTextClass}`}
               >
-                Building Fathers,
-                <span className={`mt-4 block ${accentTextClass}`}>
-                  Founders &amp; Faithful Leaders
-                </span>
+                Strategy for men who actually carry responsibility.
+                <span className={`mt-4 block ${accentTextClass}`}>Faith-rooted. Field-tested. Built to last.</span>
               </motion.h1>
-              <motion.p
-                variants={itemVariants}
-                className={`mx-auto max-w-3xl text-xl leading-relaxed ${secondaryTextClass}`}
-              >
-                Equipping serious men with faith-rooted strategy, tools, and
-                frameworks for intentional fatherhood, disciplined leadership,
-                and lasting legacy.
+
+              <motion.p variants={itemVariants} className={`mx-auto max-w-3xl text-xl leading-relaxed ${secondaryTextClass}`}>
+                Abraham of London exists to turn conviction into operating systems — for households, ventures, and institutions.
+                If you’re looking for motivational content, wrong building.
               </motion.p>
+
+              <motion.div variants={itemVariants} className="mt-10 flex flex-wrap justify-center gap-4">
+                <Link href="/canon" className={`rounded-full px-6 py-3 font-semibold transition-all ${buttonClass}`}>
+                  Enter the Canon
+                </Link>
+                <Link
+                  href="/consulting"
+                  className={`rounded-full border px-6 py-3 font-semibold transition-all ${secondaryButtonClass}`}
+                >
+                  Work with Abraham
+                </Link>
+              </motion.div>
             </motion.div>
           </div>
         </section>
 
-        {/* Bio & Portrait Section */}
-        <section
-          className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}
-        >
+        {/* Portrait + positioning */}
+        <section className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}>
           <div className="mx-auto max-w-6xl px-4">
             <div className="grid items-center gap-12 md:grid-cols-2">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7 }}
-              >
-                <h2
-                  className={`mb-6 font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}
-                >
-                  Our Purpose
-                </h2>
-                <div
-                  className={`space-y-4 text-lg leading-relaxed ${secondaryTextClass}`}
-                >
+              <motion.div initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+                <h2 className={`mb-6 font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}>What this is</h2>
+
+                <div className={`space-y-4 text-lg leading-relaxed ${secondaryTextClass}`}>
                   <p>
-                    Abraham of London exists to equip serious men and builders
-                    with faith-rooted strategy, tools, and frameworks for
-                    intentional fatherhood, disciplined leadership, and
-                    generational legacy.
+                    This platform is a strategic workshop — not a content feed. It exists to help serious men build: a
+                    household, a venture, and an internal governance structure that does not collapse under pressure.
                   </p>
                   <p>
-                    In a culture that celebrates drift and distraction, we
-                    provide language, structure, and practical resources so you
-                    can build with clarity, courage, and conviction.
+                    The operating assumption is simple: <strong>truth exists</strong>, conviction matters, and leadership
+                    without moral architecture becomes manipulation.
                   </p>
                   <p>
-                    Every strategy, tool, and framework is built on conservative
-                    Christian conviction. True leadership starts with
-                    submission to divine wisdom.
+                    Everything here is built on conservative Christian conviction. Not as decoration — as the foundation.
                   </p>
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-4">
-                  <Link
-                    href="/ventures"
-                    className={`rounded-full px-6 py-3 font-semibold transition-all ${buttonClass}`}
-                  >
-                    Explore Ventures
+                  <Link href="/downloads" className={`rounded-full px-6 py-3 font-semibold transition-all ${buttonClass}`}>
+                    Deploy the tools
                   </Link>
                   <Link
-                    href="/contact"
+                    href="/inner-circle"
                     className={`rounded-full border px-6 py-3 font-semibold transition-all ${secondaryButtonClass}`}
                   >
-                    Start Conversation
+                    Inner Circle access
                   </Link>
                 </div>
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 18 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
                 className="relative"
               >
-                <div
-                  className={`relative overflow-hidden rounded-2xl shadow-2xl ${
-                    isDark
-                      ? "ring-1 ring-white/10"
-                      : "ring-1 ring-lightGrey"
-                  }`}
-                >
+                <div className={`relative overflow-hidden rounded-2xl shadow-2xl ${isDark ? "ring-1 ring-white/10" : "ring-1 ring-lightGrey"}`}>
                   <Image
                     src="/assets/images/profile-portrait.webp"
-                    alt="Abraham of London - Founder and Strategic Leader"
+                    alt="Abraham of London — founder and strategic leader"
                     width={600}
                     height={800}
                     className="h-auto w-full"
                     priority
                   />
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-t ${
-                      isDark
-                        ? "from-black/40 to-transparent"
-                        : "from-white/20 to-transparent"
-                    }`}
-                  />
+                  <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? "from-black/45 to-transparent" : "from-white/25 to-transparent"}`} />
                 </div>
-                <div
-                  className={`absolute -bottom-6 -left-6 rounded-lg px-6 py-3 shadow-lg ${
-                    isDark ? "bg-softGold text-deepCharcoal" : "bg-forest text-cream"
-                  }`}
-                >
+
+                <div className={`absolute -bottom-6 -left-6 rounded-lg px-6 py-3 shadow-lg ${isDark ? "bg-softGold text-deepCharcoal" : "bg-forest text-cream"}`}>
                   <p className="font-semibold">Abraham of London</p>
-                  <p className="text-sm opacity-90">
-                    Founder &amp; Strategic Leader
-                  </p>
+                  <p className="text-sm opacity-90">Strategy · Fatherhood · Legacy</p>
                 </div>
               </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Key Achievements */}
-        <section
-          className={`py-16 ${
-            isDark ? "bg-slate-900" : "bg-slate-50"
-          }`}
-        >
+        {/* Workstreams */}
+        <section className={`py-16 ${isDark ? "bg-slate-900" : "bg-slate-50"}`}>
           <div className="mx-auto max-w-6xl px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-12 text-center"
-            >
-              <h2
-                className={`mb-4 font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}
-              >
-                Strategic Milestones
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-12 text-center">
+              <h2 className={`mb-4 font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}>
+                What we build (workstreams)
               </h2>
-              <p
-                className={`mx-auto max-w-2xl text-xl ${secondaryTextClass}`}
-              >
-                Building tools and communities that help men lead with
-                conviction and build lasting legacy.
+              <p className={`mx-auto max-w-3xl text-xl ${secondaryTextClass}`}>
+                Not “content.” Deliverables. Systems. Frameworks. Rooms where real decisions get made.
               </p>
             </motion.div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {achievements.map((achievement, index) => {
-                const IconComponent = achievement.icon;
+            <div className="grid gap-6 md:grid-cols-2">
+              {workstreams.map((ws, idx) => {
+                const Icon = ws.icon;
                 return (
                   <motion.div
-                    key={achievement.title}
-                    initial={{ opacity: 0, y: 20 }}
+                    key={ws.title}
+                    initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className={`rounded-2xl p-6 ${cardClass}`}
+                    transition={{ duration: 0.55, delay: idx * 0.06 }}
+                    className={`rounded-2xl border p-6 ${cardClass}`}
                   >
-                    <div
-                      className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl ${
-                        isDark ? "bg-softGold/10" : "bg-forest/10"
-                      }`}
-                    >
-                      <IconComponent
-                        className={
-                          isDark
-                            ? "h-6 w-6 text-softGold"
-                            : "h-6 w-6 text-forest"
-                        }
-                      />
+                    <div className="mb-4 flex items-start justify-between gap-4">
+                      <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
+                        <Icon className={isDark ? "h-6 w-6 text-softGold" : "h-6 w-6 text-forest"} />
+                      </div>
+                      <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+                        isDark ? "border-white/15 text-gray-300" : "border-lightGrey text-slate-700"
+                      }`}>
+                        {ws.tag}
+                      </span>
                     </div>
-                    <div
-                      className={`mb-2 text-sm font-semibold ${accentTextClass}`}
-                    >
-                      {achievement.year}
-                    </div>
-                    <h3
-                      className={`mb-3 font-serif text-xl font-semibold ${primaryTextClass}`}
-                    >
-                      {achievement.title}
-                    </h3>
-                    <p
-                      className={`mb-4 text-sm leading-relaxed ${secondaryTextClass}`}
-                    >
-                      {achievement.description}
-                    </p>
-                    <Link
-                      href={achievement.href}
-                      className={`inline-flex items-center text-sm font-semibold hover:underline ${accentTextClass}`}
-                    >
-                      Learn more <ArrowRight className="ml-1 h-3 w-3" />
+
+                    <h3 className={`mb-3 font-serif text-xl font-semibold ${primaryTextClass}`}>{ws.title}</h3>
+                    <p className={`mb-5 text-sm leading-relaxed ${secondaryTextClass}`}>{ws.description}</p>
+
+                    <ul className={`mb-6 space-y-2 text-sm ${secondaryTextClass}`}>
+                      {ws.outcomes.map((o) => (
+                        <li key={o} className="flex gap-2">
+                          <span className={accentTextClass}>•</span>
+                          <span>{o}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link href={ws.href} className={`inline-flex items-center text-sm font-semibold hover:underline ${accentTextClass}`}>
+                      Explore <ArrowRight className="ml-1 h-3 w-3" />
                     </Link>
                   </motion.div>
                 );
@@ -451,159 +409,67 @@ const AboutPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Mission & Values */}
-        <section
-          className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}
-        >
+        {/* Values */}
+        <section className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}>
           <div className="mx-auto max-w-4xl px-4">
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               className={`mb-12 text-center font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}
             >
-              Our Guiding Principles
+              Non-negotiables
             </motion.h2>
 
             <div className="grid gap-8 md:grid-cols-2">
-              <div className="space-y-6">
-                {leftValues.map((value, index) => (
-                  <motion.div
-                    key={value}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`rounded-2xl p-6 ${cardClass}`}
-                  >
-                    <div className="mb-3 flex items-center gap-3">
-                      <div
-                        className={`rounded-lg p-2 ${
-                          isDark ? "bg-softGold/10" : "bg-forest/10"
-                        }`}
-                      >
-                        <Star
-                          className={
-                            isDark
-                              ? "h-4 w-4 text-softGold"
-                              : "h-4 w-4 text-forest"
-                          }
-                        />
+              {[leftValues, rightValues].map((chunk, colIdx) => (
+                <div key={colIdx} className="space-y-6">
+                  {chunk.map((value, idx) => (
+                    <motion.div
+                      key={value}
+                      initial={{ opacity: 0, x: colIdx === 0 ? -16 : 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.07 }}
+                      className={`rounded-2xl border p-6 ${cardClass}`}
+                    >
+                      <div className="mb-3 flex items-center gap-3">
+                        <div className={`rounded-lg p-2 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
+                          <Star className={isDark ? "h-4 w-4 text-softGold" : "h-4 w-4 text-forest"} />
+                        </div>
+                        <h3 className={`text-xl font-semibold ${primaryTextClass}`}>{value}</h3>
                       </div>
-                      <h3
-                        className={`text-xl font-semibold ${primaryTextClass}`}
-                      >
-                        {value}
-                      </h3>
-                    </div>
-                    <p className={secondaryTextClass}>
-                      {value === "Faith-rooted leadership" &&
-                        "Every strategic decision and framework is anchored in Scripture and conservative Christian conviction."}
-                      {value === "Strategic discipline" &&
-                        "We prioritise focused execution over noise, distraction, and vanity metrics."}
-                      {value === "Generational thinking" &&
-                        "We build with heirs in mind, not headlines—legacy over trend cycles."}
-                      {![
-                        "Faith-rooted leadership",
-                        "Strategic discipline",
-                        "Generational thinking",
-                      ].includes(value) &&
-                        "This value shapes how we build systems, relationships, and long-term impact."}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div className="space-y-6">
-                {rightValues.map((value, index) => (
-                  <motion.div
-                    key={value}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`rounded-2xl p-6 ${cardClass}`}
-                  >
-                    <div className="mb-3 flex items-center gap-3">
-                      <div
-                        className={`rounded-lg p-2 ${
-                          isDark ? "bg-softGold/10" : "bg-forest/10"
-                        }`}
-                      >
-                        <Star
-                          className={
-                            isDark
-                              ? "h-4 w-4 text-softGold"
-                              : "h-4 w-4 text-forest"
-                          }
-                        />
-                      </div>
-                      <h3
-                        className={`text-xl font-semibold ${primaryTextClass}`}
-                      >
-                        {value}
-                      </h3>
-                    </div>
-                    <p className={secondaryTextClass}>
-                      {value === "Community focus" &&
-                        "We build brotherhoods and ecosystems that protect, sharpen, and strengthen men on the journey."}
-                      {value === "Excellence in execution" &&
-                        "Every resource is built to be battle-tested, not performative—fit for real pressure and real responsibility."}
-                      {value === "Sustainable impact" &&
-                        "We design for durability: spiritually, economically, and relationally, not quick wins."}
-                      {![
-                        "Community focus",
-                        "Excellence in execution",
-                        "Sustainable impact",
-                      ].includes(value) &&
-                        "This value informs how we show up, serve, and steward influence over time."}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
+                      <p className={secondaryTextClass}>
+                        This value governs how we design strategy, build households, and steward influence over time.
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section
-          className={`py-16 text-center ${
-            isDark
-              ? "bg-gradient-to-r from-forest to-softGold"
-              : "bg-gradient-to-r from-forest to-forest/90"
-          }`}
-        >
+        {/* CTA */}
+        <section className={`py-16 text-center ${isDark ? "bg-gradient-to-r from-forest to-softGold" : "bg-gradient-to-r from-forest to-forest/90"}`}>
           <div className="mx-auto max-w-2xl px-4">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 font-serif text-3xl font-semibold text-white md:text-4xl"
-            >
-              Ready to Build With Purpose?
+            <motion.h2 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-6 font-serif text-3xl font-semibold text-white md:text-4xl">
+              Build, don’t drift.
             </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mb-8 text-xl text-white/90"
-            >
-              Join men who are choosing conviction over convenience and
-              building families, ventures, and legacies that last.
+            <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="mb-8 text-xl text-white/90">
+              If you’re serious: start with the Canon, deploy a tool, or book a strategy conversation.
             </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-wrap justify-center gap-4"
-            >
+
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="flex flex-wrap justify-center gap-4">
               <Link
-                href="/downloads"
+                href="/canon"
                 className="inline-flex items-center rounded-lg bg-white px-8 py-4 font-semibold text-deepCharcoal shadow-lg transition-colors hover:-translate-y-0.5 hover:bg-slate-100"
               >
-                Explore Resources
+                Enter the Canon
               </Link>
               <Link
-                href="/contact"
+                href="/consulting"
                 className="inline-flex items-center rounded-lg border-2 border-white px-8 py-4 font-semibold text-white transition-colors hover:-translate-y-0.5 hover:bg-white hover:text-deepCharcoal"
               >
-                Start a Conversation
+                Strategy room
               </Link>
             </motion.div>
           </div>
@@ -614,4 +480,3 @@ const AboutPage: NextPage = () => {
 };
 
 export default AboutPage;
-

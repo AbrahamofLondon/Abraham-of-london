@@ -51,7 +51,41 @@ function pickArray(name: string): ContentDoc[] {
 const cleanStr = (v: unknown) => String(v ?? "").trim();
 const cleanLower = (v: unknown) => cleanStr(v).toLowerCase();
 const trimTrailingSlashes = (s: string) => s.replace(/\/+$/, "");
+const trimLeadingSlashes = (s: string) => s.replace(/^\/+/, "");
 const ensureLeadingSlash = (s: string) => (s.startsWith("/") ? s : `/${s}`);
+
+/**
+ * Canonical slug normalizer.
+ * Accepts:
+ *  - "my-post"
+ *  - "/blog/my-post"
+ *  - "blog/my-post/"
+ *  - "https://www.site.com/blog/my-post"
+ *  - "/my-post"
+ * Returns:
+ *  - "my-post"
+ */
+function toCanonicalSlug(input: unknown): string {
+  let s = cleanStr(input);
+  if (!s) return "";
+
+  // Strip query/hash
+  s = s.split("#")[0]?.split("?")[0] ?? s;
+
+  // Strip protocol + domain if present
+  // e.g. https://www.abrahamoflondon.org/blog/my-post -> /blog/my-post
+  s = s.replace(/^https?:\/\/[^/]+/i, "");
+
+  // Normalise slashes + casing
+  s = trimTrailingSlashes(cleanLower(s));
+  s = trimLeadingSlashes(s);
+
+  if (!s) return "";
+
+  // If slug contains folders (blog/xxx), take last segment
+  const parts = s.split("/").filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : s;
+}
 
 /* -------------------------------------------------------------------------- */
 /* Collections                                                                */
@@ -80,58 +114,73 @@ export const isDraft = (doc: ContentDoc): boolean =>
 export const isPublished = (doc: ContentDoc): boolean => !isDraft(doc);
 
 /* -------------------------------------------------------------------------- */
-/* Slug + Kind                                                                */
+/* Kind detection (matches your Contentlayer doc names)                       */
 /* -------------------------------------------------------------------------- */
 
-export function normalizeSlug(doc: ContentDoc): string {
-  if (!doc) return "";
-
-  // explicit slug wins
-  const explicit = cleanLower(doc.slug);
-  if (explicit) return trimTrailingSlashes(explicit);
-
-  // fallback to flattenedPath
-  const fp = cleanStr(doc?._raw?.flattenedPath);
-  if (!fp) return "";
-
-  const parts = fp.split("/").filter(Boolean);
-  if (parts.length === 0) return "";
-
-  const last = parts[parts.length - 1];
-  const slug = last === "index" ? parts[parts.length - 2] ?? "" : last;
-
-  return trimTrailingSlashes(cleanLower(slug));
-}
-
 export function getDocKind(doc: ContentDoc): DocKind {
-  // contentlayer commonly uses `type` (string) in your config,
-  // but some generated docs also expose `_type`.
-  const t = cleanLower(doc?._type ?? doc?.type);
+  // In Contentlayer, doc._type is usually the document name (e.g. "Post").
+  // Some configs might also expose doc.type.
+  const raw = cleanLower(doc?._type ?? doc?.type);
 
-  switch (t) {
+  switch (raw) {
     case "post":
+      return "post";
     case "book":
+      return "book";
     case "canon":
+      return "canon";
     case "short":
+      return "short";
     case "download":
+      return "download";
     case "resource":
+      return "resource";
     case "event":
+      return "event";
     case "print":
+      return "print";
     case "strategy":
-      return t;
+      return "strategy";
     default:
       return "unknown";
   }
 }
 
 /* -------------------------------------------------------------------------- */
+/* Slug normalisation                                                         */
+/* -------------------------------------------------------------------------- */
+
+export function normalizeSlug(doc: ContentDoc): string {
+  if (!doc) return "";
+
+  // explicit slug wins
+  const explicit = toCanonicalSlug(doc.slug);
+  if (explicit) return explicit;
+
+  // fallback to flattenedPath (e.g. "blog/christianity-not-extremism")
+  const fp = cleanStr(doc?._raw?.flattenedPath);
+  if (!fp) return "";
+
+  const fpClean = trimTrailingSlashes(cleanLower(fp));
+  const parts = fpClean.split("/").filter(Boolean);
+  if (parts.length === 0) return "";
+
+  const last = parts[parts.length - 1];
+  const slug = last === "index" ? parts[parts.length - 2] ?? "" : last;
+
+  return toCanonicalSlug(slug);
+}
+
+/* -------------------------------------------------------------------------- */
 /* Access control                                                             */
 /* -------------------------------------------------------------------------- */
 
-export function getAccessLevel(doc: ContentDoc): "public" | "inner-circle" | "private" {
+export function getAccessLevel(
+  doc: ContentDoc,
+): "public" | "inner-circle" | "private" {
   const v = cleanLower(doc?.accessLevel);
   if (v === "inner-circle" || v === "private" || v === "public") return v;
-  // Default to public so you don't accidentally hide most of your library.
+  // Default public so you don't accidentally hide most docs.
   return "public";
 }
 
@@ -213,10 +262,16 @@ export const getAllContentlayerDocs = (): ContentDoc[] =>
 export const getPublishedDocuments = (): ContentDoc[] =>
   getAllContentlayerDocs().filter(isPublished);
 
-export function getPublishedDocumentsByType(kind: DocKind, limit?: number): ContentDoc[] {
+export function getPublishedDocumentsByType(
+  kind: DocKind,
+  limit?: number,
+): ContentDoc[] {
   const items = getPublishedDocuments()
     .filter((d) => getDocKind(d) === kind)
-    .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
+    );
 
   return typeof limit === "number" ? items.slice(0, limit) : items;
 }
@@ -247,7 +302,7 @@ export const getPublicCanons = (): ContentDoc[] =>
 /* By Slug                                                                    */
 /* -------------------------------------------------------------------------- */
 
-const cleanMatch = (s: string) => trimTrailingSlashes(cleanLower(s));
+const cleanMatch = (s: string) => toCanonicalSlug(s);
 
 export const getPostBySlug = (s: string) =>
   getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
@@ -282,6 +337,8 @@ export const getStrategyBySlug = (s: string) =>
 
 export function assertContentlayerHasDocs(where: string) {
   if (getAllContentlayerDocs().length === 0) {
-    throw new Error(`[Critical Build Error] No Contentlayer documents found at ${where}`);
+    throw new Error(
+      `[Critical Build Error] No Contentlayer documents found at ${where}`,
+    );
   }
 }

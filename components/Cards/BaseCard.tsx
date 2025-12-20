@@ -1,37 +1,95 @@
-// components/Cards/BaseCard.tsx - UPDATED
+// components/Cards/BaseCard.tsx
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { BaseCardProps, DocumentCardProps } from "./types"; // Import from local types
+import type {
+  BaseCardProps,
+  DocumentCardProps,
+  CoverAspect,
+  CoverFit,
+  CoverPosition,
+} from "./types";
 
 // =============================================================================
-// HELPER FUNCTION
+// SAFE HELPERS (avoid `any` + keep logic local)
 // =============================================================================
 
-function getCardPropsFromDocument(doc: any): BaseCardProps {
-  return {
-    slug: doc.slug || "",
-    title: doc.title || "Untitled",
-    subtitle: doc.subtitle || null,
-    excerpt: doc.excerpt || null,
-    description: doc.description || null,
-    coverImage: doc.coverImage || null,
-    date: doc.date || null,
-    tags: doc.tags || [],
-    featured: doc.featured || false,
-    accessLevel: doc.accessLevel || null,
-    lockMessage: doc.lockMessage || null,
-    category: doc.category || null,
-    readingTime: doc.readingTime || null,
-    isNew: doc.isNew || false,
-  };
+type AnyRecord = Record<string, unknown>;
+
+function isRecord(v: unknown): v is AnyRecord {
+  return typeof v === "object" && v !== null;
+}
+
+function asString(v: unknown): string | null {
+  return typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
+}
+
+function asStringArray(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+}
+
+function asBool(v: unknown): boolean {
+  return v === true;
+}
+
+function asCoverAspect(v: unknown): CoverAspect | null {
+  const s = asString(v);
+  if (s === "wide" || s === "square" || s === "book") return s;
+  return null;
+}
+
+function asCoverFit(v: unknown): CoverFit | null {
+  const s = asString(v)?.toLowerCase();
+  // tolerate legacy "fit"
+  if (s === "fit") return "contain";
+  if (s === "cover" || s === "contain") return s;
+  return null;
+}
+
+function asCoverPosition(v: unknown): CoverPosition | null {
+  const s = asString(v);
+  if (s === "center" || s === "top" || s === "bottom" || s === "left" || s === "right")
+    return s;
+  return null;
+}
+
+function aspectClass(aspect?: CoverAspect | null): string {
+  switch (aspect) {
+    case "book":
+      return "aspect-[3/4]";
+    case "square":
+      return "aspect-square";
+    case "wide":
+    default:
+      return "aspect-[16/9]";
+  }
+}
+
+function fitClass(fit?: CoverFit | null): string {
+  return fit === "contain" ? "object-contain" : "object-cover";
+}
+
+function positionClass(pos?: CoverPosition | null): string {
+  switch ((pos || "center").toLowerCase()) {
+    case "top":
+      return "object-top";
+    case "bottom":
+      return "object-bottom";
+    case "left":
+      return "object-left";
+    case "right":
+      return "object-right";
+    default:
+      return "object-center";
+  }
 }
 
 // Local date formatter (kept here to avoid circular imports)
 function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "";
+    if (Number.isNaN(date.getTime())) return "";
     return date.toLocaleDateString("en-GB", {
       year: "numeric",
       month: "long",
@@ -40,6 +98,42 @@ function formatDate(dateString: string): string {
   } catch {
     return "";
   }
+}
+
+// =============================================================================
+// DOC -> CARD PROPS (no `any`)
+// =============================================================================
+
+function getCardPropsFromDocument(doc: unknown): BaseCardProps {
+  if (!isRecord(doc)) {
+    return { slug: "", title: "Untitled" };
+  }
+
+  return {
+    slug: asString(doc.slug) ?? "",
+    title: asString(doc.title) ?? "Untitled",
+    subtitle: asString(doc.subtitle),
+    excerpt: asString(doc.excerpt),
+    description: asString(doc.description),
+    coverImage: asString(doc.coverImage),
+    date: asString(doc.date),
+    tags: asStringArray(doc.tags),
+    featured: asBool(doc.featured),
+
+    // ✅ NEW: pass through cover controls
+    coverAspect: asCoverAspect(doc.coverAspect),
+    coverFit: asCoverFit(doc.coverFit),
+    coverPosition: asCoverPosition(doc.coverPosition),
+
+    accessLevel: (asString(doc.accessLevel) as BaseCardProps["accessLevel"]) ?? null,
+    lockMessage: asString(doc.lockMessage),
+    category: asString(doc.category),
+    readingTime: (asString(doc.readingTime) ??
+      (typeof doc.readingTime === "number" ? String(doc.readingTime) : null)) as
+      | string
+      | null,
+    isNew: asBool(doc.isNew),
+  };
 }
 
 // =============================================================================
@@ -53,6 +147,9 @@ const BaseCard: React.FC<BaseCardProps> = ({
   excerpt,
   description,
   coverImage,
+  coverAspect = null,
+  coverFit = null,
+  coverPosition = null,
   date,
   tags = [],
   featured = false,
@@ -71,9 +168,11 @@ const BaseCard: React.FC<BaseCardProps> = ({
   const formattedDate = date ? formatDate(date) : "";
 
   // On-brand fallback for missing cover images
-  const cardImage =
-    coverImage ||
-    "/assets/images/writing-desk.webp"; // known existing fallback in your project
+  const cardImage = coverImage || "/assets/images/writing-desk.webp";
+
+  const aClass = aspectClass(coverAspect);
+  const oFit = fitClass(coverFit);
+  const oPos = positionClass(coverPosition);
 
   return (
     <Link
@@ -83,14 +182,22 @@ const BaseCard: React.FC<BaseCardProps> = ({
     >
       <article className="relative flex h-full flex-col overflow-hidden">
         {/* Cover Image */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden">
+        <div className={`relative w-full overflow-hidden ${aClass}`}>
           <Image
             src={cardImage}
             alt={title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className={`${oFit} ${oPos} transition-transform duration-500 group-hover:scale-105`}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
+
+          {/* Optional: add subtle overlay only when contain is used (prevents “dead letterbox”) */}
+          {coverFit === "contain" && (
+            <div
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"
+              aria-hidden="true"
+            />
+          )}
 
           {/* Badges Container - Top Left */}
           <div className="absolute left-3 top-3 flex flex-col gap-2">
@@ -110,12 +217,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
           <div className="absolute right-3 top-3 flex flex-col gap-2">
             {isLocked && (
               <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-700/40 bg-amber-900/30 px-2 py-1 text-[0.65rem] font-semibold text-amber-400/90 backdrop-blur-sm">
-                <svg
-                  className="h-3 w-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -136,7 +238,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
 
         {/* Content */}
         <div className="flex flex-1 flex-col gap-3 p-5">
-          {/* Tags & Category Row (for cases where we want the chip even without image emphasis) */}
+          {/* Tags & Category Row */}
           {(displayTags.length > 0 || category) && (
             <div className="flex flex-wrap items-center gap-2">
               {category && (
@@ -146,7 +248,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
               )}
               {displayTags.map((tag, idx) => (
                 <span
-                  key={idx}
+                  key={`${tag}-${idx}`}
                   className="rounded-full border border-softGold/20 bg-softGold/10 px-3 py-1 text-xs font-medium text-softGold/90"
                 >
                   {tag}
@@ -160,40 +262,39 @@ const BaseCard: React.FC<BaseCardProps> = ({
             <h3 className="font-serif text-xl font-semibold text-cream transition-colors group-hover:text-softGold">
               {title}
             </h3>
-            {subtitle && (
+            {subtitle ? (
               <p className="text-sm font-medium text-gray-400">{subtitle}</p>
-            )}
+            ) : null}
           </div>
 
           {/* Excerpt/Description */}
-          {displayText && (
+          {displayText ? (
             <p className="line-clamp-3 text-sm leading-relaxed text-gray-300">
               {displayText}
             </p>
-          )}
+          ) : null}
 
-          {/* Footer: Date, Reading Time & Lock Message */}
+          {/* Footer */}
           <div className="mt-auto flex items-center justify-between gap-3 pt-3">
             <div className="flex items-center gap-3">
-              {date && formattedDate && (
+              {formattedDate ? (
                 <time className="text-xs text-gray-400">{formattedDate}</time>
-              )}
-              {readingTime && (
+              ) : null}
+
+              {readingTime ? (
                 <span className="text-xs text-gray-500 before:mr-2 before:content-['•']">
-                  {readingTime} read
+                  {typeof readingTime === "number" ? `${readingTime} min read` : `${readingTime} read`}
                 </span>
-              )}
+              ) : null}
             </div>
 
-            {isLocked && lockMessage && (
-              <span className="text-xs italic text-amber-400/80">
-                {lockMessage}
-              </span>
-            )}
+            {isLocked && lockMessage ? (
+              <span className="text-xs italic text-amber-400/80">{lockMessage}</span>
+            ) : null}
           </div>
         </div>
 
-        {/* New badge for "text-only" cards if you ever render without images via a wrapper */}
+        {/* New badge for "text-only" cards fallback */}
         {!coverImage && isNew && (
           <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-green-600/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
             New
@@ -204,22 +305,11 @@ const BaseCard: React.FC<BaseCardProps> = ({
   );
 };
 
-// =============================================================================
-// EXPORT BOTH COMPONENTS
-// =============================================================================
-
-// Export the main BaseCard
 export default BaseCard;
 
-// Export a document-specific wrapper
-export function DocumentCard({
-  document,
-  className = "",
-  href,
-}: DocumentCardProps) {
+export function DocumentCard({ document, className = "", href }: DocumentCardProps) {
   const cardProps = getCardPropsFromDocument(document);
   return <BaseCard {...cardProps} className={className} href={href} />;
 }
 
-// Export types from this file
 export type { BaseCardProps, DocumentCardProps };

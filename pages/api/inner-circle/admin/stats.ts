@@ -1,13 +1,26 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getPrivacySafeStats, getPrivacySafeKeyExport } from "@/lib/inner-circle";
 
-type AdminStatsResponse = {
-  ok: boolean;
-  stats?: any;
-  rows?: any[];
-  generatedAt?: string;
-  error?: string;
-};
+type PrivacySafeStats = { totalMembers: number; totalKeys: number };
+
+type AdminStatsResponse =
+  | {
+      ok: true;
+      stats: PrivacySafeStats;
+      rows: Array<{
+        memberId: string;
+        emailHashPrefix: string;
+        name: string | null;
+        keySuffix: string;
+        status: string;
+        createdAt: string | null;
+        expiresAt: string | null;
+        totalUnlocks: number;
+        lastUsedAt: string | null;
+      }>;
+      generatedAt: string;
+    }
+  | { ok: false; error: string };
 
 function isAdmin(req: NextApiRequest): boolean {
   const raw =
@@ -17,10 +30,13 @@ function isAdmin(req: NextApiRequest): boolean {
   const token = raw?.replace(/^Bearer\s+/i, "").trim();
   const expected = process.env.INNER_CIRCLE_ADMIN_KEY;
 
-  return !!token && !!expected && token === expected;
+  return Boolean(token && expected && token === expected);
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<AdminStatsResponse>) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<AdminStatsResponse>
+) {
   if (req.method !== "GET" && req.method !== "POST") {
     res.setHeader("Allow", ["GET", "POST"]);
     return res.status(405).json({ ok: false, error: "Method requires GET or POST." });
@@ -35,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const [stats, rows] = await Promise.all([
       getPrivacySafeStats(),
-      getPrivacySafeKeyExport ? getPrivacySafeKeyExport() : Promise.resolve([]),
+      getPrivacySafeKeyExport(),
     ]);
 
     return res.status(200).json({

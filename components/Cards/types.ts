@@ -1,27 +1,53 @@
 // components/Cards/types.ts
+
+export type CoverAspect = "wide" | "square" | "book";
+export type CoverFit = "cover" | "contain"; // allow "contain" as the real "fit"
+export type CoverPosition = "center" | "top" | "bottom" | "left" | "right";
+
+export type AccessLevel = "public" | "inner-circle" | "premium" | "private";
+
 export interface PostLike {
   slug: string;
   title: string;
+
   subtitle?: string | null;
   excerpt?: string | null;
   description?: string | null;
+
   coverImage?: string | null;
+
+  // ✅ NEW: cover orientation controls
+  coverAspect?: CoverAspect | null;
+  coverFit?: CoverFit | null;
+  coverPosition?: CoverPosition | null;
+
   date?: string | null;
   tags?: string[];
+
   featured?: boolean;
-  accessLevel?: string | null;
+
+  accessLevel?: AccessLevel | string | null; // tolerate legacy strings
   lockMessage?: string | null;
+
   category?: string | null;
   readingTime?: string | null;
+
   isNew?: boolean;
+
   href?: string;
+
   author?: string | null;
   authorPicture?: string | null;
+
   volumeNumber?: string | null;
+
   downloadUrl?: string | null;
   fileSize?: string | null;
+
   price?: string | null;
   dimensions?: string | null;
+
+  type?: string | null; // "Post" | "Book" etc or lower
 }
 
 export interface BaseCardProps extends PostLike {
@@ -29,7 +55,7 @@ export interface BaseCardProps extends PostLike {
 }
 
 export interface DocumentCardProps {
-  document: any;
+  document: unknown;
   className?: string;
   href?: string;
 }

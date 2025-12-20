@@ -1,36 +1,15 @@
 // components/Cards/index.tsx
 import * as React from "react";
 
-// =============================================================================
-// TYPE DEFINITIONS
-// =============================================================================
-
-// Define PostLike interface here
-export interface PostLike {
-  slug: string;
-  title: string;
-  subtitle?: string | null;
-  excerpt?: string | null;
-  description?: string | null;
-  coverImage?: string | null;
-  date?: string | null;
-  tags?: string[];
-  featured?: boolean;
-  accessLevel?: string | null;
-  lockMessage?: string | null;
-  category?: string | null;
-  readingTime?: string | null;
-  isNew?: boolean;
-  href?: string;
-  author?: string | null;
-  authorPicture?: string | null;
-  volumeNumber?: string | null;
-  downloadUrl?: string | null;
-  fileSize?: string | null;
-  price?: string | null;
-  dimensions?: string | null;
-  type?: string;
-}
+// ✅ Single source of truth:
+export type {
+  PostLike,
+  BaseCardProps,
+  DocumentCardProps,
+  CoverAspect,
+  CoverFit,
+  CoverPosition,
+} from "./types";
 
 // =============================================================================
 // COMPONENT EXPORTS
@@ -44,30 +23,13 @@ export { default as ArticleHero } from "./ArticleHero";
 export { DocumentCard } from "./BaseCard";
 
 // =============================================================================
-// TYPE EXPORTS - FIXED
+// TYPE EXPORTS
 // =============================================================================
 
-// Export PostLike (defined above) and other types from components
-export type { 
-  BaseCardProps,
-  DocumentCardProps,
-} from "./BaseCard";
-
-export type { 
-  BookCardProps 
-} from "./BookCard";
-
-export type { 
-  BlogPostCardProps 
-} from "./BlogPostCard";
-
-export type { 
-  CanonCardProps 
-} from "./CanonResourceCard";
-
-export type { 
-  HeroCardProps 
-} from "./ArticleHero";
+export type { BookCardProps } from "./BookCard";
+export type { BlogPostCardProps } from "./BlogPostCard";
+export type { CanonCardProps } from "./CanonResourceCard";
+export type { HeroCardProps } from "./ArticleHero";
 
 // =============================================================================
 // STYLE CONSTANTS
