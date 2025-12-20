@@ -15,6 +15,9 @@
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
 
+  # ✅ force devDependencies (eslint etc.) to be installed on Netlify
+  NPM_FLAGS = "--prod=false"
+
 # ------------------------------------------------------------------
 # CANONICAL HOST + HTTPS (STOP LOOPS)
 # ------------------------------------------------------------------
