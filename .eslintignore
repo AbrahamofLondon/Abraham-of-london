@@ -18,3 +18,6 @@ lib/websocket/WebSocketService.ts
 
 #ESLint ignores
 src/**
+ 
+**/*.sql
+lib/db/migrations/**

@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  // url is intentionally removed here to satisfy Prisma 7 validation
+  url      = env("DATABASE_URL")
 }
 
 model ShortInteraction {
