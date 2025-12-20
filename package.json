@@ -9,53 +9,61 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+
     "dev": "next dev",
-    "dev:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next dev",
     "dev:content": "contentlayer2 build --watch",
+
     "start": "next start",
-    "start:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next start",
+
     "typecheck": "pnpm exec tsc --project tsconfig.json --noEmit",
-    "typecheck:safe": "pnpm exec tsc --project tsconfig.json --noEmit --skipLibCheck",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "clean:build": "rimraf .next .contentlayer",
+
+    "clean:build": "node -e \"const fs=require('fs'); for (const p of ['.next','.contentlayer']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} }\"",
     "clean": "node -e \"const fs=require('fs'); const paths=['.next','.contentlayer','.turbo','.reports','node_modules/.cache']; for (const p of paths) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
     "clean:functions": "node -e \"const fs=require('fs'); const dir='netlify/functions'; if (!fs.existsSync(dir)) process.exit(0); for (const f of fs.readdirSync(dir)) { if (f.endsWith('.js')) { try { fs.rmSync(dir+'/'+f,{force:true}); } catch {} } }\"",
-    "clean-ts-cache": "rimraf node_modules/.cache .next && node -e \"const fs=require('fs'); const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
+    "clean-ts-cache": "node -e \"const fs=require('fs'); for (const p of ['node_modules/.cache','.next']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
     "ts-reset": "pnpm run clean-ts-cache",
+
     "fix:prints": "node scripts/fix-print-types.mjs",
+
     "content:build": "contentlayer2 build",
     "content:dev": "contentlayer2 build --watch",
     "content:fix": "node scripts/fix-contentlayer-issues.mjs",
     "content:validate": "node scripts/validate-content.mjs",
     "content:check": "node scripts/check-contentlayer-output.mjs",
     "prepare:content": "pnpm run clean:build && pnpm run content:fix && pnpm run content:validate && pnpm run content:build && pnpm run content:check",
-    "build": "pnpm run prepare:content && next build",
-    "build:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run prepare:content && next build",
-    "build:netlify": "pnpm run build:safe",
-    "build:prod": "pnpm run build:safe",
-    "build:all": "pnpm run prepare:content && next build",
+
+    "build": "pnpm run prepare:content && pnpm run lint && pnpm run typecheck && next build",
+
     "ci": "pnpm install --frozen-lockfile",
-    "check": "pnpm run typecheck",
-    "check:safe": "pnpm run typecheck:safe",
-    "check:ci": "pnpm run ci && pnpm run check:safe",
+    "check:ci": "pnpm run ci && pnpm run lint && pnpm run typecheck",
+
     "postbuild": "echo \"✓ Build completed successfully\"",
+
     "assets:scan": "node scripts/scan-content-assets.mjs",
     "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.tsx",
     "pdfs": "pnpm run pdf:purpose",
     "downloads:validate": "node scripts/validate-downloads.mjs",
+
     "debug:content": "node scripts/debug-content-routes.mjs",
     "debug:contentlayer": "cross-env CONTENTLAYER_DEBUG=true contentlayer2 build --verbose",
     "debug:content:windows": "set CONTENTLAYER_DEBUG=true && contentlayer2 build --verbose",
     "content:diagnose": "node scripts/diagnose-contentlayer.mjs",
+
     "content:test": "cross-env CONTENTLAYER_DEBUG=true pnpm run content:build && pnpm run content:check",
     "build:test": "pnpm run clean:build && pnpm run content:test",
+
     "debug:prints": "node scripts/debug-prints.mjs",
+
     "test:e2e": "pnpm dlx playwright test",
+
     "build:functions": "pnpm exec tsc --project tsconfig.functions.json --noEmit",
     "email:test": "tsx scripts/test-email.ts",
+
     "install:ci": "pnpm run ci",
     "gitattributes:validate": "node scripts/validate-gitattributes.js",
+
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -87,7 +95,6 @@
     "lucide-react": "0.454.0",
     "next": "14.2.12",
     "next-auth": "4.24.13",
-    "next-contentlayer": "0.3.4",
     "next-contentlayer2": "0.5.8",
     "next-mdx-remote": "5.0.0",
     "next-themes": "0.4.3",
@@ -142,9 +149,7 @@
       "react-dom": "18.3.1"
     },
     "peerDependencyRules": {
-      "ignoreMissing": [
-        "@opentelemetry/*"
-      ],
+      "ignoreMissing": ["@opentelemetry/*"],
       "allowedVersions": {
         "react": "18.3.1",
         "react-dom": "18.3.1"

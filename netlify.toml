@@ -1,15 +1,15 @@
 [build]
   command = "pnpm run build"
-  publish = ".next"  # Next.js with @netlify/plugin-nextjs uses .next, not out
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
-  PNPM_VERSION = "9.12.0"
+  PNPM_VERSION = "9.15.9"
   NODE_ENV = "production"
-  CI = "false"
+  CI = "true"
   HUSKY = "0"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -42,19 +42,11 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    # Prevent MIME type sniffing
     X-Content-Type-Options = "nosniff"
-    
-    # Control referrer information
     Referrer-Policy = "strict-origin-when-cross-origin"
-    
-    # Prevent clickjacking
     X-Frame-Options = "DENY"
-    
-    # Enable browser XSS protection
     X-XSS-Protection = "1; mode=block"
-    
-    # Content Security Policy (adjust based on your needs)
+
     Content-Security-Policy = """
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com;
@@ -67,11 +59,8 @@
       form-action 'self';
       upgrade-insecure-requests;
     """
-    
-    # Permissions Policy (formerly Feature Policy)
+
     Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
-    
-    # Strict Transport Security (HSTS) - force HTTPS for 2 years
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
 
 # Cache static Next.js assets aggressively
@@ -86,29 +75,29 @@
   [headers.values]
     Cache-Control = "public, max-age=86400, must-revalidate"
 
-# Cache images with revalidation
+# Cache images with revalidation (include assets subpaths too)
 [[headers]]
-  for = "/*.jpg"
+  for = "/assets/*.jpg"
   [headers.values]
     Cache-Control = "public, max-age=604800, must-revalidate"
 
 [[headers]]
-  for = "/*.jpeg"
+  for = "/assets/*.jpeg"
   [headers.values]
     Cache-Control = "public, max-age=604800, must-revalidate"
 
 [[headers]]
-  for = "/*.png"
+  for = "/assets/*.png"
   [headers.values]
     Cache-Control = "public, max-age=604800, must-revalidate"
 
 [[headers]]
-  for = "/*.webp"
+  for = "/assets/*.webp"
   [headers.values]
     Cache-Control = "public, max-age=604800, must-revalidate"
 
 [[headers]]
-  for = "/*.svg"
+  for = "/assets/*.svg"
   [headers.values]
     Cache-Control = "public, max-age=604800, must-revalidate"
 
@@ -119,7 +108,6 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
-    # Don't cache API responses
     Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
     Pragma = "no-cache"
     Expires = "0"
@@ -132,9 +120,3 @@
     Pragma = "no-cache"
     Expires = "0"
     X-Robots-Tag = "noindex, nofollow"
-
-# ------------------------------------------------------------------
-# RATE LIMITING (via redirects - basic protection)
-# ------------------------------------------------------------------
-# Note: For better rate limiting, consider using Netlify Edge Functions
-# or a dedicated API gateway

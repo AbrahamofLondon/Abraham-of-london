@@ -2,80 +2,86 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+
 import Layout from "@/components/Layout";
-import { getAllCanons, getCanonBySlug, normalizeSlug, isDraft } from "@/lib/contentlayer-helper";
+import mdxComponents from "@/components/mdx-components";
+
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote } from "next-mdx-remote";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import mdxComponents from "@/components/mdx-components";
 
-type Props = { 
+import { getAllCanons, getCanonDocBySlug } from "@/lib/canon";
+import type { Canon } from "@/lib/canon";
+
+type Props = {
   canon: {
     title: string;
     excerpt: string | null;
-    subtitle?: string | null;
+    subtitle: string | null;
     slug: string;
   };
   source: MDXRemoteSerializeResult;
 };
 
-const SITE = "https://www.abrahamoflondon.org";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+
+function cleanSlug(input: unknown): string {
+  return String(input ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\/+$/, "");
+}
+
+function safeTitle(v: unknown): string {
+  const s = String(v ?? "").trim();
+  return s || "Canon";
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const canons = getAllCanons();
-  
+  const canons: Canon[] = getAllCanons();
+
   const paths = canons
-    .filter((d: any) => !isDraft(d))
-    .map((d: any) => {
-      const slug = normalizeSlug(d);
-      if (!slug) {
-        console.warn(`⚠️ Canon missing slug:`, d.title);
-        return null;
-      }
-      return { params: { slug } };
-    })
-    .filter(Boolean) as { params: { slug: string } }[];
+    .filter((c) => c && c.draft !== true && c.draft !== "true")
+    .map((c) => cleanSlug(c.slug || c._raw?.flattenedPath?.split("/").pop()))
+    .filter(Boolean)
+    .map((slug) => ({ params: { slug } }));
 
   console.log(`📚 Canon: Generated ${paths.length} paths`);
+
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\/$/, "");
-  
-  if (!slug) {
-    console.warn(`⚠️ Canon page called with empty slug`);
-    return { notFound: true };
-  }
+  const slug = cleanSlug(params?.slug);
+  if (!slug) return { notFound: true };
 
-  const rawDoc = getCanonBySlug(slug);
+  const rawDoc = getCanonDocBySlug(slug);
 
   if (!rawDoc) {
     console.warn(`⚠️ Canon not found for slug: ${slug}`);
-    return { notFound: true };
+    return { notFound: true, revalidate: 60 };
   }
 
-  console.log(`✅ Found canon: ${rawDoc.title} (slug: ${slug})`);
+  if (rawDoc.draft === true || rawDoc.draft === "true") {
+    // hard block draft pages from being published
+    return { notFound: true, revalidate: 60 };
+  }
 
-  // Create serializable props
   const canon = {
-    title: rawDoc.title || "Canon",
-    excerpt: rawDoc.excerpt || null,
-    subtitle: rawDoc.subtitle || null,
-    slug: slug,
+    title: safeTitle(rawDoc.title),
+    excerpt: rawDoc.excerpt ? String(rawDoc.excerpt) : null,
+    subtitle: rawDoc.subtitle ? String(rawDoc.subtitle) : null,
+    slug,
   };
 
+  // Contentlayer2 exposes raw MDX via body.raw (your earlier usage)
   const raw = String(rawDoc?.body?.raw ?? "");
   let source: MDXRemoteSerializeResult;
 
   try {
-    source = await serialize(raw, {
+    source = await serialize(raw || "Content is being prepared.", {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
         rehypePlugins: [
@@ -90,10 +96,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
   return {
-    props: {
-      canon,
-      source,
-    },
+    props: { canon, source },
     revalidate: 1800,
   };
 };
@@ -105,26 +108,35 @@ const CanonPage: NextPage<Props> = ({ canon, source }) => {
   return (
     <Layout title={title} canonicalUrl={canonicalUrl}>
       <Head>
+        <title>{title} | Abraham of London</title>
+
         {canon.excerpt ? <meta name="description" content={canon.excerpt} /> : null}
+        <link rel="canonical" href={canonicalUrl} />
+
         <meta property="og:title" content={title} />
         {canon.excerpt ? <meta property="og:description" content={canon.excerpt} /> : null}
-        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="article" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        {canon.excerpt ? <meta name="twitter:description" content={canon.excerpt} /> : null}
       </Head>
+
       <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
         <header className="mb-8 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
             Canon
           </p>
+
           <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
             {title}
           </h1>
-          {canon.subtitle ? (
-            <p className="text-lg text-gray-300">{canon.subtitle}</p>
-          ) : null}
-          {canon.excerpt ? (
-            <p className="text-sm text-gray-300">{canon.excerpt}</p>
-          ) : null}
+
+          {canon.subtitle ? <p className="text-lg text-gray-300">{canon.subtitle}</p> : null}
+          {canon.excerpt ? <p className="text-sm text-gray-300">{canon.excerpt}</p> : null}
         </header>
+
         <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
           <MDXRemote {...source} components={mdxComponents} />
         </article>
