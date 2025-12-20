@@ -1,127 +1,150 @@
 // lib/rate-limit.ts
-// Comprehensive rate limiting for all API endpoints
+// Comprehensive rate limiting with enhanced security features
 
 export interface RateLimitConfig {
-  windowMs: number; // time window in milliseconds
-  max: number;      // maximum requests per window
-  keyPrefix?: string; // optional prefix for logging/identification
+  windowMs: number;
+  max: number;
+  keyPrefix?: string;
+  skipSuccessfulRequests?: boolean; // Don't count successful requests
+  skipFailedRequests?: boolean; // Don't count failed requests
+  blockDuration?: number; // Optional: block duration after limit exceeded (ms)
 }
 
 export interface RateLimitResult {
   allowed: boolean;
   remaining: number;
   limit: number;
-  resetAt: number; // epoch ms
+  resetAt: number;
+  blocked?: boolean; // If temporarily blocked
+  blockUntil?: number; // When block expires
 }
 
 export const RATE_LIMIT_CONFIGS = {
   // General API endpoints
   API_READ: {
-    windowMs: 60_000, // 1 minute
-    max: 60,          // 60 requests/minute
+    windowMs: 60_000,
+    max: 60,
     keyPrefix: "api_read",
   },
   API_WRITE: {
-    windowMs: 60_000, // 1 minute
-    max: 30,          // 30 requests/minute
+    windowMs: 60_000,
+    max: 30,
     keyPrefix: "api_write",
+    skipSuccessfulRequests: true, // Only count failed writes
   },
   
   // Content API
   CONTENT_API: {
-    windowMs: 60_000, // 1 minute
-    max: 30,          // 30 requests/minute for content API
+    windowMs: 60_000,
+    max: 30,
     keyPrefix: "content",
   },
   
-  // NEW: Shorts interactions
+  // Shorts interactions
   SHORTS_INTERACTIONS: {
-    windowMs: 60_000, // 1 minute
-    max: 30,          // 30 interaction requests/minute
+    windowMs: 60_000,
+    max: 30,
     keyPrefix: "shorts_interactions",
   },
   
   // Teaser system
   TEASER_REQUEST: {
-    windowMs: 60_000, // 1 minute
-    max: 5,           // 5 requests/minute
+    windowMs: 60_000,
+    max: 5,
     keyPrefix: "teaser",
   },
   
   // Newsletter
   NEWSLETTER_SUBSCRIBE: {
-    windowMs: 60_000, // 1 minute
-    max: 5,           // 5 requests/minute
+    windowMs: 60_000,
+    max: 5,
     keyPrefix: "newsletter",
+    blockDuration: 300_000, // 5 min block after exceeding
   },
   
-  // Authentication
+  // Authentication - more strict
   AUTH_LOGIN: {
-    windowMs: 15 * 60_000, // 15 minutes
-    max: 5,                 // 5 attempts/15 minutes
+    windowMs: 15 * 60_000,
+    max: 5,
     keyPrefix: "auth_login",
+    skipSuccessfulRequests: true, // Only count failed login attempts
+    blockDuration: 900_000, // 15 min block after 5 failed attempts
   },
   AUTH_REGISTER: {
-    windowMs: 60 * 60_000, // 1 hour
-    max: 3,                 // 3 registrations/hour
+    windowMs: 60 * 60_000,
+    max: 3,
     keyPrefix: "auth_register",
+    blockDuration: 3600_000, // 1 hour block
   },
   
-  // Inner Circle
+  // Inner Circle - enhanced security
   INNER_CIRCLE_REGISTER: {
-    windowMs: 15 * 60_000, // 15 minutes
-    max: 3,                 // 3 registrations/15 minutes per IP
+    windowMs: 15 * 60_000,
+    max: 3,
     keyPrefix: "inner_circle_register_ip",
+    blockDuration: 900_000, // 15 min block
   },
   INNER_CIRCLE_REGISTER_EMAIL: {
-    windowMs: 60 * 60_000, // 1 hour
-    max: 2,                 // 2 registrations/hour per email
+    windowMs: 60 * 60_000,
+    max: 2,
     keyPrefix: "inner_circle_register_email",
+    blockDuration: 3600_000, // 1 hour block
   },
   INNER_CIRCLE_UNLOCK: {
-    windowMs: 60_000, // 1 minute
-    max: 10,          // 10 unlock attempts/minute
+    windowMs: 60_000,
+    max: 10,
     keyPrefix: "inner_circle_unlock",
+    skipSuccessfulRequests: true, // Only count failed attempts
+    blockDuration: 300_000, // 5 min block after exceeding
   },
   
   // Admin operations
   ADMIN_OPERATIONS: {
-    windowMs: 60_000, // 1 minute
-    max: 30,          // 30 operations/minute
+    windowMs: 60_000,
+    max: 30,
     keyPrefix: "admin",
   },
   INNER_CIRCLE_ADMIN_EXPORT: {
-    windowMs: 5 * 60_000, // 5 minutes
-    max: 5,                // 5 exports/5 minutes
+    windowMs: 5 * 60_000,
+    max: 5,
     keyPrefix: "inner_circle_admin_export",
   },
   
-  // Contact forms
+  // Contact forms - prevent spam
   CONTACT_FORM: {
-    windowMs: 60_000, // 1 minute
-    max: 3,           // 3 messages/minute
+    windowMs: 60_000,
+    max: 3,
     keyPrefix: "contact",
+    blockDuration: 600_000, // 10 min block
   },
   
   // Downloads
   DOWNLOADS: {
-    windowMs: 60_000, // 1 minute
-    max: 10,          // 10 downloads/minute
+    windowMs: 60_000,
+    max: 10,
     keyPrefix: "downloads",
   },
   
   // Webhooks
   WEBHOOK_RECEIVE: {
-    windowMs: 60_000, // 1 minute
-    max: 100,         // 100 webhooks/minute
+    windowMs: 60_000,
+    max: 100,
     keyPrefix: "webhook",
   },
   
-  // Cache busting/development
+  // Cache busting
   CACHE_BUST: {
-    windowMs: 10_000, // 10 seconds
-    max: 5,           // 5 requests/10 seconds
+    windowMs: 10_000,
+    max: 5,
     keyPrefix: "cache",
+  },
+  
+  // NEW: Suspicious activity detection
+  SUSPICIOUS_ACTIVITY: {
+    windowMs: 60_000,
+    max: 2,
+    keyPrefix: "suspicious",
+    blockDuration: 3600_000, // 1 hour block
   },
 } as const;
 
@@ -129,14 +152,16 @@ type Bucket = {
   count: number;
   resetAt: number;
   firstRequestAt: number;
+  blockUntil?: number; // Temporary block
+  suspiciousActivity?: boolean;
 };
 
 class RateLimiter {
   private buckets = new Map<string, Bucket>();
+  private blockedIps = new Set<string>(); // Permanent blocks
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    // Clean up expired buckets every minute
     this.cleanupInterval = setInterval(() => {
       this.cleanupExpiredBuckets();
     }, 60_000);
@@ -147,7 +172,8 @@ class RateLimiter {
     let removed = 0;
     
     for (const [key, bucket] of this.buckets.entries()) {
-      if (bucket.resetAt <= now) {
+      // Remove if reset time passed and not blocked
+      if (bucket.resetAt <= now && (!bucket.blockUntil || bucket.blockUntil <= now)) {
         this.buckets.delete(key);
         removed++;
       }
@@ -158,17 +184,62 @@ class RateLimiter {
     }
   }
 
+  isBlocked(key: string): boolean {
+    // Check permanent blocks
+    if (this.blockedIps.has(key)) {
+      return true;
+    }
+
+    // Check temporary blocks
+    const bucket = this.buckets.get(key);
+    if (bucket?.blockUntil) {
+      const now = Date.now();
+      if (bucket.blockUntil > now) {
+        return true;
+      }
+      // Block expired, clear it
+      bucket.blockUntil = undefined;
+    }
+
+    return false;
+  }
+
+  blockPermanently(key: string): void {
+    this.blockedIps.add(key);
+    console.warn(`[RateLimiter] PERMANENT BLOCK: ${key}`);
+  }
+
+  unblock(key: string): void {
+    this.blockedIps.delete(key);
+    const bucket = this.buckets.get(key);
+    if (bucket) {
+      bucket.blockUntil = undefined;
+    }
+  }
+
   async check(
     key: string,
     config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ
   ): Promise<RateLimitResult> {
     const now = Date.now();
-    const existing = this.buckets.get(key);
 
+    // Check if blocked
+    if (this.isBlocked(key)) {
+      const bucket = this.buckets.get(key);
+      return {
+        allowed: false,
+        remaining: 0,
+        limit: config.max,
+        resetAt: bucket?.resetAt || now + config.windowMs,
+        blocked: true,
+        blockUntil: bucket?.blockUntil,
+      };
+    }
+
+    const existing = this.buckets.get(key);
     let bucket: Bucket;
 
     if (!existing || existing.resetAt <= now) {
-      // Create new bucket
       bucket = {
         count: 0,
         resetAt: now + config.windowMs,
@@ -178,18 +249,27 @@ class RateLimiter {
       bucket = existing;
     }
 
-    // Increment count
     bucket.count += 1;
     this.buckets.set(key, bucket);
 
     const allowed = bucket.count <= config.max;
     const remaining = Math.max(config.max - bucket.count, 0);
 
+    // Apply block if limit exceeded and blockDuration configured
+    if (!allowed && config.blockDuration && !bucket.blockUntil) {
+      bucket.blockUntil = now + config.blockDuration;
+      console.warn(
+        `[RateLimiter] BLOCKED: ${key} (${config.keyPrefix}) until ${new Date(bucket.blockUntil).toISOString()}`
+      );
+    }
+
     return {
       allowed,
       remaining,
       limit: config.max,
       resetAt: bucket.resetAt,
+      blocked: !!bucket.blockUntil,
+      blockUntil: bucket.blockUntil,
     };
   }
 
@@ -198,12 +278,23 @@ class RateLimiter {
     config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ
   ): RateLimitResult {
     const now = Date.now();
-    const existing = this.buckets.get(key);
 
+    if (this.isBlocked(key)) {
+      const bucket = this.buckets.get(key);
+      return {
+        allowed: false,
+        remaining: 0,
+        limit: config.max,
+        resetAt: bucket?.resetAt || now + config.windowMs,
+        blocked: true,
+        blockUntil: bucket?.blockUntil,
+      };
+    }
+
+    const existing = this.buckets.get(key);
     let bucket: Bucket;
 
     if (!existing || existing.resetAt <= now) {
-      // Create new bucket
       bucket = {
         count: 0,
         resetAt: now + config.windowMs,
@@ -213,19 +304,31 @@ class RateLimiter {
       bucket = existing;
     }
 
-    // Increment count
     bucket.count += 1;
     this.buckets.set(key, bucket);
 
     const allowed = bucket.count <= config.max;
     const remaining = Math.max(config.max - bucket.count, 0);
 
+    if (!allowed && config.blockDuration && !bucket.blockUntil) {
+      bucket.blockUntil = now + config.blockDuration;
+    }
+
     return {
       allowed,
       remaining,
       limit: config.max,
       resetAt: bucket.resetAt,
+      blocked: !!bucket.blockUntil,
+      blockUntil: bucket.blockUntil,
     };
+  }
+
+  markSuccess(key: string): void {
+    const bucket = this.buckets.get(key);
+    if (bucket && bucket.count > 0) {
+      bucket.count = Math.max(0, bucket.count - 1);
+    }
   }
 
   getStatus(key: string): RateLimitResult | null {
@@ -233,22 +336,52 @@ class RateLimiter {
     if (!bucket) return null;
 
     const now = Date.now();
-    if (bucket.resetAt <= now) return null;
+    if (bucket.resetAt <= now && !bucket.blockUntil) return null;
 
     const config = Object.values(RATE_LIMIT_CONFIGS).find(
       c => c.keyPrefix && key.startsWith(c.keyPrefix)
     ) || RATE_LIMIT_CONFIGS.API_READ;
 
     return {
-      allowed: bucket.count <= config.max,
+      allowed: bucket.count <= config.max && !this.isBlocked(key),
       remaining: Math.max(0, config.max - bucket.count),
       limit: config.max,
       resetAt: bucket.resetAt,
+      blocked: this.isBlocked(key),
+      blockUntil: bucket.blockUntil,
     };
   }
 
   resetKey(key: string): boolean {
+    this.blockedIps.delete(key);
     return this.buckets.delete(key);
+  }
+
+  getStats(): {
+    totalBuckets: number;
+    activeBuckets: number;
+    blockedKeys: number;
+    permanentBlocks: number;
+  } {
+    const now = Date.now();
+    let activeBuckets = 0;
+    let blockedKeys = 0;
+
+    for (const [, bucket] of this.buckets.entries()) {
+      if (bucket.resetAt > now) {
+        activeBuckets++;
+      }
+      if (bucket.blockUntil && bucket.blockUntil > now) {
+        blockedKeys++;
+      }
+    }
+
+    return {
+      totalBuckets: this.buckets.size,
+      activeBuckets,
+      blockedKeys,
+      permanentBlocks: this.blockedIps.size,
+    };
   }
 
   destroy(): void {
@@ -257,10 +390,10 @@ class RateLimiter {
       this.cleanupInterval = null;
     }
     this.buckets.clear();
+    this.blockedIps.clear();
   }
 }
 
-// Singleton instance
 const rateLimiter = new RateLimiter();
 
 export async function rateLimitAsync(
@@ -277,14 +410,25 @@ export function rateLimit(
   return rateLimiter.checkSync(key, config);
 }
 
+export function markRequestSuccess(key: string): void {
+  rateLimiter.markSuccess(key);
+}
+
 export function createRateLimitHeaders(
   result: RateLimitResult
 ): Record<string, string> {
-  return {
+  const headers: Record<string, string> = {
     "X-RateLimit-Limit": String(result.limit),
     "X-RateLimit-Remaining": String(result.remaining),
-    "X-RateLimit-Reset": String(Math.floor(result.resetAt / 1000)), // seconds
+    "X-RateLimit-Reset": String(Math.floor(result.resetAt / 1000)),
   };
+
+  if (result.blocked && result.blockUntil) {
+    headers["X-RateLimit-Blocked-Until"] = new Date(result.blockUntil).toISOString();
+    headers["Retry-After"] = String(Math.ceil((result.blockUntil - Date.now()) / 1000));
+  }
+
+  return headers;
 }
 
 export function getRateLimitStatus(key: string): RateLimitResult | null {
@@ -295,18 +439,29 @@ export function resetRateLimit(key: string): boolean {
   return rateLimiter.resetKey(key);
 }
 
+export function blockPermanently(key: string): void {
+  rateLimiter.blockPermanently(key);
+}
+
+export function unblock(key: string): void {
+  rateLimiter.unblock(key);
+}
+
+export function getRateLimiterStats() {
+  return rateLimiter.getStats();
+}
+
 export function getClientIpFromRequest(req: { 
   headers: Record<string, string | string[] | undefined>;
   socket?: { remoteAddress?: string };
   connection?: { remoteAddress?: string };
 }): string {
-  // Check common proxy headers
   const headers = [
-    'cf-connecting-ip',     // Cloudflare
-    'x-client-ip',         // AWS/GCP
-    'x-forwarded-for',     // Standard proxy header
-    'x-real-ip',          // Nginx
-    'forwarded-for',      // RFC 7239
+    'cf-connecting-ip',
+    'x-client-ip',
+    'x-forwarded-for',
+    'x-real-ip',
+    'forwarded-for',
   ];
   
   for (const header of headers) {
@@ -322,7 +477,6 @@ export function getClientIpFromRequest(req: {
     }
   }
   
-  // Fallback to socket address
   const socket = req.socket || req.connection;
   const remoteAddress = socket?.remoteAddress;
   
@@ -336,23 +490,19 @@ export function getClientIpFromRequest(req: {
 export function isValidIp(ip: string): boolean {
   if (!ip || ip === 'unknown') return false;
   
-  // Remove port if present
   const cleanIp = ip.split(':')[0];
   
   // IPv4
   const ipv4Regex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
   if (ipv4Regex.test(cleanIp)) return true;
   
-  // IPv6 (simplified)
+  // IPv6
   if (cleanIp.includes(':')) {
-    // Handle IPv6 with scope
     const ipWithoutScope = cleanIp.split('%')[0];
     const parts = ipWithoutScope.split(':');
     
-    // Check for IPv4-mapped IPv6
     if (parts.length >= 2 && parts[parts.length - 1].includes('.')) {
-      const lastPart = parts[parts.length - 1];
-      return ipv4Regex.test(lastPart);
+      return ipv4Regex.test(parts[parts.length - 1]);
     }
     
     if (parts.length > 8) return false;
@@ -367,18 +517,14 @@ export function isValidIp(ip: string): boolean {
 export function anonymizeIp(ip: string): string {
   if (!isValidIp(ip) || ip === 'unknown') return 'unknown';
   
-  // Remove port
   const cleanIp = ip.split(':')[0];
   
-  // IPv6
   if (cleanIp.includes(':')) {
     const parts = cleanIp.split(':');
     if (parts.length <= 3) return cleanIp;
-    // Anonymize last 80 bits for IPv6
     return `${parts.slice(0, Math.min(2, parts.length)).join(':')}::`;
   }
   
-  // IPv4 - anonymize last octet
   const parts = cleanIp.split('.');
   if (parts.length !== 4) return cleanIp;
   return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
@@ -391,7 +537,6 @@ export function generateRateLimitKey(
 ): string {
   let key = `${prefix}_${identifier}`;
   
-  // Add IP if available for additional identification
   if (req) {
     const ip = getClientIpFromRequest(req);
     if (ip && ip !== 'unknown') {
@@ -403,30 +548,31 @@ export function generateRateLimitKey(
   return key;
 }
 
-// Helper function for API routes
 export async function checkRateLimit(
   req: any,
   res: any,
   config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ
-): Promise<{ allowed: boolean; headers?: Record<string, string> }> {
+): Promise<{ allowed: boolean; headers?: Record<string, string>; result?: RateLimitResult }> {
   const ip = getClientIpFromRequest(req);
   const key = generateRateLimitKey(config.keyPrefix || 'default', ip, req);
   
   try {
     const result = await rateLimitAsync(key, config);
-    
-    // Add rate limit headers to response
     const headers = createRateLimitHeaders(result);
     
+    // Set headers on response
+    Object.entries(headers).forEach(([k, v]) => {
+      res.setHeader(k, v);
+    });
+    
     if (!result.allowed) {
-      res.setHeader('Retry-After', Math.ceil((result.resetAt - Date.now()) / 1000));
-      return { allowed: false, headers };
+      console.warn(`[RateLimit] BLOCKED: ${ip} (${config.keyPrefix})`);
+      return { allowed: false, headers, result };
     }
     
-    return { allowed: true, headers };
+    return { allowed: true, headers, result };
   } catch (error) {
     console.error('Rate limit check failed:', error);
-    // Allow request if rate limiting fails
     return { allowed: true };
   }
 }
@@ -445,9 +591,13 @@ if (typeof process !== 'undefined') {
 export default {
   rateLimitAsync,
   rateLimit,
+  markRequestSuccess,
   createRateLimitHeaders,
   getRateLimitStatus,
   resetRateLimit,
+  blockPermanently,
+  unblock,
+  getRateLimiterStats,
   getClientIpFromRequest,
   isValidIp,
   anonymizeIp,
