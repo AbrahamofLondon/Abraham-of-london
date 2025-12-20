@@ -385,19 +385,34 @@ export async function sendInnerCircleEmail(
   console.log(`[Email] Key: ${key}`);
 }
 
-export function getClientIp(req: NextApiRequest): string | undefined {
+/**
+ * Extract client IP from Next.js API request
+ * Handles various proxy headers (Netlify, Vercel, Cloudflare, etc.)
+ */
+export function getClientIp(req: any): string | undefined {
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
     const ips = Array.isArray(forwarded) ? forwarded[0] : forwarded;
     return ips.split(',')[0].trim();
   }
+  
   const realIp = req.headers['x-real-ip'];
-  if (realIp) return Array.isArray(realIp) ? realIp[0] : realIp;
+  if (realIp) {
+    return Array.isArray(realIp) ? realIp[0] : realIp;
+  }
+  
   const cfConnectingIp = req.headers['cf-connecting-ip'];
-  if (cfConnectingIp) return Array.isArray(cfConnectingIp) ? cfConnectingIp[0] : cfConnectingIp;
+  if (cfConnectingIp) {
+    return Array.isArray(cfConnectingIp) ? cfConnectingIp[0] : cfConnectingIp;
+  }
+  
   return req.socket?.remoteAddress;
 }
 
+/**
+ * Get a privacy-safe version of a key for display/logging
+ * Shows only the last 6 characters (suffix)
+ */
 export function getPrivacySafeKeyExport(key: string): string {
   if (!key || key.length < 6) return '***';
   return `***${key.slice(-6)}`;

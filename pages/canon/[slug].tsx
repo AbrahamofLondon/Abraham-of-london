@@ -3,7 +3,7 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { getAllCanons, normalizeSlug, isDraft } from "@/lib/contentlayer-helper";
+import { getAllCanons, getCanonBySlug, normalizeSlug, isDraft } from "@/lib/contentlayer-helper";
 import { serialize } from "next-mdx-remote/serialize";
 import { MDXRemote } from "next-mdx-remote";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -26,9 +26,10 @@ const SITE = "https://www.abrahamoflondon.org";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const canons = getAllCanons();
+  
   const paths = canons
-    .filter((d) => !isDraft(d))
-    .map((d) => {
+    .filter((d: any) => !isDraft(d))
+    .map((d: any) => {
       const slug = normalizeSlug(d);
       if (!slug) {
         console.warn(`⚠️ Canon missing slug:`, d.title);
@@ -38,7 +39,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
-  console.log(`📚 Generated ${paths.length} canon paths`);
+  console.log(`📚 Canon: Generated ${paths.length} paths`);
   return { paths, fallback: "blocking" };
 };
 
@@ -46,17 +47,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "")
     .trim()
     .toLowerCase()
-    .replace(/\/$/, ""); // Remove trailing slash for comparison
+    .replace(/\/$/, "");
   
   if (!slug) {
     console.warn(`⚠️ Canon page called with empty slug`);
     return { notFound: true };
   }
 
-  const canons = getAllCanons();
-  const rawDoc = canons.find(
-    (d) => !isDraft(d) && normalizeSlug(d).toLowerCase().replace(/\/$/, "") === slug
-  );
+  const rawDoc = getCanonBySlug(slug);
 
   if (!rawDoc) {
     console.warn(`⚠️ Canon not found for slug: ${slug}`);
@@ -65,7 +63,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   console.log(`✅ Found canon: ${rawDoc.title} (slug: ${slug})`);
 
-  // Create a serializable version of the canon
+  // Create serializable props
   const canon = {
     title: rawDoc.title || "Canon",
     excerpt: rawDoc.excerpt || null,

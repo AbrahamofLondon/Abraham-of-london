@@ -1,65 +1,154 @@
+// pages/blog/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import Layout from "@/components/Layout";
-import { getPublishedPosts, getPostBySlug } from "@/lib/contentlayer-helper";
+import Link from "next/link";
 import { serialize } from "next-mdx-remote/serialize";
+import { MDXRemote } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-import mdxComponents from "@/components/mdx-components";
-import { MDXRemote } from "next-mdx-remote";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import { getPublishedPosts, getPostBySlug, normalizeSlug } from "@/lib/contentlayer-helper";
 
-type Props = { post: any; source: any };
+type Props = {
+  post: {
+    title: string;
+    excerpt: string | null;
+    author: string | null;
+    coverImage: string | null;
+    date: string | null;
+    slug: string;
+  };
+  source: MDXRemoteSerializeResult;
+};
+
 const SITE = "https://www.abrahamoflondon.org";
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = getPublishedPosts().map((p) => ({
-    params: { slug: p.slug }
-  }));
-  return { paths, fallback: false };
+  const posts = getPublishedPosts();
+  
+  const paths = posts
+    .map((post: any) => {
+      const slug = normalizeSlug(post);
+      if (!slug) {
+        console.warn(`⚠️ Post missing slug:`, post.title);
+        return null;
+      }
+      return { params: { slug } };
+    })
+    .filter(Boolean) as { params: { slug: string } }[];
+
+  console.log(`📝 Blog: Generated ${paths.length} paths`);
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").toLowerCase().trim();
-  const rawDoc = getPostBySlug(slug);
-
-  if (!rawDoc) return { notFound: true };
-
-  // SURGICAL EXTRACTION
-  const post = {
-    title: rawDoc.title || "Insight",
-    date: rawDoc.date ? new Date(rawDoc.date).toISOString() : null,
-    author: rawDoc.author || null,
-    excerpt: rawDoc.excerpt || null,
-    coverImage: rawDoc.coverImage || null,
-    url: `/blog/${slug}`,
-  };
-
-  try {
-    const mdxSource = await serialize(rawDoc.body.raw, {
-      mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
-    });
-    return { 
-      props: { post, source: JSON.parse(JSON.stringify(mdxSource)) }, 
-      revalidate: 1800 
-    };
-  } catch (err) {
+  const slug = String(params?.slug ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\/$/, "");
+  
+  if (!slug) {
+    console.warn(`⚠️ Blog page called with empty slug`);
     return { notFound: true };
   }
+
+  const rawDoc = getPostBySlug(slug);
+
+  if (!rawDoc) {
+    console.warn(`⚠️ Post not found for slug: ${slug}`);
+    return { notFound: true };
+  }
+
+  console.log(`✅ Found post: ${rawDoc.title} (slug: ${slug})`);
+
+  // Create serializable props
+  const post = {
+    title: rawDoc.title || "Insight",
+    excerpt: rawDoc.excerpt || null,
+    author: rawDoc.author || null,
+    coverImage: rawDoc.coverImage || null,
+    date: rawDoc.date ? new Date(rawDoc.date).toISOString() : null,
+    slug: slug,
+  };
+
+  const raw = String(rawDoc?.body?.raw ?? "");
+  let source: MDXRemoteSerializeResult;
+
+  try {
+    source = await serialize(raw, {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: "wrap" }],
+        ],
+      },
+    });
+  } catch (err) {
+    console.error(`❌ Failed to serialize MDX for post: ${post.title}`, err);
+    source = await serialize("Content is being prepared.");
+  }
+
+  return {
+    props: {
+      post,
+      source,
+    },
+    revalidate: 3600,
+  };
 };
 
-const PostPage: NextPage<Props> = ({ post, source }) => (
-  <Layout title={post.title} description={post.excerpt} ogImage={post.coverImage} ogType="article">
-    <main className="mx-auto max-w-3xl px-6 py-12 lg:py-24">
-      <header className="mb-10 border-b border-gold/10 pb-10">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Insight & Reflection</p>
-        <h1 className="font-serif text-3xl font-semibold text-cream sm:text-5xl mt-4">{post.title}</h1>
-      </header>
-      <article className="prose prose-invert prose-gold max-w-none">
-        <MDXRemote {...source} components={mdxComponents} />
-      </article>
-    </main>
-  </Layout>
-);
+const PostPage: NextPage<Props> = ({ post, source }) => {
+  const canonicalUrl = `${SITE}/blog/${post.slug}`;
+
+  return (
+    <Layout 
+      title={post.title} 
+      description={post.excerpt || undefined}
+      ogImage={post.coverImage || undefined}
+      ogType="article"
+      canonicalUrl={canonicalUrl}
+    >
+      <Head>
+        <link rel="canonical" href={canonicalUrl} />
+      </Head>
+      <main className="mx-auto max-w-3xl px-6 py-12 lg:py-24">
+        <Link href="/blog" className="text-sm text-gold hover:underline">
+          ← Back to Essays
+        </Link>
+        <header className="mt-6 mb-10 border-b border-gold/10 pb-10">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
+            Insight & Reflection
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-5xl mt-4">
+            {post.title}
+          </h1>
+          {post.excerpt ? (
+            <p className="mt-4 text-gray-300">{post.excerpt}</p>
+          ) : null}
+          <div className="mt-4 flex gap-4 text-sm text-gray-400">
+            {post.author && <span>{post.author}</span>}
+            {post.date && (
+              <span>
+                {new Date(post.date).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+            )}
+          </div>
+        </header>
+        <article className="prose prose-invert prose-gold max-w-none">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
+      </main>
+    </Layout>
+  );
+};
 
 export default PostPage;

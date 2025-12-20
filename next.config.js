@@ -1,55 +1,76 @@
-/** @type {import("next").NextConfig} */
-import path from "node:path";
-import { withContentlayer } from "next-contentlayer2";
+/** @type {import('next').NextConfig} */
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { withContentlayer } from 'next-contentlayer2';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const nextConfig = {
   reactStrictMode: true,
-
-  // Canonical routing: no trailing slash
-  trailingSlash: false,
-
-  // Netlify + Next Image: keep optimized in prod unless you have a hard reason
+  trailingSlash: false, // ✅ Changed to match contentlayer URLs without trailing slashes
+  
+  // ✅ Required for static export
   images: {
-    // If you truly need unoptimized (static export), keep true. Otherwise set false.
-    // For Netlify + plugin-nextjs, optimized is fine.
-    unoptimized: false,
-
+    unoptimized: true,
     dangerouslyAllowSVG: true,
-
-    // NOTE: Next does NOT accept hostname: "**"
-    // Allow any HTTPS remote image by leaving remotePatterns open-ended is not supported.
-    // Use a permissive but valid pattern instead:
-    remotePatterns: [{ protocol: "https", hostname: "*", pathname: "/**" }],
-
+    contentDispositionType: "attachment",
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
     formats: ["image/avif", "image/webp"],
   },
-
-  // For production robustness: do NOT ship with these enabled long term.
-  // But I’m leaving them as you had them so you can get a deploy out first.
-  typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
-
+  
+  compress: true,
+  poweredByHeader: false,
+  
+  // Temporary build fixes
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  env: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org',
+    NEXT_PUBLIC_INNOVATEHUB_URL: process.env.NEXT_PUBLIC_INNOVATEHUB_URL || 'https://innovatehub.abrahamoflondon.org',
+    NEXT_PUBLIC_ALOMARADA_URL: process.env.NEXT_PUBLIC_ALOMARADA_URL || 'https://alomarada.com/',
+    NEXT_PUBLIC_ENDURELUXE_URL: process.env.NEXT_PUBLIC_ENDURELUXE_URL || 'https://alomarada.com/endureluxe',
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-R2Y3YMY8F8',
+  },
+  
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+  
+  // ✅ Simple webpack config for static export
   webpack: (config, { isServer }) => {
-    // Respect tsconfig paths, but ensure "@" resolves correctly and consistently
     config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      "@": path.resolve(process.cwd()),
+      ...config.resolve.alias,
+      '@': process.cwd(),
     };
-
-    // Don't stub Node core modules unless you are importing server-only code in client bundle
+    
+    // Handle SVG imports
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+    
+    // Client-side fallbacks
     if (!isServer) {
       config.resolve.fallback = {
-        ...(config.resolve.fallback || {}),
         fs: false,
         path: false,
         os: false,
         crypto: false,
         stream: false,
-        net: false,
-        tls: false,
       };
     }
-
+    
     return config;
   },
 };
