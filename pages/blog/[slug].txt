@@ -12,11 +12,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import {
-  getPublishedPosts,
-  getPostBySlug,
-  normalizeSlug,
-} from "@/lib/contentlayer-helper";
+import { getPublishedPosts, getPostBySlug } from "@/lib/contentlayer-helper";
 
 type Props = {
   post: {
@@ -33,69 +29,111 @@ type Props = {
 const SITE = "https://www.abrahamoflondon.org";
 
 /**
- * Canonicalise any incoming slug-like value into the "last path segment" format
- * your Contentlayer helper expects (and that your content uses).
+ * NOTE (why your 17 slugs are 404 right now):
+ * If your build is using static export (Next "output: export" / next export),
+ * fallback: "blocking" CANNOT generate pages on-demand. Those pages 404 unless
+ * they are pre-rendered at build time.
+ *
+ * Fix: use fallback: false and ensure all slugs are returned in getStaticPaths.
  */
-function toCanonicalSlug(input: unknown): string {
+
+function toClean(input: unknown): string {
   let s = String(input ?? "").trim();
   if (!s) return "";
-
-  // Strip query/hash
   s = s.split("#")[0]?.split("?")[0] ?? s;
-
-  // Strip protocol+domain
   s = s.replace(/^https?:\/\/[^/]+/i, "");
-
-  // Normalise casing and slashes
-  s = s.toLowerCase();
   s = s.replace(/\/+$/, "");
   s = s.replace(/^\/+/, "");
-  if (!s) return "";
+  return s.toLowerCase();
+}
 
-  // Use last segment if it's a path
+function lastSegment(pathLike: unknown): string {
+  const s = toClean(pathLike);
+  if (!s) return "";
   const parts = s.split("/").filter(Boolean);
   return parts.length ? parts[parts.length - 1] : s;
+}
+
+function stripBlogPrefix(pathLike: unknown): string {
+  const s = toClean(pathLike);
+  if (!s) return "";
+  return s.startsWith("blog/") ? s.slice("blog/".length) : s;
+}
+
+function tryFindPostByAnyKey(requestedParam: string): any | null {
+  const key = lastSegment(requestedParam);
+  if (!key) return null;
+
+  // Try multiple representations because helpers sometimes store:
+  // - "lessons-from-noah"
+  // - "blog/lessons-from-noah"
+  // - "/blog/lessons-from-noah"
+  const candidates = Array.from(
+    new Set<string>([
+      key,
+      stripBlogPrefix(key),
+      `blog/${key}`,
+      `/blog/${key}`,
+      stripBlogPrefix(`blog/${key}`),
+    ]),
+  ).filter(Boolean);
+
+  for (const c of candidates) {
+    const doc = getPostBySlug(c);
+    if (doc) return doc;
+  }
+
+  return null;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getPublishedPosts();
 
   const paths = posts
-    .map((post: any) => {
-      const slug = toCanonicalSlug(normalizeSlug(post));
+    .map((p: any) => {
+      // Be aggressive: accept url/slug/flattenedPath; always reduce to last segment.
+      const slug =
+        lastSegment(p?.slug) ||
+        lastSegment(p?.url) ||
+        lastSegment(p?._raw?.flattenedPath) ||
+        "";
+
       if (!slug) {
-        console.warn(`⚠️ Post missing slug:`, post?.title);
+        // If you see this in logs, that document is missing routing data.
+        console.warn("⚠️ Blog post missing slug/url/flattenedPath:", p?.title ?? p?._id);
         return null;
       }
+
       return { params: { slug } };
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
   console.log(`📝 Blog: Generated ${paths.length} paths`);
-  return { paths, fallback: "blocking" };
+
+  // Critical for static export: must be false (no on-demand generation).
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const requested = toCanonicalSlug(params?.slug);
+  const requested = lastSegment(params?.slug);
 
   if (!requested) {
-    console.warn(`⚠️ Blog page called with empty slug`);
     return { notFound: true };
   }
 
-  // IMPORTANT:
-  // getPostBySlug in your helper matches against normalizeSlug(doc) which is
-  // canonical last-segment. So we must pass canonical last-segment too.
-  const rawDoc = getPostBySlug(requested);
+  const rawDoc = tryFindPostByAnyKey(requested);
 
   if (!rawDoc) {
-    console.warn(`⚠️ Post not found for slug: ${requested}`);
+    console.warn(`⚠️ Blog post not found for slug: ${requested}`);
     return { notFound: true };
   }
 
-  const canonicalSlug = toCanonicalSlug(normalizeSlug(rawDoc)) || requested;
-
-  console.log(`✅ Found post: ${rawDoc.title} (slug: ${canonicalSlug})`);
+  // Canonical slug = last segment, always.
+  const canonicalSlug =
+    lastSegment(rawDoc?.slug) ||
+    lastSegment(rawDoc?.url) ||
+    lastSegment(rawDoc?._raw?.flattenedPath) ||
+    requested;
 
   const post = {
     title: rawDoc.title || "Insight",
@@ -113,10 +151,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     source = await serialize(raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [
-          rehypeSlug,
-          [rehypeAutolinkHeadings, { behavior: "wrap" }],
-        ],
+        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
       },
     });
   } catch (err) {
@@ -159,9 +194,7 @@ const PostPage: NextPage<Props> = ({ post, source }) => {
             {post.title}
           </h1>
 
-          {post.excerpt ? (
-            <p className="mt-4 text-gray-300">{post.excerpt}</p>
-          ) : null}
+          {post.excerpt ? <p className="mt-4 text-gray-300">{post.excerpt}</p> : null}
 
           <div className="mt-4 flex gap-4 text-sm text-gray-400">
             {post.author ? <span>{post.author}</span> : null}
