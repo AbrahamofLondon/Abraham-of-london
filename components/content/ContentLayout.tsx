@@ -1,10 +1,11 @@
-// components/content/ContentLayout.tsx
+// components/content/ContentLayout.tsx - FIXED
 import * as React from "react";
 import Head from "next/head";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import { getPageTitle, siteConfig } from "@/lib/imports";
+// Import the utility function directly instead of the whole config
+import { getPageTitle, siteConfig } from '@/lib/imports';
 
 interface ContentLayoutProps {
   frontmatter: {
@@ -38,7 +39,7 @@ export default function ContentLayout({
   // Safe access with fallbacks
   const title = frontmatter.title || `${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`;
   
-  // FIXED: Use getPageTitle function directly
+  // Use the utility function directly
   const pageTitle = getPageTitle(title);
   
   // Use excerpt first, then description, then title

@@ -1,23 +1,13 @@
+// components/ContentlayerDocPage.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { ArrowLeft, Share2, Clock, Calendar, Tag } from "lucide-react";
 import { motion } from "framer-motion";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-
-// Dynamic import for MDX - SSR: FALSE is critical to avoid hydration mismatch with complex MDX
-const MDXClient = dynamic(() => import("@/components/MDXClient"), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-[400px] flex flex-col items-center justify-center space-y-4 opacity-50">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
-      <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Initializing Vault Content</p>
-    </div>
-  ),
-});
 
 type ContentlayerDoc = {
   title?: string | null;
@@ -29,11 +19,11 @@ type ContentlayerDoc = {
   readTime?: string | null;
   tags?: string[] | null;
   slug?: string | null;
-  body?: { code?: string | null; raw?: string | null };
 };
 
 type Props = {
   doc: ContentlayerDoc;
+  source: MDXRemoteSerializeResult; // Changed from body.code to source
   canonicalPath: string;
   backHref?: string;
   label?: string;
@@ -44,6 +34,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondo
 
 export default function ContentlayerDocPage({
   doc,
+  source,
   canonicalPath,
   backHref = "/content",
   label = "Reading Room",
@@ -156,13 +147,16 @@ export default function ContentlayerDocPage({
 
           {/* MDX Content Area */}
           <div className="prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-gold/90 prose-a:text-gold prose-a:no-underline hover:prose-a:underline">
-            {doc.body?.code ? (
-              <MDXClient code={doc.body.code} components={components} />
-            ) : (
-              <div className="rounded-2xl border border-dashed border-white/10 p-12 text-center">
-                <p className="font-serif text-xl italic text-gray-500">Content is being prepared for the Vault.</p>
-              </div>
-            )}
+            <React.Suspense
+              fallback={
+                <div className="min-h-[400px] flex flex-col items-center justify-center space-y-4 opacity-50">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Initializing Vault Content</p>
+                </div>
+              }
+            >
+              <MDXRemote {...source} components={components} />
+            </React.Suspense>
           </div>
           
           <footer className="mt-24 border-t border-white/5 pt-12 text-center">
