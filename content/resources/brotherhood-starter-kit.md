@@ -9,12 +9,11 @@ href: "/resources/brotherhood-starter-kit"  # adjust to your actual page route
 readtime: "2 mins"
 coverImage: "/assets/images/resources/brotherhood-starter-kit.jpg"
 downloadUrl: "/assets/resources/pdfs/brotherhood-starter-kit.pdf"
-tags:
+tags: 
   - brotherhood
   - leadership
   - community
 ---
-
 # Brotherhood Starter Kit
 
 Essential tools and frameworks for building authentic brotherhood and meaningful connections.

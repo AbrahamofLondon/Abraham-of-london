@@ -10,7 +10,6 @@ href: "/resources/leadership-standards-blueprint"  # adjust to your actual page 
 coverImage: "/assets/images/resources/leadership-standards-blueprint.jpg" # etc
 downloadUrl: "/assets/resources/pdfs/leadership-standards-blueprint.pdf"
 ---
-
 # Leadership Standards Blueprint
 
 **The 12 structural pillars of durable, intergenerational leadership**

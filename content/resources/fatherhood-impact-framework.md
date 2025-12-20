@@ -10,7 +10,6 @@ coverImage: "/assets/images/canon/canon-resources.jpg"
 downloadUrl: "/assets/resources/pdfs/fatherhood-impact-framework.pdf"
 href: "/resources/fatherhood-impact-framework"  # adjust to your actual page route
 ---
-
 # Fatherhood Impact Framework
 
 _A generational model for building identity, order, and destiny_

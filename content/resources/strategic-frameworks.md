@@ -10,7 +10,6 @@ tags: ["strategic", "frameworks", "tools", "decision-making"]
 href: "/resources/strategic-frameworks"  # adjust to your actual page route
 draft: false
 ---
-
 # Strategic Frameworks Collection
 
 ## Overview
