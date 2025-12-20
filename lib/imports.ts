@@ -1,5 +1,7 @@
 // lib/imports.ts
 // Central barrel export for all lib utilities
+// NOTE: Only exports client-safe utilities. Server-only modules like 
+// inner-circle.ts must be imported directly in API routes.
 
 // ============================================================================
 // Site Configuration
@@ -20,134 +22,36 @@ export function getPageTitle(title?: string): string {
 }
 
 // ============================================================================
-// Contentlayer Helpers
+// Contentlayer Helpers - Client-safe
 // ============================================================================
-export {
-  // Raw Collections
-  allPosts,
-  allBooks,
-  allDownloads,
-  allEvents,
-  allPrints,
-  allResources,
-  allStrategies,
-  allCanons,
-  allCanon, // Alias
-  allShorts,
-  
-  // Retrieval Getters
-  getAllContentlayerDocs,
-  getPublishedDocuments,
-  getPublishedDocumentsByType,
-  getPublishedPosts,
-  getPublishedShorts,
-  getRecentShorts,
-  getAllCanons,
-  getAllBooks,
-  getAllDownloads,
-  getAllEvents,
-  getAllStrategies,
-  getAllResources,
-  getAllPrints,
-  
-  // By-Slug Getters
-  getPostBySlug,
-  getBookBySlug,
-  getCanonBySlug,
-  getShortBySlug,
-  getDownloadBySlug,
-  getResourceBySlug,
-  getEventBySlug,
-  getPrintBySlug,
-  getStrategyBySlug,
-  
-  // Logic Helpers
-  normalizeSlug,
-  getDocHref,
-  getDocKind,
-  getShortUrl,
-  isDraft,
-  isPublished,
-  assertContentlayerHasDocs,
-  resolveDocCoverImage,
-  resolveDocDownloadUrl,
-} from "./contentlayer-helper";
-
-export type { DocKind, ContentDoc } from "./contentlayer-helper";
+export * from "./contentlayer-helper";
 
 // ============================================================================
-// Input Validation & Sanitization
+// Input Validation - Client-safe
 // ============================================================================
-export {
-  sanitizeInput,
-  isValidEmail,
-  isValidUrl,
-  sanitizeObject,
-  containsSqlInjection,
-  containsXss,
-  validateApiInput,
-} from "./input-validator";
+export * from "./input-validator";
 
 // ============================================================================
-// Rate Limiting
+// Rate Limiting - Client-safe (uses in-memory storage)
 // ============================================================================
-export {
-  rateLimit,
-  rateLimitAsync,
-  markRequestSuccess,
-  createRateLimitHeaders,
-  getRateLimitStatus,
-  resetRateLimit,
-  blockPermanently,
-  unblock,
-  getRateLimiterStats,
-  getClientIpFromRequest,
-  isValidIp,
-  anonymizeIp,
-  generateRateLimitKey,
-  checkRateLimit,
-  RATE_LIMIT_CONFIGS,
-} from "./rate-limit";
-
-export type { RateLimitConfig, RateLimitResult } from "./rate-limit";
+export * from "./rate-limit";
 
 // ============================================================================
-// Security Monitoring (if available)
+// Security Monitoring - Client-safe
 // ============================================================================
-export {
-  detectSqlInjection,
-  detectXss,
-  detectPathTraversal,
-  detectSuspiciousHeaders,
-  logSecurityEvent,
-  getSecurityEvents,
-  getSecurityEventsByIp,
-  getSuspiciousIps,
-  clearSecurityHistory,
-  securityMiddleware,
-} from "./security-monitor";
+// Uncomment when security-monitor.ts is ready
+// export * from "./security-monitor";
 
 // ============================================================================
-// Inner Circle (if available)
+// ⚠️ DO NOT EXPORT SERVER-ONLY MODULES HERE
 // ============================================================================
-export {
-  createOrUpdateMemberAndIssueKey,
-  verifyInnerCircleKey,
-  recordInnerCircleUnlock,
-  revokeInnerCircleKey,
-  deleteMemberByEmail,
-  getPrivacySafeStats,
-  getActiveKeysForMember,
-  sendInnerCircleEmail,
-  getClientIp,
-  getPrivacySafeKeyExport,
-  cleanupOldData,
-} from "./inner-circle";
-
-export type {
-  InnerCircleStatus,
-  CreateOrUpdateMemberArgs,
-  IssuedKey,
-  VerifyInnerCircleKeyResult,
-  InnerCircleStore,
-} from "./inner-circle";
+// The following modules use Node.js built-ins (crypto, pg, dns, net, tls)
+// and must ONLY be imported directly in API routes:
+//
+// - lib/inner-circle.ts (uses pg, crypto)
+// - lib/server/* (any server-only utilities)
+//
+// To use them in API routes:
+//   import { functionName } from "@/lib/inner-circle";
+//
+// ============================================================================
