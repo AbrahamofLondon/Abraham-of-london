@@ -277,4 +277,4 @@ export default makeSource({
 
   onUnknownDocuments: "skip",
   disableImportAliasWarning: true,
-}););
+});
