@@ -4,20 +4,15 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-
-import {
-  assertContentlayerHasDocs,
-  getPublishedPosts,
-  getPostBySlug,
-  normalizeSlug,
-} from "@/lib/contentlayer-helper";
+import { getPublishedPosts, getPostBySlug } from "@/lib/contentlayer-helper";
 
 type Props = {
   post: {
@@ -26,80 +21,134 @@ type Props = {
     author: string | null;
     coverImage: string | null;
     date: string | null;
-    slug: string;
+    slug: string; // last segment only
+    url: string;  // canonical /blog/<slug>
   };
   source: MDXRemoteSerializeResult;
 };
 
 const SITE = "https://www.abrahamoflondon.org";
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs("pages/blog/[slug].tsx getStaticPaths");
+/** Basic clean helpers */
+function toClean(input: unknown): string {
+  let s = String(input ?? "").trim();
+  if (!s) return "";
+  s = s.split("#")[0]?.split("?")[0] ?? s;
+  s = s.replace(/^https?:\/\/[^/]+/i, "");
+  s = s.replace(/\/+$/, "");
+  s = s.replace(/^\/+/, "");
+  return s;
+}
 
+function lastSegment(pathLike: unknown): string {
+  const s = toClean(pathLike).toLowerCase();
+  if (!s) return "";
+  const parts = s.split("/").filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : s;
+}
+
+/**
+ * CRITICAL:
+ * Some blog MDX contains custom JSX components (Capitalized tags) that are not
+ * present in mdxComponents scope. That crashes prerender + next export.
+ *
+ * This sanitizer:
+ * - finds Capitalized JSX tags like <Callout ...> or <Quote />
+ * - converts them to <div> / </div> and strips attributes
+ *
+ * Result: export-safe, content still readable.
+ */
+function sanitizeBlogMdx(raw: string): string {
+  if (!raw) return raw;
+
+  // 1) Self-closing: <MyComponent ... />
+  raw = raw.replace(/<([A-Z][A-Za-z0-9_]*)\b[^>]*\/>/g, "<div />");
+
+  // 2) Opening tags: <MyComponent ...>
+  raw = raw.replace(/<([A-Z][A-Za-z0-9_]*)\b[^>]*>/g, "<div>");
+
+  // 3) Closing tags: </MyComponent>
+  raw = raw.replace(/<\/([A-Z][A-Za-z0-9_]*)\s*>/g, "</div>");
+
+  return raw;
+}
+
+function getCanonicalFromDoc(doc: any) {
+  const url = typeof doc?.url === "string" ? doc.url : "";
+  const slug = lastSegment(url || doc?.slug || doc?._raw?.flattenedPath);
+  const canonicalUrl = slug ? `/blog/${slug}` : "/blog";
+  return { slug, url: canonicalUrl };
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getPublishedPosts();
 
   const paths = posts
     .map((p: any) => {
-      const slug = normalizeSlug(p);
-      if (!slug) return null;
-      return { params: { slug } };
+      const { slug } = getCanonicalFromDoc(p);
+      return slug ? { params: { slug } } : null;
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
-  console.log(`🧱 Blog: getStaticPaths -> ${paths.length} paths`);
-  return { paths, fallback: false };
+  console.log(`📝 Blog: Generated ${paths.length} paths`);
+  return { paths, fallback: false }; // required for export
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  assertContentlayerHasDocs("pages/blog/[slug].tsx getStaticProps");
+  const requestedSlug = lastSegment(params?.slug);
+  if (!requestedSlug) return { notFound: true };
 
-  const slugParam = typeof params?.slug === "string" ? params.slug : "";
-  if (!slugParam) return { notFound: true };
+  // Prefer canonical matching by url first:
+  const byUrl = getPostBySlug(`/blog/${requestedSlug}`) || getPostBySlug(`blog/${requestedSlug}`);
+  const rawDoc =
+    byUrl ||
+    getPostBySlug(requestedSlug) ||
+    getPostBySlug(`/blog/${requestedSlug}`) ||
+    null;
 
-  // normalizeSlug() expects a doc; here we already have the slug string.
-  // getPostBySlug() should accept canonical slugs; if yours doesn’t, we’ll
-  // still catch it because normalizeSlug was used to build the paths.
-  const doc = getPostBySlug(slugParam);
-
-  if (!doc) {
-    console.warn(`⚠️ Blog: notFound for slug=${slugParam}`);
+  if (!rawDoc) {
+    console.warn(`⚠️ Blog post not found for slug: ${requestedSlug}`);
     return { notFound: true };
   }
 
-  const canonicalSlug = normalizeSlug(doc) || slugParam;
+  const { slug, url } = getCanonicalFromDoc(rawDoc);
 
   const post = {
-    title: doc.title || "Insight",
-    excerpt: doc.excerpt || doc.description || null,
-    author: doc.author || null,
-    coverImage: doc.coverImage || null,
-    date: doc.date ? new Date(doc.date).toISOString() : null,
-    slug: canonicalSlug,
+    title: rawDoc.title || "Insight",
+    excerpt: rawDoc.excerpt || rawDoc.description || null,
+    author: rawDoc.author || null,
+    coverImage: rawDoc.coverImage || null,
+    date: rawDoc.date ? new Date(rawDoc.date).toISOString() : null,
+    slug: slug || requestedSlug,
+    url,
   };
 
-  const raw = String(doc?.body?.raw ?? "");
-  let source: MDXRemoteSerializeResult;
+  const raw = String(rawDoc?.body?.raw ?? "");
+  const safeRaw = sanitizeBlogMdx(raw);
 
+  let source: MDXRemoteSerializeResult;
   try {
-    source = await serialize(raw, {
+    source = await serialize(safeRaw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
+        rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: "wrap" }],
+        ],
       },
     });
   } catch (err) {
-    console.error(`❌ Blog: MDX serialize failed for ${canonicalSlug}`, err);
+    console.error(`❌ MDX serialize failed for /blog/${requestedSlug}`, err);
     source = await serialize("Content is being prepared.");
   }
 
   return {
     props: { post, source },
-    revalidate: 3600,
   };
 };
 
 const PostPage: NextPage<Props> = ({ post, source }) => {
-  const canonicalUrl = `${SITE}/blog/${post.slug}`;
+  const canonicalUrl = `${SITE}${post.url}`;
 
   return (
     <Layout
@@ -120,14 +169,16 @@ const PostPage: NextPage<Props> = ({ post, source }) => {
 
         <header className="mt-6 mb-10 border-b border-gold/10 pb-10">
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
-            Insight &amp; Reflection
+            Insight & Reflection
           </p>
 
           <h1 className="mt-4 font-serif text-3xl font-semibold text-cream sm:text-5xl">
             {post.title}
           </h1>
 
-          {post.excerpt ? <p className="mt-4 text-gray-300">{post.excerpt}</p> : null}
+          {post.excerpt ? (
+            <p className="mt-4 text-gray-300">{post.excerpt}</p>
+          ) : null}
 
           <div className="mt-4 flex gap-4 text-sm text-gray-400">
             {post.author ? <span>{post.author}</span> : null}
