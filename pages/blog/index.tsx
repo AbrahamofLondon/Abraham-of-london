@@ -17,7 +17,12 @@ type CoverFit = "cover" | "contain";
 type CoverPosition = "center" | "top" | "bottom" | "left" | "right";
 
 type Item = {
+  // We keep slug for fallback and keys
   slug: string;
+
+  // ✅ Single source of truth for routing (from Contentlayer computedFields.url)
+  url: string;
+
   title: string;
   excerpt?: string | null;
   date?: string | null;
@@ -25,7 +30,7 @@ type Item = {
   coverImage?: string | null;
   tags?: string[] | null;
 
-  // ✅ carry through your frontmatter controls
+  // frontmatter controls
   coverAspect?: CoverAspect | null;
   coverFit?: CoverFit | null;
   coverPosition?: CoverPosition | null;
@@ -46,7 +51,7 @@ function aspectClass(aspect?: CoverAspect | null) {
 }
 
 function fitClass(fit?: CoverFit | null) {
-  // Normalize "fit" (if any legacy content exists)
+  // Normalize legacy "fit"
   if (fit === ("fit" as unknown as CoverFit)) return "object-contain";
   return fit === "contain" ? "object-contain" : "object-cover";
 }
@@ -66,6 +71,29 @@ function positionClass(pos?: CoverPosition | null) {
   }
 }
 
+/**
+ * Normalize url to:
+ * - always start with "/"
+ * - never end with "/" (except root "/")
+ */
+function normalizeUrl(input: unknown): string {
+  const raw = typeof input === "string" ? input.trim() : "";
+  if (!raw) return "";
+
+  let u = raw;
+
+  // strip domain if someone accidentally set full url
+  u = u.replace(/^https?:\/\/[^/]+/i, "");
+
+  // ensure leading slash
+  if (!u.startsWith("/")) u = `/${u}`;
+
+  // remove trailing slash (but not root)
+  if (u.length > 1) u = u.replace(/\/+$/, "");
+
+  return u;
+}
+
 const BlogIndex: NextPage<Props> = ({ items }) => {
   return (
     <Layout title="Essays">
@@ -82,7 +110,8 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
             Essays
           </h1>
           <p className="mt-3 max-w-2xl text-neutral-700 dark:text-cream/80">
-            Field notes, convictions, and strategic clarity — written for builders who refuse drift.
+            Field notes, convictions, and strategic clarity — written for
+            builders who refuse drift.
           </p>
         </header>
 
@@ -95,8 +124,8 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
 
             return (
               <Link
-                key={p.slug}
-                href={`/blog/${p.slug}`}
+                key={p.url || p.slug}
+                href={p.url} // ✅ Use computed URL (matches the pages that get exported)
                 className="group overflow-hidden rounded-2xl border border-black/10 bg-white/60 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-black/25"
               >
                 <div className={`relative ${aClass} bg-black/5 dark:bg-white/5`}>
@@ -108,7 +137,7 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
                     sizes="(min-width: 1024px) 40vw, 100vw"
                   />
 
-                  {/* Optional: if contain causes letterbox, this keeps it looking intentional */}
+                  {/* If contain causes letterbox, keep it intentional */}
                   {p.coverFit === "contain" && (
                     <div
                       className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"
@@ -156,20 +185,25 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const published = getPublishedPosts();
 
   const items: Item[] = published
-    .map((p: any) => ({
-      slug: normalizeSlug(p),
-      title: p.title ?? "Untitled",
-      excerpt: p.excerpt ?? null,
-      date: p.date ?? null,
-      readTime: p.readTime ?? null,
-      coverImage: p.coverImage ?? p.image ?? null,
-      tags: Array.isArray(p.tags) ? p.tags : null,
+    .map((p: any) => {
+      const slug = normalizeSlug(p);
+      const url = normalizeUrl(p?.url) || `/blog/${slug}`;
 
-      // ✅ frontmatter controls (allow either quoted/unquoted and legacy)
-      coverAspect: (p.coverAspect ?? null) as Item["coverAspect"],
-      coverFit: ((p.coverFit ?? null) as Item["coverFit"]) ?? null,
-      coverPosition: (p.coverPosition ?? null) as Item["coverPosition"],
-    }))
+      return {
+        slug,
+        url,
+        title: p.title ?? "Untitled",
+        excerpt: p.excerpt ?? null,
+        date: p.date ?? null,
+        readTime: p.readTime ?? null,
+        coverImage: p.coverImage ?? p.image ?? null,
+        tags: Array.isArray(p.tags) ? p.tags : null,
+
+        coverAspect: (p.coverAspect ?? null) as Item["coverAspect"],
+        coverFit: (p.coverFit ?? null) as Item["coverFit"],
+        coverPosition: (p.coverPosition ?? null) as Item["coverPosition"],
+      };
+    })
     .sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
