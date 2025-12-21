@@ -1,45 +1,77 @@
+// pages/shorts/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { Share2, Twitter, Linkedin, Mail, Link2, Check } from "lucide-react";
 import { motion } from "framer-motion";
-
-import { 
-  getPublishedShorts, 
-  getShortBySlug, 
-  normalizeSlug, 
-  resolveDocCoverImage 
-} from "@/lib/contentlayer-helper";
+import { Share2, Twitter, Linkedin, Mail, Link2, Check } from "lucide-react";
 import { serialize } from "next-mdx-remote/serialize";
-import mdxComponents from "@/components/mdx-components";
-import { MDXRemote } from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+
 import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import {
+  getPublishedShorts,
+  getShortBySlug,
+  normalizeSlug,
+  resolveDocCoverImage,
+} from "@/lib/contentlayer-helper";
 
 const SITE_URL = "https://www.abrahamoflondon.org";
 
+type ShortPageProps = {
+  short: {
+    _id: string;
+    slug: string;
+    title: string;
+    excerpt?: string | null;
+    date?: string | null;
+    readTime?: string | null;
+    tags?: string[] | null;
+    theme?: string | null;
+    cover?: string | null;
+    body: { raw: string };
+  };
+  source: MDXRemoteSerializeResult;
+};
+
+function toAbsoluteUrl(maybeUrl: string | null | undefined): string | null {
+  if (!maybeUrl) return null;
+  if (maybeUrl.startsWith("http://") || maybeUrl.startsWith("https://")) return maybeUrl;
+  if (maybeUrl.startsWith("/")) return `${SITE_URL}${maybeUrl}`;
+  return `${SITE_URL}/${maybeUrl}`;
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = getPublishedShorts().map((s) => ({ 
-    params: { slug: normalizeSlug(s) } 
+  const paths = getPublishedShorts().map((s) => ({
+    params: { slug: normalizeSlug(s) },
   }));
   return { paths, fallback: false };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params }) => {
   const slug = String(params?.slug ?? "").toLowerCase().trim();
   const rawDoc = getShortBySlug(slug);
-  
+
   if (!rawDoc) return { notFound: true };
-  
-  const short = JSON.parse(JSON.stringify({
-    ...rawDoc,
-    cover: resolveDocCoverImage(rawDoc)
-  }));
-  
+
+  // Ensure a stable slug string for links/canonical (don’t depend on normalizeSlug(doc) heuristics at runtime)
+  const stableSlug = normalizeSlug(rawDoc);
+
+  const cover = toAbsoluteUrl(resolveDocCoverImage(rawDoc)) ?? null;
+
+  const short = JSON.parse(
+    JSON.stringify({
+      ...rawDoc,
+      slug: stableSlug,
+      cover,
+    }),
+  ) as ShortPageProps["short"];
+
   try {
     const source = await serialize(short.body.raw);
     return { props: { short, source }, revalidate: 1800 };
-  } catch (err) {
+  } catch {
     return { notFound: true };
   }
 };
@@ -51,74 +83,99 @@ const ShareButton: React.FC<{
   className?: string;
 }> = ({ icon, label, onClick, className = "" }) => (
   <button
+    type="button"
     onClick={onClick}
-    className={`group flex items-center gap-2 rounded-lg border border-gold/20 bg-gold/5 px-4 py-2.5 text-sm font-medium text-gold transition-all hover:border-gold/40 hover:bg-gold/10 hover:scale-105 ${className}`}
+    className={[
+      "group flex items-center gap-2 rounded-lg border border-gold/20 bg-gold/5 px-4 py-2.5",
+      "text-sm font-medium text-gold transition-all hover:border-gold/40 hover:bg-gold/10 hover:scale-[1.03]",
+      "active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-gold/30",
+      className,
+    ].join(" ")}
+    aria-label={label}
   >
     {icon}
     <span className="hidden sm:inline">{label}</span>
   </button>
 );
 
-const ShortPage: NextPage<{short: any, source: any}> = ({ short, source }) => {
+const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
   const [copied, setCopied] = React.useState(false);
-  const shareUrl = `${SITE_URL}/shorts/${normalizeSlug(short)}`;
-  const shareTitle = short.title || "Wisdom from Abraham of London";
-  const shareText = short.excerpt || "Thought-provoking insight worth reflecting on";
 
-  const handleShare = React.useCallback((platform: 'twitter' | 'linkedin' | 'email' | 'copy') => {
-    const encodedUrl = encodeURIComponent(shareUrl);
-    const encodedTitle = encodeURIComponent(shareTitle);
-    const encodedText = encodeURIComponent(shareText);
+  // ✅ Fix: share URL should not re-normalize the whole doc again (can drift); use short.slug
+  const shareUrl = `${SITE_URL}/shorts/${short.slug}`;
+  const shareTitle = short.title || "Shorts · Abraham of London";
+  const shareText =
+    short.excerpt || "A short reflection from Abraham of London — faith-rooted clarity without the noise.";
 
-    switch (platform) {
-      case 'twitter':
-        window.open(
-          `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}&via=abrahamoflondon`,
-          '_blank',
-          'width=550,height=420'
-        );
-        break;
-      
-      case 'linkedin':
-        window.open(
-          `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-          '_blank',
-          'width=550,height=420'
-        );
-        break;
-      
-      case 'email':
-        window.location.href = `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0ARead more: ${encodedUrl}`;
-        break;
-      
-      case 'copy':
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        });
-        break;
-    }
-  }, [shareUrl, shareTitle, shareText]);
+  const handleShare = React.useCallback(
+    (platform: "twitter" | "linkedin" | "email" | "copy") => {
+      if (typeof window === "undefined") return;
+
+      const encodedUrl = encodeURIComponent(shareUrl);
+      const encodedTitle = encodeURIComponent(shareTitle);
+      const encodedText = encodeURIComponent(shareText);
+
+      switch (platform) {
+        case "twitter": {
+          // ✅ Fix: remove broken/unknown `via` param if handle isn’t exact; keep it clean
+          window.open(
+            `https://twitter.com/intent/tweet?text=${encodedTitle}%0A${encodedText}&url=${encodedUrl}`,
+            "_blank",
+            "noopener,noreferrer,width=550,height=420",
+          );
+          break;
+        }
+        case "linkedin": {
+          window.open(
+            `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+            "_blank",
+            "noopener,noreferrer,width=550,height=420",
+          );
+          break;
+        }
+        case "email": {
+          // ✅ Fix: keep body readable and predictable
+          window.location.href = `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0ARead%3A%20${encodedUrl}`;
+          break;
+        }
+        case "copy": {
+          if (!navigator?.clipboard?.writeText) return;
+          navigator.clipboard
+            .writeText(shareUrl)
+            .then(() => {
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1800);
+            })
+            .catch(() => {});
+          break;
+        }
+      }
+    },
+    [shareUrl, shareTitle, shareText],
+  );
 
   const handleNativeShare = React.useCallback(() => {
-    if (navigator.share) {
-      navigator.share({
+    if (typeof window === "undefined") return;
+    if (!navigator?.share) return;
+
+    navigator
+      .share({
         title: shareTitle,
         text: shareText,
         url: shareUrl,
-      }).catch(() => {});
-    }
+      })
+      .catch(() => {});
   }, [shareUrl, shareTitle, shareText]);
 
   return (
-    <Layout title={short.title} ogImage={short.cover}>
+    <Layout title={shareTitle} description={shareText} ogImage={short.cover ?? undefined}>
       <Head>
         <meta name="description" content={shareText} />
         <meta property="og:title" content={shareTitle} />
         <meta property="og:description" content={shareText} />
         <meta property="og:url" content={shareUrl} />
         <meta property="og:type" content="article" />
-        {short.cover && <meta property="og:image" content={short.cover} />}
+        {short.cover ? <meta property="og:image" content={short.cover} /> : null}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={shareTitle} />
         <meta name="twitter:description" content={shareText} />
@@ -127,11 +184,11 @@ const ShortPage: NextPage<{short: any, source: any}> = ({ short, source }) => {
 
       <main className="mx-auto max-w-2xl px-6 py-20">
         {/* Back Link */}
-        <Link 
-          href="/shorts" 
-          className="inline-flex items-center gap-2 text-sm text-gold/70 hover:text-gold transition-colors mb-8"
+        <Link
+          href="/shorts"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-gold/70 transition-colors hover:text-gold"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Shorts
@@ -142,14 +199,29 @@ const ShortPage: NextPage<{short: any, source: any}> = ({ short, source }) => {
           <p className="text-[10px] font-black uppercase tracking-widest text-gold">
             {short.theme || "Reflection"}
           </p>
-          <h1 className="mt-4 font-serif text-4xl text-white">
-            {short.title}
-          </h1>
-          {short.excerpt && (
-            <p className="mt-4 text-lg text-gray-400 italic">
-              {short.excerpt}
-            </p>
-          )}
+
+          <h1 className="mt-4 font-serif text-4xl text-white">{short.title}</h1>
+
+          {short.excerpt ? (
+            <p className="mt-4 text-lg text-gray-400 italic">{short.excerpt}</p>
+          ) : null}
+
+          {/* Minimal meta line (quiet, but stabilizes the “journey”) */}
+          <div className="mt-6 flex items-center justify-center gap-3 text-xs text-gray-500">
+            {short.readTime ? <span>{short.readTime} read</span> : null}
+            {short.date ? (
+              <>
+                <span className="opacity-40">•</span>
+                <span>
+                  {new Date(short.date).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </>
+            ) : null}
+          </div>
         </header>
 
         {/* Content */}
@@ -158,96 +230,55 @@ const ShortPage: NextPage<{short: any, source: any}> = ({ short, source }) => {
         </article>
 
         {/* Share CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.25, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="mt-16 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 to-transparent p-8 backdrop-blur-sm"
         >
-          <div className="text-center mb-6">
-            <h2 className="font-serif text-2xl text-cream mb-3">
-              Found This Valuable?
-            </h2>
-            <p className="text-gray-400 text-sm max-w-md mx-auto">
-              Share this wisdom with those who would benefit. 
-              Help build a community of thoughtful readers and principled leaders.
+          <div className="mb-6 text-center">
+            <h2 className="mb-3 font-serif text-2xl text-cream">Share it forward</h2>
+            <p className="mx-auto max-w-md text-sm text-gray-400">
+              If this met you in the right moment, send it to someone who needs steady clarity.
             </p>
           </div>
 
-          {/* Share Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {/* Native Share (Mobile) */}
-            {typeof window !== 'undefined' && navigator.share && (
-              <ShareButton
-                icon={<Share2 className="w-4 h-4" />}
-                label="Share"
-                onClick={handleNativeShare}
-                className="sm:hidden"
-              />
-            )}
-
-            {/* Twitter */}
+            {/* ✅ Fix: don’t reference window/navigator directly in render; just show the button always */}
+            <ShareButton icon={<Share2 className="h-4 w-4" />} label="Share" onClick={handleNativeShare} className="sm:hidden" />
+            <ShareButton icon={<Twitter className="h-4 w-4" />} label="Twitter" onClick={() => handleShare("twitter")} />
+            <ShareButton icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" onClick={() => handleShare("linkedin")} />
+            <ShareButton icon={<Mail className="h-4 w-4" />} label="Email" onClick={() => handleShare("email")} />
             <ShareButton
-              icon={<Twitter className="w-4 h-4" />}
-              label="Share on Twitter"
-              onClick={() => handleShare('twitter')}
-            />
-
-            {/* LinkedIn */}
-            <ShareButton
-              icon={<Linkedin className="w-4 h-4" />}
-              label="Share on LinkedIn"
-              onClick={() => handleShare('linkedin')}
-            />
-
-            {/* Email */}
-            <ShareButton
-              icon={<Mail className="w-4 h-4" />}
-              label="Share via Email"
-              onClick={() => handleShare('email')}
-            />
-
-            {/* Copy Link */}
-            <ShareButton
-              icon={copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
-              label={copied ? "Copied!" : "Copy Link"}
-              onClick={() => handleShare('copy')}
+              icon={copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+              label={copied ? "Copied" : "Copy link"}
+              onClick={() => handleShare("copy")}
               className={copied ? "border-green-500/40 bg-green-500/10 text-green-400" : ""}
             />
           </div>
 
-          {/* Additional CTA */}
-          <div className="mt-6 pt-6 border-t border-gold/10 text-center">
-            <p className="text-xs text-gray-500 mb-3">
-              Want more insights like this?
-            </p>
-            <Link
-              href="/shorts"
-              className="inline-flex items-center gap-2 text-sm font-medium text-gold hover:text-gold/80 transition-colors"
-            >
-              Explore More Shorts
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mt-6 border-t border-gold/10 pt-6 text-center">
+            <p className="mb-3 text-xs text-gray-500">Want another one like this?</p>
+            <Link href="/shorts" className="inline-flex items-center gap-2 text-sm font-medium text-gold transition-colors hover:text-gold/80">
+              Explore more Shorts
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
           </div>
-        </motion.div>
+        </motion.section>
 
-        {/* Footer Navigation */}
-        <div className="mt-12 pt-8 border-t border-white/5 flex justify-between items-center">
-          <Link
-            href="/shorts"
-            className="text-sm text-gray-500 hover:text-gold transition-colors"
-          >
+        {/* Footer Navigation (journey alignment) */}
+        <nav className="mt-12 flex items-center justify-between border-t border-white/5 pt-8">
+          <Link href="/shorts" className="text-sm text-gray-500 transition-colors hover:text-gold">
             ← All Shorts
           </Link>
-          <Link
-            href="/blog"
-            className="text-sm text-gray-500 hover:text-gold transition-colors"
-          >
+
+          {/* ✅ Fix: If your “Essays” live at /blog, keep it. If you also have /blog/index.tsx, this will work. */}
+          <Link href="/blog" className="text-sm text-gray-500 transition-colors hover:text-gold">
             Read Essays →
           </Link>
-        </div>
+        </nav>
       </main>
     </Layout>
   );
