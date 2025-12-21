@@ -3,8 +3,20 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
-import { Share2, Twitter, Linkedin, Mail, Link2, Check, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  Share2,
+  Twitter,
+  Linkedin,
+  Mail,
+  Link2,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Moon,
+  Sun,
+} from "lucide-react";
 
 import {
   getPublishedShorts,
@@ -19,6 +31,7 @@ import mdxComponents from "@/components/mdx-components";
 import Layout from "@/components/Layout";
 
 const SITE_URL = "https://www.abrahamoflondon.org";
+const DIM_KEY = "aol_shorts_dim_mode";
 
 type PageProps = {
   short: any;
@@ -43,19 +56,11 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const cover = resolveDocCoverImage(rawDoc) ?? null;
   const canonicalUrl = `${SITE_URL}/shorts/${normalizeSlug(rawDoc)}`;
 
-  const short = JSON.parse(
-    JSON.stringify({
-      ...rawDoc,
-      cover,
-    }),
-  );
+  const short = JSON.parse(JSON.stringify({ ...rawDoc, cover }));
 
   try {
     const source = await serialize(short.body.raw);
-    return {
-      props: { short, source, canonicalUrl, ogImage: cover },
-      revalidate: 1800,
-    };
+    return { props: { short, source, canonicalUrl, ogImage: cover }, revalidate: 1800 };
   } catch {
     return { notFound: true };
   }
@@ -85,21 +90,69 @@ const ShareButton: React.FC<{
   </button>
 );
 
+const TinyToggle: React.FC<{
+  enabled: boolean;
+  onToggle: () => void;
+}> = ({ enabled, onToggle }) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className={[
+      "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs transition",
+      "border-white/10 bg-white/5 text-gray-200 hover:bg-white/10",
+    ].join(" ")}
+    aria-pressed={enabled}
+    aria-label={enabled ? "Dim mode on" : "Dim mode off"}
+  >
+    {enabled ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+    <span className="opacity-90">{enabled ? "Dim" : "Light"}</span>
+  </button>
+);
+
 const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }) => {
   const reduceMotion = useReducedMotion();
 
   const [copied, setCopied] = React.useState(false);
   const [canNativeShare, setCanNativeShare] = React.useState(false);
 
+  // Ritual layer
+  const [showBreathe, setShowBreathe] = React.useState(false);
+  const [dimMode, setDimMode] = React.useState(false);
+
   const shareTitle = short?.title || "Short · Abraham of London";
   const shareText = short?.excerpt || "A short reflection worth keeping.";
   const shareUrl = canonicalUrl;
 
+  // Detect native share after mount (prevents SSR mismatch)
   React.useEffect(() => {
-    // Avoid SSR/hydration mismatch by detecting after mount.
     if (typeof navigator !== "undefined" && typeof (navigator as any).share === "function") {
       setCanNativeShare(true);
     }
+  }, []);
+
+  // Load dim mode preference + show breathe cue briefly
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const saved = window.localStorage.getItem(DIM_KEY);
+    if (saved === "1") setDimMode(true);
+
+    if (reduceMotion) return;
+
+    // Tiny “Breathe” cue: appear softly, fade out after ~2s
+    setShowBreathe(true);
+    const t = window.setTimeout(() => setShowBreathe(false), 2000);
+    return () => window.clearTimeout(t);
+  }, [reduceMotion]);
+
+  const toggleDim = React.useCallback(() => {
+    setDimMode((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(DIM_KEY, next ? "1" : "0");
+      }
+      return next;
+    });
   }, []);
 
   const handleShare = React.useCallback(
@@ -145,15 +198,14 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
 
   const handleNativeShare = React.useCallback(() => {
     if (typeof navigator === "undefined" || !(navigator as any).share) return;
-    (navigator as any)
-      .share({ title: shareTitle, text: shareText, url: shareUrl })
-      .catch(() => {});
+    (navigator as any).share({ title: shareTitle, text: shareText, url: shareUrl }).catch(() => {});
   }, [shareTitle, shareText, shareUrl]);
 
   // Calm motion curve: slow, late, settling.
-  const settle = reduceMotion
-    ? { duration: 0.01 }
-    : { duration: 0.9, ease: [0.16, 1, 0.3, 1] as const };
+  const settle = reduceMotion ? { duration: 0.01 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1] as const };
+
+  // Closure line (non-denominational)
+  const closureLine = "Peace to your mind. Strength to your steps.";
 
   return (
     <Layout title={shareTitle} ogImage={ogImage ?? undefined}>
@@ -173,7 +225,6 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
         <link rel="canonical" href={shareUrl} />
       </Head>
 
-      {/* Chapel */}
       <main className="relative overflow-hidden bg-black">
         {/* Ambient chapel architecture */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
@@ -183,7 +234,7 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,140,0,0.08),transparent_55%)]" />
 
           {/* “Smoke” drift — extremely slow */}
-          {!reduceMotion && (
+          {!reduceMotion ? (
             <>
               <motion.div
                 className="absolute left-[-15%] top-[22%] h-[520px] w-[520px] rounded-full bg-white/6 blur-[140px]"
@@ -196,15 +247,22 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
                 transition={{ duration: 42, repeat: Infinity, ease: "easeInOut" }}
               />
             </>
-          )}
+          ) : null}
 
-          {/* Quiet vignette for “reading lane” */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_80%)]" />
+          {/* Vignette (dim mode deepens it) */}
+          <div
+            className={[
+              "absolute inset-0",
+              dimMode
+                ? "bg-[radial-gradient(ellipse_at_center,transparent_28%,rgba(0,0,0,0.75)_82%)]"
+                : "bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_80%)]",
+            ].join(" ")}
+          />
         </div>
 
-        {/* Content container */}
+        {/* Content */}
         <div className="relative mx-auto max-w-3xl px-6 py-16 sm:py-20">
-          {/* Back */}
+          {/* Top controls */}
           <div className="mb-10 flex items-center justify-between gap-4">
             <Link
               href="/shorts"
@@ -214,12 +272,27 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
               Back to Shorts
             </Link>
 
-            {/* Tiny “silence cue” — no performance */}
-            <div className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-gray-300">
-              <span className="h-2 w-2 rounded-full bg-amber-500/90" />
-              Quiet reading
+            <div className="flex items-center gap-2">
+              <TinyToggle enabled={dimMode} onToggle={toggleDim} />
             </div>
           </div>
+
+          {/* Tiny “Breathe” cue */}
+          <AnimatePresence>
+            {showBreathe ? (
+              <motion.div
+                initial={{ opacity: 0, y: 6, filter: "blur(2px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -6, filter: "blur(2px)" }}
+                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="pointer-events-none mb-8 flex justify-center"
+              >
+                <div className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-[11px] tracking-[0.3em] text-gray-200/90 backdrop-blur-sm">
+                  BREATHE
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
 
           {/* Header */}
           <header className="mb-10 text-center">
@@ -253,7 +326,6 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
               </motion.p>
             ) : null}
 
-            {/* Micro “under pressure” reassurance — not preachy, not loud */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -280,7 +352,7 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             <MDXRemote {...source} components={mdxComponents} />
           </motion.article>
 
-          {/* Quiet action strip (not dopamine buttons) */}
+          {/* Quiet action strip */}
           <div className="mt-10 flex flex-col items-center gap-4">
             <Link
               href="/shorts"
@@ -295,7 +367,24 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             </div>
           </div>
 
-          {/* Share (soft, optional, non-intrusive) */}
+          {/* End-of-page closure line (non-denominational) */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20%" }}
+            transition={reduceMotion ? { duration: 0.01 } : { duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-14 flex justify-center"
+          >
+            <div className="max-w-xl text-center">
+              <div className="mx-auto mb-3 h-px w-24 bg-gradient-to-r from-transparent via-gold/35 to-transparent" />
+              <p className="font-serif text-base text-cream/90">{closureLine}</p>
+              <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-gray-400">
+                Close the tab. Keep the point.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Share (soft, optional) */}
           <motion.section
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
