@@ -563,57 +563,72 @@ const AboutPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Values */}
-        <section className="relative py-24 bg-black">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* Values Section — Optimized for Contrast and Legibility */}
+<section className="relative py-24 bg-black">
+  <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      className="mb-16 text-center"
+    >
+      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1">
+        <Star className="h-3.5 w-3.5 text-gold" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-gold">
+          Non-Negotiables
+        </span>
+      </div>
+
+      <h2 className="font-serif text-4xl font-semibold text-white lg:text-5xl">
+        Foundation stones
+      </h2>
+    </motion.div>
+
+    <div className="grid gap-8 md:grid-cols-2">
+      {[leftValues, rightValues].map((chunk, colIdx) => (
+        <div key={colIdx} className="space-y-6">
+          {chunk.map((value, idx) => (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="mb-16 text-center"
+              key={value}
+              initial={{ opacity: 0, x: colIdx === 0 ? -20 : 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: idx * 0.1 }}
+              {/* REFINED STYLING:
+                  - bg-zinc-900/60 for deep contrast
+                  - border-white/20 for crisp edges
+                  - Increased backdrop-blur for glassmorphism effect
+              */}
+              className="group relative rounded-2xl border border-white/20 bg-zinc-900/60 p-6 backdrop-blur-xl transition-all hover:border-gold/40 hover:bg-zinc-900/80"
             >
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1">
-                <Star className="h-3.5 w-3.5 text-gold" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-gold">
-                  Non-Negotiables
-                </span>
-              </div>
+              {/* Subtle Ambient Light Effect (blur-3xl glow) */}
+              {!reduceMotion && (
+                <div className="absolute -inset-1 -z-10 rounded-2xl bg-gradient-to-br from-gold/10 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              )}
 
-              <h2 className="font-serif text-4xl font-semibold text-white lg:text-5xl">
-                Foundation stones
-              </h2>
-            </motion.div>
-
-            <div className="grid gap-8 md:grid-cols-2">
-              {[leftValues, rightValues].map((chunk, colIdx) => (
-                <div key={colIdx} className="space-y-6">
-                  {chunk.map((value, idx) => (
-                    <motion.div
-                      key={value}
-                      initial={{ opacity: 0, x: colIdx === 0 ? -20 : 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      transition={{ duration: 0.6, delay: idx * 0.1 }}
-                      className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:border-gold/30 hover:bg-white/10"
-                    >
-                      <div className="mb-3 flex items-center gap-3">
-                        <div className="rounded-lg bg-gold/10 p-2 ring-1 ring-gold/20">
-                          <Star className="h-4 w-4 text-gold" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-white group-hover:text-gold transition-colors">
-                          {value}
-                        </h3>
-                      </div>
-                      <p className="text-gray-400">
-                        This value governs how we design strategy, build households, and steward influence over time.
-                      </p>
-                    </motion.div>
-                  ))}
+              <div className="mb-3 flex items-center gap-3">
+                <div className="rounded-lg bg-gold/10 p-2 ring-1 ring-gold/30">
+                  <Star className="h-4 w-4 text-gold" />
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                {/* FONT CHOICE: 
+                    - Sans-serif for rapid legibility 
+                    - text-white for maximum contrast 
+                */}
+                <h3 className="text-xl font-bold tracking-tight text-white group-hover:text-gold transition-colors">
+                  {value}
+                </h3>
+              </div>
+              
+              <p className="text-gray-200 leading-relaxed font-medium">
+                This value governs how we design strategy, build households, and steward influence over time.
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
 
         {/* CTA */}
         <section className="relative overflow-hidden bg-gradient-to-r from-gold via-amber-500 to-gold py-20 text-center">
