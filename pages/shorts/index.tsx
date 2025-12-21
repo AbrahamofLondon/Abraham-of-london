@@ -5,21 +5,16 @@ import Head from "next/head";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sparkles,
   Clock,
-  Zap,
   Heart,
   Share2,
   Bookmark,
-  Eye,
-  RefreshCw,
   TrendingUp,
   Filter,
   Search,
   Grid,
   List,
   MessageCircle,
-  ThumbsUp,
   ChevronRight,
 } from "lucide-react";
 
@@ -63,79 +58,49 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
-    },
+    transition: { staggerChildren: 0.08, delayChildren: 0.08 },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  hidden: { opacity: 0, y: 18, scale: 0.98 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15,
-    },
+    transition: { type: "spring", stiffness: 110, damping: 16 },
   },
   hover: {
-    y: -4,
-    scale: 1.02,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 20,
-    },
+    y: -3,
+    scale: 1.01,
+    transition: { type: "spring", stiffness: 260, damping: 20 },
   },
-  tap: {
-    scale: 0.98,
-  },
+  tap: { scale: 0.99 },
 };
 
 function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
 }
 
-function formatShortDateISO(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function safeParseInt(v: string | null): number | null {
-  if (!v) return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? Math.trunc(n) : null;
+function seeded(n: number): number {
+  // deterministic-ish pseudo random (stable across renders for fixed n)
+  const x = Math.sin(n * 9999) * 10000;
+  return x - Math.floor(x);
 }
 
 const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTheme, setSelectedTheme] = React.useState<string>("all");
+
   const [interactions, setInteractions] = React.useState<
     Record<string, { likes: number; shares: number; reads: number; saves: number }>
   >({});
   const [bookmarks, setBookmarks] = React.useState<Set<string>>(new Set());
 
-  // Subliminal / minimal-engagement states (ethical: noticeable, dismissible)
-  const [heroRewardVisible, setHeroRewardVisible] = React.useState(false);
-  const [heroHintVisible, setHeroHintVisible] = React.useState(false);
-  const [streakDays, setStreakDays] = React.useState<number>(0);
-  const [streakLabel, setStreakLabel] = React.useState<string>("");
-
-  const [todayPick, setTodayPick] = React.useState<ShortDoc | null>(null);
-  const [rotatingLine, setRotatingLine] = React.useState<string>(
-    "Bite-sized wisdom for scrolling brains",
-  );
-
-  // Initialize interactions with realistic data
+  // Initialize interactions (kept for card UI only; NOT used to clutter hero)
   React.useEffect(() => {
-    const mockInteractions: Record<
+    const mock: Record<
       string,
       { likes: number; shares: number; reads: number; saves: number }
     > = {};
@@ -145,7 +110,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       const baseLikes = Math.floor(baseReads * 0.15) + Math.floor(Math.random() * 30);
       const baseShares = Math.floor(baseLikes * 0.3) + Math.floor(Math.random() * 10);
 
-      mockInteractions[short._id] = {
+      mock[short._id] = {
         reads: baseReads,
         likes: baseLikes,
         shares: baseShares,
@@ -153,7 +118,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       };
     });
 
-    setInteractions(mockInteractions);
+    setInteractions(mock);
   }, [shorts]);
 
   const themes = React.useMemo(() => {
@@ -174,94 +139,15 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         short.tags?.some((tag) => tag.toLowerCase().includes(q));
 
       const matchesTheme = selectedTheme === "all" || short.theme === selectedTheme;
-
       return matchesSearch && matchesTheme;
     });
   }, [shorts, searchQuery, selectedTheme]);
-
-  const totalReads = Object.values(interactions).reduce((sum, i) => sum + i.reads, 0);
-  const totalLikes = Object.values(interactions).reduce((sum, i) => sum + i.likes, 0);
-  const totalSaves = Object.values(interactions).reduce((sum, i) => sum + i.saves, 0);
-
-  // Minimal “return hook” streak (local, privacy-safe, no tracking)
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const today = new Date();
-    const todayKey = formatShortDateISO(today);
-
-    const lastKey = window.localStorage.getItem("aol_shorts_last_seen");
-    const streak = safeParseInt(window.localStorage.getItem("aol_shorts_streak"));
-    const last = lastKey ? lastKey : null;
-
-    let nextStreak = streak ?? 0;
-    let label = "";
-
-    if (!last) {
-      nextStreak = 1;
-      label = "New ritual";
-      window.localStorage.setItem("aol_shorts_last_seen", todayKey);
-      window.localStorage.setItem("aol_shorts_streak", String(nextStreak));
-    } else if (last === todayKey) {
-      nextStreak = Math.max(1, nextStreak);
-      label = nextStreak >= 2 ? "Streak held" : "Good return";
-    } else {
-      const lastDate = new Date(`${last}T00:00:00`);
-      const diffDays = Math.round(
-        (new Date(`${todayKey}T00:00:00`).getTime() - lastDate.getTime()) / 86400000,
-      );
-
-      if (diffDays === 1) {
-        nextStreak = nextStreak + 1;
-        label = "Streak +1";
-      } else {
-        nextStreak = 1;
-        label = "Fresh start";
-      }
-
-      window.localStorage.setItem("aol_shorts_last_seen", todayKey);
-      window.localStorage.setItem("aol_shorts_streak", String(nextStreak));
-    }
-
-    setStreakDays(clamp(nextStreak, 1, 3650));
-    setStreakLabel(label);
-
-    // Quiet “6-second reveal”: show after user has actually stayed.
-    const t1 = window.setTimeout(() => setHeroHintVisible(true), 1400);
-    const t2 = window.setTimeout(() => setHeroRewardVisible(true), 6000);
-
-    // Today’s pick (deterministic enough, not noisy)
-    const pick = filteredShorts.length > 0 ? filteredShorts[0] : (shorts[0] ?? null);
-    setTodayPick(pick);
-
-    // Micro-rotation line (slow, subtle)
-    const lines = [
-      "Bite-sized wisdom for scrolling brains",
-      "High-protein ideas. Low-friction reading.",
-      "Small words. Big alignment.",
-    ];
-    let idx = 0;
-    const t3 = window.setInterval(() => {
-      idx = (idx + 1) % lines.length;
-      setRotatingLine(lines[idx]);
-    }, 8500);
-
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearInterval(t3);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run once
 
   const handleLike = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setInteractions((prev) => ({
       ...prev,
-      [id]: {
-        ...prev[id],
-        likes: (prev[id]?.likes ?? 0) + 1,
-      },
+      [id]: { ...prev[id], likes: (prev[id]?.likes ?? 0) + 1 },
     }));
   };
 
@@ -273,19 +159,13 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         next.delete(id);
         setInteractions((p) => ({
           ...p,
-          [id]: {
-            ...p[id],
-            saves: Math.max(0, (p[id]?.saves ?? 1) - 1),
-          },
+          [id]: { ...p[id], saves: Math.max(0, (p[id]?.saves ?? 1) - 1) },
         }));
       } else {
         next.add(id);
         setInteractions((p) => ({
           ...p,
-          [id]: {
-            ...p[id],
-            saves: (p[id]?.saves ?? 0) + 1,
-          },
+          [id]: { ...p[id], saves: (p[id]?.saves ?? 0) + 1 },
         }));
       }
       return next;
@@ -298,6 +178,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       typeof window !== "undefined"
         ? `${window.location.origin}/shorts/${slug}`
         : `https://www.abrahamoflondon.org/shorts/${slug}`;
+
     const text = `"${title}" - A short from Abraham of London.`;
 
     if (typeof navigator !== "undefined" && (navigator as any).share) {
@@ -309,14 +190,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         });
         setInteractions((prev) => ({
           ...prev,
-          [id]: {
-            ...prev[id],
-            shares: (prev[id]?.shares ?? 0) + 1,
-          },
+          [id]: { ...prev[id], shares: (prev[id]?.shares ?? 0) + 1 },
         }));
         return;
       } catch {
-        // ignore, fall back
+        // fall through
       }
     }
 
@@ -324,19 +202,9 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(`${text}\n\n${url}`);
       }
-      const btn = e.currentTarget as HTMLButtonElement;
-      const original = btn.textContent;
-      btn.textContent = "✓ Copied";
-      window.setTimeout(() => {
-        if (btn) btn.textContent = original;
-      }, 1800);
-
       setInteractions((prev) => ({
         ...prev,
-        [id]: {
-          ...prev[id],
-          shares: (prev[id]?.shares ?? 0) + 1,
-        },
+        [id]: { ...prev[id], shares: (prev[id]?.shares ?? 0) + 1 },
       }));
     } catch {
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
@@ -350,7 +218,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     if (typeof window === "undefined") return;
 
     const url = window.location.href;
-    const text = "Insightful shorts for busy minds - Abraham of London";
+    const text = "Abraham of London · Shorts";
 
     if (platform === "twitter") {
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
@@ -368,11 +236,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
     if ((navigator as any).share) {
       try {
-        await (navigator as any).share({
-          title: "Shorts · Abraham of London",
-          text,
-          url,
-        });
+        await (navigator as any).share({ title: "Shorts · Abraham of London", text, url });
       } catch {
         if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(`${text}\n${url}`);
       }
@@ -381,283 +245,169 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(`${text}\n${url}`);
-      alert("Link copied to clipboard!");
     }
   };
 
+  // micro particles (sparse, subtle, deterministic)
+  const particles = React.useMemo(() => {
+    const count = 10; // keep sparse
+    return Array.from({ length: count }).map((_, i) => {
+      const r1 = seeded(i + 1);
+      const r2 = seeded(i + 19);
+      const r3 = seeded(i + 77);
+
+      return {
+        id: i,
+        leftPct: Math.round(r1 * 100),
+        topPct: Math.round(r2 * 70) + 10,
+        size: Math.round(2 + r3 * 3), // 2–5px
+        driftX: Math.round((seeded(i + 7) - 0.5) * 60),
+        driftY: Math.round((seeded(i + 33) - 0.5) * 26),
+        duration: Math.round(14 + seeded(i + 55) * 12),
+        delay: Math.round(seeded(i + 101) * 6),
+        opacity: 0.08 + seeded(i + 88) * 0.08, // 0.08–0.16
+      };
+    });
+  }, []);
+
   return (
     <Layout
-      title="Shorts · Bite-Sized Wisdom"
-      description="High-protein, low-friction reflections for when you're tired, numb, or just too busy for long form."
+      title="Shorts"
+      description="Short, high-signal reflections."
     >
       <Head>
-        <title>Shorts · Bite-Sized Wisdom for Busy Minds</title>
+        <title>Shorts · Abraham of London</title>
         <meta
           name="description"
-          content="Quick, powerful reflections for the TikTok generation who still want depth. Read one daily to stay sharp."
+          content="Short, high-signal reflections from Abraham of London."
         />
-        <meta property="og:title" content="Shorts · Wisdom for Short Attention Spans" />
+        <meta property="og:title" content="Shorts · Abraham of London" />
         <meta
           property="og:description"
-          content="Daily micro-wisdom for busy people who still want to think deeply. Perfect for coffee breaks."
+          content="Short, high-signal reflections."
         />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://www.abrahamoflondon.org/api/og/shorts" />
         <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://www.abrahamoflondon.org/shorts" />
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-black dark:to-gray-950">
-        {/* Hero Section */}
+        {/* HERO — subliminal, no new visible words */}
         <section className="relative overflow-hidden border-b border-gray-200 dark:border-gray-800">
+          {/* Background field */}
           <div className="absolute inset-0">
-            {/* Existing backdrop */}
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-purple-500/5" />
-            <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
+            {/* base wash */}
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/6 via-transparent to-indigo-500/6" />
 
-            {/* Minimal “subliminal” add-ons: ultra-soft motion + micro-glint */}
+            {/* slow drift blobs (barely there) */}
             <motion.div
               aria-hidden="true"
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.9, ease: "easeOut" }}
-            >
-              <motion.div
-                className="absolute -left-1/3 top-1/3 h-40 w-40 rounded-full bg-white/5 blur-3xl dark:bg-white/4"
-                animate={{
-                  x: [0, 120, 0],
-                  y: [0, -30, 0],
-                }}
-                transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-                style={{ willChange: "transform" }}
-              />
-              <motion.div
-                className="absolute -right-1/3 bottom-1/3 h-40 w-40 rounded-full bg-amber-400/7 blur-3xl"
-                animate={{
-                  x: [0, -110, 0],
-                  y: [0, 25, 0],
-                }}
-                transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-                style={{ willChange: "transform" }}
-              />
-              <motion.div
-                className="absolute -top-12 left-1/2 h-28 w-[560px] -translate-x-1/2 rotate-[-8deg] bg-gradient-to-r from-transparent via-white/10 to-transparent blur-md dark:via-white/8"
-                animate={{ opacity: [0.0, 0.55, 0.0], x: ["-8%", "8%", "-8%"] }}
-                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-                style={{ willChange: "transform, opacity" }}
-              />
-            </motion.div>
+              className="absolute -top-48 -right-48 h-[520px] w-[520px] rounded-full bg-amber-500/10 blur-3xl"
+              animate={{ x: [0, -26, 0], y: [0, 18, 0] }}
+              transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+              style={{ willChange: "transform" }}
+            />
+            <motion.div
+              aria-hidden="true"
+              className="absolute -bottom-56 -left-56 h-[560px] w-[560px] rounded-full bg-blue-500/10 blur-3xl"
+              animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+              transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+              style={{ willChange: "transform" }}
+            />
+
+            {/* soft shimmer band */}
+            <motion.div
+              aria-hidden="true"
+              className="absolute left-1/2 top-10 h-16 w-[880px] -translate-x-1/2 rotate-[-10deg] bg-gradient-to-r from-transparent via-white/10 to-transparent blur-md dark:via-white/8"
+              animate={{ opacity: [0, 0.35, 0], x: ["-10%", "10%", "-10%"] }}
+              transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+              style={{ willChange: "transform, opacity" }}
+            />
+
+            {/* micro particles */}
+            <div aria-hidden="true" className="absolute inset-0">
+              {particles.map((p) => (
+                <motion.div
+                  key={p.id}
+                  className="absolute rounded-full bg-black dark:bg-white"
+                  style={{
+                    left: `${p.leftPct}%`,
+                    top: `${p.topPct}%`,
+                    width: p.size,
+                    height: p.size,
+                    opacity: p.opacity,
+                    filter: "blur(0.2px)",
+                  }}
+                  animate={{
+                    x: [0, p.driftX, 0],
+                    y: [0, p.driftY, 0],
+                    opacity: [p.opacity * 0.6, p.opacity, p.opacity * 0.6],
+                  }}
+                  transition={{
+                    duration: p.duration,
+                    delay: p.delay,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* bottom hairline + pulse dot (silent scroll cue) */}
+            <div aria-hidden="true" className="absolute bottom-0 left-0 right-0">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="relative h-10">
+                  <div className="absolute bottom-5 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent dark:via-gray-700/60" />
+                  <motion.div
+                    className="absolute bottom-[18px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-amber-500/70"
+                    animate={{ opacity: [0.25, 0.7, 0.25], scale: [1, 1.35, 1] }}
+                    transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
+          {/* Hero content — minimal */}
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
             <motion.div
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, ease: "easeOut" }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
               className="text-center"
             >
-              <motion.div
-                initial={{ scale: 0.86 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 160, damping: 14, delay: 0.15 }}
-                className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-4 py-2 backdrop-blur-sm"
-              >
-                <Sparkles className="h-4 w-4 animate-pulse text-amber-500" />
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
-                  Scrollable Wisdom
-                </span>
-              </motion.div>
-
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.22 }}
-                className="mb-4 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl"
+                transition={{ delay: 0.12 }}
+                className="font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl"
               >
                 Shorts
-                <motion.span
-                  className="mt-2 block text-lg font-normal text-gray-600 dark:text-gray-300"
-                  initial={{ opacity: 0.0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.35 }}
-                >
-                  {rotatingLine}
-                </motion.span>
               </motion.h1>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.38 }}
-                className="mx-auto mb-8 max-w-2xl text-lg text-gray-600 dark:text-gray-300"
-              >
-                For when your brain is fried, your feed is empty, and you still want to{" "}
-                <span className="font-semibold text-amber-600 dark:text-amber-400">
-                  think meaningfully
-                </span>
-                . No fluff, just fuel.
-              </motion.p>
-
-              {/* Minimal “reward loop” chips (compact, not busy) */}
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45 }}
-                className="mx-auto mb-8 flex max-w-xl flex-wrap justify-center gap-2"
-              >
-                <div className="rounded-full border border-gray-200 bg-white/55 px-4 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/45">
-                  <div className="flex items-center gap-2">
-                    <Eye className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {totalReads.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-gray-500">reads</span>
-                  </div>
-                </div>
-
-                <div className="rounded-full border border-gray-200 bg-white/55 px-4 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/45">
-                  <div className="flex items-center gap-2">
-                    <Heart className="h-4 w-4 text-red-500" />
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {totalLikes.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-gray-500">likes</span>
-                  </div>
-                </div>
-
-                <div className="rounded-full border border-gray-200 bg-white/55 px-4 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/45">
-                  <div className="flex items-center gap-2">
-                    <Bookmark className="h-4 w-4 text-amber-500" />
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {totalSaves.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-gray-500">saved</span>
-                  </div>
-                </div>
-
-                <div className="rounded-full border border-amber-500/25 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-4 py-2 backdrop-blur-sm">
-                  <div className="flex items-center gap-2">
-                    <ThumbsUp className="h-4 w-4 text-amber-500" />
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {streakDays > 0 ? `${streakDays} day` : "1 day"}
-                    </span>
-                    <span className="text-xs text-gray-600 dark:text-gray-300">
-                      {streakLabel || "streak"}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.55 }}
-                className="inline-block"
-              >
+              {/* No extra words. Keep whitespace. */}
+              <div className="mt-10 flex justify-center">
                 <Link
                   href="#shorts-grid"
-                  className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/40 active:scale-95"
+                  aria-label="Jump to shorts"
+                  className="group inline-flex items-center justify-center rounded-full border border-gray-200 bg-white/40 px-6 py-3 text-sm font-semibold text-gray-900 backdrop-blur-sm transition-all hover:bg-white/60 dark:border-gray-800 dark:bg-gray-900/35 dark:text-white"
                 >
-                  <Zap className="h-4 w-4" />
-                  Start Reading
-                  <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
+                  {/* Keep it quiet: icon only + existing semantics via aria-label */}
+                  <motion.span
+                    className="inline-flex"
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <ChevronRight className="h-4 w-4 opacity-70 group-hover:opacity-90" />
+                  </motion.span>
                 </Link>
-              </motion.div>
-
-              {/* Subtle scroll cue (tiny, non-crowding) */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.75 }}
-                className="mt-10 flex justify-center"
-              >
-                <motion.a
-                  href="#shorts-grid"
-                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/40 px-4 py-2 text-xs text-gray-600 backdrop-blur-sm hover:bg-white/55 dark:border-gray-800 dark:bg-gray-900/35 dark:text-gray-300"
-                  whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Clock className="h-3.5 w-3.5 text-gray-500" />
-                  <span>One short takes under 60 seconds</span>
-                  <ChevronRight className="h-3.5 w-3.5 opacity-70" />
-                </motion.a>
-              </motion.div>
+              </div>
             </motion.div>
-
-            {/* 6-second “reward” reveal: tiny, dismissible, pulls user to “Today’s pick” */}
-            <AnimatePresence>
-              {heroRewardVisible && todayPick ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 14, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                  className="pointer-events-none absolute left-1/2 top-[78%] w-full max-w-xl -translate-x-1/2 px-4"
-                >
-                  <div className="pointer-events-auto relative overflow-hidden rounded-2xl border border-amber-500/25 bg-white/80 p-4 shadow-xl shadow-amber-500/10 backdrop-blur-md dark:bg-gray-950/75">
-                    <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-500/10 blur-2xl" />
-                    <div className="relative flex items-start justify-between gap-3">
-                      <div>
-                        <div className="mb-1 flex items-center gap-2">
-                          <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-700 dark:text-amber-400">
-                            Unlocked
-                          </span>
-                        </div>
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                          Today’s pick:
-                          <span className="ml-2 font-serif font-semibold">
-                            {todayPick.title}
-                          </span>
-                        </div>
-                        <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                          A quick win for your mindset — then you can get back to life.
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/shorts/${todayPick.slug}`}
-                          className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-amber-500/20 hover:opacity-95"
-                        >
-                          Read it
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => setHeroRewardVisible(false)}
-                          className="rounded-full border border-gray-200 bg-white/60 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-white dark:border-gray-800 dark:bg-gray-900/50 dark:text-gray-200"
-                          aria-label="Dismiss"
-                        >
-                          Not now
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-
-            {/* Subtle early hint (fast, unobtrusive) */}
-            <AnimatePresence>
-              {heroHintVisible && !heroRewardVisible ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.35 }}
-                  className="pointer-events-none absolute left-1/2 top-[72%] -translate-x-1/2 px-4"
-                >
-                  <div className="pointer-events-none rounded-full border border-gray-200 bg-white/45 px-4 py-2 text-[11px] text-gray-600 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/35 dark:text-gray-300">
-                    Stay a moment — a “today’s pick” unlocks in a few seconds.
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
           </div>
         </section>
 
-        {/* Controls Section */}
+        {/* Controls */}
         <section className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 py-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -665,7 +415,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   type="search"
-                  placeholder="Search shorts by topic or keyword..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-amber-400"
@@ -685,7 +435,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     {themes.map((theme) => (
                       <option key={theme} value={theme}>
                         {theme === "all"
-                          ? "All Themes"
+                          ? "All"
                           : theme.charAt(0).toUpperCase() + theme.slice(1)}
                       </option>
                     ))}
@@ -731,12 +481,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
                   <Search className="h-6 w-6 text-gray-400" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No shorts found</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {searchQuery || selectedTheme !== "all"
-                    ? "Try adjusting your search or filter criteria"
-                    : "New shorts are being prepared. Check back soon."}
-                </p>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No results</h3>
+                <p className="text-gray-600 dark:text-gray-400">Adjust search or filters.</p>
                 {(searchQuery || selectedTheme !== "all") && (
                   <button
                     onClick={() => {
@@ -746,7 +492,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     className="mt-4 text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
                     type="button"
                   >
-                    Clear all filters
+                    Clear
                   </button>
                 )}
               </motion.div>
@@ -758,7 +504,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       Daily Feed
                     </h2>
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                      {filteredShorts.length} short{filteredShorts.length !== 1 ? "s" : ""} ready
+                      {filteredShorts.length} item{filteredShorts.length !== 1 ? "s" : ""}
                     </p>
                   </div>
                   {filteredShorts.length < shorts.length && (
@@ -770,7 +516,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       className="text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
                       type="button"
                     >
-                      Clear filters
+                      Clear
                     </button>
                   )}
                 </div>
@@ -829,13 +575,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                                 onClick={(e) => handleLike(short._id, e)}
                                 className="group/like flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-red-500 dark:text-gray-400"
                               >
-                                <Heart
-                                  className={`h-4 w-4 transition-transform group-hover/like:scale-110 ${
-                                    (interactions[short._id]?.likes ?? 0) > 0
-                                      ? "fill-red-500 text-red-500"
-                                      : ""
-                                  }`}
-                                />
+                                <Heart className="h-4 w-4 transition-transform group-hover/like:scale-110" />
                                 <span>{interactions[short._id]?.likes ?? 0}</span>
                               </button>
 
@@ -878,79 +618,18 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
               </>
             )}
 
-            {/* Daily Habit */}
-            {filteredShorts.length > 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45 }}
-                className="mt-16 rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900 to-black p-8"
-              >
-                <div className="grid gap-6 md:grid-cols-2 md:items-center">
-                  <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1">
-                      <Zap className="h-3 w-3 text-amber-400" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-400">
-                        Daily Habit
-                      </span>
-                    </div>
-                    <h3 className="mb-3 font-serif text-2xl font-semibold text-white">
-                      Make it consistent
-                    </h3>
-                    <p className="text-gray-300">
-                      Read one short every day. Small, consistent effort creates real change.
-                      Join others who make this part of their daily routine.
-                    </p>
-                    <p className="mt-3 text-sm text-gray-400">
-                      Current streak:{" "}
-                      <span className="font-semibold text-amber-300">{streakDays} day</span>
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <a
-                      href="#shorts-grid"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                      Start Daily Reading
-                    </a>
-
-                    <button
-                      onClick={() => sharePage()}
-                      type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-transparent px-6 py-3 text-sm font-semibold text-amber-400 transition-colors hover:bg-amber-500/10"
-                    >
-                      <TrendingUp className="h-4 w-4" />
-                      Share This Page
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
-
-            {/* Share Section */}
+            {/* Share block stays (not in hero); if you want this subliminal too, say so */}
             {filteredShorts.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
+                transition={{ delay: 0.25 }}
                 className="mt-12 rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900"
               >
                 <div className="text-center">
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1">
-                    <Share2 className="h-3 w-3 text-amber-500" />
-                    <span className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-600 dark:text-amber-400">
-                      Shared {totalSaves.toLocaleString()}+ Times
-                    </span>
-                  </div>
-
                   <h4 className="mb-3 font-serif text-xl font-semibold text-gray-900 dark:text-white">
-                    When something resonates, it spreads
+                    Share
                   </h4>
-                  <p className="mx-auto mb-6 max-w-md text-gray-600 dark:text-gray-400">
-                    People share what matters. These are the shorts that get passed around.
-                  </p>
 
                   <div className="flex flex-wrap justify-center gap-3">
                     <button
@@ -958,7 +637,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:scale-105 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                       type="button"
                     >
-                      Share on Twitter
+                      <TrendingUp className="h-4 w-4" />
+                      X
                     </button>
                     <button
                       onClick={() => sharePage("whatsapp")}
@@ -966,7 +646,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       type="button"
                     >
                       <MessageCircle className="h-4 w-4" />
-                      Share on WhatsApp
+                      WhatsApp
                     </button>
                     <button
                       onClick={() => sharePage()}
@@ -974,13 +654,9 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                       type="button"
                     >
                       <Share2 className="h-4 w-4" />
-                      Share Anywhere
+                      Copy
                     </button>
                   </div>
-
-                  <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                    Each share helps someone discover meaningful perspective.
-                  </p>
                 </div>
               </motion.div>
             ) : null}
@@ -993,13 +669,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
 export const getStaticProps: GetStaticProps = async () => {
   const shorts = getPublishedShorts();
-
-  return {
-    props: {
-      shorts,
-    },
-    revalidate: 3600,
-  };
+  return { props: { shorts }, revalidate: 3600 };
 };
 
 export default ShortsIndexPage;
