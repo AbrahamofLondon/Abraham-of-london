@@ -1,378 +1,245 @@
-import path from "path";
-import { defineDocumentType, makeSource } from "contentlayer2/source-files";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-
-/* -----------------------------------------------------------------------------
- * COMMON FIELDS (single source of truth)
- * -------------------------------------------------------------------------- */
-const commonFields = {
-  title: { type: "string", required: true },
-  date: { type: "date", required: true },
-
-  // optional overrides / routing helpers
-  slug: { type: "string", required: false },
-  href: { type: "string", required: false },
-
-  description: { type: "string", required: false },
-  excerpt: { type: "string", required: false },
-  coverImage: { type: "string", required: false },
-
-  tags: { type: "list", of: { type: "string" }, required: false },
-
-  draft: { type: "boolean", required: false, default: false },
-  featured: { type: "boolean", required: false, default: false },
-
-  accessLevel: { type: "string", required: false },
-  lockMessage: { type: "string", required: false },
-} as const;
-
-/* -----------------------------------------------------------------------------
- * SLUG + URL HELPERS (robust + consistent)
- * -------------------------------------------------------------------------- */
+// lib/contentlayer-helper.ts — STRICT, SCHEMA-ALIGNED, FULL EXPORTS
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as generated from "contentlayer/generated";
 
 /**
- * Canonical slug normaliser.
- * Accepts:
- *  - "my-post"
- *  - "/blog/my-post"
- *  - "blog/my-post/"
- *  - "https://www.site.com/blog/my-post?x=y#z"
- * Returns:
- *  - "my-post"
+ * DocKind used across the app for routing / filtering.
  */
-function toCanonicalSlug(input: unknown): string {
-  let s = String(input ?? "").trim();
-  if (!s) return "";
+export type DocKind =
+  | "post"
+  | "book"
+  | "download"
+  | "event"
+  | "print"
+  | "resource"
+  | "strategy"
+  | "canon"
+  | "short"
+  | "unknown";
 
-  // strip query/hash
-  s = s.split("#")[0]?.split("?")[0] ?? s;
+const GLOBAL_FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
+const SHORT_GLOBAL_FALLBACK = "/assets/images/shorts/cover.jpg";
 
-  // strip protocol+domain if present
-  s = s.replace(/^https?:\/\/[^/]+/i, "");
+/**
+ * Contentlayer (generated) exposes arrays like allPosts, allBooks, etc.
+ * We read defensively to avoid hard crashes during partial builds.
+ */
+function pickArray(name: string): any[] {
+  const v = (generated as any)[name];
+  return Array.isArray(v) ? v : [];
+}
 
-  // normalise slashes + casing
-  s = s.toLowerCase();
-  s = s.replace(/\/+$/, ""); // trailing
-  s = s.replace(/^\/+/, ""); // leading
+export const allPosts = pickArray("allPosts");
+export const allBooks = pickArray("allBooks");
+export const allDownloads = pickArray("allDownloads");
+export const allEvents = pickArray("allEvents");
+export const allPrints = pickArray("allPrints");
+export const allResources = pickArray("allResources");
+export const allStrategies = pickArray("allStrategies");
+export const allCanons = pickArray("allCanons");
+export const allShorts = pickArray("allShorts");
 
-  if (!s) return "";
+// legacy aliases (keep to prevent old imports breaking)
+export { allCanons as allCanon, allPosts as allPost };
 
-  // take last segment if a path is provided
-  const parts = s.split("/").filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : s;
+/**
+ * In your schema:
+ * - commonFields includes "draft"
+ * - Short additionally has "published" (default true)
+ *
+ * Publishing logic:
+ * - If doc.draft === true => NOT published
+ * - If doc._raw.sourceFileName starts "_" => NOT published
+ * - If doc._type === "Short" and published === false => NOT published
+ */
+export function isDraft(doc: any): boolean {
+  if (!doc) return true;
+  if (doc?.draft === true) return true;
+  if (String(doc?._raw?.sourceFileName ?? "").startsWith("_")) return true;
+  if (String(doc?._type ?? "").toLowerCase() === "short" && doc?.published === false) return true;
+  return false;
+}
+
+export function isPublished(doc: any): boolean {
+  return !isDraft(doc);
 }
 
 /**
- * Derive a stable "relative slug" from flattenedPath for a given basePath.
- * Examples:
- *  - flattenedPath="blog/alpha" basePath="blog" -> "alpha"
- *  - flattenedPath="blog/index" basePath="blog" -> ""  (means /blog)
- *  - flattenedPath="canon/volume-i/index" basePath="canon" -> "volume-i"
+ * Prefer Contentlayer's computed `url` field.
+ * Your config guarantees url exists for each document type.
  */
-function deriveRelativeSlug(flattenedPath: string, basePath: string): string {
-  const fp = String(flattenedPath ?? "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
+export function getDocHref(doc: any): string {
+  const url = doc?.url;
+  if (typeof url === "string" && url.trim()) return url.trim();
+  // defensive fallback (should not happen if schema computedFields works)
+  return "/content";
+}
+
+/**
+ * Normalise slug for lookups.
+ * Prefer doc.slug; else last segment of doc.url; else last of flattenedPath.
+ */
+export function normalizeSlug(docOrSlug: any): string {
+  if (typeof docOrSlug === "string") {
+    return docOrSlug.trim().toLowerCase().replace(/^\/+|\/+$/g, "");
+  }
+
+  const doc = docOrSlug;
+  const s = typeof doc?.slug === "string" ? doc.slug.trim() : "";
+  if (s) return s.toLowerCase().replace(/^\/+|\/+$/g, "").split("/").filter(Boolean).pop() ?? "";
+
+  const url = typeof doc?.url === "string" ? doc.url.trim() : "";
+  if (url) return url.toLowerCase().replace(/^\/+|\/+$/g, "").split("/").filter(Boolean).pop() ?? "";
+
+  const fp = String(doc?._raw?.flattenedPath ?? "");
   if (!fp) return "";
-
-  const base = String(basePath ?? "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
-  const withoutBase = fp.startsWith(`${base}/`) ? fp.slice(base.length + 1) : fp;
-
-  // remove trailing /index
-  const cleaned = withoutBase.replace(/\/index$/i, "");
-  return cleaned;
+  const parts = fp.split("/").filter(Boolean);
+  const last = parts[parts.length - 1];
+  const slug = last === "index" ? parts[parts.length - 2] : last;
+  return String(slug || "").toLowerCase();
 }
 
 /**
- * Ensures a string starts with exactly one leading slash.
+ * Kind detection (Contentlayer sets `_type` as your doc type name: Post, Book, etc.)
  */
-function ensureLeadingSlash(s: string): string {
-  return `/${String(s ?? "").replace(/^\/+/, "")}`;
+export function getDocKind(doc: any): DocKind {
+  const t = String(doc?._type ?? doc?.type ?? "").toLowerCase();
+  if (t === "post") return "post";
+  if (t === "book") return "book";
+  if (t === "download") return "download";
+  if (t === "event") return "event";
+  if (t === "print") return "print";
+  if (t === "resource") return "resource";
+  if (t === "strategy") return "strategy";
+  if (t === "canon") return "canon";
+  if (t === "short") return "short";
+  return "unknown";
 }
 
 /**
- * Join basePath + relativeSlug safely:
- *  - basePath="blog", rel="alpha" -> "/blog/alpha"
- *  - basePath="blog", rel=""      -> "/blog"
+ * Cover image resolution:
+ * - Your schema uses coverImage: string
+ * - But keep fallbacks for safety
  */
-function joinBase(basePath: string, rel: string): string {
-  const base = `/${String(basePath).replace(/^\/+|\/+$/g, "")}`;
-  const r = String(rel ?? "").replace(/^\/+|\/+$/g, "");
-  return r ? `${base}/${r}` : base;
+export function resolveDocCoverImage(doc: any): string {
+  const explicit =
+    doc?.coverImage ||
+    doc?.image ||
+    doc?.cover ||
+    doc?.ogImage;
+
+  if (typeof explicit === "string" && explicit.trim()) return explicit.trim();
+  return getDocKind(doc) === "short" ? SHORT_GLOBAL_FALLBACK : GLOBAL_FALLBACK_IMAGE;
 }
 
 /**
- * Robust + consistent URL generator.
- * Priority:
- *  1) doc.href (hard override)
- *  2) doc.slug (canonicalised, last segment)
- *  3) derived from _raw.flattenedPath (relative to basePath)
+ * Downloads may expose file/fileUrl/pdfPath/downloadUrl/etc
  */
-function getDocUrl(doc: any, basePath: string): string {
-  // 1) hard override href
-  if (doc?.href && typeof doc.href === "string" && doc.href.trim()) {
-    const raw = doc.href.trim();
-    // remove trailing slash for consistency
-    const noTrail = raw.replace(/\/+$/, "");
-    return ensureLeadingSlash(noTrail);
-  }
+export function resolveDocDownloadUrl(doc: any): string | null {
+  const url =
+    doc?.downloadUrl ||
+    doc?.fileUrl ||
+    doc?.pdfPath ||
+    doc?.file ||
+    doc?.downloadFile;
 
-  // 2) slug override
-  if (doc?.slug && typeof doc.slug === "string" && doc.slug.trim()) {
-    const canonical = toCanonicalSlug(doc.slug);
-    // slug can be empty if someone set "/blog/" by mistake
-    return joinBase(basePath, canonical);
-  }
-
-  // 3) fallback: derive from file path
-  const rel = deriveRelativeSlug(doc?._raw?.flattenedPath, basePath);
-
-  // If rel points to nested folders ("volume-i/intro"), we take last segment for URL
-  // but preserve index behaviour by allowing rel="".
-  if (!rel) return joinBase(basePath, "");
-
-  const last = toCanonicalSlug(rel); // last segment, lowercased
-  return joinBase(basePath, last);
+  return typeof url === "string" && url.trim() ? url.trim() : null;
 }
 
-/* -----------------------------------------------------------------------------
- * DOCUMENT TYPES
- * -------------------------------------------------------------------------- */
-
-export const Post = defineDocumentType(() => ({
-  name: "Post",
-  filePathPattern: "blog/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    author: { type: "string", required: false },
-    authorTitle: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    category: { type: "string", required: false },
-    ogTitle: { type: "string", required: false },
-    ogDescription: { type: "string", required: false },
-    socialCaption: { type: "string", required: false },
-    coverAspect: { type: "string", required: false },
-    coverFit: { type: "string", required: false },
-    coverPosition: { type: "string", required: false },
-    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
-    resources: { type: "json", required: false },
-    keyInsights: { type: "json", required: false },
-    authorNote: { type: "string", required: false },
-    layout: { type: "string", required: false },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "blog") },
-  },
-}));
-
-export const Resource = defineDocumentType(() => ({
-  name: "Resource",
-  filePathPattern: "resources/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    author: { type: "string", required: false },
-    readtime: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    resourceType: { type: "string", required: false },
-    fileUrl: { type: "string", required: false },
-    downloadUrl: { type: "string", required: false },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "resources") },
-  },
-}));
-
-export const Download = defineDocumentType(() => ({
-  name: "Download",
-  filePathPattern: "downloads/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    author: { type: "string", required: false },
-    category: { type: "string", required: false },
-    layout: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    readtime: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    file: { type: "string", required: false },
-    pdfPath: { type: "string", required: false },
-    fileSize: { type: "string", required: false },
-    downloadFile: { type: "string", required: false },
-    fileUrl: { type: "string", required: false },
-    type: { type: "string", required: false },
-    downloadUrl: { type: "string", required: false },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "downloads") },
-  },
-}));
-
-export const Book = defineDocumentType(() => ({
-  name: "Book",
-  filePathPattern: "books/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    readTime: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    author: { type: "string", required: false },
-    publisher: { type: "string", required: false },
-    isbn: { type: "string", required: false },
-    category: { type: "string", required: false },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "books") },
-  },
-}));
-
-export const Event = defineDocumentType(() => ({
-  name: "Event",
-  filePathPattern: "events/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    time: { type: "string", required: false },
-    eventDate: { type: "date", required: false },
-    location: { type: "string", required: false },
-    registrationUrl: { type: "string", required: false },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "events") },
-  },
-}));
-
-export const Print = defineDocumentType(() => ({
-  name: "Print",
-  filePathPattern: "prints/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    dimensions: { type: "string", required: false },
-    downloadFile: { type: "string", required: false },
-    price: { type: "string", required: false },
-    available: { type: "boolean", required: false, default: true },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "prints") },
-  },
-}));
-
-export const Strategy = defineDocumentType(() => ({
-  name: "Strategy",
-  filePathPattern: "strategy/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    author: { type: "string", required: false },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "strategy") },
-  },
-}));
-
-export const Canon = defineDocumentType(() => ({
-  name: "Canon",
-  filePathPattern: "canon/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    subtitle: { type: "string", required: false },
-    author: { type: "string", required: false },
-    coverAspect: { type: "string", required: false },
-    coverFit: { type: "string", required: false },
-    volumeNumber: { type: "string", required: false },
-    order: { type: "number", required: false },
-    readTime: { type: "string", required: false },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "canon") },
-  },
-}));
-
-export const Short = defineDocumentType(() => ({
-  name: "Short",
-  filePathPattern: "shorts/**/*.mdx",
-  contentType: "mdx",
-  fields: {
-    ...commonFields,
-    theme: { type: "string", required: false },
-    audience: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    published: { type: "boolean", required: false, default: true },
-  },
-  computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc, "shorts") },
-  },
-}));
-
-/* -----------------------------------------------------------------------------
- * FRONTMATTER SAFETY GUARD
- * - only modifies real YAML frontmatter blocks
- * - removes duplicated slug/date keys inside the block
- * -------------------------------------------------------------------------- */
-
-function fixDuplicateKeysInFrontmatter(raw: string): string {
-  // Only act if the file starts with a frontmatter fence.
-  if (!raw.startsWith("---")) return raw;
-
-  const end = raw.indexOf("\n---", 3);
-  if (end === -1) return raw;
-
-  const fm = raw.slice(0, end + 4); // include closing --- line
-  const body = raw.slice(end + 4);
-
-  // Remove duplicate slug/date lines (keep the first occurrence only)
-  const lines = fm.split(/\r?\n/);
-  const seen = new Set<string>();
-  const out: string[] = [];
-
-  for (const line of lines) {
-    const keyMatch = line.match(/^([a-zA-Z0-9_]+):\s*/);
-    if (!keyMatch) {
-      out.push(line);
-      continue;
-    }
-
-    const key = keyMatch[1];
-    if ((key === "slug" || key === "date") && seen.has(key)) {
-      // drop duplicates
-      continue;
-    }
-
-    if (key === "slug" || key === "date") {
-      seen.add(key);
-    }
-
-    out.push(line);
-  }
-
-  return out.join("\n") + body;
+/**
+ * Aggregate utilities
+ */
+export function getAllContentlayerDocs(): any[] {
+  return [
+    ...allPosts,
+    ...allBooks,
+    ...allDownloads,
+    ...allEvents,
+    ...allPrints,
+    ...allResources,
+    ...allStrategies,
+    ...allCanons,
+    ...allShorts,
+  ].filter(Boolean);
 }
 
-/* -----------------------------------------------------------------------------
- * MAKE SOURCE
- * -------------------------------------------------------------------------- */
+export function getPublishedDocuments(): any[] {
+  return getAllContentlayerDocs().filter(isPublished);
+}
 
-export default makeSource({
-  contentDirPath: path.join(process.cwd(), "content"),
-  documentTypes: [
-    Post,
-    Download,
-    Book,
-    Event,
-    Print,
-    Strategy,
-    Resource,
-    Canon,
-    Short,
-  ],
-  mdx: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeSlug],
-  },
-  onContent: (content) => fixDuplicateKeysInFrontmatter(content),
-  onUnknownDocuments: "skip",
-  disableImportAliasWarning: true,
-});
+export function getPublishedDocumentsByType(kind: DocKind, limit?: number): any[] {
+  const items = getPublishedDocuments()
+    .filter((d) => getDocKind(d) === kind)
+    .sort((a, b) => {
+      const da = new Date(a?.date ?? 0).getTime();
+      const db = new Date(b?.date ?? 0).getTime();
+      return db - da;
+    });
+
+  return typeof limit === "number" ? items.slice(0, Math.max(0, limit)) : items;
+}
+
+/**
+ * Named exports you rely on elsewhere
+ */
+export const getPublishedPosts = () => getPublishedDocumentsByType("post");
+export const getAllBooks = () => getPublishedDocumentsByType("book");
+export const getAllDownloads = () => getPublishedDocumentsByType("download");
+export const getAllEvents = () => getPublishedDocumentsByType("event");
+export const getAllPrints = () => getPublishedDocumentsByType("print");
+export const getAllResources = () => getPublishedDocumentsByType("resource");
+export const getAllStrategies = () => getPublishedDocumentsByType("strategy");
+export const getAllCanons = () => getPublishedDocumentsByType("canon");
+export const getPublishedShorts = () => getPublishedDocumentsByType("short");
+
+/**
+ * ✅ The missing exports causing your build warnings:
+ * - getRecentShorts
+ * - getShortUrl
+ */
+export function getRecentShorts(limit = 3): any[] {
+  return getPublishedShorts().slice(0, Math.max(0, limit));
+}
+
+export function getShortUrl(short: any): string {
+  // Prefer computed url from Contentlayer
+  return getDocHref(short);
+}
+
+/**
+ * Slug lookups
+ */
+const cleanMatch = (s: string) =>
+  String(s || "").trim().toLowerCase().replace(/^\/+|\/+$/g, "").split("/").filter(Boolean).pop() ?? "";
+
+export const getPostBySlug = (s: string) =>
+  getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getBookBySlug = (s: string) =>
+  getAllBooks().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getCanonBySlug = (s: string) =>
+  getAllCanons().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getShortBySlug = (s: string) =>
+  getPublishedShorts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getDownloadBySlug = (s: string) =>
+  getAllDownloads().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getResourceBySlug = (s: string) =>
+  getAllResources().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getEventBySlug = (s: string) =>
+  getAllEvents().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getPrintBySlug = (s: string) =>
+  getAllPrints().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getStrategyBySlug = (s: string) =>
+  getAllStrategies().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export function assertContentlayerHasDocs(where: string) {
+  const count = getAllContentlayerDocs().length;
+  if (count === 0) throw new Error(`[Critical Build Error] 0 documents found in ${where}`);
+}

@@ -10,11 +10,13 @@ import VenturesSection from "@/components/homepage/VenturesSection";
 import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 import { Calendar, Compass, Users, Sparkles } from "lucide-react";
+
 import {
   getPublishedShorts,
   getRecentShorts,
-  getShortUrl,
-  type Short,
+  getDocHref,
+  normalizeSlug,
+  isPublished,
 } from "@/lib/contentlayer-helper";
 
 // -----------------------------------------------------------------------------
@@ -41,25 +43,41 @@ const BOOKS_IN_DEV = [
 ];
 
 // -----------------------------------------------------------------------------
-// SHORTS – Get at build time with fallback
+// SHORTS – Build-time safe (no fragile assumptions)
 // -----------------------------------------------------------------------------
 
-const getFeaturedShortsSafely = (): Short[] => {
-  try {
-    const shorts = getRecentShorts(3);
-    if (shorts && shorts.length > 0) return shorts;
+type LooseShort = {
+  title?: string;
+  excerpt?: string | null;
+  description?: string | null;
+  readTime?: string | null;
+  url?: string;
+  slug?: string;
+  _type?: string;
+  draft?: boolean;
+  published?: boolean;
+  _raw?: { sourceFileName?: string; flattenedPath?: string };
+};
 
-    const allShorts = getPublishedShorts();
-    if (allShorts && allShorts.length > 0) return allShorts.slice(0, 3);
+const getFeaturedShortsSafely = (): LooseShort[] => {
+  try {
+    // Primary: use helper (already sorted by date)
+    const recent = getRecentShorts(3) as unknown as LooseShort[];
+    if (Array.isArray(recent) && recent.length > 0) return recent;
+
+    // Fallback: use all published shorts
+    const all = getPublishedShorts() as unknown as LooseShort[];
+    if (Array.isArray(all) && all.length > 0) return all.slice(0, 3);
 
     return [];
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error loading shorts for homepage:", error);
     return [];
   }
 };
 
-const featuredShorts: Short[] = getFeaturedShortsSafely();
+const featuredShorts = getFeaturedShortsSafely().filter((s) => isPublished(s));
 
 // -----------------------------------------------------------------------------
 // SECTION DIVIDER – Refined visual separator
@@ -83,7 +101,7 @@ const SectionDivider: React.FC = () => (
 // SHORTS STRIP – Homepage spotlight
 // -----------------------------------------------------------------------------
 
-const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
+const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
   if (!shorts || shorts.length === 0) return null;
 
   return (
@@ -98,11 +116,12 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
               Quick hits for women and men who don&apos;t scroll all day
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
-              Concise field notes on work, livelyhood, and building under
+              Concise field notes on work, livelihood, and building under
               pressure — designed to be read between meetings, not instead of
               them.
             </p>
           </div>
+
           <Link
             href="/shorts"
             className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
@@ -113,13 +132,17 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
 
         <div className="grid gap-6 md:grid-cols-3">
           {shorts.map((short) => {
-            const url = getShortUrl(short);
-            const readTime = short.readTime || "Quick read";
-            const excerpt = short.excerpt || short.description || "";
+            const url = getDocHref(short);
+            const title = String(short.title || "Short").trim();
+            const readTime = String(short.readTime || "Quick read").trim();
+            const excerpt = String(short.excerpt || short.description || "").trim();
+
+            // Stable key: prefer url, then canonical slug
+            const key = url || normalizeSlug(short) || title;
 
             return (
               <Link
-                key={short._id}
+                key={key}
                 href={url}
                 className="group flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 shadow-lg backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/50 hover:bg-slate-800/80 hover:shadow-2xl"
               >
@@ -134,7 +157,7 @@ const ShortsStrip: React.FC<{ shorts: Short[] }> = ({ shorts }) => {
                 </div>
 
                 <h3 className="mb-3 line-clamp-2 font-serif text-xl font-semibold text-white">
-                  {short.title}
+                  {title}
                 </h3>
 
                 {excerpt && (
@@ -193,11 +216,7 @@ const BooksInDevelopment: React.FC = () => (
 
       <div className="grid gap-6 md:grid-cols-2">
         {BOOKS_IN_DEV.map((book) => (
-          <Link
-            key={book.slug}
-            href={`/books/${book.slug}`}
-            className="group block"
-          >
+          <Link key={book.slug} href={`/books/${book.slug}`} className="group block">
             <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
               <div className="grid gap-0 md:grid-cols-[auto,1fr]">
                 <div className="relative aspect-[3/4] w-full max-w-[9rem] flex-shrink-0">
@@ -321,7 +340,7 @@ const StrategicSessions: React.FC = () => (
           </h3>
           <p className="mb-4 text-sm leading-relaxed text-gray-300">
             Small, closed rooms where we test ideas, frameworks, and Canon tools
-            against real lives and real P&Ls.
+            against real lives and real P&amp;Ls.
           </p>
           <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
             Chatham rooms · Inner Circle · Builders&apos; tables

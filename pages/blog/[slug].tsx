@@ -4,15 +4,20 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote } from "next-mdx-remote";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import { getPublishedPosts, getPostBySlug } from "@/lib/contentlayer-helper";
+
+import {
+  assertContentlayerHasDocs,
+  getPublishedPosts,
+  getPostBySlug,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
 
 type Props = {
   post: {
@@ -28,123 +33,51 @@ type Props = {
 
 const SITE = "https://www.abrahamoflondon.org";
 
-/**
- * NOTE (why your 17 slugs are 404 right now):
- * If your build is using static export (Next "output: export" / next export),
- * fallback: "blocking" CANNOT generate pages on-demand. Those pages 404 unless
- * they are pre-rendered at build time.
- *
- * Fix: use fallback: false and ensure all slugs are returned in getStaticPaths.
- */
-
-function toClean(input: unknown): string {
-  let s = String(input ?? "").trim();
-  if (!s) return "";
-  s = s.split("#")[0]?.split("?")[0] ?? s;
-  s = s.replace(/^https?:\/\/[^/]+/i, "");
-  s = s.replace(/\/+$/, "");
-  s = s.replace(/^\/+/, "");
-  return s.toLowerCase();
-}
-
-function lastSegment(pathLike: unknown): string {
-  const s = toClean(pathLike);
-  if (!s) return "";
-  const parts = s.split("/").filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : s;
-}
-
-function stripBlogPrefix(pathLike: unknown): string {
-  const s = toClean(pathLike);
-  if (!s) return "";
-  return s.startsWith("blog/") ? s.slice("blog/".length) : s;
-}
-
-function tryFindPostByAnyKey(requestedParam: string): any | null {
-  const key = lastSegment(requestedParam);
-  if (!key) return null;
-
-  // Try multiple representations because helpers sometimes store:
-  // - "lessons-from-noah"
-  // - "blog/lessons-from-noah"
-  // - "/blog/lessons-from-noah"
-  const candidates = Array.from(
-    new Set<string>([
-      key,
-      stripBlogPrefix(key),
-      `blog/${key}`,
-      `/blog/${key}`,
-      stripBlogPrefix(`blog/${key}`),
-    ]),
-  ).filter(Boolean);
-
-  for (const c of candidates) {
-    const doc = getPostBySlug(c);
-    if (doc) return doc;
-  }
-
-  return null;
-}
-
 export const getStaticPaths: GetStaticPaths = async () => {
+  assertContentlayerHasDocs("pages/blog/[slug].tsx getStaticPaths");
+
   const posts = getPublishedPosts();
 
   const paths = posts
     .map((p: any) => {
-      // Be aggressive: accept url/slug/flattenedPath; always reduce to last segment.
-      const slug =
-        lastSegment(p?.slug) ||
-        lastSegment(p?.url) ||
-        lastSegment(p?._raw?.flattenedPath) ||
-        "";
-
-      if (!slug) {
-        // If you see this in logs, that document is missing routing data.
-        console.warn("⚠️ Blog post missing slug/url/flattenedPath:", p?.title ?? p?._id);
-        return null;
-      }
-
+      const slug = normalizeSlug(p);
+      if (!slug) return null;
       return { params: { slug } };
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
-  console.log(`📝 Blog: Generated ${paths.length} paths`);
-
-  // Critical for static export: must be false (no on-demand generation).
+  console.log(`🧱 Blog: getStaticPaths -> ${paths.length} paths`);
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const requested = lastSegment(params?.slug);
+  assertContentlayerHasDocs("pages/blog/[slug].tsx getStaticProps");
 
-  if (!requested) {
+  const slugParam = typeof params?.slug === "string" ? params.slug : "";
+  if (!slugParam) return { notFound: true };
+
+  // normalizeSlug() expects a doc; here we already have the slug string.
+  // getPostBySlug() should accept canonical slugs; if yours doesn’t, we’ll
+  // still catch it because normalizeSlug was used to build the paths.
+  const doc = getPostBySlug(slugParam);
+
+  if (!doc) {
+    console.warn(`⚠️ Blog: notFound for slug=${slugParam}`);
     return { notFound: true };
   }
 
-  const rawDoc = tryFindPostByAnyKey(requested);
-
-  if (!rawDoc) {
-    console.warn(`⚠️ Blog post not found for slug: ${requested}`);
-    return { notFound: true };
-  }
-
-  // Canonical slug = last segment, always.
-  const canonicalSlug =
-    lastSegment(rawDoc?.slug) ||
-    lastSegment(rawDoc?.url) ||
-    lastSegment(rawDoc?._raw?.flattenedPath) ||
-    requested;
+  const canonicalSlug = normalizeSlug(doc) || slugParam;
 
   const post = {
-    title: rawDoc.title || "Insight",
-    excerpt: rawDoc.excerpt || null,
-    author: rawDoc.author || null,
-    coverImage: rawDoc.coverImage || null,
-    date: rawDoc.date ? new Date(rawDoc.date).toISOString() : null,
+    title: doc.title || "Insight",
+    excerpt: doc.excerpt || doc.description || null,
+    author: doc.author || null,
+    coverImage: doc.coverImage || null,
+    date: doc.date ? new Date(doc.date).toISOString() : null,
     slug: canonicalSlug,
   };
 
-  const raw = String(rawDoc?.body?.raw ?? "");
+  const raw = String(doc?.body?.raw ?? "");
   let source: MDXRemoteSerializeResult;
 
   try {
@@ -155,7 +88,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       },
     });
   } catch (err) {
-    console.error(`❌ Failed to serialize MDX for post: ${post.title}`, err);
+    console.error(`❌ Blog: MDX serialize failed for ${canonicalSlug}`, err);
     source = await serialize("Content is being prepared.");
   }
 
@@ -187,7 +120,7 @@ const PostPage: NextPage<Props> = ({ post, source }) => {
 
         <header className="mt-6 mb-10 border-b border-gold/10 pb-10">
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
-            Insight & Reflection
+            Insight &amp; Reflection
           </p>
 
           <h1 className="mt-4 font-serif text-3xl font-semibold text-cream sm:text-5xl">
