@@ -11,792 +11,319 @@ import {
   Heart,
   Share2,
   Bookmark,
-  TrendingUp,
-  Filter,
   Search,
+  Filter,
   Grid,
   List,
-  MessageCircle,
   ChevronRight,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { getPublishedShorts } from "@/lib/contentlayer-helper";
 
+/* ─────────────────────────────────────────────
+   Types
+───────────────────────────────────────────── */
+
 type ShortDoc = {
   _id: string;
   slug: string;
   title: string;
   excerpt?: string | null;
-  date?: string | null;
   readTime?: string | null;
   tags?: string[];
   theme?: string | null;
 };
 
-type ShortsIndexProps = {
+type Props = {
   shorts: ShortDoc[];
 };
 
-const themeGradients = {
-  faith: "from-blue-500/10 to-indigo-500/5 border-blue-500/20",
-  resilience: "from-amber-500/10 to-orange-500/5 border-amber-500/20",
-  purpose: "from-emerald-500/10 to-teal-500/5 border-emerald-500/20",
-  leadership: "from-purple-500/10 to-pink-500/5 border-purple-500/20",
-  fatherhood: "from-rose-500/10 to-red-500/5 border-rose-500/20",
-  strategy: "from-cyan-500/10 to-sky-500/5 border-cyan-500/20",
-} as const;
+/* ─────────────────────────────────────────────
+   Helpers
+───────────────────────────────────────────── */
 
-const themeIcons = {
-  faith: "🙏",
-  resilience: "💪",
-  purpose: "🎯",
-  leadership: "👑",
-  fatherhood: "👨‍👦",
-  strategy: "♟️",
-} as const;
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15,
-    },
-  },
-  hover: {
-    y: -4,
-    scale: 1.02,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 20,
-    },
-  },
-  tap: { scale: 0.98 },
-};
-
-function formatShortDateISO(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
-function safeParseInt(v: string | null): number | null {
-  if (!v) return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? Math.trunc(n) : null;
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n));
 }
 
-const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
+/* ─────────────────────────────────────────────
+   Page
+───────────────────────────────────────────── */
+
+const ShortsIndexPage: NextPage<Props> = ({ shorts }) => {
   const reduceMotion = useReducedMotion();
 
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedTheme, setSelectedTheme] = React.useState<string>("all");
-
-  const [interactions, setInteractions] = React.useState<
-    Record<string, { likes: number; shares: number; reads: number; saves: number }>
-  >({});
-  const [bookmarks, setBookmarks] = React.useState<Set<string>>(new Set());
-
-  // “Quiet habit” (local only) — we keep it, but we do NOT crowd the hero with it.
-  const [streakDays, setStreakDays] = React.useState<number>(0);
-
-  // Subtitle line: arrives late, calm curve
+  /* State */
   const [subtitleVisible, setSubtitleVisible] = React.useState(false);
-  const subtitle = "For wherever you are today.";
+  const [streakDays, setStreakDays] = React.useState(1);
 
-  // Initialize interactions with lightweight, privacy-safe mock data
+  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const [search, setSearch] = React.useState("");
+  const [theme, setTheme] = React.useState("all");
+
+  /* ───────────────
+     Ritual: Streak
+  ──────────────── */
   React.useEffect(() => {
-    const mock: Record<string, { likes: number; shares: number; reads: number; saves: number }> = {};
-    shorts.forEach((short, index) => {
-      const baseReads = 120 + index * 35 + Math.floor(Math.random() * 80);
-      const baseLikes = Math.floor(baseReads * 0.12) + Math.floor(Math.random() * 18);
-      const baseShares = Math.floor(baseLikes * 0.25) + Math.floor(Math.random() * 7);
-      mock[short._id] = {
-        reads: baseReads,
-        likes: baseLikes,
-        shares: baseShares,
-        saves: Math.floor(baseReads * 0.07) + Math.floor(Math.random() * 4),
-      };
-    });
-    setInteractions(mock);
-  }, [shorts]);
+    if (typeof window === "undefined") return;
 
-  // Themes list
+    const today = todayKey();
+    const last = localStorage.getItem("aol_shorts_last_seen");
+    const prev = Number(localStorage.getItem("aol_shorts_streak") || "0");
+
+    let next = 1;
+
+    if (last === today) next = Math.max(1, prev);
+    else if (last) {
+      const diff =
+        (new Date(today).getTime() - new Date(last).getTime()) / 86400000;
+      next = diff === 1 ? prev + 1 : 1;
+    }
+
+    localStorage.setItem("aol_shorts_last_seen", today);
+    localStorage.setItem("aol_shorts_streak", String(next));
+    setStreakDays(clamp(next, 1, 3650));
+
+    const t = setTimeout(() => setSubtitleVisible(true), 1200);
+    return () => clearTimeout(t);
+  }, []);
+
+  /* ───────────────
+     Filters
+  ──────────────── */
   const themes = React.useMemo(() => {
-    const allThemes = new Set<string>();
-    shorts.forEach((s) => {
-      if (s.theme) allThemes.add(s.theme);
-    });
-    return ["all", ...Array.from(allThemes)].sort();
+    const s = new Set<string>();
+    shorts.forEach((x) => x.theme && s.add(x.theme));
+    return ["all", ...Array.from(s)];
   }, [shorts]);
 
-  // Filtering
-  const filteredShorts = React.useMemo(() => {
-    return shorts.filter((short) => {
-      const q = searchQuery.toLowerCase();
-      const matchesSearch =
-        searchQuery === "" ||
-        short.title.toLowerCase().includes(q) ||
-        short.excerpt?.toLowerCase().includes(q) ||
-        short.tags?.some((tag) => tag.toLowerCase().includes(q));
+  const filtered = shorts.filter((s) => {
+    const q = search.toLowerCase();
+    const okSearch =
+      !q ||
+      s.title.toLowerCase().includes(q) ||
+      s.excerpt?.toLowerCase().includes(q);
+    const okTheme = theme === "all" || s.theme === theme;
+    return okSearch && okTheme;
+  });
 
-      const matchesTheme = selectedTheme === "all" || short.theme === selectedTheme;
-      return matchesSearch && matchesTheme;
-    });
-  }, [shorts, searchQuery, selectedTheme]);
-
-  // Local “streak” bookkeeping (no UI noise in hero)
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const todayKey = formatShortDateISO(new Date());
-    const lastKey = window.localStorage.getItem("aol_shorts_last_seen");
-    const streak = safeParseInt(window.localStorage.getItem("aol_shorts_streak"));
-
-    let nextStreak = streak ?? 0;
-
-    if (!lastKey) {
-      nextStreak = 1;
-    } else if (lastKey === todayKey) {
-      nextStreak = Math.max(1, nextStreak);
-    } else {
-      const lastDate = new Date(`${lastKey}T00:00:00`);
-      const diffDays = Math.round(
-        (new Date(`${todayKey}T00:00:00`).getTime() - lastDate.getTime()) / 86400000,
-      );
-      nextStreak = diffDays === 1 ? nextStreak + 1 : 1;
-    }
-
-    window.localStorage.setItem("aol_shorts_last_seen", todayKey);
-    window.localStorage.setItem("aol_shorts_streak", String(nextStreak));
-    setStreakDays(Math.max(1, Math.min(3650, nextStreak)));
-
-    // Subtitle arrives late — calm, not impulsive.
-    if (reduceMotion) {
-      setSubtitleVisible(true);
-      return;
-    }
-    const t = window.setTimeout(() => setSubtitleVisible(true), 1200);
-    return () => window.clearTimeout(t);
-  }, [reduceMotion]);
-
-  const totalSaves = Object.values(interactions).reduce((sum, i) => sum + i.saves, 0);
-
-  const handleLike = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setInteractions((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], likes: (prev[id]?.likes ?? 0) + 1 },
-    }));
-  };
-
-  const handleBookmark = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setBookmarks((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-        setInteractions((p) => ({
-          ...p,
-          [id]: { ...p[id], saves: Math.max(0, (p[id]?.saves ?? 1) - 1) },
-        }));
-      } else {
-        next.add(id);
-        setInteractions((p) => ({
-          ...p,
-          [id]: { ...p[id], saves: (p[id]?.saves ?? 0) + 1 },
-        }));
-      }
-      return next;
-    });
-  };
-
-  const handleShare = async (id: string, slug: string, title: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const url =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/shorts/${slug}`
-        : `https://www.abrahamoflondon.org/shorts/${slug}`;
-    const text = `"${title}" — Abraham of London`;
-
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
-      try {
-        await (navigator as any).share({
-          title: `${title} · Abraham of London`,
-          text,
-          url,
-        });
-        setInteractions((prev) => ({
-          ...prev,
-          [id]: { ...prev[id], shares: (prev[id]?.shares ?? 0) + 1 },
-        }));
-        return;
-      } catch {
-        // fall through
-      }
-    }
-
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(`${text}\n${url}`);
-      }
-      setInteractions((prev) => ({
-        ...prev,
-        [id]: { ...prev[id], shares: (prev[id]?.shares ?? 0) + 1 },
-      }));
-    } catch {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        text,
-      )}&url=${encodeURIComponent(url)}`;
-      window.open(twitterUrl, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  const sharePage = async (platform?: string) => {
-    if (typeof window === "undefined") return;
-
-    const url = window.location.href;
-    const text = "Shorts — Abraham of London";
-
-    if (platform === "twitter") {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        text,
-      )}&url=${encodeURIComponent(url)}`;
-      window.open(twitterUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-
-    if (platform === "whatsapp") {
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
-      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-
-    if ((navigator as any).share) {
-      try {
-        await (navigator as any).share({ title: "Shorts · Abraham of London", text, url });
-      } catch {
-        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(`${text}\n${url}`);
-      }
-      return;
-    }
-
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      // No alert — keep it calm.
-    }
-  };
-
-  // Motion settings: “late arrival” + calm curve
-  const subtitleMotion = reduceMotion
-    ? { initial: { opacity: 1, y: 0 }, animate: { opacity: 1, y: 0 } }
-    : {
-        initial: { opacity: 0, y: 8, filter: "blur(2px)" },
-        animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-      };
+  /* ───────────────────────────────────────────── */
 
   return (
     <Layout
       title="Shorts"
-      description="Short reflections for busy minds — faith-rooted clarity without the noise."
+      description="Short reflections for wherever you are today."
     >
       <Head>
-        <title>Shorts · Abraham of London</title>
         <meta
           name="description"
-          content="Short reflections for busy minds — faith-rooted clarity without the noise."
+          content="Short reflections for wherever you are today."
         />
-        <meta property="og:title" content="Shorts · Abraham of London" />
-        <meta
-          property="og:description"
-          content="Short reflections for busy minds — faith-rooted clarity without the noise."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://www.abrahamoflondon.org/api/og/shorts" />
-        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-black dark:to-gray-950">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-gray-200 dark:border-gray-800">
-          {/* Ambient backdrop (smoke + microflame personality) */}
-          <div className="absolute inset-0" aria-hidden="true">
-            {/* Base wash */}
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/6 via-transparent to-purple-500/6" />
-            <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
+      <main className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-black dark:via-black dark:to-black">
+        {/* ───────────────────────────
+            HERO — THE HOME
+        ─────────────────────────── */}
+        <section className="relative overflow-hidden border-b border-black/10 dark:border-white/10">
+          {/* Ambient architecture */}
+          <div className="absolute inset-0" aria-hidden>
+            {/* Hearth glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/6 via-transparent to-indigo-500/6" />
+            <div className="absolute bottom-[-20%] left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-amber-500/12 blur-[120px]" />
 
-            {/* Smoke (slow drift) */}
-            <motion.div
-              className="absolute -left-1/4 top-1/3 h-72 w-72 rounded-full bg-white/6 blur-3xl dark:bg-white/5"
-              animate={
-                reduceMotion
-                  ? undefined
-                  : { x: [0, 90, 0], y: [0, -25, 0], opacity: [0.18, 0.28, 0.18] }
-              }
-              transition={
-                reduceMotion
-                  ? undefined
-                  : { duration: 22, repeat: Infinity, ease: "easeInOut" }
-              }
-              style={{ willChange: "transform, opacity" }}
-            />
-            <motion.div
-              className="absolute -right-1/4 bottom-1/3 h-72 w-72 rounded-full bg-amber-400/8 blur-3xl"
-              animate={
-                reduceMotion
-                  ? undefined
-                  : { x: [0, -85, 0], y: [0, 22, 0], opacity: [0.14, 0.24, 0.14] }
-              }
-              transition={
-                reduceMotion
-                  ? undefined
-                  : { duration: 26, repeat: Infinity, ease: "easeInOut" }
-              }
-              style={{ willChange: "transform, opacity" }}
-            />
-            <motion.div
-              className="absolute left-1/2 top-10 h-24 w-[680px] -translate-x-1/2 rotate-[-10deg] bg-gradient-to-r from-transparent via-white/10 to-transparent blur-md dark:via-white/8"
-              animate={reduceMotion ? undefined : { opacity: [0, 0.55, 0], x: ["-10%", "10%", "-10%"] }}
-              transition={reduceMotion ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
-              style={{ willChange: "transform, opacity" }}
-            />
+            {/* Slow spiritual smoke */}
+            {!reduceMotion && (
+              <>
+                <motion.div
+                  className="absolute left-[-10%] top-[30%] h-[420px] w-[420px] rounded-full bg-white/6 blur-[140px]"
+                  animate={{ x: [0, 120, 0], opacity: [0.15, 0.28, 0.15] }}
+                  transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                  className="absolute right-[-10%] top-[50%] h-[380px] w-[380px] rounded-full bg-amber-400/8 blur-[140px]"
+                  animate={{ x: [0, -120, 0], opacity: [0.12, 0.22, 0.12] }}
+                  transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </>
+            )}
 
-            {/* Microflames (tiny warm pulses near the bottom — intermittent, not loud) */}
-            <motion.div
-              className="absolute bottom-10 left-[18%] h-12 w-12 rounded-full bg-amber-500/20 blur-2xl"
-              animate={reduceMotion ? undefined : { opacity: [0.0, 0.22, 0.0], scale: [0.95, 1.08, 0.95] }}
-              transition={reduceMotion ? undefined : { duration: 5.6, repeat: Infinity, ease: "easeInOut", repeatDelay: 3.2 }}
-              style={{ willChange: "transform, opacity" }}
-            />
-            <motion.div
-              className="absolute bottom-14 left-[52%] h-10 w-10 rounded-full bg-orange-500/18 blur-2xl"
-              animate={reduceMotion ? undefined : { opacity: [0.0, 0.18, 0.0], scale: [0.92, 1.06, 0.92] }}
-              transition={reduceMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 4.0 }}
-              style={{ willChange: "transform, opacity" }}
-            />
-            <motion.div
-              className="absolute bottom-12 right-[16%] h-14 w-14 rounded-full bg-amber-400/16 blur-2xl"
-              animate={reduceMotion ? undefined : { opacity: [0.0, 0.16, 0.0], scale: [0.94, 1.07, 0.94] }}
-              transition={reduceMotion ? undefined : { duration: 7.1, repeat: Infinity, ease: "easeInOut", repeatDelay: 4.7 }}
-              style={{ willChange: "transform, opacity" }}
-            />
-
-            {/* Quiet vignette to feel like “home”, not “stage” */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 dark:to-black/20" />
+            {/* Quiet vignette */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 dark:to-black/30" />
           </div>
 
-          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="text-center"
-            >
-              {/* Micro badge stays, but remains minimal */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-                className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-4 py-2 backdrop-blur-sm"
-              >
-                <Sparkles className="h-4 w-4 text-amber-500" />
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
-                  Shorts
-                </span>
-              </motion.div>
+          {/* Content */}
+          <div className="relative mx-auto max-w-5xl px-6 py-20 text-center">
+            {/* Identity marker */}
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 backdrop-blur">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <span className="text-xs font-semibold tracking-widest text-amber-600 dark:text-amber-400">
+                SHORTS
+              </span>
+            </div>
 
-              <h1 className="mb-2 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-                Shorts
-              </h1>
+            {/* Title */}
+            <h1 className="font-serif text-5xl font-semibold text-gray-900 dark:text-white sm:text-6xl">
+              Shorts
+            </h1>
 
-              {/* The line arrives late (calm curve) */}
-              <AnimatePresence>
-                {subtitleVisible ? (
+            {/* Arrival line */}
+            <AnimatePresence>
+              {subtitleVisible && (
+                reduceMotion ? (
+                  <p className="mx-auto mt-4 max-w-xl text-lg text-gray-600 dark:text-gray-300">
+                    For wherever you are today.
+                  </p>
+                ) : (
                   <motion.p
-                    {...subtitleMotion}
-                    transition={
-                      reduceMotion
-                        ? { duration: 0.01 }
-                        : {
-                            duration: 0.85,
-                            ease: [0.16, 1, 0.3, 1], // calm, “settling” curve
-                          }
-                    }
-                    className="mx-auto mt-3 max-w-xl text-base text-gray-600 dark:text-gray-300 sm:text-lg"
+                    initial={{ opacity: 0, y: 10, filter: "blur(2px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0)" }}
+                    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                    className="mx-auto mt-4 max-w-xl text-lg text-gray-600 dark:text-gray-300"
                   >
-                    {subtitle}
+                    For wherever you are today.
                   </motion.p>
-                ) : null}
-              </AnimatePresence>
+                )
+              )}
+            </AnimatePresence>
 
-              {/* Keep the hero clean: one CTA, one tiny cue */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className="mt-10 inline-flex flex-col items-center gap-5"
+            {/* Primary action */}
+            <div className="mt-12 flex flex-col items-center gap-6">
+              <Link
+                href="#shorts"
+                className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/30 transition hover:scale-[1.03]"
               >
-                <Link
-                  href="#shorts-grid"
-                  className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.03] hover:shadow-xl hover:shadow-amber-500/40 active:scale-95"
-                >
-                  <Zap className="h-4 w-4" />
-                  Start Reading
-                  <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
-                </Link>
+                <Zap className="h-4 w-4" />
+                Begin here
+              </Link>
 
-                <motion.a
-                  href="#shorts-grid"
-                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/35 px-4 py-2 text-xs text-gray-600 backdrop-blur-sm hover:bg-white/45 dark:border-gray-800 dark:bg-gray-900/30 dark:text-gray-300"
-                  whileHover={reduceMotion ? undefined : { y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Clock className="h-3.5 w-3.5 text-gray-500" />
-                  <span>Under a minute each</span>
-                  <ChevronRight className="h-3.5 w-3.5 opacity-70" />
-                </motion.a>
-              </motion.div>
-            </motion.div>
+              {/* Gentle accountability */}
+              <a
+                href="#daily-habit"
+                className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/40 px-4 py-2 text-xs text-gray-700 backdrop-blur dark:border-white/10 dark:bg-black/30 dark:text-gray-300"
+              >
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                Day {streakDays} — steady
+                <ChevronRight className="h-3 w-3 opacity-60" />
+              </a>
+            </div>
           </div>
         </section>
 
-        {/* Controls */}
-        <section className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 py-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="relative flex-1 max-w-md">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="search"
-                  placeholder="Search shorts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-amber-400"
-                  aria-label="Search shorts"
-                />
-              </div>
+        {/* ───────────────────────────
+            CONTROLS
+        ─────────────────────────── */}
+        <section
+          id="shorts"
+          className="sticky top-0 z-10 border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-black/80"
+        >
+          <div className="mx-auto max-w-7xl px-6 py-4 flex flex-wrap gap-4 items-center justify-between">
+            <div className="relative max-w-sm w-full">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search shorts…"
+                className="w-full rounded-xl border border-black/10 bg-white py-2 pl-10 pr-4 text-sm dark:border-white/10 dark:bg-black"
+              />
+            </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-gray-500" />
-                  <select
-                    value={selectedTheme}
-                    onChange={(e) => setSelectedTheme(e.target.value)}
-                    className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    aria-label="Filter by theme"
-                  >
-                    {themes.map((theme) => (
-                      <option key={theme} value={theme}>
-                        {theme === "all"
-                          ? "All Themes"
-                          : theme.charAt(0).toUpperCase() + theme.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="flex items-center gap-3">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <select
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-black"
+              >
+                {themes.map((t) => (
+                  <option key={t} value={t}>
+                    {t === "all" ? "All themes" : t}
+                  </option>
+                ))}
+              </select>
 
-                <div className="flex rounded-xl border border-gray-300 bg-white p-1 dark:border-gray-700 dark:bg-gray-800">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`rounded-lg p-2 transition-colors ${
-                      viewMode === "grid"
-                        ? "bg-amber-500 text-white"
-                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                    }`}
-                    aria-label="Grid view"
-                    type="button"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`rounded-lg p-2 transition-colors ${
-                      viewMode === "list"
-                        ? "bg-amber-500 text-white"
-                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                    }`}
-                    aria-label="List view"
-                    type="button"
-                  >
-                    <List className="h-4 w-4" />
-                  </button>
-                </div>
+              <div className="flex rounded-xl border border-black/10 dark:border-white/10">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 ${
+                    viewMode === "grid"
+                      ? "bg-amber-500 text-white"
+                      : "text-gray-500"
+                  }`}
+                >
+                  <Grid className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 ${
+                    viewMode === "list"
+                      ? "bg-amber-500 text-white"
+                      : "text-gray-500"
+                  }`}
+                >
+                  <List className="h-4 w-4" />
+                </button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Shorts Grid */}
-        <section id="shorts-grid" className="py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {filteredShorts.length === 0 ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-12 text-center">
-                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-                  <Search className="h-6 w-6 text-gray-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No shorts found</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Try adjusting your search or filter.
-                </p>
-                {(searchQuery || selectedTheme !== "all") && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSelectedTheme("all");
-                    }}
-                    className="mt-4 text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
-                    type="button"
-                  >
-                    Clear filters
-                  </button>
-                )}
-              </motion.div>
-            ) : (
-              <>
-                <div className="mb-8 flex items-center justify-between">
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold text-gray-900 dark:text-white sm:text-3xl">
-                      Daily Feed
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                      {filteredShorts.length} short{filteredShorts.length !== 1 ? "s" : ""} ready
+        {/* ───────────────────────────
+            GRID
+        ─────────────────────────── */}
+        <section className="py-14">
+          <div className="mx-auto max-w-7xl px-6">
+            <div
+              className={
+                viewMode === "grid"
+                  ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                  : "space-y-4"
+              }
+            >
+              {filtered.map((s) => (
+                <Link
+                  key={s._id}
+                  href={`/shorts/${s.slug}`}
+                  className="group rounded-2xl border border-black/10 bg-white/60 p-6 backdrop-blur transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-black/40"
+                >
+                  <h3 className="font-serif text-xl text-gray-900 dark:text-white">
+                    {s.title}
+                  </h3>
+                  {s.excerpt && (
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
+                      {s.excerpt}
                     </p>
-                  </div>
-                  {filteredShorts.length < shorts.length && (
-                    <button
-                      onClick={() => {
-                        setSearchQuery("");
-                        setSelectedTheme("all");
-                      }}
-                      className="text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
-                      type="button"
-                    >
-                      Clear filters
-                    </button>
                   )}
-                </div>
-
-                <AnimatePresence>
-                  <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className={
-                      viewMode === "grid"
-                        ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-                        : "space-y-4"
-                    }
-                  >
-                    {filteredShorts.map((short) => {
-                      const themeKey = (short.theme as keyof typeof themeGradients) || "faith";
-                      const gradient = themeGradients[themeKey] || themeGradients.faith;
-                      const icon = themeIcons[themeKey as keyof typeof themeIcons] || "💭";
-
-                      return (
-                        <motion.article
-                          key={short._id}
-                          layout
-                          variants={cardVariants}
-                          whileHover="hover"
-                          whileTap="tap"
-                          className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br ${gradient} p-5 backdrop-blur-sm transition-all duration-300`}
-                        >
-                          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 backdrop-blur-sm">
-                            <span className="text-sm">{icon}</span>
-                            <span className="text-xs font-medium capitalize text-gray-700 dark:text-gray-300">
-                              {short.theme || "Reflection"}
-                            </span>
-                          </div>
-
-                          <h3 className="mb-3 line-clamp-2 font-serif text-xl font-semibold text-gray-900 dark:text-white">
-                            {short.title}
-                          </h3>
-
-                          {short.excerpt ? (
-                            <p className="mb-4 line-clamp-3 text-sm text-gray-600 dark:text-gray-300">
-                              {short.excerpt}
-                            </p>
-                          ) : null}
-
-                          <div className="mb-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <Clock className="h-3 w-3" />
-                            <span>{short.readTime || "3 min"} read</span>
-                          </div>
-
-                          <div className="flex items-center justify-between border-t border-white/20 pt-4">
-                            <div className="flex items-center gap-4">
-                              <button
-                                type="button"
-                                onClick={(e) => handleLike(short._id, e)}
-                                className="group/like flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-red-500 dark:text-gray-400"
-                              >
-                                <Heart
-                                  className={`h-4 w-4 transition-transform group-hover/like:scale-110 ${
-                                    (interactions[short._id]?.likes ?? 0) > 0
-                                      ? "fill-red-500 text-red-500"
-                                      : ""
-                                  }`}
-                                />
-                                <span>{interactions[short._id]?.likes ?? 0}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={(e) => handleBookmark(short._id, e)}
-                                className={`group/bookmark flex items-center gap-1.5 text-xs transition-colors ${
-                                  bookmarks.has(short._id)
-                                    ? "text-amber-500"
-                                    : "text-gray-500 hover:text-amber-500 dark:text-gray-400"
-                                }`}
-                              >
-                                <Bookmark className="h-4 w-4 transition-transform group-hover/bookmark:scale-110" />
-                                <span>{interactions[short._id]?.saves ?? 0}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={(e) => handleShare(short._id, short.slug, short.title, e)}
-                                className="group/share flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-blue-500 dark:text-gray-400"
-                              >
-                                <Share2 className="h-4 w-4 transition-transform group-hover/share:scale-110" />
-                                <span>{interactions[short._id]?.shares ?? 0}</span>
-                              </button>
-                            </div>
-
-                            <Link
-                              href={`/shorts/${short.slug}`}
-                              className="flex items-center gap-1 text-xs font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
-                            >
-                              Read
-                              <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                            </Link>
-                          </div>
-                        </motion.article>
-                      );
-                    })}
-                  </motion.div>
-                </AnimatePresence>
-              </>
-            )}
-
-            {/* “Daily Habit” section stays (below the fold); it can carry streak without cluttering the hero */}
-            {filteredShorts.length > 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="mt-16 rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900 to-black p-8"
-              >
-                <div className="grid gap-6 md:grid-cols-2 md:items-center">
-                  <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1">
-                      <Zap className="h-3 w-3 text-amber-400" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-400">
-                        Daily Habit
-                      </span>
-                    </div>
-                    <h3 className="mb-3 font-serif text-2xl font-semibold text-white">
-                      Keep it simple
-                    </h3>
-                    <p className="text-gray-300">
-                      One short a day. Quiet consistency beats motivational bursts.
-                    </p>
-                    <p className="mt-3 text-sm text-gray-400">
-                      Current streak: <span className="font-semibold text-amber-300">{streakDays} day</span>
-                    </p>
+                  <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
+                    <Clock className="h-3 w-3" />
+                    {s.readTime || "1 min"}
                   </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                  <div className="flex flex-col gap-3">
-                    <a
-                      href="#shorts-grid"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25"
-                    >
-                      Start Daily Reading
-                    </a>
-
-                    <button
-                      onClick={() => sharePage()}
-                      type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-transparent px-6 py-3 text-sm font-semibold text-amber-400 transition-colors hover:bg-amber-500/10"
-                    >
-                      <TrendingUp className="h-4 w-4" />
-                      Share This Page
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
-
-            {/* Share Section */}
-            {filteredShorts.length > 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.35 }}
-                className="mt-12 rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900"
-              >
-                <div className="text-center">
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1">
-                    <Share2 className="h-3 w-3 text-amber-500" />
-                    <span className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-600 dark:text-amber-400">
-                      Shared {totalSaves.toLocaleString()}+ times
-                    </span>
-                  </div>
-
-                  <h4 className="mb-3 font-serif text-xl font-semibold text-gray-900 dark:text-white">
-                    Pass it on
-                  </h4>
-                  <p className="mx-auto mb-6 max-w-md text-gray-600 dark:text-gray-400">
-                    When something helps, it should travel.
-                  </p>
-
-                  <div className="flex flex-wrap justify-center gap-3">
-                    <button
-                      onClick={() => sharePage("twitter")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:scale-105 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                      type="button"
-                    >
-                      Share on Twitter
-                    </button>
-                    <button
-                      onClick={() => sharePage("whatsapp")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:scale-105 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                      type="button"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      Share on WhatsApp
-                    </button>
-                    <button
-                      onClick={() => sharePage()}
-                      className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-2.5 text-sm font-medium text-amber-600 transition-all hover:scale-105 hover:bg-amber-500/10 dark:text-amber-400"
-                      type="button"
-                    >
-                      Share Anywhere
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
+        {/* ───────────────────────────
+            DAILY HABIT
+        ─────────────────────────── */}
+        <section
+          id="daily-habit"
+          className="mx-auto max-w-5xl px-6 pb-20"
+        >
+          <div className="rounded-2xl bg-gradient-to-br from-gray-900 to-black p-10 text-center">
+            <h2 className="font-serif text-2xl text-white">
+              One a day is enough
+            </h2>
+            <p className="mt-3 text-gray-300">
+              No pressure. No streak anxiety. Just return.
+            </p>
           </div>
         </section>
       </main>
@@ -804,9 +331,15 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   );
 };
 
+/* ───────────────────────────────────────────── */
+
 export const getStaticProps: GetStaticProps = async () => {
-  const shorts = getPublishedShorts();
-  return { props: { shorts }, revalidate: 3600 };
+  return {
+    props: {
+      shorts: getPublishedShorts(),
+    },
+    revalidate: 3600,
+  };
 };
 
 export default ShortsIndexPage;
