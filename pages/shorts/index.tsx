@@ -48,19 +48,32 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").toLowerCase().trim();
-  const rawDoc = getShortBySlug(slug);
+  const slugParam = String(params?.slug ?? "").toLowerCase().trim();
+  const rawDoc = getShortBySlug(slugParam);
 
   if (!rawDoc) return { notFound: true };
 
   const cover = resolveDocCoverImage(rawDoc) ?? null;
   const canonicalUrl = `${SITE_URL}/shorts/${normalizeSlug(rawDoc)}`;
 
+  // Keep JSON-safe
   const short = JSON.parse(JSON.stringify({ ...rawDoc, cover }));
 
   try {
-    const source = await serialize(short.body.raw);
-    return { props: { short, source, canonicalUrl, ogImage: cover }, revalidate: 1800 };
+    const source = await serialize(short.body.raw, {
+      mdxOptions: {
+        // keep your existing pipeline defaults; don't introduce plugins here unless needed
+      },
+    });
+    return {
+      props: {
+        short,
+        source,
+        canonicalUrl,
+        ogImage: cover,
+      },
+      revalidate: 1800,
+    };
   } catch {
     return { notFound: true };
   }
@@ -137,9 +150,9 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
     const saved = window.localStorage.getItem(DIM_KEY);
     if (saved === "1") setDimMode(true);
 
+    // Tiny “Breathe” cue: appears, then fades out after ~2s (unless reduced motion)
     if (reduceMotion) return;
 
-    // Tiny “Breathe” cue: appear softly, fade out after ~2s
     setShowBreathe(true);
     const t = window.setTimeout(() => setShowBreathe(false), 2000);
     return () => window.clearTimeout(t);
@@ -202,7 +215,9 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
   }, [shareTitle, shareText, shareUrl]);
 
   // Calm motion curve: slow, late, settling.
-  const settle = reduceMotion ? { duration: 0.01 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1] as const };
+  const settle = reduceMotion
+    ? { duration: 0.01 }
+    : ({ duration: 0.9, ease: [0.16, 1, 0.3, 1] } as const);
 
   // Closure line (non-denominational)
   const closureLine = "Peace to your mind. Strength to your steps.";
@@ -233,7 +248,7 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.10),transparent_55%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,140,0,0.08),transparent_55%)]" />
 
-          {/* “Smoke” drift — extremely slow */}
+          {/* Smoke drift — extremely slow */}
           {!reduceMotion ? (
             <>
               <motion.div
@@ -243,7 +258,7 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
               />
               <motion.div
                 className="absolute right-[-18%] top-[50%] h-[480px] w-[480px] rounded-full bg-amber-400/10 blur-[160px]"
-                animate={{ x: [0, -150, 0], opacity: [0.10, 0.18, 0.10] }}
+                animate={{ x: [0, -150, 0], opacity: [0.1, 0.18, 0.1] }}
                 transition={{ duration: 42, repeat: Infinity, ease: "easeInOut" }}
               />
             </>
@@ -254,13 +269,12 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             className={[
               "absolute inset-0",
               dimMode
-                ? "bg-[radial-gradient(ellipse_at_center,transparent_28%,rgba(0,0,0,0.75)_82%)]"
-                : "bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_80%)]",
+                ? "bg-[radial-gradient(ellipse_at_center,transparent_28%,rgba(0,0,0,0.78)_82%)]"
+                : "bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.58)_80%)]",
             ].join(" ")}
           />
         </div>
 
-        {/* Content */}
         <div className="relative mx-auto max-w-3xl px-6 py-16 sm:py-20">
           {/* Top controls */}
           <div className="mb-10 flex items-center justify-between gap-4">
@@ -277,14 +291,18 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             </div>
           </div>
 
-          {/* Tiny “Breathe” cue */}
+          {/* Tiny “Breathe” cue (fades out after 2s) */}
           <AnimatePresence>
             {showBreathe ? (
               <motion.div
                 initial={{ opacity: 0, y: 6, filter: "blur(2px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, y: -6, filter: "blur(2px)" }}
-                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0.01 }
+                    : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                }
                 className="pointer-events-none mb-8 flex justify-center"
               >
                 <div className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-[11px] tracking-[0.3em] text-gray-200/90 backdrop-blur-sm">
@@ -336,16 +354,21 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             </motion.p>
           </header>
 
-          {/* Body */}
+          {/* Body (Dim mode subtly affects the whole “room”: lower contrast + more blur) */}
           <motion.article
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...settle, delay: reduceMotion ? 0 : 0.25 }}
             className={[
-              "rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur-md sm:p-9",
+              "rounded-3xl border p-7 sm:p-9",
+              dimMode
+                ? "border-white/10 bg-white/[0.035] text-gray-200/90 backdrop-blur-lg"
+                : "border-white/10 bg-white/5 text-gray-200 backdrop-blur-md",
               "prose prose-invert max-w-none",
               "prose-headings:font-serif prose-headings:text-cream",
-              "prose-p:text-gray-200 prose-strong:text-gold prose-a:text-gold",
+              dimMode
+                ? "prose-p:text-gray-200/85 prose-strong:text-gold/90 prose-a:text-gold/90"
+                : "prose-p:text-gray-200 prose-strong:text-gold prose-a:text-gold",
               "prose-blockquote:border-l-gold/40 prose-blockquote:text-gray-200",
             ].join(" ")}
           >
@@ -367,12 +390,14 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             </div>
           </div>
 
-          {/* End-of-page closure line (non-denominational) */}
+          {/* End-of-page closure line (non-denominational, “Amen-style” closure without the label) */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-20%" }}
-            transition={reduceMotion ? { duration: 0.01 } : { duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            transition={
+              reduceMotion ? { duration: 0.01 } : { duration: 0.85, ease: [0.16, 1, 0.3, 1] }
+            }
             className="mt-14 flex justify-center"
           >
             <div className="max-w-xl text-center">
@@ -389,7 +414,10 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...settle, delay: reduceMotion ? 0 : 0.4 }}
-            className="mt-14 rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur-md"
+            className={[
+              "mt-14 rounded-3xl border border-white/10 p-7 backdrop-blur-md",
+              dimMode ? "bg-white/[0.03]" : "bg-white/5",
+            ].join(" ")}
           >
             <div className="text-center">
               <h2 className="font-serif text-xl text-cream">Share quietly</h2>
@@ -438,19 +466,19 @@ const ShortPage: NextPage<PageProps> = ({ short, source, canonicalUrl, ogImage }
             <div className="mt-6 border-t border-white/10 pt-5 text-center">
               <Link
                 href="/shorts"
-                className="inline-flex items-center gap-2 text-sm font-medium text-gold hover:text-gold/80 transition"
+                className="inline-flex items-center gap-2 text-sm font-medium text-gold transition hover:text-gold/80"
               >
                 Explore more Shorts <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
           </motion.section>
 
-          {/* Footer navigation */}
+          {/* Footer navigation (links verified) */}
           <div className="mt-12 flex items-center justify-between border-t border-white/10 pt-8 text-sm text-gray-400">
-            <Link href="/shorts" className="hover:text-gold transition">
+            <Link href="/shorts" className="transition hover:text-gold">
               ← All Shorts
             </Link>
-            <Link href="/blog" className="hover:text-gold transition">
+            <Link href="/blog" className="transition hover:text-gold">
               Read Essays →
             </Link>
           </div>
