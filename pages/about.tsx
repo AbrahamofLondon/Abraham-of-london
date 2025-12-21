@@ -1,4 +1,4 @@
-// pages/about.tsx — Clean, Crisp, Legible Version
+// pages/about.tsx — Fixed Version
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -19,9 +19,9 @@ import {
   Sparkles,
   ChevronRight,
 } from "lucide-react";
+import React from "react"; // Explicit React import
 
 import Layout from "@/components/Layout";
-import { siteConfig } from "@/lib/imports";
 
 // ============================================================================
 // TYPES
@@ -146,6 +146,16 @@ const WORKSTREAMS: Workstream[] = [
   },
 ];
 
+// Default brand values in case import fails
+const DEFAULT_BRAND_VALUES = [
+  "Truth as foundation, not decoration",
+  "Strategy that survives first contact with reality",
+  "Fatherhood as primary governance",
+  "Institutional thinking across generations",
+  "Moral architecture before tactics",
+  "Stewardship over consumption"
+];
+
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -160,7 +170,7 @@ const AboutPage: NextPage = () => {
 
   React.useEffect(() => {
     setMounted(true);
-    // Safe theme detection
+    // Safe theme detection - only run on client
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem("aof-theme");
@@ -187,6 +197,29 @@ const AboutPage: NextPage = () => {
     }
   };
 
+  // Safe values extraction - handle both client and server
+  const [brandValues, setBrandValues] = React.useState<string[]>(DEFAULT_BRAND_VALUES);
+
+  React.useEffect(() => {
+    // Try to import siteConfig on client side only
+    if (typeof window !== 'undefined') {
+      try {
+        import("@/lib/imports").then(module => {
+          const values = module.siteConfig?.brand?.values || DEFAULT_BRAND_VALUES;
+          setBrandValues(values);
+        }).catch(() => {
+          setBrandValues(DEFAULT_BRAND_VALUES);
+        });
+      } catch {
+        setBrandValues(DEFAULT_BRAND_VALUES);
+      }
+    }
+  }, []);
+
+  const leftValues = brandValues.slice(0, Math.ceil(brandValues.length / 2));
+  const rightValues = brandValues.slice(Math.ceil(brandValues.length / 2));
+
+  // Show loading state during SSR
   if (!mounted) {
     return (
       <Layout title="About">
@@ -194,10 +227,6 @@ const AboutPage: NextPage = () => {
       </Layout>
     );
   }
-
-  const brandValues = (siteConfig as any)?.brand?.values || [];
-  const leftValues = brandValues.slice(0, Math.ceil(brandValues.length / 2));
-  const rightValues = brandValues.slice(Math.ceil(brandValues.length / 2));
 
   return (
     <Layout title="About">
@@ -219,18 +248,20 @@ const AboutPage: NextPage = () => {
       </Head>
 
       <div className="min-h-screen bg-black text-white">
-        {/* Theme Toggle */}
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-          onClick={toggleTheme}
-          className="fixed top-6 right-6 z-50 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-md transition-all hover:border-gold/30 hover:bg-black"
-          aria-label="Toggle theme"
-        >
-          {isDark ? <SunMedium className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          <span>{isDark ? "Light" : "Dark"}</span>
-        </motion.button>
+        {/* Theme Toggle - only show on client */}
+        {mounted && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 }}
+            onClick={toggleTheme}
+            className="fixed top-6 right-6 z-50 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-md transition-all hover:border-gold/30 hover:bg-black"
+            aria-label="Toggle theme"
+          >
+            {isDark ? <SunMedium className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <span>{isDark ? "Light" : "Dark"}</span>
+          </motion.button>
+        )}
 
         {/* Hero Section */}
         <motion.section 
@@ -399,7 +430,7 @@ const AboutPage: NextPage = () => {
                 </div>
               </motion.div>
 
-              {/* Portrait */}
+              {/* Portrait - with safe fallback */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -408,14 +439,22 @@ const AboutPage: NextPage = () => {
                 className="relative"
               >
                 <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-                  <Image
-                    src="/assets/images/profile-portrait.webp"
-                    alt="Abraham of London — founder and strategic leader"
-                    width={600}
-                    height={800}
-                    className="h-auto w-full"
-                    priority
-                  />
+                  <div className="relative h-[600px] w-full bg-gradient-to-br from-gray-800 to-gray-900">
+                    {/* Using a placeholder if image fails to load */}
+                    <Image
+                      src="/assets/images/profile-portrait.webp"
+                      alt="Abraham of London — founder and strategic leader"
+                      width={600}
+                      height={800}
+                      className="h-full w-full object-cover"
+                      priority
+                      onError={(e) => {
+                        // Fallback to gradient background if image fails
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   
                   <motion.div
@@ -537,7 +576,7 @@ const AboutPage: NextPage = () => {
                 <div key={colIdx} className="space-y-4">
                   {chunk.map((value, idx) => (
                     <motion.div
-                      key={value}
+                      key={`${value}-${idx}`}
                       initial={{ opacity: 0, x: colIdx === 0 ? -10 : 10 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "-30px" }}
