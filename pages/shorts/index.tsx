@@ -18,7 +18,6 @@ import {
   List,
   MessageCircle,
   ChevronRight,
-  Flame,
   Award,
 } from "lucide-react";
 
@@ -40,11 +39,9 @@ type ShortsIndexProps = {
   shorts: ShortDoc[];
 };
 
-const STREAK_LAST_READ_KEY = "aol_shorts_last_read";
+const STREAK_LAST_SEEN_KEY = "aol_shorts_last_seen";
 const STREAK_COUNT_KEY = "aol_shorts_streak";
 
-// Optional: if you want to track “read” only when opening a short, you can also set this key in [slug].tsx
-// with slug + date. For now, we keep streak based on “visiting shorts page daily”.
 function formatISO(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -106,14 +103,10 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTheme, setSelectedTheme] = React.useState<string>("all");
-
   const [bookmarks, setBookmarks] = React.useState<Set<string>>(new Set());
 
-  // REAL streak (local only): “accountability + encouragement”
   const [streakDays, setStreakDays] = React.useState<number>(0);
   const [subtitleVisible, setSubtitleVisible] = React.useState(false);
-
-  // Your chosen line
   const subtitle = "For wherever you are today.";
 
   // Themes list
@@ -140,27 +133,27 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     });
   }, [shorts, searchQuery, selectedTheme]);
 
-  // Streak + subtitle arrival
+  // Subtitle arrives late (1200ms)
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // subtitle arrives late, calm curve
     if (reduceMotion) {
       setSubtitleVisible(true);
-    } else {
-      const t = window.setTimeout(() => setSubtitleVisible(true), 1200);
-      // cleanup
-      // eslint-disable-next-line consistent-return
-      return () => window.clearTimeout(t);
+      return;
     }
+
+    const t = window.setTimeout(() => setSubtitleVisible(true), 1200);
+    return () => window.clearTimeout(t);
   }, [reduceMotion]);
 
+  // Streak bookkeeping (local, real)
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
     const todayKey = formatISO(new Date());
-    const lastKey = window.localStorage.getItem(STREAK_LAST_READ_KEY);
+    const lastKey = window.localStorage.getItem(STREAK_LAST_SEEN_KEY);
     const streak = parseIntSafe(window.localStorage.getItem(STREAK_COUNT_KEY));
+
     let next = streak ?? 0;
 
     if (!lastKey) {
@@ -174,7 +167,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       next = diffDays === 1 ? next + 1 : 1;
     }
 
-    window.localStorage.setItem(STREAK_LAST_READ_KEY, todayKey);
+    window.localStorage.setItem(STREAK_LAST_SEEN_KEY, todayKey);
     window.localStorage.setItem(STREAK_COUNT_KEY, String(next));
     setStreakDays(Math.max(1, Math.min(3650, next)));
   }, []);
@@ -191,13 +184,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
   const handleShareCard = async (slug: string, title: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const url =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/shorts/${slug}`
-        : `${"https://www.abrahamoflondon.org"}/shorts/${slug}`;
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "https://www.abrahamoflondon.org";
+    const url = `${origin}/shorts/${slug}`;
     const text = `"${title}" — Abraham of London`;
 
-    // Native share first
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
         await (navigator as any).share({
@@ -211,7 +202,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       }
     }
 
-    // Clipboard fallback
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(`${text}\n${url}`);
@@ -221,7 +211,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       // fall through
     }
 
-    // Final fallback: twitter intent
     if (typeof window !== "undefined") {
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
         text,
@@ -264,7 +253,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     }
   };
 
-  // Motion settings for subtitle: calm “settling” curve
   const subtitleMotion = reduceMotion
     ? { initial: { opacity: 1, y: 0 }, animate: { opacity: 1, y: 0 } }
     : {
@@ -291,61 +279,168 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-black dark:to-gray-950">
-        {/* HERO: “heavenly home” — slow warmth, not flashy theatre */}
-        <section className="relative overflow-hidden border-b border-gray-200 dark:border-gray-800">
+        {/* HERO: Subliminal magnetism through atmospheric depth */}
+        <section className="relative overflow-hidden border-b border-gray-200/50 dark:border-gray-800/50">
           <div className="absolute inset-0" aria-hidden="true">
-            {/* Base wash */}
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/7 via-transparent to-purple-500/7" />
-            <div className="absolute -top-44 -right-44 h-[28rem] w-[28rem] rounded-full bg-amber-500/12 blur-3xl" />
-            <div className="absolute -bottom-44 -left-44 h-[28rem] w-[28rem] rounded-full bg-blue-500/12 blur-3xl" />
+            {/* Breathing foundation - subtle pulse creates subconscious rhythm */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-amber-500/8 via-transparent to-blue-500/6"
+              animate={{
+                opacity: [0.85, 1, 0.85],
+                scale: [1, 1.02, 1],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: [0.45, 0, 0.55, 1],
+              }}
+            />
 
-            {/* Smoke drift (slow, quiet) */}
+            {/* Atmospheric depth layers - creates sense of "space" */}
             {!reduceMotion ? (
               <>
+                {/* Deep ambient glow - warmth without glare */}
                 <motion.div
-                  className="absolute -left-1/4 top-1/3 h-80 w-80 rounded-full bg-white/7 blur-3xl dark:bg-white/6"
-                  animate={{ x: [0, 110, 0], y: [0, -28, 0], opacity: [0.16, 0.26, 0.16] }}
-                  transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ willChange: "transform, opacity" }}
+                  className="absolute -top-1/2 -right-1/3 h-[600px] w-[600px] rounded-full blur-3xl"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.08) 35%, transparent 70%)",
+                  }}
+                  animate={{
+                    x: [0, 40, 0],
+                    y: [0, -30, 0],
+                    scale: [1, 1.08, 1],
+                    opacity: [0.3, 0.45, 0.3],
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                 />
+
                 <motion.div
-                  className="absolute -right-1/4 bottom-1/3 h-80 w-80 rounded-full bg-amber-400/10 blur-3xl"
-                  animate={{ x: [0, -105, 0], y: [0, 26, 0], opacity: [0.13, 0.23, 0.13] }}
-                  transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ willChange: "transform, opacity" }}
+                  className="absolute -bottom-1/2 -left-1/4 h-[500px] w-[500px] rounded-full blur-3xl"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(96,165,250,0.12) 0%, rgba(168,85,247,0.06) 40%, transparent 72%)",
+                  }}
+                  animate={{
+                    x: [0, -35, 0],
+                    y: [0, 25, 0],
+                    scale: [1, 1.06, 1],
+                    opacity: [0.25, 0.4, 0.25],
+                  }}
+                  transition={{
+                    duration: 18,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 2,
+                  }}
                 />
+
+                {/* Ethereal drift - creates subconscious movement */}
                 <motion.div
-                  className="absolute left-1/2 top-10 h-28 w-[720px] -translate-x-1/2 rotate-[-9deg] bg-gradient-to-r from-transparent via-white/12 to-transparent blur-md dark:via-white/10"
-                  animate={{ opacity: [0, 0.55, 0], x: ["-12%", "12%", "-12%"] }}
-                  transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ willChange: "transform, opacity" }}
+                  className="absolute left-1/4 top-1/3 h-96 w-96 rounded-full bg-white/4 blur-3xl dark:bg-white/3"
+                  animate={{
+                    x: [0, 120, 0],
+                    y: [0, -40, 0],
+                    rotate: [0, 180, 360],
+                    opacity: [0.15, 0.25, 0.15],
+                  }}
+                  transition={{
+                    duration: 28,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+
+                <motion.div
+                  className="absolute right-1/4 bottom-1/4 h-80 w-80 rounded-full bg-amber-300/8 blur-3xl"
+                  animate={{
+                    x: [0, -100, 0],
+                    y: [0, 35, 0],
+                    rotate: [360, 180, 0],
+                    opacity: [0.12, 0.22, 0.12],
+                  }}
+                  transition={{
+                    duration: 32,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 4,
+                  }}
+                />
+
+                {/* Shimmer beam - catches eye without being obvious */}
+                <motion.div
+                  className="absolute left-1/2 top-8 h-32 w-[800px] -translate-x-1/2 rotate-[-8deg] bg-gradient-to-r from-transparent via-white/8 to-transparent blur-xl dark:via-white/6"
+                  animate={{
+                    opacity: [0, 0.6, 0],
+                    x: ["-15%", "15%", "-15%"],
+                    scaleX: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 14,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+
+                {/* Ember particles - warmth markers for the subconscious */}
+                {[
+                  { left: "15%", bottom: "12%", size: "h-16 w-16", delay: 0, duration: 7.2 },
+                  { left: "48%", bottom: "18%", size: "h-14 w-14", delay: 2.4, duration: 8.6 },
+                  { left: "78%", bottom: "14%", size: "h-12 w-12", delay: 4.8, duration: 6.8 },
+                  { left: "32%", top: "25%", size: "h-10 w-10", delay: 1.6, duration: 9.2 },
+                  { right: "22%", top: "30%", size: "h-11 w-11", delay: 3.2, duration: 7.8 },
+                ].map((ember, i) => (
+                  <motion.div
+                    key={i}
+                    className={`absolute ${ember.size} rounded-full blur-2xl`}
+                    style={{
+                      left: ember.left,
+                      right: (ember as any).right,
+                      top: (ember as any).top,
+                      bottom: (ember as any).bottom,
+                      background: `radial-gradient(circle, ${
+                        i % 2 === 0 ? "rgba(251, 191, 36, 0.18)" : "rgba(249, 115, 22, 0.15)"
+                      } 0%, transparent 70%)`,
+                    }}
+                    animate={{
+                      opacity: [0, 0.35, 0],
+                      scale: [0.92, 1.12, 0.92],
+                      y: [0, -8, 0],
+                    }}
+                    transition={{
+                      duration: ember.duration,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      repeatDelay: ember.duration * 0.6,
+                      delay: ember.delay,
+                    }}
+                  />
+                ))}
+
+                {/* Depth field - creates 3D illusion */}
+                <motion.div
+                  className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white/3 to-transparent dark:from-black/8"
+                  animate={{ opacity: [0.6, 0.9, 0.6] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                />
+
+                <motion.div
+                  className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white/2 to-transparent dark:from-black/12"
+                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
                 />
               </>
             ) : null}
 
-            {/* Microflames: intermittent warmth, low drama */}
-            {!reduceMotion ? (
-              <>
-                <motion.div
-                  className="absolute bottom-10 left-[18%] h-14 w-14 rounded-full bg-amber-500/20 blur-2xl"
-                  animate={{ opacity: [0, 0.22, 0], scale: [0.95, 1.08, 0.95] }}
-                  transition={{ duration: 6.0, repeat: Infinity, ease: "easeInOut", repeatDelay: 3.4 }}
-                />
-                <motion.div
-                  className="absolute bottom-14 left-[52%] h-12 w-12 rounded-full bg-orange-500/18 blur-2xl"
-                  animate={{ opacity: [0, 0.18, 0], scale: [0.94, 1.06, 0.94] }}
-                  transition={{ duration: 6.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 3.9 }}
-                />
-                <motion.div
-                  className="absolute bottom-12 right-[16%] h-16 w-16 rounded-full bg-amber-400/16 blur-2xl"
-                  animate={{ opacity: [0, 0.16, 0], scale: [0.95, 1.07, 0.95] }}
-                  transition={{ duration: 7.6, repeat: Infinity, ease: "easeInOut", repeatDelay: 4.6 }}
-                />
-              </>
-            ) : null}
+            {/* Perceptual vignette - draws eye to center */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_50%,rgba(0,0,0,0.03)_100%)] dark:bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_50%,rgba(0,0,0,0.2)_100%)]" />
 
-            {/* Quiet vignette so it feels like a room, not a billboard */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 dark:to-black/25" />
+            {/* Horizon glow - depth */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-amber-500/5 via-transparent to-transparent dark:from-amber-500/10" />
           </div>
 
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
@@ -355,14 +450,19 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
               transition={reduceMotion ? { duration: 0.01 } : { duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
               className="text-center"
             >
-              {/* Badge */}
+              {/* Badge with subtle pulse */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-4 py-2 backdrop-blur-sm"
               >
-                <Sparkles className="h-4 w-4 text-amber-500" />
+                <motion.div
+                  animate={reduceMotion ? undefined : { scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] }}
+                  transition={reduceMotion ? undefined : { duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                </motion.div>
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
                   Shorts
                 </span>
@@ -372,16 +472,12 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 Shorts
               </h1>
 
-              {/* Subtitle: arrives late (1200ms), calm curve */}
+              {/* Subtitle with settling arrival */}
               <AnimatePresence>
                 {subtitleVisible ? (
                   <motion.p
                     {...subtitleMotion}
-                    transition={
-                      reduceMotion
-                        ? { duration: 0.01 }
-                        : { duration: 0.85, ease: [0.16, 1, 0.3, 1] }
-                    }
+                    transition={reduceMotion ? { duration: 0.01 } : { duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
                     className="mx-auto mt-3 max-w-xl text-base text-gray-600 dark:text-gray-300 sm:text-lg"
                   >
                     {subtitle}
@@ -389,48 +485,86 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 ) : null}
               </AnimatePresence>
 
-              {/* REAL streak badge (cute + accountable) */}
+              {/* Streak badge with gentle glow */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="mt-8 flex justify-center"
               >
-                <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/50 px-4 py-2 text-xs text-gray-700 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/40 dark:text-gray-200">
-                  <Award className="h-4 w-4 text-amber-500" />
+                <motion.div
+                  className="relative inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/50 px-4 py-2 text-xs text-gray-700 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/40 dark:text-gray-200"
+                  animate={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          boxShadow: [
+                            "0 0 0 0 rgba(251, 191, 36, 0)",
+                            "0 0 20px 2px rgba(251, 191, 36, 0.10)",
+                            "0 0 0 0 rgba(251, 191, 36, 0)",
+                          ],
+                        }
+                  }
+                  transition={reduceMotion ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <motion.div
+                    animate={reduceMotion ? undefined : { rotate: [0, 360] }}
+                    transition={reduceMotion ? undefined : { duration: 20, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Award className="h-4 w-4 text-amber-500" />
+                  </motion.div>
                   <span className="font-semibold">
                     {streakDays > 0 ? `${streakDays}-day streak` : "Start your streak"}
                   </span>
                   <span className="opacity-70">·</span>
                   <span className="opacity-80">quiet consistency wins</span>
-                </div>
+                </motion.div>
               </motion.div>
 
-              {/* CTA + tiny cue */}
+              {/* CTA with magnetic pull */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={reduceMotion ? { duration: 0.01 } : { duration: 0.75, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
                 className="mt-10 inline-flex flex-col items-center gap-5"
               >
-                <Link
-                  href="#shorts-grid"
-                  className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.03] hover:shadow-xl hover:shadow-amber-500/40 active:scale-95"
-                >
-                  <Zap className="h-4 w-4" />
-                  Start Reading
-                  <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
-                </Link>
+                <motion.div whileHover={reduceMotion ? undefined : { scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    href="#shorts-grid"
+                    className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:shadow-xl hover:shadow-amber-500/40"
+                  >
+                    {/* Shimmer effect on hover */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "200%" }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    />
+                    <Zap className="relative h-4 w-4" />
+                    <span className="relative">Start Reading</span>
+                    <motion.div
+                      animate={reduceMotion ? undefined : { rotate: [0, 12, -8, 0] }}
+                      transition={reduceMotion ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Sparkles className="relative h-4 w-4" />
+                    </motion.div>
+                  </Link>
+                </motion.div>
 
                 <motion.a
                   href="#shorts-grid"
                   className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/35 px-4 py-2 text-xs text-gray-600 backdrop-blur-sm hover:bg-white/45 dark:border-gray-800 dark:bg-gray-900/30 dark:text-gray-300"
-                  whileHover={reduceMotion ? undefined : { y: -1 }}
+                  whileHover={reduceMotion ? undefined : { y: -1, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <Clock className="h-3.5 w-3.5 text-gray-500" />
                   <span>Under a minute each</span>
-                  <ChevronRight className="h-3.5 w-3.5 opacity-70" />
+                  <motion.div
+                    animate={reduceMotion ? undefined : { x: [0, 3, 0] }}
+                    transition={reduceMotion ? undefined : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <ChevronRight className="h-3.5 w-3.5 opacity-70" />
+                  </motion.div>
                 </motion.a>
               </motion.div>
             </motion.div>
@@ -582,7 +716,9 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                           </h3>
 
                           {short.excerpt ? (
-                            <p className="mb-4 line-clamp-3 text-sm text-gray-600 dark:text-gray-300">{short.excerpt}</p>
+                            <p className="mb-4 line-clamp-3 text-sm text-gray-600 dark:text-gray-300">
+                              {short.excerpt}
+                            </p>
                           ) : null}
 
                           <div className="mb-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -596,7 +732,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  // lightweight local “like” feel without fake counters
                                 }}
                                 className="group/like flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-red-500 dark:text-gray-400"
                                 aria-label="Like"
@@ -643,7 +778,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
               </>
             )}
 
-            {/* “Daily Habit” (below the fold, not cluttering the hero) */}
+            {/* Habit section */}
             {filteredShorts.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
@@ -654,7 +789,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 <div className="grid gap-6 md:grid-cols-2 md:items-center">
                   <div>
                     <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1">
-                      <Flame className="h-3 w-3 text-amber-400" />
+                      <Zap className="h-3 w-3 text-amber-400" />
                       <span className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-400">
                         Daily Habit
                       </span>
@@ -662,8 +797,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     <h3 className="mb-3 font-serif text-2xl font-semibold text-white">Keep it simple</h3>
                     <p className="text-gray-300">One short a day. Quiet consistency beats motivational bursts.</p>
                     <p className="mt-3 text-sm text-gray-400">
-                      Current streak:{" "}
-                      <span className="font-semibold text-amber-300">{streakDays} day</span>
+                      Current streak: <span className="font-semibold text-amber-300">{streakDays} day</span>
                     </p>
                   </div>
 
@@ -688,7 +822,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
               </motion.div>
             ) : null}
 
-            {/* Share Section */}
+            {/* Share section */}
             {filteredShorts.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -704,7 +838,9 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                     </span>
                   </div>
 
-                  <h4 className="mb-3 font-serif text-xl font-semibold text-gray-900 dark:text-white">When something helps, it should travel.</h4>
+                  <h4 className="mb-3 font-serif text-xl font-semibold text-gray-900 dark:text-white">
+                    When something helps, it should travel.
+                  </h4>
                   <p className="mx-auto mb-6 max-w-md text-gray-600 dark:text-gray-400">
                     Share the page. Let someone else find their footing.
                   </p>
