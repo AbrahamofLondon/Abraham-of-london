@@ -141,7 +141,7 @@ const AboutPage: NextPage = () => {
       </Head>
 
       <div className="min-h-screen bg-black text-white selection:bg-gold/30 selection:text-gold">
-        {/* Fixed Contrast Hero */}
+        {/* HERO SECTION - REFINED CONTRAST */}
         <motion.section 
           style={reduceMotion ? {} : { opacity: heroOpacity, scale: heroScale }}
           className="relative min-h-screen flex items-center justify-center bg-zinc-950 overflow-hidden"
@@ -150,9 +150,13 @@ const AboutPage: NextPage = () => {
           
           <div className="relative z-10 max-w-5xl px-6 text-center">
             <motion.div variants={containerVariants} initial="hidden" animate="visible">
-              <motion.div variants={itemVariants} className="mb-8 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-2">
-                <Sparkles className="h-4 w-4 text-gold" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Strategic Stewardship</span>
+              
+              {/* Badge 1: Strategic Stewardship */}
+              <motion.div variants={itemVariants} className="mb-8">
+                <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/15 px-4 py-2 backdrop-blur-md">
+                  <Sparkles className="h-4 w-4 text-gold" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Strategic Stewardship</span>
+                </div>
               </motion.div>
 
               <motion.h1 variants={itemVariants} className="mb-8 font-serif text-5xl font-bold leading-[1.1] md:text-7xl lg:text-8xl">
@@ -176,12 +180,17 @@ const AboutPage: NextPage = () => {
           </div>
         </motion.section>
 
-        {/* High Legibility Workstreams */}
+        {/* WORKSTREAMS SECTION - HIGH LEGIBILITY */}
         <section className="py-32 bg-black border-y border-white/5">
           <div className="mx-auto max-w-7xl px-6">
             <div className="mb-20 text-center">
+              {/* Badge 2: Workstreams */}
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/15 px-3 py-1 backdrop-blur-md">
+                <Briefcase className="h-3.5 w-3.5 text-gold" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-gold">Workstreams</span>
+              </div>
               <h2 className="font-serif text-4xl font-bold md:text-6xl mb-6">What we build</h2>
-              <p className="text-gray-300 text-lg max-w-2xl mx-auto">Not "content." Deliverables. Systems. Frameworks.</p>
+              <p className="text-gray-300 text-lg max-w-2xl mx-auto font-sans">Not "content." Deliverables. Systems. Frameworks.</p>
             </div>
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -189,13 +198,13 @@ const AboutPage: NextPage = () => {
                 <motion.div
                   key={ws.title}
                   whileHover={{ y: -8 }}
-                  className={`group relative rounded-3xl border border-white/10 bg-zinc-900/80 p-8 backdrop-blur-xl transition-all hover:border-gold/50`}
+                  className="group relative rounded-3xl border border-white/10 bg-zinc-900/80 p-8 backdrop-blur-xl transition-all hover:border-gold/50"
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${ws.gradient} opacity-20 group-hover:opacity-40 transition-opacity`} />
                   <ws.icon className="relative z-10 h-8 w-8 text-gold mb-6" />
-                  <h3 className="relative z-10 text-xl font-bold mb-4">{ws.title}</h3>
-                  <p className="relative z-10 text-gray-200 text-sm leading-relaxed mb-6">{ws.description}</p>
-                  <Link href={ws.href} className="relative z-10 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gold">
+                  <h3 className="relative z-10 text-xl font-bold mb-4 font-sans">{ws.title}</h3>
+                  <p className="relative z-10 text-gray-200 text-sm leading-relaxed mb-6 font-sans">{ws.description}</p>
+                  <Link href={ws.href} className="relative z-10 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gold font-sans">
                     Explore <ArrowRight className="h-3 w-3" />
                   </Link>
                 </motion.div>
@@ -204,23 +213,28 @@ const AboutPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Foundation Stones Section */}
+        {/* FOUNDATION STONES SECTION */}
         <section className="py-32 bg-zinc-950">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-20 text-center">
-               <h2 className="font-serif text-4xl font-bold md:text-6xl">Foundation stones</h2>
+              {/* Badge 3: Non-Negotiables */}
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/15 px-3 py-1 backdrop-blur-md">
+                <Star className="h-3.5 w-3.5 text-gold" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-gold">Non-Negotiables</span>
+              </div>
+              <h2 className="font-serif text-4xl font-bold md:text-6xl mb-6">Foundation stones</h2>
             </div>
 
             <div className="grid gap-8 md:grid-cols-2">
               {[leftValues, rightValues].map((chunk, colIdx) => (
                 <div key={colIdx} className="space-y-6">
                   {chunk.map((value: string) => (
-                    <div key={value} className="group rounded-2xl border border-white/10 bg-zinc-900/90 p-8 hover:border-gold/40 transition-all">
+                    <div key={value} className="group rounded-2xl border border-white/20 bg-zinc-900/90 p-8 hover:border-gold/40 transition-all">
                       <div className="flex items-center gap-4 mb-4">
                         <Star className="h-5 w-5 text-gold" />
-                        <h3 className="text-xl font-black uppercase tracking-tighter text-white">{value}</h3>
+                        <h3 className="text-xl font-bold tracking-tight text-white font-sans">{value}</h3>
                       </div>
-                      <p className="text-gray-200 leading-relaxed font-medium">
+                      <p className="text-gray-200 leading-relaxed font-sans font-medium">
                         This value governs how we design strategy, build households, and steward influence.
                       </p>
                     </div>
