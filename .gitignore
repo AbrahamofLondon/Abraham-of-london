@@ -328,4 +328,26 @@ fix-*.bat export-ignore
 *.config.js text eol=lf
 *.config.ts text eol=lf
 *.config.mjs text eol=lf
-*.config.cjs text eol=lf
+*.config.cjs text eol=lf.next/
+.contentlayer/
+.netlify/
+.pdfcache/
+node_modules/
+dist/
+backups-old
+api-fixes-backup-*
+artifacts
+build.*
+setup-*
+deploy-*
+gremlin-*
+.env.local
+.gitattributes.backup
+_emergency-backup.tar
+* - Shortcut.lnk
+* - Shortcut (*).lnk
+nvm-setup.*
+setup.ps1
+sovereignty_*
+sqlite3.exe
+test.js
