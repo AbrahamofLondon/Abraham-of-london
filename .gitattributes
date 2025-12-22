@@ -1,9 +1,322 @@
+# ============================================
+# AUTO DETECTION & DEFAULT
+# ============================================
 * text=auto eol=lf
-*.bat eol=crlf
-*.cmd eol=crlf
-* text=auto eol=lf
+
+# ============================================
+# WINDOWS BATCH FILES (CRLF line endings)
+# ============================================
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.BAT text eol=crlf
+*.CMD text eol=crlf
+
+# ============================================
+# TEXT FILES (LF line endings)
+# ============================================
+# Your existing explicit settings (preserved)
 *.css text eol=lf
 *.mdx text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf
 
+# Code files
+*.js text eol=lf
+*.mjs text eol=lf
+*.jsx text eol=lf
+*.cjs text eol=lf
+
+# Style files
+*.scss text eol=lf
+*.sass text eol=lf
+*.less text eol=lf
+
+# Data files
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.xml text eol=lf
+*.csv text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+*.rst text eol=lf
+
+# Configuration
+*.env text eol=lf
+*.env.* text eol=lf
+*.gitignore text eol=lf
+*.editorconfig text eol=lf
+*.prettierrc text eol=lf
+*.eslintrc text eol=lf
+*.eslintrc.* text eol=lf
+*.prettierrc.* text eol=lf
+*.babelrc text eol=lf
+*.browserslistrc text eol=lf
+*.npmrc text eol=lf
+*.yarnrc text eol=lf
+*.dockerignore text eol=lf
+
+# Scripts
+*.sh text eol=lf
+*.bash text eol=lf
+*.ps1 text eol=lf
+
+# Web files
+*.html text eol=lf
+*.htm text eol=lf
+*.svg text eol=lf
+*.svgz text eol=lf
+
+# Source files
+*.sql text eol=lf
+*.graphql text eol=lf
+*.gql text eol=lf
+*.proto text eol=lf
+
+# Special files
+Dockerfile text eol=lf
+Makefile text eol=lf
+Procfile text eol=lf
+README text eol=lf
+README.* text eol=lf
+LICENSE text eol=lf
+LICENSE.* text eol=lf
+CHANGELOG text eol=lf
+CONTRIBUTING text eol=lf
+
+# Script directories (explicit)
+scripts/**/*.mjs text eol=lf
+scripts/**/*.js text eol=lf
+scripts/**/*.ts text eol=lf
+scripts/**/*.sh text eol=lf
+scripts/**/*.ps1 text eol=lf
+
+# ============================================
+# BINARY FILES (no line ending changes)
+# ============================================
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.bmp binary
+*.tiff binary
+*.tif binary
+*.webp binary
+*.avif binary
+*.heic binary
+*.heif binary
+
+# Fonts
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.fon binary
+
+# Audio/Video
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.flac binary
+*.aac binary
+*.m4a binary
+*.mp4 binary
+*.webm binary
+*.mov binary
+*.avi binary
+*.mkv binary
+*.flv binary
+*.wmv binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
+*.bz2 binary
+*.xz binary
+*.7z binary
+*.rar binary
+*.z binary
+
+# Executables & libraries
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.a binary
+*.lib binary
+*.obj binary
+*.o binary
+
+# Documents
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+*.odt binary
+
+# Database files (CRITICAL - must be binary)
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+*.mdb binary
+*.accdb binary
+
+# Other binaries
+*.bin binary
+*.dat binary
+*.iso binary
+*.img binary
+*.dmg binary
+*.pkg binary
+*.msi binary
+
+# Windows specific
+*.lnk binary
+*.cur binary
+*.ani binary
+
+# ============================================
+# EXCLUDE FROM GIT EXPORT/ARCHIVE (export-ignore)
+# ============================================
+# Database files and backups - CRITICAL: Never include these!
+*.db binary export-ignore
+*.sqlite binary export-ignore
+*.sqlite3 binary export-ignore
+*.sql binary export-ignore
+backups/ export-ignore
+backup-*/ export-ignore
+dev.db binary export-ignore
+prod.db binary export-ignore
+production.db binary export-ignore
+*.backup binary export-ignore
+_emergency-backup.* binary export-ignore
+
+# Development and build artifacts
+.next/ export-ignore
+.contentlayer/ export-ignore
+node_modules/ export-ignore
+dist/ export-ignore
+out/ export-ignore
+.output/ export-ignore
+.netlify/ export-ignore
+.netlify-edge-functions/ export-ignore
+.cache/ export-ignore
+.turbo/ export-ignore
+.reports/ export-ignore
+.pdfcache/ export-ignore
+.vercel/ export-ignore
+.build/ export-ignore
+
+# Generated and temporary files
+.next-env.d.ts export-ignore
+tsconfig.tsbuildinfo export-ignore
+*.tsbuildinfo export-ignore
+.generated/ export-ignore
+_patches/ export-ignore
+patches/ export-ignore
+.gremlin-backups/ export-ignore
+*.tmp export-ignore
+*.temp export-ignore
+*.swp export-ignore
+*.swo export-ignore
+*.swn export-ignore
+
+# Package manager files
+.npm/ export-ignore
+.pnpm-store/ export-ignore
+.yarn/ export-ignore
+package-lock.json export-ignore
+yarn.lock export-ignore
+pnpm-lock.yaml export-ignore
+.yarn-integrity export-ignore
+
+# IDE/Editor files
+.vscode/ export-ignore
+.vscode-settings.json export-ignore
+.idea/ export-ignore
+*.suo export-ignore
+*.ntvs* export-ignore
+*.njsproj export-ignore
+*.sln export-ignore
+
+# OS generated files
+.DS_Store export-ignore
+Thumbs.db export-ignore
+ehthumbs.db export-ignore
+Desktop.ini export-ignore
+*.lnk binary export-ignore
+
+# Environment and log files
+.env*.local export-ignore
+.env.development export-ignore
+.env.production export-ignore
+.env.test export-ignore
+.env.* export-ignore
+*.log export-ignore
+logs/ export-ignore
+
+# Testing and coverage
+coverage/ export-ignore
+playwright-report/ export-ignore
+test-results/ export-ignore
+lighthouse-budget.json export-ignore
+*.lcov export-ignore
+
+# Project-specific exclusions
+music.mp3 binary export-ignore
+nvm-setup.zip binary export-ignore
+nvm-setup.exe binary export-ignore
+offline-node-modules.tar.gz binary export-ignore
+setup-abraham-project.bat binary export-ignore
+criptsemergency-restore.ps1 export-ignore
+fix-parsing-errors.mjs.txt export-ignore
+github-recovery-codes.txt export-ignore
+output_tiktok*.mp4 binary export-ignore
+*.ass export-ignore
+*.srt export-ignore
+tiktok_cover.jpg binary export-ignore
+
+# Your script outputs
+ULTIMATE-FIX.ps1 export-ignore
+build.bat export-ignore
+build.ps1 export-ignore
+fix-*.ps1 export-ignore
+fix-*.bat export-ignore
+
+# ============================================
+# DIFF/MERGE SETTINGS
+# ============================================
+# Files that should be treated as binary for diff
+*.db -diff -merge
+*.sqlite -diff -merge
+*.sqlite3 -diff -merge
+*.pdf -diff -merge
+*.zip -diff -merge
+*.mp3 -diff -merge
+*.mp4 -diff -merge
+
+# ============================================
+# FINAL OVERRIDES
+# ============================================
+# Ensure all .git* files are treated as text
+.git* text eol=lf
+
+# Special case: Prisma schema should be text
+*.prisma text eol=lf
+
+# Special case: Any .config.js files
+*.config.js text eol=lf
+*.config.ts text eol=lf
+*.config.mjs text eol=lf
+*.config.cjs text eol=lf
