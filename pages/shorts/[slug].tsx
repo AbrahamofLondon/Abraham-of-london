@@ -1,4 +1,5 @@
 // pages/shorts/[slug].tsx
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -55,7 +56,7 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params })
 
   if (!rawDoc) return { notFound: true };
 
-  // Ensure a stable slug string for links/canonical (don’t depend on normalizeSlug(doc) heuristics at runtime)
+  // Ensure a stable slug string for links/canonical (don't depend on normalizeSlug(doc) heuristics at runtime)
   const stableSlug = normalizeSlug(rawDoc);
 
   const cover = toAbsoluteUrl(resolveDocCoverImage(rawDoc)) ?? null;
@@ -101,7 +102,7 @@ const ShareButton: React.FC<{
 const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
   const [copied, setCopied] = React.useState(false);
 
-  // ✅ Fix: share URL should not re-normalize the whole doc again (can drift); use short.slug
+  // Fix: share URL should not re-normalize the whole doc again (can drift); use short.slug
   const shareUrl = `${SITE_URL}/shorts/${short.slug}`;
   const shareTitle = short.title || "Shorts · Abraham of London";
   const shareText =
@@ -117,7 +118,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
 
       switch (platform) {
         case "twitter": {
-          // ✅ Fix: remove broken/unknown `via` param if handle isn’t exact; keep it clean
+          // Fix: remove broken/unknown `via` param if handle isn't exact; keep it clean
           window.open(
             `https://twitter.com/intent/tweet?text=${encodedTitle}%0A${encodedText}&url=${encodedUrl}`,
             "_blank",
@@ -134,7 +135,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           break;
         }
         case "email": {
-          // ✅ Fix: keep body readable and predictable
+          // Fix: keep body readable and predictable
           window.location.href = `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0ARead%3A%20${encodedUrl}`;
           break;
         }
@@ -206,7 +207,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
             <p className="mt-4 text-lg text-gray-400 italic">{short.excerpt}</p>
           ) : null}
 
-          {/* Minimal meta line (quiet, but stabilizes the “journey”) */}
+          {/* Minimal meta line (quiet, but stabilizes the "journey") */}
           <div className="mt-6 flex items-center justify-center gap-3 text-xs text-gray-500">
             {short.readTime ? <span>{short.readTime} read</span> : null}
             {short.date ? (
@@ -244,7 +245,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {/* ✅ Fix: don’t reference window/navigator directly in render; just show the button always */}
+            {/* Fix: don't reference window/navigator directly in render; just show the button always */}
             <ShareButton icon={<Share2 className="h-4 w-4" />} label="Share" onClick={handleNativeShare} className="sm:hidden" />
             <ShareButton icon={<Twitter className="h-4 w-4" />} label="Twitter" onClick={() => handleShare("twitter")} />
             <ShareButton icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" onClick={() => handleShare("linkedin")} />
@@ -274,7 +275,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
             ← All Shorts
           </Link>
 
-          {/* ✅ Fix: If your “Essays” live at /blog, keep it. If you also have /blog/index.tsx, this will work. */}
+          {/* Fix: If your "Essays" live at /blog, keep it. If you also have /blog/index.tsx, this will work. */}
           <Link href="/blog" className="text-sm text-gray-500 transition-colors hover:text-gold">
             Read Essays →
           </Link>
