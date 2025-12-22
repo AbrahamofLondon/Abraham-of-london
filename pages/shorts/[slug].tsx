@@ -1,5 +1,4 @@
 // pages/shorts/[slug].tsx
-
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -56,9 +55,7 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params })
 
   if (!rawDoc) return { notFound: true };
 
-  // Ensure a stable slug string for links/canonical (don't depend on normalizeSlug(doc) heuristics at runtime)
   const stableSlug = normalizeSlug(rawDoc);
-
   const cover = toAbsoluteUrl(resolveDocCoverImage(rawDoc)) ?? null;
 
   const short = JSON.parse(
@@ -66,7 +63,7 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params })
       ...rawDoc,
       slug: stableSlug,
       cover,
-    }),
+    })
   ) as ShortPageProps["short"];
 
   try {
@@ -102,11 +99,11 @@ const ShareButton: React.FC<{
 const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
   const [copied, setCopied] = React.useState(false);
 
-  // Fix: share URL should not re-normalize the whole doc again (can drift); use short.slug
   const shareUrl = `${SITE_URL}/shorts/${short.slug}`;
   const shareTitle = short.title || "Shorts · Abraham of London";
   const shareText =
-    short.excerpt || "A short reflection from Abraham of London — faith-rooted clarity without the noise.";
+    short.excerpt ||
+    "A short reflection from Abraham of London — faith-rooted clarity without the noise.";
 
   const handleShare = React.useCallback(
     (platform: "twitter" | "linkedin" | "email" | "copy") => {
@@ -118,11 +115,10 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
 
       switch (platform) {
         case "twitter": {
-          // Fix: remove broken/unknown `via` param if handle isn't exact; keep it clean
           window.open(
             `https://twitter.com/intent/tweet?text=${encodedTitle}%0A${encodedText}&url=${encodedUrl}`,
             "_blank",
-            "noopener,noreferrer,width=550,height=420",
+            "noopener,noreferrer,width=550,height=420"
           );
           break;
         }
@@ -130,12 +126,11 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           window.open(
             `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
             "_blank",
-            "noopener,noreferrer,width=550,height=420",
+            "noopener,noreferrer,width=550,height=420"
           );
           break;
         }
         case "email": {
-          // Fix: keep body readable and predictable
           window.location.href = `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0ARead%3A%20${encodedUrl}`;
           break;
         }
@@ -152,7 +147,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
         }
       }
     },
-    [shareUrl, shareTitle, shareText],
+    [shareUrl, shareTitle, shareText]
   );
 
   const handleNativeShare = React.useCallback(() => {
@@ -184,7 +179,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
       </Head>
 
       <main className="mx-auto max-w-2xl px-6 py-20">
-        {/* Back Link */}
         <Link
           href="/shorts"
           className="mb-8 inline-flex items-center gap-2 text-sm text-gold/70 transition-colors hover:text-gold"
@@ -195,7 +189,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           Back to Shorts
         </Link>
 
-        {/* Header */}
         <header className="mb-12 border-b border-gold/10 pb-10 text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-gold">
             {short.theme || "Reflection"}
@@ -207,7 +200,6 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
             <p className="mt-4 text-lg text-gray-400 italic">{short.excerpt}</p>
           ) : null}
 
-          {/* Minimal meta line (quiet, but stabilizes the "journey") */}
           <div className="mt-6 flex items-center justify-center gap-3 text-xs text-gray-500">
             {short.readTime ? <span>{short.readTime} read</span> : null}
             {short.date ? (
@@ -225,12 +217,10 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           </div>
         </header>
 
-        {/* Content */}
         <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-p:text-gray-300 prose-strong:text-gold prose-a:text-gold">
           <MDXRemote {...source} components={mdxComponents} />
         </article>
 
-        {/* Share CTA */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -245,11 +235,27 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {/* Fix: don't reference window/navigator directly in render; just show the button always */}
-            <ShareButton icon={<Share2 className="h-4 w-4" />} label="Share" onClick={handleNativeShare} className="sm:hidden" />
-            <ShareButton icon={<Twitter className="h-4 w-4" />} label="Twitter" onClick={() => handleShare("twitter")} />
-            <ShareButton icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" onClick={() => handleShare("linkedin")} />
-            <ShareButton icon={<Mail className="h-4 w-4" />} label="Email" onClick={() => handleShare("email")} />
+            <ShareButton
+              icon={<Share2 className="h-4 w-4" />}
+              label="Share"
+              onClick={handleNativeShare}
+              className="sm:hidden"
+            />
+            <ShareButton
+              icon={<Twitter className="h-4 w-4" />}
+              label="Twitter"
+              onClick={() => handleShare("twitter")}
+            />
+            <ShareButton
+              icon={<Linkedin className="h-4 w-4" />}
+              label="LinkedIn"
+              onClick={() => handleShare("linkedin")}
+            />
+            <ShareButton
+              icon={<Mail className="h-4 w-4" />}
+              label="Email"
+              onClick={() => handleShare("email")}
+            />
             <ShareButton
               icon={copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
               label={copied ? "Copied" : "Copy link"}
@@ -260,7 +266,10 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
 
           <div className="mt-6 border-t border-gold/10 pt-6 text-center">
             <p className="mb-3 text-xs text-gray-500">Want another one like this?</p>
-            <Link href="/shorts" className="inline-flex items-center gap-2 text-sm font-medium text-gold transition-colors hover:text-gold/80">
+            <Link
+              href="/shorts"
+              className="inline-flex items-center gap-2 text-sm font-medium text-gold transition-colors hover:text-gold/80"
+            >
               Explore more Shorts
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -269,13 +278,10 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           </div>
         </motion.section>
 
-        {/* Footer Navigation (journey alignment) */}
         <nav className="mt-12 flex items-center justify-between border-t border-white/5 pt-8">
           <Link href="/shorts" className="text-sm text-gray-500 transition-colors hover:text-gold">
             ← All Shorts
           </Link>
-
-          {/* Fix: If your "Essays" live at /blog, keep it. If you also have /blog/index.tsx, this will work. */}
           <Link href="/blog" className="text-sm text-gray-500 transition-colors hover:text-gold">
             Read Essays →
           </Link>

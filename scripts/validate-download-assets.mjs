@@ -1,77 +1,97 @@
-import fs from "node:fs";
-import path from "node:path";
+#!/usr/bin/env node
+import { promises as fs } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import matter from "gray-matter";
 
-// Contentlayer generated output exists during build
-import * as generated from "../contentlayer/generated/index.mjs";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const rootDir = join(__dirname, "..");
+const downloadsDir = join(rootDir, "content", "downloads");
+const publicDir = join(rootDir, "public");
 
-function cleanStr(v) {
-  return String(v ?? "").trim();
-}
-
-function ensureLeadingSlash(s) {
-  return s.startsWith("/") ? s : `/${s}`;
-}
-
-function resolveDocDownloadUrl(doc) {
-  const raw =
-    cleanStr(doc?.downloadUrl) ||
-    cleanStr(doc?.fileUrl) ||
-    cleanStr(doc?.pdfPath) ||
-    cleanStr(doc?.file) ||
-    cleanStr(doc?.downloadFile);
-
-  if (!raw) return null;
-
-  const url = ensureLeadingSlash(raw);
-
-  if (url.startsWith("/downloads/")) {
-    return url.replace(/^\/downloads\//, "/assets/downloads/");
-  }
-  if (url.startsWith("/assets/downloads/")) return url;
-
-  return url;
-}
+const cleanStr = (v) => String(v ?? "").trim();
+const ensureLeadingSlash = (s) => (s.startsWith("/") ? s : `/${s}`);
 
 function publicUrlToFsPath(publicUrl) {
-  if (!publicUrl || !publicUrl.startsWith("/")) return null;
-  return path.join(process.cwd(), "public", publicUrl.replace(/^\/+/, ""));
+  const u = cleanStr(publicUrl);
+  if (!u.startsWith("/")) return null;
+  return join(publicDir, u.replace(/^\/+/, ""));
 }
 
-function exists(p) {
+async function exists(p) {
   try {
-    return fs.existsSync(p);
+    await fs.access(p);
+    return true;
   } catch {
     return false;
   }
 }
 
-const allDownloads = Array.isArray(generated.allDownloads) ? generated.allDownloads : [];
+async function walk(dir) {
+  let out = [];
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  for (const e of entries) {
+    const full = join(dir, e.name);
+    if (e.isDirectory()) out = out.concat(await walk(full));
+    else if (e.name.match(/\.(md|mdx)$/)) out.push(full);
+  }
+  return out;
+}
 
-const errors = [];
-
-for (const d of allDownloads) {
-  const title = cleanStr(d?.title) || cleanStr(d?.slug) || "(untitled)";
-  const url = resolveDocDownloadUrl(d);
-
-  if (!url) {
-    errors.push(`[Download] Missing download url fields for: ${title}`);
-    continue;
+async function main() {
+  if (!(await exists(downloadsDir))) {
+    console.log("No content/downloads directory found. Skipping.");
+    process.exit(0);
   }
 
-  // Only validate existence when it is under the known physical directory.
-  if (url.startsWith("/assets/downloads/")) {
-    const fsPath = publicUrlToFsPath(url);
-    if (!fsPath || !exists(fsPath)) {
-      errors.push(`[Download] File not found: ${url} (doc: ${title})`);
+  const files = await walk(downloadsDir);
+  const missing = [];
+
+  for (const f of files) {
+    const raw = await fs.readFile(f, "utf8");
+    const { data } = matter(raw);
+
+    const fileUrl =
+      data.downloadUrl ??
+      data.fileUrl ??
+      data.pdfPath ??
+      data.file ??
+      data.downloadFile ??
+      null;
+
+    if (!fileUrl) continue;
+
+    const u = ensureLeadingSlash(cleanStr(fileUrl));
+    const canonical = u.startsWith("/downloads/")
+      ? u.replace(/^\/downloads\//, "/assets/downloads/")
+      : u;
+
+    if (!canonical.startsWith("/assets/")) continue;
+
+    const fsPath = publicUrlToFsPath(canonical);
+    if (!fsPath || !(await exists(fsPath))) {
+      missing.push({
+        file: f.replace(rootDir + "/", ""),
+        referenced: canonical,
+      });
     }
   }
+
+  if (missing.length) {
+    console.log("❌ Missing download assets:\n");
+    for (const m of missing) {
+      console.log(`- ${m.file}`);
+      console.log(`  -> ${m.referenced}`);
+    }
+    process.exit(1);
+  }
+
+  console.log("✅ Download assets validated.");
+  process.exit(0);
 }
 
-if (errors.length) {
-  console.error("\n[validate-download-assets] FAILED\n");
-  for (const e of errors) console.error(" - " + e);
-  console.error("\nFix the file path or add the missing file under /public/assets/downloads.\n");
+main().catch((e) => {
+  console.error(e);
   process.exit(1);
-}
-
-console.log(`[validate-download-assets] OK — validated ${allDownloads.length} downloads`);
+});

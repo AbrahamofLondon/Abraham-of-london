@@ -10,147 +10,28 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    
     "dev": "next dev",
     "dev:content": "contentlayer2 build --watch",
-    "dev:turbo": "next dev --turbo",
     "start": "next start",
-    "start:prod": "NODE_ENV=production next start",
-    
     "typecheck": "pnpm exec tsc --project tsconfig.json --noEmit",
-    "typecheck:watch": "pnpm exec tsc --project tsconfig.json --noEmit --watch",
-    "typecheck:functions": "pnpm exec tsc --project tsconfig.functions.json --noEmit",
-    
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "lint:strict": "next lint --max-warnings 0",
-    "lint:report": "next lint --output-file eslint-report.json --format json",
-    
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    
     "clean:build": "node -e \"const fs=require('fs'); for (const p of ['.next','.contentlayer']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} }\"",
-    "clean": "node -e \"const fs=require('fs'); const paths=['.next','.contentlayer','.turbo','.reports','node_modules/.cache']; for (const p of paths) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} }\"",
-    "clean:functions": "node -e \"const fs=require('fs'); const dir='netlify/functions'; if (!fs.existsSync(dir)) process.exit(0); for (const f of fs.readdirSync(dir)) { if (f.endsWith('.js')) { try { fs.rmSync(dir+'/'+f,{force:true}); } catch {} }\"",
-    "clean:all": "pnpm run clean && rimraf node_modules pnpm-lock.yaml",
-    "clean-ts-cache": "node -e \"const fs=require('fs'); for (const p of ['node_modules/.cache','.next']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} }\"",
-    "ts-reset": "pnpm run clean-ts-cache",
-    
-    "fix:prints": "node scripts/fix-print-types.mjs",
-    
+    "clean": "node -e \"const fs=require('fs'); const paths=['.next','.contentlayer','.turbo','.reports','node_modules/.cache']; for (const p of paths) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
+    "ts-reset": "node -e \"const fs=require('fs'); for (const p of ['node_modules/.cache','.next']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
     "content:build": "contentlayer2 build",
-    "content:dev": "contentlayer2 build --watch",
-    "content:fix": "node scripts/fix-contentlayer-issues.mjs",
     "content:validate": "node scripts/validate-content.mjs",
-    "content:check": "node scripts/check-contentlayer-output.mjs",
-    "content:diagnose": "node scripts/diagnose-contentlayer.mjs",
-    "content:test": "cross-env CONTENTLAYER_DEBUG=true pnpm run content:build && pnpm run content:check",
-    
-    "prepare:content": "pnpm run clean:build && pnpm run content:fix && pnpm run content:validate && pnpm run content:build && pnpm run content:check && pnpm run downloads:validate",
-    
-    "downloads:validate": "node scripts/validate-download-assets.mjs",
-    
-    "assets:scan": "node scripts/scan-content-assets.mjs",
-    
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:status": "prisma migrate status",
-    "db:migrate:reset": "prisma migrate reset",
-    "db:studio": "prisma studio",
-    "db:seed": "node scripts/run-migrations.mjs",
-    "db:check": "node scripts/db-check.mjs",
-    "db:backup": "node scripts/backup-database.mjs",
-    "db:validate": "prisma validate",
-    
-    "migrations:run": "node scripts/run-migrations.mjs",
-    "migrations:create": "node scripts/create-migration.mjs",
-    
+    "prepare:content": "pnpm run clean:build && node scripts/fix-contentlayer-issues.mjs && pnpm run content:validate && pnpm run content:build && pnpm run downloads:validate",
+    "assets:ensure": "node scripts/ensure-all-assets.mjs",
+    "assets:fix-names": "node scripts/fix-asset-names.mjs",
+    "pdfs": "node scripts/make-pdfs.mjs",
+    "pdfs:force": "rm -rf public/assets/downloads/*.pdf public/assets/resources/pdfs/*.pdf && pnpm run pdfs",
+    "downloads:validate": "node scripts/validate-downloads.mjs",
+    "prebuild": "node scripts/validate-env.mjs && pnpm run pdfs && pnpm run downloads:validate",
     "build": "pnpm run prepare:content && next build",
-    "build:analyze": "cross-env ANALYZE=true pnpm run build",
-    "build:production": "pnpm run validate:pre-build && pnpm run build && pnpm run validate:post-build",
-    "build:test": "pnpm run clean:build && pnpm run content:test",
-    "build:functions": "pnpm exec tsc --project tsconfig.functions.json --noEmit",
-    
     "postbuild": "echo \"✓ Build completed successfully\"",
-    
-    "prebuild": "pnpm run validate:env",
-    
-    "validate:env": "node scripts/validate-env.mjs",
-    "validate:pre-build": "pnpm run typecheck && pnpm run lint:strict && pnpm run format:check && pnpm run content:validate && pnpm run gitattributes:validate",
-    "validate:post-build": "node scripts/validate-build-output.mjs",
-    "validate:all": "pnpm run validate:env && pnpm run typecheck && pnpm run lint && pnpm run content:validate && pnpm run downloads:validate",
-    
-    "test": "echo \"No tests configured yet\"",
-    "test:e2e": "pnpm dlx playwright test",
-    "test:e2e:ui": "pnpm dlx playwright test --ui",
-    "test:e2e:headed": "pnpm dlx playwright test --headed",
-    "test:unit": "echo \"Add unit tests here\"",
-    "test:integration": "echo \"Add integration tests here\"",
-    "test:email": "tsx scripts/test-email.ts",
-    "test:content": "node scripts/test-content.js",
-    "test:admin": "node scripts/test-admin.js",
-    
-    "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.tsx",
-    "pdfs": "pnpm run pdf:purpose",
-    
-    "debug:content": "node scripts/debug-content-routes.mjs",
-    "debug:contentlayer": "cross-env CONTENTLAYER_DEBUG=true contentlayer2 build --verbose",
-    "debug:content:windows": "set CONTENTLAYER_DEBUG=true && contentlayer2 build --verbose",
-    "debug:prints": "node scripts/debug-prints.mjs",
-    "debug:build": "node scripts/debug-build.js",
-    
-    "security:audit": "pnpm audit --audit-level=moderate",
-    "security:audit:fix": "pnpm audit --fix",
-    "security:check": "pnpm audit --audit-level=high --production",
-    "security:outdated": "pnpm outdated",
-    
-    "deps:check": "pnpm outdated",
-    "deps:update": "pnpm update --latest --interactive",
-    "deps:update:minor": "pnpm update --interactive",
-    "deps:dedupe": "pnpm dedupe",
-    
-    "health:check": "node scripts/health-check.mjs",
-    "health:full": "pnpm run validate:all && pnpm run security:check && pnpm run health:check",
-    
-    "deploy:preview": "netlify deploy",
-    "deploy:production": "pnpm run build:production && netlify deploy --prod",
-    "deploy:check": "node scripts/check-deployment.mjs",
-    
-    "ci": "pnpm install --frozen-lockfile",
-    "ci:validate": "pnpm run validate:all",
-    "ci:test": "pnpm run test && pnpm run test:e2e",
-    "ci:build": "pnpm run build",
-    "ci:full": "pnpm run ci && pnpm run ci:validate && pnpm run ci:test && pnpm run ci:build",
-    
-    "check:ci": "pnpm run ci && pnpm run lint && pnpm run typecheck",
-    
-    "gitattributes:validate": "node scripts/validate-gitattributes.js",
-    
-    "setup": "pnpm install && pnpm run db:generate && pnpm run prepare:content",
-    "setup:dev": "pnpm run setup && pnpm run db:push",
-    "setup:prod": "pnpm run ci && pnpm run db:migrate:deploy && pnpm run prepare:content",
-    
-    "admin:setup": "node scripts/setup-inner-circle.mjs",
-    "admin:key": "node scripts/generate-admin-key.sh",
-    
-    "verify:routes": "node scripts/prevent-pages-router.js",
-    "verify:imports": "node scripts/fix-imports.mjs",
-    "verify:canon": "node scripts/fix-canon-files.js",
-    "verify:mdx": "node scripts/fix-mdx-imports.mjs",
-    "verify:all": "pnpm run verify:routes && pnpm run verify:imports && pnpm run verify:canon && pnpm run verify:mdx",
-    
-    "fix:comprehensive": "node scripts/comprehensive-fix.mjs",
-    "fix:contentlayer": "node scripts/fix-contentlayer-issues.mjs",
-    "fix:errors": "node scripts/fix-content-errors.js",
-    "fix:line-endings": "node scripts/fix-line-endings.sh",
-    
-    "prepare:deploy": "pnpm run clean && pnpm run setup:prod && pnpm run build:production",
-    
-    "postinstall": "pnpm run db:generate",
-    
-    "install:ci": "pnpm run ci"
+    "setup": "pnpm install && prisma generate && pnpm run prepare:content"
   },
   "dependencies": {
     "@contentlayer2/core": "0.5.8",
@@ -222,25 +103,12 @@
     "eslint-plugin-unused-imports": "4.3.0",
     "glob": "11.0.1",
     "husky": "9.1.7",
+    "markdown-pdf": "^10.0.0",
+    "pdf-lib": "^1.17.1",
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
+    "sharp": "^0.33.1",
     "shx": "0.3.4",
     "tsx": "4.20.6"
-  },
-  "pnpm": {
-    "overrides": {
-      "esbuild": "0.24.0",
-      "react": "18.3.1",
-      "react-dom": "18.3.1"
-    },
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "@opentelemetry/*"
-      ],
-      "allowedVersions": {
-        "react": "18.3.1",
-        "react-dom": "18.3.1"
-      }
-    }
   }
 }

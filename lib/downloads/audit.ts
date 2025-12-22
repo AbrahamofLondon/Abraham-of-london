@@ -1,42 +1,35 @@
 // lib/downloads/audit.ts
-import { PrismaClient } from "@prisma/client";
+import fs from "node:fs";
+import path from "node:path";
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+type AuditEventType =
+  | "DOWNLOAD_DENIED"
+  | "LINK_ISSUED"
+  | "TOKEN_REJECTED"
+  | "DOWNLOAD_GRANTED";
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: ["error", "warn"],
-  });
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-export async function logDownloadEvent(input: {
-  eventType: string;
+export type AuditEvent = {
+  eventType: AuditEventType;
   slug: string;
   requiredTier: string;
   userTier: string;
-  ip?: string | null;
-  userAgent?: string | null;
-  referrer?: string | null;
-  tokenExp?: number | null;
-  note?: string | null;
-}) {
+  ip: string | null;
+  userAgent: string | null;
+  referrer: string | null;
+  tokenExp?: number;
+  note?: string;
+  ts?: string;
+};
+
+const outDir = path.join(process.cwd(), ".reports");
+const outFile = path.join(outDir, "download-audit.jsonl");
+
+export async function logDownloadEvent(e: AuditEvent): Promise<void> {
   try {
-    await prisma.downloadAuditEvent.create({
-      data: {
-        eventType: input.eventType,
-        slug: input.slug,
-        requiredTier: input.requiredTier,
-        userTier: input.userTier,
-        ip: input.ip ?? null,
-        userAgent: input.userAgent ?? null,
-        referrer: input.referrer ?? null,
-        tokenExp: input.tokenExp ?? null,
-        note: input.note ?? null,
-      },
-    });
+    if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+    const row = JSON.stringify({ ...e, ts: new Date().toISOString() }) + "\n";
+    fs.appendFileSync(outFile, row, { encoding: "utf8" });
   } catch {
-    // Never break downloads due to logging
+    // Soft-fail: auditing must never break the site.
   }
 }

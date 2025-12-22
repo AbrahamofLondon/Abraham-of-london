@@ -1,80 +1,62 @@
 # ============================================
 # NETLIFY CONFIGURATION - Abraham of London
-# Production-ready configuration
+# Production-ready static export configuration
 # ============================================
 
 [build]
-  # Use pnpm with production build script
-  command = "pnpm run build:production"
-  publish = ".next"
+  # Build command
+  command = "pnpm run build"
   
-  # Post-processing for better performance
-  processing.css = { bundle = true, minify = true }
-  processing.js = { bundle = true, minify = true }
-  processing.html = { pretty_urls = true }
+  # IMPORTANT: For output: 'export', publish 'out' not '.next'
+  publish = "out"
+  
+  # Let Next.js handle all processing
+  [build.processing]
+    skip_processing = true
 
-# Next.js plugin (optimized for Next.js 14)
+# ============================================
+# NEXT.JS PLUGIN (v5.x Compatible)
+# ============================================
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    # Generate SSG pages at build time
-    generateStaticPages = true
-    # Enable ISR (Incremental Static Regeneration)
-    enableISR = true
-    # Image optimization
-    images = { remote = true }
-    # Security headers (already set below)
-    securityHeaders = false
+  # No inputs needed - modern versions auto-configure
+  # Do NOT add: generateStaticPages, enableISR, images, securityHeaders
 
 # ============================================
 # BUILD ENVIRONMENT
 # ============================================
 [build.environment]
-  # Node.js version (LTS)
+  # Node.js & Package Manager
   NODE_VERSION = "20.11.1"
-  
-  # Package manager
   PNPM_VERSION = "9.15.9"
-  NPM_FLAGS = "--prod=false"
   
   # Environment
   NODE_ENV = "production"
   CI = "true"
   
   # Disable telemetry and hooks
-  HUSKY = "0"
   NEXT_TELEMETRY_DISABLED = "1"
+  HUSKY = "0"
   
-  # Skip type checking and linting in CI (do it locally)
+  # Type checking done in pre-build, skip during Netlify build
   NEXT_DISABLE_ESLINT = "1"
   NEXT_DISABLE_TYPECHECK = "1"
   
   # Application URLs
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+  NEXT_PUBLIC_INNOVATEHUB_URL = "https://innovatehub.abrahamoflondon.org"
+  NEXT_PUBLIC_ALOMARADA_URL = "https://alomarada.com/"
+  NEXT_PUBLIC_ENDURELUXE_URL = "https://alomarada.com/endureluxe"
   NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
   
-  # Optional services (if not used, set dummy values)
-  VERCEL_KV_REST_API_URL = "https://dummy.kv.vercel-storage.com"
-  VERCEL_KV_REST_API_TOKEN = "dummy_token_${BUILD_ID}"
-  
-  # Database (use environment variables in Netlify UI for real values)
-  DATABASE_URL = "file:./dev.db"  # Default for build, override in Netlify UI
-  
-  # NextAuth (override in Netlify UI with real secret)
-  NEXTAUTH_URL = "https://www.abrahamoflondon.org"
-  NEXTAUTH_SECRET = "dummy-secret-${BUILD_ID}-override-in-netlify-ui"
-  
   # Performance optimizations
-  NEXT_OPTIMIZE_FONTS = "true"
-  NEXT_OPTIMIZE_IMAGES = "true"
-  NEXT_OPTIMIZE_CSS = "true"
+  NEXT_SHARP_PATH = "/opt/buildhome/.asdf/installs/nodejs/20.11.1/.npm/lib/node_modules/sharp"
   
-  # Memory and timeout settings
+  # Memory settings (critical for large builds)
   NODE_OPTIONS = "--max-old-space-size=4096"
-  NEXTJS_TIMEOUT = "300"
 
 # ============================================
-# CANONICAL HOST + HTTPS (STOP LOOPS)
+# DOMAIN REDIRECTS (Prevent Loops)
 # ============================================
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
@@ -94,85 +76,31 @@
   status = 301
   force = true
 
-# Remove trailing slashes
+# Remove trailing slashes (aligns with trailingSlash: false)
 [[redirects]]
   from = "/*/"
   to = "/:splat"
   status = 301
-  conditions = { Language = ["en"], Country = ["US", "GB"] }
+  force = true
 
 # ============================================
-# SECURITY HEADERS (Enhanced)
+# SECURITY HEADERS (Production-Grade)
 # ============================================
 [[headers]]
   for = "/*"
   [headers.values]
-    # Basic security headers
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    
-    # HSTS (2 years)
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     
-    # Permissions Policy
-    Permissions-Policy = """
-      accelerometer=(), 
-      autoplay=(), 
-      camera=(), 
-      clipboard-read=(), 
-      clipboard-write=(), 
-      encrypted-media=(), 
-      fullscreen=(), 
-      geolocation=(), 
-      gyroscope=(), 
-      hid=(), 
-      idle-detection=(), 
-      magnetometer=(), 
-      microphone=(), 
-      midi=(), 
-      payment=(), 
-      picture-in-picture=(), 
-      publickey-credentials-get=(), 
-      screen-wake-lock=(), 
-      serial=(), 
-      usb=(), 
-      web-share=()
-    """
+    Permissions-Policy = "accelerometer=(), autoplay=(), camera=(), clipboard-read=(), clipboard-write=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=()"
     
-    # Content Security Policy (Enhanced)
-    Content-Security-Policy = """
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' 
-        https://www.googletagmanager.com 
-        https://www.google-analytics.com 
-        https://ssl.google-analytics.com
-        https://cdnjs.cloudflare.com;
-      style-src 'self' 'unsafe-inline' 
-        https://fonts.googleapis.com 
-        https://cdnjs.cloudflare.com;
-      font-src 'self' 
-        https://fonts.gstatic.com 
-        https://cdnjs.cloudflare.com 
-        data:;
-      img-src 'self' 
-        data: 
-        https: 
-        blob: 
-        https://www.google-analytics.com 
-        https://ssl.gstatic.com;
-      connect-src 'self' 
-        https://www.google-analytics.com 
-        https://www.googletagmanager.com 
-        https://region1.google-analytics.com;
-      frame-src 'self';
-      frame-ancestors 'none';
-      base-uri 'self';
-      form-action 'self';
-      upgrade-insecure-requests;
-    """
+    # CSP optimized for static site with analytics
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: https: blob: https://www.google-analytics.com https://ssl.gstatic.com; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://region1.google-analytics.com; frame-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
 
+# Static assets - aggressive caching
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -180,74 +108,31 @@
     X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
-  for = "/_next/image/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
-    X-Content-Type-Options = "nosniff"
 
+# HTML pages - short cache with revalidation
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# API routes (if any Netlify Functions)
 [[headers]]
   for = "/api/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
-    Pragma = "no-cache"
-    Expires = "0"
+    Cache-Control = "no-store, no-cache, must-revalidate"
     X-Robots-Tag = "noindex, nofollow"
 
+# Admin routes
 [[headers]]
   for = "/admin/*"
   [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
-    Pragma = "no-cache"
-    Expires = "0"
+    Cache-Control = "no-store, no-cache, must-revalidate"
     X-Robots-Tag = "noindex, nofollow"
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
 
-[[headers]]
-  for = "/*.txt"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
-    X-Content-Type-Options = "nosniff"
-
-[[headers]]
-  for = "/*.xml"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
-    X-Content-Type-Options = "nosniff"
-
-# ============================================
-# CACHING OPTIMIZATIONS
-# ============================================
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
-    Service-Worker-Allowed = "/"
-
-# ============================================
-# ERROR PAGES
-# ============================================
-[[redirects]]
-  from = "/404"
-  to = "/404.html"
-  status = 404
-
-[[redirects]]
-  from = "/500"
-  to = "/500.html"
-  status = 500
-
-# ============================================
-# SITEMAP & SEO
-# ============================================
+# SEO files
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
@@ -260,38 +145,61 @@
     Cache-Control = "public, max-age=3600"
     Content-Type = "text/plain"
 
-# ============================================
-# PERFORMANCE OPTIMIZATIONS
-# ============================================
-[build.processing]
-  skip_processing = true
+# Service Worker
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
 
 # ============================================
-# EDGE FUNCTIONS (if used)
+# SPA FALLBACK (for client-side routing)
 # ============================================
-# [functions]
-#   # node_bundler = "esbuild"
-#   # external_node_modules = ["better-sqlite3", "pg", "pg-hstore"]
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {path = "/*"}
+  force = false
 
 # ============================================
-# OBSERVABILITY
+# ERROR PAGES
 # ============================================
-[build.observability]
-  enabled = true
-  [build.observability.traces]
-    enabled = true
-    sample_rate = 0.1
+[[redirects]]
+  from = "/404"
+  to = "/404.html"
+  status = 404
 
 # ============================================
-# BACKUP & SAFETY
+# DEPLOY CONTEXTS
 # ============================================
-# Environment variable backups (set in Netlify UI)
-# Required in Netlify UI:
-# - DATABASE_URL (PostgreSQL for production)
-# - NEXTAUTH_SECRET (32+ character random string)
-# - RESEND_API_KEY (if using email)
-# - MAIL_FROM
-# Optional:
-# - SUPABASE_URL
-# - SUPABASE_ANON_KEY
-# - INNER_CIRCLE_ADMIN_KEY
+[context.production]
+  command = "pnpm run build"
+  publish = "out"
+
+[context.deploy-preview]
+  command = "pnpm run build"
+  publish = "out"
+  [context.deploy-preview.environment]
+    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+
+[context.branch-deploy]
+  command = "pnpm run build"
+  publish = "out"
+  [context.branch-deploy.environment]
+    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+
+# ============================================
+# FUNCTIONS (if using Netlify Functions)
+# ============================================
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# ============================================
+# IMPORTANT NOTES FOR NETLIFY UI
+# ============================================
+# Set these environment variables in Netlify UI:
+# - NEXTAUTH_SECRET (if using NextAuth)
+# - DATABASE_URL (if using database)
+# - Any third-party API keys

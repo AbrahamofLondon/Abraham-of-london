@@ -1,14 +1,14 @@
 // lib/downloads/security.ts
-import crypto from "crypto";
+import crypto from "node:crypto";
 
-export type AccessTier =
+export type InnerCircleTier =
   | "public"
   | "inner-circle"
   | "inner-circle-plus"
   | "inner-circle-elite"
   | "private";
 
-export const TIER_ORDER: AccessTier[] = [
+const ORDER: InnerCircleTier[] = [
   "public",
   "inner-circle",
   "inner-circle-plus",
@@ -16,96 +16,95 @@ export const TIER_ORDER: AccessTier[] = [
   "private",
 ];
 
-export function tierAtLeast(user: AccessTier, required: AccessTier): boolean {
-  return TIER_ORDER.indexOf(user) >= TIER_ORDER.indexOf(required);
+export function tierAtLeast(user: InnerCircleTier, required: InnerCircleTier): boolean {
+  return ORDER.indexOf(user) >= ORDER.indexOf(required);
 }
 
-export function getUserTierFromCookies(cookieHeader: string | undefined): AccessTier {
-  const cookie = cookieHeader ?? "";
-
-  // Back-compat: if innerCircleAccess exists, minimum is inner-circle
-  const hasLegacy = cookie.includes("innerCircleAccess=");
-  const tierMatch = cookie.match(/(?:^|;\s*)innerCircleTier=([^;]+)/i);
-  const rawTier = tierMatch?.[1]?.trim() ?? "";
-
-  const decoded = safeDecodeURIComponent(rawTier).toLowerCase();
-
-  if (decoded === "inner-circle" || decoded === "inner-circle-plus" || decoded === "inner-circle-elite") {
-    return decoded as AccessTier;
-  }
-
-  if (hasLegacy) return "inner-circle";
+/**
+ * Read tier from cookies.
+ * You can wire this to your real cookie later. This is deterministic and safe.
+ */
+export function getUserTierFromCookies(cookieHeader: string | undefined): InnerCircleTier {
+  const c = cookieHeader ?? "";
+  // Example cookie: innerCircleTier=inner-circle-plus
+  const m = c.match(/(?:^|;\s*)innerCircleTier=([^;]+)/i);
+  const raw = m?.[1] ? decodeURIComponent(m[1]) : "";
+  if (raw === "inner-circle" || raw === "inner-circle-plus" || raw === "inner-circle-elite" || raw === "private")
+    return raw;
+  // If your existing system uses innerCircleAccess=true, treat it as "inner-circle"
+  if (/(?:^|;\s*)innerCircleAccess=true(?:;|$)/i.test(c)) return "inner-circle";
   return "public";
 }
 
-function safeDecodeURIComponent(v: string): string {
-  try {
-    return decodeURIComponent(v);
-  } catch {
-    return v;
-  }
+export function newNonce(): string {
+  return crypto.randomBytes(16).toString("hex");
 }
 
-export type DownloadTokenPayload = {
+type TokenPayload = {
   slug: string;
   exp: number; // unix seconds
-  requiredTier: AccessTier;
+  requiredTier: InnerCircleTier;
   nonce: string;
 };
 
 function b64url(input: Buffer | string): string {
-  const buf = Buffer.isBuffer(input) ? input : Buffer.from(input);
-  return buf
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+  const b = Buffer.isBuffer(input) ? input : Buffer.from(input);
+  return b.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-function b64urlToBuf(s: string): Buffer {
-  const pad = s.length % 4 === 0 ? "" : "=".repeat(4 - (s.length % 4));
-  const base64 = s.replace(/-/g, "+").replace(/_/g, "/") + pad;
-  return Buffer.from(base64, "base64");
+function unb64url(input: string): Buffer {
+  const pad = input.length % 4 === 0 ? "" : "=".repeat(4 - (input.length % 4));
+  const s = input.replace(/-/g, "+").replace(/_/g, "/") + pad;
+  return Buffer.from(s, "base64");
 }
 
-export function signDownloadToken(payload: DownloadTokenPayload, secret: string): string {
-  const header = { alg: "HS256", typ: "JWT" };
-  const encHeader = b64url(JSON.stringify(header));
-  const encPayload = b64url(JSON.stringify(payload));
-  const data = `${encHeader}.${encPayload}`;
-
-  const sig = crypto.createHmac("sha256", secret).update(data).digest();
-  return `${data}.${b64url(sig)}`;
+export function signDownloadToken(payload: TokenPayload, secret: string): string {
+  const body = b64url(JSON.stringify(payload));
+  const sig = crypto.createHmac("sha256", secret).update(body).digest();
+  return `${body}.${b64url(sig)}`;
 }
 
-export function verifyDownloadToken(token: string, secret: string): DownloadTokenPayload | null {
+export function verifyDownloadToken(
+  token: string,
+  secret: string
+): { valid: false; reason: string; slug?: string; requiredTier?: InnerCircleTier } | ({ valid: true } & TokenPayload) {
   const parts = token.split(".");
-  if (parts.length !== 3) return null;
+  if (parts.length !== 2) return { valid: false, reason: "malformed" };
 
-  const [encHeader, encPayload, encSig] = parts;
-  const data = `${encHeader}.${encPayload}`;
+  const [body, sig] = parts;
+  const expected = crypto.createHmac("sha256", secret).update(body).digest();
+  const got = unb64url(sig);
 
-  const expected = crypto.createHmac("sha256", secret).update(data).digest();
-  const got = b64urlToBuf(encSig);
-
-  // Timing-safe compare
-  if (got.length !== expected.length) return null;
-  if (!crypto.timingSafeEqual(got, expected)) return null;
-
-  let payload: DownloadTokenPayload;
-  try {
-    payload = JSON.parse(b64urlToBuf(encPayload).toString("utf8"));
-  } catch {
-    return null;
+  // timing safe compare
+  if (got.length !== expected.length || !crypto.timingSafeEqual(got, expected)) {
+    let slug: string | undefined;
+    try {
+      const decoded = JSON.parse(unb64url(body).toString("utf8"));
+      slug = decoded?.slug;
+    } catch {}
+    return { valid: false, reason: "bad_signature", slug };
   }
 
-  // Expiry check
+  let payload: TokenPayload;
+  try {
+    payload = JSON.parse(unb64url(body).toString("utf8"));
+  } catch {
+    return { valid: false, reason: "bad_payload" };
+  }
+
+  if (!payload?.slug || !payload?.exp || !payload?.requiredTier || !payload?.nonce) {
+    return { valid: false, reason: "missing_fields", slug: payload?.slug };
+  }
+
   const now = Math.floor(Date.now() / 1000);
-  if (!payload?.exp || payload.exp < now) return null;
+  if (payload.exp < now) {
+    return {
+      valid: false,
+      reason: "expired",
+      slug: payload.slug,
+      requiredTier: payload.requiredTier,
+    };
+  }
 
-  return payload;
-}
-
-export function newNonce(): string {
-  return crypto.randomBytes(12).toString("hex");
+  return { valid: true, ...payload };
 }

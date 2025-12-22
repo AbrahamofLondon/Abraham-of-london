@@ -12,7 +12,7 @@ import {
   resolveDocCoverImage,
   resolveDocDownloadHref,
   resolveDocDownloadUrl,
-  resolveDocDownloadSizeLabel,
+  resolveDocDownloadSizeLabel, // Imported as requested
   getAccessLevel,
 } from "@/lib/contentlayer-helper";
 
@@ -57,6 +57,7 @@ export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }>
       (typeof d.category === "string" && d.category.trim().length ? d.category : null) ??
       (typeof d.type === "string" && d.type.trim().length ? d.type : null);
 
+    // Updated: Use helper's deterministic stat instead of raw fileSize field
     const size = resolveDocDownloadSizeLabel(d);
 
     const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
@@ -178,7 +179,6 @@ export default function DownloadsIndexPage(
                         category={dl.category}
                         size={dl.size ?? undefined}
                         featured={true}
-                        // Optional: pass accessLevel if your card supports it
                         accessLevel={dl.accessLevel as any}
                       />
                     ))}

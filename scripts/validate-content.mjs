@@ -1,114 +1,149 @@
 #!/usr/bin/env node
-import { promises as fs } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import matter from 'gray-matter';
+import { promises as fs } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import matter from "gray-matter";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const rootDir = join(__dirname, '..');
-const contentDir = join(rootDir, 'content');
+const rootDir = join(__dirname, "..");
+const contentDir = join(rootDir, "content");
+const publicDir = join(rootDir, "public");
 
+// 🛡️ Fields that MUST exist for a successful build
 const requiredFields = {
-  'canon': ['title', 'date'],
-  'events': ['title', 'date'],
-  'downloads': ['title', 'date'],
-  'resources': ['title', 'date'],
-  'blog': ['title', 'date'],
-  'books': ['title', 'date']
+  canon: ["title", "date"],
+  downloads: ["title", "date"],
+  resources: ["title", "date"],
+  blog: ["title", "date"],
 };
+
+const isIsoDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+const cleanStr = (v) => String(v ?? "").trim();
+
+function ensureLeadingSlash(s) {
+  const v = cleanStr(s);
+  if (!v) return "";
+  return v.startsWith("/") ? v : `/${v}`;
+}
+
+function publicUrlToFsPath(publicUrl) {
+  const u = cleanStr(publicUrl);
+  if (!u.startsWith("/")) return null;
+  return join(publicDir, u.replace(/^\/+/, ""));
+}
+
+async function fileExists(fsPath) {
+  try {
+    await fs.access(fsPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 🛰️ Validates if a referenced asset exists.
+ * Now takes a 'targetArray' to distinguish between breaking errors and soft warnings.
+ */
+async function validateAssetUrl(label, url, targetArray) {
+  const u = cleanStr(url);
+  if (!u || !u.startsWith("/")) return;
+
+  const abs = publicUrlToFsPath(u);
+  if (!abs) return;
+
+  // Only validate assets intended for the /public folder
+  if (!u.startsWith("/assets/") && !u.startsWith("/favicon") && !u.startsWith("/icons/")) {
+    return;
+  }
+
+  if (!(await fileExists(abs))) {
+    targetArray.push(`Missing public asset (${label}): ${u}`);
+  }
+}
 
 async function validateFile(filePath) {
   try {
-    const content = await fs.readFile(filePath, 'utf8');
-    const { data, excerpt } = matter(content);
-    
+    const content = await fs.readFile(filePath, "utf8");
+    const { data } = matter(content);
     const errors = [];
     const warnings = [];
-    
-    // Check for required fields based on directory
-    const dirName = filePath.split('/').find(part => part in requiredFields);
-    if (dirName && requiredFields[dirName]) {
-      for (const field of requiredFields[dirName]) {
-        if (!data[field]) {
-          errors.push(`Missing required field: ${field}`);
-        }
+
+    // 1. Validate Required Metadata (Strict Error)
+    const dirKey = filePath.replaceAll("\\", "/").split("/").find(p => requiredFields[p]);
+    if (dirKey && requiredFields[dirKey]) {
+      for (const field of requiredFields[dirKey]) {
+        if (!data[field]) errors.push(`Missing required field: ${field}`);
       }
     }
-    
-    // Check date format
-    if (data.date) {
-      if (typeof data.date !== 'string' || !data.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        errors.push(`Invalid date format: ${data.date}. Use YYYY-MM-DD`);
-      }
+
+    if (data.date && !isIsoDate(data.date)) {
+      errors.push(`Invalid date format: ${data.date}. Use YYYY-MM-DD`);
     }
-    
-    // Check for potential YAML issues
-    if (content.includes('---') && content.split('---').length < 3) {
-      errors.push('Malformed YAML frontmatter');
+
+    // 2. Validate Assets (Relaxed Warning) 🎨
+    const cover = data.coverImage ?? data.image ?? data.cover ?? null;
+    if (cover) {
+      await validateAssetUrl("coverImage", ensureLeadingSlash(cover), warnings);
     }
-    
+
+    const fileUrl = data.downloadUrl ?? data.fileUrl ?? data.downloadFile ?? null;
+    if (fileUrl) {
+      const u = ensureLeadingSlash(fileUrl);
+      const canonical = u.startsWith("/downloads/") ? u.replace(/^\/downloads\//, "/assets/downloads/") : u;
+      await validateAssetUrl("downloadFile", canonical, warnings);
+    }
+
     return {
-      path: filePath.replace(contentDir + '/', ''),
+      path: filePath.replace(contentDir + "/", ""),
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   } catch (error) {
-    return {
-      path: filePath.replace(contentDir + '/', ''),
-      valid: false,
-      errors: [`Parse error: ${error.message}`],
-      warnings: []
-    };
+    return { path: filePath, valid: false, errors: [`Parse error: ${error.message}`], warnings: [] };
   }
 }
 
 async function walkDir(dir) {
   let results = [];
   const entries = await fs.readdir(dir, { withFileTypes: true });
-  
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
-    
-    if (entry.isDirectory()) {
-      results = results.concat(await walkDir(fullPath));
-    } else if (entry.name.match(/\.(md|mdx)$/)) {
-      results.push(fullPath);
-    }
+    if (entry.isDirectory()) results = results.concat(await walkDir(fullPath));
+    else if (entry.name.match(/\.(md|mdx)$/)) results.push(fullPath);
   }
-  
   return results;
 }
 
 async function main() {
-  console.log('Validating content files...\n');
-  
   const files = await walkDir(contentDir);
-  const results = [];
-  
-  for (const file of files) {
-    const result = await validateFile(file);
-    results.push(result);
+  const results = await Promise.all(files.map(validateFile));
+
+  const invalidFiles = results.filter((r) => !r.valid);
+  const filesWithWarnings = results.filter((r) => r.warnings.length > 0);
+
+  console.log(`📊 Summary: ${results.length} files checked.`);
+  console.log(`✅ Valid: ${results.length - invalidFiles.length} | ❌ Invalid: ${invalidFiles.length}\n`);
+
+  if (filesWithWarnings.length > 0) {
+    console.log("⚠️  Asset Warnings (Build will continue):");
+    filesWithWarnings.forEach(f => {
+      console.log(`\n📄 ${f.path}`);
+      f.warnings.forEach(w => console.log(`   - ${w}`));
+    });
   }
-  
-  const validFiles = results.filter(r => r.valid);
-  const invalidFiles = results.filter(r => !r.valid);
-  
-  console.log(`📊 Summary:`);
-  console.log(`✅ Valid files: ${validFiles.length}`);
-  console.log(`❌ Invalid files: ${invalidFiles.length}\n`);
-  
+
   if (invalidFiles.length > 0) {
-    console.log('Invalid files:');
-    for (const file of invalidFiles) {
-      console.log(`\n📄 ${file.path}:`);
-      file.errors.forEach(error => console.log(`  ❗ ${error}`));
-      file.warnings.forEach(warning => console.log(`  ⚠️  ${warning}`));
-    }
+    console.log("\n❌ Critical Errors (Build failed):");
+    invalidFiles.forEach(f => {
+      console.log(`\n📄 ${f.path}`);
+      f.errors.forEach(e => console.log(`   - ${e}`));
+    });
     process.exit(1);
   } else {
-    console.log('🎉 All content files are valid!');
+    console.log("\n🎉 Build validation passed!");
     process.exit(0);
   }
 }

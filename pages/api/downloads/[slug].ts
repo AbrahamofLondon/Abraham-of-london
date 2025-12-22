@@ -14,7 +14,7 @@ import {
 import { logDownloadEvent } from "@/lib/downloads/audit";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const slug = String(req.query.slug ?? "").toLowerCase();
+  const slug = String(req.query.slug ?? "").toLowerCase().trim();
   if (!slug) return res.status(400).send("Missing slug");
 
   const doc = getDownloadBySlug(slug);
@@ -27,9 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userTier = getUserTierFromCookies(req.headers.cookie);
 
   const ip =
-    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ??
+    (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
     req.socket.remoteAddress ??
     null;
+
+  const ua = req.headers["user-agent"] ?? null;
+  const ref = req.headers.referer ?? null;
 
   if (!tierAtLeast(userTier, requiredTier)) {
     await logDownloadEvent({
@@ -38,8 +41,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       requiredTier,
       userTier,
       ip,
-      userAgent: req.headers["user-agent"] ?? null,
-      referrer: req.headers.referer ?? null,
+      userAgent: ua,
+      referrer: ref,
       note: "Insufficient tier",
     });
     return res.redirect(302, "/inner-circle");
@@ -49,6 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!secret) return res.status(500).send("Missing DOWNLOAD_SIGNING_SECRET");
 
   const exp = Math.floor(Date.now() / 1000) + 5 * 60; // 5 mins
+
   const token = signDownloadToken(
     { slug, exp, requiredTier, nonce: newNonce() },
     secret
@@ -60,10 +64,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     requiredTier,
     userTier,
     ip,
-    userAgent: req.headers["user-agent"] ?? null,
-    referrer: req.headers.referer ?? null,
+    userAgent: ua,
+    referrer: ref,
     tokenExp: exp,
   });
 
-  return res.redirect(302, `/api/dl/${token}`);
+  return res.redirect(302, `/api/dl/${encodeURIComponent(token)}`);
 }
