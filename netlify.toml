@@ -1,10 +1,3 @@
-[build]
-  command = "pnpm run build"
-  publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
@@ -14,14 +7,17 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
-
+  
+  # Vercel KV dummy values (if keeping dependency)
+  VERCEL_KV_REST_API_URL = "https://fake-url.kv.vercel-storage.com"
+  VERCEL_KV_REST_API_TOKEN = "fake_token_123"
+  
   # force devDependencies (eslint etc.) to be installed on Netlify
   NPM_FLAGS = "--prod=false"
-
+  
   # stop deploys being blocked by repo-wide lint/type debt
   NEXT_DISABLE_ESLINT = "1"
   NEXT_DISABLE_TYPECHECK = "1"
-
 
 # ------------------------------------------------------------------
 # CANONICAL HOST + HTTPS (STOP LOOPS)

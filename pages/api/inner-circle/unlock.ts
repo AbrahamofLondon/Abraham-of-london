@@ -2,10 +2,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyInnerCircleKey, recordInnerCircleUnlock } from "@/lib/inner-circle";
 import { getClientIp } from "@/lib/server/ip";
 
-const COOKIE_NAME = "innerCircleAccess";
+const COOKIE_ACCESS = "innerCircleAccess";
+const COOKIE_TIER = "innerCircleTier";
+
+type Tier = "inner-circle" | "inner-circle-plus" | "inner-circle-elite";
 
 type UnlockJsonResponse =
-  | { ok: true; message: string; redirectTo: string }
+  | { ok: true; message: string; redirectTo: string; tier: Tier }
   | { ok: false; error: string; message?: string };
 
 function isSecureRequest(req: NextApiRequest): boolean {
@@ -14,20 +17,21 @@ function isSecureRequest(req: NextApiRequest): boolean {
   return !(req.headers.host || "").includes("localhost");
 }
 
-function setAccessCookie(res: NextApiResponse, secure: boolean): void {
+function setCookie(res: NextApiResponse, name: string, value: string, secure: boolean): void {
   const maxAge = 60 * 60 * 24 * 365; // 1 year
-
-  // NOTE: We intentionally DO NOT set HttpOnly because client-side checks need to read it.
   const parts = [
-    `${COOKIE_NAME}=true`,
+    `${name}=${encodeURIComponent(value)}`,
     `Max-Age=${maxAge}`,
     "Path=/",
     "SameSite=Lax",
   ];
-
   if (secure) parts.push("Secure");
-
-  res.setHeader("Set-Cookie", parts.join("; "));
+  // Not HttpOnly (your UI reads it)
+  const existing = res.getHeader("Set-Cookie");
+  const next = parts.join("; ");
+  if (!existing) res.setHeader("Set-Cookie", [next]);
+  else if (Array.isArray(existing)) res.setHeader("Set-Cookie", [...existing, next]);
+  else res.setHeader("Set-Cookie", [String(existing), next]);
 }
 
 function safeReturnTo(v: unknown): string {
@@ -36,6 +40,20 @@ function safeReturnTo(v: unknown): string {
   if (!trimmed.startsWith("/")) return "/canon";
   if (trimmed.startsWith("//")) return "/canon";
   return trimmed;
+}
+
+/**
+ * Deterministic tier selection:
+ * - If verifyInnerCircleKey returns a tier, use it.
+ * - Otherwise, default to "inner-circle".
+ *
+ * NOTE: This is NOT guessing paths — it’s a controlled fallback for missing tier metadata.
+ */
+function normalizeTier(v: unknown): Tier {
+  const t = String(v ?? "").trim().toLowerCase();
+  if (t === "inner-circle-plus") return "inner-circle-plus";
+  if (t === "inner-circle-elite") return "inner-circle-elite";
+  return "inner-circle";
 }
 
 export default async function handler(
@@ -67,11 +85,20 @@ export default async function handler(
       });
     }
 
+    // record unlock
     await recordInnerCircleUnlock(trimmedKey, getClientIp(req));
-    setAccessCookie(res, isSecureRequest(req));
+
+    const secure = isSecureRequest(req);
+
+    // legacy
+    setCookie(res, COOKIE_ACCESS, "true", secure);
+
+    // tiered
+    const tier = normalizeTier((result as any)?.tier);
+    setCookie(res, COOKIE_TIER, tier, secure);
 
     const redirectTo = safeReturnTo(returnTo);
-    return res.status(200).json({ ok: true, message: "Vault authorized.", redirectTo });
+    return res.status(200).json({ ok: true, message: "Vault authorized.", redirectTo, tier });
   } catch {
     return res.status(500).json({ ok: false, error: "Authorization subsystem offline." });
   }

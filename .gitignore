@@ -362,3 +362,12 @@ test.js
 *.zip
 *.tar
 *.jpg
+
+# Build outputs
+.next/
+backup-*/
+
+pages/api/analytics/
+*.ps1
+*.bat
+*.lnk

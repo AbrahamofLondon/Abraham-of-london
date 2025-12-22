@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach: Next.js (9229)", // Cleaned name
+      "type": "pwa-node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "timeout": 20000,
+      "skipFiles": ["<node_internals>/**"],
+      "smartStep": true,
+      "detail": "Attaches to the Next.js server started by the pre-launch task."
+    },
+    {
+      "name": "Debug: Grand Master (Apex)",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/grand-master.mjs",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--strict",
+        // Use robust workspace variable for the report path
+        "--report=${workspaceFolder}/scripts/_reports/grand-master-report.json"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "detail": "Launches the grand-master script in the integrated terminal."
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Pipeline: Repair & Debug", // Renamed for clarity and purpose
+      // Must reference the configuration name above
+      "configurations": ["Attach: Next.js (9229)"],
+      // Must match the final sequence task label in tasks.json
+      "preLaunchTask": "Repair & Debug (Build-Start)",
+      "stopAll": true
+    }
+  ]
+}
