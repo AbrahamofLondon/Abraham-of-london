@@ -81,7 +81,16 @@ async function generatePlaceholderPDF(pdfPath, sourceFile) {
     console.log(`  ⏭️  PDF already exists: ${pdfPath}`);
     return { status: 'exists', path: pdfPath };
   } catch {
-    // PDF doesn't exist, generate it
+    // PDF doesn't exist, try to find and copy an existing one first
+    console.log(`  🔍 Looking for existing PDF: ${pdfPath}`);
+    
+    const copied = await tryFindAndCopyExistingPDF(pdfPath, fullPath, sourceFile);
+    if (copied) {
+      console.log(`  ✅ Copied existing PDF: ${pdfPath}`);
+      return { status: 'copied', path: pdfPath };
+    }
+    
+    // No existing PDF found, generate it
     console.log(`  🔨 Generating PDF: ${pdfPath}`);
     
     try {
@@ -100,7 +109,109 @@ async function generatePlaceholderPDF(pdfPath, sourceFile) {
   }
 }
 
-// Generate specific PDF based on content type
+// Try to find and copy an existing PDF with similar name
+async function tryFindAndCopyExistingPDF(targetPath, fullPath, sourceFile) {
+  const basename = path.basename(targetPath, '.pdf');
+  const targetDir = path.dirname(fullPath);
+  
+  // Ensure target directory exists
+  await fs.mkdir(targetDir, { recursive: true });
+  
+  // Look in public/assets/downloads for existing PDFs
+  const searchDirs = [
+    'public/assets/downloads',
+    'public/downloads', // Check wrong location too
+  ];
+  
+  for (const searchDir of searchDirs) {
+    try {
+      const files = await fs.readdir(searchDir);
+      
+      // Try exact match first (case-insensitive, with spaces/dashes variations)
+      const normalizedTarget = basename.toLowerCase().replace(/[-_\s]/g, '');
+      
+      for (const file of files) {
+        if (!file.endsWith('.pdf')) continue;
+        
+        const fileBase = path.basename(file, '.pdf').toLowerCase().replace(/[-_\s]/g, '');
+        
+        // Exact normalized match
+        if (fileBase === normalizedTarget) {
+          await fs.copyFile(path.join(searchDir, file), fullPath);
+          console.log(`  📋 Copied from: ${searchDir}/${file}`);
+          return true;
+        }
+      }
+      
+      // Try partial match (e.g., "scripture-track" matches "Scripture Track - John 14.pdf")
+      const keywords = basename.toLowerCase().split(/[-_\s]+/).filter(w => w.length > 3);
+      
+      for (const file of files) {
+        if (!file.endsWith('.pdf')) continue;
+        
+        const fileLower = file.toLowerCase();
+        const matchCount = keywords.filter(kw => fileLower.includes(kw)).length;
+        
+        // If most keywords match, consider it a match
+        if (matchCount >= Math.ceil(keywords.length * 0.7)) {
+          await fs.copyFile(path.join(searchDir, file), fullPath);
+          console.log(`  📋 Copied similar: ${searchDir}/${file}`);
+          return true;
+        }
+      }
+    } catch (error) {
+      // Directory doesn't exist or can't read, continue
+      continue;
+    }
+  }
+  
+  return false;
+}
+
+// Move wrongly placed PDFs to correct location
+async function fixWronglyPlacedPDFs() {
+  try {
+    const wrongDir = 'public/downloads';
+    const correctDir = 'public/assets/downloads';
+    
+    const files = await fs.readdir(wrongDir);
+    let moved = 0;
+    
+    for (const file of files) {
+      if (file.endsWith('.pdf')) {
+        const wrongPath = path.join(wrongDir, file);
+        const correctPath = path.join(correctDir, file);
+        
+        try {
+          // Check if already exists in correct location
+          await fs.access(correctPath);
+          // Delete from wrong location
+          await fs.unlink(wrongPath);
+          console.log(`  🗑️  Deleted duplicate: ${wrongPath}`);
+        } catch {
+          // Doesn't exist in correct location, move it
+          await fs.rename(wrongPath, correctPath);
+          console.log(`  📦 Moved: ${file} -> ${correctDir}/`);
+          moved++;
+        }
+      }
+    }
+    
+    if (moved > 0) {
+      console.log(`✅ Moved ${moved} PDFs to correct location\n`);
+    }
+    
+    // Try to remove the wrong directory if empty
+    try {
+      await fs.rmdir(wrongDir);
+      console.log(`🗑️  Removed empty directory: ${wrongDir}\n`);
+    } catch {
+      // Not empty or doesn't exist, that's fine
+    }
+  } catch (error) {
+    // Directory doesn't exist, that's fine
+  }
+}
 async function generateSpecificPDF(sourceFile, outputPath) {
   const basename = path.basename(sourceFile, path.extname(sourceFile));
   
@@ -326,6 +437,10 @@ async function main() {
   console.log('🚀 Starting comprehensive PDF and asset generation...\n');
   
   try {
+    // Step 0: Fix any wrongly placed PDFs
+    console.log('📦 Checking for misplaced PDFs...');
+    await fixWronglyPlacedPDFs();
+    
     // Step 1: Ensure all directories exist
     console.log('📁 Ensuring directories...');
     await ensureDirectories();
@@ -368,6 +483,7 @@ async function main() {
     console.log('📊 Generation Summary:');
     console.log('PDFs:');
     console.log(`  ✅ Already existed: ${results.pdfs.exists}`);
+    console.log(`  📋 Copied from existing: ${results.pdfs.copied || 0}`);
     console.log(`  🔨 Generated: ${results.pdfs.generated}`);
     console.log(`  ⚠️  Placeholders: ${results.pdfs.placeholder}`);
     if (results.pdfs.errors.length) {

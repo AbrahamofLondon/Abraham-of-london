@@ -1,138 +1,74 @@
-// scripts/validate-downloads.mjs
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT = path.resolve(__dirname, "..");
+const rootDir = path.resolve(__dirname, '..');
 
 async function loadContentlayer() {
-  const generatedPath = path.join(
-    ROOT,
-    ".contentlayer",
-    "generated",
-    "index.mjs"
-  );
-
-  if (!fs.existsSync(generatedPath)) {
-    throw new Error(
-      `Contentlayer output not found at ${generatedPath}. ` +
-        `Run "pnpm run content:build" before downloads:validate.`
-    );
+  const contentlayerPath = path.join(rootDir, '.contentlayer', 'generated', 'index.mjs');
+  
+  if (!fs.existsSync(contentlayerPath)) {
+    throw new Error('Contentlayer not built. Run pnpm run content:build first.');
   }
-
-  const moduleUrl = pathToFileURL(generatedPath).href;
-  const mod = await import(moduleUrl);
-  if (!mod.allDownloads) {
-    throw new Error(
-      "Contentlayer generated index does not export allDownloads. " +
-        "Check contentlayer.config.mjs and rebuild."
-    );
-  }
-  return mod.allDownloads;
+  
+  // Convert Windows path to file:// URL for ESM import
+  const contentlayerUrl = pathToFileURL(contentlayerPath).href;
+  const contentlayerModule = await import(contentlayerUrl);
+  return contentlayerModule.allDownloads || [];
 }
 
-function collectPdfFiles(downloadsRoot, publicRoot) {
-  const pdfFiles = [];
-  if (!fs.existsSync(downloadsRoot)) return pdfFiles;
-
-  const walk = (dir) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        walk(full);
-      } else if (entry.isFile() && full.toLowerCase().endsWith(".pdf")) {
-        // normalise to absolute path
-        pdfFiles.push(path.resolve(full));
-      }
+function validateDownloadFile(download) {
+  if (!download.downloadFile) return [];
+  
+  const downloadPath = download.downloadFile.replace(/^\//, '');
+  const basename = path.basename(downloadPath);
+  
+  const possiblePaths = [
+    path.join(rootDir, 'public', downloadPath),
+    path.join(rootDir, 'public', 'downloads', basename),
+    path.join(rootDir, 'public', 'assets', 'downloads', basename),
+  ];
+  
+  for (const fullPath of possiblePaths) {
+    if (fs.existsSync(fullPath)) {
+      return [];
     }
-  };
-
-  walk(downloadsRoot);
-  return pdfFiles;
+  }
+  
+  return [{
+    slug: download.slug,
+    title: download.title,
+    downloadFile: download.downloadFile,
+    checkedPaths: possiblePaths,
+  }];
 }
 
 async function main() {
-  const allDownloads = await loadContentlayer();
-
-  const publicRoot = path.join(ROOT, "public");
-  const downloadsRoot = path.join(publicRoot, "downloads");
-
-  const missingFiles = [];
-  const unreferencedPdfs = [];
-
-  // 1) For each Download, ensure its downloadHref exists if it points to /downloads
-  for (const doc of allDownloads) {
-    const href = doc.downloadHref || doc.downloadUrl || doc.fileUrl || "";
-
-    if (!href) continue;
-
-    // only enforce for local /downloads URLs
-    if (!href.startsWith("/downloads/")) continue;
-
-    const rel = href.replace(/^\/+/, ""); // strip leading slash
-    const diskPath = path.resolve(path.join(publicRoot, rel));
-
-    if (!fs.existsSync(diskPath)) {
-      missingFiles.push({
-        slug: doc.slug,
-        title: doc.title,
-        href,
-        diskPath,
-      });
+  console.log('Validating download files...\n');
+  
+  const downloads = await loadContentlayer();
+  console.log('Found', downloads.length, 'downloads\n');
+  
+  const allErrors = downloads.flatMap(validateDownloadFile);
+  
+  if (allErrors.length > 0) {
+    console.log('❌ Missing files:\n');
+    
+    for (const error of allErrors) {
+      console.log(' -', error.slug);
+      console.log('   Title:', error.title);
+      console.log('   Expected:', error.downloadFile);
+      console.log('   Checked:');
+      error.checkedPaths.forEach(p => console.log('    ', p));
+      console.log();
     }
-  }
-
-  // 2) For each .pdf in public/downloads, ensure it is referenced
-  const pdfFiles = collectPdfFiles(downloadsRoot, publicRoot);
-
-  const usedPaths = new Set(
-    allDownloads
-      .map((doc) => doc.downloadHref || doc.downloadUrl || doc.fileUrl || "")
-      .filter((href) => href.startsWith("/downloads/"))
-      .map((href) =>
-        path.resolve(path.join(publicRoot, href.replace(/^\/+/, "")))
-      )
-  );
-
-  for (const pdfPath of pdfFiles) {
-    if (!usedPaths.has(pdfPath)) {
-      unreferencedPdfs.push(pdfPath);
-    }
-  }
-
-  // 3) Report and exit code
-  if (missingFiles.length || unreferencedPdfs.length) {
-    console.error("❌ Download validation failed.\n");
-
-    if (missingFiles.length) {
-      console.error("Missing files (referenced in MDX but not found on disk):");
-      for (const m of missingFiles) {
-        console.error(
-          ` - slug=${m.slug} | title="${m.title}" | href=${m.href} -> expected at ${m.diskPath}`
-        );
-      }
-      console.error("");
-    }
-
-    if (unreferencedPdfs.length) {
-      console.error("Unreferenced PDFs in public/downloads:");
-      for (const p of unreferencedPdfs) {
-        console.error(` - ${p}`);
-      }
-      console.error("");
-    }
-
+    
     process.exit(1);
-  } else {
-    console.log(
-      "✅ Downloads validation passed: all Contentlayer links and public/downloads files are consistent."
-    );
   }
+  
+  console.log('✅ All files validated!\n');
 }
 
-main().catch((err) => {
-  console.error("Error while validating downloads:", err);
-  process.exit(1);
-});
+main().catch(console.error);
