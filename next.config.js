@@ -133,10 +133,11 @@ const nextConfig = {
     });
     
     // ============================================
-    // CLIENT-SIDE FALLBACKS (CRITICAL for static export)
+    // CRITICAL FIX: NODE MODULE HANDLING
     // ============================================
     if (!isServer) {
       config.resolve.fallback = {
+        // Standard fallbacks
         fs: false,
         path: false,
         os: false,
@@ -145,21 +146,47 @@ const nextConfig = {
         buffer: false,
         process: false,
         util: false,
+        
+        // Additional fallbacks that might be needed
         net: false,
         tls: false,
         child_process: false,
-        // Add all Node.js modules that might be imported
-        'node:fs': false,
-        'node:path': false,
-        'node:os': false,
-        'node:crypto': false,
+        dns: false,
+        http2: false,
+        module: false,
+        readline: false,
+        
+        // IMPORTANT: Don't use 'node:' prefix here - it causes the error
+        // Remove these lines:
+        // 'node:fs': false,
+        // 'node:path': false,
+        // 'node:os': false,
+        // 'node:crypto': false,
       };
+      
+      // Add NormalModuleReplacementPlugin to handle node: protocol imports
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /^node:/,
+          (resource) => {
+            // Strip the node: prefix from imports
+            resource.request = resource.request.replace(/^node:/, '');
+          }
+        )
+      );
+      
+      // Handle polyfills for browser
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          process: 'process/browser',
+          Buffer: ['buffer', 'Buffer'],
+        })
+      );
     }
     
     // ============================================
     // PERFORMANCE OPTIMIZATIONS (Simplified for static export)
     // ============================================
-    // Static exports need simpler optimization
     if (!dev) {
       config.optimization = {
         ...config.optimization,
@@ -198,16 +225,25 @@ const nextConfig = {
     config.ignoreWarnings = [
       /Failed to parse source map/,
       /Critical dependency: the request of a dependency is an expression/,
+      /Module not found: Can't resolve 'node:/,
+      /Module not found: Error: Can't resolve 'node:/,
     ];
     
     return config;
   },
   
   // ============================================
-  // REWRITES/REDIRECTS (Limited in static export)
+  // STATIC EXPORT SPECIFIC CONFIGURATION
   // ============================================
-  // Note: Static export doesn't support async rewrites/redirects
-  // All redirects should be in netlify.toml
+  // These settings help with static export compatibility
+  
+  // Disable features that don't work with static export
+  httpAgentOptions: {
+    keepAlive: false,
+  },
+  
+  // Set production browser targets
+  transpilePackages: [],
 };
 
 // ============================================

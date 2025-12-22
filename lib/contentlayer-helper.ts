@@ -36,8 +36,8 @@ export function publicUrlToFsPath(publicUrl: string): string | null {
   if (typeof window !== "undefined") return null;
   
   try {
-    // Dynamic import for Node.js modules - won't be bundled for client
-    const path = require("node:path");
+    // CRITICAL: Use "path" not "node:path" - Next.js handles this differently
+    const path = require("path"); // Changed from "node:path"
     const u = cleanStr(publicUrl);
     if (!u.startsWith("/")) return null;
     return path.join(process.cwd(), "public", trimLeadingSlashes(u));
@@ -51,7 +51,8 @@ export function publicFileExists(publicUrl: string): boolean {
   if (typeof window !== "undefined") return false;
   
   try {
-    const fs = require("node:fs");
+    // CRITICAL: Use "fs" not "node:fs"
+    const fs = require("fs"); // Changed from "node:fs"
     const fsPath = publicUrlToFsPath(publicUrl);
     if (!fsPath) return false;
     return fs.existsSync(fsPath);
@@ -65,7 +66,8 @@ export function publicFileSizeBytes(publicUrl: string): number | null {
   if (typeof window !== "undefined") return null;
   
   try {
-    const fs = require("node:fs");
+    // CRITICAL: Use "fs" not "node:fs"
+    const fs = require("fs"); // Changed from "node:fs"
     const fsPath = publicUrlToFsPath(publicUrl);
     if (!fsPath) return null;
     const stat = fs.statSync(fsPath);
@@ -132,3 +134,66 @@ export const allCanons = pickArray("allCanons");
 
 export const getDownloadBySlug = (s: string) => 
   allDownloads.find(d => normalizeSlug(d) === s.toLowerCase().trim()) ?? null;
+
+/* -------------------------------------------------------------------------- */
+/* Helper Functions for Downloads Index                                       */
+/* -------------------------------------------------------------------------- */
+
+export function getAllDownloads(): ContentDoc[] {
+  return allDownloads;
+}
+
+export function assertContentlayerHasDocs(caller: string): void {
+  if (allDownloads.length === 0) {
+    console.warn(`⚠️ No downloads found from Contentlayer (called by ${caller})`);
+  }
+}
+
+export function assertDownloadFilesExist(docs: ContentDoc[]): void {
+  // Only run this check during build, not in browser
+  if (typeof window !== "undefined") return;
+  
+  for (const doc of docs) {
+    const fileUrl = resolveDocDownloadUrl(doc);
+    if (fileUrl && !publicFileExists(fileUrl)) {
+      console.warn(`⚠️ Download file not found: ${fileUrl} (for ${doc.title || doc.slug})`);
+    }
+  }
+}
+
+export function resolveDocCoverImage(doc: ContentDoc): string | null {
+  const cover = doc?.cover || doc?.coverImage || doc?.image;
+  if (!cover) return null;
+  const cleaned = cleanStr(cover);
+  return cleaned ? ensureLeadingSlash(cleaned) : null;
+}
+
+export function resolveDocDownloadHref(doc: ContentDoc): string | null {
+  const fileUrl = resolveDocDownloadUrl(doc);
+  if (!fileUrl) return null;
+  
+  // For public downloads, use direct link
+  const access = getAccessLevel(doc);
+  if (access === "public") {
+    return fileUrl;
+  }
+  
+  // For protected downloads, use API route
+  return `/api/downloads/${normalizeSlug(doc)}`;
+}
+
+export function getAccessLevel(doc: ContentDoc): AccessLevel {
+  const level = cleanLower(doc.accessLevel || doc.access || doc.visibility);
+  
+  if (level.includes("inner-circle")) {
+    if (level.includes("plus")) return "inner-circle-plus";
+    if (level.includes("elite")) return "inner-circle-elite";
+    return "inner-circle";
+  }
+  
+  if (level.includes("private") || level.includes("hidden")) {
+    return "private";
+  }
+  
+  return "public";
+}
