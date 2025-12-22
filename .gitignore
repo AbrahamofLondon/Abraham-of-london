@@ -1,7 +1,9 @@
 # Auto detect text files and normalize line endings to LF
 * text=auto eol=lf
 
-# Explicitly declare text files with LF
+# ============================================
+# TEXT FILES (LF line endings)
+# ============================================
 *.js text eol=lf
 *.mjs text eol=lf
 *.ts text eol=lf
@@ -34,7 +36,14 @@ Procfile text eol=lf
 README text eol=lf
 LICENSE text eol=lf
 
-# Denote binary files
+# Script directories
+scripts/**/*.mjs text eol=lf
+scripts/**/*.js text eol=lf
+scripts/**/*.ts text eol=lf
+
+# ============================================
+# BINARY FILES (no line ending changes)
+# ============================================
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -64,12 +73,23 @@ LICENSE text eol=lf
 *.dylib binary
 *.bin binary
 
-# Force LF for scripts
-scripts/**/*.mjs text eol=lf
-scripts/**/*.js text eol=lf
-scripts/**/*.ts text eol=lf
+# ============================================
+# EXCLUDE FROM GIT EXPORT/ARCHIVE
+# ============================================
+# Database files and backups - CRITICAL: Never include these!
+*.db binary export-ignore
+*.sqlite binary export-ignore
+*.sqlite3 binary export-ignore
+*.sql binary export-ignore
+backups/ export-ignore
+backup-*/ export-ignore
+dev.db binary export-ignore
+prod.db binary export-ignore
+production.db binary export-ignore
+*.backup binary export-ignore
+_emergency-backup.tar binary export-ignore
 
-# Build artifacts
+# Development and build artifacts
 .next/ export-ignore
 .contentlayer/ export-ignore
 node_modules/ export-ignore
@@ -83,10 +103,16 @@ out/ export-ignore
 .reports/ export-ignore
 .pdfcache/ export-ignore
 
-# Generated files
+# Generated and temporary files
 .next-env.d.ts export-ignore
 tsconfig.tsbuildinfo export-ignore
 *.tsbuildinfo export-ignore
+.generated/ export-ignore
+_patches/ export-ignore
+patches/ export-ignore
+.gremlin-backups/ export-ignore
+*.tmp export-ignore
+*.temp export-ignore
 
 # Package manager files
 .npm/ export-ignore
@@ -96,106 +122,50 @@ package-lock.json export-ignore
 yarn.lock export-ignore
 pnpm-lock.yaml export-ignore
 
-# IDE/Editor
+# IDE/Editor files
 .vscode/ export-ignore
+.vscode-settings.json export-ignore
 .idea/ export-ignore
 *.swp export-ignore
 *.swo export-ignore
 
-# OS generated
+# OS generated files
 .DS_Store export-ignore
 Thumbs.db export-ignore
 Desktop.ini export-ignore
-*.lnk export-ignore
-*.bat export-ignore
+*.lnk binary export-ignore
+*.bat binary export-ignore
 
-# Development files
+# Environment and log files
 .env*.local export-ignore
+.env.development export-ignore
+.env.production export-ignore
+.env.test export-ignore
 *.log export-ignore
+
+# Testing and coverage
 coverage/ export-ignore
+playwright-report/ export-ignore
+test-results/ export-ignore
 lighthouse-budget.json export-ignore
 
-# Temporary/backup files
-*.backup export-ignore
-*.tmp export-ignore
-*.temp export-ignore
-_patches/ export-ignore
-patches/ export-ignore
-.gremlin-backups/ export-ignore
-
-# Project-specific exclusions (clean up old files)
-music.mp3 export-ignore
-nvm-setup.zip export-ignore
-offline-node-modules.tar.gz export-ignore
-_emergency-backup.tar export-ignore
-setup-abraham-project.bat export-ignore
+# Project-specific exclusions
+music.mp3 binary export-ignore
+nvm-setup.zip binary export-ignore
+nvm-setup.exe binary export-ignore
+offline-node-modules.tar.gz binary export-ignore
+setup-abraham-project.bat binary export-ignore
 criptsemergency-restore.ps1 export-ignore
 fix-parsing-errors.mjs.txt export-ignore
 github-recovery-codes.txt export-ignore
+output_tiktok*.mp4 binary export-ignore
+*.ass export-ignore
+*.srt export-ignore
+tiktok_cover.jpg binary export-ignore
 
-# Git LFS (if you use it later)
+# ============================================
+# GIT LFS (if needed in future)
+# ============================================
+# Uncomment and configure if you need large file storage
 # *.psd filter=lfs diff=lfs merge=lfs -text
 # *.ai filter=lfs diff=lfs merge=lfs -text
-
-
-# PowerShell/Command artifacts (prevent accidental capture)
-$null
-(
-){
-{}
-*.lnk
-*.bat
-*.ps1
-
-# Windows setup files
-nvm-setup.exe
-nvm-setup.zip
-
-# Media files (should be in public/assets/)
-music.mp3
-output_tiktok*.mp4
-*.ass
-*.srt
-tiktok_cover.jpg
-
-# Shortcuts
-*.lnk
-# Build outputs
-.next/
-.contentlayer/
-.netlify/
-.pdfcache/
-tsconfig.tsbuildinfo
-*.tsbuildinfo
-
-# Dependencies
-node_modules/
-.npm/
-.pnpm-store/
-
-# Test/Playwright
-playwright-report/
-test-results/
-coverage/
-
-# Backups and archives
-backup-*/
-api-fixes-backup-*/
-_emergency-backup.tar
-offline-node-modules.tar.gz
-
-# IDE
-.vscode/
-.vscode-settings.json
-.idea/
-
-# Environment files
-.env.local
-.env*.local
-
-# TypeScript/build artifacts
-dist/
-artifacts/
-
-# Contentlayer cache
-.generated/
