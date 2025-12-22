@@ -1,27 +1,81 @@
+# ============================================
+# NETLIFY CONFIGURATION - Abraham of London
+# Production-ready configuration
+# ============================================
+
+[build]
+  # Use pnpm with production build script
+  command = "pnpm run build:production"
+  publish = ".next"
+  
+  # Post-processing for better performance
+  processing.css = { bundle = true, minify = true }
+  processing.js = { bundle = true, minify = true }
+  processing.html = { pretty_urls = true }
+
+# Next.js plugin (optimized for Next.js 14)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+  [plugins.inputs]
+    # Generate SSG pages at build time
+    generateStaticPages = true
+    # Enable ISR (Incremental Static Regeneration)
+    enableISR = true
+    # Image optimization
+    images = { remote = true }
+    # Security headers (already set below)
+    securityHeaders = false
+
+# ============================================
+# BUILD ENVIRONMENT
+# ============================================
 [build.environment]
+  # Node.js version (LTS)
   NODE_VERSION = "20.11.1"
+  
+  # Package manager
   PNPM_VERSION = "9.15.9"
+  NPM_FLAGS = "--prod=false"
+  
+  # Environment
   NODE_ENV = "production"
   CI = "true"
+  
+  # Disable telemetry and hooks
   HUSKY = "0"
   NEXT_TELEMETRY_DISABLED = "1"
+  
+  # Skip type checking and linting in CI (do it locally)
+  NEXT_DISABLE_ESLINT = "1"
+  NEXT_DISABLE_TYPECHECK = "1"
+  
+  # Application URLs
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
   
-  # Vercel KV dummy values (if keeping dependency)
-  VERCEL_KV_REST_API_URL = "https://fake-url.kv.vercel-storage.com"
-  VERCEL_KV_REST_API_TOKEN = "fake_token_123"
+  # Optional services (if not used, set dummy values)
+  VERCEL_KV_REST_API_URL = "https://dummy.kv.vercel-storage.com"
+  VERCEL_KV_REST_API_TOKEN = "dummy_token_${BUILD_ID}"
   
-  # force devDependencies (eslint etc.) to be installed on Netlify
-  NPM_FLAGS = "--prod=false"
+  # Database (use environment variables in Netlify UI for real values)
+  DATABASE_URL = "file:./dev.db"  # Default for build, override in Netlify UI
   
-  # stop deploys being blocked by repo-wide lint/type debt
-  NEXT_DISABLE_ESLINT = "1"
-  NEXT_DISABLE_TYPECHECK = "1"
+  # NextAuth (override in Netlify UI with real secret)
+  NEXTAUTH_URL = "https://www.abrahamoflondon.org"
+  NEXTAUTH_SECRET = "dummy-secret-${BUILD_ID}-override-in-netlify-ui"
+  
+  # Performance optimizations
+  NEXT_OPTIMIZE_FONTS = "true"
+  NEXT_OPTIMIZE_IMAGES = "true"
+  NEXT_OPTIMIZE_CSS = "true"
+  
+  # Memory and timeout settings
+  NODE_OPTIONS = "--max-old-space-size=4096"
+  NEXTJS_TIMEOUT = "300"
 
-# ------------------------------------------------------------------
+# ============================================
 # CANONICAL HOST + HTTPS (STOP LOOPS)
-# ------------------------------------------------------------------
+# ============================================
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -40,43 +94,101 @@
   status = 301
   force = true
 
+# Remove trailing slashes
+[[redirects]]
+  from = "/*/"
+  to = "/:splat"
+  status = 301
+  conditions = { Language = ["en"], Country = ["US", "GB"] }
 
-# ------------------------------------------------------------------
-# SECURITY HEADERS
-# ------------------------------------------------------------------
+# ============================================
+# SECURITY HEADERS (Enhanced)
+# ============================================
 [[headers]]
   for = "/*"
   [headers.values]
+    # Basic security headers
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
-
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # HSTS (2 years)
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    
+    # Permissions Policy
+    Permissions-Policy = """
+      accelerometer=(), 
+      autoplay=(), 
+      camera=(), 
+      clipboard-read=(), 
+      clipboard-write=(), 
+      encrypted-media=(), 
+      fullscreen=(), 
+      geolocation=(), 
+      gyroscope=(), 
+      hid=(), 
+      idle-detection=(), 
+      magnetometer=(), 
+      microphone=(), 
+      midi=(), 
+      payment=(), 
+      picture-in-picture=(), 
+      publickey-credentials-get=(), 
+      screen-wake-lock=(), 
+      serial=(), 
+      usb=(), 
+      web-share=()
+    """
+    
+    # Content Security Policy (Enhanced)
     Content-Security-Policy = """
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com data:;
-      img-src 'self' data: https: blob:;
-      connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://api.anthropic.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' 
+        https://www.googletagmanager.com 
+        https://www.google-analytics.com 
+        https://ssl.google-analytics.com
+        https://cdnjs.cloudflare.com;
+      style-src 'self' 'unsafe-inline' 
+        https://fonts.googleapis.com 
+        https://cdnjs.cloudflare.com;
+      font-src 'self' 
+        https://fonts.gstatic.com 
+        https://cdnjs.cloudflare.com 
+        data:;
+      img-src 'self' 
+        data: 
+        https: 
+        blob: 
+        https://www.google-analytics.com 
+        https://ssl.gstatic.com;
+      connect-src 'self' 
+        https://www.google-analytics.com 
+        https://www.googletagmanager.com 
+        https://region1.google-analytics.com;
+      frame-src 'self';
       frame-ancestors 'none';
       base-uri 'self';
       form-action 'self';
       upgrade-insecure-requests;
     """
 
-    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-
 [[headers]]
   for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/_next/image/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/assets/*"
   [headers.values]
-    Cache-Control = "public, max-age=604800, must-revalidate"
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/api/*"
@@ -87,6 +199,7 @@
     Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
     Pragma = "no-cache"
     Expires = "0"
+    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "/admin/*"
@@ -95,3 +208,90 @@
     Pragma = "no-cache"
     Expires = "0"
     X-Robots-Tag = "noindex, nofollow"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/*.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    X-Content-Type-Options = "nosniff"
+
+# ============================================
+# CACHING OPTIMIZATIONS
+# ============================================
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+# ============================================
+# ERROR PAGES
+# ============================================
+[[redirects]]
+  from = "/404"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/500"
+  to = "/500.html"
+  status = 500
+
+# ============================================
+# SITEMAP & SEO
+# ============================================
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "application/xml"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "text/plain"
+
+# ============================================
+# PERFORMANCE OPTIMIZATIONS
+# ============================================
+[build.processing]
+  skip_processing = true
+
+# ============================================
+# EDGE FUNCTIONS (if used)
+# ============================================
+# [functions]
+#   # node_bundler = "esbuild"
+#   # external_node_modules = ["better-sqlite3", "pg", "pg-hstore"]
+
+# ============================================
+# OBSERVABILITY
+# ============================================
+[build.observability]
+  enabled = true
+  [build.observability.traces]
+    enabled = true
+    sample_rate = 0.1
+
+# ============================================
+# BACKUP & SAFETY
+# ============================================
+# Environment variable backups (set in Netlify UI)
+# Required in Netlify UI:
+# - DATABASE_URL (PostgreSQL for production)
+# - NEXTAUTH_SECRET (32+ character random string)
+# - RESEND_API_KEY (if using email)
+# - MAIL_FROM
+# Optional:
+# - SUPABASE_URL
+# - SUPABASE_ANON_KEY
+# - INNER_CIRCLE_ADMIN_KEY
