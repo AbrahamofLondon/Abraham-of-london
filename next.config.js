@@ -16,7 +16,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   
-  // Static export for Netlify
+  // Static export for Netlify (MANDATORY for static hosting)
   output: 'export',
   
   // Trailing slash handling
@@ -33,7 +33,7 @@ const nextConfig = {
   // IMAGE OPTIMIZATION (Static Export)
   // ============================================
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true, // REQUIRED for static export
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
@@ -51,13 +51,12 @@ const nextConfig = {
   // ============================================
   // BUILD CONFIGURATION
   // ============================================
+  // IMPORTANT: Remove these when static export issues are resolved
   typescript: {
-    // In production/CI, strict checking happens in validate:pre-build
     ignoreBuildErrors: isNetlify || process.env.CI === 'true',
   },
   
   eslint: {
-    // In production/CI, linting happens in validate:pre-build
     ignoreDuringBuilds: isNetlify || process.env.CI === 'true',
     dirs: ['pages', 'components', 'lib', 'app'],
   },
@@ -66,16 +65,11 @@ const nextConfig = {
   // COMPILER OPTIONS
   // ============================================
   compiler: {
-    // Remove console logs in production
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
     } : false,
     
-    // Remove React properties in production
     reactRemoveProperties: process.env.NODE_ENV === 'production',
-    
-    // Styled components support (if needed)
-    styledComponents: false,
   },
   
   // ============================================
@@ -90,25 +84,22 @@ const nextConfig = {
   },
   
   // ============================================
-  // EXPERIMENTAL FEATURES
+  // EXPERIMENTAL FEATURES (Disabled for static export)
   // ============================================
+  // NOTE: Many experimental features don't work with static export
   experimental: {
-    // Modern JavaScript features
-    esmExternals: true,
+    esmExternals: false, // Disable for better static export compatibility
     
-    // Optimize package imports
+    // These don't work with static export:
+    // optimizeCss: false, // Not compatible with output: 'export'
+    // optimizeFonts: false, // Not compatible with output: 'export'
+    
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
       '@react-email/components',
       'date-fns',
     ],
-    
-    // Enable modern CSS features
-    optimizeCss: true,
-    
-    // Optimize fonts
-    optimizeFonts: true,
   },
   
   // ============================================
@@ -117,7 +108,7 @@ const nextConfig = {
   pageExtensions: ['tsx', 'ts', 'jsx', 'js', 'mdx', 'md'],
   
   // ============================================
-  // WEBPACK CONFIGURATION
+  // WEBPACK CONFIGURATION (CRITICAL for static export)
   // ============================================
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // ============================================
@@ -142,11 +133,10 @@ const nextConfig = {
     });
     
     // ============================================
-    // CLIENT-SIDE FALLBACKS
+    // CLIENT-SIDE FALLBACKS (CRITICAL for static export)
     // ============================================
     if (!isServer) {
       config.resolve.fallback = {
-        ...config.resolve.fallback,
         fs: false,
         path: false,
         os: false,
@@ -158,117 +148,66 @@ const nextConfig = {
         net: false,
         tls: false,
         child_process: false,
+        // Add all Node.js modules that might be imported
+        'node:fs': false,
+        'node:path': false,
+        'node:os': false,
+        'node:crypto': false,
       };
     }
     
     // ============================================
-    // PERFORMANCE OPTIMIZATIONS
+    // PERFORMANCE OPTIMIZATIONS (Simplified for static export)
     // ============================================
-    // Improve build performance
-    config.optimization = {
-      ...config.optimization,
-      moduleIds: 'deterministic',
-      runtimeChunk: 'single',
-      splitChunks: {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor chunk
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20,
-          },
-          // Common chunk
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-          // React/Next.js framework
-          framework: {
-            name: 'framework',
-            test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
-            priority: 40,
-            reuseExistingChunk: true,
-          },
-          // Large libraries
-          lib: {
-            test: /[\\/]node_modules[\\/]/,
-            name(module) {
-              const packageName = module.context.match(
-                /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-              )?.[1];
-              return `lib-${packageName?.replace('@', '')}`;
+    // Static exports need simpler optimization
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              name: 'react',
+              chunks: 'all',
+              priority: 40,
             },
-            priority: 30,
+            next: {
+              test: /[\\/]node_modules[\\/](next)[\\/]/,
+              name: 'next',
+              chunks: 'all',
+              priority: 30,
+            },
+            commons: {
+              name: 'commons',
+              minChunks: 2,
+              priority: 20,
+            },
           },
         },
-      },
-    };
+      };
+    }
     
     // ============================================
-    // IGNORE WARNINGS (Clean builds)
+    // IGNORE WARNINGS
     // ============================================
     config.ignoreWarnings = [
-      // Ignore source map warnings
       /Failed to parse source map/,
-      // Ignore webpack warnings for optional dependencies
       /Critical dependency: the request of a dependency is an expression/,
     ];
-    
-    // ============================================
-    // PLUGINS
-    // ============================================
-    config.plugins.push(
-      // Define global constants
-      new webpack.DefinePlugin({
-        __DEV__: JSON.stringify(dev),
-        __PROD__: JSON.stringify(!dev),
-        __BUILD_ID__: JSON.stringify(buildId),
-      })
-    );
     
     return config;
   },
   
   // ============================================
-  // REDIRECTS (if needed before Netlify)
+  // REWRITES/REDIRECTS (Limited in static export)
   // ============================================
-  async redirects() {
-    return [
-      // Add any application-level redirects here
-      // Domain redirects should be in netlify.toml
-    ];
-  },
-  
-  // ============================================
-  // HEADERS (Static export - limited support)
-  // ============================================
-  async headers() {
-    // Note: Most headers should be in netlify.toml
-    // These only work for Next.js dev server
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-        ],
-      },
-    ];
-  },
+  // Note: Static export doesn't support async rewrites/redirects
+  // All redirects should be in netlify.toml
 };
 
 // ============================================
