@@ -1,9 +1,9 @@
-// pages/about.tsx — WORLD-CLASS FINISH
+// pages/about.tsx — Fully Polished, Legible, Sectioned (Dark-first, crisp separation)
+import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import * as React from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
   Moon,
@@ -19,65 +19,51 @@ import {
   ScrollText,
   Sparkles,
   ChevronRight,
+  CheckCircle2,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/imports";
 
-// ---------------------------------------------------------------------------
-// Animation variants
-// ---------------------------------------------------------------------------
+// ============================================================================
+// TYPES
+// ============================================================================
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { 
-      duration: 0.5, 
-      ease: [0.16, 1, 0.3, 1], 
-      when: "beforeChildren", 
-      staggerChildren: 0.08 
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } 
-  },
-};
-
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } 
-  },
-};
-
-// ---------------------------------------------------------------------------
-// Workstreams
-// ---------------------------------------------------------------------------
-
-type Workstream = {
+interface Workstream {
   title: string;
   description: string;
   outcomes: string[];
   href: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   tag: string;
-  gradient: string;
+  accent: "amber" | "blue" | "purple" | "emerald" | "rose" | "indigo";
+}
+
+// ============================================================================
+// MOTION
+// ============================================================================
+
+const easeSettle: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: easeSettle } },
 };
 
-const workstreams: Workstream[] = [
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.08 } },
+};
+
+// ============================================================================
+// DATA
+// ============================================================================
+
+const WORKSTREAMS: Workstream[] = [
   {
     title: "Canon — the philosophical spine",
     description:
-      "Long-form doctrine, strategy, and civilisation analysis designed to outlive platform cycles. Not vibes. Architecture.",
+      "Long-form doctrine, strategy, and civilisation analysis designed to outlive platform cycles.",
     outcomes: [
       "Clear worldview + operating philosophy",
       "Decision frameworks for leadership under pressure",
@@ -86,119 +72,176 @@ const workstreams: Workstream[] = [
     href: "/canon",
     icon: ScrollText,
     tag: "Ideas → Institutions",
-    gradient: "from-amber-500/10 to-orange-500/5",
+    accent: "amber",
   },
   {
     title: "Fatherhood & household architecture",
     description:
-      "Tools and standards for men building homes that don't outsource authority to trends. Practical fathering under modern pressure.",
+      "Tools and standards for men building homes that don't outsource authority to trends.",
     outcomes: [
       "Household rhythms, roles, and boundaries",
-      "Father-led legacy planning (values + systems)",
+      "Father-led legacy planning",
       "Mentorship-grade discipline and formation",
     ],
     href: "/brands/fathering-without-fear",
     icon: Users,
     tag: "Men → Families",
-    gradient: "from-blue-500/10 to-cyan-500/5",
+    accent: "blue",
   },
   {
     title: "Strategy rooms for founders & boards",
     description:
-      "Market positioning, narrative, operating cadence, and execution design. Built for builders, not spectators.",
-    outcomes: [
-      "Sharper mandate + market focus",
-      "Governance and operating rhythm",
-      "Execution strategy that survives reality",
-    ],
+      "Market positioning, narrative, operating cadence, and execution design for builders.",
+    outcomes: ["Sharper mandate + market focus", "Governance and operating rhythm", "Execution that survives reality"],
     href: "/consulting",
     icon: Briefcase,
     tag: "Vision → Execution",
-    gradient: "from-purple-500/10 to-pink-500/5",
+    accent: "purple",
   },
   {
     title: "Resources — templates, playbooks, toolkits",
     description:
-      "Practical assets you can deploy immediately: diagnostics, operating packs, and field-ready frameworks.",
-    outcomes: [
-      "Faster implementation cycles",
-      "Reusable frameworks for teams and households",
-      "Consistency without bureaucracy",
-    ],
+      "Practical assets you can deploy immediately: diagnostics and field-ready frameworks.",
+    outcomes: ["Faster implementation cycles", "Reusable frameworks for teams", "Consistency without bureaucracy"],
     href: "/downloads",
     icon: BookOpen,
     tag: "Tools → Deployment",
-    gradient: "from-emerald-500/10 to-teal-500/5",
+    accent: "emerald",
   },
   {
     title: "Inner Circle — closed rooms & applied work",
     description:
-      "Small rooms, higher signal. A tighter layer for serious builders who want accountability, not applause.",
-    outcomes: [
-      "Direct access to selective work and releases",
-      "Closed-room discussions and working sessions",
-      "Applied thinking with feedback loops",
-    ],
+      "Small rooms, higher signal for serious builders who want accountability, not applause.",
+    outcomes: ["Direct access to selective work", "Closed-room discussions", "Applied thinking with feedback loops"],
     href: "/inner-circle",
     icon: Shield,
     tag: "Access → Accountability",
-    gradient: "from-rose-500/10 to-red-500/5",
+    accent: "rose",
   },
   {
     title: "Civic & institutional thinking",
     description:
-      "Governance, nation-building, and institutional design — the upstream work behind downstream outcomes.",
-    outcomes: [
-      "Institutional patterns and reform logic",
-      "Cultural analysis with strategic implications",
-      "Economic and governance frameworks (macro lens)",
-    ],
+      "Governance, nation-building, and institutional design — upstream work for downstream outcomes.",
+    outcomes: ["Institutional patterns and reform logic", "Cultural analysis with strategic implications", "Economic and governance frameworks"],
     href: "/strategy",
     icon: Landmark,
     tag: "Principles → Policy",
-    gradient: "from-indigo-500/10 to-violet-500/5",
+    accent: "indigo",
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Page component
-// ---------------------------------------------------------------------------
+// ============================================================================
+// STYLE HELPERS
+// ============================================================================
+
+const ACCENTS = {
+  amber: {
+    ring: "ring-amber-400/20",
+    border: "border-amber-400/20 hover:border-amber-400/35",
+    badge: "border-amber-400/25 bg-amber-400/10 text-amber-200",
+    icon: "text-amber-300",
+    glow: "from-amber-500/18 via-amber-500/6 to-transparent",
+    chip: "bg-amber-400/10 text-amber-200 border-amber-400/20",
+    link: "text-amber-200 hover:text-amber-100",
+  },
+  blue: {
+    ring: "ring-sky-400/20",
+    border: "border-sky-400/20 hover:border-sky-400/35",
+    badge: "border-sky-400/25 bg-sky-400/10 text-sky-200",
+    icon: "text-sky-200",
+    glow: "from-sky-500/16 via-sky-500/6 to-transparent",
+    chip: "bg-sky-400/10 text-sky-200 border-sky-400/20",
+    link: "text-sky-200 hover:text-sky-100",
+  },
+  purple: {
+    ring: "ring-fuchsia-400/20",
+    border: "border-fuchsia-400/20 hover:border-fuchsia-400/35",
+    badge: "border-fuchsia-400/25 bg-fuchsia-400/10 text-fuchsia-200",
+    icon: "text-fuchsia-200",
+    glow: "from-fuchsia-500/16 via-fuchsia-500/6 to-transparent",
+    chip: "bg-fuchsia-400/10 text-fuchsia-200 border-fuchsia-400/20",
+    link: "text-fuchsia-200 hover:text-fuchsia-100",
+  },
+  emerald: {
+    ring: "ring-emerald-400/20",
+    border: "border-emerald-400/20 hover:border-emerald-400/35",
+    badge: "border-emerald-400/25 bg-emerald-400/10 text-emerald-200",
+    icon: "text-emerald-200",
+    glow: "from-emerald-500/16 via-emerald-500/6 to-transparent",
+    chip: "bg-emerald-400/10 text-emerald-200 border-emerald-400/20",
+    link: "text-emerald-200 hover:text-emerald-100",
+  },
+  rose: {
+    ring: "ring-rose-400/20",
+    border: "border-rose-400/20 hover:border-rose-400/35",
+    badge: "border-rose-400/25 bg-rose-400/10 text-rose-200",
+    icon: "text-rose-200",
+    glow: "from-rose-500/16 via-rose-500/6 to-transparent",
+    chip: "bg-rose-400/10 text-rose-200 border-rose-400/20",
+    link: "text-rose-200 hover:text-rose-100",
+  },
+  indigo: {
+    ring: "ring-indigo-400/20",
+    border: "border-indigo-400/20 hover:border-indigo-400/35",
+    badge: "border-indigo-400/25 bg-indigo-400/10 text-indigo-200",
+    icon: "text-indigo-200",
+    glow: "from-indigo-500/16 via-indigo-500/6 to-transparent",
+    chip: "bg-indigo-400/10 text-indigo-200 border-indigo-400/20",
+    link: "text-indigo-200 hover:text-indigo-100",
+  },
+} as const;
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+// ============================================================================
+// PAGE
+// ============================================================================
 
 const AboutPage: NextPage = () => {
-  const [isDark, setIsDark] = React.useState(true);
-  const [mounted, setMounted] = React.useState(false);
   const reduceMotion = useReducedMotion();
-  
   const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0.25]);
+
+  // NOTE: Your Layout likely already controls dark mode.
+  // This toggle is purely “page mood” (subtle), not Tailwind dark: class switching.
+  const [moodLight, setMoodLight] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
     try {
-      const stored = localStorage.getItem("aof-theme");
-      if (stored === "light" || stored === "dark") {
-        setIsDark(stored === "dark");
-        return;
-      }
-      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-      setIsDark(prefersDark);
+      const stored = localStorage.getItem("aol-about-mood");
+      if (stored === "light") setMoodLight(true);
+      if (stored === "dark") setMoodLight(false);
     } catch {
       // ignore
     }
   }, []);
 
-  const toggleTheme = () => {
-    setIsDark((prev) => {
-      const next = !prev;
+  const toggleMood = () => {
+    setMoodLight((p) => {
+      const next = !p;
       try {
-        localStorage.setItem("aof-theme", next ? "dark" : "light");
+        localStorage.setItem("aol-about-mood", next ? "light" : "dark");
       } catch {
         // ignore
       }
       return next;
     });
   };
+
+  const brandValues = ((siteConfig as any)?.brand?.values as string[]) || [
+    "Truth over trend",
+    "Responsibility over vibes",
+    "Covenant over convenience",
+    "Competence over noise",
+    "Legacy over ego",
+    "Stewardship over status",
+  ];
+  const leftValues = brandValues.slice(0, Math.ceil(brandValues.length / 2));
+  const rightValues = brandValues.slice(Math.ceil(brandValues.length / 2));
 
   if (!mounted) {
     return (
@@ -207,11 +250,6 @@ const AboutPage: NextPage = () => {
       </Layout>
     );
   }
-
-  const brandCfg = (siteConfig as unknown as { brand?: { values?: string[] } }).brand;
-  const brandValues = brandCfg?.values ?? [];
-  const leftValues = brandValues.slice(0, Math.ceil(brandValues.length / 2));
-  const rightValues = brandValues.slice(Math.ceil(brandValues.length / 2));
 
   return (
     <Layout title="About">
@@ -228,404 +266,407 @@ const AboutPage: NextPage = () => {
         />
         <meta property="og:url" content="https://www.abrahamoflondon.org/about" />
         <meta property="og:type" content="website" />
-        <meta name="theme-color" content="#0f172a" />
+        <meta name="theme-color" content="#0b0b10" />
         <link rel="canonical" href="https://www.abrahamoflondon.org/about" />
       </Head>
 
-      {/* Shell */}
-      <div className={`min-h-screen transition-colors duration-300 ${
-        isDark 
-          ? "bg-black text-cream" 
-          : "bg-white text-gray-900"
-      }`}>
-        
-        {/* Theme toggle - floating */}
+      <div className="min-h-screen bg-black text-white">
+        {/* Mood toggle (legible, never disappears) */}
         <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-          type="button"
-          onClick={toggleTheme}
-          className={`fixed top-6 right-6 z-50 inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur-xl transition-all ${
-            isDark
-              ? "border-white/10 bg-black/50 text-cream hover:border-gold/30 hover:bg-black/70"
-              : "border-gray-300 bg-white/90 text-gray-900 hover:border-gold/50 hover:bg-white"
-          }`}
-          aria-label="Toggle theme"
-        >
-          {isDark ? (
-            <>
-              <SunMedium className="h-3.5 w-3.5" />
-              <span>Light</span>
-            </>
-          ) : (
-            <>
-              <Moon className="h-3.5 w-3.5" />
-              <span>Dark</span>
-            </>
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, ease: easeSettle, delay: 0.2 }}
+          onClick={toggleMood}
+          className={cx(
+            "fixed right-5 top-5 z-50 inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold backdrop-blur-md",
+            "border-white/12 bg-black/70 text-white hover:border-white/20 hover:bg-black/80",
           )}
+          aria-label="Toggle page mood"
+          type="button"
+        >
+          {moodLight ? <Moon className="h-4 w-4" /> : <SunMedium className="h-4 w-4" />}
+          <span>{moodLight ? "Dark mood" : "Light mood"}</span>
         </motion.button>
 
-        {/* Hero - Atmospheric */}
-        <motion.section 
-          style={reduceMotion ? {} : { opacity: heroOpacity, scale: heroScale }}
-          className="relative min-h-[90vh] overflow-hidden"
+        {/* =========================================================
+            HERO (LEGIBLE + SEPARATED)
+           ========================================================= */}
+        <motion.section
+          style={reduceMotion ? {} : { opacity: heroOpacity }}
+          className="relative isolate overflow-hidden border-b border-white/8"
         >
-          {/* Background atmosphere */}
+          {/* Background: higher contrast and a “clean stage” behind text */}
           <div className="absolute inset-0" aria-hidden="true">
-            {/* Base gradient */}
-            <div className={`absolute inset-0 ${
-              isDark 
-                ? "bg-gradient-to-br from-black via-gray-900 to-black" 
-                : "bg-gradient-to-br from-gray-50 via-white to-gray-100"
-            }`} />
-            
-            {/* Ambient glows */}
-            {!reduceMotion && (
+            <div className="absolute inset-0 bg-[#07070c]" />
+            <div
+              className={cx(
+                "absolute inset-0",
+                moodLight
+                  ? "bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_55%)]"
+                  : "bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.14),transparent_55%)]",
+              )}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(59,130,246,0.10),transparent_55%)]" />
+
+            {!reduceMotion ? (
               <>
                 <motion.div
-                  className="absolute -top-1/2 right-1/4 h-[600px] w-[600px] rounded-full bg-gradient-radial from-amber-500/15 via-amber-600/8 to-transparent blur-3xl"
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    opacity: [0.3, 0.5, 0.3]
-                  }}
+                  className="absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full bg-amber-400/14 blur-3xl"
+                  animate={{ x: [0, 30, 0], y: [0, -18, 0], opacity: [0.18, 0.32, 0.18] }}
+                  transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                  className="absolute -bottom-48 -left-48 h-[560px] w-[560px] rounded-full bg-blue-500/12 blur-3xl"
+                  animate={{ x: [0, -24, 0], y: [0, 22, 0], opacity: [0.14, 0.26, 0.14] }}
+                  transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                />
+                <motion.div
+                  className="absolute left-1/2 top-10 h-24 w-[860px] -translate-x-1/2 rotate-[-8deg] bg-gradient-to-r from-transparent via-white/10 to-transparent blur-xl"
+                  animate={{ opacity: [0, 0.55, 0], x: ["-10%", "10%", "-10%"] }}
                   transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
                 />
-                
-                <motion.div
-                  className="absolute bottom-0 left-1/4 h-[500px] w-[500px] rounded-full bg-gradient-radial from-blue-500/12 to-transparent blur-3xl"
-                  animate={{ 
-                    scale: [1, 1.08, 1],
-                    opacity: [0.25, 0.4, 0.25]
-                  }}
-                  transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-                />
               </>
-            )}
-            
-            {/* Vignette */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
+            ) : null}
+
+            {/* Text legibility plate */}
+            <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-black/75 via-black/30 to-transparent" />
+            <div
+              className={cx(
+                "absolute inset-0",
+                moodLight
+                  ? "bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.55)_75%)]"
+                  : "bg-[radial-gradient(ellipse_at_center,transparent_25%,rgba(0,0,0,0.70)_78%)]",
+              )}
+            />
           </div>
 
-          {/* Content */}
-          <div className="relative flex min-h-[90vh] items-center">
-            <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-              <motion.div 
-                variants={containerVariants} 
-                initial="hidden" 
-                animate="visible" 
-                className="text-center"
-              >
-                {/* Badge */}
-                <motion.div
-                  variants={itemVariants}
-                  className="mb-8 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-2 backdrop-blur-sm"
-                >
-                  <Sparkles className="h-4 w-4 text-gold" />
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
-                    Strategic Stewardship
+          <div className="relative mx-auto max-w-6xl px-6 py-20 sm:py-24">
+            <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center">
+              <motion.div variants={fadeUp} className="mb-7 flex justify-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-4 py-2 backdrop-blur-sm">
+                  <Sparkles className="h-4 w-4 text-amber-300" />
+                  <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
+                    Strategic stewardship
                   </span>
-                </motion.div>
-
-                <motion.h1
-                  variants={itemVariants}
-                  className={`mb-6 font-serif text-5xl font-bold leading-tight sm:text-6xl lg:text-7xl ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  Strategy for men who{" "}
-                  <span className="relative inline-block">
-                    <span className={`relative z-10 bg-gradient-to-r bg-clip-text ${
-                      isDark 
-                        ? "from-gold to-amber-300 text-transparent" 
-                        : "from-amber-600 to-orange-500 text-transparent"
-                    }`}>
-                      actually carry
-                    </span>
-                    <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-gold/20 to-amber-300/20 blur-xl"
-                      animate={reduceMotion ? {} : { opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                    />
-                  </span>
-                  {" "}responsibility.
-                </motion.h1>
-
-                <motion.p 
-                  variants={itemVariants} 
-                  className={`mx-auto mb-4 max-w-3xl text-xl leading-relaxed sm:text-2xl ${
-                    isDark ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Faith-rooted. Field-tested. Built to last.
-                </motion.p>
-
-                <motion.p
-                  variants={itemVariants}
-                  className={`mx-auto max-w-2xl text-lg ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Abraham of London exists to turn conviction into operating systems — for households, ventures, and institutions.
-                  If you're looking for motivational content, wrong building.
-                </motion.p>
-
-                <motion.div variants={itemVariants} className="mt-12 flex flex-wrap justify-center gap-4">
-                  <Link 
-                    href="/canon" 
-                    className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-gold to-amber-500 px-8 py-4 font-semibold text-black shadow-lg shadow-gold/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-gold/40"
-                  >
-                    Enter the Canon
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                  
-                  <Link
-                    href="/consulting"
-                    className={`inline-flex items-center gap-2 rounded-full border px-8 py-4 font-semibold backdrop-blur-sm transition-all ${
-                      isDark
-                        ? "border-white/20 bg-white/5 text-white hover:border-white/30 hover:bg-white/10"
-                        : "border-gray-300 bg-white/80 text-gray-900 hover:border-gray-400 hover:bg-white shadow-lg"
-                    }`}
-                  >
-                    Work with Abraham
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </motion.div>
+                </div>
               </motion.div>
-            </div>
-          </div>
 
-          {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          >
-            <motion.div
-              animate={reduceMotion ? {} : { y: [0, 8, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="h-12 w-8 rounded-full border-2 border-white/20 p-2"
-            >
-              <motion.div 
-                className="h-2 w-2 rounded-full bg-gold"
-                animate={reduceMotion ? {} : { y: [0, 16, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
+              <motion.h1 variants={fadeUp} className="mx-auto max-w-4xl font-serif text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+                Strategy for men who{" "}
+                <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100 bg-clip-text text-transparent">
+                  actually carry
+                </span>{" "}
+                responsibility.
+              </motion.h1>
+
+              <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-lg text-white/80 sm:text-xl">
+                Faith-rooted. Field-tested. Built to last.
+              </motion.p>
+
+              <motion.p variants={fadeUp} className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+                Abraham of London turns conviction into operating systems — for households, ventures, and institutions.
+              </motion.p>
+
+              <motion.div variants={fadeUp} className="mt-10 flex flex-wrap justify-center gap-4">
+                <Link
+                  href="/canon"
+                  className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-amber-500 px-8 py-4 font-semibold text-black shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02] hover:shadow-amber-500/35"
+                >
+                  Enter the Canon
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+
+                <Link
+                  href="/consulting"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/7 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-all hover:border-white/28 hover:bg-white/10"
+                >
+                  Work with Abraham
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </motion.div>
+
+              {/* Hero quick-start cards (separated, readable, not muddy) */}
+              <motion.div variants={fadeUp} className="mx-auto mt-12 max-w-5xl">
+                <div className="grid gap-4 md:grid-cols-3">
+                  {[
+                    {
+                      k: "Start light",
+                      title: "Shorts",
+                      desc: "One minute. One point.",
+                      href: "/shorts",
+                      accent: "amber" as const,
+                    },
+                    {
+                      k: "Start practical",
+                      title: "Resources",
+                      desc: "Tools you can deploy today.",
+                      href: "/downloads",
+                      accent: "emerald" as const,
+                    },
+                    {
+                      k: "Start serious",
+                      title: "Inner Circle",
+                      desc: "Accountability, not applause.",
+                      href: "/inner-circle",
+                      accent: "rose" as const,
+                    },
+                  ].map((c) => {
+                    const A = ACCENTS[c.accent];
+                    return (
+                      <Link
+                        key={c.title}
+                        href={c.href}
+                        className={cx(
+                          "group relative overflow-hidden rounded-2xl border bg-white/[0.06] p-5 backdrop-blur-md transition",
+                          "border-white/12 hover:border-white/22",
+                          "hover:-translate-y-0.5",
+                        )}
+                      >
+                        <div className={cx("absolute inset-0 opacity-70", "bg-gradient-to-br", A.glow)} />
+                        <div className="relative">
+                          <div className={cx("mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em]", A.chip)}>
+                            <span className="opacity-90">◎</span>
+                            {c.k}
+                          </div>
+                          <div className="font-serif text-xl font-semibold text-white">{c.title}</div>
+                          <p className="mt-2 text-sm text-white/72">{c.desc}</p>
+                          <div className={cx("mt-4 inline-flex items-center gap-2 text-sm font-semibold", A.link)}>
+                            Open <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         </motion.section>
 
-        {/* Portrait + positioning */}
-        <section className={`relative py-24 ${
-          isDark 
-            ? "bg-gradient-to-b from-black via-gray-900 to-black" 
-            : "bg-gradient-to-b from-white via-gray-50 to-white"
-        }`}>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid items-center gap-16 lg:grid-cols-2">
-              {/* Content */}
-              <motion.div 
-                initial={{ opacity: 0, x: -30 }} 
+        {/* =========================================================
+            SECTION DIVIDER (prevents “muddled together”)
+           ========================================================= */}
+        <div className="border-b border-white/8 bg-[#0a0a11]">
+          <div className="mx-auto max-w-6xl px-6 py-6">
+            <p className="text-center text-xs uppercase tracking-[0.28em] text-white/55">
+              Signal over noise · Systems over vibes · Legacy over ego
+            </p>
+          </div>
+        </div>
+
+        {/* =========================================================
+            PORTRAIT / WHAT THIS IS (distinct background)
+           ========================================================= */}
+        <section className="relative bg-[#070710] py-20">
+          <div className="absolute inset-0" aria-hidden="true">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.04),transparent_55%)]" />
+          </div>
+
+          <div className="relative mx-auto max-w-6xl px-6">
+            <div className="grid items-center gap-12 lg:grid-cols-2">
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
               >
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1">
-                  <Target className="h-3.5 w-3.5 text-gold" />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gold">
-                    What This Is
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1">
+                  <Target className="h-4 w-4 text-amber-200" />
+                  <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
+                    What this is
                   </span>
                 </div>
 
-                <h2 className={`mb-6 font-serif text-4xl font-semibold lg:text-5xl ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}>
+                <h2 className="font-serif text-4xl font-bold leading-tight text-white lg:text-5xl">
                   A strategic workshop,{" "}
-                  <span className={isDark ? "text-gold" : "text-amber-600"}>not a content feed</span>
+                  <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">
+                    not a content feed
+                  </span>
                 </h2>
 
-                <div className={`space-y-6 text-lg leading-relaxed ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}>
+                <div className="mt-6 space-y-4 text-base leading-relaxed text-white/78 sm:text-lg">
                   <p>
-                    This platform exists to help serious men build: a household, a venture, and an internal governance structure 
-                    that does not collapse under pressure.
+                    This platform helps serious men build: a household, a venture, and an internal governance structure
+                    that withstands pressure.
                   </p>
                   <p>
-                    The operating assumption is simple: <strong className={isDark ? "text-white" : "text-gray-900"}>truth exists</strong>, conviction matters, 
-                    and leadership without moral architecture becomes manipulation.
+                    <span className="font-semibold text-white">Truth exists</span>, conviction matters, and leadership without
+                    moral architecture becomes manipulation — and the bill always shows up later.
                   </p>
-                  <p className={`rounded-lg border p-4 text-base ${
-                    isDark 
-                      ? "border-gold/20 bg-gold/5" 
-                      : "border-amber-200 bg-amber-50"
-                  }`}>
-                    <strong className={isDark ? "text-gold" : "text-amber-700"}>Foundation:</strong> Everything here is built on conservative Christian conviction. 
-                    Not as decoration — as the foundation.
-                  </p>
+
+                  <div className="rounded-2xl border border-amber-400/25 bg-amber-400/8 p-5">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Foundation</p>
+                    <p className="mt-2 text-white/80">
+                      Everything here is built on conservative Christian conviction — not as decoration, as load-bearing structure.
+                    </p>
+                  </div>
+
+                  <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-amber-200" />
+                      <div>
+                        <p className="font-semibold text-white">Clarity</p>
+                        <p className="text-sm text-white/70">Worldview + operating philosophy that reduces decision fatigue.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-amber-200" />
+                      <div>
+                        <p className="font-semibold text-white">Structure</p>
+                        <p className="text-sm text-white/70">Frameworks for households, teams, and institutions.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-amber-200" />
+                      <div>
+                        <p className="font-semibold text-white">Execution</p>
+                        <p className="text-sm text-white/70">Cadence, governance, and field-ready tools.</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-10 flex flex-wrap gap-4">
-                  <Link 
-                    href="/downloads" 
-                    className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 font-semibold text-black transition-all hover:bg-gold/90"
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link
+                    href="/downloads"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 font-semibold text-black transition hover:bg-amber-200"
                   >
-                    Deploy the tools
-                    <ChevronRight className="h-4 w-4" />
+                    Deploy the tools <ChevronRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/inner-circle"
-                    className={`inline-flex items-center gap-2 rounded-full border px-6 py-3 font-semibold backdrop-blur-sm transition-all ${
-                      isDark
-                        ? "border-white/20 bg-white/5 text-white hover:border-white/30 hover:bg-white/10"
-                        : "border-gray-300 bg-white text-gray-900 hover:border-gray-400 hover:bg-gray-50 shadow-md"
-                    }`}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/7 px-6 py-3 font-semibold text-white backdrop-blur-sm transition hover:border-white/28 hover:bg-white/10"
                   >
-                    Inner Circle access
-                    <Shield className="h-4 w-4" />
+                    Inner Circle access <Shield className="h-4 w-4" />
                   </Link>
                 </div>
               </motion.div>
 
-              {/* Portrait */}
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
+                initial={{ opacity: 0, x: 16 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle, delay: 0.05 }}
                 className="relative"
               >
-                <div className="relative overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
+                <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl shadow-black/50">
                   <Image
                     src="/assets/images/profile-portrait.webp"
                     alt="Abraham of London — founder and strategic leader"
-                    width={600}
-                    height={800}
+                    width={720}
+                    height={900}
                     className="h-auto w-full"
                     priority
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  
-                  {/* Floating badge */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.6 }}
-                    className="absolute bottom-6 left-6 rounded-xl bg-gold px-6 py-3 shadow-lg"
-                  >
-                    <p className="font-semibold text-black">Abraham of London</p>
-                    <p className="text-sm text-black/70">Strategy · Fatherhood · Legacy</p>
-                  </motion.div>
-                </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
 
-                {/* Ambient glow */}
-                <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-gold/20 to-amber-500/10 blur-3xl" />
+                  <div className="absolute bottom-5 left-5 right-5">
+                    <div className="rounded-2xl border border-white/12 bg-black/65 p-4 backdrop-blur-md">
+                      <p className="font-serif text-xl text-white">Abraham of London</p>
+                      <p className="mt-1 text-sm text-white/70">Strategy · Fatherhood · Legacy</p>
+
+                      <div className="mt-4 flex gap-2">
+                        <span className="rounded-xl border border-white/12 bg-white/7 px-3 py-2 text-[11px] font-semibold text-white/85">
+                          SIGNAL
+                          <span className="ml-2 font-black text-amber-200">High</span>
+                        </span>
+                        <span className="rounded-xl border border-white/12 bg-white/7 px-3 py-2 text-[11px] font-semibold text-white/85">
+                          STANDARD
+                          <span className="ml-2 font-black text-amber-200">Firm</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">Operating principle</p>
+                      <p className="mt-2 text-sm text-white/80">
+                        “Build what still works when the lights go out — character, competence, covenant, and cadence.”
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Workstreams */}
-        <section className={`relative py-24 ${
-          isDark 
-            ? "bg-gradient-to-b from-black via-gray-950 to-black" 
-            : "bg-gradient-to-b from-gray-50 via-white to-gray-50"
-        }`}>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
+        {/* =========================================================
+            WORKSTREAMS (distinct background + clear color coding)
+           ========================================================= */}
+        <section className="relative bg-[#06060c] py-20">
+          <div className="absolute inset-0" aria-hidden="true">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03),transparent_60%)]" />
+          </div>
+
+          <div className="relative mx-auto max-w-6xl px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.7 }}
-              className="mb-16 text-center"
+              viewport={{ once: true, margin: "-80px" }}
+              transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
+              className="mb-12 text-center"
             >
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1">
-                <Briefcase className="h-3.5 w-3.5 text-gold" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-gold">
-                  Workstreams
-                </span>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1">
+                <Briefcase className="h-4 w-4 text-amber-200" />
+                <span className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Workstreams</span>
               </div>
 
-              <h2 className={`mb-4 font-serif text-4xl font-semibold lg:text-5xl ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}>
-                What we build
-              </h2>
-              <p className={`mx-auto max-w-2xl text-xl ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}>
-                Not "content." Deliverables. Systems. Frameworks. Rooms where real decisions get made.
+              <h2 className="font-serif text-4xl font-bold text-white lg:text-5xl">What we build</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base text-white/70 sm:text-lg">
+                Not “content.” Deliverables. Systems. Frameworks. Rooms where real decisions get made.
               </p>
             </motion.div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {workstreams.map((ws, idx) => {
+              {WORKSTREAMS.map((ws, idx) => {
                 const Icon = ws.icon;
+                const A = ACCENTS[ws.accent];
+
                 return (
                   <motion.div
                     key={ws.title}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 0.6, delay: idx * 0.08 }}
-                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                    className={`group relative overflow-hidden rounded-2xl border p-6 backdrop-blur-sm transition-all ${
-                      isDark
-                        ? `border-white/10 bg-gradient-to-br ${ws.gradient} hover:border-gold/30 hover:shadow-xl hover:shadow-gold/5`
-                        : `border-gray-200 bg-gradient-to-br ${ws.gradient.replace(/\/10/g, '/20').replace(/\/5/g, '/10')} hover:border-gold/40 hover:shadow-xl`
-                    }`}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, ease: easeSettle, delay: idx * 0.04 }}
+                    whileHover={reduceMotion ? {} : { y: -4 }}
+                    className={cx(
+                      "group relative overflow-hidden rounded-3xl border bg-white/[0.05] p-6 backdrop-blur-md transition",
+                      A.border,
+                    )}
                   >
-                    <div className="mb-4 flex items-start justify-between gap-4">
-                      <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ring-1 transition-all ${
-                        isDark
-                          ? "bg-white/5 ring-white/10 group-hover:bg-gold/10 group-hover:ring-gold/20"
-                          : "bg-white ring-gray-200 group-hover:bg-gold/10 group-hover:ring-gold/30"
-                      }`}>
-                        <Icon className="h-6 w-6 text-gold" />
+                    <div className={cx("absolute inset-0 opacity-80 bg-gradient-to-br", A.glow)} />
+                    <div className="relative">
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <div className={cx("rounded-2xl bg-white/7 p-3 ring-1", A.ring)}>
+                          <Icon className={cx("h-6 w-6", A.icon)} />
+                        </div>
+                        <span className="rounded-full border border-white/12 bg-white/7 px-2.5 py-1 text-[11px] font-semibold text-white/70">
+                          {ws.tag}
+                        </span>
                       </div>
-                      <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
-                        isDark
-                          ? "border-white/10 bg-white/5 text-gray-400"
-                          : "border-gray-300 bg-white text-gray-600"
-                      }`}>
-                        {ws.tag}
-                      </span>
+
+                      <h3 className="font-serif text-xl font-semibold text-white">{ws.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-white/72">{ws.description}</p>
+
+                      <ul className="mt-5 space-y-2 text-sm text-white/70">
+                        {ws.outcomes.map((o) => (
+                          <li key={o} className="flex gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white/55" />
+                            <span>{o}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="mt-6">
+                        <Link
+                          href={ws.href}
+                          className={cx("inline-flex items-center gap-2 text-sm font-semibold", A.link)}
+                        >
+                          Explore <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </div>
                     </div>
-
-                    <h3 className={`mb-3 font-serif text-xl font-semibold transition-colors ${
-                      isDark
-                        ? "text-white group-hover:text-gold"
-                        : "text-gray-900 group-hover:text-amber-600"
-                    }`}>
-                      {ws.title}
-                    </h3>
-                    
-                    <p className={`mb-5 text-sm leading-relaxed ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}>
-                      {ws.description}
-                    </p>
-
-                    <ul className={`mb-6 space-y-2 text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}>
-                      {ws.outcomes.map((o) => (
-                        <li key={o} className="flex gap-2">
-                          <span className="text-gold">•</span>
-                          <span>{o}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Link 
-                      href={ws.href} 
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-gold hover:gap-2 transition-all"
-                    >
-                      Explore
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
                   </motion.div>
                 );
               })}
@@ -633,65 +674,56 @@ const AboutPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Values */}
-        <section className={`relative py-24 ${
-          isDark ? "bg-black" : "bg-white"
-        }`}>
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* =========================================================
+            VALUES (clean columns + readable cards)
+           ========================================================= */}
+        <section className="relative bg-[#070710] py-20">
+          <div className="absolute inset-0" aria-hidden="true">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.10),transparent_55%)]" />
+          </div>
+
+          <div className="relative mx-auto max-w-6xl px-6">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="mb-16 text-center"
+              viewport={{ once: true, margin: "-80px" }}
+              transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
+              className="mb-12 text-center"
             >
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1">
-                <Star className="h-3.5 w-3.5 text-gold" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-gold">
-                  Non-Negotiables
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1">
+                <Star className="h-4 w-4 text-amber-200" />
+                <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
+                  Non-negotiables
                 </span>
               </div>
 
-              <h2 className={`font-serif text-4xl font-semibold lg:text-5xl ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}>
-                Foundation stones
-              </h2>
+              <h2 className="font-serif text-4xl font-bold text-white lg:text-5xl">Foundation stones</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base text-white/70 sm:text-lg">
+                These are load-bearing. If they offend trends, good.
+              </p>
             </motion.div>
 
-            <div className="grid gap-8 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {[leftValues, rightValues].map((chunk, colIdx) => (
-                <div key={colIdx} className="space-y-6">
+                <div key={colIdx} className="space-y-4">
                   {chunk.map((value, idx) => (
                     <motion.div
-                      key={value}
-                      initial={{ opacity: 0, x: colIdx === 0 ? -20 : 20 }}
+                      key={`${value}-${idx}`}
+                      initial={{ opacity: 0, x: colIdx === 0 ? -12 : 12 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      transition={{ duration: 0.6, delay: idx * 0.1 }}
-                      className={`group rounded-2xl border p-6 backdrop-blur-sm transition-all ${
-                        isDark
-                          ? "border-white/10 bg-white/5 hover:border-gold/30 hover:bg-white/10"
-                          : "border-gray-200 bg-white shadow-md hover:border-gold/40 hover:shadow-lg"
-                      }`}
+                      viewport={{ once: true, margin: "-60px" }}
+                      transition={reduceMotion ? { duration: 0.01 } : { duration: 0.55, ease: easeSettle, delay: idx * 0.03 }}
+                      className="rounded-3xl border border-white/12 bg-white/[0.05] p-6 backdrop-blur-md transition hover:border-amber-400/25"
                     >
                       <div className="mb-3 flex items-center gap-3">
-                        <div className={`rounded-lg p-2 ring-1 ${
-                          isDark
-                            ? "bg-gold/10 ring-gold/20"
-                            : "bg-amber-50 ring-amber-200"
-                        }`}>
-                          <Star className="h-4 w-4 text-gold" />
+                        <div className="rounded-2xl bg-amber-400/10 p-2 ring-1 ring-amber-400/20">
+                          <Star className="h-4 w-4 text-amber-200" />
                         </div>
-                        <h3 className={`text-xl font-semibold transition-colors ${
-                          isDark
-                            ? "text-white group-hover:text-gold"
-                            : "text-gray-900 group-hover:text-amber-600"
-                        }`}>
-                          {value}
-                        </h3>
+                        <h3 className="text-lg font-bold text-white">{value}</h3>
                       </div>
-                      <p className={isDark ? "text-gray-400" : "text-gray-600"}>
-                        This value governs how we design strategy, build households, and steward influence over time.
+
+                      <p className="text-sm leading-relaxed text-white/72">
+                        This governs how we design strategy, build households, and steward influence over time.
                       </p>
                     </motion.div>
                   ))}
@@ -701,44 +733,44 @@ const AboutPage: NextPage = () => {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-gold via-amber-500 to-gold py-20 text-center">
-          {/* Pattern overlay */}
-          <div 
-            className="absolute inset-0 opacity-10" 
-            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}
-          />
+        {/* =========================================================
+            FINAL CTA (high contrast)
+           ========================================================= */}
+        <section className="relative overflow-hidden border-t border-white/10 bg-gradient-to-r from-amber-300 to-amber-500 py-16 text-center">
+          <div className="absolute inset-0" aria-hidden="true">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,0,0,0.25),transparent_60%)]" />
+          </div>
 
-          <div className="relative mx-auto max-w-4xl px-4">
+          <div className="relative mx-auto max-w-4xl px-6">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
+              transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
             >
-              <h2 className="mb-6 font-serif text-4xl font-bold text-black lg:text-5xl">
-                Build, don't drift.
-              </h2>
-              <p className="mb-10 text-xl text-black/80">
-                If you're serious: start with the Canon, deploy a tool, or book a strategy conversation.
+              <h2 className="font-serif text-4xl font-bold text-black lg:text-5xl">Build, don’t drift.</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base text-black/85 sm:text-xl">
+                Start with the Canon, deploy a tool, or book a strategy conversation.
               </p>
 
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="mt-10 flex flex-wrap justify-center gap-4">
                 <Link
                   href="/canon"
-                  className="inline-flex items-center gap-2 rounded-full bg-black px-8 py-4 font-semibold text-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl"
+                  className="inline-flex items-center gap-2 rounded-full bg-black px-8 py-4 font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5"
                 >
-                  Enter the Canon
-                  <ChevronRight className="h-4 w-4" />
+                  Enter the Canon <ChevronRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/consulting"
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-transparent px-8 py-4 font-semibold text-black transition-all hover:-translate-y-1 hover:bg-black hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-transparent px-8 py-4 font-semibold text-black transition-all hover:bg-black hover:text-white"
                 >
-                  Strategy room
-                  <ArrowRight className="h-4 w-4" />
+                  Strategy room <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
+
+              <p className="mt-8 text-xs font-black uppercase tracking-[0.26em] text-black/75">
+                Serious men. Serious systems.
+              </p>
             </motion.div>
           </div>
         </section>
