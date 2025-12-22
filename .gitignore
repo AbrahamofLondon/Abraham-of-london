@@ -351,3 +351,14 @@ setup.ps1
 sovereignty_*
 sqlite3.exe
 test.js
+
+# Catch-all for temporary files
+* - Shortcut*.lnk
+*.mp3
+*.mp4
+*.ass
+*.srt
+*.exe
+*.zip
+*.tar
+*.jpg
