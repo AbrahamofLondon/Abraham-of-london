@@ -181,7 +181,7 @@ jobs:
 
       - name: Upload generation report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pdf-generation-report-${{ github.run_number }}
           path: |
