@@ -204,7 +204,7 @@ jobs:
         run: pnpm run test:e2e
       - name: Upload Playwright report (always)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report-prod
           path: playwright-report
@@ -262,7 +262,7 @@ jobs:
         run: pnpm run test:e2e
       - name: Upload Playwright report (always)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report-preview
           path: playwright-report
