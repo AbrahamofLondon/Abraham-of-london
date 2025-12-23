@@ -1,22 +1,23 @@
-// components/ShortCard.tsx - FIXED VERSION
+// components/ShortCard.tsx
 import * as React from "react";
 import Link from "next/link";
 
-// Define the Short type directly instead of importing from contentlayer/generated
-interface Short {
-  slug: string;
+type ShortLike = {
   title: string;
-  excerpt?: string;
-  audience?: string;
-  theme?: string;
-  tags?: string[];
-  readTime?: string;
-  url?: string;
-  [key: string]: unknown; // For any additional properties
-}
+  slug?: string | null;
+  url?: string | null;
+
+  excerpt?: string | null;
+  readTime?: string | null;
+
+  theme?: string | null;
+  audience?: string | null;
+
+  tags?: string[] | null;
+};
 
 type Props = {
-  short: Short;
+  short: ShortLike;
   className?: string;
 };
 
@@ -26,12 +27,22 @@ const audienceLabelMap: Record<string, string> = {
   church: "Inner Crowd",
 };
 
-export const ShortCard: React.FC<Props> = ({ short, className }) => {
-  const audience =
-    (short.audience && audienceLabelMap[String(short.audience)]) ||
-    "Short • High Protein";
+function safeText(v: unknown): string {
+  return typeof v === "string" ? v : "";
+}
 
-  const href = short.url ?? `/shorts/${short.slug ?? ""}`;
+function safeArray(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+}
+
+export const ShortCard: React.FC<Props> = ({ short, className }) => {
+  const audienceKey = safeText(short.audience).toLowerCase();
+  const audience = audienceLabelMap[audienceKey] || "Short • High Protein";
+
+  const slug = safeText(short.slug).replace(/^\/+|\/+$/g, "");
+  const href = safeText(short.url) || `/shorts/${slug}`;
+
+  const tags = safeArray(short.tags).slice(0, 2);
 
   return (
     <Link href={href} className="group block h-full">
@@ -51,13 +62,13 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
 
             {short.readTime ? (
               <span className="text-[0.7rem] text-gray-500 dark:text-gray-400">
-                {String(short.readTime)}
+                {short.readTime}
               </span>
             ) : null}
           </div>
 
           <h3 className="font-serif text-base font-semibold text-gray-900 dark:text-white">
-            {short.title ?? "Untitled"}
+            {short.title || "Untitled"}
           </h3>
         </header>
 
@@ -71,20 +82,18 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
           <div className="flex flex-wrap gap-1 text-gray-500 dark:text-gray-400">
             {short.theme ? (
               <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[0.7rem] dark:bg-gray-800">
-                {String(short.theme)}
+                {short.theme}
               </span>
             ) : null}
 
-            {Array.isArray(short.tags)
-              ? short.tags.slice(0, 2).map((tag) => (
-                  <span
-                    key={String(tag)}
-                    className="rounded-full bg-gray-100 px-2 py-0.5 text-[0.7rem] dark:bg-gray-800"
-                  >
-                    {String(tag)}
-                  </span>
-                ))
-              : null}
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-gray-100 px-2 py-0.5 text-[0.7rem] dark:bg-gray-800"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
 
           <span className="text-[0.75rem] font-semibold text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400">
@@ -96,6 +105,4 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
   );
 };
 
-// Export the type for reuse
-export type { Short };
 export default ShortCard;
