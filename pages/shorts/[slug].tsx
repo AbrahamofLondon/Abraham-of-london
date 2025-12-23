@@ -42,17 +42,37 @@ function toAbsoluteUrl(maybeUrl: string | null | undefined): string | null {
   return `${SITE_URL}/${maybeUrl}`;
 }
 
+function safeDateLabel(dateLike?: string | null): string | null {
+  if (!dateLike) return null;
+  const d = new Date(dateLike);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths = getPublishedShorts().map((s) => ({
     params: { slug: normalizeSlug(s) },
   }));
+
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params }) => {
-  const slug = String(params?.slug ?? "").toLowerCase().trim();
-  const rawDoc = getShortBySlug(slug);
+  const slugParam = params?.slug;
+  const slug =
+    typeof slugParam === "string"
+      ? slugParam.toLowerCase().trim()
+      : Array.isArray(slugParam)
+        ? String(slugParam[0] ?? "").toLowerCase().trim()
+        : "";
 
+  if (!slug) return { notFound: true };
+
+  const rawDoc = getShortBySlug(slug);
   if (!rawDoc) return { notFound: true };
 
   const stableSlug = normalizeSlug(rawDoc);
@@ -66,9 +86,10 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params })
     })
   ) as ShortPageProps["short"];
 
+  // NOTE: For `output: "export"`, do NOT return `revalidate`.
   try {
-    const source = await serialize(short.body.raw);
-    return { props: { short, source }, revalidate: 1800 };
+    const source = await serialize(short.body?.raw ?? "");
+    return { props: { short, source } };
   } catch {
     return { notFound: true };
   }
@@ -104,6 +125,8 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
   const shareText =
     short.excerpt ||
     "A short reflection from Abraham of London — faith-rooted clarity without the noise.";
+
+  const dateLabel = safeDateLabel(short.date);
 
   const handleShare = React.useCallback(
     (platform: "twitter" | "linkedin" | "email" | "copy") => {
@@ -196,22 +219,14 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
 
           <h1 className="mt-4 font-serif text-4xl text-white">{short.title}</h1>
 
-          {short.excerpt ? (
-            <p className="mt-4 text-lg text-gray-400 italic">{short.excerpt}</p>
-          ) : null}
+          {short.excerpt ? <p className="mt-4 text-lg text-gray-400 italic">{short.excerpt}</p> : null}
 
           <div className="mt-6 flex items-center justify-center gap-3 text-xs text-gray-500">
             {short.readTime ? <span>{short.readTime} read</span> : null}
-            {short.date ? (
+            {dateLabel ? (
               <>
                 <span className="opacity-40">•</span>
-                <span>
-                  {new Date(short.date).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </span>
+                <span>{dateLabel}</span>
               </>
             ) : null}
           </div>
@@ -235,27 +250,10 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <ShareButton
-              icon={<Share2 className="h-4 w-4" />}
-              label="Share"
-              onClick={handleNativeShare}
-              className="sm:hidden"
-            />
-            <ShareButton
-              icon={<Twitter className="h-4 w-4" />}
-              label="Twitter"
-              onClick={() => handleShare("twitter")}
-            />
-            <ShareButton
-              icon={<Linkedin className="h-4 w-4" />}
-              label="LinkedIn"
-              onClick={() => handleShare("linkedin")}
-            />
-            <ShareButton
-              icon={<Mail className="h-4 w-4" />}
-              label="Email"
-              onClick={() => handleShare("email")}
-            />
+            <ShareButton icon={<Share2 className="h-4 w-4" />} label="Share" onClick={handleNativeShare} className="sm:hidden" />
+            <ShareButton icon={<Twitter className="h-4 w-4" />} label="Twitter" onClick={() => handleShare("twitter")} />
+            <ShareButton icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" onClick={() => handleShare("linkedin")} />
+            <ShareButton icon={<Mail className="h-4 w-4" />} label="Email" onClick={() => handleShare("email")} />
             <ShareButton
               icon={copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
               label={copied ? "Copied" : "Copy link"}

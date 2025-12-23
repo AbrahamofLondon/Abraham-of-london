@@ -1,7 +1,6 @@
 // components/Cards/types.ts
-
 export type CoverAspect = "wide" | "square" | "book";
-export type CoverFit = "cover" | "contain"; // allow "contain" as the real "fit"
+export type CoverFit = "cover" | "contain";
 export type CoverPosition = "center" | "top" | "bottom" | "left" | "right";
 
 export type AccessLevel = "public" | "inner-circle" | "premium" | "private";
@@ -16,17 +15,16 @@ export interface PostLike {
 
   coverImage?: string | null;
 
-  // ✅ NEW: cover orientation controls
   coverAspect?: CoverAspect | null;
   coverFit?: CoverFit | null;
   coverPosition?: CoverPosition | null;
 
   date?: string | null;
-  tags?: string[];
+  tags?: string[] | null;
 
   featured?: boolean;
 
-  accessLevel?: AccessLevel | string | null; // tolerate legacy strings
+  accessLevel?: AccessLevel | string | null;
   lockMessage?: string | null;
 
   category?: string | null;
@@ -47,7 +45,7 @@ export interface PostLike {
   price?: string | null;
   dimensions?: string | null;
 
-  type?: string | null; // "Post" | "Book" etc or lower
+  type?: string | null;
 }
 
 export interface BaseCardProps extends PostLike {

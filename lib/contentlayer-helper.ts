@@ -1,3 +1,4 @@
+// lib/contentlayer-helper.ts - COMPLETE FIXED VERSION
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as generated from "contentlayer/generated";
 
@@ -429,3 +430,255 @@ export function assertPublicAssetsExistForAllDocs(docs: ContentDoc[]) {
     );
   }
 }
+
+/**
+ * Validates that all download files referenced in download documents exist in the public directory.
+ * This is a specific version of assertPublicAssetsExistForAllDocs focused only on downloads.
+ */
+export function assertDownloadFilesExist(): void {
+  if (!isServer) {
+    console.warn('assertDownloadFilesExist is only available server-side');
+    return;
+  }
+  
+  const downloads = getAllDownloads();
+  const missing: string[] = [];
+
+  for (const doc of downloads) {
+    const slug = normalizeSlug(doc) || "(no-slug)";
+    const label = `download/${slug}`;
+
+    // Check download files
+    const dl = resolveDocDownloadUrl(doc);
+    if (dl && dl.startsWith("/assets/") && !publicFileExists(dl)) {
+      missing.push(`${label} downloadFile -> ${dl}`);
+    }
+    
+    // Also check cover images for downloads
+    const img = resolveDocCoverImage(doc);
+    if (img.startsWith("/assets/") && !publicFileExists(img)) {
+      missing.push(`${label} coverImage -> ${img}`);
+    }
+  }
+
+  if (missing.length) {
+    throw new Error(
+      `[Critical Build Error] Missing download files referenced by content:\n` + missing.join("\n")
+    );
+  }
+}
+
+// Optional: Add an alias for backward compatibility if needed
+export const assertDownloadsExist = assertDownloadFilesExist;
+
+/* -------------------------------------------------------------------------- */
+/* Card Props Helper                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Universal card props extractor for all doc types.
+ */
+export function getCardPropsForDocument(doc: ContentDoc): {
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  description: string | null;
+  href: string;
+  coverImage: string | null;
+  tags: string[];
+  date: string | null;
+  kind: DocKind;
+  accessLevel: AccessLevel;
+  fileSize: string | null;
+} {
+  const kind = getDocKind(doc);
+  const slug = normalizeSlug(doc);
+  const access = getAccessLevel(doc);
+  
+  return {
+    slug,
+    title: cleanStr(doc?.title) || "Untitled",
+    excerpt: cleanStr(doc?.excerpt) || null,
+    description: cleanStr(doc?.description) || null,
+    href: getDocHref(doc),
+    coverImage: resolveDocCoverImage(doc),
+    tags: Array.isArray(doc?.tags) ? doc.tags.map(cleanStr) : [],
+    date: doc?.date ? safeDate(doc.date) : null,
+    kind,
+    accessLevel: access,
+    fileSize: kind === "download" ? resolveDocDownloadSizeLabel(doc) : null,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Utility Helpers                                                            */
+/* -------------------------------------------------------------------------- */
+
+function safeDate(input: unknown): string {
+  if (!input) return "";
+  try {
+    const date = new Date(String(input));
+    return date.toISOString().split("T")[0] || "";
+  } catch {
+    return "";
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Type Exports for Better TypeScript Support                                 */
+/* -------------------------------------------------------------------------- */
+
+// Basic type interfaces for better type safety
+export interface BaseDoc {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  description?: string;
+  date?: string;
+  tags?: string[];
+  coverImage?: string;
+  _raw: {
+    flattenedPath: string;
+    sourceFileName: string;
+  };
+  [key: string]: unknown;
+}
+
+export interface PostDoc extends BaseDoc {
+  type: "post";
+  featured?: boolean;
+  category?: string;
+  readTime?: string;
+}
+
+export interface BookDoc extends BaseDoc {
+  type: "book";
+  subtitle?: string;
+  isbn?: string;
+  publisher?: string;
+}
+
+export interface DownloadDoc extends BaseDoc {
+  type: "download";
+  file?: string;
+  pdfPath?: string;
+  downloadFile?: string;
+  fileUrl?: string;
+  downloadUrl?: string;
+  fileSize?: string;
+  accessLevel?: AccessLevel;
+}
+
+export interface EventDoc extends BaseDoc {
+  type: "event";
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  registrationUrl?: string;
+}
+
+export interface PrintDoc extends BaseDoc {
+  type: "print";
+  format?: string;
+  dimensions?: string;
+  price?: string | number;
+  inStock?: boolean;
+}
+
+export interface ResourceDoc extends BaseDoc {
+  type: "resource";
+  format?: string;
+  file?: string;
+}
+
+export interface StrategyDoc extends BaseDoc {
+  type: "strategy";
+  framework?: string;
+  category?: string;
+}
+
+export interface CanonDoc extends BaseDoc {
+  type: "canon";
+  volume?: number;
+  chapter?: number;
+}
+
+export interface ShortDoc extends BaseDoc {
+  type: "short";
+  theme?: string;
+  readTime?: string;
+}
+
+export type AnyDoc = PostDoc | BookDoc | DownloadDoc | EventDoc | PrintDoc | ResourceDoc | StrategyDoc | CanonDoc | ShortDoc;
+
+// Type aliases for backward compatibility
+export type PostType = PostDoc;
+export type BookType = BookDoc;
+export type DownloadType = DownloadDoc;
+export type EventType = EventDoc;
+export type PrintType = PrintDoc;
+export type ResourceType = ResourceDoc;
+export type StrategyType = StrategyDoc;
+export type CanonType = CanonDoc;
+export type ShortType = ShortDoc;
+
+export type ContentlayerCardProps = ReturnType<typeof getCardPropsForDocument>;
+
+/* -------------------------------------------------------------------------- */
+/* Contentlayer Loaded Check                                                  */
+/* -------------------------------------------------------------------------- */
+
+export const isContentlayerLoaded = (): boolean => {
+  try {
+    return allPosts.length > 0 || allBooks.length > 0 || allDownloads.length > 0;
+  } catch {
+    return false;
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+/* Document Getter                                                            */
+/* -------------------------------------------------------------------------- */
+
+export const getDocumentBySlug = (slug: string): ContentDoc | null => {
+  const slugClean = toCanonicalSlug(slug);
+  
+  // Try all collections in order of priority
+  const collections = [
+    { getter: getPostBySlug, name: "post" },
+    { getter: getBookBySlug, name: "book" },
+    { getter: getDownloadBySlug, name: "download" },
+    { getter: getShortBySlug, name: "short" },
+    { getter: getCanonBySlug, name: "canon" },
+    { getter: getResourceBySlug, name: "resource" },
+    { getter: getEventBySlug, name: "event" },
+    { getter: getPrintBySlug, name: "print" },
+    { getter: getStrategyBySlug, name: "strategy" },
+  ];
+  
+  for (const { getter, name } of collections) {
+    const doc = getter(slugClean);
+    if (doc) return doc;
+  }
+  
+  return null;
+};
+
+/* -------------------------------------------------------------------------- */
+/* Featured Documents                                                         */
+/* -------------------------------------------------------------------------- */
+
+export const getFeaturedDocuments = (limit?: number): ContentDoc[] => {
+  const allDocs = getPublishedDocuments();
+  const featured = allDocs.filter(doc => doc?.featured === true);
+  
+  // Sort by date (newest first)
+  const sorted = featured.sort((a, b) => {
+    const dateA = a.date ? new Date(a.date).getTime() : 0;
+    const dateB = b.date ? new Date(b.date).getTime() : 0;
+    return dateB - dateA;
+  });
+  
+  return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+};

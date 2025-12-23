@@ -20,6 +20,8 @@ import {
   MessageCircle,
 } from "lucide-react";
 
+import { siteConfig } from "@/lib/imports";
+
 const useDeviceType = () => {
   const [deviceType, setDeviceType] =
     React.useState<"mobile" | "tablet" | "desktop">("desktop");
@@ -40,33 +42,6 @@ const useDeviceType = () => {
   return deviceType;
 };
 
-const SITE_CONFIG = {
-  title: "Abraham of London",
-  description:
-    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
-  contact: {
-    email: "info@abrahamoflondon.org",
-    phone: "+44 20 8622 5909",
-    location: "Based in London, working globally",
-  },
-  socialLinks: [
-    { href: "https://x.com/AbrahamAda48634", label: "X", kind: "twitter" },
-    { href: "https://www.tiktok.com/@abrahamoflondon", label: "TikTok", kind: "tiktok" },
-    { href: "https://www.facebook.com/share/1Gvu4ZunTq/", label: "Facebook", kind: "facebook" },
-    {
-      href: "https://www.instagram.com/abraham_of_london_?igsh=MWw3bjFxMmlwaDd0Mw==",
-      label: "Instagram",
-      kind: "instagram",
-    },
-    {
-      href: "https://www.linkedin.com/in/abraham-adaramola-06630321",
-      label: "LinkedIn",
-      kind: "linkedin",
-    },
-    { href: "mailto:info@abrahamoflondon.org", label: "Email", kind: "email" },
-  ],
-} as const;
-
 type SocialPlatform =
   | "twitter"
   | "linkedin"
@@ -76,14 +51,19 @@ type SocialPlatform =
   | "facebook"
   | "email"
   | "phone"
-  | "website";
+  | "website"
+  | "whatsapp";
 
-const iconMap: Record<SocialPlatform, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+const iconMap: Record<
+  SocialPlatform,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
   twitter: Twitter,
   linkedin: Linkedin,
   instagram: Instagram,
   youtube: Youtube,
   tiktok: MessageCircle,
+  whatsapp: MessageCircle, // WhatsApp icon alternative (lucide has MessageCircle; ok)
   facebook: Facebook,
   email: Mail,
   phone: Phone,
@@ -113,8 +93,6 @@ const footerSections = [
       { label: "Founder Tools", href: "/founders" },
       { label: "Leadership Resources", href: "/leadership" },
       { label: "Canon Campaign", href: "/canon-campaign" },
-
-      // ✅ FIX: your build output shows /chatham-rooms exists (not /strategy/chatham-rooms)
       { label: "Chatham Rooms", href: "/chatham-rooms" },
     ],
   },
@@ -155,11 +133,19 @@ const FadeIn: React.FC<{
   );
 };
 
+function cleanTel(phone: string): string {
+  return phone.replace(/\s+/g, "");
+}
+
+function isExternal(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+
 export default function EnhancedFooter() {
   const deviceType = useDeviceType();
   const isMobile = deviceType === "mobile";
   const isTablet = deviceType === "tablet";
-  const [currentYear, setCurrentYear] = React.useState<number>(2024);
+  const [currentYear, setCurrentYear] = React.useState<number>(new Date().getFullYear());
 
   React.useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -167,17 +153,15 @@ export default function EnhancedFooter() {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    window.location.href = `mailto:${SITE_CONFIG.contact.email}`;
-  };
+  const email = siteConfig?.contact?.email || siteConfig?.email || "info@abrahamoflondon.org";
+  const phone = siteConfig?.contact?.phone || "+44 20 8622 5909";
+  const location = siteConfig?.contact?.address || "Based in London, working globally";
 
-  const handlePhoneClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    window.location.href = `tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, "")}`;
-  };
+  const description =
+    siteConfig?.description ||
+    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.";
 
-  const gridCols = isMobile ? "1" : isTablet ? "2" : "4";
+  const socials = Array.isArray(siteConfig?.socialLinks) ? siteConfig.socialLinks : [];
 
   return (
     <footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-amber-500/10">
@@ -185,7 +169,14 @@ export default function EnhancedFooter() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className={`grid grid-cols-${gridCols} gap-8`}>
+        {/* ✅ Avoid dynamic Tailwind class names */}
+        <div
+          className={[
+            "grid gap-8",
+            isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2" : "grid-cols-4",
+          ].join(" ")}
+        >
+          {/* Brand column */}
           <div className={isMobile ? "col-span-1" : isTablet ? "col-span-2" : "col-span-1"}>
             <FadeIn delay={0.1} direction="up">
               <Link href="/" className="group inline-block mb-4 lg:mb-6" aria-label="Go to homepage">
@@ -194,75 +185,77 @@ export default function EnhancedFooter() {
                     Abraham<span className="text-amber-400"> of London</span>
                   </h2>
                   <p className="text-xs font-medium tracking-[0.2em] text-amber-400/70 uppercase">
-                    Faith · Strategy · Fatherhood
+                    {siteConfig?.brand?.tagline ?? "Faith · Strategy · Fatherhood"}
                   </p>
                 </div>
               </Link>
 
               <p className="mb-4 lg:mb-6 text-sm lg:text-base text-gray-300 leading-relaxed">
-                {SITE_CONFIG.description}
+                {description}
               </p>
 
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 text-amber-400/70 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-300">{SITE_CONFIG.contact.location}</span>
+                  <span className="text-sm text-gray-300">{location}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
                   <a
-                    href={`mailto:${SITE_CONFIG.contact.email}`}
-                    onClick={handleEmailClick}
+                    href={`mailto:${email}`}
                     className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
                   >
-                    {SITE_CONFIG.contact.email}
+                    {email}
                   </a>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <Phone className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
                   <a
-                    href={`tel:${SITE_CONFIG.contact.phone.replace(/\s+/g, "")}`}
-                    onClick={handlePhoneClick}
+                    href={`tel:${cleanTel(phone)}`}
                     className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
                   >
-                    {SITE_CONFIG.contact.phone}
+                    {phone}
                   </a>
                 </div>
               </div>
 
-              {/* ✅ Social Links are here (and will now show because Footer.tsx re-exports this file) */}
-              <div className="mb-6">
-                <p className="mb-3 text-sm font-semibold text-white">Follow</p>
-                <div className="flex flex-wrap gap-2">
-                  {SITE_CONFIG.socialLinks.map((social) => {
-                    const Icon =
-                      iconMap[(social.kind as SocialPlatform) || "website"] ?? Globe;
+              {/* Socials */}
+              {socials.length > 0 && (
+                <div className="mb-6">
+                  <p className="mb-3 text-sm font-semibold text-white">Follow</p>
+                  <div className="flex flex-wrap gap-2">
+                    {socials.map((social) => {
+                      const kind = (social.kind || "website") as SocialPlatform;
+                      const Icon = iconMap[kind] ?? Globe;
+                      const external = isExternal(social.href);
 
-                    return (
-                      <motion.a
-                        key={social.label}
-                        href={social.href}
-                        target={social.href.startsWith("http") ? "_blank" : "_self"}
-                        rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                        className="group flex items-center gap-2 rounded-lg px-3 py-2 text-xs border border-amber-400/20 bg-amber-400/5 transition-all duration-200 hover:border-amber-400/40 hover:bg-amber-400/10"
-                        whileHover={{ x: 2 }}
-                        whileTap={{ scale: 0.98 }}
-                        aria-label={`Follow on ${social.label}`}
-                      >
-                        <Icon className="h-3 w-3 text-amber-400" />
-                        <span className="text-gray-300 group-hover:text-white transition-colors">
-                          {social.label}
-                        </span>
-                      </motion.a>
-                    );
-                  })}
+                      return (
+                        <motion.a
+                          key={`${social.label}-${social.href}`}
+                          href={social.href}
+                          target={external ? "_blank" : "_self"}
+                          rel={external ? "noopener noreferrer" : undefined}
+                          className="group flex items-center gap-2 rounded-lg px-3 py-2 text-xs border border-amber-400/20 bg-amber-400/5 transition-all duration-200 hover:border-amber-400/40 hover:bg-amber-400/10"
+                          whileHover={{ x: 2 }}
+                          whileTap={{ scale: 0.98 }}
+                          aria-label={`Follow on ${social.label}`}
+                        >
+                          <Icon className="h-3 w-3 text-amber-400" />
+                          <span className="text-gray-300 group-hover:text-white transition-colors">
+                            {social.label}
+                          </span>
+                        </motion.a>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </FadeIn>
           </div>
 
+          {/* Link sections */}
           {footerSections.map((section, index) => (
             <div key={section.title} className={isMobile ? "col-span-1" : ""}>
               <FadeIn delay={0.1 + index * 0.1} direction="up">
@@ -291,12 +284,13 @@ export default function EnhancedFooter() {
           ))}
         </div>
 
+        {/* Bottom bar */}
         <FadeIn delay={0.4} direction="up">
           <div className="mt-12 pt-8 border-t border-gray-800">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="text-center lg:text-left">
                 <p className="text-sm text-gray-400">
-                  © {currentYear} {SITE_CONFIG.title}. All rights reserved.
+                  © {currentYear} {siteConfig?.title ?? "Abraham of London"}. All rights reserved.
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   Built for those who still believe in duty, consequence, and legacy.
@@ -336,12 +330,13 @@ export default function EnhancedFooter() {
             </div>
 
             <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">Version 2.1.0 · Designed in London · Built with purpose</p>
+              <p className="text-xs text-gray-500">Designed in London · Built with purpose</p>
             </div>
           </div>
         </FadeIn>
       </div>
 
+      {/* Touch targets + motion reduction */}
       <style jsx global>{`
         @media (max-width: 768px) {
           a[role="button"],
@@ -349,25 +344,6 @@ export default function EnhancedFooter() {
           .touch-target {
             min-height: 44px;
             min-width: 44px;
-          }
-          .grid {
-            grid-template-columns: 1fr !important;
-          }
-          .col-span-1 {
-            grid-column: span 1;
-          }
-        }
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-          .col-span-2 {
-            grid-column: span 2;
-          }
-        }
-        @media (min-width: 1024px) {
-          .grid {
-            grid-template-columns: repeat(4, 1fr) !important;
           }
         }
         @media (prefers-reduced-motion: reduce) {

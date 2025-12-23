@@ -3,20 +3,17 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText } from "lucide-react";
-import { BlogPostCard } from "@/components/BlogPostCard";
+import BlogPostCard from "@/components/BlogPostCard"; // ✅ FIX (default import)
 import BookCard from "@/components/books/BookCard";
 
 // -----------------------------------------------------------------------------
 // Types - ENSURE required properties exist
 // -----------------------------------------------------------------------------
 
-// Define minimal required properties for all content items
 interface ContentItem {
-  // Required by both BlogPostCard and BookCard
   slug: string;
   title: string;
-  
-  // Common optional properties
+
   _type?: string;
   type?: string;
   _id?: string;
@@ -25,47 +22,43 @@ interface ContentItem {
   description?: string;
   coverImage?: string;
   date?: string;
-  author?: string;
+  author?: any;
   tags?: string[];
   featured?: boolean;
-  
-  // Allow any other properties
+
   [key: string]: any;
 }
 
-// Type assertions WITHOUT duplicate properties
 const asBlogPost = (item: ContentItem): any => {
-  // Create a new object without properties we're explicitly setting
   const { slug, title, excerpt, description, ...rest } = item;
-  
+
   return {
     slug: slug || "",
     title: title || "Untitled",
     excerpt: excerpt || description || "",
-    coverImage: rest.coverImage,
-    date: rest.date,
-    author: rest.author,
-    tags: rest.tags,
-    featured: rest.featured,
-    ...rest // Include all OTHER properties (excluding the ones we already set)
+    coverImage: rest.coverImage ?? null,
+    date: rest.date ?? null,
+    author: rest.author ?? null,
+    tags: Array.isArray(rest.tags) ? rest.tags : [],
+    featured: Boolean(rest.featured),
+    ...rest,
   };
 };
 
 const asBook = (item: ContentItem): any => {
-  // Create a new object without properties we're explicitly setting
   const { slug, title, excerpt, description, _id, id, ...rest } = item;
-  
+
   return {
     slug: slug || "",
     title: title || "Untitled",
     excerpt: excerpt || description || "",
-    coverImage: rest.coverImage,
-    date: rest.date,
-    author: rest.author,
-    tags: rest.tags,
-    featured: rest.featured,
+    coverImage: rest.coverImage ?? null,
+    date: rest.date ?? null,
+    author: rest.author ?? null,
+    tags: Array.isArray(rest.tags) ? rest.tags : [],
+    featured: Boolean(rest.featured),
     _id: _id || id || `book-${slug || Date.now()}`,
-    ...rest // Include all OTHER properties (excluding the ones we already set)
+    ...rest,
   };
 };
 
@@ -88,11 +81,10 @@ export default function ContentShowcase({
   maxItems = 6,
   className = "",
 }: ContentShowcaseProps): JSX.Element {
-  // Filter out items missing required properties
-  const validItems = items.filter(item => 
-    item && typeof item === 'object' && item.slug && item.title
+  const validItems = (items || []).filter(
+    (item) => item && typeof item === "object" && item.slug && item.title,
   );
-  
+
   const displayedItems = validItems.slice(0, maxItems);
 
   return (
@@ -108,63 +100,62 @@ export default function ContentShowcase({
           <h2 className="font-serif text-3xl font-semibold text-deepCharcoal md:text-4xl">
             {title}
           </h2>
-          {description && (
+          {description ? (
             <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
               {description}
             </p>
-          )}
+          ) : null}
         </motion.div>
 
         {/* Content Grid */}
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {displayedItems.map((item, index) => {
-            const type = item._type || item.type || '';
+            const type = String(item._type || item.type || "").toLowerCase();
             const key = item.slug || item._id || item.id || `item-${index}`;
-            
-            if (type === 'post' || type === 'Post') {
+
+            if (type === "post") {
               return (
                 <motion.div
                   key={key}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.06 }}
                 >
                   <BlogPostCard post={asBlogPost(item)} />
                 </motion.div>
               );
             }
-            
-            if (type === 'book' || type === 'Book') {
+
+            if (type === "book") {
               return (
                 <motion.div
                   key={key}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.06 }}
                 >
                   <BookCard book={asBook(item)} />
                 </motion.div>
               );
             }
-            
-            // Fallback for unknown types - still show something
+
             return (
               <motion.div
                 key={key}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.5, delay: index * 0.06 }}
               >
-                <div className="rounded-lg border border-gray-200 p-6">
+                <div className="rounded-2xl border border-gray-200 bg-white/70 p-6 backdrop-blur-sm">
                   <h3 className="font-semibold text-deepCharcoal">
-                    {item.title || 'Untitled'}
+                    {item.title || "Untitled"}
                   </h3>
                   <p className="mt-2 text-sm text-gray-600">
-                    Type: {type || 'unknown'}
+                    Type: {type || "unknown"}
                   </p>
-                  {item.excerpt && (
+                  {item.excerpt ? (
                     <p className="mt-2 text-sm text-gray-500">{item.excerpt}</p>
-                  )}
+                  ) : null}
                 </div>
               </motion.div>
             );
@@ -172,7 +163,7 @@ export default function ContentShowcase({
         </div>
 
         {/* View All CTA */}
-        {validItems.length > maxItems && (
+        {validItems.length > maxItems ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -187,10 +178,10 @@ export default function ContentShowcase({
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </motion.div>
-        )}
+        ) : null}
 
         {/* Empty State */}
-        {displayedItems.length === 0 && (
+        {displayedItems.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -204,15 +195,13 @@ export default function ContentShowcase({
                 Content Coming Soon
               </h3>
               <p className="mt-2 text-gray-600">
-                We&apos;re preparing some valuable content for you. Check back soon!
+                We&apos;re preparing some valuable content for you. Check back
+                soon!
               </p>
             </div>
           </motion.div>
-        )}
+        ) : null}
       </div>
     </section>
   );
 }
-
-// Only export the component, not types that don't exist here
-export { ContentShowcase };

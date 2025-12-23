@@ -1,21 +1,50 @@
 // components/AnimatedContentGrid.tsx
-'use client';
+"use client";
 
+import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Download, ChevronRight } from "lucide-react";
-import { type ContentlayerCardProps, type DocKind } from "@/lib/contentlayer-helper";
 
-export function AnimatedContentGrid({ 
-  filteredDocs, 
-  filter,
-  TYPE_CONFIG 
-}: { 
-  filteredDocs: ContentlayerCardProps[];
+export type DocKind =
+  | "post"
+  | "book"
+  | "download"
+  | "event"
+  | "print"
+  | "resource"
+  | "canon"
+  | "strategy"
+  | "page";
+
+export type ContentCard = {
+  type: DocKind | string;
+  slug: string;
+  href: string;
+  title: string;
+  excerpt?: string | null;
+  description?: string | null;
+  date?: string | null;
+  tags?: string[] | null;
+  image?: string | null;
+  downloadUrl?: string | null;
+};
+
+type TypeConfigItem = {
+  label: string;
+  bg: string;
+  accent: string;
+  border: string;
+};
+
+type Props = {
+  filteredDocs: ContentCard[];
   filter: DocKind | "all";
-  TYPE_CONFIG: any;
-}) {
+  TYPE_CONFIG: Record<string, TypeConfigItem>;
+};
+
+export function AnimatedContentGrid({ filteredDocs, filter, TYPE_CONFIG }: Props) {
   return (
     <AnimatePresence mode="wait">
       {filteredDocs.length > 0 ? (
@@ -28,12 +57,20 @@ export function AnimatedContentGrid({
           className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
         >
           {filteredDocs.map((doc, index) => {
-            const config = TYPE_CONFIG[doc.type as DocKind];
+            const config =
+              TYPE_CONFIG[String(doc.type)] ??
+              ({
+                label: String(doc.type ?? "Content"),
+                bg: "bg-neutral-50",
+                accent: "text-neutral-800",
+                border: "border-neutral-200/70",
+              } satisfies TypeConfigItem);
+
             const dateObj = doc.date ? new Date(doc.date) : null;
 
             return (
               <motion.div
-                key={`${doc.type}-${doc.slug}`}
+                key={`${String(doc.type)}-${doc.slug}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
@@ -57,12 +94,18 @@ export function AnimatedContentGrid({
                       {/* Meta Row */}
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <span
-                          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium ${config.bg} ${config.accent} ${config.border}`}
+                          className={[
+                            "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium",
+                            config.bg,
+                            config.accent,
+                            config.border,
+                          ].join(" ")}
                         >
-                          <div className="h-1.5 w-1.5 rounded-full bg-current" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-current" />
                           {config.label}
                         </span>
-                        {dateObj && (
+
+                        {dateObj ? (
                           <time className="text-xs font-medium text-neutral-500">
                             {dateObj.toLocaleDateString("en-US", {
                               month: "short",
@@ -70,7 +113,7 @@ export function AnimatedContentGrid({
                               year: "numeric",
                             })}
                           </time>
-                        )}
+                        ) : null}
                       </div>
 
                       {/* Title */}
@@ -79,14 +122,14 @@ export function AnimatedContentGrid({
                       </h3>
 
                       {/* Excerpt */}
-                      {(doc.excerpt || doc.description) && (
+                      {doc.excerpt || doc.description ? (
                         <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-neutral-600">
                           {doc.excerpt || doc.description}
                         </p>
-                      )}
+                      ) : null}
 
                       {/* Tags */}
-                      {doc.tags && doc.tags.length > 0 && (
+                      {doc.tags && doc.tags.length > 0 ? (
                         <div className="mb-5 flex flex-wrap gap-2">
                           {doc.tags.slice(0, 3).map((tag) => (
                             <span
@@ -96,13 +139,13 @@ export function AnimatedContentGrid({
                               {tag}
                             </span>
                           ))}
-                          {doc.tags.length > 3 && (
+                          {doc.tags.length > 3 ? (
                             <span className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-400">
                               +{doc.tags.length - 3}
                             </span>
-                          )}
+                          ) : null}
                         </div>
-                      )}
+                      ) : null}
 
                       {/* Footer */}
                       <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4">
@@ -115,9 +158,7 @@ export function AnimatedContentGrid({
                           <div />
                         )}
 
-                        <div
-                          className={`flex items-center gap-1.5 text-sm font-medium transition-all group-hover:gap-2 ${config.accent}`}
-                        >
+                        <div className={["flex items-center gap-1.5 text-sm font-medium transition-all group-hover:gap-2", config.accent].join(" ")}>
                           <span className="text-xs">View</span>
                           <ChevronRight className="h-4 w-4" />
                         </div>
