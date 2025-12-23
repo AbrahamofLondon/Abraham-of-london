@@ -1,4 +1,4 @@
-// app/api/downloads/route.ts
+// app/api/downloads/route.ts - FIXED VERSION
 
 import { NextResponse } from "next/server";
 // Use a RELATIVE import so we completely bypass the "@/lib" alias here
@@ -22,6 +22,9 @@ interface DownloadDocument {
   downloadFile?: string | null;
   fileUrl?: string | null;
   url?: string | null;
+  _raw?: {
+    flattenedPath?: string;
+  };
 }
 
 interface DownloadItem {
@@ -91,6 +94,16 @@ function jsonError(
   });
 }
 
+// Helper to extract slug from document
+function extractSlug(doc: DownloadDocument): string {
+  if (doc.slug) return doc.slug;
+  if (doc._raw?.flattenedPath) {
+    const parts = doc._raw.flattenedPath.split('/');
+    return parts[parts.length - 1] || '';
+  }
+  return '';
+}
+
 // ---------------------------------------------------------------------------
 // GET /api/downloads
 // ---------------------------------------------------------------------------
@@ -101,44 +114,54 @@ export async function GET(
   const url = new URL(request.url);
   const slugParam = url.searchParams.get("slug");
 
-  // Get all downloads from the helper function
-  const allDownloads = getAllDownloads();
+  try {
+    // Get all downloads from the helper function
+    const allDownloads = getAllDownloads();
 
-  // Single download
-  if (slugParam && typeof slugParam === "string") {
-    const slug = slugParam.trim();
-    const found = allDownloads.find((d) => {
-      // Try multiple ways to match slug
-      const docSlug = d.slug || (d as any)._raw?.flattenedPath?.split('/').pop();
-      return docSlug === slug;
-    }) as DownloadDocument | undefined;
+    // Type assertion to ensure we have the right type
+    const typedDownloads = allDownloads as unknown as DownloadDocument[];
 
-    if (!found) {
+    // Single download
+    if (slugParam && typeof slugParam === "string") {
+      const slug = slugParam.trim();
+      const found = typedDownloads.find((d) => {
+        const docSlug = extractSlug(d);
+        return docSlug === slug;
+      });
+
+      if (!found) {
+        return NextResponse.json(
+          { ok: false, error: "Download not found" },
+          { status: 404, headers: SECURITY_HEADERS }
+        );
+      }
+
       return NextResponse.json(
-        { ok: false, error: "Download not found" },
-        { status: 404, headers: SECURITY_HEADERS }
+        { ok: true, item: mapDownload(found) },
+        { headers: SECURITY_HEADERS }
       );
     }
 
+    // Full list - already sorted by getAllDownloads()
+    const items = typedDownloads.map((doc) => mapDownload(doc));
+
     return NextResponse.json(
-      { ok: true, item: mapDownload(found) },
-      { headers: SECURITY_HEADERS }
+      { ok: true, count: items.length, items },
+      {
+        headers: {
+          ...SECURITY_HEADERS,
+          // safe caching for reads
+          "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error in GET /api/downloads:", error);
+    return NextResponse.json(
+      { ok: false, error: "Internal server error" },
+      { status: 500, headers: SECURITY_HEADERS }
     );
   }
-
-  // Full list - already sorted by getAllDownloads()
-  const items = allDownloads.map((doc) => mapDownload(doc as DownloadDocument));
-
-  return NextResponse.json(
-    { ok: true, count: items.length, items },
-    {
-      headers: {
-        ...SECURITY_HEADERS,
-        // safe caching for reads
-        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
-      },
-    }
-  );
 }
 
 // ---------------------------------------------------------------------------

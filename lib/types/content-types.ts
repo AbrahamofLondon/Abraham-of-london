@@ -16,8 +16,8 @@ export interface ContentBase {
   content?: string;
   draft?: boolean;
   published?: boolean;
-  status?: 'draft' | 'published' | 'archived' | 'private';
-  accessLevel?: 'public' | 'private' | 'premium';
+  status?: "draft" | "published" | "archived" | "private";
+  accessLevel?: "public" | "private" | "premium";
   lockMessage?: string;
   _raw?: any;
   _id?: string;
@@ -26,7 +26,7 @@ export interface ContentBase {
 // Download specific types
 export interface DownloadMeta extends ContentBase {
   downloadFile?: string;
-  fileSize?: string | number;  // Can be string or number
+  fileSize?: string | number; // Can be string or number
   downloadType?: string;
   version?: string;
 }
@@ -38,28 +38,35 @@ export interface Download extends DownloadMeta {
 }
 
 // Other content types
-export interface Post extends ContentBase {}
+export type Post = ContentBase;
+
 export interface Book extends ContentBase {
   isbn?: string;
   format?: string;
   publisher?: string;
   pages?: number;
 }
+
 export interface Event extends ContentBase {
   eventDate?: string;
   location?: string;
 }
+
 export interface Page extends ContentBase {
   pageType?: string;
   parentPage?: string;
   showInNav?: boolean;
 }
-export interface Print extends ContentBase {}
+
+export type Print = ContentBase;
+
 export interface Resource extends ContentBase {
   resourceType?: string;
   applications?: string[];
 }
-export interface Strategy extends ContentBase {}
+
+export type Strategy = ContentBase;
+
 export interface Canon extends ContentBase {
   volumeNumber?: string | number;
   order?: number;
