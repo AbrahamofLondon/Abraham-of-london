@@ -58,24 +58,24 @@ const nextConfig = {
 
   pageExtensions: ["tsx", "ts", "jsx", "js", "mdx", "md"],
 
-  webpack: (config) => {
-    // ✅ Your aliases should primarily live in tsconfig.json.
-    // This is only a small safety net for webpack resolution.
+  webpack: (config, { dev }) => {
+    // ✅ Apply the cache logic for development
+    if (dev) {
+      config.cache = false;
+    }
+
+    // ✅ Maintain your existing aliases
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       "@": path.resolve(__dirname),
     };
 
-    // ✅ If you use SVGR, keep it. Otherwise remove it.
+    // ✅ Maintain your existing SVGR rules
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
       use: ["@svgr/webpack"],
     });
-
-    // ❌ Remove all the browser polyfill nonsense + node: replacements.
-    // Next 14 doesn’t need your NormalModuleReplacementPlugin trick,
-    // and it’s a common cause of “undefined path” explosions in dev.
 
     return config;
   },

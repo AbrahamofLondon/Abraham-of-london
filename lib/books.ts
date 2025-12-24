@@ -1,18 +1,18 @@
 // lib/books.ts
 import { allBooks } from "@/lib/contentlayer";
 import type { Book as ContentlayerBook } from "@/lib/contentlayer";
+
 export type Book = ContentlayerBook;
+export type BookWithContent = Book;
 
-const s = (v: unknown) =>
-  typeof v === "string" ? v : v == null ? "" : String(v);
-
+const s = (v: unknown) => (typeof v === "string" ? v : v == null ? "" : String(v));
 const lower = (v: unknown) => s(v).trim().toLowerCase();
 
 function isDraft(book: any): boolean {
   if (!book) return true;
   if (book.draft === true || String(book.draft) === "true") return true;
   if (book.published === false) return true;
-  if (String(book.status ?? "").toLowerCase() === "draft") return true;
+  if (lower(book.status ?? "") === "draft") return true;
   return false;
 }
 
@@ -21,15 +21,22 @@ function normalizeSlug(slug: string): string {
 }
 
 function getBookSlug(book: Book): string {
-  if ((book as any).slug) return s((book as any).slug).trim();
-  if ((book as any).href) {
-    const parts = s((book as any).href).split("/").filter(Boolean);
+  const anyBook = book as any;
+
+  if (anyBook.slug) return s(anyBook.slug).trim();
+
+  // some older code used href like "/books/<slug>"
+  if (anyBook.href) {
+    const parts = s(anyBook.href).split("/").filter(Boolean);
     return parts[parts.length - 1] || "";
   }
+
+  // contentlayer raw fallback
   if (book._raw?.flattenedPath) {
     const parts = s(book._raw.flattenedPath).split("/").filter(Boolean);
     return parts[parts.length - 1] || "";
   }
+
   return "";
 }
 
@@ -56,8 +63,7 @@ export function getBookBySlug(slug: string): BookWithContent | null {
 
 export function getBookSlugs(): string[] {
   return getAllBooksMeta()
-    .map((b) => getBookSlug(b))
-    .map((x) => normalizeSlug(x))
+    .map((b) => normalizeSlug(getBookSlug(b)))
     .filter((x) => x && x !== "index");
 }
 
@@ -67,7 +73,7 @@ export function getPublicBooks(): Book[] {
 
 export function getFeaturedBooks(limit?: number): Book[] {
   const featured = getPublicBooks().filter((b: any) => b.featured === true);
-  return limit ? featured.slice(0, limit) : featured;
+  return typeof limit === "number" ? featured.slice(0, limit) : featured;
 }
 
 export function getRecentBooks(limit?: number): Book[] {
@@ -76,5 +82,6 @@ export function getRecentBooks(limit?: number): Book[] {
     const tb = b.date ? new Date(b.date).getTime() : 0;
     return tb - ta;
   });
-  return limit ? sorted.slice(0, limit) : sorted;
+
+  return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
 }

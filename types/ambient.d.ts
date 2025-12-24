@@ -67,9 +67,6 @@ declare module "@/lib/hooks/useDebounce.ts" {
 // ------------------------
 // Contentlayer generated types passthrough
 // ------------------------
-declare module "contentlayer/generated";
-
-}
 
 // ------------------------
 // Lightweight component stubs used in MDX routes (resolved at build time)

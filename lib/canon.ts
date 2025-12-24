@@ -1,5 +1,5 @@
 // lib/canon.ts
-iimport { allCanons } from "@/lib/contentlayer";
+import { allCanons } from "@/lib/contentlayer";
 import type { Canon as ContentlayerCanon } from "@/lib/contentlayer";
 export type Canon = ContentlayerCanon;
 
