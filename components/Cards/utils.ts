@@ -6,14 +6,12 @@
 
 export function getCardFallbackConfig() {
   return {
-    // Use real, known assets from your repo
     defaultImage: "/assets/images/writing-desk.webp",
     defaultTitle: "Untitled",
     defaultDescription: "No description available yet.",
     defaultTags: [] as string[],
     defaultAuthor: "Abraham of London",
     defaultAvatar: "/assets/images/profile-portrait.webp",
-    // Helpful extra for book-specific cards
     defaultBookImage: "/assets/images/default-book.jpg",
   };
 }
@@ -40,7 +38,6 @@ export function getCardImageAlt(title: string, type?: string): string {
 
 export function formatCardDate(dateString: string | null | undefined): string {
   if (!dateString) return "";
-
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "";
@@ -56,7 +53,6 @@ export function formatCardDate(dateString: string | null | undefined): string {
 
 export function formatShortDate(dateString: string | null | undefined): string {
   if (!dateString) return "";
-
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "";
@@ -108,7 +104,9 @@ export function getAuthorInitials(name: string): string {
   if (!name) return "U";
   const parts = name.split(" ");
   if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  return (
+    parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+  ).toUpperCase();
 }
 
 // =============================================================================
@@ -133,11 +131,31 @@ export function getCardRole(
 }
 
 // =============================================================================
-// ACCESS CONTROL UTILITIES
+// ACCESS CONTROL UTILITIES (ROBUST)
 // =============================================================================
 
+export type NormalizedAccessLevel =
+  | "public"
+  | "inner-circle"
+  | "premium"
+  | "private"
+  | "unknown";
+
+export function normalizeAccessLevel(accessLevel?: string | null): NormalizedAccessLevel {
+  if (!accessLevel) return "public";
+  const v = String(accessLevel).trim().toLowerCase();
+
+  if (v === "public" || v === "free") return "public";
+  if (v === "inner-circle" || v === "innercircle" || v === "inner") return "inner-circle";
+  if (v === "premium" || v === "paid" || v === "pro") return "premium";
+  if (v === "private" || v === "restricted") return "private";
+
+  return "unknown";
+}
+
 export function isContentLocked(accessLevel?: string | null): boolean {
-  return accessLevel === "inner-circle" || accessLevel === "premium";
+  const level = normalizeAccessLevel(accessLevel);
+  return level === "inner-circle" || level === "premium" || level === "private";
 }
 
 export function getAccessLevelBadge(accessLevel?: string | null): {
@@ -146,7 +164,9 @@ export function getAccessLevelBadge(accessLevel?: string | null): {
   bgColor: string;
   borderColor: string;
 } {
-  switch (accessLevel) {
+  const level = normalizeAccessLevel(accessLevel);
+
+  switch (level) {
     case "inner-circle":
       return {
         text: "Inner Circle",
@@ -160,6 +180,20 @@ export function getAccessLevelBadge(accessLevel?: string | null): {
         color: "text-purple-400/90",
         bgColor: "bg-purple-900/30",
         borderColor: "border-purple-700/40",
+      };
+    case "private":
+      return {
+        text: "Private",
+        color: "text-red-300/90",
+        bgColor: "bg-red-900/20",
+        borderColor: "border-red-700/40",
+      };
+    case "unknown":
+      return {
+        text: "Restricted",
+        color: "text-rose-300/90",
+        bgColor: "bg-rose-900/20",
+        borderColor: "border-rose-700/40",
       };
     default:
       return {

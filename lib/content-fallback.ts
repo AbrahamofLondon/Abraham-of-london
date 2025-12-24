@@ -10,7 +10,7 @@ import {
   allStrategies, 
   allCanons, 
   allShorts 
-} from 'contentlayer/generated';
+} from "@/lib/contentlayer";
 import type {
   Post as PostType,
   Book as BookType,
@@ -21,7 +21,7 @@ import type {
   Strategy as StrategyType,
   Canon as CanonType,
   Short as ShortType,
-} from 'contentlayer/generated';
+} from "@/lib/contentlayer";
 
 // Union type for all documents
 export type AnyDoc = 

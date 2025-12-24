@@ -1,94 +1,122 @@
+// pages/resources/[...slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
-import { getAllResources, getResourceBySlug, normalizeSlug } from "@/lib/contentlayer-helper";
+import mdxComponents from "@/components/mdx-components";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-import mdxComponents from "@/components/mdx-components";
-import { MDXRemote } from "next-mdx-remote";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-type Props = { 
+// ✅ IMPORTANT: normalize Contentlayer exports in one place
+import { getAllResources, getResourceByUrlPath } from "@/lib/server/content";
+
+type Props = {
   resource: {
     title: string;
-    excerpt: string | null;
-    slug: string;
-  }; 
-  source: any; 
+    excerpt?: string | null;
+    description?: string | null;
+    date?: string | null;
+    coverImage?: string | null;
+    tags?: string[];
+    author?: string | null;
+    url: string;
+  };
+  source: MDXRemoteSerializeResult;
+};
+
+const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return (
+      <Layout title="Loading...">
+        <main className="mx-auto max-w-3xl px-4 py-12">Loading…</main>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout title={resource.title}>
+      <Head>
+        <link rel="canonical" href={resource.url} />
+      </Head>
+
+      <main className="mx-auto max-w-3xl px-4 py-12">
+        <header className="mb-10 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Resources
+          </p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            {resource.title}
+          </h1>
+          {resource.excerpt ? (
+            <p className="text-sm text-gray-200">{resource.excerpt}</p>
+          ) : null}
+        </header>
+
+        <article className="prose prose-invert max-w-none">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
+      </main>
+    </Layout>
+  );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const resources = getAllResources();
-  
-  const paths = resources.map((r) => {
-    const slug = normalizeSlug(r);
-    // FIX: Catch-all routes [...slug] REQUIRE an array of strings
-    return {
-      params: { slug: slug.split("/") }
-    };
-  });
+  const resources = await getAllResources();
 
-  return { paths, fallback: false };
-};
-
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  // FIX: For catch-all routes, params.slug is an array. Join it to find the doc.
-  const slugArray = params?.slug as string[];
-  const fullSlug = slugArray.join("/");
-  
-  const rawDoc = getResourceBySlug(fullSlug);
-
-  if (!rawDoc) return { notFound: true };
-
-  // SURGICAL EXTRACTION
-  const resource = {
-    title: rawDoc.title || "Vault Resource",
-    excerpt: rawDoc.excerpt || null,
-    slug: fullSlug,
-  };
-
-  try {
-    const mdxSource = await serialize(rawDoc.body.raw, {
-      mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
+  const paths = resources
+    .map((r) => r.url || r.href)
+    .filter((u): u is string => typeof u === "string" && u.startsWith("/resources/"))
+    // ✅ Avoid generating "/resources" from catch-all. Index should be a separate page.
+    .filter((u) => u !== "/resources")
+    .map((u) => {
+      const slugParts = u.replace(/^\/resources\/?/, "").split("/").filter(Boolean);
+      return { params: { slug: slugParts } };
     });
 
-    return { 
-      props: { 
-        resource, 
-        source: JSON.parse(JSON.stringify(mdxSource)) 
-      }, 
-      revalidate: 1800 
-    };
-  } catch (err) {
-    console.error(`[Build Error] Resource Serialization failed: ${fullSlug}`);
-    return { notFound: true };
-  }
+  return {
+    paths,
+    fallback: false,
+  };
 };
 
-const ResourcePage: NextPage<Props> = ({ resource, source }) => (
-  <Layout title={resource.title}>
-    <Head>
-      <title>{resource.title} | Kingdom Resources | Abraham of London</title>
-      {resource.excerpt && <meta name="description" content={resource.excerpt} />}
-    </Head>
+export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
+  const slug = (ctx.params?.slug as string[]) || [];
+  const urlPath = "/resources/" + slug.join("/");
 
-    <main className="mx-auto max-w-3xl px-6 py-20">
-      <header className="mb-10 space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold/60">
-          Vault Library
-        </p>
-        <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">
-          {resource.title}
-        </h1>
-        <div className="h-1 w-20 bg-gold/30" />
-      </header>
+  const doc = await getResourceByUrlPath(urlPath);
+  if (!doc) {
+    return { notFound: true };
+  }
 
-      <article className="prose prose-invert max-w-none prose-gold prose-p:text-gray-300">
-        <MDXRemote {...source} components={mdxComponents} />
-      </article>
-    </main>
-  </Layout>
-);
+  const source = await serialize(doc.body.raw, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
+    },
+    parseFrontmatter: false,
+  });
 
-export default ResourcePage;
+  return {
+    props: {
+      resource: {
+        title: doc.title,
+        excerpt: doc.excerpt ?? null,
+        description: doc.description ?? null,
+        date: doc.date ?? null,
+        coverImage: doc.coverImage ?? null,
+        tags: Array.isArray(doc.tags) ? doc.tags : [],
+        author: (doc.author as any) ?? null,
+        url: doc.url || doc.href || urlPath,
+      },
+      source,
+    },
+  };
+};
+
+export default ResourcesCatchAllPage;

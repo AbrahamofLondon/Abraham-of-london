@@ -1,8 +1,8 @@
 // lib/server/books-data.ts - SIMPLIFIED VERSION FOR STATIC GENERATION
 // This version works with ContentLayer during build time
 
-import { allBooks } from "contentlayer/generated";
-import type { Book as ContentlayerBook } from "contentlayer/generated";
+import { allBooks } from "@/lib/contentlayer";
+import type { Book as ContentlayerBook } from "@/lib/contentlayer";
 
 export type Book = ContentlayerBook;
 export type BookWithContent = Book;

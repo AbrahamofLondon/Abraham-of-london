@@ -1,6 +1,6 @@
 // lib/contentlayer-helper.ts - COMPLETE FIXED VERSION
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as generated from "contentlayer/generated";
+import * as generated from "@/lib/contentlayer";
 
 /* -------------------------------------------------------------------------- */
 /* Node.js-only imports (guarded for browser compatibility)                   */

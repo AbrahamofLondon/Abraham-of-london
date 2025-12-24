@@ -1,5 +1,5 @@
 // lib/stubs/contentlayer-generated.js
-// Runtime shim for any legacy imports from "contentlayer/generated".
+// Runtime shim for any legacy imports from "@/lib/contentlayer".
 // It simply proxies through to the real Contentlayer bundle under `.contentlayer/generated`.
 
 let realExports = {};

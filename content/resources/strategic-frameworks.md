@@ -7,7 +7,7 @@ excerpt: "Tools and models for thinking strategically about complex challenges."
 author: "Abraham of London"
 coverImage: "/assets/images/canon/canon-resources.jpg"
 tags: ["strategic", "frameworks", "tools", "decision-making"]
-href: "/resources/strategic-frameworks"  # adjust to your actual page route
+href: "/resources/strategic-frameworks"
 draft: false
 ---
 # Strategic Frameworks Collection

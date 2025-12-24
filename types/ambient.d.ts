@@ -67,9 +67,8 @@ declare module "@/lib/hooks/useDebounce.ts" {
 // ------------------------
 // Contentlayer generated types passthrough
 // ------------------------
-declare module "contentlayer/generated" {
-  // Type-only re-export of the generated module (keeps TS happy in editors)
-  export * from "../.contentlayer/generated";
+declare module "contentlayer/generated";
+
 }
 
 // ------------------------

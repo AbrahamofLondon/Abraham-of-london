@@ -1,4 +1,4 @@
 // test-imports.ts
-import { allShorts } from 'contentlayer/generated';
+import { allShorts } from "@/lib/contentlayer";
 
 console.log('Shorts found:', allShorts.length);

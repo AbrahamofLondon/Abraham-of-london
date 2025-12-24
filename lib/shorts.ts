@@ -1,5 +1,5 @@
 // lib/shorts.ts
-import { allShorts } from "contentlayer/generated";
+import { allShorts } from "@/lib/contentlayer";
 import { normalizeSlug, isPublished } from "./contentlayer-helper";
 
 /**

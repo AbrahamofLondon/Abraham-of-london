@@ -1,8 +1,8 @@
 // lib/api-session.ts - Simple session helper for API routes
 import type { NextApiRequest, NextApiResponse } from "next";
-import { serialize, CookieSerializeOptions } from "cookie";
+import { serialize, type SerializeOptions } from "cookie";
 
-const COOKIE_OPTIONS: CookieSerializeOptions = {
+const COOKIE_OPTIONS: SerializeOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax",

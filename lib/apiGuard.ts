@@ -15,14 +15,16 @@ interface ApiRequestBody {
   [key: string]: unknown;
 }
 
+interface RecaptchaSuccessResult {
+  success?: boolean;
+  score?: number;
+  action?: string;
+  errors?: string[];
+}
+
 type RecaptchaRawResult =
   | boolean
-  | {
-      success?: boolean;
-      score?: number;
-      action?: string;
-      errors?: string[];
-    }
+  | RecaptchaSuccessResult
   | null
   | undefined;
 
@@ -61,21 +63,30 @@ async function isRecaptchaValid(
       return raw;
     }
 
-    if (!raw || typeof raw !== "object") {
+    // Handle null/undefined
+    if (!raw) {
       return false;
     }
 
-    const success = raw.success ?? false;
+    // Type guard to ensure raw is an object
+    if (typeof raw !== "object") {
+      return false;
+    }
+
+    // Now TypeScript knows raw is an object
+    const success = (raw as RecaptchaSuccessResult).success ?? false;
     if (!success) return false;
 
     // If we know the expected action and the API returns an action, enforce match
-    if (expectedAction && raw.action && raw.action !== expectedAction) {
+    if (expectedAction && (raw as RecaptchaSuccessResult).action && 
+        (raw as RecaptchaSuccessResult).action !== expectedAction) {
       return false;
     }
 
     // Optional score enforcement – fall back to 0.5 if not configured
     const minScore = parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5");
-    if (typeof raw.score === "number" && raw.score < minScore) {
+    if (typeof (raw as RecaptchaSuccessResult).score === "number" && 
+        (raw as RecaptchaSuccessResult).score < minScore) {
       return false;
     }
 

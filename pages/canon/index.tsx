@@ -8,7 +8,7 @@ import { BookOpen, Star, Search, ChevronRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CanonCard from "@/components/CanonCard";
-import { getPublicCanon, type Canon } from "@/lib/canon";
+import { getPublicCanon, resolveCanonSlug, type Canon } from "@/lib/canon";
 
 type DeviceType = "mobile" | "tablet" | "desktop";
 type ViewMode = "grid" | "list";
@@ -501,13 +501,11 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
 
     const items: CanonIndexItem[] = docs.map((doc) => {
       const vol = toNumberOrNull((doc as any).volumeNumber);
-      const safeTitle = doc.title ?? "Untitled Canon Volume";
-      const safeSlug = doc.slug ?? "";
 
       return {
-        slug: safeSlug,
-        title: safeTitle,
-        subtitle: doc.subtitle ?? null,
+        slug: resolveCanonSlug(doc),
+        title: doc.title ?? "Untitled Canon Volume",
+        subtitle: (doc as any).subtitle ?? null,
         excerpt: (doc as any).excerpt ?? null,
         description: (doc as any).description ?? null,
         coverImage: (doc as any).coverImage ?? null,
@@ -539,15 +537,9 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
 
     const maxVolume = volumeNumbers.length ? Math.max(...volumeNumbers) : 0;
 
-    return {
-      props: { items, maxVolume },
-      revalidate: 3600,
-    };
+    return { props: { items, maxVolume }, revalidate: 3600 };
   } catch (err) {
     console.error("Error in getStaticProps for /canon:", err);
-    return {
-      props: { items: [], maxVolume: 0 },
-      revalidate: 600,
-    };
+    return { props: { items: [], maxVolume: 0 }, revalidate: 600 };
   }
 };
