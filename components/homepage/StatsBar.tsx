@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import clsx from "clsx";
 
@@ -13,7 +12,6 @@ type StatsBarProps = {
   metrics?: StatMetric[];
   variant?: "dark" | "light";
   className?: string;
-  // so your safe() wrapper can pass this without errors
   fallbackContent?: boolean;
 };
 
@@ -45,10 +43,15 @@ export default function StatsBar({
       ? "bg-white/5 border border-white/10 text-cream"
       : "bg-warmWhite border border-black/5 text-deepCharcoal";
 
+  const valueClass =
+    variant === "dark"
+      ? "text-gold/90"
+      : "text-amber-600";
+
   const labelClass =
     variant === "dark"
-      ? "text-cream/70"
-      : "text-[color:var(--color-on-secondary)]/80";
+      ? "text-cream/90"
+      : "text-[color:var(--color-on-secondary)]";
 
   const hintClass =
     variant === "dark"
@@ -57,10 +60,7 @@ export default function StatsBar({
 
   return (
     <section
-      className={clsx(
-        "px-4 py-10",
-        className
-      )}
+      className={clsx("px-4 py-10", className)}
       aria-label="Abraham of London ecosystem snapshot"
     >
       <div className="mx-auto max-w-6xl">
@@ -83,14 +83,17 @@ export default function StatsBar({
           <div className="flex flex-1 flex-wrap justify-between gap-6 md:gap-10">
             {metrics.map((metric) => (
               <div key={metric.label} className="min-w-[8rem]">
-                <div className="text-2xl font-semibold tracking-tight">
-                  {metric.value}
-                </div>
-                <div className={clsx("mt-1 text-[0.7rem] uppercase tracking-[0.22em] font-semibold", labelClass)}>
+                {/* Unified statement with italic value for subtle differentiation */}
+                <p className={clsx("text-sm font-medium leading-relaxed", labelClass)}>
+                  <span className={clsx("italic font-semibold", valueClass)}>
+                    {metric.value}
+                  </span>{" "}
                   {metric.label}
-                </div>
+                </p>
+                
+                {/* Supporting detail in smaller, muted text */}
                 {metric.hint && (
-                  <p className={clsx("mt-1 text-xs leading-snug", hintClass)}>
+                  <p className={clsx("mt-1.5 text-xs leading-snug", hintClass)}>
                     {metric.hint}
                   </p>
                 )}
