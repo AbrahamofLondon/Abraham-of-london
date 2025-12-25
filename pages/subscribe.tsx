@@ -13,7 +13,7 @@ const SubscribePage: NextPage = () => {
     "Early access to The Architecture of Human Purpose Canon for fathers, founders, builders, and institutional architects shaping the future of civilization.";
 
   return (
-    <Layout pageTitle={pageTitle}>
+    <Layout>
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />

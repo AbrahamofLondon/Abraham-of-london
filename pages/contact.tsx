@@ -27,8 +27,7 @@ const ContactPage = (): JSX.Element => {
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
 
   // Safe phone number with fallback
-  const contactPhone = "+44 20 8622 5909"
-    (siteConfig as { phone?: string }).phone ?? "+44 20 8622 5909";
+  const contactPhone = (siteConfig as { phone?: string }).phone ?? "+44 20 8622 5909";
 
   // Theme management
   React.useEffect(() => {

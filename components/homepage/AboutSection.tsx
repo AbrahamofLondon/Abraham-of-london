@@ -5,7 +5,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { BookOpen, Award, Calendar, Mail, Users, FileText, Clock, _Sparkles } from "lucide-react";
+import { BookOpen, Award, Calendar, Mail, Users, FileText, Clock } from "lucide-react";
 
 // --- Types ---
 
