@@ -209,6 +209,7 @@ node_modules/ export-ignore
 dist/ export-ignore
 out/ export-ignore
 .output/ export-ignore
+.netlify/
 .netlify/ export-ignore
 .netlify-edge-functions/ export-ignore
 .cache/ export-ignore
