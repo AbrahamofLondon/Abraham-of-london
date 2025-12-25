@@ -448,7 +448,7 @@ export default function Header({
                         : "border-amber-600/50 text-amber-600 hover:bg-amber-600/10"
                     }
                   `}
-                  aria-label="The Canon Prelude – Architecture of Human Purpose"
+                  aria-label="The Canon Prelude - Architecture of Human Purpose"
                   prefetch={true}
                 >
                   Canon Prelude

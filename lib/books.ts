@@ -1,7 +1,8 @@
-// lib/books.ts
+// lib/books.ts - MINIMAL FIX
 import { allBooks } from "@/lib/contentlayer";
 import type { Book as ContentlayerBook } from "@/lib/contentlayer";
 
+// Keep the original type but make computed fields optional
 export type Book = ContentlayerBook;
 export type BookWithContent = Book;
 
@@ -41,7 +42,8 @@ function getBookSlug(book: Book): string {
 }
 
 export function getAllBooksMeta(): Book[] {
-  return (allBooks ?? []).filter((b) => b && !isDraft(b));
+  // Cast to fix type issue - computed fields will be included
+  return ((allBooks ?? []) as Book[]).filter((b) => b && !isDraft(b));
 }
 
 export function getAllBooks(): BookWithContent[] {

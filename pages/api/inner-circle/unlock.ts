@@ -47,7 +47,7 @@ function safeReturnTo(v: unknown): string {
  * - If verifyInnerCircleKey returns a tier, use it.
  * - Otherwise, default to "inner-circle".
  *
- * NOTE: This is NOT guessing paths — it’s a controlled fallback for missing tier metadata.
+ * NOTE: This is NOT guessing paths - it's a controlled fallback for missing tier metadata.
  */
 function normalizeTier(v: unknown): Tier {
   const t = String(v ?? "").trim().toLowerCase();

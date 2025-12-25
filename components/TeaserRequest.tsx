@@ -214,7 +214,7 @@ export default function TeaserRequest({
           disabled={status === "loading" || isRateLimited}
         >
           {status === "loading"
-            ? "Sending…"
+            ? "Sending..."
             : isRateLimited
               ? "Try Again Later"
               : "Email me the teaser"}
@@ -226,7 +226,7 @@ export default function TeaserRequest({
             animate={{ opacity: 1, y: 0 }}
             className="text-xs text-green-400"
           >
-            Check your inbox—teaser sent!
+            Check your inbox-teaser sent!
           </motion.p>
         )}
         {status === "error" && (
@@ -259,7 +259,7 @@ export default function TeaserRequest({
       >
         <div className="text-center mb-4">
           <h3 className="font-serif text-xl font-semibold text-cream mb-2">
-            Fathering Without Fear — Teaser
+            Fathering Without Fear - Teaser
           </h3>
           <p className="text-gold/70 text-sm">
             Get the first chapter free. No spam, just wisdom.
@@ -324,7 +324,7 @@ export default function TeaserRequest({
             disabled={status === "loading" || isRateLimited}
           >
             {status === "loading"
-              ? "Sending…"
+              ? "Sending..."
               : isRateLimited
                 ? "Try Again Later"
                 : "Get Free Teaser"}
@@ -419,7 +419,7 @@ export default function TeaserRequest({
           disabled={status === "loading" || isRateLimited}
         >
           {status === "loading"
-            ? "Sending…"
+            ? "Sending..."
             : isRateLimited
               ? "Try Again Later"
               : "Email me the teaser"}
@@ -432,7 +432,7 @@ export default function TeaserRequest({
           animate={{ opacity: 1 }}
           className="mt-2 text-xs text-green-400"
         >
-          Check your inbox—teaser sent!
+          Check your inbox-teaser sent!
         </motion.p>
       )}
       {status === "error" && (
@@ -443,7 +443,7 @@ export default function TeaserRequest({
         >
           {isRateLimited
             ? "Too many attempts. Try again later."
-            : "Sorry—something went wrong. Please try again."}
+            : "Sorry-something went wrong. Please try again."}
         </motion.p>
       )}
     </form>

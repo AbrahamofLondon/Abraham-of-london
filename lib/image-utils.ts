@@ -227,7 +227,7 @@ function normalizeImageUrl(
     if (normalized.startsWith("/")) {
       normalized = `${CDN_BASE_URL}${normalized}`;
     } else if (normalized.startsWith("http")) {
-      // Already absolute – leave it
+      // Already absolute - leave it
     } else {
       normalized = `${CDN_BASE_URL}/${normalized}`;
     }

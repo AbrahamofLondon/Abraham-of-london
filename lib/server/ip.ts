@@ -208,13 +208,13 @@ export function getClientIpWithAnalysis(req: NextApiRequest): IpAnalysis {
 export function anonymizeIp(ip: string): string {
   if (!isValidIp(ip)) return "unknown";
 
-  // IPv6 — keep first 3 blocks
+  // IPv6 - keep first 3 blocks
   if (ip.includes(":")) {
     const parts = ip.split(":");
     return parts.slice(0, 3).join(":") + "::";
   }
 
-  // IPv4 — mask last octet
+  // IPv4 - mask last octet
   const parts = ip.split(".");
   return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
 }

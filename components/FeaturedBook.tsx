@@ -47,7 +47,7 @@ export default function FeaturedBook({
         <figure className="relative h-72 md:h-full m-0">
           <Image
             src={imgSrc}
-            alt={`${title} — book cover`}
+            alt={`${title} - book cover`}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 50vw"

@@ -23,7 +23,7 @@ export interface ContentIndex {
 }
 
 /**
- * Factory for an empty index – used both now (stub) and later
+ * Factory for an empty index - used both now (stub) and later
  * if you want to merge from multiple sources.
  */
 function createEmptyIndex(): ContentIndex {
@@ -132,7 +132,7 @@ export function getContentIndex(): ContentIndex {
         index.pages.push(safeItem);
         break;
       default:
-        // Unknown kind – ignore gracefully, no throw.
+        // Unknown kind - ignore gracefully, no throw.
         break;
     }
   }

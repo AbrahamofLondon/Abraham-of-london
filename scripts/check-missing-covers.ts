@@ -8,7 +8,7 @@ const COVER_OVERRIDES: Record<ContentKey, string> = require("../pages/content/co
 
 function hasCover(doc: SearchDoc): boolean {
   const key = `${doc.type}:${doc.slug}` as ContentKey;
-  // @ts-ignore – this is just a quick script
+  // @ts-ignore - this is just a quick script
   const overrides = (global as any).COVER_OVERRIDES || {};
   if (overrides[key]) return true;
   return !!doc.coverImage;

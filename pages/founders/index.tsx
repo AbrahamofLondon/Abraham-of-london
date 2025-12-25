@@ -21,7 +21,7 @@ const FoundersPage: NextPage = () => {
           </h1>
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-gray-200">
             Not hustle porn. Operating systems for founders who want to build
-            ventures that can stand scrutiny — spiritual, ethical, and
+            ventures that can stand scrutiny - spiritual, ethical, and
             financial.
           </p>
         </header>

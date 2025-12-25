@@ -263,7 +263,7 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       highlight: "#E5E7EB",
     },
     logo: {
-      // No dedicated logo asset specified yet – fallback to a neutral image
+      // No dedicated logo asset specified yet - fallback to a neutral image
       raster: "/assets/images/writing-desk.webp",
     },
     metadata: {

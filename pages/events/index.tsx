@@ -100,12 +100,14 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
                     <p className="text-xs uppercase tracking-[0.25em] text-gold/70">
                       {event.location || "Private Room"}
                     </p>
+
                     <h3 className="font-serif text-lg font-semibold text-cream">
                       {event.title}
                     </h3>
+
                     <p className="text-xs text-gray-300">
                       {event.eventDate
-                        ? new Date(event.eventDate).toLocaleString("en-GB", {
+                        ? new Date(event.eventDate).toLocaleString("en-GB", ...)
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
@@ -114,6 +116,7 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
                           })
                         : "Date TBC"}
                     </p>
+
                     {event.excerpt && (
                       <p className="mt-2 text-sm text-gray-300">
                         {event.excerpt}
@@ -133,8 +136,8 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
 
           {past.length === 0 && (
             <p className="text-sm text-gray-400">
-              Once the first rooms have run, they'll live here as part of the
-              Canon archive.
+              Once the first rooms have run, they&apos;ll live here as part of
+              the Canon archive.
             </p>
           )}
 
@@ -151,6 +154,7 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
                         })
                       : "Past"}
                   </span>
+
                   <Link
                     href={`/events/${event.slug}`}
                     className="flex-1 text-cream hover:text-gold"

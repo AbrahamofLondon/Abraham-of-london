@@ -162,7 +162,7 @@ export default function SiteLayout({
 
   const defaultDescription =
     metaDescription ||
-    "Abraham of London — strategy, fatherhood, and legacy for a world that has lost its bearings.";
+    "Abraham of London - strategy, fatherhood, and legacy for a world that has lost its bearings.";
 
   const defaultOgImageAbs = absUrl(
     ogImage || "/assets/images/social/og-image.jpg"

@@ -1,4 +1,4 @@
-// pages/resources/[...slug].tsx
+// pages/resources/[...slug].tsx - COMPLETE FIXED VERSION
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -6,13 +6,8 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-
-// ✅ IMPORTANT: normalize Contentlayer exports in one place
 import { getAllResources, getResourceByUrlPath } from "@/lib/server/content";
+import { serializeMDX } from "@/lib/mdx-utils";
 
 type Props = {
   resource: {
@@ -24,6 +19,10 @@ type Props = {
     tags?: string[];
     author?: string | null;
     url: string;
+    body?: {
+      raw?: string;
+      code?: string;
+    };
   };
   source: MDXRemoteSerializeResult;
 };
@@ -34,7 +33,7 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
   if (router.isFallback) {
     return (
       <Layout title="Loading...">
-        <main className="mx-auto max-w-3xl px-4 py-12">Loading…</main>
+        <main className="mx-auto max-w-3xl px-4 py-12">Loading...</main>
       </Layout>
     );
   }
@@ -67,56 +66,72 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const resources = await getAllResources();
+  try {
+    const resources = await getAllResources();
 
-  const paths = resources
-    .map((r) => r.url || r.href)
-    .filter((u): u is string => typeof u === "string" && u.startsWith("/resources/"))
-    // ✅ Avoid generating "/resources" from catch-all. Index should be a separate page.
-    .filter((u) => u !== "/resources")
-    .map((u) => {
-      const slugParts = u.replace(/^\/resources\/?/, "").split("/").filter(Boolean);
-      return { params: { slug: slugParts } };
-    });
+    const paths = resources
+      .map((r: any) => r.url || r.href)
+      .filter((u: any): u is string => typeof u === "string" && u.startsWith("/resources/"))
+      .filter((u: string) => u !== "/resources")
+      .map((u: string) => {
+        const slugParts = u.replace(/^\/resources\/?/, "").split("/").filter(Boolean);
+        return { params: { slug: slugParts } };
+      });
 
-  return {
-    paths,
-    fallback: false,
-  };
+    return {
+      paths,
+      fallback: false,
+    };
+  } catch (error) {
+    console.error("Error generating static paths for resources:", error);
+    return {
+      paths: [],
+      fallback: false,
+    };
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
-  const slug = (ctx.params?.slug as string[]) || [];
-  const urlPath = "/resources/" + slug.join("/");
+  try {
+    const slug = (ctx.params?.slug as string[]) || [];
+    const urlPath = "/resources/" + slug.join("/");
 
-  const doc = await getResourceByUrlPath(urlPath);
-  if (!doc) {
+    const doc = await getResourceByUrlPath(urlPath);
+    if (!doc) {
+      return { notFound: true };
+    }
+
+    // Extract content - handle different content layer structures
+    const content = doc.body?.raw || doc.body?.code || doc.content || '';
+    
+    if (!content) {
+      console.warn(`Resource "${doc.title}" has no content`);
+      return { notFound: true };
+    }
+
+    const source = await serializeMDX(content);
+
+    return {
+      props: {
+        resource: {
+          title: doc.title || 'Untitled Resource',
+          excerpt: doc.excerpt ?? doc.description ?? null,
+          description: doc.description ?? null,
+          date: doc.date ?? null,
+          coverImage: doc.coverImage ?? null,
+          tags: Array.isArray(doc.tags) ? doc.tags : [],
+          author: doc.author ?? null,
+          url: doc.url || doc.href || urlPath,
+          body: doc.body,
+        },
+        source,
+      },
+      revalidate: 3600, // Add revalidation for ISR
+    };
+  } catch (error) {
+    console.error("Error in getStaticProps for resource:", ctx.params?.slug, error);
     return { notFound: true };
   }
-
-  const source = await serialize(doc.body.raw, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
-    },
-    parseFrontmatter: false,
-  });
-
-  return {
-    props: {
-      resource: {
-        title: doc.title,
-        excerpt: doc.excerpt ?? null,
-        description: doc.description ?? null,
-        date: doc.date ?? null,
-        coverImage: doc.coverImage ?? null,
-        tags: Array.isArray(doc.tags) ? doc.tags : [],
-        author: (doc.author as any) ?? null,
-        url: doc.url || doc.href || urlPath,
-      },
-      source,
-    },
-  };
 };
 
 export default ResourcesCatchAllPage;

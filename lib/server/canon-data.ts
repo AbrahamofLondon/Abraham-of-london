@@ -283,7 +283,7 @@ export function canonToContentEntry(canon: Canon): ContentEntry {
 // ---------------------------------------------------------------------------
 
 /**
- * All canon entries – meta only.
+ * All canon entries - meta only.
  */
 export function getAllCanonMeta(): Canon[] {
   try {
@@ -313,7 +313,7 @@ export function getAllCanonMeta(): Canon[] {
 }
 
 /**
- * Single canon entry – meta + content.
+ * Single canon entry - meta + content.
  */
 export function getCanonBySlug(slug: string): CanonWithContent | null {
   try {

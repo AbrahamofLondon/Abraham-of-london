@@ -83,7 +83,7 @@ async function isRecaptchaValid(
       return false;
     }
 
-    // Optional score enforcement – fall back to 0.5 if not configured
+    // Optional score enforcement - fall back to 0.5 if not configured
     const minScore = parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5");
     if (typeof (raw as RecaptchaSuccessResult).score === "number" && 
         (raw as RecaptchaSuccessResult).score < minScore) {

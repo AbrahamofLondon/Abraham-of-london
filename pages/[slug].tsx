@@ -480,7 +480,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 
       <script
         // NOTE: This is intentionally inline (your current approach).
-        // It’s safe here because it uses only DOM APIs and does not interpolate user data.
+        // It's safe here because it uses only DOM APIs and does not interpolate user data.
         dangerouslySetInnerHTML={{
           __html: `
             document.addEventListener('mousemove', (e) => {

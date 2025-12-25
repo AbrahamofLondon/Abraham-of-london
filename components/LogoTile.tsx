@@ -16,7 +16,7 @@ type LogoTileProps = {
   priority?: boolean;
   /** "contain" (default) keeps full logo visible; "cover" fills the tile */
   fit?: "contain" | "cover";
-  /** Next/Image quality 1–100 (default 85) */
+  /** Next/Image quality 1-100 (default 85) */
   quality?: number;
   className?: string;
   /** Custom fallback (must be a local /public path) */

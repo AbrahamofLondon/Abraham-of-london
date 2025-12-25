@@ -4,7 +4,7 @@ import * as React from "react";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from "recharts";
-import { Heart, Bookmark, TrendingUp, Zap, Users } from "lucide-react";
+import { Heart, Bookmark, TrendingUp, Zap, _Users } from "lucide-react";
 
 interface AnalyticsProps {
   data: {

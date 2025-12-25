@@ -35,7 +35,7 @@ export default function ConsultingPage(): JSX.Element {
             </h1>
 
             <p className="mt-8 text-lg leading-relaxed text-gray-400 sm:text-xl">
-              I work with leaders who refuse to outsource responsibility — founders, boards, and builders 
+              I work with leaders who refuse to outsource responsibility - founders, boards, and builders 
               who carry weight for families, organisations, and nations. The work sits at the intersection 
               of high-stakes strategy and personal character.
             </p>
@@ -104,7 +104,7 @@ export default function ConsultingPage(): JSX.Element {
                 description: "Specialist advisory for operators engaging Nigeria and wider Africa with honest context on risk and reality.",
                 points: ["Partnership & Entry strategy", "Stakeholder navigation", "Execution discipline"],
               },
-            ].map((service, index) => (
+            items.map((item, _index) => ...)
               <div
                 key={service.title}
                 className="group rounded-2xl border border-white/5 bg-white/[0.02] p-8 transition-all hover:border-gold/30 hover:bg-white/[0.04]"
@@ -138,7 +138,7 @@ export default function ConsultingPage(): JSX.Element {
               <h2 className="font-serif text-3xl font-semibold text-white">How I Work</h2>
               <p className="mt-6 text-lg text-gray-400 leading-relaxed">
                 I am not a motivational coach. I am a strategist and advisor. The work is structured, 
-                documented, and accountable — anchored in conviction and integrity.
+                documented, and accountable - anchored in conviction and integrity.
               </p>
 
               <div className="mt-12 space-y-8">
@@ -146,7 +146,7 @@ export default function ConsultingPage(): JSX.Element {
                   { step: "Initial Call", desc: "45 minutes to understand context, stakes, and fit." },
                   { step: "Diagnostic", desc: "Clear articulation of the real problem, not the fashionable one." },
                   { step: "Engagement", desc: "Defined scope, cadence, and clear measures of success." },
-                ].map((item, i) => (
+                ].map((service, index) => (
                   <div key={i} className="flex gap-6">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/10 font-mono text-sm font-bold text-gold border border-gold/20">
                       0{i + 1}

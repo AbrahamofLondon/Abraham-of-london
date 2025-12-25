@@ -44,7 +44,7 @@ export default function LaunchSubscribe() {
       </div>
       {ok && (
         <p className="mt-2 text-xs text-forest">
-          Welcome—watch your inbox for updates.
+          Welcome-watch your inbox for updates.
         </p>
       )}
     </form>

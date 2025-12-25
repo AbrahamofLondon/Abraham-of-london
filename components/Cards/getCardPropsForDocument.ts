@@ -28,7 +28,7 @@ function fallbackHrefForType(type: string, slug: string): string {
   const s = slug.replace(/^\/+|\/+$/g, "");
   if (!s) return "/content";
 
-  // accept both “post” and “blog”, etc.
+  // accept both "post" and "blog", etc.
   if (type.includes("post") || type.includes("blog")) return `/blog/${s}`;
   if (type.includes("short")) return `/shorts/${s}`;
   if (type.includes("book")) return `/books/${s}`;

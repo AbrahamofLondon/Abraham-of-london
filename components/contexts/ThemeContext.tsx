@@ -15,7 +15,7 @@ const defaultValue: ThemeContextValue = {
   theme: "light",
   resolvedTheme: "light",
   setTheme: () => {
-    // no-op – theming disabled for now
+    // no-op - theming disabled for now
     if (process.env.NODE_ENV === "development") {
       console.warn("[ThemeContext] setTheme called, but theming is stubbed.");
     }

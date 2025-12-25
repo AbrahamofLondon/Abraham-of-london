@@ -4,8 +4,9 @@
 import { allBooks } from "@/lib/contentlayer";
 import type { Book as ContentlayerBook } from "@/lib/contentlayer";
 
+// Use the Contentlayer type directly
 export type Book = ContentlayerBook;
-export type BookWithContent = Book;
+export type BookWithContent = ContentlayerBook;
 
 // Helper to check if book is draft
 function isDraft(book: any): boolean {
@@ -20,6 +21,35 @@ function normalizeSlug(slug: string): string {
   return String(slug || "").trim().toLowerCase();
 }
 
+// Helper to get book reading time (calculate from content if needed)
+function getBookReadTime(book: any): string {
+  // First check if readTime is directly available
+  if (book.readTime && typeof book.readTime === 'string') {
+    return book.readTime;
+  }
+  
+  // Calculate from body content if available
+  if (book.body?.raw) {
+    const wordCount = book.body.raw.split(/\s+/).length;
+    const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
+    return `${readingTime} min`;
+  }
+  
+  // Default fallback
+  return "5 min";
+}
+
+// Helper to get book cover image
+function getBookCoverImage(book: any): string {
+  // Try various image fields in order of preference
+  if (book.coverImage) return book.coverImage;
+  if (book.image) return book.image;
+  if (book.cover) return book.cover;
+  
+  // Default fallback
+  return "/assets/images/writing-desk.webp";
+}
+
 /**
  * Get all books metadata (non-draft only)
  */
@@ -27,12 +57,15 @@ export function getAllBooksMeta(): Book[] {
   try {
     const books = (allBooks || []).filter(book => !isDraft(book));
     
-    // Ensure required fields
+    // Ensure required fields - including ContentLayer computed fields
     return books.map(book => ({
       ...book,
+      // Make sure computed fields are included
+      normalizedReadTime: getBookReadTime(book),
+      normalizedCoverImage: getBookCoverImage(book),
       slug: book.slug || book._raw?.flattenedPath?.split('/').pop() || '',
       title: book.title || "Untitled",
-    }));
+    })) as Book[]; // Cast to Book type
   } catch (error) {
     console.error("Error fetching all books meta:", error);
     return [];
@@ -57,7 +90,14 @@ export function getBookBySlug(slug: string): BookWithContent | null {
       return normalizeSlug(bookSlug) === normalizedSlug;
     });
     
-    return book || null;
+    if (!book) return null;
+    
+    // Ensure computed fields are included
+    return {
+      ...book,
+      normalizedReadTime: getBookReadTime(book),
+      normalizedCoverImage: getBookCoverImage(book),
+    } as BookWithContent;
   } catch (error) {
     console.error(`Error fetching book by slug (${slug}):`, error);
     return null;
@@ -70,7 +110,7 @@ export function getBookBySlug(slug: string): BookWithContent | null {
 export function getAllBooks(): BookWithContent[] {
   try {
     const books = getAllBooksMeta();
-    return books;
+    return books as BookWithContent[];
   } catch (error) {
     console.error("Error fetching all books:", error);
     return [];
@@ -154,7 +194,7 @@ export function searchBooks(query: string): Book[] {
     if (!normalizedQuery) return books;
     
     return books.filter(book => {
-      // Search in various fields
+      // Search in various fields that are likely to exist on Book type
       if (book.title?.toLowerCase().includes(normalizedQuery)) return true;
       if (book.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
       if (book.description?.toLowerCase().includes(normalizedQuery)) return true;
@@ -162,7 +202,10 @@ export function searchBooks(query: string): Book[] {
       if (book.author?.toLowerCase().includes(normalizedQuery)) return true;
       if (book.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
       if (book.category?.toLowerCase().includes(normalizedQuery)) return true;
-      if (book.series?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Only check series if it exists on the Book type
+      if ('series' in book && (book as any).series?.toLowerCase().includes(normalizedQuery)) return true;
+      
       return false;
     });
   } catch (error) {
@@ -226,13 +269,13 @@ export function bookToContentEntry(book: Book): any {
     category: book.category,
     tags: book.tags,
     featured: book.featured,
-    readTime: book.readTime,
+    readTime: book.normalizedReadTime || "5 min",
     _raw: book._raw,
     ...Object.fromEntries(
       Object.entries(book)
         .filter(([key]) => ![
           'slug', 'title', 'date', 'excerpt', 'description', 'category',
-          'tags', 'featured', 'readTime', '_raw', 'content', 'body'
+          'tags', 'featured', 'normalizedReadTime', '_raw', 'content', 'body'
         ].includes(key))
     ),
   };

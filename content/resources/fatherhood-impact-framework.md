@@ -47,6 +47,6 @@ This resource defines the five domains every father must architect intentionally
 - Calling
 - Purpose
 
-> “A father’s presence becomes a child’s first definition of safety.”
+> "A father's presence becomes a child's first definition of safety."
 
-This framework is an anchor for every father’s journey.
+This framework is an anchor for every father's journey.

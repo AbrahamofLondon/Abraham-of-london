@@ -47,7 +47,7 @@ export default function CanonResourceCard({
 
   const targetHref = href || `/canon/${slug}`;
   const isInnerCircle = accessLevel === "inner-circle";
-  const locked = isInnerCircle; // UI lock – real gate is via middleware
+  const locked = isInnerCircle; // UI lock - real gate is via middleware
 
   const displayLabel =
     label || doc.label || (volumeNumber ? `Volume ${volumeNumber}` : undefined);

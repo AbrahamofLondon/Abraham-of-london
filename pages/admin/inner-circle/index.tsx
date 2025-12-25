@@ -287,7 +287,7 @@ const AdminInnerCirclePage: NextPage = () => {
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 animate-ping rounded-full bg-black"></span>
-                    Loading…
+                    Loading...
                   </span>
                 ) : (
                   "Refresh Data"
@@ -310,7 +310,7 @@ const AdminInnerCirclePage: NextPage = () => {
                 {cleanupLoading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 animate-ping rounded-full bg-red-400"></span>
-                    Cleaning…
+                    Cleaning...
                   </span>
                 ) : (
                   "Run Cleanup"
@@ -450,7 +450,7 @@ const AdminInnerCirclePage: NextPage = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 font-mono text-sm">
-                        …{row.key_suffix}
+                        ...{row.key_suffix}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs">
                         {row.email_hash_prefix}

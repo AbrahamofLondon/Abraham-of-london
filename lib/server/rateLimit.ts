@@ -1,10 +1,11 @@
 // lib/server/rateLimit.ts
 // =========================================================================
 // Advanced Rate Limiting - In-Memory & Redis Support (Hardened)
+// + Backward-compatible wrappers for older imports (isRateLimited / rateLimit config style)
 // =========================================================================
 
 import type { NextApiRequest } from "next";
-import crypto from "crypto"; // Added for secure hashing
+import crypto from "crypto";
 
 // -------------------------------------------------------------------------
 // Types
@@ -33,7 +34,6 @@ export interface RateLimitResult {
   windowMs: number;
 }
 
-// Combined rate limiting result for IP + Email
 export interface CombinedRateLimitResult {
   ipResult: RateLimitResult;
   emailResult: RateLimitResult | null;
@@ -64,10 +64,12 @@ function logRateLimitAction(
   action: string,
   metadata: Record<string, unknown> = {}
 ): void {
+  // In production, avoid logging identifiable inputs (IPs/emails).
+  // Leave logging enabled for security observability; keep it privacy-safe.
+  // eslint-disable-next-line no-console
   console.log(`🛡️ Rate Limit: ${action}`, {
     timestamp: new Date().toISOString(),
     ...metadata,
-    // Never log full IPs or emails in production
   });
 }
 
@@ -81,12 +83,7 @@ class RateLimitStore {
 
   constructor() {
     if (typeof setInterval !== "undefined") {
-      this.cleanupInterval = setInterval(
-        () => {
-          this.cleanup();
-        },
-        60 * 60 * 1000
-      ); // hourly
+      this.cleanupInterval = setInterval(() => this.cleanup(), 60 * 60 * 1000); // hourly
     }
   }
 
@@ -113,9 +110,7 @@ class RateLimitStore {
       }
     }
 
-    if (cleaned > 0) {
-      logRateLimitAction("store_cleanup", { cleanedEntries: cleaned });
-    }
+    if (cleaned > 0) logRateLimitAction("store_cleanup", { cleanedEntries: cleaned });
   }
 
   destroy(): void {
@@ -124,7 +119,6 @@ class RateLimitStore {
       this.cleanupInterval = null;
     }
     this.store.clear();
-
     logRateLimitAction("store_destroyed");
   }
 }
@@ -136,11 +130,7 @@ class RateLimitStore {
 class RedisRateLimit {
   constructor(private redisClient: BasicRedisClient) {}
 
-  async check(
-    key: string,
-    limit: number,
-    windowMs: number
-  ): Promise<RateLimitResult> {
+  async check(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
     const now = Date.now();
     const resetTime = now + windowMs;
     const keyWithPrefix = `rate_limit:${key}`;
@@ -159,22 +149,22 @@ class RedisRateLimit {
       let count = 1;
 
       if (Array.isArray(rawResult)) {
-        const third = rawResult[2] as unknown;
-        if (Array.isArray(third) && third.length >= 2) {
-          const value = third[1] as unknown;
-          const num = Number(value);
-          if (!Number.isNaN(num) && num > 0) {
-            count = num;
-          }
-        } else {
-          const last = rawResult[rawResult.length - 1] as unknown;
-          if (Array.isArray(last) && last.length >= 2) {
-            const value = last[1] as unknown;
+        // Try 3rd item first, then fall back to last.
+        const pick = (idx: number) => rawResult[idx] as unknown;
+        const decode = (v: unknown) => {
+          if (Array.isArray(v) && v.length >= 2) {
+            const value = v[1] as unknown;
             const num = Number(value);
-            if (!Number.isNaN(num) && num > 0) {
-              count = num;
-            }
+            if (!Number.isNaN(num) && num > 0) return num;
           }
+          return null;
+        };
+
+        const third = decode(pick(2));
+        if (third !== null) count = third;
+        else {
+          const last = decode(rawResult[rawResult.length - 1] as unknown);
+          if (last !== null) count = last;
         }
       }
 
@@ -184,13 +174,13 @@ class RedisRateLimit {
       return {
         allowed: count <= limit,
         remaining,
-        retryAfterMs: count > limit ? windowMs - elapsed : 0,
+        retryAfterMs: count > limit ? Math.max(0, windowMs - elapsed) : 0,
         resetTime,
         limit,
         windowMs,
       };
     } catch (error) {
-      // Fail open but log – do NOT block legitimate traffic because Redis died
+      // Fail open but log - do NOT block legitimate traffic because Redis died
       logRateLimitAction("redis_error", {
         error: error instanceof Error ? error.message : "Unknown error",
       });
@@ -219,34 +209,53 @@ if (typeof process !== "undefined" && typeof process.on === "function") {
 }
 
 // -------------------------------------------------------------------------
-// Synchronous memory-based rate limiter (for Node/Netlify functions)
+// Core limiter (sync)
 // -------------------------------------------------------------------------
 
-export function rateLimit(
-  key: string,
-  options: RateLimitOptions
-): RateLimitResult {
-  const {
-    limit,
-    windowMs,
-    keyPrefix = "rl",
-    useRedis = false,
-    redisClient,
-  } = options;
-
+function assertValidKey(key: string): void {
   if (!key || typeof key !== "string") {
     throw new Error("Rate limit key must be a non-empty string");
   }
+}
 
-  if (limit < 1 || windowMs < 1000) {
+function assertValidOptions(options: RateLimitOptions): void {
+  if (!options || typeof options !== "object") {
+    throw new Error("Rate limit options are required");
+  }
+  if (options.limit < 1 || options.windowMs < 1000) {
     throw new Error("Invalid rate limit parameters");
   }
+}
+
+/**
+ * SYNC limiter.
+ * NOTE: If useRedis=true, we log a warning and still run in-memory (sync cannot await Redis safely).
+ */
+export function rateLimit(key: string, options: RateLimitOptions): RateLimitResult;
+export function rateLimit(config: RateLimitOptions): RateLimitOptions;
+/**
+ * Backward-compatible overload:
+ * - rateLimit(key, options) => RateLimitResult
+ * - rateLimit(options) => returns options (factory-style)
+ */
+export function rateLimit(arg1: string | RateLimitOptions, arg2?: RateLimitOptions) {
+  if (typeof arg1 !== "string") {
+    // factory-style (older code sometimes does: const cfg = rateLimit({limit,...}))
+    assertValidOptions(arg1);
+    return arg1;
+  }
+
+  const key = arg1;
+  const options = arg2 as RateLimitOptions;
+  assertValidKey(key);
+  assertValidOptions(options);
+
+  const { limit, windowMs, keyPrefix = "rl", useRedis = false, redisClient } = options;
 
   const now = Date.now();
   const storeKey = `${keyPrefix}:${key}`;
   const resetTime = now + windowMs;
 
-  // Synchronous function cannot safely talk to Redis – enforce this
   if (useRedis && redisClient) {
     logRateLimitAction("sync_redis_warning", { keyPrefix });
   }
@@ -254,11 +263,7 @@ export function rateLimit(
   const entry = memoryStore.get(storeKey);
 
   if (!entry) {
-    const newEntry: RateLimitEntry = {
-      count: 1,
-      first: now,
-      resetTime,
-    };
+    const newEntry: RateLimitEntry = { count: 1, first: now, resetTime };
     memoryStore.set(storeKey, newEntry);
 
     return {
@@ -274,11 +279,7 @@ export function rateLimit(
   const elapsed = now - entry.first;
 
   if (elapsed > windowMs) {
-    const newEntry: RateLimitEntry = {
-      count: 1,
-      first: now,
-      resetTime,
-    };
+    const newEntry: RateLimitEntry = { count: 1, first: now, resetTime };
     memoryStore.set(storeKey, newEntry);
 
     return {
@@ -292,17 +293,12 @@ export function rateLimit(
   }
 
   if (entry.count >= limit) {
-    logRateLimitAction("rate_limit_hit", {
-      key: storeKey,
-      count: entry.count,
-      limit,
-      windowMs,
-    });
+    logRateLimitAction("rate_limit_hit", { key: storeKey, count: entry.count, limit, windowMs });
 
     return {
       allowed: false,
       remaining: 0,
-      retryAfterMs: windowMs - elapsed,
+      retryAfterMs: Math.max(0, windowMs - elapsed),
       resetTime: entry.resetTime,
       limit,
       windowMs,
@@ -314,7 +310,7 @@ export function rateLimit(
 
   return {
     allowed: true,
-    remaining: limit - entry.count,
+    remaining: Math.max(0, limit - entry.count),
     retryAfterMs: 0,
     resetTime: entry.resetTime,
     limit,
@@ -323,37 +319,28 @@ export function rateLimit(
 }
 
 // -------------------------------------------------------------------------
-// Async variant – proper Redis support
+// Async variant - proper Redis support
 // -------------------------------------------------------------------------
 
-export async function rateLimitAsync(
-  key: string,
-  options: RateLimitOptions
-): Promise<RateLimitResult> {
-  const {
-    useRedis = false,
-    redisClient,
-    limit,
-    windowMs,
-    keyPrefix = "rl",
-  } = options;
+export async function rateLimitAsync(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
+  assertValidKey(key);
+  assertValidOptions(options);
+
+  const { useRedis = false, redisClient, limit, windowMs, keyPrefix = "rl" } = options;
 
   if (useRedis && redisClient) {
     const redisLimiter = new RedisRateLimit(redisClient);
     return redisLimiter.check(`${keyPrefix}:${key}`, limit, windowMs);
   }
 
-  // Fallback to in-memory
-  return rateLimit(key, options);
+  return rateLimit(key, options) as RateLimitResult;
 }
 
 // -------------------------------------------------------------------------
-// HTTP Headers helper (for API responses)
+// Headers helper
 // -------------------------------------------------------------------------
 
-export function createRateLimitHeaders(
-  result: RateLimitResult
-): Record<string, string> {
+export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
   const headers: Record<string, string> = {
     "X-RateLimit-Limit": result.limit.toString(),
     "X-RateLimit-Remaining": result.remaining.toString(),
@@ -371,10 +358,6 @@ export function createRateLimitHeaders(
 // IP extraction helper (Netlify / proxies / Node)
 // -------------------------------------------------------------------------
 
-/**
- * Best-effort IP extraction for API routes.
- * Handles typical proxy headers used by Netlify and others.
- */
 export function getClientIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.length > 0) {
@@ -388,9 +371,7 @@ export function getClientIp(req: NextApiRequest): string {
   }
 
   const socketAddr =
-    typeof req.socket?.remoteAddress === "string"
-      ? req.socket.remoteAddress
-      : "unknown";
+    typeof req.socket?.remoteAddress === "string" ? req.socket.remoteAddress : "unknown";
 
   return socketAddr;
 }
@@ -399,69 +380,48 @@ export function getClientIp(req: NextApiRequest): string {
 // Email-based rate limiting helper
 // -------------------------------------------------------------------------
 
-/**
- * Rate-limit based on email address for stricter protection
- * Usage:
- *   const result = rateLimitForEmail(email, "inner-circle-register-email", RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL);
- */
 export function rateLimitForEmail(
   email: string,
   label: string,
   options: RateLimitOptions
 ): { result: RateLimitResult; email: string } {
   const normalizedEmail = email.toLowerCase().trim();
-  // Hash email for privacy - never store raw emails
   const emailHash = crypto.createHash("sha256").update(normalizedEmail).digest("hex");
   const key = `${label}:${emailHash}`;
-  const result = rateLimit(key, options);
+  const result = rateLimit(key, options) as RateLimitResult;
 
   logRateLimitAction("email_rate_limit_check", {
     label,
     allowed: result.allowed,
     remaining: result.remaining,
-    // Never log the actual email
   });
 
   return { result, email: normalizedEmail };
 }
 
-/**
- * Convenience helper: rate-limit based on client IP + logical label.
- * Usage:
- *   const result = rateLimitForRequestIp(req, "inner-circle-register", RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER);
- */
 export function rateLimitForRequestIp(
   req: NextApiRequest,
   label: string,
   options: RateLimitOptions
 ): { result: RateLimitResult; ip: string } {
   const ip = getClientIp(req);
-  // Anonymize IP for privacy - keep only first 3 octets for IPv4
-  const anonymizedIp = ip.includes(":") 
-    ? ip.split(":").slice(0, 3).join(":") + "::" 
+
+  const anonymizedIp = ip.includes(":")
+    ? ip.split(":").slice(0, 3).join(":") + "::"
     : ip.split(".").slice(0, 3).join(".") + ".0";
+
   const key = `${label}:${anonymizedIp}`;
-  const result = rateLimit(key, options);
+  const result = rateLimit(key, options) as RateLimitResult;
 
   logRateLimitAction("ip_rate_limit_check", {
     label,
     allowed: result.allowed,
     remaining: result.remaining,
-    // Never log the actual IP
   });
 
   return { result, ip };
 }
 
-// -------------------------------------------------------------------------
-// Combined IP + Email rate limiting
-// -------------------------------------------------------------------------
-
-/**
- * Combined rate limiting for both IP and email with comprehensive result
- * Usage:
- *   const { allowed, hitIpLimit, hitEmailLimit } = combinedRateLimit(req, email, "inner-circle", RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER, RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL);
- */
 export function combinedRateLimit(
   req: NextApiRequest,
   email: string | null,
@@ -484,7 +444,6 @@ export function combinedRateLimit(
   const hitEmailLimit = emailResult ? !emailResult.allowed : false;
   const allowed = ipResult.allowed && (!emailResult || emailResult.allowed);
 
-  // Log combined result for security monitoring
   if (!allowed) {
     logRateLimitAction("combined_rate_limit_hit", {
       label,
@@ -507,114 +466,81 @@ export function combinedRateLimit(
 }
 
 // -------------------------------------------------------------------------
-// Pre-configured rate limit configurations
+// Backward-compat wrapper expected by your analytics route:
+//   const r = await isRateLimited(key, bucket, limit);
+//   if (r.limited) ...
+// -------------------------------------------------------------------------
+
+export type LegacyIsRateLimitedResult = {
+  limited: boolean;
+  retryAfter: number; // seconds
+  limit: number;
+  remaining: number;
+};
+
+export async function isRateLimited(
+  key: string,
+  bucketType: string,
+  limit: number,
+  windowMs = 5 * 60 * 1000
+): Promise<LegacyIsRateLimitedResult> {
+  const result = await rateLimitAsync(`${bucketType}:${key}`, {
+    limit,
+    windowMs,
+    keyPrefix: "api",
+    useRedis: false,
+    redisClient: null,
+  });
+
+  return {
+    limited: !result.allowed,
+    retryAfter: Math.ceil(result.retryAfterMs / 1000),
+    limit: result.limit,
+    remaining: result.remaining,
+  };
+}
+
+// -------------------------------------------------------------------------
+// Pre-configured configs
 // -------------------------------------------------------------------------
 
 export const RATE_LIMIT_CONFIGS = {
-  TEASER_REQUEST: {
-    limit: 5,
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    keyPrefix: "teaser",
-  },
-  NEWSLETTER_SUBSCRIBE: {
-    limit: 5,
-    windowMs: 10 * 60 * 1000, // 10 minutes
-    keyPrefix: "newsletter",
-  },
-  CONTACT_FORM: {
-    limit: 5,
-    windowMs: 10 * 60 * 1000, // 10 minutes
-    keyPrefix: "contact",
-  },
-  AUTHENTICATION: {
-    limit: 5,
-    windowMs: 5 * 60 * 1000, // 5 minutes
-    keyPrefix: "auth",
-  },
-  API_GENERAL: {
-    limit: 100,
-    windowMs: 60 * 60 * 1000, // 1 hour
-    keyPrefix: "api",
-  },
-  INNER_CIRCLE_REGISTER: {
-    limit: 20,
-    windowMs: 15 * 60 * 1000, // 15 minutes per IP
-    keyPrefix: "ic-reg",
-  },
-  INNER_CIRCLE_REGISTER_EMAIL: {
-    limit: 3, // Stricter limit for same email attempts
-    windowMs: 60 * 60 * 1000, // 1 hour per email
-    keyPrefix: "ic-reg-email",
-  },
-  INNER_CIRCLE_UNLOCK: {
-    limit: 50,
-    windowMs: 10 * 60 * 1000, // 10 minutes per IP
-    keyPrefix: "ic-unlock",
-  },
-  // NEW: Resend Configurations (Added to fix the error)
-  INNER_CIRCLE_RESEND: {
-    limit: 3,
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    keyPrefix: "ic-resend",
-  },
-  INNER_CIRCLE_RESEND_EMAIL: {
-    limit: 2,
-    windowMs: 60 * 60 * 1000, // 1 hour
-    keyPrefix: "ic-resend-email",
-  },
-  INNER_CIRCLE_ADMIN_EXPORT: {
-    limit: 10,
-    windowMs: 60 * 1000, // 1 minute
-    keyPrefix: "ic-admin-export",
-  },
-  ADMIN_OPERATIONS: {
-    limit: 10,
-    windowMs: 60 * 60 * 1000, // 1 hour
-    keyPrefix: "admin-ops",
-  },
-  ADMIN_LOGIN: {
-    limit: 5,
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    keyPrefix: "admin-login",
-  },
-  ADMIN_API: {
-    limit: 100,
-    windowMs: 5 * 60 * 1000, // 5 minutes
-    keyPrefix: "admin-api",
-  },
+  TEASER_REQUEST: { limit: 5, windowMs: 15 * 60 * 1000, keyPrefix: "teaser" },
+  NEWSLETTER_SUBSCRIBE: { limit: 5, windowMs: 10 * 60 * 1000, keyPrefix: "newsletter" },
+  CONTACT_FORM: { limit: 5, windowMs: 10 * 60 * 1000, keyPrefix: "contact" },
+  AUTHENTICATION: { limit: 5, windowMs: 5 * 60 * 1000, keyPrefix: "auth" },
+  API_GENERAL: { limit: 100, windowMs: 60 * 60 * 1000, keyPrefix: "api" },
+  INNER_CIRCLE_REGISTER: { limit: 20, windowMs: 15 * 60 * 1000, keyPrefix: "ic-reg" },
+  INNER_CIRCLE_REGISTER_EMAIL: { limit: 3, windowMs: 60 * 60 * 1000, keyPrefix: "ic-reg-email" },
+  INNER_CIRCLE_UNLOCK: { limit: 50, windowMs: 10 * 60 * 1000, keyPrefix: "ic-unlock" },
+  INNER_CIRCLE_RESEND: { limit: 3, windowMs: 15 * 60 * 1000, keyPrefix: "ic-resend" },
+  INNER_CIRCLE_RESEND_EMAIL: { limit: 2, windowMs: 60 * 60 * 1000, keyPrefix: "ic-resend-email" },
+  INNER_CIRCLE_ADMIN_EXPORT: { limit: 10, windowMs: 60 * 1000, keyPrefix: "ic-admin-export" },
+  ADMIN_OPERATIONS: { limit: 10, windowMs: 60 * 60 * 1000, keyPrefix: "admin-ops" },
+  ADMIN_LOGIN: { limit: 5, windowMs: 15 * 60 * 1000, keyPrefix: "admin-login" },
+  ADMIN_API: { limit: 100, windowMs: 5 * 60 * 1000, keyPrefix: "admin-api" },
 } as const;
-
-// -------------------------------------------------------------------------
-// Type-safe access to configuration keys
-// -------------------------------------------------------------------------
 
 export type RateLimitConfigKey = keyof typeof RATE_LIMIT_CONFIGS;
 
-/**
- * Helper function to safely get a rate limit configuration
- */
 export function getRateLimitConfig(key: RateLimitConfigKey): RateLimitOptions {
   const config = RATE_LIMIT_CONFIGS[key];
-  if (!config) {
-    throw new Error(`Rate limit configuration "${key}" not found`);
-  }
+  if (!config) throw new Error(`Rate limit configuration "${key}" not found`);
   return config;
 }
 
-/**
- * Check if a configuration exists
- */
 export function hasRateLimitConfig(key: string): key is RateLimitConfigKey {
   return key in RATE_LIMIT_CONFIGS;
 }
 
 // -------------------------------------------------------------------------
-// Default exports for backward compatibility
+// Default export for convenience
 // -------------------------------------------------------------------------
 
 export default {
   rateLimit,
   rateLimitAsync,
+  isRateLimited,
   createRateLimitHeaders,
   getClientIp,
   rateLimitForEmail,

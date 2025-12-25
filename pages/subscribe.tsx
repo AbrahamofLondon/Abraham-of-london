@@ -143,7 +143,7 @@ const SubscribePage: NextPage = () => {
                     meant to last generations.&quot;
                   </p>
                   <footer className="text-xs text-gray-400">
-                    — Early Reader, Institutional Architect
+                    - Early Reader, Institutional Architect
                   </footer>
                 </blockquote>
               </div>
@@ -241,7 +241,7 @@ const SubscribePage: NextPage = () => {
             <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-400">
               The Founding Readers Circle is intentionally limited to ensure
               meaningful engagement and strategic focus. This is more than a
-              newsletter—it's the beginning of a movement to rebuild the
+              newsletter-it's the beginning of a movement to rebuild the
               architecture of human purpose.
             </p>
           </div>

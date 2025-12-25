@@ -11,7 +11,7 @@ export default function NewsletterPage() {
   return (
     <Layout
       title={pageTitle}
-      description="Join Abraham of London's Inner Circle – a curated newsletter for founders, fathers, and leaders who build with depth. Occasional, high-signal emails with early access to selected events."
+      description="Join Abraham of London's Inner Circle - a curated newsletter for founders, fathers, and leaders who build with depth. Occasional, high-signal emails with early access to selected events."
     >
       <div className="min-h-screen bg-gradient-to-b from-charcoal to-black">
         {/* Hero Section */}
@@ -58,7 +58,7 @@ export default function NewsletterPage() {
                     </h2>
                     <p className="leading-relaxed text-gold/70">
                       Receive selective content that bridges ancient wisdom
-                      with modern leadership and fatherhood—delivered directly
+                      with modern leadership and fatherhood-delivered directly
                       to your inbox, without noise or gimmicks.
                     </p>
                   </div>
@@ -90,7 +90,7 @@ export default function NewsletterPage() {
                         </h3>
                         <p className="text-sm leading-relaxed text-gold/60">
                           Deep-dive writings on leadership, legacy, fatherhood,
-                          and the art of meaningful conversation—often shared
+                          and the art of meaningful conversation-often shared
                           here before appearing anywhere else.
                         </p>
                       </div>
@@ -123,7 +123,7 @@ export default function NewsletterPage() {
                         <p className="text-sm leading-relaxed text-gold/60">
                           Occasional reflections drawn from the collective
                           wisdom of founders, leaders, and fathers within our
-                          wider network—shared with discretion and respect.
+                          wider network-shared with discretion and respect.
                         </p>
                       </div>
                     </div>
@@ -136,7 +136,7 @@ export default function NewsletterPage() {
                     <ul className="space-y-2 text-sm text-gold/60">
                       <li className="flex items-center gap-2">
                         <span className="h-1 w-1 rounded-full bg-gold/40" />
-                        Typically 1–2 carefully crafted emails per month
+                        Typically 1-2 carefully crafted emails per month
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="h-1 w-1 rounded-full bg-gold/40" />
@@ -177,7 +177,7 @@ export default function NewsletterPage() {
 
                   {/* Reuse your existing NewsletterForm component */}
                   {/* Ensure this component itself does NOT touch window/document at build time */}
-                  {/* If it does, we’ll refactor that next. */}
+                  {/* If it does, we'll refactor that next. */}
                   {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
                   {React.createElement(require("@/components/NewsletterForm").default, {
                     variant: "premium",
@@ -223,7 +223,7 @@ export default function NewsletterPage() {
                       boardroom.&quot;
                     </p>
                     <p className="text-sm font-semibold text-gold">
-                      — Founder, Tech Company
+                      - Founder, Tech Company
                     </p>
                   </div>
 
@@ -235,7 +235,7 @@ export default function NewsletterPage() {
                       gold.&quot;
                     </p>
                     <p className="text-sm font-semibold text-gold">
-                      — CEO, Financial Services
+                      - CEO, Financial Services
                     </p>
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export default function NewsletterPage() {
                 Common Questions
               </h2>
               <p className="mx-auto max-w-2xl text-gold/70">
-                A brief overview of what you are—and are not—signing up for
+                A brief overview of what you are-and are not-signing up for
                 when you join The Inner Circle.
               </p>
             </div>
@@ -263,7 +263,7 @@ export default function NewsletterPage() {
                   How often will I receive emails?
                 </h3>
                 <p className="text-sm leading-relaxed text-gold/70">
-                  Typically 1–2 times per month. Frequency may vary slightly
+                  Typically 1-2 times per month. Frequency may vary slightly
                   depending on season and relevance, but the bias is firmly
                   towards quality over volume.
                 </p>

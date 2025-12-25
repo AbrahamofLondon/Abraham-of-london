@@ -1,4 +1,4 @@
-// lib/mdx.ts - Simple version
+// lib/mdx.ts - Fixed version
 import type { PostMeta } from "@/types/post";
 
 // Simple interface that matches your needs
@@ -44,25 +44,37 @@ export function convertToPostDocument(data: any): PostDocument {
   };
 }
 
-// Convert PostDocument to PostMeta
+// Convert PostDocument to PostMeta - UPDATED to match PostMeta type
 export function convertToPostMeta(doc: PostDocument): PostMeta {
+  // Convert draft to published (inverse)
+  const published = !doc.draft;
+  
   return {
     slug: doc.slug,
-    title: doc.title,
-    excerpt: doc.excerpt,
-    description: doc.description,
-    date: doc.date,
-    author: doc.author,
-    category: doc.category,
-    tags: doc.tags,
-    readTime: doc.readTime,
-    coverImage: doc.coverImage,
-    draft: doc.draft,
-    published: !doc.draft,
-    url: doc.url,
-    // Pass through additional fields
+    title: doc.title || "",
+    date: doc.date || "",
+    excerpt: doc.excerpt || "",
+    published: published,
+    featured: doc.featured || false,
+    category: doc.category || "",
+    tags: doc.tags || [],
+    author: doc.author || "",
+    readTime: doc.readTime || "",
     ...(doc.subtitle && { subtitle: doc.subtitle }),
-    ...(doc.volumeNumber && { volumeNumber: doc.volumeNumber }),
+    ...(doc.description && { description: doc.description }),
+    ...(doc.coverImage && { coverImage: doc.coverImage }),
+    ...(doc.ogImage && { ogImage: doc.ogImage }),
+    ...(doc.series && { series: doc.series }),
+    ...(doc.seriesOrder && { seriesOrder: doc.seriesOrder }),
+    ...(doc.coverAspect && { coverAspect: doc.coverAspect }),
+    ...(doc.coverFit && { coverFit: doc.coverFit }),
+    ...(doc.coverPosition && { coverPosition: doc.coverPosition }),
+    ...(doc.authors && { authors: doc.authors }),
+    ...(doc.wordCount && { wordCount: doc.wordCount }),
+    ...(doc.canonicalUrl && { canonicalUrl: doc.canonicalUrl }),
+    ...(doc.noindex && { noindex: doc.noindex }),
+    ...(doc.lastModified && { lastModified: doc.lastModified }),
+    // Note: draft is NOT included in PostMeta type
   };
 }
 
@@ -77,7 +89,8 @@ export async function getAllContent(collection?: string): Promise<PostDocument[]
     if (collection) {
       // Filter by collection type (simplified logic)
       filteredDocs = docs.filter(doc => {
-        const type = doc._raw.sourceFilePath.split('/')[0];
+        // Use flattenedPath instead of sourceFilePath
+        const type = doc._raw?.flattenedPath?.split('/')[0] || '';
         return type === collection;
       });
     }
@@ -92,19 +105,20 @@ export async function getAllContent(collection?: string): Promise<PostDocument[]
   }
 }
 
-// Get content by slug
+// Get content by slug - FIXED: use getDocumentBySlug instead
 export async function getContentBySlug(
   collection: string,
   slug: string
 ): Promise<PostDocument | null> {
   try {
-    const { getContentlayerDocBySlug } = await import('./contentlayer-helper');
-    const doc = getContentlayerDocBySlug(slug);
+    // Use getDocumentBySlug instead of getContentlayerDocBySlug
+    const { getDocumentBySlug } = await import('./contentlayer-helper');
+    const doc = getDocumentBySlug(slug);
     
     if (!doc) return null;
     
     // Optional: check if it belongs to the right collection
-    const type = doc._raw.sourceFilePath.split('/')[0];
+    const type = doc._raw?.flattenedPath?.split('/')[0] || '';
     if (collection && type !== collection) return null;
     
     return convertToPostDocument(doc);

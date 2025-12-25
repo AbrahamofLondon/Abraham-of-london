@@ -2,9 +2,6 @@
 import * as React from "react";
 import { MissingComponent } from "./MissingComponent";
 
-// Type for component imports
-type ComponentModule = { default: React.ComponentType<any> } | React.ComponentType<any>;
-
 // Cache for loaded components
 const componentCache = new Map<string, React.ComponentType<any>>();
 
@@ -19,13 +16,13 @@ export async function getComponent(
 
   try {
     // Try to import the component
-    const module = await import(`@/components/mdx/${componentName}`);
-    const Component = module.default || module;
+    const imported = await import(`@/components/mdx/${componentName}`);
+    const Component = imported.default || imported;
     
     // Cache it
     componentCache.set(componentName, Component);
     return Component;
-  } catch (error) {
+  } catch (_error) {
     // Return a fallback component
     const Fallback: React.FC<any> = (props) => (
       <MissingComponent componentName={componentName} {...props} />
@@ -38,7 +35,7 @@ export async function getComponent(
 
 // Create a component that loads dynamically
 export function createDynamicComponent(componentName: string): React.FC<any> {
-  return function DynamicComponent(props) {
+  const DynamicComponent: React.FC<any> = (props) => {
     const [Component, setComponent] = React.useState<React.ComponentType<any>>(() => {
       return () => <MissingComponent componentName={componentName} {...props} />;
     });
@@ -49,4 +46,7 @@ export function createDynamicComponent(componentName: string): React.FC<any> {
 
     return <Component {...props} />;
   };
+
+  DynamicComponent.displayName = `DynamicComponent(${componentName})`;
+  return DynamicComponent;
 }

@@ -191,7 +191,7 @@ export async function sendInnerCircleEmail(
     const subject = subjectFor(a.type);
     const text = buildText(a.type, a.data);
 
-    // Only render HTML if provider needs it (resend) — else skip cost.
+    // Only render HTML if provider needs it (resend) - else skip cost.
     let html: string | undefined;
     if (provider() === "resend") {
       html = await renderHtmlEmail({

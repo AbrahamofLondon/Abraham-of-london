@@ -86,7 +86,7 @@ async function subscribeHandler(
       timestamp,
     } = req.body as SubscribeRequestBody;
 
-    // Honeypots – silently pretend success
+    // Honeypots - silently pretend success
     if (website && website.trim() !== "") {
       // eslint-disable-next-line no-console
       console.warn("Honeypot field 'website' triggered", { email, website });

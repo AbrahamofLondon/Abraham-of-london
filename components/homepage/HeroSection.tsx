@@ -7,7 +7,7 @@ import { BaseCard, CARD_ANIMATIONS } from '@/components/Cards';
 
 // --- Utility Components ------------------------------------------------------
 
-/** Small “eyebrow” pill used above the H1 */
+/** Small "eyebrow" pill used above the H1 */
 function Eyebrow({
   children,
   className,
@@ -92,7 +92,7 @@ function getAspectClass(aspect: AspectRatio): string {
 
 export default function HeroSection({
   title = "When the System Breaks You: Finding Purpose in Pain",
-  subtitle = "Win the only battle you fully control — the one inside your chest.",
+  subtitle = "Win the only battle you fully control - the one inside your chest.",
   eyebrow = "Featured Insight",
   primaryCta = {
     href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
@@ -118,7 +118,7 @@ export default function HeroSection({
   // 2. --- Dynamic Class Generation (with clsx) ---
   const frameClasses = clsx(
     "relative overflow-hidden rounded-2xl shadow-lg shadow-black/15",
-    // contained visual – NEVER full-width skyscraper
+    // contained visual - NEVER full-width skyscraper
     "max-w-[520px] w-full mx-auto",
     getAspectClass(coverAspect),
     {
@@ -228,7 +228,7 @@ export default function HeroSection({
             <Image
               src={imgSrc}
               alt={title || "Hero image illustrating the page content"}
-              // IMPORTANT: do NOT use fill – we size via CSS
+              // IMPORTANT: do NOT use fill - we size via CSS
               width={800}
               height={1200} // portrait-ish; actual box is controlled by classes
               priority

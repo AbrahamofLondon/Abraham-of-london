@@ -83,7 +83,7 @@ function formatRange(start?: string | null, end?: string | null) {
     minute: "2-digit",
   }).format(e);
 
-  if (sameDay) return `${dayStr}, ${timeStart}–${timeEnd}`;
+  if (sameDay) return `${dayStr}, ${timeStart}-${timeEnd}`;
 
   const dayEnd = new Intl.DateTimeFormat(locale, {
     day: "2-digit",

@@ -26,7 +26,7 @@ const CARDS: readonly CardItem[] = [
     label: "The Chatham Rooms",
     kicker: "Off-record rooms for plain truth",
     description:
-      "Closed-door conversations under Chatham House Rule — one place you can speak plainly and think clearly.",
+      "Closed-door conversations under Chatham House Rule - one place you can speak plainly and think clearly.",
     Icon: Users,
   },
   {
@@ -34,7 +34,7 @@ const CARDS: readonly CardItem[] = [
     label: "Events & Salons",
     kicker: "Sessions that sharpen the edge",
     description:
-      "Live rooms and curated sessions that blend Scripture, history, and hard market reality — without the theatre.",
+      "Live rooms and curated sessions that blend Scripture, history, and hard market reality - without the theatre.",
     Icon: CalendarDays,
   },
 ] as const;
@@ -62,7 +62,7 @@ export default function StrategicFunnelStrip(): JSX.Element {
           </h2>
 
           <p className="mt-3 text-sm leading-relaxed text-gold/70 sm:text-base">
-            Personal advisory, a closed room, or a public salon — built around
+            Personal advisory, a closed room, or a public salon - built around
             consequence, conviction, and long-term legitimacy.
           </p>
         </header>

@@ -310,7 +310,7 @@ ${data.accessKey}
 Unlock here:
 ${data.unlockUrl}
 
-— ${siteName}
+- ${siteName}
 `;
 
   const html =
@@ -321,7 +321,7 @@ ${data.unlockUrl}
   <p>Unlock here:<br/>
     <a href="${escapeAttr(data.unlockUrl)}">${escapeHtml(data.unlockUrl)}</a>
   </p>
-  <p style="color:#666">— ${siteName}</p>
+  <p style="color:#666">- ${siteName}</p>
 </div>`;
 
   return { subject, text, html };

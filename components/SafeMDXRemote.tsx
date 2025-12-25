@@ -11,7 +11,7 @@ type Props = {
 export default function SafeMDXRemote({
   source,
   components,
-  loadingText = "Loading content…",
+  loadingText = "Loading content...",
 }: Props) {
   const [mounted, setMounted] = React.useState(false);
 

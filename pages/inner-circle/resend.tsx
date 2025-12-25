@@ -200,7 +200,7 @@ const InnerCircleResendPage: NextPage = () => {
           <p className="text-xs text-softGold/60">
             If you still don&apos;t receive the email after multiple attempts,
             reply to any Abraham of London newsletter or contact us through the
-            main site—we’ll assist you manually.
+            main site-we'll assist you manually.
           </p>
         </section>
       </main>

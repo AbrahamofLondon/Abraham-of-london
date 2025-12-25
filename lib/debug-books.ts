@@ -16,11 +16,17 @@ export async function debugBooks() {
     // Log all books to see what we have
     allBooks.forEach((book, index) => {
       console.log(`\n📖 Book ${index + 1}:`);
-      console.log(`   - Slug: ${book.slug}`);
-      console.log(`   - Title: ${book.title}`);
-      console.log(`   - Author: ${book.author}`);
-      console.log(`   - Has excerpt: ${!!book.excerpt}`);
-      console.log(`   - Has description: ${!!book.description}`);
+      console.log(`   - Slug: ${book.slug || '(no slug)'}`);
+      console.log(`   - Title: ${book.title || '(no title)'}`);
+      console.log(`   - Author: ${book.author || '(no author)'}`);
+      console.log(`   - Subtitle: ${book.subtitle || '(no subtitle)'}`);
+      console.log(`   - Excerpt: ${book.excerpt ? '✓' : '✗'}`);
+      console.log(`   - Description: ${book.description ? '✓' : '✗'}`);
+      console.log(`   - Cover Image: ${book.coverImage || '(no cover)'}`);
+      console.log(`   - ISBN: ${book.isbn || '(no ISBN)'}`);
+      console.log(`   - Publisher: ${book.publisher || '(no publisher)'}`);
+      console.log(`   - Date: ${book.date || '(no date)'}`);
+      console.log(`   - Draft: ${book.draft ? 'Yes' : 'No'}`);
     });
 
     const problematicSlugs = [
@@ -37,10 +43,16 @@ export async function debugBooks() {
         continue;
       }
       console.log(`✅ Book found: ${book.title}`);
-      console.log(`   - Has content: ${!!book.content}`);
-      console.log(`   - Content length: ${book.content?.length || 0}`);
+      console.log(`   - Has body content: ${!!book.body}`);
+      console.log(`   - Body type: ${typeof book.body}`);
       console.log(`   - Has title: ${!!book.title}`);
-      console.log(`   - Has date: ${!!book.date}`);
+      console.log(`   - Has date: ${book.date || 'No date'}`);
+      console.log(`   - Has excerpt: ${!!book.excerpt}`);
+      console.log(`   - Has description: ${!!book.description}`);
+      console.log(`   - Has cover image: ${!!book.coverImage}`);
+      console.log(`   - ISBN: ${book.isbn || 'No ISBN'}`);
+      console.log(`   - Publisher: ${book.publisher || 'No publisher'}`);
+      console.log(`   - Raw source: ${book._raw?.sourceFileName || 'Unknown'}`);
     }
 
     return allBooks;

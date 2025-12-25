@@ -91,7 +91,7 @@ const ventures: Venture[] = [
     name: "Endureluxe",
     slug: "endureluxe",
     description:
-      "Community-driven fitness and performance gear for people who train, build, and endure – designed to survive real life, not just product shoots.",
+      "Community-driven fitness and performance gear for people who train, build, and endure - designed to survive real life, not just product shoots.",
     icon: PackageCheck,
     href: ENDURELUXE_URL,
     status: "Active",
@@ -127,7 +127,7 @@ const VenturesPage: NextPage = () => {
         <title>Strategic Ventures | Abraham of London</title>
         <meta
           name="description"
-          content="The venture portfolio connected to Abraham of London — Alomarada, Endureluxe, and InnovateHub — built around one mindset: truth, responsibility, and multi-generational legacy."
+          content="The venture portfolio connected to Abraham of London - Alomarada, Endureluxe, and InnovateHub - built around one mindset: truth, responsibility, and multi-generational legacy."
         />
       </Head>
 

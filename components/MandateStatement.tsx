@@ -38,7 +38,7 @@ export default function MandateStatement(): JSX.Element {
         transition={{ delay: 0.4 }}
         viewport={{ once: true }}
       >
-        My work is for men and women who carry real weight — fathers, founders,
+        My work is for men and women who carry real weight - fathers, founders,
         and board-level leaders. The mandate is simple: to help them build
         strategies, cultures, and households that will stand before God,
         history, and their own children without shame.
@@ -65,7 +65,7 @@ export default function MandateStatement(): JSX.Element {
         viewport={{ once: true }}
       >
         If we work together, it is because there is a serious mandate on your
-        life and stewardship — and you are willing to be challenged, not
+        life and stewardship - and you are willing to be challenged, not
         entertained.
       </motion.p>
     </motion.section>

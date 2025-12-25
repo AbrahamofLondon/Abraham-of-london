@@ -151,7 +151,7 @@ async function run() {
 
   console.log(`\n✅ Fixed ${fixed} file(s).`);
   for (const f of touched.slice(0, 40)) console.log(`  ✓ ${f}`);
-  if (touched.length > 40) console.log(`  …and ${touched.length - 40} more`);
+  if (touched.length > 40) console.log(`  ...and ${touched.length - 40} more`);
 }
 
 run().catch((e) => {

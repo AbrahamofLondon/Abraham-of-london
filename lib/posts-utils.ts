@@ -1,4 +1,4 @@
-// lib/posts-utils.ts — UTILITY FUNCTIONS ONLY (STRICT + FIXED)
+// lib/posts-utils.ts - UTILITY FUNCTIONS ONLY (STRICT + FIXED)
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   Post,
@@ -107,13 +107,14 @@ export function transformPostForClient(post: Post): PostForClient {
  * Convert PostMeta/Post -> PostSummary
  */
 export function toPostSummary(postMeta: PostMeta | Post): PostSummary {
-  return {
+  const summary: any = {
     slug: postMeta.slug,
     title: postMeta.title,
     excerpt: postMeta.excerpt,
     date: postMeta.date,
 
-    description: postMeta.description,
+    // Removed description since PostSummary doesn't have it
+    // description: postMeta.description,
     subtitle: postMeta.subtitle,
 
     coverImage: normalizeImage(postMeta.coverImage),
@@ -122,10 +123,12 @@ export function toPostSummary(postMeta: PostMeta | Post): PostSummary {
     published: postMeta.published ?? true,
     featured: postMeta.featured ?? false,
 
-    category: postMeta.category || "",
+    // These are optional in PostSummary but we'll include them if they exist
+    ...(postMeta.category && { category: postMeta.category }),
+    ...(postMeta.author && { author: postMeta.author }),
+    ...(postMeta.readTime && { readTime: postMeta.readTime }),
+
     tags: Array.isArray(postMeta.tags) ? postMeta.tags : [],
-    author: postMeta.author || "",
-    readTime: postMeta.readTime || "",
 
     series: postMeta.series,
     seriesOrder: postMeta.seriesOrder,
@@ -138,6 +141,8 @@ export function toPostSummary(postMeta: PostMeta | Post): PostSummary {
     noindex: postMeta.noindex,
     lastModified: postMeta.lastModified,
   };
+
+  return summary as PostSummary;
 }
 
 /**

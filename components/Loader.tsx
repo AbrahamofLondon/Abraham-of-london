@@ -90,7 +90,7 @@ export default function LuxuryLoader({
               "shadow-md",
             ].join(" ")}
           />
-          <span className="sr-only">Loading…</span>
+          <span className="sr-only">Loading...</span>
         </motion.div>
       )}
     </AnimatePresence>

@@ -128,13 +128,13 @@ const PrivacyPage: NextPage = () => {
               </ul>
             </li>
             <li>
-              <strong>Usage and analytics data</strong> – high-level information
+              <strong>Usage and analytics data</strong> - high-level information
               about how you interact with the site (pages visited, approximate
               timings, referrer) via privacy-aware analytics tools or server
               logs.
             </li>
             <li>
-              <strong>Transactional / system data</strong> – for example,
+              <strong>Transactional / system data</strong> - for example,
               confirmation emails, subscription status, and basic newsletter
               engagement metrics such as opens and clicks.
             </li>
@@ -158,7 +158,7 @@ const PrivacyPage: NextPage = () => {
             <li>Send newsletters and editorial content you have requested.</li>
             <li>Respond to enquiries and manage event or call requests.</li>
             <li>
-              <strong>Manage Inner Circle access</strong> – issue cryptographic
+              <strong>Manage Inner Circle access</strong> - issue cryptographic
               access keys, verify membership status, and provide exclusive
               content to registered members.
             </li>
@@ -189,22 +189,22 @@ const PrivacyPage: NextPage = () => {
           </p>
           <ul className="ml-5 list-disc space-y-1">
             <li>
-              <strong>Consent</strong> – for example, where you subscribe to a
+              <strong>Consent</strong> - for example, where you subscribe to a
               newsletter or explicitly request a teaser or resource by email.
             </li>
             <li>
-              <strong>Legitimate interests</strong> – maintaining site security,
+              <strong>Legitimate interests</strong> - maintaining site security,
               improving content, keeping basic communication records, or
               following up on serious matters, where this does not override your
               rights and expectations.
             </li>
             <li>
-              <strong>Contractual necessity</strong> – where processing is
+              <strong>Contractual necessity</strong> - where processing is
               required to enter into or perform a contract or agreed engagement
               with you.
             </li>
             <li>
-              <strong>Inner Circle operations</strong> – processing necessary
+              <strong>Inner Circle operations</strong> - processing necessary
               for providing exclusive content and community access to registered
               members.
             </li>
@@ -249,16 +249,16 @@ const PrivacyPage: NextPage = () => {
           </p>
           <ul className="ml-5 list-disc space-y-1">
             <li>
-              <strong>Mailchimp</strong> – for newsletters and curated email
+              <strong>Mailchimp</strong> - for newsletters and curated email
               dispatches.
             </li>
             <li>
-              <strong>Resend</strong> – for transactional or system emails (such
+              <strong>Resend</strong> - for transactional or system emails (such
               as confirmations, teaser delivery, or internal notifications from
               forms).
             </li>
             <li>
-              <strong>Inner Circle access emails</strong> – cryptographic key
+              <strong>Inner Circle access emails</strong> - cryptographic key
               delivery and exclusive content notifications via secure email
               providers.
             </li>

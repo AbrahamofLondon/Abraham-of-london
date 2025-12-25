@@ -45,6 +45,9 @@ interface GoogleRecaptchaResponse {
   challenge_ts?: string;
 }
 
+// Google reCAPTCHA API endpoint
+const RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+
 const DEFAULT_CONFIG: RecaptchaConfig = {
   secretKey: process.env.RECAPTCHA_SECRET_KEY || "",
   minScore: parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5"),
@@ -344,7 +347,7 @@ export async function verifyRecaptchaDetailed(
       params.append("remoteip", clientIp);
     }
 
-    const response = await fetch(VERIFY_URL, {
+    const response = await fetch(RECAPTCHA_VERIFY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),

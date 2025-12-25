@@ -70,7 +70,7 @@ const BookCard: React.FC<BookCardProps> = ({
       aria-label={getCardAriaLabel(title, "Book")}
     >
       <article className="flex h-full flex-col overflow-hidden">
-        {/* Cover Image – always rendered with fallback */}
+        {/* Cover Image - always rendered with fallback */}
         <div className="relative aspect-[3/4] w-full overflow-hidden">
           <Image
             src={imageSrc}

@@ -49,7 +49,7 @@ export default function BrandsIndex() {
       id: "brotherhood-covenant",
       title: "Brotherhood Covenant",
       description:
-        "Structured circles of men committed to sharpening, accountability, and honour – not just casual friendship. We build brotherhoods that last through seasons of challenge and celebration.",
+        "Structured circles of men committed to sharpening, accountability, and honour - not just casual friendship. We build brotherhoods that last through seasons of challenge and celebration.",
       href: "/brands/brotherhood-covenant",
       status: "active",
       foundingYear: 2021,

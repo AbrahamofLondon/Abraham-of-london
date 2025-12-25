@@ -27,7 +27,7 @@ const ContactPage = (): JSX.Element => {
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
 
   // Safe phone number with fallback
-  const contactPhone =
+  const contactPhone = "+44 20 8622 5909"
     (siteConfig as { phone?: string }).phone ?? "+44 20 8622 5909";
 
   // Theme management
@@ -219,7 +219,7 @@ const ContactPage = (): JSX.Element => {
             <h1
               className={`mt-4 font-serif text-4xl font-bold md:text-5xl ${primaryTextClass}`}
             >
-              Contact Abraham of London
+              "Contact Abraham of London"
             </h1>
             <p
               className={`mt-6 max-w-2xl mx-auto text-lg leading-relaxed ${secondaryTextClass}`}
@@ -355,7 +355,7 @@ const ContactPage = (): JSX.Element => {
                         Response Time
                       </h3>
                       <p className={`text-sm ${secondaryTextClass}`}>
-                        We aim to respond to qualified enquiries within 2–3
+                        We aim to respond to qualified enquiries within 2-3
                         business days. Depending on volume and strategic fit, we
                         may not be able to reply to every message individually.
                       </p>

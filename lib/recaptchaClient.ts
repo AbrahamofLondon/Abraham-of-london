@@ -48,7 +48,7 @@ export async function verifyRecaptchaDetailed(
 
     if (isDev && allowBypass) {
       console.warn(
-        "[reCAPTCHA] RECAPTCHA_SECRET_KEY missing – bypass enabled via ALLOW_RECAPTCHA_BYPASS (development only)."
+        "[reCAPTCHA] RECAPTCHA_SECRET_KEY missing - bypass enabled via ALLOW_RECAPTCHA_BYPASS (development only)."
       );
       return {
         success: true,
@@ -58,7 +58,7 @@ export async function verifyRecaptchaDetailed(
       };
     }
 
-    console.error("[reCAPTCHA] RECAPTCHA_SECRET_KEY not set – verification will fail.");
+    console.error("[reCAPTCHA] RECAPTCHA_SECRET_KEY not set - verification will fail.");
     return {
       success: false,
       score: 0,

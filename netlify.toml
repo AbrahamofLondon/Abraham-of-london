@@ -1,36 +1,52 @@
-# ============================================
-# NETLIFY CONFIGURATION - Abraham of London
-# Static Export Production Configuration
-# ============================================
+# netlify.toml
+# ============================================================
+# NETLIFY CONFIGURATION — Abraham of London
+# Enterprise-grade Next.js (SSR) + API routes + Prisma
+# ============================================================
 
 [build]
   command = "pnpm run build"
   publish = ".next"
 
-# ============================================
-# BUILD ENVIRONMENT
-# ============================================
+# Use Netlify’s Next.js runtime (SSR, API routes, image optimization)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# ============================================================
+# BUILD ENVIRONMENT (non-secret, safe to keep in repo)
+# ============================================================
 [build.environment]
-  # Runtime
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
-  NODE_ENV = "production"
-  
-  # Build optimization
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_OPTIONS = "--max-old-space-size=4096"
-    
-  # Site URLs
+
+[build.environment]
+  NETLIFY_TS_IGNORE = "false"
+  NETLIFY_ESLINT_IGNORE = "false"
+
+  # Public runtime config (safe)
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_INNOVATEHUB_URL = "https://innovatehub.abrahamoflondon.org"
   NEXT_PUBLIC_ALOMARADA_URL = "https://alomarada.com/"
   NEXT_PUBLIC_ENDURELUXE_URL = "https://alomarada.com/endureluxe"
   NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
 
-# ============================================
-# DOMAIN REDIRECTS
-# ============================================
-# Canonical HTTPS with www
+# ============================================================
+# IMPORTANT: Secrets must be set in Netlify UI (not here)
+# ------------------------------------------------------------
+# Netlify → Site settings → Environment variables:
+# - DATABASE_URL
+# - NEXTAUTH_SECRET (if used)
+# - Any private API keys (Resend, etc.)
+# - DATABASE_URL (required for Prisma routes; use Postgres in production)
+# ============================================================
+
+# ============================================================
+# DOMAIN & CANONICAL REDIRECTS
+# ============================================================
+
+# Force HTTPS + www canonical
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -49,87 +65,81 @@
   status = 301
   force = true
 
-# Remove trailing slashes
-[[redirects]]
-  from = "/*"
-  to = "/:splat"
-  status = 301
-  force = true
-  conditions = { Path = "*/" }
+# NOTE:
+# DO NOT do “remove trailing slash” redirects here.
+# Next.js routing should own it. Netlify wildcard/condition tricks are unreliable.
 
-# ============================================
-# SECURITY HEADERS
-# ============================================
+# ============================================================
+# SECURITY HEADERS (production-safe defaults)
+# ============================================================
+
 [[headers]]
   for = "/*"
   [headers.values]
-    # Basic security
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    
-    # HTTPS enforcement
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    
-    # Feature restrictions
     Permissions-Policy = "accelerometer=(), autoplay=(), camera=(), clipboard-read=(), clipboard-write=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=()"
-    
-    # Content Security Policy
+
+    # CSP: Keep it realistic so it doesn’t break Next.js or third-party scripts.
+    # If you want a fully locked CSP (nonce-based), we should implement it in Next
+    # middleware + per-request nonces. Netlify static CSP strings are limited.
     Content-Security-Policy = """
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval'
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+
+      script-src 'self' 'unsafe-inline'
         https://www.googletagmanager.com
         https://www.google-analytics.com
-        https://ssl.google-analytics.com
-        https://cdnjs.cloudflare.com;
-      style-src 'self' 'unsafe-inline'
-        https://fonts.googleapis.com
-        https://cdnjs.cloudflare.com;
-      font-src 'self'
-        https://fonts.gstatic.com
-        https://cdnjs.cloudflare.com
-        data:;
-      img-src 'self'
-        data:
-        https:
-        blob:
+        https://ssl.google-analytics.com;
+
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+
+      font-src 'self' https://fonts.gstatic.com data:;
+
+      img-src 'self' data: https: blob:
         https://www.google-analytics.com
         https://ssl.gstatic.com;
+
       connect-src 'self'
         https://www.google-analytics.com
         https://www.googletagmanager.com;
+
       frame-src 'self';
-      frame-ancestors 'none';
-      base-uri 'self';
-      form-action 'self';
-      upgrade-insecure-requests;
     """
 
-# ============================================
+# ============================================================
 # CACHING STRATEGY
-# ============================================
-# Next.js static assets (immutable)
+# ============================================================
+
+# Next.js build assets (immutable)
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Application assets (one week)
+# Images optimized by Next/Netlify should be cacheable but not forever
+[[headers]]
+  for = "/_next/image*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+# Your public assets
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
 
-# HTML pages (no cache, always fresh)
+# HTML should not be cached aggressively
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# ============================================
-# SPECIAL ROUTES
-# ============================================
 # SEO files
 [[headers]]
   for = "/sitemap.xml"
@@ -143,16 +153,17 @@
     Cache-Control = "public, max-age=3600"
     Content-Type = "text/plain"
 
-# Service Worker
+# Service worker
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
     Service-Worker-Allowed = "/"
 
-# ============================================
-# ERROR PAGES
-# ============================================
+# ============================================================
+# ERROR ROUTES
+# ============================================================
+
 [[redirects]]
   from = "/404"
   to = "/404.html"
@@ -163,9 +174,10 @@
   to = "/500.html"
   status = 500
 
-# ============================================
+# ============================================================
 # DEPLOYMENT CONTEXTS
-# ============================================
+# ============================================================
+
 [context.production]
   command = "pnpm run build"
   publish = ".next"
@@ -181,10 +193,3 @@
   publish = ".next"
   [context.branch-deploy.environment]
     NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-
-# ============================================
-# NETLIFY UI NOTES
-# ============================================
-# Required environment variables to set in Netlify UI:
-# - NEXTAUTH_SECRET (if using authentication)
-# - Any third-party API keys

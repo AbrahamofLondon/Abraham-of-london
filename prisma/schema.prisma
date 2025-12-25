@@ -1,3 +1,6 @@
+// prisma/schema.prisma
+// ENTERPRISE-GRADE (SQLite-compatible)
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,47 +10,329 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ==================== AUDIT & ANALYTICS MODELS ====================
+
+model DownloadAuditEvent {
+  id String @id @default(cuid())
+
+  // Content Identification
+  slug        String
+  contentType String @default("download")
+  eventType   String @default("download")
+
+  // Optional relation to InnerCircleMember (fixes missing opposite relation)
+  memberId String?            @map("member_id")
+  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  // File Details
+  fileName String? @map("file_name")
+  fileSize BigInt? @map("file_size")
+  fileHash String? @map("file_hash") // SHA-256
+
+  // User Identification
+  userId    String? @map("user_id")
+  email     String?
+  emailHash String? @map("email_hash") // SHA-256 hash for privacy
+
+  // Session & Device
+  sessionId String? @map("session_id")
+  deviceId  String? @map("device_id")
+  userAgent String? @map("user_agent")
+
+  // Network & Location
+  ipAddress   String? @map("ip_address") // IPv4/IPv6
+  ipHash      String? @map("ip_hash") // SHA-256
+  countryCode String? @map("country_code")
+  region      String?
+  city        String?
+
+  // Referral & Campaign
+  referrer    String?
+  utmSource   String? @map("utm_source")
+  utmMedium   String? @map("utm_medium")
+  utmCampaign String? @map("utm_campaign")
+  utmTerm     String? @map("utm_term")
+  utmContent  String? @map("utm_content")
+
+  // Technical Metadata
+  httpMethod String? @map("http_method")
+  statusCode Int?    @map("status_code")
+  latencyMs  Int?    @map("latency_ms")
+
+  // Business Context
+  tier           String? // free, pro, enterprise, inner-circle
+  pricePaidCents Int?    @map("price_paid_cents")
+  currency       String?
+  couponCode     String? @map("coupon_code")
+
+  // Success/Failure Tracking
+  success     Boolean @default(true)
+  errorCode   String? @map("error_code")
+  errorDetail String? @map("error_detail")
+
+  // Timestamps
+  createdAt   DateTime  @default(now()) @map("created_at")
+  processedAt DateTime? @map("processed_at")
+
+  // Metadata
+  version Int     @default(1)
+  tags    String? // JSON string
+
+  @@index([slug])
+  @@index([contentType])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([userId])
+  @@index([emailHash])
+  @@index([sessionId])
+  @@index([ipHash])
+  @@index([countryCode])
+  @@index([success])
+  @@index([tier])
+  @@index([memberId])
+  // Compound indexes
+  @@index([slug, contentType])
+  @@index([createdAt, slug])
+  @@index([createdAt, eventType])
+  @@index([slug, createdAt])
+  @@index([contentType, createdAt])
+  @@index([userId, createdAt])
+  @@map("download_audit_events")
+}
+
+// ==================== ENHANCED INTERACTION MODELS ====================
+
 model ShortInteraction {
-  id        Int       @id @default(autoincrement())
-  shortSlug String    @map("short_slug")
-  sessionId String?   @map("session_id")
-  userId    String?   @map("user_id")
-  action    String    
+  id        Int    @id @default(autoincrement())
+  shortSlug String @map("short_slug")
+
+  // User Identification
+  sessionId String? @map("session_id")
+  userId    String? @map("user_id")
+  emailHash String? @map("email_hash")
+
+  // Action Details
+  action    String
+  subAction String? @map("sub_action")
+  metadata  String? // JSON string
+
+  // Device & Network
+  userAgent String? @map("user_agent")
+  ipAddress String? @map("ip_address")
+  ipHash    String? @map("ip_hash")
+
+  // Location
+  countryCode String? @map("country_code")
+  region      String?
+  city        String?
+
+  // Timestamps
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  // Engagement Metrics
+  durationMs  Int? @map("duration_ms")
+  scrollDepth Int? @map("scroll_depth")
+
+  @@index([shortSlug])
+  @@index([action])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@index([emailHash])
+  @@index([ipHash])
+  @@index([shortSlug, action, createdAt])
   @@map("short_interactions")
 }
 
 model InnerCircleMember {
-  id              String   @id @default(uuid())
-  emailHash       String   @unique @map("email_hash")
-  emailHashPrefix String   @map("email_hash_prefix")
-  name            String?
-  createdAt       DateTime @default(now()) @map("created_at")
-  lastSeenAt      DateTime @default(now()) @map("last_seen_at")
-  lastIp          String?  @map("last_ip")
-  keys            InnerCircleKey[]
+  id String @id @default(uuid())
 
+  // Privacy-First Identity
+  emailHash       String  @unique @map("email_hash")
+  emailHashPrefix String  @map("email_hash_prefix")
+  name            String?
+
+  // Contact Information
+  marketingOptIn  Boolean @default(false) @map("marketing_opt_in")
+  newsletterOptIn Boolean @default(false) @map("newsletter_opt_in")
+
+  // Member Status
+  status String @default("active")
+  tier   String @default("standard")
+
+  // Security
+  lastPasswordReset DateTime? @map("last_password_reset")
+  mfaEnabled        Boolean   @default(false) @map("mfa_enabled")
+
+  // Activity Tracking
+  createdAt   DateTime  @default(now()) @map("created_at")
+  lastSeenAt  DateTime  @default(now()) @map("last_seen_at")
+  lastLoginAt DateTime? @map("last_login_at")
+  lastIp      String?   @map("last_ip")
+  loginCount  Int       @default(0) @map("login_count")
+
+  // Preferences
+  timezone String?
+  locale   String?
+
+  // Financial (if applicable)
+  subscriptionId     String? @map("subscription_id")
+  subscriptionStatus String? @map("subscription_status")
+  billingCycle       String? @map("billing_cycle")
+
+  // Relations
+  keys        InnerCircleKey[]
+  auditEvents DownloadAuditEvent[] // ✅ now valid because DownloadAuditEvent has memberId/member
+
+  @@index([emailHashPrefix])
+  @@index([status])
+  @@index([tier])
+  @@index([createdAt])
+  @@index([lastSeenAt])
+  @@index([subscriptionStatus])
   @@map("inner_circle_members")
 }
 
 model InnerCircleKey {
-  id            String   @id @default(uuid())
-  memberId      String   @map("member_id")
-  member        InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  keyHash       String   @unique @map("key_hash")
-  keySuffix     String   @map("key_suffix")
-  status        String   @default("active") 
-  totalUnlocks  Int      @default(0) @map("total_unlocks")
-  createdAt     DateTime @default(now()) @map("created_at")
-  lastUsedAt    DateTime? @map("last_used_at")
-  lastIp        String?  @map("last_ip")
-  expiresAt     DateTime @map("expires_at")
+  id String @id @default(uuid())
+
+  // Foreign Key
+  memberId String            @map("member_id")
+  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  // Key Details
+  keyHash   String @unique @map("key_hash")
+  keySuffix String @map("key_suffix")
+
+  // Status Management
+  status       String @default("active")
+  totalUnlocks Int    @default(0) @map("total_unlocks")
+
+  // Security Tracking
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  lastIp     String?   @map("last_ip")
+
+  // Expiration & Revocation
+  expiresAt     DateTime  @map("expires_at")
   revokedAt     DateTime? @map("revoked_at")
   revokedBy     String?   @map("revoked_by")
   revokedReason String?   @map("revoked_reason")
 
+  // Metadata
+  keyVersion        Int     @default(1) @map("key_version")
+  deviceFingerprint String? @map("device_fingerprint")
+  notes             String?
+
+  // Rate Limiting
+  rateLimitCounter Int       @default(0) @map("rate_limit_counter")
+  rateLimitResetAt DateTime? @map("rate_limit_reset_at")
+
+  @@index([memberId])
+  @@index([status])
+  @@index([keySuffix])
+  @@index([createdAt])
+  @@index([expiresAt])
+  @@index([lastUsedAt])
+  @@index([memberId, status])
+  @@index([keyHash, status])
   @@map("inner_circle_keys")
+}
+
+// ==================== SUPPORTING MODELS ====================
+
+model ApiRateLimit {
+  id           Int      @id @default(autoincrement())
+  identifier   String
+  bucketType   String   @map("bucket_type") // ip, user, global
+  requestCount Int      @default(0) @map("request_count")
+  windowStart  DateTime @map("window_start")
+  windowEnd    DateTime @map("window_end")
+  lastRequest  DateTime @map("last_request")
+
+  @@unique([identifier, bucketType, windowStart])
+  @@index([identifier])
+  @@index([windowStart])
+  @@index([bucketType, windowStart])
+  @@map("api_rate_limits")
+}
+
+model ContentMetadata {
+  id          String @id @default(cuid())
+  slug        String @unique
+  title       String
+  contentType String @map("content_type")
+
+  // Download Stats (cached)
+  totalDownloads    Int       @default(0) @map("total_downloads")
+  uniqueDownloaders Int       @default(0) @map("unique_downloaders")
+  lastDownloadAt    DateTime? @map("last_download_at")
+
+  // Engagement
+  viewCount  Int @default(0) @map("view_count")
+  shareCount Int @default(0) @map("share_count")
+  likeCount  Int @default(0) @map("like_count")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Metadata
+  tags        String? // JSON string
+  categories  String? // JSON string
+  isPublished Boolean @default(true) @map("is_published")
+  accessLevel String  @default("public") @map("access_level")
+
+  // File Info
+  fileSize BigInt? @map("file_size")
+  fileType String? @map("file_type")
+  checksum String?
+
+  @@index([contentType])
+  @@index([accessLevel])
+  @@index([createdAt])
+  @@index([totalDownloads])
+  @@map("content_metadata")
+}
+
+model SystemAuditLog {
+  id String @id @default(cuid())
+
+  // Actor Information
+  actorType  String  @map("actor_type")
+  actorId    String? @map("actor_id")
+  actorEmail String? @map("actor_email")
+
+  // Action Details
+  action       String
+  resourceType String  @map("resource_type")
+  resourceId   String? @map("resource_id")
+
+  // Changes
+  oldValue String? @map("old_value")
+  newValue String? @map("new_value")
+  diff     String? // JSON string
+
+  // Context
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+  requestId String? @map("request_id")
+
+  // Status
+  status String  @default("success")
+  error  String?
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([actorType])
+  @@index([actorId])
+  @@index([resourceType])
+  @@index([resourceId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([resourceType, resourceId, createdAt])
+  @@map("system_audit_logs")
 }

@@ -112,14 +112,14 @@ export function Verse({
       <div className="text-[0.95rem] leading-relaxed">{children}</div>
       {cite && (
         <div className="mt-2 text-right text-xs uppercase tracking-wide text-[color:var(--color-on-secondary)/0.7]">
-          — {cite}
+          - {cite}
         </div>
       )}
     </blockquote>
   );
 }
 
-/* --- Note (alias of Callout with “key” default) --- */
+/* --- Note (alias of Callout with "key" default) --- */
 export function Note(props: React.ComponentProps<typeof Callout>) {
   return <Callout tone={props.tone ?? "key"} {...props} />;
 }
@@ -157,7 +157,7 @@ export function ResourcesCTA({
                 </Link>
                 {r.sub && (
                   <span className="ml-2 text-xs text-[color:var(--color-on-secondary)/0.7]">
-                    — {r.sub}
+                    - {r.sub}
                   </span>
                 )}
               </li>

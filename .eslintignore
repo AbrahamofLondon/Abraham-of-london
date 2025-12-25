@@ -1,23 +1,14 @@
-# Next / infra
-.next/
-node_modules/
-.contentlayer/
-public/
-scripts/
-
-# Ignore known-problem children for now
-lib/safe-fallbacks.ts
-lib/seo.ts
-lib/upgraded-component.ts
-
-# If you want to silence the stock demo stuff as well:
-src/components/LiveStockTracker.tsx
-src/lib/websocket-service.ts
-lib/websocket-service.ts
-lib/websocket/WebSocketService.ts
-
-#ESLint ignores
-src/**
- 
-**/*.sql
-lib/db/migrations/**
+# .eslintignore
+node_modules
+.next
+out
+dist
+coverage
+.turbo
+.reports
+.contentlayer
+public/assets/downloads
+public/assets/resources
+prisma/dev.db
+**/*.min.js
+**/*.min.css

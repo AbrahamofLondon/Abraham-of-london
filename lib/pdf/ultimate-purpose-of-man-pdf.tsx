@@ -230,7 +230,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         <Text style={styles.coverByline}>by AbrahamofLondon</Text>
         <Text style={styles.coverTagline}>
           A definitive editorial examining how human purpose is structured,
-          grounded, and lived — from Eden’s design to modern civilisation,
+          grounded, and lived - from Eden's design to modern civilisation,
           leadership, and legacy.
         </Text>
       </View>
@@ -241,7 +241,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       {/* Header eyebrow */}
       <View style={{ marginBottom: 16 }}>
         <Text style={styles.eyebrow}>Editorial · Foundations</Text>
-        <Text style={styles.h1}>INTRODUCTION — PURPOSE IS NOT A SENTIMENT</Text>
+        <Text style={styles.h1}>INTRODUCTION - PURPOSE IS NOT A SENTIMENT</Text>
       </View>
 
       {/* Intro body */}
@@ -257,7 +257,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </Text>
       <Text style={styles.bodyText}>
         This editorial is not a pep talk. It is not another promise. It is a
-        demonstration of how purpose actually functions in reality —
+        demonstration of how purpose actually functions in reality -
         historically, theologically, strategically.
       </Text>
       <Text style={styles.bodyText}>
@@ -268,19 +268,19 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       {/* 1. The Garden */}
       <Text style={styles.h2}>
-        1. THE GARDEN — PURPOSE AS STRUCTURE, NOT MYTH
+        1. THE GARDEN - PURPOSE AS STRUCTURE, NOT MYTH
       </Text>
 
       <View style={styles.quoteBlock}>
         <Text style={styles.quoteText}>
-          “The Lord God took the man and put him in the garden to work it and
-          keep it.” — Genesis 2:15
+          "The Lord God took the man and put him in the garden to work it and
+          keep it." - Genesis 2:15
         </Text>
       </View>
 
       <Text style={styles.bodyText}>
         Eden was not a paradise escape; it was a deployment zone. Man was not
-        dropped into chaos. He was placed into order — with identity, work,
+        dropped into chaos. He was placed into order - with identity, work,
         boundaries, and presence.
       </Text>
 
@@ -288,34 +288,34 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Placed —</Text> location as
+            <Text style={styles.strong}>Placed -</Text> location as
             intentionality
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Given identity —</Text> Imago Dei
+            <Text style={styles.strong}>Given identity -</Text> Imago Dei
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Given work —</Text> cultivate, govern,
+            <Text style={styles.strong}>Given work -</Text> cultivate, govern,
             develop
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Given boundaries —</Text> responsibility
+            <Text style={styles.strong}>Given boundaries -</Text> responsibility
             frames freedom
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Given presence —</Text> fellowship with
+            <Text style={styles.strong}>Given presence -</Text> fellowship with
             God as operating environment
           </Text>
         </View>
@@ -351,7 +351,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
     {/* PAGE 2: Ancient Lives, Jesus, Worldviews */}
     <Page size="A4" style={styles.page}>
       <Text style={styles.h2}>
-        2. ANCIENT LIVES — WHAT PURPOSE LOOKS LIKE UNDER PRESSURE
+        2. ANCIENT LIVES - WHAT PURPOSE LOOKS LIKE UNDER PRESSURE
       </Text>
       <Text style={styles.bodyText}>
         Scripture is not a collection of inspirational stories; it is the record
@@ -359,34 +359,34 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         restoration.
       </Text>
 
-      <Text style={styles.h3}>Job — Integrity under suffering</Text>
+      <Text style={styles.h3}>Job - Integrity under suffering</Text>
       <Text style={styles.bodyText}>
-        Purpose holds even when everything else collapses. Job’s story
+        Purpose holds even when everything else collapses. Job's story
         dismantles the myth that purpose is proven only in success. It is proven
         in faithfulness.
       </Text>
 
-      <Text style={styles.h3}>Moses — Assignment after delay</Text>
+      <Text style={styles.h3}>Moses - Assignment after delay</Text>
       <Text style={styles.bodyText}>
-        Purpose can be delayed, but in God’s economy, delay is often formation.
+        Purpose can be delayed, but in God's economy, delay is often formation.
         The man who fled Egypt in fear returned with clarity, authority, and a
         mandate.
       </Text>
 
-      <Text style={styles.h3}>Abraham — Direction through trust</Text>
+      <Text style={styles.h3}>Abraham - Direction through trust</Text>
       <Text style={styles.bodyText}>
         Abraham is called without a map, given promises without timelines. His
         life shows that purpose is walked out step-by-step, not leap-by-leap.
       </Text>
 
-      <Text style={styles.h3}>David — Formation in hiddenness</Text>
+      <Text style={styles.h3}>David - Formation in hiddenness</Text>
       <Text style={styles.bodyText}>
         Before the throne, there was the field. Before influence, there were
-        lions and bears. David’s leadership was forged in worship and obedience
+        lions and bears. David's leadership was forged in worship and obedience
         long before coronation.
       </Text>
 
-      <Text style={styles.h3}>Solomon — Discernment through wisdom</Text>
+      <Text style={styles.h3}>Solomon - Discernment through wisdom</Text>
       <Text style={styles.bodyText}>
         Solomon shows us that purpose without wisdom becomes vanity. Capacity
         without alignment leads to waste.
@@ -394,7 +394,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <View style={styles.sectionSpacer} />
 
-      <Text style={styles.h2}>3. JESUS — THE BLUEPRINT FOR HUMAN FUNCTION</Text>
+      <Text style={styles.h2}>3. JESUS - THE BLUEPRINT FOR HUMAN FUNCTION</Text>
       <Text style={styles.bodyText}>
         Jesus does not only save mankind; He reveals mankind. He is the perfect
         expression of ordered desires, aligned identity, disciplined action,
@@ -409,7 +409,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       <View style={styles.sectionSpacer} />
 
       <Text style={styles.h2}>
-        4. WORLDVIEWS — HUMANITY’S ATTEMPT TO REPLACE THE ORIGINAL DESIGN
+        4. WORLDVIEWS - HUMANITY'S ATTEMPT TO REPLACE THE ORIGINAL DESIGN
       </Text>
       <Text style={styles.bodyText}>
         Civilisations rise and fall on their answer to the question of human
@@ -420,33 +420,33 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Hinduism —</Text> dissolution of self.
+            <Text style={styles.strong}>Hinduism -</Text> dissolution of self.
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Buddhism —</Text> escape from desire.
+            <Text style={styles.strong}>Buddhism -</Text> escape from desire.
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Confucianism —</Text> order without a
+            <Text style={styles.strong}>Confucianism -</Text> order without a
             Father.
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Islam —</Text> obedience without
+            <Text style={styles.strong}>Islam -</Text> obedience without
             sonship.
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Atheism —</Text> meaning manufactured
+            <Text style={styles.strong}>Atheism -</Text> meaning manufactured
             from meaninglessness.
           </Text>
         </View>
@@ -485,17 +485,17 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       <Text style={styles.bodyText}>
         This is not ideology. It is documented history. Christianity did not
         merely inspire private faith; it reshaped civilisation. Much of what we
-        call “modern” is the outworking of biblical ideas entering public life.
+        call "modern" is the outworking of biblical ideas entering public life.
       </Text>
 
       {/* INSERTED ACCESSIBLE BLOCK */}
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          WHY CHRISTIANITY BUILT THE MODERN WORLD — MADE ACCESSIBLE, STILL
+          WHY CHRISTIANITY BUILT THE MODERN WORLD - MADE ACCESSIBLE, STILL
           POWERFUL
         </Text>
         <Text style={styles.bodyText}>
-          Much of what our world now treats as “obvious” or “secular progress”
+          Much of what our world now treats as "obvious" or "secular progress"
           grew directly from Christian convictions about God, people, and order.
           Here is how those ideas moved from Scripture into history:
         </Text>
@@ -503,7 +503,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          • Human Dignity — Imago Dei (Genesis 1:26–27)
+          • Human Dignity - Imago Dei (Genesis 1:26-27)
         </Text>
         <Text style={styles.bodyText}>
           The idea that every human being carries divine worth, regardless of
@@ -512,13 +512,13 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         </Text>
         <Text style={styles.bodyText}>
           Where to explore: the abolition movement, early Christian writings,
-          Genesis 1–2.
+          Genesis 1-2.
         </Text>
       </View>
 
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          • Scientific Rationalism — A rational Creator, a rational universe
+          • Scientific Rationalism - A rational Creator, a rational universe
         </Text>
         <Text style={styles.bodyText}>
           Because Christians believed God was orderly, they expected the world
@@ -526,14 +526,14 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
           scientific revolution.
         </Text>
         <Text style={styles.bodyText}>
-          Where to explore: Newton, Kepler, Boyle, Pascal — all believers who
+          Where to explore: Newton, Kepler, Boyle, Pascal - all believers who
           did not see science as an enemy of faith but as worship through
           discovery.
         </Text>
       </View>
 
       <View style={styles.sectionSpacer}>
-        <Text style={styles.h3}>• The Rule of Law — No one is above God</Text>
+        <Text style={styles.h3}>• The Rule of Law - No one is above God</Text>
         <Text style={styles.bodyText}>
           The biblical insistence that even kings answer to a higher authority
           produced the foundations of constitutional government.
@@ -546,11 +546,11 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          • Economic Freedom — Stewardship, vocation, responsibility
+          • Economic Freedom - Stewardship, vocation, responsibility
         </Text>
         <Text style={styles.bodyText}>
           Christian theology honoured the dignity of work, private stewardship,
-          and moral limits on exploitation — the seeds of many modern economic
+          and moral limits on exploitation - the seeds of many modern economic
           models.
         </Text>
         <Text style={styles.bodyText}>
@@ -561,35 +561,35 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          • Personal Responsibility — Each person answers to God
+          • Personal Responsibility - Each person answers to God
         </Text>
         <Text style={styles.bodyText}>
           Not the state. Not the tribe. Not blind fate. This created the inner
           architecture for self-governance, conscience, and moral agency.
         </Text>
         <Text style={styles.bodyText}>
-          Where to explore: Jesus’ parables, Pauline letters, Augustine on
+          Where to explore: Jesus' parables, Pauline letters, Augustine on
           conscience and will.
         </Text>
       </View>
 
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          • Charitable Systems — Love your neighbour
+          • Charitable Systems - Love your neighbour
         </Text>
         <Text style={styles.bodyText}>
           Christians were the first to build hospitals, orphanages, and
-          structured charity — not as philanthropy, but as obedience.
+          structured charity - not as philanthropy, but as obedience.
         </Text>
         <Text style={styles.bodyText}>
           Where to explore: early Church history, monastic movements, Basil the
-          Great’s early hospital work.
+          Great's early hospital work.
         </Text>
       </View>
 
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          • Justice as Moral Principle — Righteousness and equity
+          • Justice as Moral Principle - Righteousness and equity
         </Text>
         <Text style={styles.bodyText}>
           Justice became a public duty, not a privilege reserved for the
@@ -603,10 +603,10 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <View style={styles.sectionSpacer}>
         <Text style={styles.h3}>
-          • Vocation as Sacred Work — Work as worship
+          • Vocation as Sacred Work - Work as worship
         </Text>
         <Text style={styles.bodyText}>
-          Christianity erased the divide between “sacred” and “secular” work. A
+          Christianity erased the divide between "sacred" and "secular" work. A
           farmer, mother, merchant, or statesman could serve God through their
           craft with the same dignity as a priest.
         </Text>
@@ -618,24 +618,24 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <Text style={styles.bodyText}>
         When purpose is grounded in reality, it becomes productive. When it is
-        aligned with divine order, it becomes transformative — at personal,
+        aligned with divine order, it becomes transformative - at personal,
         household, and civilisational scale.
       </Text>
 
       <View style={styles.sectionSpacer} />
       <Text style={styles.h2}>
-        6. ECCLESIASTES — THE TWO-SENTENCE BLUEPRINT
+        6. ECCLESIASTES - THE TWO-SENTENCE BLUEPRINT
       </Text>
 
       <View style={styles.quoteBlock}>
         <Text style={styles.quoteText}>
-          “Fear God and keep His commandments… this is the whole duty of man.” —
+          "Fear God and keep His commandments... this is the whole duty of man." -
           Ecclesiastes 12:13
         </Text>
       </View>
 
       <Text style={styles.bodyText}>
-        The entire architecture of human purpose — condensed. This is not fear
+        The entire architecture of human purpose - condensed. This is not fear
         as terror; it is fear as proper orientation.
       </Text>
 
@@ -661,14 +661,14 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <Text style={styles.bodyText}>
         Jesus completes the blueprint: Love God. Love your neighbour as
-        yourself. Not poetry — governance. Not emotion — protocol. Love is the
+        yourself. Not poetry - governance. Not emotion - protocol. Love is the
         engine of divine order, and order is the environment where purpose
         flourishes.
       </Text>
 
       <View style={styles.sectionSpacer} />
       <Text style={styles.h2}>
-        7. FRAMEWORKS — THE STRATEGIC GRID OF HUMAN EXISTENCE
+        7. FRAMEWORKS - THE STRATEGIC GRID OF HUMAN EXISTENCE
       </Text>
       <Text style={styles.bodyText}>
         Purpose is not philosophical; it is functional. These frameworks express
@@ -683,7 +683,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       <Text style={styles.h3}>⚙️ The Garden Mandate Model</Text>
       <Text style={styles.bodyText}>Identity → Work → Influence → Culture</Text>
 
-      <Text style={styles.h3}>⚙️ Ancient–Future Leadership Matrix</Text>
+      <Text style={styles.h3}>⚙️ Ancient-Future Leadership Matrix</Text>
       <Text style={styles.bodyText}>
         (Abrahamic Faith) + (Mosaic Governance) + (Davidic Devotion) + (Pauline
         Strategy) + (Early-Church Resilience) = Enduring Leadership.
@@ -700,13 +700,13 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </Text>
 
       <Text style={styles.bodyText}>
-        These are not predictions of future work. They are work already done —
+        These are not predictions of future work. They are work already done -
         codified, articulated, structured.
       </Text>
 
       <View style={styles.sectionSpacer} />
       <Text style={styles.h2}>
-        8. CONCLUSION — PURPOSE IS A MANDATE, NOT A MYSTERY
+        8. CONCLUSION - PURPOSE IS A MANDATE, NOT A MYSTERY
       </Text>
 
       <Text style={styles.bodyText}>
@@ -714,7 +714,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         were not placed here merely to survive time and hope for comfort.
       </Text>
       <Text style={styles.bodyText}>
-        The purpose of man is not hidden: to align with God’s order, embody His
+        The purpose of man is not hidden: to align with God's order, embody His
         love, steward His world, and build with clarity.
       </Text>
       <Text style={styles.bodyText}>

@@ -332,7 +332,7 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
   premium: {
     title: "Premium Access for Men Carrying Real Weight",
     description:
-      "For fathers, founders, and directors who need more than generic motivation – they need strategic partnership.",
+      "For fathers, founders, and directors who need more than generic motivation - they need strategic partnership.",
     theme: "premium",
     layout: "featured-first",
     actions: [
@@ -384,7 +384,7 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
   },
 
   newsletter: {
-    title: "The Inner Circle – Curated Wisdom Delivered",
+    title: "The Inner Circle - Curated Wisdom Delivered",
     description:
       "The only email worth opening: deep essays, exclusive tools, and early access for serious builders and leaders.",
     theme: "premium",
@@ -605,7 +605,7 @@ export function validatePresetLinks(presetKey: CTAKey): {
     items.forEach((item) => {
       if (!item.href || item.href === "#") {
         brokenLinks.push(
-          `${String(category)}: ${item.label} – Missing or invalid href`
+          `${String(category)}: ${item.label} - Missing or invalid href`
         );
       }
     });

@@ -28,7 +28,7 @@ export interface HeroBannerConfig {
   subtitle?: string;
   /** Short descriptive copy (used as body copy under the title) */
   description?: string;
-  /** Background image path (public/…) */
+  /** Background image path (public/...) */
   backgroundImage?: string;
   /** Optional accent token for theming */
   accent?: "gold" | "blue" | "neutral";
@@ -96,7 +96,7 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
     title: "Faith-rooted strategy for founders, boards, and builders.",
     subtitle: "Advisory & consulting",
     description:
-      "Structured, accountable advisory at the intersection of strategy, governance, and character — for leaders who carry real weight.",
+      "Structured, accountable advisory at the intersection of strategy, governance, and character - for leaders who carry real weight.",
     backgroundImage: "/assets/images/london-skyline-gold.webp",
     accent: "neutral",
     primaryCta: {
@@ -153,7 +153,7 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
     title: "Fathering Without Fear.",
     subtitle: "A long-term work on courage, consequence, and legacy.",
     description:
-      "Rebuilding the courage to stay, lead, and bless — when legal systems, markets, and culture cut against fathers.",
+      "Rebuilding the courage to stay, lead, and bless - when legal systems, markets, and culture cut against fathers.",
     backgroundImage: "/assets/images/abraham-of-london-banner.webp",
     accent: "gold",
     primaryCta: {

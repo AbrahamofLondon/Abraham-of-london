@@ -21,7 +21,7 @@ const StrategyPage: NextPage = () => {
           </h1>
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-gray-200">
             Structural thinking for people who have to decide where capital,
-            time, and trust actually go — not just talk about it.
+            time, and trust actually go - not just talk about it.
           </p>
         </header>
 
@@ -42,7 +42,7 @@ const StrategyPage: NextPage = () => {
               >
                 Content Library
               </Link>{" "}
-              — filter for pieces tagged{" "}
+              - filter for pieces tagged{" "}
               <span className="font-semibold text-amber-300">
                 strategy
               </span>{" "}

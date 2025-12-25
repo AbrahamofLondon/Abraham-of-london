@@ -21,7 +21,7 @@ const FatherhoodPage: NextPage = () => {
           </h1>
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-gray-200">
             A focused doorway into the Canon, essays, and tools for men who
-            want to carry fatherhood with courage, clarity, and conviction —
+            want to carry fatherhood with courage, clarity, and conviction -
             not sentimentality.
           </p>
         </header>
@@ -49,7 +49,7 @@ const FatherhoodPage: NextPage = () => {
                   href="/canon/volume-i-foundations-of-purpose"
                   className="text-amber-300 underline-offset-2 hover:underline"
                 >
-                  Volume I – Foundations of Purpose
+                  Volume I - Foundations of Purpose
                 </Link>
               </li>
               <li>
@@ -102,7 +102,7 @@ const FatherhoodPage: NextPage = () => {
             </h2>
             <p className="text-sm text-gray-200 mb-3">
               From time to time there will be closed rooms specifically for
-              fathers — part workshop, part confessional, part strategy lab.
+              fathers - part workshop, part confessional, part strategy lab.
             </p>
             <p className="text-sm text-gray-300">
               When those open, they&apos;ll be listed on the{" "}

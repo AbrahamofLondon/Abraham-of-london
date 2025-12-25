@@ -61,7 +61,7 @@ const TermsPage: NextPage = () => {
               projects under the Abraham of London banner.
             </li>
             <li>
-              <strong>Inner Circle membership</strong> – access to exclusive
+              <strong>Inner Circle membership</strong> - access to exclusive
               content and community features through cryptographic key systems.
             </li>
           </ul>
@@ -130,8 +130,8 @@ const TermsPage: NextPage = () => {
             4. Intellectual property
           </h2>
           <p>
-            Unless otherwise stated, the content on this site — including text,
-            images, frameworks, and branding — is the intellectual property of
+            Unless otherwise stated, the content on this site - including text,
+            images, frameworks, and branding - is the intellectual property of
             Abraham of London or its licensors.
           </p>
           <p>

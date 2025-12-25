@@ -1,4 +1,4 @@
-// lib/canon.ts
+// lib/canon.ts - FIXED
 import { allCanons } from "@/lib/contentlayer";
 import type { Canon as ContentlayerCanon } from "@/lib/contentlayer";
 export type Canon = ContentlayerCanon;
@@ -132,11 +132,12 @@ export function getCanonIndexItems(): CanonIndexItem[] {
 /* Getters                                                                    */
 /* -------------------------------------------------------------------------- */
 
+// FIX: Add type assertion for computed fields
 export function getCanonDocBySlug(slug: string): Canon | null {
   const target = norm(slug);
   if (!target) return null;
 
-  const docs = allCanons ?? [];
+  const docs = (allCanons ?? []) as Canon[];
 
   return (
     docs.find((c) => !isDraftCanon(c) && resolveCanonSlug(c) === target) ??
@@ -150,24 +151,24 @@ export function getCanonDocBySlug(slug: string): Canon | null {
 }
 
 export function getPublicCanon(): Canon[] {
-  return (allCanons ?? []).filter(
-    (c) => c && !isDraftCanon(c) && isPublicCanon(c),
-  );
+  const docs = (allCanons ?? []) as Canon[];
+  return docs.filter((c) => c && !isDraftCanon(c) && isPublicCanon(c));
 }
 
 export function getAllCanons(): Canon[] {
-  return (allCanons ?? []).filter((c) => c && !isDraftCanon(c));
+  const docs = (allCanons ?? []) as Canon[];
+  return docs.filter((c) => c && !isDraftCanon(c));
 }
 
 export function getFeaturedCanons(): Canon[] {
-  return (allCanons ?? []).filter(
-    (c) => c && !isDraftCanon(c) && (c as any).featured === true,
-  );
+  const docs = (allCanons ?? []) as Canon[];
+  return docs.filter((c) => c && !isDraftCanon(c) && (c as any).featured === true);
 }
 
 export function getCanonBySlug(slug: string): Canon | undefined {
   const target = norm(slug);
-  return (allCanons ?? []).find(
+  const docs = (allCanons ?? []) as Canon[];
+  return docs.find(
     (c) => c && !isDraftCanon(c) && resolveCanonSlug(c) === target,
   );
 }
@@ -179,7 +180,7 @@ export function isCanon(doc: any): doc is ContentlayerCanon {
 }
 
 export function debugCanonVisibility() {
-  const docs = allCanons ?? [];
+  const docs = (allCanons ?? []) as Canon[];
   return docs.map((c: any) => {
     const slug = resolveCanonSlug(c);
     const draft = isDraftCanon(c);

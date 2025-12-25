@@ -83,7 +83,7 @@ const DEFAULT_ITEMS: Testimonial[] = [
   },
   {
     quote:
-      "Finally—a fatherhood voice with a spine. Clear practices my kids noticed, not just theories.",
+      "Finally-a fatherhood voice with a spine. Clear practices my kids noticed, not just theories.",
     name: "Emilia I.",
     role: "Manager",
     metric: "Family rhythms that stick",
@@ -304,11 +304,11 @@ export default function TestimonialsSection({
                   {/* Quote */}
                   <blockquote className="text-base leading-relaxed">
                     <span aria-hidden className="sr-only">
-                      “
+                      "
                     </span>
                     <span className="block line-clamp-6">{t.quote}</span>
                     <span aria-hidden className="sr-only">
-                      ”
+                      "
                     </span>
                   </blockquote>
 

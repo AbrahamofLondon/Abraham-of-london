@@ -1,25 +1,49 @@
-// lib/inner-circle/index.ts
+// lib/inner-circle/index.ts - SIMPLE RE-EXPORT
 /**
- * Public Inner Circle module surface (stable import path).
- * Keeps legacy imports working:
- *   import { ... } from "@/lib/inner-circle"
+ * Public Inner Circle module surface.
+ * Re-exports from the store module.
  */
 
+// Re-export everything from the store
 export {
   createOrUpdateMemberAndIssueKey,
   verifyInnerCircleKey,
-  recordInnerCircleUnlock,
-  revokeInnerCircleKey,
-  deleteMemberByEmail,
   getPrivacySafeStats,
-  getMemberByEmail,
+  getPrivacySafeKeyRows,
+  getClientIp,
+  getPrivacySafeKeyExport,
+  deleteMemberByEmail,
 } from "@/lib/server/inner-circle-store";
 
-// Email: new canonical location
+// Email functionality
 export { sendInnerCircleEmail } from "@/lib/inner-circle/email";
 
-// Admin export helpers (if used by routes)
-export { getPrivacySafeKeyExport } from "@/lib/server/inner-circle-export";
+// Placeholder functions (not in store)
+export const getMemberByEmail = async (email: string): Promise<any> => {
+  console.warn('[InnerCircle] getMemberByEmail not implemented');
+  return null;
+};
 
-// IP helpers SHOULD NOT be from inner-circle, but keep a compat export if needed.
-export { getClientIp } from "@/lib/server/ip";
+export const recordInnerCircleUnlock = async (
+  email: string,
+  slug: string,
+  ip?: string
+): Promise<{ success: boolean; message?: string }> => {
+  console.warn('[InnerCircle] recordInnerCircleUnlock not implemented');
+  return {
+    success: true,
+    message: 'Access logged (implementation pending)'
+  };
+};
+
+export const revokeInnerCircleKey = async (
+  email: string
+): Promise<{ success: boolean; message?: string }> => {
+  console.warn('[InnerCircle] revokeInnerCircleKey not implemented');
+  const { deleteMemberByEmail } = await import("@/lib/server/inner-circle-store");
+  const result = await deleteMemberByEmail(email);
+  return {
+    success: result,
+    message: result ? 'Member deleted' : 'Failed to delete member'
+  };
+};

@@ -1,4 +1,4 @@
-// lib/content/index.ts
+// lib/content/index.ts - FIXED
 // Unified content system with fallback support
 
 export * from '@/lib/content-fallback';
@@ -34,16 +34,16 @@ export async function loadContent<T = any>(
       const allContent = getAllContentDirect();
       
       switch(contentType) {
-        case 'post': return allContent.posts as T[];
-        case 'book': return allContent.books as T[];
-        case 'canon': return allContent.canon as T[];
-        case 'short': return allContent.shorts as T[];
-        case 'download': return allContent.downloads as T[];
-        case 'event': return allContent.events as T[];
-        case 'print': return allContent.prints as T[];
-        case 'resource': return allContent.resources as T[];
-        case 'strategy': return allContent.strategies as T[];
-        default: return allContent.posts as T[];
+        case 'post': return allContent.posts as unknown as T[];
+        case 'book': return allContent.books as unknown as T[];
+        case 'canon': return allContent.canon as unknown as T[];
+        case 'short': return allContent.shorts as unknown as T[];
+        case 'download': return allContent.downloads as unknown as T[];
+        case 'event': return allContent.events as unknown as T[];
+        case 'print': return allContent.prints as unknown as T[];
+        case 'resource': return allContent.resources as unknown as T[];
+        case 'strategy': return allContent.strategies as unknown as T[];
+        default: return allContent.posts as unknown as T[];
       }
     }
     
@@ -62,7 +62,8 @@ export async function loadContent<T = any>(
     };
     
     const unifiedType = typeMap[contentType] || contentType;
-    return await getUnifiedContentByType(unifiedType as any);
+    const content = await getUnifiedContentByType(unifiedType as any);
+    return content as unknown as T[];
   } catch (error) {
     console.error(`Error loading ${contentType}:`, error);
     return [];
@@ -80,13 +81,13 @@ export async function getContent<T = any>(
     const unifiedType = type === 'post' ? 'essay' : type;
     const content = await getUnifiedContentBySlug(slug, unifiedType as any);
     
-    if (content) return content as T;
+    if (content) return content as unknown as T;
     
     // Fallback to direct contentlayer
     const { getDocumentBySlugDirect } = await import('@/lib/content-fallback');
     const doc = getDocumentBySlugDirect(slug);
     
-    return doc ? convertToUnifiedFormat(doc) as T : null;
+    return doc ? convertToUnifiedFormat(doc) as unknown as T : null;
   } catch (error) {
     console.error(`Error getting content ${slug}:`, error);
     return null;
@@ -108,11 +109,11 @@ function convertToUnifiedFormat(doc: any): any {
   };
   
   return {
-    id: `${doc._type.toLowerCase()}-${doc.slug}`,
-    type: typeMap[doc._type] || doc._type.toLowerCase(),
+    id: `${doc.type.toLowerCase()}-${doc.slug}`,
+    type: typeMap[doc.type] || doc.type.toLowerCase(),
     slug: doc.slug,
     title: doc.title,
-    url: getContentUrl(doc._type, doc.slug),
+    url: getContentUrl(doc.type, doc.slug),
     excerpt: doc.excerpt,
     description: doc.description,
     date: doc.date,

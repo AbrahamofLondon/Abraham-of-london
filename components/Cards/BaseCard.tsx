@@ -191,7 +191,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
-          {/* Optional: add subtle overlay only when contain is used (prevents “dead letterbox”) */}
+          {/* Optional: add subtle overlay only when contain is used (prevents "dead letterbox") */}
           {coverFit === "contain" && (
             <div
               className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"

@@ -316,7 +316,7 @@ export default function NewsletterForm({
         className={buttonClasses}
       >
         {isLoading
-          ? "Subscribing…"
+          ? "Subscribing..."
           : isRateLimited
             ? "Try Again Later"
             : buttonText}

@@ -26,7 +26,7 @@ export default function CanonInvocation({ className }: CanonInvocationProps) {
             <br />
             Before time learned to turn,
             <br />
-            Before kingdoms rose or crumbled into dust —
+            Before kingdoms rose or crumbled into dust -
           </p>
 
           <p className="font-semibold text-softGold">Purpose was written.</p>

@@ -60,7 +60,7 @@ export default function ChathamRoomsPage(): JSX.Element {
               transition={{ delay: 0.4 }}
             >
               The Chatham Rooms are small, curated conversations held under
-              Chatham House Rule — where founders, executives, and fathers can
+              Chatham House Rule - where founders, executives, and fathers can
               speak plainly about power, family, faith, and consequence without
               performance or optics.
             </motion.p>
@@ -143,8 +143,8 @@ export default function ChathamRoomsPage(): JSX.Element {
                 viewport={{ once: true }}
               >
                 {[
-                  "6–12 people, carefully curated.",
-                  "2–3 hour facilitated dialogue around a real theme.",
+                  "6-12 people, carefully curated.",
+                  "2-3 hour facilitated dialogue around a real theme.",
                   "No performance, no recording, no social posting.",
                   "Scripture, history, and strategy in one room.",
                 ].map((item, index) => (
@@ -191,7 +191,7 @@ export default function ChathamRoomsPage(): JSX.Element {
               </ul>
               <p className="text-sm text-white/90 md:text-base">
                 Admission is by invitation or referral. The goal is not prestige
-                for its own sake, but protection of the conversation — so the
+                for its own sake, but protection of the conversation - so the
                 right people can finally talk honestly.
               </p>
             </motion.aside>
@@ -236,7 +236,7 @@ export default function ChathamRoomsPage(): JSX.Element {
                   icon: Users,
                   title: "No spectators",
                   description:
-                    "Everyone contributes. Everyone is accountable. You come to work on real questions — fatherhood, calling, power, money, and legacy — not to collect quotes.",
+                    "Everyone contributes. Everyone is accountable. You come to work on real questions - fatherhood, calling, power, money, and legacy - not to collect quotes.",
                 },
               ].map((principle, index) => (
                 <motion.div

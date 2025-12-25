@@ -88,7 +88,7 @@ export default function FloatingTeaserCTA(): JSX.Element | null {
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-deepCharcoal">
-                  Fathering Without Fear — Teaser
+                  Fathering Without Fear - Teaser
                 </p>
                 <p className="mt-1 text-xs text-[color:var(--color-on-secondary)/0.8]">
                   A short, cinematic preview of the story they thought they

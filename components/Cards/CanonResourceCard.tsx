@@ -54,7 +54,7 @@ const CanonResourceCard: React.FC<CanonCardProps> = ({
       aria-label={getCardAriaLabel(canon.title, "Canon volume")}
     >
       <article className="flex h-full flex-col overflow-hidden">
-        {/* Cover Image – always present with fallback */}
+        {/* Cover Image - always present with fallback */}
         <div className="relative aspect-[16/9] w-full overflow-hidden">
           <Image
             src={imageSrc}

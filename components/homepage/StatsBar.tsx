@@ -76,7 +76,7 @@ export default function StatsBar({
             </p>
             <p className="mt-2 text-sm leading-relaxed">
               Canon at the top, ventures in the middle, tools and writings in
-              the field—one structural stack.
+              the field-one structural stack.
             </p>
           </div>
 

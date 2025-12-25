@@ -170,7 +170,7 @@ export default function SearchPalette({
               setActive(0);
             }}
             onKeyDown={handleInputKeyDown}
-            placeholder="Search posts, books, events…"
+            placeholder="Search posts, books, events..."
             className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-forest dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
             aria-label="Search"
           />

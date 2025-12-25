@@ -1,6 +1,11 @@
-// lib/content-utils.ts
-import type { DocumentTypes } from "@/lib/contentlayer-helper";
+// lib/content-utils.ts - FIXED
+// Remove the import that doesn't exist and use a proper type
+
+import type { AnyDoc } from "@/lib/content-fallback";
 import type { PostMeta } from "@/types/post";
+
+// Define DocumentTypes locally based on what's actually available
+export type DocumentTypes = AnyDoc;
 
 export function convertDocumentToPostMeta(doc: DocumentTypes): PostMeta {
   // --- coverImage normalisation: always string | null ---
@@ -40,7 +45,7 @@ export function convertDocumentToPostMeta(doc: DocumentTypes): PostMeta {
     published: !doc.draft,
     url: (doc as any).url,
 
-    // Optional fields – only spread if present and non-undefined
+    // Optional fields - only spread if present and non-undefined
     subtitle: (doc as any).subtitle,
     volumeNumber:
       (doc as any).volumeNumber != null

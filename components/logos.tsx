@@ -48,13 +48,13 @@ function SvgBase({
 }
 
 /**
- * Monogram — a premium, quiet-luxury "A" crest mark.
+ * Monogram - a premium, quiet-luxury "A" crest mark.
  * Uses currentColor so it inherits text color (e.g., deepCharcoal).
  */
 export function LogoMonogram(props: SvgProps) {
   return (
     <SvgBase
-      title={props.title ?? "Abraham of London — Monogram"}
+      title={props.title ?? "Abraham of London - Monogram"}
       viewBox="0 0 64 64"
       {...props}
     >
@@ -78,13 +78,13 @@ export function LogoMonogram(props: SvgProps) {
 }
 
 /**
- * Wordmark — refined serif/smallcaps feel but rendered as vector paths,
+ * Wordmark - refined serif/smallcaps feel but rendered as vector paths,
  * so it stays sharp and brand-consistent.
  */
 export function LogoWordmark(props: SvgProps) {
   return (
     <SvgBase
-      title={props.title ?? "Abraham of London — Wordmark"}
+      title={props.title ?? "Abraham of London - Wordmark"}
       viewBox="0 0 320 64"
       {...props}
     >
@@ -150,7 +150,7 @@ export function LogoFull({
 export function LogoCompact(props: SvgProps) {
   return (
     <SvgBase
-      title={props.title ?? "Abraham of London — Compact"}
+      title={props.title ?? "Abraham of London - Compact"}
       viewBox="0 0 120 64"
       {...props}
     >
@@ -173,7 +173,7 @@ export function LogoCompact(props: SvgProps) {
 export function LogoIcon(props: SvgProps) {
   return (
     <SvgBase
-      title={props.title ?? "Abraham of London — Icon"}
+      title={props.title ?? "Abraham of London - Icon"}
       viewBox="0 0 64 64"
       {...props}
     >

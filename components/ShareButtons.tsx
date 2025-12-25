@@ -178,7 +178,7 @@ export default function ShareButtons({
       }
     }
 
-    // Fallback – use as-is (better than silently killing the UI)
+    // Fallback - use as-is (better than silently killing the UI)
     return trimmed;
   }, [url]);
 

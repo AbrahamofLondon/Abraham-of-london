@@ -17,7 +17,7 @@ const Quote: FC<QuoteProps> = ({ children, cite, ...props }) => {
       <div className="text-lg leading-relaxed">{children}</div>
       {cite && (
         <footer className="mt-4 text-sm text-gray-500 dark:text-gray-400 not-italic">
-          — {cite}
+          - {cite}
         </footer>
       )}
     </blockquote>

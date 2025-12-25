@@ -21,7 +21,7 @@ const LeadershipPage: NextPage = () => {
           </h1>
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-gray-200">
             For men holding responsibility in boardrooms, congregations, or
-            communities — this is where you enter the leadership stream of the
+            communities - this is where you enter the leadership stream of the
             Canon.
           </p>
         </header>
@@ -67,7 +67,7 @@ const LeadershipPage: NextPage = () => {
               >
                 Events
               </Link>{" "}
-              page — starting with the{" "}
+              page - starting with the{" "}
               <Link
                 href="/events/leadership-workshop"
                 className="text-amber-300 underline-offset-2 hover:underline"

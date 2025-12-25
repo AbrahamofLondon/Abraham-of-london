@@ -64,7 +64,7 @@ export default function ContactForm(): JSX.Element {
   };
 
   function validateForm(): string | null {
-    // Honeypot: if filled, it’s almost certainly a bot
+    // Honeypot: if filled, it's almost certainly a bot
     if (form.botField.trim() !== "") {
       console.warn("Contact form honeypot triggered - possible bot detected");
       // We *return a fake success message* here, but we don't block submit()
@@ -267,7 +267,7 @@ export default function ContactForm(): JSX.Element {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      {/* Honeypot – matches server 'botField' */}
+      {/* Honeypot - matches server 'botField' */}
       <div
         className="sr-only"
         aria-hidden="true"
@@ -389,7 +389,7 @@ export default function ContactForm(): JSX.Element {
         className="w-full rounded-xl bg-softGold py-3 font-bold text-black transition-all duration-200 hover:bg-softGold/90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
       >
         {submitting
-          ? "Sending…"
+          ? "Sending..."
           : isRateLimited
             ? "Try Again Later"
             : "Send Message"}

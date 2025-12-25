@@ -24,7 +24,7 @@ export interface ThemeProviderProps {
   children: React.ReactNode;
   /** Optional initial theme; defaults to "dark" */
   defaultTheme?: ThemeName;
-  /** Kept for compatibility with old API – currently unused */
+  /** Kept for compatibility with old API - currently unused */
   storageKey?: string;
 }
 
@@ -34,7 +34,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 }) => {
   const [theme, setTheme] = React.useState<ThemeName>(defaultTheme);
 
-  // Apply the `dark` class to <html> – this is what Tailwind uses
+  // Apply the `dark` class to <html> - this is what Tailwind uses
   React.useEffect(() => {
     if (typeof document === "undefined") return;
 

@@ -17,14 +17,14 @@ export type InnerCircleEmailPayload = {
 
 function subjectFor(type: InnerCircleEmailType): string {
   if (type === "resend") return "Your Inner Circle access key";
-  return "Welcome to the Inner Circle — your access key";
+  return "Welcome to the Inner Circle - your access key";
 }
 
 function buildText(type: InnerCircleEmailType, data: InnerCircleEmailPayload["data"]): string {
   const header =
     type === "resend"
       ? `Hi ${data.name},\n\nHere is your access key again.`
-      : `Hi ${data.name},\n\nWelcome — here is your access key.`;
+      : `Hi ${data.name},\n\nWelcome - here is your access key.`;
 
   return [
     header,
@@ -34,7 +34,7 @@ function buildText(type: InnerCircleEmailType, data: InnerCircleEmailPayload["da
     "",
     "If you did not request this, you can ignore this email.",
     "",
-    "— Abraham of London",
+    "- Abraham of London",
   ].join("\n");
 }
 
@@ -42,7 +42,7 @@ function buildText(type: InnerCircleEmailType, data: InnerCircleEmailPayload["da
  * Preferred, structured call:
  * await sendInnerCircleEmail({ to, type, data })
  *
- * Backward-compatible “old signature”:
+ * Backward-compatible "old signature":
  * await sendInnerCircleEmail(email, key, name?)
  */
 export async function sendInnerCircleEmail(

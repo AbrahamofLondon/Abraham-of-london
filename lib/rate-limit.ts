@@ -139,7 +139,7 @@ export const RATE_LIMIT_CONFIGS = {
     keyPrefix: "cache",
   },
   
-  // NEW: Suspicious activity detection
+  // Suspicious activity detection
   SUSPICIOUS_ACTIVITY: {
     windowMs: 60_000,
     max: 2,
@@ -451,12 +451,16 @@ export function getRateLimiterStats() {
   return rateLimiter.getStats();
 }
 
+// FIXED: Make headers optional to match usage
 export function getClientIpFromRequest(req: { 
-  headers: Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>; // Made optional
   socket?: { remoteAddress?: string };
   connection?: { remoteAddress?: string };
 }): string {
-  const headers = [
+  // Handle missing headers
+  const headers = req.headers || {};
+  
+  const headerKeys = [
     'cf-connecting-ip',
     'x-client-ip',
     'x-forwarded-for',
@@ -464,8 +468,8 @@ export function getClientIpFromRequest(req: {
     'forwarded-for',
   ];
   
-  for (const header of headers) {
-    const value = req.headers[header];
+  for (const header of headerKeys) {
+    const value = headers[header];
     if (value) {
       const ip = Array.isArray(value) 
         ? value[0]?.split(',')[0]?.trim()
@@ -530,6 +534,7 @@ export function anonymizeIp(ip: string): string {
   return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
 }
 
+// FIXED: Properly handle optional request object
 export function generateRateLimitKey(
   prefix: string,
   identifier: string,

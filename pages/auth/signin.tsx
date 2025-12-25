@@ -1,4 +1,4 @@
-// pages/auth/signin.tsx
+// pages/auth/signin.tsx - FIXED
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { signIn } from "next-auth/react";
@@ -53,7 +53,7 @@ export default function SignIn() {
                   autoComplete="current-password"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm dark:bg-gray-800"
-                  placeholder="Password (use 'demo' for development)"
+                  placeholder='Password (use "demo" for development)'
                 />
               </div>
             </div>

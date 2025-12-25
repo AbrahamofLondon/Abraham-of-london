@@ -324,7 +324,7 @@ export async function bulkSubscribe(
 }
 
 // ---------------------------------------------------------------------------
-// Unsubscribe (stub – implement real Buttondown call when needed)
+// Unsubscribe (stub - implement real Buttondown call when needed)
 // ---------------------------------------------------------------------------
 
 export async function unsubscribe(email: string): Promise<SubscriptionResult> {
@@ -339,7 +339,7 @@ export async function unsubscribe(email: string): Promise<SubscriptionResult> {
     };
   }
 
-  // TODO: call Buttondown unsubscribe endpoint when you’re ready.
+  // TODO: call Buttondown unsubscribe endpoint when you're ready.
   // For now, we just return success to avoid blocking the UX.
   return {
     ok: true,

@@ -70,7 +70,7 @@ async function sendViaConsole(input: EmailSendInput): Promise<void> {
 async function sendViaNetlify(input: EmailSendInput): Promise<void> {
   /**
    * IMPORTANT:
-   * Netlify “emails” capabilities vary depending on your setup/add-on.
+   * Netlify "emails" capabilities vary depending on your setup/add-on.
    * So we do NOT guess endpoints. You must set:
    * - NETLIFY_EMAILS_ENDPOINT
    * - NETLIFY_EMAILS_PROVIDER_API_KEY
@@ -124,7 +124,7 @@ export async function sendEmail(input: EmailSendInput): Promise<void> {
 
   const provider = getProvider();
 
-  // “none” means: do nothing but still don’t fail hard (useful in dev pipelines)
+  // "none" means: do nothing but still don't fail hard (useful in dev pipelines)
   if (provider === "none") {
     if (!isProd()) {
       console.log("📧 [Email:none] Skipped send (EMAIL_PROVIDER=none)", {

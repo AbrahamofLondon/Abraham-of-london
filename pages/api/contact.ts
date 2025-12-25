@@ -131,7 +131,7 @@ async function contactHandler(
       const maskedEmail = email.replace(/^(.).+(@.*)$/, "$1***$2");
       // eslint-disable-next-line no-console
       console.log("[contact] submission:", {
-        name: name || "—",
+        name: name || "-",
         email: maskedEmail,
         subject,
         messageLength: message.length,
@@ -199,7 +199,7 @@ async function contactHandler(
           apiKey,
           from,
           to: email,
-          subject: "Fathering Without Fear — Teaser (A4 + Mobile)",
+          subject: "Fathering Without Fear - Teaser (A4 + Mobile)",
           html: autoHtml,
           text: autoText,
         });
@@ -217,8 +217,8 @@ async function contactHandler(
       if (newsletterOptIn) {
         const nlHtml = `
         <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.5;color:#111">
-          <h3>Newsletter opt-in — Fathering Without Fear</h3>
-          <p><strong>Name:</strong> ${escapeHtml(name || "—")}</p>
+          <h3>Newsletter opt-in - Fathering Without Fear</h3>
+          <p><strong>Name:</strong> ${escapeHtml(name || "-")}</p>
           <p><strong>Email:</strong> ${escapeHtml(email)}</p>
           <p>Please add to the launch/chapters list.</p>
         </div>`.trim();
@@ -227,7 +227,7 @@ async function contactHandler(
           apiKey,
           from,
           to,
-          subject: "Newsletter opt-in — Fathering Without Fear",
+          subject: "Newsletter opt-in - Fathering Without Fear",
           html: nlHtml,
         });
 
@@ -300,7 +300,7 @@ function ownerNoticeHtml(args: OwnerNoticeArgs): string {
   return `
   <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.55;color:#111">
     <h2>New website inquiry</h2>
-    <p><strong>Name:</strong> ${escapeHtml(name || "—")}</p>
+    <p><strong>Name:</strong> ${escapeHtml(name || "-")}</p>
     <p><strong>Email:</strong> ${escapeHtml(email)}</p>
     <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
     <p><strong>Teaser requested:</strong> ${teaserOptIn ? "Yes" : "No"}</p>
@@ -322,7 +322,7 @@ function teaserAutoReplyHtml(args: TeaserAutoReplyArgs): string {
   const { teaserA4Url, teaserMobUrl, siteUrl } = args;
   return `
   <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;color:#222">
-    <p>Friends—</p>
+    <p>Friends-</p>
     <p>I'm releasing <em>Fathering Without Fear</em>, a memoir forged in the middle of loss, legal storms, and a father's stubborn hope.</p>
     <p>Here's your free, brand-styled teaser (A4 + Mobile) to read and share:</p>
     <ul>
@@ -338,14 +338,14 @@ function teaserAutoReplyHtml(args: TeaserAutoReplyArgs): string {
 function teaserAutoReplyText(args: TeaserAutoReplyArgs): string {
   const { teaserA4Url, teaserMobUrl, siteUrl } = args;
   return `
-Subject: Fathering Without Fear — the story they thought they knew
+Subject: Fathering Without Fear - the story they thought they knew
 
-Friends—
+Friends-
 I'm releasing Fathering Without Fear, a memoir forged in the middle of loss, legal storms, and a father's stubborn hope.
 
 Free teaser (A4 + Mobile):
-— ${teaserA4Url}
-— ${teaserMobUrl}
+- ${teaserA4Url}
+- ${teaserMobUrl}
 
 For chapter drops and launch dates, reply "keep me posted" or join: ${siteUrl}/contact
 

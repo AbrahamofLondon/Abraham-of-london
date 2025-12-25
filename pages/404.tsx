@@ -14,7 +14,7 @@ const NotFoundPage: React.FC = () => {
     "This page could not be found. Use the links below to return to a live, curated part of the Abraham of London experience.";
 
   return (
-    <Layout title="404 – Not Found">
+    <Layout title="404 - Not Found">
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -46,7 +46,7 @@ const NotFoundPage: React.FC = () => {
               {attemptedPath}
             </code>
             <p className="mt-2 text-[11px] text-gray-400">
-              If this URL should exist, note it down – it helps when we&apos;re
+              If this URL should exist, note it down - it helps when we&apos;re
               tightening routes or migrating content.
             </p>
           </div>

@@ -150,13 +150,13 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
   return (
     <Layout
       title="The Canon"
-      description="A curated canon of strategic, theological, and civilisational volumes — catalogued for serious builders and fathers who think in generations, not news cycles."
+      description="A curated canon of strategic, theological, and civilisational volumes - catalogued for serious builders and fathers who think in generations, not news cycles."
     >
       <Head>
         <title>The Canon | Abraham of London</title>
         <meta
           name="description"
-          content="A curated canon of strategic, theological, and civilisational volumes — catalogued for serious builders and fathers who think in generations, not news cycles."
+          content="A curated canon of strategic, theological, and civilisational volumes - catalogued for serious builders and fathers who think in generations, not news cycles."
         />
         <link rel="canonical" href={`${siteUrl}/canon`} />
         <meta property="og:title" content="The Canon | Abraham of London" />
@@ -236,7 +236,7 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-4 lg:col-span-2">
                   <p className="text-lg leading-relaxed text-gray-300">
-                    This is not a blog roll. It is a living library — volumes that sit at the
+                    This is not a blog roll. It is a living library - volumes that sit at the
                     intersection of{" "}
                     <span className="font-medium text-amber-400">
                       theology, strategy, civilisation, and human destiny
@@ -385,7 +385,7 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                 <p className="text-gray-400">
                   {searchQuery || showFeaturedOnly
                     ? "Try adjusting your search or filter criteria."
-                    : "The catalogue is being prepared. Check back soon — or join the Inner Circle for early access."}
+                    : "The catalogue is being prepared. Check back soon - or join the Inner Circle for early access."}
                 </p>
                 {(searchQuery || showFeaturedOnly) && (
                   <button
@@ -463,7 +463,7 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                       Want deeper access?
                     </h3>
                     <p className="text-gray-300">
-                      Some volumes are reserved for the Inner Circle — early drafts, advanced
+                      Some volumes are reserved for the Inner Circle - early drafts, advanced
                       frameworks, and direct dialogue with Abraham.
                     </p>
                   </div>

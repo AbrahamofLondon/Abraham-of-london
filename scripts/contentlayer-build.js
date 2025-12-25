@@ -1,6 +1,6 @@
 // scripts/contentlayer-build.js
 (async () => {
-  // Use the ESM CLI via dynamic import so we don’t need ts-node
+  // Use the ESM CLI via dynamic import so we don't need ts-node
   const cli = await import("contentlayer/cli");
   // Pass-thru args; prepend "build"
   const args = ["build", ...process.argv.slice(2)];

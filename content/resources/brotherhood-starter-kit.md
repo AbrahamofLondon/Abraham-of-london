@@ -40,4 +40,4 @@ Essential tools and frameworks for building authentic brotherhood and meaningful
 - **Consistency over Intensity** - Small, regular connections build stronger bonds
 - **Service over Status** - Focus on how you can serve, not what you can get
 
-> "Brotherhood isn't about having the same story—it's about fighting for each other's stories."
+> "Brotherhood isn't about having the same story-it's about fighting for each other's stories."

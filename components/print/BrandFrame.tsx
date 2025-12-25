@@ -2,7 +2,7 @@
 import * as React from "react";
 
 export interface BrandFrameProps {
-  /** Optional – used mainly for subtle branding / semantics */
+  /** Optional - used mainly for subtle branding / semantics */
   title?: string;
   subtitle?: string;
   author?: string;
@@ -77,7 +77,7 @@ const BrandFrame: React.FC<BrandFrameProps> = ({
           </div>
         </header>
 
-        {/* Main content – the page is responsible for its own article header */}
+        {/* Main content - the page is responsible for its own article header */}
         <main className="flex-1">{children}</main>
 
         {/* Footer */}

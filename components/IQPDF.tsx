@@ -34,7 +34,7 @@ export interface IQPDFProps {
   showPrint?: boolean;
   showPageControls?: boolean; // page controls are visual only (iframe does not expose page count)
   showZoomControls?: boolean;
-  /** Initial zoom (0.5–3.0) */
+  /** Initial zoom (0.5-3.0) */
   initialZoom?: number;
   /** Extra className for container */
   className?: string;
@@ -53,7 +53,7 @@ interface PDFState {
   currentPage: number;
   totalPages: number; // not measurable via iframe; kept for UI parity
   zoom: number;
-  progress: number; // simulated progress (0–100)
+  progress: number; // simulated progress (0-100)
   error: Error | null;
 }
 

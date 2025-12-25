@@ -30,12 +30,12 @@ export interface InteractiveElementProps
   disabled?: boolean;
 
   /**
-   * Visual variant – mapped into Tailwind classes.
+   * Visual variant - mapped into Tailwind classes.
    */
   variant?: InteractiveVariant;
 
   /**
-   * Size token – mapped into padding / text-size.
+   * Size token - mapped into padding / text-size.
    */
   size?: InteractiveSize;
 }

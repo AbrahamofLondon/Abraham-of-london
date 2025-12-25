@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const returnTo = getReturnTo(req, slug);
 
-    // If no key, just bounce back (don’t reveal anything)
+    // If no key, just bounce back (don't reveal anything)
     if (!key) return res.redirect(302, returnTo);
 
     // ✅ Check the canon doc exists & is actually gated
@@ -61,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const accessLevel = getAccessLevel(doc); // "public" | "inner-circle" | "private"
 
-    // If the page is public, don't enable preview (it’s pointless and messy)
+    // If the page is public, don't enable preview (it's pointless and messy)
     if (accessLevel === "public") {
       return res.redirect(302, returnTo);
     }
@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // ✅ Enable Preview Mode (signed cookies)
-    // Also store a tiny bit of context — helpful for UI logic if you want it later.
+    // Also store a tiny bit of context - helpful for UI logic if you want it later.
     res.setPreviewData(
       { innerCircle: true, unlockedAt: Date.now(), slug },
       { maxAge: 60 * 60 * 8 } // 8 hours
@@ -100,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.redirect(302, returnTo);
   } catch (err) {
-    // Don’t leak internals
+    // Don't leak internals
     return res.status(500).send("Server error");
   }
 }

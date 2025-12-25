@@ -1,4 +1,4 @@
-// components/Layout.tsx – MASTER ARCHITECTURE VERSION
+// components/Layout.tsx - MASTER ARCHITECTURE VERSION
 
 import * as React from "react";
 import Head from "next/head";

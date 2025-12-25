@@ -30,7 +30,7 @@ export type CTAProps = {
 };
 
 /**
- * CTA – primary call-to-action panel driven by cta-presets.
+ * CTA - primary call-to-action panel driven by cta-presets.
  * Safe to use in MDX: <CTA presetKey="fatherhood" />
  */
 export const CTA: React.FC<CTAProps> = ({

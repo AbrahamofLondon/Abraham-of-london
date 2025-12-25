@@ -36,7 +36,7 @@ const ventures: Venture[] = [
   {
     name: "Endureluxe",
     description:
-      "Community-driven fitness and performance gear for people who train, build, and endure — designed to survive real life, not just product shoots.",
+      "Community-driven fitness and performance gear for people who train, build, and endure - designed to survive real life, not just product shoots.",
     icon: PackageCheck,
     href: ENDURELUXE_URL,
     status: "Active",
@@ -92,7 +92,7 @@ const VenturesSection: React.FC = () => {
         </h2>
         <p className="max-w-3xl text-base leading-relaxed text-gray-300">
           Alomarada, Endureluxe, and InnovateHub are not side projects. They
-          are execution arms of the Canon — testing grounds for strategy,
+          are execution arms of the Canon - testing grounds for strategy,
           governance, and multi-generational design.
         </p>
       </div>

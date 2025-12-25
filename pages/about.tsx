@@ -1,4 +1,4 @@
-// pages/about.tsx — Fully Polished, Legible, Sectioned (Dark-first, crisp separation)
+// pages/about.tsx - Fully Polished, Legible, Sectioned (Dark-first, crisp separation)
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -19,7 +19,6 @@ import {
   ScrollText,
   Sparkles,
   ChevronRight,
-  CheckCircle2,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -61,7 +60,7 @@ const stagger = {
 
 const WORKSTREAMS: Workstream[] = [
   {
-    title: "Canon — the philosophical spine",
+    title: "Canon - the philosophical spine",
     description:
       "Long-form doctrine, strategy, and civilisation analysis designed to outlive platform cycles.",
     outcomes: [
@@ -99,7 +98,7 @@ const WORKSTREAMS: Workstream[] = [
     accent: "purple",
   },
   {
-    title: "Resources — templates, playbooks, toolkits",
+    title: "Resources - templates, playbooks, toolkits",
     description:
       "Practical assets you can deploy immediately: diagnostics and field-ready frameworks.",
     outcomes: ["Faster implementation cycles", "Reusable frameworks for teams", "Consistency without bureaucracy"],
@@ -109,7 +108,7 @@ const WORKSTREAMS: Workstream[] = [
     accent: "emerald",
   },
   {
-    title: "Inner Circle — closed rooms & applied work",
+    title: "Inner Circle - closed rooms & applied work",
     description:
       "Small rooms, higher signal for serious builders who want accountability, not applause.",
     outcomes: ["Direct access to selective work", "Closed-room discussions", "Applied thinking with feedback loops"],
@@ -121,7 +120,7 @@ const WORKSTREAMS: Workstream[] = [
   {
     title: "Civic & institutional thinking",
     description:
-      "Governance, nation-building, and institutional design — upstream work for downstream outcomes.",
+      "Governance, nation-building, and institutional design - upstream work for downstream outcomes.",
     outcomes: ["Institutional patterns and reform logic", "Cultural analysis with strategic implications", "Economic and governance frameworks"],
     href: "/strategy",
     icon: Landmark,
@@ -205,7 +204,7 @@ const AboutPage: NextPage = () => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0.25]);
 
   // NOTE: Your Layout likely already controls dark mode.
-  // This toggle is purely “page mood” (subtle), not Tailwind dark: class switching.
+  // This toggle is purely "page mood" (subtle), not Tailwind dark: class switching.
   const [moodLight, setMoodLight] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
 
@@ -254,12 +253,12 @@ const AboutPage: NextPage = () => {
   return (
     <Layout title="About">
       <Head>
-        <title>About | Abraham of London — Strategy, Fatherhood, Legacy</title>
+        <title>About | Abraham of London - Strategy, Fatherhood, Legacy</title>
         <meta
           name="description"
           content="Abraham of London builds faith-rooted strategy, fatherhood tools, and legacy frameworks for serious men, founders, and leaders."
         />
-        <meta property="og:title" content="About Abraham of London — Strategy, Fatherhood, Legacy" />
+        <meta property="og:title" content="About Abraham of London - Strategy, Fatherhood, Legacy" />
         <meta
           property="og:description"
           content="High-signal workstreams: Canon, strategy rooms, household architecture, tools, and Inner Circle accountability."
@@ -295,7 +294,7 @@ const AboutPage: NextPage = () => {
           style={reduceMotion ? {} : { opacity: heroOpacity }}
           className="relative isolate overflow-hidden border-b border-white/8"
         >
-          {/* Background: higher contrast and a “clean stage” behind text */}
+          {/* Background: higher contrast and a "clean stage" behind text */}
           <div className="absolute inset-0" aria-hidden="true">
             <div className="absolute inset-0 bg-[#07070c]" />
             <div
@@ -364,7 +363,7 @@ const AboutPage: NextPage = () => {
               </motion.p>
 
               <motion.p variants={fadeUp} className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
-                Abraham of London turns conviction into operating systems — for households, ventures, and institutions.
+                Abraham of London turns conviction into operating systems - for households, ventures, and institutions.
               </motion.p>
 
               <motion.div variants={fadeUp} className="mt-10 flex flex-wrap justify-center gap-4">
@@ -444,7 +443,7 @@ const AboutPage: NextPage = () => {
         </motion.section>
 
         {/* =========================================================
-            SECTION DIVIDER (prevents “muddled together”)
+            SECTION DIVIDER (prevents "muddled together")
            ========================================================= */}
         <div className="border-b border-white/8 bg-[#0a0a11]">
           <div className="mx-auto max-w-6xl px-6 py-6">
@@ -495,7 +494,7 @@ const AboutPage: NextPage = () => {
           </p>
           <p>
             <span className="font-semibold text-white">Truth exists</span>, conviction matters, and leadership without
-            moral architecture becomes manipulation — and the bill always shows up later.
+            moral architecture becomes manipulation - and the bill always shows up later.
           </p>
         </div>
 
@@ -503,7 +502,7 @@ const AboutPage: NextPage = () => {
         <div className="mt-7 rounded-3xl border border-amber-400/25 bg-amber-400/8 p-6">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Foundation</p>
           <p className="mt-2 text-white/82">
-            Everything here is built on conservative Christian conviction — not as decoration, as load-bearing structure.
+            Everything here is built on conservative Christian conviction - not as decoration, as load-bearing structure.
           </p>
         </div>
 
@@ -562,7 +561,7 @@ const AboutPage: NextPage = () => {
           <div className="relative overflow-hidden rounded-2xl">
             <Image
               src="/assets/images/profile-portrait.webp"
-              alt="Abraham of London — founder and strategic leader"
+              alt="Abraham of London - founder and strategic leader"
               width={720}
               height={900}
               className="h-auto w-full"
@@ -596,7 +595,7 @@ const AboutPage: NextPage = () => {
               Operating principle
             </p>
             <p className="mt-2 text-sm leading-relaxed text-white/80">
-              “Build what still works when the lights go out — character, competence, covenant, and cadence.”
+              "Build what still works when the lights go out - character, competence, covenant, and cadence."
             </p>
           </div>
         </div>
@@ -628,7 +627,7 @@ const AboutPage: NextPage = () => {
 
               <h2 className="font-serif text-4xl font-bold text-white lg:text-5xl">What we build</h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-white/70 sm:text-lg">
-                Not “content.” Deliverables. Systems. Frameworks. Rooms where real decisions get made.
+                Not "content." Deliverables. Systems. Frameworks. Rooms where real decisions get made.
               </p>
             </motion.div>
 
@@ -763,7 +762,7 @@ const AboutPage: NextPage = () => {
               viewport={{ once: true }}
               transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
             >
-              <h2 className="font-serif text-4xl font-bold text-black lg:text-5xl">Build, don’t drift.</h2>
+              <h2 className="font-serif text-4xl font-bold text-black lg:text-5xl">Build, don't drift.</h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-black/85 sm:text-xl">
                 Start with the Canon, deploy a tool, or book a strategy conversation.
               </p>

@@ -79,17 +79,17 @@ export function getDocSlug(doc: any): string {
 }
 
 // ============================================
-// TYPE GUARDS
+// TYPE GUARDS - FIXED: use 'type' not '_type'
 // ============================================
-export const isPost = (doc: AnyDoc): doc is PostType => doc._type === 'Post';
-export const isBook = (doc: AnyDoc): doc is BookType => doc._type === 'Book';
-export const isDownload = (doc: AnyDoc): doc is DownloadType => doc._type === 'Download';
-export const isEvent = (doc: AnyDoc): doc is EventType => doc._type === 'Event';
-export const isPrint = (doc: AnyDoc): doc is PrintType => doc._type === 'Print';
-export const isResource = (doc: AnyDoc): doc is ResourceType => doc._type === 'Resource';
-export const isStrategy = (doc: AnyDoc): doc is StrategyType => doc._type === 'Strategy';
-export const isCanon = (doc: AnyDoc): doc is CanonType => doc._type === 'Canon';
-export const isShort = (doc: AnyDoc): doc is ShortType => doc._type === 'Short';
+export const isPost = (doc: AnyDoc): doc is PostType => doc.type === 'Post';
+export const isBook = (doc: AnyDoc): doc is BookType => doc.type === 'Book';
+export const isDownload = (doc: AnyDoc): doc is DownloadType => doc.type === 'Download';
+export const isEvent = (doc: AnyDoc): doc is EventType => doc.type === 'Event';
+export const isPrint = (doc: AnyDoc): doc is PrintType => doc.type === 'Print';
+export const isResource = (doc: AnyDoc): doc is ResourceType => doc.type === 'Resource';
+export const isStrategy = (doc: AnyDoc): doc is StrategyType => doc.type === 'Strategy';
+export const isCanon = (doc: AnyDoc): doc is CanonType => doc.type === 'Canon';
+export const isShort = (doc: AnyDoc): doc is ShortType => doc.type === 'Short';
 
 export const isDraft = (doc: AnyDoc): boolean => Boolean(doc.draft);
 export const isPublished = (doc: AnyDoc): boolean => !isDraft(doc);
@@ -255,10 +255,10 @@ export interface ContentlayerCardProps {
 }
 
 export const getCardPropsForDocumentDirect = (doc: AnyDoc): ContentlayerCardProps => {
-  const type = doc._type.toLowerCase();
-  const url = doc._type === 'Post' 
+  const docType = doc.type.toLowerCase();
+  const url = doc.type === 'Post' 
     ? `/blog/${getDocSlug(doc)}`
-    : `/${type === 'canon' ? 'canon' : type}s/${getDocSlug(doc)}`;
+    : `/${docType === 'canon' ? 'canon' : docType}s/${getDocSlug(doc)}`;
 
   return {
     title: doc.title || 'Untitled',
@@ -272,7 +272,7 @@ export const getCardPropsForDocumentDirect = (doc: AnyDoc): ContentlayerCardProp
     readTime: (doc as any).readTime,
     author: (doc as any).author,
     url: (doc as any).url || url,
-    type: doc._type as DocKind,
+    type: doc.type as DocKind,
   };
 };
 

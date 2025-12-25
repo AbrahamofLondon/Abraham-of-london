@@ -84,7 +84,7 @@ const themeIcons: Record<string, string> = {
   resilience: "💪",
   purpose: "🎯",
   leadership: "👑",
-  fatherhood: "👨‍👦",
+  fatherhood: "👨👦",
   strategy: "♟️",
 };
 
@@ -253,7 +253,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://www.abrahamoflondon.org";
     const url = `${origin}/shorts/${slug}`;
-    const text = `"${title}" — Abraham of London`;
+    const text = `"${title}" - Abraham of London`;
 
     // Native share if available
     if (typeof navigator !== "undefined" && (navigator as any).share) {
@@ -291,7 +291,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
     if (typeof window === "undefined") return;
 
     const url = window.location.href;
-    const text = "Shorts — Abraham of London";
+    const text = "Shorts - Abraham of London";
 
     if (platform === "twitter") {
       window.open(
@@ -331,17 +331,17 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   const totalShares = Object.values(shares).reduce((sum, v) => sum + v, 0);
 
   return (
-    <Layout title="Shorts" description="Short reflections for busy minds — faith-rooted clarity without the noise.">
+    <Layout title="Shorts" description="Short reflections for busy minds - faith-rooted clarity without the noise.">
       <Head>
         <title>Shorts · Abraham of London</title>
         <meta
           name="description"
-          content="Short reflections for busy minds — faith-rooted clarity without the noise."
+          content="Short reflections for busy minds - faith-rooted clarity without the noise."
         />
         <meta property="og:title" content="Shorts · Abraham of London" />
         <meta
           property="og:description"
-          content="Short reflections for busy minds — faith-rooted clarity without the noise."
+          content="Short reflections for busy minds - faith-rooted clarity without the noise."
         />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://www.abrahamoflondon.org/api/og/shorts" />
@@ -656,7 +656,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                             "group relative overflow-hidden rounded-3xl border bg-gradient-to-br p-6",
                             gradient,
                             "backdrop-blur-sm transition-all duration-300",
-                            // “hero-level” polish: inner glow + subtle ring on hover
+                            // "hero-level" polish: inner glow + subtle ring on hover
                             "shadow-[0_1px_0_0_rgba(255,255,255,0.25)_inset] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset]",
                             "hover:shadow-[0_18px_60px_-28px_rgba(245,158,11,0.35)]",
                           ].join(" ")}
@@ -865,7 +865,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   );
 };
 
-// ✅ /shorts uses getStaticProps ONLY — no getStaticPaths here.
+// ✅ /shorts uses getStaticProps ONLY - no getStaticPaths here.
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
   const shorts = getPublishedShorts();
   return { props: { shorts }, revalidate: 3600 };

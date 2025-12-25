@@ -87,7 +87,7 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
       </div>
 
       <div className="relative flex gap-4">
-        {/* Left “spine” accent & volume meta */}
+        {/* Left "spine" accent & volume meta */}
         <div className="hidden md:flex flex-col items-center pr-3 border-r border-white/10 mr-3">
           {/* Vertical spine */}
           <div className="h-20 w-[2px] rounded-full bg-gradient-to-b from-softGold/90 via-softGold/40 to-transparent group-hover:from-softGold group-hover:via-softGold/60" />

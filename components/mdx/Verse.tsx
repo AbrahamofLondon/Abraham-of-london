@@ -16,7 +16,7 @@ export default function Verse({
       aria-label={cite ? `Scripture: ${cite}` : "Scripture"}
     >
       <p className="not-italic font-medium">{children}</p>
-      {cite && <footer className="mt-1 text-sm text-zinc-500">— {cite}</footer>}
+      {cite && <footer className="mt-1 text-sm text-zinc-500">- {cite}</footer>}
     </blockquote>
   );
 }

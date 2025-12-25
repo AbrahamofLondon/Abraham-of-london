@@ -5,7 +5,7 @@ export default function InlineCTA() {
     <div className="mt-8 rounded-2xl border border-[color:var(--color-primary)/0.15] bg-white p-4 shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium text-forest">
-          Let’s build something enduring.
+          Let's build something enduring.
         </p>
         <div className="flex gap-2">
           <Link

@@ -110,7 +110,7 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
             Essays
           </h1>
           <p className="mt-3 max-w-2xl text-neutral-700 dark:text-cream/80">
-            Field notes, convictions, and strategic clarity — written for
+            Field notes, convictions, and strategic clarity - written for
             builders who refuse drift.
           </p>
         </header>

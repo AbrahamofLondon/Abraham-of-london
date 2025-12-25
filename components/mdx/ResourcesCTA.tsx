@@ -9,7 +9,7 @@ import {
 } from "@/components/mdx/cta-presets";
 
 type ResourcesCTAProps = {
-  /** Preset key – can be CTAKey or string in MDX: <ResourcesCTA preset="fatherhood" /> */
+  /** Preset key - can be CTAKey or string in MDX: <ResourcesCTA preset="fatherhood" /> */
   preset?: CTAKey | string;
   /** Optional overrides from MDX */
   titleOverride?: string;
@@ -86,7 +86,7 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
   const rawKey = (preset ?? "").toString().trim().toLowerCase();
   const config: CTAPreset | null = getCtaPreset(rawKey);
 
-  // Fail-safe: if preset is unknown or missing, render nothing so MDX doesn’t explode.
+  // Fail-safe: if preset is unknown or missing, render nothing so MDX doesn't explode.
   if (!config) return null;
 
   const title = titleOverride || config.title;

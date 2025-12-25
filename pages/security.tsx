@@ -92,10 +92,10 @@ const SecurityPage: NextPage = () => {
               </li>
               <li>
                 Tight limits on contact, newsletter, and subscription flows
-                (typically 3–5 attempts per 15 minutes).
+                (typically 3-5 attempts per 15 minutes).
               </li>
               <li>
-                <strong>Inner Circle registration protection</strong> – dual
+                <strong>Inner Circle registration protection</strong> - dual
                 IP-based (20 attempts per 15 minutes) and email-based (3
                 attempts per hour) rate limiting to prevent abuse.
               </li>
@@ -194,7 +194,7 @@ const SecurityPage: NextPage = () => {
                 stored on this site.
               </li>
               <li>
-                <strong>Inner Circle privacy protection</strong> – email
+                <strong>Inner Circle privacy protection</strong> - email
                 addresses are stored as SHA-256 hashes, access keys are stored
                 as cryptographic hashes, and no raw personal data is retained in
                 accessible formats.
@@ -231,7 +231,7 @@ const SecurityPage: NextPage = () => {
                 GDPR-aware processing.
               </li>
               <li>
-                <strong>Inner Circle cryptographic key delivery</strong> –
+                <strong>Inner Circle cryptographic key delivery</strong> -
                 secure email transmission of access keys with minimal data
                 exposure.
               </li>
@@ -269,7 +269,7 @@ const SecurityPage: NextPage = () => {
                 abuse indicators.
               </li>
               <li>
-                <strong>Inner Circle access monitoring</strong> – cryptographic
+                <strong>Inner Circle access monitoring</strong> - cryptographic
                 key usage tracking without storing raw keys or personal data.
               </li>
               <li>
@@ -328,7 +328,7 @@ const SecurityPage: NextPage = () => {
                 from this brand.
               </li>
               <li>
-                <strong>Protecting Inner Circle access keys</strong> – treating
+                <strong>Protecting Inner Circle access keys</strong> - treating
                 cryptographic keys as sensitive credentials and not sharing them
                 publicly.
               </li>
@@ -371,7 +371,7 @@ const SecurityPage: NextPage = () => {
                 detection based on observed behaviour.
               </li>
               <li>
-                <strong>Cryptographic algorithm review</strong> – periodic
+                <strong>Cryptographic algorithm review</strong> - periodic
                 assessment of hashing and key generation methods.
               </li>
               <li>

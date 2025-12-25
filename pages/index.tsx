@@ -1,4 +1,4 @@
-// pages/index.tsx – REFINED HOMEPAGE WITH STRATEGIC FLOW
+// pages/index.tsx - REFINED HOMEPAGE WITH STRATEGIC FLOW
 import * as React from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
@@ -37,13 +37,13 @@ const BOOKS_IN_DEV = [
     title: "The Fiction Adaptation",
     tag: "Fiction · Drama",
     blurb:
-      "A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact.",
+      "A covert retelling of a story too real for the courtroom - where truth hides in fiction and fiction cuts deeper than fact.",
     cover: "/assets/images/books/the-fiction-adaptation.jpg",
   },
 ];
 
 // -----------------------------------------------------------------------------
-// SHORTS – Build-time safe (no fragile assumptions)
+// SHORTS - Build-time safe (no fragile assumptions)
 // -----------------------------------------------------------------------------
 
 type LooseShort = {
@@ -80,7 +80,7 @@ const getFeaturedShortsSafely = (): LooseShort[] => {
 const featuredShorts = getFeaturedShortsSafely().filter((s) => isPublished(s));
 
 // -----------------------------------------------------------------------------
-// SECTION DIVIDER – Refined visual separator
+// SECTION DIVIDER - Refined visual separator
 // -----------------------------------------------------------------------------
 
 const SectionDivider: React.FC = () => (
@@ -98,7 +98,7 @@ const SectionDivider: React.FC = () => (
 );
 
 // -----------------------------------------------------------------------------
-// SHORTS STRIP – Homepage spotlight
+// SHORTS STRIP - Homepage spotlight
 // -----------------------------------------------------------------------------
 
 const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
@@ -117,7 +117,7 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
               Concise field notes on work, livelihood, and building under
-              pressure — designed to be read between meetings, not instead of
+              pressure - designed to be read between meetings, not instead of
               them.
             </p>
           </div>
@@ -187,7 +187,7 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
 };
 
 // -----------------------------------------------------------------------------
-// BOOKS IN DEVELOPMENT – Refined cards with better contrast
+// BOOKS IN DEVELOPMENT - Refined cards with better contrast
 // -----------------------------------------------------------------------------
 
 const BooksInDevelopment: React.FC = () => (
@@ -202,7 +202,7 @@ const BooksInDevelopment: React.FC = () => (
             Long-form work that underwrites everything else
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
-            These projects sit behind the posts, shorts, and rooms — slow-cooked
+            These projects sit behind the posts, shorts, and rooms - slow-cooked
             work that outlives algorithms and platform cycles.
           </p>
         </div>
@@ -262,7 +262,7 @@ const BooksInDevelopment: React.FC = () => (
 );
 
 // -----------------------------------------------------------------------------
-// STRATEGIC SESSIONS – Improved readability
+// STRATEGIC SESSIONS - Improved readability
 // -----------------------------------------------------------------------------
 
 const StrategicSessions: React.FC = () => (
@@ -278,7 +278,7 @@ const StrategicSessions: React.FC = () => (
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
             Not inspirational talks. Working sessions built for people carrying
-            real responsibility — for a boardroom, a founding team, or a
+            real responsibility - for a boardroom, a founding team, or a
             household.
           </p>
         </div>
@@ -378,7 +378,7 @@ const HomePage: NextPage = () => {
         },
       }}
     >
-      {/* HERO – Canon spine + ventures narrative */}
+      {/* HERO - Canon spine + ventures narrative */}
       <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
         <div className="absolute inset-0">
           <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
@@ -387,7 +387,7 @@ const HomePage: NextPage = () => {
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="grid items-center gap-12 lg:grid-cols-5 lg:gap-16">
-            {/* Left – Philosophy & CTAs */}
+            {/* Left - Philosophy & CTAs */}
             <div className="max-w-xl lg:col-span-3 xl:col-span-2">
               <div className="mb-8">
                 <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-amber-400/50 bg-amber-500/10 px-4 py-2">
@@ -407,7 +407,7 @@ const HomePage: NextPage = () => {
 
                 <p className="mb-8 text-base leading-relaxed text-gray-300 sm:text-lg">
                   For men who carry responsibility for a family, a company, or a
-                  community — this is where faith, history, and strategy are
+                  community - this is where faith, history, and strategy are
                   turned into operating systems, not slogans.
                 </p>
               </div>
@@ -438,13 +438,13 @@ const HomePage: NextPage = () => {
               </p>
             </div>
 
-            {/* Right – Hero Banner */}
+            {/* Right - Hero Banner */}
             <div className="relative lg:col-span-2 xl:col-span-3">
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-sm">
                 <div className="relative aspect-video w-full">
                   <Image
                     src="/assets/images/abraham-of-london-banner.webp"
-                    alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
+                    alt="Abraham of London - Canon, ventures, and structural tools for builders of legacy"
                     fill
                     priority
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -487,7 +487,7 @@ const HomePage: NextPage = () => {
               </h2>
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
                 The Canon is the long-term work: purpose, governance,
-                civilisation, and destiny — written from a father&apos;s
+                civilisation, and destiny - written from a father&apos;s
                 vantage point, not an academic desk.
               </p>
             </div>

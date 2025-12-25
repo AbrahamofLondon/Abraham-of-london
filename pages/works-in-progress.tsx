@@ -83,13 +83,13 @@ const WorksInProgressPage: NextPage = () => {
             />
             <WipCard
               title="The Fiction Adaptation"
-              subtitle="A covert retelling — where fiction says what the courtroom cannot."
+              subtitle="A covert retelling - where fiction says what the courtroom cannot."
               href="/books/the-fiction-adaptation"
               tag="Fiction Draft"
               imageSrc="/assets/images/books/the-fiction-adaptation.jpg"
             />
             <WipCard
-              title="Canon – Future Volumes"
+              title="Canon - Future Volumes"
               subtitle="Forthcoming Canon volumes and frameworks currently in research and outline."
               href="/canon"
               tag="Canon Roadmap"

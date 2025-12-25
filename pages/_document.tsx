@@ -21,7 +21,7 @@ export default function Document() {
           href="/assets/icons/web-app-manifest-192x192.png"
         />
 
-        {/* Google Fonts – Inter & Playfair Display */}
+        {/* Google Fonts - Inter & Playfair Display */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

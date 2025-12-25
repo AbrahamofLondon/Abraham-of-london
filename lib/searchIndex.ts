@@ -6,12 +6,12 @@ import {
   getAllPrints,
   getAllResources,
   getAllCanons,
-  type Post as PostDocument,
-  type Book as BookDocument,
-  type Download as DownloadDocument,
-  type Print as PrintDocument,
-  type Resource as ResourceDocument,
-  type Canon as CanonDocument,
+  type PostType as PostDocument,
+  type BookType as BookDocument,
+  type DownloadType as DownloadDocument,
+  type PrintType as PrintDocument,
+  type ResourceType as ResourceDocument,
+  type CanonType as CanonDocument,
 } from "./contentlayer-helper";
 import { absUrl } from "@/lib/siteConfig";
 

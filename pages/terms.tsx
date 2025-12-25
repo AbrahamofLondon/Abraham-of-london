@@ -122,8 +122,8 @@ const TermsPage: NextPage = () => {
             4. Intellectual property
           </h2>
           <p>
-            Unless otherwise stated, the content on this site — including text,
-            images, frameworks, and branding — is the intellectual property of
+            Unless otherwise stated, the content on this site - including text,
+            images, frameworks, and branding - is the intellectual property of
             Abraham of London or its licensors.
           </p>
           <p>

@@ -20,7 +20,7 @@ const SpeakingPage: NextPage = () => {
           </h1>
           <p className="text-sm sm:text-base text-gray-200">
             I don&apos;t do motivational noise. I work with leaders, boards, and
-            founders who want to think in systems, history, and Scripture — and
+            founders who want to think in systems, history, and Scripture - and
             who are willing to be challenged.
           </p>
         </header>

@@ -1,16 +1,13 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { 
-  getPrivacySafeStats, 
-  getPrivacySafeKeyExport 
-} from '@/lib/server/inner-circle-store';
-import { 
-  rateLimitForRequestIp, 
+// pages/api/admin/inner-circle/export.ts - CORRECTED IMPORTS
+import type { NextApiRequest, NextApiResponse } from "next";
+import { getPrivacySafeStats, getPrivacySafeKeyRows } from "@/lib/server/inner-circle-store";
+import {
+  rateLimitForRequestIp,
   RATE_LIMIT_CONFIGS,
   createRateLimitHeaders,
-  getClientIp 
-} from '@/lib/server/rateLimit';
+  getClientIp,
+} from "@/lib/server/rateLimit";
 
-// Standard response types aligned with the Admin Console UI
 type AdminExportRow = {
   created_at: string;
   status: "active" | "revoked";
@@ -22,74 +19,81 @@ type AdminExportRow = {
 type AdminExportResponse = {
   ok: boolean;
   rows?: AdminExportRow[];
-  stats?: any;
+  stats?: unknown;
   generatedAt?: string;
   error?: string;
 };
 
-/**
- * THE INTELLIGENCE ENGINE - Unified Production Version
- * Hardened for administrative oversight without compromising user privacy.
- */
-export default async function handler(
-  req: NextApiRequest, 
-  res: NextApiResponse<AdminExportResponse>
-) {
-  // 1. Method Authority
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', ['GET']);
-    return res.status(405).json({ ok: false, error: 'Method requires GET for secure export.' });
+function normalizeExportRows(input: unknown): AdminExportRow[] {
+  const rows = Array.isArray(input) ? input : [];
+  return rows
+    .map((r: any) => {
+      const createdAt = r?.created_at ?? r?.createdAt ?? null;
+      const status = r?.status ?? null;
+      const keySuffix = r?.key_suffix ?? r?.keySuffix ?? null;
+      const emailHashPrefix = r?.email_hash_prefix ?? r?.emailHashPrefix ?? null;
+      const totalUnlocks = r?.total_unlocks ?? r?.totalUnlocks ?? 0;
+
+      if (!createdAt || !status || !keySuffix || !emailHashPrefix) return null;
+
+      const statusNorm = String(status).toLowerCase();
+      if (statusNorm !== "active" && statusNorm !== "revoked") return null;
+
+      return {
+        created_at: typeof createdAt === "string" ? createdAt : new Date(createdAt).toISOString(),
+        status: statusNorm,
+        key_suffix: String(keySuffix),
+        email_hash_prefix: String(emailHashPrefix),
+        total_unlocks: Number.isFinite(Number(totalUnlocks)) ? Number(totalUnlocks) : 0,
+      } satisfies AdminExportRow;
+    })
+    .filter(Boolean) as AdminExportRow[];
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<AdminExportResponse>) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
+    return res.status(405).json({ ok: false, error: "Method requires GET for secure export." });
   }
 
-  // 2. Authentication Perimeter (Bearer Token Contract)
-  const ADMIN_BEARER_TOKEN = process.env.INNER_CIRCLE_ADMIN_KEY; // Re-syncing with your ENV naming
+  const ADMIN_BEARER_TOKEN = process.env.INNER_CIRCLE_ADMIN_KEY;
   const authHeader = req.headers.authorization;
-  
+
   if (!ADMIN_BEARER_TOKEN || !authHeader?.startsWith("Bearer ")) {
+    // eslint-disable-next-line no-console
     console.error(`[Security Alert] Unauthorized export attempt from IP: ${getClientIp(req)}`);
-    return res.status(401).json({ ok: false, error: 'Authorization required.' });
+    return res.status(401).json({ ok: false, error: "Authorization required." });
   }
 
-  const token = authHeader.substring(7);
+  const token = authHeader.slice(7);
   if (token !== ADMIN_BEARER_TOKEN) {
-    return res.status(401).json({ ok: false, error: 'Invalid security credentials.' });
+    return res.status(401).json({ ok: false, error: "Invalid security credentials." });
   }
 
-  // 3. Administrative Rate Limiting
-  const rateLimitResult = rateLimitForRequestIp(
-    req, 
-    'inner-circle-admin-export', 
-    RATE_LIMIT_CONFIGS.ADMIN_API
-  );
-
+  const rateLimitResult = rateLimitForRequestIp(req, "inner-circle-admin-export", RATE_LIMIT_CONFIGS.ADMIN_API);
   const headers = createRateLimitHeaders(rateLimitResult.result);
-  Object.entries(headers).forEach(([key, value]) => res.setHeader(key, value));
+  for (const [key, value] of Object.entries(headers)) res.setHeader(key, value);
 
   if (!rateLimitResult.result.allowed) {
-    return res.status(429).json({ 
-      ok: false, 
-      error: 'Intelligence requests are throttled. Please wait before re-exporting.' 
+    return res.status(429).json({
+      ok: false,
+      error: "Intelligence requests are throttled. Please wait before re-exporting.",
     });
   }
 
   try {
-    // 4. Data Aggregation & Privacy Masking
-    // We execute concurrently to minimize database connection time.
-    const [stats, rows] = await Promise.all([
-      getPrivacySafeStats(),
-      getPrivacySafeKeyExport()
-    ]);
+    const [stats, rawRows] = await Promise.all([getPrivacySafeStats(), getPrivacySafeKeyRows()]);
+    const rows = normalizeExportRows(rawRows);
 
-    // 5. Response Integrity
-    return res.status(200).json({ 
-      ok: true, 
+    return res.status(200).json({
+      ok: true,
       stats,
-      rows: rows as AdminExportRow[],
-      generatedAt: new Date().toISOString()
+      rows,
+      generatedAt: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('[Admin Intelligence] System Exception:', error);
-    return res.status(500).json({ ok: false, error: 'Export subsystem failure.' });
+    // eslint-disable-next-line no-console
+    console.error("[Admin Intelligence] System Exception:", error);
+    return res.status(500).json({ ok: false, error: "Export subsystem failure." });
   }
 }

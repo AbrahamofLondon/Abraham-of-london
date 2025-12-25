@@ -163,7 +163,7 @@ const Quote: React.FC<QuoteProps> = ({ children, author }) => (
     <div className="italic">{children}</div>
     {author && (
       <figcaption className="mt-2 text-xs uppercase tracking-wide text-gray-500">
-        — {author}
+        - {author}
       </figcaption>
     )}
   </figure>
@@ -196,7 +196,7 @@ type JsonLdProps = {
 const JsonLd: React.FC<JsonLdProps> = () => null;
 
 /**
- * Generic "share row" wrapper – keeps layout from breaking
+ * Generic "share row" wrapper - keeps layout from breaking
  * even if MDX refers to <ShareRow>.
  */
 const ShareRow: React.FC<React.PropsWithChildren> = ({ children }) => (

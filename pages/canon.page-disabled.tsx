@@ -9,10 +9,10 @@ import Layout from "@/components/Layout";
 
 const CanonLandingPage: NextPage = () => {
   return (
-    <Layout pageTitle="The Canon — Civilisational Operating System">
+    <Layout pageTitle="The Canon - Civilisational Operating System">
       <Head>
         <title>
-          The Canon — Civilisational Operating System | Abraham of London
+          The Canon - Civilisational Operating System | Abraham of London
         </title>
         <meta
           name="description"
@@ -20,7 +20,7 @@ const CanonLandingPage: NextPage = () => {
         />
         <meta
           property="og:title"
-          content="The Canon — Civilisational Operating System"
+          content="The Canon - Civilisational Operating System"
         />
         <meta
           property="og:description"
@@ -68,7 +68,7 @@ const CanonLandingPage: NextPage = () => {
                 <p>
                   Then there are rare works
                   <br />
-                  written to reshape the imagination of an age —
+                  written to reshape the imagination of an age -
                   <br />
                   to rebuild what has been broken,
                   <br />
@@ -115,7 +115,7 @@ const CanonLandingPage: NextPage = () => {
                   WHAT THE CANON IS
                 </h2>
                 <p className="mb-6 font-serif text-2xl font-bold text-softGold">
-                  A civilisational operating system —
+                  A civilisational operating system -
                 </p>
                 <p className="text-lg leading-relaxed text-gray-300">
                   ten volumes mapping the architecture of purpose, identity,
@@ -243,7 +243,7 @@ const CanonLandingPage: NextPage = () => {
                   <div className="relative mb-4 overflow-hidden rounded-2xl border border-softGold/20">
                     <Image
                       src="/assets/images/canon/canon-intro-letter-cover.jpg"
-                      alt="The Canon: A Letter from the Author — cover"
+                      alt="The Canon: A Letter from the Author - cover"
                       width={400}
                       height={600}
                       className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
@@ -280,7 +280,7 @@ const CanonLandingPage: NextPage = () => {
                   <div className="relative mb-4 overflow-hidden rounded-2xl border border-softGold/20">
                     <Image
                       src="/assets/images/canon/builders-catechism-cover.jpg"
-                      alt="The Builder's Catechism — cover"
+                      alt="The Builder's Catechism - cover"
                       width={400}
                       height={600}
                       className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
@@ -291,7 +291,7 @@ const CanonLandingPage: NextPage = () => {
                   </h3>
                   <p className="mb-3 text-sm leading-relaxed text-gray-300">
                     A systematic Q&amp;A for builders, fathers, and
-                    civilisation-carriers — short, sharp, doctrinal, and
+                    civilisation-carriers - short, sharp, doctrinal, and
                     uncompromising.
                   </p>
                   <p className="mb-4 text-xs uppercase tracking-[0.18em] text-softGold/80">
@@ -317,14 +317,14 @@ const CanonLandingPage: NextPage = () => {
                   <div className="relative mb-4 overflow-hidden rounded-2xl border border-softGold/20">
                     <Image
                       src="/assets/images/canon/canon-campaign-cover.jpg"
-                      alt="The Canon — A New Era of Builders — campaign cover"
+                      alt="The Canon - A New Era of Builders - campaign cover"
                       width={400}
                       height={600}
                       className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                     />
                   </div>
                   <h3 className="mb-1 font-serif text-lg font-semibold text-cream">
-                    The Canon — A New Era of Builders
+                    The Canon - A New Era of Builders
                   </h3>
                   <p className="mb-3 text-sm leading-relaxed text-gray-300">
                     A cinematic declaration announcing the rise of a disciplined

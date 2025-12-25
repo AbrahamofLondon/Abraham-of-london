@@ -40,7 +40,7 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
 // Cover image can be string or StaticImageData-like
 type CoverImageLike = string | { src?: string | undefined } | null | undefined;
 
-// Safe image URL utility – supports string or StaticImageData-style objects
+// Safe image URL utility - supports string or StaticImageData-style objects
 const getSafeImageUrl = (image: CoverImageLike): string => {
   if (!image) return "";
 
@@ -128,7 +128,7 @@ export default function BlogPostPreview({
                 width={400}
                 height={300}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                // Static blur placeholder – safe even for dynamic paths
+                // Static blur placeholder - safe even for dynamic paths
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
               />

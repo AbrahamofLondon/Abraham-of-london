@@ -109,7 +109,7 @@ export const fonts = {
 } as const;
 
 // ------------------------------------------------------------------------------------
-// CSS variable generator – used in layout or global styles
+// CSS variable generator - used in layout or global styles
 // ------------------------------------------------------------------------------------
 
 export function generateFontCSSVariables(): string {

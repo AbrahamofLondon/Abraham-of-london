@@ -39,7 +39,7 @@ export default function SocialFollowStrip() {
         <div className="relative z-10">
           <h3 className="font-serif text-3xl text-gold mb-3">Stay Connected</h3>
           <p className="text-cream/70 mb-8 max-w-2xl mx-auto">
-            Strategic clarity across every platform — no noise, just signal.
+            Strategic clarity across every platform - no noise, just signal.
           </p>
 
           <div className="flex flex-wrap justify-center gap-3">

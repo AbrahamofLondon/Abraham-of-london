@@ -14,10 +14,10 @@ const PurposeLandingPage: NextPage = () => {
   const canonicalUrl = `${SITE_URL}/books/the-architecture-of-human-purpose-landing`;
 
   return (
-    <Layout title="The Architecture of Human Purpose — Prelude Landing">
+    <Layout title="The Architecture of Human Purpose - Prelude Landing">
       <Head>
         <title>
-          The Architecture of Human Purpose — Prelude Minibook | Abraham of
+          The Architecture of Human Purpose - Prelude Minibook | Abraham of
           London
         </title>
         <meta
@@ -28,7 +28,7 @@ const PurposeLandingPage: NextPage = () => {
 
         <meta
           property="og:title"
-          content="The Architecture of Human Purpose — Prelude Minibook"
+          content="The Architecture of Human Purpose - Prelude Minibook"
         />
         <meta
           property="og:description"
@@ -64,7 +64,7 @@ const PurposeLandingPage: NextPage = () => {
                   purpose, civilisation, governance, spiritual alignment, and
                   human destiny
                 </span>
-                . It doesn’t give you motivational slogans — it sketches the
+                . It doesn't give you motivational slogans - it sketches the
                 actual scaffolding reality runs on.
               </p>
 
@@ -95,7 +95,7 @@ const PurposeLandingPage: NextPage = () => {
               <p className="pt-3 text-[0.8rem] text-gray-400">
                 This is **Volume 0** thinking: setting the frame so every
                 decision, project, and covenant sits inside a coherent
-                architecture — not vague “purpose talk”.
+                architecture - not vague "purpose talk".
               </p>
             </div>
 
@@ -106,7 +106,7 @@ const PurposeLandingPage: NextPage = () => {
                 <div className="relative rounded-3xl border border-softGold/30 bg-black/60 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.95)]">
                   <Image
                     src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                    alt="The Architecture of Human Purpose — Prelude Minibook"
+                    alt="The Architecture of Human Purpose - Prelude Minibook"
                     width={360}
                     height={520}
                     className="h-auto w-[220px] rounded-2xl border border-softGold/40 shadow-2xl sm:w-[260px]"
@@ -121,7 +121,7 @@ const PurposeLandingPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Middle section – what’s inside */}
+        {/* Middle section - what's inside */}
         <section className="mx-auto max-w-5xl px-4 py-14">
           <div className="grid gap-10 md:grid-cols-2">
             <div className="space-y-4">
@@ -129,8 +129,8 @@ const PurposeLandingPage: NextPage = () => {
                 Human Flourishing is Architectural, Not Accidental
               </h2>
               <p className="text-sm leading-relaxed text-gray-200 sm:text-base">
-                This Prelude doesn’t give you every pillar in detail — it hands
-                you the **blueprint skeleton**. You’ll see how{" "}
+                This Prelude doesn't give you every pillar in detail - it hands
+                you the **blueprint skeleton**. You'll see how{" "}
                 <span className="text-softGold">
                   identity, authority, covenant, time, and legacy
                 </span>{" "}
@@ -140,7 +140,7 @@ const PurposeLandingPage: NextPage = () => {
               <p className="text-sm leading-relaxed text-gray-300">
                 The goal is simple: when you look at history, scripture, news,
                 or your own household, you begin to recognise the same
-                underlying architecture — and you stop living as if it’s all
+                underlying architecture - and you stop living as if it's all
                 random.
               </p>
             </div>
@@ -168,8 +168,8 @@ const PurposeLandingPage: NextPage = () => {
                 </li>
               </ul>
               <p className="mt-4 text-[0.8rem] text-gray-400">
-                It’s written for fathers, founders, and stewards who don’t want
-                vibes — they want a coherent mental model for building in a
+                It's written for fathers, founders, and stewards who don't want
+                vibes - they want a coherent mental model for building in a
                 collapsing world.
               </p>
             </div>

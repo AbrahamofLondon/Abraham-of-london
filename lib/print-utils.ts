@@ -1,6 +1,6 @@
 // ============================================================================
 // lib/print-utils.ts
-// Production-safe utilities for prints – NO Contentlayer dependency.
+// Production-safe utilities for prints - NO Contentlayer dependency.
 // For now, uses MOCK_PRINTS as the single source of truth for print data.
 // ============================================================================
 
@@ -30,7 +30,7 @@ const MOCK_PRINTS: PrintDocument[] = [
     date: "2025-11-12",
     url: "/prints/entrepreneur-operating-pack",
     excerpt:
-      "A premium operating pack for founders who want to run their lives and ventures like a boardroom—not a battlefield.",
+      "A premium operating pack for founders who want to run their lives and ventures like a boardroom-not a battlefield.",
     tags: ["entrepreneurship", "systems", "execution"],
     coverImage: "/assets/images/prints/entrepreneur-operating-pack.jpg",
     content: `# Entrepreneur Operating Pack
@@ -43,7 +43,7 @@ Use this printable pack to:
 - Lock in weekly and monthly review rhythms  
 - Align your calendar with your true priorities, not just emergencies  
 
-It’s designed to sit beside your laptop or on your desk as a **visual governance layer** for how you operate, decide, and execute.`,
+It's designed to sit beside your laptop or on your desk as a **visual governance layer** for how you operate, decide, and execute.`,
   },
   {
     _id: "print-fatherhood-standards-card",
@@ -61,7 +61,7 @@ This card is a **daily mirror** for fathers.
 
 - Who am I becoming as a man?  
 - What will my children say I normalised in our home?  
-- Where am I drifting—and what will it cost them if I stay there?
+- Where am I drifting-and what will it cost them if I stay there?
 
 Print it, keep it in your wallet, journal, or next to your bed.  
 Review it often. Adjust your behaviour, not your standards.`,
@@ -108,7 +108,7 @@ Inside this kit:
 - Session structures you can repeat with every mentee  
 - Questions that pull out purpose, not just performance  
 
-This is for fathers, leaders, and older siblings who know someone is watching them—and want to be intentional about it.`,
+This is for fathers, leaders, and older siblings who know someone is watching them-and want to be intentional about it.`,
   },
   {
     _id: "print-standards-brief",
@@ -117,7 +117,7 @@ This is for fathers, leaders, and older siblings who know someone is watching th
     date: "2025-11-12",
     url: "/prints/standards-brief",
     excerpt:
-      "A strategic one-pager to define the standards you will live by—and refuse to negotiate.",
+      "A strategic one-pager to define the standards you will live by-and refuse to negotiate.",
     tags: ["standards", "identity", "clarity"],
     coverImage: "/assets/images/prints/standards-brief.jpg",
     content: `# Standards Brief

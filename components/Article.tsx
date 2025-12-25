@@ -82,7 +82,7 @@ export default function Article(props: ArticleProps) {
         )}
       </header>
 
-      {/* HERO IMAGE – cinematic, capped height */}
+      {/* HERO IMAGE - cinematic, capped height */}
       {safeCover && (
         <section className="mb-10">
           <div className="relative overflow-hidden rounded-3xl border border-softGold/25 bg-black/70 shadow-2xl shadow-black/50">

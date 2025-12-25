@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 /**
- * Normalise email before hashing – trim + lowercase
+ * Normalise email before hashing - trim + lowercase
  */
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();

@@ -64,7 +64,7 @@ const PRESETS: Record<PresetKey, PresetData> = {
     ],
   },
   founders: {
-    title: "Founder’s Toolkit",
+    title: "Founder's Toolkit",
     reads: [
       {
         href: "/blog/reclaiming-the-narrative",
@@ -158,7 +158,7 @@ export default function EventResources(props: EventResourcesProps) {
                   )}
                   {r.sub && (
                     <span className="ml-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
-                      — {r.sub}
+                      - {r.sub}
                     </span>
                   )}
                 </li>

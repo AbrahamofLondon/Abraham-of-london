@@ -1,4 +1,4 @@
-// pages/shorts/[slug].tsx
+// pages/shorts/[slug].tsx - FIXED
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -123,7 +123,7 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
   const shareTitle = short.title || "Shorts · Abraham of London";
   const shareText =
     short.excerpt ||
-    "A short reflection from Abraham of London — faith-rooted clarity without the noise.";
+    "A short reflection from Abraham of London - faith-rooted clarity without the noise.";
 
   const dateLabel = safeDateLabel(short.date);
 

@@ -1,3 +1,4 @@
+// lib/server/inner-circle-store.ts - CORRECTED WITH PROPER EXPORTS
 /* eslint-disable no-console */
 import crypto from "node:crypto";
 import { Pool, type PoolClient } from "pg";
@@ -42,6 +43,14 @@ export interface VerifyInnerCircleKeyResult {
 export interface InnerCircleMember {
   id: string;
   name: string | null;
+}
+
+export interface AdminExportRow {
+  created_at: string;
+  status: "active" | "revoked";
+  key_suffix: string;
+  email_hash_prefix: string;
+  total_unlocks: number;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -158,7 +167,7 @@ class Store {
       keySuffix,
       createdAt: now.toISOString(),
       expiresAt: expires.toISOString(),
-      status: "pending",
+      status: "active",
       memberId: "no-db",
     });
   }
@@ -197,12 +206,36 @@ class Store {
       };
     }, { totalMembers: 0, totalKeys: 0 });
   }
+
+  async getPrivacySafeKeyRows(): Promise<AdminExportRow[]> {
+    return this.withClient(async (c) => {
+      const result = await c.query(`
+        SELECT 
+          k.created_at,
+          k.status,
+          k.key_suffix,
+          SUBSTRING(m.email_hash, 1, 8) as email_hash_prefix,
+          0 as total_unlocks -- Placeholder for now
+        FROM inner_circle_keys k
+        LEFT JOIN inner_circle_members m ON k.member_id = m.id
+        WHERE k.status IN ('active', 'revoked')
+        ORDER BY k.created_at DESC
+      `);
+      return result.rows.map(row => ({
+        created_at: row.created_at,
+        status: row.status,
+        key_suffix: row.key_suffix,
+        email_hash_prefix: row.email_hash_prefix || 'unknown',
+        total_unlocks: row.total_unlocks
+      }));
+    }, []);
+  }
 }
 
 const store = new Store();
 
 /* -------------------------------------------------------------------------- */
-/* Exports                                                                    */
+/* Named Exports                                                              */
 /* -------------------------------------------------------------------------- */
 
 export const createOrUpdateMemberAndIssueKey = (a: CreateOrUpdateMemberArgs) =>
@@ -213,6 +246,9 @@ export const verifyInnerCircleKey = (k: string) =>
 
 export const getPrivacySafeStats = () =>
   store.getPrivacySafeStats();
+
+export const getPrivacySafeKeyRows = () =>
+  store.getPrivacySafeKeyRows();
 
 export function getClientIp(req: any): string | undefined {
   const forwarded = req.headers?.['x-forwarded-for'];
@@ -236,3 +272,19 @@ export function deleteMemberByEmail(email: string): Promise<boolean> {
   console.log('[deleteMemberByEmail] Not implemented yet for:', email);
   return Promise.resolve(false);
 }
+
+/* -------------------------------------------------------------------------- */
+/* Default Export (for backward compatibility)                                */
+/* -------------------------------------------------------------------------- */
+
+const innerCircleStore = {
+  createOrUpdateMemberAndIssueKey,
+  verifyInnerCircleKey,
+  getPrivacySafeStats,
+  getPrivacySafeKeyRows,
+  getClientIp,
+  getPrivacySafeKeyExport,
+  deleteMemberByEmail,
+};
+
+export default innerCircleStore;

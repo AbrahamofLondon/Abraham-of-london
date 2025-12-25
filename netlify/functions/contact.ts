@@ -207,7 +207,11 @@ export const handler: Handler = async (event) => {
 
   const parsed = safeParseJson<ContactPayload>(raw);
   if (!parsed.ok) {
-    return fail(400, headers, parsed.error, "ERR_BAD_JSON");
+    // Use a type guard or check for 'error' property
+    if ('error' in parsed) {
+      return fail(400, headers, parsed.error, "ERR_BAD_JSON");
+    }
+    return fail(400, headers, "Invalid JSON payload", "ERR_BAD_JSON");
   }
   const payload = parsed.data;
 

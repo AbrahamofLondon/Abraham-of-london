@@ -53,7 +53,7 @@ const Quote: React.FC<QuoteProps> = ({
           )}
           
           {(author && source) && (
-            <span className="mx-2">—</span>
+            <span className="mx-2">-</span>
           )}
           
           {source && (
