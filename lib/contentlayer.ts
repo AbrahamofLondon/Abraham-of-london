@@ -1,15 +1,19 @@
+// lib/contentlayer.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// lib/contentlayer.ts
-// Typed wrapper around Contentlayer2 output.
-// ✅ avoids relying on contentlayer/generated TS types (which may not exist / mismatch)
-// ✅ uses require() to load .contentlayer/generated on Windows safely
+/**
+ * Single canonical Contentlayer surface.
+ * - Runtime comes from: "contentlayer/generated"
+ * - Types + utilities exposed for the rest of the app.
+ *
+ * DO NOT import from ".contentlayer/..." anywhere else.
+ */
 
-import path from "path";
+import * as generated from "contentlayer/generated";
 
-// ----------------------------------------------------------------------------
-// Types (what the rest of your app imports)
-// ----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* Core types                                                                 */
+/* -------------------------------------------------------------------------- */
 
 export interface ContentlayerDocument {
   _id: string;
@@ -30,9 +34,9 @@ export interface ContentlayerDocument {
   description?: string;
   tags?: string[];
   coverImage?: string;
-  body: {
-    raw: string;
-    code: string;
+  body?: {
+    raw?: string;
+    code?: string;
   };
 }
 
@@ -127,98 +131,180 @@ export interface StrategyDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
-// Friendly aliases used across your codebase
-export type Post = PostDocument;
-export type Book = BookDocument;
-export type Download = DownloadDocument;
-export type Event = EventDocument;
-export type Print = PrintDocument;
-export type Resource = ResourceDocument;
-export type Canon = CanonDocument;
-export type Strategy = StrategyDocument;
-
 export type DocumentTypes =
   | PostDocument
   | BookDocument
   | DownloadDocument
   | EventDocument
   | PrintDocument
+  | StrategyDocument
   | ResourceDocument
-  | CanonDocument
-  | StrategyDocument;
+  | CanonDocument;
 
-// ----------------------------------------------------------------------------
-// Load generated exports
-// ----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* Runtime collections                                                        */
+/* -------------------------------------------------------------------------- */
 
-type GeneratedExports = Record<string, any>;
-let generated: GeneratedExports = {};
+const safeArray = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
 
-try {
-  const generatedPath = path.join(process.cwd(), ".contentlayer", "generated");
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  generated = require(generatedPath) as GeneratedExports;
-} catch (error) {
-  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
-    console.warn("[contentlayer] .contentlayer/generated not found – using empty exports.", error);
-  }
-  generated = {};
-}
-
-function safeArray<T>(v: unknown): T[] {
-  return Array.isArray(v) ? (v as T[]) : [];
-}
-
-function getCollection<T extends ContentlayerDocument>(key: string): T[] {
-  return safeArray<T>(generated[key]);
-}
-
-// ----------------------------------------------------------------------------
-// Collections
-// ----------------------------------------------------------------------------
-
-export const allPosts = getCollection<PostDocument>("allPosts");
-export const allBooks = getCollection<BookDocument>("allBooks");
-export const allDownloads = getCollection<DownloadDocument>("allDownloads");
-export const allEvents = getCollection<EventDocument>("allEvents");
-export const allPrints = getCollection<PrintDocument>("allPrints");
-export const allStrategies = getCollection<StrategyDocument>("allStrategies");
-export const allResources = getCollection<ResourceDocument>("allResources");
-export const allCanons = getCollection<CanonDocument>("allCanons");
-export const allDocuments = getCollection<ContentlayerDocument>("allDocuments");
+export const allPosts = safeArray<PostDocument>((generated as any).allPosts);
+export const allBooks = safeArray<BookDocument>((generated as any).allBooks);
+export const allDownloads = safeArray<DownloadDocument>((generated as any).allDownloads);
+export const allEvents = safeArray<EventDocument>((generated as any).allEvents);
+export const allPrints = safeArray<PrintDocument>((generated as any).allPrints);
+export const allStrategies = safeArray<StrategyDocument>((generated as any).allStrategies);
+export const allResources = safeArray<ResourceDocument>((generated as any).allResources);
+export const allCanons = safeArray<CanonDocument>((generated as any).allCanons);
+export const allDocuments = safeArray<ContentlayerDocument>((generated as any).allDocuments);
 
 export const allContent: ContentlayerDocument[] = [...allDocuments];
-export const allPublished: ContentlayerDocument[] = allDocuments.filter((d) => !d.draft);
+export const allPublished: ContentlayerDocument[] = allDocuments.filter((d) => !d?.draft);
 
-// ----------------------------------------------------------------------------
-// Type guards
-// ----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* Type guards                                                                */
+/* -------------------------------------------------------------------------- */
 
-export function isPost(doc: ContentlayerDocument): doc is PostDocument {
-  return doc.type === "Post";
+export function isPost(doc: any): doc is PostDocument {
+  return doc?.type === "Post";
 }
-export function isBook(doc: ContentlayerDocument): doc is BookDocument {
-  return doc.type === "Book";
+export function isBook(doc: any): doc is BookDocument {
+  return doc?.type === "Book";
 }
-export function isDownload(doc: ContentlayerDocument): doc is DownloadDocument {
-  return doc.type === "Download";
+export function isDownload(doc: any): doc is DownloadDocument {
+  return doc?.type === "Download";
 }
-export function isEvent(doc: ContentlayerDocument): doc is EventDocument {
-  return doc.type === "Event";
+export function isEvent(doc: any): doc is EventDocument {
+  return doc?.type === "Event";
 }
-export function isPrint(doc: ContentlayerDocument): doc is PrintDocument {
-  return doc.type === "Print";
+export function isPrint(doc: any): doc is PrintDocument {
+  return doc?.type === "Print";
 }
-export function isResource(doc: ContentlayerDocument): doc is ResourceDocument {
-  return doc.type === "Resource";
+export function isResource(doc: any): doc is ResourceDocument {
+  return doc?.type === "Resource";
 }
-export function isCanon(doc: ContentlayerDocument): doc is CanonDocument {
-  return doc.type === "Canon";
+export function isCanon(doc: any): doc is CanonDocument {
+  return doc?.type === "Canon";
 }
-export function isStrategy(doc: ContentlayerDocument): doc is StrategyDocument {
-  return doc.type === "Strategy";
+export function isStrategy(doc: any): doc is StrategyDocument {
+  return doc?.type === "Strategy";
+}
+
+/* -------------------------------------------------------------------------- */
+/* Basic helper functions                                                     */
+/* -------------------------------------------------------------------------- */
+
+export function getPublishedDocuments<T extends ContentlayerDocument>(docs: T[] = allDocuments as T[]): T[] {
+  return [...docs]
+    .filter((d) => d && !d.draft)
+    .sort((a, b) => new Date(b.date || "").getTime() - new Date(a.date || "").getTime());
+}
+
+export function getDocumentsByType<T extends ContentlayerDocument>(type: string): T[] {
+  return allDocuments.filter((d) => d?.type === type) as T[];
+}
+
+export function getDocumentBySlug(slug: string, type?: string): ContentlayerDocument | undefined {
+  const candidates = type ? allDocuments.filter((d) => d?.type === type) : allDocuments;
+  return candidates.find((d) => d?.slug === slug);
+}
+
+export function getFeaturedDocuments(): ContentlayerDocument[] {
+  return allDocuments.filter((d) => (d as any)?.featured === true && !d?.draft);
 }
 
 export function isContentlayerLoaded(): boolean {
-  return Object.keys(generated).length > 0;
-}<PASTE THE BLOCK ABOVE HERE EXACTLY>
+  return (
+    allDocuments.length > 0 ||
+    Object.keys(generated as any).some((k) => k.startsWith("all") && Array.isArray((generated as any)[k]))
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Card mapping + utilities                                                   */
+/* -------------------------------------------------------------------------- */
+
+export function getCardFallbackConfig() {
+  return {
+    defaultImage: "/images/fallback-card.jpg",
+    defaultTitle: "Untitled",
+    defaultDescription: "No description available.",
+    defaultTags: [] as string[],
+    defaultAuthor: "Unknown Author",
+    defaultAvatar: "/images/default-avatar.jpg",
+  };
+}
+
+export function getCardImage(image: string | null | undefined, fallback?: string): string {
+  if (!image) return fallback || getCardFallbackConfig().defaultImage;
+  return image;
+}
+
+export function formatCardDate(dateString: string | null | undefined): string {
+  if (!dateString) return "";
+  try {
+    const d = new Date(dateString);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+  } catch {
+    return "";
+  }
+}
+
+function mapToBaseCardProps(doc: ContentlayerDocument) {
+  return {
+    slug: doc.slug,
+    title: doc.title || "Untitled",
+    subtitle: (doc as any).subtitle || null,
+    excerpt: doc.excerpt || null,
+    description: doc.description || null,
+    coverImage: doc.coverImage || null,
+    date: doc.date || null,
+    tags: doc.tags || [],
+    featured: (doc as any).featured || false,
+    accessLevel: (doc as any).accessLevel || null,
+    lockMessage: (doc as any).lockMessage || null,
+  };
+}
+
+function mapToBookCardProps(doc: BookDocument) {
+  return {
+    ...mapToBaseCardProps(doc),
+    author: doc.author || null,
+    isbn: doc.isbn || null,
+    publisher: doc.publisher || null,
+    publishDate: doc.date || null,
+  };
+}
+
+function mapToBlogPostCardProps(doc: PostDocument) {
+  return {
+    ...mapToBaseCardProps(doc),
+    author: doc.author || null,
+    readTime: doc.readTime || null,
+    category: doc.category || null,
+  };
+}
+
+function mapToCanonCardProps(doc: CanonDocument) {
+  return {
+    ...mapToBaseCardProps(doc),
+    author: doc.author || null,
+    volumeNumber: doc.volumeNumber || null,
+    readTime: doc.readTime || null,
+  };
+}
+
+export function getCardPropsForDocument(doc: ContentlayerDocument) {
+  if (isBook(doc)) return mapToBookCardProps(doc);
+  if (isPost(doc)) return mapToBlogPostCardProps(doc);
+  if (isCanon(doc)) return mapToCanonCardProps(doc);
+  return mapToBaseCardProps(doc);
+}
+
+export type ContentlayerCardProps = ReturnType<typeof getCardPropsForDocument>;
+
+/**
+ * Re-export generated stuff (optional). This keeps other "direct generated" imports working.
+ * If you want to lock things down, you can remove this line later.
+ */
+export * from "contentlayer/generated";
