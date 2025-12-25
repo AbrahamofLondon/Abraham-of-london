@@ -86,7 +86,6 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params })
     })
   ) as ShortPageProps["short"];
 
-  // NOTE: For `output: "export"`, do NOT return `revalidate`.
   try {
     const source = await serialize(short.body?.raw ?? "");
     return { props: { short, source } };
