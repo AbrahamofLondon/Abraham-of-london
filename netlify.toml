@@ -20,8 +20,6 @@
   PNPM_VERSION = "9.15.9"
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_OPTIONS = "--max-old-space-size=4096"
-
-[build.environment]
   NETLIFY_TS_IGNORE = "false"
   NETLIFY_ESLINT_IGNORE = "false"
 
@@ -66,7 +64,7 @@
   force = true
 
 # NOTE:
-# DO NOT do “remove trailing slash” redirects here.
+# DO NOT do "remove trailing slash" redirects here.
 # Next.js routing should own it. Netlify wildcard/condition tricks are unreliable.
 
 # ============================================================
@@ -82,7 +80,7 @@
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Permissions-Policy = "accelerometer=(), autoplay=(), camera=(), clipboard-read=(), clipboard-write=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=()"
 
-    # CSP: Keep it realistic so it doesn’t break Next.js or third-party scripts.
+    # CSP: Keep it realistic so it doesn't break Next.js or third-party scripts.
     # If you want a fully locked CSP (nonce-based), we should implement it in Next
     # middleware + per-request nonces. Netlify static CSP strings are limited.
     Content-Security-Policy = """
