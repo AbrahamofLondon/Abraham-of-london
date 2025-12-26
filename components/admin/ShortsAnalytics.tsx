@@ -1,10 +1,10 @@
-// components/admin/ShortsAnalytics.tsx
+// components/admin/ShortsAnalytics.tsx - FIXED
 
 import * as React from "react";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from "recharts";
-import { Heart, Bookmark, TrendingUp, Zap, Users } from "lucide-react";
+import { Heart, Bookmark, TrendingUp, Zap } from "lucide-react";
 
 interface AnalyticsProps {
   data: {
@@ -73,7 +73,7 @@ export default function ShortsAnalytics({ data }: AnalyticsProps) {
               Top Performance Insight
             </h3>
             <p className="text-zinc-400 mt-4 text-sm leading-relaxed">
-              The entry <span className="text-white font-bold italic">"{topPerformer?.title}"</span> has generated the highest 
+              The entry <span className="text-white font-bold italic">&quot;{topPerformer?.title}&quot;</span> has generated the highest 
               retention rate, suggesting a deep appetite for this specific strategic theme.
             </p>
           </div>

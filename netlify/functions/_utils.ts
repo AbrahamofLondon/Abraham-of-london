@@ -5,7 +5,7 @@ import type {
   HandlerEvent,
   HandlerContext,
 } from "@netlify/functions";
-import { verifyRecaptcha } from "../../lib/verifyRecaptcha";
+import { verifyRecaptchaDetailed } from "../../lib/recaptchaServer";
 
 /* ============================================================================
    SECURITY CONSTANTS & TYPES
@@ -18,6 +18,10 @@ export type GuardOptions = {
   expectedAction?: string;
   requireHoneypot?: boolean;
   honeypotFieldNames?: string[];
+  /**
+   * Optional timeout override for captcha verification (ms)
+   */
+  recaptchaTimeoutMs?: number;
 };
 
 interface ApiRequestBody {
@@ -25,6 +29,10 @@ interface ApiRequestBody {
   token?: string;
   [key: string]: unknown;
 }
+
+/* ============================================================================
+   ORIGINS / BODY LIMITS (memoized)
+   ============================================================================ */
 
 // Memoized allowed origins parsing
 let cachedAllowedOrigins: string[] | null = null;
@@ -80,13 +88,14 @@ export function withSecurity(
     expectedAction,
     requireHoneypot = true,
     honeypotFieldNames = ["website", "middleName", "botField"],
+    recaptchaTimeoutMs,
   } = options;
 
   return async (
     event: HandlerEvent,
     context: HandlerContext
   ): Promise<HandlerResponse> => {
-    const origin = event.headers.origin || event.headers.Origin || "*";
+    const origin = event.headers.origin || (event.headers as any).Origin || "*";
     const allowedOrigins = getAllowedOrigins();
 
     if (event.httpMethod === "OPTIONS") {
@@ -102,13 +111,15 @@ export function withSecurity(
     }
 
     // Honeypot (silent pass if bot filled it)
-    if (
-      requireHoneypot &&
-      event.body &&
-      (event.headers["content-type"] || event.headers["Content-Type"] || "")
-        .toString()
-        .includes("application/json")
-    ) {
+    const contentType = (
+      event.headers["content-type"] ||
+      (event.headers as any)["Content-Type"] ||
+      ""
+    )
+      .toString()
+      .toLowerCase();
+
+    if (requireHoneypot && event.body && contentType.includes("application/json")) {
       try {
         const body = JSON.parse(event.body) as Record<string, unknown>;
         for (const field of honeypotFieldNames) {
@@ -122,29 +133,28 @@ export function withSecurity(
       }
     }
 
-    // reCAPTCHA guard
+    // reCAPTCHA guard (canonical server helper)
     if (requireRecaptcha) {
       let token: string | undefined;
 
-      const ct = (
-        event.headers["content-type"] ||
-        event.headers["Content-Type"] ||
-        ""
-      )
-        .toString()
-        .toLowerCase();
-
-      if (event.body && ct.includes("application/json")) {
+      if (event.body && contentType.includes("application/json")) {
         try {
           const body = JSON.parse(event.body) as ApiRequestBody;
-          token = body.recaptchaToken || body.token;
+          const t = body.recaptchaToken || body.token;
+          token = typeof t === "string" ? t : undefined;
         } catch {
           // continue to header check
         }
       }
 
       if (!token) {
-        token = event.headers["x-recaptcha-token"] as string | undefined;
+        const headerToken =
+          (event.headers["x-recaptcha-token"] as string | undefined) ||
+          ((event.headers as any)["X-recaptcha-Token"] as string | undefined) ||
+          ((event.headers as any)["X-Recaptcha-Token"] as string | undefined) ||
+          ((event.headers as any)["x-recaptcha-token"] as string | undefined);
+
+        token = typeof headerToken === "string" ? headerToken : undefined;
       }
 
       if (!token || typeof token !== "string") {
@@ -154,18 +164,22 @@ export function withSecurity(
       const clientIp = getClientIp(event);
 
       try {
-        // SINGLE verification call
-        const detailed = await verifyRecaptcha(token, expectedAction, clientIp);
+        const detailed = await verifyRecaptchaDetailed(
+          token,
+          expectedAction,
+          clientIp,
+          typeof recaptchaTimeoutMs === "number" ? recaptchaTimeoutMs : undefined
+        );
 
         if (!detailed.success) {
           if (process.env.NODE_ENV !== "production") {
+            // Keep logs lean + safe (no hostname/reasons fields expected)
+            // NOTE: do not log token.
             console.warn("[reCAPTCHA] failed", {
               expectedAction,
               clientIp,
               score: detailed.score,
               action: detailed.action,
-              hostname: detailed.hostname,
-              reasons: detailed.reasons,
               errorCodes: detailed.errorCodes,
             });
           }
@@ -176,7 +190,6 @@ export function withSecurity(
           console.info("[reCAPTCHA] passed", {
             score: detailed.score,
             action: detailed.action,
-            hostname: detailed.hostname,
           });
         }
       } catch (error) {

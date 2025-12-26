@@ -210,7 +210,7 @@ export default function BrandsIndex() {
               </h2>
               <p className="text-gold/70 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
                 Have a vision for a movement that aligns with our values of
-                faith, fatherhood, and legacy? Let's explore how we can build
+                faith, fatherhood, and legacy? Let&apos;s explore how we can build
                 together.
               </p>
               <div className="flex flex-wrap justify-center gap-4">

@@ -27,7 +27,8 @@ const ContactPage = (): JSX.Element => {
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
 
   // Safe phone number with fallback
-  const contactPhone = (siteConfig as { phone?: string }).phone ?? "+44 20 8622 5909";
+  const contactPhone =
+    (siteConfig as { phone?: string }).phone ?? "+44 20 8622 5909";
 
   // Theme management
   React.useEffect(() => {
@@ -89,8 +90,8 @@ const ContactPage = (): JSX.Element => {
       } else {
         setSubmitStatus('error');
       }
-    } catch (error) {
-      // FIXED: removed console.error for production
+    } catch (_error) {
+      // FIXED: renamed error to _error to avoid unused variable warning
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -218,7 +219,7 @@ const ContactPage = (): JSX.Element => {
             <h1
               className={`mt-4 font-serif text-4xl font-bold md:text-5xl ${primaryTextClass}`}
             >
-              "Contact Abraham of London"
+              Contact Abraham of London
             </h1>
             <p
               className={`mt-6 max-w-2xl mx-auto text-lg leading-relaxed ${secondaryTextClass}`}
@@ -236,7 +237,7 @@ const ContactPage = (): JSX.Element => {
                 <CheckCircle className="h-5 w-5" />
                 <div>
                   <p className="font-semibold">Enquiry Submitted Successfully</p>
-                  <p className="text-sm mt-1">We'll respond within 2-3 business days. Thank you for your interest.</p>
+                  <p className="text-sm mt-1">We&apos;ll respond within 2-3 business days. Thank you for your interest.</p>
                 </div>
               </div>
             </div>
@@ -354,7 +355,7 @@ const ContactPage = (): JSX.Element => {
                         Response Time
                       </h3>
                       <p className={`text-sm ${secondaryTextClass}`}>
-                        We aim to respond to qualified enquiries within 2-3
+                        We aim to respond to qualified enquiries within 2–3
                         business days. Depending on volume and strategic fit, we
                         may not be able to reply to every message individually.
                       </p>
@@ -469,7 +470,7 @@ const ContactPage = (): JSX.Element => {
                         required
                         autoComplete="email"
                         className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ring-0 transition focus:ring-2 ${inputClass}`}
-                        placeholder="your.email@example.com"
+                        placeholder='your.email@example.com'
                         pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                       />
                     </div>
@@ -553,7 +554,7 @@ const ContactPage = (): JSX.Element => {
 
                   <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
                     <p className={`text-sm ${secondaryTextClass}`}>
-                      Prefer direct communication?{" "}
+                      Prefer direct communication?{` `}
                       <a
                         href={`mailto:${siteConfig.email}`}
                         className={`font-semibold underline-offset-2 hover:underline ${accentTextClass}`}
@@ -581,14 +582,14 @@ const ContactPage = (): JSX.Element => {
 
                   <p className={`mt-4 text-xs ${secondaryTextClass}`}>
                     By submitting this form, you acknowledge that you have read
-                    our{" "}
+                    our{` `}
                     <Link
                       href="/privacy-policy"
                       className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}
                     >
                       Privacy Policy
-                    </Link>{" "}
-                    and{" "}
+                    </Link>{` `}
+                    and{` `}
                     <Link
                       href="/terms-of-service"
                       className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}

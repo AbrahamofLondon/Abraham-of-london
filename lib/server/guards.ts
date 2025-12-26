@@ -1,13 +1,16 @@
 // lib/server/guards.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { validateAdminAccess } from "@/lib/server/validation";
+import { validateAdminAccess, isInvalidAdmin } from "@/lib/server/validation";
 import { isRateLimited } from "@/lib/server/rate-limit";
 import { logAuditEvent } from "@/lib/server/audit";
 import { jsonErr } from "@/lib/server/http";
 
 export async function requireAdmin(req: NextApiRequest, res: NextApiResponse) {
   const admin = await validateAdminAccess(req);
-  if (!admin.valid) {
+  
+  // Use the type guard for clear type narrowing
+  if (isInvalidAdmin(admin)) {
+    // TypeScript now knows admin has 'reason' property
     await logAuditEvent({
       actorType: "api",
       action: "unauthorized_access",
@@ -20,6 +23,7 @@ export async function requireAdmin(req: NextApiRequest, res: NextApiResponse) {
     return { ok: false as const };
   }
 
+  // TypeScript knows admin is valid here
   return { ok: true as const, admin };
 }
 

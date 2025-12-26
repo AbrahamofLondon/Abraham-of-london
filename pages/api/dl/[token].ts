@@ -27,7 +27,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const ref = req.headers.referer ?? null;
 
   const payload = verifyDownloadToken(token, secret);
-  if (!payload.valid) {
+  
+  // Fix: Use explicit type check with === false
+  if (payload.valid === false) {
+    // TypeScript now knows payload has 'reason' property
     await logDownloadEvent({
       eventType: "TOKEN_REJECTED",
       slug: payload.slug ?? "unknown",
@@ -36,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ip,
       userAgent: ua,
       referrer: ref,
-      note: payload.reason ?? "invalid",
+      note: payload.reason ?? "invalid", // ✅ Fixed
     });
     return res.status(403).send("Invalid or expired token");
   }

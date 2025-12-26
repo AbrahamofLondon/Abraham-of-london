@@ -1,7 +1,7 @@
-// pages/events/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+
 import Layout from "@/components/Layout";
 import {
   assertContentlayerHasDocs,
@@ -23,36 +23,58 @@ type Props = {
   past: EventItem[];
 };
 
+function isValidDateString(value: string): boolean {
+  const t = Date.parse(value);
+  return Number.isFinite(t);
+}
+
+function formatDateTimeGB(value: string): string {
+  if (!isValidDateString(value)) return "Date TBC";
+  return new Date(value).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatDateGB(value: string): string {
+  if (!isValidDateString(value)) return "Past";
+  return new Date(value).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export const getStaticProps: GetStaticProps<Props> = async () => {
   assertContentlayerHasDocs("pages/events/index.tsx getStaticProps");
 
   const eventsRaw = getAllEvents();
   const now = new Date();
 
-  const events: EventItem[] = eventsRaw.map((e: any) => ({
-    _id: String(e._id ?? `${normalizeSlug(e)}-${e.date ?? ""}`),
-    slug: normalizeSlug(e),
-    title: e.title ?? "Untitled Event",
-    excerpt: e.excerpt ?? e.description ?? null,
-    eventDate: (e.eventDate ?? e.date ?? null) as any,
-    location: e.location ?? null,
-  }));
+  const events: EventItem[] = eventsRaw.map((e: any) => {
+    const slug = normalizeSlug(e);
+    const dateCandidate = (e.eventDate ?? e.date ?? null) as string | null;
+
+    return {
+      _id: String(e._id ?? `${slug}-${dateCandidate ?? "no-date"}`),
+      slug,
+      title: String(e.title ?? "Untitled Event"),
+      excerpt: (e.excerpt ?? e.description ?? null) as string | null,
+      eventDate: dateCandidate,
+      location: (e.location ?? null) as string | null,
+    };
+  });
 
   const upcoming = events
-    .filter((e) => e.eventDate && new Date(e.eventDate) >= now)
-    .sort(
-      (a, b) =>
-        new Date(a.eventDate || "").getTime() -
-        new Date(b.eventDate || "").getTime()
-    );
+    .filter((e) => e.eventDate && isValidDateString(e.eventDate) && new Date(e.eventDate) >= now)
+    .sort((a, b) => Date.parse(a.eventDate as string) - Date.parse(b.eventDate as string));
 
   const past = events
-    .filter((e) => !e.eventDate || new Date(e.eventDate) < now)
-    .sort(
-      (a, b) =>
-        new Date(b.eventDate || "").getTime() -
-        new Date(a.eventDate || "").getTime()
-    );
+    .filter((e) => !e.eventDate || !isValidDateString(e.eventDate) || new Date(e.eventDate) < now)
+    .sort((a, b) => Date.parse(b.eventDate ?? "") - Date.parse(a.eventDate ?? ""));
 
   return { props: { upcoming, past }, revalidate: 1800 };
 };
@@ -69,8 +91,7 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
             Events & Rooms
           </h1>
           <p className="text-sm text-gray-300">
-            Private rooms, salons and workshops designed for builders who take
-            responsibility seriously.
+            Private rooms, salons and workshops designed for builders who take responsibility seriously.
           </p>
         </header>
 
@@ -79,24 +100,18 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
             Upcoming
           </h2>
 
-          {upcoming.length === 0 && (
+          {upcoming.length === 0 ? (
             <p className="text-sm text-gray-400">
-              No upcoming events announced yet. Join the newsletter to hear
-              first when the next room opens.
+              No upcoming events announced yet. Join the newsletter to hear first when the next room opens.
             </p>
-          )}
-
-          {upcoming.length > 0 && (
+          ) : (
             <ul className="space-y-4">
               {upcoming.map((event) => (
                 <li
                   key={event._id}
                   className="rounded-2xl border border-white/5 bg-black/40 p-4 transition hover:border-gold/60 hover:bg-black/70"
                 >
-                  <Link
-                    href={`/events/${event.slug}`}
-                    className="block space-y-1 no-underline"
-                  >
+                  <Link href={`/events/${event.slug}`} className="block space-y-1 no-underline">
                     <p className="text-xs uppercase tracking-[0.25em] text-gold/70">
                       {event.location || "Private Room"}
                     </p>
@@ -106,22 +121,12 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
                     </h3>
 
                     <p className="text-xs text-gray-300">
-                      {event.eventDate
-                        ? new Date(event.eventDate).toLocaleString("en-GB", ...)
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "Date TBC"}
+                      {event.eventDate ? formatDateTimeGB(event.eventDate) : "Date TBC"}
                     </p>
 
-                    {event.excerpt && (
-                      <p className="mt-2 text-sm text-gray-300">
-                        {event.excerpt}
-                      </p>
-                    )}
+                    {event.excerpt ? (
+                      <p className="mt-2 text-sm text-gray-300">{event.excerpt}</p>
+                    ) : null}
                   </Link>
                 </li>
               ))}
@@ -134,31 +139,19 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
             Archive
           </h2>
 
-          {past.length === 0 && (
+          {past.length === 0 ? (
             <p className="text-sm text-gray-400">
-              Once the first rooms have run, they&apos;ll live here as part of
-              the Canon archive.
+              Once the first rooms have run, they&apos;ll live here as part of the Canon archive.
             </p>
-          )}
-
-          {past.length > 0 && (
+          ) : (
             <ul className="space-y-3 text-sm text-gray-400">
               {past.map((event) => (
                 <li key={event._id} className="flex items-baseline gap-3">
                   <span className="w-32 shrink-0 text-xs text-gray-500">
-                    {event.eventDate
-                      ? new Date(event.eventDate).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "Past"}
+                    {event.eventDate ? formatDateGB(event.eventDate) : "Past"}
                   </span>
 
-                  <Link
-                    href={`/events/${event.slug}`}
-                    className="flex-1 text-cream hover:text-gold"
-                  >
+                  <Link href={`/events/${event.slug}`} className="flex-1 text-cream hover:text-gold">
                     {event.title}
                   </Link>
                 </li>

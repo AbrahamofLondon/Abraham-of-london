@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { deleteMemberByEmail } from '@/lib/server/inner-circle-store';
+import innerCircleStore from '@/lib/server/inner-circle-store';
 import { 
   rateLimitForRequestIp, 
   RATE_LIMIT_CONFIGS,
@@ -42,7 +42,7 @@ export default async function handler(
 
   // 2. Authentication Perimeter
   if (!isAdminAuthenticated(req)) {
-    console.error(`[Security Alert] Unauthorized deletion attempt for IP: ${getClientIp(req)}`);
+    console.error(`[Security Alert] Unauthorized deletion attempt from IP: ${getClientIp(req)}`);
     return res.status(401).json({ ok: false, error: 'Unauthorized. System Admin key required.' });
   }
 
@@ -75,7 +75,7 @@ export default async function handler(
 
     // 4. Surgical Deletion Execution
     // This removes the member and all associated cryptographic keys.
-    const success = await deleteMemberByEmail(normalizedEmail);
+    const success = await innerCircleStore.deleteMemberByEmail(normalizedEmail);
 
     if (!success) {
       return res.status(404).json({ 
@@ -92,7 +92,6 @@ export default async function handler(
       deletedAt: new Date().toISOString(),
       note: reason ? `Reason provided: ${reason}` : undefined
     });
-
   } catch (error) {
     console.error('[Admin Action] Exception during surgical deletion:', error);
     return res.status(500).json({ ok: false, error: 'Purge subsystem failure. Action aborted.' });

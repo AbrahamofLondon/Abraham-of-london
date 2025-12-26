@@ -33,7 +33,7 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
 
         <p className={`mt-3 text-sm leading-relaxed ${text}`}>
           For a clear view of how we handle data, security, accessibility, and platform use, review the documents below.
-          They're designed to be readable - not intimidating.
+          They&apos;re designed to be readable - not intimidating.
         </p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-3 text-sm font-medium">

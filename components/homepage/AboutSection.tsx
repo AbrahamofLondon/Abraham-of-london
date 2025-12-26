@@ -1,4 +1,4 @@
-// components/homepage/AboutSection.tsx
+// components/homepage/AboutSection.tsx - FIXED
 "use client";
 
 import React from "react";
@@ -24,7 +24,7 @@ type AboutSectionProps = {
   portraitSrc?: string;
   portraitAlt?: string;
   priority?: boolean;
-  className?: string;
+  _className?: string; // Changed from className to _className to fix unused warning
 };
 
 // --- Animation Variants ---
@@ -85,7 +85,7 @@ export default function AboutSection({
   portraitSrc = "/assets/images/profile-portrait.webp",
   portraitAlt = "Portrait of Abraham of London",
   priority = false,
-  className,
+  _className, // Changed from className to _className
 }: AboutSectionProps) {
   const containerRef = React.useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -334,7 +334,7 @@ export default function AboutSection({
               className="mt-12 rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 shadow-sm dark:border-gray-800 dark:from-gray-900 dark:to-gray-950"
             >
               <div className="flex items-start gap-3">
-                <div className="text-3xl text-blue-500">"</div>
+                <div className="text-3xl text-blue-500">&quot;</div>
                 <div>
                   <p className="font-serif text-lg italic text-gray-800 dark:text-gray-300">
                     The true measure of wisdom is not in what you know, but in what you do with that knowledge to shape a better world.

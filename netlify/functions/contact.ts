@@ -1,6 +1,7 @@
 // netlify/functions/contact.ts
 import type { Handler } from "@netlify/functions";
 import { sendAppEmail } from "./_email";
+import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
 
 /* =========================
    CONFIG
@@ -10,6 +11,7 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "*")
   .map((s) => s.trim())
   .filter(Boolean);
 
+// Optional legacy env (Netlify-function-only). If absent, we use canonical verifier.
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET?.trim();
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET?.trim();
 const MAX_BODY_BYTES = Number(process.env.MAX_BODY_BYTES || 64 * 1024);
@@ -41,14 +43,21 @@ function isJsonContentType(ct?: string | null) {
   return !!ct && /application\/json/i.test(ct);
 }
 
-function safeParseJson<T = unknown>(
-  raw: string
-): { ok: true; data: T } | { ok: false; error: string } {
+type JsonParseOk<T> = { ok: true; data: T };
+type JsonParseFail = { ok: false; error: string };
+type JsonParseResult<T> = JsonParseOk<T> | JsonParseFail;
+
+function safeParseJson<T = unknown>(raw: string): JsonParseResult<T> {
   try {
     return { ok: true, data: JSON.parse(raw) as T };
   } catch {
     return { ok: false, error: "Invalid JSON payload" };
   }
+}
+
+// ✅ Dedicated type guard: fixes TS union narrowing in strict builds
+function isParseFail<T>(r: JsonParseResult<T>): r is JsonParseFail {
+  return r.ok === false;
 }
 
 function fail(
@@ -101,9 +110,15 @@ function validatePayload(p: ContactPayload) {
   };
 }
 
-async function verifyRecaptcha(token: string, remoteIp?: string) {
-  if (!RECAPTCHA_SECRET)
+/* =========================
+   BOT VERIFICATION
+   ========================= */
+async function verifyRecaptchaLegacy(token: string, remoteIp?: string) {
+  // If legacy secret isn't present, do not block.
+  if (!RECAPTCHA_SECRET) {
     return { ok: true, provider: "recaptcha", skipped: true as const };
+  }
+
   try {
     const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
       method: "POST",
@@ -114,34 +129,52 @@ async function verifyRecaptcha(token: string, remoteIp?: string) {
         ...(remoteIp ? { remoteip: remoteIp } : {}),
       }),
     });
+
     const json = (await res.json()) as {
       success?: boolean;
       score?: number;
       "error-codes"?: string[];
     };
+
     if (!json.success) {
       return {
         ok: false,
-        provider: "recaptcha",
+        provider: "recaptcha" as const,
         reason: (json["error-codes"] || ["verification_failed"]).join(","),
       };
     }
+
     if (typeof json.score === "number" && json.score < 0.4) {
       return {
         ok: false,
-        provider: "recaptcha",
+        provider: "recaptcha" as const,
         reason: `low_score:${json.score}`,
       };
     }
+
     return { ok: true, provider: "recaptcha" as const };
   } catch {
     return { ok: false, provider: "recaptcha" as const, reason: "network_error" };
   }
 }
 
+async function verifyRecaptchaCanonical(token: string, remoteIp?: string) {
+  // Canonical verifier uses RECAPTCHA_SECRET_KEY (shared with API routes).
+  const detailed = await verifyRecaptchaDetailed(token, "contact", remoteIp);
+  return detailed.success
+    ? { ok: true, provider: "recaptcha" as const }
+    : {
+        ok: false,
+        provider: "recaptcha" as const,
+        reason: (detailed.errorCodes || ["failed"]).join(","),
+      };
+}
+
 async function verifyTurnstile(token: string, remoteIp?: string) {
-  if (!TURNSTILE_SECRET)
+  if (!TURNSTILE_SECRET) {
     return { ok: true, provider: "turnstile", skipped: true as const };
+  }
+
   try {
     const res = await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
@@ -154,17 +187,20 @@ async function verifyTurnstile(token: string, remoteIp?: string) {
         }),
       }
     );
+
     const json = (await res.json()) as {
       success?: boolean;
       "error-codes"?: string[];
     };
+
     if (!json.success) {
       return {
         ok: false,
-        provider: "turnstile",
+        provider: "turnstile" as const,
         reason: (json["error-codes"] || ["verification_failed"]).join(","),
       };
     }
+
     return { ok: true, provider: "turnstile" as const };
   } catch {
     return { ok: false, provider: "turnstile" as const, reason: "network_error" };
@@ -201,18 +237,18 @@ export const handler: Handler = async (event) => {
   if (!raw) {
     return fail(400, headers, "Missing request body", "ERR_NO_BODY");
   }
+
   if (Buffer.byteLength(raw, "utf8") > MAX_BODY_BYTES) {
     return fail(413, headers, "Payload too large", "ERR_TOO_LARGE");
   }
 
   const parsed = safeParseJson<ContactPayload>(raw);
-  if (!parsed.ok) {
-    // Use a type guard or check for 'error' property
-    if ('error' in parsed) {
-      return fail(400, headers, parsed.error, "ERR_BAD_JSON");
-    }
-    return fail(400, headers, "Invalid JSON payload", "ERR_BAD_JSON");
+
+  // ✅ TS-safe narrowing (no property access on union without guard)
+  if (isParseFail(parsed)) {
+    return fail(400, headers, parsed.error, "ERR_BAD_JSON");
   }
+
   const payload = parsed.data;
 
   const { valid, errors, data } = validatePayload(payload);
@@ -233,6 +269,7 @@ export const handler: Handler = async (event) => {
       .split(",")[0]
       ?.trim() || undefined;
 
+  // Bot checks: Turnstile preferred if present; else reCAPTCHA
   if (payload.turnstileToken) {
     const v = await verifyTurnstile(String(payload.turnstileToken), remoteIp);
     if (!v.ok && !("skipped" in v && v.skipped)) {
@@ -244,7 +281,13 @@ export const handler: Handler = async (event) => {
       );
     }
   } else if (payload.recaptchaToken) {
-    const v = await verifyRecaptcha(String(payload.recaptchaToken), remoteIp);
+    const token = String(payload.recaptchaToken);
+
+    // If legacy secret exists, use it; otherwise use canonical verifier.
+    const v = RECAPTCHA_SECRET
+      ? await verifyRecaptchaLegacy(token, remoteIp)
+      : await verifyRecaptchaCanonical(token, remoteIp);
+
     if (!v.ok && !("skipped" in v && v.skipped)) {
       return fail(
         403,
@@ -255,10 +298,9 @@ export const handler: Handler = async (event) => {
     }
   }
 
-  // === Email / CRM wiring (best-effort, does NOT affect user response) ===
+  // === Email / CRM wiring (best-effort) ===
   try {
     await sendAppEmail({
-      // goes to MAIL_TO_PRIMARY + MAIL_TO_FALLBACK by default
       subject: `[Contact] ${data.subject}`,
       html: `
         <p><strong>Name:</strong> ${data.name}</p>
@@ -270,7 +312,6 @@ export const handler: Handler = async (event) => {
     });
   } catch (err) {
     console.error("Contact email send failed:", err);
-    // we deliberately do NOT fail the request here
   }
 
   return {
@@ -281,10 +322,7 @@ export const handler: Handler = async (event) => {
       message: "Received",
       receivedAt: new Date().toISOString(),
       data,
-      meta: {
-        ip: remoteIp || null,
-        origin,
-      },
+      meta: { ip: remoteIp || null, origin },
     }),
   };
 };

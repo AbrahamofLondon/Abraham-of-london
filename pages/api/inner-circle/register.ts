@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyRecaptchaDetailed } from "@/lib/recaptcha";
+import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
 import { createOrUpdateMemberAndIssueKey, sendInnerCircleEmail } from "@/lib/inner-circle";
 import { getClientIp } from "@/lib/server/ip";
 import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";

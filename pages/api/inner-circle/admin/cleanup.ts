@@ -1,86 +1,226 @@
+// pages/api/inner-circle/admin/cleanup.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { cleanupOldData } from "@/lib/inner-circle";
+import { cleanupOldData, type CleanupResult } from "@/lib/inner-circle";
 
-type CleanupResponse = {
-  ok: boolean;
-  message?: string;
-  stats?: { deletedMembers: number; deletedKeys: number };
-  error?: string;
-  cleanedAt?: string;
-};
+/* =============================================================================
+   TYPES
+   ============================================================================= */
+
+type CleanupApiResponse =
+  | {
+      ok: true;
+      message: string;
+      stats: {
+        deletedMembers: number;
+        deletedKeys: number;
+      };
+      meta?: {
+        remainingTotal?: number;
+      };
+      cleanedAt: string;
+    }
+  | {
+      ok: false;
+      error: string;
+      details?: string;
+    };
+
+/* =============================================================================
+   CONSTANTS
+   ============================================================================= */
+
+const RATE_LIMIT_CONFIG = {
+  maxRequests: 3,
+  windowSeconds: 3600, // 1 hour
+} as const;
+
+const ADMIN_KEY_HEADERS = [
+  "x-inner-circle-admin-key",
+  "authorization",
+] as const;
+
+/* =============================================================================
+   UTILITIES
+   ============================================================================= */
 
 function getClientIp(req: NextApiRequest): string {
-  const xf = req.headers["x-forwarded-for"];
-  if (typeof xf === "string") return xf.split(",")[0].trim();
-  return (req.socket as any)?.remoteAddress || "unknown";
+  const xForwardedFor = req.headers["x-forwarded-for"];
+  
+  if (typeof xForwardedFor === "string") {
+    return xForwardedFor.split(",")[0].trim();
+  }
+  
+  if (Array.isArray(xForwardedFor) && xForwardedFor.length > 0) {
+    return xForwardedFor[0].split(",")[0].trim();
+  }
+  
+  return req.socket?.remoteAddress ?? "unknown";
+}
+
+function extractBearerToken(authHeader?: string): string | null {
+  if (!authHeader) return null;
+  
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1].trim() : null;
 }
 
 function isAdminAuthenticated(req: NextApiRequest): boolean {
-  const headerKey =
-    (req.headers["x-inner-circle-admin-key"] as string | undefined) ||
-    (req.headers["authorization"] as string | undefined);
-
-  const token = headerKey?.replace(/^Bearer\s+/i, "").trim();
-  if (!token) return false;
-
-  const expected = process.env.INNER_CIRCLE_ADMIN_KEY;
-  if (!expected) return false;
-
-  return token === expected;
-}
-
-// small limiter: 3/hour per IP
-const BUCKET = new Map<string, { count: number; resetAt: number }>();
-function rateLimit(ip: string, limit = 3, windowSec = 3600) {
-  const now = Date.now();
-  const resetAt = now + windowSec * 1000;
-  const cur = BUCKET.get(ip);
-
-  if (!cur || cur.resetAt < now) {
-    BUCKET.set(ip, { count: 1, resetAt });
-    return { allowed: true, remaining: limit - 1, resetAt };
+  const adminKey = process.env.INNER_CIRCLE_ADMIN_KEY;
+  
+  if (!adminKey) {
+    console.error("[AdminAuth] INNER_CIRCLE_ADMIN_KEY not configured");
+    return false;
   }
 
-  cur.count += 1;
-  BUCKET.set(ip, cur);
+  for (const headerName of ADMIN_KEY_HEADERS) {
+    const headerValue = req.headers[headerName];
+    
+    if (typeof headerValue === "string") {
+      const token = extractBearerToken(headerValue) ?? headerValue.trim();
+      
+      if (token && token === adminKey) {
+        return true;
+      }
+    }
+  }
 
-  return {
-    allowed: cur.count <= limit,
-    remaining: Math.max(0, limit - cur.count),
-    resetAt: cur.resetAt,
-  };
+  return false;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<CleanupResponse>) {
+/* =============================================================================
+   RATE LIMITING
+   ============================================================================= */
+
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+function checkRateLimit(
+  key: string,
+  maxRequests: number = RATE_LIMIT_CONFIG.maxRequests,
+  windowSeconds: number = RATE_LIMIT_CONFIG.windowSeconds
+): { allowed: boolean; remaining: number; resetAt: number } {
+  const now = Date.now();
+  const resetAt = now + windowSeconds * 1000;
+  
+  const entry = rateLimitStore.get(key);
+  
+  // Entry doesn't exist or has expired
+  if (!entry || entry.resetAt < now) {
+    const newEntry: RateLimitEntry = { count: 1, resetAt };
+    rateLimitStore.set(key, newEntry);
+    return { allowed: true, remaining: maxRequests - 1, resetAt };
+  }
+  
+  // Entry exists and is within window
+  entry.count += 1;
+  rateLimitStore.set(key, entry);
+  
+  const allowed = entry.count <= maxRequests;
+  const remaining = Math.max(0, maxRequests - entry.count);
+  
+  return { allowed, remaining, resetAt: entry.resetAt };
+}
+
+function setRateLimitHeaders(
+  res: NextApiResponse,
+  remaining: number,
+  resetAt: number
+): void {
+  res.setHeader("X-RateLimit-Limit", RATE_LIMIT_CONFIG.maxRequests.toString());
+  res.setHeader("X-RateLimit-Remaining", remaining.toString());
+  res.setHeader("X-RateLimit-Reset", Math.floor(resetAt / 1000).toString());
+}
+
+/* =============================================================================
+   MAIN HANDLER
+   ============================================================================= */
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<CleanupApiResponse>
+): Promise<void> {
+  // Method validation
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
-    return res.status(405).json({ ok: false, error: "Maintenance requires POST." });
+    res.status(405).json({
+      ok: false,
+      error: "Method Not Allowed",
+      details: "Maintenance operations require POST method",
+    });
+    return;
   }
 
+  // Authentication
   if (!isAdminAuthenticated(req)) {
-    return res.status(401).json({ ok: false, error: "Unauthorized. Admin key required." });
+    res.status(401).json({
+      ok: false,
+      error: "Unauthorized",
+      details: "Valid admin key required for this operation",
+    });
+    return;
   }
 
-  const ip = getClientIp(req);
-  const rl = rateLimit(`inner-circle-cleanup:${ip}`, 3, 3600);
-  res.setHeader("X-RateLimit-Limit", "3");
-  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
-  res.setHeader("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
-
-  if (!rl.allowed) {
-    return res.status(429).json({ ok: false, error: "Cleanup limited to 3 runs per hour." });
+  // Rate limiting
+  const clientIp = getClientIp(req);
+  const rateLimitKey = `inner-circle-cleanup:${clientIp}`;
+  
+  const rateLimitResult = checkRateLimit(
+    rateLimitKey,
+    RATE_LIMIT_CONFIG.maxRequests,
+    RATE_LIMIT_CONFIG.windowSeconds
+  );
+  
+  setRateLimitHeaders(res, rateLimitResult.remaining, rateLimitResult.resetAt);
+  
+  if (!rateLimitResult.allowed) {
+    res.status(429).json({
+      ok: false,
+      error: "Too Many Requests",
+      details: `Cleanup operations limited to ${RATE_LIMIT_CONFIG.maxRequests} per hour`,
+    });
+    return;
   }
 
+  // Execute cleanup
   try {
     const result = await cleanupOldData();
-    return res.status(200).json({
+    
+    console.log(`[Cleanup] Successfully deleted ${result.deletedMembers} members and ${result.deletedKeys} keys`);
+    
+    const response: CleanupApiResponse = {
       ok: true,
-      message: "Vault hygiene completed successfully.",
-      stats: { deletedMembers: result.deletedMembers, deletedKeys: result.deletedKeys },
+      message: "Vault hygiene completed successfully",
+      stats: {
+        deletedMembers: result.deletedMembers,
+        deletedKeys: result.deletedKeys,
+      },
       cleanedAt: new Date().toISOString(),
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("[Cleanup] Operation failed:", error);
+    
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    
+    res.status(500).json({
+      ok: false,
+      error: "Cleanup operation failed",
+      details: errorMessage,
     });
-  } catch (e) {
-    console.error("[InnerCircle] cleanup error:", e);
-    return res.status(500).json({ ok: false, error: "hygiene subsystem failure." });
   }
 }
+
+/* =============================================================================
+   CONFIGURATION
+   ============================================================================= */
+
+export const config = {
+  api: {
+    bodyParser: false, // No body needed for cleanup operations
+  },
+};

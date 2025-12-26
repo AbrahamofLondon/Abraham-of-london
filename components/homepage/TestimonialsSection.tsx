@@ -301,14 +301,14 @@ export default function TestimonialsSection({
                     )}
                   </div>
 
-                  {/* Quote */}
+                   {/* Quote */}
                   <blockquote className="text-base leading-relaxed">
                     <span aria-hidden className="sr-only">
-                      "
+                      &quot;
                     </span>
                     <span className="block line-clamp-6">{t.quote}</span>
                     <span aria-hidden className="sr-only">
-                      "
+                      &quot;
                     </span>
                   </blockquote>
 

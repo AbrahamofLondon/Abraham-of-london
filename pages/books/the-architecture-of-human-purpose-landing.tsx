@@ -81,13 +81,13 @@ const PurposeLandingPage: NextPage = () => {
 
   return (
     <Layout 
-      title="The Architecture of Human Purpose - Prelude" 
+      title="The Architecture of Human Purpose — Prelude" 
       description="Volume Zero: The foundational scaffolding for purpose, civilisation, and human destiny. A limited-release prelude."
       structuredData={structuredData}
       ogType="book"
     >
       <Head>
-        <title>The Architecture of Human Purpose - Prelude | Volume Zero</title>
+        <title>The Architecture of Human Purpose — Prelude | Volume Zero</title>
         <meta
           name="description"
           content="Volume Zero of the Canon. The foundational architecture for purpose, civilisation, governance, and human destiny. Limited prelude release."
@@ -96,7 +96,7 @@ const PurposeLandingPage: NextPage = () => {
         <meta name="theme-color" content="#1a1a1a" />
 
         {/* Open Graph */}
-        <meta property="og:title" content="The Architecture of Human Purpose - Volume Zero" />
+        <meta property="og:title" content="The Architecture of Human Purpose — Volume Zero" />
         <meta property="og:description" content="Human flourishing is not accidental. It is architectural. This prelude sketches the scaffolding behind purpose, civilisation, and destiny." />
         <meta property="og:type" content="book" />
         <meta property="og:url" content={canonicalUrl} />
@@ -107,7 +107,7 @@ const PurposeLandingPage: NextPage = () => {
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@abrahamoflondon" />
-        <meta name="twitter:title" content="The Architecture of Human Purpose - Volume Zero" />
+        <meta name="twitter:title" content="The Architecture of Human Purpose — Volume Zero" />
         <meta name="twitter:description" content="Volume Zero of the Canon. Limited prelude release." />
         <meta name="twitter:image" content={`${SITE_URL}/api/og/books/the-architecture-of-human-purpose`} />
       </Head>
@@ -174,7 +174,7 @@ const PurposeLandingPage: NextPage = () => {
                   <div className="h-px w-24 bg-gradient-to-r from-[#d4af37]/50 via-[#d4af37]/30 to-transparent" />
                   
                   <p className="text-lg text-[#999] leading-relaxed max-w-xl">
-                    A limited-release prelude to the Canon. Not motivation, but scaffolding - 
+                    A limited-release prelude to the Canon. Not motivation, but scaffolding — 
                     the structural principles behind purpose, civilisation, governance, and destiny.
                   </p>
                 </div>
@@ -237,7 +237,7 @@ const PurposeLandingPage: NextPage = () => {
                       <div className="relative w-full aspect-[3/4] rounded-xl border border-[#d4af37]/20 shadow-2xl overflow-hidden">
                         <Image
                           src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-                          alt="The Architecture of Human Purpose - Volume Zero"
+                          alt="The Architecture of Human Purpose — Volume Zero"
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, 50vw"
@@ -293,15 +293,15 @@ const PurposeLandingPage: NextPage = () => {
                   
                   <div className="space-y-6">
                     <p className="text-[#999] leading-relaxed">
-                      This prelude doesn't present another layer of thinking - it reveals the bedrock 
+                      This prelude doesn&apos;t present another layer of thinking — it reveals the bedrock 
                       beneath all meaningful thought. The architectural principles that govern purpose, 
                       civilisation, and human destiny.
                     </p>
                     
                     <div className="relative pl-6 border-l border-[#d4af37]/20">
                       <p className="text-[#ccc] italic">
-                        "Human flourishing is not accidental. It follows a design - 
-                        an architecture that can be understood, applied, and built upon."
+                        &quot;Human flourishing is not accidental. It follows a design — 
+                        an architecture that can be understood, applied, and built upon.&quot;
                       </p>
                     </div>
                   </div>
@@ -363,7 +363,7 @@ const PurposeLandingPage: NextPage = () => {
                   
                   <div className="pt-6 mt-6 border-t border-[#2a2a2a]">
                     <p className="text-sm text-[#666]">
-                      Written for those who build - fathers, founders, stewards - 
+                      Written for those who build — fathers, founders, stewards — 
                       who require not inspiration, but an architectural framework for a fragmenting world.
                     </p>
                   </div>
@@ -436,7 +436,7 @@ const PurposeLandingPage: NextPage = () => {
             
             {/* Microcopy */}
             <p className="mt-8 text-sm text-[#666]">
-              This is where structural thinking begins - before application, before execution, 
+              This is where structural thinking begins — before application, before execution, 
               before legacy. The foundation.
             </p>
           </div>

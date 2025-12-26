@@ -1,9 +1,11 @@
 // lib/isRecaptchaValid.ts
-// Convenience wrapper for boolean validation
-
 import { verifyRecaptcha } from "@/lib/recaptchaServer";
 
-export async function isRecaptchaValid(
+/**
+ * Minimal compatibility function used by older paths.
+ * Keep it tiny and deterministic.
+ */
+export function isRecaptchaValid(
   token: string,
   expectedAction?: string,
   clientIp?: string

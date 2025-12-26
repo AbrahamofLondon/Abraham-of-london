@@ -1,4 +1,4 @@
-// pages/subscribe.tsx
+// pages/subscribe.tsx - FIXED
 import type { NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -241,7 +241,7 @@ const SubscribePage: NextPage = () => {
             <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-400">
               The Founding Readers Circle is intentionally limited to ensure
               meaningful engagement and strategic focus. This is more than a
-              newsletter-it's the beginning of a movement to rebuild the
+              newsletter-it&apos;s the beginning of a movement to rebuild the
               architecture of human purpose.
             </p>
           </div>

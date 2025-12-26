@@ -1,6 +1,6 @@
 // pages/api/newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyRecaptcha, RecaptchaError } from "@/lib/verifyRecaptcha";
+import { verifyRecaptcha, RecaptchaError } from "@/lib/recaptchaServer";
 import {
   rateLimit,
   RATE_LIMIT_CONFIGS,

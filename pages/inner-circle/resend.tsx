@@ -14,9 +14,7 @@ const InnerCircleResendPage: NextPage = () => {
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [status, setStatus] = React.useState<"idle" | "success" | "error">(
-    "idle"
-  );
+  const [status, setStatus] = React.useState<"idle" | "success" | "error">("idle");
   const [feedback, setFeedback] = React.useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -33,10 +31,7 @@ const InnerCircleResendPage: NextPage = () => {
     setFeedback(null);
 
     try {
-      // Security: get a reCAPTCHA token (safe wrapper returns null on failure)
-      const recaptchaToken = await getRecaptchaTokenSafe(
-        "inner_circle_resend"
-      );
+      const recaptchaToken = await getRecaptchaTokenSafe("inner_circle_resend");
 
       if (!recaptchaToken) {
         setStatus("error");
@@ -90,7 +85,6 @@ const InnerCircleResendPage: NextPage = () => {
     <Layout title="Resend Inner Circle Access">
       <main className="mx-auto max-w-xl px-4 py-12 sm:py-16 lg:py-20">
         <section className="space-y-8">
-          {/* Header */}
           <header className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-softGold/70">
               Inner Circle · Access
@@ -99,12 +93,11 @@ const InnerCircleResendPage: NextPage = () => {
               Resend Your Inner Circle Access
             </h1>
             <p className="text-sm text-softGold/80">
-              If you&apos;ve already registered but can&apos;t find your access
-              email, request a fresh one here.
+              If you&apos;ve already registered but can&apos;t find your access email,
+              request a fresh one here.
             </p>
           </header>
 
-          {/* Form */}
           <form
             onSubmit={handleSubmit}
             className="
@@ -113,7 +106,6 @@ const InnerCircleResendPage: NextPage = () => {
               shadow-black/40
             "
           >
-            {/* Email */}
             <div className="space-y-2">
               <label
                 htmlFor="email"
@@ -136,12 +128,11 @@ const InnerCircleResendPage: NextPage = () => {
                 placeholder="you@example.com"
               />
               <p className="text-[11px] text-softGold/70">
-                Use the same email you registered with. If the message
-                doesn&apos;t appear, check Promotions or Spam.
+                Use the same email you registered with. If the message doesn&apos;t appear,
+                check Promotions or Spam.
               </p>
             </div>
 
-            {/* Name (optional) */}
             <div className="space-y-2">
               <label
                 htmlFor="name"
@@ -164,7 +155,6 @@ const InnerCircleResendPage: NextPage = () => {
               />
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -179,7 +169,6 @@ const InnerCircleResendPage: NextPage = () => {
               {loading ? "Resending..." : "Resend access email"}
             </button>
 
-            {/* Feedback */}
             {feedback && (
               <div
                 className={[
@@ -196,11 +185,9 @@ const InnerCircleResendPage: NextPage = () => {
             )}
           </form>
 
-          {/* Footer note */}
           <p className="text-xs text-softGold/60">
-            If you still don&apos;t receive the email after multiple attempts,
-            reply to any Abraham of London newsletter or contact us through the
-            main site-we'll assist you manually.
+            If you still don&apos;t receive the email after multiple attempts, reply to any
+            Abraham of London newsletter or contact us through the main site — we&apos;ll assist you manually.
           </p>
         </section>
       </main>

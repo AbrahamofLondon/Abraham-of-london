@@ -4,7 +4,7 @@ import {
   verifyRecaptcha,
   RecaptchaError,
   type RecaptchaVerificationResult,
-} from "@/lib/verifyRecaptcha";
+} from "@/lib/recaptchaServer";
 import {
   rateLimit,
   createRateLimitHeaders,

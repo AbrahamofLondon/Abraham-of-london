@@ -1,4 +1,7 @@
-// pages/about.tsx - Fully Polished, Legible, Sectioned (Dark-first, crisp separation)
+// pages/about.tsx
+// Fully Polished, Legible, Sectioned (Dark-first, crisp separation)
+/* eslint-disable react/no-unescaped-entities */
+
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -51,7 +54,10 @@ const fadeUp = {
 
 const stagger = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.08 } },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.08 },
+  },
 };
 
 // ============================================================================
@@ -91,7 +97,11 @@ const WORKSTREAMS: Workstream[] = [
     title: "Strategy rooms for founders & boards",
     description:
       "Market positioning, narrative, operating cadence, and execution design for builders.",
-    outcomes: ["Sharper mandate + market focus", "Governance and operating rhythm", "Execution that survives reality"],
+    outcomes: [
+      "Sharper mandate + market focus",
+      "Governance and operating rhythm",
+      "Execution that survives reality",
+    ],
     href: "/consulting",
     icon: Briefcase,
     tag: "Vision → Execution",
@@ -101,7 +111,11 @@ const WORKSTREAMS: Workstream[] = [
     title: "Resources - templates, playbooks, toolkits",
     description:
       "Practical assets you can deploy immediately: diagnostics and field-ready frameworks.",
-    outcomes: ["Faster implementation cycles", "Reusable frameworks for teams", "Consistency without bureaucracy"],
+    outcomes: [
+      "Faster implementation cycles",
+      "Reusable frameworks for teams",
+      "Consistency without bureaucracy",
+    ],
     href: "/downloads",
     icon: BookOpen,
     tag: "Tools → Deployment",
@@ -111,7 +125,11 @@ const WORKSTREAMS: Workstream[] = [
     title: "Inner Circle - closed rooms & applied work",
     description:
       "Small rooms, higher signal for serious builders who want accountability, not applause.",
-    outcomes: ["Direct access to selective work", "Closed-room discussions", "Applied thinking with feedback loops"],
+    outcomes: [
+      "Direct access to selective work",
+      "Closed-room discussions",
+      "Applied thinking with feedback loops",
+    ],
     href: "/inner-circle",
     icon: Shield,
     tag: "Access → Accountability",
@@ -121,7 +139,11 @@ const WORKSTREAMS: Workstream[] = [
     title: "Civic & institutional thinking",
     description:
       "Governance, nation-building, and institutional design - upstream work for downstream outcomes.",
-    outcomes: ["Institutional patterns and reform logic", "Cultural analysis with strategic implications", "Economic and governance frameworks"],
+    outcomes: [
+      "Institutional patterns and reform logic",
+      "Cultural analysis with strategic implications",
+      "Economic and governance frameworks",
+    ],
     href: "/strategy",
     icon: Landmark,
     tag: "Principles → Policy",
@@ -203,8 +225,6 @@ const AboutPage: NextPage = () => {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0.25]);
 
-  // NOTE: Your Layout likely already controls dark mode.
-  // This toggle is purely "page mood" (subtle), not Tailwind dark: class switching.
   const [moodLight, setMoodLight] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
 
@@ -258,7 +278,10 @@ const AboutPage: NextPage = () => {
           name="description"
           content="Abraham of London builds faith-rooted strategy, fatherhood tools, and legacy frameworks for serious men, founders, and leaders."
         />
-        <meta property="og:title" content="About Abraham of London - Strategy, Fatherhood, Legacy" />
+        <meta
+          property="og:title"
+          content="About Abraham of London - Strategy, Fatherhood, Legacy"
+        />
         <meta
           property="og:description"
           content="High-signal workstreams: Canon, strategy rooms, household architecture, tools, and Inner Circle accountability."
@@ -270,11 +293,15 @@ const AboutPage: NextPage = () => {
       </Head>
 
       <div className="min-h-screen bg-black text-white">
-        {/* Mood toggle (legible, never disappears) */}
+        {/* Mood toggle */}
         <motion.button
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, ease: easeSettle, delay: 0.2 }}
+          transition={
+            reduceMotion
+              ? { duration: 0.01 }
+              : { duration: 0.6, ease: easeSettle, delay: 0.2 }
+          }
           onClick={toggleMood}
           className={cx(
             "fixed right-5 top-5 z-50 inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold backdrop-blur-md",
@@ -287,14 +314,11 @@ const AboutPage: NextPage = () => {
           <span>{moodLight ? "Dark mood" : "Light mood"}</span>
         </motion.button>
 
-        {/* =========================================================
-            HERO (LEGIBLE + SEPARATED)
-           ========================================================= */}
+        {/* HERO */}
         <motion.section
           style={reduceMotion ? {} : { opacity: heroOpacity }}
           className="relative isolate overflow-hidden border-b border-white/8"
         >
-          {/* Background: higher contrast and a "clean stage" behind text */}
           <div className="absolute inset-0" aria-hidden="true">
             <div className="absolute inset-0 bg-[#07070c]" />
             <div
@@ -327,7 +351,6 @@ const AboutPage: NextPage = () => {
               </>
             ) : null}
 
-            {/* Text legibility plate */}
             <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-black/75 via-black/30 to-transparent" />
             <div
               className={cx(
@@ -350,7 +373,10 @@ const AboutPage: NextPage = () => {
                 </div>
               </motion.div>
 
-              <motion.h1 variants={fadeUp} className="mx-auto max-w-4xl font-serif text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+              <motion.h1
+                variants={fadeUp}
+                className="mx-auto max-w-4xl font-serif text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl"
+              >
                 Strategy for men who{" "}
                 <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100 bg-clip-text text-transparent">
                   actually carry
@@ -358,11 +384,17 @@ const AboutPage: NextPage = () => {
                 responsibility.
               </motion.h1>
 
-              <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-lg text-white/80 sm:text-xl">
+              <motion.p
+                variants={fadeUp}
+                className="mx-auto mt-6 max-w-3xl text-lg text-white/80 sm:text-xl"
+              >
                 Faith-rooted. Field-tested. Built to last.
               </motion.p>
 
-              <motion.p variants={fadeUp} className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+              <motion.p
+                variants={fadeUp}
+                className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base"
+              >
                 Abraham of London turns conviction into operating systems - for households, ventures, and institutions.
               </motion.p>
 
@@ -384,31 +416,12 @@ const AboutPage: NextPage = () => {
                 </Link>
               </motion.div>
 
-              {/* Hero quick-start cards (separated, readable, not muddy) */}
               <motion.div variants={fadeUp} className="mx-auto mt-12 max-w-5xl">
                 <div className="grid gap-4 md:grid-cols-3">
                   {[
-                    {
-                      k: "Start light",
-                      title: "Shorts",
-                      desc: "One minute. One point.",
-                      href: "/shorts",
-                      accent: "amber" as const,
-                    },
-                    {
-                      k: "Start practical",
-                      title: "Resources",
-                      desc: "Tools you can deploy today.",
-                      href: "/downloads",
-                      accent: "emerald" as const,
-                    },
-                    {
-                      k: "Start serious",
-                      title: "Inner Circle",
-                      desc: "Accountability, not applause.",
-                      href: "/inner-circle",
-                      accent: "rose" as const,
-                    },
+                    { k: "Start light", title: "Shorts", desc: "One minute. One point.", href: "/shorts", accent: "amber" as const },
+                    { k: "Start practical", title: "Resources", desc: "Tools you can deploy today.", href: "/downloads", accent: "emerald" as const },
+                    { k: "Start serious", title: "Inner Circle", desc: "Accountability, not applause.", href: "/inner-circle", accent: "rose" as const },
                   ].map((c) => {
                     const A = ACCENTS[c.accent];
                     return (
@@ -442,9 +455,7 @@ const AboutPage: NextPage = () => {
           </div>
         </motion.section>
 
-        {/* =========================================================
-            SECTION DIVIDER (prevents "muddled together")
-           ========================================================= */}
+        {/* SECTION DIVIDER */}
         <div className="border-b border-white/8 bg-[#0a0a11]">
           <div className="mx-auto max-w-6xl px-6 py-6">
             <p className="text-center text-xs uppercase tracking-[0.28em] text-white/55">
@@ -453,160 +464,130 @@ const AboutPage: NextPage = () => {
           </div>
         </div>
 
-        {/* =========================================================
-    PORTRAIT / WHAT THIS IS (UNMUDDLED + CLEAR HIERARCHY)
-   ========================================================= */}
-<section className="relative bg-[#070710] py-20">
-  <div className="absolute inset-0" aria-hidden="true">
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.04),transparent_55%)]" />
-    <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 to-transparent" />
-    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 to-transparent" />
-  </div>
-
-  <div className="relative mx-auto max-w-6xl px-6">
-    <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
-      {/* LEFT: COPY (clean, not stacked into chaos) */}
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
-        className="relative"
-      >
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1">
-          <Target className="h-4 w-4 text-amber-200" />
-          <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
-            What this is
-          </span>
-        </div>
-
-        <h2 className="font-serif text-4xl font-bold leading-tight text-white lg:text-5xl">
-          A strategic workshop,{" "}
-          <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">
-            not a content feed
-          </span>
-        </h2>
-
-        <div className="mt-6 space-y-4 text-base leading-relaxed text-white/78 sm:text-lg">
-          <p>
-            This platform helps serious men build: a household, a venture, and an internal governance structure
-            that withstands pressure.
-          </p>
-          <p>
-            <span className="font-semibold text-white">Truth exists</span>, conviction matters, and leadership without
-            moral architecture becomes manipulation - and the bill always shows up later.
-          </p>
-        </div>
-
-        {/* FOUNDATION (single, strong card) */}
-        <div className="mt-7 rounded-3xl border border-amber-400/25 bg-amber-400/8 p-6">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Foundation</p>
-          <p className="mt-2 text-white/82">
-            Everything here is built on conservative Christian conviction - not as decoration, as load-bearing structure.
-          </p>
-        </div>
-
-        {/* 3 PILLARS (clean row, no clutter) */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {[
-            {
-              title: "Clarity",
-              body: "Worldview + operating philosophy that reduces decision fatigue.",
-            },
-            {
-              title: "Structure",
-              body: "Frameworks for households, teams, and institutions.",
-            },
-            {
-              title: "Execution",
-              body: "Cadence, governance, and field-ready tools.",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur-md"
-            >
-              <p className="font-semibold text-white">{item.title}</p>
-              <p className="mt-2 text-sm leading-relaxed text-white/70">{item.body}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/downloads"
-            className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 font-semibold text-black transition hover:bg-amber-200"
-          >
-            Deploy the tools <ChevronRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/inner-circle"
-            className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/7 px-6 py-3 font-semibold text-white backdrop-blur-sm transition hover:border-white/28 hover:bg-white/10"
-          >
-            Inner Circle access <Shield className="h-4 w-4" />
-          </Link>
-        </div>
-      </motion.div>
-
-      {/* RIGHT: PORTRAIT (NO TEXT ON IMAGE) */}
-      <motion.div
-        initial={{ opacity: 0, x: 16 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle, delay: 0.05 }}
-        className="relative"
-      >
-        {/* Portrait card */}
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/50">
-          <div className="relative overflow-hidden rounded-2xl">
-            <Image
-              src="/assets/images/profile-portrait.webp"
-              alt="Abraham of London - founder and strategic leader"
-              width={720}
-              height={900}
-              className="h-auto w-full"
-              priority
-            />
-            {/* Only a gentle gradient; NO TEXT overlays */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+        {/* PORTRAIT / WHAT THIS IS */}
+        <section className="relative bg-[#070710] py-20">
+          <div className="absolute inset-0" aria-hidden="true">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.04),transparent_55%)]" />
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 to-transparent" />
           </div>
 
-          {/* Caption BELOW image (clean + readable) */}
-          <div className="mt-4 rounded-2xl border border-white/10 bg-black/45 p-4 backdrop-blur-md">
-            <p className="font-serif text-xl text-white">Abraham of London</p>
-            <p className="mt-1 text-sm text-white/70">Strategy · Fatherhood · Legacy</p>
+          <div className="relative mx-auto max-w-6xl px-6">
+            <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
+                className="relative"
+              >
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1">
+                  <Target className="h-4 w-4 text-amber-200" />
+                  <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">What this is</span>
+                </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-xl border border-white/12 bg-white/7 px-3 py-2 text-[11px] font-semibold text-white/85">
-                SIGNAL <span className="ml-2 font-black text-amber-200">High</span>
-              </span>
-              <span className="rounded-xl border border-white/12 bg-white/7 px-3 py-2 text-[11px] font-semibold text-white/85">
-                STANDARD <span className="ml-2 font-black text-amber-200">Firm</span>
-              </span>
-              <span className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-[11px] font-semibold text-amber-200">
-                STEWARDSHIP
-              </span>
+                <h2 className="font-serif text-4xl font-bold leading-tight text-white lg:text-5xl">
+                  A strategic workshop,{" "}
+                  <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">
+                    not a content feed
+                  </span>
+                </h2>
+
+                <div className="mt-6 space-y-4 text-base leading-relaxed text-white/78 sm:text-lg">
+                  <p>
+                    This platform helps serious men build: a household, a venture, and an internal governance structure that withstands pressure.
+                  </p>
+                  <p>
+                    <span className="font-semibold text-white">Truth exists</span>, conviction matters, and leadership without moral architecture becomes manipulation - and the bill always shows up later.
+                  </p>
+                </div>
+
+                <div className="mt-7 rounded-3xl border border-amber-400/25 bg-amber-400/8 p-6">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Foundation</p>
+                  <p className="mt-2 text-white/82">
+                    Everything here is built on conservative Christian conviction - not as decoration, as load-bearing structure.
+                  </p>
+                </div>
+
+                <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                  {[
+                    { title: "Clarity", body: "Worldview + operating philosophy that reduces decision fatigue." },
+                    { title: "Structure", body: "Frameworks for households, teams, and institutions." },
+                    { title: "Execution", body: "Cadence, governance, and field-ready tools." },
+                  ].map((item) => (
+                    <div key={item.title} className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur-md">
+                      <p className="font-semibold text-white">{item.title}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-white/70">{item.body}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link
+                    href="/downloads"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 font-semibold text-black transition hover:bg-amber-200"
+                  >
+                    Deploy the tools <ChevronRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/inner-circle"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/7 px-6 py-3 font-semibold text-white backdrop-blur-sm transition hover:border-white/28 hover:bg-white/10"
+                  >
+                    Inner Circle access <Shield className="h-4 w-4" />
+                  </Link>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle, delay: 0.05 }}
+                className="relative"
+              >
+                <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/50">
+                  <div className="relative overflow-hidden rounded-2xl">
+                    <Image
+                      src="/assets/images/profile-portrait.webp"
+                      alt="Abraham of London - founder and strategic leader"
+                      width={720}
+                      height={900}
+                      className="h-auto w-full"
+                      priority
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-black/45 p-4 backdrop-blur-md">
+                    <p className="font-serif text-xl text-white">Abraham of London</p>
+                    <p className="mt-1 text-sm text-white/70">Strategy · Fatherhood · Legacy</p>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="rounded-xl border border-white/12 bg-white/7 px-3 py-2 text-[11px] font-semibold text-white/85">
+                        SIGNAL <span className="ml-2 font-black text-amber-200">High</span>
+                      </span>
+                      <span className="rounded-xl border border-white/12 bg-white/7 px-3 py-2 text-[11px] font-semibold text-white/85">
+                        STANDARD <span className="ml-2 font-black text-amber-200">Firm</span>
+                      </span>
+                      <span className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-[11px] font-semibold text-amber-200">
+                        STEWARDSHIP
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">Operating principle</p>
+                    <p className="mt-2 text-sm leading-relaxed text-white/80">
+                      &ldquo;Build what still works when the lights go out - character, competence, covenant, and cadence.&rdquo;
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
+        </section>
 
-          {/* Operating principle BELOW caption (no stacking on photo) */}
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">
-              Operating principle
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-white/80">
-              "Build what still works when the lights go out - character, competence, covenant, and cadence."
-            </p>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  </div>
-</section>
-
-        {/* =========================================================
-            WORKSTREAMS (distinct background + clear color coding)
-           ========================================================= */}
+        {/* WORKSTREAMS */}
         <section className="relative bg-[#06060c] py-20">
           <div className="absolute inset-0" aria-hidden="true">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03),transparent_60%)]" />
@@ -627,7 +608,7 @@ const AboutPage: NextPage = () => {
 
               <h2 className="font-serif text-4xl font-bold text-white lg:text-5xl">What we build</h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-white/70 sm:text-lg">
-                Not "content." Deliverables. Systems. Frameworks. Rooms where real decisions get made.
+                Not &quot;content.&quot; Deliverables. Systems. Frameworks. Rooms where real decisions get made.
               </p>
             </motion.div>
 
@@ -673,10 +654,7 @@ const AboutPage: NextPage = () => {
                       </ul>
 
                       <div className="mt-6">
-                        <Link
-                          href={ws.href}
-                          className={cx("inline-flex items-center gap-2 text-sm font-semibold", A.link)}
-                        >
+                        <Link href={ws.href} className={cx("inline-flex items-center gap-2 text-sm font-semibold", A.link)}>
                           Explore <ArrowRight className="h-4 w-4" />
                         </Link>
                       </div>
@@ -688,9 +666,7 @@ const AboutPage: NextPage = () => {
           </div>
         </section>
 
-        {/* =========================================================
-            VALUES (clean columns + readable cards)
-           ========================================================= */}
+        {/* VALUES */}
         <section className="relative bg-[#070710] py-20">
           <div className="absolute inset-0" aria-hidden="true">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.10),transparent_55%)]" />
@@ -706,9 +682,7 @@ const AboutPage: NextPage = () => {
             >
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1">
                 <Star className="h-4 w-4 text-amber-200" />
-                <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
-                  Non-negotiables
-                </span>
+                <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Non-negotiables</span>
               </div>
 
               <h2 className="font-serif text-4xl font-bold text-white lg:text-5xl">Foundation stones</h2>
@@ -747,9 +721,7 @@ const AboutPage: NextPage = () => {
           </div>
         </section>
 
-        {/* =========================================================
-            FINAL CTA (high contrast)
-           ========================================================= */}
+        {/* FINAL CTA */}
         <section className="relative overflow-hidden border-t border-white/10 bg-gradient-to-r from-amber-300 to-amber-500 py-16 text-center">
           <div className="absolute inset-0" aria-hidden="true">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,0,0,0.25),transparent_60%)]" />
@@ -762,7 +734,9 @@ const AboutPage: NextPage = () => {
               viewport={{ once: true }}
               transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: easeSettle }}
             >
-              <h2 className="font-serif text-4xl font-bold text-black lg:text-5xl">Build, don't drift.</h2>
+              <h2 className="font-serif text-4xl font-bold text-black lg:text-5xl">
+                Build, don&apos;t drift.
+              </h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-black/85 sm:text-xl">
                 Start with the Canon, deploy a tool, or book a strategy conversation.
               </p>

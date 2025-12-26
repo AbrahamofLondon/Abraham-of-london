@@ -1,9 +1,23 @@
 // lib/server/validation.ts
 import type { NextApiRequest } from "next";
 
+// Explicit discriminated union type
 export type AdminAuthResult =
   | { valid: true; userId?: string; method: "api_key" | "dev_mode" }
   | { valid: false; reason: string };
+
+// Type guard functions for better type narrowing
+export function isInvalidAdmin(
+  result: AdminAuthResult
+): result is { valid: false; reason: string } {
+  return result.valid === false;
+}
+
+export function isValidAdmin(
+  result: AdminAuthResult
+): result is { valid: true; userId?: string; method: "api_key" | "dev_mode" } {
+  return result.valid === true;
+}
 
 function getBearerToken(req: NextApiRequest): string | null {
   const h = req.headers.authorization;

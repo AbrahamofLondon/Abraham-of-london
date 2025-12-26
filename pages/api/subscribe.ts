@@ -5,7 +5,7 @@ import {
   type SubscriptionResult,
   type SubscriptionPreferences,
 } from "@/lib/server/subscription";
-import { verifyRecaptcha } from "@/lib/verifyRecaptcha";
+import { verifyRecaptcha } from "@/lib/recaptchaServer";
 import {
   rateLimit,
   RATE_LIMIT_CONFIGS,

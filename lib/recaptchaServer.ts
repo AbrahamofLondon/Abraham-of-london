@@ -1,9 +1,13 @@
 /* eslint-disable no-console */
 /**
- * Server-side reCAPTCHA v3 verification helper (canonical).
- * - verifyRecaptchaDetailed(): returns rich result
- * - verifyRecaptcha(): returns boolean for legacy call-sites
- * - validateRecaptchaConfig(): small config health snapshot
+ * lib/recaptchaServer.ts
+ * Canonical server-side reCAPTCHA v3 verification helper.
+ *
+ * Use in:
+ * - pages/api/** (Node runtime)
+ * - Netlify functions / server handlers
+ *
+ * Do NOT import this into client components.
  */
 
 export type RecaptchaVerificationResult = {
@@ -16,16 +20,25 @@ export type RecaptchaVerificationResult = {
 
 const DEFAULT_MIN_SCORE = 0.5;
 const VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+const DEFAULT_TIMEOUT_MS = 5000;
 
 function getSecret(): string | null {
-  const secret = process.env.RECAPTCHA_SECRET_KEY;
-  if (!secret || secret.trim().length < 10) return null;
-  return secret.trim();
+  // Support both common names to avoid env drift
+  const candidates = [
+    process.env.RECAPTCHA_SECRET_KEY,
+    process.env.RECAPTCHA_SECRET,
+  ];
+
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim().length >= 10) return c.trim();
+  }
+  return null;
 }
 
 function getMinScore(): number {
-  const n = Number(process.env.RECAPTCHA_MIN_SCORE);
-  if (Number.isFinite(n)) return n;
+  const raw = process.env.RECAPTCHA_MIN_SCORE;
+  const n = Number(raw);
+  if (Number.isFinite(n) && n >= 0 && n <= 1) return n;
   return DEFAULT_MIN_SCORE;
 }
 
@@ -34,10 +47,27 @@ function normalizeErrorCodes(value: unknown): string[] {
   return [];
 }
 
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { name?: string }).name === "AbortError"
+  );
+}
+
+/**
+ * Detailed verifier with score + action checks.
+ * - Fails closed by default.
+ * - Optional dev bypass if ALLOW_RECAPTCHA_BYPASS=true and NODE_ENV!=production.
+ *
+ * expectedAction:
+ * - If provided, and Google returns an action, mismatches fail.
+ */
 export async function verifyRecaptchaDetailed(
   token: string,
   expectedAction?: string,
-  remoteIp?: string
+  remoteIp?: string,
+  timeoutMs: number = DEFAULT_TIMEOUT_MS
 ): Promise<RecaptchaVerificationResult> {
   const secret = getSecret();
 
@@ -48,7 +78,7 @@ export async function verifyRecaptchaDetailed(
 
     if (isDev && allowBypass) {
       console.warn(
-        "[reCAPTCHA] RECAPTCHA_SECRET_KEY missing - bypass enabled via ALLOW_RECAPTCHA_BYPASS (development only)."
+        "[reCAPTCHA] Secret missing - bypass enabled via ALLOW_RECAPTCHA_BYPASS (development only)."
       );
       return {
         success: true,
@@ -58,7 +88,7 @@ export async function verifyRecaptchaDetailed(
       };
     }
 
-    console.error("[reCAPTCHA] RECAPTCHA_SECRET_KEY not set - verification will fail.");
+    console.error("[reCAPTCHA] Secret not set - verification will fail.");
     return {
       success: false,
       score: 0,
@@ -68,7 +98,7 @@ export async function verifyRecaptchaDetailed(
   }
 
   // Basic token sanity check
-  if (!token || typeof token !== "string" || token.length < 30) {
+  if (!token || typeof token !== "string" || token.trim().length < 30) {
     console.error("[reCAPTCHA] Invalid token format.");
     return {
       success: false,
@@ -82,11 +112,11 @@ export async function verifyRecaptchaDetailed(
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     const params = new URLSearchParams();
     params.set("secret", secret);
-    params.set("response", token);
+    params.set("response", token.trim());
     if (remoteIp) params.set("remoteip", remoteIp);
 
     const response = await fetch(VERIFY_URL, {
@@ -147,7 +177,10 @@ export async function verifyRecaptchaDetailed(
     }
 
     if (score < minScore) {
-      console.warn(`[reCAPTCHA] Score below threshold: ${score} (min: ${minScore})`, { action });
+      console.warn(
+        `[reCAPTCHA] Score below threshold: ${score} (min: ${minScore})`,
+        { action }
+      );
       return {
         success: false,
         score,
@@ -165,12 +198,7 @@ export async function verifyRecaptchaDetailed(
       raw: data,
     };
   } catch (error: unknown) {
-    const isAbort =
-      typeof error === "object" &&
-      error !== null &&
-      (error as { name?: string }).name === "AbortError";
-
-    if (isAbort) {
+    if (isAbortError(error)) {
       console.error("[reCAPTCHA] Verification timed out.");
       return {
         success: false,
@@ -191,7 +219,7 @@ export async function verifyRecaptchaDetailed(
 }
 
 /**
- * Backward-compatible boolean verifier.
+ * Backward-compatible boolean verifier (legacy call-sites).
  */
 export async function verifyRecaptcha(
   token: string,
@@ -202,6 +230,9 @@ export async function verifyRecaptcha(
   return result.success;
 }
 
+/**
+ * Small config health snapshot (safe to log server-side).
+ */
 export function validateRecaptchaConfig(): {
   hasSecret: boolean;
   minScore: number;

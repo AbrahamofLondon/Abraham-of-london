@@ -46,8 +46,8 @@ const CanonCampaignPage: NextPage = () => {
               </h1>
 
               <p className="max-w-3xl text-sm leading-relaxed text-gray-300 sm:text-base">
-                The Canon is a long-horizon build - not "content", not dopamine,
-                not noise. It's an architecture of applied wisdom for men who
+                The Canon is a long-horizon build - not &quot;content&quot;, not dopamine,
+                not noise. It&apos;s an architecture of applied wisdom for men who
                 carry responsibility over time: fathers, founders, leaders.
               </p>
 
@@ -159,7 +159,7 @@ const CanonCampaignPage: NextPage = () => {
                 Inner Circle access
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                Some material won't be public. Not because it's "exclusive" -
+                Some material won&apos;t be public. Not because it&apos;s &quot;exclusive&quot; -
                 because serious work needs a serious room.
               </p>
 

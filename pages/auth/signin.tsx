@@ -15,7 +15,7 @@ export default function SignIn() {
               Sign in to your account
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-              Use any email with password "demo" for development
+              Use any email with password &quot;demo&quot; for development
             </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={(e) => {
@@ -53,7 +53,7 @@ export default function SignIn() {
                   autoComplete="current-password"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm dark:bg-gray-800"
-                  placeholder='Password (use "demo" for development)'
+                  placeholder="Password (use &quot;demo&quot; for development)"
                 />
               </div>
             </div>
