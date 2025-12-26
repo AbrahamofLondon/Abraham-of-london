@@ -1,33 +1,58 @@
-// components/content/ContentLayout.tsx - FIXED VERSION
+// components/content/ContentLayout.tsx
 import * as React from "react";
 import Head from "next/head";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import Layout, { type LayoutProps } from "@/components/Layout"; // Direct import with type
-import mdxComponents from "@/components/mdx-components";
-// Import the utility function directly instead of the whole config
-import { getPageTitle, siteConfig } from '@/lib/imports';
 
-interface ContentLayoutProps {
-  frontmatter: {
-    slug: string;
-    title: string;
-    excerpt?: string;
-    description?: string;
-    date?: string;
-    author?: string;
-    category?: string;
-    tags?: string[];
-    readTime?: string;
-    coverImage?: string | { src?: string } | null;
-    url?: string;
-    subtitle?: string;
-    volumeNumber?: string;
-    featured?: boolean;
-    [key: string]: any;
-  };
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import { getPageTitle, siteConfig } from "@/lib/imports";
+
+type CoverImage = string | { src?: string } | null | undefined;
+
+type Frontmatter = {
+  slug: string;
+  title: string;
+  excerpt?: string;
+  description?: string;
+  date?: string; // ISO-ish or parseable
+  author?: string;
+  category?: string;
+  tags?: string[];
+  readTime?: string; // e.g. "6" or "6 min read" or "6 min"
+  coverImage?: CoverImage;
+  url?: string;
+  subtitle?: string;
+  volumeNumber?: string;
+  featured?: boolean;
+};
+
+export type ContentLayoutProps = {
+  frontmatter: Frontmatter;
   mdxSource: MDXRemoteSerializeResult;
   contentType?: string;
   children?: React.ReactNode;
+};
+
+function coerceOgImage(coverImage: CoverImage): string | undefined {
+  if (!coverImage) return undefined;
+  if (typeof coverImage === "string") return coverImage;
+  if (typeof coverImage === "object" && typeof coverImage.src === "string") return coverImage.src;
+  return undefined;
+}
+
+function normalizeReadTime(input?: string): string | null {
+  if (!input) return null;
+  const s = String(input).trim();
+  if (!s) return null;
+
+  // If user already wrote "min read" etc., keep it.
+  if (/min/i.test(s)) return s;
+
+  // If it's numeric, format as "X min read"
+  const n = Number(s);
+  if (Number.isFinite(n) && n > 0) return `${Math.round(n)} min read`;
+
+  return s;
 }
 
 export default function ContentLayout({
@@ -36,77 +61,93 @@ export default function ContentLayout({
   contentType = "content",
   children,
 }: ContentLayoutProps): JSX.Element {
-  // Safe access with fallbacks
-  const title = frontmatter.title || `${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`;
-  
-  // Use the utility function directly
+  const title =
+    frontmatter.title ||
+    `${contentType.charAt(0).toUpperCase()}${contentType.slice(1)}`;
+
   const pageTitle = getPageTitle(title);
-  
-  // Use excerpt first, then description, then title
   const description = frontmatter.excerpt || frontmatter.description || title;
-  
-  // URL can be from frontmatter or constructed
+
   const url = frontmatter.url || `/${contentType}/${frontmatter.slug}`;
   const fullUrl = `${siteConfig.siteUrl}${url}`;
 
+  const ogImage = coerceOgImage(frontmatter.coverImage);
+  const readTime = normalizeReadTime(frontmatter.readTime);
+
   return (
-    <Layout 
-      title={title} 
+    <Layout
+      title={pageTitle}
       className={`bg-charcoal content-${contentType}`}
       description={description}
       keywords={frontmatter.tags}
       canonicalUrl={fullUrl}
-      ogImage={typeof frontmatter.coverImage === 'string' ? frontmatter.coverImage : (frontmatter.coverImage as any)?.src}
+      ogImage={ogImage}
       ogType="article"
     >
       <Head>
-        {/* Additional head tags if needed beyond what Layout provides */}
-        {frontmatter.date && (
-          <meta property="article:published_time" content={new Date(frontmatter.date).toISOString()} />
-        )}
-        {frontmatter.author && (
+        {frontmatter.date ? (
+          <meta
+            property="article:published_time"
+            content={new Date(frontmatter.date).toISOString()}
+          />
+        ) : null}
+
+        {frontmatter.author ? (
           <meta property="article:author" content={frontmatter.author} />
-        )}
-        {frontmatter.tags && frontmatter.tags.map((tag, index) => (
-          <meta key={index} property="article:tag" content={tag} />
+        ) : null}
+
+        {frontmatter.tags?.map((tag) => (
+          <meta key={tag} property="article:tag" content={tag} />
         ))}
       </Head>
 
       <main className="mx-auto max-w-4xl px-4 py-12 sm:py-16 lg:py-20 text-cream">
         <article className="prose prose-invert prose-lg max-w-none">
-          {/* Header Section */}
           <header className="mb-10 border-b border-softGold/20 pb-8">
             <div className="mb-4">
               <span className="inline-block rounded-full bg-softGold/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-softGold">
                 {contentType}
               </span>
-              {frontmatter.volumeNumber && (
+
+              {frontmatter.volumeNumber ? (
                 <span className="ml-2 inline-block rounded-full bg-charcoal-light px-3 py-1 text-xs font-medium text-cream/70">
                   Volume {frontmatter.volumeNumber}
                 </span>
-              )}
-              {frontmatter.featured && (
+              ) : null}
+
+              {frontmatter.featured ? (
                 <span className="ml-2 inline-block rounded-full bg-softGold px-3 py-1 text-xs font-semibold text-charcoal">
                   Featured
                 </span>
-              )}
+              ) : null}
             </div>
-            
-            <h1 className="mb-4 font-serif text-4xl md:text-5xl font-semibold leading-tight text-cream">
+
+            <h1 className="mb-4 font-serif text-4xl font-semibold leading-tight text-cream md:text-5xl">
               {title}
             </h1>
-            
-            {frontmatter.subtitle && (
-              <p className="mb-6 text-xl text-cream/80 italic">
+
+            {frontmatter.subtitle ? (
+              <p className="mb-6 text-xl italic text-cream/80">
                 {frontmatter.subtitle}
               </p>
-            )}
-            
+            ) : null}
+
             <div className="flex flex-wrap items-center gap-4 text-sm text-cream/70">
-              {frontmatter.date && (
+              {frontmatter.date ? (
                 <time dateTime={frontmatter.date} className="flex items-center">
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
                   </svg>
                   {new Date(frontmatter.date).toLocaleDateString("en-GB", {
                     year: "numeric",
@@ -114,28 +155,50 @@ export default function ContentLayout({
                     day: "numeric",
                   })}
                 </time>
-              )}
-              
-              {frontmatter.author && (
+              ) : null}
+
+              {frontmatter.author ? (
                 <span className="flex items-center">
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                   {frontmatter.author}
                 </span>
-              )}
-              
-              {frontmatter.readTime && (
+              ) : null}
+
+              {readTime ? (
                 <span className="flex items-center">
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
-                  {frontmatter.readTime} min read
+                  {readTime}
                 </span>
-              )}
+              ) : null}
             </div>
-            
-            {frontmatter.tags && frontmatter.tags.length > 0 && (
+
+            {frontmatter.tags?.length ? (
               <div className="mt-6 flex flex-wrap gap-2">
                 {frontmatter.tags.map((tag) => (
                   <span
@@ -146,10 +209,9 @@ export default function ContentLayout({
                   </span>
                 ))}
               </div>
-            )}
+            ) : null}
           </header>
 
-          {/* Content */}
           <div className="mt-8">
             <MDXRemote {...mdxSource} components={mdxComponents} />
             {children}
