@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyInnerCircleKey } from "@/lib/inner-circle";
+import innerCircleStore from "@/lib/server/inner-circle-store";
 
 type VerifyResponse = {
   valid: boolean;
@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    const result = await verifyInnerCircleKey(key.trim());
+    const result = await innerCircleStore.verifyInnerCircleKey(key.trim());
     if (result.valid) {
       return res.status(200).json({ valid: true, keySuffix: result.keySuffix });
     }

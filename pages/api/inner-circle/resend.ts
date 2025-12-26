@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
-import { sendInnerCircleEmail, createOrUpdateMemberAndIssueKey } from "@/lib/inner-circle";
+import innerCircleStore from "@/lib/server/inner-circle-store";
+import { sendInnerCircleEmail } from "@/lib/inner-circle/email";
 import { getClientIp } from "@/lib/server/ip";
 import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";
 
@@ -57,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     // Pragmatic resend strategy:
     // - If user exists in DB, the store issues a new key anyway (safe + simple).
     // - If DB unavailable, fallback key still flows (UX works).
-    const keyRecord = await createOrUpdateMemberAndIssueKey({
+    const keyRecord = await innerCircleStore.createOrUpdateMemberAndIssueKey({
       email: normalizedEmail,
       name: typeof name === "string" ? name.trim() : undefined,
       ipAddress: ip,
@@ -81,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
 
     return res.status(200).json({ ok: true, message: GENERIC_SUCCESS });
-  } catch (error) {
+  } catch (_error) {
     // Do not leak details
     return res.status(200).json({ ok: true, message: GENERIC_SUCCESS });
   }

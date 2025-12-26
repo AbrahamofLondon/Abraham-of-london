@@ -1,4 +1,3 @@
-// pages/canon.tsx
 import type { NextPage } from "next";
 import Head from "next/head";
 import * as React from "react";
@@ -9,11 +8,8 @@ import Layout from "@/components/Layout";
 
 const CanonLandingPage: NextPage = () => {
   return (
-    <Layout pageTitle="The Canon - Civilisational Operating System">
+    <Layout title="The Canon - Civilisational Operating System">
       <Head>
-        <title>
-          The Canon - Civilisational Operating System | Abraham of London
-        </title>
         <meta
           name="description"
           content="Ten volumes mapping the architecture of purpose, identity, family, culture, institutions, nations, power, governance, civilisation, and destiny."

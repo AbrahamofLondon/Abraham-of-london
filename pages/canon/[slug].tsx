@@ -1,4 +1,3 @@
-// pages/canon/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -301,7 +300,8 @@ const CanonPage: NextPage<Props> = (props) => {
           </section>
         ) : (
           <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
-            <MDXRemote {...props.source} components={mdxComponents} />
+            {/* Type guard ensures props has source when locked is false */}
+            <MDXRemote {...(props as UnlockedProps).source} components={mdxComponents} />
           </article>
         )}
       </main>

@@ -1,4 +1,3 @@
-// pages/api/inner-circle/exit-preview.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
 function safeReturnTo(v: unknown): string {

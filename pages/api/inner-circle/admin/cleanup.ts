@@ -1,138 +1,116 @@
 // pages/api/inner-circle/admin/cleanup.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { cleanupOldData, type CleanupResult } from "@/lib/inner-circle";
+import {
+  cleanupExpiredData,
+  type CleanupResult,
+} from "@/lib/server/inner-circle-store";
 
 /* =============================================================================
    TYPES
    ============================================================================= */
 
-type CleanupApiResponse =
-  | {
-      ok: true;
-      message: string;
-      stats: {
-        deletedMembers: number;
-        deletedKeys: number;
-      };
-      meta?: {
-        remainingTotal?: number;
-      };
-      cleanedAt: string;
-    }
-  | {
-      ok: false;
-      error: string;
-      details?: string;
-    };
+type CleanupOk = {
+  ok: true;
+  message: string;
+  stats: CleanupResult;
+  cleanedAt: string;
+};
+
+type CleanupFail = {
+  ok: false;
+  error: "Method Not Allowed" | "Unauthorized" | "Too Many Requests" | "Cleanup operation failed";
+  details?: string;
+};
+
+type CleanupApiResponse = CleanupOk | CleanupFail;
 
 /* =============================================================================
    CONSTANTS
    ============================================================================= */
 
-const RATE_LIMIT_CONFIG = {
+const RATE_LIMIT = {
   maxRequests: 3,
   windowSeconds: 3600, // 1 hour
 } as const;
 
-const ADMIN_KEY_HEADERS = [
-  "x-inner-circle-admin-key",
-  "authorization",
-] as const;
+const ADMIN_KEY_HEADERS = ["x-inner-circle-admin-key", "authorization"] as const;
 
 /* =============================================================================
    UTILITIES
    ============================================================================= */
 
+function firstIpFromXff(xff: string): string {
+  return xff.split(",")[0]?.trim() || "unknown";
+}
+
 function getClientIp(req: NextApiRequest): string {
-  const xForwardedFor = req.headers["x-forwarded-for"];
-  
-  if (typeof xForwardedFor === "string") {
-    return xForwardedFor.split(",")[0].trim();
-  }
-  
-  if (Array.isArray(xForwardedFor) && xForwardedFor.length > 0) {
-    return xForwardedFor[0].split(",")[0].trim();
-  }
-  
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string") return firstIpFromXff(xff);
+  if (Array.isArray(xff) && xff.length > 0) return firstIpFromXff(xff[0] ?? "");
   return req.socket?.remoteAddress ?? "unknown";
 }
 
 function extractBearerToken(authHeader?: string): string | null {
   if (!authHeader) return null;
-  
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? match[1].trim() : null;
+  const m = authHeader.match(/^Bearer\s+(.+)$/i);
+  return m ? m[1]!.trim() : null;
 }
 
 function isAdminAuthenticated(req: NextApiRequest): boolean {
-  const adminKey = process.env.INNER_CIRCLE_ADMIN_KEY;
-  
-  if (!adminKey) {
-    console.error("[AdminAuth] INNER_CIRCLE_ADMIN_KEY not configured");
+  const expected = process.env.INNER_CIRCLE_ADMIN_KEY;
+  if (!expected) {
+    console.error("[InnerCircle/Admin] INNER_CIRCLE_ADMIN_KEY not configured");
     return false;
   }
 
-  for (const headerName of ADMIN_KEY_HEADERS) {
-    const headerValue = req.headers[headerName];
-    
-    if (typeof headerValue === "string") {
-      const token = extractBearerToken(headerValue) ?? headerValue.trim();
-      
-      if (token && token === adminKey) {
-        return true;
-      }
-    }
+  for (const name of ADMIN_KEY_HEADERS) {
+    const value = req.headers[name];
+    if (typeof value !== "string") continue;
+
+    const token = extractBearerToken(value) ?? value.trim();
+    if (token && token === expected) return true;
   }
 
   return false;
 }
 
 /* =============================================================================
-   RATE LIMITING
+   RATE LIMITING (in-memory, per-lambda-instance)
    ============================================================================= */
 
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
-
+type RateLimitEntry = { count: number; resetAt: number };
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 function checkRateLimit(
   key: string,
-  maxRequests: number = RATE_LIMIT_CONFIG.maxRequests,
-  windowSeconds: number = RATE_LIMIT_CONFIG.windowSeconds
-): { allowed: boolean; remaining: number; resetAt: number } {
+  maxRequests: number = RATE_LIMIT.maxRequests,
+  windowSeconds: number = RATE_LIMIT.windowSeconds
+): { allowed: boolean; remaining: number; resetAt: number; limit: number } {
   const now = Date.now();
   const resetAt = now + windowSeconds * 1000;
-  
+
   const entry = rateLimitStore.get(key);
-  
-  // Entry doesn't exist or has expired
   if (!entry || entry.resetAt < now) {
-    const newEntry: RateLimitEntry = { count: 1, resetAt };
-    rateLimitStore.set(key, newEntry);
-    return { allowed: true, remaining: maxRequests - 1, resetAt };
+    rateLimitStore.set(key, { count: 1, resetAt });
+    return { allowed: true, remaining: maxRequests - 1, resetAt, limit: maxRequests };
   }
-  
-  // Entry exists and is within window
+
   entry.count += 1;
   rateLimitStore.set(key, entry);
-  
+
   const allowed = entry.count <= maxRequests;
   const remaining = Math.max(0, maxRequests - entry.count);
-  
-  return { allowed, remaining, resetAt: entry.resetAt };
+
+  return { allowed, remaining, resetAt: entry.resetAt, limit: maxRequests };
 }
 
 function setRateLimitHeaders(
   res: NextApiResponse,
-  remaining: number,
-  resetAt: number
-): void {
-  res.setHeader("X-RateLimit-Limit", RATE_LIMIT_CONFIG.maxRequests.toString());
-  res.setHeader("X-RateLimit-Remaining", remaining.toString());
-  res.setHeader("X-RateLimit-Reset", Math.floor(resetAt / 1000).toString());
+  rl: { remaining: number; resetAt: number; limit: number }
+) {
+  res.setHeader("X-RateLimit-Limit", String(rl.limit));
+  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+  res.setHeader("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
 }
 
 /* =============================================================================
@@ -143,7 +121,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<CleanupApiResponse>
 ): Promise<void> {
-  // Method validation
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
     res.status(405).json({
@@ -154,7 +131,6 @@ export default async function handler(
     return;
   }
 
-  // Authentication
   if (!isAdminAuthenticated(req)) {
     res.status(401).json({
       ok: false,
@@ -164,54 +140,39 @@ export default async function handler(
     return;
   }
 
-  // Rate limiting
-  const clientIp = getClientIp(req);
-  const rateLimitKey = `inner-circle-cleanup:${clientIp}`;
-  
-  const rateLimitResult = checkRateLimit(
-    rateLimitKey,
-    RATE_LIMIT_CONFIG.maxRequests,
-    RATE_LIMIT_CONFIG.windowSeconds
-  );
-  
-  setRateLimitHeaders(res, rateLimitResult.remaining, rateLimitResult.resetAt);
-  
-  if (!rateLimitResult.allowed) {
+  const ip = getClientIp(req);
+  const rl = checkRateLimit(`inner-circle-cleanup:${ip}`);
+  setRateLimitHeaders(res, rl);
+
+  if (!rl.allowed) {
     res.status(429).json({
       ok: false,
       error: "Too Many Requests",
-      details: `Cleanup operations limited to ${RATE_LIMIT_CONFIG.maxRequests} per hour`,
+      details: `Cleanup operations limited to ${RATE_LIMIT.maxRequests} per hour`,
     });
     return;
   }
 
-  // Execute cleanup
   try {
-    const result = await cleanupOldData();
-    
-    console.log(`[Cleanup] Successfully deleted ${result.deletedMembers} members and ${result.deletedKeys} keys`);
-    
-    const response: CleanupApiResponse = {
+    const stats = await cleanupExpiredData();
+    const cleanedAt = new Date().toISOString();
+
+    console.info("[InnerCircle/Admin] cleanup ok", {
+      deletedMembers: stats.deletedMembers,
+      deletedKeys: stats.deletedKeys,
+      totalOrphanedKeys: stats.totalOrphanedKeys,
+    });
+
+    res.status(200).json({
       ok: true,
       message: "Vault hygiene completed successfully",
-      stats: {
-        deletedMembers: result.deletedMembers,
-        deletedKeys: result.deletedKeys,
-      },
-      cleanedAt: new Date().toISOString(),
-    };
-
-    res.status(200).json(response);
-  } catch (error) {
-    console.error("[Cleanup] Operation failed:", error);
-    
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    
-    res.status(500).json({
-      ok: false,
-      error: "Cleanup operation failed",
-      details: errorMessage,
+      stats,
+      cleanedAt,
     });
+  } catch (err) {
+    console.error("[InnerCircle/Admin] cleanup failed:", err);
+    const details = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ ok: false, error: "Cleanup operation failed", details });
   }
 }
 
@@ -221,6 +182,6 @@ export default async function handler(
 
 export const config = {
   api: {
-    bodyParser: false, // No body needed for cleanup operations
+    bodyParser: false,
   },
 };

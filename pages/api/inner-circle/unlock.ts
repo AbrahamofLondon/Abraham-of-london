@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyInnerCircleKey, recordInnerCircleUnlock } from "@/lib/inner-circle";
+import innerCircleStore from "@/lib/server/inner-circle-store";
 import { getClientIp } from "@/lib/server/ip";
 
 const COOKIE_ACCESS = "innerCircleAccess";
@@ -75,7 +75,7 @@ export default async function handler(
   }
 
   try {
-    const result = await verifyInnerCircleKey(trimmedKey);
+    const result = await innerCircleStore.verifyInnerCircleKey(trimmedKey);
 
     if (!result.valid) {
       return res.status(403).json({
@@ -86,7 +86,7 @@ export default async function handler(
     }
 
     // record unlock
-    await recordInnerCircleUnlock(trimmedKey, getClientIp(req));
+    await innerCircleStore.recordInnerCircleUnlock(trimmedKey, getClientIp(req));
 
     const secure = isSecureRequest(req);
 
@@ -99,7 +99,8 @@ export default async function handler(
 
     const redirectTo = safeReturnTo(returnTo);
     return res.status(200).json({ ok: true, message: "Vault authorized.", redirectTo, tier });
-  } catch {
+  } catch (error) {
+    console.error("[InnerCircle] Unlock error:", error);
     return res.status(500).json({ ok: false, error: "Authorization subsystem offline." });
   }
 }

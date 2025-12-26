@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
-import { createOrUpdateMemberAndIssueKey, sendInnerCircleEmail } from "@/lib/inner-circle";
+import innerCircleStore from "@/lib/server/inner-circle-store";
+import { sendInnerCircleEmail } from "@/lib/inner-circle/email"; // Import directly from email module
 import { getClientIp } from "@/lib/server/ip";
 import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";
 
@@ -55,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    const keyRecord = await createOrUpdateMemberAndIssueKey({
+    const keyRecord = await innerCircleStore.createOrUpdateMemberAndIssueKey({
       email: normalizedEmail,
       name: typeof name === "string" ? name.trim() : undefined,
       ipAddress: ip,
@@ -81,6 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       keySuffix: keyRecord.keySuffix,
     });
   } catch (e) {
+    console.error("[InnerCircle] Registration error:", e);
     return res.status(500).json({ ok: false, error: "Internal server error during vault registration." });
   }
 }

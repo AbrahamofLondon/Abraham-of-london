@@ -1,8 +1,8 @@
-// components/content/ContentLayout.tsx - FIXED
+// components/content/ContentLayout.tsx - FIXED VERSION
 import * as React from "react";
 import Head from "next/head";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import Layout from "@/components/Layout";
+import Layout, { type LayoutProps } from "@/components/Layout"; // Direct import with type
 import mdxComponents from "@/components/mdx-components";
 // Import the utility function directly instead of the whole config
 import { getPageTitle, siteConfig } from '@/lib/imports';
@@ -48,36 +48,28 @@ export default function ContentLayout({
   // URL can be from frontmatter or constructed
   const url = frontmatter.url || `/${contentType}/${frontmatter.slug}`;
   const fullUrl = `${siteConfig.siteUrl}${url}`;
-  
+
   return (
-    <Layout title={title} className={`bg-charcoal content-${contentType}`}>
+    <Layout 
+      title={title} 
+      className={`bg-charcoal content-${contentType}`}
+      description={description}
+      keywords={frontmatter.tags}
+      canonicalUrl={fullUrl}
+      ogImage={typeof frontmatter.coverImage === 'string' ? frontmatter.coverImage : (frontmatter.coverImage as any)?.src}
+      ogType="article"
+    >
       <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={description} />
-        {frontmatter.tags && frontmatter.tags.length > 0 && (
-          <meta name="keywords" content={frontmatter.tags.join(", ")} />
+        {/* Additional head tags if needed beyond what Layout provides */}
+        {frontmatter.date && (
+          <meta property="article:published_time" content={new Date(frontmatter.date).toISOString()} />
         )}
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={fullUrl} />
-        {frontmatter.coverImage && (
-          <meta property="og:image" content={
-            typeof frontmatter.coverImage === 'string' 
-              ? frontmatter.coverImage 
-              : (frontmatter.coverImage as any)?.src || ''
-          } />
+        {frontmatter.author && (
+          <meta property="article:author" content={frontmatter.author} />
         )}
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={fullUrl} />
+        {frontmatter.tags && frontmatter.tags.map((tag, index) => (
+          <meta key={index} property="article:tag" content={tag} />
+        ))}
       </Head>
 
       <main className="mx-auto max-w-4xl px-4 py-12 sm:py-16 lg:py-20 text-cream">

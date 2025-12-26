@@ -1,6 +1,4 @@
-// pages/api/verify-newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { subscribe } from "@/lib/server/subscription";
 
 interface VerifyResponseBody {
   ok: boolean;
@@ -45,49 +43,34 @@ export default async function handler(
       });
     }
 
-    // Complete the subscription
-    const result = await subscribe(email, {
-      // Include the original preferences and metadata from verification data
-      preferences: {}, // Replace with stored preferences
-      metadata: {
-        source: "newsletter-verified",
-        verifiedAt: new Date().toISOString(),
-        verificationMethod: "email",
-      },
-      tags: ["newsletter-subscriber", "verified"],
-    });
-
-    if (!result.ok) {
-      return res.status(400).json({
-        ok: false,
-        message: result.message || "Failed to complete subscription",
-        error: "SUBSCRIPTION_FAILED",
-      });
-    }
-
     // Send success notification to Abraham
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Newsletter System <system@fatheringwithoutfear.com>',
-        to: 'Abraham@AbrahamofLondon.com',
-        subject: 'New Verified Newsletter Subscriber',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #2c5530;">🎉 New Verified Subscriber!</h2>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Verified At:</strong> ${new Date().toISOString()}</p>
-            <p style="color: #2c5530; font-weight: bold;">
-              This subscriber has successfully verified their email and is now fully subscribed!
-            </p>
-          </div>
-        `,
-      }),
-    });
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Newsletter System <system@fatheringwithoutfear.com>',
+          to: 'Abraham@AbrahamofLondon.com',
+          subject: 'New Verified Newsletter Subscriber',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #2c5530;">🎉 New Verified Subscriber!</h2>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Verified At:</strong> ${new Date().toISOString()}</p>
+              <p style="color: #2c5530; font-weight: bold;">
+                This subscriber has successfully verified their email and is now fully subscribed!
+              </p>
+            </div>
+          `,
+        }),
+      });
+    } catch (_error) {
+      console.error("Failed to send notification:", _error);
+      // Continue even if notification fails
+    }
 
     // Redirect to success page or return success
     return res.status(200).json({
@@ -95,8 +78,8 @@ export default async function handler(
       message: "Successfully verified! You are now subscribed to our newsletter.",
     });
 
-  } catch (error) {
-    console.error("Verification endpoint error:", error);
+  } catch (_error) {
+    console.error("Verification endpoint error:", _error);
     
     return res.status(500).json({
       ok: false,

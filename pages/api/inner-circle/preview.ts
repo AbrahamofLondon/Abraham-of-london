@@ -1,6 +1,5 @@
-// pages/api/inner-circle/preview.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyInnerCircleKey, recordInnerCircleUnlock } from "@/lib/inner-circle";
+import innerCircleStore, { type VerifyInnerCircleKeyResult } from "@/lib/server/inner-circle-store";
 import { getCanonDocBySlug, getAccessLevel } from "@/lib/canon";
 
 /**
@@ -32,9 +31,27 @@ function safeKey(v: unknown): string {
   return k;
 }
 
+function getClientIp(req: NextApiRequest): string | undefined {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  if (Array.isArray(forwarded) && forwarded.length > 0) {
+    return forwarded[0].split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress;
+}
+
 function getReturnTo(req: NextApiRequest, slug: string): string {
   // fixed internal redirect only
   return `/canon/${slug}`;
+}
+
+interface PreviewData {
+  innerCircle: boolean;
+  unlockedAt: number;
+  slug: string;
+  keySuffix?: string;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -67,40 +84,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // ✅ Verify the key
-    const result = await verifyInnerCircleKey(key);
-    if (!result?.ok) {
+    const result: VerifyInnerCircleKeyResult = await innerCircleStore.verifyInnerCircleKey(key);
+    if (!result?.valid) {
       // No hints. Just bounce.
       return res.redirect(302, returnTo);
     }
 
     // ✅ Enable Preview Mode (signed cookies)
-    // Also store a tiny bit of context - helpful for UI logic if you want it later.
+    const previewData: PreviewData = {
+      innerCircle: true,
+      unlockedAt: Date.now(),
+      slug,
+      keySuffix: result.keySuffix
+    };
+
     res.setPreviewData(
-      { innerCircle: true, unlockedAt: Date.now(), slug },
+      previewData,
       { maxAge: 60 * 60 * 8 } // 8 hours
     );
 
-    // ✅ Optional but recommended: record the unlock event (audit trail)
-    // Only call if your store supports it safely.
+    // ✅ Record the unlock event (audit trail)
     try {
-      await recordInnerCircleUnlock({
-        accessKey: key,
-        slug,
-        // You can add IP / userAgent if your implementation expects them.
-        // Keep it privacy-safe.
-        userAgent: typeof req.headers["user-agent"] === "string" ? req.headers["user-agent"] : undefined,
-        ip:
-          typeof req.headers["x-forwarded-for"] === "string"
-            ? req.headers["x-forwarded-for"].split(",")[0].trim()
-            : undefined,
-      } as any);
-    } catch {
+      const clientIp = getClientIp(req);
+      const userAgent = typeof req.headers["user-agent"] === "string" 
+        ? req.headers["user-agent"] 
+        : undefined;
+
+      await innerCircleStore.recordInnerCircleUnlock(key, clientIp);
+      
+      console.log(`[InnerCircle] Preview unlocked for slug: ${slug}, key suffix: ${result.keySuffix}`);
+    } catch (error) {
       // Don't block unlock on analytics/audit failure.
+      console.warn("[InnerCircle] Failed to record unlock event:", error);
     }
 
     return res.redirect(302, returnTo);
   } catch (err) {
     // Don't leak internals
+    console.error("[InnerCircle] Preview error:", err);
     return res.status(500).send("Server error");
   }
 }
+
+// API configuration
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+};

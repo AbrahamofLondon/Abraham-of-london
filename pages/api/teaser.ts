@@ -1,9 +1,6 @@
-// pages/api/teaser.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   verifyRecaptcha,
-  RecaptchaError,
-  type RecaptchaVerificationResult,
 } from "@/lib/recaptchaServer";
 import {
   rateLimit,
@@ -18,7 +15,7 @@ import {
 
 // Email validation with comprehensive checks
 const EMAIL_REGEX =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zAZ0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 // Disposable email domains
 const DISPOSABLE_DOMAINS = [
@@ -259,7 +256,7 @@ export default async function handler(
     return;
   }
 
-  let recaptchaResult: RecaptchaVerificationResult;
+  let recaptchaResult;
   try {
     recaptchaResult = await verifyRecaptcha(
       recaptchaToken,
@@ -294,19 +291,18 @@ export default async function handler(
       // For now we allow but we have telemetry if abuse grows
     }
   } catch (error) {
-    const recaptchaError = error as RecaptchaError;
+    const recaptchaError = error as Error;
 
     logSecurityEvent("reCAPTCHA error", {
       ip,
       email,
       error: recaptchaError.message,
-      code: recaptchaError.code,
     });
 
     res.status(400).json({
       ok: false,
       message: "Security check failed. Please refresh and try again.",
-      errorCode: recaptchaError.code ?? "RECAPTCHA_ERROR",
+      errorCode: "RECAPTCHA_ERROR",
     });
     return;
   }

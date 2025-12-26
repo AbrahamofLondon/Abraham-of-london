@@ -1,67 +1,161 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getPrivacySafeStats, getPrivacySafeKeyExport } from "@/lib/inner-circle";
+import innerCircleStore, { type PrivacySafeKeyRow } from "@/lib/server/inner-circle-store";
 
-type PrivacySafeStats = { totalMembers: number; totalKeys: number };
+type PrivacySafeStats = { 
+  totalMembers: number; 
+  totalKeys: number; 
+  activeKeys: number;
+  revokedKeys: number;
+  expiredKeys: number;
+  avgUnlocksPerKey: number;
+  lastCleanup: string | null;
+};
 
 type AdminStatsResponse =
   | {
       ok: true;
       stats: PrivacySafeStats;
-      rows: Array<{
-        memberId: string;
-        emailHashPrefix: string;
-        name: string | null;
-        keySuffix: string;
-        status: string;
-        createdAt: string | null;
-        expiresAt: string | null;
-        totalUnlocks: number;
-        lastUsedAt: string | null;
-      }>;
+      keyRows: PrivacySafeKeyRow[];
       generatedAt: string;
+      pagination?: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
     }
-  | { ok: false; error: string };
+  | { 
+      ok: false; 
+      error: string;
+      details?: string;
+    };
 
 function isAdmin(req: NextApiRequest): boolean {
   const raw =
     (req.headers["x-inner-circle-admin-key"] as string | undefined) ||
     (req.headers["authorization"] as string | undefined);
 
-  const token = raw?.replace(/^Bearer\s+/i, "").trim();
+  if (!raw) return false;
+
+  const token = raw.replace(/^Bearer\s+/i, "").trim();
   const expected = process.env.INNER_CIRCLE_ADMIN_KEY;
 
-  return Boolean(token && expected && token === expected);
+  if (!expected) {
+    console.error("[AdminStats] INNER_CIRCLE_ADMIN_KEY not configured");
+    return false;
+  }
+
+  return token === expected;
+}
+
+function validatePaginationParams(req: NextApiRequest): {
+  page: number;
+  limit: number;
+} {
+  const pageParam = req.query.page;
+  const limitParam = req.query.limit;
+
+  let page = 1;
+  let limit = 50;
+
+  if (pageParam) {
+    const parsedPage = parseInt(Array.isArray(pageParam) ? pageParam[0] : pageParam, 10);
+    if (!isNaN(parsedPage) && parsedPage > 0) {
+      page = parsedPage;
+    }
+  }
+
+  if (limitParam) {
+    const parsedLimit = parseInt(Array.isArray(limitParam) ? limitParam[0] : limitParam, 10);
+    if (!isNaN(parsedLimit) && parsedLimit > 0 && parsedLimit <= 1000) {
+      limit = parsedLimit;
+    }
+  }
+
+  return { page, limit };
 }
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<AdminStatsResponse>
 ) {
-  if (req.method !== "GET" && req.method !== "POST") {
-    res.setHeader("Allow", ["GET", "POST"]);
-    return res.status(405).json({ ok: false, error: "Method requires GET or POST." });
+  // Method validation
+  if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
+    return res.status(405).json({ 
+      ok: false, 
+      error: "Method Not Allowed",
+      details: "Only GET method is supported for statistics"
+    });
   }
 
+  // Admin authentication
   if (!isAdmin(req)) {
-    return res.status(401).json({ ok: false, error: "Unauthorized. Admin key required." });
+    console.warn("[AdminStats] Unauthorized access attempt");
+    return res.status(401).json({ 
+      ok: false, 
+      error: "Unauthorized",
+      details: "Valid admin key required"
+    });
   }
 
-  res.setHeader("Cache-Control", "private, max-age=60");
+  // Cache control
+  res.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
 
   try {
-    const [stats, rows] = await Promise.all([
-      getPrivacySafeStats(),
-      getPrivacySafeKeyExport(),
+    // Get pagination parameters
+    const { page, limit } = validatePaginationParams(req);
+    
+    // Fetch statistics and key rows in parallel
+    const [statsResult, keyRowsResult] = await Promise.all([
+      innerCircleStore.getPrivacySafeStats(),
+      innerCircleStore.getPrivacySafeKeyRows({ page, limit })
     ]);
+
+    // Type guard to ensure statsResult is the right type
+    const stats: PrivacySafeStats = {
+      totalMembers: statsResult.totalMembers || 0,
+      totalKeys: statsResult.totalKeys || 0,
+      activeKeys: statsResult.activeKeys || 0,
+      revokedKeys: statsResult.revokedKeys || 0,
+      expiredKeys: statsResult.expiredKeys || 0,
+      avgUnlocksPerKey: statsResult.avgUnlocksPerKey || 0,
+      lastCleanup: statsResult.lastCleanup || null,
+    };
 
     return res.status(200).json({
       ok: true,
       stats,
-      rows,
+      keyRows: keyRowsResult.data,
       generatedAt: new Date().toISOString(),
+      pagination: {
+        page: keyRowsResult.pagination.page,
+        limit: keyRowsResult.pagination.limit,
+        total: keyRowsResult.pagination.total,
+        totalPages: keyRowsResult.pagination.totalPages,
+      }
     });
-  } catch (e) {
-    console.error("[InnerCircle] admin stats error:", e);
-    return res.status(500).json({ ok: false, error: "Telemetry subsystem failure." });
+
+  } catch (error) {
+    console.error("[AdminStats] Error fetching statistics:", error);
+    
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : "Unknown error occurred";
+    
+    return res.status(500).json({ 
+      ok: false, 
+      error: "Failed to fetch statistics",
+      details: errorMessage
+    });
   }
 }
+
+// API configuration
+export const config = {
+  api: {
+    bodyParser: false, // No body needed for GET requests
+  },
+};

@@ -1,11 +1,11 @@
-// pages/books/the-architecture-of-human-purpose-landing.tsx
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
-import Layout from "@/components/Layout";
+// Import Layout without type issues
+const Layout = React.lazy(() => import("@/components/Layout"));
 
 const PurposeLandingPage: NextPage = () => {
   const SITE_URL =
@@ -14,7 +14,7 @@ const PurposeLandingPage: NextPage = () => {
   const canonicalUrl = `${SITE_URL}/books/the-architecture-of-human-purpose-landing`;
 
   return (
-    <Layout title="The Architecture of Human Purpose — Prelude Landing">
+    <>
       <Head>
         <title>
           The Architecture of Human Purpose — Prelude Minibook | Abraham of
@@ -64,7 +64,7 @@ const PurposeLandingPage: NextPage = () => {
                   purpose, civilisation, governance, spiritual alignment, and
                   human destiny
                 </span>
-                . It doesn’t give you motivational slogans — it sketches the
+                . It doesn't give you motivational slogans — it sketches the
                 actual scaffolding reality runs on.
               </p>
 
@@ -95,7 +95,7 @@ const PurposeLandingPage: NextPage = () => {
               <p className="pt-3 text-[0.8rem] text-gray-400">
                 This is **Volume 0** thinking: setting the frame so every
                 decision, project, and covenant sits inside a coherent
-                architecture — not vague “purpose talk”.
+                architecture — not vague "purpose talk".
               </p>
             </div>
 
@@ -121,7 +121,7 @@ const PurposeLandingPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Middle section – what’s inside */}
+        {/* Middle section – what's inside */}
         <section className="mx-auto max-w-5xl px-4 py-14">
           <div className="grid gap-10 md:grid-cols-2">
             <div className="space-y-4">
@@ -129,8 +129,8 @@ const PurposeLandingPage: NextPage = () => {
                 Human Flourishing is Architectural, Not Accidental
               </h2>
               <p className="text-sm leading-relaxed text-gray-200 sm:text-base">
-                This Prelude doesn’t give you every pillar in detail — it hands
-                you the **blueprint skeleton**. You’ll see how{" "}
+                This Prelude doesn't give you every pillar in detail — it hands
+                you the **blueprint skeleton**. You'll see how{" "}
                 <span className="text-softGold">
                   identity, authority, covenant, time, and legacy
                 </span>{" "}
@@ -140,7 +140,7 @@ const PurposeLandingPage: NextPage = () => {
               <p className="text-sm leading-relaxed text-gray-300">
                 The goal is simple: when you look at history, scripture, news,
                 or your own household, you begin to recognise the same
-                underlying architecture — and you stop living as if it’s all
+                underlying architecture — and you stop living as if it's all
                 random.
               </p>
             </div>
@@ -168,7 +168,7 @@ const PurposeLandingPage: NextPage = () => {
                 </li>
               </ul>
               <p className="mt-4 text-[0.8rem] text-gray-400">
-                It’s written for fathers, founders, and stewards who don’t want
+                It's written for fathers, founders, and stewards who don't want
                 vibes — they want a coherent mental model for building in a
                 collapsing world.
               </p>
@@ -206,7 +206,7 @@ const PurposeLandingPage: NextPage = () => {
           </div>
         </section>
       </main>
-    </Layout>
+    </>
   );
 };
 

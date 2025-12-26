@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getPrivacySafeStats } from "@/lib/inner-circle";
+import innerCircleStore from "@/lib/server/inner-circle-store";
 
 type StatusResponse =
   | {
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    const stats = await getPrivacySafeStats();
+    const stats = await innerCircleStore.getPrivacySafeStats();
     const hasDbUrl = Boolean(process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL);
 
     return res.status(200).json({
@@ -32,7 +32,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         siteUrl: process.env.NEXT_PUBLIC_SITE_URL || null,
         hasDbUrl,
       },
-      stats,
+      stats: {
+        totalMembers: stats.totalMembers,
+        totalKeys: stats.totalKeys
+      },
     });
   } catch (e: any) {
     return res.status(500).json({

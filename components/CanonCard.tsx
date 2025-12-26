@@ -12,6 +12,7 @@ export type CanonCardProps = {
     coverImage?: string | null;
     volumeNumber?: number | string | null;
     featured?: boolean | null;
+    variant?: "grid" | "list";
     tags?: string[] | null;
     date?: string | null;
     accessLevel?: string | null;

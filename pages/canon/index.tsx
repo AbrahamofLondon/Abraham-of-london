@@ -195,43 +195,27 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
 
           <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
             <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 18 }}
-              animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={reducedMotion ? { duration: 0.01 } : { duration: 0.6 }}
-              className="space-y-8"
-            >
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
-                <BookOpen className="h-4 w-4 text-amber-400" />
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
-                  Canon · Catalogue
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl md:text-5xl lg:text-6xl">
-                  The Canon
-                  <span className="mt-2 block font-semibold text-amber-400">
-                    of Purpose, Power &amp; Stewardship
-                  </span>
-                </h1>
-
-                {deviceType !== "mobile" && (
-                  <div className="flex items-center gap-4 pt-4">
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-gray-800">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600"
-                        style={{ width: `${(activeSegments / totalSegments) * 100}%` }}
-                      />
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      <span className="font-semibold text-amber-400">
-                        Volume {activeSegments}
-                      </span>{" "}
-                      of {totalSegments}
-                    </div>
-                  </div>
-                )}
-              </div>
+  variants={containerVariants}
+  initial="hidden"
+  animate="visible"
+  custom={reducedMotion}
+  className={
+    viewMode === "grid"
+      ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+      : "space-y-4"
+  }
+>
+  {filteredItems.map((item) => (
+    <motion.div
+      key={item.slug}
+      variants={itemVariants}
+      custom={reducedMotion}
+      className={viewMode === "list" ? "max-w-3xl" : ""}
+    >
+      <CanonCard canon={item} />
+    </motion.div>
+  ))}
+</motion.div>
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-4 lg:col-span-2">

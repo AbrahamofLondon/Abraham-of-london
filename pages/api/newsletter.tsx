@@ -1,6 +1,6 @@
 // pages/api/newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyRecaptcha, RecaptchaError } from "@/lib/recaptchaServer";
+import { verifyRecaptcha } from "@/lib/recaptchaServer";
 import {
   rateLimit,
   RATE_LIMIT_CONFIGS,
@@ -368,12 +368,11 @@ export default async function handler(
       });
     }
   } catch (err) {
-    const e = err as RecaptchaError;
+    const e = err as Error;
     logSecurityEvent("reCAPTCHA error", {
       ip,
       email,
       error: e.message,
-      code: e.code,
     });
 
     res.status(400).json({
