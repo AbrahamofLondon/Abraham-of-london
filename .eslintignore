@@ -12,3 +12,9 @@ public/assets/resources
 prisma/dev.db
 **/*.min.js
 **/*.min.css
+
+# generated reports / artifacts
+.reports
+**/.reports/**
+**/*.report.*
+**/reports/**

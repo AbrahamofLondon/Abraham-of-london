@@ -372,3 +372,7 @@ pages/api/analytics/
 *.ps1
 *.bat
 *.lnk
+
+# generated reports / artifacts
+.reports/
+reports/
