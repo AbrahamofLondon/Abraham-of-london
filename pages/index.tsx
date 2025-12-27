@@ -77,7 +77,22 @@ const getFeaturedShortsSafely = (): LooseShort[] => {
   }
 };
 
-const featuredShorts = getFeaturedShortsSafely().filter((s) => isPublished(s));
+// Custom isPublished check for LooseShort type
+const isLooseShortPublished = (s: LooseShort): boolean => {
+  // Check for explicit published flag
+  if (s.published === true) return true;
+  if (s.published === false) return false;
+  
+  // Check for draft flag
+  if (s.draft === true) return false;
+  
+  // Check if it has a title and slug (basic published check)
+  if (s.title && s.slug) return true;
+  
+  return false;
+};
+
+const featuredShorts = getFeaturedShortsSafely().filter(isLooseShortPublished);
 
 // -----------------------------------------------------------------------------
 // SECTION DIVIDER - Refined visual separator

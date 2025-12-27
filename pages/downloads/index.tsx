@@ -12,7 +12,7 @@ import {
   resolveDocCoverImage,
   resolveDocDownloadHref,
   resolveDocDownloadUrl,
-  resolveDocDownloadSizeLabel, // Imported as requested
+  resolveDocDownloadSizeLabel,
   getAccessLevel,
 } from "@/lib/contentlayer-helper";
 
@@ -21,8 +21,8 @@ type NormalisedDownload = {
   title: string;
   excerpt: string | null;
   coverImage: string | null;
-  fileHref: string | null; // what UI uses (direct or /api/downloads/:slug)
-  fileUrl: string | null;  // the underlying resolved path (useful for debugging/admin)
+  fileHref: string | null;
+  fileUrl: string | null;
   accessLevel: "public" | "inner-circle" | "inner-circle-plus" | "inner-circle-elite" | "private";
   category: string | null;
   size: string | null;
@@ -38,7 +38,7 @@ export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }>
 
   // Build-time validation for known public download directory.
   // This will fail the build if any /assets/downloads/... files are missing.
-  assertDownloadFilesExist(all);
+  assertDownloadFilesExist();
 
   const downloads: NormalisedDownload[] = all.map((d: any) => {
     const slug = normalizeSlug(d);
@@ -51,13 +51,12 @@ export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }>
     const coverImage = resolveDocCoverImage(d) || null;
 
     const fileUrl = resolveDocDownloadUrl(d);
-    const fileHref = resolveDocDownloadHref(d); // direct or /api/downloads/:slug
+    const fileHref = resolveDocDownloadHref(d);
 
     const category =
       (typeof d.category === "string" && d.category.trim().length ? d.category : null) ??
       (typeof d.type === "string" && d.type.trim().length ? d.type : null);
 
-    // Updated: Use helper's deterministic stat instead of raw fileSize field
     const size = resolveDocDownloadSizeLabel(d);
 
     const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
@@ -179,7 +178,6 @@ export default function DownloadsIndexPage(
                         category={dl.category}
                         size={dl.size ?? undefined}
                         featured={true}
-                        accessLevel={dl.accessLevel as any}
                       />
                     ))}
                   </div>
@@ -205,7 +203,6 @@ export default function DownloadsIndexPage(
                         fileHref={dl.fileHref}
                         category={dl.category}
                         size={dl.size ?? undefined}
-                        accessLevel={dl.accessLevel as any}
                       />
                     ))}
                   </div>

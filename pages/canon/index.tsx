@@ -1,559 +1,612 @@
-// pages/canon/index.tsx
+// pages/index.tsx - FINAL INTEGRATED HOMEPAGE
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
-import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { BookOpen, Star, Search, ChevronRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import CanonCard from "@/components/CanonCard";
-import { getPublicCanon, resolveCanonSlug, type Canon } from "@/lib/canon";
+import StatsBar from "@/components/homepage/StatsBar";
+import VenturesSection from "@/components/homepage/VenturesSection";
+import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import { LinkItemWithIcon, LinkItemWithBadge } from "@/components/Cards/partials";
+import { Calendar, Compass, Users, Sparkles, BookOpen } from "lucide-react";
 
-type DeviceType = "mobile" | "tablet" | "desktop";
-type ViewMode = "grid" | "list";
+import {
+  getPublishedShorts,
+  getRecentShorts,
+  getDocHref,
+  normalizeSlug,
+} from "@/lib/contentlayer-helper";
 
-type CanonIndexItem = {
-  slug: string;
-  title: string;
-  subtitle?: string | null;
+// -----------------------------------------------------------------------------
+// BOOKS IN DEVELOPMENT
+// -----------------------------------------------------------------------------
+
+const BOOKS_IN_DEV = [
+  {
+    slug: "fathering-without-fear",
+    title: "Fathering Without Fear",
+    tag: "Fatherhood · Household",
+    blurb:
+      "Standards, rituals, and household architecture for men building families that outlast culture wars.",
+    cover: "/assets/images/books/fathering-without-fear.jpg",
+  },
+  {
+    slug: "the-fiction-adaptation",
+    title: "The Fiction Adaptation",
+    tag: "Fiction · Drama",
+    blurb:
+      "A covert retelling of a story too real for the courtroom - where truth hides in fiction and fiction cuts deeper than fact.",
+    cover: "/assets/images/books/the-fiction-adaptation.jpg",
+  },
+] as const;
+
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
+
+type LooseShort = {
+  title?: string;
   excerpt?: string | null;
   description?: string | null;
-  coverImage?: string | null;
-  volumeNumber?: number | null;
-  date?: string | null;
-  tags?: string[];
-  featured?: boolean;
-  accessLevel?: string | null;
-  lockMessage?: string | null;
+  readTime?: string | null;
+  url?: string;
+  slug?: string;
+  _type?: string;
+  draft?: boolean;
+  published?: boolean;
+  _raw?: { sourceFileName?: string; flattenedPath?: string };
 };
 
-type PageProps = {
-  items: CanonIndexItem[];
-  maxVolume: number;
+type HomePageProps = {
+  featuredShorts: LooseShort[];
 };
 
-// -----------------------------
-// Helpers
-// -----------------------------
+// -----------------------------------------------------------------------------
+// SECTION DIVIDER
+// -----------------------------------------------------------------------------
 
-function toNumberOrNull(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const n = Number(value.trim());
-    return Number.isFinite(n) ? n : null;
-  }
-  return null;
-}
+const SectionDivider: React.FC = () => (
+  <div className="relative h-16 overflow-hidden">
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-200/40 to-transparent dark:via-amber-500/30" />
+      <div className="mx-6 flex items-center gap-2">
+        <div className="h-2 w-2 rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
+        <div className="h-1 w-1 rounded-full bg-amber-400/60" />
+        <div className="h-2 w-2 rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
+      </div>
+      <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-200/40 to-transparent dark:via-amber-500/30" />
+    </div>
+  </div>
+);
 
-function useDeviceType(): DeviceType {
-  const [deviceType, setDeviceType] = React.useState<DeviceType>("desktop");
+// -----------------------------------------------------------------------------
+// SHORTS STRIP
+// -----------------------------------------------------------------------------
 
-  React.useEffect(() => {
-    const check = () => {
-      const w = window.innerWidth;
-      if (w < 768) setDeviceType("mobile");
-      else if (w < 1024) setDeviceType("tablet");
-      else setDeviceType("desktop");
-    };
+const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
+  if (!shorts || shorts.length === 0) return null;
 
-    check();
-    window.addEventListener("resize", check, { passive: true });
-    return () => window.removeEventListener("resize", check);
-  }, []);
+  return (
+    <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+              Shorts · Field signals
+            </p>
+            <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-white sm:text-4xl">
+              Quick hits for women and men who don&apos;t scroll all day
+            </h2>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
+              Concise field notes on work, livelihood, and building under
+              pressure - designed to be read between meetings, not instead of
+              them.
+            </p>
+          </div>
 
-  return deviceType;
-}
+          <Link
+            href="/shorts"
+            className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
+          >
+            View all shorts
+          </Link>
+        </div>
 
-function useReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onChange = () => setReduced(Boolean(mq.matches));
-    onChange();
-    mq.addEventListener?.("change", onChange);
-    return () => mq.removeEventListener?.("change", onChange);
-  }, []);
-  return reduced;
-}
+        <div className="grid gap-6 md:grid-cols-3">
+          {shorts.map((short) => {
+            const href = getDocHref(short);
+            const title = String(short.title || "Short").trim();
+            const readTime = String(short.readTime || "Quick read").trim();
+            const excerpt = String(short.excerpt || short.description || "").trim();
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: (reduced: boolean) => ({
-    opacity: 1,
-    transition: reduced
-      ? { duration: 0.01 }
-      : { staggerChildren: 0.08, delayChildren: 0.12 },
-  }),
-};
+            // Stable key: prefer href, then slug, then raw filename, then title
+            const key =
+              href ||
+              short.slug ||
+              short._raw?.sourceFileName ||
+              normalizeSlug(short) ||
+              title;
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: (reduced: boolean) => ({
-    opacity: 1,
-    y: 0,
-    transition: reduced ? { duration: 0.01 } : { duration: 0.45, ease: "easeOut" },
-  }),
-};
+            return (
+              <Link
+                key={key}
+                href={href}
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 shadow-lg backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/50 hover:bg-slate-800/80 hover:shadow-2xl"
+              >
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
+                    <Sparkles className="h-3 w-3" />
+                    Short
+                  </span>
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                    {readTime}
+                  </span>
+                </div>
 
-const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
-  const deviceType = useDeviceType();
-  const reducedMotion = useReducedMotion();
+                <h3 className="mb-3 line-clamp-2 font-serif text-xl font-semibold text-white">
+                  {title}
+                </h3>
 
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [showFeaturedOnly, setShowFeaturedOnly] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
+                {excerpt ? (
+                  <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-300">
+                    {excerpt}
+                  </p>
+                ) : null}
 
-  // set viewMode based on device after mount (SSR-safe)
-  React.useEffect(() => {
-    setViewMode(deviceType === "mobile" ? "list" : "grid");
-  }, [deviceType]);
+                <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                    Field note
+                  </span>
+                  <span className="inline-flex items-center text-sm font-semibold text-amber-300 transition-all group-hover:gap-2 group-hover:text-amber-200">
+                    Read
+                    <span className="ml-1 transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
 
-  const filteredItems = React.useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-
-    return items.filter((item) => {
-      const matchesFeatured = !showFeaturedOnly || Boolean(item.featured);
-
-      if (!q) return matchesFeatured;
-
-      const hay = [
-        item.title,
-        item.subtitle ?? "",
-        item.excerpt ?? "",
-        item.description ?? "",
-        (item.tags ?? []).join(" "),
-        item.accessLevel ?? "",
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return matchesFeatured && hay.includes(q);
-    });
-  }, [items, searchQuery, showFeaturedOnly]);
-
-  const hasItems = filteredItems.length > 0;
-
-  const totalSegments = 5;
-  const activeSegments = Math.max(
-    0,
-    Math.min(totalSegments, maxVolume || filteredItems.length || 0),
+        {/* INTEGRATED: LinkItemWithIcon and LinkItemWithBadge */}
+        <div className="mt-12 grid gap-4 md:grid-cols-2">
+          <LinkItemWithIcon
+            href="/inner-circle"
+            icon={<Users className="h-5 w-5" />}
+            title="Join Inner Circle"
+            description="Access premium content and exclusive community"
+            iconColor="amber"
+          />
+          <LinkItemWithBadge
+            href="/canon"
+            title="Explore The Canon"
+            badge="New"
+            description="Foundational principles and long-term thinking"
+            badgeColor="amber"
+            badgeVariant="filled"
+          />
+          <LinkItemWithIcon
+            href="/books"
+            icon={<BookOpen className="h-5 w-5" />}
+            title="Browse Books"
+            description="Complete collection of published works"
+            iconColor="blue"
+          />
+          <LinkItemWithBadge
+            href="/downloads"
+            title="Strategic Resources"
+            badge="Premium"
+            description="Tools, frameworks, and downloadable assets"
+            badgeColor="green"
+            badgeVariant="outline"
+          />
+        </div>
+      </div>
+    </section>
   );
-  const segments = React.useMemo(
-    () => Array.from({ length: totalSegments }, (_, i) => i + 1),
-    [],
-  );
+};
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+// -----------------------------------------------------------------------------
+// BOOKS IN DEVELOPMENT
+// -----------------------------------------------------------------------------
+
+const BooksInDevelopment: React.FC = () => (
+  <section className="bg-white py-16 dark:bg-slate-950">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+            Books in development
+          </p>
+          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            Long-form work that underwrites everything else
+          </h2>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
+            These sit behind the posts, shorts, and rooms - slow-cooked work that
+            outlives algorithms and platform cycles.
+          </p>
+        </div>
+        <Link
+          href="/books"
+          className="inline-flex items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
+        >
+          View all books
+        </Link>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {BOOKS_IN_DEV.map((book) => (
+          <Link key={book.slug} href={`/books/${book.slug}`} className="group block">
+            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+              <div className="grid gap-0 md:grid-cols-[auto,1fr]">
+                <div className="relative aspect-[3/4] w-full max-w-[9rem] flex-shrink-0">
+                  <Image
+                    src={book.cover}
+                    alt={book.title}
+                    fill
+                    sizes="(max-width: 768px) 35vw, 20vw"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex flex-col justify-between p-6">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+                      In development
+                    </p>
+                    <h3 className="mt-2 font-serif text-xl font-semibold text-slate-900 dark:text-white">
+                      {book.title}
+                    </h3>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.15em] text-slate-600 dark:text-gray-400">
+                      {book.tag}
+                    </p>
+                    <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-gray-300">
+                      {book.blurb}
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <span className="text-xs font-medium uppercase tracking-[0.15em] text-slate-500 dark:text-gray-500">
+                      Canon bookshelf
+                    </span>
+                    <span className="text-sm font-semibold text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400">
+                      View project →
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </Link>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// -----------------------------------------------------------------------------
+// STRATEGIC SESSIONS
+// -----------------------------------------------------------------------------
+
+const StrategicSessions: React.FC = () => (
+  <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            Strategic sessions
+          </p>
+          <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-white sm:text-4xl">
+            Where we do the work in the room
+          </h2>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
+            Not inspirational talks. Working sessions built for people carrying
+            real responsibility - for a boardroom, a founding team, or a household.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/consulting"
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-lg shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-xl"
+          >
+            Book a conversation
+          </Link>
+          <Link
+            href="/events"
+            className="inline-flex items-center justify-center rounded-full border border-amber-400/60 bg-amber-400/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition-all hover:bg-amber-400/10 hover:border-amber-300"
+          >
+            Upcoming rooms
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
+            <Compass className="h-6 w-6" />
+          </div>
+          <h3 className="mb-3 font-serif text-lg font-semibold text-white">
+            Strategy rooms for founders & boards
+          </h3>
+          <p className="mb-4 text-sm leading-relaxed text-gray-300">
+            Clarify mandate, markets, and operating rhythm so your decisions stop
+            fighting your design.
+          </p>
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
+            Alomarada · InfraNova Africa · Governance diagnostics
+          </p>
+        </article>
+
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+            <Users className="h-6 w-6" />
+          </div>
+          <h3 className="mb-3 font-serif text-lg font-semibold text-white">
+            Fatherhood & household architecture
+          </h3>
+          <p className="mb-4 text-sm leading-relaxed text-gray-300">
+            Standards, rituals, and structures that let men show up for their sons
+            without outsourcing conviction to the culture.
+          </p>
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
+            Fathering Without Fear · Canon household tools
+          </p>
+        </article>
+
+        <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-800/60 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-blue-400/30 hover:bg-slate-800/80 hover:shadow-2xl">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20 text-blue-400">
+            <Calendar className="h-6 w-6" />
+          </div>
+          <h3 className="mb-3 font-serif text-lg font-semibold text-white">
+            Leadership salons & inner-circle work
+          </h3>
+          <p className="mb-4 text-sm leading-relaxed text-gray-300">
+            Small, closed rooms where we test ideas, frameworks, and Canon tools
+            against real lives and real P&amp;Ls.
+          </p>
+          <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
+            Chatham rooms · Inner Circle · Builders&apos; tables
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+);
+
+// -----------------------------------------------------------------------------
+// PAGE COMPONENT
+// -----------------------------------------------------------------------------
+
+const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
+  const siteTitle = "Abraham of London";
+  const siteTagline =
+    "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
 
   return (
     <Layout
-      title="The Canon"
-      description="A curated canon of strategic, theological, and civilisational volumes - catalogued for serious builders and fathers who think in generations, not news cycles."
+      title={siteTitle}
+      description={siteTagline}
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: siteTitle,
+        description: siteTagline,
+        url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
+        publisher: { "@type": "Person", name: "Abraham of London" },
+      }}
     >
-      <Head>
-        <title>The Canon | Abraham of London</title>
-        <meta
-          name="description"
-          content="A curated canon of strategic, theological, and civilisational volumes - catalogued for serious builders and fathers who think in generations, not news cycles."
-        />
-        <link rel="canonical" href={`${siteUrl}/canon`} />
-        <meta property="og:title" content="The Canon | Abraham of London" />
-        <meta
-          property="og:description"
-          content="Harrods-library atmosphere. Ancient Near Eastern gravitas. Modern strategic intelligence. A living canon for men who build."
-        />
-        <meta property="og:url" content={`${siteUrl}/canon`} />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content={`${siteUrl}/api/og/canon?title=The%20Canon`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="The Canon | Abraham of London" />
-        <meta
-          name="twitter:description"
-          content="A living library for men who build, father, and lead with purpose."
-        />
-      </Head>
+      {/* HERO - Canon spine + ventures narrative */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        <div className="absolute inset-0">
+          <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-40 left-0 h-96 w-96 rounded-full bg-emerald-500/8 blur-3xl" />
+        </div>
 
-      <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-950">
-        {/* HERO */}
-        <section className="relative overflow-hidden border-b border-gray-800">
-          <div className="absolute inset-0">
-            <div className="absolute inset-x-0 -top-32 h-64 bg-[radial-gradient(circle_at_top,rgba(226,197,120,0.15),transparent_65%)]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/85" />
-            <div
-              className="absolute inset-0 opacity-[0.06]"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
-                `,
-                backgroundSize: "44px 44px",
-              }}
-            />
-          </div>
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+          <div className="grid items-center gap-12 lg:grid-cols-5 lg:gap-16">
+            {/* Left - Philosophy & CTAs */}
+            <div className="max-w-xl lg:col-span-3 xl:col-span-2">
+              <div className="mb-8">
+                <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-amber-400/50 bg-amber-500/10 px-4 py-2">
+                  <span className="text-lg text-amber-400">𓆓</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
+                    Canon · Ventures · Field tools
+                  </span>
+                </div>
 
-          <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 18 }}
-              animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={reducedMotion ? { duration: 0.01 } : { duration: 0.6 }}
-              className="space-y-8"
-            >
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
-                <BookOpen className="h-4 w-4 text-amber-400" />
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
-                  Canon · Catalogue
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl md:text-5xl lg:text-6xl">
-                  The Canon
-                  <span className="mt-2 block font-semibold text-amber-400">
-                    of Purpose, Power &amp; Stewardship
+                <h1 className="mb-5 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+                  Abraham of London
+                  <span className="mt-4 block text-xl font-normal text-amber-100 sm:text-2xl lg:text-3xl">
+                    Structural thinking for fathers, founders, and builders of
+                    legacy.
                   </span>
                 </h1>
 
-                {deviceType !== "mobile" && (
-                  <div className="flex items-center gap-4 pt-4">
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-gray-800">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600"
-                        style={{ width: `${(activeSegments / totalSegments) * 100}%` }}
-                      />
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      <span className="font-semibold text-amber-400">
-                        Volume {activeSegments}
-                      </span>{" "}
-                      of {totalSegments}
-                    </div>
-                  </div>
-                )}
+                <p className="mb-8 text-base leading-relaxed text-gray-300 sm:text-lg">
+                  For men who carry responsibility for a family, a company, or a
+                  community - this is where faith, history, and strategy are
+                  turned into operating systems, not slogans.
+                </p>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-4 lg:col-span-2">
-                  <p className="text-lg leading-relaxed text-gray-300">
-                    This is not a blog roll. It is a living library - volumes that sit at the
-                    intersection of{" "}
-                    <span className="font-medium text-amber-400">
-                      theology, strategy, civilisation, and human destiny
-                    </span>
-                    . Each entry is catalogued, not casually posted.
-                  </p>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/canon"
+                  className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-7 py-3.5 text-sm font-semibold text-black shadow-lg shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-xl"
+                >
+                  <span>Enter the Canon</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+                <Link
+                  href="/consulting"
+                  className="group inline-flex items-center gap-2 rounded-xl border border-amber-400/60 bg-amber-400/5 px-7 py-3.5 text-sm font-semibold text-amber-100 transition-all hover:scale-105 hover:bg-amber-500/10"
+                >
+                  <span>Work with Abraham</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+              </div>
 
-                  <p className="text-sm leading-relaxed text-gray-400">
-                    Think <strong className="text-white">Harrods Library</strong> meets{" "}
-                    <strong className="text-white">Ancient Near Eastern gravitas</strong>, wrapped in{" "}
-                    <strong className="text-white">modern strategic intelligence</strong>. Built for men
-                    who lead, fathers who refuse to disappear, and builders who understand that
-                    ideas outlive news cycles.
+              <p className="mt-6 text-xs uppercase tracking-[0.2em] text-gray-500">
+                Canon · Essays · Field letters · Tools · Inner circle
+              </p>
+            </div>
+
+            {/* Right - Hero Banner */}
+            <div className="relative lg:col-span-2 xl:col-span-3">
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-sm">
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src="/assets/images/abraham-of-london-banner.webp"
+                    alt="Abraham of London - Canon, ventures, and structural tools for builders of legacy"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                </div>
+                <div className="border-t border-white/10 bg-slate-900/90 px-5 py-4 backdrop-blur-sm">
+                  <p className="text-sm font-medium leading-relaxed text-gray-200">
+                    The Canon is the philosophical spine. The ventures are the
+                    working arms. Together they exist to build men, families,
+                    and institutions that outlast headlines.
                   </p>
                 </div>
-
-                <motion.div
-                  initial={reducedMotion ? false : { opacity: 0, x: 18 }}
-                  animate={reducedMotion ? {} : { opacity: 1, x: 0 }}
-                  transition={reducedMotion ? { duration: 0.01 } : { delay: 0.25 }}
-                  className="rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900/80 to-black/80 p-6 backdrop-blur-sm"
-                >
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
-                        Catalogued Volumes
-                      </p>
-                      <p className="mt-2 text-3xl font-bold text-white">
-                        {String(items.length).padStart(2, "0")}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-1.5">
-                        {segments.map((seg) => {
-                          const active = seg <= activeSegments;
-                          return (
-                            <div
-                              key={seg}
-                              className={`h-2 flex-1 rounded-full transition-all duration-200 ${
-                                active
-                                  ? "bg-gradient-to-r from-amber-500 to-amber-600"
-                                  : "bg-gray-800"
-                              }`}
-                            />
-                          );
-                        })}
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        <span className="text-amber-400">Foundational pillars</span> in progress
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* CONTROLS */}
-        <section
-          className={[
-            "z-10 border-b border-gray-800 bg-black/95 backdrop-blur-sm py-4",
-            deviceType === "mobile" ? "relative" : "sticky top-0",
-          ].join(" ")}
-        >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="relative w-full max-w-md flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="search"
-                  placeholder="Search volumes..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-gray-700 bg-gray-900/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                  aria-label="Search Canon volumes"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => setShowFeaturedOnly((s) => !s)}
-                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
-                    showFeaturedOnly
-                      ? "border-amber-500/30 bg-amber-500/20 text-amber-400"
-                      : "border-gray-700 text-gray-400 hover:bg-gray-800/50 hover:text-gray-300"
-                  }`}
-                  aria-pressed={showFeaturedOnly}
-                >
-                  <Star className="h-4 w-4" />
-                  <span>Featured</span>
-                </button>
-
-                {deviceType !== "mobile" && (
-                  <div className="flex rounded-lg border border-gray-700 bg-gray-900/50 p-1">
-                    <button
-                      onClick={() => setViewMode("grid")}
-                      className={`rounded-md p-2 transition-colors ${
-                        viewMode === "grid" ? "bg-amber-500 text-white" : "text-gray-400 hover:text-gray-300"
-                      }`}
-                      aria-label="Grid view"
-                      aria-pressed={viewMode === "grid"}
-                    >
-                      <div className="grid h-4 w-4 grid-cols-2 gap-0.5">
-                        {[1, 2, 3, 4].map((i) => (
-                          <div key={i} className="rounded-sm bg-current" />
-                        ))}
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className={`rounded-md p-2 transition-colors ${
-                        viewMode === "list" ? "bg-amber-500 text-white" : "text-gray-400 hover:text-gray-300"
-                      }`}
-                      aria-label="List view"
-                      aria-pressed={viewMode === "list"}
-                    >
-                      <div className="flex h-4 w-4 flex-col justify-between">
-                        <div className="h-0.5 w-full rounded bg-current" />
-                        <div className="h-0.5 w-full rounded bg-current" />
-                        <div className="h-0.5 w-full rounded bg-current" />
-                      </div>
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* CONTENT */}
-        <section className="py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {!hasItems ? (
-              <motion.div
-                initial={reducedMotion ? false : { opacity: 0 }}
-                animate={reducedMotion ? {} : { opacity: 1 }}
-                className="rounded-2xl border border-dashed border-gray-700 bg-gray-900/30 p-8 text-center"
-              >
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
-                  <Search className="h-6 w-6 text-gray-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-white">No volumes found</h3>
-                <p className="text-gray-400">
-                  {searchQuery || showFeaturedOnly
-                    ? "Try adjusting your search or filter criteria."
-                    : "The catalogue is being prepared. Check back soon - or join the Inner Circle for early access."}
-                </p>
-                {(searchQuery || showFeaturedOnly) && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery("");
-                      setShowFeaturedOnly(false);
-                    }}
-                    className="mt-4 text-sm font-medium text-amber-400 hover:text-amber-300"
-                  >
-                    Clear all filters
-                  </button>
-                )}
-              </motion.div>
-            ) : (
-              <>
-                <div className="mb-8 flex items-center justify-between">
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold text-white sm:text-3xl">
-                      Catalogued Volumes
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-400">
-                      Showing{" "}
-                      <span className="font-semibold text-white">{filteredItems.length}</span> of{" "}
-                      <span className="font-semibold text-white">{items.length}</span> volumes
-                    </p>
-                  </div>
-                  {filteredItems.length < items.length && (
-                    <button
-                      onClick={() => {
-                        setSearchQuery("");
-                        setShowFeaturedOnly(false);
-                      }}
-                      className="text-sm font-medium text-amber-400 hover:text-amber-300"
-                    >
-                      Clear filters
-                    </button>
-                  )}
-                </div>
+      {/* STATS BAR */}
+      <section className="border-y border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <StatsBar />
+        </div>
+      </section>
 
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  custom={reducedMotion}
-                  className={
-                    viewMode === "grid"
-                      ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-                      : "space-y-4"
-                  }
-                >
-                  {filteredItems.map((item) => (
-                    <motion.div
-                      key={item.slug}
-                      variants={itemVariants}
-                      custom={reducedMotion}
-                      className={viewMode === "list" ? "max-w-3xl" : ""}
-                    >
-                      <CanonCard canon={item} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </>
-            )}
+      <SectionDivider />
 
-            {hasItems && (
-              <motion.div
-                initial={reducedMotion ? false : { opacity: 0, y: 14 }}
-                animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
-                transition={reducedMotion ? { duration: 0.01 } : { delay: 0.25 }}
-                className="mt-16 rounded-2xl border border-gray-800 bg-gradient-to-r from-gray-900 to-black p-8"
-              >
-                <div className="grid gap-6 md:grid-cols-2 md:items-center">
-                  <div>
-                    <h3 className="mb-3 font-serif text-2xl font-semibold text-white">
-                      Want deeper access?
-                    </h3>
-                    <p className="text-gray-300">
-                      Some volumes are reserved for the Inner Circle - early drafts, advanced
-                      frameworks, and direct dialogue with Abraham.
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <Link
-                      href="/inner-circle"
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-600"
-                    >
-                      Join Inner Circle
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                    <Link
-                      href="/books/the-architecture-of-human-purpose"
-                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-500/30 bg-transparent px-6 py-3 text-sm font-semibold text-amber-400 transition-colors hover:bg-amber-500/10"
-                    >
-                      Read Public Prelude
-                      <BookOpen className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+      {/* CANON SPOTLIGHT */}
+      <section className="bg-white py-16 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+                Canon · Foundations
+              </p>
+              <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+                The philosophical spine
+              </h2>
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
+                The Canon is the long-term work: purpose, governance, civilisation,
+                and destiny - written from a father&apos;s vantage point, not an academic desk.
+              </p>
+            </div>
+            <Link
+              href="/canon"
+              className="inline-flex items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
+            >
+              Browse Canon entries
+            </Link>
           </div>
-        </section>
-      </main>
+
+          {/* FIXED: CanonPrimaryCard with required props and adjusted image */}
+          <CanonPrimaryCard
+            title="The Architecture of Human Purpose"
+            href="/canon/the-architecture-of-human-purpose"
+            excerpt="The foundational volume: a framework for discerning and deploying purpose across a lifetime. How to build systems, structures, and legacies that outlast you."
+            volumeNumber={1}
+            // Adjusted image path - using a realistic fallback
+            image="/assets/images/canon/architecture-of-human-purpose-cover.jpg"
+            className="max-w-2xl mx-auto"
+          />
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* STRATEGIC FUNNEL STRIP */}
+      <StrategicFunnelStrip />
+
+      <SectionDivider />
+
+      {/* SHORTS STRIP */}
+      {featuredShorts.length > 0 ? (
+        <>
+          <ShortsStrip shorts={featuredShorts} />
+          <SectionDivider />
+        </>
+      ) : null}
+
+      {/* VENTURES */}
+      <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
+        <VenturesSection />
+      </section>
+
+      <SectionDivider />
+
+      {/* BOOKS */}
+      <BooksInDevelopment />
+
+      <SectionDivider />
+
+      {/* SESSIONS */}
+      <StrategicSessions />
     </Layout>
   );
 };
 
-export default CanonIndexPage;
+export default HomePage;
 
-export const getStaticProps: GetStaticProps<PageProps> = async () => {
-  try {
-    const docs: Canon[] = getPublicCanon();
+// -----------------------------------------------------------------------------
+// BUILD-TIME DATA (robust + typed)
+// -----------------------------------------------------------------------------
 
-    const items: CanonIndexItem[] = docs.map((doc) => {
-      // Create a type-safe way to access properties
-      const canonDoc = doc as Canon & {
-        subtitle?: string;
-        excerpt?: string;
-        description?: string;
-        coverImage?: string;
-        volumeNumber?: number | string;
-        date?: string;
-        tags?: string[];
-        featured?: boolean;
-        accessLevel?: string;
-        lockMessage?: string;
-      };
+export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  // Custom isPublished check for LooseShort type
+  const isLooseShortPublished = (s: LooseShort): boolean => {
+    // Check for explicit published flag
+    if (s.published === true) return true;
+    if (s.published === false) return false;
+    
+    // Check for draft flag
+    if (s.draft === true) return false;
+    
+    // Check if it has a title and slug (basic published check)
+    if (s.title && s.slug) return true;
+    
+    return false;
+  };
 
-      const vol = toNumberOrNull(canonDoc.volumeNumber);
+  const getFeaturedShortsSafely = (): LooseShort[] => {
+    try {
+      const recent = getRecentShorts(3) as unknown as LooseShort[];
+      const cleanedRecent = Array.isArray(recent) ? recent : [];
 
-      return {
-        slug: resolveCanonSlug(doc),
-        title: doc.title ?? "Untitled Canon Volume",
-        subtitle: canonDoc.subtitle ?? null,
-        excerpt: canonDoc.excerpt ?? null,
-        description: canonDoc.description ?? null,
-        coverImage: canonDoc.coverImage ?? null,
-        volumeNumber: vol,
-        date: canonDoc.date ?? null,
-        tags: Array.isArray(canonDoc.tags) ? canonDoc.tags : [],
-        featured: Boolean(canonDoc.featured),
-        accessLevel: canonDoc.accessLevel ?? null,
-        lockMessage: canonDoc.lockMessage ?? null,
-      };
-    });
+      if (cleanedRecent.length > 0) return cleanedRecent;
 
-    items.sort((a, b) => {
-      if (a.featured && !b.featured) return -1;
-      if (!a.featured && b.featured) return 1;
+      const all = getPublishedShorts() as unknown as LooseShort[];
+      const cleanedAll = Array.isArray(all) ? all : [];
 
-      const volA = a.volumeNumber ?? Infinity;
-      const volB = b.volumeNumber ?? Infinity;
-      if (volA !== volB) return volA - volB;
+      return cleanedAll.slice(0, 3);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[home] Error loading shorts:", err);
+      return [];
+    }
+  };
 
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
-    });
+  const featuredShorts = getFeaturedShortsSafely().filter(isLooseShortPublished);
 
-    const volumeNumbers = items
-      .map((it) => it.volumeNumber)
-      .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
-
-    const maxVolume = volumeNumbers.length ? Math.max(...volumeNumbers) : 0;
-
-    return { props: { items, maxVolume }, revalidate: 3600 };
-  } catch (err) {
-    console.error("Error in getStaticProps for /canon:", err);
-    return { props: { items: [], maxVolume: 0 }, revalidate: 600 };
-  }
+  return {
+    props: {
+      featuredShorts,
+    },
+    revalidate: 3600, // Revalidate every hour
+  };
 };
