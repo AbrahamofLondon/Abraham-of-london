@@ -1,248 +1,267 @@
-// lib/posts-utils.ts - COMPLETE UTILITY FUNCTIONS
-import { 
-  Post, 
-  PostMeta, 
-  PostWithContent, 
-  PostForClient,
-  PostSummary,
-  ImageType,
-  PostList,
-  PostNavigation
-} from '@/types/post';
+// lib/posts-utils.ts - Production utilities (safe exports, stable typing)
 
-// Image normalization functions
-export function normalizeImage(image: ImageType): string | null {
+import type {
+  ImageType,
+  Post,
+  PostForClient,
+  PostList,
+  PostMeta,
+  PostNavigation,
+  PostSummary,
+  PostWithContent,
+} from "@/types/post";
+
+// ============================================================================
+// IMAGE NORMALIZATION
+// ============================================================================
+
+export function normalizeImage(image: ImageType | string | null | undefined): string | null {
   if (!image) return null;
-  if (typeof image === 'string') return image;
-  if (typeof image === 'object' && image.src) return image.src;
+  if (typeof image === "string") return image;
+  if (typeof image === "object" && typeof image.src === "string") return image.src;
   return null;
 }
 
-export function normalizeImageToUndefined(image: ImageType): string | undefined {
+export function normalizeImageToUndefined(
+  image: ImageType | string | null | undefined
+): string | undefined {
   const result = normalizeImage(image);
   return result === null ? undefined : result;
 }
 
-export function normalizeImageToString(image: ImageType, fallback: string = ''): string {
+export function normalizeImageToString(
+  image: ImageType | string | null | undefined,
+  fallback = ""
+): string {
   const result = normalizeImage(image);
   return result === null ? fallback : result;
 }
 
-// Post transformation functions
+// ============================================================================
+// TRANSFORMATIONS
+// ============================================================================
+
 export function transformPostToWithContent(post: Post): PostWithContent {
   return {
     ...post,
-    coverImage: normalizeImage(post.coverImage as any),
-    ogImage: normalizeImage(post.ogImage as any),
-    content: post.content || '',
-    html: post.html || '',
-    compiledSource: post.compiledSource || '',
+    coverImage: normalizeImage(post.coverImage),
+    ogImage: normalizeImage(post.ogImage),
+    content: post.content || "",
+    html: post.html || "",
+    compiledSource: post.compiledSource || "",
   };
 }
 
 export function transformPostForClient(post: Post): PostForClient {
   return {
     ...post,
-    coverImage: normalizeImageToUndefined(post.coverImage as any),
-    ogImage: normalizeImageToUndefined(post.ogImage as any),
-    content: post.content || '',
-    html: post.html || '',
-    compiledSource: post.compiledSource || '',
+    coverImage: normalizeImageToUndefined(post.coverImage),
+    ogImage: normalizeImageToUndefined(post.ogImage),
+    content: post.content || "",
+    html: post.html || "",
+    compiledSource: post.compiledSource || "",
   };
 }
 
-export function toPostSummary(postMeta: PostMeta | Post): PostSummary {
+export function toPostSummary(postMeta: PostMeta): PostSummary {
   return {
     slug: postMeta.slug,
     title: postMeta.title,
-    excerpt: postMeta.excerpt || '',
+    excerpt: postMeta.excerpt || "",
     date: postMeta.date,
-    category: postMeta.category || '',
-    readTime: postMeta.readTime || '',
-    coverImage: normalizeImage(postMeta.coverImage as any),
-    tags: postMeta.tags,
-    author: postMeta.author || '',
-    featured: postMeta.featured || false
+    category: postMeta.category || "",
+    readTime: postMeta.readTime || "",
+    coverImage: normalizeImage(postMeta.coverImage),
+    tags: postMeta.tags || [],
+    author: postMeta.author || "",
+    featured: postMeta.featured || false,
   };
 }
 
-// Collection transformation functions
+// ============================================================================
+// COLLECTION HELPERS
+// ============================================================================
+
 export function getAllPostsForClient(posts: Post[]): PostForClient[] {
-  try {
-    if (!Array.isArray(posts)) return [];
-    return posts.map(post => transformPostForClient(post));
-  } catch {
-    return [];
-  }
+  if (!Array.isArray(posts)) return [];
+  return posts.map(transformPostForClient);
 }
 
 export function getAllPostsWithContent(posts: Post[]): PostWithContent[] {
-  try {
-    if (!Array.isArray(posts)) return [];
-    return posts.map(post => transformPostToWithContent(post));
-  } catch {
-    return [];
-  }
+  if (!Array.isArray(posts)) return [];
+  return posts.map(transformPostToWithContent);
 }
 
-// Validation
+// ============================================================================
+// VALIDATION
+// ============================================================================
+
 export function validatePostMeta(postMeta: Partial<PostMeta>): postMeta is PostMeta {
   return !!(postMeta.slug && postMeta.title && postMeta.date);
 }
 
-// Content utilities
-export function extractExcerpt(content: string, maxLength: number = 160): string {
-  const plain = content
-    .replace(/#{1,6}\s+/g, '')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/`([^`]+)`/g, '$1')
+// ============================================================================
+// CONTENT UTILITIES
+// ============================================================================
+
+export function extractExcerpt(content: string, maxLength = 160): string {
+  const plain = String(content || "")
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`([^`]+)`/g, "$1")
     .trim();
-  
+
   if (plain.length <= maxLength) return plain;
-  
-  const truncated = plain.substring(0, maxLength);
-  const lastPeriod = truncated.lastIndexOf('.');
-  const lastQuestion = truncated.lastIndexOf('?');
-  const lastExclamation = truncated.lastIndexOf('!');
-  const lastSentence = Math.max(lastPeriod, lastQuestion, lastExclamation);
-  
-  if (lastSentence > 0) return plain.substring(0, lastSentence + 1);
-  
-  const lastSpace = truncated.lastIndexOf(' ');
-  return lastSpace > 0 ? plain.substring(0, lastSpace) + '...' : truncated + '...';
+
+  const truncated = plain.slice(0, maxLength);
+  const lastSentence = Math.max(
+    truncated.lastIndexOf("."),
+    truncated.lastIndexOf("?"),
+    truncated.lastIndexOf("!")
+  );
+
+  if (lastSentence > 0) return plain.slice(0, lastSentence + 1);
+
+  const lastSpace = truncated.lastIndexOf(" ");
+  return lastSpace > 0 ? plain.slice(0, lastSpace) + "..." : truncated + "...";
 }
 
-export function calculateReadingTime(content: string, wordsPerMinute: number = 200): string {
-  const words = content.trim().split(/\s+/).length;
-  const minutes = Math.ceil(words / wordsPerMinute);
+export function calculateReadingTime(content: string, wordsPerMinute = 200): string {
+  const words = String(content || "").trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
   return `${minutes} min read`;
 }
 
 export function getWordCount(content: string): number {
-  return content.trim().split(/\s+/).length;
+  return String(content || "").trim().split(/\s+/).filter(Boolean).length;
 }
 
-// Sorting and filtering
-export function sortPostsByDate(posts: PostMeta[], order: 'desc' | 'asc' = 'desc'): PostMeta[] {
-  return [...posts].sort((a, b) => {
+// ============================================================================
+// SORTING + FILTERING
+// ============================================================================
+
+export function sortPostsByDate(posts: PostMeta[], order: "desc" | "asc" = "desc"): PostMeta[] {
+  return [...(posts || [])].sort((a, b) => {
     const dateA = new Date(a.date || 0).getTime();
     const dateB = new Date(b.date || 0).getTime();
-    return order === 'desc' ? dateB - dateA : dateA - dateB;
+    return order === "desc" ? dateB - dateA : dateA - dateB;
   });
 }
 
 export function filterByCategory(posts: PostMeta[], category: string): PostMeta[] {
-  return posts.filter(post => post.category === category);
+  return (posts || []).filter((post) => post.category === category);
 }
 
 export function filterByTag(posts: PostMeta[], tag: string): PostMeta[] {
-  return posts.filter(post => post.tags?.includes(tag));
+  return (posts || []).filter((post) => Array.isArray(post.tags) && post.tags.includes(tag));
 }
 
 export function getCategories(posts: PostMeta[]): string[] {
   const categories = new Set<string>();
-  posts.forEach(post => post.category && categories.add(post.category));
+  (posts || []).forEach((post) => {
+    if (post.category) categories.add(post.category);
+  });
   return Array.from(categories).sort();
 }
 
 export function getTags(posts: PostMeta[]): string[] {
   const tags = new Set<string>();
-  posts.forEach(post => post.tags?.forEach(tag => tags.add(tag)));
+  (posts || []).forEach((post) => {
+    (post.tags || []).forEach((tag) => tags.add(tag));
+  });
   return Array.from(tags).sort();
 }
 
 export function getSeriesPosts(posts: PostMeta[], seriesName: string): PostMeta[] {
-  return posts
-    .filter(post => post.series === seriesName)
+  return (posts || [])
+    .filter((post) => post.series === seriesName)
     .sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
 }
 
-// Pagination
-export function paginatePosts(
-  posts: PostMeta[],
-  page: number = 1,
-  perPage: number = 10
-): PostList {
-  const start = (page - 1) * perPage;
-  const end = start + perPage;
-  const paginated = posts.slice(start, end);
-  
+// ============================================================================
+// PAGINATION  ✅ THIS MUST BE A NAMED EXPORT
+// ============================================================================
+
+export function paginatePosts(posts: PostMeta[], page = 1, perPage = 10): PostList {
+  const safePosts = Array.isArray(posts) ? posts : [];
+  const safePage = Number.isFinite(page) && page > 0 ? page : 1;
+  const safePerPage = Number.isFinite(perPage) && perPage > 0 ? perPage : 10;
+
+  const start = (safePage - 1) * safePerPage;
+  const end = start + safePerPage;
+
+  const total = safePosts.length;
+  const totalPages = Math.max(1, Math.ceil(total / safePerPage));
+  const currentPage = Math.min(safePage, totalPages);
+
+  const sliceStart = (currentPage - 1) * safePerPage;
+  const sliceEnd = sliceStart + safePerPage;
+
+  const paginated = safePosts.slice(sliceStart, sliceEnd);
+
   return {
     posts: paginated.map(toPostSummary),
-    total: posts.length,
-    page,
-    perPage,
-    totalPages: Math.ceil(posts.length / perPage),
+    total,
+    page: currentPage,
+    perPage: safePerPage,
+    totalPages,
+    hasNext: currentPage < totalPages,
+    hasPrevious: currentPage > 1,
   };
 }
 
-export function getPostNavigation(
-  posts: PostMeta[],
-  currentSlug: string
-): PostNavigation {
-  const sortedPosts = sortPostsByDate(posts);
-  const currentIndex = sortedPosts.findIndex(p => p.slug === currentSlug);
-  
-  if (currentIndex === -1) return {};
-  
+export function getPostNavigation(posts: PostMeta[], currentSlug: string): PostNavigation {
+  const sorted = sortPostsByDate(posts, "desc");
+  const idx = sorted.findIndex((p) => p.slug === currentSlug);
+  if (idx === -1) return {};
+
   return {
-    prev: currentIndex > 0 ? toPostSummary(sortedPosts[currentIndex - 1]) : undefined,
-    next: currentIndex < sortedPosts.length - 1 ? toPostSummary(sortedPosts[currentIndex + 1]) : undefined,
+    prev: idx > 0 ? toPostSummary(sorted[idx - 1]) : undefined,
+    next: idx < sorted.length - 1 ? toPostSummary(sorted[idx + 1]) : undefined,
   };
 }
 
-// Search
+// ============================================================================
+// SEARCH
+// ============================================================================
+
 export function searchPosts(posts: PostMeta[], query: string): PostMeta[] {
-  const lowerQuery = query.toLowerCase();
-  return posts.filter(post => 
-    post.title.toLowerCase().includes(lowerQuery) ||
-    post.excerpt?.toLowerCase().includes(lowerQuery) ||
-    post.description?.toLowerCase().includes(lowerQuery)
-  );
+  const q = String(query || "").trim().toLowerCase();
+  if (!q) return posts || [];
+
+  return (posts || []).filter((post) => {
+    const hay = [
+      post.title,
+      post.excerpt,
+      post.description,
+      post.subtitle,
+      post.category,
+      post.author,
+      ...(post.tags || []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return hay.includes(q);
+  });
 }
 
 export function getFeaturedPosts(posts: PostMeta[]): PostMeta[] {
-  return posts.filter(post => post.featured);
+  return (posts || []).filter((post) => post.featured === true);
 }
 
-export function getRecentPosts(posts: PostMeta[], limit: number = 5): PostMeta[] {
-  return sortPostsByDate(posts).slice(0, limit);
+export function getRecentPosts(posts: PostMeta[], limit = 5): PostMeta[] {
+  return sortPostsByDate(posts, "desc").slice(0, Math.max(0, limit));
 }
 
-// Factory function
-export function createPostMeta(data: Partial<PostMeta>): PostMeta {
-  return {
-    slug: data.slug || '',
-    title: data.title || '',
-    date: data.date || new Date().toISOString().split('T')[0],
-    subtitle: data.subtitle,
-    excerpt: data.excerpt || '',
-    description: data.description,
-    lastModified: data.lastModified,
-    published: data.published ?? true,
-    category: data.category || '',
-    tags: data.tags || [],
-    series: data.series,
-    seriesOrder: data.seriesOrder,
-    coverImage: data.coverImage,
-    ogImage: data.ogImage,
-    coverAspect: data.coverAspect,
-    coverFit: data.coverFit,
-    coverPosition: data.coverPosition,
-    author: data.author || '',
-    authors: data.authors,
-    readTime: data.readTime || '',
-    wordCount: data.wordCount,
-    canonicalUrl: data.canonicalUrl,
-    noindex: data.noindex,
-    featured: data.featured || false,
-  };
-}
+// ============================================================================
+// DEFAULT + NAMESPACE (OPTIONAL)
+// ============================================================================
 
-// Namespace export
 export const PostUtils = {
   normalizeImage,
   normalizeImageToUndefined,
@@ -267,7 +286,6 @@ export const PostUtils = {
   searchPosts,
   getFeaturedPosts,
   getRecentPosts,
-  createPostMeta,
-};
+} as const;
 
 export default PostUtils;

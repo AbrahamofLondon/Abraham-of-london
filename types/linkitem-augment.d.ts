@@ -1,5 +1,8 @@
 // types/linkitem-augment.d.ts
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+
 declare global {
   /**
    * Augmented LinkItem interface for enhanced navigation

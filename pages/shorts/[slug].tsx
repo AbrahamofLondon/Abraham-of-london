@@ -46,11 +46,7 @@ function safeDateLabel(dateLike?: string | null): string | null {
   if (!dateLike) return null;
   const d = new Date(dateLike);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -135,27 +131,24 @@ export default function ShortPage({ short, source }: ShortPageProps): JSX.Elemen
       const encodedText = encodeURIComponent(shareText);
 
       switch (platform) {
-        case "twitter": {
+        case "twitter":
           window.open(
             `https://twitter.com/intent/tweet?text=${encodedTitle}%0A${encodedText}&url=${encodedUrl}`,
             "_blank",
             "noopener,noreferrer,width=550,height=420"
           );
           break;
-        }
-        case "linkedin": {
+        case "linkedin":
           window.open(
             `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
             "_blank",
             "noopener,noreferrer,width=550,height=420"
           );
           break;
-        }
-        case "email": {
+        case "email":
           window.location.href = `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0ARead%3A%20${encodedUrl}`;
           break;
-        }
-        case "copy": {
+        case "copy":
           if (!navigator?.clipboard?.writeText) return;
           navigator.clipboard
             .writeText(shareUrl)
@@ -165,7 +158,6 @@ export default function ShortPage({ short, source }: ShortPageProps): JSX.Elemen
             })
             .catch(() => {});
           break;
-        }
       }
     },
     [shareUrl, shareTitle, shareText]
@@ -174,14 +166,7 @@ export default function ShortPage({ short, source }: ShortPageProps): JSX.Elemen
   const handleNativeShare = React.useCallback(() => {
     if (typeof window === "undefined") return;
     if (!navigator?.share) return;
-
-    navigator
-      .share({
-        title: shareTitle,
-        text: shareText,
-        url: shareUrl,
-      })
-      .catch(() => {});
+    navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(() => {});
   }, [shareUrl, shareTitle, shareText]);
 
   return (

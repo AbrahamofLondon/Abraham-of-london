@@ -14,19 +14,19 @@ async function main() {
   const outDir = path.join(process.cwd(), "public", "downloads");
   await ensureDir(outDir);
 
-  // ✅ MUST be a real file path on disk (build-time readable), not a /public URL
+  // ✅ Use a REAL disk path. Do NOT include "/assets/images" inside path.join like a URL.
   const coverDiskPath = path.join(
     process.cwd(),
     "public",
     "assets",
     "images",
-    "purpose-cover.jpg" // <-- FIX: no leading slash, no duplicated folders
+    "purpose-cover.jpg"
   );
 
-  // This element is now correctly typed as ReactElement<DocumentProps>
-  const element = React.createElement(UltimatePurposeOfManDocument, {
-    coverImagePath: coverDiskPath,
-  });
+  // ✅ JSX element; cast to satisfy @react-pdf/renderer typing expectations
+  const element = (
+    <UltimatePurposeOfManDocument coverImagePath={coverDiskPath} />
+  ) as unknown as React.ReactElement;
 
   const instance = pdf(element);
   const buffer = await instance.toBuffer();

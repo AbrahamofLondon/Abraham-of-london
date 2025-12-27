@@ -1,4 +1,4 @@
-// types/post.ts - FIXED VERSION
+// types/post.ts - COMPLETE PRODUCTION TYPES
 export interface ImageType {
   src?: string;
   alt?: string;
@@ -92,54 +92,15 @@ export interface PostNavigation {
   next?: PostSummary;
 }
 
-// Paginated post list - FIXED: Added missing perPage property
+// Paginated post list
 export interface PostList {
   posts: PostSummary[];
   total: number;
   page: number;
-  perPage: number;  // This was missing - added it here
+  perPage: number;
   totalPages: number;
-}
-
-// Post with guaranteed content
-export interface Post extends PostMeta {
-  content: string;
-}
-
-// Validated post with all derived fields
-export interface PostWithContent extends Post {
-  html: string;
-  compiledSource: string;
-}
-
-// Client-safe post (no sensitive/optional fields guaranteed)
-export interface PostForClient extends PostMeta {
-  // All fields optional for client safety
-  [key: string]: any;
-}
-
-// Lightweight post for listings
-export interface PostSummary extends Pick<PostMeta, 
-  'slug' | 'title' | 'date' | 'excerpt' | 'published' | 'featured' | 
-  'category' | 'tags' | 'author' | 'readTime' | 'subtitle' |
-  'coverImage' | 'series' | 'wordCount'> {
-  id?: string;
-}
-
-// Collection response
-export interface PostList {
-  posts: PostSummary[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-// Navigation context
-export interface PostNavigation {
-  prev?: PostSummary | null;
-  next?: PostSummary | null;
+  hasNext?: boolean;
+  hasPrevious?: boolean;
 }
 
 // Validation results
@@ -152,7 +113,7 @@ export interface FrontmatterValidation {
 }
 
 // ============================================================================
-// SAFETY UTILITIES (RENAMED FROM 'PostMeta' to 'PostMetaUtils')
+// SAFETY UTILITIES
 // ============================================================================
 
 // Type-safe field accessors with defaults
@@ -344,6 +305,8 @@ export const PostFactory = {
     return {
       ...meta,
       content: data.content?.trim() || '',
+      html: data.html?.trim() || '',
+      compiledSource: data.compiledSource?.trim() || '',
     };
   },
   
@@ -351,6 +314,9 @@ export const PostFactory = {
     const safe = PostMetaUtils.toSafeObject(post);
     return {
       ...safe,
+      content: post.content || '',
+      html: post.html || '',
+      compiledSource: post.compiledSource || '',
       // Remove any sensitive fields
       draft: undefined,
       noindex: undefined,
@@ -364,19 +330,14 @@ export const PostFactory = {
     return {
       slug: PostMetaUtils.getSlug(post),
       title: PostMetaUtils.getTitle(post),
-      date: PostMetaUtils.getDate(post),
       excerpt: PostMetaUtils.getExcerpt(post),
-      published: post.published ?? true,
-      featured: post.featured ?? false,
+      date: PostMetaUtils.getDate(post),
       category: PostMetaUtils.getCategory(post),
+      readTime: PostMetaUtils.getReadTime(post),
+      coverImage: PostMetaUtils.getCoverImage(post),
       tags: PostMetaUtils.getTags(post),
       author: PostMetaUtils.getAuthor(post),
-      readTime: PostMetaUtils.getReadTime(post),
-      subtitle: post.subtitle?.trim() || undefined,
-      coverImage: PostMetaUtils.getCoverImage(post),
-      series: post.series?.trim() || undefined,
-      wordCount: post.wordCount,
-      id: post.id || post.slug,
+      featured: post.featured || false,
     };
   },
 };
