@@ -47,6 +47,60 @@ export interface PostMeta {
   compiledSource?: string;
 }
 
+// Post with full content (used when reading complete posts)
+export interface Post extends PostMeta {
+  content: string;
+  html: string;
+  compiledSource: string;
+}
+
+// Post with normalized content (coverImage/ogImage as string | null)
+export interface PostWithContent extends PostMeta {
+  content: string;
+  html: string;
+  compiledSource: string;
+  coverImage: string | null;
+  ogImage: string | null;
+}
+
+// Post for client-side rendering (coverImage/ogImage as optional string)
+export interface PostForClient extends PostMeta {
+  content: string;
+  html: string;
+  compiledSource: string;
+  coverImage?: string;
+  ogImage?: string;
+}
+
+// Summary for listing posts
+export interface PostSummary {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  readTime: string;
+  coverImage: string | null;
+  tags: string[];
+  author: string;
+  featured: boolean;
+}
+
+// Navigation between posts
+export interface PostNavigation {
+  prev?: PostSummary;
+  next?: PostSummary;
+}
+
+// Paginated post list - FIXED: Added missing perPage property
+export interface PostList {
+  posts: PostSummary[];
+  total: number;
+  page: number;
+  perPage: number;  // This was missing - added it here
+  totalPages: number;
+}
+
 // Post with guaranteed content
 export interface Post extends PostMeta {
   content: string;

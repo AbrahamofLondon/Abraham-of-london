@@ -1,3 +1,4 @@
+// scripts/generate-pdfs.ts
 import fs from "node:fs/promises";
 import path from "node:path";
 import React from "react";
@@ -13,16 +14,16 @@ async function main() {
   const outDir = path.join(process.cwd(), "public", "downloads");
   await ensureDir(outDir);
 
-  // IMPORTANT: coverImagePath must be a path React-PDF can read at build-time.
-  // Best is an absolute file path on disk (NOT a /public URL).
+  // ✅ MUST be a real file path on disk (build-time readable), not a /public URL
   const coverDiskPath = path.join(
     process.cwd(),
     "public",
     "assets",
     "images",
-    "/assets/images/purpose-cover.jpg"
+    "purpose-cover.jpg" // <-- FIX: no leading slash, no duplicated folders
   );
 
+  // This element is now correctly typed as ReactElement<DocumentProps>
   const element = React.createElement(UltimatePurposeOfManDocument, {
     coverImagePath: coverDiskPath,
   });
@@ -33,10 +34,12 @@ async function main() {
   const outPath = path.join(outDir, "ultimate-purpose-of-man-special.pdf");
   await fs.writeFile(outPath, buffer);
 
+  // eslint-disable-next-line no-console
   console.log(`✅ PDF generated: ${outPath}`);
 }
 
 main().catch((err) => {
+  // eslint-disable-next-line no-console
   console.error("❌ PDF generation failed:", err);
   process.exit(1);
 });

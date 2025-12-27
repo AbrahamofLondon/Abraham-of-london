@@ -1,5 +1,6 @@
 // pages/resources/strategic-frameworks/[slug].tsx
 import * as React from "react";
+import { useState, useEffect } from "react";
 import type { GetStaticProps, GetStaticPaths, NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -56,11 +57,11 @@ type PageProps = {
   isPreview?: boolean;
 };
 
-export default function FrameworkDetailPage({ framework, isPreview = false }: PageProps) {
+const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false }: PageProps) => {
   const router = useRouter();
 
   // Client-side gating: show prelude immediately, then reveal full dossier if cookie exists.
-  const [access, setAccess] = React.useState<AccessState>(() => {
+  const [access, setAccess] = useState<AccessState>(() => {
     // Initialize with server-side data if available, otherwise default
     if (typeof window === "undefined") {
       return {
@@ -74,7 +75,7 @@ export default function FrameworkDetailPage({ framework, isPreview = false }: Pa
     return getInnerCircleAccess();
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setAccess(getInnerCircleAccess());
   }, []);
 
@@ -484,7 +485,9 @@ export default function FrameworkDetailPage({ framework, isPreview = false }: Pa
       </main>
     </Layout>
   );
-}
+};
+
+export default FrameworkDetailPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = getAllFrameworkSlugs();

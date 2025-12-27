@@ -10,7 +10,7 @@ import {
   PostNavigation
 } from '@/types/post';
 
-// SOLUTION 3: Enhanced normalizeImage function with multiple outputs
+// Image normalization functions
 export function normalizeImage(image: ImageType): string | null {
   if (!image) return null;
   if (typeof image === 'string') return image;
@@ -28,43 +28,45 @@ export function normalizeImageToString(image: ImageType, fallback: string = ''):
   return result === null ? fallback : result;
 }
 
-// SOLUTION 2: Transform functions for different use cases
+// Post transformation functions
 export function transformPostToWithContent(post: Post): PostWithContent {
   return {
     ...post,
-    coverImage: normalizeImage(post.coverImage as any),     // string | null
-    ogImage: normalizeImage(post.ogImage as any),           // string | null
+    coverImage: normalizeImage(post.coverImage as any),
+    ogImage: normalizeImage(post.ogImage as any),
     content: post.content || '',
-        html: post.html || '',
-};
+    html: post.html || '',
+    compiledSource: post.compiledSource || '',
+  };
 }
 
 export function transformPostForClient(post: Post): PostForClient {
   return {
     ...post,
-    coverImage: normalizeImageToUndefined(post.coverImage as any),  // string | undefined
-    ogImage: normalizeImageToUndefined(post.ogImage as any),        // string | undefined
+    coverImage: normalizeImageToUndefined(post.coverImage as any),
+    ogImage: normalizeImageToUndefined(post.ogImage as any),
     content: post.content || '',
-        html: post.html || '',
-};
+    html: post.html || '',
+    compiledSource: post.compiledSource || '',
+  };
 }
 
 export function toPostSummary(postMeta: PostMeta | Post): PostSummary {
   return {
     slug: postMeta.slug,
     title: postMeta.title,
-        excerpt: postMeta.excerpt || '',
+    excerpt: postMeta.excerpt || '',
     date: postMeta.date,
-        category: postMeta.category || '',
-        readTime: postMeta.readTime || '',
+    category: postMeta.category || '',
+    readTime: postMeta.readTime || '',
     coverImage: normalizeImage(postMeta.coverImage as any),
     tags: postMeta.tags,
-        author: postMeta.author || '',
+    author: postMeta.author || '',
     featured: postMeta.featured || false
   };
 }
 
-// Fixed version of your problematic function
+// Collection transformation functions
 export function getAllPostsForClient(posts: Post[]): PostForClient[] {
   try {
     if (!Array.isArray(posts)) return [];
@@ -170,7 +172,10 @@ export function paginatePosts(
   
   return {
     posts: paginated.map(toPostSummary),
-    
+    total: posts.length,
+    page,
+    perPage,
+    totalPages: Math.ceil(posts.length / perPage),
   };
 }
 
@@ -214,11 +219,11 @@ export function createPostMeta(data: Partial<PostMeta>): PostMeta {
     title: data.title || '',
     date: data.date || new Date().toISOString().split('T')[0],
     subtitle: data.subtitle,
-        excerpt: data.excerpt || '',
+    excerpt: data.excerpt || '',
     description: data.description,
     lastModified: data.lastModified,
     published: data.published ?? true,
-        category: data.category || '',
+    category: data.category || '',
     tags: data.tags || [],
     series: data.series,
     seriesOrder: data.seriesOrder,
@@ -227,9 +232,9 @@ export function createPostMeta(data: Partial<PostMeta>): PostMeta {
     coverAspect: data.coverAspect,
     coverFit: data.coverFit,
     coverPosition: data.coverPosition,
-        author: data.author || '',
+    author: data.author || '',
     authors: data.authors,
-        readTime: data.readTime || '',
+    readTime: data.readTime || '',
     wordCount: data.wordCount,
     canonicalUrl: data.canonicalUrl,
     noindex: data.noindex,
@@ -239,27 +244,18 @@ export function createPostMeta(data: Partial<PostMeta>): PostMeta {
 
 // Namespace export
 export const PostUtils = {
-  // Image utilities
   normalizeImage,
   normalizeImageToUndefined,
   normalizeImageToString,
-  
-  // Transformation functions
   transformPostToWithContent,
   transformPostForClient,
   toPostSummary,
   getAllPostsForClient,
   getAllPostsWithContent,
-  
-  // Validation
   validatePostMeta,
-  
-  // Content utilities
   extractExcerpt,
   calculateReadingTime,
   getWordCount,
-  
-  // Sorting and filtering
   sortPostsByDate,
   filterByCategory,
   filterByTag,
@@ -271,10 +267,7 @@ export const PostUtils = {
   searchPosts,
   getFeaturedPosts,
   getRecentPosts,
-  
-  // Factory
   createPostMeta,
 };
 
 export default PostUtils;
-

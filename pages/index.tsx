@@ -1,4 +1,4 @@
-// pages/index.tsx — FULL ROBUST HOMEPAGE (LEGACY-FIRST + TYPE-SAFE + BUILD-SAFE)
+// pages/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
@@ -19,9 +19,9 @@ import {
   normalizeSlug,
 } from "@/lib/contentlayer-helper";
 
-/* =============================================================================
-   BOOKS IN DEVELOPMENT (STATIC)
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// BOOKS IN DEVELOPMENT
+// -----------------------------------------------------------------------------
 
 const BOOKS_IN_DEV = [
   {
@@ -42,24 +42,9 @@ const BOOKS_IN_DEV = [
   },
 ] as const;
 
-/* =============================================================================
-   CANON SPOTLIGHT (SINGLE SOURCE OF TRUTH)
-   NOTE: Use an image path that YOU KNOW exists. Do not invent new cover paths.
-   ============================================================================= */
-
-const CANON_SPOTLIGHT = {
-  title: "The Architecture of Human Purpose",
-  href: "/canon/the-architecture-of-human-purpose",
-  excerpt:
-    "The foundational volume: a framework for discerning and deploying purpose across a lifetime. How to build systems, structures, and legacies that outlast you.",
-  volumeNumber: 1,
-  // IMPORTANT: ensure this file exists in /public/assets/images/books/
-  image: "/assets/images/books/the-architecture-of-human-purpose.jpg",
-} as const;
-
-/* =============================================================================
-   TYPES
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
 
 type LooseShort = {
   title?: string;
@@ -78,52 +63,9 @@ type HomePageProps = {
   featuredShorts: LooseShort[];
 };
 
-/* =============================================================================
-   UTILS (LOCAL + BUILD-SAFE)
-   ============================================================================= */
-
-function safeString(v: unknown): string {
-  return typeof v === "string" ? v : "";
-}
-
-function isLooseShortPublished(s: LooseShort): boolean {
-  if (!s) return false;
-
-  // Hard blocks
-  if (s.draft === true) return false;
-  if (s.published === false) return false;
-
-  // Prefer explicit published
-  if (s.published === true) return true;
-
-  // Minimum viable publish signal
-  const hasTitle = safeString(s.title).trim().length > 0;
-  const hasSlug = safeString(s.slug).trim().length > 0;
-  const hasUrl = safeString(s.url).trim().length > 0;
-
-  // Require raw info too (prevents random objects leaking)
-  const hasRaw = Boolean(s._raw?.flattenedPath || s._raw?.sourceFileName);
-
-  // Accept if it has a title + (url or slug) + raw backing
-  return hasTitle && (hasUrl || hasSlug) && hasRaw;
-}
-
-function resolveDocHref(s: LooseShort): string {
-  // Prefer helper, but never trust it blindly.
-  const href = safeString(getDocHref(s as any)).trim();
-  if (href) return href;
-
-  // Fallback: if slug exists, assume /shorts/:slug for shorts pages.
-  // (Keeps build stable even if helper fails or shape changes.)
-  const slug = safeString(s.slug).trim();
-  if (slug) return `/shorts/${slug}`;
-
-  return "";
-}
-
-/* =============================================================================
-   SECTION DIVIDER
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// SECTION DIVIDER
+// -----------------------------------------------------------------------------
 
 const SectionDivider: React.FC = () => (
   <div className="relative h-16 overflow-hidden">
@@ -139,9 +81,9 @@ const SectionDivider: React.FC = () => (
   </div>
 );
 
-/* =============================================================================
-   SHORTS STRIP (BUILD-SAFE, HREF-GUARDED)
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// SHORTS STRIP
+// -----------------------------------------------------------------------------
 
 const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
   if (!shorts || shorts.length === 0) return null;
@@ -158,8 +100,9 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
               Quick hits for women and men who don&apos;t scroll all day
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
-              Concise field notes on work, livelihood, and building under pressure — designed
-              to be read between meetings, not instead of them.
+              Concise field notes on work, livelihood, and building under
+              pressure - designed to be read between meetings, not instead of
+              them.
             </p>
           </div>
 
@@ -173,23 +116,16 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
 
         <div className="grid gap-6 md:grid-cols-3">
           {shorts.map((short) => {
-            const href = resolveDocHref(short);
-            if (!href) return null;
-
-            const title = safeString(short.title).trim() || "Short";
-            const readTime = safeString(short.readTime).trim() || "Quick read";
-            const excerpt = (
-              safeString(short.excerpt) ||
-              safeString(short.description) ||
-              ""
-            ).trim();
+            const href = getDocHref(short);
+            const title = String(short.title || "Short").trim();
+            const readTime = String(short.readTime || "Quick read").trim();
+            const excerpt = String(short.excerpt || short.description || "").trim();
 
             const key =
               href ||
-              safeString(short.slug) ||
-              short._raw?.flattenedPath ||
+              short.slug ||
               short._raw?.sourceFileName ||
-              normalizeSlug(short as any) ||
+              normalizeSlug(short) ||
               title;
 
             return (
@@ -234,20 +170,20 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
           })}
         </div>
 
-        {/* Depth-first: Tools + Rooms are not “upsells” — they’re entry points */}
+        {/* ✅ These two components are now both used -> no ESLint unused warning */}
         <div className="mt-12 grid gap-4 md:grid-cols-2">
           <LinkItemWithIcon
             href="/inner-circle"
             icon={<Users className="h-5 w-5" />}
             title="Join Inner Circle"
-            description="Premium content, closed rooms, and long-horizon community."
+            description="Access premium content and exclusive community"
             iconColor="amber"
           />
           <LinkItemWithBadge
             href="/canon"
             title="Explore The Canon"
             badge="New"
-            description="First principles and long-term legitimacy — the spine."
+            description="Foundational principles and long-term thinking"
             badgeColor="amber"
             badgeVariant="filled"
           />
@@ -255,14 +191,14 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
             href="/books"
             icon={<BookOpen className="h-5 w-5" />}
             title="Browse Books"
-            description="Long-form work that outlives platform cycles."
+            description="Complete collection of published works"
             iconColor="blue"
           />
           <LinkItemWithBadge
             href="/downloads"
             title="Strategic Resources"
             badge="Premium"
-            description="Frameworks, tools, and assets you can actually deploy."
+            description="Tools, frameworks, and downloadable assets"
             badgeColor="green"
             badgeVariant="outline"
           />
@@ -272,9 +208,9 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
   );
 };
 
-/* =============================================================================
-   BOOKS IN DEVELOPMENT
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// BOOKS IN DEVELOPMENT
+// -----------------------------------------------------------------------------
 
 const BooksInDevelopment: React.FC = () => (
   <section className="bg-white py-16 dark:bg-slate-950">
@@ -288,8 +224,8 @@ const BooksInDevelopment: React.FC = () => (
             Long-form work that underwrites everything else
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
-            These sit behind the posts, shorts, and rooms — slow-cooked work that outlives
-            algorithms and platform cycles.
+            These sit behind the posts, shorts, and rooms - slow-cooked work that
+            outlives algorithms and platform cycles.
           </p>
         </div>
         <Link
@@ -347,9 +283,9 @@ const BooksInDevelopment: React.FC = () => (
   </section>
 );
 
-/* =============================================================================
-   STRATEGIC SESSIONS
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// STRATEGIC SESSIONS
+// -----------------------------------------------------------------------------
 
 const StrategicSessions: React.FC = () => (
   <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
@@ -363,8 +299,8 @@ const StrategicSessions: React.FC = () => (
             Where we do the work in the room
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
-            Not inspirational talks. Working sessions built for people carrying real
-            responsibility — for a boardroom, a founding team, or a household.
+            Not inspirational talks. Working sessions built for people carrying
+            real responsibility - for a boardroom, a founding team, or a household.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -392,8 +328,8 @@ const StrategicSessions: React.FC = () => (
             Strategy rooms for founders & boards
           </h3>
           <p className="mb-4 text-sm leading-relaxed text-gray-300">
-            Clarify mandate, markets, and operating rhythm so your decisions stop fighting
-            your design.
+            Clarify mandate, markets, and operating rhythm so your decisions stop
+            fighting your design.
           </p>
           <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
             Alomarada · InfraNova Africa · Governance diagnostics
@@ -408,8 +344,8 @@ const StrategicSessions: React.FC = () => (
             Fatherhood & household architecture
           </h3>
           <p className="mb-4 text-sm leading-relaxed text-gray-300">
-            Standards, rituals, and structures that let men show up for their sons without
-            outsourcing conviction to the culture.
+            Standards, rituals, and structures that let men show up for their sons
+            without outsourcing conviction to the culture.
           </p>
           <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
             Fathering Without Fear · Canon household tools
@@ -424,8 +360,8 @@ const StrategicSessions: React.FC = () => (
             Leadership salons & inner-circle work
           </h3>
           <p className="mb-4 text-sm leading-relaxed text-gray-300">
-            Small, closed rooms where we test ideas, frameworks, and Canon tools against real
-            lives and real P&amp;Ls.
+            Small, closed rooms where we test ideas, frameworks, and Canon tools
+            against real lives and real P&amp;Ls.
           </p>
           <p className="mt-auto text-xs font-medium uppercase tracking-[0.15em] text-gray-500">
             Chatham rooms · Inner Circle · Builders&apos; tables
@@ -436,9 +372,9 @@ const StrategicSessions: React.FC = () => (
   </section>
 );
 
-/* =============================================================================
-   PAGE COMPONENT
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// PAGE COMPONENT
+// -----------------------------------------------------------------------------
 
 const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
   const siteTitle = "Abraham of London";
@@ -458,7 +394,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
         publisher: { "@type": "Person", name: "Abraham of London" },
       }}
     >
-      {/* HERO — Canon spine + ventures narrative */}
+      {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
         <div className="absolute inset-0">
           <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
@@ -467,7 +403,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="grid items-center gap-12 lg:grid-cols-5 lg:gap-16">
-            {/* Left — Philosophy & CTAs */}
             <div className="max-w-xl lg:col-span-3 xl:col-span-2">
               <div className="mb-8">
                 <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-amber-400/50 bg-amber-500/10 px-4 py-2">
@@ -480,13 +415,15 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
                 <h1 className="mb-5 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
                   Abraham of London
                   <span className="mt-4 block text-xl font-normal text-amber-100 sm:text-2xl lg:text-3xl">
-                    Structural thinking for fathers, founders, and builders of legacy.
+                    Structural thinking for fathers, founders, and builders of
+                    legacy.
                   </span>
                 </h1>
 
                 <p className="mb-8 text-base leading-relaxed text-gray-300 sm:text-lg">
-                  For men who carry responsibility for a family, a company, or a community — this is
-                  where faith, history, and strategy are turned into operating systems, not slogans.
+                  For men who carry responsibility for a family, a company, or a
+                  community - this is where faith, history, and strategy are
+                  turned into operating systems, not slogans.
                 </p>
               </div>
 
@@ -498,7 +435,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
                   <span>Enter the Canon</span>
                   <span className="transition-transform group-hover:translate-x-1">→</span>
                 </Link>
-
                 <Link
                   href="/consulting"
                   className="group inline-flex items-center gap-2 rounded-xl border border-amber-400/60 bg-amber-400/5 px-7 py-3.5 text-sm font-semibold text-amber-100 transition-all hover:scale-105 hover:bg-amber-500/10"
@@ -513,7 +449,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
               </p>
             </div>
 
-            {/* Right — Hero Banner */}
             <div className="relative lg:col-span-2 xl:col-span-3">
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-sm">
                 <div className="relative aspect-video w-full">
@@ -529,8 +464,9 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
                 </div>
                 <div className="border-t border-white/10 bg-slate-900/90 px-5 py-4 backdrop-blur-sm">
                   <p className="text-sm font-medium leading-relaxed text-gray-200">
-                    The Canon is the philosophical spine. The ventures are the working arms. Together they exist
-                    to build men, families, and institutions that outlast headlines.
+                    The Canon is the philosophical spine. The ventures are the
+                    working arms. Together they exist to build men, families,
+                    and institutions that outlast headlines.
                   </p>
                 </div>
               </div>
@@ -539,7 +475,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
         </div>
       </section>
 
-      {/* STATS BAR */}
       <section className="border-y border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <StatsBar />
@@ -548,7 +483,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
       <SectionDivider />
 
-      {/* CANON SPOTLIGHT */}
       <section className="bg-white py-16 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -560,11 +494,11 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
                 The philosophical spine
               </h2>
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
-                The Canon is the long-term work: purpose, governance, civilisation, and destiny — written from a
-                father&apos;s vantage point, not an academic desk.
+                The Canon is the long-term work: purpose, governance,
+                civilisation, and destiny - written from a father&apos;s
+                vantage point, not an academic desk.
               </p>
             </div>
-
             <Link
               href="/canon"
               className="inline-flex items-center rounded-full border border-amber-500/60 bg-amber-500/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 transition-all hover:bg-amber-500/10 hover:border-amber-500 dark:text-amber-300"
@@ -573,17 +507,12 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
             </Link>
           </div>
 
-          {/* Depth cue (not sales): principle → entry point */}
-          <p className="mx-auto mb-6 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-gray-400">
-            Start with first principles. Then choose an entry point where consequence forces clarity.
-          </p>
-
           <CanonPrimaryCard
-            title={CANON_SPOTLIGHT.title}
-            href={CANON_SPOTLIGHT.href}
-            excerpt={CANON_SPOTLIGHT.excerpt}
-            volumeNumber={CANON_SPOTLIGHT.volumeNumber}
-            image={CANON_SPOTLIGHT.image}
+            title="The Architecture of Human Purpose"
+            href="/canon/the-architecture-of-human-purpose"
+            excerpt="The foundational volume: a framework for discerning and deploying purpose across a lifetime. How to build systems, structures, and legacies that outlast you."
+            volumeNumber={1}
+            image="/assets/images/canon/architecture-of-human-purpose-cover.jpg"
             className="mx-auto max-w-2xl"
           />
         </div>
@@ -591,12 +520,10 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
       <SectionDivider />
 
-      {/* STRATEGIC FUNNEL STRIP */}
       <StrategicFunnelStrip />
 
       <SectionDivider />
 
-      {/* SHORTS STRIP */}
       {featuredShorts.length > 0 ? (
         <>
           <ShortsStrip shorts={featuredShorts} />
@@ -604,19 +531,16 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
         </>
       ) : null}
 
-      {/* VENTURES */}
       <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16">
         <VenturesSection />
       </section>
 
       <SectionDivider />
 
-      {/* BOOKS */}
       <BooksInDevelopment />
 
       <SectionDivider />
 
-      {/* SESSIONS */}
       <StrategicSessions />
     </Layout>
   );
@@ -624,25 +548,28 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
 export default HomePage;
 
-/* =============================================================================
-   BUILD-TIME DATA (ROBUST + TYPED)
-   ============================================================================= */
+// -----------------------------------------------------------------------------
+// BUILD-TIME DATA
+// -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  const isLooseShortPublished = (s: LooseShort): boolean => {
+    if (s.published === true) return true;
+    if (s.published === false) return false;
+    if (s.draft === true) return false;
+    if (s.title && (s.slug || s._raw?.flattenedPath || s._raw?.sourceFileName)) return true;
+    return false;
+  };
+
   const getFeaturedShortsSafely = (): LooseShort[] => {
     try {
       const recent = getRecentShorts(3) as unknown as LooseShort[];
       const cleanedRecent = Array.isArray(recent) ? recent : [];
-
-      // Filter BEFORE returning (prevents drafts leaking into fallback)
-      const recentPublished = cleanedRecent.filter(isLooseShortPublished);
-      if (recentPublished.length > 0) return recentPublished.slice(0, 3);
+      if (cleanedRecent.length > 0) return cleanedRecent;
 
       const all = getPublishedShorts() as unknown as LooseShort[];
       const cleanedAll = Array.isArray(all) ? all : [];
-      const allPublished = cleanedAll.filter(isLooseShortPublished);
-
-      return allPublished.slice(0, 3);
+      return cleanedAll.slice(0, 3);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[home] Error loading shorts:", err);
@@ -650,10 +577,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     }
   };
 
-  const featuredShorts = getFeaturedShortsSafely();
+  const featuredShorts = getFeaturedShortsSafely().filter(isLooseShortPublished);
 
   return {
     props: { featuredShorts },
-    revalidate: 3600, // hourly refresh
+    revalidate: 3600,
   };
 };
