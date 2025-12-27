@@ -18,3 +18,6 @@ prisma/dev.db
 **/.reports/**
 **/*.report.*
 **/reports/**
+
+Update in pages/
+Update in pages/**

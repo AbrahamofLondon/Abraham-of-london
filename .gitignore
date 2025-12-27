@@ -375,4 +375,7 @@ pages/api/analytics/
 
 # generated reports / artifacts
 .reports/
-reports/
+reports/  
+
+Update in pages/
+Update in pages/**
