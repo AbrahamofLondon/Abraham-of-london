@@ -1,12 +1,13 @@
 // pages/shorts/[slug].tsx
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Share2, Twitter, Linkedin, Mail, Link2, Check } from "lucide-react";
 import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
@@ -116,7 +117,7 @@ const ShareButton: React.FC<{
   </button>
 );
 
-const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
+export default function ShortPage({ short, source }: ShortPageProps): JSX.Element {
   const [copied, setCopied] = React.useState(false);
 
   const shareUrl = `${SITE_URL}/shorts/${short.slug}`;
@@ -249,9 +250,18 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <ShareButton icon={<Share2 className="h-4 w-4" />} label="Share" onClick={handleNativeShare} className="sm:hidden" />
+            <ShareButton
+              icon={<Share2 className="h-4 w-4" />}
+              label="Share"
+              onClick={handleNativeShare}
+              className="sm:hidden"
+            />
             <ShareButton icon={<Twitter className="h-4 w-4" />} label="Twitter" onClick={() => handleShare("twitter")} />
-            <ShareButton icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" onClick={() => handleShare("linkedin")} />
+            <ShareButton
+              icon={<Linkedin className="h-4 w-4" />}
+              label="LinkedIn"
+              onClick={() => handleShare("linkedin")}
+            />
             <ShareButton icon={<Mail className="h-4 w-4" />} label="Email" onClick={() => handleShare("email")} />
             <ShareButton
               icon={copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
@@ -286,6 +296,4 @@ const ShortPage: NextPage<ShortPageProps> = ({ short, source }) => {
       </main>
     </Layout>
   );
-};
-
-export default ShortPage;
+}

@@ -21,18 +21,55 @@ function getCookieValueFromHeader(cookieHeader: string | undefined, name: string
 }
 
 /**
- * Client call: hasInnerCircleAccess()
- * Server call: hasInnerCircleAccess(req.headers.cookie)
+ * Type representing the access state of a user
  */
-export function hasInnerCircleAccess(cookieHeader?: string): boolean {
+export type AccessState = {
+  /** Whether the user has access to inner circle content */
+  hasAccess: boolean;
+  /** Compatible with older code expecting 'ok' property */
+  ok: boolean;
+  /** Reason for access status (for debugging/UI) */
+  reason: "granted" | "missing" | "expired" | "invalid";
+  /** The access token value if present */
+  token?: string | null;
+  /** Timestamp when access was last checked */
+  checkedAt: Date;
+  /** Optional: Expiry timestamp if the token has an expiration */
+  expiresAt?: Date;
+  /** Optional: User's tier/level within the inner circle */
+  tier?: "member" | "patron" | "founder";
+};
+
+/**
+ * Client call: getInnerCircleAccess()
+ * Server call: getInnerCircleAccess(req.headers.cookie)
+ * Returns: AccessState object with detailed access information
+ */
+export function getInnerCircleAccess(cookieHeader?: string): AccessState {
   const val =
     typeof cookieHeader === "string"
       ? getCookieValueFromHeader(cookieHeader, COOKIE_NAME)
       : getCookieValueFromDocument(COOKIE_NAME);
 
-  // Treat any non-empty value as access; your system can later validate signatures.
-  return Boolean(val && val.length > 10);
+  const hasAccess = Boolean(val && val.length > 10);
+  const now = new Date();
+
+  return {
+    hasAccess,
+    ok: hasAccess, // Alias for backward compatibility
+    reason: hasAccess ? "granted" : "missing",
+    token: hasAccess ? val : null,
+    checkedAt: now,
+    // Optional future enhancements:
+    // expiresAt: val ? parseExpiration(val) : undefined,
+    // tier: val ? decodeTier(val) : undefined,
+  };
 }
 
-// Alias for backward compatibility with existing imports
-export const getInnerCircleAccess = hasInnerCircleAccess;
+/**
+ * Legacy function for backward compatibility
+ * Returns: boolean indicating if user has access
+ */
+export function hasInnerCircleAccess(cookieHeader?: string): boolean {
+  return getInnerCircleAccess(cookieHeader).hasAccess;
+}

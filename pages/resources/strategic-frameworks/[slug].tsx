@@ -1,32 +1,27 @@
 // pages/resources/strategic-frameworks/[slug].tsx
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Head from "next/head";
+import type { GetStaticProps, GetStaticPaths, NextPage } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  AlertTriangle,
-  ArrowLeft,
   ArrowRight,
-  CheckCircle2,
-  ChevronRight,
-  Download,
-  FileText,
+  BookOpen,
+  Lock,
   Shield,
-  Target,
-  Layers,
-  Workflow,
-  Gauge,
-  Scale,
+  TrendingUp,
+  Users,
+  Zap,
+  CheckCircle,
+  AlertTriangle,
+  Calendar,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import {
-  FRAMEWORKS,
-  LIBRARY_HREF,
-  getAllFrameworkSlugs,
   getFrameworkBySlug,
+  getAllFrameworkSlugs,
   type Framework,
   type FrameworkTier,
 } from "@/lib/resources/strategic-frameworks";
@@ -34,612 +29,483 @@ import { getInnerCircleAccess, type AccessState } from "@/lib/inner-circle/acces
 
 const easeSettle: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: easeSettle } },
+const tierIcon: Record<FrameworkTier, React.ReactNode> = {
+  Board: <Shield className="h-4 w-4" />,
+  Founder: <Zap className="h-4 w-4" />,
+  Household: <Users className="h-4 w-4" />,
 };
 
-const stagger = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.06 } },
+const accentColor: Record<Framework["accent"], string> = {
+  gold: "text-amber-400",
+  emerald: "text-emerald-400",
+  blue: "text-blue-400",
+  rose: "text-rose-400",
+  indigo: "text-indigo-400",
 };
 
-function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
-
-const ACCENTS = {
-  gold: {
-    ring: "ring-amber-400/25",
-    border: "border-amber-400/20 hover:border-amber-400/35",
-    chip: "border-amber-400/25 bg-amber-400/10 text-amber-200",
-    glow: "from-amber-500/18 via-amber-500/6 to-transparent",
-    link: "text-amber-200 hover:text-amber-100",
-    icon: "text-amber-200",
-  },
-  emerald: {
-    ring: "ring-emerald-400/20",
-    border: "border-emerald-400/20 hover:border-emerald-400/35",
-    chip: "border-emerald-400/25 bg-emerald-400/10 text-emerald-200",
-    glow: "from-emerald-500/16 via-emerald-500/6 to-transparent",
-    link: "text-emerald-200 hover:text-emerald-100",
-    icon: "text-emerald-200",
-  },
-  blue: {
-    ring: "ring-sky-400/20",
-    border: "border-sky-400/20 hover:border-sky-400/35",
-    chip: "border-sky-400/25 bg-sky-400/10 text-sky-200",
-    glow: "from-sky-500/16 via-sky-500/6 to-transparent",
-    link: "text-sky-200 hover:text-sky-100",
-    icon: "text-sky-200",
-  },
-  rose: {
-    ring: "ring-rose-400/20",
-    border: "border-rose-400/20 hover:border-rose-400/35",
-    chip: "border-rose-400/25 bg-rose-400/10 text-rose-200",
-    glow: "from-rose-500/16 via-rose-500/6 to-transparent",
-    link: "text-rose-200 hover:text-rose-100",
-    icon: "text-rose-200",
-  },
-  indigo: {
-    ring: "ring-indigo-400/20",
-    border: "border-indigo-400/20 hover:border-indigo-400/35",
-    chip: "border-indigo-400/25 bg-indigo-400/10 text-indigo-200",
-    glow: "from-indigo-500/16 via-indigo-500/6 to-transparent",
-    link: "text-indigo-200 hover:text-indigo-100",
-    icon: "text-indigo-200",
-  },
-} as const;
-
-function TierBadge({ tier }: { tier: FrameworkTier }) {
-  const map: Record<FrameworkTier, { label: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }> = {
-    Board: { label: "Board-grade", Icon: Scale },
-    Founder: { label: "Founder execution", Icon: Gauge },
-    Household: { label: "Household formation", Icon: Layers },
-  };
-  const t = map[tier];
-  const Icon = t.Icon;
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/7 px-2.5 py-1 text-[11px] font-semibold text-white/80">
-      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-      {t.label}
-    </span>
-  );
-}
-
-function Card({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  children: React.ReactNode;
-}) {
-  const Icon = icon;
-  return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-      <div className="mb-3 flex items-center gap-2">
-        <span className="grid h-9 w-9 place-items-center rounded-2xl bg-white/7 ring-1 ring-white/10">
-          <Icon className="h-4 w-4 text-amber-200" aria-hidden="true" />
-        </span>
-        <p className="text-sm font-semibold text-white">{title}</p>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-type Props = {
-  framework: Framework | null;
-  allSlugs: string[];
+const accentBg: Record<Framework["accent"], string> = {
+  gold: "bg-amber-500/10 border-amber-500/30",
+  emerald: "bg-emerald-500/10 border-emerald-500/30",
+  blue: "bg-blue-500/10 border-blue-500/30",
+  rose: "bg-rose-500/10 border-rose-500/30",
+  indigo: "bg-indigo-500/10 border-indigo-500/30",
 };
 
-const FrameworkDossierPage: NextPage<Props> = ({ framework, allSlugs }) => {
+type PageProps = {
+  framework: Framework;
+  isPreview?: boolean;
+};
+
+export default function FrameworkDetailPage({ framework, isPreview = false }: PageProps) {
   const router = useRouter();
-  const reduceMotion = useReducedMotion();
 
   // Client-side gating: show prelude immediately, then reveal full dossier if cookie exists.
-  const [access, setAccess] = React.useState<AccessState>({ ok: false, reason: "missing" });
+  const [access, setAccess] = React.useState<AccessState>(() => {
+    // Initialize with server-side data if available, otherwise default
+    if (typeof window === "undefined") {
+      return {
+        hasAccess: false,
+        ok: false,
+        reason: "missing",
+        token: null,
+        checkedAt: new Date(),
+      };
+    }
+    return getInnerCircleAccess();
+  });
 
   React.useEffect(() => {
     setAccess(getInnerCircleAccess());
   }, []);
 
-  if (router.isFallback) {
-    return (
-      <Layout title="Loading dossier">
-        <div className="min-h-screen bg-black text-white">
-          <div className="mx-auto max-w-4xl px-6 py-20">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">Loading dossier…</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  const canViewFull = access.hasAccess || isPreview;
 
-  if (!framework) {
-    return (
-      <Layout title="Dossier not found">
-        <Head>
-          <meta name="robots" content="noindex" />
-        </Head>
-        <div className="min-h-screen bg-black text-white">
-          <div className="mx-auto max-w-4xl px-6 py-20">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-8">
-              <p className="font-serif text-2xl font-semibold">Dossier not found</p>
-              <p className="mt-3 text-sm text-white/70">This dossier does not exist (or it has not been published yet).</p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href={LIBRARY_HREF}
-                  className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-5 py-3 text-sm font-semibold text-black transition hover:bg-amber-200"
-                >
-                  Back to library <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                </Link>
-                <Link
-                  href="/inner-circle"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/22 hover:bg-white/10"
-                >
-                  Inner Circle <Shield className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  const A = ACCENTS[framework.accent];
-
-  const idx = allSlugs.indexOf(framework.slug);
-  const prevSlug = idx > 0 ? allSlugs[idx - 1] : null;
-  const nextSlug = idx >= 0 && idx < allSlugs.length - 1 ? allSlugs[idx + 1] : null;
-
-  const canonical = `https://www.abrahamoflondon.org${LIBRARY_HREF}/${framework.slug}`;
-  const isUnlocked = access.ok;
-
-  // Use reduceMotion so it cannot be flagged unused
-  const motionProps = reduceMotion ? { initial: false } : { initial: "hidden" as const };
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    headline: `${framework.title} — Strategic Dossier`,
-    description: framework.oneLiner,
-    author: { "@type": "Person", name: "Abraham of London" },
-    mainEntityOfPage: canonical,
+  // Handle navigation to locked sections
+  const scrollToLocked = (id: string) => {
+    const element = document.getElementById(id);
+    if (element && canViewFull) {
+      element.scrollIntoView({ behavior: "smooth" });
+    } else if (!canViewFull) {
+      // Show lock modal or redirect to access page
+      router.push("/inner-circle?returnTo=" + encodeURIComponent(router.asPath));
+    }
   };
 
+  if (router.isFallback) {
+    return (
+      <Layout title="Loading framework...">
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-lg text-gray-400">Loading strategic framework...</div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout title={`${framework.title} Dossier`}>
-      <Head>
-        <title>{framework.title} — Dossier | Abraham of London</title>
-        <meta name="description" content={framework.oneLiner} />
-        <link rel="canonical" href={canonical} />
-        <meta property="og:title" content={`${framework.title} — Dossier`} />
-        <meta property="og:description" content={framework.oneLiner} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonical} />
-        <meta name="theme-color" content="#0b0b10" />
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
-
-      <div className="min-h-screen bg-black text-white">
-        {/* HERO */}
-        <section className="relative isolate overflow-hidden border-b border-white/8">
-          <div className="absolute inset-0" aria-hidden="true">
-            <div className="absolute inset-0 bg-[#06060b]" />
-            <div className={cx("absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.12),transparent_55%)]")} />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(59,130,246,0.09),transparent_55%)]" />
-            <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-black/75 via-black/30 to-transparent" />
+    <Layout
+      title={`${framework.title} | Strategic Framework`}
+      description={framework.oneLiner}
+    >
+      <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        {/* Hero Header */}
+        <section className="relative overflow-hidden border-b border-white/10">
+          <div className="absolute inset-0">
+            <div className="absolute -top-40 right-0 h-80 w-80 rounded-full bg-gradient-to-r from-amber-500/10 to-transparent blur-3xl" />
+            <div className="absolute -bottom-40 left-0 h-80 w-80 rounded-full bg-gradient-to-r from-blue-500/10 to-transparent blur-3xl" />
           </div>
 
-          <div className="relative mx-auto max-w-6xl px-6 py-18 sm:py-22">
-            <motion.div variants={stagger} {...motionProps} animate="visible">
-              <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-between gap-3">
-                <Link
-                  href={LIBRARY_HREF}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/22 hover:bg-white/10"
-                >
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  Back to library
-                </Link>
+          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            <div className="mb-8">
+              <Link
+                href="/resources/strategic-frameworks"
+                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
+              >
+                ← Back to all frameworks
+              </Link>
+            </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {framework.tier.map((t) => (
-                    <TierBadge key={`${framework.slug}-${t}`} tier={t} />
-                  ))}
-
-                  <span className={cx("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em]", A.chip)}>
-                    <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                    {isUnlocked ? "Full dossier" : "Prelude"}
-                  </span>
-                </div>
-              </motion.div>
-
-              <motion.h1 variants={fadeUp} className="mt-8 font-serif text-5xl font-bold leading-[1.05] text-white sm:text-6xl">
-                {framework.title}
-              </motion.h1>
-
-              <motion.p variants={fadeUp} className="mt-5 max-w-3xl text-lg text-white/80 sm:text-xl">
-                {framework.oneLiner}
-              </motion.p>
-
-              <motion.div variants={fadeUp} className="mt-8 flex flex-wrap gap-3">
-                {framework.artifactHref ? (
-                  <a
-                    href={framework.artifactHref}
-                    className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-semibold text-black transition hover:bg-amber-200"
+            <div className="grid gap-8 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <div className="mb-6 flex flex-wrap items-center gap-3">
+                  <span
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${accentBg[framework.accent]} ${accentColor[framework.accent]}`}
                   >
-                    <Download className="h-4 w-4" aria-hidden="true" />
-                    Download artifact
-                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                ) : null}
-
-                <Link
-                  href="/consulting"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/22 hover:bg-white/10"
-                >
-                  Apply this in a Strategy Room <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-
-                <Link
-                  href="/inner-circle"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/22 hover:bg-white/10"
-                >
-                  Inner Circle <Shield className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* BODY */}
-        <section className="relative bg-[#070710] py-16">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid gap-8 lg:grid-cols-12">
-              {/* MAIN */}
-              <div className="space-y-8 lg:col-span-8">
-                {/* Prelude (always visible) */}
-                <Card title="Executive summary" icon={FileText}>
-                  <ul className="mt-2 space-y-2 text-sm leading-relaxed text-white/75">
-                    {framework.executiveSummary.map((x) => (
-                      <li key={x} className="flex gap-2">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-200" aria-hidden="true" />
-                        <span>{x}</span>
-                      </li>
+                    {framework.tag}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {framework.tier.map((t) => (
+                      <span
+                        key={t}
+                        className="flex items-center gap-1 rounded-full bg-white/5 px-3 py-1 text-xs text-gray-300"
+                      >
+                        {tierIcon[t]}
+                        {t}
+                      </span>
                     ))}
-                  </ul>
-                </Card>
-
-                <Card title="Use when" icon={Target}>
-                  <ul className="mt-2 space-y-2 text-sm leading-relaxed text-white/75">
-                    {framework.useWhen.map((x) => (
-                      <li key={x} className="flex gap-2">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white/55" />
-                        <span>{x}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                  <Card title="Inputs" icon={Layers}>
-                    <ul className="mt-2 space-y-2 text-sm leading-relaxed text-white/75">
-                      {framework.inputs.map((x) => (
-                        <li key={x} className="flex gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white/55" />
-                          <span>{x}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-
-                  <Card title="Outputs" icon={CheckCircle2}>
-                    <ul className="mt-2 space-y-2 text-sm leading-relaxed text-white/75">
-                      {framework.outputs.map((x) => (
-                        <li key={x} className="flex gap-2">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-200" aria-hidden="true" />
-                          <span>{x}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
+                  </div>
                 </div>
 
-                {/* Gating panel */}
-                {!isUnlocked ? (
-                  <div className="rounded-3xl border border-amber-400/20 bg-amber-400/8 p-6">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
-                          Prelude complete
-                        </p>
-                        <p className="mt-2 text-sm leading-relaxed text-white/80">
-                          The full dossier includes operating logic, playbook, metrics, board questions, failure modes, and next actions.
-                          This is designed for Inner Circle access: higher signal, usable artifacts, and accountability.
-                        </p>
-                      </div>
+                <h1 className="mb-4 font-serif text-4xl font-bold text-white sm:text-5xl">
+                  {framework.title}
+                </h1>
+                <p className="mb-8 text-xl text-gray-300">{framework.oneLiner}</p>
 
-                      <div className="flex flex-col gap-2">
-                        <Link
-                          href="/inner-circle"
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-semibold text-black transition hover:bg-amber-200"
-                        >
-                          Unlock via Inner Circle <Shield className="h-4 w-4" aria-hidden="true" />
-                        </Link>
-                        <Link
-                          href="/inner-circle/resend"
-                          className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/7 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/22 hover:bg-white/10"
-                        >
-                          Resend access email <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                        </Link>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">What you unlock</p>
-                      <div className="mt-3 grid gap-3 md:grid-cols-2">
-                        {[
-                          "Operating logic (why it works)",
-                          "Application playbook (step-by-step)",
-                          "Metrics + review cadence",
-                          "Board questions + failure modes",
-                        ].map((x) => (
-                          <div key={x} className="flex items-center gap-2 text-sm text-white/80">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-200" aria-hidden="true" />
-                            <span>{x}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Full dossier (gated) */}
-                {isUnlocked ? (
-                  <>
-                    <Card title="Operating logic" icon={Workflow}>
-                      <div className="mt-2 space-y-4">
-                        {framework.operatingLogic.map((s) => (
-                          <div key={s.title} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                            <p className="font-semibold text-white">{s.title}</p>
-                            <p className="mt-2 text-sm leading-relaxed text-white/75">{s.body}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-
-                    <Card title="Application playbook" icon={Gauge}>
-                      <div className="mt-2 space-y-4">
-                        {framework.applicationPlaybook.map((s) => (
-                          <div key={s.step} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                            <p className="text-sm font-semibold text-white">{s.step}</p>
-                            <p className="mt-2 text-sm leading-relaxed text-white/75">{s.detail}</p>
-                            <p className="mt-3 text-xs font-black uppercase tracking-[0.22em] text-white/55">Deliverable</p>
-                            <p className="mt-1 text-sm text-white/78">{s.deliverable}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-
-                    <Card title="Failure modes" icon={AlertTriangle}>
-                      <ul className="mt-2 space-y-2 text-sm leading-relaxed text-white/75">
-                        {framework.failureModes.map((x) => (
-                          <li key={x} className="flex gap-2">
-                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-200" aria-hidden="true" />
-                            <span>{x}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </Card>
-                  </>
-                ) : null}
+                <div className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+                  <h3 className="mb-4 text-lg font-semibold text-white">
+                    Canon foundation
+                  </h3>
+                  <p className="text-gray-300">{framework.canonRoot}</p>
+                </div>
               </div>
 
-              {/* SIDEBAR */}
-              <aside className="space-y-6 lg:col-span-4">
-                <div className="rounded-3xl border border-amber-400/20 bg-amber-400/8 p-6">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Canon root</p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/78">{framework.canonRoot}</p>
-                  <div className="mt-5">
-                    <Link
-                      href="/canon"
-                      className={cx("inline-flex items-center gap-2 text-sm font-semibold", A.link)}
-                    >
-                      Enter the Canon <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                    </Link>
-                  </div>
+              <div className="space-y-6">
+                <div className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+                  <h3 className="mb-4 text-lg font-semibold text-white">
+                    At a glance
+                  </h3>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-400" />
+                      <span className="text-sm text-gray-300">
+                        Tier: {framework.tier.join(", ")}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <TrendingUp className="h-5 w-5 flex-shrink-0 text-blue-400" />
+                      <span className="text-sm text-gray-300">
+                        {framework.executiveSummary.length} core principles
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Calendar className="h-5 w-5 flex-shrink-0 text-amber-400" />
+                      <span className="text-sm text-gray-300">
+                        {framework.applicationPlaybook.length}-step playbook
+                      </span>
+                    </li>
+                  </ul>
                 </div>
 
-                {isUnlocked ? (
-                  <>
-                    <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">Metrics</p>
-                      <div className="mt-3 space-y-3">
-                        {framework.metrics.map((m) => (
-                          <div key={m.metric} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                            <p className="font-semibold text-white">{m.metric}</p>
-                            <p className="mt-2 text-sm text-white/75">{m.whyItMatters}</p>
-                            <p className="mt-3 text-xs font-black uppercase tracking-[0.22em] text-white/55">
-                              Review cadence
-                            </p>
-                            <p className="mt-1 text-sm text-white/78">{m.reviewCadence}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">Board questions</p>
-                      <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/75">
-                        {framework.boardQuestions.map((q) => (
-                          <li key={q} className="flex gap-2">
-                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white/55" />
-                            <span>{q}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">What to do next</p>
-                      <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/75">
-                        {framework.whatToDoNext.map((x) => (
-                          <li key={x} className="flex gap-2">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-200" aria-hidden="true" />
-                            <span>{x}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className="mt-5 flex flex-wrap gap-3">
-                        {framework.artifactHref ? (
-                          <a
-                            href={framework.artifactHref}
-                            className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-200"
-                          >
-                            <Download className="h-4 w-4" aria-hidden="true" />
-                            Artifact
-                          </a>
-                        ) : null}
-
-                        <Link
-                          href="/consulting"
-                          className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22 hover:bg-white/10"
-                        >
-                          Strategy Room <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                        </Link>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">
-                      Full dossier access
-                    </p>
-                    <p className="mt-3 text-sm leading-relaxed text-white/70">
-                      You are viewing the prelude. Unlock the full dossier via Inner Circle (cookie-based access).
-                    </p>
-                    <div className="mt-5 flex flex-col gap-2">
-                      <Link
-                        href="/inner-circle"
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-semibold text-black transition hover:bg-amber-200"
-                      >
-                        Unlock <Shield className="h-4 w-4" aria-hidden="true" />
-                      </Link>
-                      <Link
-                        href="/inner-circle/resend"
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/7 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/22 hover:bg-white/10"
-                      >
-                        Resend access email <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                      </Link>
-                    </div>
+                {framework.artifactHref && (
+                  <div className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+                    <h3 className="mb-4 text-lg font-semibold text-white">
+                      Download artifact
+                    </h3>
+                    <a
+                      href={framework.artifactHref}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
+                      download
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Download template
+                    </a>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </section>
 
-                {/* Prev / Next */}
-                <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/60">Navigate</p>
-                  <div className="mt-3 grid gap-2">
-                    {prevSlug ? (
-                      <Link
-                        href={`${LIBRARY_HREF}/${prevSlug}`}
-                        className="inline-flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-white/85 transition hover:border-white/20"
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                          Previous dossier
-                        </span>
-                        <ChevronRight className="h-4 w-4 rotate-180 opacity-70" aria-hidden="true" />
-                      </Link>
-                    ) : null}
+        {/* Prelude Section (Always Visible) */}
+        <section className="py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12">
+              <h2 className="mb-4 font-serif text-3xl font-semibold text-white">
+                Executive prelude
+              </h2>
+              <p className="text-gray-400">
+                Public overview—full dossier available to Inner Circle members.
+              </p>
+            </div>
 
-                    {nextSlug ? (
-                      <Link
-                        href={`${LIBRARY_HREF}/${nextSlug}`}
-                        className="inline-flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-white/85 transition hover:border-white/20"
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          Next dossier <ChevronRight className="h-4 w-4 opacity-70" aria-hidden="true" />
-                        </span>
-                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                      </Link>
-                    ) : null}
-
-                    <Link
-                      href={LIBRARY_HREF}
-                      className="inline-flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-white/85 transition hover:border-white/20"
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div>
+                <h3 className="mb-4 text-xl font-semibold text-white">
+                  Executive summary
+                </h3>
+                <ul className="space-y-3">
+                  {framework.executiveSummary.map((item, idx) => (
+                    <motion.li
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="flex items-start gap-3"
                     >
-                      <span className="inline-flex items-center gap-2">
-                        <Shield className="h-4 w-4" aria-hidden="true" />
-                        Back to library
-                      </span>
-                      <ChevronRight className="h-4 w-4 opacity-70" aria-hidden="true" />
-                    </Link>
+                      <div className="mt-1 h-2 w-2 rounded-full bg-amber-500" />
+                      <span className="text-gray-300">{item}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="mb-4 text-xl font-semibold text-white">
+                  Use when
+                </h3>
+                <ul className="space-y-3">
+                  {framework.useWhen.map((item, idx) => (
+                    <motion.li
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="flex items-start gap-3"
+                    >
+                      <AlertTriangle className="h-5 w-5 flex-shrink-0 text-amber-500" />
+                      <span className="text-gray-300">{item}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-12 grid gap-8 lg:grid-cols-2">
+              <div>
+                <h3 className="mb-4 text-xl font-semibold text-white">Inputs</h3>
+                <ul className="space-y-2">
+                  {framework.inputs.map((item, idx) => (
+                    <li key={idx} className="text-gray-300">
+                      • {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="mb-4 text-xl font-semibold text-white">Outputs</h3>
+                <ul className="space-y-2">
+                  {framework.outputs.map((item, idx) => (
+                    <li key={idx} className="text-gray-300">
+                      • {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Full Dossier Section (Gated) */}
+        <section id="full-dossier" className="border-t border-white/10 py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 flex items-center justify-between">
+              <div>
+                <h2 className="mb-2 font-serif text-3xl font-semibold text-white">
+                  Full dossier
+                </h2>
+                <p className="text-gray-400">
+                  Inner Circle content—operating logic, playbook, metrics, board questions.
+                </p>
+              </div>
+
+              {!canViewFull && (
+                <button
+                  onClick={() => scrollToLocked("full-dossier")}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
+                >
+                  <Lock className="h-4 w-4" />
+                  Unlock Inner Circle
+                </button>
+              )}
+            </div>
+
+            {canViewFull ? (
+              <div className="space-y-16">
+                {/* Operating Logic */}
+                <div>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">
+                    Operating logic
+                  </h3>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {framework.operatingLogic.map((logic, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
+                      >
+                        <h4 className="mb-3 text-lg font-semibold text-white">
+                          {logic.title}
+                        </h4>
+                        <p className="text-gray-300">{logic.body}</p>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
-              </aside>
-            </div>
-          </div>
-        </section>
 
-        {/* FINAL STRIP */}
-        <section className="border-t border-white/10 bg-gradient-to-r from-amber-300 to-amber-500 py-14 text-center">
-          <div className="mx-auto max-w-4xl px-6">
-            <h2 className="font-serif text-3xl font-bold text-black sm:text-4xl">
-              Build, don&apos;t drift.
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base text-black/85 sm:text-lg">
-              For boards: mandate + governance artifacts. For founders: execution cadence. For households: formation and order.
-              Bring this into a Strategy Room if you want it applied to real decisions with clean deliverables.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <Link
-                href="/consulting"
-                className="inline-flex items-center gap-2 rounded-full bg-black px-8 py-4 font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
-              >
-                Request a Strategy Room <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-              <Link
-                href="/inner-circle"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-transparent px-8 py-4 font-semibold text-black transition hover:bg-black hover:text-white"
-              >
-                Unlock full dossiers <Shield className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </div>
+                {/* Application Playbook */}
+                <div>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">
+                    Application playbook
+                  </h3>
+                  <div className="space-y-6">
+                    {framework.applicationPlaybook.map((step, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
+                      >
+                        <div className="mb-3 flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
+                            {idx + 1}
+                          </div>
+                          <h4 className="text-lg font-semibold text-white">
+                            {step.step}
+                          </h4>
+                        </div>
+                        <p className="mb-4 text-gray-300">{step.detail}</p>
+                        <div className="rounded-lg bg-white/5 p-4">
+                          <p className="text-sm font-semibold text-amber-400">
+                            Deliverable
+                          </p>
+                          <p className="mt-1 text-gray-300">{step.deliverable}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Metrics */}
+                <div>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">
+                    Metrics & review
+                  </h3>
+                  <div className="overflow-hidden rounded-xl border border-white/10">
+                    <table className="w-full">
+                      <thead className="border-b border-white/10 bg-black/40">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                            Metric
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                            Why it matters
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                            Review cadence
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {framework.metrics.map((metric, idx) => (
+                          <tr
+                            key={idx}
+                            className="border-b border-white/5 hover:bg-white/5"
+                          >
+                            <td className="px-6 py-4 text-sm text-gray-300">
+                              {metric.metric}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-300">
+                              {metric.whyItMatters}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-300">
+                              {metric.reviewCadence}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Board Questions */}
+                <div>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">
+                    Board questions
+                  </h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {framework.boardQuestions.map((question, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
+                      >
+                        <p className="text-gray-300">{question}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Failure Modes */}
+                <div>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">
+                    Failure modes
+                  </h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {framework.failureModes.map((mode, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
+                      >
+                        <AlertTriangle className="h-5 w-5 flex-shrink-0 text-rose-500" />
+                        <p className="text-gray-300">{mode}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* What to Do Next */}
+                <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent p-8">
+                  <h3 className="mb-4 text-2xl font-semibold text-white">
+                    What to do next
+                  </h3>
+                  <ul className="space-y-4">
+                    {framework.whatToDoNext.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <ArrowRight className="h-5 w-5 flex-shrink-0 text-amber-500" />
+                        <span className="text-gray-300">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-12 text-center">
+                <Lock className="mx-auto mb-4 h-12 w-12 text-gray-500" />
+                <h3 className="mb-2 text-xl font-semibold text-white">
+                  Full dossier locked
+                </h3>
+                <p className="mb-6 text-gray-400">
+                  Join the Inner Circle to access the complete strategic framework,
+                  including operating logic, playbook, metrics, and board questions.
+                </p>
+                <Link
+                  href="/inner-circle"
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
+                >
+                  Join Inner Circle
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
           </div>
         </section>
-      </div>
+      </main>
     </Layout>
   );
-};
-
-export default FrameworkDossierPage;
-
-// -----------------------------------------------------------------------------
-// SSG
-// -----------------------------------------------------------------------------
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getAllFrameworkSlugs();
   return {
-    paths: getAllFrameworkSlugs().map((slug) => ({ params: { slug } })),
+    paths: slugs.map((slug) => ({ params: { slug } })),
     fallback: false,
   };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
-  const slug = String(ctx.params?.slug || "");
+export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
+  const slug = params?.slug as string;
   const framework = getFrameworkBySlug(slug);
 
-  // Keep a stable ordering identical to FRAMEWORKS.
-  const allSlugs = FRAMEWORKS.map((f) => f.slug);
+  if (!framework) {
+    return { notFound: true };
+  }
 
-  return { props: { framework, allSlugs } };
+  return {
+    props: {
+      framework,
+    },
+    revalidate: 3600,
+  };
 };
