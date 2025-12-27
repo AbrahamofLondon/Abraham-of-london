@@ -302,12 +302,20 @@ function Footer(): JSX.Element {
   );
 }
 
+type UltimatePurposeOfManDocumentProps = {
+  coverImagePath: string;
+};
+
 // ✅ CRITICAL: return type tells TS this component produces a <Document /> element
 export default function UltimatePurposeOfManDocument({
   coverImagePath,
-}: {
-  coverImagePath: string;
-}): React.ReactElement<DocumentProps> {
+}: UltimatePurposeOfManDocumentProps): React.ReactElement<DocumentProps> {
+  return (
+    <Document>
+      {/* ... your pages ... */}
+    </Document>
+  );
+}
   return (
     <Document>
       {/* COVER PAGE */}

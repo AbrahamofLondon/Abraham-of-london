@@ -16,6 +16,7 @@
     "typecheck": "pnpm exec tsc --project tsconfig.json --noEmit",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
+    "test:books": "pnpm exec tsx scripts/test-books-data.ts",
     "format": "prettier --write .",
     "clean:build": "node -e \"const fs=require('fs'); for (const p of ['.next','.contentlayer']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} }\"",
     "clean": "node -e \"const fs=require('fs'); const paths=['.next','.contentlayer','.turbo','.reports','node_modules/.cache']; for (const p of paths) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
