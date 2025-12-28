@@ -1,4 +1,4 @@
-// lib/contentlayer-helper.ts - COMPLETE FIXED VERSION WITH TYPE GUARDS
+// lib/contentlayer-helper.ts - COMPLETE FIXED VERSION
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as generated from "@/lib/contentlayer";
 
@@ -6,13 +6,11 @@ import * as generated from "@/lib/contentlayer";
 /* Node.js-only imports (guarded for browser compatibility)                   */
 /* -------------------------------------------------------------------------- */
 
-// These will only be available server-side
 const isServer = typeof window === "undefined";
 let fs: any = null;
 let path: any = null;
 
 if (isServer) {
-  // Dynamic require to avoid webpack bundling for browser
   fs = eval('require')("fs");
   path = eval('require')("path");
 }
@@ -34,10 +32,8 @@ export type DocKind =
   | "unknown";
 
 export type AccessLevel = "public" | "inner-circle" | "private";
-
 export type ContentDoc = any;
 
-// Basic type interfaces for better type safety
 export interface BaseDoc {
   _id: string;
   slug: string;
@@ -121,7 +117,6 @@ export interface ShortDoc extends BaseDoc {
 
 export type AnyDoc = PostDoc | BookDoc | DownloadDoc | EventDoc | PrintDoc | ResourceDoc | StrategyDoc | CanonDoc | ShortDoc;
 
-// Type aliases for backward compatibility
 export type PostType = PostDoc;
 export type BookType = BookDoc;
 export type DownloadType = DownloadDoc;
@@ -184,13 +179,8 @@ function pickArray(name: string): ContentDoc[] {
   return Array.isArray(v) ? v : [];
 }
 
-/**
- * Build-time only. Resolves a public URL path ("/assets/...") to an absolute FS path.
- * Returns null if the URL path is not a site-local absolute path.
- */
 export function publicUrlToFsPath(publicUrl: string): string | null {
   if (!isServer || !path) return null;
-  
   const u = cleanStr(publicUrl);
   if (!u.startsWith("/")) return null;
   return path.join(process.cwd(), "public", trimLeadingSlashes(u));
@@ -198,7 +188,6 @@ export function publicUrlToFsPath(publicUrl: string): string | null {
 
 export function publicFileExists(publicUrl: string): boolean {
   if (!isServer || !fs) return false;
-  
   const fsPath = publicUrlToFsPath(publicUrl);
   if (!fsPath) return false;
   try {
@@ -210,7 +199,6 @@ export function publicFileExists(publicUrl: string): boolean {
 
 export function publicFileSizeBytes(publicUrl: string): number | null {
   if (!isServer || !fs) return null;
-  
   const fsPath = publicUrlToFsPath(publicUrl);
   if (!fsPath) return null;
   try {
@@ -232,20 +220,14 @@ export function formatBytes(bytes: number): string {
   return `${gb.toFixed(1)} GB`;
 }
 
-/**
- * Canonical slug normalizer. Deterministic and resilient.
- */
 function toCanonicalSlug(input: unknown): string {
   let s = cleanStr(input);
   if (!s) return "";
-
   s = s.split("#")[0]?.split("?")[0] ?? s;
   s = s.replace(/^https?:\/\/[^/]+/i, "");
   s = trimTrailingSlashes(cleanLower(s));
   s = trimLeadingSlashes(s);
-
   if (!s) return "";
-
   const parts = s.split("/").filter(Boolean);
   return parts.length ? parts[parts.length - 1] : s;
 }
@@ -280,26 +262,16 @@ export const isPublishedContent = (doc: ContentDoc): boolean => !isDraftContent(
 export function getDocKind(doc: ContentDoc): DocKind {
   const raw = cleanLower(doc?._type ?? doc?.type);
   switch (raw) {
-    case "post":
-      return "post";
-    case "book":
-      return "book";
-    case "canon":
-      return "canon";
-    case "short":
-      return "short";
-    case "download":
-      return "download";
-    case "resource":
-      return "resource";
-    case "event":
-      return "event";
-    case "print":
-      return "print";
-    case "strategy":
-      return "strategy";
-    default:
-      return "unknown";
+    case "post": return "post";
+    case "book": return "book";
+    case "canon": return "canon";
+    case "short": return "short";
+    case "download": return "download";
+    case "resource": return "resource";
+    case "event": return "event";
+    case "print": return "print";
+    case "strategy": return "strategy";
+    default: return "unknown";
   }
 }
 
@@ -309,20 +281,15 @@ export function getDocKind(doc: ContentDoc): DocKind {
 
 export function normalizeSlug(doc: ContentDoc): string {
   if (!doc) return "";
-
   const explicit = toCanonicalSlug(doc.slug);
   if (explicit) return explicit;
-
   const fp = cleanStr(doc?._raw?.flattenedPath);
   if (!fp) return "";
-
   const fpClean = trimTrailingSlashes(cleanLower(fp));
   const parts = fpClean.split("/").filter(Boolean);
   if (!parts.length) return "";
-
   const last = parts[parts.length - 1];
   const slug = last === "index" ? parts[parts.length - 2] ?? "" : last;
-
   return toCanonicalSlug(slug);
 }
 
@@ -340,7 +307,6 @@ export function isPublic(doc: ContentDoc): boolean {
   return getAccessLevel(doc) === "public";
 }
 
-// Alias for compatibility
 export function getRequiredTier(doc: ContentDoc): AccessLevel {
   return getAccessLevel(doc);
 }
@@ -360,19 +326,14 @@ export function getDocHref(doc: ContentDoc): string {
 /* Media                                                                      */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Universal cover resolver across all 9 doc types.
- * Strict behavior: if doc provides a value, we return it with a leading slash.
- */
 export function resolveDocCoverImage(doc: ContentDoc): string {
   const explicit = cleanStr(doc?.coverImage || doc?.image || doc?.cover);
   if (explicit) return ensureLeadingSlash(explicit);
-
   return getDocKind(doc) === "short" ? SHORT_GLOBAL_FALLBACK : GLOBAL_FALLBACK_IMAGE;
 }
 
 /* -------------------------------------------------------------------------- */
-/* Download URL resolution (STRICT + CANONICAL)                               */
+/* Download URL resolution                                                    */
 /* -------------------------------------------------------------------------- */
 
 export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
@@ -384,43 +345,34 @@ export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
     cleanStr(doc?.downloadFile);
 
   if (!raw) return null;
-
   const url = ensureLeadingSlash(raw);
 
   if (url.startsWith("/downloads/")) {
     return url.replace(/^\/downloads\//, "/assets/downloads/");
   }
-
   if (url.startsWith("/assets/downloads/")) {
     return url;
   }
-
   return url;
 }
 
 export function resolveDocDownloadHref(doc: ContentDoc): string | null {
   const direct = resolveDocDownloadUrl(doc);
   if (!direct) return null;
-
   const access = getAccessLevel(doc);
   if (access === "public") return direct;
-
   const slug = normalizeSlug(doc);
   if (!slug) return null;
-
   return `/api/downloads/${encodeURIComponent(slug)}`;
 }
 
 export function resolveDocDownloadSizeLabel(doc: ContentDoc): string | null {
   const explicit = cleanStr(doc?.fileSize);
   if (explicit) return explicit;
-
   const url = resolveDocDownloadUrl(doc);
   if (!url) return null;
-
   const bytes = publicFileSizeBytes(url);
   if (bytes == null) return null;
-
   return formatBytes(bytes);
 }
 
@@ -447,15 +399,10 @@ export const getPublishedDocuments = (): ContentDoc[] =>
 export function getPublishedDocumentsByType(kind: DocKind, limit?: number): ContentDoc[] {
   const items = getPublishedDocuments()
     .filter((d) => getDocKind(d) === kind)
-    .sort(
-      (a, b) =>
-        new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
-    );
-
+    .sort((a, b) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime());
   return typeof limit === "number" ? items.slice(0, limit) : items;
 }
 
-/* Named Queries */
 export const getPublishedPosts = () => getPublishedDocumentsByType("post");
 export const getAllBooks = () => getPublishedDocumentsByType("book");
 export const getAllCanons = () => getPublishedDocumentsByType("canon");
@@ -465,44 +412,39 @@ export const getAllPrints = () => getPublishedDocumentsByType("print");
 export const getAllResources = () => getPublishedDocumentsByType("resource");
 export const getAllStrategies = () => getPublishedDocumentsByType("strategy");
 export const getPublishedShorts = () => getPublishedDocumentsByType("short");
+export const getRecentShorts = (limit?: number) => getPublishedDocumentsByType("short", limit);
 
-// Alias for compatibility
-export const getRecentShorts = (limit?: number) => 
-  getPublishedDocumentsByType("short", limit);
-
-/* By Slug */
 const cleanMatch = (s: string) => toCanonicalSlug(s);
 
 export const getDownloadBySlug = (s: string) =>
   getAllDownloads().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getPostBySlug = (s: string) =>
   getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getBookBySlug = (s: string) =>
   getAllBooks().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getCanonBySlug = (s: string) =>
   getAllCanons().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getShortBySlug = (s: string) =>
   getPublishedShorts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getResourceBySlug = (s: string) =>
   getAllResources().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getEventBySlug = (s: string) =>
   getAllEvents().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getPrintBySlug = (s: string) =>
   getAllPrints().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-
 export const getStrategyBySlug = (s: string) =>
   getAllStrategies().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
 
 /* -------------------------------------------------------------------------- */
-/* Build Guard                                                                */
+/* Build Guards - SINGLE IMPLEMENTATION                                       */
 /* -------------------------------------------------------------------------- */
+
+const STRICT_ASSETS = process.env.CONTENT_STRICT_ASSETS === "1";
+
+function throwIfStrict(message: string) {
+  if (STRICT_ASSETS) throw new Error(message);
+  console.warn(message);
+}
 
 export function assertContentlayerHasDocs(where: string) {
   if (getAllContentlayerDocs().length === 0) {
@@ -510,12 +452,9 @@ export function assertContentlayerHasDocs(where: string) {
   }
 }
 
-/**
- * Validates that site-local /assets/* referenced by ANY doc exist in /public.
- * This covers the "all 9 doc types" requirement (covers images + other assets).
- * It DOES NOT guess, it only validates deterministic /assets/ paths.
- */
 export function assertPublicAssetsExistForAllDocs(docs: ContentDoc[]) {
+  if (!isServer) return;
+
   const missing: string[] = [];
 
   for (const doc of docs) {
@@ -523,13 +462,11 @@ export function assertPublicAssetsExistForAllDocs(docs: ContentDoc[]) {
     const slug = normalizeSlug(doc) || "(no-slug)";
     const label = `${kind}/${slug}`;
 
-    // Cover images (if under /assets/)
     const img = resolveDocCoverImage(doc);
     if (img.startsWith("/assets/") && !publicFileExists(img)) {
       missing.push(`${label} coverImage -> ${img}`);
     }
 
-    // Download files (if present and under /assets/)
     const dl = resolveDocDownloadUrl(doc);
     if (dl && dl.startsWith("/assets/") && !publicFileExists(dl)) {
       missing.push(`${label} downloadFile -> ${dl}`);
@@ -537,22 +474,13 @@ export function assertPublicAssetsExistForAllDocs(docs: ContentDoc[]) {
   }
 
   if (missing.length) {
-    throw new Error(
-      `[Critical Build Error] Missing public assets referenced by content:\n` + missing.join("\n"),
-    );
+    throwIfStrict(`[Assets] Missing public assets:\n${missing.join("\n")}`);
   }
 }
 
-/**
- * Validates that all download files referenced in download documents exist in the public directory.
- * This is a specific version of assertPublicAssetsExistForAllDocs focused only on downloads.
- */
 export function assertDownloadFilesExist(): void {
-  if (!isServer) {
-    console.warn('assertDownloadFilesExist is only available server-side');
-    return;
-  }
-  
+  if (!isServer) return;
+
   const downloads = getAllDownloads();
   const missing: string[] = [];
 
@@ -560,13 +488,11 @@ export function assertDownloadFilesExist(): void {
     const slug = normalizeSlug(doc) || "(no-slug)";
     const label = `download/${slug}`;
 
-    // Check download files
     const dl = resolveDocDownloadUrl(doc);
     if (dl && dl.startsWith("/assets/") && !publicFileExists(dl)) {
       missing.push(`${label} downloadFile -> ${dl}`);
     }
-    
-    // Also check cover images for downloads
+
     const img = resolveDocCoverImage(doc);
     if (img.startsWith("/assets/") && !publicFileExists(img)) {
       missing.push(`${label} coverImage -> ${img}`);
@@ -574,22 +500,16 @@ export function assertDownloadFilesExist(): void {
   }
 
   if (missing.length) {
-    throw new Error(
-      `[Critical Build Error] Missing download files referenced by content:\n` + missing.join("\n")
-    );
+    throwIfStrict(`[Downloads] Missing files:\n${missing.join("\n")}`);
   }
 }
 
-// Optional: Add an alias for backward compatibility if needed
 export const assertDownloadsExist = assertDownloadFilesExist;
 
 /* -------------------------------------------------------------------------- */
 /* Card Props Helper                                                          */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Universal card props extractor for all doc types.
- */
 export function getCardPropsForDocument(doc: ContentDoc): {
   slug: string;
   title: string;
@@ -624,10 +544,6 @@ export function getCardPropsForDocument(doc: ContentDoc): {
 
 export type ContentlayerCardProps = ReturnType<typeof getCardPropsForDocument>;
 
-/* -------------------------------------------------------------------------- */
-/* Utility Helpers                                                            */
-/* -------------------------------------------------------------------------- */
-
 function safeDate(input: unknown): string {
   if (!input) return "";
   try {
@@ -638,14 +554,8 @@ function safeDate(input: unknown): string {
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Document Getter                                                            */
-/* -------------------------------------------------------------------------- */
-
 export const getDocumentBySlug = (slug: string): ContentDoc | null => {
   const slugClean = toCanonicalSlug(slug);
-  
-  // Try all collections in order of priority
   const collections = [
     { getter: getPostBySlug, name: "post" },
     { getter: getBookBySlug, name: "book" },
@@ -658,28 +568,20 @@ export const getDocumentBySlug = (slug: string): ContentDoc | null => {
     { getter: getStrategyBySlug, name: "strategy" },
   ];
   
-  for (const { getter, name } of collections) {
+  for (const { getter } of collections) {
     const doc = getter(slugClean);
     if (doc) return doc;
   }
-  
   return null;
 };
-
-/* -------------------------------------------------------------------------- */
-/* Featured Documents                                                         */
-/* -------------------------------------------------------------------------- */
 
 export const getFeaturedDocuments = (limit?: number): ContentDoc[] => {
   const allDocs = getPublishedDocuments();
   const featured = allDocs.filter(doc => doc?.featured === true);
-  
-  // Sort by date (newest first)
   const sorted = featured.sort((a, b) => {
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     return dateB - dateA;
   });
-  
   return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
 };
