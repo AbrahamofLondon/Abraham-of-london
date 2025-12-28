@@ -71,10 +71,19 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     const paths = resources
       .map((r: any) => r.url || r.href)
-      .filter((u: any): u is string => typeof u === "string" && u.startsWith("/resources/"))
+      .filter((u: unknown): u is string => typeof u === "string")
+      .filter((u: string) => u.startsWith("/resources/"))
       .filter((u: string) => u !== "/resources")
+
+      // 🚫 EXCLUDE strategic-frameworks (explicit route owns it)
+      .filter((u: string) => !u.startsWith("/resources/strategic-frameworks"))
+
       .map((u: string) => {
-        const slugParts = u.replace(/^\/resources\/?/, "").split("/").filter(Boolean);
+        const slugParts = u
+          .replace(/^\/resources\/?/, "")
+          .split("/")
+          .filter(Boolean);
+
         return { params: { slug: slugParts } };
       });
 

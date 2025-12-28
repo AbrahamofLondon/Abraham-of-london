@@ -1,4 +1,3 @@
-// lib/pdf/ultimate-purpose-of-man-pdf.tsx
 /* eslint-disable jsx-a11y/alt-text */
 
 import React from "react";
@@ -10,7 +9,6 @@ import {
   Image,
   StyleSheet,
   Font,
-  type DocumentProps,
 } from "@react-pdf/renderer";
 
 // ---------------------------------------------------------------------------
@@ -194,14 +192,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 3,
   },
-  eyebrow: {
-    fontFamily: "AoLSans",
-    fontSize: 8.5,
-    textTransform: "uppercase",
-    letterSpacing: 2.4,
-    color: BRAND.gold2,
-    marginBottom: 6,
-  },
 
   bodyText: {
     fontFamily: "AoLSans",
@@ -278,7 +268,8 @@ const styles = StyleSheet.create({
   },
 });
 
-function TopRail({ eyebrow, title }: { eyebrow: string; title: string }): JSX.Element {
+function TopRail(props: { eyebrow: string; title: string }): JSX.Element {
+  const { eyebrow, title } = props;
   return (
     <View style={styles.topRail} fixed>
       <View style={styles.railLeft}>
@@ -302,20 +293,15 @@ function Footer(): JSX.Element {
   );
 }
 
-type UltimatePurposeOfManDocumentProps = {
+export type UltimatePurposeOfManDocumentProps = {
   coverImagePath: string;
 };
 
-// ✅ CRITICAL: return type tells TS this component produces a <Document /> element
-export default function UltimatePurposeOfManDocument({
-  coverImagePath,
-}: UltimatePurposeOfManDocumentProps): React.ReactElement<DocumentProps> {
-  return (
-    <Document>
-      {/* ... your pages ... */}
-    </Document>
-  );
-}
+export default function UltimatePurposeOfManDocument(
+  props: UltimatePurposeOfManDocumentProps
+): JSX.Element {
+  const { coverImagePath } = props;
+
   return (
     <Document>
       {/* COVER PAGE */}

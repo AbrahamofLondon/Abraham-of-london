@@ -36,5 +36,13 @@
     ".contentlayer/generated",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next", "**/*.backup.*", "dist"]
+  "exclude": [
+  "node_modules",
+  ".next",
+  "**/*.backup.*",
+  "dist",
+  ".contentlayer/.cache",
+  "lib/post-extensions.d.ts",
+  "types/index.d.ts"
+]
 }
