@@ -1,118 +1,121 @@
 // lib/server/content.ts
-import * as generated from "@/lib/contentlayer";
+import fs from "fs";
+import path from "path";
 
-/**
- * - Canonical URL MUST come from `doc.url` if present, otherwise derived from flattenedPath/slug.
- * - `href` is treated as a CTA destination ONLY (never used for routing).
- * - `pickDoc` matches ONLY by canonical `url`.
- */
+export type ResourceDoc = {
+  title: string;
+  excerpt?: string | null;
+  description?: string | null;
+  date?: string | null;
+  coverImage?: string | null;
+  tags?: string[];
+  author?: string | null;
+  url: string;            // CANONICAL route (must start with /resources/)
+  href?: string | null;   // CTA destination only (optional)
+  body: { raw: string };
+};
 
-function pickArray<T = any>(...candidates: any[]): T[] {
-  for (const c of candidates) {
-    if (Array.isArray(c)) return c as T[];
-  }
-  return [];
+const RESOURCES_DIR = path.join(process.cwd(), "content", "resources");
+
+function stripQuotes(s: string) {
+  return String(s || "").replace(/^["']|["']$/g, "").trim();
 }
 
 function cleanPath(p: string): string {
-  const s = String(p || "");
+  const s = String(p || "").trim();
   if (!s) return "";
-  // remove query/hash and trailing slash
   return s.split("#")[0]!.split("?")[0]!.replace(/\/+$/, "");
 }
 
-function lastPathSegment(flattenedPath?: string): string {
-  const fp = cleanPath(flattenedPath || "");
-  if (!fp) return "";
-  const parts = fp.split("/").filter(Boolean);
-  if (!parts.length) return "";
-  const last = parts[parts.length - 1]!;
-  if (last === "index") return parts[parts.length - 2] || "";
-  return last;
+function parseFrontmatter(raw: string): Record<string, any> {
+  const out: Record<string, any> = {};
+  const m = raw.match(/^---\s*([\s\S]*?)\s*---/);
+  if (!m) return out;
+
+  const lines = m[1].split("\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const idx = trimmed.indexOf(":");
+    if (idx === -1) continue;
+
+    const key = trimmed.slice(0, idx).trim();
+    let val = trimmed.slice(idx + 1).trim();
+
+    // arrays: tags: ["a","b"]
+    if (val.startsWith("[") && val.endsWith("]")) {
+      try {
+        out[key] = JSON.parse(val);
+        continue;
+      } catch {
+        // fall through
+      }
+    }
+
+    // booleans
+    if (val === "true") out[key] = true;
+    else if (val === "false") out[key] = false;
+    else out[key] = stripQuotes(val);
+  }
+
+  return out;
 }
 
-function deriveUrl(doc: any, base: string): string {
-  // 1) If doc.url exists and matches base, trust it
-  const explicit = cleanPath(doc?.url || "");
-  if (explicit && explicit.startsWith(base)) return explicit;
-
-  // 2) Derive slug deterministically (never from href)
-  const slug =
-    cleanPath(doc?.slug || "") ||
-    lastPathSegment(doc?._raw?.flattenedPath) ||
-    "";
-
-  return slug ? `${base}/${slug}` : base;
+function deriveUrlFromFilename(filename: string) {
+  const base = filename.replace(/\.(md|mdx)$/i, "");
+  return `/resources/${base}`;
 }
 
-function pickDoc<T = any>(all: T[], urlPath: string): T | null {
+export async function getAllResources(): Promise<ResourceDoc[]> {
+  if (!fs.existsSync(RESOURCES_DIR)) return [];
+
+  const files = fs
+    .readdirSync(RESOURCES_DIR)
+    .filter((f) => /\.(md|mdx)$/i.test(f));
+
+  const docs: ResourceDoc[] = [];
+
+  for (const file of files) {
+    const abs = path.join(RESOURCES_DIR, file);
+    const raw = fs.readFileSync(abs, "utf8");
+    const fm = parseFrontmatter(raw);
+
+    if (fm.draft === true) continue;
+
+    const explicitUrl = typeof fm.url === "string" ? cleanPath(fm.url) : "";
+    const url =
+      explicitUrl && explicitUrl.startsWith("/resources/")
+        ? explicitUrl
+        : deriveUrlFromFilename(file);
+
+    const href = typeof fm.href === "string" ? cleanPath(fm.href) : "";
+
+    docs.push({
+      title: typeof fm.title === "string" ? fm.title : "Untitled Resource",
+      excerpt: typeof fm.excerpt === "string" ? fm.excerpt : null,
+      description: typeof fm.description === "string" ? fm.description : null,
+      date: typeof fm.date === "string" ? fm.date : null,
+      coverImage: typeof fm.coverImage === "string" ? fm.coverImage : null,
+      tags: Array.isArray(fm.tags) ? fm.tags : [],
+      author: typeof fm.author === "string" ? fm.author : null,
+      href: href || null,
+      url,
+      body: { raw },
+    });
+  }
+
+  // stable sort (newest first by date string)
+  docs.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+  return docs;
+}
+
+export async function getResourceByUrlPath(
+  urlPath: string
+): Promise<ResourceDoc | null> {
   const target = cleanPath(urlPath);
   if (!target) return null;
 
-  const doc = (all as any[]).find((d) => {
-    const docUrl = cleanPath(d?.url || "");
-    return docUrl === target;
-  });
-
-  return (doc as T) || null;
-}
-
-// ✅ Works whether exports are named or default-wrapped
-const genAny = generated as any;
-const defaultAny = genAny?.default as any;
-
-function normalizeDoc(doc: any, base: string) {
-  const url = deriveUrl(doc, base);
-
-  // body normalization (keep it plain; avoid Proxies during export)
-  const rawBody =
-    (doc?.body && typeof doc.body === "object" && typeof doc.body.raw === "string" && doc.body.raw) ||
-    (typeof doc?.content === "string" ? doc.content : "") ||
-    "";
-
-  return {
-    ...doc,
-    // Canonical route used by getStaticPaths + getStaticProps
-    url,
-
-    // Keep href as CTA only (do not let routing depend on it)
-    href: typeof doc?.href === "string" ? doc.href : undefined,
-
-    // Ensure body exists with raw
-    body: doc?.body && typeof doc.body === "object" ? { ...doc.body, raw: rawBody } : { raw: rawBody },
-  };
-}
-
-// ----------------------
-// RESOURCES
-// ----------------------
-export async function getAllResources(): Promise<any[]> {
-  const resources = pickArray(genAny.allResources, defaultAny?.allResources, defaultAny);
-  return resources.map((doc: any) => normalizeDoc(doc, "/resources"));
-}
-
-export async function getResourceByUrlPath(urlPath: string): Promise<any | null> {
   const all = await getAllResources();
-  return pickDoc(all, urlPath);
-}
-
-export async function getResourceBySlug(slug: string): Promise<any | null> {
-  const s = cleanPath(slug).split("/").filter(Boolean).pop() || "";
-  if (!s) return null;
-
-  const all = await getAllResources();
-  return all.find((doc: any) => cleanPath(doc?.slug || "") === s || lastPathSegment(doc?._raw?.flattenedPath) === s) || null;
-}
-
-// ----------------------
-// SHORTS
-// ----------------------
-export async function getAllShorts(): Promise<any[]> {
-  const shorts = pickArray(genAny.allShorts, defaultAny?.allShorts, defaultAny);
-  return shorts.map((doc: any) => normalizeDoc(doc, "/shorts"));
-}
-
-export async function getShortByUrlPath(urlPath: string): Promise<any | null> {
-  const all = await getAllShorts();
-  return pickDoc(all, urlPath);
+  return all.find((r) => cleanPath(r.url) === target) ?? null;
 }

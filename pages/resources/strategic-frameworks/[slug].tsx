@@ -1,8 +1,7 @@
 // pages/resources/strategic-frameworks/[slug].tsx
 import * as React from "react";
-import { useState, useEffect } from "react";
-import type { GetStaticProps, GetStaticPaths, NextPage } from "next";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
@@ -28,7 +27,10 @@ import {
 } from "@/lib/resources/strategic-frameworks";
 import { getInnerCircleAccess, type AccessState } from "@/lib/inner-circle/access";
 
-const easeSettle: [number, number, number, number] = [0.16, 1, 0.3, 1];
+type PageProps = {
+  framework: Framework;
+  isPreview?: boolean;
+};
 
 const tierIcon: Record<FrameworkTier, React.ReactNode> = {
   Board: <Shield className="h-4 w-4" />,
@@ -52,17 +54,11 @@ const accentBg: Record<Framework["accent"], string> = {
   indigo: "bg-indigo-500/10 border-indigo-500/30",
 };
 
-type PageProps = {
-  framework: Framework;
-  isPreview?: boolean;
-};
-
-const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false }: PageProps) => {
+const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false }) => {
   const router = useRouter();
 
   // Client-side gating: show prelude immediately, then reveal full dossier if cookie exists.
   const [access, setAccess] = useState<AccessState>(() => {
-    // Initialize with server-side data if available, otherwise default
     if (typeof window === "undefined") {
       return {
         hasAccess: false,
@@ -81,15 +77,13 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
   const canViewFull = access.hasAccess || isPreview;
 
-  // Handle navigation to locked sections
   const scrollToLocked = (id: string) => {
-    const element = document.getElementById(id);
-    if (element && canViewFull) {
-      element.scrollIntoView({ behavior: "smooth" });
-    } else if (!canViewFull) {
-      // Show lock modal or redirect to access page
-      router.push("/inner-circle?returnTo=" + encodeURIComponent(router.asPath));
+    const el = document.getElementById(id);
+    if (el && canViewFull) {
+      el.scrollIntoView({ behavior: "smooth" });
+      return;
     }
+    router.push("/inner-circle?returnTo=" + encodeURIComponent(router.asPath));
   };
 
   if (router.isFallback) {
@@ -103,10 +97,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
   }
 
   return (
-    <Layout
-      title={`${framework.title} | Strategic Framework`}
-      description={framework.oneLiner}
-    >
+    <Layout title={`${framework.title} | Strategic Framework`} description={framework.oneLiner}>
       <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
         {/* Hero Header */}
         <section className="relative overflow-hidden border-b border-white/10">
@@ -133,6 +124,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                   >
                     {framework.tag}
                   </span>
+
                   <div className="flex items-center gap-2">
                     {framework.tier.map((t) => (
                       <span
@@ -152,24 +144,18 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                 <p className="mb-8 text-xl text-gray-300">{framework.oneLiner}</p>
 
                 <div className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
-                  <h3 className="mb-4 text-lg font-semibold text-white">
-                    Canon foundation
-                  </h3>
+                  <h3 className="mb-4 text-lg font-semibold text-white">Canon foundation</h3>
                   <p className="text-gray-300">{framework.canonRoot}</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
-                  <h3 className="mb-4 text-lg font-semibold text-white">
-                    At a glance
-                  </h3>
+                  <h3 className="mb-4 text-lg font-semibold text-white">At a glance</h3>
                   <ul className="space-y-3">
                     <li className="flex items-start gap-3">
                       <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-400" />
-                      <span className="text-sm text-gray-300">
-                        Tier: {framework.tier.join(", ")}
-                      </span>
+                      <span className="text-sm text-gray-300">Tier: {framework.tier.join(", ")}</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <TrendingUp className="h-5 w-5 flex-shrink-0 text-blue-400" />
@@ -188,9 +174,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
                 {framework.artifactHref && (
                   <div className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
-                    <h3 className="mb-4 text-lg font-semibold text-white">
-                      Download artifact
-                    </h3>
+                    <h3 className="mb-4 text-lg font-semibold text-white">Download artifact</h3>
                     <a
                       href={framework.artifactHref}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
@@ -210,9 +194,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
         <section className="py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
-              <h2 className="mb-4 font-serif text-3xl font-semibold text-white">
-                Executive prelude
-              </h2>
+              <h2 className="mb-4 font-serif text-3xl font-semibold text-white">Executive prelude</h2>
               <p className="text-gray-400">
                 Public overview—full dossier available to Inner Circle members.
               </p>
@@ -220,9 +202,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
             <div className="grid gap-8 lg:grid-cols-2">
               <div>
-                <h3 className="mb-4 text-xl font-semibold text-white">
-                  Executive summary
-                </h3>
+                <h3 className="mb-4 text-xl font-semibold text-white">Executive summary</h3>
                 <ul className="space-y-3">
                   {framework.executiveSummary.map((item, idx) => (
                     <motion.li
@@ -240,9 +220,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
               </div>
 
               <div>
-                <h3 className="mb-4 text-xl font-semibold text-white">
-                  Use when
-                </h3>
+                <h3 className="mb-4 text-xl font-semibold text-white">Use when</h3>
                 <ul className="space-y-3">
                   {framework.useWhen.map((item, idx) => (
                     <motion.li
@@ -265,9 +243,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                 <h3 className="mb-4 text-xl font-semibold text-white">Inputs</h3>
                 <ul className="space-y-2">
                   {framework.inputs.map((item, idx) => (
-                    <li key={idx} className="text-gray-300">
-                      • {item}
-                    </li>
+                    <li key={idx} className="text-gray-300">• {item}</li>
                   ))}
                 </ul>
               </div>
@@ -276,9 +252,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                 <h3 className="mb-4 text-xl font-semibold text-white">Outputs</h3>
                 <ul className="space-y-2">
                   {framework.outputs.map((item, idx) => (
-                    <li key={idx} className="text-gray-300">
-                      • {item}
-                    </li>
+                    <li key={idx} className="text-gray-300">• {item}</li>
                   ))}
                 </ul>
               </div>
@@ -291,9 +265,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12 flex items-center justify-between">
               <div>
-                <h2 className="mb-2 font-serif text-3xl font-semibold text-white">
-                  Full dossier
-                </h2>
+                <h2 className="mb-2 font-serif text-3xl font-semibold text-white">Full dossier</h2>
                 <p className="text-gray-400">
                   Inner Circle content—operating logic, playbook, metrics, board questions.
                 </p>
@@ -314,9 +286,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
               <div className="space-y-16">
                 {/* Operating Logic */}
                 <div>
-                  <h3 className="mb-6 text-2xl font-semibold text-white">
-                    Operating logic
-                  </h3>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">Operating logic</h3>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {framework.operatingLogic.map((logic, idx) => (
                       <motion.div
@@ -326,9 +296,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                         transition={{ delay: idx * 0.1 }}
                         className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
                       >
-                        <h4 className="mb-3 text-lg font-semibold text-white">
-                          {logic.title}
-                        </h4>
+                        <h4 className="mb-3 text-lg font-semibold text-white">{logic.title}</h4>
                         <p className="text-gray-300">{logic.body}</p>
                       </motion.div>
                     ))}
@@ -337,9 +305,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
                 {/* Application Playbook */}
                 <div>
-                  <h3 className="mb-6 text-2xl font-semibold text-white">
-                    Application playbook
-                  </h3>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">Application playbook</h3>
                   <div className="space-y-6">
                     {framework.applicationPlaybook.map((step, idx) => (
                       <motion.div
@@ -353,15 +319,13 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
                             {idx + 1}
                           </div>
-                          <h4 className="text-lg font-semibold text-white">
-                            {step.step}
-                          </h4>
+                          <h4 className="text-lg font-semibold text-white">{step.step}</h4>
                         </div>
+
                         <p className="mb-4 text-gray-300">{step.detail}</p>
+
                         <div className="rounded-lg bg-white/5 p-4">
-                          <p className="text-sm font-semibold text-amber-400">
-                            Deliverable
-                          </p>
+                          <p className="text-sm font-semibold text-amber-400">Deliverable</p>
                           <p className="mt-1 text-gray-300">{step.deliverable}</p>
                         </div>
                       </motion.div>
@@ -371,39 +335,22 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
                 {/* Metrics */}
                 <div>
-                  <h3 className="mb-6 text-2xl font-semibold text-white">
-                    Metrics & review
-                  </h3>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">Metrics &amp; review</h3>
                   <div className="overflow-hidden rounded-xl border border-white/10">
                     <table className="w-full">
                       <thead className="border-b border-white/10 bg-black/40">
                         <tr>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">
-                            Metric
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">
-                            Why it matters
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">
-                            Review cadence
-                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">Metric</th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">Why it matters</th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-white">Review cadence</th>
                         </tr>
                       </thead>
                       <tbody>
                         {framework.metrics.map((metric, idx) => (
-                          <tr
-                            key={idx}
-                            className="border-b border-white/5 hover:bg-white/5"
-                          >
-                            <td className="px-6 py-4 text-sm text-gray-300">
-                              {metric.metric}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-300">
-                              {metric.whyItMatters}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-300">
-                              {metric.reviewCadence}
-                            </td>
+                          <tr key={idx} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="px-6 py-4 text-sm text-gray-300">{metric.metric}</td>
+                            <td className="px-6 py-4 text-sm text-gray-300">{metric.whyItMatters}</td>
+                            <td className="px-6 py-4 text-sm text-gray-300">{metric.reviewCadence}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -413,16 +360,14 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
                 {/* Board Questions */}
                 <div>
-                  <h3 className="mb-6 text-2xl font-semibold text-white">
-                    Board questions
-                  </h3>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">Board questions</h3>
                   <div className="grid gap-4 md:grid-cols-2">
-                    {framework.boardQuestions.map((question, idx) => (
+                    {framework.boardQuestions.map((q, idx) => (
                       <div
                         key={idx}
                         className="rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
                       >
-                        <p className="text-gray-300">{question}</p>
+                        <p className="text-gray-300">{q}</p>
                       </div>
                     ))}
                   </div>
@@ -430,9 +375,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
                 {/* Failure Modes */}
                 <div>
-                  <h3 className="mb-6 text-2xl font-semibold text-white">
-                    Failure modes
-                  </h3>
+                  <h3 className="mb-6 text-2xl font-semibold text-white">Failure modes</h3>
                   <div className="grid gap-4 md:grid-cols-2">
                     {framework.failureModes.map((mode, idx) => (
                       <div
@@ -448,9 +391,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
 
                 {/* What to Do Next */}
                 <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent p-8">
-                  <h3 className="mb-4 text-2xl font-semibold text-white">
-                    What to do next
-                  </h3>
+                  <h3 className="mb-4 text-2xl font-semibold text-white">What to do next</h3>
                   <ul className="space-y-4">
                     {framework.whatToDoNext.map((item, idx) => (
                       <li key={idx} className="flex items-start gap-3">
@@ -464,19 +405,15 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
             ) : (
               <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-12 text-center">
                 <Lock className="mx-auto mb-4 h-12 w-12 text-gray-500" />
-                <h3 className="mb-2 text-xl font-semibold text-white">
-                  Full dossier locked
-                </h3>
+                <h3 className="mb-2 text-xl font-semibold text-white">Full dossier locked</h3>
                 <p className="mb-6 text-gray-400">
-                  Join the Inner Circle to access the complete strategic framework,
-                  including operating logic, playbook, metrics, and board questions.
+                  Join the Inner Circle to access the complete dossier: operating logic, playbook, metrics, board questions.
                 </p>
                 <Link
                   href="/inner-circle"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
                 >
-                  Join Inner Circle
-                  <ArrowRight className="h-4 w-4" />
+                  Join Inner Circle <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             )}
@@ -501,14 +438,10 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slug = params?.slug as string;
   const framework = getFrameworkBySlug(slug);
 
-  if (!framework) {
-    return { notFound: true };
-  }
+  if (!framework) return { notFound: true };
 
   return {
-    props: {
-      framework,
-    },
+    props: { framework },
     revalidate: 3600,
   };
 };
