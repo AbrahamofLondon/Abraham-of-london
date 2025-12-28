@@ -1,3 +1,4 @@
+/* lib/pdf/ultimate-purpose-of-man-pdf.tsx */
 /* eslint-disable jsx-a11y/alt-text */
 
 import React from "react";
@@ -11,9 +12,12 @@ import {
   Font,
 } from "@react-pdf/renderer";
 
-// ---------------------------------------------------------------------------
-// Fonts (brand)
-// ---------------------------------------------------------------------------
+/**
+ * IMPORTANT DESIGN NOTES
+ * - This module must be safe to import in Node/CI (Netlify).
+ * - Fonts are registered via public URLs; if font fetch fails, React-PDF will fall back.
+ * - coverImagePath should be an absolute local filesystem path when rendering in CI.
+ */
 
 try {
   Font.register({
@@ -29,12 +33,8 @@ try {
     src: "https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2oWUg0MKqScQ7Z7o_vo0qZxP9kFz.woff2",
   });
 } catch {
-  // fall back to built-ins
+  // React-PDF will fallback to built-ins if register fails
 }
-
-// ---------------------------------------------------------------------------
-// Brand tokens
-// ---------------------------------------------------------------------------
 
 const BRAND = {
   bg: "#050609",
@@ -49,13 +49,10 @@ const BRAND = {
   white: "#F9FAFB",
 };
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
 const styles = StyleSheet.create({
   document: { backgroundColor: BRAND.bg },
 
+  // Standard inner pages
   page: {
     paddingTop: 52,
     paddingBottom: 62,
@@ -63,6 +60,7 @@ const styles = StyleSheet.create({
     backgroundColor: BRAND.bg,
   },
 
+  // Top rail
   topRail: {
     marginBottom: 14,
     paddingBottom: 10,
@@ -92,6 +90,7 @@ const styles = StyleSheet.create({
     color: BRAND.muted,
   },
 
+  // Footer
   footer: {
     position: "absolute",
     bottom: 28,
@@ -115,10 +114,10 @@ const styles = StyleSheet.create({
     color: "#C7CBD3",
   },
 
+  // Cover
   coverPage: { padding: 0, backgroundColor: BRAND.bg },
   coverImageWrapper: { width: "100%", height: "55%" },
   coverImage: { width: "100%", height: "100%" },
-
   coverOverlay: {
     position: "absolute",
     left: 0,
@@ -156,14 +155,12 @@ const styles = StyleSheet.create({
     color: "#C7CBD3",
     marginBottom: 18,
   },
-
   coverRule: {
     height: 1,
     width: 160,
     backgroundColor: "rgba(212,175,55,0.45)",
     marginBottom: 16,
   },
-
   coverTagline: {
     fontFamily: "AoLSans",
     fontSize: 10,
@@ -172,6 +169,7 @@ const styles = StyleSheet.create({
     maxWidth: "84%",
   },
 
+  // Typography
   h1: {
     fontFamily: "AoLSerif",
     fontSize: 22,
@@ -192,7 +190,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 3,
   },
-
   bodyText: {
     fontFamily: "AoLSans",
     fontSize: 10.3,
@@ -206,6 +203,7 @@ const styles = StyleSheet.create({
     color: BRAND.white,
   },
 
+  // Blocks
   divider: {
     marginTop: 12,
     marginBottom: 12,
@@ -293,18 +291,22 @@ function Footer(): JSX.Element {
   );
 }
 
-export type UltimatePurposeOfManDocumentProps = {
+export type UltimatePurposeOfManPdfProps = {
+  /**
+   * Use an absolute local file path in Node/CI when calling renderToFile:
+   * e.g. path.join(process.cwd(), "public", "assets", "images", "purpose-cover.jpg")
+   */
   coverImagePath: string;
 };
 
-export default function UltimatePurposeOfManDocument(
-  props: UltimatePurposeOfManDocumentProps
+export default function UltimatePurposeOfManPdf(
+  props: UltimatePurposeOfManPdfProps
 ): JSX.Element {
   const { coverImagePath } = props;
 
   return (
-    <Document>
-      {/* COVER PAGE */}
+    <Document title="The Ultimate Purpose of Man — Strategic Editorial">
+      {/* COVER */}
       <Page size="A4" style={styles.coverPage}>
         <View style={styles.coverImageWrapper}>
           <Image src={coverImagePath} style={styles.coverImage} />
@@ -342,7 +344,7 @@ export default function UltimatePurposeOfManDocument(
           {`The modern world has mastered activity and forgotten meaning. It has perfected progress and lost direction. It has multiplied options and erased foundations.`}
         </Text>
         <Text style={styles.bodyText}>
-          {`This editorial is not a pep talk. It is not another promise. It is a demonstration of how purpose actually functions in reality — historically, theologically, strategically.`}
+          {`This editorial is not a pep talk. It is a demonstration of how purpose actually functions in reality — historically, theologically, strategically.`}
         </Text>
         <Text style={styles.bodyText}>
           {`Purpose is not something we chase. It is something we align with.`}
@@ -359,7 +361,7 @@ export default function UltimatePurposeOfManDocument(
         </View>
 
         <Text style={styles.bodyText}>
-          {`Eden was not a paradise escape; it was a deployment zone. Man was not dropped into chaos. He was placed into order — with identity, work, boundaries, and presence.`}
+          {`Eden was not a paradise escape; it was a deployment zone. Man was placed into order — with identity, work, boundaries, and presence.`}
         </Text>
 
         <View style={styles.bulletList}>
@@ -405,43 +407,40 @@ export default function UltimatePurposeOfManDocument(
 
         <Text style={styles.h3}>{`Job — Integrity under suffering`}</Text>
         <Text style={styles.bodyText}>
-          {`Purpose holds even when everything else collapses. Job’s story dismantles the myth that purpose is proven only in success. It is proven in faithfulness.`}
+          {`Purpose holds even when everything else collapses. Job dismantles the myth that purpose is proven only in success.`}
         </Text>
 
         <Text style={styles.h3}>{`Moses — Assignment after delay`}</Text>
         <Text style={styles.bodyText}>
-          {`Purpose can be delayed, but in God’s economy, delay is often formation. The man who fled Egypt in fear returned with clarity, authority, and a mandate.`}
+          {`Delay is often formation. The man who fled in fear returned with clarity, authority, and mandate.`}
         </Text>
 
         <Text style={styles.h3}>{`Abraham — Direction through trust`}</Text>
         <Text style={styles.bodyText}>
-          {`Abraham is called without a map, given promises without timelines. His life shows that purpose is walked out step-by-step, not leap-by-leap.`}
+          {`Called without a map, promised without timelines. Purpose is walked out step-by-step.`}
         </Text>
 
         <Text style={styles.h3}>{`David — Formation in hiddenness`}</Text>
         <Text style={styles.bodyText}>
-          {`Before the throne, there was the field. Before influence, there were lions and bears. David’s leadership was forged in worship and obedience long before coronation.`}
+          {`Before the throne, there was the field. Leadership was forged in worship and obedience long before coronation.`}
         </Text>
 
         <Text style={styles.h3}>{`Solomon — Discernment through wisdom`}</Text>
         <Text style={styles.bodyText}>
-          {`Solomon shows us that purpose without wisdom becomes vanity. Capacity without alignment leads to waste.`}
+          {`Purpose without wisdom becomes vanity. Capacity without alignment leads to waste.`}
         </Text>
 
         <View style={styles.divider} />
 
         <Text style={styles.h2}>{`3. JESUS — THE BLUEPRINT FOR HUMAN FUNCTION`}</Text>
         <Text style={styles.bodyText}>
-          {`Jesus does not only save mankind; He reveals mankind. He is the perfect expression of ordered desires, aligned identity, disciplined action, sacrificial leadership, and integrated purpose.`}
-        </Text>
-        <Text style={styles.bodyText}>
-          {`The disciples and early Church turn this blueprint into lived practice: ordinary men and women whose lives became architecture because they were aligned, not exceptional.`}
+          {`Jesus does not only save mankind; He reveals mankind. He is the perfect expression of aligned identity, disciplined action, sacrificial leadership, and integrated purpose.`}
         </Text>
 
         <View style={styles.divider} />
 
         <Text style={styles.h2}>
-          {`4. WORLDVIEWS — HUMANITY’S ATTEMPT TO REPLACE THE ORIGINAL DESIGN`}
+          {`4. WORLDVIEWS — ATTEMPTS TO REPLACE THE ORIGINAL DESIGN`}
         </Text>
         <Text style={styles.bodyText}>
           {`Civilisations rise and fall on their answer to the question of human purpose.`}
@@ -470,7 +469,7 @@ export default function UltimatePurposeOfManDocument(
           <Text style={styles.calloutText}>
             <Text style={styles.strong}>{`Origin → Identity → Meaning → Morality → Destiny`}</Text>
             {`\n`}
-            {`Each alternative can manufacture ethic or discipline — but not the full chain that sustains civilisation over time.`}
+            {`Alternatives can manufacture ethic or discipline — but not the full chain that sustains civilisation over time.`}
           </Text>
         </View>
 
@@ -483,13 +482,13 @@ export default function UltimatePurposeOfManDocument(
 
         <Text style={styles.h2}>{`5. WHY CHRISTIANITY BUILT THE MODERN WORLD`}</Text>
         <Text style={styles.bodyText}>
-          {`This is not ideology. It is documented history. Christianity did not merely inspire private faith; it reshaped civilisation. Much of what we call “modern” is the outworking of biblical ideas entering public life.`}
+          {`Christianity did not merely inspire private faith; it reshaped civilisation. Much of what we call “modern” is the outworking of biblical ideas entering public life.`}
         </Text>
 
         <View style={styles.callout}>
-          <Text style={styles.calloutLabel}>{`Made accessible · still powerful`}</Text>
+          <Text style={styles.calloutLabel}>{`Still the hidden engine`}</Text>
           <Text style={styles.calloutText}>
-            {`Much of what our world now treats as “obvious” or “secular progress” grew directly from Christian convictions about God, people, and order.`}
+            {`Much of what the world now treats as “obvious” grew directly from Christian convictions about God, people, and order.`}
           </Text>
         </View>
 
@@ -497,42 +496,22 @@ export default function UltimatePurposeOfManDocument(
           {
             title: "Human Dignity — Imago Dei (Genesis 1:26–27)",
             body:
-              "The idea that every human being carries divine worth, regardless of status, tribe, or power. This doctrine dismantled ancient class hierarchies and fuelled human rights movements.",
+              "Every human carries divine worth regardless of status. This doctrine dismantled ancient hierarchies and seeded human rights reasoning.",
           },
           {
             title: "Scientific Rationalism — A rational Creator, a rational universe",
             body:
-              "Because Christians believed God was orderly, they expected the world to operate by discoverable laws. This conviction powered the scientific revolution.",
+              "Belief in an orderly God produced expectation of discoverable laws — a driver of the scientific revolution.",
           },
           {
             title: "The Rule of Law — No one is above God",
             body:
-              "The biblical insistence that even kings answer to a higher authority produced foundations for constitutional government.",
+              "Even kings answer to a higher authority — foundations for constitutional government.",
           },
           {
-            title: "Economic Freedom — Stewardship, vocation, responsibility",
+            title: "Vocation — Work as stewardship",
             body:
-              "Christian theology honoured the dignity of work, private stewardship, and moral limits on exploitation — seeds of many modern economic models.",
-          },
-          {
-            title: "Personal Responsibility — Each person answers to God",
-            body:
-              "Not the state. Not the tribe. Not blind fate. This built conscience, moral agency, and self-governance.",
-          },
-          {
-            title: "Charitable Systems — Love your neighbour",
-            body:
-              "Christians built hospitals, orphanages, and structured charity — not as philanthropy, but as obedience.",
-          },
-          {
-            title: "Justice as moral principle — Righteousness and equity",
-            body:
-              "Justice became public duty, not private privilege. Christian ethics insisted the poor, foreigner, and vulnerable be protected.",
-          },
-          {
-            title: "Vocation as sacred work — Work as worship",
-            body:
-              "Christianity erased the divide between “sacred” and “secular” work: farmer, mother, merchant, or statesman could serve God through craft.",
+              "The sacred–secular divide collapses: farmer, merchant, mother, statesman all serve through craft and responsibility.",
           },
         ].map((b) => (
           <View key={b.title} style={{ marginTop: 8 }}>
@@ -540,10 +519,6 @@ export default function UltimatePurposeOfManDocument(
             <Text style={styles.bodyText}>{b.body}</Text>
           </View>
         ))}
-
-        <Text style={styles.bodyText}>
-          {`When purpose is grounded in reality, it becomes productive. When it aligns with divine order, it becomes transformative — at personal, household, and civilisational scale.`}
-        </Text>
 
         <View style={styles.divider} />
 
@@ -556,63 +531,14 @@ export default function UltimatePurposeOfManDocument(
         </View>
 
         <Text style={styles.bodyText}>
-          {`The entire architecture of human purpose — condensed. This is not fear as terror; it is fear as proper orientation.`}
-        </Text>
-
-        <Text style={styles.h3}>{`To fear God is to:`}</Text>
-        <View style={styles.bulletList}>
-          {["recognise His structure", "submit to His wisdom", "respect His order", "align with His design"].map(
-            (t) => (
-              <View key={t} style={styles.bulletItem}>
-                <Text style={styles.bulletDot}>{`•`}</Text>
-                <Text style={styles.bulletText}>{t}</Text>
-              </View>
-            )
-          )}
-        </View>
-
-        <Text style={styles.bodyText}>
-          {`Jesus completes the blueprint: Love God. Love your neighbour as yourself. Not poetry — governance. Not emotion — protocol. Love is the engine of divine order, and order is the environment where purpose flourishes.`}
+          {`This is not fear as terror; it is fear as proper orientation — reality accepted, order respected, authority acknowledged.`}
         </Text>
 
         <View style={styles.divider} />
 
-        <Text style={styles.h2}>{`7. FRAMEWORKS — THE STRATEGIC GRID OF HUMAN EXISTENCE`}</Text>
+        <Text style={styles.h2}>{`7. CONCLUSION — PURPOSE IS A MANDATE, NOT A MYSTERY`}</Text>
         <Text style={styles.bodyText}>
-          {`Purpose is not philosophical; it is functional. These frameworks express that function in operational form:`}
-        </Text>
-
-        <View style={styles.callout}>
-          <Text style={styles.calloutLabel}>{`Framework set`}</Text>
-          <Text style={styles.calloutText}>
-            <Text style={styles.strong}>{`Dominion Framework:`}</Text>
-            {` Stewardship + Responsibility = Influence\n`}
-            <Text style={styles.strong}>{`Garden Mandate Model:`}</Text>
-            {` Identity → Work → Influence → Culture\n`}
-            <Text style={styles.strong}>{`Ancient–Future Leadership Matrix:`}</Text>
-            {` (Abrahamic Faith) + (Mosaic Governance) + (Davidic Devotion) + (Pauline Strategy) + (Early-Church Resilience) = Enduring Leadership\n`}
-            <Text style={styles.strong}>{`Ecclesiastes Operating System (EOS):`}</Text>
-            {` Truth → Wisdom → Alignment → Flourishing\n`}
-            <Text style={styles.strong}>{`Love-Alignment Protocol:`}</Text>
-            {` Love God → Love Self → Love Neighbour → Transform Environment.`}
-          </Text>
-        </View>
-
-        <Text style={styles.bodyText}>
-          {`These are not predictions of future work. They are work already done — codified, articulated, structured.`}
-        </Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.h2}>{`8. CONCLUSION — PURPOSE IS A MANDATE, NOT A MYSTERY`}</Text>
-        <Text style={styles.bodyText}>
-          {`You were not designed for drift. You were not born for confusion. You were not placed here merely to survive time and hope for comfort.`}
-        </Text>
-        <Text style={styles.bodyText}>
-          {`The purpose of man is not hidden: to align with God’s order, embody His love, steward His world, and build with clarity.`}
-        </Text>
-        <Text style={styles.bodyText}>
-          {`Your decisions, leadership, discipline, relationships, work, and words all sit under one mandate:`}
+          {`You were not designed for drift. The purpose of man is not hidden: align with God’s order, embody His love, steward His world, build with clarity.`}
         </Text>
         <Text style={[styles.bodyText, { color: BRAND.white }]}>
           {`Fear God. Keep His commandments. Walk in love. Build with precision. Everything else is commentary.`}

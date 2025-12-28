@@ -1,79 +1,44 @@
-// scripts/generate-ultimate-purpose-of-man-pdf.tsx
-import * as React from "react";
-import fs from "node:fs";
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  pdf,
-} from "@react-pdf/renderer";
+/* scripts/generate-ultimate-purpose-of-man-pdf.ts */
+import fs from "fs/promises";
+import path from "path";
+import React from "react";
+import { renderToFile } from "@react-pdf/renderer";
 
-// ---------------- Styles ----------------
+import UltimatePurposeOfManDocument from "../lib/pdf/ultimate-purpose-of-man-pad";
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "column",
-    backgroundColor: "#E4E4E4",
-    padding: 30,
-  },
-  title: {
-    fontSize: 24,
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-  },
-});
-
-// ---------------- Document Component ----------------
-
-const MyDocument: React.FC = () => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>The Ultimate Purpose of Man</Text>
-        <Text>Section #1</Text>
-      </View>
-      <View style={styles.section}>
-        <Text>Section #2</Text>
-      </View>
-    </Page>
-  </Document>
-);
-
-// ---------------- Main generator ----------------
-
-async function generatePdf(): Promise<void> {
-  console.log("[pdf] Starting PDF generation...");
-
-  const outputDir = "./public/downloads";
-  const outputPath = `${outputDir}/ultimate-purpose-of-man.pdf`;
-
-  try {
-    // Ensure the output directory exists
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-
-    // Render the PDF to a buffer and save it
-    const instance = pdf(<MyDocument />);
-
-    // Typings for @react-pdf/renderer are looser; at runtime this is a Buffer.
-    const buffer = (await instance.toBuffer()) as unknown as Buffer;
-
-    fs.writeFileSync(outputPath, buffer);
-
-    console.log("[pdf] PDF generated successfully at:", outputPath);
-  } catch (error) {
-    console.error("[pdf] Error generating PDF:", error);
-    process.exit(1);
-  }
+async function ensureDir(p: string) {
+  await fs.mkdir(p, { recursive: true });
 }
 
-// Run the generation
-void generatePdf();
+async function main() {
+  const outDir = path.join(process.cwd(), "public", "assets", "downloads");
+  const outFile = path.join(outDir, "ultimate-purpose-of-man-editorial.pdf");
+
+  // pick an existing cover image; must exist in /public
+  const coverImagePublic = "/assets/images/purpose-cover.jpg";
+  const coverImageFs = path.join(process.cwd(), "public", coverImagePublic.replace(/^\//, ""));
+
+  await ensureDir(outDir);
+
+  // sanity check cover exists; if not, fall back to something you know exists
+  let coverToUse = coverImagePublic;
+  try {
+    await fs.access(coverImageFs);
+  } catch {
+    coverToUse = "/assets/images/writing-desk.webp";
+  }
+
+  await renderToFile(
+    <UltimatePurposeOfManDocument coverImagePath={coverToUse} />,
+    outFile
+  );
+
+  // eslint-disable-next-line no-console
+  console.log(`✅ Generated PDF: ${outFile}`);
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error("❌ PDF generation failed:", err);
+  process.exit(1);
+});

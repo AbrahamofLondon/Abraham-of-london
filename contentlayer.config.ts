@@ -1,4 +1,4 @@
-// contentlayer.ts (or contentlayer.config.ts) — FULL VERSION
+// contentlayer.config.ts — FULL VERSION (resilient)
 import path from "path";
 import { makeSource, defineDocumentType } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
@@ -9,7 +9,7 @@ type RawMeta = { flattenedPath: string };
 type AnyDoc = {
   _raw: RawMeta;
   slug?: string | null; // canonical routing helper (optional)
-  url?: string | null;  // OPTIONAL explicit canonical route (must match base)
+  canonicalUrl?: string | null; // OPTIONAL explicit canonical route (must match base)
   href?: string | null; // CTA ONLY (never used for routing)
 };
 
@@ -35,17 +35,21 @@ function stripIndex(p: string): string {
 }
 
 function deriveSegmentFromFlattenedPath(flattenedPath: string, basePath: string): string {
-  const fp = stripIndex(toPosix(flattenedPath));
+  const fp = stripIndex(toPosix(flattenedPath || ""));
   const base = trimSlashes(basePath);
+
+  if (!base) return fp;
 
   if (fp === base) return "";
   if (fp.startsWith(`${base}/`)) return fp.slice(base.length + 1);
+
+  // fallback: if file is oddly placed, still return something stable
   return fp;
 }
 
 /**
  * Canonical URL rules:
- * 0) doc.url (optional explicit canonical) — allowed only if it matches the base
+ * 0) doc.canonicalUrl (optional explicit canonical) — allowed only if it matches the base
  * 1) doc.slug (canonical) — allow "resources/foo" or "foo"
  * 2) flattenedPath fallback (canonical)
  *
@@ -55,8 +59,8 @@ function getDocUrl(doc: AnyDoc, basePath: string): string {
   const base = trimSlashes(basePath);
 
   // 0) Explicit canonical URL (optional feature)
-  if (isNonEmptyString(doc.url)) {
-    const explicit = normalizeUrl(doc.url);
+  if (isNonEmptyString(doc.canonicalUrl)) {
+    const explicit = normalizeUrl(doc.canonicalUrl);
     if (explicit === `/${base}` || explicit.startsWith(`/${base}/`)) return explicit;
   }
 
@@ -70,7 +74,7 @@ function getDocUrl(doc: AnyDoc, basePath: string): string {
   }
 
   // 2) flattenedPath fallback (canonical routing)
-  const seg = deriveSegmentFromFlattenedPath(doc._raw.flattenedPath, base);
+  const seg = deriveSegmentFromFlattenedPath(doc._raw?.flattenedPath ?? "", base);
   return seg ? normalizeUrl(`${base}/${seg}`) : normalizeUrl(base);
 }
 
@@ -104,8 +108,8 @@ const commonFields = {
 
   slug: { type: "string", required: false },
 
-  // ✅ allow explicit canonical when needed
-  url: { type: "string", required: false },
+  // ✅ explicit canonical URL support without colliding with computedFields.url
+  canonicalUrl: { type: "string", required: false },
 
   // CTA ONLY (never used for routing)
   href: { type: "string", required: false },
@@ -123,6 +127,28 @@ const commonFields = {
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
 } as const;
+
+const computedCommon = (base: string) => ({
+  url: { type: "string", resolve: (doc: any) => getDocUrl(doc as AnyDoc, base) },
+  normalizedCoverImage: {
+    type: "string",
+    resolve: (doc: any) =>
+      (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
+      (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
+      "",
+  },
+});
+
+const computedReadTime = {
+  normalizedReadTime: {
+    type: "string",
+    resolve: (doc: any) =>
+      (typeof doc.readTime === "string" && doc.readTime.trim()) ||
+      (typeof doc.readtime === "string" && doc.readtime.trim()) ||
+      (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
+      "",
+  },
+};
 
 export const Post = defineDocumentType(() => ({
   name: "Post",
@@ -150,22 +176,8 @@ export const Post = defineDocumentType(() => ({
     layout: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "blog") },
-    normalizedReadTime: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.readTime === "string" && doc.readTime.trim()) ||
-        (typeof doc.readtime === "string" && doc.readtime.trim()) ||
-        (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
-        "",
-    },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("blog"),
+    ...computedReadTime,
   },
 }));
 
@@ -186,22 +198,8 @@ export const Resource = defineDocumentType(() => ({
     fileSize: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "resources") },
-    normalizedReadTime: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.readTime === "string" && doc.readTime.trim()) ||
-        (typeof doc.readtime === "string" && doc.readtime.trim()) ||
-        (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
-        "",
-    },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("resources"),
+    ...computedReadTime,
   },
 }));
 
@@ -218,29 +216,50 @@ export const Download = defineDocumentType(() => ({
     readtime: { type: "string", required: false },
     readingTime: { type: "string", required: false },
     subtitle: { type: "string", required: false },
-    file: { type: "string", required: false },
-    pdfPath: { type: "string", required: false },
+
+    // PDF-related (multiple legacy forms supported)
+    file: { type: "string", required: false }, // filename-only (preferred)
+    pdfPath: { type: "string", required: false }, // "/assets/downloads/x.pdf" (preferred)
     fileSize: { type: "string", required: false },
+
+    // legacy/optional
     downloadFile: { type: "string", required: false },
     fileUrl: { type: "string", required: false },
     downloadUrl: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "downloads") },
-    normalizedReadTime: {
+    ...computedCommon("downloads"),
+    ...computedReadTime,
+
+    // ✅ A single canonical PDF href your app & scripts can rely on
+    canonicalPdfHref: {
       type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.readTime === "string" && doc.readTime.trim()) ||
-        (typeof doc.readtime === "string" && doc.readtime.trim()) ||
-        (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
-        "",
-    },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
+      resolve: (doc: any) => {
+        const pick =
+          (typeof doc.pdfPath === "string" && doc.pdfPath.trim()) ||
+          (typeof doc.downloadFile === "string" && doc.downloadFile.trim()) ||
+          "";
+
+        const file = typeof doc.file === "string" && doc.file.trim() ? doc.file.trim() : "";
+
+        // Remote URL allowed
+        if (/^https?:\/\//i.test(pick)) return pick;
+
+        // If pdfPath/downloadFile is a path-like string, use it (but normalize /downloads -> /assets/downloads)
+        if (pick) {
+          const clean = pick.startsWith("/") ? pick : `/${pick}`;
+          const base = path.posix.basename(clean);
+          return `/assets/downloads/${base}`;
+        }
+
+        // If only filename exists, assume canonical assets location
+        if (file) {
+          const base = path.posix.basename(file);
+          return `/assets/downloads/${base}`;
+        }
+
+        return "";
+      },
     },
   },
 }));
@@ -261,22 +280,8 @@ export const Book = defineDocumentType(() => ({
     category: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "books") },
-    normalizedReadTime: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.readTime === "string" && doc.readTime.trim()) ||
-        (typeof doc.readtime === "string" && doc.readtime.trim()) ||
-        (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
-        "",
-    },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("books"),
+    ...computedReadTime,
   },
 }));
 
@@ -292,14 +297,7 @@ export const Event = defineDocumentType(() => ({
     registrationUrl: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "events") },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("events"),
   },
 }));
 
@@ -315,14 +313,7 @@ export const Print = defineDocumentType(() => ({
     available: { type: "boolean", required: false, default: true },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "prints") },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("prints"),
   },
 }));
 
@@ -335,14 +326,7 @@ export const Strategy = defineDocumentType(() => ({
     author: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "strategy") },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("strategy"),
   },
 }));
 
@@ -364,22 +348,8 @@ export const Canon = defineDocumentType(() => ({
     readingTime: { type: "string", required: false },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "canon") },
-    normalizedReadTime: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.readTime === "string" && doc.readTime.trim()) ||
-        (typeof doc.readtime === "string" && doc.readtime.trim()) ||
-        (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
-        "",
-    },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("canon"),
+    ...computedReadTime,
   },
 }));
 
@@ -397,22 +367,8 @@ export const Short = defineDocumentType(() => ({
     published: { type: "boolean", required: false, default: true },
   },
   computedFields: {
-    url: { type: "string", resolve: (doc) => getDocUrl(doc as AnyDoc, "shorts") },
-    normalizedReadTime: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.readTime === "string" && doc.readTime.trim()) ||
-        (typeof doc.readtime === "string" && doc.readtime.trim()) ||
-        (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
-        "",
-    },
-    normalizedCoverImage: {
-      type: "string",
-      resolve: (doc: any) =>
-        (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
-    },
+    ...computedCommon("shorts"),
+    ...computedReadTime,
   },
 }));
 

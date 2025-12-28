@@ -4,12 +4,28 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, BookOpen, User, Mail, Shield, LayoutGrid } from "lucide-react";
+import {
+  Menu,
+  X,
+  BookOpen,
+  User,
+  Mail,
+  Shield,
+  LayoutGrid,
+  Lock,
+} from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: BookOpen },
-  { href: "/content", label: "Vault", icon: LayoutGrid },
+
+  // ✅ Vault is NOT /content. Vault is its own destination.
+  { href: "/vault", label: "Vault", icon: LayoutGrid },
+
   { href: "/canon", label: "The Canon", icon: Shield },
+
+  // ✅ Optional but recommended: direct Inner Circle entry
+  { href: "/inner-circle", label: "Inner Circle", icon: Lock },
+
   { href: "/about", label: "About", icon: User },
   { href: "/contact", label: "Contact", icon: Mail },
 ];
@@ -29,14 +45,15 @@ export default function Navbar() {
   React.useEffect(() => setIsOpen(false), [pathname]);
 
   return (
-    <nav 
+    <nav
       className={`fixed top-0 z-[100] w-full transition-all duration-500 ${
-        scrolled ? "bg-black/80 backdrop-blur-xl border-b border-gold/10 py-3" : "bg-transparent py-6"
+        scrolled
+          ? "bg-black/80 backdrop-blur-xl border-b border-gold/10 py-3"
+          : "bg-transparent py-6"
       }`}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          
           {/* Logo */}
           <Link href="/" className="group flex flex-col">
             <span className="font-serif text-xl font-bold tracking-tight text-white sm:text-2xl">
@@ -54,12 +71,15 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`text-xs font-bold uppercase tracking-widest transition-colors ${
-                  pathname === item.href ? "text-gold" : "text-gray-400 hover:text-white"
+                  pathname === item.href
+                    ? "text-gold"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 {item.label}
               </Link>
             ))}
+
             <Link
               href="/canon/the-architecture-of-human-purpose"
               className="rounded-full border border-gold bg-gold/10 px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-gold hover:bg-gold hover:text-black transition-all"
@@ -69,7 +89,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Toggle */}
-          <button 
+          <button
             onClick={() => setIsOpen(!isOpen)}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/20 text-gold lg:hidden"
           >
@@ -98,6 +118,7 @@ export default function Navbar() {
                   {item.label}
                 </Link>
               ))}
+
               <div className="pt-6">
                 <Link
                   href="/inner-circle"

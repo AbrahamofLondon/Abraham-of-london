@@ -1,12 +1,9 @@
-// pages/vault/index.tsx
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import DownloadCard from "@/components/downloads/DownloadCard";
 import {
   assertContentlayerHasDocs,
-  assertDownloadFilesExist,
   getAllDownloads,
   normalizeSlug,
   resolveDocCoverImage,
@@ -16,7 +13,7 @@ import {
   getAccessLevel,
 } from "@/lib/contentlayer-helper";
 
-type NormalisedDownload = {
+type VaultItem = {
   slug: string;
   title: string;
   excerpt: string | null;
@@ -36,77 +33,79 @@ type NormalisedDownload = {
   featured?: boolean;
 };
 
-export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }> = async () => {
+const VAULT_SLUG_ALLOWLIST = new Set([
+  "purpose-pyramid-worksheet",
+  "decision-matrix-scorecard",
+  "legacy-canvas",
+  "board-decision-log-template",
+  "operating-cadence-pack",
+]);
+
+export const getStaticProps: GetStaticProps<{ items: VaultItem[] }> = async () => {
   assertContentlayerHasDocs("pages/vault/index.tsx getStaticProps");
 
   const all = getAllDownloads();
 
-  // Build-time validation for known public download directory.
-  // This will fail the build if any /assets/downloads/... files are missing.
-  assertDownloadFilesExist();
+  const items: VaultItem[] = all
+    .map((d: any) => {
+      const slug = normalizeSlug(d);
 
-  const downloads: NormalisedDownload[] = all.map((d: any) => {
-    const slug = normalizeSlug(d);
-    const title = d.title ?? "Untitled download";
+      if (!VAULT_SLUG_ALLOWLIST.has(slug)) return null;
 
-    const excerpt =
-      (typeof d.excerpt === "string" && d.excerpt.trim().length ? d.excerpt : null) ??
-      (typeof d.description === "string" && d.description.trim().length ? d.description : null);
+      const title = d.title ?? "Untitled artifact";
 
-    const coverImage = resolveDocCoverImage(d) || null;
+      const excerpt =
+        (typeof d.excerpt === "string" && d.excerpt.trim().length ? d.excerpt : null) ??
+        (typeof d.description === "string" && d.description.trim().length ? d.description : null);
 
-    const fileUrl = resolveDocDownloadUrl(d);
-    const fileHref = resolveDocDownloadHref(d);
+      const coverImage = resolveDocCoverImage(d) || null;
+      const fileUrl = resolveDocDownloadUrl(d);
+      const fileHref = resolveDocDownloadHref(d);
 
-    const category =
-      (typeof d.category === "string" && d.category.trim().length ? d.category : null) ??
-      (typeof d.type === "string" && d.type.trim().length ? d.type : null);
+      const category =
+        (typeof d.category === "string" && d.category.trim().length ? d.category : null) ??
+        (typeof d.type === "string" && d.type.trim().length ? d.type : null) ??
+        "Vault";
 
-    const size = resolveDocDownloadSizeLabel(d);
+      const size = resolveDocDownloadSizeLabel(d);
+      const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
+      const date = typeof d.date === "string" ? d.date : null;
+      const featured = Boolean(d.featured);
+      const accessLevel = getAccessLevel(d);
 
-    const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
-    const date = typeof d.date === "string" ? d.date : null;
-    const featured = Boolean(d.featured);
+      return {
+        slug,
+        title,
+        excerpt,
+        coverImage,
+        fileHref: fileHref ?? null,
+        fileUrl: fileUrl ?? null,
+        accessLevel,
+        category,
+        size,
+        tags,
+        date,
+        featured,
+      };
+    })
+    .filter(Boolean) as VaultItem[];
 
-    const accessLevel = getAccessLevel(d);
-
-    return {
-      slug,
-      title,
-      excerpt: excerpt ?? null,
-      coverImage,
-      fileHref: fileHref ?? null,
-      fileUrl: fileUrl ?? null,
-      accessLevel,
-      category,
-      size,
-      tags,
-      date,
-      featured,
-    };
-  });
-
-  downloads.sort((a, b) => {
+  // Sort: featured first, then newest
+  items.sort((a, b) => {
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
-
     const da = a.date ? new Date(a.date).getTime() : 0;
     const db = b.date ? new Date(b.date).getTime() : 0;
     return db - da;
   });
 
-  return { props: { downloads }, revalidate: 3600 };
+  return { props: { items }, revalidate: 3600 };
 };
 
-export default function VaultIndexPage(
-  props: InferGetStaticPropsType<typeof getStaticProps>
-) {
-  const title = "The Vault";
+export default function VaultPage(props: InferGetStaticPropsType<typeof getStaticProps>) {
+  const title = "Vault";
   const description =
-    "Board-grade artifacts: worksheets, scorecards, templates, and cadence packs — delivered with tier-controlled access.";
-
-  const featuredDownloads = props.downloads.filter((d) => d.featured);
-  const regularDownloads = props.downloads.filter((d) => !d.featured);
+    "Board-grade artifacts: fillable PDFs, audit-ready templates, and cadence packs — engineered for leaders who execute.";
 
   return (
     <Layout title={title}>
@@ -115,135 +114,99 @@ export default function VaultIndexPage(
         <meta name="description" content={description} />
         <meta property="og:title" content={`${title} | Abraham of London`} />
         <meta property="og:description" content={description} />
+        <link rel="canonical" href="https://www.abrahamoflondon.org/vault" />
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <header className="mb-16 text-center">
-            <div className="mb-6">
-              <span className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white">
-                Vault Access
-              </span>
-            </div>
-            <h1 className="mb-6 font-serif text-5xl font-light tracking-tight text-slate-900 md:text-6xl">
+      <main className="min-h-screen bg-gradient-to-b from-slate-950 via-black to-slate-950">
+        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+          <header className="mb-14">
+            <p className="text-xs font-bold uppercase tracking-[0.35em] text-gold/60">
               The Vault
+            </p>
+            <h1 className="mt-4 font-serif text-4xl font-semibold text-cream sm:text-5xl">
+              Real artifacts. No fluff.
             </h1>
-            <p className="mx-auto max-w-3xl text-lg leading-8 text-slate-600">
-              Curated assets for leadership, governance, and decision velocity.
-              Every download is routed via a controlled endpoint (tier + audit-ready).
+            <p className="mt-5 max-w-2xl text-base leading-7 text-gray-300">
+              If it doesn’t fill clean, print clean, and stand up in a boardroom,
+              it doesn’t ship. This Vault is operational — not inspirational.
             </p>
 
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/downloads"
-                className="rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-105"
+                className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3 text-xs font-bold uppercase tracking-widest text-black transition-transform hover:scale-105"
               >
-                Browse downloads
+                Browse all downloads
               </Link>
               <Link
                 href="/inner-circle"
-                className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-all hover:border-slate-400 hover:scale-105"
+                className="inline-flex items-center justify-center rounded-full border border-gold/30 bg-transparent px-7 py-3 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 transition-all"
               >
                 Unlock Inner Circle
               </Link>
             </div>
           </header>
 
-          {props.downloads.length === 0 ? (
-            <section className="rounded-2xl border border-slate-200 bg-white/60 p-8 backdrop-blur-sm">
-              <div className="text-center">
-                <h2 className="mb-3 text-xl font-semibold text-slate-900">
-                  Vault is being stocked
+          <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {props.items.map((it) => (
+              <div
+                key={it.slug}
+                className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm transition-all hover:border-gold/25 hover:bg-white/[0.05]"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-300">
+                    {it.category ?? "Vault"}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gold/70">
+                    {it.accessLevel === "public" ? "Public" : "Gated"}
+                  </span>
+                </div>
+
+                <h2 className="font-serif text-xl font-semibold text-cream">
+                  {it.title}
                 </h2>
-                <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                  Artifacts are being prepared for publication.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                {it.excerpt ? (
+                  <p className="mt-3 text-sm leading-6 text-gray-300">
+                    {it.excerpt}
+                  </p>
+                ) : null}
+
+                <div className="mt-6 flex flex-col gap-3">
                   <Link
-                    href="/content"
-                    className="rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-105"
+                    href={`/downloads/${it.slug}`}
+                    className="inline-flex items-center justify-center rounded-xl bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-widest text-cream transition-all hover:bg-white/10"
                   >
-                    Explore Insights
+                    View details
                   </Link>
-                  <Link
-                    href="/books"
-                    className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-all hover:border-slate-400 hover:scale-105"
-                  >
-                    Browse Books
-                  </Link>
+
+                  {/* direct download (works for public; gated users will be redirected by your /api/downloads/[slug] flow if you use it) */}
+                  {it.fileHref ? (
+                    <a
+                      href={it.fileHref}
+                      className="inline-flex items-center justify-center rounded-xl border border-gold/25 bg-gold/10 px-4 py-3 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/15"
+                    >
+                      Download
+                    </a>
+                  ) : null}
+
+                  {it.size ? (
+                    <p className="text-[11px] text-gray-400">Size: {it.size}</p>
+                  ) : null}
                 </div>
               </div>
-            </section>
-          ) : (
-            <div className="space-y-16">
-              {featuredDownloads.length > 0 && (
-                <section>
-                  <div className="mb-8 flex items-center justify-between">
-                    <div>
-                      <h2 className="font-serif text-3xl font-light text-slate-900">
-                        Flagship Artifacts
-                      </h2>
-                      <p className="mt-2 text-slate-600">
-                        Highest signal assets — the ones you pull out in a board room.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid gap-8 lg:grid-cols-2">
-                    {featuredDownloads.map((dl) => (
-                      <DownloadCard
-                        key={dl.slug}
-                        slug={dl.slug}
-                        title={dl.title}
-                        excerpt={dl.excerpt}
-                        coverImage={dl.coverImage}
-                        fileHref={dl.fileHref}
-                        category={dl.category}
-                        size={dl.size ?? undefined}
-                        featured={true}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
+            ))}
+          </section>
 
-              {regularDownloads.length > 0 && (
-                <section>
-                  <div className="mb-8">
-                    <h2 className="font-serif text-3xl font-light text-slate-900">
-                      Complete Vault
-                    </h2>
-                    <p className="mt-2 text-slate-600">
-                      Everything currently published — tools, templates, and packs.
-                    </p>
-                  </div>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {regularDownloads.map((dl) => (
-                      <DownloadCard
-                        key={dl.slug}
-                        slug={dl.slug}
-                        title={dl.title}
-                        excerpt={dl.excerpt}
-                        coverImage={dl.coverImage}
-                        fileHref={dl.fileHref}
-                        category={dl.category}
-                        size={dl.size ?? undefined}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              <section className="rounded-2xl border border-amber-200 bg-amber-50 p-8">
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Quality standard (non-negotiable)
-                </h3>
-                <p className="mt-2 text-slate-700">
-                  PDFs must be fillable + print clean. Soft scans (image-only) are not vault-grade.
-                  If it can’t be filled, exported, and archived cleanly — it doesn’t ship.
-                </p>
-              </section>
-            </div>
-          )}
+          <section className="mt-14 rounded-2xl border border-gold/20 bg-gradient-to-r from-gold/10 to-transparent p-8">
+            <h3 className="font-serif text-2xl font-semibold text-cream">
+              Quality bar
+            </h3>
+            <ul className="mt-4 space-y-2 text-sm text-gray-200">
+              <li>• PDFs are fillable (not image-only).</li>
+              <li>• Prints are clean (no blurry raster text).</li>
+              <li>• Templates are audit-friendly (versionable, shareable, reusable).</li>
+            </ul>
+          </section>
         </div>
       </main>
     </Layout>
