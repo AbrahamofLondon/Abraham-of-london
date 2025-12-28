@@ -1,4 +1,4 @@
-// pages/resources/[...slug].tsx - COMPLETE FIXED VERSION
+// pages/resources/[...slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { getAllResources, getResourceByUrlPath } from "@/lib/server/content";
+import { getAllResources, getResourceByUrlPath, type ResourceDoc } from "@/lib/server/content";
 import { serializeMDX } from "@/lib/mdx-utils";
 
 type Props = {
@@ -19,10 +19,7 @@ type Props = {
     tags?: string[];
     author?: string | null;
     url: string;
-    body?: {
-      raw?: string;
-      code?: string;
-    };
+    body: { raw: string };
   };
   source: MDXRemoteSerializeResult;
 };
@@ -39,22 +36,18 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
   }
 
   return (
-    <Layout title={resource.title}>
+    <Layout title={resource.title} description={resource.description ?? resource.excerpt ?? undefined}>
       <Head>
         <link rel="canonical" href={resource.url} />
+        <meta property="og:title" content={resource.title} />
+        {resource.description ? <meta property="og:description" content={resource.description} /> : null}
       </Head>
 
       <main className="mx-auto max-w-3xl px-4 py-12">
         <header className="mb-10 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Resources
-          </p>
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-            {resource.title}
-          </h1>
-          {resource.excerpt ? (
-            <p className="text-sm text-gray-200">{resource.excerpt}</p>
-          ) : null}
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Resources</p>
+          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{resource.title}</h1>
+          {resource.excerpt ? <p className="text-sm text-gray-200">{resource.excerpt}</p> : null}
         </header>
 
         <article className="prose prose-invert max-w-none">
@@ -66,81 +59,50 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const resources = await getAllResources();
+  const resources = await getAllResources();
 
-    const paths = resources
-      .map((r: any) => r.url || r.href)
-      .filter((u: unknown): u is string => typeof u === "string")
-      .filter((u: string) => u.startsWith("/resources/"))
-      .filter((u: string) => u !== "/resources")
+  const paths = resources
+    .map((r) => r.url)
+    .filter((u): u is string => typeof u === "string" && u.startsWith("/resources/") && u !== "/resources")
+    // explicit route owns this subtree
+    .filter((u) => !u.startsWith("/resources/strategic-frameworks"))
+    .map((u) => {
+      const slugParts = u.replace(/^\/resources\/?/, "").split("/").filter(Boolean);
+      return { params: { slug: slugParts } };
+    });
 
-      // 🚫 EXCLUDE strategic-frameworks (explicit route owns it)
-      .filter((u: string) => !u.startsWith("/resources/strategic-frameworks"))
-
-      .map((u: string) => {
-        const slugParts = u
-          .replace(/^\/resources\/?/, "")
-          .split("/")
-          .filter(Boolean);
-
-        return { params: { slug: slugParts } };
-      });
-
-    return {
-      paths,
-      fallback: false,
-    };
-  } catch (error) {
-    console.error("Error generating static paths for resources:", error);
-    return {
-      paths: [],
-      fallback: false,
-    };
-  }
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
-  try {
-    const slug = (ctx.params?.slug as string[]) || [];
-    const urlPath = "/resources/" + slug.join("/");
+  const slugParts = (ctx.params?.slug as string[]) || [];
+  const urlPath = "/resources/" + slugParts.join("/");
 
-    const doc = await getResourceByUrlPath(urlPath);
-    if (!doc) {
-      return { notFound: true };
-    }
+  const doc = (await getResourceByUrlPath(urlPath)) as ResourceDoc | null;
+  if (!doc) return { notFound: true };
 
-    // Extract content - handle different content layer structures
-    const content = doc.body?.raw || doc.body?.code || doc.content || '';
-    
-    if (!content) {
-      console.warn(`Resource "${doc.title}" has no content`);
-      return { notFound: true };
-    }
+  const content = doc.body?.raw || "";
+  if (!content.trim()) return { notFound: true };
 
-    const source = await serializeMDX(content);
+  const source = await serializeMDX(content);
 
-    return {
-      props: {
-        resource: {
-          title: doc.title || 'Untitled Resource',
-          excerpt: doc.excerpt ?? doc.description ?? null,
-          description: doc.description ?? null,
-          date: doc.date ?? null,
-          coverImage: doc.coverImage ?? null,
-          tags: Array.isArray(doc.tags) ? doc.tags : [],
-          author: doc.author ?? null,
-          url: doc.url || doc.href || urlPath,
-          body: doc.body,
-        },
-        source,
+  return {
+    props: {
+      resource: {
+        title: doc.title || "Untitled Resource",
+        excerpt: doc.excerpt ?? doc.description ?? null,
+        description: doc.description ?? null,
+        date: doc.date ?? null,
+        coverImage: doc.coverImage ?? null,
+        tags: Array.isArray(doc.tags) ? doc.tags : [],
+        author: doc.author ?? null,
+        url: doc.url || urlPath,
+        body: { raw: content },
       },
-      revalidate: 3600, // Add revalidation for ISR
-    };
-  } catch (error) {
-    console.error("Error in getStaticProps for resource:", ctx.params?.slug, error);
-    return { notFound: true };
-  }
+      source,
+    },
+    revalidate: 3600,
+  };
 };
 
 export default ResourcesCatchAllPage;
