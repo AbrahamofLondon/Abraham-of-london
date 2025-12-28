@@ -1,4 +1,4 @@
-// scripts/validate-downloads.mjs
+// scripts/validate-downloads.mjs - FIXED VERSION
 import fs from "fs";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
@@ -23,15 +23,10 @@ function basenameFromAny(p) {
 }
 
 function canonicalizeToAssetsDownloads(publicPathOrFile) {
-  // Converts:
-  // - "/downloads/x.pdf" -> "/assets/downloads/x.pdf"
-  // - "downloads/x.pdf"  -> "/assets/downloads/x.pdf"
-  // - "/assets/downloads/x.pdf" -> "/assets/downloads/x.pdf"
-  // - "x.pdf" -> "/assets/downloads/x.pdf"
   if (!publicPathOrFile || typeof publicPathOrFile !== "string") return null;
 
   const raw = publicPathOrFile.trim();
-  if (isRemoteUrl(raw)) return raw; // don't rewrite remote URLs
+  if (isRemoteUrl(raw)) return raw;
 
   const base = basenameFromAny(raw);
   if (!base) return null;
@@ -42,24 +37,54 @@ function canonicalizeToAssetsDownloads(publicPathOrFile) {
 async function loadContentlayer() {
   const contentlayerPath = path.join(rootDir, ".contentlayer", "generated", "index.mjs");
 
+  // Check if Contentlayer is built
   if (!fs.existsSync(contentlayerPath)) {
-    throw new Error("Contentlayer not built. Run pnpm run content:build first.");
+    console.warn("⚠️  Contentlayer not found at:", contentlayerPath);
+    console.warn("⚠️  Attempting to build Contentlayer first...\n");
+    
+    // Try to build Contentlayer
+    const { execSync } = await import("child_process");
+    try {
+      execSync("pnpm run content:build", {
+        cwd: rootDir,
+        stdio: "inherit",
+      });
+      
+      // Check again after building
+      if (!fs.existsSync(contentlayerPath)) {
+        throw new Error(
+          "Contentlayer build completed but output not found. " +
+          "This might indicate a configuration issue."
+        );
+      }
+      
+      console.log("✅ Contentlayer built successfully\n");
+    } catch (buildError) {
+      throw new Error(
+        `Failed to build Contentlayer: ${buildError.message}\n` +
+        "Please run 'pnpm run content:build' manually to diagnose the issue."
+      );
+    }
   }
 
   const contentlayerUrl = pathToFileURL(contentlayerPath).href;
-  const contentlayerModule = await import(contentlayerUrl);
-
-  // Your schema exports allDownloads (as you already used)
-  return contentlayerModule.allDownloads || [];
+  
+  try {
+    const contentlayerModule = await import(contentlayerUrl);
+    return contentlayerModule.allDownloads || [];
+  } catch (importError) {
+    throw new Error(
+      `Failed to import Contentlayer: ${importError.message}\n` +
+      "The .contentlayer directory may be corrupted. Try rebuilding with 'pnpm run content:build'."
+    );
+  }
 }
 
 function getPdfRef(download) {
-  // Priority order matches your MDX usage
+  // Priority order:
   // 1) pdfPath (preferred)
   // 2) downloadFile (legacy/alternate)
   // 3) file (filename-only)
-  //
-  // NOTE: if file is just "x.pdf", we canonicalize to /assets/downloads/x.pdf
   const pdfPath = download?.pdfPath;
   if (typeof pdfPath === "string" && pdfPath.trim()) return pdfPath.trim();
 
@@ -79,48 +104,54 @@ function buildCandidateDiskPaths(pdfRef) {
   const base = basenameFromAny(raw);
   if (!base) return [];
 
-  // canonical public href we *expect* going forward
-  const canonicalPublicHref = canonicalizeToAssetsDownloads(raw); // /assets/downloads/<base>.pdf
+  const canonicalPublicHref = canonicalizeToAssetsDownloads(raw);
 
   const candidates = [];
 
-  // 1) if pdfRef is a path-like thing (/assets/downloads/.. or /downloads/..),
-  // check it directly under public
-  // - If it is just "x.pdf", this becomes "public/x.pdf" which is not desired,
-  //   but it’s harmless to check.
+  // 1) Direct path under public
   const direct = path.join(rootDir, "public", stripLeadingSlash(raw));
   candidates.push(direct);
 
-  // 2) always check canonical location: public/assets/downloads/<basename>
+  // 2) Canonical location: public/assets/downloads/<basename>
   candidates.push(path.join(rootDir, "public", "assets", "downloads", base));
 
-  // 3) check legacy wrong location: public/downloads/<basename>
+  // 3) Legacy location: public/downloads/<basename>
   candidates.push(path.join(rootDir, "public", "downloads", base));
 
-  // 4) also check the canonicalPublicHref explicitly (in case raw was "x.pdf")
+  // 4) Canonical public href
   if (canonicalPublicHref && !isRemoteUrl(canonicalPublicHref)) {
     candidates.push(path.join(rootDir, "public", stripLeadingSlash(canonicalPublicHref)));
   }
 
-  // de-dupe
+  // De-duplicate
   return Array.from(new Set(candidates));
 }
 
 function validateOneDownload(download) {
   const pdfRef = getPdfRef(download);
-  if (!pdfRef) return []; // nothing to validate
-
-  // Remote URLs are allowed
-  if (isRemoteUrl(pdfRef)) return [];
-
-  // Normalize to canonical expected href (for reporting)
-  const expected = canonicalizeToAssetsDownloads(pdfRef) || pdfRef;
-
-  const candidates = buildCandidateDiskPaths(pdfRef);
-  for (const p of candidates) {
-    if (fs.existsSync(p)) return [];
+  if (!pdfRef) {
+    // No PDF reference - might be intentional (e.g., external link only)
+    return [];
   }
 
+  // Remote URLs are allowed
+  if (isRemoteUrl(pdfRef)) {
+    console.log(`  ℹ️  Remote URL (skipping): ${download.slug} -> ${pdfRef}`);
+    return [];
+  }
+
+  const expected = canonicalizeToAssetsDownloads(pdfRef) || pdfRef;
+  const candidates = buildCandidateDiskPaths(pdfRef);
+  
+  // Check if file exists in any candidate location
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      console.log(`  ✓ ${download.slug}`);
+      return [];
+    }
+  }
+
+  // File not found in any location
   return [
     {
       slug: download.slug,
@@ -133,33 +164,73 @@ function validateOneDownload(download) {
 }
 
 async function main() {
-  console.log("Validating downloads (pdfPath / downloadFile / file)...\n");
+  console.log("═══════════════════════════════════════════════════════");
+  console.log("  Download PDF Validator");
+  console.log("═══════════════════════════════════════════════════════\n");
 
-  const downloads = await loadContentlayer();
-  console.log("Found", downloads.length, "downloads\n");
+  let downloads;
+  
+  try {
+    downloads = await loadContentlayer();
+  } catch (error) {
+    console.error("❌ Failed to load Contentlayer data:\n");
+    console.error(error.message);
+    console.error("\nPlease ensure:");
+    console.error("  1. Content files are present in your content directory");
+    console.error("  2. Contentlayer config (contentlayer.config.ts) is valid");
+    console.error("  3. Run 'pnpm run content:build' manually to diagnose\n");
+    process.exit(1);
+  }
+
+  console.log(`Found ${downloads.length} download(s) to validate\n`);
+
+  if (downloads.length === 0) {
+    console.log("⚠️  No downloads found. Nothing to validate.\n");
+    process.exit(0);
+  }
 
   const allErrors = downloads.flatMap(validateOneDownload);
 
+  console.log(); // Empty line after validation output
+
   if (allErrors.length > 0) {
-    console.log("❌ Missing PDF files:\n");
+    console.log("═══════════════════════════════════════════════════════");
+    console.log("❌ Missing PDF Files");
+    console.log("═══════════════════════════════════════════════════════\n");
 
     for (const err of allErrors) {
-      console.log(" -", err.slug);
-      console.log("   Title:   ", err.title);
-      console.log("   Raw ref: ", err.raw);
-      console.log("   Expected:", err.expected);
-      console.log("   Checked:");
-      err.checkedPaths.forEach((p) => console.log("    ", p));
+      console.log(`📄 ${err.slug}`);
+      console.log(`   Title:    ${err.title}`);
+      console.log(`   Raw ref:  ${err.raw}`);
+      console.log(`   Expected: ${err.expected}`);
+      console.log(`   Checked locations:`);
+      err.checkedPaths.forEach((p) => console.log(`     • ${p}`));
       console.log();
     }
+
+    console.log("═══════════════════════════════════════════════════════");
+    console.log(`Summary: ${allErrors.length} missing file(s)`);
+    console.log("═══════════════════════════════════════════════════════\n");
+    
+    console.log("To fix:");
+    console.log("  1. Add the missing PDF files to public/assets/downloads/");
+    console.log("  2. Or update the frontmatter to point to correct files");
+    console.log("  3. Or add files to .gitignore exceptions if they're ignored\n");
 
     process.exit(1);
   }
 
-  console.log("✅ All download PDFs validated!\n");
+  console.log("═══════════════════════════════════════════════════════");
+  console.log("✅ All Download PDFs Validated Successfully!");
+  console.log("═══════════════════════════════════════════════════════\n");
+  process.exit(0);
 }
 
 main().catch((e) => {
-  console.error("❌ Validator failed:", e);
+  console.error("\n═══════════════════════════════════════════════════════");
+  console.error("❌ Validator Failed with Unexpected Error");
+  console.error("═══════════════════════════════════════════════════════\n");
+  console.error(e);
+  console.error();
   process.exit(1);
 });

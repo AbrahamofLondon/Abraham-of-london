@@ -10,30 +10,42 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    
     "dev": "next dev",
     "dev:content": "contentlayer2 build --watch",
     "start": "next start",
+    
     "typecheck": "pnpm exec tsc --project tsconfig.json --noEmit",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "test:books": "pnpm exec tsx scripts/test-books-data.ts",
     "format": "prettier --write .",
+    
+    "test:books": "pnpm exec tsx scripts/test-books-data.ts",
+    
     "clean:build": "node -e \"const fs=require('fs'); for (const p of ['.next','.contentlayer']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} }\"",
     "clean": "node -e \"const fs=require('fs'); const paths=['.next','.contentlayer','.turbo','.reports','node_modules/.cache']; for (const p of paths) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
     "ts-reset": "node -e \"const fs=require('fs'); for (const p of ['node_modules/.cache','.next']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } const cwd=process.cwd(); for (const f of fs.readdirSync(cwd)) { if (f.endsWith('.tsbuildinfo') || f === '.tsbuildinfo') { try { fs.rmSync(f,{force:true}); } catch {} } }\"",
+    
     "content:build": "contentlayer2 build",
     "content:validate": "node scripts/validate-content.mjs",
-    "prepare:content": "pnpm run clean:build && node scripts/fix-contentlayer-issues.mjs && pnpm run content:validate && pnpm run content:build && pnpm run downloads:validate",
+    
     "assets:ensure": "node scripts/ensure-all-assets.mjs",
     "assets:fix-names": "node scripts/fix-asset-names.mjs",
+    
     "check:smart-quotes": "node scripts/check-smart-quotes.mjs",
     "fix:bad-chars": "node scripts/fix-bad-chars.mjs",
+    
     "pdfs": "node scripts/make-pdfs.mjs",
     "pdfs:force": "rm -rf public/assets/downloads/*.pdf public/assets/resources/pdfs/*.pdf && pnpm run pdfs",
+    
     "downloads:validate": "node scripts/validate-downloads.mjs",
-    "prebuild": "node scripts/validate-env.mjs && pnpm run pdfs && pnpm run downloads:validate",
-    "build": "pnpm run prepare:content && next build",
+    
+    "prepare:content": "pnpm run clean:build && node scripts/fix-contentlayer-issues.mjs && pnpm run content:validate && pnpm run content:build",
+    
+    "prebuild": "node scripts/validate-env.mjs && pnpm run prepare:content && pnpm run pdfs && pnpm run downloads:validate",
+    "build": "next build",
     "postbuild": "echo \"✓ Build completed successfully\"",
+    
     "setup": "pnpm install && prisma generate && pnpm run prepare:content"
   },
   "dependencies": {
