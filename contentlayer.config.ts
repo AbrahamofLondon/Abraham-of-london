@@ -6,8 +6,9 @@ import rehypeSlug from "rehype-slug";
 type RawMeta = { flattenedPath: string };
 type AnyDoc = {
   _raw: RawMeta;
-  slug?: string | null;
-  href?: string | null;
+  slug?: string | null; // canonical routing hint
+  href?: string | null; // CTA ONLY (never canonical routing)
+  url?: string | null;  // OPTIONAL explicit canonical route
 };
 
 function isNonEmptyString(v: unknown): v is string {
@@ -31,10 +32,7 @@ function stripIndex(p: string): string {
   return p.replace(/\/index$/i, "");
 }
 
-function deriveSegmentFromFlattenedPath(
-  flattenedPath: string,
-  basePath: string,
-): string {
+function deriveSegmentFromFlattenedPath(flattenedPath: string, basePath: string): string {
   const fp = stripIndex(toPosix(flattenedPath));
   const base = trimSlashes(basePath);
 
@@ -43,18 +41,32 @@ function deriveSegmentFromFlattenedPath(
   return fp;
 }
 
+/**
+ * Canonical URL rules:
+ * 0) doc.url (optional explicit canonical) — must be within basePath.
+ * 1) doc.slug (canonical routing) — can be "foo" or "resources/foo".
+ * 2) flattenedPath fallback.
+ *
+ * href is CTA only and is NEVER used for routing.
+ */
 function getDocUrl(doc: AnyDoc, basePath: string): string {
   const base = trimSlashes(basePath);
 
-  if (isNonEmptyString(doc.href)) return normalizeUrl(doc.href);
+  // 0) Explicit canonical URL (optional feature)
+  if (isNonEmptyString(doc.url)) {
+    const explicit = normalizeUrl(doc.url);
+    if (explicit === `/${base}` || explicit.startsWith(`/${base}/`)) return explicit;
+  }
 
+  // 1) Slug (canonical routing)
   if (isNonEmptyString(doc.slug)) {
     const provided = trimSlashes(doc.slug);
     if (provided === base) return `/${base}`;
-    if (provided.startsWith(`${base}/`)) return `/${provided}`;
+    if (provided.startsWith(`${base}/`)) return normalizeUrl(`/${provided}`);
     return normalizeUrl(`${base}/${provided}`);
   }
 
+  // 2) flattenedPath fallback (canonical routing)
   const seg = deriveSegmentFromFlattenedPath(doc._raw.flattenedPath, base);
   return seg ? normalizeUrl(`${base}/${seg}`) : normalizeUrl(base);
 }
@@ -86,8 +98,15 @@ function withAppAliases(esbuildOptions: any) {
 const commonFields = {
   title: { type: "string", required: true },
   date: { type: "date", required: false },
+
   slug: { type: "string", required: false },
+
+  // ✅ allow explicit canonical when needed
+  url: { type: "string", required: false },
+
+  // CTA destination (never canonical routing)
   href: { type: "string", required: false },
+
   type: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
@@ -394,17 +413,7 @@ export const Short = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
-  documentTypes: [
-    Post,
-    Download,
-    Book,
-    Event,
-    Print,
-    Strategy,
-    Resource,
-    Canon,
-    Short,
-  ],
+  documentTypes: [Post, Download, Book, Event, Print, Strategy, Resource, Canon, Short],
 
   mdx: {
     remarkPlugins: [remarkGfm],
