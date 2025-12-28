@@ -362,8 +362,15 @@ test.js
 *.exe
 *.zip
 *.tar
-*.jpg
 
+# Only ignore JPGs in specific locations (adjust to your needs)
+/uploads/*.jpg
+/tmp/*.jpg
+/temp/*.jpg
+*.tmp.jpg
+*-temp.jpg
+
+# This way, public/assets/*.jpg will be tracked by default
 # Build outputs
 .next/
 backup-*/
