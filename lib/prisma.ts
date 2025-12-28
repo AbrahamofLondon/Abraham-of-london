@@ -22,9 +22,9 @@ function assertNodeRuntime() {
 /**
  * Enterprise-safe log config:
  * - No readonly tuples (Prisma expects a mutable array)
- * - Optional structured LogDefinitions supported
+ * - Uses string literals instead of Prisma.LogLevel type
  */
-function resolvePrismaLog(): (Prisma.LogLevel | Prisma.LogDefinition)[] {
+function resolvePrismaLog(): Array<"query" | "info" | "warn" | "error"> {
   const level = (process.env.PRISMA_LOG_LEVEL || "").toLowerCase();
 
   if (level === "debug") return ["query", "info", "warn", "error"];
