@@ -1,14 +1,16 @@
+// contentlayer.ts (or contentlayer.config.ts) — FULL VERSION
 import path from "path";
 import { makeSource, defineDocumentType } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
 type RawMeta = { flattenedPath: string };
+
 type AnyDoc = {
   _raw: RawMeta;
-  slug?: string | null; // canonical routing hint
-  href?: string | null; // CTA ONLY (never canonical routing)
-  url?: string | null;  // OPTIONAL explicit canonical route
+  slug?: string | null; // canonical routing helper (optional)
+  url?: string | null;  // OPTIONAL explicit canonical route (must match base)
+  href?: string | null; // CTA ONLY (never used for routing)
 };
 
 function isNonEmptyString(v: unknown): v is string {
@@ -43,11 +45,11 @@ function deriveSegmentFromFlattenedPath(flattenedPath: string, basePath: string)
 
 /**
  * Canonical URL rules:
- * 0) doc.url (optional explicit canonical) — must be within basePath.
- * 1) doc.slug (canonical routing) — can be "foo" or "resources/foo".
- * 2) flattenedPath fallback.
+ * 0) doc.url (optional explicit canonical) — allowed only if it matches the base
+ * 1) doc.slug (canonical) — allow "resources/foo" or "foo"
+ * 2) flattenedPath fallback (canonical)
  *
- * href is CTA only and is NEVER used for routing.
+ * NOTE: doc.href is CTA ONLY. Never used here.
  */
 function getDocUrl(doc: AnyDoc, basePath: string): string {
   const base = trimSlashes(basePath);
@@ -61,6 +63,7 @@ function getDocUrl(doc: AnyDoc, basePath: string): string {
   // 1) Slug (canonical routing)
   if (isNonEmptyString(doc.slug)) {
     const provided = trimSlashes(doc.slug);
+
     if (provided === base) return `/${base}`;
     if (provided.startsWith(`${base}/`)) return normalizeUrl(`/${provided}`);
     return normalizeUrl(`${base}/${provided}`);
@@ -104,7 +107,7 @@ const commonFields = {
   // ✅ allow explicit canonical when needed
   url: { type: "string", required: false },
 
-  // CTA destination (never canonical routing)
+  // CTA ONLY (never used for routing)
   href: { type: "string", required: false },
 
   type: { type: "string", required: false },
@@ -113,8 +116,10 @@ const commonFields = {
   coverImage: { type: "string", required: false },
   coverimage: { type: "string", required: false },
   tags: { type: "list", of: { type: "string" }, required: false },
+
   draft: { type: "boolean", required: false, default: false },
   featured: { type: "boolean", required: false, default: false },
+
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
 } as const;
@@ -414,13 +419,11 @@ export const Short = defineDocumentType(() => ({
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
   documentTypes: [Post, Download, Book, Event, Print, Strategy, Resource, Canon, Short],
-
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
     esbuildOptions: (options) => withAppAliases(options),
   },
-
   onUnknownDocuments: "skip-warn",
   disableImportAliasWarning: true,
 });
