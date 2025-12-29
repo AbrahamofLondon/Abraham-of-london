@@ -1,6 +1,8 @@
 // lib/server/content.ts
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
+import { safeListFiles } from "@/lib/fs-utils";
+
 import {
   getAllResources as getResourcesFromContentlayer,
   getResourceBySlug as getResourceBySlugFromContentlayer,
@@ -153,8 +155,10 @@ function deriveUrlFromFilename(filename: string): string {
 }
 
 function mapResourceFromContentlayer(r: any): ResourceDoc {
-  // IMPORTANT: prefer computed url (your config guarantees it when built)
-  const url = typeof r?.url === "string" && r.url.startsWith("/") ? r.url : `/resources/${normalizeSlug(r)}`;
+  const url =
+    typeof r?.url === "string" && r.url.startsWith("/")
+      ? r.url
+      : `/resources/${normalizeSlug(r)}`;
 
   return {
     title: r.title || "Untitled Resource",
@@ -175,7 +179,7 @@ function mapResourceFromContentlayer(r: any): ResourceDoc {
 }
 
 export function getAllResources(): ResourceDoc[] {
-  // Contentlayer first (normal path)
+  // Contentlayer first
   try {
     const items = getResourcesFromContentlayer();
     if (items?.length) {
@@ -188,17 +192,24 @@ export function getAllResources(): ResourceDoc[] {
     console.warn("⚠️ Contentlayer resources unavailable, using filesystem fallback");
   }
 
-  // FS fallback (rare; mostly useful if contentlayer is not initialized in some context)
-  if (!fs.existsSync(RESOURCES_DIR)) return [];
+  // FS fallback
+  const dirExists = (() => {
+    try {
+      return fs.existsSync(RESOURCES_DIR) && fs.statSync(RESOURCES_DIR).isDirectory();
+    } catch {
+      return false;
+    }
+  })();
+  if (!dirExists) return [];
 
-  const files = fs.readdirSync(RESOURCES_DIR).filter((f) => /\.(md|mdx)$/i.test(f));
+  // ✅ safeListFiles prevents accidental file scandir issues
+  const files = safeListFiles(RESOURCES_DIR).filter((p) => /\.(md|mdx)$/i.test(p));
+
   const docs: ResourceDoc[] = [];
-
-  for (const file of files) {
-    const abs = path.join(RESOURCES_DIR, file);
+  for (const abs of files) {
+    const file = path.basename(abs);
     const raw = fs.readFileSync(abs, "utf8");
     const fm = parseFrontmatter(raw);
-
     if (fm.draft === true) continue;
 
     const explicitUrl =
@@ -240,11 +251,9 @@ export function getResourceBySlug(slug: string): ResourceDoc | null {
   const s = String(slug || "").trim().toLowerCase();
   if (!s) return null;
 
-  // Contentlayer resource first
   const cl = getResourceBySlugFromContentlayer(s);
   if (cl) return mapResourceFromContentlayer(cl);
 
-  // FS fallback (last resort)
   return getAllResources().find((r) => (r.slug ?? "").toLowerCase() === s) ?? null;
 }
 
@@ -294,7 +303,6 @@ export function getShortBySlugServer(slug: string): ContentDoc | null {
 export function assertPublicAssetsForDownloadsAndResources() {
   const missing: string[] = [];
 
-  // Downloads: validate file + cover
   for (const d of getAllDownloads()) {
     const slug = normalizeSlug(d) || "(no-slug)";
     const label = `download/${slug}`;
@@ -310,7 +318,6 @@ export function assertPublicAssetsForDownloadsAndResources() {
     }
   }
 
-  // Resources: validate cover only
   for (const r of getAllResources()) {
     const slug = (r.slug || "").trim() || "(no-slug)";
     const label = `resource/${slug}`;

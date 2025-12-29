@@ -57,7 +57,6 @@ export type ContentDoc = {
   href?: string | null; // CTA only
 
   draft?: boolean;
-
   featured?: boolean;
 
   accessLevel?: string | null;
@@ -74,13 +73,12 @@ export type ContentDoc = {
   readingTime?: string | null;
   normalizedReadTime?: string | null; // computed
 
-  // downloads computed
   canonicalPdfHref?: string | null;
 
-  // body/content (varies depending on setup)
   body?: { raw?: string; code?: string } | null;
   content?: string | null;
 
+  // allow arbitrary frontmatter passthrough
   [key: string]: unknown;
 };
 
@@ -102,7 +100,31 @@ const KIND_URL_MAP: Record<DocKind, string> = {
 };
 
 const GLOBAL_FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
+
+/**
+ * NOTE:
+ * Keep this as a single, real file path — never a directory.
+ * This allows any downstream code to treat it as a final image, not something to scan.
+ */
 const SHORT_GLOBAL_FALLBACK = "/assets/images/shorts/cover.jpg";
+
+/**
+ * Your themed covers live here:
+ * /public/assets/images/shorts/themes/*.jpg  ->  "/assets/images/shorts/themes/*.jpg"
+ *
+ * Use tag/category signals to pick a theme deterministically.
+ * No filesystem scanning. No randomness. No Windows EPERM traps.
+ */
+const SHORT_THEME_COVERS: Record<string, string> = {
+  default: "/assets/images/shorts/themes/default-cover.jpg",
+  faith: "/assets/images/shorts/themes/faith.jpg",
+  gentle: "/assets/images/shorts/themes/gentle.jpg",
+  "hard-truths": "/assets/images/shorts/themes/hard-truths.jpg",
+  "inner-life": "/assets/images/shorts/themes/inner-life.jpg",
+  "outer-life": "/assets/images/shorts/themes/outer-life.jpg",
+  purpose: "/assets/images/shorts/themes/purpose.jpg",
+  relationships: "/assets/images/shorts/themes/relationships.jpg",
+};
 
 /* -------------------------------------------------------------------------- */
 /* Small utilities                                                            */
@@ -114,6 +136,29 @@ const cleanLower = (v: unknown) => cleanStr(v).toLowerCase();
 const trimLeadingSlashes = (s: string) => s.replace(/^\/+/, "");
 const trimTrailingSlashes = (s: string) => s.replace(/\/+$/, "");
 const ensureLeadingSlash = (s: string) => (s.startsWith("/") ? s : `/${s}`);
+
+/** Normalize internal paths: leading slash, forward slashes, no query/hash. */
+function normalizeInternalPath(input: unknown): string {
+  let s = cleanStr(input);
+  if (!s) return "";
+
+  // allow remote passthrough (for download URLs etc.)
+  if (/^https?:\/\//i.test(s)) return s;
+
+  // strip query/hash
+  s = stripQueryAndHash(s);
+
+  // normalize slashes
+  s = s.replace(/\\/g, "/");
+
+  // trim spaces + enforce internal
+  s = ensureLeadingSlash(s);
+
+  // collapse accidental doubles (keep protocol-safe already handled above)
+  s = s.replace(/\/{2,}/g, "/");
+
+  return s;
+}
 
 function stripQueryAndHash(s: string): string {
   return s.split("#")[0]?.split("?")[0] ?? s;
@@ -220,7 +265,6 @@ export function getDocKind(doc: ContentDoc): DocKind {
 export function normalizeSlug(doc: ContentDoc): string {
   if (!doc) return "";
 
-  // Prefer explicitly provided slug (last segment only)
   const explicit = toCanonicalSlug(doc.slug);
   if (explicit) return explicit;
 
@@ -263,16 +307,9 @@ export function isPublic(doc: ContentDoc): boolean {
 /* URL routing                                                                */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Enterprise rule:
- * - If computed `doc.url` exists, that is canonical.
- * - If not, fall back to kind + normalizedSlug (legacy/backfill).
- *
- * This keeps routing consistent with your config’s getDocUrl().
- */
 export function getDocHref(doc: ContentDoc): string {
   const computedUrl = cleanStr(doc?.url);
-  if (computedUrl && isValidInternalUrl(computedUrl)) return computedUrl;
+  if (computedUrl && isValidInternalUrl(computedUrl)) return normalizeInternalPath(computedUrl);
 
   const kind = getDocKind(doc);
   const base = KIND_URL_MAP[kind] ?? "/content";
@@ -281,10 +318,6 @@ export function getDocHref(doc: ContentDoc): string {
   return slug ? `${base}/${slug}` : base;
 }
 
-/**
- * Use when you NEED a stable URL for <link rel="canonical"> or metadata.
- * Prefer computed url; otherwise falls back.
- */
 export function getDocCanonicalUrlPath(doc: ContentDoc): string {
   return getDocHref(doc);
 }
@@ -293,23 +326,91 @@ export function getDocCanonicalUrlPath(doc: ContentDoc): string {
 /* Media                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export function resolveDocCoverImage(doc: ContentDoc): string {
-  // computed first (best)
-  const normalized = cleanStr(doc?.normalizedCoverImage);
-  if (normalized) return ensureLeadingSlash(normalized);
+function coerceTags(doc: ContentDoc): string[] {
+  const t = doc?.tags;
+  if (Array.isArray(t)) return (t as any[]).map((x) => cleanLower(x)).filter(Boolean);
+  return [];
+}
+
+/**
+ * Deterministic theme selection for Shorts.
+ * Order of precedence:
+ * 1) explicit coverImage / normalizedCoverImage
+ * 2) theme inferred from tags/category-like fields
+ * 3) SHORT_THEME_COVERS.default (if present)
+ * 4) SHORT_GLOBAL_FALLBACK
+ */
+function resolveShortCover(doc: ContentDoc): string {
+  // computed first
+  const normalized = normalizeInternalPath(doc?.normalizedCoverImage);
+  if (normalized && isValidInternalUrl(normalized)) return normalized;
 
   // raw variants
-  const explicit = cleanStr(doc?.coverImage || doc?.coverimage || doc?.image || doc?.cover);
-  if (explicit) return ensureLeadingSlash(explicit);
+  const explicit = normalizeInternalPath(
+    doc?.coverImage || doc?.coverimage || (doc as any)?.image || (doc as any)?.cover
+  );
+  if (explicit && isValidInternalUrl(explicit)) return explicit;
 
-  return getDocKind(doc) === "short" ? SHORT_GLOBAL_FALLBACK : GLOBAL_FALLBACK_IMAGE;
+  // infer theme from tags
+  const tags = coerceTags(doc);
+
+  // quick signal extraction from common fields
+  const themeHint = cleanLower((doc as any)?.theme || (doc as any)?.category || "");
+
+  const candidates = [themeHint, ...tags].filter(Boolean);
+
+  // map common phrases to known keys
+  const normalizeThemeKey = (k: string) => {
+    const s = cleanLower(k)
+      .replace(/\s+/g, "-")
+      .replace(/_/g, "-")
+      .replace(/[^\w-]/g, "");
+
+    if (s.includes("hard") && s.includes("truth")) return "hard-truths";
+    if (s.includes("inner") && s.includes("life")) return "inner-life";
+    if (s.includes("outer") && s.includes("life")) return "outer-life";
+    if (s.includes("relationship")) return "relationships";
+    if (s.includes("faith") || s.includes("scripture") || s.includes("theology")) return "faith";
+    if (s.includes("purpose") || s.includes("calling") || s.includes("destiny")) return "purpose";
+    if (s.includes("gentle") || s.includes("soft") || s.includes("comfort")) return "gentle";
+    return s;
+  };
+
+  for (const c of candidates) {
+    const key = normalizeThemeKey(c);
+    const cover = SHORT_THEME_COVERS[key];
+    if (cover) return cover;
+  }
+
+  return SHORT_THEME_COVERS.default || SHORT_GLOBAL_FALLBACK;
+}
+
+export function resolveDocCoverImage(doc: ContentDoc): string {
+  const kind = getDocKind(doc);
+
+  if (kind === "short") {
+    // ✅ no FS scanning, deterministic theme assignment
+    return normalizeInternalPath(resolveShortCover(doc)) || SHORT_GLOBAL_FALLBACK;
+  }
+
+  const normalized = normalizeInternalPath(doc?.normalizedCoverImage);
+  if (normalized && isValidInternalUrl(normalized)) return normalized;
+
+  const explicit = normalizeInternalPath(
+    doc?.coverImage || doc?.coverimage || (doc as any)?.image || (doc as any)?.cover
+  );
+  if (explicit && isValidInternalUrl(explicit)) return explicit;
+
+  return GLOBAL_FALLBACK_IMAGE;
 }
 
 export function resolveDocReadTime(doc: ContentDoc): string | null {
   const normalized = cleanStr(doc?.normalizedReadTime);
   if (normalized) return normalized;
+
   const raw =
     cleanStr(doc?.readTime) || cleanStr(doc?.readtime) || cleanStr(doc?.readingTime);
+
   return raw || null;
 }
 
@@ -318,23 +419,22 @@ export function resolveDocReadTime(doc: ContentDoc): string | null {
 /* -------------------------------------------------------------------------- */
 
 export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
-  // computed first (best)
   const canonical = cleanStr(doc?.canonicalPdfHref);
-  if (canonical) return canonical;
+  if (canonical) return normalizeInternalPath(canonical);
 
   const raw =
-    cleanStr(doc?.downloadUrl) ||
-    cleanStr(doc?.fileUrl) ||
-    cleanStr(doc?.pdfPath) ||
-    cleanStr(doc?.file) ||
-    cleanStr(doc?.downloadFile);
+    cleanStr((doc as any)?.downloadUrl) ||
+    cleanStr((doc as any)?.fileUrl) ||
+    cleanStr((doc as any)?.pdfPath) ||
+    cleanStr((doc as any)?.file) ||
+    cleanStr((doc as any)?.downloadFile);
 
   if (!raw) return null;
 
   // allow remote
   if (/^https?:\/\//i.test(raw)) return raw;
 
-  const url = ensureLeadingSlash(stripQueryAndHash(raw));
+  const url = normalizeInternalPath(raw);
 
   // normalize legacy "/downloads/foo.pdf" -> "/assets/downloads/foo.pdf"
   if (url.startsWith("/downloads/")) {
@@ -344,11 +444,6 @@ export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
   return url;
 }
 
-/**
- * Href used by UI:
- * - public: direct file
- * - gated: API route your app controls
- */
 export function resolveDocDownloadHref(doc: ContentDoc): string | null {
   const direct = resolveDocDownloadUrl(doc);
   if (!direct) return null;

@@ -1,40 +1,46 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
+// lib/fs-utils.ts
+import fs from "node:fs";
+import path from "node:path";
 
-export const CONTENT_ROOT = path.join(process.cwd(), "content");
-export const MD_EXTS = [".md", ".mdx"];
-
-export function ensureDir(dir: string): string | null {
+/**
+ * Safe directory listing.
+ * - If absPath is a directory => returns absolute paths of children
+ * - If absPath is a file => returns [absPath]
+ * - If absPath doesn't exist / permission issues => returns []
+ *
+ * This prevents Windows EPERM when code accidentally calls readdirSync on a file.
+ */
+export function safeListFsEntries(absPath: string): string[] {
   try {
-    const abs = path.join(CONTENT_ROOT, dir);
-    if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) return abs;
-    return null;
+    if (!absPath) return [];
+    if (!fs.existsSync(absPath)) return [];
+
+    const stat = fs.statSync(absPath);
+
+    // ✅ If a file was passed by mistake, treat it as a single entry (not a directory)
+    if (stat.isFile()) return [absPath];
+
+    if (!stat.isDirectory()) return [];
+
+    return fs
+      .readdirSync(absPath, { withFileTypes: true })
+      .filter((d) => !d.name.startsWith("."))
+      .map((d) => path.join(absPath, d.name));
   } catch {
-    return null;
+    return [];
   }
 }
 
-export function listMdFiles(absDir: string): string[] {
-  return fs
-    .readdirSync(absDir)
-    .filter((f) => MD_EXTS.some((ext) => f.toLowerCase().endsWith(ext)))
-    .map((f) => path.join(absDir, f));
-}
-
-export function fileToSlug(filePath: string): string {
-  const base = path.basename(filePath);
-  const slug = base.replace(/\.(mdx?|MDX?)$/, "");
-  return slug.trim();
-}
-
-export function readFrontmatter(absFile: string) {
-  const raw = fs.readFileSync(absFile, "utf8");
-  const { data, content } = matter(raw);
-  return { data: data as Record<string, any>, content };
-}
-
-export function sortByDateDesc<T extends { date?: string }>(items: T[]): T[] {
-  const toKey = (d?: string) => (d ? new Date(d).valueOf() : 0);
-  return [...items].sort((a, b) => toKey(b.date) - toKey(a.date));
+/**
+ * Return only files in a directory (or a single file if a file path is passed).
+ */
+export function safeListFiles(absPath: string): string[] {
+  const entries = safeListFsEntries(absPath);
+  return entries.filter((p) => {
+    try {
+      return fs.statSync(p).isFile();
+    } catch {
+      return false;
+    }
+  });
 }

@@ -2,9 +2,10 @@
 // Generic, file-system based MDX loader for content/* collections.
 // No Contentlayer dependency. Safe for Netlify / Next static builds.
 
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import matter from "gray-matter";
+import { safeListFiles } from "@/lib/fs-utils";
 
 export const CONTENT_ROOT = path.join(process.cwd(), "content");
 const MD_EXTS = [".md", ".mdx"] as const;
@@ -43,34 +44,38 @@ function sortByDateDesc<T extends { date?: string | null }>(items: T[]): T[] {
 function getCollectionDir(collection: string): string | null {
   const dir = path.join(CONTENT_ROOT, collection);
   try {
-    if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
-      return dir;
-    }
+    if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) return dir;
   } catch {
     // ignore
   }
   return null;
 }
 
+function isMdxFile(absPath: string): boolean {
+  const lower = absPath.toLowerCase();
+  return MD_EXTS.some((ext) => lower.endsWith(ext));
+}
+
 function listCollectionFiles(collection: string): string[] {
   const dir = getCollectionDir(collection);
   if (!dir) return [];
-  return fs
-    .readdirSync(dir)
-    .filter((f) =>
-      MD_EXTS.some((ext) => f.toLowerCase().endsWith(ext as string))
-    )
-    .map((f) => path.join(dir, f));
+
+  // ✅ safeListFiles handles directories AND accidental file paths
+  const files = safeListFiles(dir);
+
+  // Only MD/MDX files
+  return files.filter(isMdxFile);
 }
 
 function readRawDocs(collection: string): RawDoc[] {
   const files = listCollectionFiles(collection);
+
   return files.map((filePath) => {
     const raw = fs.readFileSync(filePath, "utf8");
     const { data, content } = matter(raw);
 
     const base = path.basename(filePath).replace(/\.(mdx?|MDX?)$/, "");
-    const fmSlug = data?.slug;
+    const fmSlug = (data as any)?.slug;
     const slug = (
       typeof fmSlug === "string" && fmSlug.trim().length ? fmSlug : base
     ).trim();
@@ -107,10 +112,7 @@ export function getMdxCollectionMeta(collection: string): MdxMeta[] {
 export function getMdxCollectionDocuments(collection: string): MdxDocument[] {
   const docs = readRawDocs(collection).map((doc) => {
     const meta = toMeta(doc);
-    return {
-      ...meta,
-      content: doc.content,
-    };
+    return { ...meta, content: doc.content };
   });
   return sortByDateDesc(docs);
 }
@@ -121,8 +123,10 @@ export function getMdxDocumentBySlug(
   slug: string
 ): MdxDocument | null {
   const target = String(slug || "").toLowerCase();
+  if (!target) return null;
+
   const docs = getMdxCollectionDocuments(collection);
-  const match =
-    docs.find((d) => String(d.slug || "").toLowerCase() === target) ?? null;
-  return match ?? null;
+  return (
+    docs.find((d) => String(d.slug || "").toLowerCase() === target) ?? null
+  );
 }
