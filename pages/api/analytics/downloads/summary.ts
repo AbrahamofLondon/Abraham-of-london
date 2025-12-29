@@ -13,6 +13,16 @@ import { Prisma } from "@prisma/client";
  */
 
 // ---------------------------
+// FIX: Prisma Static Helpers
+// ---------------------------
+// We cast Prisma to 'any' to avoid TS build errors complaining that .sql/.join don't exist.
+// They exist at runtime, but the generated types sometimes miss them in certain environments.
+const PrismaAny = Prisma as any;
+const sql = PrismaAny.sql;
+const join = PrismaAny.join;
+const raw = PrismaAny.raw;
+
+// ---------------------------
 // Types (JSON-safe)
 // ---------------------------
 
@@ -94,18 +104,16 @@ export default async function handler(
   const startTime = Date.now();
 
   try {
-    // 1) Admin auth - FIXED: Use explicit type checking
+    // 1) Admin auth
     const adminAuth = await validateAdminAccess(req);
     
-    // Check if valid is false explicitly
     if (adminAuth.valid === false) {
-      // TypeScript now knows adminAuth has 'reason' property
       await logAuditEvent({
         actorType: "api",
         action: "unauthorized_access",
         resourceType: "analytics",
         status: "failed",
-        details: { reason: adminAuth.reason }, // ✅ Fixed
+        details: { reason: adminAuth.reason },
       });
 
       return res.status(401).json({
@@ -123,7 +131,7 @@ export default async function handler(
       });
     }
 
-    // 2) Rate limiting (compat wrapper)
+    // 2) Rate limiting
     const rateLimitKey = `analytics:${adminAuth.userId || req.socket.remoteAddress || "unknown"}`;
     const rl = await isRateLimited(rateLimitKey, "analytics_api", 100);
     if (rl.limited) {
@@ -218,7 +226,7 @@ export default async function handler(
       getTotalContentCount(since, until, filters),
     ]);
 
-    // Enrich top content with tier/country distributions (batch, not N+1)
+    // Enrich top content with tier/country distributions
     const enrichedTopContent = await enrichContentBreakdowns(since, until, filters, topContent);
 
     const responseTime = Date.now() - startTime;
@@ -354,7 +362,6 @@ function validateQuery(query: NextApiRequest["query"]) {
   if (tier) filters.tier = tier;
   if (countryCode) filters.countryCode = countryCode;
 
-  // Normalize success to "true"/"false" only
   if (success) {
     const norm = success
       .map((s) => s.toLowerCase())
@@ -373,23 +380,22 @@ function validateQuery(query: NextApiRequest["query"]) {
 // ---------------------------
 
 function whereSql(since: Date, until: Date, filters: Record<string, string[]>) {
-  // FIX: Remove explicit type annotation to allow inference
+  // Use our local 'sql' helper from the any-cast
   const parts = [
-    Prisma.sql`created_at BETWEEN ${since} AND ${until}`,
+    sql`created_at BETWEEN ${since} AND ${until}`,
   ];
 
   if (filters.success?.length) {
     const bools = filters.success.map((s) => (s === "true" ? 1 : 0));
-    parts.push(Prisma.sql`success IN (${Prisma.join(bools)})`);
+    parts.push(sql`success IN (${join(bools)})`);
   }
 
-  if (filters.contentType?.length) parts.push(Prisma.sql`content_type IN (${Prisma.join(filters.contentType)})`);
-  if (filters.eventType?.length) parts.push(Prisma.sql`event_type IN (${Prisma.join(filters.eventType)})`);
-  if (filters.tier?.length) parts.push(Prisma.sql`tier IN (${Prisma.join(filters.tier)})`);
-  if (filters.countryCode?.length) parts.push(Prisma.sql`country_code IN (${Prisma.join(filters.countryCode)})`);
+  if (filters.contentType?.length) parts.push(sql`content_type IN (${join(filters.contentType)})`);
+  if (filters.eventType?.length) parts.push(sql`event_type IN (${join(filters.eventType)})`);
+  if (filters.tier?.length) parts.push(sql`tier IN (${join(filters.tier)})`);
+  if (filters.countryCode?.length) parts.push(sql`country_code IN (${join(filters.countryCode)})`);
 
-  // FIXED: Use string " AND " instead of Prisma.sql` AND `
-  return Prisma.join(parts, " AND ");
+  return join(parts, " AND ");
 }
 
 function toInt(v: unknown, fallback = 0): number {
@@ -404,7 +410,6 @@ function toFloat(v: unknown): number | null {
 }
 
 function toIsoDate(v: unknown): string {
-  // raw SQLite DATE() returns "YYYY-MM-DD"
   if (typeof v === "string" && v.length >= 10) return v.slice(0, 10);
   const d = v instanceof Date ? v : new Date(String(v));
   if (Number.isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
@@ -412,11 +417,9 @@ function toIsoDate(v: unknown): string {
 }
 
 function toSizeString(v: unknown): string {
-  // SUM(file_size) may come back as number | bigint | string depending on driver
   if (typeof v === "bigint") return v.toString();
   if (typeof v === "number") return Math.trunc(v).toString();
   if (typeof v === "string" && v.trim()) {
-    // some drivers return numeric strings
     const n = Number(v);
     if (Number.isFinite(n)) return Math.trunc(n).toString();
     return v;
@@ -439,7 +442,7 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
       successful_downloads: unknown;
       total_size: unknown;
     }>
-  >(Prisma.sql`
+  >(sql`
     SELECT
       COUNT(*) AS total_downloads,
       COUNT(DISTINCT slug) AS unique_content,
@@ -464,7 +467,7 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
 
   const byPeriod = await prisma.$queryRaw<
     Array<{ date: unknown; count: unknown }>
-  >(Prisma.sql`
+  >(sql`
     SELECT
       DATE(created_at) AS date,
       COUNT(*) AS count
@@ -506,7 +509,7 @@ async function getTopContent(
       avg_latency: unknown;
       success_rate: unknown; // 0..100 float
     }>
-  >(Prisma.sql`
+  >(sql`
     SELECT
       slug,
       COALESCE(content_type, 'unknown') AS content_type,
@@ -549,11 +552,11 @@ async function getGroupedCounts(
   const where = whereSql(since, until, filters);
 
   const rows = await prisma.$queryRaw<Array<{ key: unknown; count: unknown }>>(
-    Prisma.sql`
-      SELECT ${Prisma.raw(column)} AS key, COUNT(*) AS count
+    sql`
+      SELECT ${raw(column)} AS key, COUNT(*) AS count
       FROM download_audit_events
-      WHERE ${where} AND ${Prisma.raw(column)} IS NOT NULL
-      GROUP BY ${Prisma.raw(column)}
+      WHERE ${where} AND ${raw(column)} IS NOT NULL
+      GROUP BY ${raw(column)}
     `
   );
 
@@ -574,7 +577,7 @@ async function getDailyTrends(
 
   const rows = await prisma.$queryRaw<
     Array<{ date: unknown; downloads: unknown; users: unknown }>
-  >(Prisma.sql`
+  >(sql`
     SELECT
       DATE(created_at) AS date,
       COUNT(*) AS downloads,
@@ -595,7 +598,7 @@ async function getDailyTrends(
 async function getTotalContentCount(since: Date, until: Date, filters: Record<string, string[]>) {
   const where = whereSql(since, until, filters);
 
-  const rows = await prisma.$queryRaw<Array<{ total: unknown }>>(Prisma.sql`
+  const rows = await prisma.$queryRaw<Array<{ total: unknown }>>(sql`
     SELECT COUNT(*) AS total FROM (
       SELECT 1
       FROM download_audit_events
@@ -606,11 +609,7 @@ async function getTotalContentCount(since: Date, until: Date, filters: Record<st
 
   return toInt(rows[0]?.total);
 }
-/**
- * Batch breakdowns for the current page of topContent:
- * - byTier + byCountry per (slug, contentType, eventType) key.
- * This avoids N+1 while staying SQLite-friendly.
- */
+
 async function enrichContentBreakdowns(
   since: Date,
   until: Date,
@@ -621,19 +620,16 @@ async function enrichContentBreakdowns(
 
   const where = whereSql(since, until, filters);
 
-  // Build a list of composite keys to restrict breakdown queries to just the current page
-  // SQLite doesn't have tuple IN nicely, so we OR-chunk safely.
-  // FIX: Remove explicit type annotation
-  const orParts = top.map((t) => Prisma.sql`
+  // Use local 'sql' and 'join' helpers
+  const orParts = top.map((t) => sql`
     (slug = ${t.slug} AND COALESCE(content_type,'unknown') = ${t.contentType} AND COALESCE(event_type,'download') = ${t.eventType})
   `);
 
-  // FIXED: Use string " OR " instead of Prisma.sql` OR `
-  const scope = Prisma.join(orParts, " OR ");
+  const scope = join(orParts, " OR ");
 
   const tierRows = await prisma.$queryRaw<
     Array<{ slug: string; content_type: string; event_type: string; tier: string | null; count: unknown }>
-  >(Prisma.sql`
+  >(sql`
     SELECT
       slug,
       COALESCE(content_type,'unknown') AS content_type,
@@ -647,7 +643,7 @@ async function enrichContentBreakdowns(
 
   const countryRows = await prisma.$queryRaw<
     Array<{ slug: string; content_type: string; event_type: string; country_code: string | null; count: unknown }>
-  >(Prisma.sql`
+  >(sql`
     SELECT
       slug,
       COALESCE(content_type,'unknown') AS content_type,
@@ -685,7 +681,6 @@ async function enrichContentBreakdowns(
   });
 }
 
-// Keep config (fine)
 export const config = {
   api: {
     responseLimit: false,
