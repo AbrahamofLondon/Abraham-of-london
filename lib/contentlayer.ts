@@ -1,4 +1,3 @@
-// lib/contentlayer.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
@@ -131,6 +130,16 @@ export interface StrategyDocument extends ContentlayerDocument {
   lockMessage?: string;
 }
 
+export interface ShortDocument extends ContentlayerDocument {
+  type: "Short";
+  theme?: string;
+  audience?: string;
+  readTime?: string;
+  published?: boolean;
+  accessLevel?: string;
+  lockMessage?: string;
+}
+
 export type DocumentTypes =
   | PostDocument
   | BookDocument
@@ -139,7 +148,8 @@ export type DocumentTypes =
   | PrintDocument
   | StrategyDocument
   | ResourceDocument
-  | CanonDocument;
+  | CanonDocument
+  | ShortDocument;
 
 /* -------------------------------------------------------------------------- */
 /* Runtime collections                                                        */
@@ -155,6 +165,8 @@ export const allPrints = safeArray<PrintDocument>((generated as any).allPrints);
 export const allStrategies = safeArray<StrategyDocument>((generated as any).allStrategies);
 export const allResources = safeArray<ResourceDocument>((generated as any).allResources);
 export const allCanons = safeArray<CanonDocument>((generated as any).allCanons);
+export const allShorts = safeArray<ShortDocument>((generated as any).allShorts);
+
 export const allDocuments = safeArray<ContentlayerDocument>((generated as any).allDocuments);
 
 export const allContent: ContentlayerDocument[] = [...allDocuments];
@@ -187,6 +199,9 @@ export function isCanon(doc: any): doc is CanonDocument {
 }
 export function isStrategy(doc: any): doc is StrategyDocument {
   return doc?.type === "Strategy";
+}
+export function isShort(doc: any): doc is ShortDocument {
+  return doc?.type === "Short";
 }
 
 /* -------------------------------------------------------------------------- */
@@ -294,10 +309,19 @@ function mapToCanonCardProps(doc: CanonDocument) {
   };
 }
 
+function mapToShortCardProps(doc: ShortDocument) {
+  return {
+    ...mapToBaseCardProps(doc),
+    theme: doc.theme || null,
+    readTime: doc.readTime || null,
+  };
+}
+
 export function getCardPropsForDocument(doc: ContentlayerDocument) {
   if (isBook(doc)) return mapToBookCardProps(doc);
   if (isPost(doc)) return mapToBlogPostCardProps(doc);
   if (isCanon(doc)) return mapToCanonCardProps(doc);
+  if (isShort(doc)) return mapToShortCardProps(doc);
   return mapToBaseCardProps(doc);
 }
 
@@ -305,6 +329,5 @@ export type ContentlayerCardProps = ReturnType<typeof getCardPropsForDocument>;
 
 /**
  * Re-export generated stuff (optional). This keeps other "direct generated" imports working.
- * If you want to lock things down, you can remove this line later.
  */
 export * from "contentlayer/generated";

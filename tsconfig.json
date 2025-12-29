@@ -1,32 +1,37 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "es2022"],
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
-
     "strict": false,
-    "strictNullChecks": false,
-
     "noEmit": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "contentlayer/generated": ["./.contentlayer/generated"]
+      "@/*": [
+        "./*"
+      ],
+      "contentlayer/generated": [
+        "./.contentlayer/generated"
+      ]
     },
-
-    "forceConsistentCasingInFileNames": true,
-    "plugins": [{ "name": "next" }]
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -37,12 +42,8 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-  "node_modules",
-  ".next",
-  "**/*.backup.*",
-  "dist",
-  ".contentlayer/.cache",
-  "lib/post-extensions.d.ts",
-  "types/index.d.ts"
-]
+    "node_modules",
+    ".next",
+    ".contentlayer/.cache"
+  ]
 }

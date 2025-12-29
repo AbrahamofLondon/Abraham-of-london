@@ -25,7 +25,7 @@ const nextConfig = {
    * ENTERPRISE BUILD SIGNAL:
    * - Keep TS errors ON in CI by default.
    * - If you absolutely need an emergency bypass on Netlify:
-   *   set NETLIFY_TS_IGNORE=true explicitly.
+   * set NETLIFY_TS_IGNORE=true explicitly.
    */
   typescript: {
     ignoreBuildErrors: isNetlify && process.env.NETLIFY_TS_IGNORE === "true",
@@ -58,20 +58,20 @@ const nextConfig = {
     if (dev && process.env.NEXT_DEV_DISABLE_CACHE === "true") {
       config.cache = false;
     }
-    
+
     // Path alias
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       "@": path.resolve(__dirname),
     };
-    
+
     // SVG via SVGR
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
       use: ["@svgr/webpack"],
     });
-    
+
     // Browser bundles: do not polyfill node built-ins
     if (!isServer) {
       config.resolve.fallback = {
@@ -80,7 +80,7 @@ const nextConfig = {
         path: false,
       };
     }
-    
+
     /**
      * CRITICAL FIX: Prevent webpack from trying to process binary files
      * Files in public/ are served statically and should NOT be bundled or scanned
@@ -92,7 +92,7 @@ const nextConfig = {
         emit: false, // Don't emit these files (they're already in public/)
       },
     });
-    
+
     /**
      * CRITICAL: Exclude binary files from dependency tracking
      * This prevents webpack from trying to scan/parse zip files and other binaries
@@ -101,10 +101,11 @@ const nextConfig = {
       ...(config.module.noParse || []),
       /\.(pdf|xlsx?|docx?|zip|tar|gz)$/i,
     ];
-    
+
     /**
      * Watch options: Ignore problematic directories
      * Prevents locked file errors during development and builds
+     * UPDATED: Added 'public/assets' which was causing your error
      */
     config.watchOptions = {
       ...config.watchOptions,
@@ -115,12 +116,16 @@ const nextConfig = {
         '**/.contentlayer/**',
         // Ignore the downloads directory to prevent EPERM errors on zip files
         '**/public/downloads/**',
+        // Ignore assets to prevent EPERM on PDFs/images
+        '**/public/assets/**',
+        '**/public/assets/vault/**',
       ],
     };
-    
+
     /**
      * Snapshot options: Exclude binary files from module snapshots
      * Prevents webpack from trying to read binary content
+     * UPDATED: Added 'public/assets'
      */
     if (config.snapshot) {
       config.snapshot = {
@@ -132,10 +137,11 @@ const nextConfig = {
         immutablePaths: [
           ...(config.snapshot.immutablePaths || []),
           path.resolve(__dirname, 'public/downloads'),
+          path.resolve(__dirname, 'public/assets'),
         ],
       };
     }
-    
+
     /**
      * Optional: reduce cache weirdness in CI by creating a stable cache name.
      * (Useful when multiple deployments share caches)
@@ -152,7 +158,7 @@ const nextConfig = {
         },
       };
     }
-    
+
     return config;
   },
 };

@@ -1,4 +1,3 @@
-// lib/contentlayer-helper.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as generated from "@/lib/contentlayer";
 
@@ -6,6 +5,10 @@ import * as generated from "@/lib/contentlayer";
 /* 1. TYPES & INTERFACES                                                      */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Document kind enumeration for all content types in the system.
+ * Each kind maps to a specific URL route.
+ */
 export type DocKind =
   | "post"
   | "book"
@@ -18,6 +21,10 @@ export type DocKind =
   | "short"
   | "unknown";
 
+/**
+ * Access tier system for gated content.
+ * Higher tiers require higher membership levels.
+ */
 export type AccessLevel =
   | "public"
   | "inner-circle"
@@ -27,18 +34,27 @@ export type AccessLevel =
 
 export type Tier = AccessLevel;
 
+/**
+ * Raw metadata from Contentlayer's internal processing.
+ */
 interface RawMeta {
   flattenedPath?: string;
   sourceFileName?: string;
 }
 
+/**
+ * ContentDoc: Permissive input shape that accepts messy frontmatter.
+ * All fields are optional because frontmatter is untrusted input.
+ */
 export interface ContentDoc {
+  // Contentlayer discriminators (varies by setup)
   _type?: string;
   type?: string;
   documentType?: string;
 
   _raw?: RawMeta;
 
+  // Common metadata (can be messy in frontmatter)
   title?: string | null;
   subtitle?: string | null;
   description?: string | null;
@@ -46,11 +62,12 @@ export interface ContentDoc {
 
   date?: string | Date | null;
 
-  slug?: string | null;
+  slug?: string | null; // May include nested paths
   canonicalUrl?: string | null;
 
-  url?: string | null;
-  href?: string | null;
+  // Some docs include precomputed url/href fields
+  url?: string | null; // Canonical internal route if present
+  href?: string | null; // CTA only
 
   draft?: boolean;
   featured?: boolean;
@@ -60,47 +77,48 @@ export interface ContentDoc {
 
   tags?: unknown;
 
+  // Media
   coverImage?: string | null;
   coverimage?: string | null;
   normalizedCoverImage?: string | null;
 
+  // Aspect hints (varies across docs)
   coverAspect?: string | null;
   aspect?: string | null;
 
+  // Reading time variants
   readTime?: string | null;
   readtime?: string | null;
   readingTime?: string | null;
   normalizedReadTime?: string | null;
 
+  // Download variants
   canonicalPdfHref?: string | null;
   downloadUrl?: string | null;
   fileUrl?: string | null;
   pdfPath?: string | null;
   file?: string | null;
   downloadFile?: string | null;
-
-  // size-ish fields (optional; frontmatter is messy)
-  size?: number | string | null;
+  
+  // NEW: Add file size handling
   fileSize?: number | string | null;
-  filesize?: number | string | null;
+  size?: number | string | null;
   downloadSize?: number | string | null;
-  bytes?: number | string | null;
-  fileBytes?: number | string | null;
-  filesizeBytes?: number | string | null;
-  downloadBytes?: number | string | null;
   fileSizeLabel?: string | null;
-  sizeLabel?: string | null;
-  sizelabel?: string | null;
-  downloadSizeLabel?: string | null;
 
+  // Prints/events/other
   available?: boolean | null;
 
   body?: { raw?: string; code?: string } | null;
   content?: string | null;
 
+  // Allow arbitrary frontmatter passthrough (untrusted)
   [key: string]: unknown;
 }
 
+/**
+ * UI-ready card properties for consistent display.
+ */
 export interface CardProps {
   kind: DocKind;
   slug: string;
@@ -110,27 +128,28 @@ export interface CardProps {
   description: string | null;
   href: string;
 
+  // Media (always present or null-safe)
   coverImage: string;
   coverAspect: string | null;
 
+  // Meta
   tags: string[];
-  dateISO: string | null;
+  dateISO: string | null; // ISO string
   readTime: string | null;
 
+  // Access
   accessLevel: AccessLevel;
   lockMessage: string | null;
 
+  // Downloads
   downloadHref: string | null;
-  downloadSizeLabel: string | null;
+  downloadSizeLabel: string | null; // NEW: Add file size label
 }
 
-export type SearchDocType =
-  | "post"
-  | "book"
-  | "download"
-  | "print"
-  | "resource"
-  | "canon";
+/**
+ * Search document shape for indexing.
+ */
+export type SearchDocType = "post" | "book" | "download" | "print" | "resource" | "canon";
 
 export interface SearchDoc {
   type: SearchDocType;
@@ -148,7 +167,7 @@ export interface SearchDoc {
 /* 2. VALIDATION TYPES                                                        */
 /* -------------------------------------------------------------------------- */
 
-export type ValidationIssueLevel = "error" | "warning" | "info";
+export type ValidationIssueLevel = 'error' | 'warning' | 'info';
 
 export interface ValidationIssue {
   level: ValidationIssueLevel;
@@ -176,8 +195,8 @@ export interface BatchOptions {
   filterByKind?: DocKind[];
   limit?: number;
   offset?: number;
-  sortBy?: "date" | "title" | "slug";
-  sortDirection?: "asc" | "desc";
+  sortBy?: 'date' | 'title' | 'slug';
+  sortDirection?: 'asc' | 'desc';
   featuredOnly?: boolean;
   withTag?: string;
 }
@@ -187,20 +206,25 @@ export interface BatchOptions {
 /* -------------------------------------------------------------------------- */
 
 interface ContentlayerHelperConfig {
+  // URLs
   kindUrlMap: Record<DocKind, string>;
   fallbackImage: string;
   shortFallbackImage: string;
   shortThemeCovers: Record<string, string>;
-
+  
+  // Behavior
   strictMode: boolean;
   logWarnings: boolean;
   throwOnMissingAssets: boolean;
-
+  
+  // Search
   searchableKinds: DocKind[];
-
+  
+  // Tier
   tierOrder: Tier[];
   defaultTier: Tier;
-
+  
+  // Performance
   enableCaching: boolean;
   cacheMaxSize: number;
 }
@@ -245,61 +269,67 @@ const DEFAULT_CONFIG: ContentlayerHelperConfig = {
   fallbackImage: GLOBAL_FALLBACK_IMAGE,
   shortFallbackImage: SHORT_GLOBAL_FALLBACK,
   shortThemeCovers: SHORT_THEME_COVERS,
-
   strictMode: process.env.NODE_ENV === "production",
   logWarnings: process.env.NODE_ENV === "development",
   throwOnMissingAssets: process.env.CI === "true",
-
   searchableKinds: ["post", "book", "download", "print", "resource", "canon"],
-
   tierOrder: TIER_ORDER,
   defaultTier: "public",
-
   enableCaching: true,
   cacheMaxSize: 1000,
 };
 
-let config: ContentlayerHelperConfig = { ...DEFAULT_CONFIG };
+let config = DEFAULT_CONFIG;
 
-export function configureContentlayerHelper(
-  overrides: Partial<ContentlayerHelperConfig>
-): void {
+/**
+ * Configure the helper behavior at runtime.
+ */
+export function configureContentlayerHelper(overrides: Partial<ContentlayerHelperConfig>): void {
   config = { ...config, ...overrides };
   clearCaches();
 }
 
 /* -------------------------------------------------------------------------- */
-/* 4. UTILS                                                                   */
+/* 4. UTILITY FUNCTIONS                                                       */
 /* -------------------------------------------------------------------------- */
 
-type MemoFn<T extends (...args: any[]) => any> = T & { __cache?: Map<string, any> };
-const memoizedSet = new Set<MemoFn<any>>();
+// Enhanced memoization with cache clearing support
+type MemoFn<T extends (...args: any[]) => any> = T & { __cache?: Map<string, ReturnType<T>> };
 
 const memoize = <T extends (...args: any[]) => any>(
   fn: T,
   keyFn: (...args: Parameters<T>) => string
 ): MemoFn<T> => {
   if (!config.enableCaching) return fn as MemoFn<T>;
-
+  
   const wrapped = ((...args: Parameters<T>) => {
     const cache = wrapped.__cache!;
     const key = keyFn(...args);
-    if (cache.has(key)) return cache.get(key);
+    if (cache.has(key)) {
+      return cache.get(key)!;
+    }
     const result = fn(...args);
-    if (cache.size < config.cacheMaxSize) cache.set(key, result);
+    if (cache.size < config.cacheMaxSize) {
+      cache.set(key, result);
+    }
     return result;
   }) as MemoFn<T>;
-
-  wrapped.__cache = new Map<string, any>();
-  memoizedSet.add(wrapped);
-
+  
+  wrapped.__cache = new Map<string, ReturnType<T>>();
   return wrapped;
 };
 
+// Track memoized functions for clearing
+const memoizedFunctions: Set<MemoFn<any>> = new Set();
+
+// Clear all caches (useful for testing or config changes)
 export function clearCaches(): void {
-  for (const fn of memoizedSet) fn.__cache?.clear();
+  for (const fn of memoizedFunctions) {
+    fn.__cache?.clear();
+  }
 }
 
+// Type-safe coercion utilities
 const str = (v: unknown, fallback = ""): string => {
   if (typeof v === "string") return v;
   if (typeof v === "number" || typeof v === "boolean") return String(v);
@@ -307,10 +337,12 @@ const str = (v: unknown, fallback = ""): string => {
 };
 
 const strTrim = (v: unknown, fallback = ""): string => str(v, fallback).trim();
+
 const strOrNull = (v: unknown): string | null => {
   const s = strTrim(v, "");
   return s ? s : null;
 };
+
 const lower = (v: unknown, fallback = ""): string => strTrim(v, fallback).toLowerCase();
 
 const bool = (v: unknown, fallback = false): boolean => {
@@ -324,14 +356,20 @@ const bool = (v: unknown, fallback = false): boolean => {
   return fallback;
 };
 
+// String manipulation utilities
 const stripQueryAndHash = (s: string): string => s.split("#")[0]?.split("?")[0] ?? s;
+
 const ensureLeadingSlash = (s: string): string => (s.startsWith("/") ? s : `/${s}`);
+
 const normalizeSlashes = (s: string): string => s.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
 
 function normalizeInternalPath(input: unknown): string {
   let s = strTrim(input, "");
   if (!s) return "";
+
+  // Allow remote passthrough
   if (/^https?:\/\//i.test(s)) return s;
+
   s = stripQueryAndHash(s);
   s = normalizeSlashes(s);
   s = ensureLeadingSlash(s);
@@ -342,6 +380,10 @@ function isValidInternalUrl(u: string): boolean {
   return u.startsWith("/") && !u.startsWith("//");
 }
 
+/**
+ * Canonical slug = last segment only
+ * NOTE: used where pages expect [slug].tsx.
+ */
 function toCanonicalSlug(input: unknown): string {
   let s = strTrim(input, "");
   if (!s) return "";
@@ -353,51 +395,6 @@ function toCanonicalSlug(input: unknown): string {
   if (!s) return "";
   const parts = s.split("/").filter(Boolean);
   return parts.length ? parts[parts.length - 1] : s;
-}
-
-function coerceTags(doc: ContentDoc): string[] {
-  const t = (doc as any)?.tags;
-
-  if (Array.isArray(t)) {
-    return t
-      .map((x) => strTrim(x, ""))
-      .filter(Boolean)
-      .map((x) => lower(x, ""));
-  }
-
-  if (typeof t === "string") {
-    const s = t.trim();
-    if (!s) return [];
-    if (s.includes(",") || s.includes("|")) {
-      return s
-        .split(/[,|]/g)
-        .map((x) => lower(x.trim(), ""))
-        .filter(Boolean);
-    }
-    const single = lower(s, "");
-    return single ? [single] : [];
-  }
-
-  return [];
-}
-
-export function resolveDocDateISO(doc: ContentDoc): string | null {
-  const v = (doc as any)?.date;
-  if (!v) return null;
-  try {
-    const d = v instanceof Date ? v : new Date(String(v));
-    if (Number.isNaN(d.getTime())) return null;
-    return d.toISOString();
-  } catch {
-    return null;
-  }
-}
-
-function safeTime(doc: ContentDoc): number {
-  const iso = resolveDocDateISO(doc);
-  if (!iso) return 0;
-  const t = new Date(iso).getTime();
-  return Number.isFinite(t) ? t : 0;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -431,6 +428,9 @@ export const allStrategies = pickArray("allStrategies");
 export const allCanons = pickArray("allCanons");
 export const allShorts = pickArray("allShorts");
 
+/**
+ * Get all documents from Contentlayer.
+ */
 export const getAllContentlayerDocs = (): ContentDoc[] =>
   [
     ...allPosts,
@@ -456,30 +456,58 @@ export const isPublishedContent = (doc: ContentDoc): boolean => !isDraftContent(
 export const getPublishedDocuments = (): ContentDoc[] =>
   getAllContentlayerDocs().filter(isPublishedContent);
 
-export const getFeaturedDocuments = (): ContentDoc[] =>
-  getPublishedDocuments().filter((d) => bool((d as any)?.featured, false));
+export const getFeaturedDocuments = (): ContentDoc[] => {
+  const docs = getPublishedDocuments();
+  return docs.filter((d) => bool((d as any)?.featured, false));
+};
 
+export const getFeaturedDocumentsByType = (type: string): ContentDoc[] => {
+  const t = lower(type, "");
+  if (!t) return getFeaturedDocuments();
+
+  return getFeaturedDocuments().filter((d) => {
+    const dt = lower((d as any)?.type || (d as any)?._type || (d as any)?.documentType, "");
+    return dt === t;
+  });
+};
+
+/**
+ * Get document kind with memoization.
+ */
 export const getDocKind = memoize(
   (doc: ContentDoc): DocKind => {
     const raw = lower(doc?._type ?? doc?.type ?? (doc as any)?.documentType, "");
     switch (raw) {
       case "post":
+        return "post";
       case "book":
+        return "book";
       case "download":
+        return "download";
       case "event":
+        return "event";
       case "print":
+        return "print";
       case "resource":
+        return "resource";
       case "strategy":
+        return "strategy";
       case "canon":
+        return "canon";
       case "short":
-        return raw;
+        return "short";
       default:
         return "unknown";
     }
   },
-  (doc) => doc?._raw?.flattenedPath || strTrim(doc?.slug, "") || "unknown"
+  (doc) => doc._raw?.flattenedPath || strTrim(doc?.slug, '') || 'unknown'
 );
 
+memoizedFunctions.add(getDocKind as MemoFn<any>);
+
+/**
+ * Normalize slug with memoization.
+ */
 export const normalizeSlug = memoize(
   (doc: ContentDoc): string => {
     if (!doc) return "";
@@ -499,8 +527,10 @@ export const normalizeSlug = memoize(
 
     return toCanonicalSlug(slug);
   },
-  (doc) => doc?._raw?.flattenedPath || strTrim(doc?.slug, "") || "unknown"
+  (doc) => doc._raw?.flattenedPath || strTrim(doc?.slug, '') || 'unknown'
 );
+
+memoizedFunctions.add(normalizeSlug as MemoFn<any>);
 
 /* -------------------------------------------------------------------------- */
 /* 7. ACCESS CONTROL                                                          */
@@ -516,12 +546,17 @@ export function normalizeTier(v: unknown, fallback: Tier = "public"): Tier {
   return (TIER_ORDER as string[]).includes(s) ? (s as Tier) : fallback;
 }
 
+/**
+ * Centralized access tier interpretation.
+ */
 export function getRequiredTier(doc: ContentDoc): Tier {
   if (!doc) return config.defaultTier;
 
-  const primary = normalizeTier((doc as any)?.accessLevel, config.defaultTier);
-  if (primary) return primary;
+  // Primary: your existing accessLevel field
+  const accessLevel = normalizeTier((doc as any)?.accessLevel, config.defaultTier);
+  if (accessLevel !== config.defaultTier) return accessLevel;
 
+  // Secondary/legacy signals
   const legacy =
     (doc as any)?.requiredTier ??
     (doc as any)?.tier ??
@@ -533,38 +568,101 @@ export function getRequiredTier(doc: ContentDoc): Tier {
 }
 
 export function getAccessLevel(doc: ContentDoc): AccessLevel {
-  const v = lower(doc?.accessLevel, "");
-  switch (v) {
-    case "public":
-    case "inner-circle":
-    case "inner-circle-plus":
-    case "inner-circle-elite":
-    case "private":
-      return v;
-    default:
-      return config.defaultTier;
-  }
+  return getRequiredTier(doc);
 }
 
 export function isPublic(doc: ContentDoc): boolean {
   return getAccessLevel(doc) === "public";
 }
 
+/**
+ * Compare user tier vs doc required tier.
+ * Returns true if user can access the doc.
+ */
 export function isTierAllowed(userTier: unknown, requiredTier: unknown): boolean {
   const u = normalizeTier(userTier, config.defaultTier);
   const r = normalizeTier(requiredTier, config.defaultTier);
   return config.tierOrder.indexOf(u) >= config.tierOrder.indexOf(r);
 }
 
+/**
+ * Convenience for callers that already have a doc.
+ */
 export function canAccessDoc(doc: ContentDoc, userTier: unknown): boolean {
   return isTierAllowed(userTier, getRequiredTier(doc));
 }
 
 /* -------------------------------------------------------------------------- */
-/* 8. URL ROUTING                                                             */
+/* 8. METADATA NORMALIZATION                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Tag coercion with support for comma and pipe separators.
+ */
+function coerceTags(doc: ContentDoc): string[] {
+  // Accept tags as:
+  // - array
+  // - comma-separated string
+  // - pipe-separated string
+  // - single string
+  const t = (doc as any)?.tags;
+
+  if (Array.isArray(t)) {
+    return t
+      .map((x) => strTrim(x, ""))
+      .filter(Boolean)
+      .map((x) => lower(x, ""));
+  }
+
+  if (typeof t === "string") {
+    const s = t.trim();
+    if (!s) return [];
+    
+    // Split by comma or pipe
+    if (s.includes(",") || s.includes("|")) {
+      return s
+        .split(/[,|]/g)
+        .map((x) => lower(x.trim(), ""))
+        .filter(Boolean);
+    }
+    
+    // Single tag
+    const tag = lower(s, "");
+    return tag ? [tag] : [];
+  }
+
+  return [];
+}
+
+/**
+ * Date normalization to ISO string.
+ */
+export function resolveDocDateISO(doc: ContentDoc): string | null {
+  const v = (doc as any)?.date;
+  if (!v) return null;
+
+  try {
+    const d = v instanceof Date ? v : new Date(String(v));
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+function safeTime(doc: ContentDoc): number {
+  const iso = resolveDocDateISO(doc);
+  if (!iso) return 0;
+  const t = new Date(iso).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 9. URL ROUTING                                                             */
 /* -------------------------------------------------------------------------- */
 
 export function getDocHref(doc: ContentDoc): string {
+  // Trust explicit internal url if valid
   const computedUrl = strTrim(doc?.url, "");
   if (computedUrl) {
     const n = normalizeInternalPath(computedUrl);
@@ -573,8 +671,8 @@ export function getDocHref(doc: ContentDoc): string {
 
   const kind = getDocKind(doc);
   const base = config.kindUrlMap[kind] ?? "/content";
-  const slug = normalizeSlug(doc);
 
+  const slug = normalizeSlug(doc);
   return slug ? `${base}/${slug}` : base;
 }
 
@@ -583,7 +681,7 @@ export function getDocCanonicalUrlPath(doc: ContentDoc): string {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 9. MEDIA RESOLUTION                                                        */
+/* 10. MEDIA RESOLUTION                                                       */
 /* -------------------------------------------------------------------------- */
 
 function normalizeThemeKey(k: string): string {
@@ -603,14 +701,13 @@ function normalizeThemeKey(k: string): string {
 }
 
 function resolveShortCover(doc: ContentDoc): string {
+  // Computed first
   const normalized = normalizeInternalPath((doc as any)?.normalizedCoverImage);
   if (normalized && isValidInternalUrl(normalized)) return normalized;
 
+  // Raw variants
   const explicit = normalizeInternalPath(
-    (doc as any)?.coverImage ||
-      (doc as any)?.coverimage ||
-      (doc as any)?.image ||
-      (doc as any)?.cover
+    (doc as any)?.coverImage || (doc as any)?.coverimage || (doc as any)?.image || (doc as any)?.cover
   );
   if (explicit && isValidInternalUrl(explicit)) return explicit;
 
@@ -639,10 +736,7 @@ export function resolveDocCoverImage(doc: ContentDoc): string {
   if (normalized && isValidInternalUrl(normalized)) return normalized;
 
   const explicit = normalizeInternalPath(
-    (doc as any)?.coverImage ||
-      (doc as any)?.coverimage ||
-      (doc as any)?.image ||
-      (doc as any)?.cover
+    (doc as any)?.coverImage || (doc as any)?.coverimage || (doc as any)?.image || (doc as any)?.cover
   );
   if (explicit && isValidInternalUrl(explicit)) return explicit;
 
@@ -661,115 +755,14 @@ export function resolveDocReadTime(doc: ContentDoc): string | null {
   return raw || null;
 }
 
+/**
+ * Cover aspect normalization.
+ */
 export function resolveDocCoverAspect(doc: ContentDoc): string | null {
   const raw = strTrim((doc as any)?.coverAspect ?? (doc as any)?.aspect, "");
-  return raw ? raw.toLowerCase() : null;
-}
-
-/* -------------------------------------------------------------------------- */
-/* 10. DOWNLOAD URLs                                                          */
-/* -------------------------------------------------------------------------- */
-
-export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
-  const canonical = strTrim((doc as any)?.canonicalPdfHref, "");
-  if (canonical) return normalizeInternalPath(canonical);
-
-  const raw =
-    strTrim((doc as any)?.downloadUrl, "") ||
-    strTrim((doc as any)?.fileUrl, "") ||
-    strTrim((doc as any)?.pdfPath, "") ||
-    strTrim((doc as any)?.file, "") ||
-    strTrim((doc as any)?.downloadFile, "");
-
   if (!raw) return null;
 
-  if (/^https?:\/\//i.test(raw)) return raw;
-
-  const url = normalizeInternalPath(raw);
-
-  if (url.startsWith("/downloads/")) {
-    return url.replace(/^\/downloads\//, "/assets/downloads/");
-  }
-
-  return url;
-}
-
-export function resolveDocDownloadHref(doc: ContentDoc): string | null {
-  const direct = resolveDocDownloadUrl(doc);
-  if (!direct) return null;
-
-  if (getAccessLevel(doc) === "public") return direct;
-
-  const slug = normalizeSlug(doc);
-  if (!slug) return null;
-
-  return `/api/downloads/${encodeURIComponent(slug)}`;
-}
-
-/* -------------------------------------------------------------------------- */
-/* 10b. DOWNLOAD SIZE LABEL (SINGLE EXPORT, NO DUPES)                          */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Best-effort download size label.
- * 1) explicit label-ish fields
- * 2) bytes-like fields -> "X KB/MB/GB"
- * 3) explicit numeric string treated as bytes
- * 4) otherwise null
- */
-export function resolveDocDownloadSizeLabel(doc: ContentDoc): string | null {
-  if (!doc) return null;
-
-  const explicit =
-    strOrNull((doc as any)?.fileSizeLabel) ??
-    strOrNull((doc as any)?.downloadSizeLabel) ??
-    strOrNull((doc as any)?.sizeLabel) ??
-    strOrNull((doc as any)?.sizelabel) ??
-    strOrNull((doc as any)?.size) ??
-    strOrNull((doc as any)?.fileSize) ??
-    strOrNull((doc as any)?.filesize) ??
-    strOrNull((doc as any)?.downloadSize) ??
-    strOrNull((doc as any)?.downloadsize);
-
-  // If explicit is already a human label like "2.3 MB", keep it.
-  if (explicit && /(?:^|\s)(b|kb|mb|gb|tb)\s*$/i.test(explicit.trim())) {
-    return explicit.trim();
-  }
-
-  const bytesRaw =
-    (doc as any)?.bytes ??
-    (doc as any)?.fileBytes ??
-    (doc as any)?.filesizeBytes ??
-    (doc as any)?.downloadBytes ??
-    (doc as any)?.fileSizeBytes;
-
-  const bytes =
-    typeof bytesRaw === "number"
-      ? bytesRaw
-      : typeof bytesRaw === "string"
-        ? Number(bytesRaw)
-        : explicit && /^[0-9]+(\.[0-9]+)?$/.test(explicit)
-          ? Number(explicit)
-          : NaN;
-
-  if (!Number.isFinite(bytes) || bytes <= 0) {
-    // If explicit exists (but not bytes), still show it.
-    return explicit ? explicit.trim() : null;
-  }
-
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  let n = bytes;
-  let u = 0;
-
-  while (n >= 1024 && u < units.length - 1) {
-    n /= 1024;
-    u += 1;
-  }
-
-  const rounded =
-    n >= 100 ? Math.round(n) : n >= 10 ? Math.round(n * 10) / 10 : Math.round(n * 100) / 100;
-
-  return `${rounded} ${units[u]}`;
+  return raw.toLowerCase();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -811,87 +804,126 @@ export function resolveDocDownloadHref(doc: ContentDoc): string | null {
   return `/api/downloads/${encodeURIComponent(slug)}`;
 }
 
-/* -------------------------------------------------------------------------- */
-/* 11b. DOWNLOAD SIZE LABEL                                                   */
-/* -------------------------------------------------------------------------- */
-
-function formatBytes(bytes: number): string {
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  let n = bytes;
-  let u = 0;
-
-  while (n >= 1024 && u < units.length - 1) {
-    n /= 1024;
-    u += 1;
-  }
-
-  const rounded =
-    n >= 100 ? Math.round(n) : n >= 10 ? Math.round(n * 10) / 10 : Math.round(n * 100) / 100;
-
-  return `${rounded} ${units[u]}`;
-}
-
 /**
- * Best-effort download size label.
- * - Uses explicit frontmatter strings when present.
- * - Falls back to byte fields when present.
- * - Never throws; returns null when unknown.
+ * File size label resolution.
  */
 export function resolveDocDownloadSizeLabel(doc: ContentDoc): string | null {
-  if (!doc || typeof doc !== "object") return null;
-
-  // 1) explicit “label-like” fields (strings win)
-  const explicit =
-    strOrNull((doc as any)?.size) ??
-    strOrNull((doc as any)?.fileSizeLabel) ??
-    strOrNull((doc as any)?.fileSize) ??
-    strOrNull((doc as any)?.filesize) ??
-    strOrNull((doc as any)?.downloadSize) ??
-    strOrNull((doc as any)?.downloadsize) ??
-    strOrNull((doc as any)?.sizeLabel) ??
-    strOrNull((doc as any)?.sizelabel);
-
-  if (explicit) return explicit;
-
-  // 2) bytes fields -> human label
-  const bytesRaw =
-    (doc as any)?.bytes ??
-    (doc as any)?.fileBytes ??
-    (doc as any)?.filesizeBytes ??
-    (doc as any)?.downloadBytes;
-
-  const bytes =
-    typeof bytesRaw === "number"
-      ? bytesRaw
-      : typeof bytesRaw === "string"
-        ? Number(bytesRaw)
-        : NaN;
-
-  if (Number.isFinite(bytes) && bytes > 0) return formatBytes(bytes);
-
+  if (!doc || typeof doc !== 'object') return null;
+  
+  // Try different property names
+  const sizeProp = doc.size || doc.fileSize || doc.downloadSize || doc.fileSizeLabel;
+  
+  if (typeof sizeProp === 'string') {
+    const trimmed = sizeProp.trim();
+    return trimmed || null;
+  }
+  
+  // If size is a number in bytes, format it
+  if (typeof sizeProp === 'number') {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = sizeProp;
+    let unitIndex = 0;
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    
+    return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+  }
+  
   return null;
 }
 
 /* -------------------------------------------------------------------------- */
-/* 12. UI-READY PROPS                                                         */
+/* 12. QUERY FUNCTIONS                                                        */
 /* -------------------------------------------------------------------------- */
 
-export function isContentDoc(v: unknown): v is ContentDoc {
-  if (!v || typeof v !== "object") return false;
-  const obj = v as Record<string, unknown>;
-  return typeof obj._raw === "object" || typeof obj.slug === "string" || typeof obj.title === "string";
+export function getPublishedDocumentsByType(kind: DocKind, limit?: number): ContentDoc[] {
+  const items = getPublishedDocuments()
+    .filter((d) => getDocKind(d) === kind)
+    .sort((a, b) => safeTime(b) - safeTime(a));
+
+  return typeof limit === "number" ? items.slice(0, limit) : items;
 }
 
+export const getPublishedPosts = (): ContentDoc[] => getPublishedDocumentsByType("post");
+export const getAllBooks = (): ContentDoc[] => getPublishedDocumentsByType("book");
+export const getAllDownloads = (): ContentDoc[] => getPublishedDocumentsByType("download");
+export const getAllEvents = (): ContentDoc[] => getPublishedDocumentsByType("event");
+export const getAllPrints = (): ContentDoc[] => getPublishedDocumentsByType("print");
+export const getAllResources = (): ContentDoc[] => getPublishedDocumentsByType("resource");
+export const getAllStrategies = (): ContentDoc[] => getPublishedDocumentsByType("strategy");
+export const getAllCanons = (): ContentDoc[] => getPublishedDocumentsByType("canon");
+export const getPublishedShorts = (): ContentDoc[] => getPublishedDocumentsByType("short");
+
+/* By Slug: last-segment match only */
+const cleanMatch = (s: string): string => toCanonicalSlug(s);
+
+export const getPostBySlug = (s: string): ContentDoc | null =>
+  getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getBookBySlug = (s: string): ContentDoc | null =>
+  getAllBooks().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getDownloadBySlug = (s: string): ContentDoc | null =>
+  getAllDownloads().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getResourceBySlug = (s: string): ContentDoc | null =>
+  getAllResources().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getEventBySlug = (s: string): ContentDoc | null =>
+  getAllEvents().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getPrintBySlug = (s: string): ContentDoc | null =>
+  getAllPrints().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getStrategyBySlug = (s: string): ContentDoc | null =>
+  getAllStrategies().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getCanonBySlug = (s: string): ContentDoc | null =>
+  getAllCanons().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getShortBySlug = (s: string): ContentDoc | null =>
+  getPublishedShorts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+/* -------------------------------------------------------------------------- */
+/* 13. UI-READY PROPS                                                         */
+/* -------------------------------------------------------------------------- */
+
+// Runtime type guard for ContentDoc
+export function isContentDoc(v: unknown): v is ContentDoc {
+  if (!v || typeof v !== 'object') return false;
+  
+  const obj = v as Record<string, unknown>;
+  
+  // Must have at least one of these identifiers
+  const hasIdentifier = 
+    typeof obj._raw === 'object' ||
+    typeof obj.slug === 'string' ||
+    typeof obj.title === 'string';
+    
+  // Allow unknown kinds for future expansion
+  return hasIdentifier;
+}
+
+// Assert that a value is a ContentDoc
 export function assertContentDoc(v: unknown, context?: string): asserts v is ContentDoc {
   if (!isContentDoc(v)) {
     const error = new Error(
-      `Invalid ContentDoc${context ? ` in ${context}` : ""}: ${JSON.stringify(v).slice(0, 120)}`
+      `Invalid ContentDoc${context ? ` in ${context}` : ''}: ${JSON.stringify(v).slice(0, 100)}`
     );
-    if (config.strictMode) throw error;
-    if (config.logWarnings) console.warn(error.message);
+    if (config.strictMode) {
+      throw error;
+    } else if (config.logWarnings) {
+      console.warn(error.message);
+    }
   }
 }
 
+/**
+ * Get document category with proper inference.
+ */
 function getDocCategory(doc: ContentDoc, tags: string[]): string | null {
   const explicit = strOrNull((doc as any)?.category);
   if (explicit) return explicit;
@@ -901,8 +933,8 @@ function getDocCategory(doc: ContentDoc, tags: string[]): string | null {
 }
 
 export function getCardPropsForDocument(doc: ContentDoc): CardProps {
-  assertContentDoc(doc, "getCardPropsForDocument");
-
+  assertContentDoc(doc, 'getCardPropsForDocument');
+  
   const kind = getDocKind(doc);
   const slug = normalizeSlug(doc);
 
@@ -926,13 +958,14 @@ export function getCardPropsForDocument(doc: ContentDoc): CardProps {
     lockMessage: strOrNull((doc as any)?.lockMessage),
 
     downloadHref: kind === "download" ? resolveDocDownloadHref(doc) : null,
-    downloadSizeLabel: kind === "download" ? resolveDocDownloadSizeLabel(doc) : null,
+    downloadSizeLabel: resolveDocDownloadSizeLabel(doc), // NEW
   };
 }
 
 export function getSearchDocForDocument(doc: ContentDoc): SearchDoc | null {
   const card = getCardPropsForDocument(doc);
 
+  // Only index allowed kinds
   const allowedKinds = new Set(config.searchableKinds);
   if (!allowedKinds.has(card.kind)) return null;
 
@@ -950,77 +983,89 @@ export function getSearchDocForDocument(doc: ContentDoc): SearchDoc | null {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 13. VALIDATION                                                             */
+/* 14. DOCUMENT VALIDATION                                                    */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Validate a single document for common issues.
+ */
 export function validateDocument(doc: ContentDoc): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const slug = normalizeSlug(doc);
-
-  if (!strTrim(doc?.title, "")) {
+  
+  // Required fields
+  if (!strTrim(doc?.title, '')) {
     issues.push({
-      level: "warning",
-      code: "MISSING_TITLE",
-      message: "Document is missing a title",
+      level: 'warning',
+      code: 'MISSING_TITLE',
+      message: `Document is missing a title`,
       slug,
-      field: "title",
-      suggestion: "Add a descriptive title",
+      field: 'title',
+      suggestion: 'Add a descriptive title',
     });
   }
-
-  if ((doc as any)?.date) {
+  
+  // Date validation
+  if (doc.date) {
     const iso = resolveDocDateISO(doc);
     if (!iso) {
       issues.push({
-        level: "warning",
-        code: "INVALID_DATE",
-        message: "Date format is invalid",
+        level: 'warning',
+        code: 'INVALID_DATE',
+        message: `Date format is invalid`,
         slug,
-        field: "date",
-        suggestion: "Use ISO format (YYYY-MM-DD) or a valid Date value",
+        field: 'date',
+        suggestion: 'Use ISO format (YYYY-MM-DD) or Date object',
       });
     }
   }
-
+  
+  // Cover image validation
   const cover = resolveDocCoverImage(doc);
   if (cover === config.fallbackImage || cover === config.shortFallbackImage) {
     issues.push({
-      level: "info",
-      code: "USING_FALLBACK_COVER",
-      message: "Using fallback cover image",
+      level: 'info',
+      code: 'USING_FALLBACK_COVER',
+      message: `Using fallback cover image`,
       slug,
-      field: "coverImage",
-      suggestion: "Add a coverImage field",
+      field: 'coverImage',
+      suggestion: 'Add a coverImage field',
     });
   }
-
+  
+  // Slug validation
   if (!slug) {
     issues.push({
-      level: "error",
-      code: "INVALID_SLUG",
-      message: "Document has no valid slug",
-      field: "slug",
-      suggestion: "Add a slug or ensure flattenedPath is set",
+      level: 'error',
+      code: 'INVALID_SLUG',
+      message: `Document has no valid slug`,
+      field: 'slug',
+      suggestion: 'Add a slug or ensure flattenedPath is set',
     });
   }
-
+  
   return issues;
 }
 
+/**
+ * Validate all documents and return aggregated issues.
+ */
 export function validateAllDocuments(): Record<string, ValidationIssue[]> {
   const result: Record<string, ValidationIssue[]> = {};
   const docs = getAllContentlayerDocs();
-
+  
   for (const doc of docs) {
     const slug = normalizeSlug(doc);
-    if (slug) result[slug] = validateDocument(doc);
+    if (slug) {
+      result[slug] = validateDocument(doc);
+    }
   }
-
+  
   return result;
 }
 
 /* -------------------------------------------------------------------------- */
-/* 14. BATCH                                                                  */
+/* 15. BATCH OPERATIONS                                                       */
 /* -------------------------------------------------------------------------- */
 
 export function getDocumentsBatch(options: BatchOptions = {}): ContentDoc[] {
@@ -1029,116 +1074,134 @@ export function getDocumentsBatch(options: BatchOptions = {}): ContentDoc[] {
     filterByKind,
     limit,
     offset = 0,
-    sortBy = "date",
-    sortDirection = "desc",
+    sortBy = 'date',
+    sortDirection = 'desc',
     featuredOnly = false,
     withTag,
   } = options;
-
-  let docs = includeDrafts ? getAllContentlayerDocs() : getPublishedDocuments();
-
-  if (featuredOnly) docs = docs.filter((doc) => bool((doc as any)?.featured, false));
-
-  if (filterByKind?.length) docs = docs.filter((doc) => filterByKind.includes(getDocKind(doc)));
-
+  
+  let docs = includeDrafts 
+    ? getAllContentlayerDocs() 
+    : getPublishedDocuments();
+    
+  if (featuredOnly) {
+    docs = docs.filter(doc => bool((doc as any)?.featured, false));
+  }
+  
+  if (filterByKind?.length) {
+    docs = docs.filter(doc => filterByKind.includes(getDocKind(doc)));
+  }
+  
   if (withTag) {
     const tagLower = withTag.toLowerCase();
-    docs = docs.filter((doc) => coerceTags(doc).some((t) => t.toLowerCase() === tagLower));
+    docs = docs.filter(doc => {
+      const tags = coerceTags(doc);
+      return tags.some(t => t.toLowerCase() === tagLower);
+    });
   }
-
+  
+  // Sorting
   docs.sort((a, b) => {
-    let aVal: any;
-    let bVal: any;
-
+    let aVal: any, bVal: any;
+    
     switch (sortBy) {
-      case "date":
+      case 'date':
         aVal = safeTime(a);
         bVal = safeTime(b);
         break;
-      case "title":
-        aVal = strTrim(a.title, "").toLowerCase();
-        bVal = strTrim(b.title, "").toLowerCase();
+      case 'title':
+        aVal = strTrim(a.title, '').toLowerCase();
+        bVal = strTrim(b.title, '').toLowerCase();
         break;
-      case "slug":
+      case 'slug':
         aVal = normalizeSlug(a);
         bVal = normalizeSlug(b);
         break;
       default:
         return 0;
     }
-
-    const modifier = sortDirection === "desc" ? -1 : 1;
+    
+    const modifier = sortDirection === 'desc' ? -1 : 1;
     return (aVal < bVal ? -1 : aVal > bVal ? 1 : 0) * modifier;
   });
-
+  
+  // Pagination
   const start = offset;
-  const end = typeof limit === "number" ? start + limit : docs.length;
+  const end = limit ? start + limit : docs.length;
   return docs.slice(start, end);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 15. QUERY BUILDER                                                          */
+/* 16. QUERY BUILDER                                                          */
 /* -------------------------------------------------------------------------- */
 
 export class ContentQueryBuilder {
   private documents: ContentDoc[] = getAllContentlayerDocs();
-
+  private shouldIncludeDrafts = false;
+  
+  constructor() {}
+  
   includeDrafts(include = true): this {
-    if (!include) this.documents = this.documents.filter(isPublishedContent);
+    this.shouldIncludeDrafts = include;
+    if (!include) {
+      this.documents = this.documents.filter(isPublishedContent);
+    }
     return this;
   }
-
+  
   ofKind(kind: DocKind): this {
-    this.documents = this.documents.filter((doc) => getDocKind(doc) === kind);
+    this.documents = this.documents.filter(doc => getDocKind(doc) === kind);
     return this;
   }
-
+  
   withTag(tag: string): this {
     const tagLower = tag.toLowerCase();
-    this.documents = this.documents.filter((doc) =>
-      coerceTags(doc).some((t) => t.toLowerCase() === tagLower)
-    );
+    this.documents = this.documents.filter(doc => {
+      const tags = coerceTags(doc);
+      return tags.some(t => t.toLowerCase() === tagLower);
+    });
     return this;
   }
-
+  
   featuredOnly(): this {
-    this.documents = this.documents.filter((doc) => bool((doc as any)?.featured, false));
+    this.documents = this.documents.filter(doc => bool((doc as any)?.featured, false));
     return this;
   }
-
-  sortByDate(direction: "asc" | "desc" = "desc"): this {
-    const dir = direction === "asc" ? 1 : -1;
+  
+  sortByDate(direction: 'asc' | 'desc' = 'desc'): this {
+    const dir = direction === 'asc' ? 1 : -1;
     this.documents.sort((a, b) => (safeTime(a) - safeTime(b)) * dir);
     return this;
   }
-
-  sortByTitle(direction: "asc" | "desc" = "asc"): this {
-    const modifier = direction === "asc" ? 1 : -1;
-    this.documents.sort((a, b) =>
-      strTrim(a.title, "").toLowerCase().localeCompare(strTrim(b.title, "").toLowerCase()) *
-      modifier
-    );
+  
+  sortByTitle(direction: 'asc' | 'desc' = 'asc'): this {
+    const modifier = direction === 'asc' ? 1 : -1;
+    this.documents.sort((a, b) => {
+      const aTitle = strTrim(a.title, '').toLowerCase();
+      const bTitle = strTrim(b.title, '').toLowerCase();
+      return aTitle.localeCompare(bTitle) * modifier;
+    });
     return this;
   }
-
+  
   limit(count: number): this {
     this.documents = this.documents.slice(0, count);
     return this;
   }
-
+  
   offset(count: number): this {
     this.documents = this.documents.slice(count);
     return this;
   }
-
+  
   get(): ContentDoc[] {
     return [...this.documents];
   }
-
+  
   getCardProps(): CardProps[] {
     return this.documents.map(getCardPropsForDocument);
   }
-
+  
   getSearchDocs(): SearchDoc[] {
     return this.documents
       .map(getSearchDocForDocument)
@@ -1147,7 +1210,7 @@ export class ContentQueryBuilder {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 16. METRICS                                                                */
+/* 17. METRICS COLLECTION                                                     */
 /* -------------------------------------------------------------------------- */
 
 export function collectContentMetrics(): ContentMetrics {
@@ -1155,46 +1218,32 @@ export function collectContentMetrics(): ContentMetrics {
   const published = getPublishedDocuments();
   const drafts = allDocs.filter(isDraftContent);
   const featured = getFeaturedDocuments();
-
-  const byKind: Record<DocKind, number> = {
-    post: 0,
-    book: 0,
-    download: 0,
-    event: 0,
-    print: 0,
-    resource: 0,
-    strategy: 0,
-    canon: 0,
-    short: 0,
-    unknown: 0,
-  };
-
-  const byTier: Record<Tier, number> = {
-    public: 0,
-    "inner-circle": 0,
-    "inner-circle-plus": 0,
-    "inner-circle-elite": 0,
-    private: 0,
-  };
-
-  allDocs.forEach((doc) => {
+  
+  const byKind: Record<DocKind, number> = {} as Record<DocKind, number>;
+  const byTier: Record<Tier, number> = {} as Record<Tier, number>;
+  
+  allDocs.forEach(doc => {
     const kind = getDocKind(doc);
     const tier = getRequiredTier(doc);
+    
     byKind[kind] = (byKind[kind] || 0) + 1;
     byTier[tier] = (byTier[tier] || 0) + 1;
   });
-
+  
   const dates = published
-    .map((doc) => resolveDocDateISO(doc))
+    .map(doc => resolveDocDateISO(doc))
     .filter((d): d is string => d !== null)
     .sort();
-
+    
   const totalTags = published.reduce((sum, doc) => sum + coerceTags(doc).length, 0);
-
+  
+  // Count validation issues
   let validationIssues = 0;
   const validation = validateAllDocuments();
-  Object.values(validation).forEach((issues) => (validationIssues += issues.length));
-
+  Object.values(validation).forEach(issues => {
+    validationIssues += issues.length;
+  });
+  
   return {
     totalDocuments: allDocs.length,
     publishedDocuments: published.length,
@@ -1212,30 +1261,20 @@ export function collectContentMetrics(): ContentMetrics {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 17. CRITICAL BUILD GUARD                                                   */
+/* 18. UTILITY FUNCTIONS                                                      */
 /* -------------------------------------------------------------------------- */
 
-export function assertContentlayerHasDocs(where: string): void {
-  if (getAllContentlayerDocs().length === 0) {
-    throw new Error(`[Critical Build Error] No Contentlayer documents found at ${where}`);
-  }
-}
-
-/* -------------------------------------------------------------------------- */
-/* 18. SHORT THEME (UTILITY)                                                  */
-/* -------------------------------------------------------------------------- */
-
+// Exported theme coercion for Shorts
 export function coerceShortTheme(doc: ContentDoc, tags?: string[]): string | null {
   const explicit = String((doc as any)?.theme ?? "").trim();
   if (explicit) return explicit;
 
   const t = Array.isArray(tags) ? tags : coerceTags(doc);
-  const joined = t.join(" ").toLowerCase();
 
-  if (joined.includes("faith") || joined.includes("scripture") || joined.includes("theology"))
-    return "Faith";
-  if (joined.includes("purpose") || joined.includes("calling") || joined.includes("destiny"))
-    return "Purpose";
+  // Light inference — keep it stable and boring
+  const joined = t.join(" ").toLowerCase();
+  if (joined.includes("faith") || joined.includes("scripture") || joined.includes("theology")) return "Faith";
+  if (joined.includes("purpose") || joined.includes("calling") || joined.includes("destiny")) return "Purpose";
   if (joined.includes("relationship")) return "Relationships";
   if (joined.includes("hard") && joined.includes("truth")) return "Hard Truths";
   if (joined.includes("gentle") || joined.includes("comfort")) return "Gentle";
@@ -1244,46 +1283,17 @@ export function coerceShortTheme(doc: ContentDoc, tags?: string[]): string | nul
 }
 
 /* -------------------------------------------------------------------------- */
-/* 19. UI DOC CONVERSION                                                      */
+/* 19. BACKWARD COMPATIBILITY                                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface UiDoc {
-  title: string;
-  excerpt: string | null;
-  description: string | null;
-  coverImage: string | null;
-  category: string | null;
-  dateISO: string | null;
-  readTime: string | null;
-  tags: string[] | null;
-  slug: string;
-}
-
-export function toUiDoc(doc: ContentDoc): UiDoc {
-  const card = getCardPropsForDocument(doc);
-  const tags = card.tags;
-
-  return {
-    title: card.title,
-    excerpt: card.excerpt,
-    description: card.description,
-    coverImage: card.coverImage,
-    category: getDocCategory(doc, tags),
-    dateISO: card.dateISO,
-    readTime: card.readTime,
-    tags: tags.length ? tags : null,
-    slug: card.slug,
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/* 20. BACKWARD COMPAT                                                        */
-/* -------------------------------------------------------------------------- */
-
+// Old name some files use
 export const isPublished = isPublishedContent;
 export const isDraft = isDraftContent;
+
+// Sometimes people imported "getPublishedShorts" logic through helper anyway
 export const getShorts = getPublishedShorts;
 
+// Legacy type exports for compatibility
 export type PostType = ContentDoc;
 export type BookType = ContentDoc;
 export type DownloadType = ContentDoc;
@@ -1295,23 +1305,86 @@ export type CanonType = ContentDoc;
 export type ShortType = ContentDoc;
 
 /* -------------------------------------------------------------------------- */
-/* 21. CONFIG GETTER + KIND BASE PATH                                         */
+/* 20. CRITICAL BUILD GUARD                                                   */
 /* -------------------------------------------------------------------------- */
 
+export function assertContentlayerHasDocs(where: string): void {
+  if (getAllContentlayerDocs().length === 0) {
+    throw new Error(`[Critical Build Error] No Contentlayer documents found at ${where}`);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 21. UI DOCUMENT CONVERSION                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Convert a ContentDoc to a UI-friendly document shape.
+ * Used by pages that need a standardized UI object.
+ */
+export interface UiDoc {
+  title: string;
+  excerpt: string | null;
+  description: string | null;
+  coverImage: string | null;
+  category: string | null;
+  dateISO: string | null; // ISO datetime string
+  readTime: string | null;
+  tags: string[] | null;
+  slug: string;
+}
+
+export function toUiDoc(doc: ContentDoc): UiDoc {
+  const cardProps = getCardPropsForDocument(doc);
+  const tags = cardProps.tags;
+  
+  // Get category with proper inference
+  const category = getDocCategory(doc, tags);
+
+  return {
+    title: cardProps.title,
+    excerpt: cardProps.excerpt,
+    description: cardProps.description,
+    coverImage: cardProps.coverImage,
+    category,
+    dateISO: cardProps.dateISO,
+    readTime: cardProps.readTime,
+    tags: tags.length > 0 ? tags : null,
+    slug: cardProps.slug,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* 22. CONFIGURATION GETTER                                                   */
+/* -------------------------------------------------------------------------- */
+
+// Export configuration getter for debugging
 export function getConfig(): Readonly<ContentlayerHelperConfig> {
   return { ...config };
 }
 
+/* -------------------------------------------------------------------------- */
+/* 23. KIND BASE PATH GETTER (Backward Compatibility)                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Get the base path for a document kind.
+ * Used by some older components.
+ */
 export function getKindBasePath(kind: DocKind): string {
   return config.kindUrlMap[kind] ?? "/content";
 }
 
+/**
+ * Get the base path for a document.
+ */
 export function getDocBasePath(doc: ContentDoc): string {
-  return getKindBasePath(getDocKind(doc));
+  const kind = getDocKind(doc);
+  return getKindBasePath(kind);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 22. INIT                                                                   */
+/* 24. INITIALIZATION                                                         */
 /* -------------------------------------------------------------------------- */
 
 if (process.env.NODE_ENV === "development") {

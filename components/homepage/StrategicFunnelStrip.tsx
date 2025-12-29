@@ -1,4 +1,5 @@
-// components/homepage/StrategicFunnelStrip.tsx
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -10,18 +11,18 @@ import {
   BookOpen,
   Wrench,
   ShieldCheck,
+  LucideIcon,
 } from "lucide-react";
 
-type IconType = React.ComponentType<{ className?: string }>;
-
+// 1. Precise type definition for Icons using Lucide's own type
 type CardItem = {
   href: string;
   label: string;
   kicker: string;
   description: string;
-  Icon: IconType;
+  Icon: LucideIcon;
   pillar: {
-    icon: IconType;
+    icon: LucideIcon;
     name: string;
     phase: string;
   };
@@ -69,19 +70,20 @@ const CARDS: readonly CardItem[] = [
   },
 ] as const;
 
+// 2. Smoother animation variants
 const containerAnim = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.1,
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
     },
   },
 };
 
 const cardAnim = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
@@ -94,48 +96,51 @@ const cardAnim = {
 
 export default function StrategicFunnelStrip(): JSX.Element {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-charcoal via-charcoal to-black/95 py-20">
-      {/* Subtle grid pattern */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(212,175,55,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(212,175,55,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+    <section className="relative overflow-hidden bg-gradient-to-b from-charcoal via-charcoal to-black/95 py-20 lg:py-28">
+      {/* Background Grid Pattern */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(212,175,55,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(212,175,55,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <header className="mx-auto mb-16 max-w-3xl text-center">
+        
+        {/* --- Header Section --- */}
+        <header className="mx-auto mb-16 max-w-3xl text-center md:mb-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold/60">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold/60">
               The Framework
             </p>
 
-            <h2 className="mt-4 font-serif text-3xl font-semibold leading-tight text-cream sm:text-4xl lg:text-5xl">
-              Principles → Tools → Rooms
+            <h2 className="mt-6 font-serif text-3xl font-semibold leading-tight text-cream sm:text-4xl lg:text-5xl">
+              Principles <span className="text-gold/40">→</span> Tools{" "}
+              <span className="text-gold/40">→</span> Rooms
             </h2>
 
-            <p className="mt-5 text-base leading-relaxed text-gold/70 sm:text-lg">
-              The Canon establishes first principles. The tools translate them into 
-              operating systems. The rooms prove them under pressure — in the boardroom, 
-              the household, and the real world.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gold/70 sm:text-lg">
+              The Canon establishes first principles. The tools translate them
+              into operating systems. The rooms prove them under pressure — in
+              the boardroom, the household, and the real world.
             </p>
           </motion.div>
 
-          {/* Three Pillars Overview */}
+          {/* Three Pillars Visualizer */}
           <motion.div
-            className="mt-10 flex flex-wrap items-center justify-center gap-8"
+            className="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
           >
+            {/* Pillar 1 */}
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 ring-1 ring-gold/20">
                 <BookOpen className="h-5 w-5 text-gold" />
               </div>
               <div className="text-left">
-                <div className="text-xs font-semibold uppercase tracking-wider text-gold/50">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gold/50">
                   Canon
                 </div>
                 <div className="text-sm font-medium text-cream/90">
@@ -144,126 +149,124 @@ export default function StrategicFunnelStrip(): JSX.Element {
               </div>
             </div>
 
-            <div className="flex h-px w-8 bg-gradient-to-r from-gold/20 via-gold/40 to-gold/20" />
+            {/* Divider */}
+            <div className="hidden h-px w-12 bg-gradient-to-r from-transparent via-gold/30 to-transparent sm:block" />
 
+            {/* Pillar 2 */}
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 ring-1 ring-gold/20">
                 <Wrench className="h-5 w-5 text-gold" />
               </div>
               <div className="text-left">
-                <div className="text-xs font-semibold uppercase tracking-wider text-gold/50">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gold/50">
                   Tools
                 </div>
                 <div className="text-sm font-medium text-cream/90">
-                  Operating Systems
+                  Systems
                 </div>
               </div>
             </div>
 
-            <div className="flex h-px w-8 bg-gradient-to-r from-gold/20 via-gold/40 to-gold/20" />
+            {/* Divider */}
+            <div className="hidden h-px w-12 bg-gradient-to-r from-transparent via-gold/30 to-transparent sm:block" />
 
+            {/* Pillar 3 */}
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 ring-1 ring-gold/20">
                 <ShieldCheck className="h-5 w-5 text-gold" />
               </div>
               <div className="text-left">
-                <div className="text-xs font-semibold uppercase tracking-wider text-gold/50">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gold/50">
                   Rooms
                 </div>
                 <div className="text-sm font-medium text-cream/90">
-                  Proof Under Pressure
+                  Pressure
                 </div>
               </div>
             </div>
           </motion.div>
         </header>
 
-        {/* Cards Grid */}
+        {/* --- Cards Grid --- */}
         <motion.div
-          className="grid gap-6 md:grid-cols-3"
+          className="grid gap-6 md:grid-cols-3 lg:gap-8"
           variants={containerAnim}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, margin: "-50px" }}
         >
           {CARDS.map((card, index) => (
             <motion.article
               key={card.href}
               variants={cardAnim}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-charcoal/90 to-charcoal/70 backdrop-blur-sm transition-all duration-300 hover:border-gold/40 hover:shadow-xl hover:shadow-gold/5"
-              whileHover={{ y: -6, scale: 1.02 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gold/15 bg-gradient-to-br from-charcoal/80 to-charcoal/40 p-1 backdrop-blur-md transition-all duration-500 hover:border-gold/30 hover:shadow-2xl hover:shadow-gold/5"
             >
-              {/* Pillar Badge */}
-              <div className="absolute right-4 top-4 z-10">
-                <div className="flex items-center gap-1.5 rounded-full border border-gold/30 bg-charcoal/80 px-3 py-1 backdrop-blur-sm">
-                  <card.pillar.icon className="h-3 w-3 text-gold/80" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gold/80">
+              {/* Pillar Badge (Absolute Top Right) */}
+              <div className="absolute right-5 top-5 z-20">
+                <div className="flex items-center gap-1.5 rounded-full border border-gold/20 bg-black/40 px-3 py-1 backdrop-blur-md transition-colors group-hover:border-gold/40 group-hover:bg-gold/10">
+                  <card.pillar.icon className="h-3 w-3 text-gold/70 group-hover:text-gold" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gold/70 group-hover:text-gold">
                     {card.pillar.name}
                   </span>
                 </div>
               </div>
 
-              {/* Card Content */}
-              <div className="flex flex-1 flex-col p-7">
-                {/* Icon */}
-                <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-gold/20 to-gold/10 ring-1 ring-gold/30 transition-all duration-300 group-hover:scale-110 group-hover:ring-gold/50">
-                  <card.Icon className="h-7 w-7 text-gold" />
+              {/* Inner Card Content */}
+              <div className="relative flex h-full flex-col rounded-xl bg-charcoal/40 p-6 sm:p-8">
+                {/* Icon Wrapper */}
+                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-gold/10 to-transparent ring-1 ring-gold/20 transition-all duration-500 group-hover:scale-110 group-hover:from-gold/20 group-hover:ring-gold/40">
+                  <card.Icon className="h-7 w-7 text-gold transition-transform duration-500 group-hover:-rotate-6" />
                 </div>
 
                 {/* Kicker */}
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold/60">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gold/50 transition-colors group-hover:text-gold/80">
                   {card.kicker}
                 </p>
 
                 {/* Title */}
-                <h3 className="mt-2 font-serif text-xl font-semibold leading-tight text-cream transition-colors group-hover:text-white">
+                <h3 className="mb-4 font-serif text-2xl font-semibold leading-tight text-cream transition-colors group-hover:text-white">
                   {card.label}
                 </h3>
 
                 {/* Description */}
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-gold/70">
+                <p className="mb-8 flex-1 text-sm leading-relaxed text-gold/60 transition-colors group-hover:text-gold/80">
                   {card.description}
                 </p>
 
-                {/* Bottom Section */}
-                <div className="mt-6 flex items-center justify-between border-t border-gold/10 pt-5">
+                {/* Footer / CTA */}
+                <div className="mt-auto flex items-center justify-between border-t border-gold/10 pt-6">
                   <Link
                     href={card.href}
-                    className="group/link inline-flex items-center gap-2 text-sm font-semibold text-gold transition-colors hover:text-amber-200"
-                    aria-label={`Enter ${card.label}`}
+                    className="group/link flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-gold transition-colors hover:text-white"
                   >
-                    <span>Enter</span>
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold/15 ring-1 ring-gold/30 transition-all group-hover/link:translate-x-1 group-hover/link:bg-gold/25 group-hover/link:ring-gold/50">
-                      <ArrowRight className="h-4 w-4" />
+                    <span>Explore</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold/10 transition-all duration-300 group-hover/link:translate-x-1 group-hover/link:bg-gold group-hover/link:text-charcoal">
+                      <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </Link>
 
-                  <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold/40">
-                    {String(index + 1).padStart(2, "0")}
+                  <span className="text-[10px] font-bold text-gold/20">
+                    0{index + 1}
                   </span>
                 </div>
               </div>
 
-              {/* Hover glow effect */}
-              <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 ring-1 ring-inset ring-gold/0 transition-all duration-300 group-hover:opacity-100 group-hover:ring-gold/30" />
-              
-              {/* Gradient overlay on hover */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-gold/0 to-gold/0 opacity-0 transition-opacity duration-300 group-hover:from-gold/5 group-hover:to-transparent group-hover:opacity-100" />
+              {/* Hover Glow Effects */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             </motion.article>
           ))}
         </motion.div>
 
-        {/* Bottom CTA */}
+        {/* --- Bottom Note --- */}
         <motion.div
-          className="mt-12 text-center"
+          className="mt-16 text-center"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.6, duration: 0.6 }}
+          transition={{ delay: 0.8 }}
         >
-          <p className="text-sm text-gold/60">
-            Each door leads to real work. No performance. No pretense.
+          <p className="text-xs font-medium text-gold/40">
+            STRATEGY • OPERATIONS • LEGACY
           </p>
         </motion.div>
       </div>
