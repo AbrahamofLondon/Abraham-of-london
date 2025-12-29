@@ -94,9 +94,10 @@ export function generateVerifiedDisplayKey(
  */
 export function constantTimeCompare(a: string, b: string): boolean {
   try {
+    // FIX: Explicitly cast Buffer to Uint8Array to satisfy strict TypeScript definitions
     return crypto.timingSafeEqual(
-      Buffer.from(a, "utf8"),
-      Buffer.from(b, "utf8")
+      Buffer.from(a, "utf8") as unknown as Uint8Array,
+      Buffer.from(b, "utf8") as unknown as Uint8Array
     );
   } catch {
     return false;

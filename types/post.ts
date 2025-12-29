@@ -68,9 +68,10 @@ export type Post = PostMeta & PostContentRequired;
 // CLIENT VARIANTS
 // ---------------------------------------------------------------------------
 
-export type PostForClient = Post & {
-  coverImage?: string;
-  ogImage?: string;
+// FIX: Use Omit to cleanly overwrite image types with string versions
+export type PostForClient = Omit<Post, 'coverImage' | 'ogImage'> & {
+  coverImage?: string | null;
+  ogImage?: string | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -180,6 +181,7 @@ export const PostMetaUtils = {
     return post.coverImage.src ?? null;
   },
 
+  // FIX: Normalize now correctly returns PostForClient with nullable images
   normalize(post: Post): PostForClient {
     return {
       ...post,
@@ -187,7 +189,7 @@ export const PostMetaUtils = {
       ogImage:
         typeof post.ogImage === "string"
           ? post.ogImage
-          : post.ogImage?.src,
+          : post.ogImage?.src ?? null,
       draft: undefined,
       noindex: undefined,
     };

@@ -1,5 +1,3 @@
-// pages/shorts/index.tsx
-
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Head from "next/head";
@@ -85,7 +83,7 @@ const themeIcons: Record<string, string> = {
   resilience: "💪",
   purpose: "🎯",
   leadership: "👑",
-  fatherhood: "👨👦",
+  fatherhood: "👨‍👦",
   strategy: "♟️",
 };
 
@@ -875,11 +873,12 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     _id: short._id || short.slug || short.title,
     slug: short.slug,
     title: short.title,
-    excerpt: short.excerpt,
-    date: short.date,
-    readTime: short.readTime,
-    tags: short.tags,
-    theme: short.theme,
+    excerpt: short.excerpt ?? null,
+    date: short.date ?? null,
+    readTime: short.readTime ?? null,
+    tags: short.tags ?? [],
+    // FIX: Fallback to null to prevent Next.js serialization error with undefined
+    theme: short.theme ?? null,
   }));
   
   return { props: { shorts }, revalidate: 3600 };

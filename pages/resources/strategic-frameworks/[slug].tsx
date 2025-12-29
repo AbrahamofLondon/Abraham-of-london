@@ -1,4 +1,3 @@
-// pages/resources/strategic-frameworks/[slug].tsx
 import * as React from "react";
 import { useEffect, useState } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
@@ -57,12 +56,13 @@ const accentBg: Record<Framework["accent"], string> = {
 const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false }) => {
   const router = useRouter();
 
+  // FIX: Initialize checkedAt with new Date() because the interface strictly requires a Date object, not null.
   const [access, setAccess] = useState<AccessState>(() => ({
     hasAccess: false,
     ok: false,
     reason: "missing",
     token: null,
-    checkedAt: null,
+    checkedAt: new Date(), 
   }));
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-// pages/shorts/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
@@ -15,21 +14,21 @@ import {
   getShortBySlug,
   normalizeSlug,
   resolveDocCoverImage,
+  coerceShortTheme,
 } from "@/lib/contentlayer-helper";
 
 const SITE_URL = "https://www.abrahamoflondon.org";
 
 type ShortPageProps = {
   short: {
-    _id: string;
     slug: string;
     title: string;
-    excerpt?: string | null;
-    date?: string | null;
-    readTime?: string | null;
-    tags?: string[] | null;
-    theme?: string | null;
-    cover?: string | null;
+    excerpt: string | null;
+    date: string | null;
+    readTime: string | null;
+    tags: string[];
+    theme: string | null;
+    cover: string | null;
     body: { raw: string };
   };
   source: MDXRemoteSerializeResult;
@@ -62,8 +61,8 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params })
     typeof slugParam === "string"
       ? slugParam.toLowerCase().trim()
       : Array.isArray(slugParam)
-        ? String(slugParam[0] ?? "").toLowerCase().trim()
-        : "";
+      ? String(slugParam[0] ?? "").toLowerCase().trim()
+      : "";
 
   if (!slug) return { notFound: true };
 
@@ -73,16 +72,21 @@ export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params })
   const stableSlug = normalizeSlug(rawDoc);
   const cover = toAbsoluteUrl(resolveDocCoverImage(rawDoc)) ?? null;
 
-  const short = JSON.parse(
-    JSON.stringify({
-      ...rawDoc,
-      slug: stableSlug,
-      cover,
-    })
-  ) as ShortPageProps["short"];
+  // FIX: Explicit mapping avoids JSON hacks and ensures no "undefined" leaks
+  const short: ShortPageProps["short"] = {
+    slug: stableSlug,
+    title: rawDoc.title || "Untitled Short",
+    excerpt: rawDoc.excerpt || null,
+    date: rawDoc.date ? String(rawDoc.date) : null,
+    readTime: rawDoc.readTime || null,
+    tags: Array.isArray(rawDoc.tags) ? (rawDoc.tags as string[]) : [],
+    theme: coerceShortTheme(rawDoc) ?? null, // Safe coercion
+    cover,
+    body: { raw: rawDoc.body?.raw || "" },
+  };
 
   try {
-    const source = await serialize(short.body?.raw ?? "");
+    const source = await serialize(short.body.raw);
     return { props: { short, source } };
   } catch {
     return { notFound: true };

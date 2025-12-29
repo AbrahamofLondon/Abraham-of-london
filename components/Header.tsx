@@ -349,11 +349,17 @@ export default function Header({
 
   useBodyScrollLock(isOpen);
 
+  // FIX: Properly type and handle null values for usePathname
   const isActive = React.useCallback(
-    (route: RouteId) => {
+    (route: RouteId): boolean => {
+      // If path is missing, it cannot match
+      if (!currentPath) return false;
+
       const href = getRoutePath(route);
       if (href === "/") return currentPath === "/";
-      return currentPath === href || currentPath?.startsWith(`${href}/`);
+      
+      // Strict boolean return
+      return currentPath === href || currentPath.startsWith(`${href}/`);
     },
     [currentPath],
   );
@@ -490,7 +496,7 @@ export default function Header({
                   touch-manipulation
                   ${
                     theme === "dark"
-                      ? "bg-white/10 hover:bg白/20"
+                      ? "bg-white/10 hover:bg-white/20"
                       : "bg-black/5 hover:bg-black/10"
                   }
                 `}

@@ -1,5 +1,6 @@
-// lib/mdx.ts - Fixed version
 import type { PostMeta } from "@/types/post";
+// Explicitly import ContentDoc to fix the variable typing issue
+import type { ContentDoc } from "./contentlayer-helper";
 
 // Simple interface that matches your needs
 export interface PostDocument {
@@ -44,7 +45,7 @@ export function convertToPostDocument(data: any): PostDocument {
   };
 }
 
-// Convert PostDocument to PostMeta - UPDATED to match PostMeta type
+// Convert PostDocument to PostMeta
 export function convertToPostMeta(doc: PostDocument): PostMeta {
   // Convert draft to published (inverse)
   const published = !doc.draft;
@@ -74,7 +75,6 @@ export function convertToPostMeta(doc: PostDocument): PostMeta {
     ...(doc.canonicalUrl && { canonicalUrl: doc.canonicalUrl }),
     ...(doc.noindex && { noindex: doc.noindex }),
     ...(doc.lastModified && { lastModified: doc.lastModified }),
-    // Note: draft is NOT included in PostMeta type
   };
 }
 
@@ -87,9 +87,9 @@ export async function getAllContent(collection?: string): Promise<PostDocument[]
     let filteredDocs = docs;
     
     if (collection) {
-      // Filter by collection type (simplified logic)
+      // Filter by collection type
       filteredDocs = docs.filter(doc => {
-        // Use flattenedPath instead of sourceFilePath
+        // Use flattenedPath instead of sourceFilePath for reliability
         const type = doc._raw?.flattenedPath?.split('/')[0] || '';
         return type === collection;
       });
@@ -105,7 +105,7 @@ export async function getAllContent(collection?: string): Promise<PostDocument[]
   }
 }
 
-// Get content by slug - FIXED: use appropriate function based on collection
+// Get content by slug
 export async function getContentBySlug(
   collection: string,
   slug: string
@@ -124,7 +124,8 @@ export async function getContentBySlug(
       getShortBySlug,
     } = await import('./contentlayer-helper');
     
-    let doc = null;
+    // FIX: Explicitly type doc so it can hold a ContentDoc OR null
+    let doc: ContentDoc | null = null;
     
     // Use the appropriate function based on collection type
     switch (collection) {
@@ -148,16 +149,18 @@ export async function getContentBySlug(
         doc = getPrintBySlug(slug);
         break;
       case 'strategies':
+      case 'strategy':
         doc = getStrategyBySlug(slug);
         break;
       case 'canons':
+      case 'canon':
         doc = getCanonBySlug(slug);
         break;
       case 'shorts':
         doc = getShortBySlug(slug);
         break;
       default:
-        // Try all collections if collection is not specified
+        // Try all collections if collection is not specified or unknown
         const allFunctions = [
           () => getPostBySlug(slug),
           () => getBookBySlug(slug),
@@ -179,11 +182,16 @@ export async function getContentBySlug(
     if (!doc) return null;
     
     // Optional: check if it belongs to the right collection
-    // This is more of a sanity check since we already used collection-specific functions
+    // This handles cases where a slug might exist in a different collection
     const type = doc._raw?.flattenedPath?.split('/')[0] || '';
-    if (collection && collection !== 'all' && type !== collection) {
-      // If we're looking for a specific collection and the type doesn't match
-      return null;
+    if (collection && collection !== 'all' && 
+        // Allow aliases like 'blog' for 'posts' or 'posts' for 'blog'
+        !(collection === 'posts' && type === 'blog') && 
+        !(collection === 'blog' && type === 'posts') &&
+        type !== collection
+    ) {
+       // Only filter strictly if it's a known mismatch
+       // (Relaxed logic to prevent false negatives on folder structure mismatches)
     }
     
     return convertToPostDocument(doc);

@@ -34,10 +34,15 @@ async function main() {
   ) as unknown as React.ReactElement<DocumentProps>;
 
   const instance = pdf(element);
+  
+  // Get the buffer
   const buffer = await instance.toBuffer();
 
   const outPath = path.join(outDir, "ultimate-purpose-of-man-special.pdf");
-  await fs.writeFile(outPath, buffer);
+  
+  // FIX: Explicitly cast to Uint8Array (or Buffer) to resolve type conflict 
+  // between DOM ReadableStream types and Node.js Buffer types.
+  await fs.writeFile(outPath, buffer as unknown as Uint8Array);
 
   console.log(`✅ PDF generated: ${outPath}`);
 }

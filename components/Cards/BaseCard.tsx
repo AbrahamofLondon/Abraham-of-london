@@ -1,4 +1,3 @@
-// components/Cards/BaseCard.tsx
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -164,7 +163,11 @@ const BaseCard: React.FC<BaseCardProps> = ({
   const isLocked = accessLevel === "inner-circle" || accessLevel === "premium";
   const linkHref = href || `/${slug}`;
   const displayText = excerpt || description || subtitle || "";
-  const displayTags = tags.slice(0, 3);
+  
+  // FIX: Ensure tags is treated as an array even if passed as null
+  const safeTags = Array.isArray(tags) ? tags : [];
+  const displayTags = safeTags.slice(0, 3);
+  
   const formattedDate = date ? formatDate(date) : "";
 
   // On-brand fallback for missing cover images

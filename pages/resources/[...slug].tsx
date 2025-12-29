@@ -1,4 +1,3 @@
-// pages/resources/[...slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -120,6 +119,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
       const href = getDocHref(r); // prefers computed doc.url
       const slugPath = cleanResourcesPath(href);
       if (!slugPath) return null;
+
+      // --- CRITICAL FIX START ---
+      // We must exclude paths that already exist as physical files in pages/resources/
+      // to prevent "Conflicting paths" build error.
+      if (slugPath === "strategic-frameworks") return null;
+      // --- CRITICAL FIX END ---
 
       return { params: { slug: slugPath.split("/").filter(Boolean) } };
     })

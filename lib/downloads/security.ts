@@ -1,4 +1,3 @@
-// lib/downloads/security.ts
 import crypto from "node:crypto";
 
 export type InnerCircleTier =
@@ -30,7 +29,7 @@ export function getUserTierFromCookies(cookieHeader: string | undefined): InnerC
   const m = c.match(/(?:^|;\s*)innerCircleTier=([^;]+)/i);
   const raw = m?.[1] ? decodeURIComponent(m[1]) : "";
   if (raw === "inner-circle" || raw === "inner-circle-plus" || raw === "inner-circle-elite" || raw === "private")
-    return raw;
+    return raw as InnerCircleTier;
   // If your existing system uses innerCircleAccess=true, treat it as "inner-circle"
   if (/(?:^|;\s*)innerCircleAccess=true(?:;|$)/i.test(c)) return "inner-circle";
   return "public";
@@ -75,8 +74,9 @@ export function verifyDownloadToken(
   const expected = crypto.createHmac("sha256", secret).update(body).digest();
   const got = unb64url(sig);
 
-  // timing safe compare
-  if (got.length !== expected.length || !crypto.timingSafeEqual(got, expected)) {
+  // FIX: Cast buffers to Uint8Array to satisfy strict TypeScript definitions
+  // (Buffer inherits from Uint8Array in Node, but TS types can sometimes conflict on 'entries')
+  if (got.length !== expected.length || !crypto.timingSafeEqual(got as unknown as Uint8Array, expected as unknown as Uint8Array)) {
     let slug: string | undefined;
     try {
       const decoded = JSON.parse(unb64url(body).toString("utf8"));

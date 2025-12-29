@@ -1,33 +1,40 @@
-/* scripts/generate-ultimate-purpose-of-man-pdf.ts */
+/* scripts/generate-ultimate-purpose-of-man-pdf.tsx */
 import fs from "fs/promises";
 import path from "path";
 import React from "react";
 import { renderToFile } from "@react-pdf/renderer";
 
-import UltimatePurposeOfManDocument from "../lib/pdf/ultimate-purpose-of-man-pdp.tsx";
+// FIX 1: Corrected filename spelling ('pdp' -> 'pdf') and removed '.tsx' extension
+import UltimatePurposeOfManDocument from "../lib/pdf/ultimate-purpose-of-man-pdf";
 
 async function ensureDir(p: string) {
   await fs.mkdir(p, { recursive: true });
 }
 
 async function main() {
+  // Define output location
   const outDir = path.join(process.cwd(), "public", "assets", "downloads");
   const outFile = path.join(outDir, "ultimate-purpose-of-man-editorial.pdf");
 
-  // pick an existing cover image; must exist in /public
-  const coverImagePublic = "/assets/images/purpose-cover.jpg";
-  const coverImageFs = path.join(process.cwd(), "public", coverImagePublic.replace(/^\//, ""));
-
   await ensureDir(outDir);
 
-  // sanity check cover exists; if not, fall back to something you know exists
-  let coverToUse = coverImagePublic;
+  // FIX 2: Resolve absolute file system paths for images
+  // React-PDF in a Node environment cannot load relative web paths like "/assets/..."
+  const publicDir = path.join(process.cwd(), "public");
+  
+  const primaryCoverPath = path.join(publicDir, "assets", "images", "purpose-cover.jpg");
+  const fallbackCoverPath = path.join(publicDir, "assets", "images", "writing-desk.webp");
+
+  // Determine which cover image to use based on file existence
+  let coverToUse = primaryCoverPath;
   try {
-    await fs.access(coverImageFs);
+    await fs.access(primaryCoverPath);
   } catch {
-    coverToUse = "/assets/images/writing-desk.webp";
+    console.warn("⚠️ Primary cover not found, using fallback.");
+    coverToUse = fallbackCoverPath;
   }
 
+  // Generate PDF
   await renderToFile(
     <UltimatePurposeOfManDocument coverImagePath={coverToUse} />,
     outFile

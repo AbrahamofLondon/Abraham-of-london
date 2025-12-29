@@ -1,6 +1,4 @@
-// lib/content-utils.ts - FIXED
-// Remove the import that doesn't exist and use a proper type
-
+// lib/content-utils.ts
 import type { AnyDoc } from "@/lib/content-fallback";
 import type { PostMeta } from "@/types/post";
 
@@ -29,12 +27,16 @@ export function convertDocumentToPostMeta(doc: DocumentTypes): PostMeta {
       ? `${rawReadTime} min`
       : (rawReadTime as string | undefined);
 
+  // Fallback for date to satisfy strict typing
+  const dateStr = doc.date || new Date().toISOString();
+
   const base: PostMeta & Record<string, any> = {
     slug: doc.slug || "",
     title: doc.title || "Untitled",
     excerpt: doc.excerpt || "",
     description: doc.description || doc.excerpt || "",
-    date: doc.date,
+    // FIX: Ensure date is a string (fallback to current date if missing)
+    date: dateStr,
     author: (doc as any).author,
     category: (doc as any).category,
     tags: doc.tags || [],
