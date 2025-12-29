@@ -1,4 +1,3 @@
-// pages/api/analytics/downloads/summary.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { isRateLimited } from "@/lib/server/rate-limit";
@@ -374,7 +373,8 @@ function validateQuery(query: NextApiRequest["query"]) {
 // ---------------------------
 
 function whereSql(since: Date, until: Date, filters: Record<string, string[]>) {
-  const parts: Prisma.Sql[] = [
+  // FIX: Remove explicit type annotation to allow inference
+  const parts = [
     Prisma.sql`created_at BETWEEN ${since} AND ${until}`,
   ];
 
@@ -623,7 +623,8 @@ async function enrichContentBreakdowns(
 
   // Build a list of composite keys to restrict breakdown queries to just the current page
   // SQLite doesn't have tuple IN nicely, so we OR-chunk safely.
-  const orParts: Prisma.Sql[] = top.map((t) => Prisma.sql`
+  // FIX: Remove explicit type annotation
+  const orParts = top.map((t) => Prisma.sql`
     (slug = ${t.slug} AND COALESCE(content_type,'unknown') = ${t.contentType} AND COALESCE(event_type,'download') = ${t.eventType})
   `);
 
