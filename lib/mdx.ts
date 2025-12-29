@@ -105,21 +105,86 @@ export async function getAllContent(collection?: string): Promise<PostDocument[]
   }
 }
 
-// Get content by slug - FIXED: use getDocumentBySlug instead
+// Get content by slug - FIXED: use appropriate function based on collection
 export async function getContentBySlug(
   collection: string,
   slug: string
 ): Promise<PostDocument | null> {
   try {
-    // Use getDocumentBySlug instead of getContentlayerDocBySlug
-    const { getDocumentBySlug } = await import('./contentlayer-helper');
-    const doc = getDocumentBySlug(slug);
+    // Import the helper functions
+    const {
+      getPostBySlug,
+      getBookBySlug,
+      getDownloadBySlug,
+      getResourceBySlug,
+      getEventBySlug,
+      getPrintBySlug,
+      getStrategyBySlug,
+      getCanonBySlug,
+      getShortBySlug,
+    } = await import('./contentlayer-helper');
+    
+    let doc = null;
+    
+    // Use the appropriate function based on collection type
+    switch (collection) {
+      case 'posts':
+      case 'blog':
+        doc = getPostBySlug(slug);
+        break;
+      case 'books':
+        doc = getBookBySlug(slug);
+        break;
+      case 'downloads':
+        doc = getDownloadBySlug(slug);
+        break;
+      case 'resources':
+        doc = getResourceBySlug(slug);
+        break;
+      case 'events':
+        doc = getEventBySlug(slug);
+        break;
+      case 'prints':
+        doc = getPrintBySlug(slug);
+        break;
+      case 'strategies':
+        doc = getStrategyBySlug(slug);
+        break;
+      case 'canons':
+        doc = getCanonBySlug(slug);
+        break;
+      case 'shorts':
+        doc = getShortBySlug(slug);
+        break;
+      default:
+        // Try all collections if collection is not specified
+        const allFunctions = [
+          () => getPostBySlug(slug),
+          () => getBookBySlug(slug),
+          () => getDownloadBySlug(slug),
+          () => getResourceBySlug(slug),
+          () => getEventBySlug(slug),
+          () => getPrintBySlug(slug),
+          () => getStrategyBySlug(slug),
+          () => getCanonBySlug(slug),
+          () => getShortBySlug(slug),
+        ];
+        
+        for (const fn of allFunctions) {
+          doc = fn();
+          if (doc) break;
+        }
+    }
     
     if (!doc) return null;
     
     // Optional: check if it belongs to the right collection
+    // This is more of a sanity check since we already used collection-specific functions
     const type = doc._raw?.flattenedPath?.split('/')[0] || '';
-    if (collection && type !== collection) return null;
+    if (collection && collection !== 'all' && type !== collection) {
+      // If we're looking for a specific collection and the type doesn't match
+      return null;
+    }
     
     return convertToPostDocument(doc);
   } catch (error) {

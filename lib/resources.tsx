@@ -5,7 +5,7 @@ import {
   getAllContentlayerDocs,
   getDocHref,
   getDocKind,
-  isDraft,
+  isDraftContent, // Changed from isDraft to isDraftContent
   normalizeSlug,
 } from "@/lib/contentlayer-helper";
 
@@ -30,7 +30,7 @@ const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath, source }) => {
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const paths = getAllContentlayerDocs()
-      .filter((d) => !isDraft(d))
+      .filter((d) => !isDraftContent(d)) // Changed from isDraft to isDraftContent
       .filter((d) => getDocKind(d) === "resource")
       .map((d) => getDocHref(d))
       .filter((href) => href.startsWith("/resources/"))
@@ -51,7 +51,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
     const doc =
       getAllContentlayerDocs()
-        .filter((d) => !isDraft(d))
+        .filter((d) => !isDraftContent(d)) // Changed from isDraft to isDraftContent
         .find((d) => getDocKind(d) === "resource" && normalizeSlug(d) === slug) ?? null;
 
     if (!doc) return { notFound: true };

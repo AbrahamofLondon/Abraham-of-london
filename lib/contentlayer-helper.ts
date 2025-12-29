@@ -229,6 +229,32 @@ export const getPublishedDocuments = (): ContentDoc[] =>
   getAllContentlayerDocs().filter(isPublishedContent);
 
 /* -------------------------------------------------------------------------- */
+/* Featured Documents                                                         */
+/* -------------------------------------------------------------------------- */
+
+export function getFeaturedDocuments(): ContentDoc[] {
+  // Be conservative: only from published docs, then filter by `featured: true`
+  const docs = getPublishedDocuments?.() ?? [];
+  return docs.filter((d) => (d as any)?.featured === true);
+}
+
+/**
+ * Optional: featured by type (handy for homepages/sections)
+ */
+export function getFeaturedDocumentsByType(type: string): ContentDoc[] {
+  const t = String(type || "").trim().toLowerCase();
+  if (!t) return getFeaturedDocuments();
+
+  return getFeaturedDocuments().filter((d) => {
+    const dt =
+      String((d as any)?.type || (d as any)?._type || (d as any)?.documentType || "")
+        .trim()
+        .toLowerCase();
+    return dt === t;
+  });
+}
+
+/* -------------------------------------------------------------------------- */
 /* Kind detection                                                             */
 /* -------------------------------------------------------------------------- */
 

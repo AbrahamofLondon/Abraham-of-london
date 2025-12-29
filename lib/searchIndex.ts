@@ -6,12 +6,7 @@ import {
   getAllPrints,
   getAllResources,
   getAllCanons,
-  type PostType as PostDocument,
-  type BookType as BookDocument,
-  type DownloadType as DownloadDocument,
-  type PrintType as PrintDocument,
-  type ResourceType as ResourceDocument,
-  type CanonType as CanonDocument,
+  type ContentDoc, // Use ContentDoc type instead of individual types
 } from "./contentlayer-helper";
 import { absUrl } from "@/lib/siteConfig";
 
@@ -65,26 +60,34 @@ export interface SearchDoc {
   coverAspect?: string | null;
 }
 
+// Type aliases for clarity (these are just ContentDoc, but named for readability)
+type PostDocument = ContentDoc;
+type BookDocument = ContentDoc;
+type DownloadDocument = ContentDoc;
+type PrintDocument = ContentDoc;
+type ResourceDocument = ContentDoc;
+type CanonDocument = ContentDoc;
+
 // ----------------- Builders per collection -----------------
 
 function mapPosts(): SearchDoc[] {
   const posts = getPublishedPosts();
   return sortByDate(posts)
-    .filter((p: PostDocument) => !(p as any).draft)
+    .filter((p: PostDocument) => !p.draft)
     .map((p: PostDocument) => {
       // IMPORTANT: default to top-level "/slug" which is always handled
-      const href = (p as any).url || `/${p.slug}`;
+      const href = p.url || `/${p.slug}`;
       return {
         type: "post" as const,
-        slug: p.slug,
+        slug: p.slug || "",
         href,
         url: absUrl(href),
         title: p.title ?? "Untitled",
-        date: (p as any).date ?? null,
-        excerpt: (p as any).excerpt ?? (p as any).description ?? null,
-        tags: (p as any).tags ?? [],
-        coverImage: (p as any).coverImage || null,
-        coverAspect: (p as any).coverAspect ?? (p as any).aspect ?? null,
+        date: p.date ?? null,
+        excerpt: p.excerpt ?? p.description ?? null,
+        tags: Array.isArray(p.tags) ? p.tags : [],
+        coverImage: p.coverImage || null,
+        coverAspect: p.coverAspect ?? p.aspect ?? null,
       };
     });
 }
@@ -92,21 +95,21 @@ function mapPosts(): SearchDoc[] {
 function mapBooks(): SearchDoc[] {
   const books = getAllBooks();
   return sortByDate(books)
-    .filter((b: BookDocument) => !(b as any).draft)
+    .filter((b: BookDocument) => !b.draft)
     .map((b: BookDocument) => {
       // Books do have dedicated /books/[slug] pages
-      const href = (b as any).url || `/books/${b.slug}`;
+      const href = b.url || `/books/${b.slug}`;
       return {
         type: "book" as const,
-        slug: b.slug,
+        slug: b.slug || "",
         href,
         url: absUrl(href),
         title: b.title ?? "Untitled Book",
-        date: (b as any).date ?? null,
-        excerpt: (b as any).excerpt ?? (b as any).description ?? null,
-        tags: (b as any).tags ?? [],
-        coverImage: (b as any).coverImage || null,
-        coverAspect: (b as any).coverAspect ?? (b as any).aspect ?? null,
+        date: b.date ?? null,
+        excerpt: b.excerpt ?? b.description ?? null,
+        tags: Array.isArray(b.tags) ? b.tags : [],
+        coverImage: b.coverImage || null,
+        coverAspect: b.coverAspect ?? b.aspect ?? null,
       };
     });
 }
@@ -114,18 +117,18 @@ function mapBooks(): SearchDoc[] {
 function mapDownloads(): SearchDoc[] {
   const downloads = getAllDownloads();
   return sortByDate(downloads).map((d: DownloadDocument) => {
-    const href = (d as any).url || `/downloads/${d.slug}`;
+    const href = d.url || `/downloads/${d.slug}`;
     return {
       type: "download" as const,
-      slug: d.slug,
+      slug: d.slug || "",
       href,
       url: absUrl(href),
       title: d.title ?? "Untitled Download",
-      date: (d as any).date ?? null,
-      excerpt: (d as any).excerpt ?? (d as any).description ?? null,
-      tags: (d as any).tags ?? [],
-      coverImage: (d as any).coverImage || null,
-      coverAspect: (d as any).coverAspect ?? (d as any).aspect ?? null,
+      date: d.date ?? null,
+      excerpt: d.excerpt ?? d.description ?? null,
+      tags: Array.isArray(d.tags) ? d.tags : [],
+      coverImage: d.coverImage || null,
+      coverAspect: d.coverAspect ?? d.aspect ?? null,
     };
   });
 }
@@ -133,21 +136,21 @@ function mapDownloads(): SearchDoc[] {
 function mapPrints(): SearchDoc[] {
   const prints = getAllPrints();
   return sortByDate(prints)
-    .filter((p: PrintDocument) => (p as any).available !== false)
+    .filter((p: PrintDocument) => p.available !== false)
     .map((p: PrintDocument) => {
       // Many prints are still served by the universal "/[slug]" route
-      const href = (p as any).url || `/${p.slug}`;
+      const href = p.url || `/${p.slug}`;
       return {
         type: "print" as const,
-        slug: p.slug,
+        slug: p.slug || "",
         href,
         url: absUrl(href),
         title: p.title ?? "Untitled Print",
-        date: (p as any).date ?? null,
-        excerpt: (p as any).excerpt ?? (p as any).description ?? null,
-        tags: (p as any).tags ?? [],
-        coverImage: (p as any).coverImage || null,
-        coverAspect: (p as any).coverAspect ?? (p as any).aspect ?? null,
+        date: p.date ?? null,
+        excerpt: p.excerpt ?? p.description ?? null,
+        tags: Array.isArray(p.tags) ? p.tags : [],
+        coverImage: p.coverImage || null,
+        coverAspect: p.coverAspect ?? p.aspect ?? null,
       };
     });
 }
@@ -156,18 +159,18 @@ function mapResources(): SearchDoc[] {
   const resources = getAllResources();
   return sortByDate(resources).map((r: ResourceDocument) => {
     // Same logic as prints: default to "/slug" to hit pages/[slug].tsx
-    const href = (r as any).url || `/${r.slug}`;
+    const href = r.url || `/${r.slug}`;
     return {
       type: "resource" as const,
-      slug: r.slug,
+      slug: r.slug || "",
       href,
       url: absUrl(href),
       title: r.title ?? "Untitled Resource",
-      date: (r as any).date ?? null,
-      excerpt: (r as any).excerpt ?? (r as any).description ?? null,
-      tags: (r as any).tags ?? [],
-      coverImage: (r as any).coverImage || null,
-      coverAspect: (r as any).coverAspect ?? (r as any).aspect ?? null,
+      date: r.date ?? null,
+      excerpt: r.excerpt ?? r.description ?? null,
+      tags: Array.isArray(r.tags) ? r.tags : [],
+      coverImage: r.coverImage || null,
+      coverAspect: r.coverAspect ?? r.aspect ?? null,
     };
   });
 }
@@ -175,20 +178,20 @@ function mapResources(): SearchDoc[] {
 function mapCanons(): SearchDoc[] {
   const canons = getAllCanons();
   return sortByDate(canons)
-    .filter((c: CanonDocument) => !(c as any).draft)
+    .filter((c: CanonDocument) => !c.draft)
     .map((c: CanonDocument) => {
-      const href = (c as any).url || `/canon/${c.slug}`;
+      const href = c.url || `/canon/${c.slug}`;
       return {
         type: "canon" as const,
-        slug: c.slug,
+        slug: c.slug || "",
         href,
         url: absUrl(href),
         title: c.title ?? "Untitled Canon",
-        date: (c as any).date ?? null,
-        excerpt: (c as any).excerpt ?? (c as any).description ?? null,
-        tags: (c as any).tags ?? [],
-        coverImage: (c as any).coverImage || null,
-        coverAspect: (c as any).coverAspect ?? (c as any).aspect ?? null,
+        date: c.date ?? null,
+        excerpt: c.excerpt ?? c.description ?? null,
+        tags: Array.isArray(c.tags) ? c.tags : [],
+        coverImage: c.coverImage || null,
+        coverAspect: c.coverAspect ?? c.aspect ?? null,
       };
     });
 }

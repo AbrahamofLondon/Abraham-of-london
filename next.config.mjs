@@ -13,7 +13,6 @@ const isCI = process.env.CI === "true" || isNetlify;
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-
   trailingSlash: false,
   poweredByHeader: false,
   compress: true,
@@ -26,24 +25,24 @@ const nextConfig = {
   },
 
   /**
- * ENTERPRISE BUILD SIGNAL:
- * - Keep TS errors ON in CI by default.
- * - If you absolutely need an emergency bypass on Netlify:
- *   set NETLIFY_TS_IGNORE=true explicitly.
- */
-typescript: {
-  ignoreBuildErrors: isNetlify && process.env.NETLIFY_TS_IGNORE === "true",
-},
+   * ENTERPRISE BUILD SIGNAL:
+   * - Keep TS errors ON in CI by default.
+   * - If you absolutely need an emergency bypass on Netlify:
+   *   set NETLIFY_TS_IGNORE=true explicitly.
+   */
+  typescript: {
+    ignoreBuildErrors: isNetlify && process.env.NETLIFY_TS_IGNORE === "true",
+  },
 
-/**
- * ESLint: never "always true".
- * If you want to skip lint on Netlify sometimes, make it explicit.
- */
-eslint: {
-  dirs: ["pages", "components", "lib", "types"],
-  ignoreDuringBuilds:
-    isNetlify && process.env.NETLIFY_ESLINT_IGNORE === "true",
-},
+  /**
+   * ESLint: never "always true".
+   * If you want to skip lint on Netlify sometimes, make it explicit.
+   */
+  eslint: {
+    dirs: ["pages", "components", "lib", "types"],
+    ignoreDuringBuilds:
+      isNetlify && process.env.NETLIFY_ESLINT_IGNORE === "true",
+  },
 
   env: {
     NEXT_PUBLIC_SITE_URL:
@@ -91,6 +90,43 @@ eslint: {
     }
 
     /**
+     * CRITICAL FIX: Prevent webpack from trying to process binary files
+     * Files in public/ are served statically and should NOT be bundled
+     */
+    config.module.rules.push({
+      test: /\.(pdf|xlsx?|docx?|zip|tar|gz)$/i,
+      type: "asset/resource",
+      generator: {
+        emit: false, // Don't emit these files (they're already in public/)
+      },
+    });
+
+    /**
+     * Watch options: Ignore problematic directories but ONLY for watching
+     * This prevents locked file errors during development
+     */
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: [
+        '**/node_modules/**',
+        '**/.git/**',
+        '**/.next/**',
+        '**/.contentlayer/**',
+        // Ignore the legacy downloads directory to prevent permission errors
+        '**/public/downloads/**',
+      ],
+    };
+
+    /**
+     * Externalize binary file handlers to prevent bundling issues
+     */
+    if (!isServer) {
+      config.externals = {
+        ...(config.externals || []),
+      };
+    }
+
+    /**
      * Optional: reduce cache weirdness in CI by creating a stable cache name.
      * (Useful when multiple deployments share caches)
      */
@@ -98,6 +134,8 @@ eslint: {
       config.cache = {
         ...config.cache,
         name: `webpack-cache-${process.env.NODE_ENV || "prod"}`,
+        // Add version to bust cache when needed
+        version: process.env.BUILD_ID || "1",
       };
     }
 
