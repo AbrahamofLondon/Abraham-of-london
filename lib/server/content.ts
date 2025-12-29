@@ -1,4 +1,4 @@
-// lib/server/content.ts - COMPLETE UNIFIED SERVER HELPERS
+// lib/server/content.ts
 import fs from "fs";
 import path from "path";
 import {
@@ -15,11 +15,67 @@ import {
   getPublishedShorts,
   getShortBySlug,
   normalizeSlug,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl,
   type ContentDoc,
 } from "@/lib/contentlayer-helper";
 
 /* -------------------------------------------------------------------------- */
-/* Types                                                                      */
+/* Strictness                                                                 */
+/* -------------------------------------------------------------------------- */
+
+const STRICT_ASSETS = process.env.CONTENT_STRICT_ASSETS === "1";
+
+function failOrWarn(message: string) {
+  if (STRICT_ASSETS) throw new Error(message);
+  // eslint-disable-next-line no-console
+  console.warn(message);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Public FS helpers                                                          */
+/* -------------------------------------------------------------------------- */
+
+function publicUrlToFsPath(publicUrl: string): string | null {
+  const u = String(publicUrl || "").trim();
+  if (!u.startsWith("/") || u.startsWith("//")) return null;
+  return path.join(process.cwd(), "public", u.replace(/^\/+/, ""));
+}
+
+function publicExists(publicUrl: string): boolean {
+  const fsPath = publicUrlToFsPath(publicUrl);
+  if (!fsPath) return false;
+  try {
+    return fs.existsSync(fsPath);
+  } catch {
+    return false;
+  }
+}
+
+function publicSizeBytes(publicUrl: string): number | null {
+  const fsPath = publicUrlToFsPath(publicUrl);
+  if (!fsPath) return null;
+  try {
+    const st = fs.statSync(fsPath);
+    return typeof st.size === "number" ? st.size : null;
+  } catch {
+    return null;
+  }
+}
+
+export function formatBytes(bytes: number): string {
+  const b = Math.max(0, bytes);
+  if (b < 1024) return `${b} B`;
+  const kb = b / 1024;
+  if (kb < 1024) return `${Math.round(kb)} KB`;
+  const mb = kb / 1024;
+  if (mb < 1024) return `${mb.toFixed(1)} MB`;
+  const gb = mb / 1024;
+  return `${gb.toFixed(1)} GB`;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Resources (Contentlayer-first, FS fallback for edge cases)                 */
 /* -------------------------------------------------------------------------- */
 
 export type ResourceDoc = {
@@ -30,25 +86,22 @@ export type ResourceDoc = {
   coverImage?: string | null;
   tags?: string[];
   author?: string | null;
-  url: string; // Canonical route (must start with /resources/)
-  href?: string | null; // CTA destination only (optional)
+
+  url: string; // canonical route
+  href?: string | null; // CTA only
+
   body?: { raw?: string; code?: string };
   content?: string;
+
   slug?: string;
   draft?: boolean;
   _raw?: any;
 };
 
-/* -------------------------------------------------------------------------- */
-/* File System Helpers (Fallback)                                            */
-/* -------------------------------------------------------------------------- */
-
 const RESOURCES_DIR = path.join(process.cwd(), "content", "resources");
 
 function stripQuotes(s: string): string {
-  return String(s || "")
-    .replace(/^["']|["']$/g, "")
-    .trim();
+  return String(s || "").replace(/^["']|["']$/g, "").trim();
 }
 
 function cleanPath(p: string): string {
@@ -73,17 +126,15 @@ function parseFrontmatter(raw: string): Record<string, any> {
     const key = trimmed.slice(0, idx).trim();
     let val = trimmed.slice(idx + 1).trim();
 
-    // Arrays: tags: ["a","b"]
     if (val.startsWith("[") && val.endsWith("]")) {
       try {
         out[key] = JSON.parse(val);
         continue;
       } catch {
-        // fall through
+        // ignore
       }
     }
 
-    // Booleans
     if (val === "true") out[key] = true;
     else if (val === "false") out[key] = false;
     else out[key] = stripQuotes(val);
@@ -92,56 +143,55 @@ function parseFrontmatter(raw: string): Record<string, any> {
   return out;
 }
 
+function deriveSlugFromFilename(filename: string): string {
+  return filename.replace(/\.(md|mdx)$/i, "").toLowerCase();
+}
+
 function deriveUrlFromFilename(filename: string): string {
   const base = filename.replace(/\.(md|mdx)$/i, "");
   return `/resources/${base}`;
 }
 
-function deriveSlugFromFilename(filename: string): string {
-  return filename.replace(/\.(md|mdx)$/i, "").toLowerCase();
+function mapResourceFromContentlayer(r: any): ResourceDoc {
+  // IMPORTANT: prefer computed url (your config guarantees it when built)
+  const url = typeof r?.url === "string" && r.url.startsWith("/") ? r.url : `/resources/${normalizeSlug(r)}`;
+
+  return {
+    title: r.title || "Untitled Resource",
+    excerpt: r.excerpt ?? r.description ?? null,
+    description: r.description ?? r.excerpt ?? null,
+    date: r.date ?? null,
+    coverImage: r.coverImage ?? r.normalizedCoverImage ?? null,
+    tags: Array.isArray(r.tags) ? r.tags : [],
+    author: r.author ?? null,
+    url,
+    href: r.href ?? null,
+    body: r.body ?? { raw: r.content || "" },
+    content: r.content ?? r.body?.raw ?? "",
+    slug: normalizeSlug(r),
+    draft: r.draft ?? false,
+    _raw: r._raw,
+  };
 }
 
-/* -------------------------------------------------------------------------- */
-/* Resources - Hybrid Approach (Contentlayer + FS Fallback)                  */
-/* -------------------------------------------------------------------------- */
-
 export function getAllResources(): ResourceDoc[] {
+  // Contentlayer first (normal path)
   try {
-    // Try Contentlayer first
-    const contentlayerResources = getResourcesFromContentlayer();
-    
-    if (contentlayerResources && contentlayerResources.length > 0) {
-      return contentlayerResources.map((r: any) => ({
-        title: r.title || "Untitled Resource",
-        excerpt: r.excerpt ?? r.description ?? null,
-        description: r.description ?? r.excerpt ?? null,
-        date: r.date ?? null,
-        coverImage: r.coverImage ?? null,
-        tags: Array.isArray(r.tags) ? r.tags : [],
-        author: r.author ?? null,
-        url: r.url || `/resources/${normalizeSlug(r)}`,
-        href: r.href ?? null,
-        body: r.body ?? { raw: r.content || "" },
-        content: r.content ?? r.body?.raw ?? "",
-        slug: normalizeSlug(r),
-        draft: r.draft ?? false,
-        _raw: r._raw,
-      }));
+    const items = getResourcesFromContentlayer();
+    if (items?.length) {
+      const docs = items.map(mapResourceFromContentlayer);
+      docs.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+      return docs;
     }
-  } catch (error) {
+  } catch {
+    // eslint-disable-next-line no-console
     console.warn("⚠️ Contentlayer resources unavailable, using filesystem fallback");
   }
 
-  // Fallback to filesystem
-  if (!fs.existsSync(RESOURCES_DIR)) {
-    console.warn(`⚠️ Resources directory not found: ${RESOURCES_DIR}`);
-    return [];
-  }
+  // FS fallback (rare; mostly useful if contentlayer is not initialized in some context)
+  if (!fs.existsSync(RESOURCES_DIR)) return [];
 
-  const files = fs
-    .readdirSync(RESOURCES_DIR)
-    .filter((f) => /\.(md|mdx)$/i.test(f));
-
+  const files = fs.readdirSync(RESOURCES_DIR).filter((f) => /\.(md|mdx)$/i.test(f));
   const docs: ResourceDoc[] = [];
 
   for (const file of files) {
@@ -151,7 +201,13 @@ export function getAllResources(): ResourceDoc[] {
 
     if (fm.draft === true) continue;
 
-    const explicitUrl = typeof fm.url === "string" ? cleanPath(fm.url) : "";
+    const explicitUrl =
+      typeof fm.canonicalUrl === "string"
+        ? cleanPath(fm.canonicalUrl)
+        : typeof fm.url === "string"
+        ? cleanPath(fm.url)
+        : "";
+
     const url =
       explicitUrl && explicitUrl.startsWith("/resources/")
         ? explicitUrl
@@ -176,234 +232,112 @@ export function getAllResources(): ResourceDoc[] {
     });
   }
 
-  // Sort by date (newest first)
   docs.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
-
   return docs;
 }
 
-export function getResourceByUrlPath(urlPath: string): ResourceDoc | null {
-  const target = cleanPath(urlPath);
-  if (!target) return null;
-
-  const all = getAllResources();
-  return all.find((r) => cleanPath(r.url) === target) ?? null;
-}
-
 export function getResourceBySlug(slug: string): ResourceDoc | null {
-  const cleanSlug = slug.toLowerCase().trim();
-  if (!cleanSlug) return null;
+  const s = String(slug || "").trim().toLowerCase();
+  if (!s) return null;
 
-  const all = getAllResources();
-  return (
-    all.find((r) => r.slug?.toLowerCase() === cleanSlug) ??
-    all.find((r) => normalizeSlug(r as any) === cleanSlug) ??
-    null
-  );
+  // Contentlayer resource first
+  const cl = getResourceBySlugFromContentlayer(s);
+  if (cl) return mapResourceFromContentlayer(cl);
+
+  // FS fallback (last resort)
+  return getAllResources().find((r) => (r.slug ?? "").toLowerCase() === s) ?? null;
 }
 
 /* -------------------------------------------------------------------------- */
-/* Books                                                                      */
+/* Books / Downloads / Posts / Canon / Shorts                                 */
 /* -------------------------------------------------------------------------- */
 
 export function getAllBooks(): ContentDoc[] {
   return getBooksFromContentlayer();
 }
-
 export function getBookBySlug(slug: string): ContentDoc | null {
   return getBookBySlugFromContentlayer(slug);
 }
 
-export function getBookByUrlPath(urlPath: string): ContentDoc | null {
-  const slug = urlPath
-    .replace(/^\/books\/?/, "")
-    .split("/")
-    .filter(Boolean)
-    .pop();
-
-  if (!slug) return null;
-  return getBookBySlugFromContentlayer(slug);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Downloads                                                                  */
-/* -------------------------------------------------------------------------- */
-
 export function getAllDownloads(): ContentDoc[] {
   return getDownloadsFromContentlayer();
 }
-
 export function getDownloadBySlug(slug: string): ContentDoc | null {
   return getDownloadBySlugFromContentlayer(slug);
 }
 
-export function getDownloadByUrlPath(urlPath: string): ContentDoc | null {
-  const slug = urlPath
-    .replace(/^\/downloads\/?/, "")
-    .split("/")
-    .filter(Boolean)
-    .pop();
-
-  if (!slug) return null;
-  return getDownloadBySlugFromContentlayer(slug);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Posts (Blog)                                                               */
-/* -------------------------------------------------------------------------- */
-
 export function getAllPosts(): ContentDoc[] {
   return getPublishedPosts();
 }
-
 export function getPostBySlugServer(slug: string): ContentDoc | null {
   return getPostBySlug(slug);
 }
 
-export function getPostByUrlPath(urlPath: string): ContentDoc | null {
-  const slug = urlPath
-    .replace(/^\/blog\/?/, "")
-    .split("/")
-    .filter(Boolean)
-    .pop();
-
-  if (!slug) return null;
-  return getPostBySlug(slug);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Canon                                                                      */
-/* -------------------------------------------------------------------------- */
-
 export function getAllCanons(): ContentDoc[] {
   return getCanonsFromContentlayer();
 }
-
 export function getCanonBySlug(slug: string): ContentDoc | null {
   return getCanonBySlugFromContentlayer(slug);
 }
 
-export function getCanonByUrlPath(urlPath: string): ContentDoc | null {
-  const slug = urlPath
-    .replace(/^\/canon\/?/, "")
-    .split("/")
-    .filter(Boolean)
-    .pop();
-
-  if (!slug) return null;
-  return getCanonBySlugFromContentlayer(slug);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Shorts                                                                     */
-/* -------------------------------------------------------------------------- */
-
 export function getAllShorts(): ContentDoc[] {
   return getPublishedShorts();
 }
-
 export function getShortBySlugServer(slug: string): ContentDoc | null {
   return getShortBySlug(slug);
 }
 
-export function getShortByUrlPath(urlPath: string): ContentDoc | null {
-  const slug = urlPath
-    .replace(/^\/shorts\/?/, "")
-    .split("/")
-    .filter(Boolean)
-    .pop();
+/* -------------------------------------------------------------------------- */
+/* Build-time asset validation (downloads + resources + covers)               */
+/* -------------------------------------------------------------------------- */
 
-  if (!slug) return null;
-  return getShortBySlug(slug);
+export function assertPublicAssetsForDownloadsAndResources() {
+  const missing: string[] = [];
+
+  // Downloads: validate file + cover
+  for (const d of getAllDownloads()) {
+    const slug = normalizeSlug(d) || "(no-slug)";
+    const label = `download/${slug}`;
+
+    const cover = resolveDocCoverImage(d);
+    if (cover.startsWith("/assets/") && !publicExists(cover)) {
+      missing.push(`${label} coverImage -> ${cover}`);
+    }
+
+    const dl = resolveDocDownloadUrl(d);
+    if (dl && dl.startsWith("/assets/") && !publicExists(dl)) {
+      missing.push(`${label} file -> ${dl}`);
+    }
+  }
+
+  // Resources: validate cover only
+  for (const r of getAllResources()) {
+    const slug = (r.slug || "").trim() || "(no-slug)";
+    const label = `resource/${slug}`;
+    const cover = String(r.coverImage || "").trim();
+    if (cover.startsWith("/assets/") && !publicExists(cover)) {
+      missing.push(`${label} coverImage -> ${cover}`);
+    }
+  }
+
+  if (missing.length) {
+    failOrWarn(`[Content Assets] Missing public assets:\n${missing.join("\n")}`);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
-/* Generic Document Finder                                                    */
+/* Optional: download size label (server only)                                */
 /* -------------------------------------------------------------------------- */
 
-export function getDocumentByUrlPath(urlPath: string): ContentDoc | ResourceDoc | null {
-  if (urlPath.startsWith("/resources/")) {
-    return getResourceByUrlPath(urlPath);
-  }
-  if (urlPath.startsWith("/books/")) {
-    return getBookByUrlPath(urlPath);
-  }
-  if (urlPath.startsWith("/downloads/")) {
-    return getDownloadByUrlPath(urlPath);
-  }
-  if (urlPath.startsWith("/blog/")) {
-    return getPostByUrlPath(urlPath);
-  }
-  if (urlPath.startsWith("/canon/")) {
-    return getCanonByUrlPath(urlPath);
-  }
-  if (urlPath.startsWith("/shorts/")) {
-    return getShortByUrlPath(urlPath);
-  }
+export function getDownloadSizeLabel(doc: ContentDoc): string | null {
+  const explicit = String((doc as any)?.fileSize || "").trim();
+  if (explicit) return explicit;
 
-  // Fallback: try as a generic slug across all types
-  const slug = urlPath.split("/").filter(Boolean).pop();
-  if (!slug) return null;
+  const url = resolveDocDownloadUrl(doc);
+  if (!url || !url.startsWith("/")) return null;
 
-  return (
-    getResourceBySlug(slug) ||
-    getBookBySlug(slug) ||
-    getDownloadBySlug(slug) ||
-    getPostBySlug(slug) ||
-    getCanonBySlug(slug) ||
-    getShortBySlug(slug) ||
-    null
-  );
-}
+  const bytes = publicSizeBytes(url);
+  if (bytes == null) return null;
 
-/* -------------------------------------------------------------------------- */
-/* Validation Helpers                                                         */
-/* -------------------------------------------------------------------------- */
-
-export function hasValidContent(doc: ContentDoc | ResourceDoc | null): boolean {
-  if (!doc) return false;
-
-  const content =
-    (doc as any).body?.raw ||
-    (doc as any).body?.code ||
-    (doc as any).content ||
-    "";
-
-  return typeof content === "string" && content.trim().length > 0;
-}
-
-export function getDocumentContent(doc: ContentDoc | ResourceDoc): string {
-  return (
-    (doc as any).body?.raw ||
-    (doc as any).body?.code ||
-    (doc as any).content ||
-    ""
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Slug Utilities                                                             */
-/* -------------------------------------------------------------------------- */
-
-export function extractSlugFromPath(urlPath: string): string | null {
-  const parts = urlPath
-    .split("/")
-    .filter(Boolean)
-    .filter((part) => !["resources", "books", "blog", "downloads", "canon", "shorts"].includes(part));
-
-  return parts.length > 0 ? parts[parts.length - 1] : null;
-}
-
-export function buildUrlPath(slug: string, type: string): string {
-  const typeMap: Record<string, string> = {
-    resource: "/resources",
-    book: "/books",
-    download: "/downloads",
-    post: "/blog",
-    canon: "/canon",
-    short: "/shorts",
-  };
-
-  const prefix = typeMap[type] || "/content";
-  return `${prefix}/${slug}`;
+  return formatBytes(bytes);
 }

@@ -22,8 +22,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 function UnknownMdxComponent(props: AnyProps) {
-  const { children } = props as { children?: React.ReactNode };
-  return <>{children}</>;
+  return <>{(props as any)?.children}</>;
 }
 
 function Anchor(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
@@ -66,48 +65,58 @@ function Pre(props: React.HTMLAttributes<HTMLPreElement>) {
 }
 
 /**
- * Placeholder DownloadCard component.
- * Replace this with your actual implementation when ready.
+ * Resilient DownloadCard:
+ * - href (direct file URL)
+ * - slug (routes to /downloads/[slug])
+ * - title/label/children
  */
 function DownloadCard(props: {
-  slug?: string;
   title?: string;
-  description?: string;
+  label?: string;
+  href?: string;
+  slug?: string;
   fileSize?: string;
+  children?: React.ReactNode;
   [key: string]: any;
 }) {
-  const { slug, title, description, fileSize, ...rest } = props;
-  
+  const title = typeof props.title === "string" ? props.title : "Download";
+  const label = typeof props.label === "string" ? props.label : "Download";
+  const href =
+    typeof props.href === "string" && props.href.trim()
+      ? props.href.trim()
+      : typeof props.slug === "string" && props.slug.trim()
+      ? `/downloads/${props.slug.trim()}`
+      : null;
+
   return (
-    <div
-      className="my-6 rounded-2xl border border-gold/20 bg-charcoal/80 p-6"
-      {...rest}
-    >
+    <div className="my-6 rounded-2xl border border-gold/20 bg-charcoal/80 p-6">
       <div className="flex items-start gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 ring-1 ring-gold/20">
-          <Lucide.Download className="h-6 w-6 text-gold" />
+          <Lucide.Download className="h-6 w-6 text-gold" aria-hidden="true" />
         </div>
+
         <div className="flex-1">
-          <h3 className="font-serif text-lg font-semibold text-cream">
-            {title || "Download"}
-          </h3>
-          {description && (
-            <p className="mt-1 text-sm text-gold/70">{description}</p>
-          )}
-          {fileSize && (
-            <p className="mt-2 text-xs font-medium uppercase tracking-wider text-gold/50">
-              {fileSize}
+          <h3 className="font-serif text-lg font-semibold text-cream">{title}</h3>
+
+          {props.children ? (
+            <div className="mt-2 text-sm leading-relaxed text-gold/70">{props.children}</div>
+          ) : null}
+
+          {typeof props.fileSize === "string" && props.fileSize.trim() ? (
+            <p className="mt-3 text-xs font-medium uppercase tracking-wider text-gold/50">
+              {props.fileSize.trim()}
             </p>
-          )}
-          {slug && (
+          ) : null}
+
+          {href ? (
             <a
-              href={`/downloads/${slug}`}
-              className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-gold transition-colors hover:text-amber-200"
+              href={href}
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-gold transition-colors hover:text-amber-200"
             >
-              Download
-              <Lucide.ArrowRight className="h-4 w-4" />
+              {label}
+              <Lucide.ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -115,7 +124,7 @@ function DownloadCard(props: {
 }
 
 const baseComponents = {
-  // Headings
+  // headings
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h1
       {...props}
@@ -135,17 +144,14 @@ const baseComponents = {
     />
   ),
 
-  // Paragraph / text
+  // text
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
     <p {...props} className={cx("my-6 text-lg leading-relaxed text-gray-300", props.className)} />
   ),
 
-  // Lists
+  // lists
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul
-      {...props}
-      className={cx("my-6 list-disc space-y-2 pl-6 text-gray-300", props.className)}
-    />
+    <ul {...props} className={cx("my-6 list-disc space-y-2 pl-6 text-gray-300", props.className)} />
   ),
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
     <ol
@@ -157,14 +163,12 @@ const baseComponents = {
     <li {...props} className={cx("leading-relaxed", props.className)} />
   ),
 
-  // Links
+  // links / code
   a: Anchor,
-
-  // Code
   code: InlineCode,
   pre: Pre,
 
-  // Images
+  // images
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -175,7 +179,7 @@ const baseComponents = {
     />
   ),
 
-  // Custom components
+  // custom components
   Divider,
   Rule,
   Grid,
@@ -191,7 +195,6 @@ const baseComponents = {
   DownloadCard,
 
   /**
-   * Icon usage in MDX:
    * <Icon name="Shield" size={18} className="..." />
    */
   Icon: ({
@@ -210,16 +213,15 @@ const baseComponents = {
 } satisfies Record<string, unknown>;
 
 /**
- * Resilient proxy for MDX components
+ * Proxy makes MDX resilient:
+ * - Unknown components don’t crash builds
+ * - Case-insensitive lookup (Icon vs icon etc.)
  */
 export const mdxComponents = new Proxy(baseComponents as Record<string, any>, {
   get(target, prop: string | symbol) {
     if (typeof prop !== "string") return (target as any)[prop];
-
-    // Exact match first
     if ((target as any)[prop]) return (target as any)[prop];
 
-    // Case-insensitive match
     const foundKey = Object.keys(target).find((k) => k.toLowerCase() === prop.toLowerCase());
     if (foundKey) return (target as any)[foundKey];
 

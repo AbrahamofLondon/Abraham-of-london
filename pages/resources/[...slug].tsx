@@ -1,12 +1,18 @@
-// pages/resources/[...slug].tsx - COMPLETE FIXED VERSION
+// pages/resources/[...slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { getAllResources, getResourceBySlug } from "@/lib/contentlayer-helper";
+
+import {
+  assertContentlayerHasDocs,
+  getAllResources,
+  resolveDocCoverImage,
+  getDocHref,
+} from "@/lib/contentlayer-helper";
+
 import { serializeMDX } from "@/lib/mdx-utils";
 
 type Props = {
@@ -18,31 +24,32 @@ type Props = {
     coverImage: string | null;
     tags: string[];
     author: string | null;
-    url: string;
-    slug: string;
+    url: string; // canonical route (computed)
+    slugPath: string; // path after /resources/
   };
   source: MDXRemoteSerializeResult;
 };
 
-const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
-  const router = useRouter();
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://www.abrahamoflondon.org";
 
-  if (router.isFallback) {
-    return (
-      <Layout title="Loading...">
-        <main className="mx-auto max-w-3xl px-4 py-12">
-          <div className="flex items-center justify-center">
-            <div className="text-gold/70">Loading...</div>
-          </div>
-        </main>
-      </Layout>
-    );
-  }
+function cleanResourcesPath(href: string): string | null {
+  if (!href || typeof href !== "string") return null;
+  if (!href.startsWith("/resources")) return null;
+
+  // normalize "/resources" -> null, "/resources/foo/bar" -> "foo/bar"
+  const rest = href.replace(/^\/resources\/?/, "").replace(/^\/+|\/+$/g, "");
+  return rest || null;
+}
+
+const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
+  const canonical = `${SITE_URL}${resource.url}`;
 
   return (
     <Layout title={resource.title}>
       <Head>
-        <link rel="canonical" href={`https://yourdomain.com${resource.url}`} />
+        <title>{resource.title} | Resources | Abraham of London</title>
+        <link rel="canonical" href={canonical} />
         <meta name="description" content={resource.description || resource.excerpt || ""} />
         {resource.coverImage && (
           <>
@@ -50,6 +57,7 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
             <meta name="twitter:image" content={resource.coverImage} />
           </>
         )}
+        <meta property="og:type" content="article" />
       </Head>
 
       <main className="mx-auto max-w-3xl px-4 py-12">
@@ -57,15 +65,16 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
             Resources
           </p>
+
           <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">
             {resource.title}
           </h1>
+
           {resource.excerpt && (
-            <p className="text-base leading-relaxed text-gray-200 sm:text-lg">
-              {resource.excerpt}
-            </p>
+            <p className="text-base leading-relaxed text-gray-200 sm:text-lg">{resource.excerpt}</p>
           )}
-          {resource.tags && resource.tags.length > 0 && (
+
+          {resource.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
               {resource.tags.map((tag) => (
                 <span
@@ -86,7 +95,8 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
         {resource.date && (
           <footer className="mt-12 border-t border-gold/10 pt-6">
             <p className="text-sm text-gold/60">
-              Last updated: {new Date(resource.date).toLocaleDateString("en-US", {
+              Last updated:{" "}
+              {new Date(resource.date).toLocaleDateString("en-GB", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -100,122 +110,66 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const resources = getAllResources();
+  assertContentlayerHasDocs("pages/resources/[...slug].tsx getStaticPaths");
 
-    // Build paths from all resources
-    const paths = resources
-      .filter((r: any) => {
-        // Only include published resources
-        if (r.draft === true) return false;
-        
-        // Must have a slug
-        const slug = r.slug || r._raw?.flattenedPath;
-        if (!slug) return false;
+  const resources = getAllResources();
 
-        // Exclude strategic-frameworks (has its own explicit route)
-        const slugStr = String(slug).toLowerCase();
-        if (slugStr.includes("strategic-frameworks")) return false;
+  const paths = resources
+    .filter((r: any) => r?.draft !== true)
+    .map((r: any) => {
+      const href = getDocHref(r); // prefers computed doc.url
+      const slugPath = cleanResourcesPath(href);
+      if (!slugPath) return null;
 
-        return true;
-      })
-      .map((r: any) => {
-        // Get the slug from various possible locations
-        const slug = r.slug || r._raw?.flattenedPath || "";
-        
-        // Clean and split the slug
-        const cleanSlug = String(slug)
-          .replace(/^resources\/?/, "") // Remove leading "resources/"
-          .replace(/^\/+|\/+$/g, "") // Trim slashes
-          .toLowerCase();
+      return { params: { slug: slugPath.split("/").filter(Boolean) } };
+    })
+    .filter(Boolean) as Array<{ params: { slug: string[] } }>;
 
-        const slugParts = cleanSlug.split("/").filter(Boolean);
-
-        return {
-          params: { slug: slugParts },
-        };
-      })
-      .filter((p) => p.params.slug.length > 0); // Must have at least one slug part
-
-    console.log(`📄 Resources: Generated ${paths.length} paths`);
-
-    return {
-      paths,
-      fallback: false,
-    };
-  } catch (error) {
-    console.error("❌ Error generating static paths for resources:", error);
-    return {
-      paths: [],
-      fallback: false,
-    };
-  }
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
-  try {
-    const slugArray = (ctx.params?.slug as string[]) || [];
-    
-    if (slugArray.length === 0) {
-      return { notFound: true };
-    }
+  const slugArray = (ctx.params?.slug as string[]) || [];
+  if (!slugArray.length) return { notFound: true };
 
-    // Get the final slug (last part of the path)
-    const finalSlug = slugArray[slugArray.length - 1];
-    
-    // Try to find the resource by slug
-    const doc = getResourceBySlug(finalSlug);
+  const urlPath = `/resources/${slugArray.join("/")}`;
 
-    if (!doc) {
-      console.warn(`⚠️ Resource not found for slug: ${finalSlug}`);
-      return { notFound: true };
-    }
+  const resources = getAllResources();
+  const doc = resources.find((r: any) => getDocHref(r) === urlPath);
 
-    // Check if it's a draft
-    if (doc.draft === true) {
-      console.warn(`⚠️ Resource is draft: ${finalSlug}`);
-      return { notFound: true };
-    }
+  if (!doc || (doc as any)?.draft === true) return { notFound: true };
 
-    // Extract content from various possible locations
-    const content = 
-      doc.body?.raw || 
-      doc.body?.code || 
-      doc.content || 
-      "";
+  const content =
+    typeof (doc as any).body?.raw === "string"
+      ? String((doc as any).body.raw)
+      : typeof (doc as any).content === "string"
+      ? String((doc as any).content)
+      : "";
 
-    if (!content || content.trim().length === 0) {
-      console.warn(`⚠️ Resource "${doc.title}" has no content`);
-      return { notFound: true };
-    }
-
-    // Serialize MDX
-    const source = await serializeMDX(content);
-
-    // Build the canonical URL
-    const urlPath = `/resources/${slugArray.join("/")}`;
-
-    return {
-      props: {
-        resource: {
-          title: doc.title || "Untitled Resource",
-          excerpt: doc.excerpt ?? doc.description ?? null,
-          description: doc.description ?? doc.excerpt ?? null,
-          date: doc.date ?? null,
-          coverImage: doc.coverImage ?? null,
-          tags: Array.isArray(doc.tags) ? doc.tags : [],
-          author: doc.author ?? null,
-          url: urlPath,
-          slug: finalSlug,
-        },
-        source,
-      },
-      revalidate: 3600, // ISR: regenerate every hour
-    };
-  } catch (error) {
-    console.error("❌ Error in getStaticProps for resource:", ctx.params?.slug, error);
+  if (!content.trim()) {
+    // resources should contain content; but don’t hard-crash builds: 404 cleanly
     return { notFound: true };
   }
+
+  const source = await serializeMDX(content);
+
+  return {
+    props: {
+      resource: {
+        title: (doc as any).title || "Untitled Resource",
+        excerpt: (doc as any).excerpt ?? (doc as any).description ?? null,
+        description: (doc as any).description ?? (doc as any).excerpt ?? null,
+        date: (doc as any).date ?? null,
+        coverImage: resolveDocCoverImage(doc),
+        tags: Array.isArray((doc as any).tags) ? (doc as any).tags : [],
+        author: (doc as any).author ?? null,
+        url: urlPath,
+        slugPath: slugArray.join("/"),
+      },
+      source,
+    },
+    revalidate: 3600,
+  };
 };
 
 export default ResourcesCatchAllPage;

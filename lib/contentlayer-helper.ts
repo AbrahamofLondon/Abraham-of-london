@@ -1,22 +1,9 @@
-// lib/contentlayer-helper.ts - COMPLETE FIXED VERSION
+// lib/contentlayer-helper.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as generated from "@/lib/contentlayer";
 
 /* -------------------------------------------------------------------------- */
-/* Node.js-only imports (guarded for browser compatibility)                   */
-/* -------------------------------------------------------------------------- */
-
-const isServer = typeof window === "undefined";
-let fs: any = null;
-let path: any = null;
-
-if (isServer) {
-  fs = eval('require')("fs");
-  path = eval('require')("path");
-}
-
-/* -------------------------------------------------------------------------- */
-/* Types                                                                      */
+/* Core types                                                                 */
 /* -------------------------------------------------------------------------- */
 
 export type DocKind =
@@ -31,133 +18,86 @@ export type DocKind =
   | "short"
   | "unknown";
 
-export type AccessLevel = "public" | "inner-circle" | "private";
-export type ContentDoc = any;
+export type AccessLevel =
+  | "public"
+  | "inner-circle"
+  | "inner-circle-plus"
+  | "inner-circle-elite"
+  | "private";
 
-export interface BaseDoc {
-  _id: string;
-  slug: string;
-  title: string;
-  excerpt?: string;
-  description?: string;
-  date?: string;
-  tags?: string[];
-  coverImage?: string;
-  _raw: {
-    flattenedPath: string;
-    sourceFileName: string;
-  };
-  [key: string]: unknown;
-}
+type GeneratedArrays = {
+  allPosts?: unknown;
+  allBooks?: unknown;
+  allDownloads?: unknown;
+  allEvents?: unknown;
+  allPrints?: unknown;
+  allResources?: unknown;
+  allStrategies?: unknown;
+  allCanons?: unknown;
+  allShorts?: unknown;
+};
 
-export interface PostDoc extends BaseDoc {
-  type: "post";
+type RawMeta = { flattenedPath?: string; sourceFileName?: string };
+
+export type ContentDoc = {
+  _type?: string;
+  type?: string;
+
+  _raw?: RawMeta;
+
+  title?: string | null;
+  description?: string | null;
+  excerpt?: string | null;
+  date?: string | Date | null;
+
+  slug?: string | null;
+  canonicalUrl?: string | null;
+
+  url?: string | null; // computed canonical route
+  href?: string | null; // CTA only
+
+  draft?: boolean;
+
   featured?: boolean;
-  category?: string;
-  readTime?: string;
-}
 
-export interface BookDoc extends BaseDoc {
-  type: "book";
-  subtitle?: string;
-  isbn?: string;
-  publisher?: string;
-}
+  accessLevel?: string | null;
+  lockMessage?: string | null;
 
-export interface DownloadDoc extends BaseDoc {
-  type: "download";
-  file?: string;
-  pdfPath?: string;
-  downloadFile?: string;
-  fileUrl?: string;
-  downloadUrl?: string;
-  fileSize?: string;
-  accessLevel?: AccessLevel;
-}
+  tags?: unknown;
 
-export interface EventDoc extends BaseDoc {
-  type: "event";
-  startDate?: string;
-  endDate?: string;
-  location?: string;
-  registrationUrl?: string;
-}
+  coverImage?: string | null;
+  coverimage?: string | null;
+  normalizedCoverImage?: string | null; // computed
 
-export interface PrintDoc extends BaseDoc {
-  type: "print";
-  format?: string;
-  dimensions?: string;
-  price?: string | number;
-  inStock?: boolean;
-}
+  readTime?: string | null;
+  readtime?: string | null;
+  readingTime?: string | null;
+  normalizedReadTime?: string | null; // computed
 
-export interface ResourceDoc extends BaseDoc {
-  type: "resource";
-  format?: string;
-  file?: string;
-}
+  // downloads computed
+  canonicalPdfHref?: string | null;
 
-export interface StrategyDoc extends BaseDoc {
-  type: "strategy";
-  framework?: string;
-  category?: string;
-}
+  // body/content (varies depending on setup)
+  body?: { raw?: string; code?: string } | null;
+  content?: string | null;
 
-export interface CanonDoc extends BaseDoc {
-  type: "canon";
-  volume?: number;
-  chapter?: number;
-}
-
-export interface ShortDoc extends BaseDoc {
-  type: "short";
-  theme?: string;
-  readTime?: string;
-}
-
-export type AnyDoc = PostDoc | BookDoc | DownloadDoc | EventDoc | PrintDoc | ResourceDoc | StrategyDoc | CanonDoc | ShortDoc;
-
-export type PostType = PostDoc;
-export type BookType = BookDoc;
-export type DownloadType = DownloadDoc;
-export type EventType = EventDoc;
-export type PrintType = PrintDoc;
-export type ResourceType = ResourceDoc;
-export type StrategyType = StrategyDoc;
-export type CanonType = CanonDoc;
-export type ShortType = ShortDoc;
+  [key: string]: unknown;
+};
 
 /* -------------------------------------------------------------------------- */
-/* Type Guards                                                                */
-/* -------------------------------------------------------------------------- */
-
-export const isPost = (doc: AnyDoc): doc is PostType => doc.type === "post";
-export const isDownload = (doc: AnyDoc): doc is DownloadType => doc.type === "download";
-export const isBook = (doc: AnyDoc): doc is BookType => doc.type === "book";
-export const isEvent = (doc: AnyDoc): doc is EventType => doc.type === "event";
-export const isPrint = (doc: AnyDoc): doc is PrintType => doc.type === "print";
-export const isResource = (doc: AnyDoc): doc is ResourceType => doc.type === "resource";
-export const isCanon = (doc: AnyDoc): doc is CanonType => doc.type === "canon";
-export const isShort = (doc: AnyDoc): doc is ShortType => doc.type === "short";
-export const isStrategy = (doc: AnyDoc): doc is StrategyType => doc.type === "strategy";
-export const isDraft = (doc: AnyDoc): boolean => Boolean(doc.draft);
-export const isPublished = (doc: AnyDoc): boolean => !isDraft(doc);
-export const isContentlayerLoaded = (): boolean => true;
-
-/* -------------------------------------------------------------------------- */
-/* Routing                                                                    */
+/* Constants                                                                  */
 /* -------------------------------------------------------------------------- */
 
 const KIND_URL_MAP: Record<DocKind, string> = {
   post: "/blog",
   book: "/books",
-  canon: "/canon",
   download: "/downloads",
   event: "/events",
   print: "/prints",
-  short: "/shorts",
   resource: "/resources",
   strategy: "/strategy",
+  canon: "/canon",
+  short: "/shorts",
   unknown: "/content",
 };
 
@@ -165,71 +105,43 @@ const GLOBAL_FALLBACK_IMAGE = "/assets/images/writing-desk.webp";
 const SHORT_GLOBAL_FALLBACK = "/assets/images/shorts/cover.jpg";
 
 /* -------------------------------------------------------------------------- */
-/* Helpers                                                                    */
+/* Small utilities                                                            */
 /* -------------------------------------------------------------------------- */
 
 const cleanStr = (v: unknown) => String(v ?? "").trim();
 const cleanLower = (v: unknown) => cleanStr(v).toLowerCase();
-const trimTrailingSlashes = (s: string) => s.replace(/\/+$/, "");
+
 const trimLeadingSlashes = (s: string) => s.replace(/^\/+/, "");
+const trimTrailingSlashes = (s: string) => s.replace(/\/+$/, "");
 const ensureLeadingSlash = (s: string) => (s.startsWith("/") ? s : `/${s}`);
 
-function pickArray(name: string): ContentDoc[] {
-  const v = (generated as any)[name];
-  return Array.isArray(v) ? v : [];
+function stripQueryAndHash(s: string): string {
+  return s.split("#")[0]?.split("?")[0] ?? s;
 }
 
-export function publicUrlToFsPath(publicUrl: string): string | null {
-  if (!isServer || !path) return null;
-  const u = cleanStr(publicUrl);
-  if (!u.startsWith("/")) return null;
-  return path.join(process.cwd(), "public", trimLeadingSlashes(u));
+function isValidInternalUrl(u: string): boolean {
+  return u.startsWith("/") && !u.startsWith("//");
 }
 
-export function publicFileExists(publicUrl: string): boolean {
-  if (!isServer || !fs) return false;
-  const fsPath = publicUrlToFsPath(publicUrl);
-  if (!fsPath) return false;
-  try {
-    return fs.existsSync(fsPath);
-  } catch {
-    return false;
-  }
-}
-
-export function publicFileSizeBytes(publicUrl: string): number | null {
-  if (!isServer || !fs) return null;
-  const fsPath = publicUrlToFsPath(publicUrl);
-  if (!fsPath) return null;
-  try {
-    const stat = fs.statSync(fsPath);
-    return typeof stat.size === "number" ? stat.size : null;
-  } catch {
-    return null;
-  }
-}
-
-export function formatBytes(bytes: number): string {
-  const b = Math.max(0, bytes);
-  if (b < 1024) return `${b} B`;
-  const kb = b / 1024;
-  if (kb < 1024) return `${Math.round(kb)} KB`;
-  const mb = kb / 1024;
-  if (mb < 1024) return `${mb.toFixed(1)} MB`;
-  const gb = mb / 1024;
-  return `${gb.toFixed(1)} GB`;
-}
-
+/**
+ * Canonical slug = last segment only (used ONLY where pages expect [slug].tsx).
+ * For Resources Catch-All ([...slug]) you should use doc.url (computed) instead.
+ */
 function toCanonicalSlug(input: unknown): string {
   let s = cleanStr(input);
   if (!s) return "";
-  s = s.split("#")[0]?.split("?")[0] ?? s;
+  s = stripQueryAndHash(s);
   s = s.replace(/^https?:\/\/[^/]+/i, "");
   s = trimTrailingSlashes(cleanLower(s));
   s = trimLeadingSlashes(s);
   if (!s) return "";
   const parts = s.split("/").filter(Boolean);
   return parts.length ? parts[parts.length - 1] : s;
+}
+
+function pickArray<K extends keyof GeneratedArrays>(name: K): ContentDoc[] {
+  const v = (generated as any as GeneratedArrays)[name];
+  return Array.isArray(v) ? (v as ContentDoc[]) : [];
 }
 
 /* -------------------------------------------------------------------------- */
@@ -246,140 +158,6 @@ export const allStrategies = pickArray("allStrategies");
 export const allCanons = pickArray("allCanons");
 export const allShorts = pickArray("allShorts");
 
-/* -------------------------------------------------------------------------- */
-/* Draft / Publish                                                            */
-/* -------------------------------------------------------------------------- */
-
-export const isDraftContent = (doc: ContentDoc): boolean =>
-  doc?.draft === true || cleanStr(doc?._raw?.sourceFileName).startsWith("_");
-
-export const isPublishedContent = (doc: ContentDoc): boolean => !isDraftContent(doc);
-
-/* -------------------------------------------------------------------------- */
-/* Kind detection                                                             */
-/* -------------------------------------------------------------------------- */
-
-export function getDocKind(doc: ContentDoc): DocKind {
-  const raw = cleanLower(doc?._type ?? doc?.type);
-  switch (raw) {
-    case "post": return "post";
-    case "book": return "book";
-    case "canon": return "canon";
-    case "short": return "short";
-    case "download": return "download";
-    case "resource": return "resource";
-    case "event": return "event";
-    case "print": return "print";
-    case "strategy": return "strategy";
-    default: return "unknown";
-  }
-}
-
-/* -------------------------------------------------------------------------- */
-/* Slug normalisation                                                         */
-/* -------------------------------------------------------------------------- */
-
-export function normalizeSlug(doc: ContentDoc): string {
-  if (!doc) return "";
-  const explicit = toCanonicalSlug(doc.slug);
-  if (explicit) return explicit;
-  const fp = cleanStr(doc?._raw?.flattenedPath);
-  if (!fp) return "";
-  const fpClean = trimTrailingSlashes(cleanLower(fp));
-  const parts = fpClean.split("/").filter(Boolean);
-  if (!parts.length) return "";
-  const last = parts[parts.length - 1];
-  const slug = last === "index" ? parts[parts.length - 2] ?? "" : last;
-  return toCanonicalSlug(slug);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Access control                                                             */
-/* -------------------------------------------------------------------------- */
-
-export function getAccessLevel(doc: ContentDoc): AccessLevel {
-  const v = cleanLower(doc?.accessLevel);
-  if (v === "inner-circle" || v === "private" || v === "public") return v;
-  return "public";
-}
-
-export function isPublic(doc: ContentDoc): boolean {
-  return getAccessLevel(doc) === "public";
-}
-
-export function getRequiredTier(doc: ContentDoc): AccessLevel {
-  return getAccessLevel(doc);
-}
-
-/* -------------------------------------------------------------------------- */
-/* URLs                                                                       */
-/* -------------------------------------------------------------------------- */
-
-export function getDocHref(doc: ContentDoc): string {
-  const kind = getDocKind(doc);
-  const slug = normalizeSlug(doc);
-  const base = KIND_URL_MAP[kind] ?? "/content";
-  return slug ? `${base}/${slug}` : base;
-}
-
-/* -------------------------------------------------------------------------- */
-/* Media                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export function resolveDocCoverImage(doc: ContentDoc): string {
-  const explicit = cleanStr(doc?.coverImage || doc?.image || doc?.cover);
-  if (explicit) return ensureLeadingSlash(explicit);
-  return getDocKind(doc) === "short" ? SHORT_GLOBAL_FALLBACK : GLOBAL_FALLBACK_IMAGE;
-}
-
-/* -------------------------------------------------------------------------- */
-/* Download URL resolution                                                    */
-/* -------------------------------------------------------------------------- */
-
-export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
-  const raw =
-    cleanStr(doc?.downloadUrl) ||
-    cleanStr(doc?.fileUrl) ||
-    cleanStr(doc?.pdfPath) ||
-    cleanStr(doc?.file) ||
-    cleanStr(doc?.downloadFile);
-
-  if (!raw) return null;
-  const url = ensureLeadingSlash(raw);
-
-  if (url.startsWith("/downloads/")) {
-    return url.replace(/^\/downloads\//, "/assets/downloads/");
-  }
-  if (url.startsWith("/assets/downloads/")) {
-    return url;
-  }
-  return url;
-}
-
-export function resolveDocDownloadHref(doc: ContentDoc): string | null {
-  const direct = resolveDocDownloadUrl(doc);
-  if (!direct) return null;
-  const access = getAccessLevel(doc);
-  if (access === "public") return direct;
-  const slug = normalizeSlug(doc);
-  if (!slug) return null;
-  return `/api/downloads/${encodeURIComponent(slug)}`;
-}
-
-export function resolveDocDownloadSizeLabel(doc: ContentDoc): string | null {
-  const explicit = cleanStr(doc?.fileSize);
-  if (explicit) return explicit;
-  const url = resolveDocDownloadUrl(doc);
-  if (!url) return null;
-  const bytes = publicFileSizeBytes(url);
-  if (bytes == null) return null;
-  return formatBytes(bytes);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Aggregation                                                                */
-/* -------------------------------------------------------------------------- */
-
 export const getAllContentlayerDocs = (): ContentDoc[] =>
   [
     ...allPosts,
@@ -393,122 +171,271 @@ export const getAllContentlayerDocs = (): ContentDoc[] =>
     ...allShorts,
   ].filter(Boolean);
 
+/* -------------------------------------------------------------------------- */
+/* Draft / Publish                                                            */
+/* -------------------------------------------------------------------------- */
+
+export const isDraftContent = (doc: ContentDoc): boolean =>
+  doc?.draft === true || cleanStr(doc?._raw?.sourceFileName).startsWith("_");
+
+export const isPublishedContent = (doc: ContentDoc): boolean => !isDraftContent(doc);
+
 export const getPublishedDocuments = (): ContentDoc[] =>
   getAllContentlayerDocs().filter(isPublishedContent);
+
+/* -------------------------------------------------------------------------- */
+/* Kind detection                                                             */
+/* -------------------------------------------------------------------------- */
+
+export function getDocKind(doc: ContentDoc): DocKind {
+  const raw = cleanLower(doc?._type ?? doc?.type);
+  switch (raw) {
+    case "post":
+      return "post";
+    case "book":
+      return "book";
+    case "download":
+      return "download";
+    case "event":
+      return "event";
+    case "print":
+      return "print";
+    case "resource":
+      return "resource";
+    case "strategy":
+      return "strategy";
+    case "canon":
+      return "canon";
+    case "short":
+      return "short";
+    default:
+      return "unknown";
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Slug normalization                                                         */
+/* -------------------------------------------------------------------------- */
+
+export function normalizeSlug(doc: ContentDoc): string {
+  if (!doc) return "";
+
+  // Prefer explicitly provided slug (last segment only)
+  const explicit = toCanonicalSlug(doc.slug);
+  if (explicit) return explicit;
+
+  const fp = cleanStr(doc?._raw?.flattenedPath);
+  if (!fp) return "";
+
+  const fpClean = trimTrailingSlashes(cleanLower(fp));
+  const parts = fpClean.split("/").filter(Boolean);
+  if (!parts.length) return "";
+
+  const last = parts[parts.length - 1];
+  const slug = last === "index" ? parts[parts.length - 2] ?? "" : last;
+
+  return toCanonicalSlug(slug);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Access control                                                             */
+/* -------------------------------------------------------------------------- */
+
+export function getAccessLevel(doc: ContentDoc): AccessLevel {
+  const v = cleanLower(doc?.accessLevel);
+  switch (v) {
+    case "public":
+    case "inner-circle":
+    case "inner-circle-plus":
+    case "inner-circle-elite":
+    case "private":
+      return v;
+    default:
+      return "public";
+  }
+}
+
+export function isPublic(doc: ContentDoc): boolean {
+  return getAccessLevel(doc) === "public";
+}
+
+/* -------------------------------------------------------------------------- */
+/* URL routing                                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Enterprise rule:
+ * - If computed `doc.url` exists, that is canonical.
+ * - If not, fall back to kind + normalizedSlug (legacy/backfill).
+ *
+ * This keeps routing consistent with your config’s getDocUrl().
+ */
+export function getDocHref(doc: ContentDoc): string {
+  const computedUrl = cleanStr(doc?.url);
+  if (computedUrl && isValidInternalUrl(computedUrl)) return computedUrl;
+
+  const kind = getDocKind(doc);
+  const base = KIND_URL_MAP[kind] ?? "/content";
+
+  const slug = normalizeSlug(doc);
+  return slug ? `${base}/${slug}` : base;
+}
+
+/**
+ * Use when you NEED a stable URL for <link rel="canonical"> or metadata.
+ * Prefer computed url; otherwise falls back.
+ */
+export function getDocCanonicalUrlPath(doc: ContentDoc): string {
+  return getDocHref(doc);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Media                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export function resolveDocCoverImage(doc: ContentDoc): string {
+  // computed first (best)
+  const normalized = cleanStr(doc?.normalizedCoverImage);
+  if (normalized) return ensureLeadingSlash(normalized);
+
+  // raw variants
+  const explicit = cleanStr(doc?.coverImage || doc?.coverimage || doc?.image || doc?.cover);
+  if (explicit) return ensureLeadingSlash(explicit);
+
+  return getDocKind(doc) === "short" ? SHORT_GLOBAL_FALLBACK : GLOBAL_FALLBACK_IMAGE;
+}
+
+export function resolveDocReadTime(doc: ContentDoc): string | null {
+  const normalized = cleanStr(doc?.normalizedReadTime);
+  if (normalized) return normalized;
+  const raw =
+    cleanStr(doc?.readTime) || cleanStr(doc?.readtime) || cleanStr(doc?.readingTime);
+  return raw || null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Download URLs (no FS checks here)                                          */
+/* -------------------------------------------------------------------------- */
+
+export function resolveDocDownloadUrl(doc: ContentDoc): string | null {
+  // computed first (best)
+  const canonical = cleanStr(doc?.canonicalPdfHref);
+  if (canonical) return canonical;
+
+  const raw =
+    cleanStr(doc?.downloadUrl) ||
+    cleanStr(doc?.fileUrl) ||
+    cleanStr(doc?.pdfPath) ||
+    cleanStr(doc?.file) ||
+    cleanStr(doc?.downloadFile);
+
+  if (!raw) return null;
+
+  // allow remote
+  if (/^https?:\/\//i.test(raw)) return raw;
+
+  const url = ensureLeadingSlash(stripQueryAndHash(raw));
+
+  // normalize legacy "/downloads/foo.pdf" -> "/assets/downloads/foo.pdf"
+  if (url.startsWith("/downloads/")) {
+    return url.replace(/^\/downloads\//, "/assets/downloads/");
+  }
+
+  return url;
+}
+
+/**
+ * Href used by UI:
+ * - public: direct file
+ * - gated: API route your app controls
+ */
+export function resolveDocDownloadHref(doc: ContentDoc): string | null {
+  const direct = resolveDocDownloadUrl(doc);
+  if (!direct) return null;
+
+  if (getAccessLevel(doc) === "public") return direct;
+
+  const slug = normalizeSlug(doc);
+  if (!slug) return null;
+
+  return `/api/downloads/${encodeURIComponent(slug)}`;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Queries                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function safeTime(doc: ContentDoc): number {
+  const v = doc?.date;
+  try {
+    const t = v ? new Date(v as any).getTime() : 0;
+    return Number.isFinite(t) ? t : 0;
+  } catch {
+    return 0;
+  }
+}
 
 export function getPublishedDocumentsByType(kind: DocKind, limit?: number): ContentDoc[] {
   const items = getPublishedDocuments()
     .filter((d) => getDocKind(d) === kind)
-    .sort((a, b) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime());
+    .sort((a, b) => safeTime(b) - safeTime(a));
+
   return typeof limit === "number" ? items.slice(0, limit) : items;
 }
 
 export const getPublishedPosts = () => getPublishedDocumentsByType("post");
 export const getAllBooks = () => getPublishedDocumentsByType("book");
-export const getAllCanons = () => getPublishedDocumentsByType("canon");
 export const getAllDownloads = () => getPublishedDocumentsByType("download");
 export const getAllEvents = () => getPublishedDocumentsByType("event");
 export const getAllPrints = () => getPublishedDocumentsByType("print");
 export const getAllResources = () => getPublishedDocumentsByType("resource");
 export const getAllStrategies = () => getPublishedDocumentsByType("strategy");
+export const getAllCanons = () => getPublishedDocumentsByType("canon");
 export const getPublishedShorts = () => getPublishedDocumentsByType("short");
-export const getRecentShorts = (limit?: number) => getPublishedDocumentsByType("short", limit);
 
+/* By Slug: last-segment match only */
 const cleanMatch = (s: string) => toCanonicalSlug(s);
+
+export const getPostBySlug = (s: string) =>
+  getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
+export const getBookBySlug = (s: string) =>
+  getAllBooks().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
 
 export const getDownloadBySlug = (s: string) =>
   getAllDownloads().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-export const getPostBySlug = (s: string) =>
-  getPublishedPosts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-export const getBookBySlug = (s: string) =>
-  getAllBooks().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-export const getCanonBySlug = (s: string) =>
-  getAllCanons().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
-export const getShortBySlug = (s: string) =>
-  getPublishedShorts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
 export const getResourceBySlug = (s: string) =>
   getAllResources().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
 export const getEventBySlug = (s: string) =>
   getAllEvents().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
 export const getPrintBySlug = (s: string) =>
   getAllPrints().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
+
 export const getStrategyBySlug = (s: string) =>
   getAllStrategies().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
 
-/* -------------------------------------------------------------------------- */
-/* Build Guards - SINGLE IMPLEMENTATION                                       */
-/* -------------------------------------------------------------------------- */
+export const getCanonBySlug = (s: string) =>
+  getAllCanons().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
 
-const STRICT_ASSETS = process.env.CONTENT_STRICT_ASSETS === "1";
-
-function throwIfStrict(message: string) {
-  if (STRICT_ASSETS) throw new Error(message);
-  console.warn(message);
-}
-
-export function assertContentlayerHasDocs(where: string) {
-  if (getAllContentlayerDocs().length === 0) {
-    throw new Error(`[Critical Build Error] No Contentlayer documents found at ${where}`);
-  }
-}
-
-export function assertPublicAssetsExistForAllDocs(docs: ContentDoc[]) {
-  if (!isServer) return;
-
-  const missing: string[] = [];
-
-  for (const doc of docs) {
-    const kind = getDocKind(doc);
-    const slug = normalizeSlug(doc) || "(no-slug)";
-    const label = `${kind}/${slug}`;
-
-    const img = resolveDocCoverImage(doc);
-    if (img.startsWith("/assets/") && !publicFileExists(img)) {
-      missing.push(`${label} coverImage -> ${img}`);
-    }
-
-    const dl = resolveDocDownloadUrl(doc);
-    if (dl && dl.startsWith("/assets/") && !publicFileExists(dl)) {
-      missing.push(`${label} downloadFile -> ${dl}`);
-    }
-  }
-
-  if (missing.length) {
-    throwIfStrict(`[Assets] Missing public assets:\n${missing.join("\n")}`);
-  }
-}
-
-export function assertDownloadFilesExist(): void {
-  if (!isServer) return;
-
-  const downloads = getAllDownloads();
-  const missing: string[] = [];
-
-  for (const doc of downloads) {
-    const slug = normalizeSlug(doc) || "(no-slug)";
-    const label = `download/${slug}`;
-
-    const dl = resolveDocDownloadUrl(doc);
-    if (dl && dl.startsWith("/assets/") && !publicFileExists(dl)) {
-      missing.push(`${label} downloadFile -> ${dl}`);
-    }
-
-    const img = resolveDocCoverImage(doc);
-    if (img.startsWith("/assets/") && !publicFileExists(img)) {
-      missing.push(`${label} coverImage -> ${img}`);
-    }
-  }
-
-  if (missing.length) {
-    throwIfStrict(`[Downloads] Missing files:\n${missing.join("\n")}`);
-  }
-}
-
-export const assertDownloadsExist = assertDownloadFilesExist;
+export const getShortBySlug = (s: string) =>
+  getPublishedShorts().find((d) => normalizeSlug(d) === cleanMatch(s)) ?? null;
 
 /* -------------------------------------------------------------------------- */
-/* Card Props Helper                                                          */
+/* Cards                                                                      */
 /* -------------------------------------------------------------------------- */
+
+function safeDateIso(input: unknown): string | null {
+  try {
+    const d = new Date(String(input));
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toISOString().split("T")[0] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export function getCardPropsForDocument(doc: ContentDoc): {
   slug: string;
@@ -516,72 +443,42 @@ export function getCardPropsForDocument(doc: ContentDoc): {
   excerpt: string | null;
   description: string | null;
   href: string;
-  coverImage: string | null;
+  coverImage: string;
   tags: string[];
   date: string | null;
   kind: DocKind;
   accessLevel: AccessLevel;
-  fileSize: string | null;
+  downloadHref: string | null;
+  readTime: string | null;
 } {
-  const kind = getDocKind(doc);
-  const slug = normalizeSlug(doc);
-  const access = getAccessLevel(doc);
-  
+  const title = cleanStr(doc?.title) || "Untitled";
+  const excerpt = cleanStr(doc?.excerpt) || null;
+  const description = cleanStr(doc?.description) || null;
+
   return {
-    slug,
-    title: cleanStr(doc?.title) || "Untitled",
-    excerpt: cleanStr(doc?.excerpt) || null,
-    description: cleanStr(doc?.description) || null,
+    slug: normalizeSlug(doc),
+    title,
+    excerpt,
+    description,
     href: getDocHref(doc),
     coverImage: resolveDocCoverImage(doc),
-    tags: Array.isArray(doc?.tags) ? doc.tags.map(cleanStr) : [],
-    date: doc?.date ? safeDate(doc.date) : null,
-    kind,
-    accessLevel: access,
-    fileSize: kind === "download" ? resolveDocDownloadSizeLabel(doc) : null,
+    tags: Array.isArray(doc?.tags)
+      ? (doc.tags as any[]).map((t) => cleanStr(t)).filter(Boolean)
+      : [],
+    date: doc?.date ? safeDateIso(doc.date) : null,
+    kind: getDocKind(doc),
+    accessLevel: getAccessLevel(doc),
+    downloadHref: getDocKind(doc) === "download" ? resolveDocDownloadHref(doc) : null,
+    readTime: resolveDocReadTime(doc),
   };
 }
 
-export type ContentlayerCardProps = ReturnType<typeof getCardPropsForDocument>;
+/* -------------------------------------------------------------------------- */
+/* Critical build guard                                                       */
+/* -------------------------------------------------------------------------- */
 
-function safeDate(input: unknown): string {
-  if (!input) return "";
-  try {
-    const date = new Date(String(input));
-    return date.toISOString().split("T")[0] || "";
-  } catch {
-    return "";
+export function assertContentlayerHasDocs(where: string) {
+  if (getAllContentlayerDocs().length === 0) {
+    throw new Error(`[Critical Build Error] No Contentlayer documents found at ${where}`);
   }
 }
-
-export const getDocumentBySlug = (slug: string): ContentDoc | null => {
-  const slugClean = toCanonicalSlug(slug);
-  const collections = [
-    { getter: getPostBySlug, name: "post" },
-    { getter: getBookBySlug, name: "book" },
-    { getter: getDownloadBySlug, name: "download" },
-    { getter: getShortBySlug, name: "short" },
-    { getter: getCanonBySlug, name: "canon" },
-    { getter: getResourceBySlug, name: "resource" },
-    { getter: getEventBySlug, name: "event" },
-    { getter: getPrintBySlug, name: "print" },
-    { getter: getStrategyBySlug, name: "strategy" },
-  ];
-  
-  for (const { getter } of collections) {
-    const doc = getter(slugClean);
-    if (doc) return doc;
-  }
-  return null;
-};
-
-export const getFeaturedDocuments = (limit?: number): ContentDoc[] => {
-  const allDocs = getPublishedDocuments();
-  const featured = allDocs.filter(doc => doc?.featured === true);
-  const sorted = featured.sort((a, b) => {
-    const dateA = a.date ? new Date(a.date).getTime() : 0;
-    const dateB = b.date ? new Date(b.date).getTime() : 0;
-    return dateB - dateA;
-  });
-  return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
-};

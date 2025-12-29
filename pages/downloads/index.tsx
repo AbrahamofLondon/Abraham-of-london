@@ -4,17 +4,24 @@ import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import DownloadCard from "@/components/downloads/DownloadCard";
+
 import {
   assertContentlayerHasDocs,
-  assertDownloadFilesExist,
   getAllDownloads,
   normalizeSlug,
   resolveDocCoverImage,
   resolveDocDownloadHref,
   resolveDocDownloadUrl,
-  resolveDocDownloadSizeLabel,
   getAccessLevel,
 } from "@/lib/contentlayer-helper";
+
+// ✅ Node-only checks/sizing belong here:
+import {
+  assertPublicAssetsForDownloadsAndResources,
+  getDownloadSizeLabel,
+} from "@/lib/server/content";
+
+type AccessLevel = "public" | "inner-circle" | "private";
 
 type NormalisedDownload = {
   slug: string;
@@ -23,7 +30,7 @@ type NormalisedDownload = {
   coverImage: string | null;
   fileHref: string | null;
   fileUrl: string | null;
-  accessLevel: "public" | "inner-circle" | "inner-circle-plus" | "inner-circle-elite" | "private";
+  accessLevel: AccessLevel;
   category: string | null;
   size: string | null;
   tags: string[];
@@ -34,57 +41,58 @@ type NormalisedDownload = {
 export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }> = async () => {
   assertContentlayerHasDocs("pages/downloads/index.tsx getStaticProps");
 
+  // ✅ One call validates downloads + resources covers/files under /assets/* (strict optional via env)
+  assertPublicAssetsForDownloadsAndResources();
+
   const all = getAllDownloads();
 
-  // Build-time validation for known public download directory.
-  // This will fail the build if any /assets/downloads/... files are missing.
-  assertDownloadFilesExist();
+  const downloads: NormalisedDownload[] = all
+    .filter((d: any) => d?.draft !== true)
+    .map((d: any) => {
+      const slug = normalizeSlug(d);
+      const title = d.title ?? "Untitled download";
 
-  const downloads: NormalisedDownload[] = all.map((d: any) => {
-    const slug = normalizeSlug(d);
-    const title = d.title ?? "Untitled download";
+      const excerpt =
+        (typeof d.excerpt === "string" && d.excerpt.trim() ? d.excerpt : null) ??
+        (typeof d.description === "string" && d.description.trim() ? d.description : null);
 
-    const excerpt =
-      (typeof d.excerpt === "string" && d.excerpt.trim().length ? d.excerpt : null) ??
-      (typeof d.description === "string" && d.description.trim().length ? d.description : null);
+      const coverImage = resolveDocCoverImage(d) || null;
 
-    const coverImage = resolveDocCoverImage(d) || null;
+      const fileUrl = resolveDocDownloadUrl(d);
+      const fileHref = resolveDocDownloadHref(d);
 
-    const fileUrl = resolveDocDownloadUrl(d);
-    const fileHref = resolveDocDownloadHref(d);
+      const category =
+        (typeof d.category === "string" && d.category.trim() ? d.category : null) ??
+        (typeof d.type === "string" && d.type.trim() ? d.type : null);
 
-    const category =
-      (typeof d.category === "string" && d.category.trim().length ? d.category : null) ??
-      (typeof d.type === "string" && d.type.trim().length ? d.type : null);
+      const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
+      const date = typeof d.date === "string" ? d.date : null;
+      const featured = Boolean(d.featured);
 
-    const size = resolveDocDownloadSizeLabel(d);
+      const accessLevel = getAccessLevel(d) as AccessLevel;
 
-    const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
-    const date = typeof d.date === "string" ? d.date : null;
-    const featured = Boolean(d.featured);
+      // ✅ server-only size label (uses filesystem)
+      const size = getDownloadSizeLabel(d);
 
-    const accessLevel = getAccessLevel(d);
-
-    return {
-      slug,
-      title,
-      excerpt: excerpt ?? null,
-      coverImage,
-      fileHref: fileHref ?? null,
-      fileUrl: fileUrl ?? null,
-      accessLevel,
-      category,
-      size,
-      tags,
-      date,
-      featured,
-    };
-  });
+      return {
+        slug,
+        title,
+        excerpt,
+        coverImage,
+        fileHref: fileHref ?? null,
+        fileUrl: fileUrl ?? null,
+        accessLevel,
+        category,
+        size,
+        tags,
+        date,
+        featured,
+      };
+    });
 
   downloads.sort((a, b) => {
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
-
     const da = a.date ? new Date(a.date).getTime() : 0;
     const db = b.date ? new Date(b.date).getTime() : 0;
     return db - da;
@@ -133,19 +141,19 @@ export default function DownloadsIndexPage(
                 <h2 className="mb-3 text-xl font-semibold text-slate-900">
                   Access Premium Resources
                 </h2>
-                <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                <p className="mx-auto mb-6 max-w-md text-slate-600">
                   Resources are being prepared for publication.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col justify-center gap-4 sm:flex-row">
                   <Link
                     href="/content"
-                    className="rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-105"
+                    className="rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white transition-all hover:scale-105 hover:bg-slate-800"
                   >
                     Explore Insights
                   </Link>
                   <Link
                     href="/books"
-                    className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-all hover:border-slate-400 hover:scale-105"
+                    className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-all hover:scale-105 hover:border-slate-400"
                   >
                     Browse Books
                   </Link>
@@ -166,6 +174,7 @@ export default function DownloadsIndexPage(
                       </p>
                     </div>
                   </div>
+
                   <div className="grid gap-8 lg:grid-cols-2">
                     {featuredDownloads.map((dl) => (
                       <DownloadCard
@@ -177,7 +186,7 @@ export default function DownloadsIndexPage(
                         fileHref={dl.fileHref}
                         category={dl.category}
                         size={dl.size ?? undefined}
-                        featured={true}
+                        featured
                       />
                     ))}
                   </div>
@@ -192,6 +201,7 @@ export default function DownloadsIndexPage(
                     </h2>
                     <p className="mt-2 text-slate-600">All strategic tools and resources</p>
                   </div>
+
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {regularDownloads.map((dl) => (
                       <DownloadCard

@@ -1,3 +1,4 @@
+// pages/resources/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -26,9 +27,7 @@ type ResourceMeta = {
   href: string;
 };
 
-type Props = {
-  resources: ResourceMeta[];
-};
+type Props = { resources: ResourceMeta[] };
 
 const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
   const pageTitle = "The Resource Vault | Abraham of London";
@@ -55,16 +54,16 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-400 sm:text-lg">
-              Curated frameworks and structural primers. These are not general insights, 
+              Curated frameworks and structural primers. These are not general insights,
               but architectural tools for those building legacies.
             </p>
 
-            <div className="mt-8 flex justify-center items-center gap-3">
-               <div className="h-px w-8 bg-gold/30" />
-               <p className="text-[11px] font-mono uppercase tracking-widest text-gold/60">
-                 {resources.length} Compiled Volumes
-               </p>
-               <div className="h-px w-8 bg-gold/30" />
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <div className="h-px w-8 bg-gold/30" />
+              <p className="text-[11px] font-mono uppercase tracking-widest text-gold/60">
+                {resources.length} Compiled Volumes
+              </p>
+              <div className="h-px w-8 bg-gold/30" />
             </div>
           </header>
 
@@ -87,47 +86,47 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
                         <div className="absolute inset-0 bg-black/20 transition-opacity group-hover:opacity-0" />
                       </div>
                     ) : (
-                      <div className="aspect-[16/10] w-full bg-zinc-900/50 flex items-center justify-center border-b border-white/5">
-                         <span className="font-serif text-gold/20 text-4xl italic">Vault</span>
+                      <div className="flex aspect-[16/10] w-full items-center justify-center border-b border-white/5 bg-zinc-900/50">
+                        <span className="font-serif text-4xl italic text-gold/20">Vault</span>
                       </div>
                     )}
 
                     <div className="flex flex-1 flex-col p-8">
                       <div className="mb-4">
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gold/80 bg-gold/10 px-2 py-0.5 rounded">
+                        <div className="mb-3 flex items-center gap-3">
+                          <span className="rounded bg-gold/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-gold/80">
                             Framework
                           </span>
                           {res.readTime && (
-                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-tighter">
+                            <span className="text-[10px] font-mono uppercase tracking-tighter text-gray-500">
                               {res.readTime}
                             </span>
                           )}
                         </div>
 
-                        <h2 className="font-serif text-2xl font-semibold text-cream group-hover:text-gold transition-colors duration-300">
+                        <h2 className="font-serif text-2xl font-semibold text-cream transition-colors duration-300 group-hover:text-gold">
                           {res.title}
                         </h2>
                       </div>
 
                       {res.subtitle && (
-                        <p className="mb-4 text-sm font-medium text-gray-400 italic">
+                        <p className="mb-4 text-sm font-medium italic text-gray-400">
                           {res.subtitle}
                         </p>
                       )}
-                      
+
                       {res.description && (
-                        <p className="mb-6 text-sm leading-relaxed text-gray-500 line-clamp-2">
+                        <p className="mb-6 line-clamp-2 text-sm leading-relaxed text-gray-500">
                           {res.description}
                         </p>
                       )}
 
-                      <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                      <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-6">
                         <div className="flex flex-col gap-0.5">
                           {res.author && (
-                             <span className="text-[10px] text-gray-400 uppercase tracking-wide">
-                               By {res.author}
-                             </span>
+                            <span className="text-[10px] uppercase tracking-wide text-gray-400">
+                              By {res.author}
+                            </span>
                           )}
                           {res.date && (
                             <time className="text-[10px] font-mono text-gray-600">
@@ -153,7 +152,9 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
             </div>
           ) : (
             <div className="py-32 text-center">
-              <h3 className="font-serif text-2xl text-cream opacity-50 italic">Resources are being initialized...</h3>
+              <h3 className="font-serif text-2xl italic text-cream opacity-50">
+                Resources are being initialized...
+              </h3>
             </div>
           )}
         </section>
@@ -163,7 +164,6 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  // Build safety check
   assertContentlayerHasDocs("pages/resources/index.tsx");
 
   const docs = getAllResources();
@@ -175,22 +175,15 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       description: r.description ?? r.excerpt ?? null,
       subtitle: r.subtitle ?? null,
       date: r.date ? String(r.date) : null,
-      readTime: r.readTime ?? r.readtime ?? null,
+      readTime: r.normalizedReadTime ?? r.readTime ?? r.readtime ?? null,
       image: resolveDocCoverImage(r),
       tags: Array.isArray(r.tags) ? r.tags : null,
       author: r.author ?? null,
-      href: getDocHref(r),
+      href: getDocHref(r), // uses doc.url if present
     }))
-    .sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0;
-      const db = b.date ? new Date(b.date).getTime() : 0;
-      return db - da;
-    });
+    .sort((a, b) => (b.date ? new Date(b.date).getTime() : 0) - (a.date ? new Date(a.date).getTime() : 0));
 
-  return { 
-    props: { resources }, 
-    revalidate: 1800 
-  };
+  return { props: { resources }, revalidate: 1800 };
 };
 
 export default ResourcesIndexPage;

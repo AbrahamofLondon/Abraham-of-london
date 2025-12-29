@@ -33,9 +33,9 @@ type PageProps = {
 };
 
 const tierIcon: Record<FrameworkTier, React.ReactNode> = {
-  Board: <Shield className="h-4 w-4" />,
-  Founder: <Zap className="h-4 w-4" />,
-  Household: <Users className="h-4 w-4" />,
+  Board: <Shield className="h-4 w-4" aria-hidden="true" />,
+  Founder: <Zap className="h-4 w-4" aria-hidden="true" />,
+  Household: <Users className="h-4 w-4" aria-hidden="true" />,
 };
 
 const accentColor: Record<Framework["accent"], string> = {
@@ -57,19 +57,13 @@ const accentBg: Record<Framework["accent"], string> = {
 const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false }) => {
   const router = useRouter();
 
-  // Client-side gating: show prelude immediately, then reveal full dossier if cookie exists.
-  const [access, setAccess] = useState<AccessState>(() => {
-    if (typeof window === "undefined") {
-      return {
-        hasAccess: false,
-        ok: false,
-        reason: "missing",
-        token: null,
-        checkedAt: new Date(),
-      };
-    }
-    return getInnerCircleAccess();
-  });
+  const [access, setAccess] = useState<AccessState>(() => ({
+    hasAccess: false,
+    ok: false,
+    reason: "missing",
+    token: null,
+    checkedAt: null,
+  }));
 
   useEffect(() => {
     setAccess(getInnerCircleAccess());
@@ -85,16 +79,6 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
     }
     router.push("/inner-circle?returnTo=" + encodeURIComponent(router.asPath));
   };
-
-  if (router.isFallback) {
-    return (
-      <Layout title="Loading framework...">
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-lg text-gray-400">Loading strategic framework...</div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout title={`${framework.title} | Strategic Framework`} description={framework.oneLiner}>
@@ -154,17 +138,17 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                   <h3 className="mb-4 text-lg font-semibold text-white">At a glance</h3>
                   <ul className="space-y-3">
                     <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-400" />
+                      <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-400" aria-hidden="true" />
                       <span className="text-sm text-gray-300">Tier: {framework.tier.join(", ")}</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <TrendingUp className="h-5 w-5 flex-shrink-0 text-blue-400" />
+                      <TrendingUp className="h-5 w-5 flex-shrink-0 text-blue-400" aria-hidden="true" />
                       <span className="text-sm text-gray-300">
                         {framework.executiveSummary.length} core principles
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <Calendar className="h-5 w-5 flex-shrink-0 text-amber-400" />
+                      <Calendar className="h-5 w-5 flex-shrink-0 text-amber-400" aria-hidden="true" />
                       <span className="text-sm text-gray-300">
                         {framework.applicationPlaybook.length}-step playbook
                       </span>
@@ -180,7 +164,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                       className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
                       download
                     >
-                      <BookOpen className="h-4 w-4" />
+                      <BookOpen className="h-4 w-4" aria-hidden="true" />
                       Download template
                     </a>
                   </div>
@@ -195,9 +179,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
               <h2 className="mb-4 font-serif text-3xl font-semibold text-white">Executive prelude</h2>
-              <p className="text-gray-400">
-                Public overview—full dossier available to Inner Circle members.
-              </p>
+              <p className="text-gray-400">Public overview—full dossier available to Inner Circle members.</p>
             </div>
 
             <div className="grid gap-8 lg:grid-cols-2">
@@ -230,7 +212,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                       transition={{ delay: idx * 0.1 }}
                       className="flex items-start gap-3"
                     >
-                      <AlertTriangle className="h-5 w-5 flex-shrink-0 text-amber-500" />
+                      <AlertTriangle className="h-5 w-5 flex-shrink-0 text-amber-500" aria-hidden="true" />
                       <span className="text-gray-300">{item}</span>
                     </motion.li>
                   ))}
@@ -276,7 +258,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                   onClick={() => scrollToLocked("full-dossier")}
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
                 >
-                  <Lock className="h-4 w-4" />
+                  <Lock className="h-4 w-4" aria-hidden="true" />
                   Unlock Inner Circle
                 </button>
               )}
@@ -382,20 +364,20 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                         key={idx}
                         className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
                       >
-                        <AlertTriangle className="h-5 w-5 flex-shrink-0 text-rose-500" />
+                        <AlertTriangle className="h-5 w-5 flex-shrink-0 text-rose-500" aria-hidden="true" />
                         <p className="text-gray-300">{mode}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* What to Do Next */}
+                {/* Next */}
                 <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent p-8">
                   <h3 className="mb-4 text-2xl font-semibold text-white">What to do next</h3>
                   <ul className="space-y-4">
                     {framework.whatToDoNext.map((item, idx) => (
                       <li key={idx} className="flex items-start gap-3">
-                        <ArrowRight className="h-5 w-5 flex-shrink-0 text-amber-500" />
+                        <ArrowRight className="h-5 w-5 flex-shrink-0 text-amber-500" aria-hidden="true" />
                         <span className="text-gray-300">{item}</span>
                       </li>
                     ))}
@@ -404,7 +386,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-12 text-center">
-                <Lock className="mx-auto mb-4 h-12 w-12 text-gray-500" />
+                <Lock className="mx-auto mb-4 h-12 w-12 text-gray-500" aria-hidden="true" />
                 <h3 className="mb-2 text-xl font-semibold text-white">Full dossier locked</h3>
                 <p className="mb-6 text-gray-400">
                   Join the Inner Circle to access the complete dossier: operating logic, playbook, metrics, board questions.
@@ -413,7 +395,7 @@ const FrameworkDetailPage: NextPage<PageProps> = ({ framework, isPreview = false
                   href="/inner-circle"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 text-sm font-semibold text-black transition-all hover:scale-105"
                 >
-                  Join Inner Circle <ArrowRight className="h-4 w-4" />
+                  Join Inner Circle <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
             )}
@@ -428,20 +410,15 @@ export default FrameworkDetailPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = getAllFrameworkSlugs();
-  return {
-    paths: slugs.map((slug) => ({ params: { slug } })),
-    fallback: false,
-  };
+  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
-  const slug = params?.slug as string;
-  const framework = getFrameworkBySlug(slug);
+  const slug = String(params?.slug ?? "").trim();
+  if (!slug) return { notFound: true };
 
+  const framework = getFrameworkBySlug(slug);
   if (!framework) return { notFound: true };
 
-  return {
-    props: { framework },
-    revalidate: 3600,
-  };
+  return { props: { framework }, revalidate: 3600 };
 };
