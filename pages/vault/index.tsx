@@ -1,3 +1,5 @@
+// pages/vault/index.tsx
+import * as React from "react";
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -49,14 +51,14 @@ export const getStaticProps: GetStaticProps<{ items: VaultItem[] }> = async () =
   const items: VaultItem[] = all
     .map((d: any) => {
       const slug = normalizeSlug(d);
-
       if (!VAULT_SLUG_ALLOWLIST.has(slug)) return null;
 
       const title = d.title ?? "Untitled artifact";
 
       const excerpt =
         (typeof d.excerpt === "string" && d.excerpt.trim().length ? d.excerpt : null) ??
-        (typeof d.description === "string" && d.description.trim().length ? d.description : null);
+        (typeof d.description === "string" && d.description.trim().length ? d.description : null) ??
+        null;
 
       const coverImage = resolveDocCoverImage(d) || null;
       const fileUrl = resolveDocDownloadUrl(d);
@@ -68,7 +70,11 @@ export const getStaticProps: GetStaticProps<{ items: VaultItem[] }> = async () =
         "Vault";
 
       const size = resolveDocDownloadSizeLabel(d);
-      const tags = Array.isArray(d.tags) ? d.tags.filter((t: any) => typeof t === "string") : [];
+
+      const tags = Array.isArray(d.tags)
+        ? d.tags.filter((t: any) => typeof t === "string")
+        : [];
+
       const date = typeof d.date === "string" ? d.date : null;
       const featured = Boolean(d.featured);
       const accessLevel = getAccessLevel(d);
@@ -102,7 +108,9 @@ export const getStaticProps: GetStaticProps<{ items: VaultItem[] }> = async () =
   return { props: { items }, revalidate: 3600 };
 };
 
-export default function VaultPage(props: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function VaultPage(
+  props: InferGetStaticPropsType<typeof getStaticProps>
+) {
   const title = "Vault";
   const description =
     "Board-grade artifacts: fillable PDFs, audit-ready templates, and cadence packs — engineered for leaders who execute.";
@@ -123,12 +131,15 @@ export default function VaultPage(props: InferGetStaticPropsType<typeof getStati
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-gold/60">
               The Vault
             </p>
+
             <h1 className="mt-4 font-serif text-4xl font-semibold text-cream sm:text-5xl">
               Real artifacts. No fluff.
             </h1>
+
             <p className="mt-5 max-w-2xl text-base leading-7 text-gray-300">
-              If it doesn’t fill clean, print clean, and stand up in a boardroom,
-              it doesn’t ship. This Vault is operational — not inspirational.
+              If it doesn&apos;t fill clean, print clean, and stand up in a
+              boardroom, it doesn&apos;t ship. This Vault is operational — not
+              inspirational.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -138,9 +149,10 @@ export default function VaultPage(props: InferGetStaticPropsType<typeof getStati
               >
                 Browse all downloads
               </Link>
+
               <Link
                 href="/inner-circle"
-                className="inline-flex items-center justify-center rounded-full border border-gold/30 bg-transparent px-7 py-3 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 transition-all"
+                className="inline-flex items-center justify-center rounded-full border border-gold/30 bg-transparent px-7 py-3 text-xs font-bold uppercase tracking-widest text-gold transition-all hover:bg-gold/10"
               >
                 Unlock Inner Circle
               </Link>
@@ -157,6 +169,7 @@ export default function VaultPage(props: InferGetStaticPropsType<typeof getStati
                   <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-300">
                     {it.category ?? "Vault"}
                   </span>
+
                   <span className="text-[10px] font-bold uppercase tracking-widest text-gold/70">
                     {it.accessLevel === "public" ? "Public" : "Gated"}
                   </span>
@@ -165,6 +178,7 @@ export default function VaultPage(props: InferGetStaticPropsType<typeof getStati
                 <h2 className="font-serif text-xl font-semibold text-cream">
                   {it.title}
                 </h2>
+
                 {it.excerpt ? (
                   <p className="mt-3 text-sm leading-6 text-gray-300">
                     {it.excerpt}
@@ -204,7 +218,10 @@ export default function VaultPage(props: InferGetStaticPropsType<typeof getStati
             <ul className="mt-4 space-y-2 text-sm text-gray-200">
               <li>• PDFs are fillable (not image-only).</li>
               <li>• Prints are clean (no blurry raster text).</li>
-              <li>• Templates are audit-friendly (versionable, shareable, reusable).</li>
+              <li>
+                • Templates are audit-friendly (versionable, shareable,
+                reusable).
+              </li>
             </ul>
           </section>
         </div>

@@ -37,7 +37,6 @@ import {
 
 import {
   getPublishedShorts,
-  getRecentShorts,
   getDocHref,
   normalizeSlug,
 } from "@/lib/contentlayer-helper";
@@ -80,6 +79,7 @@ type LooseShort = {
   draft?: boolean;
   published?: boolean;
   _raw?: { sourceFileName?: string; flattenedPath?: string };
+  date?: string | Date;
 };
 
 type HomePageProps = {
@@ -172,7 +172,7 @@ const FirmIntro: React.FC = () => (
           </p>
 
           <h2 className="mt-3 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-            A builder’s platform for people tired of performance culture — and ready for structure.
+            A builder&apos;s platform for people tired of performance culture — and ready for structure.
           </h2>
 
           <div className="mt-6 space-y-4 text-base leading-relaxed text-slate-700 dark:text-gray-300">
@@ -182,11 +182,11 @@ const FirmIntro: React.FC = () => (
               at home, in business, and in public life.
             </p>
             <p>
-              The posture is simple: <strong>legacy doesn’t happen by accident</strong>. You architect it.
+              The posture is simple: <strong>legacy doesn&apos;t happen by accident</strong>. You architect it.
               We operate like a proper firm: diagnostics first, then design, then execution governance.
             </p>
             <p className="text-sm text-slate-500 dark:text-gray-400">
-              If you want trend-chasing, you’re on the wrong site. If you want frameworks that survive pressure — welcome.
+              If you want trend-chasing, you&apos;re on the wrong site. If you want frameworks that survive pressure — welcome.
             </p>
           </div>
 
@@ -384,7 +384,7 @@ const Capabilities: React.FC = () => {
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-300">
               Clear problem frames, disciplined analysis, and governance-grade deliverables.
-              We don’t “inspire” teams — we equip them.
+              We don&apos;t &quot;inspire&quot; teams — we equip them.
             </p>
           </div>
 
@@ -452,7 +452,7 @@ const DeliveryModel: React.FC = () => (
             A disciplined delivery model — designed for repeatability
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
-            The point isn’t “a strategy.” The point is an operating system your people can run without you.
+            The point isn&apos;t &quot;a strategy.&quot; The point is an operating system your people can run without you.
           </p>
         </div>
 
@@ -859,7 +859,7 @@ const StrategicSessions: React.FC = () => (
 const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
   const siteTitle = "Abraham of London";
   const siteTagline =
-    "A builder’s advisory platform — Christian conviction, strategic discipline, and historical realism turned into systems that survive pressure.";
+    "A builder&apos;s advisory platform — Christian conviction, strategic discipline, and historical realism turned into systems that survive pressure.";
 
   return (
     <Layout
@@ -895,12 +895,12 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
                 <h1 className="mb-5 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
                   Abraham of London
                   <span className="mt-4 block text-xl font-normal text-amber-100 sm:text-2xl lg:text-3xl">
-                    Legacy doesn’t happen by accident. You architect it.
+                    Legacy doesn&apos;t happen by accident. You architect it.
                   </span>
                 </h1>
 
                 <p className="mb-8 text-base leading-relaxed text-gray-300 sm:text-lg">
-                  A builder’s platform for people tired of performance culture — and ready for structure.
+                  A builder&apos;s platform for people tired of performance culture — and ready for structure.
                   We fuse Christian conviction, strategic discipline, and historical realism into systems that work:
                   at home, in business, and in public life.
                 </p>
@@ -1085,13 +1085,17 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
   const getFeaturedShortsSafely = (): LooseShort[] => {
     try {
-      const recent = getRecentShorts(3) as unknown as LooseShort[];
-      const cleanedRecent = Array.isArray(recent) ? recent : [];
-      if (cleanedRecent.length > 0) return cleanedRecent;
-
       const all = getPublishedShorts() as unknown as LooseShort[];
       const cleanedAll = Array.isArray(all) ? all : [];
-      return cleanedAll.slice(0, 3);
+      
+      // Get the 3 most recent shorts by date
+      return cleanedAll
+        .sort((a, b) => {
+          const dateA = a.date ? new Date(a.date).getTime() : 0;
+          const dateB = b.date ? new Date(b.date).getTime() : 0;
+          return dateB - dateA;
+        })
+        .slice(0, 3);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[home] Error loading shorts:", err);

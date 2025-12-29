@@ -1,4 +1,5 @@
 // pages/shorts/index.tsx
+
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Head from "next/head";
@@ -867,7 +868,20 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
 // ✅ /shorts uses getStaticProps ONLY - no getStaticPaths here.
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
-  const shorts = getPublishedShorts();
+  // Transform the ContentDoc[] to ShortDoc[]
+  const allShorts = getPublishedShorts();
+  
+  const shorts: ShortDoc[] = allShorts.map((short: any) => ({
+    _id: short._id || short.slug || short.title,
+    slug: short.slug,
+    title: short.title,
+    excerpt: short.excerpt,
+    date: short.date,
+    readTime: short.readTime,
+    tags: short.tags,
+    theme: short.theme,
+  }));
+  
   return { props: { shorts }, revalidate: 3600 };
 };
 

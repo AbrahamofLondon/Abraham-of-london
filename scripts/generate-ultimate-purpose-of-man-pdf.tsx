@@ -4,7 +4,7 @@ import path from "path";
 import React from "react";
 import { renderToFile } from "@react-pdf/renderer";
 
-import UltimatePurposeOfManDocument from "../lib/pdf/ultimate-purpose-of-man-pad";
+import UltimatePurposeOfManDocument from "../lib/pdf/ultimate-purpose-of-man-pdp.tsx";
 
 async function ensureDir(p: string) {
   await fs.mkdir(p, { recursive: true });

@@ -11,22 +11,14 @@ import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 import {
   getAllContentlayerDocs,
   getDocHref,
-  isDraft,
+  isDraftContent,
   normalizeSlug,
+  toUiDoc,
+  type UiDoc, // Add this type import
 } from "@/lib/contentlayer-helper";
 
-type Props = { 
-  doc: {
-    title: string;
-    excerpt: string | null;
-    description: string | null;
-    coverImage: string | null;
-    category: string | null;
-    date: string | null;
-    readTime: string | null;
-    tags: string[] | null;
-    slug: string;
-  };
+type Props = {
+  doc: UiDoc; // Use the imported type
   source: MDXRemoteSerializeResult;
   canonicalPath: string;
 };
@@ -45,11 +37,9 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths = getAllContentlayerDocs()
-    .filter((d) => !isDraft(d))
+    .filter((d) => !isDraftContent(d))
     .filter((d) => getDocHref(d).startsWith("/content/"))
-    .map((d) => ({
-      params: { slug: normalizeSlug(d) },
-    }))
+    .map((d) => ({ params: { slug: normalizeSlug(d) } }))
     .filter((p) => Boolean(p.params.slug));
 
   console.log(`📄 Content: Generated ${paths.length} paths`);
@@ -58,13 +48,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
-  
-  if (!slug) {
-    return { notFound: true };
-  }
+  if (!slug) return { notFound: true };
 
   const rawDoc = getAllContentlayerDocs()
-    .filter((d) => !isDraft(d))
+    .filter((d) => !isDraftContent(d))
     .find((d) => getDocHref(d) === `/content/${slug}`);
 
   if (!rawDoc) {
@@ -72,20 +59,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
-  console.log(`✅ Found content: ${rawDoc.title} (slug: ${slug})`);
-
-  // Create serializable props
-  const doc = {
-    title: rawDoc.title || "Untitled",
-    excerpt: rawDoc.excerpt || null,
-    description: rawDoc.description || null,
-    coverImage: rawDoc.coverImage || null,
-    category: rawDoc.category || null,
-    date: rawDoc.date || null,
-    readTime: rawDoc.readTime || null,
-    tags: rawDoc.tags || null,
-    slug: slug,
-  };
+  const doc = toUiDoc(rawDoc);
 
   // Serialize MDX
   const raw = String(rawDoc?.body?.raw ?? "");
@@ -95,10 +69,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     source = await serialize(raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [
-          rehypeSlug,
-          [rehypeAutolinkHeadings, { behavior: "wrap" }],
-        ],
+        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
       },
     });
   } catch (err) {

@@ -1,6 +1,12 @@
 // lib/shorts.ts
-import { allShorts } from "@/lib/contentlayer";
-import { normalizeSlug, isPublished } from "./contentlayer-helper";
+
+import {
+  type ContentDoc,
+  getPublishedDocumentsByType,
+  normalizeSlug,
+  resolveDocReadTime,
+  coerceShortTheme,
+} from "./contentlayer-helper";
 
 /**
  * Unified type for Shorts Indexing.
@@ -19,36 +25,83 @@ export type ShortIndexItem = {
   published?: boolean;
 };
 
+/** Safe ISO date (or null) */
+function toIsoDate(input: unknown): string | null {
+  if (!input) return null;
+  try {
+    const d = input instanceof Date ? input : new Date(String(input));
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+/** Convert unknown tags to string[] */
+function toTags(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((x) => String(x ?? "").trim())
+    .filter(Boolean);
+}
+
 /**
- * Robust getter for public-facing Shorts.
- * 1. Safely extracts the array.
- * 2. Uses the CENTRALIZED normalizeSlug to prevent dead links.
- * 3. Filters by your custom publication rules.
+ * Public-facing Shorts:
+ * - Sourced via helper (single source of truth)
+ * - Slug normalized via helper
+ * - Draft filtering handled centrally
  */
 export function getPublicShorts(): ShortIndexItem[] {
-  // Defensive check for empty generated content
-  const docs = allShorts ?? [];
+  // ✅ single source of truth: helper decides what is "published"
+  const docs = getPublishedDocumentsByType("short");
 
-  const items: ShortIndexItem[] = docs.map((d: any) => ({
-    _id: d._id,
-    // ✅ SYNCED: Uses the robust helper logic to ensure URLs match routes
-    slug: normalizeSlug(d),
-    title: d.title ?? "Untitled",
-    excerpt: d.excerpt ?? d.description ?? null,
-    date: d.date ? String(d.date) : null,
-    readTime: d.readTime ?? d.readtime ?? "2 min",
-    tags: Array.isArray(d.tags) ? d.tags : [],
-    theme: d.theme ?? "General",
-    draft: Boolean(d.draft),
-    published: typeof d.published === "boolean" ? d.published : true,
-  }));
+  const items: ShortIndexItem[] = docs.map((d: ContentDoc) => {
+    const slug = normalizeSlug(d);
 
-  // Application of "Public Rule": (Not a draft) AND (Not explicitly un-published)
+    // Title/excerpt are optional in ContentDoc, normalize hard
+    const title = String(d?.title ?? "").trim() || "Untitled";
+    const excerpt =
+      (String(d?.excerpt ?? "").trim() ||
+        String(d?.description ?? "").trim() ||
+        null) ?? null;
+
+    // Date: normalized ISO or null
+    const date = toIsoDate(d?.date);
+
+    // Read time: use helper normalization
+    const readTime = resolveDocReadTime(d);
+
+    // Tags: safe string array
+    const tags = toTags(d?.tags);
+
+    // Theme: best-effort inference (helper-driven)
+    const theme = coerceShortTheme(d, tags);
+
+    // These are primarily informational; helper already filtered drafts out.
+    const draft = Boolean((d as any)?.draft);
+    const published =
+      typeof (d as any)?.published === "boolean" ? (d as any).published : true;
+
+    return {
+      _id: String((d as any)?._id ?? slug ?? ""),
+      slug,
+      title,
+      excerpt,
+      date,
+      readTime,
+      tags,
+      theme,
+      draft,
+      published,
+    };
+  });
+
+  // Secondary guard (in case somebody set `published: false` but not `draft`)
   return items
     .filter((s) => !s.draft && s.published !== false)
     .sort((a, b) => {
       const aTime = a.date ? new Date(a.date).getTime() : 0;
       const bTime = b.date ? new Date(b.date).getTime() : 0;
-      return bTime - aTime; // Newest first
+      return bTime - aTime;
     });
 }

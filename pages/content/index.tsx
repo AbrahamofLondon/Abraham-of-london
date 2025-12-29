@@ -30,9 +30,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
   const items: Item[] = docs
     .map((d) => ({
-      key: d._id ?? `${getDocKind(d)}:${normalizeSlug(d)}`,
+      // Ensure key is always a string
+      key: String(d._id ?? `${getDocKind(d)}:${normalizeSlug(d)}`),
       kind: getDocKind(d),
-      title: d.title ?? "Untitled Framework",
+      title: String(d.title ?? "Untitled Framework"),
       href: getDocHref(d),
       excerpt: d.excerpt ?? d.description ?? null,
       date: d.date ? String(d.date) : null,
