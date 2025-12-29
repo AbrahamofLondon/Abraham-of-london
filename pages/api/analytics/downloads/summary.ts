@@ -6,17 +6,9 @@ import { cacheResponse, getCacheKey } from "@/lib/server/cache";
 import { logAuditEvent } from "@/lib/server/audit";
 import { Prisma } from "@prisma/client";
 
-/**
- * ENTERPRISE NOTES:
- * - SQLite + Prisma: use parameterized SQL for DISTINCT counts + date bucketing + safe IN filters.
- * - JSON: never return bigint (convert to string).
- */
-
 // ---------------------------
 // FIX: Prisma Static Helpers
 // ---------------------------
-// We cast Prisma to 'any' to avoid TS build errors complaining that .sql/.join don't exist.
-// They exist at runtime, but the generated types sometimes miss them in certain environments.
 const PrismaAny = Prisma as any;
 const sql = PrismaAny.sql;
 const join = PrismaAny.join;
@@ -33,9 +25,9 @@ type DownloadSummary = {
   count: number;
   uniqueUsers: number;
   lastDownload: string | null;
-  totalSize: string; // bigint -> string for JSON safety
+  totalSize: string;
   avgLatency: number | null;
-  successRate: number; // 0..100
+  successRate: number;
   byTier?: Record<string, number>;
   byCountry?: Record<string, number>;
 };
@@ -47,7 +39,7 @@ type AnalyticsResponse = {
       totalDownloads: number;
       uniqueContent: number;
       uniqueUsers: number;
-      totalSize: string; // bigint -> string
+      totalSize: string;
       avgSuccessRate: number;
       byPeriod: Array<{ date: string; count: number }>;
     };
@@ -104,7 +96,6 @@ export default async function handler(
   const startTime = Date.now();
 
   try {
-    // 1) Admin auth
     const adminAuth = await validateAdminAccess(req);
     
     if (adminAuth.valid === false) {
@@ -131,7 +122,6 @@ export default async function handler(
       });
     }
 
-    // 2) Rate limiting
     const rateLimitKey = `analytics:${adminAuth.userId || req.socket.remoteAddress || "unknown"}`;
     const rl = await isRateLimited(rateLimitKey, "analytics_api", 100);
     if (rl.limited) {
@@ -158,7 +148,6 @@ export default async function handler(
       });
     }
 
-    // 3) Query validation
     const { since, until, days, filters, page, limit } = validateQuery(req.query);
 
     if (days > MAX_DAYS) {
@@ -180,7 +169,6 @@ export default async function handler(
       });
     }
 
-    // 4) Cache
     const cacheKey = getCacheKey("analytics:downloads:summary", {
       since: since.toISOString(),
       until: until.toISOString(),
@@ -192,20 +180,17 @@ export default async function handler(
     const cached = await cacheResponse.get<AnalyticsResponse>(cacheKey);
     if (cached) {
       cached.meta.cacheHit = true;
-
       await logAuditEvent({
         actorType: "system",
         action: "cache_hit",
         resourceType: "analytics",
         details: { cacheKey, responseTime: Date.now() - startTime },
       });
-
       res.setHeader("X-Cache-Status", "hit");
       res.setHeader("X-Rate-Limit-Remaining", rl.remaining.toString());
       return res.json(cached);
     }
 
-    // 5) Fetch data (safe SQL + batching)
     const [
       summaryStats,
       topContent,
@@ -226,7 +211,6 @@ export default async function handler(
       getTotalContentCount(since, until, filters),
     ]);
 
-    // Enrich top content with tier/country distributions
     const enrichedTopContent = await enrichContentBreakdowns(since, until, filters, topContent);
 
     const responseTime = Date.now() - startTime;
@@ -282,9 +266,7 @@ export default async function handler(
 
     return res.json(response);
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("Analytics API Error:", error);
-
     await logAuditEvent({
       actorType: "system",
       action: "analytics_error",
@@ -317,7 +299,7 @@ export default async function handler(
 }
 
 // ---------------------------
-// Query parsing (typed, safe)
+// Helpers
 // ---------------------------
 
 function asStringArray(v: unknown): string[] | null {
@@ -343,14 +325,12 @@ function asDate(v: unknown): Date | null {
 
 function validateQuery(query: NextApiRequest["query"]) {
   const days = Math.min(MAX_DAYS, Math.max(1, asNumber(query.days) ?? DEFAULT_DAYS));
-
   const until = asDate(query.until) ?? new Date();
   const since = asDate(query.since) ?? new Date(until.getTime() - days * 86400000);
 
   if (since > until) throw new Error("Start date must be before end date");
 
   const filters: Record<string, string[]> = {};
-
   const contentType = asStringArray(query.contentType);
   const eventType = asStringArray(query.eventType);
   const tier = asStringArray(query.tier);
@@ -375,12 +355,7 @@ function validateQuery(query: NextApiRequest["query"]) {
   return { since, until, days, filters, page, limit };
 }
 
-// ---------------------------
-// SQL helpers (safe composition)
-// ---------------------------
-
 function whereSql(since: Date, until: Date, filters: Record<string, string[]>) {
-  // Use our local 'sql' helper from the any-cast
   const parts = [
     sql`created_at BETWEEN ${since} AND ${until}`,
   ];
@@ -428,21 +403,13 @@ function toSizeString(v: unknown): string {
 }
 
 // ---------------------------
-// Data access
+// Data access (FIX: Cast results instead of using generics)
 // ---------------------------
 
 async function getSummaryStats(since: Date, until: Date, filters: Record<string, string[]>) {
   const where = whereSql(since, until, filters);
 
-  const row = await prisma.$queryRaw<
-    Array<{
-      total_downloads: unknown;
-      unique_content: unknown;
-      unique_users: unknown;
-      successful_downloads: unknown;
-      total_size: unknown;
-    }>
-  >(sql`
+  const row = (await prisma.$queryRaw(sql`
     SELECT
       COUNT(*) AS total_downloads,
       COUNT(DISTINCT slug) AS unique_content,
@@ -451,7 +418,13 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
       COALESCE(SUM(COALESCE(file_size, 0)), 0) AS total_size
     FROM download_audit_events
     WHERE ${where}
-  `);
+  `)) as Array<{
+    total_downloads: unknown;
+    unique_content: unknown;
+    unique_users: unknown;
+    successful_downloads: unknown;
+    total_size: unknown;
+  }>;
 
   const stats = row[0] ?? {
     total_downloads: 0,
@@ -465,9 +438,7 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
   const successfulDownloads = toInt(stats.successful_downloads);
   const avgSuccessRate = totalDownloads > 0 ? (successfulDownloads / totalDownloads) * 100 : 0;
 
-  const byPeriod = await prisma.$queryRaw<
-    Array<{ date: unknown; count: unknown }>
-  >(sql`
+  const byPeriod = (await prisma.$queryRaw(sql`
     SELECT
       DATE(created_at) AS date,
       COUNT(*) AS count
@@ -475,7 +446,7 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
     WHERE ${where}
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at) ASC
-  `);
+  `)) as Array<{ date: unknown; count: unknown }>;
 
   return {
     totalDownloads,
@@ -497,19 +468,7 @@ async function getTopContent(
   const where = whereSql(since, until, filters);
   const offset = (page - 1) * limit;
 
-  const rows = await prisma.$queryRaw<
-    Array<{
-      slug: string;
-      content_type: string;
-      event_type: string;
-      count: unknown;
-      unique_users: unknown;
-      last_download: unknown;
-      total_size: unknown;
-      avg_latency: unknown;
-      success_rate: unknown; // 0..100 float
-    }>
-  >(sql`
+  const rows = (await prisma.$queryRaw(sql`
     SELECT
       slug,
       COALESCE(content_type, 'unknown') AS content_type,
@@ -528,7 +487,17 @@ async function getTopContent(
     GROUP BY slug, content_type, event_type
     ORDER BY count DESC
     LIMIT ${limit} OFFSET ${offset}
-  `);
+  `)) as Array<{
+    slug: string;
+    content_type: string;
+    event_type: string;
+    count: unknown;
+    unique_users: unknown;
+    last_download: unknown;
+    total_size: unknown;
+    avg_latency: unknown;
+    success_rate: unknown;
+  }>;
 
   return rows.map((r) => ({
     slug: r.slug,
@@ -551,14 +520,12 @@ async function getGroupedCounts(
 ): Promise<Record<string, number>> {
   const where = whereSql(since, until, filters);
 
-  const rows = await prisma.$queryRaw<Array<{ key: unknown; count: unknown }>>(
-    sql`
-      SELECT ${raw(column)} AS key, COUNT(*) AS count
-      FROM download_audit_events
-      WHERE ${where} AND ${raw(column)} IS NOT NULL
-      GROUP BY ${raw(column)}
-    `
-  );
+  const rows = (await prisma.$queryRaw(sql`
+    SELECT ${raw(column)} AS key, COUNT(*) AS count
+    FROM download_audit_events
+    WHERE ${where} AND ${raw(column)} IS NOT NULL
+    GROUP BY ${raw(column)}
+  `)) as Array<{ key: unknown; count: unknown }>;
 
   const out: Record<string, number> = {};
   for (const r of rows) {
@@ -575,9 +542,7 @@ async function getDailyTrends(
 ): Promise<Array<{ date: string; downloads: number; users: number }>> {
   const where = whereSql(since, until, filters);
 
-  const rows = await prisma.$queryRaw<
-    Array<{ date: unknown; downloads: unknown; users: unknown }>
-  >(sql`
+  const rows = (await prisma.$queryRaw(sql`
     SELECT
       DATE(created_at) AS date,
       COUNT(*) AS downloads,
@@ -586,7 +551,7 @@ async function getDailyTrends(
     WHERE ${where}
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at) ASC
-  `);
+  `)) as Array<{ date: unknown; downloads: unknown; users: unknown }>;
 
   return rows.map((r) => ({
     date: toIsoDate(r.date),
@@ -598,14 +563,14 @@ async function getDailyTrends(
 async function getTotalContentCount(since: Date, until: Date, filters: Record<string, string[]>) {
   const where = whereSql(since, until, filters);
 
-  const rows = await prisma.$queryRaw<Array<{ total: unknown }>>(sql`
+  const rows = (await prisma.$queryRaw(sql`
     SELECT COUNT(*) AS total FROM (
       SELECT 1
       FROM download_audit_events
       WHERE ${where}
       GROUP BY slug, content_type, event_type
     ) t
-  `);
+  `)) as Array<{ total: unknown }>;
 
   return toInt(rows[0]?.total);
 }
@@ -620,16 +585,13 @@ async function enrichContentBreakdowns(
 
   const where = whereSql(since, until, filters);
 
-  // Use local 'sql' and 'join' helpers
   const orParts = top.map((t) => sql`
     (slug = ${t.slug} AND COALESCE(content_type,'unknown') = ${t.contentType} AND COALESCE(event_type,'download') = ${t.eventType})
   `);
 
   const scope = join(orParts, " OR ");
 
-  const tierRows = await prisma.$queryRaw<
-    Array<{ slug: string; content_type: string; event_type: string; tier: string | null; count: unknown }>
-  >(sql`
+  const tierRows = (await prisma.$queryRaw(sql`
     SELECT
       slug,
       COALESCE(content_type,'unknown') AS content_type,
@@ -639,11 +601,9 @@ async function enrichContentBreakdowns(
     FROM download_audit_events
     WHERE ${where} AND (${scope}) AND tier IS NOT NULL
     GROUP BY slug, content_type, event_type, tier
-  `);
+  `)) as Array<{ slug: string; content_type: string; event_type: string; tier: string | null; count: unknown }>;
 
-  const countryRows = await prisma.$queryRaw<
-    Array<{ slug: string; content_type: string; event_type: string; country_code: string | null; count: unknown }>
-  >(sql`
+  const countryRows = (await prisma.$queryRaw(sql`
     SELECT
       slug,
       COALESCE(content_type,'unknown') AS content_type,
@@ -653,7 +613,7 @@ async function enrichContentBreakdowns(
     FROM download_audit_events
     WHERE ${where} AND (${scope}) AND country_code IS NOT NULL
     GROUP BY slug, content_type, event_type, country_code
-  `);
+  `)) as Array<{ slug: string; content_type: string; event_type: string; country_code: string | null; count: unknown }>;
 
   const tierMap = new Map<string, Record<string, number>>();
   for (const r of tierRows) {
@@ -680,10 +640,3 @@ async function enrichContentBreakdowns(
     };
   });
 }
-
-export const config = {
-  api: {
-    responseLimit: false,
-    bodyParser: { sizeLimit: "10mb" },
-  },
-};
