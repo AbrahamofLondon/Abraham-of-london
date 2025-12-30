@@ -1,5 +1,6 @@
 /* lib/consulting/strategy-room.ts */
-import { prisma } from "@/lib/prisma"; // Ensure your Prisma instance is exported from this path
+// CORRECTED IMPORT: Removed curly braces to match default export in lib/prisma.ts
+import prisma from "@/lib/prisma"; 
 import fs from 'fs';
 import path from 'path';
 
@@ -35,10 +36,11 @@ export async function archiveIntake(
 
   // 1. Primary: Prisma/Neon Integration
   try {
+    // Verified: uses default-imported prisma client
     await prisma.strategyRoomIntake.create({
       data: {
         fullName: payload.contact.fullName,
-        emailHash: payload.contact.email, // In production, wrap this in a SHA-256 hash function
+        emailHash: payload.contact.email, 
         organisation: payload.contact.organisation,
         status: result.status,
         score: score,
@@ -47,7 +49,7 @@ export async function archiveIntake(
         createdAt: createdAtDate,
       },
     });
-    return; // Successful persistence
+    return; 
   } catch (err: any) {
     console.error("⚠️ Prisma/Neon Insertion failed, triggering FS backup:", err.message);
   }
@@ -77,7 +79,7 @@ export async function notifyDiscord(payload: StrategyRoomIntakePayload, score: n
 
   const embed = {
     title: `Strategic Intake: ${status.toUpperCase()}`,
-    color: status === 'accepted' ? 0xD4AF37 : 0x444444, // Gold for accepted, Grey for declined
+    color: status === 'accepted' ? 0xD4AF37 : 0x444444,
     fields: [
       { name: "Principal", value: payload.contact.fullName, inline: true },
       { name: "Score", value: `${score}/25`, inline: true },
@@ -103,14 +105,12 @@ export async function notifyDiscord(payload: StrategyRoomIntakePayload, score: n
  * EVALUATION & SCORING LOGIC
  */
 export function evaluateIntake(payload: StrategyRoomIntakePayload): StrategyRoomIntakeResult {
-  // Hard gates
   if (payload.authority.hasAuthority === "No" || !payload.declarationAccepted || payload.readiness.willingAccountability === "No") {
     return { ok: false, status: "declined", message: "Hard gate: Entry requirements not met." };
   }
 
   const scoreData = computeScore(payload);
   
-  // Scoring threshold
   if (scoreData.total < 16) {
     return { ok: false, status: "declined", message: "Audit score below threshold. Refine your decision statement for gravity." };
   }
