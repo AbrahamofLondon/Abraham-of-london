@@ -120,7 +120,7 @@ async function main() {
   const outPath = path.join(outDir, "ultimate-purpose-of-man-special.pdf");
   
   // 5. Save
-  await fs.writeFile(outPath, buffer as unknown as Uint8Array);
+  await fs.writeFile(destPath, Buffer.from(arrayBuffer) as unknown as Uint8Array);
 
   console.log(`✅ PDF generated: ${outPath}`);
 }
