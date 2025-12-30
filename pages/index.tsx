@@ -1008,7 +1008,8 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
           <CanonPrimaryCard
             title="The Architecture of Human Purpose"
-            href="/canon/the-architecture-of-human-purpose"
+            // FIXED: Changed link to match the slug defined in foundations-of-purpose.mdx
+            href="/canon/volume-i-foundations-of-purpose"
             excerpt="The foundational volume: a framework for discerning and deploying purpose across a lifetime. How to build systems, structures, and legacies that outlast you."
             volumeNumber={1}
             image="/assets/images/canon/architecture-of-human-purpose-cover.jpg"
