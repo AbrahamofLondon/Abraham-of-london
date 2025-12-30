@@ -90,8 +90,7 @@ export const FRAMEWORKS: Framework[] = [
       "Convert the stack into a 90-day execution plan.",
       "Bring it into a Strategy Room for board alignment.",
     ],
-    // UPDATED LINK:
-    artifactHref: "/downloads/frameworks/purpose-pyramid.pdf",
+    artifactHref: "/downloads/purpose-pyramid.pdf",
     accent: "gold",
   },
   {
@@ -157,8 +156,7 @@ export const FRAMEWORKS: Framework[] = [
       "Install a decision log and make it visible.",
       "Bring a neutral facilitator into the room.",
     ],
-    // UPDATED LINK:
-    artifactHref: "/downloads/frameworks/decision-matrix.pdf",
+    artifactHref: "/downloads/decision-matrix.pdf",
     accent: "blue",
   },
   {
@@ -191,7 +189,7 @@ export const FRAMEWORKS: Framework[] = [
     ],
     operatingLogic: [
       { title: "Why four dimensions", body: "Money without wisdom is waste. Wisdom without relationships is sterile. Relationships without formation decay." },
-      { title: "Why time horizons matter", body: "3 years measures execution. 10 years measures institution-building. 25 years measures what outlives you." },
+      { title: "Why time horizons matter", body: "3 years measures execution. 10 years measures institution-building. 25 years measures what outlive you." },
       { title: "Why leading indicators", body: "Collapse shows up late. Leading indicators surface drift early." },
     ],
     applicationPlaybook: [
@@ -224,8 +222,7 @@ export const FRAMEWORKS: Framework[] = [
       "Install a monthly cadence.",
       "Bring it into a Strategy Room.",
     ],
-    // UPDATED LINK:
-    artifactHref: "/downloads/frameworks/legacy-canvas.pdf",
+    artifactHref: "/downloads/legacy-canvas.pdf",
     accent: "indigo",
   },
 ];

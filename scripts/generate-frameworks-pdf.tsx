@@ -1,21 +1,16 @@
 /* scripts/generate-frameworks-pdf.tsx */
-import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
 import React from "react";
 import { pdf, Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
-
-// Import your data
 import { FRAMEWORKS, type Framework } from "../lib/resources/strategic-frameworks";
 
-// 1. REGISTER STANDARD FONTS
 Font.register({ family: "Times-Roman", src: "Times-Roman" });
 Font.register({ family: "Times-Italic", src: "Times-Italic" });
 Font.register({ family: "Helvetica", src: "Helvetica" });
 Font.register({ family: "Helvetica-Bold", src: "Helvetica-Bold" });
 Font.register({ family: "Courier", src: "Courier" });
 
-// 2. STYLES
 const styles = StyleSheet.create({
   page: { padding: 50, backgroundColor: "#FFFFFF", fontFamily: "Helvetica" },
   header: { marginBottom: 25, borderBottomWidth: 1.5, borderBottomColor: "#000", paddingBottom: 15 },
@@ -29,27 +24,17 @@ const styles = StyleSheet.create({
   logicCard: { width: "31%", padding: 10, backgroundColor: "#F5F5F5", borderRadius: 4, marginBottom: 10 },
   logicTitle: { fontSize: 10, fontFamily: "Helvetica-Bold", marginBottom: 4 },
   logicBody: { fontSize: 9, lineHeight: 1.4, color: "#333" },
-  stepRow: { flexDirection: "row", marginBottom: 10 },
-  stepNum: { width: 20, fontSize: 10, fontFamily: "Helvetica-Bold", color: "#888" },
-  stepContent: { flex: 1 },
-  stepDeliverable: { fontSize: 9, color: "#555", fontStyle: "italic", marginTop: 2 },
-  tableRow: { flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: "#EEE", paddingVertical: 4 },
-  colMetric: { width: "35%", fontSize: 10, fontFamily: "Helvetica-Bold" },
-  colReason: { width: "45%", fontSize: 10, color: "#333" },
-  colCadence: { width: "20%", fontSize: 10, color: "#666", textAlign: "right" },
   footer: { position: "absolute", bottom: 30, left: 50, right: 50, borderTopWidth: 1, borderTopColor: "#EEE", paddingTop: 10, flexDirection: "row", justifyContent: "space-between" },
   footerText: { fontSize: 8, color: "#999" },
 });
 
-// 3. DOCUMENT COMPONENT WITH METADATA
 const FrameworkDossier = ({ f }: { f: Framework }) => (
   <Document 
     title={`${f.title} | Strategic Framework | Abraham of London`}
     author="Abraham of London"
     subject={f.oneLiner}
-    keywords={`strategy, governance, ${f.tag}, leadership, institutional-design`}
-    creator="Abraham of London Strategic Engine"
-    producer="Abraham of London"
+    producer="Abraham of London Strategic Engine"
+    creator="Abraham of London"
   >
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -77,29 +62,6 @@ const FrameworkDossier = ({ f }: { f: Framework }) => (
           </View>
         ))}
       </View>
-      <Text style={styles.sectionTitle}>Application Playbook</Text>
-      {f.applicationPlaybook.map((step, i) => (
-        <View key={i} style={styles.stepRow}>
-          <Text style={styles.stepNum}>{i + 1}.</Text>
-          <View style={styles.stepContent}>
-            <Text style={{ fontSize: 10, fontFamily: "Helvetica-Bold" }}>{step.step}</Text>
-            <Text style={{ fontSize: 10, lineHeight: 1.4, marginVertical: 2 }}>{step.detail}</Text>
-            <Text style={styles.stepDeliverable}>→ Output: {step.deliverable}</Text>
-          </View>
-        </View>
-      ))}
-      <Text style={styles.sectionTitle}>Key Metrics</Text>
-      {f.metrics.map((m, i) => (
-        <View key={i} style={styles.tableRow}>
-          <Text style={styles.colMetric}>{m.metric}</Text>
-          <Text style={styles.colReason}>{m.whyItMatters}</Text>
-          <Text style={styles.colCadence}>{m.reviewCadence}</Text>
-        </View>
-      ))}
-      <Text style={styles.sectionTitle}>Board Questions</Text>
-      {f.boardQuestions.map((q, i) => (
-         <Text key={i} style={{ fontSize: 10, marginBottom: 4, fontFamily: "Times-Italic" }}>? {q}</Text>
-      ))}
       <View style={styles.footer} fixed>
         <Text style={styles.footerText}>© Abraham of London</Text>
         <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
@@ -108,44 +70,24 @@ const FrameworkDossier = ({ f }: { f: Framework }) => (
   </Document>
 );
 
-// 4. MAIN EXECUTION
 async function main() {
-  const outDir = path.join(process.cwd(), "public", "downloads", "frameworks");
-  
-  // Ensure directory exists using Sync for absolute reliability in script context
-  if (!fsSync.existsSync(outDir)) {
-    fsSync.mkdirSync(outDir, { recursive: true });
-  }
-
-  console.log(`📚 Generating ${FRAMEWORKS.length} Framework Dossiers...`);
+  const outDir = path.join(process.cwd(), "public", "downloads");
+  if (!fsSync.existsSync(outDir)) fsSync.mkdirSync(outDir, { recursive: true });
 
   for (const f of FRAMEWORKS) {
     try {
-      const fileName = `${f.slug}.pdf`;
-      const filePath = path.join(outDir, fileName);
-      
-      // 1. Generate the Web Stream (toBuffer() returns a ReadableStream in Node 18+)
+      const filePath = path.join(outDir, `${f.slug}.pdf`);
       const stream = await pdf(<FrameworkDossier f={f} />).toBuffer();
-      
-      // 2. Aggregate chunks with Type Erasure to prevent prototype collisions
       const chunks: any[] = [];
-      // @ts-ignore - blob is a Web ReadableStream
-      for await (const chunk of stream) {
-        chunks.push(chunk);
-      }
-      
-      // 3. CONSOLIDATE & WRITE
-      // The double-cast (as unknown as any) bypasses the entries() iterator mismatch
-      // which causes the "map, filter, take, drop" error on Netlify/Windows.
-      const finalBuffer = Buffer.concat(chunks) as unknown as any;
-      fsSync.writeFileSync(filePath, finalBuffer);
-      
-      console.log(`   - Writing: ${fileName}`);
+      // @ts-ignore
+      for await (const chunk of stream) { chunks.push(chunk as unknown as Uint8Array); }
+      const finalData = Buffer.concat(chunks) as unknown as any;
+      fsSync.writeFileSync(filePath, finalData);
+      console.log(`   - Generated: ${f.slug}.pdf`);
     } catch (err) {
-      console.error(`❌ Failed to generate ${f.slug}:`, err);
+      console.error(`❌ Failed ${f.slug}:`, err);
     }
   }
-  console.log("✅ All Framework PDFs Generated.");
 }
 
 main();

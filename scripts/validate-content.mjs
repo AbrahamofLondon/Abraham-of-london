@@ -1,6 +1,13 @@
 #!/usr/bin/env node
+/**
+ * scripts/validate-content.mjs
+ * ENTERPRISE-GRADE CONTENT AUDITOR
+ * * Verifies that all MDX/MD files in the /content directory meet the 
+ * brand's strict metadata requirements before build.
+ */
+
 import { promises as fs } from "fs";
-import { join, dirname } from "path";
+import path, { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import matter from "gray-matter";
 
@@ -43,8 +50,7 @@ async function fileExists(fsPath) {
 }
 
 /**
- * 🛰️ Validates if a referenced asset exists.
- * Now takes a 'targetArray' to distinguish between breaking errors and soft warnings.
+ * Validates if a referenced asset exists in the /public folder.
  */
 async function validateAssetUrl(label, url, targetArray) {
   const u = cleanStr(url);
@@ -53,7 +59,7 @@ async function validateAssetUrl(label, url, targetArray) {
   const abs = publicUrlToFsPath(u);
   if (!abs) return;
 
-  // Only validate assets intended for the /public folder
+  // Only validate assets that are expected to be in the local /public folder
   if (!u.startsWith("/assets/") && !u.startsWith("/favicon") && !u.startsWith("/icons/")) {
     return;
   }
@@ -70,8 +76,11 @@ async function validateFile(filePath) {
     const errors = [];
     const warnings = [];
 
+    // Normalize path for key matching across OS environments
+    const normalizedPath = filePath.split(path.sep).join("/");
+    const dirKey = normalizedPath.split("/").find(p => requiredFields[p]);
+
     // 1. Validate Required Metadata (Strict Error)
-    const dirKey = filePath.replaceAll("\\", "/").split("/").find(p => requiredFields[p]);
     if (dirKey && requiredFields[dirKey]) {
       for (const field of requiredFields[dirKey]) {
         if (!data[field]) errors.push(`Missing required field: ${field}`);
@@ -82,7 +91,7 @@ async function validateFile(filePath) {
       errors.push(`Invalid date format: ${data.date}. Use YYYY-MM-DD`);
     }
 
-    // 2. Validate Assets (Relaxed Warning) 🎨
+    // 2. Validate Assets (Relaxed Warning)
     const cover = data.coverImage ?? data.image ?? data.cover ?? null;
     if (cover) {
       await validateAssetUrl("coverImage", ensureLeadingSlash(cover), warnings);
@@ -91,12 +100,13 @@ async function validateFile(filePath) {
     const fileUrl = data.downloadUrl ?? data.fileUrl ?? data.downloadFile ?? null;
     if (fileUrl) {
       const u = ensureLeadingSlash(fileUrl);
+      // Logic for legacy asset mapping
       const canonical = u.startsWith("/downloads/") ? u.replace(/^\/downloads\//, "/assets/downloads/") : u;
       await validateAssetUrl("downloadFile", canonical, warnings);
     }
 
     return {
-      path: filePath.replace(contentDir + "/", ""),
+      path: path.relative(contentDir, filePath),
       valid: errors.length === 0,
       errors,
       warnings,
@@ -118,34 +128,40 @@ async function walkDir(dir) {
 }
 
 async function main() {
+  if (!existsSync(contentDir)) {
+    console.warn("⚠️  Content directory not found. Skipping validation.");
+    process.exit(0);
+  }
+
   const files = await walkDir(contentDir);
   const results = await Promise.all(files.map(validateFile));
 
   const invalidFiles = results.filter((r) => !r.valid);
   const filesWithWarnings = results.filter((r) => r.warnings.length > 0);
 
-  console.log(`📊 Summary: ${results.length} files checked.`);
+  console.log(`📊 Summary: ${results.length} documents audited.`);
   console.log(`✅ Valid: ${results.length - invalidFiles.length} | ❌ Invalid: ${invalidFiles.length}\n`);
 
   if (filesWithWarnings.length > 0) {
-    console.log("⚠️  Asset Warnings (Build will continue):");
+    console.log("⚠️  Asset Warnings (Non-breaking):");
     filesWithWarnings.forEach(f => {
-      console.log(`\n📄 ${f.path}`);
+      console.log(`📄 ${f.path}`);
       f.warnings.forEach(w => console.log(`   - ${w}`));
     });
   }
 
   if (invalidFiles.length > 0) {
-    console.log("\n❌ Critical Errors (Build failed):");
+    console.log("\n❌ Critical Content Errors (Build Failed):");
     invalidFiles.forEach(f => {
-      console.log(`\n📄 ${f.path}`);
+      console.log(`📄 ${f.path}`);
       f.errors.forEach(e => console.log(`   - ${e}`));
     });
     process.exit(1);
   } else {
-    console.log("\n🎉 Build validation passed!");
+    console.log("\n🎉 Content validation passed!");
     process.exit(0);
   }
 }
 
+import { existsSync } from "fs";
 main().catch(console.error);

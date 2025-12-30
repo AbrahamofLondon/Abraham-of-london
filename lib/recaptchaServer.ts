@@ -2,12 +2,7 @@
 /**
  * lib/recaptchaServer.ts
  * Canonical server-side reCAPTCHA v3 verification helper.
- *
- * Use in:
- * - pages/api/** (Node runtime)
- * - Netlify functions / server handlers
- *
- * Do NOT import this into client components.
+ * Optimized for Abraham of London Strategic Infrastructure.
  */
 
 export type RecaptchaVerificationResult = {
@@ -22,11 +17,14 @@ const DEFAULT_MIN_SCORE = 0.5;
 const VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 const DEFAULT_TIMEOUT_MS = 5000;
 
+/**
+ * RESOLVE SECRET:
+ * Prioritizes the validated RECAPTCHA_SECRET_KEY from the environment.
+ */
 function getSecret(): string | null {
-  // Support both common names to avoid env drift
   const candidates = [
-    process.env.RECAPTCHA_SECRET_KEY,
-    process.env.RECAPTCHA_SECRET,
+    process.env.RECAPTCHA_SECRET_KEY, // Primary (validated by scripts/validate-env.mjs)
+    process.env.RECAPTCHA_SECRET,     // Legacy fallback
   ];
 
   for (const c of candidates) {
@@ -56,12 +54,10 @@ function isAbortError(error: unknown): boolean {
 }
 
 /**
- * Detailed verifier with score + action checks.
+ * DETAILED VERIFIER:
  * - Fails closed by default.
- * - Optional dev bypass if ALLOW_RECAPTCHA_BYPASS=true and NODE_ENV!=production.
- *
- * expectedAction:
- * - If provided, and Google returns an action, mismatches fail.
+ * - Validates score threshold.
+ * - Validates expectedAction to prevent token reuse across handlers.
  */
 export async function verifyRecaptchaDetailed(
   token: string,
@@ -71,41 +67,22 @@ export async function verifyRecaptchaDetailed(
 ): Promise<RecaptchaVerificationResult> {
   const secret = getSecret();
 
-  // Fail closed unless explicitly bypassing in dev
+  // Fail closed unless in Dev with explicit bypass
   if (!secret) {
     const isDev = process.env.NODE_ENV !== "production";
     const allowBypass = process.env.ALLOW_RECAPTCHA_BYPASS === "true";
 
     if (isDev && allowBypass) {
-      console.warn(
-        "[reCAPTCHA] Secret missing - bypass enabled via ALLOW_RECAPTCHA_BYPASS (development only)."
-      );
-      return {
-        success: true,
-        score: 1,
-        action: expectedAction,
-        errorCodes: ["bypassed:missing_secret"],
-      };
+      console.warn("[reCAPTCHA] Secret missing - bypass enabled via ALLOW_RECAPTCHA_BYPASS.");
+      return { success: true, score: 1, action: expectedAction, errorCodes: ["bypassed:missing_secret"] };
     }
 
-    console.error("[reCAPTCHA] Secret not set - verification will fail.");
-    return {
-      success: false,
-      score: 0,
-      action: expectedAction,
-      errorCodes: ["missing_secret"],
-    };
+    console.error("[reCAPTCHA] Secret not set - failing verification.");
+    return { success: false, score: 0, action: expectedAction, errorCodes: ["missing_secret"] };
   }
 
-  // Basic token sanity check
   if (!token || typeof token !== "string" || token.trim().length < 30) {
-    console.error("[reCAPTCHA] Invalid token format.");
-    return {
-      success: false,
-      score: 0,
-      action: expectedAction,
-      errorCodes: ["invalid_token_format"],
-    };
+    return { success: false, score: 0, action: expectedAction, errorCodes: ["invalid_token_format"] };
   }
 
   const minScore = getMinScore();
@@ -129,98 +106,32 @@ export async function verifyRecaptchaDetailed(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error(`[reCAPTCHA] HTTP error: ${response.status}`);
-      return {
-        success: false,
-        score: 0,
-        action: expectedAction,
-        errorCodes: [`http_${response.status}`],
-      };
+      return { success: false, score: 0, action: expectedAction, errorCodes: [`http_${response.status}`] };
     }
 
-    const data: {
-      success?: boolean;
-      score?: number;
-      action?: string;
-      "error-codes"?: string[];
-      [key: string]: unknown;
-    } = await response.json();
-
+    const data: any = await response.json();
     const success = Boolean(data.success);
     const score = typeof data.score === "number" ? data.score : 0;
     const action = typeof data.action === "string" ? data.action : undefined;
     const errorCodes = normalizeErrorCodes(data["error-codes"]);
 
-    // Action mismatch = failure (security boundary)
+    // Security boundary: Action mismatch check
     if (expectedAction && action && expectedAction !== action) {
-      console.warn(
-        `[reCAPTCHA] Action mismatch: expected="${expectedAction}" got="${action}"`
-      );
-      return {
-        success: false,
-        score: 0,
-        action,
-        errorCodes: errorCodes.length ? errorCodes : ["action_mismatch"],
-        raw: data,
-      };
+      console.warn(`[reCAPTCHA] Action mismatch: expected="${expectedAction}" got="${action}"`);
+      return { success: false, score: 0, action, errorCodes: ["action_mismatch"], raw: data };
     }
 
-    if (!success) {
-      console.warn("[reCAPTCHA] Verification failed:", { action, score, errorCodes });
-      return {
-        success: false,
-        score,
-        action,
-        errorCodes: errorCodes.length ? errorCodes : ["verification_failed"],
-        raw: data,
-      };
+    if (!success || score < minScore) {
+      return { success: false, score, action, errorCodes: errorCodes.length ? errorCodes : ["low_score_or_failed"], raw: data };
     }
 
-    if (score < minScore) {
-      console.warn(
-        `[reCAPTCHA] Score below threshold: ${score} (min: ${minScore})`,
-        { action }
-      );
-      return {
-        success: false,
-        score,
-        action,
-        errorCodes: errorCodes.length ? errorCodes : ["low_score"],
-        raw: data,
-      };
-    }
-
-    return {
-      success: true,
-      score,
-      action,
-      errorCodes,
-      raw: data,
-    };
+    return { success: true, score, action, errorCodes, raw: data };
   } catch (error: unknown) {
-    if (isAbortError(error)) {
-      console.error("[reCAPTCHA] Verification timed out.");
-      return {
-        success: false,
-        score: 0,
-        action: expectedAction,
-        errorCodes: ["timeout"],
-      };
-    }
-
-    console.error("[reCAPTCHA] Verification failed with error:", error);
-    return {
-      success: false,
-      score: 0,
-      action: expectedAction,
-      errorCodes: ["exception"],
-    };
+    const isTimeout = isAbortError(error);
+    return { success: false, score: 0, action: expectedAction, errorCodes: [isTimeout ? "timeout" : "exception"] };
   }
 }
 
-/**
- * Backward-compatible boolean verifier (legacy call-sites).
- */
 export async function verifyRecaptcha(
   token: string,
   expectedAction?: string,
@@ -230,14 +141,7 @@ export async function verifyRecaptcha(
   return result.success;
 }
 
-/**
- * Small config health snapshot (safe to log server-side).
- */
-export function validateRecaptchaConfig(): {
-  hasSecret: boolean;
-  minScore: number;
-  bypassEnabled: boolean;
-} {
+export function validateRecaptchaConfig() {
   return {
     hasSecret: Boolean(getSecret()),
     minScore: getMinScore(),
