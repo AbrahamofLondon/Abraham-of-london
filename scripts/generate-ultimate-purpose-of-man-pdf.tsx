@@ -5,14 +5,12 @@ import path from "path";
 import React from "react";
 import { renderToFile, Font } from "@react-pdf/renderer";
 
-// Import your component
 import UltimatePurposeOfManDocument from "../lib/pdf/ultimate-purpose-of-man-pdf";
 
-// Helper: Register fonts using local TTF files or System Fallbacks
-function registerLocalFonts() {
+function registerFonts() {
   const fontsDir = path.join(process.cwd(), "public", "fonts");
 
-  // 1. AoLSerif (Use your local .ttf files - these are safe)
+  // 1. AoLSerif - Try local, fallback to Times-Roman
   const serifRegular = path.join(fontsDir, "AoLSerif-Regular.ttf");
   const serifItalic = path.join(fontsDir, "AoLSerif-Italic.ttf");
 
@@ -24,27 +22,26 @@ function registerLocalFonts() {
         { src: serifItalic, fontWeight: 400, fontStyle: "italic" },
       ],
     });
-    console.log("✅ Registered AoLSerif (Local .ttf)");
+    console.log("✅ Registered AoLSerif (Local TTF)");
   } else {
-    console.warn("⚠️ AoLSerif .ttf files missing. Using Times-Roman.");
     Font.register({ family: "AoLSerif", src: "Times-Roman" });
+    console.log("✅ Registered AoLSerif (System Times-Roman)");
   }
 
-  // 2. AoLMono (FIX: Use Courier instead of the corrupt WOFF2 file)
-  // The 'Bad base 128 number' error comes from parsing the woff2 file.
-  // Courier is a standard PDF font and guaranteed to work.
+  // 2. AoLSans - Force Helvetica
+  // This is the cleanest sans-serif font available by default in PDFs
+  Font.register({
+    family: "AoLSans",
+    src: "Helvetica", 
+  });
+  console.log("✅ Registered AoLSans (System Helvetica)");
+
+  // 3. AoLMono - Force Courier
   Font.register({
     family: "AoLMono",
     src: "Courier",
   });
   console.log("✅ Registered AoLMono (System Courier)");
-
-  // 3. AoLSans (Use Helvetica to prevent network fetch/crash)
-  Font.register({
-    family: "AoLSans",
-    src: "Helvetica",
-  });
-  console.log("✅ Registered AoLSans (System Helvetica)");
 }
 
 async function ensureDir(p: string) {
@@ -53,15 +50,15 @@ async function ensureDir(p: string) {
 
 async function main() {
   try {
-    // 1. Register fonts first
-    registerLocalFonts();
+    // 1. Register fonts
+    registerFonts();
 
-    // 2. Prepare output directories
+    // 2. Prepare paths
     const outDir = path.join(process.cwd(), "public", "downloads");
     const outFile = path.join(outDir, "ultimate-purpose-of-man-editorial.pdf");
     await ensureDir(outDir);
 
-    // 3. Resolve cover image
+    // 3. Resolve Assets
     const publicDir = path.join(process.cwd(), "public");
     const primaryCoverPath = path.join(publicDir, "assets", "images", "purpose-cover.jpg");
     const fallbackCoverPath = path.join(publicDir, "assets", "images", "writing-desk.webp");
@@ -74,7 +71,7 @@ async function main() {
       coverToUse = fallbackCoverPath;
     }
 
-    // 4. Render PDF
+    // 4. Render
     console.log("📄 Generating PDF...");
     await renderToFile(
       <UltimatePurposeOfManDocument coverImagePath={coverToUse} />,

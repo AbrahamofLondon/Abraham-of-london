@@ -9,37 +9,8 @@ import {
   View,
   Image,
   StyleSheet,
-  Font,
+  // Note: Font is NOT imported or registered here to prevent errors
 } from "@react-pdf/renderer";
-
-/**
- * IMPORTANT DESIGN NOTES
- * - This module must be safe to import in Node/CI (Netlify).
- * - Fonts are registered via public URLs ONLY in the browser.
- * - In Node.js (generation script), fonts must be registered manually before rendering.
- * - coverImagePath should be an absolute local filesystem path when rendering in CI.
- */
-
-// FIX: Only register remote fonts if running in the browser.
-// This prevents the PDF generation script from crashing on fetch errors in Node.js.
-if (typeof window !== "undefined") {
-  try {
-    Font.register({
-      family: "AoLSerif",
-      src: "https://fonts.gstatic.com/s/playfairdisplay/v30/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYhig.woff2",
-    });
-    Font.register({
-      family: "AoLSans",
-      src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boK.woff2",
-    });
-    Font.register({
-      family: "AoLMono",
-      src: "https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2oWUg0MKqScQ7Z7o_vo0qZxP9kFz.woff2",
-    });
-  } catch {
-    // React-PDF will fallback to built-ins if register fails
-  }
-}
 
 const BRAND = {
   bg: "#050609",
@@ -297,10 +268,6 @@ function Footer(): JSX.Element {
 }
 
 export type UltimatePurposeOfManPdfProps = {
-  /**
-   * Use an absolute local file path in Node/CI when calling renderToFile:
-   * e.g. path.join(process.cwd(), "public", "assets", "images", "purpose-cover.jpg")
-   */
   coverImagePath: string;
 };
 

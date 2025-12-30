@@ -43,7 +43,8 @@
     "prepare:content": "pnpm run clean:build && node scripts/fix-contentlayer-issues.mjs && pnpm run content:validate && pnpm run content:build",
     
     "prebuild": "node scripts/validate-env.mjs && pnpm run prepare:content && pnpm run pdfs && pnpm run downloads:validate",
-    "build": "next build",
+    
+    "build": "npx tsx scripts/generate-standalone-pdf.tsx && next build",
     "postbuild": "echo \"✓ Build completed successfully\"",
     
     "setup": "pnpm install && prisma generate && pnpm run prepare:content"

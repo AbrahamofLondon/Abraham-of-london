@@ -1,8 +1,8 @@
-// components/downloads/DownloadCard.tsx
 import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import * as React from "react";
+import { Download, FileText, Lock, ArrowRight } from "lucide-react";
 
 type DownloadCardProps = {
   slug: string;
@@ -20,6 +20,7 @@ type DownloadCardProps = {
 
 const DEFAULT_COVER = "/assets/images/downloads/default-download-cover.jpg";
 
+// ✅ Logic preserved: Checks if the link is an API route (Inner Circle) vs Static File
 function isGatedHref(href: string): boolean {
   return href.startsWith("/api/downloads/");
 }
@@ -38,135 +39,152 @@ export default function DownloadCard({
   const detailHref = `/downloads/${slug}`;
   const finalImageSrc = (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
 
+  // Determine if this is a static file (Download) or a gated API route (Unlock)
   const gated = typeof fileHref === "string" && fileHref ? isGatedHref(fileHref) : false;
 
   return (
     <article
       className={clsx(
-        "group relative overflow-hidden rounded-xl border bg-white shadow-card transition-all duration-300",
-        "flex flex-col",
-        featured
-          ? "border-amber-200 hover:shadow-xl hover:border-amber-300"
-          : "border-lightGrey hover:shadow-cardHover",
-        className,
+        "group relative flex overflow-hidden rounded-2xl bg-white transition-all duration-300",
+        // Featured Layout: Horizontal on desktop, Vertical on mobile
+        featured ? "flex-col md:flex-row border border-amber-200 shadow-xl" : "flex-col border border-slate-200 shadow-card hover:shadow-cardHover hover:border-amber-200/50",
+        className
       )}
     >
-      {featured && (
-        <div className="absolute top-3 left-3 z-10">
-          <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white shadow-sm">
-            Featured
-          </span>
-        </div>
-      )}
+      {/* --- Image Section --- */}
+      <div
+        className={clsx(
+          "relative overflow-hidden bg-slate-100",
+          featured ? "w-full md:w-2/5 min-h-[260px]" : "w-full aspect-[16/9]"
+        )}
+      >
+        <Link href={detailHref} prefetch={false} className="block w-full h-full" tabIndex={-1}>
+           {/* Featured Badge */}
+          {featured && (
+             <div className="absolute top-4 left-4 z-10">
+               <span className="inline-flex items-center rounded-full bg-slate-900/90 px-3 py-1 text-xs font-medium text-amber-50 shadow-sm backdrop-blur-sm border border-white/10">
+                 Featured Asset
+               </span>
+             </div>
+           )}
 
-      <Link href={detailHref} prefetch={false} className="block relative w-full flex-shrink-0" tabIndex={-1}>
-        <div className="relative w-full aspect-[16/9]">
+           {/* Category Badge (Overlay) */}
+           {category && !featured && (
+             <div className="absolute top-3 left-3 z-10">
+               <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-700 shadow-sm backdrop-blur-md">
+                 {category}
+               </span>
+             </div>
+           )}
+
           <Image
             src={finalImageSrc}
             alt={`Cover image for ${title}`}
             fill
-            sizes="(max-width: 768px) 50vw, 300px"
+            sizes={featured ? "(max-width: 768px) 100vw, 40vw" : "(max-width: 768px) 100vw, 30vw"}
             className={clsx(
-              "object-cover transition-transform duration-300",
-              featured ? "group-hover:scale-[1.03]" : "group-hover:scale-[1.02]",
+              "object-cover transition-transform duration-700",
+              featured ? "group-hover:scale-105" : "group-hover:scale-110"
             )}
-            priority={false}
+            priority={featured}
           />
-          {featured && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
-          )}
-        </div>
-      </Link>
+          
+          {/* Subtle Overlay on Hover */}
+          <div className="absolute inset-0 bg-slate-900/0 transition-colors duration-300 group-hover:bg-slate-900/5" />
+        </Link>
+      </div>
 
-      <div className={clsx("flex flex-col flex-grow", featured ? "p-6" : "p-4")}>
-        <h3
-          className={clsx(
-            "font-serif leading-snug text-deepCharcoal",
-            featured ? "text-xl font-semibold" : "text-lg font-semibold",
-          )}
-        >
-          <Link
-            href={detailHref}
-            prefetch={false}
-            className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]"
+      {/* --- Content Section --- */}
+      <div className={clsx("flex flex-1 flex-col", featured ? "p-6 md:p-8" : "p-5")}>
+        <div className="flex-1">
+          {/* Metadata Row */}
+          <div className="mb-3 flex items-center gap-3 text-xs font-medium text-slate-500 uppercase tracking-wide">
+             {featured && category && (
+               <span className="text-amber-600 font-bold">{category}</span>
+             )}
+             {size && (
+               <>
+                 {featured && category && <span>•</span>}
+                 <span>{size}</span>
+               </>
+             )}
+             <span>PDF</span>
+          </div>
+
+          <h3
+            className={clsx(
+              "font-serif text-slate-900 transition-colors group-hover:text-amber-700",
+              featured ? "text-2xl font-bold mb-3" : "text-lg font-semibold mb-2"
+            )}
           >
-            {title}
-          </Link>
-        </h3>
+            <Link href={detailHref} prefetch={false} className="outline-none focus:underline">
+              {title}
+            </Link>
+          </h3>
 
-        <div className="mt-2 flex items-center text-xs text-gray-600 space-x-2">
-          {category && (
-            <span
+          {excerpt && (
+            <p
               className={clsx(
-                "rounded-full px-2 py-0.5",
-                featured ? "bg-amber-100 text-amber-800" : "bg-warmWhite text-gray-700",
+                "text-slate-600 leading-relaxed",
+                featured ? "text-base line-clamp-3" : "text-sm line-clamp-2"
               )}
             >
-              {category}
-            </span>
-          )}
-          {size && (
-            <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">{size}</span>
-          )}
-          {gated && (
-            <span className="text-[10px] rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-800">
-              Inner Circle
-            </span>
+              {excerpt}
+            </p>
           )}
         </div>
 
-        {excerpt && (
-          <p
-            className={clsx(
-              "line-clamp-3 leading-relaxed text-gray-700 flex-grow",
-              featured ? "mt-3 text-sm" : "mt-2 text-sm",
-            )}
-          >
-            {excerpt}
-          </p>
-        )}
-
-        <div className={clsx("flex gap-3 flex-shrink-0", featured ? "mt-5" : "mt-4")}>
+        {/* --- Actions Footer --- */}
+        <div className={clsx("flex items-center justify-between pt-6 border-t border-slate-100", featured ? "mt-6" : "mt-4")}>
           <Link
             href={detailHref}
-            className={clsx(
-              "inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-              featured
-                ? "border-amber-300 text-deepCharcoal hover:bg-amber-50 hover:border-amber-400"
-                : "border-lightGrey text-deepCharcoal hover:bg-warmWhite",
-            )}
+            className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-slate-400 transition-colors hover:text-amber-600"
             prefetch={false}
-            scroll
           >
-            View Notes
+            Details <ArrowRight className="h-3 w-3" />
           </Link>
 
-          {fileHref && (
-            gated ? (
-              <a
-                href={fileHref}
-                className={clsx(
-                  "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold text-cream transition-colors",
-                  featured ? "bg-amber-600 hover:bg-amber-700" : "bg-forest hover:bg-deepCharcoal",
-                )}
-              >
-                Unlock & Download
-              </a>
-            ) : (
-              <a
-                href={fileHref}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className={clsx(
-                  "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold text-cream transition-colors",
-                  featured ? "bg-amber-600 hover:bg-amber-700" : "bg-forest hover:bg-deepCharcoal",
-                )}
-              >
-                Download
-              </a>
-            )
-          )}
+          <div className="flex items-center gap-3">
+             {/* Status Indicator */}
+             {gated && (
+               <div className="flex items-center gap-1 text-xs font-medium text-amber-600/80 bg-amber-50 px-2 py-1 rounded-md">
+                 <Lock className="h-3 w-3" />
+                 <span>Inner Circle</span>
+               </div>
+             )}
+
+             {/* Action Button */}
+             {fileHref && (
+               gated ? (
+                 <a
+                   href={fileHref}
+                   className={clsx(
+                     "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all",
+                     "bg-slate-900 hover:bg-slate-800 hover:shadow-md"
+                   )}
+                 >
+                   Unlock
+                 </a>
+               ) : (
+                 <a
+                   href={fileHref}
+                   download
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className={clsx(
+                     "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all shadow-sm",
+                     featured 
+                       ? "bg-amber-500 text-white hover:bg-amber-600 hover:shadow-amber-200"
+                       : "bg-white border border-slate-200 text-slate-700 hover:border-amber-300 hover:text-amber-700"
+                   )}
+                   onClick={(e) => e.stopPropagation()}
+                 >
+                   <Download className="h-4 w-4" />
+                   {featured && "Download"}
+                 </a>
+               )
+             )}
+          </div>
         </div>
       </div>
     </article>
