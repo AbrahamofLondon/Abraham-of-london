@@ -2,32 +2,50 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { createClient } from "@supabase/supabase-js";
+import pkg from 'pg'; // Use standard PG driver for Neon integration
+const { Pool } = pkg;
 import Layout from "@/components/Layout";
-import { Users, Zap, Clock, ExternalLink } from "lucide-react"; // Removed unused 'Shield'
+import { Users, Zap, Clock, ExternalLink } from "lucide-react";
 
 type DashboardProps = {
   members: any[];
   intakes: any[];
 };
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
-
 export const getServerSideProps: GetServerSideProps = async () => {
-  const [membersRes, intakesRes] = await Promise.all([
-    supabase.from("inner_circle_members").select("*").order("created_at", { ascending: false }),
-    supabase.from("strategy_room_intakes").select("*").order("created_at", { ascending: false }),
-  ]);
+  // PROPER FIX: Check for Neon DATABASE_URL, not Supabase variables
+  if (!process.env.DATABASE_URL) {
+    console.error("❌ Critical: DATABASE_URL is missing in environment.");
+    return { props: { members: [], intakes: [] } };
+  }
 
-  return {
-    props: {
-      members: membersRes.data || [],
-      intakes: intakesRes.data || [],
-    },
-  };
+  // Initialize Neon Connection Pool
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+  try {
+    /**
+     * Parallel fetch from Neon PostgreSQL
+     * We query both the members table (Shorts) and the new strategic intakes table.
+     */
+    const [membersRes, intakesRes] = await Promise.all([
+      pool.query("SELECT * FROM inner_circle_members ORDER BY created_at DESC"),
+      pool.query("SELECT * FROM strategy_room_intakes ORDER BY created_at DESC")
+    ]);
+
+    // Mandatory: Close the pool in serverless environments to prevent connection leaks
+    await pool.end();
+
+    return {
+      props: {
+        members: membersRes.rows || [],
+        intakes: intakesRes.rows || [],
+      },
+    };
+  } catch (error) {
+    console.error("🔥 Neon Database Fetch Error:", error);
+    // Graceful fallback to prevent build failure
+    return { props: { members: [], intakes: [] } };
+  }
 };
 
 const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
@@ -38,6 +56,7 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
       </Head>
 
       <main className="min-h-screen bg-[#050609] text-white p-6 md:p-12">
+        {/* HEADER SECTION */}
         <header className="max-w-7xl mx-auto mb-12 border-b border-white/10 pb-8 flex justify-between items-end">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/60 italic mb-2">
@@ -56,6 +75,8 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
         </header>
 
         <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-10">
+          
+          {/* COLUMN 1: INNER CIRCLE SHORTS (MEMBERS) */}
           <section className="lg:col-span-1 space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-blue-400" />
@@ -79,6 +100,7 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
             </div>
           </section>
 
+          {/* COLUMN 2 & 3: STRATEGIC INTAKES */}
           <section className="lg:col-span-2 space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <Zap className="w-5 h-5 text-amber-500" />
@@ -112,7 +134,6 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
                     </div>
                   </div>
 
-                  {/* Fixed unescaped double quotes below using &quot; */}
                   <div className="mt-6 bg-black/40 rounded-xl p-4 border border-white/5 italic">
                     <p className="text-[10px] uppercase text-amber-500/60 mb-2 font-black tracking-[0.2em] not-italic">Decision Anchor</p>
                     <p className="text-sm text-gray-300 leading-relaxed">&quot;{i.decision_statement}&quot;</p>
