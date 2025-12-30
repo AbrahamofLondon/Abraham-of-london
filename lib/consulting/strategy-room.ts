@@ -3,7 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
-// --- TYPES ---
+/**
+ * 1. DATA STRUCTURES & SCHEMAS
+ * Defines the strict interface for intake data and scoring results.
+ */
 export type StrategyRoomIntakePayload = {
   meta: {
     source: "web" | "inner-circle" | "referral";
@@ -63,20 +66,23 @@ type ScoreBreakdown = {
   total: number;
 };
 
-// --- DB CLIENT WITH WORKAROUND ---
-// Only initializes if keys are present, preventing runtime crashes in local dev.
+/**
+ * 2. INFRASTRUCTURE INITIALIZATION
+ * Uses environment variables for Neon/PostgreSQL (via Supabase client logic).
+ */
 const supabase = (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY)
   ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
   : null;
 
-// --- PERSISTENCE & NOTIFICATION LOGIC ---
-
 /**
- * ARCHIVE INTAKE:
- * Attempts Supabase persistence. If DB is offline or keys missing, 
- * fails over to local File System and Console Logs.
+ * 3. PERSISTENCE LAYER
+ * Attempts Neon storage with a robust "Fail-Open" to local logs if the DB is offline.
  */
-export async function archiveIntake(payload: StrategyRoomIntakePayload, result: StrategyRoomIntakeResult, score: number) {
+export async function archiveIntake(
+  payload: StrategyRoomIntakePayload, 
+  result: StrategyRoomIntakeResult, 
+  score: number
+) {
   const intakeData = {
     full_name: payload.contact.fullName,
     email: payload.contact.email,
@@ -88,18 +94,18 @@ export async function archiveIntake(payload: StrategyRoomIntakePayload, result: 
     created_at: new Date().toISOString(),
   };
 
-  // 1. Attempt Supabase Persistence
+  // Primary: Production Database
   if (supabase) {
     try {
       const { error } = await supabase.from('strategy_room_intakes').insert([intakeData]);
       if (!error) return; 
-      console.error("⚠️ Supabase insertion failed, triggering FS backup:", error.message);
+      console.error("⚠️ Neon/Supabase error, triggering FS backup:", error.message);
     } catch (err) {
-      console.error("⚠️ Supabase connection failed, triggering FS backup.");
+      console.error("⚠️ Database connection failed. Data redirected to local logs.");
     }
   }
 
-  // 2. Fallback: Local FS / Console Redundancy
+  // Fallback: File System / Console Audit Trail
   const logEntry = `[INTAKE_BACKUP][${intakeData.status.toUpperCase()}] ${JSON.stringify(intakeData)}\n`;
   console.log(logEntry);
   
@@ -108,28 +114,32 @@ export async function archiveIntake(payload: StrategyRoomIntakePayload, result: 
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
     fs.appendFileSync(path.join(backupDir, 'intakes.log'), logEntry);
   } catch (e) {
-    // Fail silently on FS to ensure API response is not blocked
+    // Fail silently to ensure the API response is never blocked by IO errors.
   }
 }
 
 /**
- * DISCORD NOTIFICATION:
- * Real-time alerting for the Board with high-signal context.
+ * 4. NOTIFICATION LAYER
+ * High-fidelity Discord alerts for immediate board oversight.
  */
-export async function notifyDiscord(payload: StrategyRoomIntakePayload, score: number, status: string) {
+export async function notifyDiscord(
+  payload: StrategyRoomIntakePayload, 
+  score: number, 
+  status: string
+) {
   const webhookUrl = process.env.DISCORD_STRATEGY_ROOM_WEBHOOK;
   if (!webhookUrl) return;
 
   const embed = {
     title: `Strategic Intake: ${status === 'accepted' ? '✅ ACCEPTED' : '🛑 DECLINED'}`,
-    color: status === 'accepted' ? 0xD4AF37 : 0x444444, // Gold or Gray
+    color: status === 'accepted' ? 0xD4AF37 : 0x444444,
     fields: [
       { name: "Principal", value: payload.contact.fullName, inline: true },
       { name: "Organisation", value: payload.contact.organisation, inline: true },
       { name: "Audit Score", value: `${score}/25`, inline: true },
-      { name: "Decision Statement", value: payload.decision.statement }
+      { name: "Decision Statement", value: `*${payload.decision.statement}*` }
     ],
-    footer: { text: "Abraham of London Strategic Engine" },
+    footer: { text: "Abraham of London · Strategic Engine" },
     timestamp: new Date().toISOString()
   };
 
@@ -140,55 +150,55 @@ export async function notifyDiscord(payload: StrategyRoomIntakePayload, score: n
       body: JSON.stringify({ embeds: [embed] }) 
     });
   } catch (err) {
-    console.error("❌ Discord Notification Failed");
+    console.error("❌ Discord Notification delivery failed.");
   }
 }
 
-// --- EVALUATION ENGINE ---
-
+/**
+ * 5. EVALUATION ENGINE
+ * Filters intakes based on hard gates and weighted audit scores.
+ */
 export function evaluateIntake(payload: StrategyRoomIntakePayload): StrategyRoomIntakeResult {
-  // Hard gates (Fail-closed security posture)
+  // Hard gates: Protect the room from low-gravity or exploratory requests.
   if (payload.authority.hasAuthority === "No") {
-    return { ok: false, status: "declined", message: "This environment requires decision authority." };
+    return { ok: false, status: "declined", message: "This room requires decision authority." };
   }
   if (!payload.declarationAccepted) {
-    return { ok: false, status: "declined", message: "Declaration acceptance is required." };
+    return { ok: false, status: "declined", message: "Strategic declaration is required." };
   }
   if (payload.readiness.readyForUnpleasantDecision === "No" || payload.readiness.willingAccountability === "No") {
-    return { ok: false, status: "declined", message: "Commitment to outcome and execution is required." };
+    return { ok: false, status: "declined", message: "Commitment to outcomes and execution is mandatory." };
   }
 
-  const b = computeScore(payload);
+  const scoreData = computeScore(payload);
   const threshold = 16; 
 
-  if (b.total < threshold) {
+  if (scoreData.total < threshold) {
     return {
       ok: false,
       status: "declined",
-      message: "A Strategy Room would not be productive at this stage. Please refine your decision statement and constraints using the Strategic Frameworks provided.",
+      message: "At this stage, a Strategy Room would not be productive. Please refine your decision logic via our Frameworks before re-applying.",
     };
   }
 
   return {
     ok: true,
     status: "accepted",
-    message: "Accepted. Pre-read materials and scheduling protocols have been dispatched to your email.",
+    message: "Accepted. Strategic pre-read materials have been dispatched to your email address.",
     nextUrl: "/resources/strategic-frameworks",
   };
 }
 
-// --- SCORING UTILITIES ---
-
+/**
+ * 6. SCORING UTILITIES
+ * Measures the "signal" of the text provided by the principal.
+ */
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function textLen(s: string | null | undefined) {
-  return (s || "").trim().length;
-}
-
 function scoreTextSignal(s: string, minLen: number, maxScore: number) {
-  const len = textLen(s);
+  const len = (s || "").trim().length;
   if (len <= minLen) return 0;
   if (len >= minLen * 3) return maxScore;
   const ratio = len / (minLen * 3);
@@ -198,16 +208,12 @@ function scoreTextSignal(s: string, minLen: number, maxScore: number) {
 export function computeScore(payload: StrategyRoomIntakePayload): ScoreBreakdown {
   const authorityScore = payload.authority.hasAuthority === "Yes, fully" ? 5 : 3;
   const mandateScore = clamp(scoreTextSignal(payload.authority.mandate, 60, 5), 0, 5);
-
   const decisionScore = clamp(scoreTextSignal(payload.decision.statement, 60, 5), 0, 5);
   const reasonsScore = clamp(payload.decision.stuckReasons.length, 1, 5);
-
   const tradeOffScore = clamp(scoreTextSignal(payload.constraints.avoidedTradeOff, 45, 5), 0, 5);
   const unacceptableScore = clamp(scoreTextSignal(payload.constraints.unacceptableOutcome, 45, 5), 0, 5);
-
   const delayScore = clamp(payload.timeCost.costOfDelay.length, 1, 5);
   const breaksScore = clamp(scoreTextSignal(payload.timeCost.breaksFirst, 35, 5), 0, 5);
-
   const whyNowScore = clamp(scoreTextSignal(payload.readiness.whyNow, 45, 5), 0, 5);
 
   const authorityBucket = clamp(Math.round((authorityScore + mandateScore) / 2), 0, 5);
@@ -216,14 +222,12 @@ export function computeScore(payload: StrategyRoomIntakePayload): ScoreBreakdown
   const costDelayBucket = clamp(Math.round((delayScore + breaksScore) / 2), 0, 5);
   const readinessBucket = clamp(whyNowScore, 0, 5);
 
-  const total = authorityBucket + decisionGravityBucket + constraintsBucket + costDelayBucket + readinessBucket;
-
   return {
     authority: authorityBucket,
     decisionGravity: decisionGravityBucket,
     constraints: constraintsBucket,
     costDelay: costDelayBucket,
     readiness: readinessBucket,
-    total,
+    total: authorityBucket + decisionGravityBucket + constraintsBucket + costDelayBucket + readinessBucket,
   };
 }
