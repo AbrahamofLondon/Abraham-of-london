@@ -4,7 +4,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { createClient } from "@supabase/supabase-js";
 import Layout from "@/components/Layout";
-import { Shield, Users, Zap, Clock, ExternalLink } from "lucide-react";
+import { Users, Zap, Clock, ExternalLink } from "lucide-react"; // Removed unused 'Shield'
 
 type DashboardProps = {
   members: any[];
@@ -17,7 +17,6 @@ const supabase = createClient(
 );
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  // Parallel fetch for enterprise performance
   const [membersRes, intakesRes] = await Promise.all([
     supabase.from("inner_circle_members").select("*").order("created_at", { ascending: false }),
     supabase.from("strategy_room_intakes").select("*").order("created_at", { ascending: false }),
@@ -39,7 +38,6 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
       </Head>
 
       <main className="min-h-screen bg-[#050609] text-white p-6 md:p-12">
-        {/* HEADER SECTION */}
         <header className="max-w-7xl mx-auto mb-12 border-b border-white/10 pb-8 flex justify-between items-end">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/60 italic mb-2">
@@ -58,8 +56,6 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
         </header>
 
         <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-10">
-          
-          {/* COLUMN 1: INNER CIRCLE SHORTS (MEMBERS) */}
           <section className="lg:col-span-1 space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-blue-400" />
@@ -77,14 +73,12 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
                   </div>
                   <div className="mt-3 flex items-center justify-between text-[10px] text-gray-500">
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(m.created_at).toLocaleDateString()}</span>
-                    <span className="font-mono text-[8px] opacity-0 group-hover:opacity-100 transition-opacity">IP: {m.last_ip || "Locked"}</span>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* COLUMN 2 & 3: STRATEGIC INTAKES */}
           <section className="lg:col-span-2 space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <Zap className="w-5 h-5 text-amber-500" />
@@ -99,7 +93,6 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
                 <div key={i.id} className={`relative overflow-hidden border p-6 rounded-2xl transition-all ${
                   i.status === 'accepted' ? 'border-amber-500/20 bg-amber-500/[0.02]' : 'border-white/5 bg-white/[0.01]'
                 }`}>
-                  {/* Status Indicator Bar */}
                   <div className={`absolute left-0 top-0 bottom-0 w-1 ${i.status === 'accepted' ? 'bg-amber-500' : 'bg-gray-800'}`} />
 
                   <div className="flex justify-between items-start">
@@ -112,17 +105,17 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
                           {i.status}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{i.organisation} • {i.email_hash ? "Hashed Entry" : "Legacy Entry"}</p>
+                      <p className="text-xs text-gray-500 mt-1">{i.organisation}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-mono font-black text-white">{i.score}<span className="text-[10px] text-gray-600">/25</span></p>
-                      <p className="text-[9px] uppercase font-bold text-gray-600 tracking-tighter">Audit Score</p>
                     </div>
                   </div>
 
+                  {/* Fixed unescaped double quotes below using &quot; */}
                   <div className="mt-6 bg-black/40 rounded-xl p-4 border border-white/5 italic">
                     <p className="text-[10px] uppercase text-amber-500/60 mb-2 font-black tracking-[0.2em] not-italic">Decision Anchor</p>
-                    <p className="text-sm text-gray-300 leading-relaxed">"{i.decision_statement}"</p>
+                    <p className="text-sm text-gray-300 leading-relaxed">&quot;{i.decision_statement}&quot;</p>
                   </div>
 
                   <div className="mt-6 flex gap-4 pt-4 border-t border-white/5">

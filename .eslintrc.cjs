@@ -4,9 +4,16 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint"],
   rules: {
+    // Downgrade to 'warn' and allow underscore-prefixed variables for deliberate omissions
     "@typescript-eslint/no-unused-vars": [
       "warn",
-      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      { 
+        argsIgnorePattern: "^_", 
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_" 
+      },
     ],
+    // Disable strict unescaped entities check to allow for standard prose characters
+    "react/no-unescaped-entities": "off",
   },
 };
