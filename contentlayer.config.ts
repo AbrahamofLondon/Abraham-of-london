@@ -12,8 +12,8 @@ type RawMeta = { flattenedPath: string };
 type AnyDoc = {
   _raw: RawMeta;
   slug?: string | null;
-  canonicalUrl?: string | null; // Optional explicit canonical route
-  href?: string | null;         // CTA only
+  canonicalUrl?: string | null;
+  href?: string | null;
   coverImage?: string | null;
   coverimage?: string | null;
   readTime?: string | null;
@@ -57,38 +57,24 @@ function stripIndex(p: string): string {
 function deriveSegmentFromFlattenedPath(flattenedPath: string, basePath: string): string {
   const fp = stripIndex(toPosix(flattenedPath || ""));
   const base = trimSlashes(basePath);
-
   if (!base) return fp;
   if (fp === base) return "";
   if (fp.startsWith(`${base}/`)) return fp.slice(base.length + 1);
-  return fp; // fallback
+  return fp;
 }
 
-/**
- * Canonical URL rules:
- * 0) doc.canonicalUrl (explicit override)
- * 1) doc.slug (manual slug)
- * 2) flattenedPath (file system based)
- */
 function getDocUrl(doc: AnyDoc, basePath: string): string {
   const base = trimSlashes(basePath);
-
-  // 0) Explicit canonical URL
   if (isNonEmptyString(doc.canonicalUrl)) {
     const explicit = normalizeUrl(doc.canonicalUrl);
-    // Only allow if it matches the expected base path logic to prevent accidental cross-linking
     if (explicit === `/${base}` || explicit.startsWith(`/${base}/`)) return explicit;
   }
-
-  // 1) Slug
   if (isNonEmptyString(doc.slug)) {
     const provided = trimSlashes(doc.slug);
     if (provided === base) return `/${base}`;
     if (provided.startsWith(`${base}/`)) return normalizeUrl(`/${provided}`);
     return normalizeUrl(`${base}/${provided}`);
   }
-
-  // 2) flattenedPath
   const seg = deriveSegmentFromFlattenedPath(doc._raw?.flattenedPath ?? "", base);
   return seg ? normalizeUrl(`${base}/${seg}`) : normalizeUrl(base);
 }
@@ -99,7 +85,6 @@ function getDocUrl(doc: AnyDoc, basePath: string): string {
 
 function withAppAliases(esbuildOptions: any) {
   const root = process.cwd();
-
   esbuildOptions.alias = {
     ...(esbuildOptions.alias || {}),
     "@": root,
@@ -108,11 +93,7 @@ function withAppAliases(esbuildOptions: any) {
     "@/types": path.join(root, "types"),
     "@/content": path.join(root, "content"),
   };
-
-  esbuildOptions.resolveExtensions = [
-    ".tsx", ".ts", ".jsx", ".js", ".json", ".mdx", ".md",
-  ];
-
+  esbuildOptions.resolveExtensions = [".tsx", ".ts", ".jsx", ".js", ".json", ".mdx", ".md"];
   return esbuildOptions;
 }
 
@@ -125,12 +106,12 @@ const commonFields = {
   date: { type: "date", required: false },
   slug: { type: "string", required: false },
   canonicalUrl: { type: "string", required: false },
-  href: { type: "string", required: false }, // CTA link
+  href: { type: "string", required: false },
   type: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
   coverImage: { type: "string", required: false },
-  coverimage: { type: "string", required: false }, // Legacy compat
+  coverimage: { type: "string", required: false },
   tags: { type: "list", of: { type: "string" }, required: false },
   draft: { type: "boolean", required: false, default: false },
   featured: { type: "boolean", required: false, default: false },
@@ -144,16 +125,12 @@ const commonFields = {
 
 function computedCommon(base: string) {
   return {
-    url: {
-      type: "string",
-      resolve: (doc: AnyDoc) => getDocUrl(doc, base),
-    },
+    url: { type: "string", resolve: (doc: AnyDoc) => getDocUrl(doc, base) },
     normalizedCoverImage: {
       type: "string",
       resolve: (doc: AnyDoc) =>
         (typeof doc.coverImage === "string" && doc.coverImage.trim()) ||
-        (typeof doc.coverimage === "string" && doc.coverimage.trim()) ||
-        "",
+        (typeof doc.coverimage === "string" && doc.coverimage.trim()) || "",
     },
   } as const;
 }
@@ -165,8 +142,7 @@ function computedReadTime() {
       resolve: (doc: AnyDoc) =>
         (typeof doc.readTime === "string" && doc.readTime.trim()) ||
         (typeof doc.readtime === "string" && doc.readtime.trim()) ||
-        (typeof doc.readingTime === "string" && doc.readingTime.trim()) ||
-        "",
+        (typeof doc.readingTime === "string" && doc.readingTime.trim()) || "",
     },
   } as const;
 }
@@ -176,37 +152,22 @@ function computedCanonicalPdfHref() {
     canonicalPdfHref: {
       type: "string",
       resolve: (doc: DownloadDoc) => {
-        // Priority order for download link sources
         const pick =
           (typeof doc.pdfPath === "string" && doc.pdfPath.trim()) ||
           (typeof doc.downloadFile === "string" && doc.downloadFile.trim()) ||
           (typeof doc.fileUrl === "string" && doc.fileUrl.trim()) ||
-          (typeof doc.downloadUrl === "string" && doc.downloadUrl.trim()) ||
-          "";
-
+          (typeof doc.downloadUrl === "string" && doc.downloadUrl.trim()) || "";
         const file = typeof doc.file === "string" && doc.file.trim() ? doc.file.trim() : "";
-
-        // 1. Allow remote URLs (S3, etc)
         if (/^https?:\/\//i.test(pick)) return pick;
-
-        // 2. Handle paths starting with slash (explicit path)
         if (pick) {
           const clean = pick.startsWith("/") ? pick : `/${pick}`;
-          // If it looks like a filename only, assume it is in the new downloads folder
-          if (!clean.includes("/", 1)) {
-             return `/downloads${clean}`;
-          }
-          // If it starts with /assets/downloads (legacy), allow it but prefer /downloads if moving forward
+          if (!clean.includes("/", 1)) return `/downloads${clean}`;
           return clean;
         }
-
-        // 3. Handle 'file' field (legacy behavior: usually just a filename)
         if (file) {
-          const base = path.posix.basename(file);
-          // Default to the new safe zone for simple filenames
-          return base ? `/downloads/${base}` : "";
+          const b = path.posix.basename(file);
+          return b ? `/downloads/${b}` : "";
         }
-
         return "";
       },
     },
@@ -242,10 +203,7 @@ export const Post = defineDocumentType(() => ({
     authorNote: { type: "string", required: false },
     layout: { type: "string", required: false },
   },
-  computedFields: {
-    ...computedCommon("blog"),
-    ...computedReadTime(),
-  },
+  computedFields: { ...computedCommon("blog"), ...computedReadTime() },
 }));
 
 export const Resource = defineDocumentType(() => ({
@@ -264,10 +222,7 @@ export const Resource = defineDocumentType(() => ({
     downloadUrl: { type: "string", required: false },
     fileSize: { type: "string", required: false },
   },
-  computedFields: {
-    ...computedCommon("resources"),
-    ...computedReadTime(),
-  },
+  computedFields: { ...computedCommon("resources"), ...computedReadTime() },
 }));
 
 export const Download = defineDocumentType(() => ({
@@ -283,19 +238,14 @@ export const Download = defineDocumentType(() => ({
     readtime: { type: "string", required: false },
     readingTime: { type: "string", required: false },
     subtitle: { type: "string", required: false },
-    file: { type: "string", required: false }, // filename
-    pdfPath: { type: "string", required: false }, // explicit path
+    file: { type: "string", required: false },
+    pdfPath: { type: "string", required: false },
     fileSize: { type: "string", required: false },
-    // legacy
     downloadFile: { type: "string", required: false },
     fileUrl: { type: "string", required: false },
     downloadUrl: { type: "string", required: false },
   },
-  computedFields: {
-    ...computedCommon("downloads"),
-    ...computedReadTime(),
-    ...computedCanonicalPdfHref(),
-  },
+  computedFields: { ...computedCommon("downloads"), ...computedReadTime(), ...computedCanonicalPdfHref() },
 }));
 
 export const Book = defineDocumentType(() => ({
@@ -313,10 +263,7 @@ export const Book = defineDocumentType(() => ({
     isbn: { type: "string", required: false },
     category: { type: "string", required: false },
   },
-  computedFields: {
-    ...computedCommon("books"),
-    ...computedReadTime(),
-  },
+  computedFields: { ...computedCommon("books"), ...computedReadTime() },
 }));
 
 export const Event = defineDocumentType(() => ({
@@ -330,9 +277,7 @@ export const Event = defineDocumentType(() => ({
     location: { type: "string", required: false },
     registrationUrl: { type: "string", required: false },
   },
-  computedFields: {
-    ...computedCommon("events"),
-  },
+  computedFields: { ...computedCommon("events") },
 }));
 
 export const Print = defineDocumentType(() => ({
@@ -346,22 +291,15 @@ export const Print = defineDocumentType(() => ({
     price: { type: "string", required: false },
     available: { type: "boolean", required: false, default: true },
   },
-  computedFields: {
-    ...computedCommon("prints"),
-  },
+  computedFields: { ...computedCommon("prints") },
 }));
 
 export const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    ...commonFields,
-    author: { type: "string", required: false },
-  },
-  computedFields: {
-    ...computedCommon("strategy"),
-  },
+  fields: { ...commonFields, author: { type: "string", required: false } },
+  computedFields: { ...computedCommon("strategy") },
 }));
 
 export const Canon = defineDocumentType(() => ({
@@ -381,10 +319,7 @@ export const Canon = defineDocumentType(() => ({
     readtime: { type: "string", required: false },
     readingTime: { type: "string", required: false },
   },
-  computedFields: {
-    ...computedCommon("canon"),
-    ...computedReadTime(),
-  },
+  computedFields: { ...computedCommon("canon"), ...computedReadTime() },
 }));
 
 export const Short = defineDocumentType(() => ({
@@ -400,10 +335,7 @@ export const Short = defineDocumentType(() => ({
     readingTime: { type: "string", required: false },
     published: { type: "boolean", required: false, default: true },
   },
-  computedFields: {
-    ...computedCommon("shorts"),
-    ...computedReadTime(),
-  },
+  computedFields: { ...computedCommon("shorts"), ...computedReadTime() },
 }));
 
 /* -------------------------------------------------------------------------- */
@@ -411,7 +343,6 @@ export const Short = defineDocumentType(() => ({
 /* -------------------------------------------------------------------------- */
 
 export default makeSource({
-  // Strictly target the 'content' directory to avoid scanning public assets
   contentDirPath: path.join(process.cwd(), "content"),
   documentTypes: [Post, Download, Book, Event, Print, Strategy, Resource, Canon, Short],
   mdx: {

@@ -14,7 +14,7 @@ type UltimatePurposeOfManDocumentProps = {
   coverImagePath: string;
 };
 
-// Font URLs (Direct from Google Fonts CDN)
+// Font URLs
 const FONTS = {
   AoLSerif_Regular: "https://fonts.gstatic.com/s/playfairdisplay/v30/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYhig.woff2",
   AoLSerif_Italic: "https://fonts.gstatic.com/s/playfairdisplay/v30/nuFkD-vYSZviVYUb_rj3ij__anPXDTzYhCBN.woff2",
@@ -23,17 +23,16 @@ const FONTS = {
 };
 
 async function downloadFont(url: string, destPath: string) {
-  if (fsSync.existsSync(destPath)) return; // Skip if exists
-
+  if (fsSync.existsSync(destPath)) return;
   console.log(`⬇️ Downloading font to ${path.basename(destPath)}...`);
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch font: ${res.statusText}`);
     const arrayBuffer = await res.arrayBuffer();
-    // FIX: Cast Buffer to Uint8Array to resolve type error
+    // Use unknown bridge here as well to satisfy fs.writeFile
     await fs.writeFile(destPath, Buffer.from(arrayBuffer) as unknown as Uint8Array);
   } catch (e) {
-    console.warn(`⚠️ Warning: Could not download font from ${url}. Continuing...`);
+    console.warn(`⚠️ Warning: Could not download font from ${url}.`);
   }
 }
 
@@ -41,25 +40,11 @@ async function prepareFonts() {
   const fontsDir = path.join(process.cwd(), "public", "fonts");
   await fs.mkdir(fontsDir, { recursive: true });
 
-  // 1. Download missing fonts (Self-healing)
   await downloadFont(FONTS.AoLSerif_Regular, path.join(fontsDir, "AoLSerif-Regular.woff2"));
   await downloadFont(FONTS.AoLSerif_Italic, path.join(fontsDir, "AoLSerif-Italic.woff2"));
   await downloadFont(FONTS.AoLSans_Regular, path.join(fontsDir, "AoLSans-Regular.woff2"));
   await downloadFont(FONTS.AoLMono_Regular, path.join(fontsDir, "AoLMono-Regular.woff2"));
 
-  // 2. Register them explicitly for Node.js rendering
-  // We prefer the .woff2 files we just downloaded, or .ttf if you manually added them
-  const registerIfExists = (family: string, file: string, fallback: string) => {
-    const filePath = path.join(fontsDir, file);
-    if (fsSync.existsSync(filePath)) {
-      Font.register({ family, src: filePath });
-    } else {
-      console.warn(`⚠️ Font ${file} missing. Using fallback ${fallback}.`);
-      Font.register({ family, src: fallback });
-    }
-  };
-
-  // Complex registration for Serif (Regular + Italic)
   const serifReg = path.join(fontsDir, "AoLSerif-Regular.woff2");
   const serifItal = path.join(fontsDir, "AoLSerif-Italic.woff2");
   
@@ -75,53 +60,44 @@ async function prepareFonts() {
     Font.register({ family: "AoLSerif", src: "Times-Roman" });
   }
 
-  // Simple registration for others
-  registerIfExists("AoLSans", "AoLSans-Regular.woff2", "Helvetica");
-  registerIfExists("AoLMono", "AoLMono-Regular.woff2", "Courier");
-}
-
-async function ensureDir(dir: string) {
-  await fs.mkdir(dir, { recursive: true });
-}
-
-function resolveCoverDiskPath(): string {
-  return path.join(process.cwd(), "public", "assets", "images", "purpose-cover.jpg");
+  Font.register({ family: "AoLSans", src: "Helvetica" });
+  Font.register({ family: "AoLMono", src: "Courier" });
 }
 
 async function main() {
   const outDir = path.join(process.cwd(), "public", "downloads");
-  await ensureDir(outDir);
+  await fs.mkdir(outDir, { recursive: true });
 
-  // 1. Setup fonts
   await prepareFonts();
 
-  // 2. Resolve assets
-  const coverDiskPath = resolveCoverDiskPath();
-  
-  // Fallback if cover doesn't exist
+  const coverDiskPath = path.join(process.cwd(), "public", "assets", "images", "purpose-cover.jpg");
   let coverToUse = coverDiskPath;
   try {
     await fs.access(coverDiskPath);
   } catch {
-    console.warn("⚠️ Primary cover not found, using fallback.");
     coverToUse = path.join(process.cwd(), "public", "assets", "images", "writing-desk.webp");
   }
 
-  // 3. Create element
   const element = React.createElement(
     UltimatePurposeOfManDocument as unknown as React.ComponentType<UltimatePurposeOfManDocumentProps>,
     { coverImagePath: coverToUse }
   ) as unknown as React.ReactElement<DocumentProps>;
 
-  // 4. Render
   console.log("📄 Generating PDF...");
   const instance = pdf(element);
-  const buffer = await instance.toBuffer();
+  const stream = await instance.toBuffer();
+
+  const chunks: any[] = [];
+  // @ts-ignore
+  for await (const chunk of stream) {
+    chunks.push(chunk as unknown as Uint8Array);
+  }
+  const finalBuffer = Buffer.concat(chunks);
 
   const outPath = path.join(outDir, "ultimate-purpose-of-man-special.pdf");
   
-  // 5. Save
-  await fs.writeFile(destPath, Buffer.from(arrayBuffer) as unknown as Uint8Array);
+  // FINAL FIX: Use unknown as the bridge to Uint8Array to satisfy the writeFile type check
+  await fs.writeFile(outPath, finalBuffer as unknown as Uint8Array);
 
   console.log(`✅ PDF generated: ${outPath}`);
 }

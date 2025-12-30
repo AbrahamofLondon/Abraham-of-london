@@ -31,7 +31,11 @@
         "./.contentlayer/generated"
       ]
     },
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "types": [
+      "node",
+      "@netlify/functions"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -39,7 +43,8 @@
     "**/*.tsx",
     "**/*.d.ts",
     ".contentlayer/generated",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "netlify/**/*.ts"
   ],
   "exclude": [
     "node_modules",

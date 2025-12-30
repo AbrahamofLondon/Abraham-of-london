@@ -17,7 +17,6 @@ import {
 // 1. ASSETS & FONTS
 // ---------------------------------------------------------
 
-// Helper to load image as Buffer
 const loadImageBuffer = (relativePath: string) => {
   try {
     const fullPath = path.join(process.cwd(), "public", relativePath);
@@ -26,15 +25,9 @@ const loadImageBuffer = (relativePath: string) => {
   return null;
 };
 
-// Load Cover Image
 const coverBuffer = loadImageBuffer("assets/images/purpose-cover.jpg") || 
                     loadImageBuffer("assets/images/writing-desk.webp");
 
-// USE STANDARD FONTS (Guarantees perfect formatting & alignment)
-// We map your brand names to standard PDF fonts.
-// - AoLSerif -> Times-Roman (Professional Serif)
-// - AoLSans  -> Helvetica (Clean Sans)
-// - AoLMono  -> Courier (Technical Mono)
 Font.register({ family: "AoLSerif", src: "Times-Roman" });
 Font.register({ family: "AoLSerif", fontStyle: "italic", src: "Times-Italic" });
 Font.register({ family: "AoLSans", src: "Helvetica" });
@@ -57,7 +50,6 @@ const styles = StyleSheet.create({
   document: { backgroundColor: BRAND.bg },
   page: { paddingTop: 52, paddingBottom: 62, paddingHorizontal: 56, backgroundColor: BRAND.bg },
   
-  // Header / Footer
   topRail: {
     marginBottom: 14, paddingBottom: 10, borderBottomWidth: 0.7, borderBottomColor: BRAND.border,
     flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end",
@@ -69,10 +61,12 @@ const styles = StyleSheet.create({
   
   footer: {
     position: "absolute", bottom: 28, left: 56, right: 56, flexDirection: "row", justifyContent: "space-between",
-    fontFamily: "AoLSans", fontSize: 9, color: BRAND.muted, borderTopWidth: 0.6, borderTopColor: BRAND.border, paddingTop: 8,
+    borderTopWidth: 0.6, borderTopColor: BRAND.border, paddingTop: 8,
   },
+  // ADDED MISSING STYLES HERE
+  smallBrand: { fontFamily: "AoLSans", fontSize: 8, color: BRAND.muted, textTransform: "uppercase", letterSpacing: 1 },
+  pageNumber: { fontFamily: "AoLSans", fontSize: 8, color: BRAND.muted },
   
-  // Cover
   coverPage: { padding: 0, backgroundColor: BRAND.bg },
   coverImageWrapper: { width: "100%", height: "55%" },
   coverImage: { width: "100%", height: "100%", objectFit: "cover" },
@@ -85,7 +79,6 @@ const styles = StyleSheet.create({
   coverRule: { height: 1, width: 160, backgroundColor: "rgba(212,175,55,0.45)", marginBottom: 16 },
   coverTagline: { fontFamily: "AoLSans", fontSize: 10, color: BRAND.muted, lineHeight: 1.55, maxWidth: "84%" },
 
-  // Content
   h1: { fontFamily: "AoLSerif", fontSize: 22, color: BRAND.white, marginBottom: 6 },
   h2: { fontFamily: "AoLSerif", fontSize: 15, color: BRAND.white, marginTop: 16, marginBottom: 6 },
   h3: { fontFamily: "AoLSerif", fontSize: 12.5, color: BRAND.ink, marginTop: 10, marginBottom: 3 },
@@ -135,7 +128,6 @@ const Footer = () => (
 
 const UltimatePurposeOfManPdf = ({ coverImage }: { coverImage: any }) => (
   <Document title="The Ultimate Purpose of Man">
-    {/* --- COVER --- */}
     <Page size="A4" style={styles.coverPage}>
       <View style={styles.coverImageWrapper}>
         {coverImage && <Image src={coverImage} style={styles.coverImage} />}
@@ -153,7 +145,6 @@ const UltimatePurposeOfManPdf = ({ coverImage }: { coverImage: any }) => (
       </View>
     </Page>
 
-    {/* --- PAGE 1: Intro & Garden --- */}
     <Page size="A4" style={styles.page}>
       <TopRail eyebrow="Editorial · Foundations" title="Purpose is not a sentiment" />
       <Text style={styles.h1}>INTRODUCTION — PURPOSE IS NOT A SENTIMENT</Text>
@@ -198,7 +189,6 @@ const UltimatePurposeOfManPdf = ({ coverImage }: { coverImage: any }) => (
       <Footer />
     </Page>
 
-    {/* --- PAGE 2: Ancient Lives --- */}
     <Page size="A4" style={styles.page}>
       <TopRail eyebrow="Editorial · Pattern Recognition" title="Purpose under pressure" />
       <Text style={styles.h2}>2. ANCIENT LIVES — WHAT PURPOSE LOOKS LIKE UNDER PRESSURE</Text>
@@ -233,7 +223,6 @@ const UltimatePurposeOfManPdf = ({ coverImage }: { coverImage: any }) => (
       <Footer />
     </Page>
 
-    {/* --- PAGE 3: Jesus & Worldviews --- */}
     <Page size="A4" style={styles.page}>
       <TopRail eyebrow="Editorial · The Blueprint" title="The Original Design" />
       <Text style={styles.h2}>3. JESUS — THE BLUEPRINT FOR HUMAN FUNCTION</Text>
@@ -274,7 +263,6 @@ const UltimatePurposeOfManPdf = ({ coverImage }: { coverImage: any }) => (
       <Footer />
     </Page>
 
-    {/* --- PAGE 4: Christianity & Modern World --- */}
     <Page size="A4" style={styles.page}>
       <TopRail eyebrow="Editorial · Civilisation" title="Purpose becomes public" />
       <Text style={styles.h2}>5. WHY CHRISTIANITY BUILT THE MODERN WORLD</Text>
@@ -305,7 +293,6 @@ const UltimatePurposeOfManPdf = ({ coverImage }: { coverImage: any }) => (
       <Footer />
     </Page>
 
-    {/* --- PAGE 5: Conclusion --- */}
     <Page size="A4" style={styles.page}>
       <TopRail eyebrow="Editorial · Conclusion" title="The Whole Duty of Man" />
       <Text style={styles.h2}>6. ECCLESIASTES — THE TWO-SENTENCE BLUEPRINT</Text>
@@ -345,7 +332,7 @@ async function main() {
 
     console.log("📄 Generating Full PDF (Standard Fonts)...");
     
-    // Pass the Image Buffer, NOT a path string
+    // Pass the Image Buffer
     await renderToFile(<UltimatePurposeOfManPdf coverImage={coverBuffer} />, outFile);
     
     console.log(`✅ Success! PDF saved to: ${outFile}`);
