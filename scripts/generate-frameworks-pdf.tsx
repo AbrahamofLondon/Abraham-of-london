@@ -111,8 +111,10 @@ const FrameworkDossier = ({ f }: { f: Framework }) => (
 // 4. MAIN EXECUTION
 async function main() {
   const outDir = path.join(process.cwd(), "public", "downloads", "frameworks");
+  
+  // Ensure directory exists using Sync for absolute reliability in script context
   if (!fsSync.existsSync(outDir)) {
-    await fs.mkdir(outDir, { recursive: true });
+    fsSync.mkdirSync(outDir, { recursive: true });
   }
 
   console.log(`📚 Generating ${FRAMEWORKS.length} Framework Dossiers...`);
@@ -122,15 +124,21 @@ async function main() {
       const fileName = `${f.slug}.pdf`;
       const filePath = path.join(outDir, fileName);
       
-      const blob = await pdf(<FrameworkDossier f={f} />).toBuffer();
+      // 1. Generate the Web Stream (toBuffer() returns a ReadableStream in Node 18+)
+      const stream = await pdf(<FrameworkDossier f={f} />).toBuffer();
       
+      // 2. Aggregate chunks with Type Erasure to prevent prototype collisions
       const chunks: any[] = [];
-      // @ts-ignore
-      for await (const chunk of blob) {
-        chunks.push(chunk as unknown as Uint8Array);
+      // @ts-ignore - blob is a Web ReadableStream
+      for await (const chunk of stream) {
+        chunks.push(chunk);
       }
       
-      await fs.writeFile(filePath, Buffer.concat(chunks) as unknown as Uint8Array);
+      // 3. CONSOLIDATE & WRITE
+      // The double-cast (as unknown as any) bypasses the entries() iterator mismatch
+      // which causes the "map, filter, take, drop" error on Netlify/Windows.
+      const finalBuffer = Buffer.concat(chunks) as unknown as any;
+      fsSync.writeFileSync(filePath, finalBuffer);
       
       console.log(`   - Writing: ${fileName}`);
     } catch (err) {

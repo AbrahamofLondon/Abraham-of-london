@@ -312,9 +312,7 @@ async function main() {
     }
     const outFile = path.join(outDir, "ultimate-purpose-of-man-editorial.pdf");
 
-    console.log("📄 Generating Full PDF (Standard Fonts)...");
-    
-    // Pass the Image Buffer, NOT a path string
+    console.log("📄 Generating PDF...");
     const blob = await pdf(<UltimatePurposeOfManPdf coverImage={coverBuffer} />).toBuffer();
     
     const chunks: any[] = [];
@@ -322,7 +320,10 @@ async function main() {
     for await (const chunk of blob) {
       chunks.push(chunk as unknown as Uint8Array);
     }
-    fsSync.writeFileSync(outFile, Buffer.concat(chunks));
+
+    // THE FIX: Bridge through unknown to string to satisfy fsSync.writeFileSync
+    const finalData = Buffer.concat(chunks) as unknown as string;
+    fsSync.writeFileSync(outFile, finalData);
     
     console.log(`✅ Success! PDF saved to: ${outFile}`);
 
