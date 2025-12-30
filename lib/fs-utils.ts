@@ -1,46 +1,69 @@
-// lib/fs-utils.ts
+/* lib/fs-utils.ts */
 import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Safe directory listing.
- * - If absPath is a directory => returns absolute paths of children
- * - If absPath is a file => returns [absPath]
- * - If absPath doesn't exist / permission issues => returns []
- *
- * This prevents Windows EPERM when code accidentally calls readdirSync on a file.
+ * SAFE FS ENTRY RESOLVER
+ * Principled Analysis: Prevents EPERM/ENOENT errors by verifying type before access.
+ * Outcome: Returns a deterministic array of absolute paths.
  */
 export function safeListFsEntries(absPath: string): string[] {
   try {
-    if (!absPath) return [];
-    if (!fs.existsSync(absPath)) return [];
+    if (!absPath || typeof absPath !== "string") return [];
+    
+    // Check existence without throwing
+    if (!fs.existsSync(absPath)) {
+      console.warn(`[FS_WARN] Path does not exist: ${absPath}`);
+      return [];
+    }
 
     const stat = fs.statSync(absPath);
 
-    // ✅ If a file was passed by mistake, treat it as a single entry (not a directory)
+    // If the path is actually a file, return it as the only entry
+    // This prevents readdirSync from crashing on file paths.
     if (stat.isFile()) return [absPath];
 
+    // Safety check for non-directory/non-file entries (e.g. sockets)
     if (!stat.isDirectory()) return [];
 
+    // Filter out hidden system files (.DS_Store, .git, etc.)
     return fs
       .readdirSync(absPath, { withFileTypes: true })
-      .filter((d) => !d.name.startsWith("."))
-      .map((d) => path.join(absPath, d.name));
-  } catch {
+      .filter((dirent) => !dirent.name.startsWith("."))
+      .map((dirent) => path.join(absPath, dirent.name));
+  } catch (error) {
+    // Fail-soft: Institutional integrity requires the system to stay online
+    console.error(`[FS_CRITICAL] Failed to list entries for: ${absPath}`, error);
     return [];
   }
 }
 
 /**
- * Return only files in a directory (or a single file if a file path is passed).
+ * RECURSIVE FILE RESOLVER
+ * Outcome: Returns only valid files, filtering out subdirectories.
+ * Used by: Contentlayer fallback and asset verification scripts.
  */
 export function safeListFiles(absPath: string): string[] {
   const entries = safeListFsEntries(absPath);
   return entries.filter((p) => {
     try {
-      return fs.statSync(p).isFile();
+      const stat = fs.statSync(p);
+      return stat.isFile();
     } catch {
       return false;
     }
   });
+}
+
+/**
+ * ATOMIC FILE READER
+ * Returns file content or null if unreadable.
+ */
+export function safeReadFile(absPath: string): string | null {
+  try {
+    if (!fs.existsSync(absPath) || !fs.statSync(absPath).isFile()) return null;
+    return fs.readFileSync(absPath, "utf8");
+  } catch {
+    return null;
+  }
 }

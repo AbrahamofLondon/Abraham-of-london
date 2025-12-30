@@ -1,6 +1,7 @@
 /* middleware.ts */
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { combinedRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/server/rateLimit";
 
 const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
 
@@ -23,7 +24,6 @@ const SAFE_EXACT: string[] = [
   "/inner-circle/resend",
 ];
 
-// Slugs for the /canon/ route
 const PUBLIC_CANON = new Set<string>(["canon-campaign", "canon-master-index-preview"]);
 const FORCE_RESTRICTED_CANON = new Set<string>(["the-builders-catechism"]);
 
@@ -47,7 +47,7 @@ export async function middleware(req: NextRequest) {
   // PRIMARY ACCESS CHECK (Cookie-based)
   const hasAccess = req.cookies.get(INNER_CIRCLE_COOKIE_NAME)?.value === "true";
 
-  // 0) Safety Gates: Allow essential assets and public entry points
+  // 0) Safety Gates
   if (
     SAFE_PREFIXES.some((p) => pathname.startsWith(p)) || 
     SAFE_EXACT.includes(pathname) || 
@@ -56,13 +56,25 @@ export async function middleware(req: NextRequest) {
     return applySecurityHeaders(NextResponse.next());
   }
 
-  // 1) Block Probes: Immediate termination for malicious path patterns
+  // 1) Block Probes
   if (isMalicious(lower)) {
     return applySecurityHeaders(new NextResponse("Forbidden", { status: 403 }));
   }
 
-  // 2) BOARD GATE: Restricted Oversight
-  // Only users with valid verified access can view the dashboard
+  // 2) PERIMETER GUARD: Global API & Dashboard Rate Limiting
+  // Note: CombinedRateLimit handles IP anonymization and institutional audit logging.
+  const limitCheck = combinedRateLimit(
+    req as any, 
+    null, 
+    "global-perimeter", 
+    { limit: 100, windowMs: 15 * 60 * 1000 } // General dashboard/canon pacing
+  );
+
+  if (!limitCheck.allowed) {
+    return applySecurityHeaders(new NextResponse("Rate limit exceeded. Too many requests from this principal origin.", { status: 429 }));
+  }
+
+  // 3) BOARD GATE: Restricted Oversight
   if (pathname.startsWith("/board/")) {
     if (!hasAccess) {
       const url = req.nextUrl.clone();
@@ -70,11 +82,9 @@ export async function middleware(req: NextRequest) {
       url.searchParams.set("returnTo", pathname);
       return applySecurityHeaders(NextResponse.redirect(url, 302));
     }
-    // Principled addition: Log dashboard access for institutional oversight
-    console.log(`[AUDIT] Dashboard Access attempted by verified principal at: ${new Date().toISOString()}`);
   }
 
-  // 3) CANON GATE: Content Gating Logic
+  // 4) CANON GATE: Content Gating Logic
   if (pathname.startsWith("/canon/")) {
     const slug = pathname.slice("/canon/".length).replace(/\/+$/, "").toLowerCase();
     
@@ -82,7 +92,6 @@ export async function middleware(req: NextRequest) {
       const forceRestricted = FORCE_RESTRICTED_CANON.has(slug);
       const isPublicSlug = !forceRestricted && PUBLIC_CANON.has(slug);
 
-      // Gate non-public slugs
       if (!isPublicSlug && !hasAccess) {
         const url = req.nextUrl.clone();
         url.pathname = "/inner-circle/locked";
@@ -97,15 +106,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - assets (public assets)
-     * - inner-circle (gate routes themselves)
-     */
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|assets/|icons/|api/|inner-circle/).*)",
   ],
 };

@@ -10,9 +10,10 @@
     "pdfs:verify": "npx tsx scripts/verify-assets.ts",
     "content:build": "contentlayer2 build",
     "content:validate": "node scripts/validate-content.mjs",
+    "postinstall": "prisma generate",
     "prebuild": "node scripts/validate-env.mjs && pnpm run content:validate && pnpm run content:build && pnpm run pdfs && pnpm run pdfs:verify",
-    "build": "pnpm run prebuild && next build",
-    "setup": "pnpm install && prisma generate && pnpm run prebuild",
+    "build": "pnpm run postinstall && pnpm run prebuild && next build",
+    "setup": "pnpm install && pnpm run postinstall && pnpm run prebuild",
     "clean": "rimraf .next .contentlayer"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 // prisma/schema.prisma
 // ENTERPRISE-GRADE (SQLite-compatible)
-// Integrated for Membership, Interactions, and Strategic Intakes
+// Integrated for Membership, Interactions, Strategic Intakes, and Institutional Audit
 
 generator client {
   provider = "prisma-client-js"
@@ -82,7 +82,7 @@ model ShortInteraction {
   sessionId String? @map("session_id")
   emailHash String? @map("email_hash")
   
-  // Relation to Member (New Strategic Linkage)
+  // Relation to Member
   memberId String?            @map("member_id")
   member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
 
@@ -148,7 +148,7 @@ model InnerCircleMember {
   // Relations
   keys             InnerCircleKey[]
   auditEvents      DownloadAuditEvent[]
-  interactions     ShortInteraction[] // ✅ now linked for behavioral analysis
+  interactions     ShortInteraction[]
 
   @@index([emailHashPrefix])
   @@index([status])
@@ -202,7 +202,7 @@ model ContentMetadata {
   title       String
   contentType String @map("content_type")
 
-  // Download Stats (cached)
+  // Download Stats
   totalDownloads    Int       @default(0) @map("total_downloads")
   uniqueDownloaders Int       @default(0) @map("unique_downloaders")
   lastDownloadAt    DateTime? @map("last_download_at")
@@ -225,17 +225,21 @@ model SystemAuditLog {
   id String @id @default(cuid())
 
   // Actor Information
-  actorType  String  @map("actor_type")
-  actorId    String? @map("actor_id")
+  actorType   String  @map("actor_type")
+  actorId     String? @map("actor_id")
+  actorEmail  String? @map("actor_email") // FIX: Resolved Type Error in lib/server/audit.ts
 
   // Action Details
   action       String
   resourceType String  @map("resource_type")
   resourceId   String? @map("resource_id")
 
-  // Context
+  // Changes & Context
+  oldValue  String? @map("old_value")
+  newValue  String? @map("new_value") // Used for 'details'
   ipAddress String? @map("ip_address")
   userAgent String? @map("user_agent")
+  requestId String? @map("request_id") // FIX: Resolved mapping requirement
   status    String  @default("success")
 
   // Timestamps
