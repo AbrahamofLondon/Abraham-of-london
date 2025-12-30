@@ -52,7 +52,7 @@ export interface ContentDoc {
   href?: string | null;
 
   draft?: boolean;
-  featured?: boolean;
+  published?: boolean;
 
   accessLevel?: string | null;
   lockMessage?: string | null;
@@ -780,6 +780,14 @@ export const getAllResources = (): ContentDoc[] => getPublishedDocumentsByType("
 export const getAllStrategies = (): ContentDoc[] => getPublishedDocumentsByType("strategy");
 export const getAllCanons = (): ContentDoc[] => getPublishedDocumentsByType("canon");
 export const getPublishedShorts = (): ContentDoc[] => getPublishedDocumentsByType("short");
+
+/**
+ * RECENT SHORTS EXPORT
+ * Returns latest published shorts sorted by date.
+ */
+export const getRecentShorts = (limit: number = 3): ContentDoc[] => {
+  return getPublishedDocumentsByType("short", limit);
+};
 
 const cleanMatch = (s: string): string => toCanonicalSlug(s);
 
