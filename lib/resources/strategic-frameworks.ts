@@ -1,4 +1,4 @@
-// lib/resources/strategic-frameworks.ts
+/* lib/resources/strategic-frameworks.ts */
 export type FrameworkTier = "Board" | "Founder" | "Household";
 export type FrameworkAccent = "gold" | "emerald" | "blue" | "rose" | "indigo";
 
@@ -7,31 +7,20 @@ export type Framework = {
   slug: string;
   title: string;
   oneLiner: string;
-
   tier: FrameworkTier[];
   tag: string;
-
-  // Where it came from (Canon → tool)
   canonRoot: string;
-
-  // Public (prelude)
   executiveSummary: string[];
   useWhen: string[];
   inputs: string[];
   outputs: string[];
-
-  // Gated (full dossier)
   operatingLogic: Array<{ title: string; body: string }>;
   applicationPlaybook: Array<{ step: string; detail: string; deliverable: string }>;
   metrics: Array<{ metric: string; whyItMatters: string; reviewCadence: string }>;
   boardQuestions: string[];
   failureModes: string[];
   whatToDoNext: string[];
-
-  // Optional artifact
   artifactHref?: string;
-
-  // UI
   accent: FrameworkAccent;
 };
 
@@ -45,8 +34,7 @@ export const FRAMEWORKS: Framework[] = [
     oneLiner: "A hierarchy that forces clarity: survival → success → significance → legacy.",
     tier: ["Board", "Founder", "Household"],
     tag: "Identity → Assignment → Stewardship",
-    canonRoot:
-      "Created order implies ordered aims: identity precedes assignment; assignment governs stewardship.",
+    canonRoot: "Created order implies ordered aims: identity precedes assignment; assignment governs stewardship.",
     executiveSummary: [
       "Purpose is a ranked hierarchy of aims enforced by trade-offs, not a slogan.",
       "Most teams are not under-strategised; they are under-disciplined (no priority stack, no kill list, no cadence).",
@@ -68,59 +56,22 @@ export const FRAMEWORKS: Framework[] = [
       "A kill list (what stops now or next quarter).",
     ],
     operatingLogic: [
-      {
-        title: "Why a hierarchy",
-        body:
-          "You cannot pursue every good simultaneously. A hierarchy prevents mission creep by turning philosophy into operational constraint.",
-      },
-      {
-        title: "Trade-offs are the receipt",
-        body:
-          "Anybody can write purpose. Only leaders who accept trade-offs actually have it. Trade-offs are the proof.",
-      },
-      {
-        title: "Incentives tell the truth",
-        body:
-          "If your rewards contradict your stated purpose, your purpose becomes theatre. Incentives are the enforcement layer.",
-      },
+      { title: "Why a hierarchy", body: "You cannot pursue every good simultaneously. A hierarchy prevents mission creep by turning philosophy into operational constraint." },
+      { title: "Trade-offs are the receipt", body: "Anybody can write purpose. Only leaders who accept trade-offs actually have it. Trade-offs are the proof." },
+      { title: "Incentives tell the truth", body: "If your rewards contradict your stated purpose, your purpose becomes theatre. Incentives are the enforcement layer." },
     ],
     applicationPlaybook: [
-      {
-        step: "Step 1 — Identify the current tier",
-        detail:
-          "Decide the tier you are actually operating in (not what you wish): Survival (cashflow/compliance/crisis), Success (repeatability/profit), Significance (durable stakeholder value), Legacy (intergenerational durability).",
-        deliverable: "One sentence: “We are in ____ tier because ____.”",
-      },
-      {
-        step: "Step 2 — Lock non-negotiables",
-        detail:
-          "List 3–7 constraints that cannot be violated: regulatory, moral, reputational, covenantal. This blocks clever strategies that destroy trust.",
-        deliverable: "Non-negotiables list + owners + enforcement triggers.",
-      },
-      {
-        step: "Step 3 — Build the priority stack",
-        detail:
-          "Rank five priorities. If you cannot rank them, you do not have priorities—only wishes. Assign owners, metrics, and review dates.",
-        deliverable: "Priority stack (P1–P5) with owner + metric + review date.",
-      },
-      {
-        step: "Step 4 — Create the kill list",
-        detail:
-          "Stop anything that competes with the priority stack. The kill list is compassion: fewer initiatives, higher execution, lower cynicism.",
-        deliverable: "Kill list + stop date + stakeholder comms note.",
-      },
-      {
-        step: "Step 5 — Install cadence",
-        detail:
-          "Weekly: progress and blockers. Monthly: metric review. Quarterly: tier reassessment and trade-off refresh. Without cadence, purpose drifts.",
-        deliverable: "Cadence calendar with decision outputs (not updates).",
-      },
+      { step: "Step 1 — Identify the current tier", detail: "Decide the tier you are actually operating in: Survival, Success, Significance, or Legacy.", deliverable: "One sentence: “We are in ____ tier because ____.”" },
+      { step: "Step 2 — Lock non-negotiables", detail: "List 3–7 constraints that cannot be violated: regulatory, moral, reputational.", deliverable: "Non-negotiables list + owners." },
+      { step: "Step 3 — Build the priority stack", detail: "Rank five priorities. If you cannot rank them, you do not have priorities.", deliverable: "Priority stack (P1–P5)." },
+      { step: "Step 4 — Create the kill list", detail: "Stop anything that competes with the priority stack.", deliverable: "Kill list + stop date." },
+      { step: "Step 5 — Install cadence", detail: "Weekly: progress and blockers. Monthly: metric review.", deliverable: "Cadence calendar." },
     ],
     metrics: [
       { metric: "Priority compliance rate", whyItMatters: "Measures discipline: are we executing what we claim matters?", reviewCadence: "Weekly" },
       { metric: "Active initiative count", whyItMatters: "Too many initiatives is a predictable failure mode.", reviewCadence: "Monthly" },
       { metric: "Incentive alignment score", whyItMatters: "If rewards contradict purpose, drift is guaranteed.", reviewCadence: "Quarterly" },
-      { metric: "Trust signal proxy", whyItMatters: "Trust collapses late; measure earlier signals (retention, escalations, quality).", reviewCadence: "Quarterly" },
+      { metric: "Trust signal proxy", whyItMatters: "Trust collapses late; measure earlier signals.", reviewCadence: "Quarterly" },
     ],
     boardQuestions: [
       "What tier are we actually in—and what evidence proves it?",
@@ -130,19 +81,19 @@ export const FRAMEWORKS: Framework[] = [
     ],
     failureModes: [
       "Confusing identity with marketing language.",
-      "Trying to serve every tier at once (you will serve none).",
+      "Trying to serve every tier at once.",
       "Leaving incentives misaligned with the stated purpose.",
       "Calling it a vision while refusing the sacrifices it requires.",
     ],
     whatToDoNext: [
-      "Run a 60-minute Pyramid session and ship the priority stack + kill list.",
-      "Convert the stack into a 90-day execution plan with owners and review dates.",
-      "If you want speed: bring it into a Strategy Room and produce board-ready artifacts in-session.",
+      "Run a 60-minute Pyramid session and ship the priority stack.",
+      "Convert the stack into a 90-day execution plan.",
+      "Bring it into a Strategy Room for board alignment.",
     ],
-    artifactHref: "/downloads/decision-log-template.pdf",
+    // UPDATED LINK:
+    artifactHref: "/downloads/frameworks/purpose-pyramid.pdf",
     accent: "gold",
   },
-
   {
     key: "decision-matrix",
     slug: "decision-matrix",
@@ -162,54 +113,54 @@ export const FRAMEWORKS: Framework[] = [
       "You need speed without recklessness.",
     ],
     inputs: [
-      "Decision candidates (3–12).",
+      "Decision candidates.",
       "Constraints and non-negotiables.",
-      "Risk register: financial, legal, reputational, ethical, operational.",
+      "Risk register.",
     ],
     outputs: [
-      "Ranked options with rationale (audit trail).",
-      "Decision log entry (owner, date, assumptions, triggers).",
-      "Review date (how the decision stays alive).",
+      "Ranked options with rationale.",
+      "Decision log entry.",
+      "Review date.",
     ],
     operatingLogic: [
-      { title: "Criteria must be explicit", body: "When criteria are hidden, power fills the vacuum. Explicit criteria reduce political drift and improve fairness." },
-      { title: "Review dates are humility", body: "Markets move; assumptions decay. A review date is operational intelligence and prevents stubbornness masquerading as conviction." },
-      { title: "Moral cost belongs in the model", body: "A decision can be profitable and still be corrupt. Moral cost protects trust, brand durability, and institutional integrity." },
+      { title: "Criteria must be explicit", body: "When criteria are hidden, power fills the vacuum. Explicit criteria reduce political drift." },
+      { title: "Review dates are humility", body: "Markets move; assumptions decay. A review date is operational intelligence." },
+      { title: "Moral cost belongs in the model", body: "A decision can be profitable and still be corrupt. Moral cost protects trust." },
     ],
     applicationPlaybook: [
-      { step: "Step 1 — Define the decision", detail: "Write one sentence: “We are deciding whether to ____ by ____ because ____.”", deliverable: "Decision statement + scope boundaries." },
-      { step: "Step 2 — Lock constraints", detail: "List constraints and non-negotiables. These become hard filters before scoring begins.", deliverable: "Constraints list; violations eliminated." },
-      { step: "Step 3 — Score with agreed meaning", detail: "Score impact, effort, risk, certainty, and moral cost using a shared rubric (what does a 5 mean?).", deliverable: "Rubric + scored options." },
-      { step: "Step 4 — Capture assumptions", detail: "For the top option, list the top assumptions that must be true and the evidence status today.", deliverable: "Assumptions list + evidence status." },
-      { step: "Step 5 — Triggers + review date", detail: "Define what would change your mind and when you will revisit.", deliverable: "Trigger list + review date + owner." },
+      { step: "Step 1 — Define the decision", detail: "Write one sentence: “We are deciding whether to ____ by ____.”", deliverable: "Decision statement." },
+      { step: "Step 2 — Lock constraints", detail: "List constraints and non-negotiables. These become hard filters.", deliverable: "Constraints list." },
+      { step: "Step 3 — Score with agreed meaning", detail: "Score impact, effort, risk, certainty, and moral cost.", deliverable: "Rubric + scored options." },
+      { step: "Step 4 — Capture assumptions", detail: "For the top option, list the top assumptions that must be true.", deliverable: "Assumptions list." },
+      { step: "Step 5 — Triggers + review date", detail: "Define what would change your mind and when you will revisit.", deliverable: "Trigger list + review date." },
     ],
     metrics: [
-      { metric: "Decision cycle time", whyItMatters: "Speed without chaos; too slow kills opportunity, too fast kills trust.", reviewCadence: "Monthly" },
-      { metric: "Decision reversal rate", whyItMatters: "High reversals indicate weak assumptions or poor evidence discipline.", reviewCadence: "Quarterly" },
+      { metric: "Decision cycle time", whyItMatters: "Speed without chaos; too slow kills opportunity.", reviewCadence: "Monthly" },
+      { metric: "Decision reversal rate", whyItMatters: "High reversals indicate weak assumptions.", reviewCadence: "Quarterly" },
       { metric: "Assumption accuracy", whyItMatters: "Improves organisational judgment over time.", reviewCadence: "Quarterly" },
       { metric: "Risk events realised", whyItMatters: "Confirms whether risk assessment is real or ceremonial.", reviewCadence: "Quarterly" },
     ],
     boardQuestions: [
       "What is the real decision—and what are we refusing to decide?",
       "Which assumption is most likely wrong, and what evidence would prove it?",
-      "What moral cost are we accepting, and is it compatible with our stated values?",
+      "What moral cost are we accepting, and is it compatible with our values?",
       "What is the review date—and who owns the revisit?",
     ],
     failureModes: [
       "Scoring without agreeing what the scores mean.",
       "Pretending unknowns are knowns.",
-      "Skipping the review date and locking in bad decisions.",
+      "Skipping the review date.",
       "Allowing hierarchy to replace evidence.",
     ],
     whatToDoNext: [
       "Apply the Matrix to your top decisions this quarter.",
-      "Install a decision log and make it visible in leadership cadence.",
-      "If decisions are politically stuck: bring a neutral facilitator into the room.",
+      "Install a decision log and make it visible.",
+      "Bring a neutral facilitator into the room.",
     ],
-    artifactHref: "/downloads/decision-log-template.pdf",
+    // UPDATED LINK:
+    artifactHref: "/downloads/frameworks/decision-matrix.pdf",
     accent: "blue",
   },
-
   {
     key: "legacy-canvas",
     slug: "legacy-canvas",
@@ -226,29 +177,29 @@ export const FRAMEWORKS: Framework[] = [
     useWhen: [
       "You want long-range governance, not short-term adrenaline.",
       "You sense success without meaning is expensive.",
-      "You need formation, succession, and durability built into operations.",
+      "You need formation, succession, and durability.",
     ],
     inputs: [
-      "Current state (assets, knowledge, relationships, convictions).",
+      "Current state (assets, knowledge, relationships).",
       "Time horizons (3, 10, 25 years).",
-      "Stewardship priorities and constraints.",
+      "Stewardship priorities.",
     ],
     outputs: [
-      "Legacy scorecard (leading indicators).",
-      "Succession intent and skills gap analysis.",
-      "Formation plan: values, rhythms, boundaries, accountability.",
+      "Legacy scorecard.",
+      "Succession intent.",
+      "Formation plan.",
     ],
     operatingLogic: [
-      { title: "Why four dimensions", body: "Money without wisdom is waste. Wisdom without relationships is sterile. Relationships without formation decay. Formation without responsibility becomes self-indulgent." },
+      { title: "Why four dimensions", body: "Money without wisdom is waste. Wisdom without relationships is sterile. Relationships without formation decay." },
       { title: "Why time horizons matter", body: "3 years measures execution. 10 years measures institution-building. 25 years measures what outlives you." },
-      { title: "Why leading indicators", body: "Collapse shows up late. Leading indicators surface drift early while correction is still cheap." },
+      { title: "Why leading indicators", body: "Collapse shows up late. Leading indicators surface drift early." },
     ],
     applicationPlaybook: [
-      { step: "Step 1 — Map the current legacy", detail: "Write current state across the four dimensions with brutal honesty.", deliverable: "One-page Legacy Snapshot." },
-      { step: "Step 2 — Define the 25-year anchor", detail: "What must be true in 25 years if stewardship is faithful?", deliverable: "Legacy North Star statement." },
-      { step: "Step 3 — Convert to 10-year capabilities", detail: "List capabilities required: governance, culture, succession, knowledge systems.", deliverable: "Capability roadmap." },
-      { step: "Step 4 — Install 90-day moves", detail: "Choose three initiatives that compound toward the legacy anchor.", deliverable: "90-day legacy sprint plan." },
-      { step: "Step 5 — Cadence + accountability", detail: "Monthly review; quarterly reset; annual deep audit.", deliverable: "Legacy review cadence + owners." },
+      { step: "Step 1 — Map the current legacy", detail: "Write current state across the four dimensions.", deliverable: "Legacy Snapshot." },
+      { step: "Step 2 — Define the 25-year anchor", detail: "What must be true in 25 years?", deliverable: "Legacy North Star." },
+      { step: "Step 3 — Convert to 10-year capabilities", detail: "List capabilities required: governance, culture, succession.", deliverable: "Capability roadmap." },
+      { step: "Step 4 — Install 90-day moves", detail: "Choose three initiatives that compound toward the anchor.", deliverable: "90-day sprint plan." },
+      { step: "Step 5 — Cadence + accountability", detail: "Monthly review; quarterly reset; annual audit.", deliverable: "Legacy review cadence." },
     ],
     metrics: [
       { metric: "Succession readiness", whyItMatters: "Durability requires transfer, not personality dependence.", reviewCadence: "Quarterly" },
@@ -259,21 +210,22 @@ export const FRAMEWORKS: Framework[] = [
     boardQuestions: [
       "What are we building that still works when we are no longer here?",
       "Where is the institution dependent on one personality?",
-      "What relational debt have we accumulated—and what is the repayment plan?",
+      "What relational debt have we accumulated?",
       "What formation practices are installed, not merely admired?",
     ],
     failureModes: [
       "Treating legacy as branding.",
-      "Ignoring relational debt until it becomes crisis.",
-      "Outsourcing spiritual and moral formation to chance.",
-      "No succession path; everything depends on the founder.",
+      "Ignoring relational debt.",
+      "Outsourcing formation to chance.",
+      "No succession path.",
     ],
     whatToDoNext: [
-      "Run the Canvas with leadership and household heads; produce a scorecard.",
-      "Install a monthly cadence and assign owners to each dimension.",
-      "If you want a board pack: bring it into a Strategy Room and ship it as a governance artifact.",
+      "Run the Canvas with leadership; produce a scorecard.",
+      "Install a monthly cadence.",
+      "Bring it into a Strategy Room.",
     ],
-    artifactHref: "/downloads/operating-cadence-template.pdf",
+    // UPDATED LINK:
+    artifactHref: "/downloads/frameworks/legacy-canvas.pdf",
     accent: "indigo",
   },
 ];

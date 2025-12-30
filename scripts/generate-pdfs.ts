@@ -30,7 +30,8 @@ async function downloadFont(url: string, destPath: string) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch font: ${res.statusText}`);
     const arrayBuffer = await res.arrayBuffer();
-    await fs.writeFile(destPath, Buffer.from(arrayBuffer));
+    // FIX: Cast Buffer to Uint8Array to resolve type error
+    await fs.writeFile(destPath, Buffer.from(arrayBuffer) as unknown as Uint8Array);
   } catch (e) {
     console.warn(`⚠️ Warning: Could not download font from ${url}. Continuing...`);
   }
