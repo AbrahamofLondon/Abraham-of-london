@@ -40,23 +40,29 @@ function isMalicious(pathnameLower: string): boolean {
   return BAD.some((p) => pathnameLower.includes(p));
 }
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const lower = pathname.toLowerCase();
+  
+  // PRIMARY ACCESS CHECK (Cookie-based)
   const hasAccess = req.cookies.get(INNER_CIRCLE_COOKIE_NAME)?.value === "true";
 
-  // 0) Safety Gates
-  if (SAFE_PREFIXES.some((p) => pathname.startsWith(p)) || SAFE_EXACT.includes(pathname) || pathname.startsWith("/inner-circle/")) {
+  // 0) Safety Gates: Allow essential assets and public entry points
+  if (
+    SAFE_PREFIXES.some((p) => pathname.startsWith(p)) || 
+    SAFE_EXACT.includes(pathname) || 
+    pathname.startsWith("/inner-circle/")
+  ) {
     return applySecurityHeaders(NextResponse.next());
   }
 
-  // 1) Block Probes
+  // 1) Block Probes: Immediate termination for malicious path patterns
   if (isMalicious(lower)) {
     return applySecurityHeaders(new NextResponse("Forbidden", { status: 403 }));
   }
 
   // 2) BOARD GATE: Restricted Oversight
-  // Only users with valid Inner Circle access can view the dashboard
+  // Only users with valid verified access can view the dashboard
   if (pathname.startsWith("/board/")) {
     if (!hasAccess) {
       const url = req.nextUrl.clone();
@@ -64,16 +70,20 @@ export function middleware(req: NextRequest) {
       url.searchParams.set("returnTo", pathname);
       return applySecurityHeaders(NextResponse.redirect(url, 302));
     }
+    // Principled addition: Log dashboard access for institutional oversight
+    console.log(`[AUDIT] Dashboard Access attempted by verified principal at: ${new Date().toISOString()}`);
   }
 
-  // 3) CANON GATE
+  // 3) CANON GATE: Content Gating Logic
   if (pathname.startsWith("/canon/")) {
     const slug = pathname.slice("/canon/".length).replace(/\/+$/, "").toLowerCase();
+    
     if (slug) {
       const forceRestricted = FORCE_RESTRICTED_CANON.has(slug);
-      const isPublic = !forceRestricted && PUBLIC_CANON.has(slug);
+      const isPublicSlug = !forceRestricted && PUBLIC_CANON.has(slug);
 
-      if (!isPublic && !hasAccess) {
+      // Gate non-public slugs
+      if (!isPublicSlug && !hasAccess) {
         const url = req.nextUrl.clone();
         url.pathname = "/inner-circle/locked";
         url.searchParams.set("returnTo", pathname);
@@ -87,6 +97,15 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - assets (public assets)
+     * - inner-circle (gate routes themselves)
+     */
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|assets/|icons/|api/|inner-circle/).*)",
   ],
 };

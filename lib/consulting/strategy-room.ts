@@ -1,8 +1,9 @@
 /* lib/consulting/strategy-room.ts */
-import pkg from 'pg';
-const { Pool } = pkg;
+import { prisma } from "@/lib/prisma"; // Ensure your Prisma instance is exported from this path
 import fs from 'fs';
 import path from 'path';
+
+// --- TYPES ---
 
 export type StrategyRoomIntakePayload = {
   meta: { source: "web" | "inner-circle" | "referral"; page: string; submittedAtIso: string };
@@ -21,52 +22,49 @@ export type StrategyRoomIntakeResult =
   | { ok: false; status: "declined"; message: string };
 
 /**
- * DATABASE INITIALIZATION
- * Connects to Neon via DATABASE_URL. Uses a Pool for serverless efficiency.
+ * PERSISTENCE LAYER
+ * Primary: Neon PostgreSQL (via Prisma)
+ * Fallback: Local File System (JSON Log)
  */
-const pool = process.env.DATABASE_URL 
-  ? new Pool({ connectionString: process.env.DATABASE_URL }) 
-  : null;
+export async function archiveIntake(
+  payload: StrategyRoomIntakePayload, 
+  result: StrategyRoomIntakeResult, 
+  score: number
+) {
+  const createdAtDate = new Date();
 
-/**
- * ARCHIVE INTAKE (Neon + File System Fallback)
- */
-export async function archiveIntake(payload: StrategyRoomIntakePayload, result: StrategyRoomIntakeResult, score: number) {
-  const createdAt = new Date().toISOString();
-
-  // 1. Primary: Neon PostgreSQL
-  if (pool) {
-    try {
-      const query = `
-        INSERT INTO strategy_room_intakes 
-        (full_name, email_hash, organisation, status, score, decision_statement, payload, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      `;
-      const values = [
-        payload.contact.fullName,
-        payload.contact.email, // Hashing recommended for production
-        payload.contact.organisation,
-        result.status,
-        score,
-        payload.decision.statement,
-        JSON.stringify(payload),
-        createdAt
-      ];
-      await pool.query(query, values);
-      return; 
-    } catch (err: any) {
-      console.error("⚠️ Neon Insertion failed, triggering FS backup:", err.message);
-    }
+  // 1. Primary: Prisma/Neon Integration
+  try {
+    await prisma.strategyRoomIntake.create({
+      data: {
+        fullName: payload.contact.fullName,
+        emailHash: payload.contact.email, // In production, wrap this in a SHA-256 hash function
+        organisation: payload.contact.organisation,
+        status: result.status,
+        score: score,
+        decisionStatement: payload.decision.statement,
+        payload: JSON.stringify(payload),
+        createdAt: createdAtDate,
+      },
+    });
+    return; // Successful persistence
+  } catch (err: any) {
+    console.error("⚠️ Prisma/Neon Insertion failed, triggering FS backup:", err.message);
   }
 
-  // 2. Fallback: Local File System
-  const logEntry = `[INTAKE_BACKUP][${result.status.toUpperCase()}] ${JSON.stringify({ payload, score, createdAt })}\n`;
+  // 2. Fallback: Local File System (Fail-Open Resilience)
+  const logEntry = `[INTAKE_BACKUP][${result.status.toUpperCase()}] ${JSON.stringify({ 
+    payload, 
+    score, 
+    createdAt: createdAtDate.toISOString() 
+  })}\n`;
+
   try {
     const backupDir = path.join(process.cwd(), 'tmp');
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
     fs.appendFileSync(path.join(backupDir, 'intakes.log'), logEntry);
   } catch (e) {
-    console.error("❌ Critical: Could not write to local fallback log.");
+    console.error("❌ Critical Failure: Could not write to local fallback log.");
   }
 }
 
@@ -78,18 +76,24 @@ export async function notifyDiscord(payload: StrategyRoomIntakePayload, score: n
   if (!webhookUrl) return;
 
   const embed = {
-    title: `Intake: ${status.toUpperCase()}`,
-    color: status === 'accepted' ? 0xD4AF37 : 0x444444,
+    title: `Strategic Intake: ${status.toUpperCase()}`,
+    color: status === 'accepted' ? 0xD4AF37 : 0x444444, // Gold for accepted, Grey for declined
     fields: [
       { name: "Principal", value: payload.contact.fullName, inline: true },
       { name: "Score", value: `${score}/25`, inline: true },
-      { name: "Decision", value: payload.decision.statement }
+      { name: "Organisation", value: payload.contact.organisation, inline: true },
+      { name: "Decision Statement", value: `"${payload.decision.statement}"` }
     ],
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    footer: { text: "Abraham of London · Strategy Room" }
   };
 
   try {
-    await fetch(webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ embeds: [embed] }) });
+    await fetch(webhookUrl, { 
+      method: "POST", 
+      headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ embeds: [embed] }) 
+    });
   } catch (err) {
     console.error("❌ Discord Notification delivery failed.");
   }
@@ -99,25 +103,38 @@ export async function notifyDiscord(payload: StrategyRoomIntakePayload, score: n
  * EVALUATION & SCORING LOGIC
  */
 export function evaluateIntake(payload: StrategyRoomIntakePayload): StrategyRoomIntakeResult {
+  // Hard gates
   if (payload.authority.hasAuthority === "No" || !payload.declarationAccepted || payload.readiness.willingAccountability === "No") {
     return { ok: false, status: "declined", message: "Hard gate: Entry requirements not met." };
   }
 
   const scoreData = computeScore(payload);
+  
+  // Scoring threshold
   if (scoreData.total < 16) {
-    return { ok: false, status: "declined", message: "Audit score below threshold. Refine your decision statement." };
+    return { ok: false, status: "declined", message: "Audit score below threshold. Refine your decision statement for gravity." };
   }
 
-  return { ok: true, status: "accepted", message: "Accepted. Check your email for materials.", nextUrl: "/resources/strategic-frameworks" };
+  return { 
+    ok: true, 
+    status: "accepted", 
+    message: "Accepted. Strategic materials dispatched to your email.", 
+    nextUrl: "/resources/strategic-frameworks" 
+  };
 }
 
 export function computeScore(payload: StrategyRoomIntakePayload) {
-  const s = (txt: string, min: number, max: number) => {
+  const evaluateDensity = (txt: string, min: number, max: number) => {
     const len = (txt || "").trim().length;
     if (len <= min) return 0;
     return Math.round(Math.min(max, (len / (min * 3)) * max));
   };
 
-  const total = 10 + s(payload.decision.statement, 60, 5) + s(payload.constraints.avoidedTradeOff, 45, 5) + s(payload.readiness.whyNow, 45, 5);
+  const baseGravity = 10;
+  const decisionWeight = evaluateDensity(payload.decision.statement, 60, 5);
+  const tradeOffWeight = evaluateDensity(payload.constraints.avoidedTradeOff, 45, 5);
+  const urgencyWeight = evaluateDensity(payload.readiness.whyNow, 45, 5);
+
+  const total = baseGravity + decisionWeight + tradeOffWeight + urgencyWeight;
   return { total: Math.min(25, total) };
 }

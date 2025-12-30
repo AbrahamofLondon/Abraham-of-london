@@ -2,8 +2,7 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import pkg from 'pg'; // Use standard PG driver for Neon integration
-const { Pool } = pkg;
+import { prisma } from "@/lib/prisma"; // Standardized Prisma Client integration
 import Layout from "@/components/Layout";
 import { Users, Zap, Clock, ExternalLink } from "lucide-react";
 
@@ -13,37 +12,31 @@ type DashboardProps = {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  // PROPER FIX: Check for Neon DATABASE_URL, not Supabase variables
-  if (!process.env.DATABASE_URL) {
-    console.error("❌ Critical: DATABASE_URL is missing in environment.");
-    return { props: { members: [], intakes: [] } };
-  }
-
-  // Initialize Neon Connection Pool
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
   try {
     /**
-     * Parallel fetch from Neon PostgreSQL
-     * We query both the members table (Shorts) and the new strategic intakes table.
+     * ARCHITECTURAL UPDATE: Prisma Fetching
+     * reuses the internal connection pool managed by Prisma.
+     * Parallel execution ensures low latency for institutional oversight.
      */
-    const [membersRes, intakesRes] = await Promise.all([
-      pool.query("SELECT * FROM inner_circle_members ORDER BY created_at DESC"),
-      pool.query("SELECT * FROM strategy_room_intakes ORDER BY created_at DESC")
+    const [members, intakes] = await Promise.all([
+      prisma.innerCircleMember.findMany({
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.strategyRoomIntake.findMany({
+        orderBy: { createdAt: 'desc' }
+      })
     ]);
-
-    // Mandatory: Close the pool in serverless environments to prevent connection leaks
-    await pool.end();
 
     return {
       props: {
-        members: membersRes.rows || [],
-        intakes: intakesRes.rows || [],
+        // Prisma returns Date objects; Next.js requires serialization
+        members: JSON.parse(JSON.stringify(members)) || [],
+        intakes: JSON.parse(JSON.stringify(intakes)) || [],
       },
     };
   } catch (error) {
-    console.error("🔥 Neon Database Fetch Error:", error);
-    // Graceful fallback to prevent build failure
+    console.error("🔥 Institutional Dashboard Data Failure:", error);
+    // Graceful fallback to maintain uptime even during DB maintenance
     return { props: { members: [], intakes: [] } };
   }
 };
@@ -90,10 +83,10 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
                 <div key={m.id} className="group border border-white/5 bg-white/[0.02] p-4 rounded-xl hover:bg-white/[0.04] transition-all">
                   <div className="flex justify-between items-start">
                     <p className="font-bold text-sm text-gray-200">{m.name || "Access Key User"}</p>
-                    <p className="text-[9px] font-mono text-gray-600 uppercase tracking-tighter">Prefix: {m.email_hash_prefix}</p>
+                    <p className="text-[9px] font-mono text-gray-600 uppercase tracking-tighter">Prefix: {m.emailHashPrefix}</p>
                   </div>
                   <div className="mt-3 flex items-center justify-between text-[10px] text-gray-500">
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(m.created_at).toLocaleDateString()}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(m.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               ))}
@@ -120,7 +113,7 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-bold text-gray-100">{i.full_name}</h3>
+                        <h3 className="text-lg font-bold text-gray-100">{i.fullName}</h3>
                         <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
                           i.status === 'accepted' ? 'bg-amber-500 text-black' : 'bg-gray-800 text-gray-400'
                         }`}>
@@ -136,14 +129,14 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes }) => {
 
                   <div className="mt-6 bg-black/40 rounded-xl p-4 border border-white/5 italic">
                     <p className="text-[10px] uppercase text-amber-500/60 mb-2 font-black tracking-[0.2em] not-italic">Decision Anchor</p>
-                    <p className="text-sm text-gray-300 leading-relaxed">&quot;{i.decision_statement}&quot;</p>
+                    <p className="text-sm text-gray-300 leading-relaxed">&quot;{i.decisionStatement}&quot;</p>
                   </div>
 
                   <div className="mt-6 flex gap-4 pt-4 border-t border-white/5">
                     <button className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white flex items-center gap-1">
                       <ExternalLink className="w-3 h-3" /> Open Full Dossier
                     </button>
-                    <span className="text-[10px] text-gray-700 ml-auto">{new Date(i.created_at).toLocaleString()}</span>
+                    <span className="text-[10px] text-gray-700 ml-auto">{new Date(i.createdAt).toLocaleString()}</span>
                   </div>
                 </div>
               ))}

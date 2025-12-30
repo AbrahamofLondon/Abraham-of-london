@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import innerCircleStore from "@/lib/server/inner-circle-store";
+import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/server/ip";
 
 const COOKIE_ACCESS = "innerCircleAccess";
@@ -11,6 +11,9 @@ type UnlockJsonResponse =
   | { ok: true; message: string; redirectTo: string; tier: Tier }
   | { ok: false; error: string; message?: string };
 
+/**
+ * 1. INFRASTRUCTURE HELPERS
+ */
 function isSecureRequest(req: NextApiRequest): boolean {
   const proto = req.headers["x-forwarded-proto"];
   if (typeof proto === "string") return proto.split(",")[0].trim() === "https";
@@ -18,7 +21,7 @@ function isSecureRequest(req: NextApiRequest): boolean {
 }
 
 function setCookie(res: NextApiResponse, name: string, value: string, secure: boolean): void {
-  const maxAge = 60 * 60 * 24 * 365; // 1 year
+  const maxAge = 60 * 60 * 24 * 365; // 1 year institutional persistence
   const parts = [
     `${name}=${encodeURIComponent(value)}`,
     `Max-Age=${maxAge}`,
@@ -26,7 +29,7 @@ function setCookie(res: NextApiResponse, name: string, value: string, secure: bo
     "SameSite=Lax",
   ];
   if (secure) parts.push("Secure");
-  // Not HttpOnly (your UI reads it)
+  
   const existing = res.getHeader("Set-Cookie");
   const next = parts.join("; ");
   if (!existing) res.setHeader("Set-Cookie", [next]);
@@ -42,13 +45,6 @@ function safeReturnTo(v: unknown): string {
   return trimmed;
 }
 
-/**
- * Deterministic tier selection:
- * - If verifyInnerCircleKey returns a tier, use it.
- * - Otherwise, default to "inner-circle".
- *
- * NOTE: This is NOT guessing paths - it's a controlled fallback for missing tier metadata.
- */
 function normalizeTier(v: unknown): Tier {
   const t = String(v ?? "").trim().toLowerCase();
   if (t === "inner-circle-plus") return "inner-circle-plus";
@@ -56,6 +52,9 @@ function normalizeTier(v: unknown): Tier {
   return "inner-circle";
 }
 
+/**
+ * 2. PRIMARY HANDLER
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<UnlockJsonResponse>
@@ -66,8 +65,7 @@ export default async function handler(
   }
 
   const key = req.method === "GET" ? req.query.key : (req.body?.key as unknown);
-  const returnTo =
-    req.method === "GET" ? req.query.returnTo : (req.body?.returnTo as unknown);
+  const returnTo = req.method === "GET" ? req.query.returnTo : (req.body?.returnTo as unknown);
 
   const trimmedKey = typeof key === "string" ? key.trim() : "";
   if (!trimmedKey) {
@@ -75,30 +73,54 @@ export default async function handler(
   }
 
   try {
-    const result = await innerCircleStore.verifyInnerCircleKey(trimmedKey);
+    /**
+     * PRISMA VERIFICATION
+     * Validates key existence, active status, and expiry in a single query.
+     */
+    const keyRecord = await prisma.innerCircleKey.findUnique({
+      where: { keyHash: trimmedKey },
+      include: { member: true }
+    });
 
-    if (!result.valid) {
-      return res.status(403).json({
-        ok: false,
-        error: "Invalid or expired key.",
-        message: result.reason || "invalid",
-      });
+    // Validations
+    if (!keyRecord || keyRecord.status !== "active") {
+      return res.status(403).json({ ok: false, error: "Invalid or inactive key." });
     }
 
-    // record unlock
-    await innerCircleStore.recordInnerCircleUnlock(trimmedKey, getClientIp(req));
+    if (keyRecord.expiresAt && keyRecord.expiresAt < new Date()) {
+      return res.status(403).json({ ok: false, error: "Access key has expired." });
+    }
+
+    /**
+     * AUDIT UPDATE (Outcome Focused)
+     * Records the unlock and current IP to the Neon database.
+     */
+    await prisma.innerCircleKey.update({
+      where: { id: keyRecord.id },
+      data: {
+        totalUnlocks: { increment: 1 },
+        lastUsedAt: new Date(),
+        lastIp: getClientIp(req)
+      }
+    });
 
     const secure = isSecureRequest(req);
 
-    // legacy
+    // Set Legacy Authorization Cookie
     setCookie(res, COOKIE_ACCESS, "true", secure);
 
-    // tiered
-    const tier = normalizeTier((result as any)?.tier);
+    // Set Tiered Authorization Cookie
+    const tier = normalizeTier(keyRecord.member.tier);
     setCookie(res, COOKIE_TIER, tier, secure);
 
     const redirectTo = safeReturnTo(returnTo);
-    return res.status(200).json({ ok: true, message: "Vault authorized.", redirectTo, tier });
+    return res.status(200).json({ 
+      ok: true, 
+      message: "Vault authorized.", 
+      redirectTo, 
+      tier 
+    });
+
   } catch (error) {
     console.error("[InnerCircle] Unlock error:", error);
     return res.status(500).json({ ok: false, error: "Authorization subsystem offline." });

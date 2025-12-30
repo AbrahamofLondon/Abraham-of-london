@@ -1,20 +1,15 @@
+/* pages/api/inner-circle/register.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
-import innerCircleStore from "@/lib/server/inner-circle-store";
-import { sendInnerCircleEmail } from "@/lib/inner-circle/email"; // Import directly from email module
+import { prisma } from "@/lib/prisma";
+import { sendInnerCircleEmail } from "@/lib/inner-circle/email";
 import { getClientIp } from "@/lib/server/ip";
 import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";
+import { generateAccessKey, getEmailHash } from "@/lib/inner-circle/keys";
 
 type ResponseData =
   | { ok: true; message: string; keySuffix?: string }
   | { ok: false; error: string };
-
-function safeReturnTo(v: unknown): string {
-  if (typeof v !== "string") return "/canon";
-  const trimmed = v.trim();
-  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return "/canon";
-  return trimmed;
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
   if (req.method !== "POST") {
@@ -22,67 +17,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ ok: false, error: "System requires POST for registration." });
   }
 
-  // IP rate limit (tight, protects endpoints)
+  const ip = getClientIp(req);
   const ipLimit = limitIp(req, "inner-circle-register", { windowMs: 60_000, max: 20 });
   setRateLimitHeaders(res, ipLimit);
-  if (!ipLimit.allowed) {
-    return res.status(429).json({ ok: false, error: "Too many requests. Please wait and try again." });
-  }
+  if (!ipLimit.allowed) return res.status(429).json({ ok: false, error: "Too many requests." });
 
   const { email, name, recaptchaToken, returnTo } = req.body || {};
-  if (!email || typeof email !== "string") {
-    return res.status(400).json({ ok: false, error: "Identity (email) is required." });
-  }
+  if (!email) return res.status(400).json({ ok: false, error: "Identity required." });
 
   const normalizedEmail = email.trim().toLowerCase();
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(normalizedEmail)) {
-    return res.status(400).json({ ok: false, error: "Invalid identity format." });
-  }
+  const emailLimit = limitEmail(normalizedEmail, "inner-circle-register", { windowMs: 600_000, max: 10 });
+  if (!emailLimit.allowed) return res.status(429).json({ ok: false, error: "Too many attempts for this identity." });
 
-  // Email rate limit (prevents abuse / enumeration attempts)
-  const emailLimit = limitEmail(normalizedEmail, "inner-circle-register", { windowMs: 10 * 60_000, max: 10 });
-  if (!emailLimit.allowed) {
-    return res.status(429).json({ ok: false, error: "Too many attempts for this identity. Please wait and try again." });
-  }
+  const verification = await verifyRecaptchaDetailed(recaptchaToken || "", "inner_circle_register", ip);
+  if (!verification.success) return res.status(403).json({ ok: false, error: "Security verification failed." });
 
-  // reCAPTCHA (hard boundary)
-  const token = typeof recaptchaToken === "string" ? recaptchaToken : "";
-  const ip = getClientIp(req);
-
-  const verification = await verifyRecaptchaDetailed(token, "inner_circle_register", ip);
-  if (!verification.success) {
-    return res.status(403).json({ ok: false, error: "Security verification failed. Please refresh and try again." });
-  }
+  const emailHash = getEmailHash(normalizedEmail);
 
   try {
-    const keyRecord = await innerCircleStore.createOrUpdateMemberAndIssueKey({
-      email: normalizedEmail,
-      name: typeof name === "string" ? name.trim() : undefined,
-      ipAddress: ip,
-      context: "web-registration",
+    const { fullKey, suffix, hash } = generateAccessKey();
+
+    /**
+     * ATOMIC PRISMA UPSERT
+     * Creates member if new, or updates 'lastSeenAt' if existing.
+     * Always attaches a new active Key.
+     */
+    await prisma.innerCircleMember.upsert({
+      where: { emailHash },
+      update: {
+        lastSeenAt: new Date(),
+        lastIp: ip,
+        keys: {
+          create: {
+            keyHash: hash,
+            keySuffix: suffix,
+            status: "active",
+            expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            lastIp: ip,
+          }
+        }
+      },
+      create: {
+        emailHash,
+        emailHashPrefix: emailHash.slice(0, 8),
+        name: name?.trim() || null,
+        lastIp: ip,
+        keys: {
+          create: {
+            keyHash: hash,
+            keySuffix: suffix,
+            status: "active",
+            expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            lastIp: ip,
+          }
+        }
+      }
     });
 
     const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const safeTo = safeReturnTo(returnTo);
+    const safeTo = (typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//")) ? returnTo : "/canon";
 
     await sendInnerCircleEmail({
       to: normalizedEmail,
       type: "welcome",
       data: {
-        name: (typeof name === "string" && name.trim()) ? name.trim() : "Builder",
-        accessKey: keyRecord.key,
-        unlockUrl: `${site}/inner-circle?key=${encodeURIComponent(keyRecord.key)}&returnTo=${encodeURIComponent(safeTo)}`,
+        name: name?.trim() || "Builder",
+        accessKey: fullKey,
+        unlockUrl: `${site}/inner-circle/unlock?key=${encodeURIComponent(fullKey)}&returnTo=${encodeURIComponent(safeTo)}`,
       },
     });
 
-    return res.status(200).json({
-      ok: true,
-      message: "Access granted. Check your inbox for the security key.",
-      keySuffix: keyRecord.keySuffix,
-    });
+    return res.status(200).json({ ok: true, message: "Access granted. Check your inbox.", keySuffix: suffix });
   } catch (e) {
-    console.error("[InnerCircle] Registration error:", e);
-    return res.status(500).json({ ok: false, error: "Internal server error during vault registration." });
+    console.error("[InnerCircle] Register Error:", e);
+    return res.status(500).json({ ok: false, error: "Internal server error during registration." });
   }
 }

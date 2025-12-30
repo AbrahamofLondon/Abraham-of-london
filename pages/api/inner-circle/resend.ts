@@ -1,89 +1,74 @@
+/* pages/api/inner-circle/resend.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
-import innerCircleStore from "@/lib/server/inner-circle-store";
+import { prisma } from "@/lib/prisma";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/email";
 import { getClientIp } from "@/lib/server/ip";
 import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";
+import { generateAccessKey, getEmailHash } from "@/lib/inner-circle/keys";
 
-type ResponseData = {
-  ok: boolean;
-  message?: string;
-  error?: string;
-};
-
-const GENERIC_SUCCESS =
-  "If your email is registered, your Inner Circle access email will be dispatched shortly.";
+type ResponseData = { ok: boolean; message?: string; error?: string };
+const GENERIC_SUCCESS = "If your email is registered, your access email will be dispatched shortly.";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ ok: false, error: "Method requires POST for secure dispatch." });
+    return res.status(405).json({ ok: false, error: "POST required." });
   }
 
-  // IP rate limiting
+  const ip = getClientIp(req);
   const ipLimit = limitIp(req, "inner-circle-resend", { windowMs: 60_000, max: 15 });
   setRateLimitHeaders(res, ipLimit);
-  if (!ipLimit.allowed) {
-    return res.status(429).json({ ok: false, error: "Too many requests. Please wait before trying again." });
-  }
+  if (!ipLimit.allowed) return res.status(429).json({ ok: false, error: "Too many requests." });
 
   const { email, name, recaptchaToken, returnTo } = req.body || {};
-  if (!email || typeof email !== "string") {
-    return res.status(400).json({ ok: false, error: "Identity (email) is required." });
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(normalizedEmail)) {
-    // still return generic success to prevent probing
-    return res.status(200).json({ ok: true, message: GENERIC_SUCCESS });
-  }
-
-  // Email-based rate limit (prevents targeted flooding)
-  const emailLimit = limitEmail(normalizedEmail, "inner-circle-resend", { windowMs: 10 * 60_000, max: 6 });
-  if (!emailLimit.allowed) {
-    return res.status(429).json({ ok: false, error: "Too many requests. Please wait before requesting another dispatch." });
-  }
-
-  // reCAPTCHA (hard boundary)
-  const token = typeof recaptchaToken === "string" ? recaptchaToken : "";
-  const ip = getClientIp(req);
-
-  const verification = await verifyRecaptchaDetailed(token, "inner_circle_resend", ip);
-  if (!verification.success) {
-    return res.status(403).json({ ok: false, error: "Security verification failed. Please refresh and try again." });
-  }
+  const normalizedEmail = email?.trim().toLowerCase();
+  
+  // reCAPTCHA Gate
+  const verification = await verifyRecaptchaDetailed(recaptchaToken || "", "inner_circle_resend", ip);
+  if (!verification.success) return res.status(403).json({ ok: false, error: "Security check failed." });
 
   try {
-    // Pragmatic resend strategy:
-    // - If user exists in DB, the store issues a new key anyway (safe + simple).
-    // - If DB unavailable, fallback key still flows (UX works).
-    const keyRecord = await innerCircleStore.createOrUpdateMemberAndIssueKey({
-      email: normalizedEmail,
-      name: typeof name === "string" ? name.trim() : undefined,
-      ipAddress: ip,
-      context: "web-resend",
-    });
+    const emailHash = getEmailHash(normalizedEmail);
+    const { fullKey, suffix, hash } = generateAccessKey();
 
-    const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const safeTo =
-      typeof returnTo === "string" && returnTo.trim().startsWith("/") && !returnTo.trim().startsWith("//")
-        ? returnTo.trim()
-        : "/canon";
+    /**
+     * PRISMA TRANSACTIONAL UPDATE
+     * We issue a new key only if the member already exists.
+     * This prevents attackers from using 'Resend' to register new accounts.
+     */
+    const member = await prisma.innerCircleMember.findUnique({ where: { emailHash } });
 
-    await sendInnerCircleEmail({
-      to: normalizedEmail,
-      type: "resend",
-      data: {
-        name: (typeof name === "string" && name.trim()) ? name.trim() : "Builder",
-        accessKey: keyRecord.key,
-        unlockUrl: `${site}/inner-circle?key=${encodeURIComponent(keyRecord.key)}&returnTo=${encodeURIComponent(safeTo)}`,
-      },
-    });
+    if (member) {
+      await prisma.innerCircleKey.create({
+        data: {
+          memberId: member.id,
+          keyHash: hash,
+          keySuffix: suffix,
+          status: "active",
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          lastIp: ip,
+        }
+      });
 
+      const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      const safeTo = (typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//")) ? returnTo : "/canon";
+
+      await sendInnerCircleEmail({
+        to: normalizedEmail,
+        type: "resend",
+        data: {
+          name: member.name || name?.trim() || "Builder",
+          accessKey: fullKey,
+          unlockUrl: `${site}/inner-circle/unlock?key=${encodeURIComponent(fullKey)}&returnTo=${encodeURIComponent(safeTo)}`,
+        },
+      });
+    }
+
+    // Always return success to prevent email enumeration (Privacy standard)
     return res.status(200).json({ ok: true, message: GENERIC_SUCCESS });
-  } catch (_error) {
-    // Do not leak details
+  } catch (error) {
+    console.error("[InnerCircle] Resend Error:", error);
     return res.status(200).json({ ok: true, message: GENERIC_SUCCESS });
   }
 }

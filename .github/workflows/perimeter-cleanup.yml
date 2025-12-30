@@ -1,0 +1,17 @@
+name: Institutional Perimeter Cleanup
+
+on:
+  schedule:
+    # Every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Key Revocation Subsystem
+        run: |
+          curl -X POST "https://${{ secrets.SITE_DOMAIN }}/api/cron/clean-keys" \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          -H "Content-Type: application/json"
