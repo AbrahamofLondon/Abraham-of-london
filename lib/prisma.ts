@@ -1,5 +1,5 @@
 // lib/prisma.ts
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -11,7 +11,8 @@ declare global {
  * If an Edge route imports Prisma by mistake, fail fast with a clear error.
  */
 function assertNodeRuntime() {
-  if (process.env.NEXT_RUNTIME === "edge") {
+  // Check for Edge Runtime
+  if (typeof EdgeRuntime !== 'undefined' || process.env.NEXT_RUNTIME === 'edge') {
     throw new Error(
       "PrismaClient cannot run in the Edge Runtime. " +
         "Move this code to a Node.js runtime route or set `export const runtime = 'nodejs'`."
@@ -20,9 +21,7 @@ function assertNodeRuntime() {
 }
 
 /**
- * Enterprise-safe log config:
- * - No readonly tuples (Prisma expects a mutable array)
- * - Uses string literals instead of Prisma.LogLevel type
+ * Enterprise-safe log config
  */
 function resolvePrismaLog(): Array<"query" | "info" | "warn" | "error"> {
   const level = (process.env.PRISMA_LOG_LEVEL || "").toLowerCase();
@@ -69,18 +68,21 @@ if (process.env.NODE_ENV !== "production") {
  * (Serverless functions typically don't need this, but it doesn't hurt.)
  */
 if (process.env.PRISMA_ENABLE_SHUTDOWN_HOOKS === "true") {
-  const disconnect = async () => {
-    try {
-      await prisma.$disconnect();
-      // eslint-disable-next-line no-console
-      console.log("Prisma disconnected");
-    } catch {
-      // ignore
-    }
-  };
+  // Only register shutdown hooks in Node.js runtime
+  if (typeof process !== 'undefined' && process.version) {
+    const disconnect = async () => {
+      try {
+        await prisma.$disconnect();
+        // eslint-disable-next-line no-console
+        console.log("Prisma disconnected");
+      } catch {
+        // ignore
+      }
+    };
 
-  process.on("SIGINT", disconnect);
-  process.on("SIGTERM", disconnect);
+    process.on("SIGINT", disconnect);
+    process.on("SIGTERM", disconnect);
+  }
 }
 
 export default prisma;

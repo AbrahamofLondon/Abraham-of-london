@@ -1,5 +1,5 @@
 /* components/search/CommandPalette.tsx */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { 
   Search, 
@@ -21,7 +21,6 @@ const CommandPalette: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ContentMetadata[]>([]);
 
-  // 1. HYDRATION: Synchronize metadata on mount
   useEffect(() => {
     initializeClientContent();
 
@@ -37,7 +36,6 @@ const CommandPalette: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // 2. SEARCH LOGIC: Real-time filtering from client cache
   useEffect(() => {
     if (query.trim().length > 1) {
       setResults(searchInstitutionalContent(query));
@@ -58,8 +56,6 @@ const CommandPalette: React.FC = () => {
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 bg-[#050609]/90 backdrop-blur-sm">
       <div className="w-full max-w-2xl bg-[#0a0c10] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        
-        {/* INPUT SECTION */}
         <div className="flex items-center p-4 border-b border-white/5">
           <Search className="w-5 h-5 text-gray-500 mr-3" />
           <input
@@ -67,8 +63,7 @@ const CommandPalette: React.FC = () => {
             className="flex-1 bg-transparent border-none outline-none text-white placeholder-gray-600 text-lg font-serif italic"
             placeholder="Search the Institutional Canon..."
             value={query}
-            Access target.value for React ChangeEvent
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); }} 
           />
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono text-gray-600 border border-white/10 px-1.5 py-0.5 rounded">ESC</span>
@@ -78,7 +73,6 @@ const CommandPalette: React.FC = () => {
           </div>
         </div>
 
-        {/* RESULTS SECTION */}
         <div className="max-h-[60vh] overflow-y-auto p-2">
           {results.length > 0 ? (
             <div className="space-y-1">

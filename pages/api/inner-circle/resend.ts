@@ -1,7 +1,7 @@
 /* pages/api/inner-circle/resend.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/email";
 import { getClientIp } from "@/lib/server/ip";
 import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";

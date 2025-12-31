@@ -1,11 +1,30 @@
-// lib/debug-books.ts
+// lib/debug-books.ts - TYPE-SAFE VERSION
 import { getAllBooks, getBookBySlug } from "@/lib/books"; // Use the correct export path
+
+// Define a more complete Book type that includes all possible properties
+interface DebugBook {
+  slug?: string;
+  title?: string;
+  author?: string;
+  subtitle?: string;
+  excerpt?: string;
+  description?: string;
+  coverImage?: string;
+  isbn?: string;
+  publisher?: string;
+  date?: string;
+  draft?: boolean;
+  body?: any;
+  _raw?: {
+    sourceFileName?: string;
+  };
+}
 
 export async function debugBooks() {
   try {
     console.log("📚 Debugging books data...");
 
-    const allBooks = await getAllBooks();
+    const allBooks = await getAllBooks() as DebugBook[];
     console.log(`Total books found: ${allBooks.length}`);
 
     if (allBooks.length === 0) {
@@ -37,7 +56,7 @@ export async function debugBooks() {
 
     for (const slug of problematicSlugs) {
       console.log(`\n🔍 Checking book: ${slug}`);
-      const book = await getBookBySlug(slug);
+      const book = await getBookBySlug(slug) as DebugBook | null;
       if (!book) {
         console.log(`❌ Book not found: ${slug}`);
         continue;

@@ -1,29 +1,13 @@
 /* lib/server/rateLimit.ts */
-// =========================================================================
-// Advanced Rate Limiting - In-Memory & Redis Support (Hardened)
-// Architected for: Abraham of London Institutional Perimeter
-// =========================================================================
-
 import type { NextApiRequest } from "next";
 import crypto from "crypto";
-import { logAuditEvent } from "./audit"; // Synchronized with Enterprise Schema
+import { logAuditEvent } from "./audit";
 
-// -------------------------------------------------------------------------
-// Types & Interfaces
-// -------------------------------------------------------------------------
-
+// --- Types & Interfaces ---
 export interface RateLimitOptions {
   limit: number;
   windowMs: number;
   keyPrefix?: string;
-  useRedis?: boolean;
-  redisClient?: BasicRedisClient | null;
-}
-
-export interface RateLimitEntry {
-  count: number;
-  first: number;
-  resetTime: number;
 }
 
 export interface RateLimitResult {
@@ -35,138 +19,42 @@ export interface RateLimitResult {
   windowMs: number;
 }
 
-export interface CombinedRateLimitResult {
-  ipResult: RateLimitResult;
-  emailResult: RateLimitResult | null;
-  ip: string;
-  email: string | null;
-  allowed: boolean;
-  hitIpLimit: boolean;
-  hitEmailLimit: boolean;
+export interface LegacyIsRateLimitedResult {
+  limited: boolean;
+  retryAfter: number; 
+  limit: number;
+  remaining: number;
 }
 
-export interface BasicRedisMulti {
-  incr(key: string): BasicRedisMulti;
-  expire(key: string, seconds: number): BasicRedisMulti;
-  get(key: string): BasicRedisMulti;
-  exec(): Promise<unknown>;
-}
-
-export interface BasicRedisClient {
-  multi(): BasicRedisMulti;
-}
-
-// -------------------------------------------------------------------------
-// Privacy-Conscious Logging & Audit Integration
-// -------------------------------------------------------------------------
-
-function logRateLimitAction(action: string, metadata: Record<string, unknown> = {}): void {
-  // Console logging for real-time DevOps observability
-  console.log(`🛡️ [PERIMETER] ${action}`, {
-    ts: new Date().toISOString(),
-    ...metadata,
-  });
-}
-
-// -------------------------------------------------------------------------
-// In-Memory Store (Resilience Layer)
-// -------------------------------------------------------------------------
-
+// --- In-Memory Store ---
 class RateLimitStore {
-  private store = new Map<string, RateLimitEntry>();
-  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
-
+  private store = new Map<string, { count: number; first: number; resetTime: number }>();
   constructor() {
     if (typeof setInterval !== "undefined") {
-      this.cleanupInterval = setInterval(() => this.cleanup(), 60 * 60 * 1000); // Hourly hygiene
+      setInterval(() => {
+        const now = Date.now();
+        for (const [key, entry] of this.store.entries()) {
+          if (now > entry.resetTime) this.store.delete(key);
+        }
+      }, 60 * 60 * 1000);
     }
   }
-
-  get(key: string): RateLimitEntry | undefined { return this.store.get(key); }
-  set(key: string, entry: RateLimitEntry): void { this.store.set(key, entry); }
-  delete(key: string): void { this.store.delete(key); }
-
-  private cleanup(): void {
-    const now = Date.now();
-    let cleaned = 0;
-    for (const [key, entry] of this.store.entries()) {
-      if (now > entry.resetTime) {
-        this.store.delete(key);
-        cleaned++;
-      }
-    }
-    if (cleaned > 0) logRateLimitAction("STORE_CLEANUP", { cleanedEntries: cleaned });
-  }
-
-  destroy(): void {
-    if (this.cleanupInterval) clearInterval(this.cleanupInterval);
-    this.store.clear();
-  }
+  get(key: string) { return this.store.get(key); }
+  set(key: string, entry: any) { this.store.set(key, entry); }
 }
 
 const memoryStore = new RateLimitStore();
 
-// -------------------------------------------------------------------------
-// Redis-Based Rate Limiting (Distributed Strategy)
-// -------------------------------------------------------------------------
-
-class RedisRateLimit {
-  constructor(private redisClient: BasicRedisClient) {}
-
-  async check(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
-    const now = Date.now();
-    const resetTime = now + windowMs;
-    const keyWithPrefix = `rate_limit:${key}`;
-
-    try {
-      const ttlSeconds = Math.ceil(windowMs / 1000);
-      const multi = this.redisClient.multi();
-      multi.incr(keyWithPrefix);
-      multi.expire(keyWithPrefix, ttlSeconds);
-      multi.get(keyWithPrefix);
-
-      const rawResult = await multi.exec();
-      let count = 1;
-
-      if (Array.isArray(rawResult)) {
-        const decode = (v: any) => {
-          const val = Array.isArray(v) ? v[1] : v;
-          const num = Number(val);
-          return !Number.isNaN(num) && num > 0 ? num : null;
-        };
-        count = decode(rawResult[0]) ?? decode(rawResult[2]) ?? 1;
-      }
-
-      return {
-        allowed: count <= limit,
-        remaining: Math.max(0, limit - count),
-        retryAfterMs: count > limit ? windowMs : 0,
-        resetTime,
-        limit,
-        windowMs,
-      };
-    } catch (error) {
-      logRateLimitAction("REDIS_FAIL_OPEN", { error: String(error) });
-      return { allowed: true, remaining: limit - 1, retryAfterMs: 0, resetTime, limit, windowMs };
-    }
-  }
-}
-
-// -------------------------------------------------------------------------
-// Core Limiter (Sync & Async)
-// -------------------------------------------------------------------------
-
+// --- Core Exports ---
 export function rateLimit(key: string, options: RateLimitOptions): RateLimitResult {
   const { limit, windowMs, keyPrefix = "rl" } = options;
   const now = Date.now();
   const storeKey = `${keyPrefix}:${key}`;
   const resetTime = now + windowMs;
-
   const entry = memoryStore.get(storeKey);
 
   if (!entry || (now - entry.first) > windowMs) {
-    const newEntry: RateLimitEntry = { count: 1, first: now, resetTime };
-    memoryStore.set(storeKey, newEntry);
+    memoryStore.set(storeKey, { count: 1, first: now, resetTime });
     return { allowed: true, remaining: limit - 1, retryAfterMs: 0, resetTime, limit, windowMs };
   }
 
@@ -175,20 +63,17 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
   }
 
   entry.count += 1;
-  memoryStore.set(storeKey, entry);
   return { allowed: true, remaining: Math.max(0, limit - entry.count), retryAfterMs: 0, resetTime: entry.resetTime, limit, windowMs };
 }
 
-export async function rateLimitAsync(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
-  if (options.useRedis && options.redisClient) {
-    return new RedisRateLimit(options.redisClient).check(key, options.limit, options.windowMs);
-  }
-  return rateLimit(key, options);
+export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
+  return {
+    "X-RateLimit-Limit": result.limit.toString(),
+    "X-RateLimit-Remaining": result.remaining.toString(),
+    "X-RateLimit-Reset": Math.ceil(result.resetTime / 1000).toString(),
+    "Retry-After": result.retryAfterMs > 0 ? Math.ceil(result.retryAfterMs / 1000).toString() : "0"
+  };
 }
-
-// -------------------------------------------------------------------------
-// Institutional Helpers (IP/Email/Combined)
-// -------------------------------------------------------------------------
 
 export function getClientIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
@@ -196,52 +81,127 @@ export function getClientIp(req: NextApiRequest): string {
   return (req.headers["x-nf-client-connection-ip"] as string) || req.socket?.remoteAddress || "unknown";
 }
 
-export function combinedRateLimit(
-  req: NextApiRequest,
-  email: string | null,
-  label: string,
-  ipOptions: RateLimitOptions,
-  emailOptions?: RateLimitOptions
-): CombinedRateLimitResult {
+export function rateLimitForRequestIp(req: NextApiRequest, label: string, options: RateLimitOptions) {
   const ip = getClientIp(req);
-  const anonIp = ip.includes(":") ? ip.split(":").slice(0, 3).join(":") + "::" : ip.split(".").slice(0, 3).join(".") + ".0";
-  
-  const ipResult = rateLimit(`${label}:${anonIp}`, ipOptions);
-  let emailResult: RateLimitResult | null = null;
-  let normalizedEmail: string | null = null;
-
-  if (email && emailOptions) {
-    normalizedEmail = email.toLowerCase().trim();
-    const emailHash = crypto.createHash("sha256").update(normalizedEmail).digest("hex");
-    emailResult = rateLimit(`${label}:${emailHash}`, emailOptions);
-  }
-
-  const allowed = ipResult.allowed && (!emailResult || emailResult.allowed);
-
-  if (!allowed) {
-    // Institutional Audit: Breach recorded for Board Dashboard
-    logAuditEvent({
-      actorType: "system",
-      action: "RATE_LIMIT_EXCEEDED",
-      resourceType: label,
-      status: "failed",
-      details: { label, ip: anonIp, email: normalizedEmail ? "present" : "absent" },
-      ipAddress: ip
-    }).catch(() => {});
-  }
-
-  return { ipResult, emailResult, ip, email: normalizedEmail, allowed, hitIpLimit: !ipResult.allowed, hitEmailLimit: emailResult ? !emailResult.allowed : false };
+  const result = rateLimit(`${label}:${ip}`, options);
+  return { result, ip, headers: createRateLimitHeaders(result) };
 }
 
-// -------------------------------------------------------------------------
-// Institutional Configurations
-// -------------------------------------------------------------------------
+export async function isRateLimited(key: string, bucket: string, limit: number): Promise<LegacyIsRateLimitedResult> {
+  const res = rateLimit(`${bucket}:${key}`, { limit, windowMs: 5 * 60 * 1000 });
+  return { limited: !res.allowed, retryAfter: Math.ceil(res.retryAfterMs / 1000), limit: res.limit, remaining: res.remaining };
+}
+
+// ============================================================================
+// NEW: ADD MISSING EXPORT - combinedRateLimit
+// ============================================================================
+
+/**
+ * Combined rate limit wrapper for middleware and API routes
+ * @param handler The route handler function
+ * @param options Rate limit options (defaults to API_GENERAL)
+ */
+export const combinedRateLimit = (
+  handler: Function, 
+  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
+) => {
+  return async (req: NextApiRequest, ...args: any[]) => {
+    try {
+      const ip = getClientIp(req);
+      const result = rateLimit(`${options.keyPrefix}:${ip}`, options);
+      
+      // Log rate limit attempts
+      if (!result.allowed) {
+        await logAuditEvent?.('rate_limit_hit', {
+          ip,
+          keyPrefix: options.keyPrefix,
+          limit: options.limit,
+          windowMs: options.windowMs,
+          retryAfterMs: result.retryAfterMs
+        }).catch(() => {});
+        
+        // Return 429 Too Many Requests
+        return new Response(
+          JSON.stringify({
+            error: 'Rate limit exceeded',
+            retryAfter: Math.ceil(result.retryAfterMs / 1000),
+            limit: options.limit,
+            windowMs: options.windowMs
+          }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              ...createRateLimitHeaders(result)
+            }
+          }
+        );
+      }
+      
+      // Add rate limit headers to successful requests
+      const response = await handler(req, ...args);
+      
+      if (response instanceof Response) {
+        const headers = new Headers(response.headers);
+        Object.entries(createRateLimitHeaders(result)).forEach(([key, value]) => {
+          headers.set(key, value);
+        });
+        
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers
+        });
+      }
+      
+      return response;
+      
+    } catch (error) {
+      console.error('[RATE_LIMIT_ERROR]', error);
+      return new Response(
+        JSON.stringify({ error: 'Internal server error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  };
+};
+
+/**
+ * Middleware-friendly rate limit check (for Next.js middleware)
+ */
+export const checkRateLimit = (identifier: string, options: RateLimitOptions): RateLimitResult => {
+  return rateLimit(identifier, options);
+};
+
+// ============================================================================
+// Rate Limit Configurations
+// ============================================================================
 
 export const RATE_LIMIT_CONFIGS = {
-  STRATEGY_ROOM_INTAKE: { limit: 10, windowMs: 60 * 60 * 1000, keyPrefix: "strategy" },
-  INNER_CIRCLE_REGISTER: { limit: 20, windowMs: 15 * 60 * 1000, keyPrefix: "ic-reg" },
-  INNER_CIRCLE_UNLOCK: { limit: 50, windowMs: 10 * 60 * 1000, keyPrefix: "ic-unlock" },
-  INNER_CIRCLE_RESEND: { limit: 3, windowMs: 15 * 60 * 1000, keyPrefix: "ic-resend" },
+  STRATEGY_ROOM_INTAKE: { limit: 10, windowMs: 3600000, keyPrefix: "strategy" },
+  INNER_CIRCLE_REGISTER: { limit: 20, windowMs: 900000, keyPrefix: "ic-reg" },
+  CONTACT_FORM: { limit: 5, windowMs: 600000, keyPrefix: "contact" },
+  NEWSLETTER_SUBSCRIBE: { limit: 5, windowMs: 600000, keyPrefix: "news" },
+  API_GENERAL: { limit: 100, windowMs: 3600000, keyPrefix: "api" },
+  TEASER_REQUEST: { limit: 10, windowMs: 900000, keyPrefix: "teaser" },
+  ADMIN_API: { limit: 50, windowMs: 300000, keyPrefix: "admin" },
+  ADMIN_OPERATIONS: { limit: 20, windowMs: 3600000, keyPrefix: "admin-ops" },
+  
+  // NEW: Special configurations
+  DOWNLOAD_API: { limit: 30, windowMs: 600000, keyPrefix: "download" },
+  ASSET_API: { limit: 50, windowMs: 300000, keyPrefix: "asset" }
 } as const;
 
-export default { rateLimit, rateLimitAsync, combinedRateLimit, getClientIp, RATE_LIMIT_CONFIGS };
+// ============================================================================
+// Export everything
+// ============================================================================
+
+export default { 
+  rateLimit, 
+  isRateLimited, 
+  rateLimitForRequestIp, 
+  createRateLimitHeaders,
+  combinedRateLimit, // ADDED
+  checkRateLimit, // ADDED
+  RATE_LIMIT_CONFIGS 
+};

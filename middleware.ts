@@ -1,7 +1,7 @@
 /* middleware.ts */
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { combinedRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/server/rateLimit";
+import { rateLimit, getClientIp } from "@/lib/server/rateLimit-edge";
 
 const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
 
@@ -62,16 +62,27 @@ export async function middleware(req: NextRequest) {
   }
 
   // 2) PERIMETER GUARD: Global API & Dashboard Rate Limiting
-  // Note: CombinedRateLimit handles IP anonymization and institutional audit logging.
-  const limitCheck = combinedRateLimit(
-    req as any, 
-    null, 
-    "global-perimeter", 
-    { limit: 100, windowMs: 15 * 60 * 1000 } // General dashboard/canon pacing
-  );
+  const ip = getClientIp(req);
+  const limitResult = rateLimit(`global:${ip}`, { 
+    limit: 100, 
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "perimeter" 
+  });
 
-  if (!limitCheck.allowed) {
-    return applySecurityHeaders(new NextResponse("Rate limit exceeded. Too many requests from this principal origin.", { status: 429 }));
+  if (!limitResult.allowed) {
+    const response = new NextResponse("Rate limit exceeded. Too many requests from this principal origin.", { 
+      status: 429 
+    });
+    
+    // Add rate limit headers
+    response.headers.set("X-RateLimit-Limit", limitResult.limit.toString());
+    response.headers.set("X-RateLimit-Remaining", limitResult.remaining.toString());
+    response.headers.set("X-RateLimit-Reset", Math.ceil(limitResult.resetTime / 1000).toString());
+    if (limitResult.retryAfterMs > 0) {
+      response.headers.set("Retry-After", Math.ceil(limitResult.retryAfterMs / 1000).toString());
+    }
+    
+    return applySecurityHeaders(response);
   }
 
   // 3) BOARD GATE: Restricted Oversight

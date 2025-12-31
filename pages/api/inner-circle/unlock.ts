@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { getClientIp } from "@/lib/server/ip";
 
 const COOKIE_ACCESS = "innerCircleAccess";

@@ -1,51 +1,16 @@
 // app/api/downloads/route.ts - FIXED VERSION
 
 import { NextResponse } from "next/server";
-// Use a RELATIVE import so we completely bypass the "@/lib" alias here
-import { getAllDownloads } from '../../../lib/contentlayer-helper';
+// Use the project alias to ensure absolute resolution from the root
+import ContentHelper from "@/lib/content-helper";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-interface DownloadDocument {
-  slug: string;
-  title: string;
-  subtitle?: string | null;
-  description?: string | null;
-  excerpt?: string | null;
-  date: string;
-  tags: string[];
-  coverImage?: string | null;
-  file?: string | null;
-  pdfPath?: string | null;
-  downloadFile?: string | null;
-  fileUrl?: string | null;
-  url?: string | null;
-  _raw?: {
-    flattenedPath?: string;
-  };
-}
-
-interface DownloadItem {
-  slug: string;
-  title: string;
-  subtitle?: string | null;
-  description?: string | null;
-  excerpt?: string | null;
-  date: string;
-  tags: string[];
-  coverImage?: string | null;
-  file?: string | null;
-  pdfPath?: string | null;
-  downloadFile?: string | null;
-  fileUrl?: string | null;
-  url: string;
-}
-
 type DownloadsResponse =
-  | { ok: true; count: number; items: DownloadItem[] }
-  | { ok: true; item: DownloadItem }
+  | { ok: true; count: number; items: any[] }
+  | { ok: true; item: any }
   | { ok: false; error: string };
 
 // ---------------------------------------------------------------------------
@@ -59,31 +24,6 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Referrer-Policy": "same-origin",
 };
 
-function safeDate(input: unknown): string {
-  if (!input) return "1970-01-01";
-  const d = new Date(String(input));
-  if (Number.isNaN(d.getTime())) return "1970-01-01";
-  return d.toISOString().split("T")[0]!;
-}
-
-function mapDownload(doc: DownloadDocument): DownloadItem {
-  return {
-    slug: doc.slug,
-    title: doc.title,
-    subtitle: doc.subtitle ?? null,
-    description: doc.description ?? null,
-    excerpt: doc.excerpt ?? null,
-    date: safeDate(doc.date),
-    tags: doc.tags ?? [],
-    coverImage: doc.coverImage ?? null,
-    file: doc.file ?? null,
-    pdfPath: doc.pdfPath ?? null,
-    downloadFile: doc.downloadFile ?? null,
-    fileUrl: doc.fileUrl ?? null,
-    url: doc.url ?? `/downloads/${doc.slug}`,
-  };
-}
-
 function jsonError(
   body: { ok: false; error: string },
   status: number
@@ -92,16 +32,6 @@ function jsonError(
     status,
     headers: SECURITY_HEADERS,
   });
-}
-
-// Helper to extract slug from document
-function extractSlug(doc: DownloadDocument): string {
-  if (doc.slug) return doc.slug;
-  if (doc._raw?.flattenedPath) {
-    const parts = doc._raw.flattenedPath.split('/');
-    return parts[parts.length - 1] || '';
-  }
-  return '';
 }
 
 // ---------------------------------------------------------------------------
@@ -115,19 +45,15 @@ export async function GET(
   const slugParam = url.searchParams.get("slug");
 
   try {
-    // Get all downloads from the helper function
-    const allDownloads = getAllDownloads();
+    // FIX: Use the correct exported member 'getDownloads'
+    const downloads = ContentHelper.getDownloads();
 
-    // Type assertion to ensure we have the right type
-    const typedDownloads = allDownloads as unknown as DownloadDocument[];
-
-    // Single download
-    if (slugParam && typeof slugParam === "string") {
+    // Single download lookup
+    if (slugParam) {
       const slug = slugParam.trim();
-      const found = typedDownloads.find((d) => {
-        const docSlug = extractSlug(d);
-        return docSlug === slug;
-      });
+      const found = downloads.find((d) => 
+        (d.slug === slug) || (d._raw?.flattenedPath?.endsWith(slug))
+      );
 
       if (!found) {
         return NextResponse.json(
@@ -136,21 +62,21 @@ export async function GET(
         );
       }
 
+      // Use getCardProps to ensure all SEO/Visual fields are retained
       return NextResponse.json(
-        { ok: true, item: mapDownload(found) },
+        { ok: true, item: ContentHelper.getCardProps(found) },
         { headers: SECURITY_HEADERS }
       );
     }
 
-    // Full list - already sorted by getAllDownloads()
-    const items = typedDownloads.map((doc) => mapDownload(doc));
+    // Full list - utilize the unified card props for the UI
+    const items = downloads.map((doc) => ContentHelper.getCardProps(doc));
 
     return NextResponse.json(
       { ok: true, count: items.length, items },
       {
         headers: {
           ...SECURITY_HEADERS,
-          // safe caching for reads
           "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
         },
       }
@@ -165,21 +91,10 @@ export async function GET(
 }
 
 // ---------------------------------------------------------------------------
-// Other methods – not allowed
+// Other methods
 // ---------------------------------------------------------------------------
 
-export async function POST() {
-  return jsonError({ ok: false, error: "Method not allowed" }, 405);
-}
-
-export async function PUT() {
-  return jsonError({ ok: false, error: "Method not allowed" }, 405);
-}
-
-export async function DELETE() {
-  return jsonError({ ok: false, error: "Method not allowed" }, 405);
-}
-
-export async function PATCH() {
-  return jsonError({ ok: false, error: "Method not allowed" }, 405);
-}
+export async function POST() { return jsonError({ ok: false, error: "Method not allowed" }, 405); }
+export async function PUT() { return jsonError({ ok: false, error: "Method not allowed" }, 405); }
+export async function DELETE() { return jsonError({ ok: false, error: "Method not allowed" }, 405); }
+export async function PATCH() { return jsonError({ ok: false, error: "Method not allowed" }, 405); }

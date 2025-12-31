@@ -1,6 +1,6 @@
 /* pages/api/inner-circle/verify.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 type VerifyResponse = {
   valid: boolean;

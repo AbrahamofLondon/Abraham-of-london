@@ -2,7 +2,7 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { prisma } from "@/lib/prisma"; // Standardized Prisma Client integration
+import prisma from "@/lib/prisma"; // Standardized Prisma Client integration
 import Layout from "@/components/Layout";
 import { Users, Zap, Clock, ExternalLink } from "lucide-react";
 

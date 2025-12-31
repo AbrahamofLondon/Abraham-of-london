@@ -1,14 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"; // This is your instantiated client
 import { isRateLimited } from "@/lib/server/rate-limit";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { cacheResponse, getCacheKey } from "@/lib/server/cache";
 import { logAuditEvent } from "@/lib/server/audit";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client"; // Import Prisma as a namespace for SQL helpers
 
 // ---------------------------
 // FIX: Prisma Static Helpers
 // ---------------------------
+// We use 'Prisma' (capitalized) for SQL utilities like sql, join, and raw.
 const PrismaAny = Prisma as any;
 const sql = PrismaAny.sql;
 const join = PrismaAny.join;
@@ -403,7 +404,7 @@ function toSizeString(v: unknown): string {
 }
 
 // ---------------------------
-// Data access (FIX: Cast results instead of using generics)
+// Data access
 // ---------------------------
 
 async function getSummaryStats(since: Date, until: Date, filters: Record<string, string[]>) {

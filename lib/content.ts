@@ -4,9 +4,9 @@
 // ============================================
 // CONTENTLAYER HELPER (main source)
 // ============================================
-import {
+import ContentHelper, {
   // Document getters - rename to avoid conflicts
-  getAllContentlayerDocs as getAllContentlayerDocsInternal,
+  getAllDocuments as getAllContentlayerDocsInternal,
   getPublishedDocuments as getPublishedDocumentsInternal,
   getFeaturedDocuments as getFeaturedDocumentsInternal,
   getFeaturedDocumentsByType as getFeaturedDocumentsByTypeInternal,
@@ -36,11 +36,6 @@ import {
   // Document kind detection
   getDocKind,
   
-  // Types (keep these)
-  type ContentDoc,
-  type DocKind,
-  type AccessLevel,
-  
   // Draft/Publish helpers
   isDraftContent as isDraftContentInternal,
   isPublishedContent as isPublishedContentInternal,
@@ -53,8 +48,19 @@ import {
 // ============================================
 // TYPE DEFINITIONS
 // ============================================
-// Re-export types from contentlayer-helper
-export type { ContentDoc, DocKind, AccessLevel };
+// Define local types since they're not exported from contentlayer-helper
+export type DocKind = 
+  | "post" | "book" | "download" | "canon" | "short" | "event" 
+  | "resource" | "strategy" | "article" | "guide" | "tutorial" 
+  | "caseStudy" | "whitepaper" | "report" | "newsletter" | "sermon" 
+  | "devotional" | "prayer" | "testimony" | "podcast" | "video" 
+  | "course" | "lesson" | "print";
+
+export type AccessLevel = 'public' | 'private' | 'restricted';
+
+// ContentDoc type - since it's not exported, define it as any
+// In a real scenario, you might want to import from contentlayer/generated
+export type ContentDoc = any;
 
 // Define composite types for backward compatibility
 export type AnyDoc = ContentDoc;
@@ -220,15 +226,26 @@ export const getPublishedDocuments = (): ContentDoc[] => {
   return getPublishedDocumentsInternal();
 };
 
-export const getFeaturedDocuments = (limit?: number): ContentDoc[] => {
+// FIXED: getFeaturedDocuments now accepts optional kind and limit parameters
+export const getFeaturedDocuments = (kind?: DocKind, limit?: number): ContentDoc[] => {
   if (!isContentlayerLoaded()) return [];
-  const featured = getFeaturedDocumentsInternal();
-  return limit ? featured.slice(0, limit) : featured;
+  
+  if (kind) {
+    // If kind is provided, get featured documents of that specific type
+    const featured = getFeaturedDocumentsInternal(kind, limit);
+    return limit ? featured.slice(0, limit) : featured;
+  } else {
+    // If no kind provided, get all documents and filter for featured ones
+    const allDocs = getAllDocuments();
+    const featured = allDocs.filter((doc: ContentDoc) => doc.featured === true);
+    return limit ? featured.slice(0, limit) : featured;
+  }
 };
 
-export const getFeaturedDocumentsByType = (type: string, limit?: number): ContentDoc[] => {
+// FIXED: getFeaturedDocumentsByType expects a DocKind, not just a string
+export const getFeaturedDocumentsByType = (kind: DocKind, limit?: number): ContentDoc[] => {
   if (!isContentlayerLoaded()) return [];
-  const featured = getFeaturedDocumentsByTypeInternal(type);
+  const featured = getFeaturedDocumentsByTypeInternal(kind);
   return limit ? featured.slice(0, limit) : featured;
 };
 
@@ -351,7 +368,8 @@ export const getDocumentsForSitemap = (): Array<{
   
   return getPublishedDocuments().map(doc => {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
-    const href = getCardPropsForDocument(doc).href;
+    const cardProps = getCardPropsForDocument(doc);
+    const href = cardProps.href;
     
     // Helper function to convert date to ISO string
     const dateToISO = (date: string | Date | null | undefined): string | undefined => {

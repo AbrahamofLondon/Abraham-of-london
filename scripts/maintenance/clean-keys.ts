@@ -1,5 +1,5 @@
 /* scripts/maintenance/clean-keys.ts */
-import { prisma } from "../../lib/prisma";
+import prisma from "../../lib/prisma";
 
 /**
  * INSTITUTIONAL KEY MAINTENANCE

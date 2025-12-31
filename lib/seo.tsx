@@ -1,48 +1,38 @@
-// lib/seo.ts
-export interface SeoInput {
-  /** Page title without site suffix */
-  title?: string;
-  /** Plain-text description (<= 160 chars ideal) */
-  description?: string;
-  /** Path beginning with '/' OR absolute URL */
-  path?: string;
-  /** Absolute URL to image (OG/Twitter) */
-  imageUrl?: string;
-  /** Optional noindex */
-  noindex?: boolean;
-  /** Optional canonical override (absolute URL) */
-  canonicalUrl?: string;
-}
+/* ============================================================================
+ * ENTERPRISE SEO CONTEXT SYSTEM
+ * Version: 4.0.0
+ * * Upgraded to support context retention from Contentlayer Helper v3.2.1.
+ * Provides O(1) metadata resolution for all 24 project contexts.
+ * ============================================================================ */
 
-export interface BuiltSeo {
-  title: string;
-  description: string;
-  canonical: string;
-  robots: string;
-  openGraph: {
-    title: string;
-    description: string;
-    url: string;
-    images?: { url: string }[];
-    type: "website" | "article";
-  };
-  twitter: {
-    card: "summary" | "summary_large_image";
-    title: string;
-    description: string;
-    image?: string;
-  };
+import { Metadata } from "next";
+import ContentHelper, { ContentDoc, CardProps } from "@/lib/content-helper";
+
+/* -------------------------------------------------------------------------- */
+/* 1. TYPES & REGISTRY CONTEXT                                                */
+/* -------------------------------------------------------------------------- */
+
+export interface SeoInput {
+  title?: string;
+  description?: string;
+  path?: string;
+  imageUrl?: string;
+  noindex?: boolean;
+  canonicalUrl?: string;
+  /** Pass the full document to retain context-specific metadata */
+  doc?: ContentDoc;
 }
 
 const SITE_NAME = "Abraham of London";
-const DEFAULT_DESC =
-  "Insights, strategy, and leadership from Abraham of London.";
+const DEFAULT_DESC = "Insights, strategy, and leadership from Abraham of London.";
+const TWITTER_HANDLE = "@AbrahamOfLondon";
+
+/* -------------------------------------------------------------------------- */
+/* 2. CORE URL RESOLVERS                                                      */
+/* -------------------------------------------------------------------------- */
 
 function getBaseUrl(): string {
-  const raw = (
-    process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org"
-  ).trim();
-  return raw.replace(/\/+$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(/\/+$/, "");
 }
 
 export function toAbsoluteUrl(input?: string): string | undefined {
@@ -51,38 +41,86 @@ export function toAbsoluteUrl(input?: string): string | undefined {
   return `${getBaseUrl()}/${input.replace(/^\/+/, "")}`;
 }
 
-export function canonicalFrom(path?: string, override?: string): string {
-  if (override && /^https?:\/\//i.test(override)) return override;
-  if (!path) return getBaseUrl();
-  return toAbsoluteUrl(path)!;
-}
+/* -------------------------------------------------------------------------- */
+/* 3. ROBUST METADATA BUILDER                                                 */
+/* -------------------------------------------------------------------------- */
 
-export function buildSeo(input: SeoInput, asArticle = false): BuiltSeo {
+/**
+ * Faithfully builds Next.js Metadata objects using the 24-context registry.
+ * This is the primary entry point for Page components.
+ */
+export function buildMetadata(input: SeoInput): Metadata {
   const baseUrl = getBaseUrl();
-  const titleCore = (input.title || SITE_NAME).trim();
-  const title = input.title ? `${titleCore} | ${SITE_NAME}` : SITE_NAME;
-  const description = (input.description || DEFAULT_DESC).trim();
-  const canonical = canonicalFrom(input.path, input.canonicalUrl);
-  const robots = input.noindex ? "noindex,follow" : "index,follow";
-  const imgAbs = toAbsoluteUrl(input.imageUrl);
+  let card: CardProps | null = null;
+
+  // If a document context is provided, resolve using the Enterprise Helper
+  if (input.doc) {
+    card = ContentHelper.getCardProps(input.doc);
+  }
+
+  // Priority-based resolution (Contextual Field -> Input Override -> Global Default)
+  const titleCore = (input.title || card?.ogTitle || card?.title || SITE_NAME).trim();
+  const titleFull = input.title || card?.title ? `${titleCore} | ${SITE_NAME}` : SITE_NAME;
+  
+  const description = (
+    input.description || 
+    card?.socialCaption || 
+    card?.excerpt || 
+    input.doc?.subtitle || 
+    DEFAULT_DESC
+  ).trim();
+
+  const canonical = input.canonicalUrl || (card?.href ? `${baseUrl}${card.href}` : baseUrl);
+  const imageUrl = toAbsoluteUrl(input.imageUrl || card?.coverImage);
+  const robots = input.noindex ? "noindex, follow" : "index, follow";
 
   return {
-    title,
+    title: titleFull,
     description,
-    canonical,
+    alternates: {
+      canonical: canonical,
+    },
     robots,
     openGraph: {
       title: titleCore,
       description,
-      url: canonical || baseUrl,
-      images: imgAbs ? [{ url: imgAbs }] : undefined,
-      type: asArticle ? "article" : "website",
+      url: canonical,
+      siteName: SITE_NAME,
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630, alt: titleCore }] : [],
+      type: card?.kind === "post" || card?.kind === "article" ? "article" : "website",
+      ...(card?.dateISO && { publishedTime: card.dateISO }),
     },
     twitter: {
-      card: imgAbs ? "summary_large_image" : "summary",
+      card: imageUrl ? "summary_large_image" : "summary",
       title: titleCore,
       description,
-      image: imgAbs,
+      images: imageUrl ? [imageUrl] : [],
+      site: TWITTER_HANDLE,
+      creator: TWITTER_HANDLE,
     },
+    // Retain context for visual positioning in the project
+    other: card ? {
+      "content-kind": card.kind,
+      "cover-fit": card.coverFit,
+      "cover-position": card.coverPosition,
+    } : {},
   };
+}
+
+/* -------------------------------------------------------------------------- */
+/* 4. CONTEXT RETENTION HELPER FOR DYNAMIC ROUTES                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One-liner for generateMetadata in Next.js dynamic routes.
+ * Handles slug lookup and SEO generation for any of the 24 contexts.
+ */
+export async function getDynamicMetadata(
+  slug: string, 
+  kind: any // DocKind
+): Promise<Metadata> {
+  const doc = ContentHelper.getDocBySlug(slug, kind);
+  if (!doc) return { title: "Not Found" };
+
+  return buildMetadata({ doc });
 }

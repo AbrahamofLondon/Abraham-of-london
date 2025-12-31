@@ -1,183 +1,126 @@
-// prisma/schema.prisma
-// ENTERPRISE-GRADE (SQLite-compatible)
-// Integrated for Membership, Interactions, Strategic Intakes, and Institutional Audit
+/* prisma/schema.prisma */
+// ENTERPRISE-GRADE (SQLite-compatible for local dev, Neon-compatible for prod)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "sqlite" // Toggle to "postgresql" for Neon production
   url      = env("DATABASE_URL")
 }
 
 // ==================== AUDIT & ANALYTICS MODELS ====================
 
 model DownloadAuditEvent {
-  id String @id @default(cuid())
-
-  // Content Identification
+  id          String   @id @default(cuid())
   slug        String
-  contentType String @default("download")
-  eventType   String @default("download")
-
-  // Optional relation to InnerCircleMember
-  memberId String?            @map("member_id")
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  // File Details
-  fileName String? @map("file_name")
-  fileSize BigInt? @map("file_size")
-  fileHash String? @map("file_hash") // SHA-256
-
-  // User Identification
-  userId    String? @map("user_id")
-  email     String?
-  emailHash String? @map("email_hash") // SHA-256 hash for privacy
-
-  // Session & Device
-  sessionId String? @map("session_id")
-  deviceId  String? @map("device_id")
-  userAgent String? @map("user_agent")
-
-  // Network & Location
-  ipAddress   String? @map("ip_address")
-  ipHash      String? @map("ip_hash")
-  countryCode String? @map("country_code")
+  contentType String   @default("download")
+  eventType   String   @default("download")
+  memberId    String?  @map("member_id")
+  member      InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  fileName    String?  @map("file_name")
+  fileSize    BigInt?  @map("file_size")
+  fileHash    String?  @map("file_hash") 
+  userId      String?  @map("user_id")
+  email       String?
+  emailHash   String?  @map("email_hash") 
+  sessionId   String?  @map("session_id")
+  deviceId    String?  @map("device_id")
+  userAgent   String?  @map("user_agent")
+  ipAddress   String?  @map("ip_address")
+  ipHash      String?  @map("ip_hash")
+  countryCode String?  @map("country_code")
   region      String?
   city        String?
-
-  // Referral & Campaign
   referrer    String?
-  utmSource   String? @map("utm_source")
-  utmMedium   String? @map("utm_medium")
-  utmCampaign String? @map("utm_campaign")
-
-  // Technical Metadata
-  statusCode Int?    @map("status_code")
-  latencyMs  Int?    @map("latency_ms")
-
-  // Success/Failure Tracking
-  success     Boolean @default(true)
-  errorCode   String? @map("error_code")
-  errorDetail String? @map("error_detail")
-
-  // Timestamps
-  createdAt   DateTime  @default(now()) @map("created_at")
+  utmSource   String?  @map("utm_source")
+  utmMedium   String?  @map("utm_medium")
+  utmCampaign String?  @map("utm_campaign")
+  statusCode  Int?     @map("status_code")
+  latencyMs   Int?     @map("latency_ms")
+  success     Boolean  @default(true)
+  errorCode   String?  @map("error_code")
+  errorDetail String?  @map("error_detail")
+  createdAt   DateTime @default(now()) @map("created_at")
   processedAt DateTime? @map("processed_at")
 
   @@index([slug])
   @@index([createdAt])
-  @@index([memberId])
   @@map("download_audit_events")
 }
 
-// ==================== ENHANCED INTERACTION MODELS ====================
-
 model ShortInteraction {
-  id        Int    @id @default(autoincrement())
-  shortSlug String @map("short_slug")
-
-  // User Identification
-  sessionId String? @map("session_id")
-  emailHash String? @map("email_hash")
-  
-  // Relation to Member
-  memberId String?            @map("member_id")
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  // Action Details
-  action    String  // 'like', 'save', 'view'
-  subAction String? @map("sub_action")
-  metadata  String? // JSON string
-
-  // Device & Network
-  userAgent String? @map("user_agent")
-  ipAddress String? @map("ip_address")
-  ipHash    String? @map("ip_hash")
-
-  // Timestamps
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+  id         Int      @id @default(autoincrement())
+  shortSlug  String   @map("short_slug")
+  sessionId  String?  @map("session_id")
+  emailHash  String?  @map("email_hash")
+  memberId   String?  @map("member_id")
+  member     InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  action     String  
+  subAction  String?  @map("sub_action")
+  metadata   String?  // JSON string
+  userAgent  String?  @map("user_agent")
+  ipAddress  String?  @map("ip_address")
+  ipHash     String?  @map("ip_hash")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   @@index([shortSlug])
-  @@index([action])
-  @@index([memberId])
-  @@index([shortSlug, action, createdAt])
   @@map("short_interactions")
 }
 
 model StrategyRoomIntake {
-  id                 String   @id @default(cuid())
-  fullName           String   @map("full_name")
-  emailHash          String   @map("email_hash")
-  organisation       String
-  status             String   // 'accepted' | 'declined'
-  score              Int
-  decisionStatement  String   @map("decision_statement")
-  payload            String   // Full JSON payload for recovery
-  createdAt          DateTime @default(now()) @map("created_at")
+  id                String   @id @default(cuid())
+  fullName          String   @map("full_name")
+  emailHash         String   @map("email_hash")
+  organisation      String
+  status            String   
+  score             Int
+  decisionStatement String   @map("decision_statement")
+  payload           String   
+  createdAt         DateTime @default(now()) @map("created_at")
 
   @@index([status])
-  @@index([emailHash])
-  @@index([createdAt])
   @@map("strategy_room_intakes")
 }
 
 // ==================== CORE MEMBERSHIP MODELS ====================
 
 model InnerCircleMember {
-  id String @id @default(uuid())
-
-  // Identity
-  emailHash       String  @unique @map("email_hash")
-  emailHashPrefix String  @map("email_hash_prefix")
+  id              String   @id @default(uuid())
+  emailHash       String   @unique @map("email_hash")
+  emailHashPrefix String   @map("email_hash_prefix")
   name            String?
+  status          String   @default("active")
+  tier            String   @default("standard")
+  createdAt       DateTime @default(now()) @map("created_at")
+  lastSeenAt      DateTime @default(now()) @map("last_seen_at")
+  lastIp          String?  @map("last_ip")
+  loginCount      Int      @default(0) @map("login_count")
 
-  // Member Status
-  status String @default("active")
-  tier   String @default("standard")
+  keys            InnerCircleKey[]
+  auditEvents     DownloadAuditEvent[]
+  interactions    ShortInteraction[]
 
-  // Activity Tracking
-  createdAt   DateTime  @default(now()) @map("created_at")
-  lastSeenAt  DateTime  @default(now()) @map("last_seen_at")
-  lastIp      String?   @map("last_ip")
-  loginCount  Int       @default(0) @map("login_count")
-
-  // Relations
-  keys             InnerCircleKey[]
-  auditEvents      DownloadAuditEvent[]
-  interactions     ShortInteraction[]
-
-  @@index([emailHashPrefix])
   @@index([status])
-  @@index([createdAt])
   @@map("inner_circle_members")
 }
 
 model InnerCircleKey {
-  id String @id @default(uuid())
-
-  // Foreign Key
-  memberId String            @map("member_id")
-  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  // Key Details
-  keyHash   String @unique @map("key_hash")
-  keySuffix String @map("key_suffix")
-
-  // Status Management
-  status       String @default("active")
-  totalUnlocks Int    @default(0) @map("total_unlocks")
-
-  // Security Tracking
-  createdAt  DateTime  @default(now()) @map("created_at")
-  lastUsedAt DateTime? @map("last_used_at")
-  lastIp     String?   @map("last_ip")
+  id           String    @id @default(uuid())
+  memberId     String    @map("member_id")
+  member       InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  keyHash      String    @unique @map("key_hash")
+  keySuffix    String    @map("key_suffix")
+  status       String    @default("active")
+  totalUnlocks Int       @default(0) @map("total_unlocks")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  lastUsedAt   DateTime? @map("last_used_at")
+  lastIp       String?   @map("last_ip")
 
   @@index([memberId])
-  @@index([keyHash, status])
   @@map("inner_circle_keys")
 }
 
@@ -186,7 +129,7 @@ model InnerCircleKey {
 model ApiRateLimit {
   id           Int      @id @default(autoincrement())
   identifier   String
-  bucketType   String   @map("bucket_type") // ip, user, global
+  bucketType   String   @map("bucket_type")
   requestCount Int      @default(0) @map("request_count")
   windowStart  DateTime @map("window_start")
   windowEnd    DateTime @map("window_end")
@@ -197,57 +140,38 @@ model ApiRateLimit {
 }
 
 model ContentMetadata {
-  id          String @id @default(cuid())
-  slug        String @unique
-  title       String
-  contentType String @map("content_type")
-
-  // Download Stats
+  id                String    @id @default(cuid())
+  slug              String    @unique
+  title             String
+  contentType       String    @map("content_type")
   totalDownloads    Int       @default(0) @map("total_downloads")
   uniqueDownloaders Int       @default(0) @map("unique_downloaders")
   lastDownloadAt    DateTime? @map("last_download_at")
+  viewCount         Int       @default(0) @map("view_count")
+  shareCount        Int       @default(0) @map("share_count")
+  likeCount         Int       @default(0) @map("like_count")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  // Engagement
-  viewCount  Int @default(0) @map("view_count")
-  shareCount Int @default(0) @map("share_count")
-  likeCount  Int @default(0) @map("like_count")
-
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-
-  @@index([contentType])
-  @@index([createdAt])
   @@map("content_metadata")
 }
 
 model SystemAuditLog {
-  id String @id @default(cuid())
-
-  // Actor Information
-  actorType   String  @map("actor_type")
-  actorId     String? @map("actor_id")
-  actorEmail  String? @map("actor_email") // FIX: Resolved Type Error in lib/server/audit.ts
-
-  // Action Details
+  id           String   @id @default(cuid())
+  actorType    String   @map("actor_type")
+  actorId      String?  @map("actor_id")
+  actorEmail   String?  @map("actor_email") // FIXED: Named specifically for audit.ts
   action       String
-  resourceType String  @map("resource_type")
-  resourceId   String? @map("resource_id")
+  resourceType String   @map("resource_type")
+  resourceId   String?  @map("resource_id")
+  oldValue     String?  @map("old_value")
+  newValue     String?  @map("new_value") 
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  requestId    String?  @map("request_id") // FIXED: Matches trace requirements
+  status       String   @default("success")
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  // Changes & Context
-  oldValue  String? @map("old_value")
-  newValue  String? @map("new_value") // Used for 'details'
-  ipAddress String? @map("ip_address")
-  userAgent String? @map("user_agent")
-  requestId String? @map("request_id") // FIX: Resolved mapping requirement
-  status    String  @default("success")
-
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@index([actorId])
-  @@index([resourceId])
   @@index([action])
-  @@index([createdAt])
   @@map("system_audit_logs")
 }

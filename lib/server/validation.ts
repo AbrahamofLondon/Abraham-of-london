@@ -54,27 +54,24 @@ export async function validateAdminAccess(
   }
 
   // 4. TIMING-SAFE COMPARISON (Enterprise Standard)
-  // Prevents leaking the key length or content via response time variance.
   try {
     const keyBuffer = Buffer.from(adminKey);
     const tokenBuffer = Buffer.from(token);
     
-    if (keyBuffer.length !== tokenBuffer.length || !crypto.timingSafeEqual(keyBuffer, tokenBuffer)) {
+    // FIXED: Convert to Uint8Array for strictly typed timingSafeEqual compatibility
+    if (keyBuffer.length !== tokenBuffer.length || !crypto.timingSafeEqual(new Uint8Array(keyBuffer), new Uint8Array(tokenBuffer))) {
       return { valid: false, reason: "Invalid admin token" };
     }
-  } catch (err) {
+  } catch (_err) { // FIXED: Prefixed with underscore to satisfy ESLint
     return { valid: false, reason: "Internal security comparison failure" };
   }
 
-  // Optional: institutional user tracking via custom header
   const userId = (req.headers["x-admin-user-id"] as string | undefined)?.trim();
-
   return { valid: true, userId, method: "api_key" };
 }
 
 /**
  * DATA INTEGRITY: DATE RANGE VALIDATION
- * Used for exporting institutional audit logs.
  */
 export function validateDateRange(input: {
   since: Date;

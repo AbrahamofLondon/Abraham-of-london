@@ -1,0 +1,221 @@
+import { defineDocumentType, makeSource } from "contentlayer2/source-files";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+
+/* -------------------------------------------------------------------------- */
+/* 1. COMPREHENSIVE FIELD DEFINITIONS WITH FUTURE-PROOFING                   */
+/* -------------------------------------------------------------------------- */
+
+const commonFields = {
+  // === CORE METADATA ===
+  title: { type: "string", required: true },
+  subtitle: { type: "string", required: false },
+  date: { type: "date", required: false },
+  slug: { type: "string", required: false },
+  href: { type: "string", required: false },
+  description: { type: "string", required: false },
+  excerpt: { type: "string", required: false },
+  category: { type: "string", required: false },
+  author: { type: "string", required: false },
+  authorTitle: { type: "string", required: false },
+  readTime: { type: "string", required: false },
+  readtime: { type: "string", required: false }, // lowercase variant
+  
+  // === VISUAL & LAYOUT ===
+  coverImage: { type: "string", required: false },
+  coverAspect: { type: "string", required: false },
+  coverFit: { type: "string", required: false },
+  coverPosition: { type: "string", required: false },
+  layout: { type: "string", required: false },
+  theme: { type: "string", required: false },
+  
+  // === SEO & SOCIAL ===
+  ogTitle: { type: "string", required: false },
+  ogDescription: { type: "string", required: false },
+  socialCaption: { type: "string", required: false },
+  
+  // === CONTENT MANAGEMENT ===
+  draft: { type: "boolean", required: false, default: false },
+  featured: { type: "boolean", required: false, default: false },
+  archived: { type: "boolean", required: false, default: false },
+  published: { type: "boolean", required: false, default: true }, // FIXED: Added this field
+  lockMessage: { type: "string", required: false },
+  accessLevel: { type: "string", required: false },
+  available: { type: "boolean", required: false, default: true },
+  
+  // === TAXONOMY ===
+  tags: { type: "list", of: { type: "string" }, required: false },
+  audience: { type: "string", required: false },
+  resourceType: { type: "string", required: false },
+  
+  // === DOCUMENT-SPECIFIC IDENTIFIERS ===
+  volumeNumber: { type: "string", required: false },
+  order: { type: "number", required: false },
+  isbn: { type: "string", required: false },
+  bibleVerse: { type: "string", required: false },
+  
+  // === FILE & DOWNLOAD HANDLING ===
+  file: { type: "string", required: false },
+  downloadFile: { type: "string", required: false },
+  pdfPath: { type: "string", required: false },
+  downloadUrl: { type: "string", required: false },
+  fileUrl: { type: "string", required: false },
+  fileSize: { type: "string", required: false },
+  
+  // === EVENT MANAGEMENT ===
+  eventDate: { type: "date", required: false },
+  time: { type: "string", required: false },
+  registrationUrl: { type: "string", required: false },
+  location: { type: "string", required: false },
+  
+  // === CONTENT RELATIONSHIPS ===
+  resources: { type: "json", required: false },
+  relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+  
+  // === FUTURE-PROOFING: COMMON FIELD PATTERNS ===
+  // Generic string fields for unexpected frontmatter
+  metaDescription: { type: "string", required: false },
+  keywords: { type: "list", of: { type: "string" }, required: false },
+  status: { type: "string", required: false },
+  priority: { type: "number", required: false },
+  
+  // Generic JSON for any structured data
+  meta: { type: "json", required: false },
+  customFields: { type: "json", required: false },
+  
+  // Generic lists
+  categories: { type: "list", of: { type: "string" }, required: false },
+  authors: { type: "list", of: { type: "string" }, required: false },
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* 2. DEFENSIVE COMPUTED FIELDS WITH FALLBACKS                               */
+/* -------------------------------------------------------------------------- */
+
+const computedCommon = (base: string) => ({
+  url: { 
+    type: "string", 
+    resolve: (doc: any) => {
+      // Priority: href > slug > file path
+      if (doc.href && doc.href !== "#") return doc.href;
+      const slug = doc.slug || doc._raw.flattenedPath.split("/").pop();
+      return `/${base}/${slug}`.replace(/\/+/g, '/'); // Clean double slashes
+    }
+  },
+  // Defensive: Add file path for debugging
+  sourcePath: {
+    type: "string",
+    resolve: (doc: any) => doc._raw.flattenedPath
+  },
+  // Defensive: Publication status check
+  isPublished: {
+    type: "boolean",
+    resolve: (doc: any) => {
+      const isDraft = doc.draft === true || doc.draft === "true";
+      const isArchived = doc.archived === true || doc.archived === "true";
+      const isPublished = doc.published === true || doc.published === "true" || doc.published === undefined;
+      return !isDraft && !isArchived && isPublished;
+    }
+  }
+});
+
+/* -------------------------------------------------------------------------- */
+/* 3. DOCUMENT TYPES WITH SPECIFIC OVERRIDES                                 */
+/* -------------------------------------------------------------------------- */
+
+// Helper for consistent type definitions
+const createDocumentType = (name: string, pattern: string, basePath: string, extraFields = {}) => 
+  defineDocumentType(() => ({
+    name,
+    filePathPattern: pattern,
+    contentType: "mdx",
+    fields: { ...commonFields, ...extraFields },
+    computedFields: computedCommon(basePath),
+  }));
+
+export const Post = createDocumentType("Post", "blog/**/*.{md,mdx}", "blog");
+export const Canon = createDocumentType("Canon", "canon/**/*.{md,mdx}", "canon");
+export const Download = createDocumentType(
+  "Download", 
+  "downloads/**/*.{md,mdx}", 
+  "downloads",
+  {}, // No extra fields needed - all in commonFields
+);
+export const Book = createDocumentType("Book", "books/**/*.{md,mdx}", "books");
+export const Short = createDocumentType("Short", "shorts/**/*.{md,mdx}", "shorts");
+export const Event = createDocumentType("Event", "events/**/*.{md,mdx}", "events");
+export const Resource = createDocumentType("Resource", "resources/**/*.{md,mdx}", "resources");
+export const Strategy = createDocumentType("Strategy", "strategy/**/*.{md,mdx}", "strategy");
+export const Article = createDocumentType("Article", "articles/**/*.{md,mdx}", "articles");
+export const Guide = createDocumentType("Guide", "guides/**/*.{md,mdx}", "guides");
+export const Tutorial = createDocumentType("Tutorial", "tutorials/**/*.{md,mdx}", "tutorials");
+export const CaseStudy = createDocumentType("CaseStudy", "case-studies/**/*.{md,mdx}", "case-studies");
+export const Whitepaper = createDocumentType("Whitepaper", "whitepapers/**/*.{md,mdx}", "whitepapers");
+export const Report = createDocumentType("Report", "reports/**/*.{md,mdx}", "reports");
+export const Newsletter = createDocumentType("Newsletter", "newsletters/**/*.{md,mdx}", "newsletters");
+export const Sermon = createDocumentType("Sermon", "sermons/**/*.{md,mdx}", "sermons");
+export const Devotional = createDocumentType("Devotional", "devotionals/**/*.{md,mdx}", "devotionals");
+export const Prayer = createDocumentType("Prayer", "prayers/**/*.{md,mdx}", "prayers");
+export const Testimony = createDocumentType("Testimony", "testimonies/**/*.{md,mdx}", "testimonies");
+export const Podcast = createDocumentType("Podcast", "podcasts/**/*.{md,mdx}", "podcasts");
+export const Video = createDocumentType("Video", "videos/**/*.{md,mdx}", "videos");
+export const Course = createDocumentType("Course", "courses/**/*.{md,mdx}", "courses");
+export const Lesson = createDocumentType("Lesson", "lessons/**/*.{md,mdx}", "lessons");
+export const Print = createDocumentType("Print", "prints/**/*.{md,mdx}", "prints");
+
+// Add downloadPath computation to Download type
+const DownloadWithExtra = defineDocumentType(() => ({
+  name: "Download",
+  filePathPattern: "downloads/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: commonFields,
+  computedFields: {
+    ...computedCommon("downloads"),
+    downloadPath: {
+      type: "string",
+      resolve: (doc: any) => {
+        // Unified download path resolver with priority
+        return doc.file || doc.downloadFile || doc.downloadUrl || doc.pdfPath || doc.fileUrl || "";
+      }
+    },
+    fileInfo: {
+      type: "json",
+      resolve: (doc: any) => ({
+        path: doc.file || doc.downloadFile || doc.downloadUrl || doc.pdfPath || doc.fileUrl,
+        size: doc.fileSize,
+        type: doc.file?.split('.').pop() || doc.downloadFile?.split('.').pop() || 'unknown'
+      })
+    }
+  },
+}));
+
+/* -------------------------------------------------------------------------- */
+/* 4. ROBUST SOURCE CONFIGURATION                                            */
+/* -------------------------------------------------------------------------- */
+
+export default makeSource({
+  contentDirPath: "content",
+  documentTypes: [
+    Post, Book, DownloadWithExtra, Canon, Short, Event, Resource, Strategy, 
+    Article, Guide, Tutorial, CaseStudy, Whitepaper, Report, Newsletter, 
+    Sermon, Devotional, Prayer, Testimony, Podcast, Video, Course, Lesson, Print
+  ],
+  mdx: {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [rehypeSlug],
+  },
+  // Defensive error handling
+  onUnknownDocuments: "skip-warn",
+  onMissingOrIncompatibleData: "skip-warn",
+  onExtraFieldData: "warn", // Changed from default to warn instead of fail
+  disableImportAliasWarning: true,
+  
+  // Future-proofing: Content directory exclusions
+  contentDirExclude: ['.*', '*.tmp', '*.bak', '_*'],
+  
+  // Windows compatibility
+  date: {
+    timezone: "UTC",
+    locale: "en-US",
+  },
+});
