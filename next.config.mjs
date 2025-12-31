@@ -18,12 +18,18 @@ const nextConfig = {
   images: {
     unoptimized: false,
     dangerouslyAllowSVG: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   typescript: {
     ignoreBuildErrors: isNetlify && process.env.NETLIFY_TS_IGNORE === "true",
   },
   eslint: {
-    dirs: ["pages", "components", "lib", "types"],
+    dirs: ["pages", "components", "lib", "types", "app"],
     ignoreDuringBuilds: isNetlify && process.env.NETLIFY_ESLINT_IGNORE === "true",
   },
   env: {
@@ -32,6 +38,7 @@ const nextConfig = {
   },
   experimental: {
     esmExternals: false,
+    serverComponentsExternalPackages: ['pg', 'pg-native', 'crypto'],
   },
   pageExtensions: ["tsx", "ts", "jsx", "js", "mdx", "md"],
   webpack: (config, { dev, isServer }) => {
@@ -51,6 +58,7 @@ const nextConfig = {
         ...(config.resolve.fallback || {}),
         fs: false,
         path: false,
+        crypto: false,
       };
     }
 
@@ -105,6 +113,17 @@ const nextConfig = {
         version: process.env.BUILD_ID || "1",
       };
     }
+
+    // Fix for pg and other native modules
+    config.externals = [
+      ...(config.externals || []),
+      ({ context, request }, callback) => {
+        if (/^pg-native$/.test(request)) {
+          return callback(null, 'commonjs ' + request);
+        }
+        callback();
+      },
+    ];
 
     return config;
   },

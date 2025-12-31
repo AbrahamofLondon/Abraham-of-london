@@ -1,12 +1,86 @@
-// lib/posts.ts
+// lib/posts.ts - Simplified version
 /* eslint-disable no-console */
 
-import type { Post as PostType, PostForClient as PostForClientType, PostSummary as PostSummaryType, PostList } from "@/types/post";
-import { PostFactory, PostMetaUtils, TypeGuards, Validation } from "@/types/post";
+// Define types locally to avoid import issues
+interface ImageType {
+  src: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  blurDataURL?: string;
+}
+
+interface PostMeta {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  published?: boolean;
+  featured?: boolean;
+  category?: string;
+  tags?: string[];
+  author?: string;
+  readTime?: string;
+  subtitle?: string;
+  description?: string;
+  coverImage?: string | ImageType | null;
+  ogImage?: string | ImageType | null;
+  series?: string;
+  seriesOrder?: number;
+  coverAspect?: string;
+  coverFit?: string;
+  coverPosition?: string;
+  authors?: string[];
+  wordCount?: number;
+  canonicalUrl?: string;
+  noindex?: boolean;
+  lastModified?: string;
+  id?: string;
+  url?: string;
+  draft?: boolean;
+}
+
+interface Post extends PostMeta {
+  content?: string;
+  html?: string;
+  compiledSource?: string;
+  body?: any;
+}
+
+interface PostForClient extends Post {
+  content: string;
+  html: string;
+  compiledSource: string;
+  coverImage?: string;
+  ogImage?: string;
+}
+
+interface PostSummary {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  readTime?: string;
+  category?: string;
+  tags?: string[];
+  featured?: boolean;
+  coverImage?: string;
+}
+
+interface PostList {
+  posts: PostSummary[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 import { getPublishedPosts as getPublishedPostDocs, normalizeSlug } from "@/lib/contentlayer-helper";
 
 // -----------------------------
-// Local helpers (NO posts-utils)
+// Local helpers
 // -----------------------------
 
 function clean(s: unknown): string {
@@ -20,20 +94,48 @@ function safeIsoDate(input: unknown): string {
   return new Date().toISOString().split("T")[0]!;
 }
 
-function toSummary(post: PostType): PostSummaryType {
-  return PostFactory.createSummary(post);
+function normalizeImage(image: string | ImageType | null | undefined): string | undefined {
+  if (!image) return undefined;
+  if (typeof image === "string") return image;
+  if (typeof image === "object" && (image as ImageType).src) return (image as ImageType).src;
+  return undefined;
 }
 
-function searchLocal(posts: PostType[], query: string): PostType[] {
+function toSummary(post: Post): PostSummary {
+  return {
+    slug: post.slug,
+    title: post.title,
+    date: post.date,
+    excerpt: post.excerpt,
+    readTime: post.readTime,
+    category: post.category,
+    tags: post.tags,
+    featured: post.featured,
+    coverImage: normalizeImage(post.coverImage),
+  };
+}
+
+function toPostForClient(post: Post): PostForClient {
+  return {
+    ...post,
+    coverImage: normalizeImage(post.coverImage),
+    ogImage: normalizeImage(post.ogImage),
+    content: post.content || "",
+    html: post.html || "",
+    compiledSource: post.compiledSource || "",
+  };
+}
+
+function searchLocal(posts: Post[], query: string): Post[] {
   const q = clean(query);
   if (!q) return [];
 
   return posts.filter((p) => {
     const hay = [
-      PostMetaUtils.getTitle(p),
-      PostMetaUtils.getExcerpt(p),
-      PostMetaUtils.getCategory(p),
-      PostMetaUtils.getAuthor(p),
+      p.title || "",
+      p.excerpt || "",
+      p.category || "",
+      p.author || "",
       ...(Array.isArray(p.tags) ? p.tags : []),
       p.subtitle ?? "",
       p.description ?? "",
@@ -46,11 +148,11 @@ function searchLocal(posts: PostType[], query: string): PostType[] {
   });
 }
 
-function featuredLocal(posts: PostType[]): PostType[] {
+function featuredLocal(posts: Post[]): Post[] {
   return posts.filter((p) => p.featured === true);
 }
 
-function paginateSummaries(summaries: PostSummaryType[], page = 1, perPage = 10): PostList {
+function paginateSummaries(summaries: PostSummary[], page = 1, perPage = 10): PostList {
   const safePerPage = Math.max(1, Math.min(100, Math.floor(perPage)));
   const total = summaries.length;
   const totalPages = Math.max(1, Math.ceil(total / safePerPage));
@@ -76,13 +178,13 @@ function paginateSummaries(summaries: PostSummaryType[], page = 1, perPage = 10)
 // Cache
 // -----------------------------
 
-let postsCache: PostType[] | null = null;
+let postsCache: Post[] | null = null;
 
 // -----------------------------
 // Contentlayer mapping
 // -----------------------------
 
-function mapDocToPost(doc: any): PostType | null {
+function mapDocToPost(doc: any): Post | null {
   try {
     if (!doc || typeof doc !== "object") return null;
 
@@ -90,7 +192,7 @@ function mapDocToPost(doc: any): PostType | null {
     const content = String(doc?.body?.raw ?? doc?.content ?? "").trim();
     if (!slug || !content) return null;
 
-    const postData: Partial<PostType> = {
+    const postData: Post = {
       slug,
       title: String(doc?.title ?? "Untitled"),
       date: safeIsoDate(doc?.date),
@@ -133,27 +235,28 @@ function mapDocToPost(doc: any): PostType | null {
       draft: Boolean(doc?.draft),
     };
 
-    const post = PostFactory.createPost(postData);
-
-    const validation = Validation.validatePostMeta(post);
-    if (!validation.isValid) {
-      console.warn(`[posts] invalid post "${slug}":`, validation.errors);
+    // Basic validation
+    const errors: string[] = [];
+    if (!postData.slug) errors.push("Slug is required");
+    if (!postData.title) errors.push("Title is required");
+    if (!postData.date) errors.push("Date is required");
+    
+    if (errors.length > 0) {
+      console.warn(`[posts] invalid post "${slug}":`, errors);
       return null;
     }
 
-    if (!TypeGuards.isPost(post)) return null;
-
-    return post;
+    return postData;
   } catch (e) {
     console.error("[posts] mapDocToPost error:", e);
     return null;
   }
 }
 
-function loadFromContentlayer(): PostType[] {
+function loadFromContentlayer(): Post[] {
   try {
     const docs = getPublishedPostDocs();
-    const posts = docs.map(mapDocToPost).filter((p): p is PostType => p !== null);
+    const posts = docs.map(mapDocToPost).filter((p): p is Post => p !== null);
 
     postsCache = posts;
     return posts;
@@ -163,8 +266,8 @@ function loadFromContentlayer(): PostType[] {
   }
 }
 
-function getSourcePosts(): PostType[] {
-  if (Array.isArray(postsCache) && postsCache.length && postsCache.every(TypeGuards.isPost)) {
+function getSourcePosts(): Post[] {
+  if (Array.isArray(postsCache) && postsCache.length > 0) {
     return postsCache;
   }
   return loadFromContentlayer();
@@ -178,36 +281,36 @@ export function clearPostsCache(): void {
   postsCache = null;
 }
 
-export function getPostBySlugWithContent(slug: string): PostType | null {
+export function getPostBySlugWithContent(slug: string): Post | null {
   const target = clean(slug);
   if (!target) return null;
 
   const posts = getSourcePosts();
-  const found = posts.find((p) => clean(PostMetaUtils.getSlug(p)) === target);
+  const found = posts.find((p) => clean(p.slug) === target);
   return found ?? null;
 }
 
-export function getPostBySlug(slug: string): PostForClientType | null {
+export function getPostBySlug(slug: string): PostForClient | null {
   const post = getPostBySlugWithContent(slug);
   if (!post) return null;
-  return PostFactory.createForClient(post);
+  return toPostForClient(post);
 }
 
-export function getAllPosts(): PostForClientType[] {
+export function getAllPosts(): PostForClient[] {
   const posts = getSourcePosts();
-  return posts.map((p) => PostFactory.createForClient(p));
+  return posts.map(toPostForClient);
 }
 
-export function getPublicPosts(): PostForClientType[] {
+export function getPublicPosts(): PostForClient[] {
   return getAllPosts().filter((p) => p.published !== false);
 }
 
-export function getFeaturedPosts(): PostForClientType[] {
+export function getFeaturedPosts(): PostForClient[] {
   const posts = featuredLocal(getSourcePosts());
-  return posts.map((p) => PostFactory.createForClient(p));
+  return posts.map(toPostForClient);
 }
 
-export function getPostSummaries(): PostSummaryType[] {
+export function getPostSummaries(): PostSummary[] {
   const posts = getSourcePosts();
   const sorted = [...posts].sort((a, b) => {
     const da = new Date(a.date || 0).getTime();
@@ -218,7 +321,7 @@ export function getPostSummaries(): PostSummaryType[] {
   return sorted.map(toSummary);
 }
 
-export function searchPosts(query: string): PostSummaryType[] {
+export function searchPosts(query: string): PostSummary[] {
   const results = searchLocal(getSourcePosts(), query);
   return results.map(toSummary);
 }
@@ -227,17 +330,17 @@ export function getPaginatedPostSummaries(page = 1, perPage = 10): PostList {
   return paginateSummaries(getPostSummaries(), page, perPage);
 }
 
-export function getPostsByCategory(category: string): PostForClientType[] {
+export function getPostsByCategory(category: string): PostForClient[] {
   const c = clean(category);
-  return getAllPosts().filter((p) => clean(PostMetaUtils.getCategory(p)) === c);
+  return getAllPosts().filter((p) => clean(p.category || "") === c);
 }
 
-export function getPostsByTag(tag: string): PostForClientType[] {
+export function getPostsByTag(tag: string): PostForClient[] {
   const t = clean(tag);
-  return getAllPosts().filter((p) => PostMetaUtils.getTags(p).some((x) => clean(x) === t));
+  return getAllPosts().filter((p) => (p.tags || []).some((x) => clean(x) === t));
 }
 
-export function getRecentPosts(limit = 5): PostForClientType[] {
+export function getRecentPosts(limit = 5): PostForClient[] {
   const all = getAllPosts();
   const sorted = [...all].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
   return sorted.slice(0, Math.max(0, limit));

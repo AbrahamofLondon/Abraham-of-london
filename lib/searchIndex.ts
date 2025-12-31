@@ -1,40 +1,35 @@
-// lib/searchIndex.ts
-import {
-  getPublishedPosts,
-  getAllBooks,
-  getAllDownloads,
-  getAllPrints,
-  getAllResources,
-  getAllCanons,
+/* ============================================================================
+ * ENTERPRISE SEARCH INDEX SYSTEM
+ * Version: 3.0.0
+ * * Fully synchronized with ContentHelper v5.0.0
+ * ============================================================================ */
+
+import ContentHelper, { 
   type ContentDoc,
-  getSearchDocForDocument,
+  type DocKind 
 } from "./contentlayer-helper";
 import { absUrl } from "@/lib/siteConfig";
 
 /* -------------------------------------------------------------------------- */
-/* Search index public shape (UI-safe, no unknown)                            */
+/* 1. SEARCH INDEX SHAPE                                                      */
 /* -------------------------------------------------------------------------- */
 
-export type SearchDocType = "post" | "book" | "download" | "print" | "resource" | "canon";
-
 export interface SearchDoc {
-  type: SearchDocType;
+  type: string; 
   slug: string;
-
-  href: string; // internal route
-  url: string; // absolute route
-
+  href: string; 
+  url: string;  
   title: string;
-  date?: string | null; // ISO string
+  date?: string | null; 
   excerpt?: string | null;
   tags?: string[];
-
   coverImage?: string | null;
   coverAspect?: string | null;
+  category?: string | null;
 }
 
 /* -------------------------------------------------------------------------- */
-/* Date sorting                                                               */
+/* 2. UTILITIES                                                               */
 /* -------------------------------------------------------------------------- */
 
 function sortByDate<T extends { date?: string | null }>(docs: T[]): T[] {
@@ -45,103 +40,80 @@ function sortByDate<T extends { date?: string | null }>(docs: T[]): T[] {
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/* Mapper using helper (single source of truth)                               */
-/* -------------------------------------------------------------------------- */
-
+/**
+ * Transforms any document from the 24 contexts into a searchable shape.
+ * Uses getCardProps to resolve casing differences (readTime/readtime)
+ * and positioning fields (coverFit).
+ */
 function toSearchDoc(doc: ContentDoc): SearchDoc | null {
-  const base = getSearchDocForDocument(doc);
-  if (!base) return null;
+  if (!doc) return null;
 
-  const href = base.href || `/${base.slug}`;
+  const props = ContentHelper.getCardProps(doc);
+  
+  // Filter out any documents that failed to resolve correctly
+  if (props.slug === "unknown") return null;
 
   return {
-    type: base.type,
-    slug: base.slug,
-
-    href,
-    url: absUrl(href),
-
-    title: base.title,
-    date: base.dateISO ?? null,
-    excerpt: base.excerpt ?? null,
-    tags: base.tags ?? [],
-
-    coverImage: base.coverImage ?? null,
-    coverAspect: base.coverAspect ?? null,
+    type: props.kind,
+    slug: props.slug,
+    href: props.href,
+    url: absUrl(props.href),
+    title: props.title,
+    date: props.dateISO ?? null,
+    excerpt: props.description ?? null, // Uses the safe extraction from helper
+    tags: props.tags ?? [],
+    coverImage: props.coverImage ?? null,
+    coverAspect: props.coverAspect ?? null,
+    category: props.category ?? null,
   };
 }
 
-function compact<T>(arr: (T | null | undefined)[]): T[] {
-  return arr.filter(Boolean) as T[];
-}
-
 /* -------------------------------------------------------------------------- */
-/* Builders per collection                                                    */
+/* 3. AUTOMATED INDEX BUILDER                                                 */
 /* -------------------------------------------------------------------------- */
 
-function mapPosts(): SearchDoc[] {
-  const posts = getPublishedPosts();
-  return compact(posts.map(toSearchDoc));
-}
-
-function mapBooks(): SearchDoc[] {
-  const books = getAllBooks();
-  return compact(books.map(toSearchDoc));
-}
-
-function mapDownloads(): SearchDoc[] {
-  const downloads = getAllDownloads();
-  return compact(downloads.map(toSearchDoc));
-}
-
-function mapPrints(): SearchDoc[] {
-  const prints = getAllPrints();
-  // NOTE: availability filtering belongs in helper if you want it global.
-  return compact(prints.map(toSearchDoc));
-}
-
-function mapResources(): SearchDoc[] {
-  const resources = getAllResources();
-  return compact(resources.map(toSearchDoc));
-}
-
-function mapCanons(): SearchDoc[] {
-  const canons = getAllCanons();
-  return compact(canons.map(toSearchDoc));
-}
-
-/* -------------------------------------------------------------------------- */
-/* Main search index                                                          */
-/* -------------------------------------------------------------------------- */
-
+/**
+ * Iterates through all 24 document kinds defined in ContentHelper
+ * and flattens them into a single sorted index.
+ */
 export function buildSearchIndex(): SearchDoc[] {
-  const all = [
-    ...mapPosts(),
-    ...mapBooks(),
-    ...mapDownloads(),
-    ...mapPrints(),
-    ...mapResources(),
-    ...mapCanons(),
-  ];
+  // Use the master list of document kinds from the helper
+  const allKinds = ContentHelper.documentKinds;
+  
+  const allSearchDocs: SearchDoc[] = [];
 
-  // sort newest first
-  return sortByDate(all);
+  allKinds.forEach((kind: DocKind) => {
+    const docs = ContentHelper.getPublishedDocumentsByType(kind);
+    docs.forEach(doc => {
+      const searchEntry = toSearchDoc(doc);
+      if (searchEntry) allSearchDocs.push(searchEntry);
+    });
+  });
+
+  return sortByDate(allSearchDocs);
 }
 
+// Global Singleton for the Search Index
 export const searchIndex: SearchDoc[] = buildSearchIndex();
 
 /* -------------------------------------------------------------------------- */
-/* Query helper                                                               */
+/* 4. QUERY ENGINE                                                            */
 /* -------------------------------------------------------------------------- */
 
 export function searchDocuments(query: string, limit: number = 20): SearchDoc[] {
   const searchTerm = query.toLowerCase().trim();
+  
+  // Return recent content if no query provided
   if (!searchTerm) return searchIndex.slice(0, limit);
 
   return searchIndex
     .filter((doc) => {
-      const searchableText = [doc.title, doc.excerpt ?? "", (doc.tags ?? []).join(" ")]
+      const searchableText = [
+        doc.title, 
+        doc.excerpt ?? "", 
+        doc.category ?? "",
+        (doc.tags ?? []).join(" ")
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();

@@ -1,5 +1,8 @@
+/* pages/api/inner-circle/status.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import innerCircleStore from "@/lib/server/inner-circle-store";
+
+import { getPrivacySafeStats } from "@/lib/server/inner-circle-simple";
 
 type StatusResponse =
   | {

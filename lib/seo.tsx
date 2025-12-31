@@ -1,16 +1,19 @@
 /* ============================================================================
  * ENTERPRISE SEO CONTEXT SYSTEM
- * Version: 4.0.0
- * * Upgraded to support context retention from Contentlayer Helper v3.2.1.
- * Provides O(1) metadata resolution for all 24 project contexts.
+ * Version: 4.1.0
+ * * Fixed type imports to match ContentHelper v5.2.0
  * ============================================================================ */
 
 import { Metadata } from "next";
-import ContentHelper, { ContentDoc, CardProps } from "@/lib/content-helper";
+import ContentHelper, { type ContentDoc, type DocKind } from "@/lib/content-helper";
 
 /* -------------------------------------------------------------------------- */
 /* 1. TYPES & REGISTRY CONTEXT                                                */
 /* -------------------------------------------------------------------------- */
+
+// FIX: Infer the return type of getCardProps dynamically
+// This creates a valid 'CardProps' type without needing an explicit export
+type CardProps = ReturnType<typeof ContentHelper.getCardProps>;
 
 export interface SeoInput {
   title?: string;
@@ -59,14 +62,14 @@ export function buildMetadata(input: SeoInput): Metadata {
   }
 
   // Priority-based resolution (Contextual Field -> Input Override -> Global Default)
-  const titleCore = (input.title || card?.ogTitle || card?.title || SITE_NAME).trim();
+  // Use optional chaining carefully as card might be null
+  const titleCore = (input.title || card?.title || SITE_NAME).trim();
   const titleFull = input.title || card?.title ? `${titleCore} | ${SITE_NAME}` : SITE_NAME;
   
   const description = (
     input.description || 
-    card?.socialCaption || 
-    card?.excerpt || 
-    input.doc?.subtitle || 
+    card?.description || 
+    card?.subtitle || 
     DEFAULT_DESC
   ).trim();
 
@@ -100,9 +103,9 @@ export function buildMetadata(input: SeoInput): Metadata {
     },
     // Retain context for visual positioning in the project
     other: card ? {
-      "content-kind": card.kind,
-      "cover-fit": card.coverFit,
-      "cover-position": card.coverPosition,
+      "content-kind": card.kind || "unknown",
+      "cover-fit": card.coverFit || "cover",
+      "cover-position": card.coverPosition || "center",
     } : {},
   };
 }
@@ -117,9 +120,9 @@ export function buildMetadata(input: SeoInput): Metadata {
  */
 export async function getDynamicMetadata(
   slug: string, 
-  kind: any // DocKind
+  kind: DocKind
 ): Promise<Metadata> {
-  const doc = ContentHelper.getDocBySlug(slug, kind);
+  const doc = ContentHelper.getDocumentBySlug(kind, slug);
   if (!doc) return { title: "Not Found" };
 
   return buildMetadata({ doc });

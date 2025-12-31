@@ -1,6 +1,37 @@
 // lib/content-utils.ts
 import type { AnyDoc } from "@/lib/content-fallback";
-import type { PostMeta } from "@/types/post";
+
+// Define PostMeta locally since the file doesn't exist
+interface PostMeta {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+
+  published?: boolean;
+  featured?: boolean;
+  category?: string;
+  tags?: string[];
+  author?: string;
+  readTime?: string;
+  subtitle?: string;
+  description?: string;
+
+  coverImage?: string | null;
+  heroImage?: string | null;
+
+  // Additional fields used in the function
+  draft?: boolean;
+  url?: string;
+  volumeNumber?: string;
+  downloadUrl?: string;
+  fileSize?: string | number;
+  price?: string | number;
+  dimensions?: string;
+  resourceType?: string;
+  accessLevel?: string;
+  lockMessage?: string;
+}
 
 // Define DocumentTypes locally based on what's actually available
 export type DocumentTypes = AnyDoc;

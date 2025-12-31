@@ -1,6 +1,6 @@
 /* ============================================================================
  * ENTERPRISE GATING & ACCESS CONTROL SYSTEM
- * Version: 2.0.0
+ * Version: 2.1.0
  * ============================================================================ */
 
 import type { Tier as TierType } from "@/lib/contentlayer-helper";
@@ -19,8 +19,8 @@ import {
 export type Tier = TierType;
 
 /**
- * TIER_HIERARCHY must match the hierarchy defined in contentlayer-helper.ts
- * Based on your original Tier type: 'free' | 'basic' | 'premium' | 'enterprise' | 'restricted'
+ * TIER_HIERARCHY matches the contentlayer-helper definition
+ * 'free' | 'basic' | 'premium' | 'enterprise' | 'restricted'
  */
 const TIER_HIERARCHY: Record<Tier, number> = {
   "free": 0,
@@ -30,26 +30,24 @@ const TIER_HIERARCHY: Record<Tier, number> = {
   "restricted": 4,
 };
 
-// Helper to map your new naming convention to the actual Tier values
+// Maps legacy/display names to system tiers
 const TIER_NAME_MAP: Record<string, Tier> = {
   "public": "free",
-  "inner-circle": "restricted", // or "premium" depending on your hierarchy
-  "inner-circle-plus": "enterprise",
-  "inner-circle-elite": "enterprise", // or create a new tier if needed
+  "inner-circle": "basic", 
+  "inner-circle-plus": "premium",
+  "inner-circle-elite": "enterprise",
   "private": "restricted",
 };
 
-/**
- * Convert display tier names to actual Tier values
- */
 export const resolveTierName = (displayName: string): Tier => {
   const normalized = displayName.toLowerCase().trim();
   return TIER_NAME_MAP[normalized] || normalizeTier(displayName);
 };
 
-/**
- * Access Checkers
- */
+/* -------------------------------------------------------------------------- */
+/* ACCESS CHECKERS                                                            */
+/* -------------------------------------------------------------------------- */
+
 export const canAccessByTier = (doc: any, userTier: Tier | string): boolean => {
   if (!doc) return false;
   if (isDraftDoc(doc)) return false;
@@ -60,7 +58,6 @@ export const canAccessByTier = (doc: any, userTier: Tier | string): boolean => {
 export const requiresInnerCircle = (doc: any): boolean => {
   if (!doc) return false;
   const tier = getRequiredTier(doc);
-  // Any tier higher than 'free' requires at least basic membership
   return TIER_HIERARCHY[tier] >= TIER_HIERARCHY["basic"];
 };
 
@@ -78,7 +75,6 @@ export const checkDocumentAccess = (
 ): { allowed: boolean; reason?: string } => {
   if (!doc) return { allowed: false, reason: 'Document not found' };
   
-  // Convert display tier names to actual Tier values if needed
   const userTierValue = options.userTier ? resolveTierName(options.userTier as string) : 'free';
   const { cookies, requirePublished = true } = options;
   
@@ -92,10 +88,10 @@ export const checkDocumentAccess = (
 
   if (isPublicDoc(doc)) return { allowed: true };
 
-  // Tier check logic
+  // Tier check
   if (canAccessDoc(doc, userTierValue)) return { allowed: true };
   
-  // Cookie fallback for specific restricted legacy content
+  // Legacy cookie check
   if (requiresInnerCircle(doc) && hasInnerCircleAccess(cookies)) {
     return { allowed: true };
   }
@@ -103,14 +99,14 @@ export const checkDocumentAccess = (
   return { allowed: false, reason: 'Insufficient access level' };
 };
 
-/**
- * UI & Routing Helpers
- */
+/* -------------------------------------------------------------------------- */
+/* UI UTILITIES                                                               */
+/* -------------------------------------------------------------------------- */
+
 export const getAccessRedirectUrl = (doc: any, returnTo?: string): string => {
   const tier = getRequiredTier(doc);
   let path = `/membership?required=${tier}`;
 
-  // Map tier to appropriate redirect page
   if (tier === "restricted") {
     path = "/admin/login";
   } else if (TIER_HIERARCHY[tier] >= TIER_HIERARCHY["basic"]) {
@@ -129,38 +125,34 @@ export const getAccessRedirectUrl = (doc: any, returnTo?: string): string => {
 export const getTierDisplayName = (tier: Tier | string): string => {
   const normalized = normalizeTier(tier);
   const names: Record<Tier, string> = {
-    "free": "Free",
-    "basic": "Basic",
-    "premium": "Premium",
-    "enterprise": "Enterprise",
-    "restricted": "Restricted",
+    "free": "Public",
+    "basic": "Inner Circle",
+    "premium": "Inner Circle Plus",
+    "enterprise": "Inner Circle Elite",
+    "restricted": "Private",
   };
-  return names[normalized] || "Free";
+  return names[normalized] || "Public";
 };
 
-/**
- * Filter a document array based on permissions
- */
 export const filterByAccess = (
   docs: any[],
   options: { userTier?: Tier | string; cookies?: any; includeDrafts?: boolean; } = {}
 ): any[] => {
   const userTierValue = options.userTier ? resolveTierName(options.userTier as string) : 'free';
-  const { cookies, includeDrafts = false } = options;
-  
   return docs.filter(doc => {
     const { allowed } = checkDocumentAccess(doc, { 
       userTier: userTierValue, 
-      cookies, 
-      requirePublished: !includeDrafts 
+      cookies: options.cookies, 
+      requirePublished: !options.includeDrafts 
     });
     return allowed;
   });
 };
 
-/**
- * Additional utility functions
- */
+/* -------------------------------------------------------------------------- */
+/* TIER UTILITIES                                                             */
+/* -------------------------------------------------------------------------- */
+
 export const isHigherTier = (tier1: Tier | string, tier2: Tier | string): boolean => {
   const t1 = normalizeTier(tier1);
   const t2 = normalizeTier(tier2);
@@ -177,34 +169,20 @@ export const getTierDescription = (tier: Tier | string): string => {
   const normalized = normalizeTier(tier);
   const descriptions: Record<Tier, string> = {
     "free": "Public content accessible to all visitors",
-    "basic": "Basic membership content",
-    "premium": "Premium content with additional resources",
-    "enterprise": "Enterprise-level content and features",
-    "restricted": "Restricted access content",
+    "basic": "Inner Circle membership content",
+    "premium": "Plus membership content with additional resources",
+    "enterprise": "Elite level content and features",
+    "restricted": "Restricted administrative access",
   };
   return descriptions[normalized] || "Access level not defined";
 };
 
 /* -------------------------------------------------------------------------- */
-/* Compatibility layer for old code                                           */
+/* EXPORT OBJECT                                                              */
 /* -------------------------------------------------------------------------- */
 
-// These functions maintain compatibility with code expecting the old tier names
-export const requiresInnerCircleLegacy = (doc: any): boolean => {
-  return requiresInnerCircle(doc);
-};
-
-export const getAccessRedirectUrlLegacy = (doc: any, returnTo?: string): string => {
-  return getAccessRedirectUrl(doc, returnTo);
-};
-
-/* -------------------------------------------------------------------------- */
-/* Default export for convenience                                             */
-/* -------------------------------------------------------------------------- */
 const Gating = {
-  // Tier type (exported separately as type)
-  
-  // Functions from contentlayer-helper
+  // Helper Imports
   getRequiredTier,
   normalizeTier,
   isTierAllowed,
@@ -214,7 +192,7 @@ const Gating = {
   isDraftDoc,
   isPublishedDoc,
   
-  // Enhanced access control functions
+  // Logic
   canAccessByTier,
   requiresInnerCircle,
   hasInnerCircleAccess,
@@ -223,17 +201,11 @@ const Gating = {
   getTierDisplayName,
   filterByAccess,
   resolveTierName,
-  
-  // Additional utilities
   isHigherTier,
   isSameOrHigherTier,
   getTierDescription,
   
-  // Compatibility functions
-  requiresInnerCircleLegacy,
-  getAccessRedirectUrlLegacy,
-  
-  // Tier hierarchy constant (value, not type)
+  // Constants
   TIER_HIERARCHY,
   TIER_NAME_MAP,
 };

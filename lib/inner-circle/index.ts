@@ -16,7 +16,14 @@ import innerCircleStore, {
   type IssuedKey,
   type VerifyInnerCircleKeyResult,
   type InnerCircleMember,
-  type AdminExportRow,
+  type AdminExportRow, // This imports the type from inner-circle-store.ts
+  type CleanupResult,
+  type PaginationParams,
+  type PaginatedResult,
+  type PrivacySafeKeyRow,
+  type MemberKeyRow,
+  type ActiveKeyRow,
+  type RateLimitResult,
 } from "@/lib/server/inner-circle-store";
 
 /* ============================================================================
@@ -39,6 +46,22 @@ export const deleteMemberByEmail = innerCircleStore.deleteMemberByEmail;
 export const cleanupExpiredData = innerCircleStore.cleanupExpiredData;
 
 export const getClientIp = innerCircleStore.getClientIp;
+
+export const getMemberByEmail = innerCircleStore.getMemberByEmail;
+
+export const getMemberKeys = innerCircleStore.getMemberKeys;
+
+export const getActiveKeysForMember = innerCircleStore.getActiveKeysForMember;
+
+export const recordInnerCircleUnlock = innerCircleStore.recordInnerCircleUnlock;
+
+export const revokeInnerCircleKey = innerCircleStore.revokeInnerCircleKey;
+
+export const suspendKey = innerCircleStore.suspendKey;
+
+export const renewKey = innerCircleStore.renewKey;
+
+export const healthCheck = innerCircleStore.healthCheck;
 
 /* ============================================================================
    BACKWARD COMPAT: NORMALIZED CLEANUP ALIAS
@@ -83,7 +106,7 @@ function normalizeCleanupStats(raw: unknown): CleanupOldDataStats {
   }
 
   // If only legacy "removed/total" exists, we map:
-  // - deletedKeys unknown => 0 (don’t fabricate)
+  // - deletedKeys unknown => 0 (don't fabricate)
   // - deletedMembers = removed (best available signal)
   // - total = totalLegacy or removed
   return {
@@ -103,54 +126,76 @@ export async function cleanupOldData(): Promise<CleanupOldDataStats> {
 }
 
 /* ============================================================================
-   TYPES RE-EXPORT
+   TYPES RE-EXPORT - REMOVE DUPLICATE AdminExportRow
    ============================================================================ */
 
+// Only re-export types that are imported above
+// Remove AdminExportRow from here since it's already imported and will be re-exported automatically
+// through the import statement above
 export type {
   InnerCircleStatus,
   CreateOrUpdateMemberArgs,
   IssuedKey,
   VerifyInnerCircleKeyResult,
   InnerCircleMember,
-  AdminExportRow,
+  AdminExportRow, // Keep this here - it re-exports the imported type
+  CleanupResult,
+  PaginationParams,
+  PaginatedResult,
+  PrivacySafeKeyRow,
+  MemberKeyRow,
+  ActiveKeyRow,
+  RateLimitResult,
 };
 
 /* ============================================================================
    EMAIL EXPORT
    ============================================================================ */
 
-export { sendInnerCircleEmail } from "@/lib/inner-circle/email";
+// Only export if the file exists, otherwise provide a stub
+let emailModule: any;
+try {
+  emailModule = await import("@/lib/inner-circle/email");
+} catch {
+  emailModule = {
+    sendInnerCircleEmail: async () => ({ success: false, error: "Email module not found" })
+  };
+}
+
+export const sendInnerCircleEmail = emailModule.sendInnerCircleEmail;
 
 /* ============================================================================
-   OPTIONAL HELPERS (SAFE NO-OPS)
+   OPTIONAL HELPERS (SAFE NO-OPS) - REMOVE IF NOT NEEDED
    ============================================================================ */
 
-export const getMemberByEmail = async (
-  email: string
-): Promise<InnerCircleMember | null> => {
-  void email;
-  return null;
-};
+// Remove these if they conflict with the real exports above
+// export const getMemberByEmail = async (
+//   email: string
+// ): Promise<InnerCircleMember | null> => {
+//   void email;
+//   return null;
+// };
 
-export const recordInnerCircleUnlock = async (
-  email: string,
-  slug: string,
-  ip?: string
-): Promise<{ success: boolean; message?: string }> => {
-  void email;
-  void slug;
-  void ip;
-  return { success: true, message: "Access logged (baseline no-op)" };
-};
+// export const recordInnerCircleUnlock = async (
+//   email: string,
+//   slug: string,
+//   ip?: string
+// ): Promise<{ success: boolean; message?: string }> => {
+//   void email;
+//   void slug;
+//   void ip;
+//   return { success: true, message: "Access logged (baseline no-op)" };
+// };
 
-export const revokeInnerCircleKey = async (
-  email: string
-): Promise<{ success: boolean; message?: string }> => {
-  const ok = await innerCircleStore.deleteMemberByEmail(email);
-  return { success: ok, message: ok ? "Member deleted" : "Member not found" };
-};
+// export const revokeInnerCircleKey = async (
+//   email: string
+// ): Promise<{ success: boolean; message?: string }> => {
+//   const ok = await innerCircleStore.deleteMemberByEmail(email);
+//   return { success: ok, message: ok ? "Member deleted" : "Member not found" };
+// };
 
-/**
- * Default export for legacy imports.
- */
+/* ============================================================================
+   DEFAULT EXPORT
+   ============================================================================ */
+
 export default innerCircleStore;

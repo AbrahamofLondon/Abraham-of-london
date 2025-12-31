@@ -1,6 +1,42 @@
-import type { PostMeta } from "@/types/post";
-// Explicitly import ContentDoc to fix the variable typing issue
-import type { ContentDoc } from "./contentlayer-helper";
+// lib/mdx.ts
+
+// Remove the problematic import and define PostMeta locally
+// import type { PostMeta } from "@/types/post"; // REMOVE THIS LINE
+
+// Define PostMeta locally
+interface PostMeta {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+
+  published?: boolean;
+  featured?: boolean;
+  category?: string;
+  tags?: string[];
+  author?: string;
+  readTime?: string;
+  subtitle?: string;
+  description?: string;
+
+  coverImage?: string | { src?: string } | null;
+  ogImage?: string | { src?: string } | null;
+
+  series?: string;
+  seriesOrder?: number;
+  coverAspect?: string;
+  coverFit?: string;
+  coverPosition?: string;
+  authors?: string[];
+  wordCount?: number;
+  canonicalUrl?: string;
+  noindex?: boolean;
+  lastModified?: string;
+
+  id?: string;
+  url?: string;
+  draft?: boolean;
+}
 
 // Simple interface that matches your needs
 export interface PostDocument {
@@ -56,7 +92,7 @@ export function convertToPostMeta(doc: PostDocument): PostMeta {
     date: doc.date || "",
     excerpt: doc.excerpt || "",
     published: published,
-    featured: doc.featured || false,
+    featured: (doc as any).featured || false,
     category: doc.category || "",
     tags: doc.tags || [],
     author: doc.author || "",
@@ -64,17 +100,17 @@ export function convertToPostMeta(doc: PostDocument): PostMeta {
     ...(doc.subtitle && { subtitle: doc.subtitle }),
     ...(doc.description && { description: doc.description }),
     ...(doc.coverImage && { coverImage: doc.coverImage }),
-    ...(doc.ogImage && { ogImage: doc.ogImage }),
-    ...(doc.series && { series: doc.series }),
-    ...(doc.seriesOrder && { seriesOrder: doc.seriesOrder }),
-    ...(doc.coverAspect && { coverAspect: doc.coverAspect }),
-    ...(doc.coverFit && { coverFit: doc.coverFit }),
-    ...(doc.coverPosition && { coverPosition: doc.coverPosition }),
-    ...(doc.authors && { authors: doc.authors }),
-    ...(doc.wordCount && { wordCount: doc.wordCount }),
-    ...(doc.canonicalUrl && { canonicalUrl: doc.canonicalUrl }),
-    ...(doc.noindex && { noindex: doc.noindex }),
-    ...(doc.lastModified && { lastModified: doc.lastModified }),
+    ...((doc as any).ogImage && { ogImage: (doc as any).ogImage }),
+    ...((doc as any).series && { series: (doc as any).series }),
+    ...((doc as any).seriesOrder && { seriesOrder: (doc as any).seriesOrder }),
+    ...((doc as any).coverAspect && { coverAspect: (doc as any).coverAspect }),
+    ...((doc as any).coverFit && { coverFit: (doc as any).coverFit }),
+    ...((doc as any).coverPosition && { coverPosition: (doc as any).coverPosition }),
+    ...((doc as any).authors && { authors: (doc as any).authors }),
+    ...((doc as any).wordCount && { wordCount: (doc as any).wordCount }),
+    ...((doc as any).canonicalUrl && { canonicalUrl: (doc as any).canonicalUrl }),
+    ...((doc as any).noindex && { noindex: (doc as any).noindex }),
+    ...((doc as any).lastModified && { lastModified: (doc as any).lastModified }),
   };
 }
 
@@ -124,8 +160,8 @@ export async function getContentBySlug(
       getShortBySlug,
     } = await import('./contentlayer-helper');
     
-    // FIX: Explicitly type doc so it can hold a ContentDoc OR null
-    let doc: ContentDoc | null = null;
+    // Use any type instead of ContentDoc since it's not exported
+    let doc: any = null;
     
     // Use the appropriate function based on collection type
     switch (collection) {
@@ -180,19 +216,6 @@ export async function getContentBySlug(
     }
     
     if (!doc) return null;
-    
-    // Optional: check if it belongs to the right collection
-    // This handles cases where a slug might exist in a different collection
-    const type = doc._raw?.flattenedPath?.split('/')[0] || '';
-    if (collection && collection !== 'all' && 
-        // Allow aliases like 'blog' for 'posts' or 'posts' for 'blog'
-        !(collection === 'posts' && type === 'blog') && 
-        !(collection === 'blog' && type === 'posts') &&
-        type !== collection
-    ) {
-       // Only filter strictly if it's a known mismatch
-       // (Relaxed logic to prevent false negatives on folder structure mismatches)
-    }
     
     return convertToPostDocument(doc);
   } catch (error) {

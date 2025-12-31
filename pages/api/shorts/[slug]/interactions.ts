@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const sessionId = getOrSetSessionId(req, res);
 
   // 1. Defensive Boundary: Throttling per unique session
-  const rl = await isRateLimited(sessionId, "telemetry", 100, 60000); // 100 req/min
+  const rl = await isRateLimitedWithWindow(sessionId, "telemetry", 100, 60000);
   if (rl.limited) return res.status(429).json({ error: "THROTTLED" });
 
   try {

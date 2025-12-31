@@ -1,14 +1,19 @@
+// components/blog/BlogPostPreview.tsx
 import { safeString } from "@/lib/utils";
-
 import Link from "next/link";
 import Image from "next/image";
-import type { PostMeta } from "@/types/post";
 
-// Extended interface to handle optional properties safely
+// Simplified interface with only the fields actually used
 interface BlogPostPreviewProps {
-  post: PostMeta & {
+  post: {
+    slug: string;
+    title: string;
+    date?: string;
+    excerpt?: string;
+    description?: string;
     readTime?: string;
     coverImage?: string | { src?: string } | null;
+    featured?: boolean;
   };
   featured?: boolean;
   className?: string;
@@ -22,11 +27,9 @@ const safePostProp = (value: unknown): string => safeString(value, "");
 // Safe date formatting utility
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
-
   try {
     const date = new Date(dateString);
     if (Number.isNaN(date.getTime())) return "";
-
     return date.toLocaleDateString("en-GB", {
       year: "numeric",
       month: "short",
@@ -37,21 +40,15 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
   }
 };
 
-// Cover image can be string or StaticImageData-like
-type CoverImageLike = string | { src?: string | undefined } | null | undefined;
-
-// Safe image URL utility - supports string or StaticImageData-style objects
-const getSafeImageUrl = (image: CoverImageLike): string => {
+// Safe image URL utility
+const getSafeImageUrl = (image: string | { src?: string } | null | undefined): string => {
   if (!image) return "";
-
-  // Static import (e.g. next/image StaticImageData)
+  
   if (typeof image === "object") {
-    const candidate = safeString((image as { src?: string }).src);
+    const candidate = safeString(image.src);
     if (!candidate) return "";
     if (candidate.startsWith("/")) return candidate;
     try {
-      // Absolute URL
-      // eslint-disable-next-line no-new
       new URL(candidate);
       return candidate;
     } catch {
@@ -59,16 +56,12 @@ const getSafeImageUrl = (image: CoverImageLike): string => {
     }
   }
 
-  // Plain string path or URL
   const url = safeString(image);
   if (!url) return "";
-
-  // Allow relative paths starting with "/"
+  
   if (url.startsWith("/")) return url;
-
-  // Validate absolute URL
+  
   try {
-    // eslint-disable-next-line no-new
     new URL(url);
     return url;
   } catch {
@@ -76,42 +69,17 @@ const getSafeImageUrl = (image: CoverImageLike): string => {
   }
 };
 
-// Type guard to check if object has coverImage property
-const hasCoverImage = (
-  post: unknown
-): post is { coverImage: CoverImageLike } => {
-  return typeof post === "object" && post !== null && "coverImage" in post;
-};
-
-// Type guard to check if object has readTime property
-const hasReadTime = (post: unknown): post is { readTime: string } => {
-  return (
-    typeof post === "object" &&
-    post !== null &&
-    "readTime" in post &&
-    typeof (post as { readTime: unknown }).readTime === "string"
-  );
-};
-
 export default function BlogPostPreview({
   post,
   featured = false,
   className = "",
 }: BlogPostPreviewProps) {
-  // Safe extraction with proper type checking
+  // Safe extraction
   const safeTitle = safeString(post.title, "Untitled Post");
   const safeExcerpt = safePostProp(post.excerpt);
   const safeDate = formatDateSafe(post.date);
-
-  // ✅ TYPE-SAFE: Handle readTime with proper type checking
-  const safeReadTime = hasReadTime(post) ? safePostProp(post.readTime) : "";
-
-  // ✅ TYPE-SAFE: Handle coverImage with proper type checking
-  const safeCoverImage = hasCoverImage(post)
-    ? getSafeImageUrl(post.coverImage)
-    : "";
-
-  // ✅ Route aligned with /[slug].tsx
+  const safeReadTime = safePostProp(post.readTime);
+  const safeCoverImage = getSafeImageUrl(post.coverImage);
   const safeSlug = safeString(post.slug);
   const href = safeSlug ? `/${safeSlug}` : "#";
 
@@ -119,7 +87,7 @@ export default function BlogPostPreview({
     <article className={`group ${className}`}>
       <Link href={href} className="block h-full" prefetch={false}>
         <div className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md">
-          {/* Cover Image - Only render if we have a valid image */}
+          {/* Cover Image */}
           {safeCoverImage && (
             <div className="aspect-[4/3] overflow-hidden bg-gray-100">
               <Image
@@ -128,7 +96,6 @@ export default function BlogPostPreview({
                 width={400}
                 height={300}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                // Static blur placeholder - safe even for dynamic paths
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
               />
@@ -136,17 +103,11 @@ export default function BlogPostPreview({
           )}
 
           {/* Content */}
-          <div
-            className={`flex flex-1 flex-col ${
-              safeCoverImage ? "p-6" : "p-6 pt-8"
-            }`}
-          >
+          <div className={`flex flex-1 flex-col ${safeCoverImage ? "p-6" : "p-6 pt-8"}`}>
             {/* Title */}
-            <h3
-              className={`mb-3 line-clamp-2 font-serif font-semibold text-deepCharcoal ${
-                featured ? "text-2xl" : "text-xl"
-              }`}
-            >
+            <h3 className={`mb-3 line-clamp-2 font-serif font-semibold text-deepCharcoal ${
+              featured ? "text-2xl" : "text-xl"
+            }`}>
               {safeTitle}
             </h3>
 
@@ -160,14 +121,12 @@ export default function BlogPostPreview({
             {/* Metadata */}
             <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
               {/* Date */}
-              {safeDate && (
-                <time dateTime={post.date || undefined}>{safeDate}</time>
-              )}
+              {safeDate && <time dateTime={post.date || undefined}>{safeDate}</time>}
 
-              {/* Read Time - Only show if we have readTime */}
+              {/* Read Time */}
               {safeReadTime && <span>{safeReadTime}</span>}
 
-              {/* Spacer when no metadata */}
+              {/* Spacer */}
               {!safeDate && !safeReadTime && <span />}
             </div>
 
@@ -188,6 +147,3 @@ export default function BlogPostPreview({
 
 // Optional: Display name for debugging
 BlogPostPreview.displayName = "BlogPostPreview";
-
-
-

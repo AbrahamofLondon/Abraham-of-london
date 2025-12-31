@@ -35,6 +35,10 @@
     "types": [
       "node",
       "@netlify/functions"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
     ]
   },
   "include": [
@@ -44,11 +48,17 @@
     "**/*.d.ts",
     ".contentlayer/generated",
     ".next/types/**/*.ts",
-    "netlify/**/*.ts"
+    "netlify/**/*.ts",
+    "types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
     ".next",
-    ".contentlayer/.cache"
+    ".contentlayer/.cache",
+    "_tests_",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ]
 }

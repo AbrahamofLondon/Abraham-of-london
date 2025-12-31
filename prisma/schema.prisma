@@ -1,12 +1,10 @@
 /* prisma/schema.prisma */
-// ENTERPRISE-GRADE (SQLite-compatible for local dev, Neon-compatible for prod)
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite" // Toggle to "postgresql" for Neon production
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -47,6 +45,8 @@ model DownloadAuditEvent {
 
   @@index([slug])
   @@index([createdAt])
+  @@index([memberId])
+  @@index([emailHash])
   @@map("download_audit_events")
 }
 
@@ -68,6 +68,9 @@ model ShortInteraction {
   deletedAt  DateTime? @map("deleted_at")
 
   @@index([shortSlug])
+  @@index([memberId])
+  @@index([emailHash])
+  @@index([createdAt])
   @@map("short_interactions")
 }
 
@@ -83,6 +86,7 @@ model StrategyRoomIntake {
   createdAt         DateTime @default(now()) @map("created_at")
 
   @@index([status])
+  @@index([emailHash])
   @@map("strategy_room_intakes")
 }
 
@@ -99,28 +103,42 @@ model InnerCircleMember {
   lastSeenAt      DateTime @default(now()) @map("last_seen_at")
   lastIp          String?  @map("last_ip")
   loginCount      Int      @default(0) @map("login_count")
+  email           String?  // Optional: store email if needed (hashed elsewhere)
+  flags           String?  // JSON array for additional flags
 
   keys            InnerCircleKey[]
   auditEvents     DownloadAuditEvent[]
   interactions    ShortInteraction[]
+  sessions        Session[]  // Added this relationship
 
   @@index([status])
+  @@index([tier])
+  @@index([createdAt])
   @@map("inner_circle_members")
 }
 
 model InnerCircleKey {
-  id           String    @id @default(uuid())
-  memberId     String    @map("member_id")
-  member       InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  keyHash      String    @unique @map("key_hash")
-  keySuffix    String    @map("key_suffix")
-  status       String    @default("active")
-  totalUnlocks Int       @default(0) @map("total_unlocks")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  lastUsedAt   DateTime? @map("last_used_at")
-  lastIp       String?   @map("last_ip")
+  id            String    @id @default(uuid())
+  memberId      String    @map("member_id")
+  member        InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  keyHash       String    @unique @map("key_hash")
+  keySuffix     String    @map("key_suffix")
+  status        String    @default("active")
+  totalUnlocks  Int       @default(0) @map("total_unlocks")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  lastUsedAt    DateTime? @map("last_used_at")
+  lastIp        String?   @map("last_ip")
+  expiresAt     DateTime? @map("expires_at")
+  revokedAt     DateTime? @map("revoked_at")
+  revokedReason String?   @map("revoked_reason")
+  keyType       String?   @map("key_type") @default("standard") // standard, admin, etc.
+  metadata      String?   // JSON string for additional data
 
   @@index([memberId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@index([keyType])
   @@map("inner_circle_keys")
 }
 
@@ -136,6 +154,9 @@ model ApiRateLimit {
   lastRequest  DateTime @map("last_request")
 
   @@unique([identifier, bucketType, windowStart])
+  @@index([identifier])
+  @@index([windowStart])
+  @@index([windowEnd])
   @@map("api_rate_limits")
 }
 
@@ -150,9 +171,15 @@ model ContentMetadata {
   viewCount         Int       @default(0) @map("view_count")
   shareCount        Int       @default(0) @map("share_count")
   likeCount         Int       @default(0) @map("like_count")
+  commentCount      Int       @default(0) @map("comment_count")
+  rating            Float?    @default(0.0)
+  tags              String?   // JSON array
+  metadata          String?   // JSON object
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
 
+  @@index([contentType])
+  @@index([createdAt])
   @@map("content_metadata")
 }
 
@@ -160,18 +187,170 @@ model SystemAuditLog {
   id           String   @id @default(cuid())
   actorType    String   @map("actor_type")
   actorId      String?  @map("actor_id")
-  actorEmail   String?  @map("actor_email") // FIXED: Named specifically for audit.ts
+  actorEmail   String?  @map("actor_email")
+  ipAddress    String?  @map("ip_address")
   action       String
   resourceType String   @map("resource_type")
   resourceId   String?  @map("resource_id")
   oldValue     String?  @map("old_value")
-  newValue     String?  @map("new_value") 
-  ipAddress    String?  @map("ip_address")
+  newValue     String?  @map("new_value")
   userAgent    String?  @map("user_agent")
-  requestId    String?  @map("request_id") // FIXED: Matches trace requirements
+  requestId    String?  @map("request_id")
+  sessionId    String?  @map("session_id")
   status       String   @default("success")
+  severity     String?  @default("low")
+  errorMessage String?  @map("error_message")
+  durationMs   Int?     @map("duration_ms")
+  metadata     Json?
+  category     String?  // For grouping logs
+  subCategory  String?  @map("sub_category")
+  tags         String?  // JSON array for additional filtering
   createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
+  @@index([actorType])
+  @@index([actorId])
+  @@index([actorEmail])
   @@index([action])
+  @@index([resourceType])
+  @@index([resourceId])
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+  @@index([category])
+  @@index([actorType, createdAt])
+  @@index([resourceType, createdAt])
+  @@index([status, severity])
   @@map("system_audit_logs")
 }
+
+// ==================== ADDITIONAL SUPPORT MODELS ====================
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique @map("session_id")
+  memberId     String?  @map("member_id")
+  member       InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  emailHash    String?  @map("email_hash")
+  userAgent    String?  @map("user_agent")
+  ipAddress    String?  @map("ip_address")
+  expiresAt    DateTime @map("expires_at")
+  lastActivity DateTime @map("last_activity")
+  data         String?  // JSON string
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([sessionId])
+  @@index([memberId])
+  @@index([emailHash])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model CacheEntry {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // JSON string
+  expiresAt DateTime @map("expires_at")
+  tags      String?  // JSON array
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@index([expiresAt])
+  @@map("cache_entries")
+}
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   // JSON string
+  type        String   @default("string") // string, number, boolean, json, array
+  category    String?  @default("general")
+  description String?
+  isPublic    Boolean  @default(false) @map("is_public")
+  updatedBy   String?  @map("updated_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@index([category])
+  @@map("system_configs")
+}
+
+model FailedJob {
+  id         String   @id @default(cuid())
+  queue      String
+  payload    String   // JSON string
+  error      String
+  failedAt   DateTime @default(now()) @map("failed_at")
+  retryCount Int      @default(0) @map("retry_count")
+  nextRetry  DateTime? @map("next_retry")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([queue])
+  @@index([failedAt])
+  @@index([nextRetry])
+  @@map("failed_jobs")
+}
+
+model MaintenanceLog {
+  id          String   @id @default(cuid())
+  operation   String
+  status      String   @default("pending") // pending, running, completed, failed
+  startedAt   DateTime @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  durationMs  Int?     @map("duration_ms")
+  logs        String?  // JSON array of log messages
+  error       String?
+  metadata    String?  // JSON object
+  createdBy   String?  @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([operation])
+  @@index([status])
+  @@index([startedAt])
+  @@map("maintenance_logs")
+}
+
+// ==================== ENUMS FOR TYPE SAFETY ====================
+
+// Note: SQLite doesn't support native enums, but we can use string constants
+// Uncomment if using PostgreSQL
+
+// enum MemberStatus {
+//   active
+//   inactive
+//   suspended
+//   pending
+// }
+
+// enum KeyStatus {
+//   active
+//   expired
+//   revoked
+//   pending
+// }
+
+// enum AuditSeverity {
+//   low
+//   medium
+//   high
+//   critical
+// }
+
+// enum AuditStatus {
+//   success
+//   failed
+//   warning
+//   pending
+// }
+
+// enum ActorType {
+//   system
+//   api
+//   member
+//   admin
+//   cron
+//   webhook
+// }

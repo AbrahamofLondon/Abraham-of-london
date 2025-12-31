@@ -1,0 +1,21 @@
+// lib/posts-utils.ts
+// Try different import path
+import { Post, PostForClient, ImageType } from ''../../types/post'';
+
+export function normalizeImageToUndefined(image: string | ImageType | null | undefined): string | undefined {
+  if (!image) return undefined;
+  if (typeof image === ''string'') return image;
+  if (typeof image === ''object'' && (image as ImageType).src) return (image as ImageType).src;
+  return undefined;
+}
+
+export function transformPostForClient(post: Post): PostForClient {
+  return {
+    ...post,
+    coverImage: normalizeImageToUndefined(post.coverImage),
+    ogImage: normalizeImageToUndefined(post.ogImage),
+    content: post.content || '''',
+    html: post.html || '''',
+    compiledSource: post.compiledSource || '''',
+  };
+}

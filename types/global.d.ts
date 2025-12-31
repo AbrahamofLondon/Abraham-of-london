@@ -21,10 +21,10 @@ declare global {
   // Analytics global declarations
   interface Window {
     gtag?: (
-  command: string,
-  action: string,
-  params?: Record<string, unknown>
-) => void;
+      command: string,
+      action: string,
+      params?: Record<string, unknown>
+    ) => void;
     dataLayer: unknown[];
     plausible?: (
       event: string,
@@ -56,6 +56,38 @@ declare global {
     author?: string;
     dateFrom?: string;
     dateTo?: string;
+  }
+
+  // ContentLayer Types
+  type ContentType = 'post' | 'book' | 'event' | 'print' | 'resource';
+  
+  interface ContentDoc {
+    _id: string;
+    _raw: {
+      sourceFilePath: string;
+      sourceFileName: string;
+      sourceFileDir: string;
+      contentType: string;
+      flattenedPath: string;
+    };
+    type: ContentType;
+    title: string;
+    slug: string;
+    description?: string;
+    excerpt?: string;
+    date?: string;
+    tags?: string[];
+    featured?: boolean;
+    draft?: boolean;
+    published?: boolean;
+  }
+
+  // Rate limit types
+  interface RateLimitResult {
+    limited: boolean;
+    retryAfter: number;
+    limit: number;
+    remaining: number;
   }
 
   // Missing module declarations
@@ -116,6 +148,15 @@ declare global {
       // Node Environment
       NODE_ENV: "development" | "production" | "test";
 
+      // Database
+      DATABASE_URL: string;
+
+      // Authentication
+      INNER_CIRCLE_JWT_SECRET: string;
+      ADMIN_API_KEY: string;
+      NEXTAUTH_SECRET: string;
+      NEXTAUTH_URL: string;
+
       // Site Configuration
       SITE_URL: string;
       NEXT_PUBLIC_SITE_URL?: string;
@@ -132,12 +173,19 @@ declare global {
       NEXT_PUBLIC_ALOMARADA_URL?: string;
       NEXT_PUBLIC_ENDURELUXE_URL?: string;
 
+      // Email
+      RESEND_API_KEY?: string;
+
       // API Keys (optional)
       NEXT_PUBLIC_SOME_API_KEY?: string;
 
       // Feature Flags
       NEXT_PUBLIC_ENABLE_FEATURE_X?: string;
       NEXT_PUBLIC_ENABLE_FEATURE_Y?: string;
+
+      // Development
+      PRISMA_QUERY_ENGINE_LIBRARY?: string;
+      PRISMA_CLIENT_ENGINE_TYPE?: string;
     }
   }
 
@@ -169,7 +217,7 @@ declare global {
   }
 
   declare module "*.svg" {
-    const value: string;
+    const value: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
     export default value;
   }
 
@@ -177,6 +225,12 @@ declare global {
     const value: string;
     export default value;
   }
+
+  // Font formats
+  declare module "*.woff";
+  declare module "*.woff2";
+  declare module "*.ttf";
+  declare module "*.eot";
 }
 
 // This export is required for global type modifications

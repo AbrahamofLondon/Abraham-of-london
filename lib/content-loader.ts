@@ -1,7 +1,9 @@
-// lib/content-loader.ts - FINAL VERSION WITH WORKAROUND
 import { Post } from '@/types/post';
 
-const mockPosts = [
+/* -------------------------------------------------------------------------- */
+/* MOCK DATA (Fallback for Dev/Build resilience)                              */
+/* -------------------------------------------------------------------------- */
+const mockPosts: Post[] = [
   {
     slug: 'welcome-post',
     title: 'Welcome to Abraham of London',
@@ -14,7 +16,10 @@ const mockPosts = [
     category: 'announcements',
     tags: ['welcome', 'introduction'],
     author: 'Abraham',
-    readTime: '2 min read'
+    readTime: '2 min read',
+    // FIX: Satisfy strict Post type requirements
+    html: '<p>This is the welcome post content...</p>',
+    compiledSource: '' 
   },
   {
     slug: 'getting-started',
@@ -22,62 +27,80 @@ const mockPosts = [
     date: '2024-01-02',
     content: 'Guide content here...',
     excerpt: 'Learn how to get started',
-        coverImage: '/images/guide.jpg',
+    coverImage: '/images/guide.jpg',
     published: true,
+    featured: false,
     category: 'guides',
     tags: ['guide', 'tutorial'],
     author: 'Abraham',
-    readTime: '5 min read'
+    readTime: '5 min read',
+    // FIX: Satisfy strict Post type requirements
+    html: '<p>Guide content here...</p>',
+    compiledSource: ''
   }
-] as Post[];
+];
+
+/* -------------------------------------------------------------------------- */
+/* MAIN LOADER                                                                */
+/* -------------------------------------------------------------------------- */
 
 export async function loadPostsFromSource(): Promise<Post[]> {
-  try {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[content-loader] Using mock posts data');
-      return mockPosts;
-    }
+  // 1. Dev Mode Bypass (Optional: Remove if you always want real content)
+  if (process.env.NODE_ENV === 'development' && process.env.USE_MOCK_DATA === 'true') {
+    console.log('[content-loader] Using mock posts data');
+    return mockPosts;
+  }
 
-    try {
-      const contentlayer = await import('./contentlayer-helper');
-      const docs = contentlayer.getAllContentlayerDocs();
-      
-      return docs.map(doc => ({
-        slug: doc.slug || '',
-        title: doc.title || 'Untitled',
-        date: doc.date || new Date().toISOString().split('T')[0],
-                content: doc.body?.raw || (doc as any).content || '',
-        excerpt: doc.excerpt || '',
-        description: doc.description,
-        coverImage: doc.coverImage,
-                published: (doc as any).published !== false,
-                featured: (doc as any).featured || false,
-                category: (doc as any).category,
-        tags: doc.tags || [],
-                author: (doc as any).author,
-                readTime: (doc as any).readTime,
-                subtitle: (doc as any).subtitle,
-      } as Post));
-    } catch (contentlayerError) {
-      console.warn('[content-loader] Contentlayer not available');
-      return mockPosts;
-    }
+  try {
+    // 2. Dynamic Import of the Enterprise Helper
+    // We use the alias '@/lib/contentlayer-helper' to match your project config
+    const ContentHelper = await import('@/lib/contentlayer-helper');
     
+    // Use the unified method from v5.0.0
+    const docs = ContentHelper.getAllDocuments();
+
+    // 3. Map ContentDoc to Post Interface
+    return docs.map((doc: any) => ({
+      slug: doc.slug || doc._raw?.flattenedPath || '',
+      title: doc.title || 'Untitled',
+      date: doc.date || new Date().toISOString().split('T')[0],
+      
+      // Handle Contentlayer body fields safely
+      content: doc.body?.raw || doc.content || '',
+      
+      // FIX: Map the specific MDX fields required by the Post type
+      // Contentlayer generates 'code' for MDX, and sometimes 'html' if configured
+      html: doc.body?.html || '', 
+      compiledSource: doc.body?.code || '',
+
+      excerpt: doc.excerpt || doc.description || '',
+      description: doc.description || '',
+      coverImage: doc.coverImage || doc.coverimage || '/assets/images/placeholder.jpg',
+      published: doc.published !== false && doc.draft !== true,
+      featured: !!doc.featured,
+      category: doc.category || 'General',
+      tags: doc.tags || [],
+      author: doc.author || 'Abraham of London',
+      readTime: doc.readTime || doc.readtime || '5 min read',
+      subtitle: doc.subtitle || '',
+      
+      // Ensure "kind" is tracked if you need to filter mixed content later
+      kind: doc.type ? doc.type.toLowerCase() : 'post' 
+    } as unknown as Post));
+
   } catch (error) {
-    console.error('[content-loader] Error:', error);
+    console.warn('[content-loader] Contentlayer load failed, falling back to mocks.', error);
+    // Return mocks so the build/page doesn't crash completely
     return mockPosts;
   }
 }
 
 export async function initializeAllContent(): Promise<{ posts: Post[] }> {
-  try {
-    const posts = await loadPostsFromSource();
-    console.log(`[content-loader] Initialized ${posts.length} posts`);
-    return { posts };
-  } catch (error) {
-    console.error('[content-loader] Error:', error);
-    return { posts: [] };
-  }
+  const posts = await loadPostsFromSource();
+  // Filter to ensure we mostly return what the UI expects (e.g. valid slugs)
+  const validPosts = posts.filter(p => p.slug);
+  console.log(`[content-loader] Initialized ${validPosts.length} documents`);
+  return { posts: validPosts };
 }
 
 export function createContentLoader() {
@@ -86,7 +109,6 @@ export function createContentLoader() {
   };
 }
 
-// Default export remains for compatibility
 export default {
   loadPostsFromSource,
   initializeAllContent,
