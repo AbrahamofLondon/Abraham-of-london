@@ -73,6 +73,7 @@ const commonFields = {
   location: { type: "string" as const, required: false },
   
   // === CONTENT RELATIONSHIPS ===
+  // CHANGED: resources is now json (was string), to fix the ctaPrimary error
   resources: { type: "json" as const, required: false },
   relatedDownloads: { type: "list" as const, of: { type: "string" as const }, required: false },
   
@@ -98,8 +99,11 @@ const commonFields = {
   language: { type: "string" as const, required: false },
   format: { type: "string" as const, required: false },
   readingTime: { type: "string" as const, required: false },
-  ctaPrimary: { type: "string" as const, required: false },
-  ctaSecondary: { type: "string" as const, required: false },
+  
+  // FIXED: Changed from "string" to "json" to accept objects like {"label":"Download PDF","href":"/path"}
+  ctaPrimary: { type: "json" as const, required: false },
+  ctaSecondary: { type: "json" as const, required: false },
+  
   related: { type: "list" as const, of: { type: "string" as const }, required: false },
   
   // === ADDITIONAL COMMON FIELDS FOR COMPREHENSIVE COVERAGE ===
