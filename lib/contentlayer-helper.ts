@@ -3,8 +3,6 @@
  * Features: 24-Context Registry + Complete Backward Compatibility
  * ============================================================================ */
 
-import * as generated from "contentlayer/generated";
-
 /* -------------------------------------------------------------------------- */
 /* 1. TYPES & INTERFACES                                                      */
 /* -------------------------------------------------------------------------- */
@@ -56,6 +54,34 @@ const COLLECTION_MAP: Record<DocKind, string> = {
   testimony: "allTestimonies", podcast: "allPodcasts", video: "allVideos",
   course: "allCourses", lesson: "allLessons", print: "allPrints"
 };
+
+// Dynamic import to handle Contentlayer not being built yet
+let generated: any = {};
+let isContentlayerDisabled = false;
+
+// Try to load the generated contentlayer data
+try {
+  if (process.env.DISABLE_CONTENTLAYER !== 'true') {
+    // Use require for Node.js to avoid ESM issues
+    generated = require(".contentlayer/generated");
+  } else {
+    isContentlayerDisabled = true;
+    console.log("ℹ️ Contentlayer is disabled via DISABLE_CONTENTLAYER env");
+  }
+} catch (error) {
+  console.warn("⚠️ Contentlayer not built yet or disabled. Run 'contentlayer build' first or use DISABLE_CONTENTLAYER=true.");
+  isContentlayerDisabled = true;
+  generated = {};
+}
+
+// Create empty collections when Contentlayer is disabled
+if (isContentlayerDisabled) {
+  Object.keys(COLLECTION_MAP).forEach(key => {
+    const collectionName = COLLECTION_MAP[key as DocKind];
+    generated[collectionName] = [];
+  });
+  generated.allDocuments = [];
+}
 
 const getCollection = (kind: DocKind): ContentDoc[] => {
   const collectionName = COLLECTION_MAP[kind];
@@ -213,6 +239,16 @@ Object.keys(COLLECTION_MAP).forEach((key) => {
   getters[`getPublished${capitalized}s`] = getterFn;
 });
 
+// Initialize empty arrays for all collections when Contentlayer is disabled
+if (isContentlayerDisabled) {
+  Object.keys(COLLECTION_MAP).forEach((key) => {
+    const kind = key as DocKind;
+    const capitalized = kind.charAt(0).toUpperCase() + kind.slice(1);
+    getters[`getAll${capitalized}s`] = () => [];
+    getters[`getPublished${capitalized}s`] = () => [];
+  });
+}
+
 // Explicit Exports for Tree-Shaking safety
 export const {
   getAllPosts, getPublishedPosts,
@@ -234,14 +270,18 @@ export const {
 /* 7. GLOBAL UTILITIES                                                        */
 /* -------------------------------------------------------------------------- */
 
-export const getAllDocuments = () => Object.values(COLLECTION_MAP).flatMap(name => {
-  return filterPublished((generated as any)[name] || []);
-});
+export const getAllDocuments = () => {
+  if (isContentlayerDisabled) return [];
+  return Object.values(COLLECTION_MAP).flatMap(name => {
+    return filterPublished((generated as any)[name] || []);
+  });
+};
 
 export const getAllContentlayerDocs = getAllDocuments; // Alias
 export const getPublishedDocuments = getAllDocuments; // Alias
 
 export const getDocumentBySlug = (kind: DocKind, slug: string): ContentDoc | null => {
+  if (isContentlayerDisabled) return null;
   const docs = filterPublished(getCollection(kind));
   const normalized = normalizeSlug(slug);
   return docs.find((d: ContentDoc) => 
@@ -261,6 +301,7 @@ export const getResourceBySlug = (s: string) => getDocumentBySlug('resource', s)
 export const getCanonBySlug = (s: string) => getDocumentBySlug('canon', s);
 
 export const getFeaturedDocuments = (kind?: DocKind, limit = 3) => {
+  if (isContentlayerDisabled) return [];
   const docs = kind ? filterPublished(getCollection(kind)) : getAllDocuments();
   return docs.filter(d => d.featured).slice(0, limit);
 };
@@ -286,7 +327,8 @@ const ContentHelper = {
   canAccessDoc,
   getRequiredTier,
   isTierAllowed,
-  normalizeTier
+  normalizeTier,
+  isContentlayerDisabled: () => isContentlayerDisabled
 };
 
 export default ContentHelper;

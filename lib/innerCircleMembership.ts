@@ -355,6 +355,8 @@ class MemoryInnerCircleStore implements InnerCircleStore {
 
     for (let i = this.members.length - 1; i >= 0; i--) {
       const member = this.members[i];
+      if (!member) continue; // Safety check
+
       const lastActivity = new Date(member.lastSeenAt).getTime();
       if (lastActivity < cutoff) {
         this.emailHashIndex.delete(member.emailHash);
@@ -499,6 +501,10 @@ class PostgresInnerCircleStore implements InnerCircleStore {
           [emailHash, emailHashPrefix, args.name || null, args.ipAddress || null]
         );
 
+        // FIX: Ensure ID exists before accessing it
+        if (!memberRes.rows[0]) {
+          throw new Error("Database error: Failed to retrieve or create member ID");
+        }
         memberId = memberRes.rows[0].id;
 
         // Insert the new key

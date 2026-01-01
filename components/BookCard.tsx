@@ -15,26 +15,23 @@ type BookCardProps = {
   image?: string | null;
 };
 
-const BOOK_FALLBACK_COVER = "/assets/images/default-book.jpg";
+const BOOK_FALLBACK_COVER = "/assets/images/fathering-without-fear-teaser.jpg";
 
 function resolveBookCover(book: BookCardProps): string {
-  const candidates: string[] = [];
-
-  const addCandidate = (value?: string | null) => {
-    if (typeof value === "string" && value.trim().length > 0) {
-      candidates.push(value.trim());
-    }
-  };
-
-  addCandidate(book.coverImage);
-  addCandidate(book.heroImage);
-  addCandidate(book.image);
-
-  if (!candidates.includes(BOOK_FALLBACK_COVER)) {
-    candidates.push(BOOK_FALLBACK_COVER);
+  // Check in order of priority
+  if (book.coverImage && typeof book.coverImage === 'string' && book.coverImage.trim() !== '') {
+    return book.coverImage.trim();
   }
-
-  return candidates[0];
+  
+  if (book.heroImage && typeof book.heroImage === 'string' && book.heroImage.trim() !== '') {
+    return book.heroImage.trim();
+  }
+  
+  if (book.image && typeof book.image === 'string' && book.image.trim() !== '') {
+    return book.image.trim();
+  }
+  
+  return BOOK_FALLBACK_COVER;
 }
 
 export default function BookCard(props: BookCardProps): JSX.Element {

@@ -188,7 +188,7 @@ const useSafeArea = () => {
 
 const useBodyScrollLock = (isLocked: boolean) => {
   React.useEffect(() => {
-    if (typeof document === "undefined") return;
+    if (typeof document === "undefined") return undefined;
 
     const body = document.body;
     if (isLocked) {
@@ -197,6 +197,7 @@ const useBodyScrollLock = (isLocked: boolean) => {
       body.style.top = `-${scrollY}px`;
       body.style.width = "100%";
       body.style.overflowY = "hidden";
+      
       return () => {
         body.style.position = "";
         body.style.top = "";
@@ -205,6 +206,8 @@ const useBodyScrollLock = (isLocked: boolean) => {
         window.scrollTo(0, scrollY);
       };
     }
+    
+    return undefined;
   }, [isLocked]);
 };
 

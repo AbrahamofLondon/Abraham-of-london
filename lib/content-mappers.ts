@@ -1,5 +1,13 @@
 // lib/content-mappers.ts
-import type { Canon, Book, Post, Download, Resource, Event, Print } from "@/lib/contentlayer";
+import type { 
+  CanonDocument as Canon, 
+  BookDocument as Book, 
+  PostDocument as Post, 
+  DownloadDocument as Download, 
+  ResourceDocument as Resource, 
+  EventDocument as Event, 
+  PrintDocument as Print 
+} from "@/lib/contentlayer";
 
 type AnyDoc =
   | Post

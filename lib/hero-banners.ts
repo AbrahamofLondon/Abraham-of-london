@@ -181,7 +181,13 @@ export function getHeroBannerByKey(
 
 // Helper: find hero by route (e.g. "/books")
 export function getHeroBannerForRoute(route: string): HeroBannerConfig {
-  const cleanRoute = route.split("?")[0].split("#")[0] || "/";
+  if (!route) return DEFAULT_HERO;
+  
+  // Safely extract the clean route
+  const parts = route.split("?");
+  const beforeHash = parts[0] ?? "/";
+  const cleanRoute = beforeHash.split("#")[0] ?? "/";
+  
   return (
     HERO_BANNERS.find(
       (b) => b.route && b.route.toLowerCase() === cleanRoute.toLowerCase()

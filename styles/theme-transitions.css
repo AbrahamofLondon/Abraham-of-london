@@ -1,4 +1,19 @@
 /* styles/theme-transitions.css */
+
+/*
+ * ----------------------------------------------------------------------
+ * Theme Transition Utilities
+ * ----------------------------------------------------------------------
+ * These classes enable smooth theme transitions for the entire application.
+ * Apply .theme-transition to the <html> or <body> element.
+ * Use .no-transition to temporarily disable transitions during theme changes.
+ * ----------------------------------------------------------------------
+ */
+
+/*
+ * Base transition class for smooth theme changes
+ * Apply this to the root element (html or body)
+ */
 .theme-transition {
   transition:
     background-color 0.3s ease,
@@ -6,6 +21,10 @@
     color 0.3s ease;
 }
 
+/*
+ * Apply transitions to all elements and pseudo-elements
+ * This ensures all UI components transition smoothly
+ */
 .theme-transition *,
 .theme-transition *::before,
 .theme-transition *::after {
@@ -17,6 +36,10 @@
     stroke 0.3s ease;
 }
 
+/*
+ * Exclude media elements and non-theme-related SVGs from transitions
+ * These elements don't need theme transitions and can cause performance issues
+ */
 .theme-transition img,
 .theme-transition video,
 .theme-transition canvas,
@@ -25,9 +48,384 @@
   transition: none;
 }
 
+/*
+ * Disable transitions temporarily
+ * Use this class when you need to update multiple theme properties
+ * without triggering multiple transitions
+ */
 .no-transition,
 .no-transition *,
 .no-transition *::before,
 .no-transition *::after {
   transition: none !important;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Specific Element Transitions
+ * ----------------------------------------------------------------------
+ * These classes can be applied to specific elements for more control
+ */
+
+/* Text color transitions */
+.theme-transition-text {
+  transition: color 0.3s ease;
+}
+
+/* Background color transitions */
+.theme-transition-bg {
+  transition: background-color 0.3s ease;
+}
+
+/* Border color transitions */
+.theme-transition-border {
+  transition: border-color 0.3s ease;
+}
+
+/* Fill color transitions (for SVGs) */
+.theme-transition-fill {
+  transition: fill 0.3s ease;
+}
+
+/* Stroke color transitions (for SVGs) */
+.theme-transition-stroke {
+  transition: stroke 0.3s ease;
+}
+
+/* Box shadow transitions */
+.theme-transition-shadow {
+  transition: box-shadow 0.3s ease;
+}
+
+/* Opacity transitions */
+.theme-transition-opacity {
+  transition: opacity 0.3s ease;
+}
+
+/* Transform transitions */
+.theme-transition-transform {
+  transition: transform 0.3s ease;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Transition Delays
+ * ----------------------------------------------------------------------
+ * Stagger transitions for a more natural feel
+ */
+
+/* First layer (fastest) */
+.theme-transition-fast {
+  transition-duration: 0.2s;
+}
+
+/* Second layer */
+.theme-transition-medium {
+  transition-duration: 0.3s;
+}
+
+/* Third layer (slowest) */
+.theme-transition-slow {
+  transition-duration: 0.5s;
+}
+
+/* Staggered delays */
+.theme-transition-delay-1 {
+  transition-delay: 0.05s;
+}
+
+.theme-transition-delay-2 {
+  transition-delay: 0.1s;
+}
+
+.theme-transition-delay-3 {
+  transition-delay: 0.15s;
+}
+
+.theme-transition-delay-4 {
+  transition-delay: 0.2s;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Transition Timing Functions
+ * ----------------------------------------------------------------------
+ * Different easing curves for different effects
+ */
+
+.theme-transition-ease {
+  transition-timing-function: ease;
+}
+
+.theme-transition-ease-in {
+  transition-timing-function: ease-in;
+}
+
+.theme-transition-ease-out {
+  transition-timing-function: ease-out;
+}
+
+.theme-transition-ease-in-out {
+  transition-timing-function: ease-in-out;
+}
+
+.theme-transition-linear {
+  transition-timing-function: linear;
+}
+
+/* Material Design easing curve */
+.theme-transition-material {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Apple-style easing curve */
+.theme-transition-apple {
+  transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Performance Optimizations
+ * ----------------------------------------------------------------------
+ */
+
+/*
+ * Only enable transitions when the user hasn't requested reduced motion
+ * This respects accessibility preferences
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-transition-reduced-motion {
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition-reduced-motion,
+  .theme-transition-reduced-motion *,
+  .theme-transition-reduced-motion *::before,
+  .theme-transition-reduced-motion *::after {
+    transition: none !important;
+  }
+}
+
+/*
+ * Hardware acceleration for smoother transitions
+ * Only apply to elements that actually change during theme transitions
+ */
+.theme-transition-hardware {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Theme Transition Events
+ * ----------------------------------------------------------------------
+ * These classes can be used to trigger specific transition states
+ */
+
+/* Apply when theme change starts */
+.theme-changing {
+  pointer-events: none;
+  cursor: wait;
+}
+
+/* Apply when theme change is complete */
+.theme-changed {
+  /* Can be used to trigger animations or other effects */
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Theme-Specific Transitions
+ * ----------------------------------------------------------------------
+ */
+
+/* Smooth transition for dark mode */
+html.dark .theme-transition-dark {
+  transition-duration: 0.4s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth transition for light mode */
+html:not(.dark) .theme-transition-light {
+  transition-duration: 0.4s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Component-Specific Transitions
+ * ----------------------------------------------------------------------
+ */
+
+/* Button theme transitions */
+.button-theme-transition {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Card theme transitions */
+.card-theme-transition {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Input theme transitions */
+.input-theme-transition {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Link theme transitions */
+.link-theme-transition {
+  transition: color 0.3s ease;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Utility Classes for JavaScript Control
+ * ----------------------------------------------------------------------
+ */
+
+/* Use with JavaScript to temporarily disable transitions */
+.js-no-transition {
+  transition: none !important;
+}
+
+/* Use when programmatically changing themes */
+.js-theme-changing {
+  overflow: hidden !important;
+}
+
+/* Use to indicate theme loading state */
+.js-theme-loading {
+  opacity: 0.7;
+  filter: blur(1px);
+}
+
+/* Use to indicate theme loaded state */
+.js-theme-loaded {
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Debug Classes
+ * ----------------------------------------------------------------------
+ * These can be used during development to visualize transitions
+ */
+
+/* Highlight all transitioning elements */
+.debug-transitions * {
+  outline: 1px solid rgba(255, 0, 0, 0.3) !important;
+}
+
+/* Show transition timing */
+.debug-transition-timing::after {
+  content: attr(style);
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 9999;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Responsive Transition Adjustments
+ * ----------------------------------------------------------------------
+ */
+
+/* Faster transitions on mobile for better performance */
+@media (max-width: 768px) {
+  .theme-transition-mobile {
+    transition-duration: 0.2s;
+  }
+}
+
+/* Even faster transitions on very small screens */
+@media (max-width: 480px) {
+  .theme-transition-mobile-small {
+    transition-duration: 0.15s;
+  }
+}
+
+/* Slower transitions on desktop for more cinematic feel */
+@media (min-width: 1024px) {
+  .theme-transition-desktop {
+    transition-duration: 0.4s;
+  }
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Print Styles
+ * ----------------------------------------------------------------------
+ */
+
+@media print {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * High Contrast Mode Support
+ * ----------------------------------------------------------------------
+ */
+
+@media (prefers-contrast: high) {
+  .theme-transition-high-contrast {
+    transition-duration: 0.1s;
+  }
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Final Utility Class for Easy Application
+ * ----------------------------------------------------------------------
+ */
+
+/* Apply this to your app's root element for complete theme transition support */
+.theme-transition-app {
+  composes: theme-transition;
+}
+
+.theme-transition-app *,
+.theme-transition-app *::before,
+.theme-transition-app *::after {
+  composes: theme-transition;
+}
+
+/* Exclusions remain the same */
+.theme-transition-app img,
+.theme-transition-app video,
+.theme-transition-app canvas,
+.theme-transition-app iframe,
+.theme-transition-app svg:not([class*="icon"]) {
+  transition: none;
 }

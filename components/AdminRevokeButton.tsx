@@ -1,7 +1,7 @@
 // components/AdminRevokeButton.tsx
 
 import React, { useState } from 'react';
-import { Trash2, ShieldAlert, Loader2 } from 'lucide-react';
+import { ShieldAlert, Loader2 } from 'lucide-react';
 
 interface RevokeProps {
   accessKey: string; // The raw key or hash you wish to revoke

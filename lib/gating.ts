@@ -177,6 +177,69 @@ export const getTierDescription = (tier: Tier | string): string => {
   return descriptions[normalized] || "Access level not defined";
 };
 
+// =============================================================================
+// GRADIENT UTILITIES (Fixed - Safer Version)
+// =============================================================================
+
+/**
+ * Generates a deterministic gradient pair based on a string input
+ */
+export function getGradientPair(input: string = ''): [string, string] {
+  // Default gradient pair
+  const defaultPair: [string, string] = ['#1a1a2e', '#16213e'];
+  
+  // If no input, return default
+  if (!input.trim()) {
+    return defaultPair;
+  }
+  
+  // Create hash from input
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = input.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  // Array of luxury gradient pairs
+  const gradientPairs: [string, string][] = [
+    // Gold & Charcoal gradients
+    ['#d6b26a', '#15171c'], // Primary gold to charcoal
+    ['#a8925e', '#0b0d10'], // Dark gold to deep charcoal
+    ['#f2e0b0', '#1a1a2e'], // Light gold to navy
+    
+    // Earthy & Luxury gradients
+    ['#0e3b33', '#15171c'], // Forest to charcoal
+    ['#2c5530', '#1a1a2e'], // Deep green to navy
+    ['#5d432c', '#2d2424'], // Brown to dark brown
+    
+    // Neutral & Modern gradients
+    ['#4a5568', '#1a202c'], // Gray to dark gray
+    ['#718096', '#2d3748'], // Light gray to gray
+    ['#a0aec0', '#4a5568'], // Lighter gray to medium gray
+    
+    // Accent gradients
+    ['#805ad5', '#553c9a'], // Purple to dark purple
+    ['#d53f8c', '#97266d'], // Pink to dark pink
+    ['#3182ce', '#2c5282'], // Blue to dark blue
+    
+    // Warm gradients
+    ['#dd6b20', '#c05621'], // Orange to dark orange
+    ['#e53e3e', '#c53030'], // Red to dark red
+    ['#38a169', '#276749'], // Green to dark green
+  ];
+  
+  // Ensure hash is positive for modulo operation
+  const positiveHash = Math.abs(hash);
+  const index = positiveHash % gradientPairs.length;
+  
+  // Get the gradient pair at the calculated index
+  const gradientPair = gradientPairs[index];
+  
+  // TypeScript needs assurance this is never undefined
+  // Since index is guaranteed to be 0 <= index < gradientPairs.length,
+  // this is safe, but we'll add a type assertion for TypeScript
+  return gradientPair as [string, string];
+}
+
 /* -------------------------------------------------------------------------- */
 /* EXPORT OBJECT                                                              */
 /* -------------------------------------------------------------------------- */

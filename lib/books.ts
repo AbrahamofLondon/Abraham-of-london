@@ -1,6 +1,6 @@
 // lib/books.ts - MINIMAL FIX
 import { allBooks } from "@/lib/contentlayer";
-import type { Book as ContentlayerBook } from "@/lib/contentlayer";
+import type { BookDocument as ContentlayerBook } from "@/lib/contentlayer";
 
 // Keep the original type but make computed fields optional
 export type Book = ContentlayerBook;

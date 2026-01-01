@@ -12,15 +12,15 @@ import {
   allShorts 
 } from "@/lib/contentlayer";
 import type {
-  Post as PostType,
-  Book as BookType,
-  Download as DownloadType,
-  Event as EventType,
-  Print as PrintType,
-  Resource as ResourceType,
-  Strategy as StrategyType,
-  Canon as CanonType,
-  Short as ShortType,
+  PostDocument as PostType,
+  BookDocument as BookType,
+  DownloadDocument as DownloadType,
+  EventDocument as EventType,
+  PrintDocument as PrintType,
+  ResourceDocument as ResourceType,
+  StrategyDocument as StrategyType,
+  CanonDocument as CanonType,
+  ShortDocument as ShortType,
 } from "@/lib/contentlayer";
 
 // Union type for all documents

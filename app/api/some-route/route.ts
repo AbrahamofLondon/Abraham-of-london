@@ -1,6 +1,7 @@
 // app/api/some-route/route.ts
-export const runtime = 'nodejs'; // Add this line
+export const runtime = 'nodejs';
 
-export async function POST(req: Request) {
+// Prefix unused parameter with underscore to satisfy TypeScript
+export async function POST(_req: Request) {
   // Your Prisma code here
 }

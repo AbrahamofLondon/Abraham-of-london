@@ -4,8 +4,9 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
-// Import Layout without type issues
-const Layout = React.lazy(() => import("@/components/Layout"));
+// Remove unused Layout import since you're not using it in this component
+// If you need Layout, wrap the component with it. Otherwise, delete this line.
+// const Layout = React.lazy(() => import("@/components/Layout"));
 
 const PurposeLandingPage: NextPage = () => {
   const SITE_URL =

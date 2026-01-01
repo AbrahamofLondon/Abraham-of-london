@@ -2,13 +2,13 @@
 
 /**
  * Single canonical Contentlayer surface.
- * - Runtime comes from: "contentlayer/generated"
+ * - Runtime comes from: ".contentlayer/generated"
  * - Types + utilities exposed for the rest of the app.
  *
  * DO NOT import from ".contentlayer/..." anywhere else.
  */
 
-import * as generated from "contentlayer/generated";
+import type * as generatedTypes from "contentlayer/generated";
 
 /* -------------------------------------------------------------------------- */
 /* Core types                                                                 */
@@ -37,13 +37,18 @@ export interface ContentlayerDocument {
     raw?: string;
     code?: string;
   };
+  // Common optional fields for all document types
+  featured?: boolean;
+  subtitle?: string;
+  author?: string;
+  accessLevel?: string;
+  lockMessage?: string;
+  category?: string;
+  readTime?: string;
 }
 
 export interface PostDocument extends ContentlayerDocument {
   type: "Post";
-  category?: string;
-  author?: string;
-  readTime?: string;
   featured?: boolean;
   accessLevel?: string;
   lockMessage?: string;
@@ -74,6 +79,7 @@ export interface DownloadDocument extends ContentlayerDocument {
   fileSize?: string;
   accessLevel?: string;
   lockMessage?: string;
+  featured?: boolean;
 }
 
 export interface PrintDocument extends ContentlayerDocument {
@@ -84,6 +90,7 @@ export interface PrintDocument extends ContentlayerDocument {
   downloadFile?: string;
   accessLevel?: string;
   lockMessage?: string;
+  featured?: boolean;
 }
 
 export interface ResourceDocument extends ContentlayerDocument {
@@ -120,6 +127,7 @@ export interface EventDocument extends ContentlayerDocument {
   isUpcoming?: boolean;
   accessLevel?: string;
   lockMessage?: string;
+  featured?: boolean;
 }
 
 export interface StrategyDocument extends ContentlayerDocument {
@@ -128,6 +136,7 @@ export interface StrategyDocument extends ContentlayerDocument {
   author?: string;
   accessLevel?: string;
   lockMessage?: string;
+  featured?: boolean;
 }
 
 export interface ShortDocument extends ContentlayerDocument {
@@ -138,6 +147,7 @@ export interface ShortDocument extends ContentlayerDocument {
   published?: boolean;
   accessLevel?: string;
   lockMessage?: string;
+  featured?: boolean;
 }
 
 export type DocumentTypes =
@@ -151,23 +161,46 @@ export type DocumentTypes =
   | CanonDocument
   | ShortDocument;
 
+// ============================================
+// EXPORT ALIASES FOR LEGACY COMPATIBILITY
+// ============================================
+export type Post = PostDocument;
+export type Book = BookDocument;
+export type Canon = CanonDocument;
+export type Download = DownloadDocument;
+export type Event = EventDocument;
+export type Print = PrintDocument;
+export type Resource = ResourceDocument;
+export type Strategy = StrategyDocument;
+export type Short = ShortDocument;
+
 /* -------------------------------------------------------------------------- */
 /* Runtime collections                                                        */
 /* -------------------------------------------------------------------------- */
 
 const safeArray = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
 
-export const allPosts = safeArray<PostDocument>((generated as any).allPosts);
-export const allBooks = safeArray<BookDocument>((generated as any).allBooks);
-export const allDownloads = safeArray<DownloadDocument>((generated as any).allDownloads);
-export const allEvents = safeArray<EventDocument>((generated as any).allEvents);
-export const allPrints = safeArray<PrintDocument>((generated as any).allPrints);
-export const allStrategies = safeArray<StrategyDocument>((generated as any).allStrategies);
-export const allResources = safeArray<ResourceDocument>((generated as any).allResources);
-export const allCanons = safeArray<CanonDocument>((generated as any).allCanons);
-export const allShorts = safeArray<ShortDocument>((generated as any).allShorts);
+// Dynamic import that works with Contentlayer's generation process
+let generatedContent: any = { allDocuments: [] };
+if (process.env.DISABLE_CONTENTLAYER !== 'true') {
+  try {
+    generatedContent = await import(".contentlayer/generated");
+  } catch (error) {
+    console.warn("Contentlayer not built yet. Run 'contentlayer build' first.");
+  }
+}
 
-export const allDocuments = safeArray<ContentlayerDocument>((generated as any).allDocuments);
+export const allPosts = safeArray<PostDocument>(generatedContent.allPosts);
+export const allBooks = safeArray<BookDocument>(generatedContent.allBooks);
+export const allDownloads = safeArray<DownloadDocument>(generatedContent.allDownloads);
+export const allEvents = safeArray<EventDocument>(generatedContent.allEvents);
+export const allPrints = safeArray<PrintDocument>(generatedContent.allPrints);
+export const allStrategies = safeArray<StrategyDocument>(generatedContent.allStrategies);
+export const allResources = safeArray<ResourceDocument>(generatedContent.allResources);
+export const allCanons = safeArray<CanonDocument>(generatedContent.allCanons);
+export const allShorts = safeArray<ShortDocument>(generatedContent.allShorts);
+
+export const allDocuments = safeArray<ContentlayerDocument>(generatedContent.allDocuments);
 
 export const allContent: ContentlayerDocument[] = [...allDocuments];
 export const allPublished: ContentlayerDocument[] = allDocuments.filter((d) => !d?.draft);
@@ -224,13 +257,13 @@ export function getDocumentBySlug(slug: string, type?: string): ContentlayerDocu
 }
 
 export function getFeaturedDocuments(): ContentlayerDocument[] {
-  return allDocuments.filter((d) => (d as any)?.featured === true && !d?.draft);
+  return allDocuments.filter((d) => d?.featured === true && !d?.draft);
 }
 
 export function isContentlayerLoaded(): boolean {
   return (
     allDocuments.length > 0 ||
-    Object.keys(generated as any).some((k) => k.startsWith("all") && Array.isArray((generated as any)[k]))
+    Object.keys(generatedContent).some((k) => k.startsWith("all") && Array.isArray(generatedContent[k]))
   );
 }
 
@@ -269,52 +302,102 @@ function mapToBaseCardProps(doc: ContentlayerDocument) {
   return {
     slug: doc.slug,
     title: doc.title || "Untitled",
-    subtitle: (doc as any).subtitle || null,
+    subtitle: doc.subtitle || null,
     excerpt: doc.excerpt || null,
     description: doc.description || null,
     coverImage: doc.coverImage || null,
     date: doc.date || null,
     tags: doc.tags || [],
-    featured: (doc as any).featured || false,
-    accessLevel: (doc as any).accessLevel || null,
-    lockMessage: (doc as any).lockMessage || null,
+    featured: doc.featured || false,
+    accessLevel: doc.accessLevel || null,
+    lockMessage: doc.lockMessage || null,
+    category: doc.category || null,
+    readTime: doc.readTime || null,
+    author: doc.author || null,
   };
 }
 
 function mapToBookCardProps(doc: BookDocument) {
+  const base = mapToBaseCardProps(doc);
   return {
-    ...mapToBaseCardProps(doc),
-    author: doc.author || null,
+    ...base,
     isbn: doc.isbn || null,
     publisher: doc.publisher || null,
-    publishDate: doc.date || null,
+    format: doc.format || null,
+    status: doc.status || null,
   };
 }
 
 function mapToBlogPostCardProps(doc: PostDocument) {
-  return {
-    ...mapToBaseCardProps(doc),
-    author: doc.author || null,
-    readTime: doc.readTime || null,
-    category: doc.category || null,
-  };
+  return mapToBaseCardProps(doc);
 }
 
 function mapToCanonCardProps(doc: CanonDocument) {
+  const base = mapToBaseCardProps(doc);
   return {
-    ...mapToBaseCardProps(doc),
-    author: doc.author || null,
+    ...base,
     volumeNumber: doc.volumeNumber || null,
-    readTime: doc.readTime || null,
+    coverAspect: doc.coverAspect || null,
+    coverFit: doc.coverFit || null,
+    order: doc.order || null,
   };
 }
 
 function mapToShortCardProps(doc: ShortDocument) {
+  const base = mapToBaseCardProps(doc);
   return {
-    ...mapToBaseCardProps(doc),
+    ...base,
     theme: doc.theme || null,
-    readTime: doc.readTime || null,
+    audience: doc.audience || null,
   };
+}
+
+function mapToDownloadCardProps(doc: DownloadDocument) {
+  const base = mapToBaseCardProps(doc);
+  return {
+    ...base,
+    file: doc.file || null,
+    pdfPath: doc.pdfPath || null,
+    downloadFile: doc.downloadFile || null,
+    fileUrl: doc.fileUrl || null,
+    downloadUrl: doc.downloadUrl || null,
+    fileSize: doc.fileSize || null,
+  };
+}
+
+function mapToPrintCardProps(doc: PrintDocument) {
+  const base = mapToBaseCardProps(doc);
+  return {
+    ...base,
+    dimensions: doc.dimensions || null,
+    price: doc.price || null,
+    available: doc.available || null,
+    downloadFile: doc.downloadFile || null,
+  };
+}
+
+function mapToEventCardProps(doc: EventDocument) {
+  const base = mapToBaseCardProps(doc);
+  return {
+    ...base,
+    eventDate: doc.eventDate || null,
+    time: doc.time || null,
+    location: doc.location || null,
+    registrationUrl: doc.registrationUrl || null,
+    isUpcoming: doc.isUpcoming || null,
+  };
+}
+
+function mapToResourceCardProps(doc: ResourceDocument) {
+  const base = mapToBaseCardProps(doc);
+  return {
+    ...base,
+    resourceType: doc.resourceType || null,
+  };
+}
+
+function mapToStrategyCardProps(doc: StrategyDocument) {
+  return mapToBaseCardProps(doc);
 }
 
 export function getCardPropsForDocument(doc: ContentlayerDocument) {
@@ -322,6 +405,11 @@ export function getCardPropsForDocument(doc: ContentlayerDocument) {
   if (isPost(doc)) return mapToBlogPostCardProps(doc);
   if (isCanon(doc)) return mapToCanonCardProps(doc);
   if (isShort(doc)) return mapToShortCardProps(doc);
+  if (isDownload(doc)) return mapToDownloadCardProps(doc);
+  if (isPrint(doc)) return mapToPrintCardProps(doc);
+  if (isEvent(doc)) return mapToEventCardProps(doc);
+  if (isResource(doc)) return mapToResourceCardProps(doc);
+  if (isStrategy(doc)) return mapToStrategyCardProps(doc);
   return mapToBaseCardProps(doc);
 }
 

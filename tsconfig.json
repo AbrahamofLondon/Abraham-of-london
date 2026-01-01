@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -24,22 +21,38 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "contentlayer/generated": [
-        "./.contentlayer/generated"
-      ]
+      "@/*": ["./*"],
+      "contentlayer/generated": ["./.contentlayer/generated"],
+      ".contentlayer/generated": ["./.contentlayer/generated"]
     },
     "strictNullChecks": true,
-    "types": [
-      "node",
-      "@netlify/functions"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ]
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false, // CHANGED: false instead of true
+    "noUnusedParameters": false, // CHANGED: false instead of true
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "types": ["node", "@netlify/functions"],
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "outDir": "./dist",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": true,
+    "skipDefaultLibCheck": true,
+    "verbatimModuleSyntax": false
   },
   "include": [
     "next-env.d.ts",
@@ -49,16 +62,43 @@
     ".contentlayer/generated",
     ".next/types/**/*.ts",
     "netlify/**/*.ts",
-    "types/**/*.d.ts"
+    "types/**/*.d.ts",
+    "scripts/**/*.ts",
+    "scripts/**/*.mjs",
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "pages/**/*.ts",
+    "pages/**/*.tsx",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "utils/**/*.ts",
+    "utils/**/*.tsx"
   ],
   "exclude": [
     "node_modules",
     ".next",
     ".contentlayer/.cache",
+    "out",
+    "dist",
+    "build",
+    "public",
     "_tests_",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "cypress",
+    "playwright",
+    "jest.config.*",
+    "next.config.*",
+    "tailwind.config.*",
+    "postcss.config.*",
+    "*.config.ts",
+    "*.config.js",
+    "*.config.mjs",
+    "**/__tests__/**",
+    "**/__mocks__/**"
   ]
 }

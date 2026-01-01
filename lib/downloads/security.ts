@@ -80,13 +80,19 @@ export function verifyDownloadToken(
 ): { valid: false; reason: string; slug?: string; requiredTier?: InnerCircleTier } | ({ valid: true } & TokenPayload) {
   const parts = token.split(".");
   if (parts.length !== 2) return { valid: false, reason: "malformed_structure" };
-
-  const [bodyEncoded, sigEncoded] = parts;
+  
+  const bodyEncoded = parts[0];
+  const sigEncoded = parts[1];
+  
+  // Type safety: ensure both parts exist
+  if (!bodyEncoded || !sigEncoded) {
+    return { valid: false, reason: "malformed_structure" };
+  }
   
   try {
     const expected = crypto.createHmac("sha256", secret).update(bodyEncoded).digest();
     const got = unb64url(sigEncoded);
-
+    
     // FIXED: Strict casting to Uint8Array for timingSafeEqual to prevent TS 'entries' collision
     if (got.length !== expected.length || 
         !crypto.timingSafeEqual(new Uint8Array(got), new Uint8Array(expected))) {
@@ -95,21 +101,23 @@ export function verifyDownloadToken(
       try {
         const decoded = JSON.parse(unb64url(bodyEncoded).toString("utf8"));
         slug = decoded?.slug;
-      } catch {}
+      } catch {
+        // Silent catch - slug extraction is best-effort
+      }
       return { valid: false, reason: "signature_mismatch", slug };
     }
-
+    
     const payload: TokenPayload = JSON.parse(unb64url(bodyEncoded).toString("utf8"));
     const now = Math.floor(Date.now() / 1000);
-
+    
     if (payload.exp < now) {
       return { valid: false, reason: "token_expired", slug: payload.slug, requiredTier: payload.requiredTier };
     }
-
+    
     if (!payload.slug || !payload.exp || !payload.requiredTier || !payload.nonce) {
       return { valid: false, reason: "incomplete_payload", slug: payload.slug };
     }
-
+    
     return { valid: true, ...payload };
   } catch (err) {
     return { valid: false, reason: "internal_decryption_error" };

@@ -56,10 +56,10 @@ export default function ShortsAnalytics({ data }: AnalyticsProps) {
                   itemStyle={{ color: "#d4af37" }}
                 />
                 <Bar dataKey="likes" radius={[4, 4, 0, 0]}>
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={BRAND_COLORS[index % BRAND_COLORS.length]} />
-                  ))}
-                </Bar>
+                 {data.map((_entry, index) => (
+                  <Cell key={`cell-${index}`} fill={BRAND_COLORS[index % BRAND_COLORS.length]} />
+                ))}
+               </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

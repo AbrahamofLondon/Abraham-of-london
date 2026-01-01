@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
@@ -45,6 +44,7 @@ export default function LuxuryLoader({
       );
       return () => window.clearTimeout(t);
     }
+    return undefined;
   }, [show, autohideAfterMs]);
 
   return (

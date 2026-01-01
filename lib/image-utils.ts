@@ -276,6 +276,10 @@ function getFallbackImage(config: FallbackConfig = { type: "book" }): string {
   // Default array
   if ("default" in fallbacks && Array.isArray(fallbacks.default)) {
     const defaultArray = fallbacks.default as string[];
+    if (defaultArray.length === 0) {
+      return FALLBACK_IMAGES.generic.placeholder;
+    }
+    
     const index = category
       ? Math.abs(
           category
@@ -283,7 +287,10 @@ function getFallbackImage(config: FallbackConfig = { type: "book" }): string {
             .reduce((acc, char) => acc + char.charCodeAt(0), 0)
         ) % defaultArray.length
       : 0;
-    return defaultArray[index];
+    
+    // Safe array access with fallback
+    const selected = defaultArray[index];
+    return selected ?? defaultArray[0] ?? FALLBACK_IMAGES.generic.placeholder;
   }
 
   // Gradient
@@ -311,12 +318,22 @@ function createFallbackSequence(
 
   if ("default" in fallbacks && Array.isArray(fallbacks.default)) {
     const defaultArray = fallbacks.default as string[];
-    const primaryIndex = Math.abs(seedNum) % defaultArray.length;
-    sequence.push(defaultArray[primaryIndex]);
+    
+    if (defaultArray.length > 0) {
+      const primaryIndex = Math.abs(seedNum) % defaultArray.length;
+      const primaryImage = defaultArray[primaryIndex];
+      
+      if (primaryImage) {
+        sequence.push(primaryImage);
+      }
 
-    for (let i = 0; i < defaultArray.length; i += 1) {
-      if (i !== primaryIndex) {
-        sequence.push(defaultArray[i]);
+      for (let i = 0; i < defaultArray.length; i += 1) {
+        if (i !== primaryIndex) {
+          const image = defaultArray[i];
+          if (image) {
+            sequence.push(image);
+          }
+        }
       }
     }
   }
@@ -350,11 +367,11 @@ function generateOptimizedImageUrls(
     context = "cover",
   } = options;
 
-  const config = IMAGE_OPTIMIZATION[context];
+  const config = IMAGE_OPTIMIZATION[context]!;
   const targetWidths = widths || config.widths;
   const targetQuality = quality || config.quality;
   const targetFormats: SupportedFormat[] =
-    format != null ? [format] : config.formats; // ✅ Now works without error
+    format != null ? [format] : config.formats;
 
   const urls: Array<{ src: string; width: number; format: string }> = [];
 
@@ -449,6 +466,10 @@ function createImageLoader(
     }
 
     const url = fallbackSequence[currentAttempt];
+    if (!url) {
+      throw new Error("Invalid fallback URL");
+    }
+    
     currentAttempt += 1;
 
     try {
@@ -484,10 +505,10 @@ function createImageLoader(
 
   return {
     load: loadImage,
-    getCurrentUrl: () =>
-      fallbackSequence[
-        Math.min(currentAttempt, Math.max(fallbackSequence.length - 1, 0))
-      ],
+    getCurrentUrl: () => {
+      const index = Math.min(currentAttempt, Math.max(fallbackSequence.length - 1, 0));
+      return fallbackSequence[index] ?? FALLBACK_IMAGES.generic.placeholder;
+    },
     hasMoreAttempts: () => currentAttempt < fallbackSequence.length,
     reset: () => {
       currentAttempt = 0;

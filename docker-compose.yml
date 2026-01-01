@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: abraham_of_london
+      POSTGRES_USER: AbrahamofLondon
+      POSTGRES_PASSWORD: DB_PASSWORD=du9EDnkurJci7DVfxEhTaYuJZatj8/qLK8dozUFNAzM=
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./lib/server/inner-circle-schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  postgres_data:

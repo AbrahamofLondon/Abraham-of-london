@@ -4,7 +4,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useMemo } from "react";
-import type { Book } from "@/types/index";
 import { safeString } from "@/lib/utils";
 import { 
   getSafeImageProps, 

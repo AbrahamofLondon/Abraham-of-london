@@ -14,7 +14,7 @@ export class InteractionErrorBoundary extends React.Component<
     return { hasError: true };
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="text-center py-4 text-gray-500 text-sm">
@@ -22,7 +22,6 @@ export class InteractionErrorBoundary extends React.Component<
         </div>
       );
     }
-
     return this.props.children;
   }
 }

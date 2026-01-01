@@ -1,6 +1,6 @@
 // lib/canon.ts - FIXED
 import { allCanons } from "@/lib/contentlayer";
-import type { Canon as ContentlayerCanon } from "@/lib/contentlayer";
+import type { CanonDocument as ContentlayerCanon } from "@/lib/contentlayer";
 export type Canon = ContentlayerCanon;
 
 /* -------------------------------------------------------------------------- */

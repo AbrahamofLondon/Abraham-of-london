@@ -91,13 +91,17 @@ const ImageShimmer = () => (
 
 // Best image source from content
 function getPostImage(post: PostLike): string | null {
-  const sources = [
-    safeString(post.coverImage),
-    safeString((post as any).heroImage),
-    safeString((post as any).image),
-  ].filter(Boolean) as string[];
-
-  return sources.length ? sources[0].trim() : null;
+  // Check each source explicitly and return first valid one
+  const coverImage = safeString(post.coverImage);
+  if (coverImage && coverImage.trim() !== "") return coverImage.trim();
+  
+  const heroImage = safeString((post as any).heroImage);
+  if (heroImage && heroImage.trim() !== "") return heroImage.trim();
+  
+  const image = safeString((post as any).image);
+  if (image && image.trim() !== "") return image.trim();
+  
+  return null;
 }
 
 function getPostFallbackConfig(post: PostLike): FallbackConfig {

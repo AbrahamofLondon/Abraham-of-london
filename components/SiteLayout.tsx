@@ -2,7 +2,7 @@
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { getPageTitle, absUrl } from '@/lib/imports'; // This now works!
+import { getPageTitle, absUrl } from '@/lib/imports';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -75,11 +75,11 @@ class LayoutErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Layout Error:", error, errorInfo);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         this.props.fallback || (
