@@ -1,4 +1,3 @@
-// lib/inner-circle/index.ts
 /* eslint-disable no-console */
 /**
  * Public Inner Circle module surface.
@@ -16,15 +15,17 @@ import innerCircleStore, {
   type IssuedKey,
   type VerifyInnerCircleKeyResult,
   type InnerCircleMember,
-  type AdminExportRow, // This imports the type from inner-circle-store.ts
+  type AdminExportRow,
   type CleanupResult,
   type PaginationParams,
   type PaginatedResult,
   type PrivacySafeKeyRow,
   type MemberKeyRow,
   type ActiveKeyRow,
-  type RateLimitResult,
 } from "@/lib/server/inner-circle-store";
+
+// FIX: Import RateLimitResult from its source of truth
+import type { RateLimitResult } from "@/lib/rate-limit";
 
 /* ============================================================================
    PUBLIC FUNCTION EXPORTS (DIRECT PASSTHROUGH)
@@ -67,48 +68,27 @@ export const healthCheck = innerCircleStore.healthCheck;
    BACKWARD COMPAT: NORMALIZED CLEANUP ALIAS
    ============================================================================ */
 
-/**
- * Canonical cleanup stats shape for API surfaces.
- * Keep this stable even if the underlying store evolves.
- */
 export type CleanupOldDataStats = {
   deletedMembers: number;
   deletedKeys: number;
-  total: number; // total removed (members + keys, or store-specific total)
+  total: number;
 };
 
-/**
- * Robust adapter:
- * - Supports legacy store shape: { removed, total }
- * - Supports future shape: { deletedMembers, deletedKeys } (and/or total)
- * - Never throws for missing numeric fields; defaults to 0
- */
 function normalizeCleanupStats(raw: unknown): CleanupOldDataStats {
   const obj = (raw ?? {}) as Record<string, unknown>;
-
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 
-  // legacy store returns:
-  // { removed: number; total: number }
   const removed = n(obj.removed);
   const totalLegacy = n(obj.total);
-
-  // future/alternate store returns:
-  // { deletedMembers: number; deletedKeys: number; total?: number }
   const deletedMembers = n(obj.deletedMembers);
   const deletedKeys = n(obj.deletedKeys);
   const totalNew = n(obj.total);
 
-  // If store already provides member/key split, use it.
   if (deletedMembers > 0 || deletedKeys > 0) {
     const total = totalNew || deletedMembers + deletedKeys;
     return { deletedMembers, deletedKeys, total };
   }
 
-  // If only legacy "removed/total" exists, we map:
-  // - deletedKeys unknown => 0 (don't fabricate)
-  // - deletedMembers = removed (best available signal)
-  // - total = totalLegacy or removed
   return {
     deletedMembers: removed,
     deletedKeys: 0,
@@ -116,29 +96,22 @@ function normalizeCleanupStats(raw: unknown): CleanupOldDataStats {
   };
 }
 
-/**
- * Backward-compatible alias for older admin endpoints:
- * returns stable { deletedMembers, deletedKeys, total }.
- */
 export async function cleanupOldData(): Promise<CleanupOldDataStats> {
   const raw = await innerCircleStore.cleanupExpiredData();
   return normalizeCleanupStats(raw);
 }
 
 /* ============================================================================
-   TYPES RE-EXPORT - REMOVE DUPLICATE AdminExportRow
+   TYPES RE-EXPORT
    ============================================================================ */
 
-// Only re-export types that are imported above
-// Remove AdminExportRow from here since it's already imported and will be re-exported automatically
-// through the import statement above
 export type {
   InnerCircleStatus,
   CreateOrUpdateMemberArgs,
   IssuedKey,
   VerifyInnerCircleKeyResult,
   InnerCircleMember,
-  AdminExportRow, // Keep this here - it re-exports the imported type
+  AdminExportRow,
   CleanupResult,
   PaginationParams,
   PaginatedResult,
@@ -149,50 +122,25 @@ export type {
 };
 
 /* ============================================================================
-   EMAIL EXPORT
+   EMAIL EXPORT (Lazy Load)
    ============================================================================ */
 
-// Only export if the file exists, otherwise provide a stub
-let emailModule: any;
+// Note: This pattern assumes email module is always present in production
+// but prevents build crashes if it's temporarily missing during refactors.
+let sendEmailFn: any = async () => ({ success: false, error: "Email module not loaded" });
+
 try {
-  emailModule = await import("@/lib/inner-circle/email");
-} catch {
-  emailModule = {
-    sendInnerCircleEmail: async () => ({ success: false, error: "Email module not found" })
-  };
+  // Using require to avoid top-level await issues in some Next.js configs
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const emailModule = require("@/lib/inner-circle/email");
+  if (emailModule.sendInnerCircleEmail) {
+    sendEmailFn = emailModule.sendInnerCircleEmail;
+  }
+} catch (e) {
+  // Silent fail on build, will fail at runtime if called
 }
 
-export const sendInnerCircleEmail = emailModule.sendInnerCircleEmail;
-
-/* ============================================================================
-   OPTIONAL HELPERS (SAFE NO-OPS) - REMOVE IF NOT NEEDED
-   ============================================================================ */
-
-// Remove these if they conflict with the real exports above
-// export const getMemberByEmail = async (
-//   email: string
-// ): Promise<InnerCircleMember | null> => {
-//   void email;
-//   return null;
-// };
-
-// export const recordInnerCircleUnlock = async (
-//   email: string,
-//   slug: string,
-//   ip?: string
-// ): Promise<{ success: boolean; message?: string }> => {
-//   void email;
-//   void slug;
-//   void ip;
-//   return { success: true, message: "Access logged (baseline no-op)" };
-// };
-
-// export const revokeInnerCircleKey = async (
-//   email: string
-// ): Promise<{ success: boolean; message?: string }> => {
-//   const ok = await innerCircleStore.deleteMemberByEmail(email);
-//   return { success: ok, message: ok ? "Member deleted" : "Member not found" };
-// };
+export const sendInnerCircleEmail = sendEmailFn;
 
 /* ============================================================================
    DEFAULT EXPORT

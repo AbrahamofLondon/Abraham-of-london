@@ -1,33 +1,15 @@
 // lib/server/unified-content.ts
 // Server-side unified content system for Abraham of London
-// Synchronized with ContentHelper v5.0.0
+// Synchronized with ContentHelper v5.2.0
 
 import ContentHelper, { 
   type DocKind,
-  getAllPosts,
-  getAllBooks,
-  getAllDownloads,
-  getAllCanons,
-  getAllShorts,
-  getAllEvents,
-  getAllResources,
-  getAllStrategies,
-  getAllArticles,
-  getAllGuides,
-  getAllTutorials,
-  getAllCaseStudies,
-  getAllWhitepapers,
-  getAllReports,
-  getAllNewsletters,
-  getAllSermons,
-  getAllDevotionals,
-  getAllPrayers,
-  getAllTestimonies,
-  getAllPodcasts,
-  getAllVideos,
-  getAllCourses,
-  getAllLessons,
-  getAllPrints
+  getAllPosts, getAllBooks, getAllDownloads, getAllCanons, getAllShorts,
+  getAllEvents, getAllResources, getAllStrategies, getAllArticles,
+  getAllGuides, getAllTutorials, getAllCaseStudies, getAllWhitepapers,
+  getAllReports, getAllNewsletters, getAllSermons, getAllDevotionals,
+  getAllPrayers, getAllTestimonies, getAllPodcasts, getAllVideos,
+  getAllCourses, getAllLessons, getAllPrints
 } from "@/lib/contentlayer-helper";
 
 /* -------------------------------------------------------------------------- */
@@ -89,50 +71,38 @@ export interface UnifiedContent extends BaseContent {
   videoUrl?: string; // Video
 }
 
-export type UnifiedContentSummaryType = "page" | "download" | "event" | "media" | "academic";
-
 /* -------------------------------------------------------------------------- */
 /* 2. HELPERS                                                                 */
 /* -------------------------------------------------------------------------- */
 
 function getAuthorName(item: any): string | undefined {
   if (!item || !item.author) return undefined;
+  // Handle string author
   if (typeof item.author === "string") return item.author;
-  if (typeof item.author === "object" && item.author !== null) {
+  // Handle object author
+  if (typeof item.author === "object" && !Array.isArray(item.author)) {
     return item.author.name;
+  }
+  // Handle array of authors (return first)
+  if (Array.isArray(item.author) && item.author.length > 0) {
+    const first = item.author[0];
+    return typeof first === 'string' ? first : first.name;
   }
   return undefined;
 }
 
-// Maps the 24 types to high-level buckets for UI summaries
-function toSummaryType(type: ContentType): UnifiedContentSummaryType {
-  const map: Record<string, UnifiedContentSummaryType> = {
-    download: "download",
-    event: "event",
-    podcast: "media",
-    video: "media",
-    sermon: "media",
-    course: "academic",
-    lesson: "academic",
-    canon: "academic",
-    whitepaper: "download",
-    report: "download",
-  };
-  return map[type] || "page";
-}
-
-// Centralized URL Resolver matching ContentHelper Registry
+// Centralized URL Resolver
 export function getContentUrl(type: ContentType, slug: string): string {
   const typeMap: Record<string, string> = {
     post: "blog",
-    essay: "blog", // Alias
+    essay: "blog",
     book: "books",
     download: "downloads",
     event: "events",
     print: "prints",
     resource: "resources",
     canon: "canon",
-    strategy: "strategy", // Singular in URL map
+    strategy: "strategies", // Pluralized for consistency
     short: "shorts",
     article: "articles",
     guide: "guides",
@@ -153,7 +123,6 @@ export function getContentUrl(type: ContentType, slug: string): string {
   };
   
   const path = typeMap[type];
-  // If path is undefined, default to root or type name
   const basePath = path !== undefined ? path : type.toLowerCase() + "s";
   return basePath ? `/${basePath}/${slug}` : `/${slug}`;
 }
@@ -203,13 +172,15 @@ async function safeLoadContent(
           accessLevel: item.accessLevel,
           lockMessage: item.lockMessage,
 
-          // Type-Specific Field Mapping
+          // Context-Specific Mapping
           ...(type === "canon" ? { volumeNumber: item.volumeNumber, order: item.order } : {}),
           ...(type === "download" ? { downloadFile: item.downloadFile, fileSize: item.fileSize } : {}),
           ...(type === "event" ? { eventDate: item.eventDate, location: item.location } : {}),
           ...(type === "short" ? { theme: item.theme } : {}),
           ...(type === "devotional" ? { bibleVerse: item.bibleVerse } : {}),
           ...(type === "book" ? { isbn: item.isbn, publisher: item.publisher } : {}),
+          ...(type === "video" ? { videoUrl: item.videoUrl } : {}),
+          ...(type === "podcast" ? { audioUrl: item.audioUrl } : {}),
           
           _raw: item,
         } as UnifiedContent;
@@ -221,14 +192,18 @@ async function safeLoadContent(
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. MAIN LOADERS                                                            */
+/* 3. MAIN LOADERS (With Caching)                                             */
 /* -------------------------------------------------------------------------- */
 
-export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
-  // console.time("[unified-content] Total load time"); // Optional logging
+let contentCache: UnifiedContent[] | null = null;
+
+export async function getAllUnifiedContent(forceRefresh = false): Promise<UnifiedContent[]> {
+  // Use cache if available (server-side optimization)
+  if (contentCache && !forceRefresh && process.env.NODE_ENV === 'production') {
+    return contentCache;
+  }
 
   try {
-    // 1. Definition of all 24 loaders
     const loaders = [
       { label: "posts", loader: getAllPosts, type: "post" as ContentType },
       { label: "books", loader: getAllBooks, type: "book" as ContentType },
@@ -256,21 +231,21 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       { label: "lessons", loader: getAllLessons, type: "lesson" as ContentType },
     ];
 
-    // 2. Parallel Execution
     const results = await Promise.all(
       loaders.map(({ label, loader, type }) => safeLoadContent(label, loader, type))
     );
 
-    // 3. Flatten and Sort
     const allContent = results.flat();
 
+    // Sort by date descending
     allContent.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
 
-    // console.timeEnd("[unified-content] Total load time");
+    // Populate cache
+    contentCache = allContent;
     return allContent;
   } catch (error) {
     console.error("[unified-content] Critical error loading content:", error);
@@ -345,14 +320,12 @@ export async function queryUnifiedContent(options: ContentQuery = {}): Promise<U
     );
   }
 
-  // Sorting
   content.sort((a, b) => {
     if (options.sortBy === "title") {
       return options.sortOrder === "asc" 
         ? a.title.localeCompare(b.title) 
         : b.title.localeCompare(a.title);
     }
-    // Default date sort
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     return options.sortOrder === "asc" ? dateA - dateB : dateB - dateA;

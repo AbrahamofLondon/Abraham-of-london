@@ -1,5 +1,9 @@
 import type { NextApiRequest } from "next";
 
+/* ============================================================================
+ * 1. TYPES
+ * ============================================================================ */
+
 export interface IpAnalysis {
   ip: string;
   source: string;
@@ -7,6 +11,7 @@ export interface IpAnalysis {
   isLocalhost: boolean;
   version: 4 | 6 | "unknown";
   trusted: boolean;
+  // Nested analysis kept for backward compatibility if needed
   analysis?: {
     isPrivate: boolean;
     isLocalhost: boolean;
@@ -15,67 +20,122 @@ export interface IpAnalysis {
   };
 }
 
-// ----------------------------------------------------------------------------
-// 1. PRIVATE + SPECIAL ADDRESS RANGES
-// ----------------------------------------------------------------------------
+/* ============================================================================
+ * 2. CONSTANTS & REGEX
+ * ============================================================================ */
+
 const PRIVATE_IPV4 = [
   /^10\./,
   /^192\.168\./,
   /^172\.(1[6-9]|2\d|3[0-1])\./,
   /^127\./,
 ];
+
 const PRIVATE_IPV6 = [
   /^fc00:/, // Unique local address
   /^fd00:/, // Unique local address
   /^fe80:/, // Link-local
-  /^::1$/, // Loopback
+  /^::1$/,  // Loopback
 ];
 
 const LOOPBACK = ["127.0.0.1", "::1", "localhost"];
 
-// ----------------------------------------------------------------------------
-// 2. FULL IPv4 + IPv6 VALIDATION (supports compressed IPv6!)
-// ----------------------------------------------------------------------------
-const IPV4_REGEX =
-  /^(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}$/;
+// Strict IPv4 Regex
+const IPV4_REGEX = /^(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}$/;
 
-// Full IPv6 (normal + compressed + IPv4 embedded)
-const IPV6_REGEX =
-  /^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(([0-9A-Fa-f]{1,4}:){1,7}|:)((:[0-9A-Fa-f]{1,4}){1,7}|:)|(([0-9A-Fa-f]{1,4}:){6}|:)((25[0-5]|(2[0-4]\d|[0-1]?\d?\d))(\.(25[0-5]|(2[0-4]\d|[0-1]?\d?\d))){3}))$/;
+// Comprehensive IPv6 Regex (Standard + Compressed + Mixed)
+const IPV6_REGEX = /^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(([0-9A-Fa-f]{1,4}:){1,7}|:)((:[0-9A-Fa-f]{1,4}){1,7}|:)|(([0-9A-Fa-f]{1,4}:){6}|:)((25[0-5]|(2[0-4]\d|[0-1]?\d?\d))(\.(25[0-5]|(2[0-4]\d|[0-1]?\d?\d))){3}))$/;
 
-// ----------------------------------------------------------------------------
-// 3. HELPER: VALID IP?
-// ----------------------------------------------------------------------------
-export function isValidIp(ip: string): boolean {
+const TRUSTED_HEADERS = [
+  "cf-connecting-ip",      // Cloudflare
+  "x-client-ip",           // AWS / GCP
+  "true-client-ip",        // Akamai / Cloudflare
+  "x-real-ip",             // Nginx / Vercel
+  "x-forwarded-for",       // Standard Proxy
+  "x-forwarded",
+  "x-cluster-client-ip",
+  "forwarded-for",
+  "forwarded",
+  "client-ip",
+];
+
+/* ============================================================================
+ * 3. VALIDATION LOGIC
+ * ============================================================================ */
+
+export function isValidIp(ip: string | undefined | null): boolean {
   if (!ip || typeof ip !== "string") return false;
-  if (ip === "unknown") return false;
-  if (LOOPBACK.includes(ip)) return true;
+  const clean = ip.trim();
+  if (clean === "unknown" || clean === "") return false;
+  if (LOOPBACK.includes(clean)) return true;
 
-  // IPv4
-  if (IPV4_REGEX.test(ip)) return true;
-
-  // IPv6 (normal, compressed, embedded IPv4)
-  if (IPV6_REGEX.test(ip)) return true;
-
-  return false;
+  return IPV4_REGEX.test(clean) || IPV6_REGEX.test(clean);
 }
 
-// ----------------------------------------------------------------------------
-// 4. PRIVATE ADDRESS CHECK
-// ----------------------------------------------------------------------------
 function isPrivateIp(ip: string): boolean {
   if (!isValidIp(ip)) return false;
-
   if (PRIVATE_IPV4.some((r) => r.test(ip))) return true;
   if (PRIVATE_IPV6.some((r) => r.test(ip))) return true;
-
   return false;
 }
 
-// ----------------------------------------------------------------------------
-// 5. ANALYSE AN IP ADDRESS
-// ----------------------------------------------------------------------------
-function analyzeIp(ip: string, source = "unknown"): IpAnalysis {
+/* ============================================================================
+ * 4. EXTRACTION LOGIC
+ * ============================================================================ */
+
+/**
+ * Safely parses a header value (which might be a comma-separated chain)
+ * and returns the first valid public IP found.
+ */
+function extractFirstValidIp(headerVal: string | string[] | undefined): string | null {
+  if (!headerVal) return null;
+
+  // Handle array (rare in Next.js headers object but possible in raw node)
+  const valString = Array.isArray(headerVal) ? headerVal[0] : headerVal;
+  if (!valString) return null;
+
+  // Split "1.2.3.4, 10.0.0.1" -> ["1.2.3.4", "10.0.0.1"]
+  const parts = valString.split(",");
+
+  for (const part of parts) {
+    const clean = part.trim();
+    if (isValidIp(clean)) return clean;
+  }
+
+  return null;
+}
+
+
+
+/**
+ * Main extractor. Checks headers in order of trust, falls back to socket.
+ */
+export function getClientIp(
+  req: NextApiRequest | { headers: Record<string, string | string[] | undefined>; socket?: any }
+): string {
+  const headers = req.headers || {};
+
+  // 1. Check Headers
+  for (const header of TRUSTED_HEADERS) {
+    const value = headers[header];
+    const extracted = extractFirstValidIp(value);
+    if (extracted) return extracted;
+  }
+
+  // 2. Check Socket (Local dev / Direct connection)
+  const socket = (req as any).socket;
+  if (socket?.remoteAddress && isValidIp(socket.remoteAddress)) {
+    return socket.remoteAddress;
+  }
+
+  return "unknown";
+}
+
+/* ============================================================================
+ * 5. ANALYSIS LOGIC
+ * ============================================================================ */
+
+export function analyzeIp(ip: string, source = "unknown"): IpAnalysis {
   if (!isValidIp(ip)) {
     return {
       ip: "unknown",
@@ -84,18 +144,13 @@ function analyzeIp(ip: string, source = "unknown"): IpAnalysis {
       isLocalhost: false,
       version: "unknown",
       trusted: false,
-      analysis: {
-        isPrivate: false,
-        isLocalhost: false,
-        version: "unknown",
-        trusted: false,
-      },
+      analysis: { isPrivate: false, isLocalhost: false, version: "unknown", trusted: false },
     };
   }
 
   const isLocalhost = LOOPBACK.includes(ip);
   const isPrivate = isPrivateIp(ip);
-
+  
   let version: 4 | 6 | "unknown" = "unknown";
   if (IPV4_REGEX.test(ip)) version = 4;
   else if (IPV6_REGEX.test(ip)) version = 6;
@@ -109,119 +164,41 @@ function analyzeIp(ip: string, source = "unknown"): IpAnalysis {
     isLocalhost,
     version,
     trusted,
-    analysis: {
-      isPrivate,
-      isLocalhost,
-      version,
-      trusted,
-    },
+    analysis: { isPrivate, isLocalhost, version, trusted },
   };
 }
 
-// ----------------------------------------------------------------------------
-// 6. TRUSTED HEADERS (ordered by reliability)
-// ----------------------------------------------------------------------------
-const TRUSTED_HEADERS = [
-  // Cloudflare
-  "cf-connecting-ip",
-
-  // AWS / GCP / Fly / Heroku
-  "x-client-ip",
-  "true-client-ip",
-
-  // Nginx / Apache / Vercel / Netlify
-  "x-real-ip",
-
-  // Standard proxy header (can contain multiple)
-  "x-forwarded-for",
-
-  // Other RFC-compliant variants
-  "x-forwarded",
-  "x-cluster-client-ip",
-  "forwarded",
-  "forwarded-for",
-
-  // Netlify (custom)
-  "client-ip",
-];
-
-// ----------------------------------------------------------------------------
-// 7. SAFE PARSER FOR X-FORWARDED-FOR CHAINS
-// ----------------------------------------------------------------------------
-function extractFirstValidIp(headerVal: string): string | null {
-  if (!headerVal) return null;
-
-  // Can be a chain "1.1.1.1, 10.0.0.1, ::1"
-  const parts = headerVal.split(",").map((x) => x.trim());
-
-  for (const part of parts) {
-    if (isValidIp(part)) return part;
-  }
-
-  return null;
-}
-
-// ----------------------------------------------------------------------------
-// 8. MAIN: GET CLIENT IP
-// ----------------------------------------------------------------------------
-export function getClientIp(
-  req: NextApiRequest | { headers: Record<string, any> }
-): string {
-  const headers = req.headers || {};
-
-  for (const header of TRUSTED_HEADERS) {
-    const value = headers[header];
-
-    if (!value) continue;
-
-    if (Array.isArray(value)) {
-      const extracted = extractFirstValidIp(value[0]);
-      if (extracted) return extracted;
-    }
-
-    if (typeof value === "string") {
-      const extracted = extractFirstValidIp(value);
-      if (extracted) return extracted;
-    }
-  }
-
-  // Fallback to socket remote address
-  const socket = (req as NextApiRequest).socket;
-  if (socket?.remoteAddress && isValidIp(socket.remoteAddress)) {
-    return socket.remoteAddress;
-  }
-
-  return "unknown";
-}
-
-// ----------------------------------------------------------------------------
-// 9. GET CLIENT IP + ANALYSIS
-// ----------------------------------------------------------------------------
 export function getClientIpWithAnalysis(req: NextApiRequest): IpAnalysis {
   const ip = getClientIp(req);
   return analyzeIp(ip, "header/proxy");
 }
 
-// ----------------------------------------------------------------------------
-// 🔟 ANONYMISATION FOR RATE LIMIT KEYS
-// ----------------------------------------------------------------------------
+/* ============================================================================
+ * 6. ANONYMIZATION (GDPR/Privacy Safe)
+ * ============================================================================ */
+
 export function anonymizeIp(ip: string): string {
   if (!isValidIp(ip)) return "unknown";
 
-  // IPv6 - keep first 3 blocks
+  // IPv6: Keep first 3 segments (usually /48 or /64 prefix)
+  // e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334 -> 2001:0db8:85a3::
   if (ip.includes(":")) {
     const parts = ip.split(":");
-    return parts.slice(0, 3).join(":") + "::";
+    if (parts.length < 3) return ip; // Fallback for weirdly compressed IPs
+    return `${parts[0]}:${parts[1]}:${parts[2]}::`;
   }
 
-  // IPv4 - mask last octet
+  // IPv4: Zero out the last octet
+  // e.g. 192.168.1.50 -> 192.168.1.0
   const parts = ip.split(".");
-  return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
+  // SAFEGUARD: Ensure we actually have 4 parts before accessing indices
+  if (parts.length === 4) {
+    return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
+  }
+
+  return ip;
 }
 
-// ----------------------------------------------------------------------------
-// 11. RATE LIMIT KEY DERIVED FROM ANONYMISED IP
-// ----------------------------------------------------------------------------
 export function getRateLimitKey(req: NextApiRequest, prefix: string): string {
   const ip = getClientIp(req);
   const anon = anonymizeIp(ip);

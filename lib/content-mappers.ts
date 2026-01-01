@@ -1,14 +1,15 @@
 // lib/content-mappers.ts
 import type { 
-  CanonDocument as Canon, 
-  BookDocument as Book, 
-  PostDocument as Post, 
-  DownloadDocument as Download, 
-  ResourceDocument as Resource, 
-  EventDocument as Event, 
-  PrintDocument as Print 
+  Canon, 
+  Book, 
+  Post, 
+  Download, 
+  Resource, 
+  Event, 
+  Print 
 } from "@/lib/contentlayer";
 
+// Define strict union of known types + generic fallback
 type AnyDoc =
   | Post
   | Book
@@ -35,34 +36,40 @@ export function isCanon(doc: AnyDoc): doc is Canon {
 }
 
 export function mapToBaseCardProps(doc: AnyDoc) {
+  // Use safe access for all fields since AnyDoc might be a generic record
+  const d = doc as any;
   return {
-    slug: s((doc as any).slug),
-    title: s((doc as any).title) || "Untitled",
-    subtitle: (doc as any).subtitle ?? null,
-    excerpt: (doc as any).excerpt ?? null,
-    description: (doc as any).description ?? null,
-    coverImage: (doc as any).coverImage ?? null,
-    date: (doc as any).date ?? null,
-    tags: Array.isArray((doc as any).tags) ? (doc as any).tags : [],
-    featured: Boolean((doc as any).featured),
-    accessLevel: (doc as any).accessLevel ?? null,
-    lockMessage: (doc as any).lockMessage ?? null,
+    slug: s(d.slug || d._raw?.flattenedPath),
+    title: s(d.title) || "Untitled",
+    subtitle: d.subtitle ?? null,
+    excerpt: d.excerpt ?? null,
+    description: d.description ?? null,
+    coverImage: d.coverImage ?? null,
+    date: d.date ?? null,
+    tags: Array.isArray(d.tags) ? d.tags : [],
+    featured: Boolean(d.featured),
+    accessLevel: d.accessLevel ?? null,
+    lockMessage: d.lockMessage ?? null,
+    type: d.type || 'Page', // Ensure type is passed through for UI badges
   };
 }
 
 export function mapToBookCardProps(doc: Book) {
+  const base = mapToBaseCardProps(doc);
   return {
-    ...mapToBaseCardProps(doc),
-    author: (doc as any).author ?? null,
-    isbn: (doc as any).isbn ?? null,
-    publisher: (doc as any).publisher ?? null,
-    publishDate: (doc as any).date ?? null,
+    ...base,
+    author: doc.author ?? null,
+    isbn: doc.isbn ?? null,
+    publisher: doc.publisher ?? null,
+    publishDate: doc.date ?? null,
   };
 }
 
 export function mapToBlogPostCardProps(doc: Post) {
+  const base = mapToBaseCardProps(doc);
   return {
-    ...mapToBaseCardProps(doc),
+    ...base,
+    // Use unsafe access for properties that might not exist on all Post types depending on config
     author: (doc as any).author ?? null,
     readTime: (doc as any).readTime ?? null,
     category: (doc as any).category ?? null,
@@ -70,10 +77,11 @@ export function mapToBlogPostCardProps(doc: Post) {
 }
 
 export function mapToCanonCardProps(doc: Canon) {
+  const base = mapToBaseCardProps(doc);
   return {
-    ...mapToBaseCardProps(doc),
+    ...base,
     author: (doc as any).author ?? null,
-    volumeNumber: (doc as any).volumeNumber ?? null,
+    volumeNumber: doc.volumeNumber ?? null,
     readTime: (doc as any).readTime ?? null,
   };
 }

@@ -1,5 +1,5 @@
 /* ============================================================================
- * ROBUST CONTENTLAYER HELPER v5.2.0
+ * ROBUST CONTENTLAYER HELPER v5.2.1
  * Features: 24-Context Registry + Complete Backward Compatibility
  * ============================================================================ */
 
@@ -63,6 +63,7 @@ let isContentlayerDisabled = false;
 try {
   if (process.env.DISABLE_CONTENTLAYER !== 'true') {
     // Use require for Node.js to avoid ESM issues
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     generated = require(".contentlayer/generated");
   } else {
     isContentlayerDisabled = true;
@@ -255,7 +256,7 @@ export const {
   getAllBooks, getPublishedBooks,
   getAllDownloads, getPublishedDownloads,
   getAllCanons, getPublishedCanons,
-  getAllShorts, getPublishedShorts, getRecentShorts, // Shorts often use 'Recent' alias
+  getAllShorts, getPublishedShorts, getRecentShorts, 
   getAllEvents, getPublishedEvents,
   getAllPrints, getPublishedPrints,
   getAllResources, getPublishedResources,
@@ -288,6 +289,20 @@ export const getDocumentBySlug = (kind: DocKind, slug: string): ContentDoc | nul
     normalizeSlug(d.slug || d._raw.flattenedPath.split("/").pop()) === normalized
   ) || null;
 };
+
+/**
+ * Check if Contentlayer has successfully generated data.
+ * Useful for health checks and preventing crashes on cold boots.
+ */
+export function isContentlayerLoaded(): boolean {
+  try {
+    // FIX: Access 'allDocuments' from the 'generated' object
+    const docs = (generated as any).allDocuments;
+    return Array.isArray(docs) && docs.length >= 0;
+  } catch (e) {
+    return false;
+  }
+}
 
 // Backward compatible specific slug getters
 export const getPostBySlug = (s: string) => getDocumentBySlug('post', s);
@@ -328,6 +343,7 @@ const ContentHelper = {
   getRequiredTier,
   isTierAllowed,
   normalizeTier,
+  isContentlayerLoaded,
   isContentlayerDisabled: () => isContentlayerDisabled
 };
 

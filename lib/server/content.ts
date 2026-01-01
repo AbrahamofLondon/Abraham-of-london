@@ -1,57 +1,48 @@
 /* lib/server/content.ts */
-import {
-  allCanons,
-  allDownloads,
-  allShorts,
-  allBooks,
-  allPosts,
-  allEvents,
-  allResources,
-  allPrints,
-  allStrategies,
-  type Canon,
-  type Download,
-  type Short,
-  type Book,
-  type Post,
-  type Event,
-  type Resource,
-  type Print,
-  type Strategy
-} from "contentlayer/generated";
+import ContentHelper, { 
+  type ContentDoc,
+  getAllCanons,
+  getAllDownloads,
+  getAllShorts,
+  getAllBooks,
+  getAllPosts,
+  getAllEvents,
+  getAllResources,
+  getAllPrints,
+  getAllStrategies
+} from "@/lib/contentlayer-helper";
 import prisma from "@/lib/prisma";
-
-// Define a union type for institutional documents
-export type ContentDoc = Canon | Download | Short | Book | Post | Event | Resource | Print | Strategy;
 
 /**
  * INSTITUTIONAL ENGAGEMENT TRACKING
  * Logs unique principal views into the Prisma/Neon database.
  */
 export async function recordContentView(doc: ContentDoc, memberId?: string): Promise<void> {
-  const slug = (doc as any).slug;
+  const slug = doc.slug || doc._raw?.flattenedPath;
   if (!slug) return;
 
   try {
+    // Fail-soft: If Prisma is not configured or down, catch the error
     await prisma.shortInteraction.create({
       data: {
         shortSlug: slug,
         action: "view",
         memberId: memberId || null,
         metadata: JSON.stringify({
-          title: (doc as any).title || "Untitled",
-          type: (doc as any).type || "institutional_content",
+          title: doc.title || "Untitled",
+          type: ContentHelper.getDocKind(doc),
           timestamp: new Date().toISOString(),
         }),
       },
     });
   } catch (error) {
+    // Log but do not crash the request
     console.error(`[AUDIT_FAILURE] Engagement log failed for slug: ${slug}`, error);
   }
 }
 
 // ============================================================================
-// CRITICAL: ADD MISSING EXPORTS FOR PAGES
+// ASSET INTEGRITY & VALIDATION
 // ============================================================================
 
 /**
@@ -61,18 +52,21 @@ export const assertPublicAssetsForDownloadsAndResources = (): { missing: string[
   const missingAssets: string[] = [];
   
   // Check downloads
-  allDownloads.forEach(download => {
-    const filePath = (download as any).file || (download as any).downloadFile || (download as any).downloadUrl;
-    if (filePath && !filePath.includes('http')) {
-      // Simple check - in production you'd verify file exists
-      console.log(`[ASSET CHECK] Download: ${download.title} -> ${filePath}`);
+  const downloads = getAllDownloads();
+  downloads.forEach(download => {
+    const filePath = ContentHelper.resolveDocDownloadUrl(download);
+    if (filePath && !filePath.includes('http') && !filePath.startsWith('/')) {
+       // Validation logic for relative paths vs absolute
+       console.log(`[ASSET CHECK] Download: ${download.title} -> ${filePath}`);
     }
   });
   
   // Check resources
-  allResources.forEach(resource => {
-    const filePath = (resource as any).file || (resource as any).downloadFile || (resource as any).downloadUrl;
-    if (filePath && !filePath.includes('http')) {
+  const resources = getAllResources();
+  resources.forEach(resource => {
+    // Resources might use 'file' or 'url' depending on schema
+    const filePath = (resource as any).file || (resource as any).url;
+    if (filePath && !filePath.includes('http') && !filePath.startsWith('/')) {
       console.log(`[ASSET CHECK] Resource: ${resource.title} -> ${filePath}`);
     }
   });
@@ -125,110 +119,59 @@ const formatBytes = (bytes: number, decimals = 2): string => {
  * Resolve document download URL
  */
 export const resolveDocDownloadUrl = (doc: any): string => {
-  return doc.downloadUrl || doc.pdfPath || doc.file || doc.downloadFile || doc.fileUrl || '';
+  return ContentHelper.resolveDocDownloadUrl(doc);
 };
 
 /**
  * Get required subscription tier for document
  */
 export const getRequiredTier = (doc: any): string => {
-  const accessLevel = doc.accessLevel || 'public';
-  
-  switch (accessLevel) {
-    case 'premium':
-      return 'premium';
-    case 'inner-circle':
-      return 'inner-circle';
-    case 'founders':
-      return 'founders';
-    default:
-      return 'free';
-  }
+  return ContentHelper.getRequiredTier(doc);
 };
 
 // ============================================================================
-// WRAPPERS: Standardized access with safety defaults
+// WRAPPERS: Standardized access via ContentHelper
 // ============================================================================
 
-export const getAllCanons = (): Canon[] => {
-  return allCanons || [];
+// Re-export specific getters for backward compatibility
+export {
+  getAllCanons,
+  getAllDownloads,
+  getAllBooks,
+  getAllPosts,
+  getAllEvents,
+  getAllResources,
+  getAllPrints,
+  getAllStrategies
 };
 
-export const getCanonBySlug = (slug: string): Canon | null => {
-  return allCanons.find((c) => c.slug === slug) || null;
-};
+export const getCanonBySlug = (slug: string) => ContentHelper.getCanonBySlug(slug);
+export const getDownloadBySlug = (slug: string) => ContentHelper.getDownloadBySlug(slug);
+export const getBookBySlug = (slug: string) => ContentHelper.getBookBySlug(slug);
 
-export const getAllDownloads = (): Download[] => {
-  return allDownloads || [];
-};
-
-export const getDownloadBySlug = (slug: string): Download | null => {
-  return allDownloads.find((d) => d.slug === slug) || null;
-};
-
-export const getPublishedShorts = (): Short[] => {
-  // Filter for non-drafts to maintain institutional quality
-  return allShorts.filter(s => !(s as any).draft) || [];
-};
-
-export const getAllBooks = (): Book[] => {
-  return allBooks || [];
-};
-
-export const getBookBySlug = (slug: string): Book | null => {
-  return allBooks.find((b) => b.slug === slug) || null;
-};
-
-export const getAllPosts = (): Post[] => {
-  return allPosts || [];
-};
-
-export const getAllEvents = (): Event[] => {
-  return allEvents || [];
-};
-
-export const getAllResources = (): Resource[] => {
-  return allResources || [];
-};
-
-export const getAllPrints = (): Print[] => {
-  return allPrints || [];
-};
-
-export const getAllStrategies = (): Strategy[] => {
-  return allStrategies || [];
+export const getPublishedShorts = (): ContentDoc[] => {
+  return ContentHelper.getPublishedShorts();
 };
 
 // Utility: Check if document exists
 export const documentExists = (slug: string): boolean => {
-  const allDocs = [
-    ...allCanons,
-    ...allDownloads,
-    ...allShorts,
-    ...allBooks,
-    ...allPosts,
-    ...allEvents,
-    ...allResources,
-    ...allPrints,
-    ...allStrategies
-  ];
-  
-  return allDocs.some(doc => doc.slug === slug);
+  const allDocs = ContentHelper.getAllDocuments();
+  return allDocs.some(doc => 
+    doc.slug === slug || doc._raw?.flattenedPath.split('/').pop() === slug
+  );
 };
 
 // Utility: Get document by slug (any type)
 export const getDocumentBySlug = (slug: string): ContentDoc | null => {
-  const allDocs = [
-    ...allCanons,
-    ...allDownloads,
-    ...allShorts,
-    ...allBooks,
-    ...allPosts,
-    ...allEvents,
-    ...allResources,
-    ...allPrints,
-    ...allStrategies
-  ];
+  // Use the robust helper which checks all 24 types
+  // We pass 'post' as a default kind, but the logic inside actually scans correctly
+  // or we can iterate if we want to be explicit, but getAllDocuments().find is safer here
+  const allDocs = ContentHelper.getAllDocuments();
   
-  return allDocs.find(doc => doc.slug === slug) || null;
+  const normalized = ContentHelper.normalizeSlug(slug);
+  
+  return allDocs.find(doc => {
+    const docSlug = doc.slug || doc._raw?.flattenedPath.split('/').pop();
+    return ContentHelper.normalizeSlug(docSlug) === normalized;
+  }) || null;
 };

@@ -1,5 +1,8 @@
+/* ============================================================================
+ * ENTERPRISE SECURITY UTILITIES
+ * ============================================================================ */
+
 import crypto from "crypto";
-import type { IncomingMessage } from "http";
 
 /**
  * Hash email for privacy-safe storage
@@ -15,17 +18,19 @@ export function hashEmail(email: string): string {
  * Mask email for display purposes
  */
 export function maskEmail(email: string): string {
-  const [local, domain] = email.split("@");
-  if (!domain) return "****";
+  const parts = email.split("@");
   
-  // Handle edge cases
+  const local = parts[0];
+  const domain = parts[1];
+
+  if (!local || !domain) return "****";
+  
   if (local.length <= 2) {
     return local.length === 1 
       ? `*@${domain}`
       : `${local.charAt(0)}*@${domain}`;
   }
   
-  // Show first 2 characters, mask the rest
   const visible = local.slice(0, 2);
   const masked = "*".repeat(Math.max(1, local.length - 2));
   return `${visible}${masked}@${domain}`;
@@ -43,7 +48,9 @@ export function generateSecureToken(length: number = 32): string {
  */
 export function constantTimeCompare(a: string, b: string): boolean {
   try {
-    // FIX: Cast Buffer to Uint8Array to satisfy strict TypeScript definitions
+    if (a.length !== b.length) return false;
+    
+    // FIX: Force cast to 'any' to bypass strict Buffer vs Uint8Array definition mismatches
     return crypto.timingSafeEqual(
       Buffer.from(a, "utf8") as unknown as Uint8Array,
       Buffer.from(b, "utf8") as unknown as Uint8Array
@@ -57,6 +64,7 @@ export function constantTimeCompare(a: string, b: string): boolean {
  * Sanitize user input for safe display
  */
 export function sanitizeHtml(input: string): string {
+  if (!input) return "";
   return input
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -72,23 +80,19 @@ export function sanitizeHtml(input: string): string {
 export function isValidRedirectUrl(url: string, allowedDomains: string[] = []): boolean {
   if (!url || typeof url !== "string") return false;
   
-  // Must start with / for relative URLs
   if (url.startsWith("/")) {
-    return !url.includes("//"); // Prevent protocol-relative URLs
+    return !url.includes("//"); 
   }
   
-  // For absolute URLs, check against allowed domains
   try {
     const parsed = new URL(url);
     
-    // Check if domain is in allowed list
     if (allowedDomains.length > 0) {
       return allowedDomains.some(domain => 
         parsed.hostname === domain || parsed.hostname.endsWith(`.${domain}`)
       );
     }
     
-    // If no allowed domains specified, allow common safe protocols
     return ["http:", "https:"].includes(parsed.protocol);
   } catch {
     return false;
@@ -110,7 +114,7 @@ export function validateCsrfToken(token: string, expectedToken: string): boolean
 }
 
 /**
- * Encrypt data (simple XOR for demonstration - use proper encryption in production)
+ * Encrypt data (simple XOR for demonstration)
  */
 export function simpleEncrypt(data: string, key: string): string {
   const encoder = new TextEncoder();
@@ -118,8 +122,12 @@ export function simpleEncrypt(data: string, key: string): string {
   const keyBytes = encoder.encode(key);
   
   const result = new Uint8Array(dataBytes.length);
+  
+  // FIX: Provide explicit fallback (|| 0) for array access to satisfy strict null checks
   for (let i = 0; i < dataBytes.length; i++) {
-    result[i] = dataBytes[i] ^ keyBytes[i % keyBytes.length];
+    const d = dataBytes[i] || 0;
+    const k = keyBytes[i % keyBytes.length] || 0;
+    result[i] = d ^ k;
   }
   
   return Buffer.from(result).toString("base64");
@@ -129,12 +137,16 @@ export function simpleEncrypt(data: string, key: string): string {
  * Decrypt data
  */
 export function simpleDecrypt(encrypted: string, key: string): string {
-  const dataBytes = Buffer.from(encrypted, "base64");
+  const dataBytes = Buffer.from(encrypted, "base64") as unknown as Uint8Array;
   const keyBytes = new TextEncoder().encode(key);
   
   const result = new Uint8Array(dataBytes.length);
+  
+  // FIX: Provide explicit fallback (|| 0) for array access
   for (let i = 0; i < dataBytes.length; i++) {
-    result[i] = dataBytes[i] ^ keyBytes[i % keyBytes.length];
+    const d = dataBytes[i] || 0;
+    const k = keyBytes[i % keyBytes.length] || 0;
+    result[i] = d ^ k;
   }
   
   return new TextDecoder().decode(result);
@@ -144,6 +156,7 @@ export function simpleDecrypt(encrypted: string, key: string): string {
  * Check if string contains SQL injection patterns
  */
 export function containsSqlInjection(input: string): boolean {
+  if (!input) return false;
   const sqlPatterns = [
     /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|EXEC|ALTER|CREATE|TRUNCATE)\b)/i,
     /(\b(OR|AND)\s+\d+=\d+\b)/i,
@@ -159,6 +172,7 @@ export function containsSqlInjection(input: string): boolean {
  * Check if string contains XSS patterns
  */
 export function containsXss(input: string): boolean {
+  if (!input) return false;
   const xssPatterns = [
     /<script\b[^>]*>(.*?)<\/script>/i,
     /javascript:/i,
@@ -185,10 +199,8 @@ export function sanitizeUserInput(input: string): {
   const hasSql = containsSqlInjection(input);
   const hasXss = containsXss(input);
   
-  // Remove potentially dangerous content
   let clean = input;
   if (hasSql || hasXss) {
-    // For demonstration - in production use a proper sanitizer like DOMPurify
     clean = sanitizeHtml(input);
   }
   

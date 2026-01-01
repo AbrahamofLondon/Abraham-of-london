@@ -1,10 +1,15 @@
-// lib/books.ts - MINIMAL FIX
+// lib/books.ts - FIXED
 import { allBooks } from "@/lib/contentlayer";
-import type { BookDocument as ContentlayerBook } from "@/lib/contentlayer";
+// FIX: Import 'Book' instead of 'BookDocument' to match the generated types
+import type { Book as ContentlayerBook } from "@/lib/contentlayer";
 
-// Keep the original type but make computed fields optional
+// Keep the internal alias consistent
 export type Book = ContentlayerBook;
 export type BookWithContent = Book;
+
+/* -------------------------------------------------------------------------- */
+/* Utilities                                                                  */
+/* -------------------------------------------------------------------------- */
 
 const s = (v: unknown) => (typeof v === "string" ? v : v == null ? "" : String(v));
 const lower = (v: unknown) => s(v).trim().toLowerCase();
@@ -40,6 +45,10 @@ function getBookSlug(book: Book): string {
 
   return "";
 }
+
+/* -------------------------------------------------------------------------- */
+/* Getters                                                                    */
+/* -------------------------------------------------------------------------- */
 
 export function getAllBooksMeta(): Book[] {
   // Cast to fix type issue - computed fields will be included

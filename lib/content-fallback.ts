@@ -11,16 +11,18 @@ import {
   allCanons, 
   allShorts 
 } from "@/lib/contentlayer";
+
+// FIX: Import correct type names (Post, Book) and alias them to preserve existing code
 import type {
-  PostDocument as PostType,
-  BookDocument as BookType,
-  DownloadDocument as DownloadType,
-  EventDocument as EventType,
-  PrintDocument as PrintType,
-  ResourceDocument as ResourceType,
-  StrategyDocument as StrategyType,
-  CanonDocument as CanonType,
-  ShortDocument as ShortType,
+  Post as PostType,
+  Book as BookType,
+  Download as DownloadType,
+  Event as EventType,
+  Print as PrintType,
+  Resource as ResourceType,
+  Strategy as StrategyType,
+  Canon as CanonType,
+  Short as ShortType,
 } from "@/lib/contentlayer";
 
 // Union type for all documents
@@ -79,7 +81,7 @@ export function getDocSlug(doc: any): string {
 }
 
 // ============================================
-// TYPE GUARDS - FIXED: use 'type' not '_type'
+// TYPE GUARDS
 // ============================================
 export const isPost = (doc: AnyDoc): doc is PostType => doc.type === 'Post';
 export const isBook = (doc: AnyDoc): doc is BookType => doc.type === 'Book';
@@ -263,8 +265,8 @@ export const getCardPropsForDocumentDirect = (doc: AnyDoc): ContentlayerCardProp
   return {
     title: doc.title || 'Untitled',
     description: doc.description,
-    excerpt: doc.excerpt,
-    coverImage: doc.coverImage,
+    excerpt: (doc as any).excerpt,
+    coverImage: (doc as any).coverImage,
     date: doc.date,
     slug: getDocSlug(doc),
     tags: doc.tags,
@@ -304,7 +306,7 @@ export function searchDocumentsDirect<T extends AnyDoc>(docs: T[], query: string
     const searchable = [
       doc.title || '',
       doc.description || '',
-      doc.excerpt || '',
+      (doc as any).excerpt || '',
       ...(doc.tags || []),
     ].join(' ').toLowerCase();
     
@@ -419,7 +421,7 @@ export const searchPostsDirect = (query: string): PostType[] => {
     const searchable = [
       post.title || '',
       post.description || '',
-      post.excerpt || '',
+      (post as any).excerpt || '',
       ...(post.tags || []),
       (post as any).category || '',
     ].join(' ').toLowerCase();
@@ -441,7 +443,7 @@ export const getPostsByTagDirect = (tag: string): PostType[] => {
 };
 
 // ============================================
-// CONVENIENCE EXPORTS (arrays for .map, .length, etc.)
+// CONVENIENCE EXPORTS
 // ============================================
 export const postsDirect = getAllPostsDirect();
 export const booksDirect = getAllBooksDirect();
