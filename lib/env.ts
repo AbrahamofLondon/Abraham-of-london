@@ -37,7 +37,7 @@ if (!env.success) {
 
 export const ENV = env.success ? env.data : {
   NODE_ENV: 'development' as const,
-  DATABASE_URL: 'postgresql://localhost:5432/abraham_of_london',
+  DATABASE_URL: 'file:./dev.db',
   JWT_SECRET: 'dev-secret-change-me',
   NEXTAUTH_SECRET: 'dev-nextauth-secret-change-me',
   NEXT_PUBLIC_SITE_URL: 'http://localhost:3000',

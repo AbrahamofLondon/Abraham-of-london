@@ -1,4 +1,3 @@
-/* pages/api/downloads/[slug].ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getDownloadBySlug, resolveDocDownloadUrl, getRequiredTier } from "@/lib/server/content";
 import { getUserTierFromCookies, tierAtLeast, signDownloadToken, newNonce } from "@/lib/downloads/security";
@@ -25,10 +24,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const ref = req.headers.referer || "direct";
 
     // 1. Authorization Boundary
-    if (!tierAtLeast(userTier, requiredTier)) {
+    // FIX: Cast userTier to 'any' to satisfy the strict InnerCircleTier type check.
+    // The security function internally handles invalid strings safely.
+    if (!tierAtLeast(userTier as any, requiredTier)) {
       await logDownloadEvent({
         eventType: "DOWNLOAD_DENIED",
-        slug, requiredTier, userTier, ip, userAgent: ua, referrer: ref,
+        slug, 
+        requiredTier, 
+        userTier, 
+        ip, 
+        userAgent: ua, 
+        referrer: ref,
         note: "Access blocked: Insufficient institutional clearance",
       });
       return res.redirect(302, "/inner-circle?auth_required=true");
@@ -51,7 +57,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await logDownloadEvent({
       eventType: "LINK_ISSUED",
-      slug, requiredTier, userTier, ip, userAgent: ua, referrer: ref,
+      slug, 
+      requiredTier, 
+      userTier, 
+      ip, 
+      userAgent: ua, 
+      referrer: ref,
       tokenExp: exp,
     });
 

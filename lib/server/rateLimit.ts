@@ -1,7 +1,6 @@
 // lib/server/rateLimit.ts - Node.js Runtime compatible
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextRequest } from "next/server";
-import crypto from "crypto";
 import { logAuditEvent } from "./audit";
 
 // --- Types & Interfaces ---
@@ -68,6 +67,7 @@ class RateLimitStore {
     return this.store.get(key); 
   }
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set(key: string, entry: any) { 
     this.store.set(key, entry); 
   }
@@ -172,8 +172,8 @@ export function tokenBucketRateLimit(key: string, options: TokenBucketOptions): 
       allowed: true, 
       remaining: Math.floor(bucket.tokens), 
       retryAfterMs: 0, 
-      resetTime: now + Math.ceil((1 - bucket.tokens) / tokensPerSecond) * 1000,
-      limit: capacity,
+      resetTime: now + Math.ceil((1 - bucket.tokens) / tokensPerSecond) * 1000, 
+      limit: capacity, 
       windowMs: Math.ceil(1000 / tokensPerSecond)
     };
   }
@@ -186,8 +186,8 @@ export function tokenBucketRateLimit(key: string, options: TokenBucketOptions): 
     allowed: false, 
     remaining: 0, 
     retryAfterMs, 
-    resetTime: now + retryAfterMs,
-    limit: capacity,
+    resetTime: now + retryAfterMs, 
+    limit: capacity, 
     windowMs: Math.ceil(1000 / tokensPerSecond)
   };
 }
@@ -244,31 +244,47 @@ export function createRateLimitHeaders(result: RateLimitResult): Record<string, 
  * Get client IP address from request
  */
 export function getClientIp(req: NextApiRequest | NextRequest): string {
-  // Handle NextApiRequest
-  if ('headers' in req && typeof req.headers === 'object') {
-    const forwarded = req.headers["x-forwarded-for"];
-    if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
-    return (req.headers["x-nf-client-connection-ip"] as string) || 
-           req.socket?.remoteAddress || 
+  // Handle NextApiRequest (Node.js) - check for 'socket' or plain object headers
+  if ('socket' in req || ('headers' in req && typeof req.headers === 'object' && !('get' in req.headers))) {
+    const nodeReq = req as NextApiRequest;
+    const forwarded = nodeReq.headers["x-forwarded-for"];
+    
+    if (typeof forwarded === "string") {
+      return forwarded.split(",")[0]?.trim() || "unknown";
+    }
+    
+    if (Array.isArray(forwarded) && forwarded[0]) {
+      return forwarded[0].trim();
+    }
+    
+    return (nodeReq.headers["x-nf-client-connection-ip"] as string) || 
+           nodeReq.socket?.remoteAddress || 
            "unknown";
   }
   
   // Handle NextRequest (Edge runtime)
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const ips = forwarded.split(",").map(ip => ip.trim());
-    // Return the first non-internal IP
-    for (const ip of ips) {
-      if (!ip.match(/^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.|::1|127\.|fd[0-9a-f]{2}:|fe80::)/)) {
-        return ip;
+  if ('headers' in req && typeof (req as any).headers.get === 'function') {
+    const edgeReq = req as NextRequest;
+    const forwarded = edgeReq.headers.get("x-forwarded-for");
+    
+    if (forwarded) {
+      const ips = forwarded.split(",").map(ip => ip.trim());
+      // Return the first non-internal IP
+      for (const ip of ips) {
+        if (!ip.match(/^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.|::1|127\.|fd[0-9a-f]{2}:|fe80::)/)) {
+          return ip;
+        }
       }
+      return ips[0] || "unknown";
     }
-    return ips[0] || "unknown";
+    
+    return edgeReq.headers.get("x-nf-client-connection-ip") || 
+           edgeReq.headers.get("x-real-ip") || 
+           (edgeReq as any).ip || 
+           "unknown";
   }
   
-  return req.headers.get("x-nf-client-connection-ip") || 
-         req.headers.get("x-real-ip") || 
-         "unknown";
+  return "unknown";
 }
 
 /**
@@ -310,15 +326,24 @@ export async function isRateLimitedWithWindow(
  */
 export function getRateLimitKeys(req: NextApiRequest | NextRequest, keyPrefix: string): string[] {
   const ip = getClientIp(req);
-  const userAgent = 'headers' in req 
-    ? (req.headers['user-agent'] as string || 'unknown')
-    : req.headers.get('user-agent') || 'unknown';
   
-  const pathname = 'nextUrl' in req 
-    ? new URL(req.url).pathname 
-    : req.url?.split('?')[0] || '/';
-  
-  const method = 'method' in req ? req.method : 'GET';
+  let userAgent = 'unknown';
+  let pathname = '/';
+  let method = 'GET';
+
+  if ('headers' in req && 'get' in req.headers && typeof (req.headers as any).get === 'function') {
+    // Edge Request
+    const r = req as NextRequest;
+    userAgent = r.headers.get('user-agent') || 'unknown';
+    pathname = new URL(r.url).pathname;
+    method = r.method;
+  } else {
+    // Node Request
+    const r = req as NextApiRequest;
+    userAgent = (r.headers['user-agent'] as string) || 'unknown';
+    pathname = r.url?.split('?')[0] || '/';
+    method = r.method || 'GET';
+  }
   
   return [
     `${keyPrefix}:${ip}`, // Global per IP
@@ -341,7 +366,7 @@ export function checkMultipleRateLimits(
     if (!worst.allowed) return worst;
     if (current.remaining < worst.remaining) return current;
     return worst;
-  }, results[0]);
+  }, results[0] as RateLimitResult);
   
   return { results, worstResult };
 }
@@ -417,10 +442,13 @@ export function withApiRateLimit(
 /**
  * Combined rate limit wrapper for Node.js API routes
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const combinedRateLimit = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: (req: NextApiRequest, res: NextApiResponse, ...args: any[]) => Promise<any> | any,
   options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (req: NextApiRequest, res: NextApiResponse, ...args: any[]) => {
     try {
       const ip = getClientIp(req);
@@ -553,19 +581,19 @@ export const RATE_LIMIT_CONFIGS = {
 
 export default { 
   rateLimit, 
-  tokenBucketRateLimit,
-  rateLimitWithBackoff,
-  isRateLimited,
+  tokenBucketRateLimit, 
+  rateLimitWithBackoff, 
+  isRateLimited, 
   isRateLimitedWithWindow, 
   rateLimitForRequestIp, 
-  createRateLimitHeaders,
-  getClientIp,
-  getRateLimitKeys,
-  checkMultipleRateLimits,
-  withApiRateLimit,
-  combinedRateLimit,
-  checkRateLimit,
-  clearRateLimitData,
-  getRateLimitStats,
+  createRateLimitHeaders, 
+  getClientIp, 
+  getRateLimitKeys, 
+  checkMultipleRateLimits, 
+  withApiRateLimit, 
+  combinedRateLimit, 
+  checkRateLimit, 
+  clearRateLimitData, 
+  getRateLimitStats, 
   RATE_LIMIT_CONFIGS 
 };

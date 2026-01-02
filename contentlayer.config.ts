@@ -2,60 +2,13 @@ import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import { visit } from "unist-util-visit";
 
 /* ========================================================================== */
-/* ENTERPRISE CONTENTLAYER CONFIGURATION                                     */
-/* Cross-platform compatible, production-ready content processing            */
+/* ENTERPRISE CONTENTLAYER CONFIGURATION                                      */
+/* Cross-platform compatible, production-ready content processing             */
 /* ========================================================================== */
 
 const IS_WINDOWS = process.platform === 'win32';
-const IS_DEV = process.env.NODE_ENV !== 'production';
-
-/* -------------------------------------------------------------------------- */
-/* WINDOWS-SPECIFIC WORKAROUNDS                                              */
-/* -------------------------------------------------------------------------- */
-
-// Windows-specific workaround for package resolution issues
-if (IS_WINDOWS) {
-  console.log('🪟 Windows platform detected - applying optimizations...');
-  
-  // Workaround for ESM package resolution on Windows
-  if (typeof require !== 'undefined') {
-    const originalResolve = require.resolve;
-    const Module = require('module');
-    
-    Module.prototype.require = new Proxy(Module.prototype.require, {
-      apply(target, thisArg, args) {
-        const [request] = args;
-        
-        // Handle problematic mdast-util-gfm-task-list-item import
-        if (request && request.includes('mdast-util-gfm-task-list-item')) {
-          try {
-            // Try to resolve through alternative paths
-            const paths = [
-              'mdast-util-gfm-task-list-item/lib/index.js',
-              'mdast-util-gfm-task-list-item/index.js',
-              'mdast-util-gfm-task-list-item'
-            ];
-            
-            for (const path of paths) {
-              try {
-                return originalResolve.call(thisArg, path);
-              } catch {
-                // Continue to next path
-              }
-            }
-          } catch (error) {
-            console.warn('⚠️ Windows workaround for mdast-util-gfm-task-list-item failed:', error.message);
-          }
-        }
-        
-        return Reflect.apply(target, thisArg, args);
-      }
-    });
-  }
-}
 
 /* -------------------------------------------------------------------------- */
 /* PATH NORMALIZATION UTILITIES                                               */
@@ -100,12 +53,9 @@ const createFieldSchema = () => ({
   category: { type: "string" as const, required: false },
   categories: { type: "list" as const, of: { type: "string" as const }, required: false },
   tags: { type: "list" as const, of: { type: "string" as const }, required: false },
-  resourceType: { type: "string" as const, required: false },
-  contentType: { type: "string" as const, required: false },
   
   author: { type: "string" as const, required: false },
   authors: { type: "list" as const, of: { type: "string" as const }, required: false },
-  authorTitle: { type: "string" as const, required: false },
   
   coverImage: { type: "string" as const, required: false },
   coverAspect: { type: "string" as const, required: false },
@@ -120,78 +70,58 @@ const createFieldSchema = () => ({
   readingTime: { type: "string" as const, required: false },
   
   wordCount: { type: "number" as const, required: false },
-  characterCount: { type: "number" as const, required: false },
-  views: { type: "number" as const, required: false },
-  likes: { type: "number" as const, required: false },
-  shares: { type: "number" as const, required: false },
   
   draft: { type: "boolean" as const, required: false, default: false },
   published: { type: "boolean" as const, required: false, default: true },
   featured: { type: "boolean" as const, required: false, default: false },
   archived: { type: "boolean" as const, required: false, default: false },
-  available: { type: "boolean" as const, required: false, default: true },
   
   requiredTier: { type: "string" as const, required: false },
   tier: { type: "string" as const, required: false },
   accessLevel: { type: "string" as const, required: false },
-  requiresLogin: { type: "boolean" as const, required: false, default: false },
-  requiresSubscription: { type: "boolean" as const, required: false, default: false },
-  ageRestriction: { type: "number" as const, required: false },
   lockMessage: { type: "string" as const, required: false },
   
+  // SEO
   ogTitle: { type: "string" as const, required: false },
   ogDescription: { type: "string" as const, required: false },
   metaDescription: { type: "string" as const, required: false },
-  socialCaption: { type: "string" as const, required: false },
   keywords: { type: "list" as const, of: { type: "string" as const }, required: false },
   
+  // Asset Links
   file: { type: "string" as const, required: false },
   downloadFile: { type: "string" as const, required: false },
   pdfPath: { type: "string" as const, required: false },
   downloadUrl: { type: "string" as const, required: false },
-  fileUrl: { type: "string" as const, required: false },
   fileSize: { type: "string" as const, required: false },
   
+  // Event Specific
   time: { type: "string" as const, required: false },
   location: { type: "string" as const, required: false },
   registrationUrl: { type: "string" as const, required: false },
   
+  // Canon/Series Specific
   volumeNumber: { type: "string" as const, required: false },
   order: { type: "number" as const, required: false },
-  priority: { type: "number" as const, required: false },
   series: { type: "string" as const, required: false },
   part: { type: "number" as const, required: false },
   
+  // Relations
   related: { type: "list" as const, of: { type: "string" as const }, required: false },
-  relatedDownloads: { type: "list" as const, of: { type: "string" as const }, required: false },
-  next: { type: "string" as const, required: false },
-  prev: { type: "string" as const, required: false },
   
+  // Rich Content
   resources: { type: "json" as const, required: false },
-  ctaPrimary: { type: "json" as const, required: false },
-  ctaSecondary: { type: "json" as const, required: false },
   meta: { type: "json" as const, required: false },
-  customFields: { type: "json" as const, required: false },
   
-  toc: { type: "boolean" as const, required: false, default: false },
-  showToc: { type: "boolean" as const, required: false, default: false },
-  showComments: { type: "boolean" as const, required: false, default: false },
-  
+  // Book Specific
   isbn: { type: "string" as const, required: false },
+  publisher: { type: "string" as const, required: false },
+  
+  // Devotional/Sermon
   bibleVerse: { type: "string" as const, required: false },
-  version: { type: "string" as const, required: false },
   
-  language: { type: "string" as const, required: false },
-  format: { type: "string" as const, required: false },
-  
-  source: { type: "string" as const, required: false },
-  originalUrl: { type: "string" as const, required: false },
-  license: { type: "string" as const, required: false },
-  
-  status: { type: "string" as const, required: false },
-  stage: { type: "string" as const, required: false },
-  milestone: { type: "string" as const, required: false },
-  audience: { type: "string" as const, required: false },
+  // Media
+  videoUrl: { type: "string" as const, required: false },
+  audioUrl: { type: "string" as const, required: false },
 });
 
 /* -------------------------------------------------------------------------- */
@@ -202,8 +132,7 @@ const createComputedFields = (basePath: string) => ({
   url: {
     type: "string" as const,
     resolve: (doc: any) => {
-      if (doc.canonicalUrl && doc.canonicalUrl !== '#') return doc.canonicalUrl;
-      if (doc.href && doc.href !== '#') return doc.href;
+      if (doc.canonicalUrl) return doc.canonicalUrl;
       const slug = doc.slug || generateSlug(doc._raw.flattenedPath);
       return normalizePath(`/${basePath}/${slug}`);
     }
@@ -217,11 +146,7 @@ const createComputedFields = (basePath: string) => ({
   isPublished: {
     type: "boolean" as const,
     resolve: (doc: any) => {
-      const isDraft = doc.draft === true;
-      const isArchived = doc.archived === true;
-      const isPublished = doc.published !== false;
-      const isAvailable = doc.available !== false;
-      return isPublished && !isDraft && !isArchived && isAvailable;
+      return (doc.published !== false) && !doc.draft && !doc.archived;
     }
   },
 
@@ -232,96 +157,19 @@ const createComputedFields = (basePath: string) => ({
     }
   },
 
-  effectiveDate: {
-    type: "date" as const,
-    resolve: (doc: any) => {
-      return doc.publishDate || doc.date || doc.updated || new Date().toISOString();
-    }
-  },
-
-  lastModified: {
-    type: "date" as const,
-    resolve: (doc: any) => {
-      return doc.updated || doc.date || new Date().toISOString();
-    }
-  },
-
   computedTier: {
     type: "string" as const,
     resolve: (doc: any) => doc.requiredTier || doc.tier || 'free'
   },
 
-  sourcePath: {
-    type: "string" as const,
-    resolve: (doc: any) => normalizePath(doc._raw.flattenedPath)
-  },
-
-  sourceFileName: {
-    type: "string" as const,
-    resolve: (doc: any) => {
-      const path = doc._raw.sourceFileName || doc._raw.flattenedPath;
-      return path.replace(/\.mdx?$/, '');
-    }
-  },
-
-  fileType: {
-    type: "string" as const,
-    resolve: (doc: any) => {
-      const fileName = doc._raw.sourceFileName || '';
-      return fileName.endsWith('.mdx') ? 'mdx' : 'md';
-    }
-  },
-
-  seoDescription: {
-    type: "string" as const,
-    resolve: (doc: any) => {
-      return doc.metaDescription || doc.ogDescription || doc.description || doc.excerpt || '';
-    }
-  },
-
-  authorList: {
-    type: "list" as const,
-    of: { type: "string" as const },
-    resolve: (doc: any) => {
-      if (doc.authors && Array.isArray(doc.authors)) return doc.authors;
-      if (doc.author) return [doc.author];
-      return [];
-    }
-  },
-
-  allTaxonomies: {
-    type: "list" as const,
-    of: { type: "string" as const },
-    resolve: (doc: any) => {
-      const taxonomies = new Set<string>();
-      if (doc.tags) doc.tags.forEach((t: string) => taxonomies.add(t));
-      if (doc.categories) doc.categories.forEach((c: string) => taxonomies.add(c));
-      if (doc.category) taxonomies.add(doc.category);
-      return Array.from(taxonomies);
-    }
-  },
-
-  downloadPath: {
-    type: "string" as const,
-    resolve: (doc: any) => {
-      const path = doc.file || doc.downloadFile || doc.downloadUrl || 
-                   doc.pdfPath || doc.fileUrl || '';
-      return normalizePath(path);
-    }
-  },
-
   fileInfo: {
     type: "json" as const,
     resolve: (doc: any) => {
-      const path = doc.file || doc.downloadFile || doc.downloadUrl || 
-                   doc.pdfPath || doc.fileUrl || '';
-      const extension = path ? path.split('.').pop()?.toLowerCase() : 'unknown';
-      
+      const path = doc.file || doc.downloadFile || doc.downloadUrl || doc.pdfPath || '';
       return {
         path: normalizePath(path),
         size: doc.fileSize || null,
-        type: extension,
-        name: path ? path.split('/').pop() : null
+        extension: path ? path.split('.').pop()?.toLowerCase() : null
       };
     }
   }
@@ -334,23 +182,19 @@ const createComputedFields = (basePath: string) => ({
 const createDocumentType = (
   name: string,
   pattern: string,
-  basePath: string,
-  extraFields: Record<string, any> = {}
+  basePath: string
 ) => {
   return defineDocumentType(() => ({
     name,
     filePathPattern: pattern,
     contentType: "mdx" as const,
-    fields: {
-      ...createFieldSchema(),
-      ...extraFields
-    },
+    fields: createFieldSchema(),
     computedFields: createComputedFields(basePath)
   }));
 };
 
 /* -------------------------------------------------------------------------- */
-/* DOCUMENT TYPE DEFINITIONS                                                  */
+/* DOCUMENT TYPE DEFINITIONS (ALL 24 TYPES)                                   */
 /* -------------------------------------------------------------------------- */
 
 export const Post = createDocumentType("Post", "blog/**/*.{md,mdx}", "blog");
@@ -379,56 +223,6 @@ export const Print = createDocumentType("Print", "prints/**/*.{md,mdx}", "prints
 export const Download = createDocumentType("Download", "downloads/**/*.{md,mdx}", "downloads");
 
 /* -------------------------------------------------------------------------- */
-/* MDX PROCESSING CONFIGURATION                                               */
-/* -------------------------------------------------------------------------- */
-
-const rehypeHeadings = () => {
-  return (tree: any) => {
-    visit(tree, 'element', (node: any) => {
-      if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(node.tagName)) {
-        if (!node.properties) node.properties = {};
-        if (!node.properties.id) {
-          const text = node.children
-            .filter((child: any) => child.type === 'text')
-            .map((child: any) => child.value)
-            .join('');
-          node.properties.id = text
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '');
-        }
-      }
-    });
-  };
-};
-
-const mdxOptions = {
-  remarkPlugins: [
-    remarkGfm
-  ],
-  rehypePlugins: [
-    rehypeSlug,
-    rehypeHeadings(),
-    [rehypeAutolinkHeadings, { behavior: 'wrap' }]
-  ],
-  ...(IS_WINDOWS && {
-    esbuildOptions: (options: any) => {
-      options.platform = 'node';
-      options.target = 'es2020';
-      options.minify = false;
-      options.sourcemap = false;
-      options.loader = {
-        ...options.loader,
-        '.js': 'jsx'
-      };
-      options.mainFields = ['module', 'main'];
-      options.resolveExtensions = ['.tsx', '.ts', '.jsx', '.js', '.json'];
-      return options;
-    }
-  })
-} as any;
-
-/* -------------------------------------------------------------------------- */
 /* MAIN CONFIGURATION                                                         */
 /* -------------------------------------------------------------------------- */
 
@@ -441,51 +235,17 @@ export default makeSource({
     Sermon, Devotional, Prayer, Testimony, Podcast, Video, Course, Lesson, Print
   ],
   
-  mdx: mdxOptions,
+  mdx: {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { behavior: 'wrap' }]
+    ],
+  },
   
   onUnknownDocuments: "skip-warn",
   onMissingOrIncompatibleData: "skip-warn",
-  onExtraFieldData: "warn",
-  
+  onExtraFieldData: "skip-warn", // Relaxed to prevent strict mode crashes
   disableImportAliasWarning: true,
-  
-  contentDirExclude: [
-    '.*',
-    '*.tmp',
-    '*.bak',
-    '_*',
-    'node_modules',
-    '.git'
-  ],
-  
-  date: {
-    timezone: "UTC"
-  },
-  
-  ...(IS_WINDOWS && {
-    contentDirInclude: ['**/*.md', '**/*.mdx'],
-    disableImportAliasWarning: true,
-  }),
-  
-  onSuccess: async (importData) => {
-    const { allDocuments } = await importData();
-    console.log(`✅ Successfully generated ${allDocuments.length} documents`);
-    
-    const typeCount: Record<string, number> = {};
-    allDocuments.forEach((doc: any) => {
-      const type = doc.type || 'Unknown';
-      typeCount[type] = (typeCount[type] || 0) + 1;
-    });
-    
-    console.log('\n📊 Document breakdown:');
-    Object.entries(typeCount)
-      .sort(([, a], [, b]) => b - a)
-      .forEach(([type, count]) => {
-        console.log(`   ${type}: ${count}`);
-      });
-    
-    if (IS_WINDOWS) {
-      console.log('\n🪟 Windows platform - optimizations applied');
-    }
-  }
+  date: { timezone: "UTC" },
 });

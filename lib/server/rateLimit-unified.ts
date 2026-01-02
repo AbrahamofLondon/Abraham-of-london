@@ -1,4 +1,4 @@
-// lib/server/rateLimit-unified.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Unified interface for both Edge and Node.js runtimes
 
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -42,12 +42,16 @@ export interface LegacyIsRateLimitedResult {
   remaining: number;
 }
 
+// Define the Mock Response type that includes the Edge conversion method
+type EdgeMockResponse = NextApiResponse & { toResponse: () => Response };
+
 // Lazy load the appropriate rate limiter
 function getRateLimiter() {
   if (!rateLimiter) {
     if (isEdgeRuntime) {
       // Edge runtime
       try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         edgeRateLimiter = require('./rateLimit-edge');
         rateLimiter = edgeRateLimiter.default || edgeRateLimiter;
       } catch (error) {
@@ -58,6 +62,7 @@ function getRateLimiter() {
     } else {
       // Node.js runtime
       try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         nodeRateLimiter = require('./rateLimit');
         rateLimiter = nodeRateLimiter.default || nodeRateLimiter;
       } catch (error) {
@@ -125,16 +130,26 @@ function createFallbackRateLimiter() {
     },
     
     getClientIp(req: NextApiRequest | NextRequest): string {
-      if ('headers' in req && typeof req.headers === 'object') {
-        const forwarded = req.headers["x-forwarded-for"];
-        if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
+      // 1. Handle NextRequest (Edge / App Router)
+      if (req.headers && 'get' in req.headers && typeof (req.headers as any).get === 'function') {
+        const forwarded = (req.headers as any).get("x-forwarded-for");
+        if (forwarded) {
+          const ips = forwarded.split(",").map((ip: string) => ip.trim());
+          return ips[0] || "unknown";
+        }
         return "unknown";
       }
       
-      const forwarded = req.headers.get("x-forwarded-for");
-      if (forwarded) {
-        const ips = forwarded.split(",").map(ip => ip.trim());
-        return ips[0] || "unknown";
+      // 2. Handle NextApiRequest (Node.js)
+      const headers = req.headers as any;
+      const forwarded = headers["x-forwarded-for"];
+      
+      if (typeof forwarded === "string") {
+        return forwarded.split(",")[0]?.trim() || "unknown";
+      }
+      
+      if (Array.isArray(forwarded) && forwarded[0]) {
+        return forwarded[0].trim();
       }
       
       return "unknown";
@@ -163,9 +178,11 @@ function getRateLimitFunction<T extends (...args: any[]) => any>(
 
 // Export functions with proper fallbacks
 export const rateLimit = getRateLimitFunction('rateLimit', createFallbackRateLimiter().rateLimit);
+
 export const tokenBucketRateLimit = getRateLimitFunction('tokenBucketRateLimit', () => { 
   throw new Error('Token bucket rate limiting not available in this runtime');
 });
+
 export const rateLimitWithBackoff = getRateLimitFunction('rateLimitWithBackoff', (key: string, options: any) => {
   const baseResult = rateLimit(key, options);
   if (!baseResult.allowed) {
@@ -180,6 +197,7 @@ export const rateLimitWithBackoff = getRateLimitFunction('rateLimitWithBackoff',
 
 export const createRateLimitHeaders = getRateLimitFunction('createRateLimitHeaders', createFallbackRateLimiter().createRateLimitHeaders);
 export const getClientIp = getRateLimitFunction('getClientIp', createFallbackRateLimiter().getClientIp);
+
 export const getRateLimitKeys = getRateLimitFunction('getRateLimitKeys', (req: any, keyPrefix: string) => {
   const ip = getClientIp(req);
   return [`${keyPrefix}:${ip}`];
@@ -192,7 +210,7 @@ export const checkMultipleRateLimits = getRateLimitFunction('checkMultipleRateLi
     if (!worst.allowed) return worst;
     if (current.remaining < worst.remaining) return current;
     return worst;
-  }, results[0]);
+  }, results[0] || { allowed: true, remaining: options.limit, retryAfterMs: 0, resetTime: 0, limit: options.limit, windowMs: options.windowMs });
   return { results, worstResult };
 });
 
@@ -209,6 +227,7 @@ export function withRateLimit(
     return async (req: NextRequest) => {
       try {
         if (!edgeRateLimiter) {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
           edgeRateLimiter = require('./rateLimit-edge');
         }
         const edgeHandler = edgeRateLimiter.withRateLimit || edgeRateLimiter.default?.withRateLimit;
@@ -237,6 +256,7 @@ export function withRateLimit(
     // Node.js runtime handler (for Pages Router)
     try {
       if (!nodeRateLimiter) {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         nodeRateLimiter = require('./rateLimit');
       }
       const nodeHandler = nodeRateLimiter.withApiRateLimit || nodeRateLimiter.default?.withApiRateLimit;
@@ -268,7 +288,8 @@ function createApiRequestFromEdgeRequest(req: NextRequest): NextApiRequest {
 }
 
 // Helper to create a mock API response
-function createApiResponse(): NextApiResponse {
+// FIX: Return the extended type so 'toResponse' is visible to TypeScript
+function createApiResponse(): EdgeMockResponse {
   const headers = new Map<string, string>();
   let statusCode = 200;
   let body: any;
@@ -289,6 +310,7 @@ function createApiResponse(): NextApiResponse {
     getHeader(name: string) {
       return headers.get(name);
     },
+    // Custom method to convert back to standard Response
     toResponse() {
       return new Response(body, {
         status: statusCode,

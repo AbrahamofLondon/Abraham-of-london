@@ -1,5 +1,5 @@
 /* ============================================================================
- * ROBUST CONTENTLAYER HELPER v5.2.1
+ * ROBUST CONTENTLAYER HELPER v5.2.2
  * Features: 24-Context Registry + Complete Backward Compatibility
  * ============================================================================ */
 
@@ -62,7 +62,6 @@ let isContentlayerDisabled = false;
 // Try to load the generated contentlayer data
 try {
   if (process.env.DISABLE_CONTENTLAYER !== 'true') {
-    // Use require for Node.js to avoid ESM issues
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     generated = require(".contentlayer/generated");
   } else {
@@ -108,17 +107,14 @@ export const getDocKind = (doc: ContentDoc): DocKind => {
 /* 3. COMPATIBILITY UTILITIES (Restoring missing exports)                     */
 /* -------------------------------------------------------------------------- */
 
-// Restored: Used by pages/index.tsx
 export const getDocHref = (doc: any): string => {
   return doc.url || doc.href || `/${doc._raw?.flattenedPath}`;
 };
 
-// Restored: Used by pages/[slug].tsx
 export const resolveDocCoverImage = (doc: any): string => {
   return doc.coverImage || doc.coverimage || "/assets/images/placeholder.jpg";
 };
 
-// Restored: Used by pages/downloads/[slug].tsx
 export const resolveDocDownloadUrl = (doc: any): string => {
   return doc.downloadUrl || doc.pdfPath || doc.file || doc.downloadFile || "";
 };
@@ -131,14 +127,11 @@ export const resolveDocDownloadSizeLabel = (doc: any): string => {
   return doc.fileSize || "Unknown Size";
 };
 
-// Restored: Used by pages/shorts/[slug].tsx
 export const coerceShortTheme = (theme: any): string => {
   return typeof theme === 'string' ? theme : 'default';
 };
 
-// Restored: Used by pages/debug/content.tsx
 export const assertContentlayerHasDocs = (): void => {
-  // No-op in production to prevent crashes, just a check
   const all = getAllDocuments();
   if (all.length === 0) console.warn("Contentlayer has no documents.");
 };
@@ -212,13 +205,11 @@ export const getCardProps = (doc: ContentDoc | null | undefined) => {
     readTime: doc.readTime || doc.readtime || null,
     tags: doc.tags || [],
     layout: doc.layout || "default",
-    // Type specific
     downloadUrl: resolveDocDownloadUrl(doc),
     theme: doc.theme,
   };
 };
 
-// Restored: Used by pages/content/[slug].tsx
 export const toUiDoc = (doc: any) => getCardProps(doc);
 export const getCardPropsForDocument = getCardProps;
 
@@ -235,12 +226,11 @@ Object.keys(COLLECTION_MAP).forEach((key) => {
   
   // Standard V5 Name: getAllPosts
   getters[`getAll${capitalized}s`] = getterFn;
-  
   // Backward Compat Name: getPublishedPosts
   getters[`getPublished${capitalized}s`] = getterFn;
 });
 
-// Initialize empty arrays for all collections when Contentlayer is disabled
+// Initialize empty arrays if disabled
 if (isContentlayerDisabled) {
   Object.keys(COLLECTION_MAP).forEach((key) => {
     const kind = key as DocKind;
@@ -250,8 +240,9 @@ if (isContentlayerDisabled) {
   });
 }
 
-// Explicit Exports for Tree-Shaking safety
+// FIX: Explicitly Export ALL Content Types to satisfy TypeScript
 export const {
+  // Core
   getAllPosts, getPublishedPosts,
   getAllBooks, getPublishedBooks,
   getAllDownloads, getPublishedDownloads,
@@ -261,9 +252,25 @@ export const {
   getAllPrints, getPublishedPrints,
   getAllResources, getPublishedResources,
   getAllStrategies, getPublishedStrategies,
+  
+  // Extended Types (Fixes the unified-content.ts error)
+  getAllArticles, getPublishedArticles,
+  getAllGuides, getPublishedGuides,
+  getAllTutorials, getPublishedTutorials,
+  getAllCaseStudies, getPublishedCaseStudies,
+  getAllWhitepapers, getPublishedWhitepapers,
+  getAllReports, getPublishedReports,
+  getAllNewsletters, getPublishedNewsletters,
+  getAllSermons, getPublishedSermons,
+  getAllDevotionals, getPublishedDevotionals,
+  getAllPrayers, getPublishedPrayers,
+  getAllTestimonies, getPublishedTestimonies,
+  getAllPodcasts, getPublishedPodcasts,
+  getAllVideos, getPublishedVideos,
+  getAllCourses, getPublishedCourses,
+  getAllLessons, getPublishedLessons,
 } = {
   ...getters,
-  // Add specific alias for shorts
   getRecentShorts: getters.getAllShorts ? ((limit = 5) => getters.getAllShorts().slice(0, limit)) : () => []
 } as any;
 
@@ -278,8 +285,8 @@ export const getAllDocuments = () => {
   });
 };
 
-export const getAllContentlayerDocs = getAllDocuments; // Alias
-export const getPublishedDocuments = getAllDocuments; // Alias
+export const getAllContentlayerDocs = getAllDocuments; 
+export const getPublishedDocuments = getAllDocuments; 
 
 export const getDocumentBySlug = (kind: DocKind, slug: string): ContentDoc | null => {
   if (isContentlayerDisabled) return null;
@@ -290,13 +297,8 @@ export const getDocumentBySlug = (kind: DocKind, slug: string): ContentDoc | nul
   ) || null;
 };
 
-/**
- * Check if Contentlayer has successfully generated data.
- * Useful for health checks and preventing crashes on cold boots.
- */
 export function isContentlayerLoaded(): boolean {
   try {
-    // FIX: Access 'allDocuments' from the 'generated' object
     const docs = (generated as any).allDocuments;
     return Array.isArray(docs) && docs.length >= 0;
   } catch (e) {

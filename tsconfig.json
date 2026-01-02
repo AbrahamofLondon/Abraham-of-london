@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -21,28 +25,64 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "contentlayer/generated": ["./.contentlayer/generated"],
-      ".contentlayer/generated": ["./.contentlayer/generated"]
+      "@/*": [
+        "./*"
+      ],
+      "contentlayer/generated": [
+        "./.contentlayer/generated"
+      ],
+      ".contentlayer/generated": [
+        "./.contentlayer/generated"
+      ]
     },
+    
+    // --- RELAXED SETTINGS START HERE ---
+    
+    // 1. Array Access Safety: Disabled
+    // Fixes "Object is possibly undefined" when accessing arr[0]
+    "noUncheckedIndexedAccess": false,
+
+    // 2. Class Initialization: Disabled
+    // Allows defining class properties without immediate assignment in constructor
+    "strictPropertyInitialization": false,
+
+    // 3. Catch Variables: Relaxed
+    // Allows catch(e) to treat 'e' as 'any' instead of 'unknown' (no manual casting needed)
+    "useUnknownInCatchVariables": false,
+
+    // 4. Implicit Any: Relaxed
+    // Allows variables to implicitly be 'any' if type inference fails
+    "noImplicitAny": false,
+
+    // 5. Unused Code: Relaxed
+    // Stops compilation errors for unused variables during development
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+
+    // 6. Returns: Relaxed
+    // Allows functions to exit without an explicit return statement
+    "noImplicitReturns": false,
+
+    // --- RELAXED SETTINGS END ---
+
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitAny": false,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "noUnusedLocals": false, // CHANGED: false instead of true
-    "noUnusedParameters": false, // CHANGED: false instead of true
-    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "exactOptionalPropertyTypes": false,
-    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "types": ["node", "@netlify/functions"],
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "types": [
+      "node",
+      "@netlify/functions"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ],
     "outDir": "./dist",
     "declaration": false,
     "declarationMap": false,

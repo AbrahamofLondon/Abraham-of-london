@@ -65,12 +65,13 @@ export function startCleanup(intervalMs: number = 60000): void {
     
     // Cleanup edgeStore
     for (const [key, entry] of edgeStore.entries()) {
-      if (now - entry.first > entry.windowMs) {
+      // FIX: Use resetTime to determine expiration since windowMs is not stored
+      if (now > entry.resetTime) {
         edgeStore.delete(key);
       }
     }
     
-    // Cleanup tokenBuckets (optional - they self-clean on next access)
+    // Cleanup tokenBuckets
     for (const [key, bucket] of tokenBuckets.entries()) {
       if (now - bucket.lastRefill > 3600000) { // 1 hour idle
         tokenBuckets.delete(key);
@@ -79,9 +80,13 @@ export function startCleanup(intervalMs: number = 60000): void {
     
     // Cleanup violation counts
     for (const [key] of violationCounts.entries()) {
-      const [prefix] = key.split(':');
-      const entry = edgeStore.get(`${prefix}:${key.split(':').slice(1).join(':')}`);
-      if (!entry || now - entry.first > 3600000) { // 1 hour since last violation
+      const parts = key.split(':');
+      const prefix = parts[0]; 
+      const baseKey = `${prefix}:${parts.slice(1).join(':')}`;
+      const entry = edgeStore.get(baseKey);
+      
+      // If base entry is gone or violation is old (1 hour TTL)
+      if (!entry || now > entry.resetTime + 3600000) { 
         violationCounts.delete(key);
       }
     }
@@ -106,12 +111,13 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
   const resetTime = now + windowMs;
   const entry = edgeStore.get(storeKey);
 
-  // Start cleanup on first rate limit call (if in Node.js environment)
+  // Start cleanup on first rate limit call
   if (!cleanupInterval && typeof global !== 'undefined' && typeof setInterval !== 'undefined') {
     startCleanup();
   }
 
-  if (!entry || (now - entry.first) > windowMs) {
+  // Check if expired
+  if (!entry || (now > entry.resetTime)) {
     edgeStore.set(storeKey, { count: 1, first: now, resetTime: resetTime });
     return { 
       allowed: true, 
@@ -127,7 +133,7 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
     return { 
       allowed: false, 
       remaining: 0, 
-      retryAfterMs: Math.max(0, windowMs - (now - entry.first)), 
+      retryAfterMs: Math.max(0, entry.resetTime - now), 
       resetTime: entry.resetTime, 
       limit, 
       windowMs 
@@ -146,7 +152,7 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
 }
 
 /**
- * Token bucket rate limiter (for smooth rate limiting)
+ * Token bucket rate limiter
  */
 export function tokenBucketRateLimit(key: string, options: TokenBucketOptions): RateLimitResult {
   const { capacity, tokensPerSecond, keyPrefix = "tb" } = options;
@@ -160,13 +166,11 @@ export function tokenBucketRateLimit(key: string, options: TokenBucketOptions): 
     tokenBuckets.set(storeKey, bucket);
   }
   
-  // Refill tokens
   const timePassed = now - bucket.lastRefill;
   const tokensToAdd = Math.floor((timePassed / 1000) * tokensPerSecond);
   bucket.tokens = Math.min(capacity, bucket.tokens + tokensToAdd);
   bucket.lastRefill = now;
   
-  // Check if request is allowed
   if (bucket.tokens >= 1) {
     bucket.tokens -= 1;
     return { 
@@ -175,11 +179,10 @@ export function tokenBucketRateLimit(key: string, options: TokenBucketOptions): 
       retryAfterMs: 0, 
       resetTime: now + Math.ceil((1 - bucket.tokens) / tokensPerSecond) * 1000,
       limit: capacity,
-      windowMs: Math.ceil(1000 / tokensPerSecond) // Average window per request
+      windowMs: Math.ceil(1000 / tokensPerSecond)
     };
   }
   
-  // Calculate retry time
   const tokensNeeded = 1 - bucket.tokens;
   const retryAfterMs = Math.ceil(tokensNeeded / tokensPerSecond * 1000);
   
@@ -194,7 +197,7 @@ export function tokenBucketRateLimit(key: string, options: TokenBucketOptions): 
 }
 
 /**
- * Rate limit with exponential backoff for repeated violations
+ * Rate limit with exponential backoff
  */
 export function rateLimitWithBackoff(
   key: string, 
@@ -204,15 +207,12 @@ export function rateLimitWithBackoff(
   const now = Date.now();
   const storeKey = `${keyPrefix}:${key}`;
   
-  // Check existing rate limit
   const baseResult = rateLimit(key, { limit, windowMs, keyPrefix });
   
   if (!baseResult.allowed) {
-    // Increment violation count
     const violations = (violationCounts.get(storeKey) || 0) + 1;
     violationCounts.set(storeKey, violations);
     
-    // Apply exponential backoff
     const backoffMs = baseResult.retryAfterMs * Math.pow(backoffFactor, violations - 1);
     
     return {
@@ -221,7 +221,6 @@ export function rateLimitWithBackoff(
     };
   }
   
-  // Reset violation count on successful request
   if (baseResult.remaining > 0) {
     violationCounts.delete(storeKey);
   }
@@ -230,7 +229,7 @@ export function rateLimitWithBackoff(
 }
 
 /**
- * Generate HTTP headers from rate limit result
+ * Generate HTTP headers
  */
 export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
   return {
@@ -242,13 +241,12 @@ export function createRateLimitHeaders(result: RateLimitResult): Record<string, 
 }
 
 /**
- * Get client IP address from request
+ * Get client IP
  */
 export function getClientIp(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) {
     const ips = forwarded.split(",").map(ip => ip.trim());
-    // Return the first non-internal IP
     for (const ip of ips) {
       if (!ip.match(/^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.|::1|127\.|fd[0-9a-f]{2}:|fe80::)/)) {
         return ip;
@@ -264,43 +262,57 @@ export function getClientIp(req: NextRequest): string {
 }
 
 /**
- * Generate multiple rate limit keys for different strategies
+ * Generate keys
  */
 export function getRateLimitKeys(req: NextRequest, keyPrefix: string): string[] {
   const ip = getClientIp(req);
   const userAgent = req.headers.get('user-agent') || 'unknown';
   const url = new URL(req.url);
-  const path = url.pathname;
-  const method = req.method;
   
   return [
-    `${keyPrefix}:${ip}`, // Global per IP
-    `${keyPrefix}:${ip}:${path}`, // Per IP + endpoint
-    `${keyPrefix}:${ip}:${method}:${path}`, // Per IP + method + endpoint
-    `${keyPrefix}:${ip}:${userAgent}`, // Per IP + user agent
+    `${keyPrefix}:${ip}`,
+    `${keyPrefix}:${ip}:${url.pathname}`,
+    `${keyPrefix}:${ip}:${req.method}:${url.pathname}`,
+    `${keyPrefix}:${ip}:${userAgent}`,
   ];
 }
 
 /**
- * Check multiple rate limit strategies
+ * Check multiple limits - FIXED
  */
 export function checkMultipleRateLimits(
   keys: string[], 
   options: RateLimitOptions
 ): { results: RateLimitResult[]; worstResult: RateLimitResult } {
   const results = keys.map(key => rateLimit(key, options));
+  
+  // FIX: Handle empty array case explicitly
+  if (results.length === 0) {
+    const defaultResult: RateLimitResult = {
+      allowed: true,
+      remaining: options.limit,
+      retryAfterMs: 0,
+      resetTime: Date.now() + options.windowMs,
+      limit: options.limit,
+      windowMs: options.windowMs
+    };
+    return { results, worstResult: defaultResult };
+  }
+
+  // FIX: Safe reduce with explicit initial value type
   const worstResult = results.reduce((worst, current) => {
+    if (!worst) return current; // Should not happen, but safe for TS
     if (!current.allowed) return current;
     if (!worst.allowed) return worst;
     if (current.remaining < worst.remaining) return current;
     return worst;
-  }, results[0]);
+  }, results[0] as RateLimitResult);
   
   return { results, worstResult };
 }
 
 /**
- * Combined rate limit wrapper for Edge middleware
+ * Combined limit wrapper
  */
 export const combinedRateLimit = (
   handler: Function, 
@@ -329,8 +341,6 @@ export const combinedRateLimit = (
     }
     
     const response = await handler(req, ...args);
-    
-    // Add rate limit headers to successful responses
     Object.entries(createRateLimitHeaders(result)).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
@@ -340,7 +350,7 @@ export const combinedRateLimit = (
 };
 
 /**
- * Next.js App Router compatible rate limit middleware
+ * Next.js wrapper
  */
 export function withRateLimit(
   handler: (req: NextRequest) => Promise<Response> | Response,
@@ -375,8 +385,6 @@ export function withRateLimit(
     }
     
     const response = await handler(req);
-    
-    // Add rate limit headers to successful responses
     const headers = createRateLimitHeaders(result);
     Object.entries(headers).forEach(([key, value]) => {
       response.headers.set(key, value);
@@ -386,9 +394,6 @@ export function withRateLimit(
   };
 }
 
-/**
- * Helper to clear all rate limit data (useful for testing)
- */
 export function clearRateLimitData(): void {
   edgeStore.clear();
   tokenBuckets.clear();
@@ -396,9 +401,6 @@ export function clearRateLimitData(): void {
   stopCleanup();
 }
 
-/**
- * Get store statistics (for monitoring)
- */
 export function getRateLimitStats() {
   return {
     totalEntries: edgeStore.size,
@@ -407,9 +409,6 @@ export function getRateLimitStats() {
   };
 }
 
-/**
- * Export rate limit configurations
- */
 export const RATE_LIMIT_CONFIGS = {
   API_GENERAL: { limit: 100, windowMs: 3600000, keyPrefix: "api" },
   API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },

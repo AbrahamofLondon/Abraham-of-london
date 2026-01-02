@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 import crypto from "node:crypto";
 import { Pool, type PoolClient } from "pg";
-
-// Use absolute path to ensure we find the audit module
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
 
 /* =============================================================================
@@ -298,10 +296,6 @@ export async function getPrivacySafeStats() {
   ).then(rows => rows[0] || { totalMembers: 0, totalKeys: 0 });
 }
 
-/* =============================================================================
-   EMAIL LOGIC
-   ============================================================================= */
-
 export async function sendInnerCircleEmail(a: any, b?: any, c?: any): Promise<void> {
   if (a && typeof a === "object" && "to" in a) {
     console.log(`📧 [InnerCircle Email] Sending ${a.type} to ${a.to}`, a.data);
@@ -313,20 +307,5 @@ export async function sendInnerCircleEmail(a: any, b?: any, c?: any): Promise<vo
   console.log(`📧 [InnerCircle Email] Sending key to ${email} (${name})`, { key });
 }
 
-/* =============================================================================
-   DEFAULT EXPORT
-   ============================================================================= */
-
-// FIX: Renamed variable to guarantee uniqueness
-const InnerCircleService_FINAL = {
-  createOrUpdateMemberAndIssueKey,
-  verifyInnerCircleKey,
-  recordInnerCircleUnlock,
-  revokeInnerCircleKey,
-  deleteMemberByEmail,
-  getMemberKeys,
-  getPrivacySafeStats,
-  sendInnerCircleEmail
-};
-
-export default InnerCircleService_FINAL;
+// NOTE: No Default Export to prevent file/folder namespace collisions.
+// Use named imports: import { verifyInnerCircleKey } from '@/lib/inner-circle';

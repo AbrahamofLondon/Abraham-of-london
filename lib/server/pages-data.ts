@@ -1,4 +1,3 @@
-// lib/server/pages-data.ts - FIXED VERSION
 // Pages under content/pages/* - Using MDX collections
 
 import {
@@ -84,9 +83,6 @@ function safeAccessLevel(
   return undefined;
 }
 
-/**
- * Safely convert layout field to allowed values
- */
 function safeLayout(
   value: unknown
 ): "narrow" | "default" | "wide" | "fullscreen" | undefined {
@@ -107,10 +103,8 @@ function safeLayout(
 function fromMdxMeta(meta: MdxMeta): Page {
   const m = meta as PageishMdxMeta;
 
-  // Handle different date fields
   const date = safeString(m.date) || safeString(m.publishDate) || safeString(m.releaseDate);
   
-  // Ensure required fields have defaults
   const slug = safeString(m.slug) || "";
   const title = safeString(m.title) || "Untitled Page";
   
@@ -119,32 +113,23 @@ function fromMdxMeta(meta: MdxMeta): Page {
   }
 
   return {
-    // Core identifiers
     slug,
     title,
-
-    // Content fields
     description: safeString(m.description),
     excerpt: safeString(m.excerpt),
     subtitle: safeString(m.subtitle),
-
-    // Metadata
     date,
     author: safeString(m.author),
     category: safeString(m.category),
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
     readTime: safeString(m.readTime) || safeNumber(m.readTime),
-
-    // Visual
     coverImage: safeString(m.coverImage) || safeString(m.image),
-
-    // Page-specific fields
     pageType: safeString(m.pageType) || "page",
     parentPage: safeString(m.parentPage),
     order: safeNumber(m.order),
     template: safeString(m.template),
-    layout: safeLayout(m.layout) || "default", // Use safeLayout converter with default
+    layout: safeLayout(m.layout) || "default",
     showInNav: safeBoolean(m.showInNav),
     navOrder: safeNumber(m.navOrder),
     navTitle: safeString(m.navTitle),
@@ -152,23 +137,15 @@ function fromMdxMeta(meta: MdxMeta): Page {
     metaDescription: safeString(m.metaDescription),
     keywords: safeArray(m.keywords),
     lastModified: safeString(m.lastModified),
-
-    // State
     draft: safeBoolean(m.draft),
     published: safeBoolean(m.published),
     status: safeStatus(m.status),
-
-    // Access
     accessLevel: safeAccessLevel(m.accessLevel) || "public",
     lockMessage: safeString(m.lockMessage),
-
-    // System fields
     _raw: m._raw,
     _id: safeString(m._id),
     url: safeString(m.url),
     type: safeString(m.type) || "page",
-
-    // Preserve any additional fields
     ...Object.fromEntries(
       Object.entries(m)
         .filter(([key]) => ![
@@ -238,7 +215,6 @@ export function getAllPagesMeta(): Page[] {
     
     const pages = metas.map((m) => fromMdxMeta(m));
     
-    // Filter out invalid pages (missing required fields)
     const validPages = pages.filter(page => {
       const isValid = page.slug && page.title;
       if (!isValid) {
@@ -361,7 +337,6 @@ export function getNavPages(): Page[] {
     return pages
       .filter(page => page.showInNav !== false)
       .sort((a, b) => {
-        // Sort by navOrder, then by title
         const orderA = a.navOrder || 999;
         const orderB = b.navOrder || 999;
         if (orderA !== orderB) return orderA - orderB;
@@ -381,7 +356,6 @@ export function getChildPages(parentSlug: string): Page[] {
     return pages
       .filter(page => page.parentPage === parentSlug)
       .sort((a, b) => {
-        // Sort by order, then by title
         const orderA = a.order || 999;
         const orderB = b.order || 999;
         if (orderA !== orderB) return orderA - orderB;
@@ -417,24 +391,12 @@ export function searchPages(query: string): Page[] {
     if (!normalizedQuery) return pages;
     
     return pages.filter(page => {
-      // Search in title
       if (page.title?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in subtitle
       if (page.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in description
       if (page.description?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in excerpt
       if (page.excerpt?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in tags
       if (page.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
-      
-      // Search in category
       if (page.category?.toLowerCase().includes(normalizedQuery)) return true;
-      
       return false;
     });
   } catch (error) {
@@ -447,14 +409,12 @@ export function getRecentPages(limit?: number): Page[] {
   try {
     const pages = getPublishedPages();
     
-    // Sort by date (newest first), then by title for same dates
     const sorted = pages.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       
       if (dateB !== dateA) return dateB - dateA;
       
-      // Same date, sort alphabetically by title
       return (a.title || '').localeCompare(b.title || '');
     });
     
@@ -473,8 +433,6 @@ export function getAllPageCategories(): string[] {
       .filter((category): category is string => 
         typeof category === "string" && category.trim().length > 0
       );
-    
-    // Remove duplicates and sort alphabetically
     return [...new Set(categories)].sort();
   } catch (error) {
     console.error("Error fetching page categories:", error);
@@ -488,8 +446,6 @@ export function getAllPageTags(): string[] {
     const allTags = pages
       .flatMap(page => page.tags || [])
       .filter((tag): tag is string => typeof tag === "string");
-    
-    // Remove duplicates and sort alphabetically
     return [...new Set(allTags)].sort();
   } catch (error) {
     console.error("Error fetching page tags:", error);
@@ -505,8 +461,6 @@ export function getAllPageAuthors(): string[] {
       .filter((author): author is string => 
         typeof author === "string" && author.trim().length > 0
       );
-    
-    // Remove duplicates and sort alphabetically
     return [...new Set(authors)].sort();
   } catch (error) {
     console.error("Error fetching page authors:", error);
@@ -528,7 +482,6 @@ export function getAllPageSlugs(): string[] {
 
 export function getHomePage(): PageWithContent | null {
   try {
-    // Try common home page slugs
     const homeSlugs = ["", "/", "home", "index", "welcome"];
     
     for (const slug of homeSlugs) {
@@ -538,7 +491,6 @@ export function getHomePage(): PageWithContent | null {
       }
     }
     
-    // Try to find any page marked as home
     const pages = getAllPagesMeta();
     const homePage = pages.find(page => 
       page.pageType === "home" || 
@@ -550,9 +502,9 @@ export function getHomePage(): PageWithContent | null {
       return getPageBySlug(homePage.slug);
     }
     
-    // Return first published page as fallback
     const publishedPages = getPublishedPages();
-    if (publishedPages.length > 0) {
+    // FIX: Ensure array has elements before accessing index 0
+    if (publishedPages.length > 0 && publishedPages[0]) {
       return getPageBySlug(publishedPages[0].slug);
     }
     
@@ -586,17 +538,14 @@ export function getPageStats(): {
     };
     
     pages.forEach(page => {
-      // Count by category
       if (page.category) {
         stats.byCategory[page.category] = (stats.byCategory[page.category] || 0) + 1;
       }
       
-      // Count by type
       if (page.pageType) {
         stats.byType[page.pageType] = (stats.byType[page.pageType] || 0) + 1;
       }
       
-      // Count by year
       if (page.date) {
         const year = new Date(page.date).getFullYear().toString();
         stats.byYear[year] = (stats.byYear[year] || 0) + 1;
@@ -623,12 +572,9 @@ export function getPageStats(): {
 // ---------------------------------------------------------------------------
 
 const pagesData = {
-  // Core functions
   getAllPagesMeta,
   getPageBySlug,
   getAllPages,
-  
-  // Filter functions
   getPagesByCategory,
   getPagesByTag,
   getFeaturedPages,
@@ -638,20 +584,12 @@ const pagesData = {
   getPagesByType,
   searchPages,
   getRecentPages,
-  
-  // Special pages
   getHomePage,
-  
-  // List functions
   getAllPageCategories,
   getAllPageTags,
   getAllPageAuthors,
   getAllPageSlugs,
-  
-  // Stats
   getPageStats,
-  
-  // Utility functions
   pageToContentMeta,
   pageToContentEntry,
 };

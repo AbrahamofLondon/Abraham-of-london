@@ -181,10 +181,12 @@ export default async function handler(
     const cached = await cacheResponse.get<AnalyticsResponse>(cacheKey);
     if (cached) {
       cached.meta.cacheHit = true;
+      // FIX: Added 'status' field here
       await logAuditEvent({
         actorType: "system",
         action: "cache_hit",
         resourceType: "analytics",
+        status: "success", 
         details: { cacheKey, responseTime: Date.now() - startTime },
       });
       res.setHeader("X-Cache-Status", "hit");

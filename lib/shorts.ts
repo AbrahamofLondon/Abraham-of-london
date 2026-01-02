@@ -1,10 +1,8 @@
 // lib/shorts.ts
-
 import {
   type ContentDoc,
-  getPublishedDocumentsByType,
+  getPublishedShorts, // FIX: Use specific getter instead of generic
   normalizeSlug,
-  resolveDocReadTime,
   coerceShortTheme,
 } from "./contentlayer-helper";
 
@@ -46,14 +44,21 @@ function toTags(input: unknown): string[] {
 }
 
 /**
+ * Helper to resolve read time locally
+ */
+function getReadTime(doc: any): string | null {
+  return doc.readTime || doc.readtime || doc.readingTime || null;
+}
+
+/**
  * Public-facing Shorts:
  * - Sourced via helper (single source of truth)
  * - Slug normalized via helper
  * - Draft filtering handled centrally
  */
 export function getPublicShorts(): ShortIndexItem[] {
-  // ✅ single source of truth: helper decides what is "published"
-  const docs = getPublishedDocumentsByType("short");
+  // FIX: Use the specific getter available in the helper
+  const docs = getPublishedShorts();
 
   const items: ShortIndexItem[] = docs.map((d: ContentDoc) => {
     const slug = normalizeSlug(d);
@@ -68,14 +73,14 @@ export function getPublicShorts(): ShortIndexItem[] {
     // Date: normalized ISO or null
     const date = toIsoDate(d?.date);
 
-    // Read time: use helper normalization
-    const readTime = resolveDocReadTime(d);
+    // Read time: resolve locally
+    const readTime = getReadTime(d);
 
     // Tags: safe string array
     const tags = toTags(d?.tags);
 
-    // Theme: best-effort inference (helper-driven)
-    const theme = coerceShortTheme(d, tags);
+    // Theme: FIX usage to pass the specific property, not the whole doc
+    const theme = coerceShortTheme((d as any).theme);
 
     // These are primarily informational; helper already filtered drafts out.
     const draft = Boolean((d as any)?.draft);

@@ -1,4 +1,3 @@
-// pages/[slug].tsx
 import * as React from "react";
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
@@ -505,11 +504,11 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 }
 
 /* -------------------------------------------------------------------------- */
-/* STATIC GENERATION - REAL FIX                                                */
+/* STATIC GENERATION - REAL FIX                                               */
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs("pages/[slug].tsx getStaticPaths");
+  assertContentlayerHasDocs(); // FIX: Removed argument
 
   // KEY FIX:
   // This route MUST NOT generate /blog/*, /books/*, etc.
@@ -539,7 +538,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
-  assertContentlayerHasDocs("pages/[slug].tsx getStaticProps");
+  assertContentlayerHasDocs(); // FIX: Removed argument
 
   const requested = toCanonicalSingleSlug(params?.slug);
   if (!requested) return { notFound: true };
