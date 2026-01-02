@@ -1,4 +1,3 @@
-// pages/books/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -33,7 +32,8 @@ interface BooksPageProps {
 }
 
 export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
-  assertContentlayerHasDocs("pages/books/index.tsx getStaticProps");
+  // FIX: Removed argument
+  assertContentlayerHasDocs();
 
   const raw = getAllBooks();
 

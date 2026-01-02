@@ -165,6 +165,11 @@ export function sanitizeString(input: string): string {
   return input.trim().replace(/[<>"'`;]/g, "");
 }
 
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim().toLowerCase());
+}
+
 // ============================================================================
 // DATABASE CLIENT
 // ============================================================================
@@ -278,8 +283,8 @@ export class DatabaseClient {
   }
 
   static async transaction<T>(
-    operation: string, // operation name for logging
-    callback: (client: any) => Promise<T>, // callback receives raw client or transaction wrapper
+    operation: string,
+    callback: (client: any) => Promise<T>,
     fallback: T,
     useTransaction = true
   ): Promise<T> {
@@ -291,14 +296,17 @@ export class DatabaseClient {
     try {
       if (useTransaction) await client.query('BEGIN');
 
-      // The original code expected raw client in some places, adapting here
       const result = await callback(client);
       
       if (useTransaction) await client.query('COMMIT');
       return result;
     } catch (error) {
       if (useTransaction) {
-        try { await client.query('ROLLBACK'); } catch (e) { /* ignore */ }
+        try { 
+          await client.query('ROLLBACK'); 
+        } catch (_rollbackError) { 
+          console.error(`[InnerCircle] Rollback failed (${operation}):`, _rollbackError);
+        }
       }
       console.error(`[InnerCircle] Transaction failed (${operation}):`, error);
       return fallback;
@@ -330,7 +338,11 @@ export class DatabaseClient {
       return results;
     } catch (error) {
       if (options.transaction) {
-        try { await client.query('ROLLBACK'); } catch (e) { /* ignore */ }
+        try { 
+          await client.query('ROLLBACK'); 
+        } catch (_rollbackError) { 
+          console.error('[InnerCircle] Batch rollback failed:', _rollbackError);
+        }
       }
       throw error;
     } finally {
@@ -343,8 +355,8 @@ export class DatabaseClient {
     try {
       await this.query('healthCheck', 'SELECT 1');
       return { healthy: true, latency: Date.now() - startTime };
-    } catch (e) {
-      return { healthy: false, latency: Date.now() - startTime, error: String(e) };
+    } catch (_healthCheckError) {
+      return { healthy: false, latency: Date.now() - startTime, error: String(_healthCheckError) };
     }
   }
 }
@@ -363,17 +375,18 @@ function generateAccessKey(): { key: string; keyHash: string; keySuffix: string 
   return { key, keyHash: sha256Hex(key), keySuffix: key.slice(-8) };
 }
 
-function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email.trim().toLowerCase());
-}
-
 // ============================================================================
 // BUSINESS LOGIC
 // ============================================================================
 
 export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
   const email = sanitizeString(args.email).toLowerCase();
+  
+  // Validate email format
+  if (!validateEmail(email)) {
+    throw new Error('Invalid email format');
+  }
+  
   const emailHash = sha256Hex(email);
   const now = new Date();
   const expiresAt = new Date(now);
@@ -420,7 +433,9 @@ export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMember
           status: 'success',
           details: { source: args.source || 'registration' }
         });
-      } catch (e) { /* ignore */ }
+      } catch (_auditError) { 
+        console.warn('[InnerCircle] Audit logging failed:', _auditError);
+      }
 
       return {
         key, keySuffix, createdAt: now.toISOString(), expiresAt: expiresAt.toISOString(),
@@ -452,7 +467,8 @@ export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCirc
 
     // Daily limit check...
     return { valid: true, memberId: row.member_id, keySuffix: row.key_suffix, status: "active" };
-  } catch (e) {
+  } catch (_verifyError) {
+    console.error('[InnerCircle] Key verification failed:', _verifyError);
     return { valid: false, reason: "no_db" };
   }
 }
@@ -470,7 +486,9 @@ export async function recordInnerCircleUnlock(key: string, ip?: string): Promise
       `INSERT INTO key_unlock_logs (key_id, ip_address) SELECT id, $2 FROM inner_circle_keys WHERE key_hash = $1`,
       [keyHash, ip || null]
     );
-  } catch (e) { /* safe fail */ }
+  } catch (_logError) { 
+    console.warn('[InnerCircle] Unlock logging failed:', _logError);
+  }
 }
 
 export async function revokeInnerCircleKey(key: string, by = "admin", reason = "manual"): Promise<boolean> {
@@ -517,12 +535,15 @@ export async function getPrivacySafeStats() {
 // EXPORT
 // ============================================================================
 
-export default {
+const InnerCircleAPI = {
   createOrUpdateMemberAndIssueKey,
   verifyInnerCircleKey,
   recordInnerCircleUnlock,
   revokeInnerCircleKey,
   deleteMemberByEmail,
   getMemberKeys,
-  getPrivacySafeStats
+  getPrivacySafeStats,
+  validateEmail
 };
+
+export default InnerCircleAPI;

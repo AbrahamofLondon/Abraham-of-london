@@ -1,4 +1,3 @@
-/* pages/api/shorts/[slug]/interactions.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { isRateLimited, RATE_LIMIT_CONFIGS } from "@/lib/server/rateLimit";
 import prisma from "@/lib/prisma";
@@ -13,7 +12,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const sessionId = getOrSetSessionId(req, res);
 
   // 1. Defensive Boundary: Throttling per unique session
-  const rl = await isRateLimitedWithWindow(sessionId, "telemetry", 100, 60000);
+  // FIX: Added the "telemetry" namespace string as the 2nd argument.
+  // Signature: isRateLimited(key, namespace, limit)
+  const rl = await isRateLimited(`telemetry:${sessionId}`, "telemetry", 100);
+  
   if (rl.limited) return res.status(429).json({ error: "THROTTLED" });
 
   try {

@@ -56,6 +56,7 @@ const StrategyRoomPage: NextPage = () => {
     if (!mandate.trim()) return "Mandate description required.";
     if (!decision.trim()) return "Decision statement required.";
     if (stuckReasons.length === 0) return "Select at least one reason why the decision is stuck.";
+    if (!constraints.trim()) return "Constraints description required.";
     if (!tradeOff.trim()) return "Trade-off statement required.";
     if (!unacceptableOutcome.trim()) return "Unacceptable outcome statement required.";
     if (costDelay.length === 0) return "Select at least one cost-of-delay item.";
@@ -104,7 +105,8 @@ const StrategyRoomPage: NextPage = () => {
 
       const data = (await res.json()) as StrategyRoomIntakeResult;
       setResult(data);
-    } catch (error) {
+    } catch (_submitError) {
+      console.error('[StrategyRoom] Submission failed:', _submitError);
       setResult({ ok: false, status: "declined", message: "Submission failed. Please try again shortly." });
     } finally {
       setLoading(false);
@@ -130,6 +132,14 @@ const StrategyRoomPage: NextPage = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-softGold/70">Consulting · Institutional Strategy</p>
             <h1 className="mt-3 font-serif text-3xl font-semibold text-cream sm:text-4xl italic">Strategy Room Intake</h1>
             <p className="mt-3 text-sm text-softGold/80 max-w-2xl">This intake is required before scheduling. It prioritises structural logic over sentiment.</p>
+            
+            {/* Inner Circle Access Badge */}
+            {icAccess && (
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-900/20 px-3 py-1 text-xs text-amber-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                Inner Circle Member
+              </div>
+            )}
           </div>
         </section>
 
@@ -177,20 +187,69 @@ const StrategyRoomPage: NextPage = () => {
             <div className="space-y-6">
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-softGold/50 italic">Step 03 / The Decision</p>
               <textarea value={decision} onChange={(e)=>setDecision(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-softGold min-h-[120px]" placeholder="State the decision you cannot make right now (be precise)." required />
-              <div className="grid gap-4 sm:grid-cols-2">
-                {["Lack of clarity", "Conflicting incentives", "Political risk", "Moral uncertainty", "Incomplete information", "Personal cost"].map(v => (
-                  <label key={v} className="flex items-center gap-3 p-3 rounded-xl border border-white/5 bg-white/[0.02] cursor-pointer hover:border-softGold/20 transition-all text-xs tracking-wide">
-                    <input type="checkbox" checked={stuckReasons.includes(v as any)} onChange={()=>toggleMulti(v as any, stuckReasons, setStuckReasons)} />
-                    {v}
-                  </label>
-                ))}
+              
+              {/* Decision Type Selector */}
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-softGold/70 uppercase tracking-widest">Decision Type</p>
+                <select value={decisionType} onChange={(e)=>setDecisionType(e.target.value as any)} className="w-full bg-black border border-white/10 rounded-lg p-2 text-sm text-cream outline-none">
+                  <option>Irreversible</option>
+                  <option>High-cost to reverse</option>
+                  <option>Direction-setting</option>
+                  <option>Personnel/authority-related</option>
+                  <option>Capital allocation</option>
+                  <option>Reputation/governance</option>
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-softGold/70 uppercase tracking-widest">Why is this decision stuck?</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {["Lack of clarity", "Conflicting incentives", "Political risk", "Moral uncertainty", "Incomplete information", "Personal cost"].map(v => (
+                    <label key={v} className="flex items-center gap-3 p-3 rounded-xl border border-white/5 bg-white/[0.02] cursor-pointer hover:border-softGold/20 transition-all text-xs tracking-wide">
+                      <input type="checkbox" checked={stuckReasons.includes(v as any)} onChange={()=>toggleMulti(v as any, stuckReasons, setStuckReasons)} />
+                      {v}
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* 4. CONSTRAINTS & READINESS */}
+            {/* 4. CONSTRAINTS & TRADE-OFFS */}
             <div className="space-y-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-softGold/50 italic">Step 04 / Readiness</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-softGold/50 italic">Step 04 / Constraints & Trade-offs</p>
+              
+              <textarea value={constraints} onChange={(e)=>setConstraints(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-softGold min-h-[100px]" placeholder="What constraints cannot be removed? (legal, fiduciary, moral)" required />
+              
               <textarea value={tradeOff} onChange={(e)=>setTradeOff(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-softGold min-h-[100px]" placeholder="The trade-off you are avoiding..." required />
+              
+              <textarea value={unacceptableOutcome} onChange={(e)=>setUnacceptableOutcome(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-softGold min-h-[100px]" placeholder="What outcome is absolutely unacceptable?" required />
+            </div>
+
+            {/* 5. COST OF DELAY */}
+            <div className="space-y-6">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-softGold/50 italic">Step 05 / Cost of Delay</p>
+              
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-softGold/70 uppercase tracking-widest">What deteriorates if you delay?</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {["Financial", "Reputational", "Cultural", "Personal authority", "Opportunity loss"].map(v => (
+                    <label key={v} className="flex items-center gap-3 p-3 rounded-xl border border-white/5 bg-white/[0.02] cursor-pointer hover:border-softGold/20 transition-all text-xs tracking-wide">
+                      <input type="checkbox" checked={costDelay.includes(v as any)} onChange={()=>toggleMulti(v as any, costDelay, setCostDelay)} />
+                      {v}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <textarea value={whoAffected} onChange={(e)=>setWhoAffected(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-softGold min-h-[80px]" placeholder="Who is affected most directly?" required />
+              
+              <textarea value={breaksFirst} onChange={(e)=>setBreaksFirst(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-softGold min-h-[80px]" placeholder="What breaks first if you wait?" required />
+            </div>
+
+            {/* 6. READINESS */}
+            <div className="space-y-6">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-softGold/50 italic">Step 06 / Readiness</p>
+              
               <div className="bg-softGold/5 border border-softGold/20 rounded-2xl p-6 space-y-4">
                 <p className="text-xs font-bold text-softGold uppercase italic tracking-widest text-center">Commitment</p>
                 <div className="grid gap-6 sm:grid-cols-2">
@@ -208,17 +267,26 @@ const StrategyRoomPage: NextPage = () => {
                   </div>
                 </div>
               </div>
+
+              <textarea value={whyNow} onChange={(e)=>setWhyNow(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm outline-none focus:border-softGold min-h-[100px]" placeholder="Why are you seeking this environment now?" required />
             </div>
 
+            {/* 7. DECLARATION & SUBMIT */}
             <div className="space-y-6 pt-4">
               <label className="flex gap-3 text-xs text-white/60 cursor-pointer">
                 <input type="checkbox" checked={declaration} onChange={(e)=>setDeclaration(e.target.checked)} />
                 <span>I accept responsibility for the outcome of the Strategy Room. I understand this is not coaching.</span>
               </label>
               
-              <button type="submit" disabled={loading} className="w-full sm:w-auto px-10 py-4 bg-softGold text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-white transition-all disabled:opacity-50">
-                {loading ? "Processing..." : "Submit Intake for Review"}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <button type="submit" disabled={loading} className="w-full sm:w-auto px-10 py-4 bg-softGold text-black font-black uppercase tracking-widest text-xs rounded-full hover:bg-white transition-all disabled:opacity-50">
+                  {loading ? "Processing..." : "Submit Intake for Review"}
+                </button>
+
+                <Link href="/consulting" className="text-xs text-softGold/60 hover:text-softGold transition-colors">
+                  ← Back to Consulting
+                </Link>
+              </div>
 
               {result && (
                 <div className={`mt-6 p-4 rounded-xl border italic text-sm ${feedbackTone}`}>

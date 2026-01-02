@@ -6,12 +6,44 @@ import prisma from "@/lib/prisma"; // Standardized Prisma Client integration
 import Layout from "@/components/Layout";
 import { Users, Zap, Clock, ExternalLink } from "lucide-react";
 
+// FIX: Import Security Primitives
+import { validateAdminAccess } from "@/lib/server/validation";
+import { logAuditEvent } from "@/lib/server/audit";
+
 type DashboardProps = {
   members: any[];
   intakes: any[];
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const startTime = Date.now();
+
+  // ---------------------------------------------------------------------------
+  // 1. SECURITY BARRIER (CRITICAL)
+  // ---------------------------------------------------------------------------
+  const auth = await validateAdminAccess(req as any);
+
+  if (!auth.valid) {
+    // Log the attempted breach
+    await logAuditEvent({
+      actorType: "unknown",
+      action: "unauthorized_access",
+      resourceType: "board_dashboard",
+      status: "failed",
+      ipAddress: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress,
+      details: { 
+        path: "/board/dashboard", 
+        reason: auth.reason 
+      }
+    });
+
+    // Obfuscate: Return 404 so attackers don't know this page exists
+    return { notFound: true };
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2. DATA RETRIEVAL
+  // ---------------------------------------------------------------------------
   try {
     /**
      * ARCHITECTURAL UPDATE: Prisma Fetching
@@ -20,12 +52,24 @@ export const getServerSideProps: GetServerSideProps = async () => {
      */
     const [members, intakes] = await Promise.all([
       prisma.innerCircleMember.findMany({
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        take: 100 // Limit results for performance
       }),
       prisma.strategyRoomIntake.findMany({
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        take: 100 // Limit results for performance
       })
     ]);
+
+    // Log successful access
+    await logAuditEvent({
+      actorType: "admin",
+      actorId: auth.userId,
+      action: "view_dashboard",
+      resourceType: "board_dashboard",
+      status: "success",
+      details: { durationMs: Date.now() - startTime }
+    });
 
     return {
       props: {
@@ -36,6 +80,16 @@ export const getServerSideProps: GetServerSideProps = async () => {
     };
   } catch (error) {
     console.error("🔥 Institutional Dashboard Data Failure:", error);
+    
+    // Log the system failure
+    await logAuditEvent({
+      actorType: "system",
+      action: "dashboard_error",
+      resourceType: "board_dashboard",
+      status: "failed",
+      details: { error: String(error) }
+    });
+
     // Graceful fallback to maintain uptime even during DB maintenance
     return { props: { members: [], intakes: [] } };
   }

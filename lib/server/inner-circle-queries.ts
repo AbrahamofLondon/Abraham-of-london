@@ -22,12 +22,168 @@ export interface AnalyticsPeriod {
   interval: 'hour' | 'day' | 'week' | 'month';
 }
 
+export interface MemberStatistics {
+  id: string;
+  email_hash_prefix: string;
+  name: string;
+  tier: string;
+  status: string;
+  created_at: string;
+  last_seen_at: string;
+  total_keys: number;
+  total_unlocks: number;
+  last_activity: string;
+  active_keys: number;
+  revoked_keys: number;
+  recent_activity: Array<{
+    date: string;
+    daily_unlocks: number;
+    unique_ips: number;
+  }>;
+  top_ips: Array<{
+    ip_address: string;
+    unlock_count: number;
+    last_used: string;
+  }>;
+}
+
+export interface SystemAnalyticsRow {
+  period: string;
+  new_members: number;
+  total_members: number;
+  unlocks: number;
+  active_keys: number;
+  unique_ips: number;
+  key_statuses: Record<string, number>;
+  tier_distribution: Array<{
+    tier: string;
+    member_count: number;
+    active_members: number;
+  }>;
+}
+
+export interface SearchResultRow {
+  key_id: string;
+  key_suffix: string;
+  key_status: string;
+  key_created: string;
+  expires_at: string;
+  total_unlocks: number;
+  last_used_at: string | null;
+  last_ip: string | null;
+  revoked_at: string | null;
+  revoked_by: string | null;
+  revoked_reason: string | null;
+  key_flags: string[];
+  member_id: string;
+  email_hash_prefix: string;
+  member_name: string | null;
+  member_tier: string | null;
+  member_status: string;
+  last_seen_at: string;
+  member_flags: Array<{ flag: string }>;
+  recent_unlocks: Array<{
+    date: string;
+    count: number;
+  }>;
+}
+
+export interface HeatmapRow {
+  date: string;
+  hour: number;
+  unlocks: number;
+  intensity: 'none' | 'low' | 'medium' | 'high';
+}
+
+export interface RetentionMetricsRow {
+  cohort_period: string;
+  cohort_size: number;
+  retained_1m: number;
+  retained_3m: number;
+  retained_6m: number;
+  retention_1m_pct: number;
+  retention_3m_pct: number;
+  retention_6m_pct: number;
+}
+
+export interface SuspiciousActivityRow {
+  member_id: string;
+  ip_address: string;
+  unlock_count: number;
+  active_days: number;
+  first_seen: string;
+  last_seen: string;
+  keys_used: string[];
+  user_agents: string[];
+  email_hash_prefix: string;
+  name: string | null;
+  tier: string | null;
+  member_status: string;
+  weekly_unlocks: number;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  pattern: string;
+}
+
+export interface TopPerformerRow {
+  member_id: string;
+  unlock_count: number;
+  unique_ips: number;
+  last_activity: string;
+  active_keys: string[];
+  email_hash_prefix: string;
+  name: string | null;
+  tier: string | null;
+  status: string;
+  member_since: string;
+  total_lifetime_unlocks: number;
+}
+
+export interface KeyPerformanceRow {
+  id: string;
+  key_hash: string;
+  key_suffix: string;
+  member_id: string;
+  status: string;
+  created_at: string;
+  expires_at: string;
+  total_unlocks: number;
+  last_used_at: string | null;
+  last_ip: string | null;
+  created_by_ip: string | null;
+  revoked_at: string | null;
+  revoked_by: string | null;
+  revoked_reason: string | null;
+  flags: string[];
+  email_hash_prefix: string;
+  member_name: string | null;
+  tier: string | null;
+  hourly_pattern: Array<{
+    hour: number;
+    unlocks: number;
+    percentage: number;
+  }>;
+  daily_trend: Array<{
+    date: string;
+    daily_unlocks: number;
+    unique_ips: number;
+    user_agents: string[];
+  }>;
+  top_ips: Array<{
+    ip_address: string;
+    unlock_count: number;
+    first_seen: string;
+    last_seen: string;
+    user_agents: string[];
+  }>;
+}
+
 export class InnerCircleQueries {
   /**
    * Get comprehensive member statistics
    */
-  static async getMemberStatistics(memberId: string) {
-    return DatabaseClient.query(
+  static async getMemberStatistics(memberId: string): Promise<MemberStatistics | null> {
+    // Note: We use 'any[]' for the raw query result type to avoid inference issues with the complex join
+    const result = await DatabaseClient.query<any[]>(
       "getMemberStatistics",
       `
       WITH key_stats AS (
@@ -97,15 +253,45 @@ export class InnerCircleQueries {
       GROUP BY m.id, ks.total_keys, ks.total_unlocks, ks.last_activity, ks.active_keys, ks.revoked_keys
       `,
       [memberId],
-      null
+      []
     );
+
+    if (!result || result.length === 0) return null;
+
+    // FIX: Explicitly treating row as 'any' to map it manually
+    const row = result[0];
+    
+    return {
+      id: row.id,
+      email_hash_prefix: row.email_hash_prefix,
+      name: row.name,
+      tier: row.tier,
+      status: row.status,
+      created_at: toIso(row.created_at),
+      last_seen_at: toIso(row.last_seen_at),
+      total_keys: toInt(row.total_keys),
+      total_unlocks: toInt(row.total_unlocks),
+      last_activity: toIso(row.last_activity),
+      active_keys: toInt(row.active_keys),
+      revoked_keys: toInt(row.revoked_keys),
+      recent_activity: Array.isArray(row.recent_activity) ? row.recent_activity.map((activity: any) => ({
+        date: toIso(activity.date),
+        daily_unlocks: toInt(activity.daily_unlocks),
+        unique_ips: toInt(activity.unique_ips)
+      })) : [],
+      top_ips: Array.isArray(row.top_ips) ? row.top_ips.map((ip: any) => ({
+        ip_address: ip.ip_address,
+        unlock_count: toInt(ip.unlock_count),
+        last_used: toIso(ip.last_used)
+      })) : []
+    };
   }
 
   /**
    * Get system-wide analytics
    */
-  static async getSystemAnalytics(period: AnalyticsPeriod) {
-    return DatabaseClient.query(
+  static async getSystemAnalytics(period: AnalyticsPeriod): Promise<SystemAnalyticsRow[]> {
+    const result = await DatabaseClient.query<any[]>(
       "getSystemAnalytics",
       `
       WITH period_series AS (
@@ -183,12 +369,25 @@ export class InnerCircleQueries {
       ],
       []
     );
+
+    if (!result) return [];
+
+    return result.map(row => ({
+      period: toIso(row.period),
+      new_members: toInt(row.new_members),
+      total_members: toInt(row.total_members),
+      unlocks: toInt(row.unlocks),
+      active_keys: toInt(row.active_keys),
+      unique_ips: toInt(row.unique_ips),
+      key_statuses: row.key_statuses || {},
+      tier_distribution: row.tier_distribution || []
+    }));
   }
 
   /**
    * Search with advanced filters
    */
-  static async advancedSearch(filters: QueryFilters, limit: number = 50, offset: number = 0) {
+  static async advancedSearch(filters: QueryFilters, limit: number = 50, offset: number = 0): Promise<SearchResultRow[]> {
     const conditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
@@ -307,19 +506,42 @@ export class InnerCircleQueries {
 
     params.push(limit, offset);
 
-    return DatabaseClient.query(
-      "advancedSearch",
-      query,
-      params,
-      []
-    );
+    const result = await DatabaseClient.query<any[]>("advancedSearch", query, params, []);
+    
+    if (!result) return [];
+
+    return result.map(row => ({
+      key_id: row.key_id,
+      key_suffix: row.key_suffix,
+      key_status: row.key_status,
+      key_created: toIso(row.key_created),
+      expires_at: toIso(row.expires_at),
+      total_unlocks: toInt(row.total_unlocks),
+      last_used_at: row.last_used_at ? toIso(row.last_used_at) : null,
+      last_ip: row.last_ip,
+      revoked_at: row.revoked_at ? toIso(row.revoked_at) : null,
+      revoked_by: row.revoked_by,
+      revoked_reason: row.revoked_reason,
+      key_flags: row.key_flags || [],
+      member_id: row.member_id,
+      email_hash_prefix: row.email_hash_prefix,
+      member_name: row.member_name,
+      member_tier: row.member_tier,
+      member_status: row.member_status,
+      last_seen_at: toIso(row.last_seen_at),
+      member_flags: Array.isArray(row.member_flags) ? row.member_flags : [],
+      recent_unlocks: Array.isArray(row.recent_unlocks) ? row.recent_unlocks.map((unlock: any) => ({
+        date: toIso(unlock.date),
+        count: toInt(unlock.count)
+      })) : []
+    }));
   }
 
   /**
    * Get key usage heatmap data
    */
-  static async getKeyUsageHeatmap(keyId: string, days: number = 30) {
-    return DatabaseClient.query(
+  static async getKeyUsageHeatmap(keyId: string, days: number = 30): Promise<HeatmapRow[]> {
+    const result = await DatabaseClient.query<any[]>(
       "getKeyUsageHeatmap",
       `
       WITH hour_series AS (
@@ -362,13 +584,22 @@ export class InnerCircleQueries {
       [keyId],
       []
     );
+
+    if (!result) return [];
+
+    return result.map(row => ({
+      date: toIso(row.date),
+      hour: toInt(row.hour),
+      unlocks: toInt(row.unlocks),
+      intensity: row.intensity
+    }));
   }
 
   /**
    * Get member retention metrics
    */
-  static async getRetentionMetrics(cohortInterval: 'week' | 'month' = 'month') {
-    return DatabaseClient.query(
+  static async getRetentionMetrics(cohortInterval: 'week' | 'month' = 'month'): Promise<RetentionMetricsRow[]> {
+    const result = await DatabaseClient.query<any[]>(
       "getRetentionMetrics",
       `
       WITH member_cohorts AS (
@@ -420,13 +651,26 @@ export class InnerCircleQueries {
       [cohortInterval],
       []
     );
+
+    if (!result) return [];
+
+    return result.map(row => ({
+      cohort_period: toIso(row.cohort_period),
+      cohort_size: toInt(row.cohort_size),
+      retained_1m: toInt(row.retained_1m),
+      retained_3m: toInt(row.retained_3m),
+      retained_6m: toInt(row.retained_6m),
+      retention_1m_pct: toFloat(row.retention_1m_pct),
+      retention_3m_pct: toFloat(row.retention_3m_pct),
+      retention_6m_pct: toFloat(row.retention_6m_pct)
+    }));
   }
 
   /**
    * Detect suspicious activity patterns
    */
-  static async detectSuspiciousActivity(threshold: number = 10) {
-    return DatabaseClient.query(
+  static async detectSuspiciousActivity(threshold: number = 10): Promise<SuspiciousActivityRow[]> {
+    const result = await DatabaseClient.query<any[]>(
       "detectSuspiciousActivity",
       `
       WITH recent_activity AS (
@@ -486,13 +730,33 @@ export class InnerCircleQueries {
       [threshold],
       []
     );
+
+    if (!result) return [];
+
+    return result.map(row => ({
+      member_id: row.member_id,
+      ip_address: row.ip_address,
+      unlock_count: toInt(row.unlock_count),
+      active_days: toInt(row.active_days),
+      first_seen: toIso(row.first_seen),
+      last_seen: toIso(row.last_seen),
+      keys_used: row.keys_used || [],
+      user_agents: row.user_agents || [],
+      email_hash_prefix: row.email_hash_prefix,
+      name: row.name,
+      tier: row.tier,
+      member_status: row.member_status,
+      weekly_unlocks: toInt(row.weekly_unlocks),
+      severity: row.severity,
+      pattern: row.pattern
+    }));
   }
 
   /**
    * Get top performers (most active members)
    */
-  static async getTopPerformers(limit: number = 10, period: 'day' | 'week' | 'month' = 'week') {
-    return DatabaseClient.query(
+  static async getTopPerformers(limit: number = 10, period: 'day' | 'week' | 'month' = 'week'): Promise<TopPerformerRow[]> {
+    const result = await DatabaseClient.query<any[]>(
       "getTopPerformers",
       `
       WITH period_unlocks AS (
@@ -532,13 +796,29 @@ export class InnerCircleQueries {
       [limit],
       []
     );
+
+    if (!result) return [];
+
+    return result.map(row => ({
+      member_id: row.member_id,
+      unlock_count: toInt(row.unlock_count),
+      unique_ips: toInt(row.unique_ips),
+      last_activity: toIso(row.last_activity),
+      active_keys: row.active_keys || [],
+      email_hash_prefix: row.email_hash_prefix,
+      name: row.name,
+      tier: row.tier,
+      status: row.status,
+      member_since: toIso(row.member_since),
+      total_lifetime_unlocks: toInt(row.total_lifetime_unlocks)
+    }));
   }
 
   /**
    * Get key performance metrics
    */
-  static async getKeyPerformanceMetrics(keyId: string) {
-    return DatabaseClient.query(
+  static async getKeyPerformanceMetrics(keyId: string): Promise<KeyPerformanceRow | null> {
+    const result = await DatabaseClient.query<any[]>(
       "getKeyPerformanceMetrics",
       `
       WITH key_info AS (
@@ -625,8 +905,50 @@ export class InnerCircleQueries {
       FROM key_info ki
       `,
       [keyId],
-      null
+      []
     );
+
+    if (!result || result.length === 0) return null;
+
+    const row = result[0];
+    return {
+      id: row.id,
+      key_hash: row.key_hash,
+      key_suffix: row.key_suffix,
+      member_id: row.member_id,
+      status: row.status,
+      created_at: toIso(row.created_at),
+      expires_at: toIso(row.expires_at),
+      total_unlocks: toInt(row.total_unlocks),
+      last_used_at: row.last_used_at ? toIso(row.last_used_at) : null,
+      last_ip: row.last_ip,
+      created_by_ip: row.created_by_ip,
+      revoked_at: row.revoked_at ? toIso(row.revoked_at) : null,
+      revoked_by: row.revoked_by,
+      revoked_reason: row.revoked_reason,
+      flags: row.flags || [],
+      email_hash_prefix: row.email_hash_prefix,
+      member_name: row.member_name,
+      tier: row.tier,
+      hourly_pattern: Array.isArray(row.hourly_pattern) ? row.hourly_pattern.map((pattern: any) => ({
+        hour: toInt(pattern.hour),
+        unlocks: toInt(pattern.unlocks),
+        percentage: toFloat(pattern.percentage)
+      })) : [],
+      daily_trend: Array.isArray(row.daily_trend) ? row.daily_trend.map((trend: any) => ({
+        date: toIso(trend.date),
+        daily_unlocks: toInt(trend.daily_unlocks),
+        unique_ips: toInt(trend.unique_ips),
+        user_agents: trend.user_agents || []
+      })) : [],
+      top_ips: Array.isArray(row.top_ips) ? row.top_ips.map((ip: any) => ({
+        ip_address: ip.ip_address,
+        unlock_count: toInt(ip.unlock_count),
+        first_seen: toIso(ip.first_seen),
+        last_seen: toIso(ip.last_seen),
+        user_agents: ip.user_agents || []
+      })) : []
+    };
   }
 }
 

@@ -1,4 +1,3 @@
-// pages/blog/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
@@ -180,7 +179,8 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  assertContentlayerHasDocs("pages/blog/index.tsx getStaticProps");
+  // FIX: Removed argument from assertion call
+  assertContentlayerHasDocs();
 
   const published = getPublishedPosts();
 

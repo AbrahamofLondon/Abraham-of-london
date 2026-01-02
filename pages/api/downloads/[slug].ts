@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getDownloadBySlug, resolveDocDownloadUrl, getRequiredTier } from "@/lib/server/content";
-import { getUserTierFromCookies, tierAtLeast, signDownloadToken, newNonce } from "@/lib/downloads/security";
+import { getUserTierFromCookies, tierAtLeast, signDownloadToken, newNonce, type InnerCircleTier } from "@/lib/downloads/security";
 import { logDownloadEvent } from "@/lib/downloads/audit";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,7 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const url = resolveDocDownloadUrl(doc);
     if (!url) return res.status(500).send("ERR_ASSET_UNREACHABLE");
 
-    const requiredTier = getRequiredTier(doc);
+    const requiredTierRaw = getRequiredTier(doc);
+    const requiredTier: InnerCircleTier = requiredTierRaw as InnerCircleTier;
     const userTier = getUserTierFromCookies(req.headers.cookie);
 
     const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "0.0.0.0";
@@ -24,9 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const ref = req.headers.referer || "direct";
 
     // 1. Authorization Boundary
-    // FIX: Cast userTier to 'any' to satisfy the strict InnerCircleTier type check.
-    // The security function internally handles invalid strings safely.
-    if (!tierAtLeast(userTier as any, requiredTier)) {
+    if (!tierAtLeast(userTier, requiredTier)) {
       await logDownloadEvent({
         eventType: "DOWNLOAD_DENIED",
         slug, 
@@ -67,7 +66,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     return res.redirect(302, `/api/dl/${encodeURIComponent(token)}`);
-
   } catch (error) {
     console.error("[ISSUER_FAULT]", error);
     return res.status(500).send("ERR_SEC_ISSUANCE_FAILED");
