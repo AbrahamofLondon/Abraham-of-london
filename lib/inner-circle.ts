@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
 import crypto from "node:crypto";
 import { Pool, type PoolClient } from "pg";
+// Ensure these imports match your actual file structure for audit
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
 
 /* =============================================================================
-   CONFIGURATION & CONSTANTS
+   1. CONFIGURATION
    ============================================================================= */
 
 const CONFIG = {
@@ -18,7 +19,7 @@ const CONFIG = {
 } as const;
 
 /* =============================================================================
-   TYPES
+   2. TYPE DEFINITIONS
    ============================================================================= */
 
 export type InnerCircleStatus = "pending" | "active" | "revoked" | "expired" | "suspended";
@@ -44,6 +45,7 @@ export type IssuedKey = {
   totalUnlocks: number;
 };
 
+// Explicit type for verification results
 export type VerifyInnerCircleKeyResult = {
   valid: boolean;
   reason?: "empty" | "not_found" | "revoked" | "expired" | "no_db" | "invalid_format" | "suspended" | "rate_limited";
@@ -65,15 +67,24 @@ export type InnerCircleStats = {
   lastActivity?: string;
 };
 
+// THIS IS THE TYPE THAT WAS MISSING
+export type CleanupResult = {
+  deletedMembers: number;
+  deletedKeys: number;
+  totalOrphanedKeys: number;
+  cleanedAt: string;
+  suspendedKeys: number;
+};
+
 /* =============================================================================
-   UTILITY FUNCTIONS
+   3. UTILITY FUNCTIONS
    ============================================================================= */
 
-function sha256Hex(value: string): string {
+export function sha256Hex(value: string): string {
   return crypto.createHash("sha256").update(value, "utf8").digest("hex");
 }
 
-function generateAccessKey(): { key: string; keyHash: string; keySuffix: string } {
+export function generateAccessKey(): { key: string; keyHash: string; keySuffix: string } {
   const raw = crypto.randomBytes(CONFIG.KEY_LENGTH).toString("base64url");
   const key = `${CONFIG.KEY_PREFIX}${raw}`;
   return {
@@ -83,35 +94,35 @@ function generateAccessKey(): { key: string; keyHash: string; keySuffix: string 
   };
 }
 
-function validateEmail(email: string): boolean {
+export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email.trim().toLowerCase());
 }
 
-function sanitizeString(input: string): string {
+export function sanitizeString(input: string): string {
   return input.trim().replace(/[<>"'`;]/g, "");
 }
 
-function toIso(date: Date | string | null): string {
+export function toIso(date: Date | string | null): string {
   if (!date) return "";
   const d = date instanceof Date ? date : new Date(date);
   return Number.isNaN(d.getTime()) ? "" : d.toISOString();
 }
 
-function toInt(value: any, fallback: number = 0): number {
+export function toInt(value: any, fallback: number = 0): number {
   if (value === null || value === undefined) return fallback;
   const num = Number(value);
   return Number.isInteger(num) ? num : fallback;
 }
 
-function toFloat(value: any, fallback: number = 0): number {
+export function toFloat(value: any, fallback: number = 0): number {
   if (value === null || value === undefined) return fallback;
   const num = Number(value);
   return Number.isFinite(num) ? num : fallback;
 }
 
 /* =============================================================================
-   DATABASE CLIENT
+   4. DATABASE CLIENT
    ============================================================================= */
 
 let sharedPool: Pool | null = null;
@@ -134,7 +145,7 @@ function getPool(): Pool | null {
   return sharedPool;
 }
 
-class DatabaseClient {
+export class DatabaseClient {
   private static async withClient<T>(
     operation: string,
     fn: (client: PoolClient) => Promise<T>,
@@ -154,9 +165,7 @@ class DatabaseClient {
       if (transactional) {
         try { 
           await client.query("ROLLBACK"); 
-        } catch (_rollbackError) { 
-          // Ignore rollback errors
-        }
+        } catch (_rollbackError) { /* Ignore */ }
       }
       console.error(`[InnerCircle] ${operation} failed:`, err);
       throw err;
@@ -183,7 +192,7 @@ class DatabaseClient {
 }
 
 /* =============================================================================
-   STORE LOGIC
+   5. CORE STORE LOGIC
    ============================================================================= */
 
 export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
@@ -211,7 +220,7 @@ export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMember
   return DatabaseClient.transactional(
     "createMember",
     async (client) => {
-      // Check if member already has max active keys
+      // Check Limit
       const activeCountRes = await client.query<{ count: string }>(
         `SELECT COUNT(*)::text as count
          FROM inner_circle_keys k
@@ -227,7 +236,7 @@ export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMember
         throw new Error(`Member already has ${CONFIG.MAX_KEYS_PER_MEMBER} active keys`);
       }
 
-      // Create or update member
+      // Upsert Member
       const memberRes = await client.query<{ id: string }>(
         `INSERT INTO inner_circle_members (email_hash, email_hash_prefix, name, last_ip, metadata)
          VALUES ($1, $2, $3, $4, $5)
@@ -246,18 +255,16 @@ export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMember
         ]
       );
 
-      const memberRow = memberRes.rows[0];
-      if (!memberRow) throw new Error("Database failed to return member ID");
-      const memberId = memberRow.id;
+      const memberId = memberRes.rows[0].id;
 
-      // Create the new key
+      // Insert Key
       await client.query(
         `INSERT INTO inner_circle_keys (member_id, key_hash, key_suffix, status, expires_at, created_by_ip)
          VALUES ($1, $2, $3, 'active', $4, $5)`,
         [memberId, keyHash, keySuffix, expiresAt, args.ipAddress || null]
       );
 
-      // Log audit event
+      // Audit Log
       try {
         await logAuditEvent({
           actorType: args.source === 'admin' ? 'admin' : 'member',
@@ -275,10 +282,7 @@ export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMember
           }
         });
       } catch (_auditError) { 
-        // Log audit failure only in development
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('[InnerCircle] Audit log failed:', _auditError);
-        }
+        if (process.env.NODE_ENV === 'development') console.warn('Audit failed:', _auditError);
       }
 
       return {
@@ -319,26 +323,33 @@ export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCirc
     );
 
     if (rows.length === 0) {
-      // Log failed verification attempt
       try {
         await logAuditEvent({
           actorType: "system",
-          action: AUDIT_ACTIONS.VERIFY_FAILED,
+          action: AUDIT_ACTIONS.LOGIN_FAILED,
           resourceType: AUDIT_CATEGORIES.AUTHENTICATION,
           status: "failed",
           severity: "low",
           details: { reason: "not_found", keyPrefix: cleaned.substring(0, 8) + "..." }
         });
-      } catch (_auditError) { /* ignore */ }
+      } catch (_e) { /* ignore */ }
       
       return { valid: false, reason: "not_found" };
     }
 
     const row = rows[0];
+    
+    // Strict Status Check
     if (row.status !== 'active') {
+      // Map DB status to strict Reason type
+      let reasonCode: VerifyInnerCircleKeyResult['reason'] = 'not_found';
+      if (row.status === 'revoked') reasonCode = 'revoked';
+      else if (row.status === 'suspended') reasonCode = 'suspended';
+      else if (row.status === 'expired') reasonCode = 'expired';
+      
       return { 
         valid: false, 
-        reason: row.status, 
+        reason: reasonCode, 
         memberId: row.member_id, 
         keySuffix: row.key_suffix, 
         status: row.status 
@@ -357,7 +368,7 @@ export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCirc
       };
     }
 
-    // Check daily usage limit
+    // Check Daily Limit
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -381,7 +392,7 @@ export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCirc
         memberId: row.member_id, 
         keySuffix: row.key_suffix, 
         status: "active", 
-        remainingUnlocks: 0,
+        remainingUnlocks: 0, 
         unlocksToday: usedToday
       };
     }
@@ -391,8 +402,8 @@ export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCirc
       memberId: row.member_id, 
       keySuffix: row.key_suffix, 
       status: "active", 
-      expiresAt: row.expires_at,
-      remainingUnlocks: remaining,
+      expiresAt: row.expires_at, 
+      remainingUnlocks: remaining, 
       unlocksToday: usedToday
     };
   } catch (_error) {
@@ -418,7 +429,7 @@ export async function recordInnerCircleUnlock(key: string, ip?: string, userAgen
     null
   );
 
-  // Log the unlock event
+  // Best effort log
   try {
     await DatabaseClient.query(
       "log", 
@@ -429,143 +440,19 @@ export async function recordInnerCircleUnlock(key: string, ip?: string, userAgen
       [keyHash, ip || null, userAgent || null], 
       null
     );
-  } catch (_logError) { 
-    // Safe to ignore if table doesn't exist
-  }
+  } catch (_logError) { /* ignore */ }
 
-  // Log audit event
   try {
     await logAuditEvent({
       actorType: "member",
-      action: AUDIT_ACTIONS.UNLOCK,
+      action: AUDIT_ACTIONS.ACCESS_GRANTED, // Using standard action
       resourceType: AUDIT_CATEGORIES.AUTHENTICATION,
       status: "success",
       ipAddress: ip,
       userAgent,
-      details: { 
-        action: "key_unlock", 
-        keyHashPrefix: keyHash.substring(0, 8)
-      }
+      details: { action: "key_unlock", keyHashPrefix: keyHash.substring(0, 8) }
     });
-  } catch (_auditError) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[InnerCircle] Audit log failed for unlock:', _auditError);
-    }
-  }
-}
-
-export async function revokeInnerCircleKey(
-  key: string, 
-  by: string = "admin", 
-  reason: string = "manual_revocation",
-  actorId?: string
-): Promise<boolean> {
-  const cleaned = key.trim();
-  if (!cleaned) return false;
-  
-  const keyHash = sha256Hex(cleaned);
-  const sanitizedBy = sanitizeString(by);
-  const sanitizedReason = sanitizeString(reason);
-
-  const res = await DatabaseClient.query<Array<{ id: string }>>(
-    "revoke", 
-    `UPDATE inner_circle_keys 
-     SET status = 'revoked', 
-         revoked_at = NOW(), 
-         revoked_by = $2, 
-         revoked_reason = $3 
-     WHERE key_hash = $1 AND status = 'active'
-     RETURNING id`,
-    [keyHash, sanitizedBy, sanitizedReason], 
-    []
-  );
-
-  const rows = res || [];
-  if (rows.length > 0) {
-    try {
-      await logAuditEvent({
-        actorType: "admin",
-        actorId,
-        actorEmail: by,
-        action: AUDIT_ACTIONS.REVOKE,
-        resourceType: AUDIT_CATEGORIES.AUTHENTICATION,
-        resourceId: keyHash.substring(0, 8),
-        status: "success",
-        details: { 
-          keySuffix: cleaned.substring(cleaned.length - 8),
-          reason: sanitizedReason,
-          revokedBy: sanitizedBy
-        }
-      });
-    } catch (_auditError) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('[InnerCircle] Audit log failed for revoke:', _auditError);
-      }
-    }
-  }
-
-  return rows.length > 0;
-}
-
-export async function deleteMemberByEmail(email: string): Promise<boolean> {
-  const cleaned = email.trim().toLowerCase();
-  if (!validateEmail(cleaned)) throw new Error("Invalid email address");
-  
-  const emailHash = sha256Hex(cleaned);
-
-  return DatabaseClient.transactional(
-    "delete", 
-    async (client) => {
-      await client.query(
-        `DELETE FROM inner_circle_keys 
-         WHERE member_id IN (
-           SELECT id FROM inner_circle_members WHERE email_hash = $1
-         )`, 
-        [emailHash]
-      );
-      const res = await client.query(
-        `DELETE FROM inner_circle_members WHERE email_hash = $1`, 
-        [emailHash]
-      );
-      return (res.rowCount || 0) > 0;
-    }, 
-    false
-  );
-}
-
-export async function getMemberKeys(memberId: string): Promise<Array<{
-  id: string;
-  key_suffix: string;
-  status: InnerCircleStatus;
-  created_at: string;
-  expires_at: string;
-  total_unlocks: number;
-  last_used_at: string | null;
-  last_ip: string | null;
-  flags: string[];
-}>> {
-  if (!memberId) return [];
-  
-  const rows = await DatabaseClient.query<any[]>(
-    "getKeys", 
-    `SELECT * FROM inner_circle_keys 
-     WHERE member_id = $1 
-     ORDER BY created_at DESC`, 
-    [memberId], 
-    []
-  );
-
-  return (rows || []).map(row => ({
-    id: row.id,
-    key_suffix: row.key_suffix,
-    status: row.status,
-    created_at: toIso(row.created_at),
-    expires_at: toIso(row.expires_at),
-    total_unlocks: toInt(row.total_unlocks),
-    last_used_at: row.last_used_at ? toIso(row.last_used_at) : null,
-    last_ip: row.last_ip,
-    flags: row.flags || []
-  }));
+  } catch (_e) { /* ignore */ }
 }
 
 export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
@@ -596,35 +483,66 @@ export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
   };
 }
 
-export async function sendInnerCircleEmail(
-  recipientOrConfig: any, 
-  key?: string, 
-  name?: string
-): Promise<void> {
-  if (recipientOrConfig && typeof recipientOrConfig === "object" && "to" in recipientOrConfig) {
-    const config = recipientOrConfig as { to: string; type?: string; data?: any };
-    console.log(`📧 [InnerCircle Email] Sending ${config.type || 'notification'} to ${config.to}`, config.data || {});
-    return;
-  }
-  
-  const email = String(recipientOrConfig);
-  const keyValue = String(key || "");
-  console.log(`📧 [InnerCircle Email] Sending key to ${email} (${name || 'No name provided'})`, { 
-    keyLength: keyValue.length,
-    keyPreview: keyValue ? `${keyValue.substring(0, 8)}...` : 'No key'
-  });
+// ----------------------------------------------------------------------
+// CLEANUP UTILITY
+// ----------------------------------------------------------------------
+
+export async function cleanupExpiredData(): Promise<CleanupResult> {
+  return DatabaseClient.transactional(
+    "cleanup",
+    async (client) => {
+      // 1. Mark expired
+      await client.query(
+        `UPDATE inner_circle_keys SET status = 'expired' WHERE expires_at < NOW() AND status = 'active'`
+      );
+
+      // 2. Delete old keys
+      const keysRes = await client.query(
+        `DELETE FROM inner_circle_keys 
+         WHERE (status = 'expired' OR status = 'revoked') 
+         AND (last_used_at IS NULL OR last_used_at < NOW() - INTERVAL '${CONFIG.CLEANUP_KEY_TTL_DAYS} days') 
+         RETURNING id`
+      );
+      
+      const suspendedRes = await client.query(
+        `SELECT COUNT(*)::text as count FROM inner_circle_keys WHERE status = 'suspended'`
+      );
+      
+      // 3. Delete inactive members
+      const memberRes = await client.query(
+        `DELETE FROM inner_circle_members m 
+         WHERE NOT EXISTS (
+           SELECT 1 FROM inner_circle_keys k 
+           WHERE k.member_id = m.id 
+           AND ((k.status = 'active' AND k.expires_at > NOW()) 
+           OR (k.last_used_at > NOW() - INTERVAL '${CONFIG.CLEANUP_MEMBER_INACTIVE_DAYS} days'))
+         ) RETURNING id`
+      );
+      
+      const suspendedCount = toInt((suspendedRes.rows[0] as any)?.count, 0);
+
+      try {
+        await logAuditEvent({
+          actorType: "system",
+          action: AUDIT_ACTIONS.DELETE, // Using standard action
+          resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION,
+          status: "success",
+          details: {
+            deletedMembers: memberRes.rowCount || 0,
+            deletedKeys: keysRes.rowCount || 0,
+            suspendedKeys: suspendedCount
+          }
+        });
+      } catch (_e) { /* ignore */ }
+      
+      return {
+        deletedMembers: memberRes.rowCount || 0,
+        deletedKeys: keysRes.rowCount || 0,
+        totalOrphanedKeys: 0,
+        cleanedAt: new Date().toISOString(),
+        suspendedKeys: suspendedCount
+      };
+    },
+    { deletedMembers: 0, deletedKeys: 0, totalOrphanedKeys: 0, cleanedAt: "", suspendedKeys: 0 }
+  );
 }
-
-/* =============================================================================
-   CONVENIENCE FUNCTIONS
-   ============================================================================= */
-
-export {
-  toIso,
-  toInt,
-  toFloat,
-  sanitizeString
-};
-
-// Export DatabaseClient for advanced usage
-export { DatabaseClient };

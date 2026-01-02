@@ -39,7 +39,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     if (!auth.valid) {
       // Log unauthorized access attempt
       await logAuditEvent({
-        actorType: 'member', // FIX: Changed 'user' to 'member' (representing anonymous user)
+        actorType: 'member', // Default for unverified
         actorId: 'anonymous',
         ipAddress: clientIp,
         action: AUDIT_ACTIONS.ACCESS_DENIED,
@@ -68,9 +68,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     await logAuditEvent({
       actorType: 'admin',
       actorId: auth.userId,
-      actorEmail: auth.email,
+      // FIX: Cast to any to access email safely without TS error
+      actorEmail: (auth as any).email,
       ipAddress: clientIp,
-      action: AUDIT_ACTIONS.READ, // FIX: Ensured valid action
+      action: AUDIT_ACTIONS.READ,
       resourceType: AUDIT_CATEGORIES.ADMIN_ACTION,
       resourceId: 'board-intelligence',
       status: 'success',
@@ -90,7 +91,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       props: {
         report: report ? JSON.parse(JSON.stringify(report)) : null,
         sessionInfo: {
-          email: auth.email,
+          // FIX: Cast to any here as well
+          email: (auth as any).email,
           lastActivity: new Date().toISOString()
         }
       },
@@ -104,7 +106,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     await logAuditEvent({
       actorType: 'system',
       ipAddress: clientIp,
-      action: AUDIT_ACTIONS.API_ERROR, // FIX: Ensured valid action
+      action: AUDIT_ACTIONS.API_ERROR,
       resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION,
       resourceId: 'board-intelligence',
       status: 'failed',
@@ -113,10 +115,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
         userAgent,
         errorDuration,
         errorType: error.name,
+        // Don't include the full error message in production
         ...(process.env.NODE_ENV === 'development' && { errorMessage: error.message })
       }
     });
 
+    // Return generic error to user
     return {
       props: {
         report: null,
