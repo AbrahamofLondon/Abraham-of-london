@@ -1,146 +1,246 @@
+// contentlayer.config.ts
+// Enterprise-Grade Content Configuration
+// Windows-compatible, production-optimized, error-resilient
+
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import path from "path";
+import fs from "fs";
 
-/* -------------------------------------------------------------------------- */
-/* 1. COMPREHENSIVE FIELD DEFINITIONS WITH FUTURE-PROOFING                   */
-/* -------------------------------------------------------------------------- */
+/* ========================================================================== */
+/* PLATFORM COMPATIBILITY & SAFETY LAYER                                      */
+/* ========================================================================== */
 
-const commonFields = {
-  // === CORE METADATA ===
-  title: { type: "string", required: true },
-  subtitle: { type: "string", required: false },
-  date: { type: "date", required: false },
-  slug: { type: "string", required: false },
-  href: { type: "string", required: false },
-  description: { type: "string", required: false },
-  excerpt: { type: "string", required: false },
-  category: { type: "string", required: false },
-  author: { type: "string", required: false },
-  authorTitle: { type: "string", required: false },
-  readTime: { type: "string", required: false },
-  readtime: { type: "string", required: false }, // lowercase variant
-  
-  // === VISUAL & LAYOUT ===
-  coverImage: { type: "string", required: false },
-  coverAspect: { type: "string", required: false },
-  coverFit: { type: "string", required: false },
-  coverPosition: { type: "string", required: false },
-  layout: { type: "string", required: false },
-  theme: { type: "string", required: false },
-  
-  // === SEO & SOCIAL ===
-  ogTitle: { type: "string", required: false },
-  ogDescription: { type: "string", required: false },
-  socialCaption: { type: "string", required: false },
-  
-  // === CONTENT MANAGEMENT ===
-  draft: { type: "boolean", required: false, default: false },
-  featured: { type: "boolean", required: false, default: false },
-  archived: { type: "boolean", required: false, default: false },
-  published: { type: "boolean", required: false, default: true }, // FIXED: Added this field
-  lockMessage: { type: "string", required: false },
-  accessLevel: { type: "string", required: false },
-  available: { type: "boolean", required: false, default: true },
-  
-  // === TAXONOMY ===
-  tags: { type: "list", of: { type: "string" }, required: false },
-  audience: { type: "string", required: false },
-  resourceType: { type: "string", required: false },
-  
-  // === DOCUMENT-SPECIFIC IDENTIFIERS ===
-  volumeNumber: { type: "string", required: false },
-  order: { type: "number", required: false },
-  isbn: { type: "string", required: false },
-  bibleVerse: { type: "string", required: false },
-  
-  // === FILE & DOWNLOAD HANDLING ===
-  file: { type: "string", required: false },
-  downloadFile: { type: "string", required: false },
-  pdfPath: { type: "string", required: false },
-  downloadUrl: { type: "string", required: false },
-  fileUrl: { type: "string", required: false },
-  fileSize: { type: "string", required: false },
-  
-  // === EVENT MANAGEMENT ===
-  eventDate: { type: "date", required: false },
-  time: { type: "string", required: false },
-  registrationUrl: { type: "string", required: false },
-  location: { type: "string", required: false },
-  
-  // === CONTENT RELATIONSHIPS ===
-  resources: { type: "json", required: false },
-  relatedDownloads: { type: "list", of: { type: "string" }, required: false },
-  
-  // === FUTURE-PROOFING: COMMON FIELD PATTERNS ===
-  // Generic string fields for unexpected frontmatter
-  metaDescription: { type: "string", required: false },
-  keywords: { type: "list", of: { type: "string" }, required: false },
-  status: { type: "string", required: false },
-  priority: { type: "number", required: false },
-  
-  // Generic JSON for any structured data
-  meta: { type: "json", required: false },
-  customFields: { type: "json", required: false },
-  
-  // Generic lists
-  categories: { type: "list", of: { type: "string" }, required: false },
-  authors: { type: "list", of: { type: "string" }, required: false },
-} as const;
+const IS_WINDOWS = process.platform === 'win32';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
-/* -------------------------------------------------------------------------- */
-/* 2. DEFENSIVE COMPUTED FIELDS WITH FALLBACKS                               */
-/* -------------------------------------------------------------------------- */
+/**
+ * Windows-safe path normalization
+ * Handles backslashes, duplicate slashes, and preserves network paths
+ */
+const normalizePathForPlatform = (filePath: string): string => {
+  if (!filePath || typeof filePath !== 'string') return '';
+  
+  // Handle Windows paths
+  let normalized = filePath.replace(/\\/g, '/');
+  
+  // Remove duplicate slashes but preserve protocol (like file://)
+  normalized = normalized.replace(/([^:]\/)\/+/g, '$1');
+  
+  return normalized;
+};
 
-const computedCommon = (base: string) => ({
-  url: { 
-    type: "string", 
+/**
+ * Safe file existence check with error suppression
+ */
+const safeFileExists = (filePath: string): boolean => {
+  try {
+    const normalized = normalizePathForPlatform(filePath);
+    return fs.existsSync(normalized);
+  } catch (error) {
+    if (!IS_PRODUCTION) {
+      console.warn(`[Contentlayer] Could not check file: ${filePath}`, error.message);
+    }
+    return false;
+  }
+};
+
+/**
+ * Generate deterministic slug from file path
+ */
+const generateSlug = (filePath: string): string => {
+  const normalized = normalizePathForPlatform(filePath);
+  const fileName = path.basename(normalized, path.extname(normalized));
+  
+  return fileName
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    || 'untitled';
+};
+
+/* ========================================================================== */
+/* FIELD SCHEMA FACTORY (Type-safe, extensible)                               */
+/* ========================================================================== */
+
+type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'list' | 'json';
+type FieldDefinition = {
+  type: FieldType;
+  required: boolean;
+  default?: any;
+  of?: { type: FieldType };
+};
+
+const createFieldSchema = () => ({
+  // Core metadata
+  title: { type: 'string' as const, required: true },
+  description: { type: 'string' as const, required: false },
+  excerpt: { type: 'string' as const, required: false },
+  
+  // Dates
+  date: { type: 'date' as const, required: true },
+  updated: { type: 'date' as const, required: false },
+  publishDate: { type: 'date' as const, required: false },
+  expireDate: { type: 'date' as const, required: false },
+  
+  // Content identification
+  slug: { type: 'string' as const, required: false },
+  canonicalUrl: { type: 'string' as const, required: false },
+  
+  // Categorization
+  category: { type: 'string' as const, required: false },
+  categories: { 
+    type: 'list' as const, 
+    of: { type: 'string' as const }, 
+    required: false 
+  },
+  tags: { 
+    type: 'list' as const, 
+    of: { type: 'string' as const }, 
+    required: false 
+  },
+  
+  // Authorship
+  author: { type: 'string' as const, required: false },
+  authors: { 
+    type: 'list' as const, 
+    of: { type: 'string' as const }, 
+    required: false 
+  },
+  
+  // Visual assets
+  coverImage: { type: 'string' as const, required: false },
+  coverAspect: { type: 'string' as const, required: false },
+  
+  // Layout & theming
+  layout: { type: 'string' as const, required: false },
+  theme: { type: 'string' as const, required: false },
+  
+  // Reading metrics
+  readTime: { type: 'string' as const, required: false },
+  wordCount: { type: 'number' as const, required: false },
+  
+  // Publication status
+  draft: { type: 'boolean' as const, required: false, default: false },
+  published: { type: 'boolean' as const, required: false, default: true },
+  featured: { type: 'boolean' as const, required: false, default: false },
+  
+  // Access control
+  tier: { type: 'string' as const, required: false, default: 'free' },
+  accessLevel: { type: 'string' as const, required: false },
+  
+  // SEO
+  metaDescription: { type: 'string' as const, required: false },
+  keywords: { 
+    type: 'list' as const, 
+    of: { type: 'string' as const }, 
+    required: false 
+  },
+  
+  // Asset links (safe for Windows)
+  file: { type: 'string' as const, required: false },
+  downloadFile: { type: 'string' as const, required: false },
+  fileSize: { type: 'string' as const, required: false },
+  
+  // Structured data
+  resources: { type: 'json' as const, required: false },
+  meta: { type: 'json' as const, required: false },
+});
+
+/* ========================================================================== */
+/* COMPUTED FIELDS FACTORY (Error-resilient)                                  */
+/* ========================================================================== */
+
+const createComputedFields = (basePath: string) => ({
+  url: {
+    type: 'string' as const,
     resolve: (doc: any) => {
-      // Priority: href > slug > file path
-      if (doc.href && doc.href !== "#") return doc.href;
-      const slug = doc.slug || doc._raw.flattenedPath.split("/").pop();
-      return `/${base}/${slug}`.replace(/\/+/g, '/'); // Clean double slashes
+      try {
+        if (doc.canonicalUrl) return doc.canonicalUrl;
+        const slug = doc.slug || generateSlug(doc._raw.flattenedPath);
+        return `/${basePath}/${slug}`;
+      } catch (error) {
+        return `/${basePath}/error`;
+      }
     }
   },
-  // Defensive: Add file path for debugging
-  sourcePath: {
-    type: "string",
-    resolve: (doc: any) => doc._raw.flattenedPath
-  },
-  // Defensive: Publication status check
-  isPublished: {
-    type: "boolean",
+
+  computedSlug: {
+    type: 'string' as const,
     resolve: (doc: any) => {
-      const isDraft = doc.draft === true || doc.draft === "true";
-      const isArchived = doc.archived === true || doc.archived === "true";
-      const isPublished = doc.published === true || doc.published === "true" || doc.published === undefined;
-      return !isDraft && !isArchived && isPublished;
+      try {
+        return doc.slug || generateSlug(doc._raw.flattenedPath);
+      } catch (error) {
+        return 'error-slug';
+      }
+    }
+  },
+
+  isPublished: {
+    type: 'boolean' as const,
+    resolve: (doc: any) => {
+      return (doc.published !== false) && !doc.draft;
+    }
+  },
+
+  computedReadingTime: {
+    type: 'string' as const,
+    resolve: (doc: any) => {
+      return doc.readTime || '5 min read';
+    }
+  },
+
+  computedTier: {
+    type: 'string' as const,
+    resolve: (doc: any) => doc.tier || 'free'
+  },
+
+  fileInfo: {
+    type: 'json' as const,
+    resolve: (doc: any) => {
+      try {
+        const path = doc.file || doc.downloadFile || '';
+        const normalized = normalizePathForPlatform(path);
+        return {
+          path: normalized,
+          size: doc.fileSize || null,
+          extension: path ? path.split('.').pop()?.toLowerCase() : null,
+          exists: path ? safeFileExists(path) : false
+        };
+      } catch (error) {
+        return { error: 'Could not compute file info' };
+      }
     }
   }
 });
 
-/* -------------------------------------------------------------------------- */
-/* 3. DOCUMENT TYPES WITH SPECIFIC OVERRIDES                                 */
-/* -------------------------------------------------------------------------- */
+/* ========================================================================== */
+/* DOCUMENT TYPE FACTORY (Robust pattern matching)                            */
+/* ========================================================================== */
 
-// Helper for consistent type definitions
-const createDocumentType = (name: string, pattern: string, basePath: string, extraFields = {}) => 
-  defineDocumentType(() => ({
+const createDocumentType = (
+  name: string,
+  pattern: string,
+  basePath: string
+) => {
+  return defineDocumentType(() => ({
     name,
     filePathPattern: pattern,
-    contentType: "mdx",
-    fields: { ...commonFields, ...extraFields },
-    computedFields: computedCommon(basePath),
+    contentType: 'mdx' as const,
+    fields: createFieldSchema(),
+    computedFields: createComputedFields(basePath)
   }));
+};
+
+/* ========================================================================== */
+/* DOCUMENT TYPE DEFINITIONS (Your existing types, enhanced)                  */
+/* ========================================================================== */
 
 export const Post = createDocumentType("Post", "blog/**/*.{md,mdx}", "blog");
 export const Canon = createDocumentType("Canon", "canon/**/*.{md,mdx}", "canon");
-export const Download = createDocumentType(
-  "Download", 
-  "downloads/**/*.{md,mdx}", 
-  "downloads",
-  {}, // No extra fields needed - all in commonFields
-);
 export const Book = createDocumentType("Book", "books/**/*.{md,mdx}", "books");
 export const Short = createDocumentType("Short", "shorts/**/*.{md,mdx}", "shorts");
 export const Event = createDocumentType("Event", "events/**/*.{md,mdx}", "events");
@@ -162,60 +262,128 @@ export const Video = createDocumentType("Video", "videos/**/*.{md,mdx}", "videos
 export const Course = createDocumentType("Course", "courses/**/*.{md,mdx}", "courses");
 export const Lesson = createDocumentType("Lesson", "lessons/**/*.{md,mdx}", "lessons");
 export const Print = createDocumentType("Print", "prints/**/*.{md,mdx}", "prints");
+export const Download = createDocumentType("Download", "downloads/**/*.{md,mdx}", "downloads");
 
-// Add downloadPath computation to Download type
-const DownloadWithExtra = defineDocumentType(() => ({
-  name: "Download",
-  filePathPattern: "downloads/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: commonFields,
-  computedFields: {
-    ...computedCommon("downloads"),
-    downloadPath: {
-      type: "string",
-      resolve: (doc: any) => {
-        // Unified download path resolver with priority
-        return doc.file || doc.downloadFile || doc.downloadUrl || doc.pdfPath || doc.fileUrl || "";
-      }
-    },
-    fileInfo: {
-      type: "json",
-      resolve: (doc: any) => ({
-        path: doc.file || doc.downloadFile || doc.downloadUrl || doc.pdfPath || doc.fileUrl,
-        size: doc.fileSize,
-        type: doc.file?.split('.').pop() || doc.downloadFile?.split('.').pop() || 'unknown'
-      })
-    }
-  },
-}));
+/* ========================================================================== */
+/* SECURE FILE SYSTEM PATHS (Windows-safe exclusions)                         */
+/* ========================================================================== */
 
-/* -------------------------------------------------------------------------- */
-/* 4. ROBUST SOURCE CONFIGURATION                                            */
-/* -------------------------------------------------------------------------- */
+const SECURE_EXCLUSIONS = [
+  // System directories (absolute safety)
+  "**/node_modules/**",
+  "**/.git/**",
+  "**/.next/**",
+  "**/.contentlayer/**",
+  
+  // Public assets (prevent font/permission issues)
+  "**/public/**",
+  "**/fonts/**",
+  "**/assets/**",
+  "**/uploads/**",
+  
+  // Binary/non-text files
+  "**/*.ttf",
+  "**/*.woff",
+  "**/*.woff2",
+  "**/*.otf",
+  "**/*.eot",
+  "**/*.jpg",
+  "**/*.jpeg",
+  "**/*.png",
+  "**/*.gif",
+  "**/*.svg",
+  "**/*.pdf",
+  "**/*.zip",
+  "**/*.exe",
+  "**/*.dll",
+  "**/*.so",
+  "**/*.dylib",
+  
+  // Configuration and secrets
+  "**/.env*",
+  "**/*.secret*",
+  "**/*.key*",
+  
+  // Temporary files
+  "**/tmp/**",
+  "**/temp/**",
+  "**/*.tmp",
+  "**/*.temp",
+];
+
+/* ========================================================================== */
+/* MAIN CONFIGURATION (Production-ready, error-resilient)                     */
+/* ========================================================================== */
 
 export default makeSource({
+  // Core configuration
   contentDirPath: "content",
+  contentDirExclude: SECURE_EXCLUSIONS,
+  
+  // Document types (your complete set)
   documentTypes: [
-    Post, Book, DownloadWithExtra, Canon, Short, Event, Resource, Strategy, 
-    Article, Guide, Tutorial, CaseStudy, Whitepaper, Report, Newsletter, 
-    Sermon, Devotional, Prayer, Testimony, Podcast, Video, Course, Lesson, Print
+    Post, Canon, Book, Short, Event, Resource, Strategy,
+    Article, Guide, Tutorial, CaseStudy, Whitepaper, Report, Newsletter,
+    Sermon, Devotional, Prayer, Testimony, Podcast, Video, Course, Lesson, Print, Download
   ],
+  
+  // MDX processing
   mdx: {
     remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeSlug],
+    rehypePlugins: [
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { 
+        behavior: 'wrap',
+        properties: {
+          className: ['heading-anchor'],
+          'aria-hidden': 'true'
+        }
+      }]
+    ],
+    
+    // Error handling in MDX compilation
+    onCompileError: (error, filePath) => {
+      if (!IS_PRODUCTION) {
+        console.warn(`[Contentlayer] MDX compile error in ${filePath}:`, error.message);
+      }
+      return null; // Skip problematic files rather than failing
+    },
   },
-  // Defensive error handling
+  
+  // Error resilience configuration
   onUnknownDocuments: "skip-warn",
   onMissingOrIncompatibleData: "skip-warn",
-  onExtraFieldData: "warn", // Changed from default to warn instead of fail
+  onExtraFieldData: "skip-warn",
+  
+  // Performance optimizations
   disableImportAliasWarning: true,
+  date: { timezone: "UTC" },
   
-  // Future-proofing: Content directory exclusions
-  contentDirExclude: ['.*', '*.tmp', '*.bak', '_*'],
+  // File system safety
+  disableRecursivePathScan: true,
   
-  // Windows compatibility
-  date: {
-    timezone: "UTC",
-    locale: "en-US",
+  // Build optimization
+  onSuccess: async () => {
+    if (!IS_PRODUCTION) {
+      console.log('✅ Contentlayer build completed successfully');
+    }
+  },
+  
+  onError: (error) => {
+    console.error('❌ Contentlayer build failed:', error.message);
+    
+    // In production, fail fast
+    if (IS_PRODUCTION) {
+      throw error;
+    }
+    
+    // In development, continue with degraded functionality
+    console.warn('⚠️  Continuing with degraded content functionality');
   },
 });
+
+/* ========================================================================== */
+/* TYPE EXPORTS FOR CONSUMERS                                                 */
+/* ========================================================================== */
+
+export type { DocumentTypes } from 'contentlayer2/generated';

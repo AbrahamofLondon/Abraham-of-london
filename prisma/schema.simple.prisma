@@ -1,0 +1,20 @@
+// prisma/schema.simple.prisma
+// Minimal working schema for Prisma 7.2.0
+
+generator client {
+  provider = "prisma-client-js"
+  // No preview features initially
+}
+
+datasource db {
+  provider = "sqlite"
+  // URL in config.ts
+}
+
+model DownloadAuditEvent {
+  id          String   @id @default(cuid())
+  slug        String
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  @@map("download_audit_events")
+}

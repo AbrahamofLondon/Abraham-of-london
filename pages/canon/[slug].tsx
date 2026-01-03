@@ -1,4 +1,3 @@
-// pages/canon/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -13,8 +12,8 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
+// FIX: Removed 'Canon' from named imports as it is not exported by the module
 import { getAllCanons, getCanonDocBySlug, getAccessLevel, resolveCanonSlug } from "@/lib/canon";
-import type { Canon } from "@/lib/canon";
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
@@ -72,13 +71,14 @@ function getCanonMeta(doc: any, slug: string): CanonMeta {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const canons: Canon[] = getAllCanons();
+  // FIX: Removed explicit type ': Canon[]' to rely on inference
+  const canons = getAllCanons();
 
   const paths = canons
-    .filter((c) => c && !isDraft(c))
-    .map((c) => cleanSlug(resolveCanonSlug(c)))
+    .filter((c: any) => c && !isDraft(c))
+    .map((c: any) => cleanSlug(resolveCanonSlug(c)))
     .filter(Boolean)
-    .map((slug) => ({ params: { slug } }));
+    .map((slug: string) => ({ params: { slug } }));
 
   return { paths, fallback: false };
 };

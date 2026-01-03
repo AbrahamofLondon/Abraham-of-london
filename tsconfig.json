@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "es2022"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,99 +19,74 @@
         "name": "next"
       }
     ],
+    
+    /* Base URL & Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "contentlayer/generated": [
-        "./.contentlayer/generated"
-      ],
-      ".contentlayer/generated": [
-        "./.contentlayer/generated"
-      ]
+      "@/*": ["./*"],
+      "@/lib/*": ["./lib/*"],
+      "@/components/*": ["./components/*"],
+      "@/scripts/*": ["./scripts/*"],
+      "@/utils/*": ["./utils/*"],
+      "@/types/*": ["./types/*"],
+      "@/public/*": ["./public/*"],
+      "@/content/*": ["./content/*"]
     },
     
-    // --- RELAXED SETTINGS START HERE ---
-    
-    // 1. Array Access Safety: Disabled
-    // Fixes "Object is possibly undefined" when accessing arr[0]
-    "noUncheckedIndexedAccess": false,
-
-    // 2. Class Initialization: Disabled
-    // Allows defining class properties without immediate assignment in constructor
-    "strictPropertyInitialization": false,
-
-    // 3. Catch Variables: Relaxed
-    // Allows catch(e) to treat 'e' as 'any' instead of 'unknown' (no manual casting needed)
-    "useUnknownInCatchVariables": false,
-
-    // 4. Implicit Any: Relaxed
-    // Allows variables to implicitly be 'any' if type inference fails
-    "noImplicitAny": false,
-
-    // 5. Unused Code: Relaxed
-    // Stops compilation errors for unused variables during development
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-
-    // 6. Returns: Relaxed
-    // Allows functions to exit without an explicit return statement
-    "noImplicitReturns": false,
-
-    // --- RELAXED SETTINGS END ---
-
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noFallthroughCasesInSwitch": true,
+    /* --- MODERN TYPESCRIPT SETTINGS --- */
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "exactOptionalPropertyTypes": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,
     "noImplicitOverride": true,
+    "noImplicitReturns": false,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "useUnknownInCatchVariables": false,
+    
+    /* --- PERFORMANCE --- */
+    "verbatimModuleSyntax": false,
+    "preserveConstEnums": true,
+    "removeComments": false,
+    
+    /* --- ESM SUPPORT --- */
+    "moduleDetection": "force",
+    "resolvePackageJsonExports": true,
+    "resolvePackageJsonImports": true,
+    
+    /* --- TYPE SUPPORT --- */
     "types": [
       "node",
-      "@netlify/functions"
+      "react",
+      "react-dom",
+      "@netlify/functions",
+      "next"
     ],
     "typeRoots": [
       "./node_modules/@types",
       "./types"
-    ],
-    "outDir": "./dist",
-    "declaration": false,
-    "declarationMap": false,
-    "sourceMap": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "allowSyntheticDefaultImports": true,
-    "useDefineForClassFields": true,
-    "skipDefaultLibCheck": true,
-    "verbatimModuleSyntax": false
+    ]
   },
+  
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts",
+    "**/*.mts",
+    "**/*.cts",
     ".contentlayer/generated",
-    ".next/types/**/*.ts",
-    "netlify/**/*.ts",
-    "types/**/*.d.ts",
-    "scripts/**/*.ts",
-    "scripts/**/*.mjs",
-    "lib/**/*.ts",
-    "lib/**/*.tsx",
-    "components/**/*.ts",
-    "components/**/*.tsx",
-    "pages/**/*.ts",
-    "pages/**/*.tsx",
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "utils/**/*.ts",
-    "utils/**/*.tsx"
+    ".next/types/**/*.ts"
   ],
+  
   "exclude": [
     "node_modules",
     ".next",
@@ -124,21 +95,17 @@
     "dist",
     "build",
     "public",
-    "_tests_",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "cypress",
-    "playwright",
-    "jest.config.*",
-    "next.config.*",
-    "tailwind.config.*",
-    "postcss.config.*",
-    "*.config.ts",
-    "*.config.js",
-    "*.config.mjs",
+    ".netlify",
+    ".turbo",
+    
+    /* Test Files */
+    "**/*.test.*",
+    "**/*.spec.*",
     "**/__tests__/**",
-    "**/__mocks__/**"
+    "**/__mocks__/**",
+    
+    /* Configuration Files */
+    "**/*.config.*",
+    "**/*.d.ts"
   ]
 }

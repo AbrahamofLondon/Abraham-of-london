@@ -3,6 +3,35 @@
 
 import { blockPermanently, RATE_LIMIT_CONFIGS } from './rate-limit';
 
+// 1. Pre-compiled Patterns for Performance
+const SQL_INJECTION_PATTERNS = [
+  /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|DECLARE)\b)/i,
+  /(--|;|\/\*|\*\/|xp_|sp_)/i,
+  /(\bOR\b.*=|1\s*=\s*1|'.*'.*=.*')/i,
+  /(WAITFOR|DELAY|BENCHMARK|SLEEP)/i,
+];
+
+const XSS_PATTERNS = [
+  /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+  /javascript:/gi,
+  /on\w+\s*=/gi,
+  /<iframe/gi,
+  /<object/gi,
+  /<embed/gi,
+  /eval\s*\(/gi,
+  /expression\s*\(/gi,
+];
+
+const PATH_TRAVERSAL_PATTERNS = [
+  /\.\.\//g,
+  /\.\.\\/g,
+  /%2e%2e\//gi,
+  /%252e%252e\//gi,
+  /\.\.\%2f/gi,
+];
+
+const BAD_USER_AGENTS = ['sqlmap', 'nikto', 'nmap', 'masscan', 'metasploit', 'havij'];
+
 interface SecurityEvent {
   type: 'sql_injection' | 'xss' | 'path_traversal' | 'suspicious_headers' | 'rapid_requests' | 'brute_force';
   ip: string;
@@ -34,10 +63,16 @@ class SecurityMonitor {
     const count = (this.suspiciousIps.get(event.ip) || 0) + 1;
     this.suspiciousIps.set(event.ip, count);
 
+    // 2. Enhanced Blocking Logic using Configuration
+    // FIX: Switched from API_GENERAL to API_READ (which exists in your config)
+    // We access the 'max' property, defaulting to 60 if unavailable.
+    const baseLimit = (RATE_LIMIT_CONFIGS as any).API_READ?.max || 60;
+    const blockThreshold = Math.max(5, Math.floor(baseLimit / 10));
+
     // Auto-block for critical events or repeated offenders
-    if (event.severity === 'critical' || count >= 5) {
+    if (event.severity === 'critical' || count >= blockThreshold) {
       blockPermanently(event.ip);
-      console.error(`[Security] BLOCKED IP: ${event.ip} (${count} incidents)`);
+      console.error(`[Security] BLOCKED IP: ${event.ip} (${count} incidents, threshold: ${blockThreshold})`);
     }
 
     // Log based on severity
@@ -82,58 +117,37 @@ const monitor = new SecurityMonitor();
 // Detection functions
 
 export function detectSqlInjection(input: string): boolean {
-  const patterns = [
-    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|DECLARE)\b)/i,
-    /(--|;|\/\*|\*\/|xp_|sp_)/i,
-    /(\bOR\b.*=|1\s*=\s*1|'.*'.*=.*')/i,
-    /(WAITFOR|DELAY|BENCHMARK|SLEEP)/i,
-  ];
-  
-  return patterns.some(p => p.test(input));
+  if (!input) return false;
+  return SQL_INJECTION_PATTERNS.some(p => p.test(input));
 }
 
 export function detectXss(input: string): boolean {
-  const patterns = [
-    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-    /javascript:/gi,
-    /on\w+\s*=/gi,
-    /<iframe/gi,
-    /<object/gi,
-    /<embed/gi,
-    /eval\s*\(/gi,
-    /expression\s*\(/gi,
-  ];
-  
-  return patterns.some(p => p.test(input));
+  if (!input) return false;
+  return XSS_PATTERNS.some(p => p.test(input));
 }
 
 export function detectPathTraversal(input: string): boolean {
-  const patterns = [
-    /\.\.\//g,
-    /\.\.\\/g,
-    /%2e%2e\//gi,
-    /%252e%252e\//gi,
-    /\.\.\%2f/gi,
-  ];
-  
-  return patterns.some(p => p.test(input));
+  if (!input) return false;
+  return PATH_TRAVERSAL_PATTERNS.some(p => p.test(input));
 }
 
-export function detectSuspiciousHeaders(headers: Record<string, any>): string[] {
+export function detectSuspiciousHeaders(headers: Record<string, string | string[] | undefined>): string[] {
   const suspicious: string[] = [];
   
   // Check for suspicious user agents
   const ua = String(headers['user-agent'] || '').toLowerCase();
-  const badUserAgents = ['sqlmap', 'nikto', 'nmap', 'masscan', 'metasploit', 'havij'];
   
-  if (badUserAgents.some(bad => ua.includes(bad))) {
+  if (BAD_USER_AGENTS.some(bad => ua.includes(bad))) {
     suspicious.push('Suspicious user agent');
   }
 
   // Check for proxy headers manipulation
   const xForwardedFor = headers['x-forwarded-for'];
-  if (xForwardedFor && String(xForwardedFor).split(',').length > 5) {
-    suspicious.push('Excessive proxy chain');
+  if (xForwardedFor) {
+    const chain = Array.isArray(xForwardedFor) ? xForwardedFor : xForwardedFor.split(',');
+    if (chain.length > 5) {
+      suspicious.push('Excessive proxy chain');
+    }
   }
 
   // Check for unusual accept headers
@@ -180,7 +194,7 @@ export function securityMiddleware(req: any, endpoint: string): {
   const ip = getIpFromRequest(req);
 
   // Check headers
-  const headerIssues = detectSuspiciousHeaders(req.headers);
+  const headerIssues = detectSuspiciousHeaders(req.headers || {});
   if (headerIssues.length > 0) {
     issues.push(...headerIssues);
     logSecurityEvent('suspicious_headers', ip, endpoint, headerIssues.join(', '), 'medium');
@@ -209,16 +223,21 @@ export function securityMiddleware(req: any, endpoint: string): {
 
   // Check body
   if (req.body && typeof req.body === 'object') {
-    const bodyStr = JSON.stringify(req.body);
-    
-    if (detectSqlInjection(bodyStr)) {
-      issues.push('SQL injection in request body');
-      logSecurityEvent('sql_injection', ip, endpoint, 'Request body', 'critical');
-    }
-    
-    if (detectXss(bodyStr)) {
-      issues.push('XSS attempt in request body');
-      logSecurityEvent('xss', ip, endpoint, 'Request body', 'high');
+    try {
+      const bodyStr = JSON.stringify(req.body);
+      
+      if (detectSqlInjection(bodyStr)) {
+        issues.push('SQL injection in request body');
+        logSecurityEvent('sql_injection', ip, endpoint, 'Request body', 'critical');
+      }
+      
+      if (detectXss(bodyStr)) {
+        issues.push('XSS attempt in request body');
+        logSecurityEvent('xss', ip, endpoint, 'Request body', 'high');
+      }
+    } catch (e) {
+      // Body might be circular or unparsable; ignore but log warning
+      console.warn('[Security] Could not parse request body for scan', e);
     }
   }
 
@@ -239,15 +258,18 @@ function getIpFromRequest(req: any): string {
   for (const header of headers) {
     const value = req.headers?.[header];
     if (value) {
-      const ip = Array.isArray(value) ? value[0] : value;
-      return ip.split(',')[0].trim();
+      // Handle both string and string[] cases for headers
+      const ipRaw = Array.isArray(value) ? value[0] : value;
+      // Handle "IP1, IP2" format in single string
+      return ipRaw.split(',')[0].trim();
     }
   }
   
   return req.socket?.remoteAddress || 'unknown';
 }
 
-export default {
+// 3. Named Export Object to Satisfy Linter
+const securityMonitorExports = {
   detectSqlInjection,
   detectXss,
   detectPathTraversal,
@@ -259,3 +281,5 @@ export default {
   clearSecurityHistory,
   securityMiddleware,
 };
+
+export default securityMonitorExports;

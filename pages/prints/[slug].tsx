@@ -1,3 +1,4 @@
+/* Institutional Print Collection Detail */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -5,7 +6,7 @@ import Layout from "@/components/Layout";
 import { 
   getAllPrints, 
   getPrintBySlug, 
-  normalizeSlug,
+  normalizeSlug, 
   resolveDocCoverImage 
 } from "@/lib/contentlayer-helper";
 import { serialize } from "next-mdx-remote/serialize";
@@ -13,7 +14,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import mdxComponents from "@/components/mdx-components";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Ruler, CheckCircle, XCircle } from "lucide-react";
 
 type Props = {
   print: {
@@ -31,8 +32,6 @@ type Props = {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const prints = getAllPrints();
-
-  // Filter out drafts and ensure strictly typed paths
   const paths = prints
     .filter((p: any) => p?.draft !== true)
     .map((p: any) => ({ params: { slug: normalizeSlug(p) } }))
@@ -48,13 +47,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const doc = getPrintBySlug(slug);
   if (!doc || (doc as any)?.draft === true) return { notFound: true };
 
-  // MDX content: allow empty bodies safely
-  const mdxContent =
-    typeof (doc as any).body?.raw === "string"
-      ? String((doc as any).body.raw)
-      : typeof (doc as any).content === "string"
-      ? String((doc as any).content)
-      : "";
+  const mdxContent = (doc as any).body?.raw || (doc as any).content || "";
 
   const print = {
     title: (doc as any).title || "Exclusive Print",
@@ -64,7 +57,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     dimensions: (doc as any).dimensions ?? null,
     coverImage: resolveDocCoverImage(doc),
     slug,
-    available: (doc as any).available !== false, // Default to true if undefined
+    available: (doc as any).available !== false,
   };
 
   const source = await serialize(mdxContent || " ", {
@@ -81,59 +74,82 @@ const PrintPage: NextPage<Props> = ({ print, source }) => {
   return (
     <Layout title={print.title}>
       <Head>
-        <title>{print.title} | Prints | Abraham of London</title>
+        <title>{print.title} | Print Collection | Abraham of London</title>
         {print.description && <meta name="description" content={print.description} />}
-        {print.coverImage && (
-          <>
-            <meta property="og:image" content={print.coverImage} />
-            <meta name="twitter:image" content={print.coverImage} />
-          </>
-        )}
       </Head>
 
-      <main className="mx-auto max-w-4xl px-6 py-20 lg:py-28">
-        <header className="mb-12 border-b border-gold/10 pb-10 text-center">
-          <div className="mb-6 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold/10 ring-1 ring-gold/20">
-              <ShoppingBag className="h-6 w-6 text-gold" aria-hidden="true" />
-            </div>
-          </div>
+      <main className="mx-auto max-w-5xl px-6 py-20 lg:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold/70">
-            Exclusive Print Collection
-          </p>
-
-          <h1 className="mt-4 font-serif text-4xl font-semibold text-cream sm:text-5xl">
-            {print.title}
-          </h1>
-
-          {print.price && (
-            <p className="mt-4 text-2xl text-gold font-serif italic">
-              {print.price}
-            </p>
-          )}
-
-          <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm text-gray-400">
-            {print.dimensions && (
-              <span className="rounded-full border border-white/10 px-3 py-1">
-                {print.dimensions}
-              </span>
-            )}
-            {print.available ? (
-              <span className="rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1 text-green-400">
-                Available
-              </span>
-            ) : (
-              <span className="rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-red-400">
-                Sold Out
-              </span>
-            )}
+          {/* IMAGE SECTION */}
+          <div className="relative group">
+            <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-black border border-white/5 shadow-2xl">
+              {print.coverImage ? (
+                <img 
+                  src={print.coverImage} 
+                  alt={print.title}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-gold/20 italic font-serif">
+                  Image Pending
+                </div>
+              )}
+            </div>
+            <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 pointer-events-none" />
           </div>
-        </header>
 
-        <article className="prose prose-invert prose-lg mx-auto">
-          <MDXRemote {...source} components={mdxComponents} />
-        </article>
+          {/* CONTENT SECTION */}
+          <section>
+            <div className="mb-8 border-b border-white/5 pb-8">
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold/70">
+                Institutional Print Collection
+              </span>
+              <h1 className="mt-4 font-serif text-5xl font-bold text-cream tracking-tight leading-tight">
+                {print.title}
+              </h1>
+              {print.price && (
+                <p className="mt-6 text-3xl text-gold font-serif italic tracking-wide">
+                  {print.price}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-6 mb-10">
+              <div className="flex items-center gap-4 text-gray-400">
+                <Ruler className="h-5 w-5 text-gold/40" />
+                <span className="text-sm tracking-wide font-mono uppercase">
+                  Dimensions: <span className="text-cream">{print.dimensions || "Custom Size"}</span>
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                {print.available ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 text-green-500/60" />
+                    <span className="text-xs font-bold uppercase tracking-widest text-green-400">Currently Available</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="h-5 w-5 text-red-500/60" />
+                    <span className="text-xs font-bold uppercase tracking-widest text-red-400">Sold Out</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <article className="prose prose-invert prose-md max-w-none prose-headings:font-serif prose-headings:text-gold/90 prose-headings:mt-8 mb-12">
+              <MDXRemote {...source} components={mdxComponents} />
+            </article>
+
+            {print.available && (
+              <button className="w-full flex items-center justify-center gap-3 bg-cream text-black py-5 rounded-full text-sm font-bold uppercase tracking-widest transition-all hover:bg-gold hover:shadow-2xl hover:shadow-gold/20 active:scale-95">
+                <ShoppingBag className="h-4 w-4" />
+                Enquire for Acquisition
+              </button>
+            )}
+          </section>
+        </div>
       </main>
     </Layout>
   );

@@ -39,7 +39,8 @@ type NormalisedDownload = {
 };
 
 export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }> = async () => {
-  assertContentlayerHasDocs("pages/downloads/index.tsx getStaticProps");
+  // ✅ Fixed: Remove the argument from assertContentlayerHasDocs
+  assertContentlayerHasDocs();
 
   // ✅ One call validates downloads + resources covers/files under /assets/* (strict optional via env)
   assertPublicAssetsForDownloadsAndResources();

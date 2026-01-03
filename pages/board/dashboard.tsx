@@ -8,7 +8,7 @@ import { Users, Zap, Clock, ExternalLink } from "lucide-react";
 
 // FIX: Import Security Primitives
 import { validateAdminAccess } from "@/lib/server/validation";
-import { logAuditEvent } from "@/lib/server/audit";
+import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
 
 type DashboardProps = {
   members: any[];
@@ -26,9 +26,11 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   if (!auth.valid) {
     // Log the attempted breach
     await logAuditEvent({
-      actorType: "unknown",
-      action: "unauthorized_access",
-      resourceType: "board_dashboard",
+      // FIX: Changed "unknown" to "member" (representing anonymous/unverified user)
+      actorType: "member",
+      actorId: "anonymous", // Explicitly marking as anonymous
+      action: AUDIT_ACTIONS.ACCESS_DENIED, // Using constant instead of string literal
+      resourceType: AUDIT_CATEGORIES.ADMIN_ACTION, // Using constant
       status: "failed",
       ipAddress: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress,
       details: { 
@@ -65,8 +67,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     await logAuditEvent({
       actorType: "admin",
       actorId: auth.userId,
-      action: "view_dashboard",
-      resourceType: "board_dashboard",
+      action: AUDIT_ACTIONS.READ, // Using constant
+      resourceType: AUDIT_CATEGORIES.ADMIN_ACTION, // Using constant
       status: "success",
       details: { durationMs: Date.now() - startTime }
     });
@@ -84,8 +86,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     // Log the system failure
     await logAuditEvent({
       actorType: "system",
-      action: "dashboard_error",
-      resourceType: "board_dashboard",
+      action: AUDIT_ACTIONS.API_ERROR, // Using constant
+      resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION, // Using constant
       status: "failed",
       details: { error: String(error) }
     });

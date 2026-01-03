@@ -23,20 +23,16 @@ type Props = {
     coverImage: string | null;
     tags: string[];
     author: string | null;
-    url: string; // canonical route (computed)
-    slugPath: string; // path after /resources/
+    url: string;
+    slugPath: string;
   };
   source: MDXRemoteSerializeResult;
 };
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://www.abrahamoflondon.org";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://www.abrahamoflondon.org";
 
 function cleanResourcesPath(href: string): string | null {
   if (!href || typeof href !== "string") return null;
-  if (!href.startsWith("/resources")) return null;
-
-  // normalize "/resources" -> null, "/resources/foo/bar" -> "foo/bar"
   const rest = href.replace(/^\/resources\/?/, "").replace(/^\/+|\/+$/g, "");
   return rest || null;
 }
@@ -56,30 +52,28 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
             <meta name="twitter:image" content={resource.coverImage} />
           </>
         )}
-        <meta property="og:type" content="article" />
       </Head>
 
-      <main className="mx-auto max-w-3xl px-4 py-12">
-        <header className="mb-10 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-            Resources
+      <main className="mx-auto max-w-4xl px-6 py-16">
+        <header className="mb-12 border-b border-gold/10 pb-10">
+          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.4em] text-gold/60">
+            Institutional Resource
           </p>
 
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl">
+          <h1 className="font-serif text-4xl font-bold tracking-tight text-cream sm:text-5xl lg:text-6xl">
             {resource.title}
           </h1>
 
           {resource.excerpt && (
-            <p className="text-base leading-relaxed text-gray-200 sm:text-lg">{resource.excerpt}</p>
+            <p className="mt-6 text-xl leading-relaxed text-gray-400 font-light italic">
+              {resource.excerpt}
+            </p>
           )}
 
           {resource.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-2">
+            <div className="mt-8 flex flex-wrap gap-2">
               {resource.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center rounded-full border border-gold/20 bg-gold/5 px-3 py-1 text-xs font-medium text-gold/80"
-                >
+                <span key={tag} className="rounded-full border border-gold/20 bg-gold/5 px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-gold/80">
                   {tag}
                 </span>
               ))}
@@ -87,18 +81,15 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
           )}
         </header>
 
-        <article className="prose prose-invert prose-lg max-w-none">
+        <article className="prose prose-invert prose-lg max-w-none prose-headings:font-serif prose-headings:text-gold/90 prose-p:text-gray-300">
           <MDXRemote {...source} components={mdxComponents} />
         </article>
 
         {resource.date && (
-          <footer className="mt-12 border-t border-gold/10 pt-6">
-            <p className="text-sm text-gold/60">
-              Last updated:{" "}
-              {new Date(resource.date).toLocaleDateString("en-GB", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
+          <footer className="mt-16 border-t border-gold/10 pt-8">
+            <p className="text-xs font-mono uppercase tracking-widest text-gold/40">
+              Publication Checkpoint: {new Date(resource.date).toLocaleDateString("en-GB", {
+                year: "numeric", month: "long", day: "numeric"
               })}
             </p>
           </footer>
@@ -109,22 +100,20 @@ const ResourcesCatchAllPage: NextPage<Props> = ({ resource, source }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs("pages/resources/[...slug].tsx getStaticPaths");
+  // FIXED: Removed argument to resolve Type error: Expected 0 arguments, but got 1.
+  assertContentlayerHasDocs();
 
   const resources = getAllResources();
 
   const paths = resources
     .filter((r: any) => r?.draft !== true)
     .map((r: any) => {
-      const href = getDocHref(r); // prefers computed doc.url
+      const href = getDocHref(r);
       const slugPath = cleanResourcesPath(href);
       if (!slugPath) return null;
 
-      // --- CRITICAL FIX START ---
-      // We must exclude paths that already exist as physical files in pages/resources/
-      // to prevent "Conflicting paths" build error.
-      if (slugPath === "strategic-frameworks") return null;
-      // --- CRITICAL FIX END ---
+      const reservedPaths = ["strategic-frameworks", "archive"];
+      if (reservedPaths.includes(slugPath)) return null;
 
       return { params: { slug: slugPath.split("/").filter(Boolean) } };
     })
@@ -138,23 +127,13 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
   if (!slugArray.length) return { notFound: true };
 
   const urlPath = `/resources/${slugArray.join("/")}`;
-
   const resources = getAllResources();
   const doc = resources.find((r: any) => getDocHref(r) === urlPath);
 
   if (!doc || (doc as any)?.draft === true) return { notFound: true };
 
-  const content =
-    typeof (doc as any).body?.raw === "string"
-      ? String((doc as any).body.raw)
-      : typeof (doc as any).content === "string"
-      ? String((doc as any).content)
-      : "";
-
-  if (!content.trim()) {
-    // resources should contain content; but don’t hard-crash builds: 404 cleanly
-    return { notFound: true };
-  }
+  const content = (doc as any).body?.raw || (doc as any).content || "";
+  if (!content.trim()) return { notFound: true };
 
   const source = await serializeMDX(content);
 

@@ -14,11 +14,14 @@ import {
   isDraftContent,
   normalizeSlug,
   toUiDoc,
-  type UiDoc, // Add this type import
+  type ContentDoc, // Import the actual type from the helper
 } from "@/lib/contentlayer-helper";
 
+// Define the return type of toUiDoc based on the helper file
+type UiDoc = ReturnType<typeof toUiDoc>;
+
 type Props = {
-  doc: UiDoc; // Use the imported type
+  doc: UiDoc;
   source: MDXRemoteSerializeResult;
   canonicalPath: string;
 };
@@ -50,7 +53,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim().toLowerCase();
   if (!slug) return { notFound: true };
 
-  const rawDoc = getAllContentlayerDocs()
+  const rawDoc: ContentDoc | undefined = getAllContentlayerDocs()
     .filter((d) => !isDraftContent(d))
     .find((d) => getDocHref(d) === `/content/${slug}`);
 
@@ -72,8 +75,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
       },
     });
-  } catch (err) {
-    console.error(`❌ Failed to serialize MDX for: ${doc.title}`, err);
+  } catch (_err) {
+    console.error(`❌ Failed to serialize MDX for: ${doc.title}`, _err);
     source = await serialize("Content is being prepared for the Vault.");
   }
 

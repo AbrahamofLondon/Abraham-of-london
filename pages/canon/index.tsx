@@ -1,4 +1,3 @@
-// pages/canon/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -6,12 +5,12 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 
+// FIX: Removed 'Canon' type import as it is not exported by the module
 import {
   getAllCanons,
   getAccessLevel,
   resolveCanonSlug,
 } from "@/lib/canon";
-import type { Canon } from "@/lib/canon";
 
 // -----------------------------------------------------------------------------
 // TYPES
@@ -267,11 +266,12 @@ export default CanonIndexPage;
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
-  const canons: Canon[] = getAllCanons();
+  // FIX: Removed explicit ': Canon[]' type annotation
+  const canons = getAllCanons();
 
   const items: CanonItem[] = canons
-    .filter((c) => c && !isDraft(c))
-    .map((c) => {
+    .filter((c: any) => c && !isDraft(c))
+    .map((c: any) => {
       const slug = cleanSlug(resolveCanonSlug(c));
       const accessLevel = toAccessLevel(getAccessLevel(c));
 
@@ -286,7 +286,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
         accessLevel,
       };
     })
-    .filter((x) => Boolean(x.slug))
+    .filter((x: any) => Boolean(x.slug))
     // Sort newest-first if date exists; else stable by title
     .sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;

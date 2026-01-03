@@ -1,0 +1,805 @@
+// prisma/schema.prisma
+// Prisma 7.2.0 Schema with valid configuration
+// Enterprise-grade data modeling with full type safety
+
+generator client {
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+  
+  // Valid preview features for Prisma 7.2.0
+  previewFeatures = [
+    "postgresqlExtensions", 
+    "relationJoins", 
+    "schemaEngineDriverAdapters",
+    "shardKeys",
+    "strictUndefinedChecks",
+    "views",
+    "improvedQueryRaw"
+  ]
+}
+
+datasource db {
+  provider = "sqlite"
+  // URL configuration moved to prisma/config.ts for Prisma 7+ compliance
+}
+
+// ==================== ENUM DEFINITIONS ====================
+// SQLite doesn't support native enums, but we define them for documentation
+// and use string literals in the models for consistency
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+  ARCHIVED
+}
+
+enum KeyStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  PENDING
+  SUSPENDED
+}
+
+enum AuditSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILED
+  WARNING
+  PENDING
+}
+
+enum ActorType {
+  SYSTEM
+  API
+  MEMBER
+  ADMIN
+  CRON
+  WEBHOOK
+  EXTERNAL
+}
+
+enum ContentType {
+  PDF
+  EXCEL
+  POWERPOINT
+  ZIP
+  MARKDOWN
+  VIDEO
+  AUDIO
+  IMAGE
+  OTHER
+}
+
+enum TierLevel {
+  FREE
+  MEMBER
+  ARCHITECT
+  INNER_CIRCLE
+  ADMIN
+}
+
+// ==================== AUDIT & ANALYTICS MODELS ====================
+
+model DownloadAuditEvent {
+  // Primary identifier
+  id          String   @id @default(cuid())
+  
+  // Content reference
+  slug        String   @db.VarChar(255)
+  contentType String   @default("download") @map("content_type") @db.VarChar(50)
+  eventType   String   @default("download") @map("event_type") @db.VarChar(50)
+  
+  // Member association
+  memberId    String?  @map("member_id") @db.VarChar(36)
+  member      InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  
+  // File metadata
+  fileName    String?  @map("file_name") @db.VarChar(512)
+  fileSize    BigInt?  @map("file_size")
+  fileHash    String?  @map("file_hash") @db.VarChar(128)
+  
+  // User identification
+  userId      String?  @map("user_id") @db.VarChar(255)
+  email       String?  @db.VarChar(320)
+  emailHash   String?  @map("email_hash") @db.VarChar(128)
+  
+  // Session and device
+  sessionId   String?  @map("session_id") @db.VarChar(128)
+  deviceId    String?  @map("device_id") @db.VarChar(128)
+  userAgent   String?  @map("user_agent") @db.Text
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  ipHash      String?  @map("ip_hash") @db.VarChar(128)
+  
+  // Geolocation
+  countryCode String?  @map("country_code") @db.VarChar(2)
+  region      String?  @db.VarChar(100)
+  city        String?  @db.VarChar(100)
+  
+  // Marketing attribution
+  referrer    String?  @db.Text
+  utmSource   String?  @map("utm_source") @db.VarChar(100)
+  utmMedium   String?  @map("utm_medium") @db.VarChar(100)
+  utmCampaign String?  @map("utm_campaign") @db.VarChar(100)
+  utmTerm     String?  @map("utm_term") @db.VarChar(100)
+  utmContent  String?  @map("utm_content") @db.VarChar(100)
+  
+  // Performance metrics
+  statusCode  Int?     @map("status_code")
+  latencyMs   Int?     @map("latency_ms")
+  success     Boolean  @default(true)
+  
+  // Error tracking
+  errorCode   String?  @map("error_code") @db.VarChar(50)
+  errorDetail String?  @map("error_detail") @db.Text
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  processedAt DateTime? @map("processed_at")
+  completedAt DateTime? @map("completed_at")
+  
+  // Retention and cleanup
+  retentionDays Int?    @default(365) @map("retention_days")
+  archivedAt    DateTime? @map("archived_at")
+  
+  // Indexes
+  @@index([slug], name: "idx_download_slug")
+  @@index([createdAt], name: "idx_download_created_at")
+  @@index([memberId], name: "idx_download_member_id")
+  @@index([emailHash], name: "idx_download_email_hash")
+  @@index([sessionId], name: "idx_download_session_id")
+  @@index([ipHash], name: "idx_download_ip_hash")
+  @@index([contentType, createdAt], name: "idx_download_content_type_date")
+  @@index([success, createdAt], name: "idx_download_success_date")
+  
+  @@map("download_audit_events")
+}
+
+model ShortInteraction {
+  // Primary identifier
+  id         Int      @id @default(autoincrement())
+  
+  // Interaction reference
+  shortSlug  String   @map("short_slug") @db.VarChar(100)
+  sessionId  String?  @map("session_id") @db.VarChar(128)
+  
+  // User identification
+  emailHash  String?  @map("email_hash") @db.VarChar(128)
+  memberId   String?  @map("member_id") @db.VarChar(36)
+  member     InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  
+  // Action data
+  action     String   @db.VarChar(100)
+  subAction  String?  @map("sub_action") @db.VarChar(100)
+  metadata   String?  @db.Text // JSON string
+  
+  // Technical data
+  userAgent  String?  @map("user_agent") @db.Text
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  ipHash     String?  @map("ip_hash") @db.VarChar(128)
+  
+  // Device and browser
+  deviceType String?  @map("device_type") @db.VarChar(50)
+  browser    String?  @db.VarChar(100)
+  os         String?  @db.VarChar(100)
+  screenSize String?  @map("screen_size") @db.VarChar(20)
+  
+  // Engagement metrics
+  durationMs Int?     @map("duration_ms")
+  scrollDepth Int?    @map("scroll_depth")
+  elementCount Int?   @map("element_count")
+  
+  // Timestamps
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+  
+  // Indexes
+  @@index([shortSlug], name: "idx_short_interaction_slug")
+  @@index([memberId], name: "idx_short_interaction_member")
+  @@index([emailHash], name: "idx_short_interaction_email")
+  @@index([createdAt], name: "idx_short_interaction_date")
+  @@index([action, createdAt], name: "idx_short_interaction_action_date")
+  @@index([sessionId, createdAt], name: "idx_short_interaction_session_date")
+  
+  @@map("short_interactions")
+}
+
+model StrategyRoomIntake {
+  // Primary identifier
+  id                String   @id @default(cuid())
+  
+  // Contact information
+  fullName          String   @map("full_name") @db.VarChar(200)
+  emailHash         String   @map("email_hash") @db.VarChar(128)
+  email             String?  @db.VarChar(320)
+  organisation      String   @db.VarChar(200)
+  position          String?  @db.VarChar(100)
+  
+  // Assessment data
+  status            String   @default("submitted") @db.VarChar(50)
+  score             Int      @default(0)
+  decisionStatement String   @map("decision_statement") @db.Text
+  payload           String   @db.Text // JSON string
+  
+  // Segmentation
+  segment           String?  @db.VarChar(50)
+  priority          Int?     @default(0)
+  tags              String?  @db.Text // JSON array
+  
+  // Processing
+  assignedTo        String?  @map("assigned_to") @db.VarChar(100)
+  notes             String?  @db.Text
+  processedAt       DateTime? @map("processed_at")
+  followUpDate      DateTime? @map("follow_up_date")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Indexes
+  @@index([status], name: "idx_strategy_intake_status")
+  @@index([emailHash], name: "idx_strategy_intake_email")
+  @@index([createdAt], name: "idx_strategy_intake_date")
+  @@index([segment, createdAt], name: "idx_strategy_intake_segment_date")
+  @@index([priority, createdAt], name: "idx_strategy_intake_priority_date")
+  
+  @@map("strategy_room_intakes")
+}
+
+// ==================== CORE MEMBERSHIP MODELS ====================
+
+model InnerCircleMember {
+  // Primary identifier
+  id              String   @id @default(uuid()) @db.VarChar(36)
+  
+  // Authentication and identification
+  emailHash       String   @unique @map("email_hash") @db.VarChar(128)
+  emailHashPrefix String   @map("email_hash_prefix") @db.VarChar(10)
+  email           String?  @unique @db.VarChar(320)
+  
+  // Profile information
+  name            String?  @db.VarChar(200)
+  title           String?  @db.VarChar(100)
+  organization    String?  @db.VarChar(200)
+  location        String?  @db.VarChar(200)
+  
+  // Membership status
+  status          String   @default("active") @db.VarChar(20)
+  tier            String   @default("standard") @db.VarChar(20)
+  joinedAt        DateTime @default(now()) @map("joined_at")
+  
+  // Security and access
+  isVerified      Boolean  @default(false) @map("is_verified")
+  verificationToken String? @map("verification_token") @db.VarChar(128)
+  verificationExpires DateTime? @map("verification_expires")
+  resetToken      String?  @map("reset_token") @db.VarChar(128)
+  resetExpires    DateTime? @map("reset_expires")
+  passwordHash    String?  @map("password_hash") @db.VarChar(255)
+  
+  // Activity tracking
+  lastSeenAt      DateTime @default(now()) @map("last_seen_at")
+  lastLoginAt     DateTime? @map("last_login_at")
+  lastIp          String?  @map("last_ip") @db.VarChar(45)
+  loginCount      Int      @default(0) @map("login_count")
+  failedLoginAttempts Int  @default(0) @map("failed_login_attempts")
+  lockedUntil     DateTime? @map("locked_until")
+  
+  // Preferences and settings
+  preferences     String?  @db.Text // JSON string
+  flags           String?  @db.Text // JSON array
+  metadata        String?  @db.Text // JSON object
+  
+  // Subscription data
+  subscriptionId  String?  @map("subscription_id") @db.VarChar(100)
+  subscriptionTier String? @map("subscription_tier") @db.VarChar(50)
+  subscriptionStatus String? @map("subscription_status") @db.VarChar(50)
+  subscriptionExpires DateTime? @map("subscription_expires")
+  
+  // Compliance
+  acceptedTermsAt DateTime? @map("accepted_terms_at")
+  dataConsentAt   DateTime? @map("data_consent_at")
+  marketingOptIn  Boolean   @default(false) @map("marketing_opt_in")
+  
+  // Timestamps
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  archivedAt      DateTime? @map("archived_at")
+  
+  // Relationships
+  keys            InnerCircleKey[]
+  auditEvents     DownloadAuditEvent[]
+  interactions    ShortInteraction[]
+  sessions        Session[]
+  contentAccess   ContentAccess[]
+  
+  // Indexes
+  @@index([status], name: "idx_member_status")
+  @@index([tier], name: "idx_member_tier")
+  @@index([createdAt], name: "idx_member_created")
+  @@index([emailHashPrefix], name: "idx_member_email_prefix")
+  @@index([subscriptionStatus], name: "idx_member_subscription")
+  @@index([lastSeenAt], name: "idx_member_last_seen")
+  @@index([joinedAt], name: "idx_member_joined")
+  
+  @@map("inner_circle_members")
+}
+
+model InnerCircleKey {
+  // Primary identifier
+  id            String    @id @default(uuid()) @db.VarChar(36)
+  
+  // Member association
+  memberId      String    @map("member_id") @db.VarChar(36)
+  member        InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  // Key data
+  keyHash       String    @unique @map("key_hash") @db.VarChar(128)
+  keySuffix     String    @map("key_suffix") @db.VarChar(10)
+  keyType       String    @default("standard") @map("key_type") @db.VarChar(20)
+  
+  // Status
+  status        String    @default("active") @db.VarChar(20)
+  totalUnlocks  Int       @default(0) @map("total_unlocks")
+  
+  // Usage tracking
+  lastUsedAt    DateTime? @map("last_used_at")
+  lastIp        String?   @map("last_ip") @db.VarChar(45)
+  lastUserAgent String?   @map("last_user_agent") @db.Text
+  
+  // Validity
+  createdAt     DateTime  @default(now()) @map("created_at")
+  expiresAt     DateTime? @map("expires_at")
+  revokedAt     DateTime? @map("revoked_at")
+  revokedReason String?   @map("revoked_reason") @db.VarChar(255)
+  
+  // Metadata
+  metadata      String?   @db.Text // JSON string
+  tags          String?   @db.Text // JSON array
+  
+  // Security
+  algorithm     String?   @default("sha256") @db.VarChar(20)
+  iterations    Int?      @default(100000)
+  salt          String?   @db.VarChar(64)
+  
+  // Indexes
+  @@index([memberId], name: "idx_key_member")
+  @@index([status], name: "idx_key_status")
+  @@index([expiresAt], name: "idx_key_expires")
+  @@index([revokedAt], name: "idx_key_revoked")
+  @@index([keyType], name: "idx_key_type")
+  @@index([createdAt], name: "idx_key_created")
+  @@index([lastUsedAt], name: "idx_key_last_used")
+  
+  @@map("inner_circle_keys")
+}
+
+// ==================== CONTENT MANAGEMENT ====================
+
+model ContentMetadata {
+  // Primary identifier
+  id                String    @id @default(cuid())
+  
+  // Content identification
+  slug              String    @unique @db.VarChar(255)
+  title             String    @db.VarChar(200)
+  description       String?   @db.Text
+  contentType       String    @map("content_type") @db.VarChar(50)
+  format            String?   @db.VarChar(50)
+  version           String?   @default("1.0.0") @db.VarChar(20)
+  
+  // Access control
+  tierRequirement   String?   @map("tier_requirement") @db.VarChar(20)
+  requiresAuth      Boolean   @default(false) @map("requires_auth")
+  isPublic          Boolean   @default(true) @map("is_public")
+  
+  // File metadata
+  filePath          String?   @map("file_path") @db.VarChar(512)
+  fileSize          BigInt?   @map("file_size")
+  fileHash          String?   @map("file_hash") @db.VarChar(128)
+  mimeType          String?   @map("mime_type") @db.VarChar(100)
+  
+  // Usage statistics
+  totalDownloads    Int       @default(0) @map("total_downloads")
+  uniqueDownloaders Int       @default(0) @map("unique_downloaders")
+  viewCount         Int       @default(0) @map("view_count")
+  shareCount        Int       @default(0) @map("share_count")
+  likeCount         Int       @default(0) @map("like_count")
+  commentCount      Int       @default(0) @map("comment_count")
+  
+  // Quality metrics
+  rating            Float?    @default(0.0)
+  ratingCount       Int       @default(0) @map("rating_count")
+  averageRating     Float?    @default(0.0) @map("average_rating")
+  
+  // Activity tracking
+  lastDownloadAt    DateTime? @map("last_download_at")
+  lastViewedAt      DateTime? @map("last_viewed_at")
+  
+  // Organization
+  category          String?   @db.VarChar(100)
+  subcategory       String?   @db.VarChar(100)
+  tags              String?   @db.Text // JSON array
+  metadata          String?   @db.Text // JSON object
+  
+  // Lifecycle
+  publishedAt       DateTime? @map("published_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+  archivedAt        DateTime? @map("archived_at")
+  
+  // Timestamps
+  createdAt         DateTime  @default(now()) @map("created_at")
+  
+  // Relationships
+  accessRecords     ContentAccess[]
+  
+  // Indexes
+  @@index([contentType], name: "idx_content_type")
+  @@index([createdAt], name: "idx_content_created")
+  @@index([slug], name: "idx_content_slug")
+  @@index([category], name: "idx_content_category")
+  @@index([tierRequirement], name: "idx_content_tier")
+  @@index([publishedAt], name: "idx_content_published")
+  @@index([totalDownloads], name: "idx_content_popularity")
+  
+  @@map("content_metadata")
+}
+
+model ContentAccess {
+  // Primary identifier
+  id              String   @id @default(cuid())
+  
+  // Content reference
+  contentId       String   @map("content_id") @db.VarChar(36)
+  content         ContentMetadata @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  // User reference
+  memberId        String?  @map("member_id") @db.VarChar(36)
+  member          InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  // Access data
+  emailHash       String?  @map("email_hash") @db.VarChar(128)
+  sessionId       String?  @map("session_id") @db.VarChar(128)
+  accessType      String   @default("download") @map("access_type") @db.VarChar(50)
+  
+  // Device and location
+  userAgent       String?  @map("user_agent") @db.Text
+  ipAddress       String?  @map("ip_address") @db.VarChar(45)
+  countryCode     String?  @map("country_code") @db.VarChar(2)
+  
+  // Access control
+  grantedAt       DateTime @default(now()) @map("granted_at")
+  expiresAt       DateTime? @map("expires_at")
+  revokedAt       DateTime? @map("revoked_at")
+  accessToken     String?  @map("access_token") @db.VarChar(255)
+  
+  // Usage tracking
+  downloadCount   Int      @default(0) @map("download_count")
+  lastDownloadAt  DateTime? @map("last_download_at")
+  
+  // Timestamps
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  // Indexes
+  @@index([contentId], name: "idx_access_content")
+  @@index([memberId], name: "idx_access_member")
+  @@index([emailHash], name: "idx_access_email")
+  @@index([grantedAt], name: "idx_access_granted")
+  @@index([accessType], name: "idx_access_type")
+  @@index([contentId, memberId], name: "idx_access_content_member")
+  
+  @@map("content_access")
+}
+
+// ==================== SUPPORTING MODELS ====================
+
+model Session {
+  // Primary identifier
+  id           String   @id @default(cuid())
+  
+  // Session identification
+  sessionId    String   @unique @map("session_id") @db.VarChar(128)
+  memberId     String?  @map("member_id") @db.VarChar(36)
+  member       InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  // Authentication data
+  emailHash    String?  @map("email_hash") @db.VarChar(128)
+  authMethod   String?  @map("auth_method") @db.VarChar(50)
+  
+  // Device information
+  userAgent    String?  @map("user_agent") @db.Text
+  ipAddress    String?  @map("ip_address") @db.VarChar(45)
+  deviceId     String?  @map("device_id") @db.VarChar(128)
+  deviceType   String?  @map("device_type") @db.VarChar(50)
+  
+  // Session state
+  data         String?  @db.Text // JSON string
+  isActive     Boolean  @default(true) @map("is_active")
+  
+  // Validity
+  createdAt    DateTime @default(now()) @map("created_at")
+  expiresAt    DateTime @map("expires_at")
+  lastActivity DateTime @default(now()) @map("last_activity")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  // Security
+  csrfToken    String?  @map("csrf_token") @db.VarChar(128)
+  refreshToken String?  @map("refresh_token") @db.VarChar(255)
+  
+  // Indexes
+  @@index([sessionId], name: "idx_session_id")
+  @@index([memberId], name: "idx_session_member")
+  @@index([emailHash], name: "idx_session_email")
+  @@index([expiresAt], name: "idx_session_expires")
+  @@index([lastActivity], name: "idx_session_activity")
+  @@index([isActive], name: "idx_session_active")
+  
+  @@map("sessions")
+}
+
+model SystemAuditLog {
+  // Primary identifier
+  id           String   @id @default(cuid())
+  
+  // Actor information
+  actorType    String   @map("actor_type") @db.VarChar(50)
+  actorId      String?  @map("actor_id") @db.VarChar(36)
+  actorEmail   String?  @map("actor_email") @db.VarChar(320)
+  actorName    String?  @map("actor_name") @db.VarChar(200)
+  
+  // Technical context
+  ipAddress    String?  @map("ip_address") @db.VarChar(45)
+  userAgent    String?  @map("user_agent") @db.Text
+  requestId    String?  @map("request_id") @db.VarChar(128)
+  sessionId    String?  @map("session_id") @db.VarChar(128)
+  
+  // Action details
+  action       String   @db.VarChar(100)
+  resourceType String   @map("resource_type") @db.VarChar(100)
+  resourceId   String?  @map("resource_id") @db.VarChar(36)
+  resourcePath String?  @map("resource_path") @db.VarChar(512)
+  
+  // Change tracking
+  oldValue     String?  @map("old_value") @db.Text
+  newValue     String?  @map("new_value") @db.Text
+  diff         String?  @db.Text // JSON diff
+  
+  // Status and severity
+  status       String   @default("success") @db.VarChar(20)
+  severity     String   @default("low") @db.VarChar(20)
+  
+  // Error information
+  errorCode    String?  @map("error_code") @db.VarChar(50)
+  errorMessage String?  @map("error_message") @db.Text
+  stackTrace   String?  @map("stack_trace") @db.Text
+  
+  // Performance
+  durationMs   Int?     @map("duration_ms")
+  memoryUsage  BigInt?  @map("memory_usage")
+  
+  // Metadata
+  metadata     Json?
+  category     String?  @db.VarChar(50)
+  subCategory  String?  @map("sub_category") @db.VarChar(50)
+  tags         String?  @db.Text // JSON array
+  
+  // Timestamps
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  // Indexes
+  @@index([actorType], name: "idx_audit_actor_type")
+  @@index([actorId], name: "idx_audit_actor_id")
+  @@index([action], name: "idx_audit_action")
+  @@index([resourceType], name: "idx_audit_resource_type")
+  @@index([status], name: "idx_audit_status")
+  @@index([severity], name: "idx_audit_severity")
+  @@index([createdAt], name: "idx_audit_created")
+  @@index([category, createdAt], name: "idx_audit_category_date")
+  @@index([actorType, createdAt], name: "idx_audit_actor_date")
+  @@index([resourceType, resourceId], name: "idx_audit_resource")
+  
+  @@map("system_audit_logs")
+}
+
+model ApiRateLimit {
+  // Primary identifier
+  id           Int      @id @default(autoincrement())
+  
+  // Identification
+  identifier   String   @db.VarChar(255)
+  bucketType   String   @map("bucket_type") @db.VarChar(50)
+  endpoint     String?  @db.VarChar(255)
+  method       String?  @db.VarChar(10)
+  
+  // Rate limiting
+  requestCount Int      @default(0) @map("request_count")
+  limit        Int      @default(100) @map("limit")
+  windowStart  DateTime @map("window_start")
+  windowEnd    DateTime @map("window_end")
+  
+  // Usage tracking
+  lastRequest  DateTime @map("last_request")
+  firstRequest DateTime @map("first_request")
+  
+  // Metadata
+  userAgent    String?  @map("user_agent") @db.Text
+  ipAddress    String?  @map("ip_address") @db.VarChar(45)
+  
+  // Timestamps
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  // Unique constraint and indexes
+  @@unique([identifier, bucketType, windowStart], name: "uq_rate_limit_window")
+  @@index([identifier], name: "idx_rate_limit_identifier")
+  @@index([windowStart], name: "idx_rate_limit_window_start")
+  @@index([windowEnd], name: "idx_rate_limit_window_end")
+  @@index([endpoint, method], name: "idx_rate_limit_endpoint")
+  @@index([ipAddress], name: "idx_rate_limit_ip")
+  
+  @@map("api_rate_limits")
+}
+
+model CacheEntry {
+  // Primary identifier
+  id        String   @id @default(cuid())
+  
+  // Cache key
+  key       String   @unique @db.VarChar(512)
+  namespace String?  @default("default") @db.VarChar(100)
+  
+  // Cache value
+  value     String   @db.Text // JSON string
+  compressed Boolean @default(false)
+  size      Int      @default(0)
+  
+  // Metadata
+  tags      String?  @db.Text // JSON array
+  metadata  String?  @db.Text // JSON object
+  hits      Int      @default(0)
+  
+  // Validity
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Indexes
+  @@index([key], name: "idx_cache_key")
+  @@index([expiresAt], name: "idx_cache_expires")
+  @@index([namespace], name: "idx_cache_namespace")
+  @@index([createdAt], name: "idx_cache_created")
+  @@index([hits], name: "idx_cache_hits")
+  
+  @@map("cache_entries")
+}
+
+model SystemConfig {
+  // Primary identifier
+  id          String   @id @default(cuid())
+  
+  // Configuration key
+  key         String   @unique @db.VarChar(255)
+  namespace   String?  @default("global") @db.VarChar(100)
+  group       String?  @default("general") @db.VarChar(100)
+  
+  // Configuration value
+  value       String   @db.Text // JSON string
+  type        String   @default("string") @db.VarChar(20)
+  encrypted   Boolean  @default(false)
+  
+  // Metadata
+  description String?  @db.Text
+  isPublic    Boolean  @default(false) @map("is_public")
+  isRequired  Boolean  @default(false) @map("is_required")
+  validation  String?  @db.Text // JSON validation schema
+  
+  // Versioning
+  version     String?  @default("1.0.0") @db.VarChar(20)
+  previousValue String? @map("previous_value") @db.Text
+  
+  // Audit
+  updatedBy   String?  @map("updated_by") @db.VarChar(100)
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  // Indexes
+  @@index([key], name: "idx_config_key")
+  @@index([namespace], name: "idx_config_namespace")
+  @@index([group], name: "idx_config_group")
+  @@index([isPublic], name: "idx_config_public")
+  @@index([createdAt], name: "idx_config_created")
+  
+  @@map("system_configs")
+}
+
+model FailedJob {
+  // Primary identifier
+  id         String   @id @default(cuid())
+  
+  // Job identification
+  queue      String   @db.VarChar(100)
+  jobName    String   @map("job_name") @db.VarChar(200)
+  jobId      String?  @map("job_id") @db.VarChar(100)
+  
+  // Job data
+  payload    String   @db.Text // JSON string
+  error      String   @db.Text
+  stackTrace String?  @map("stack_trace") @db.Text
+  
+  // Failure tracking
+  failedAt   DateTime @default(now()) @map("failed_at")
+  retryCount Int      @default(0) @map("retry_count")
+  maxRetries Int      @default(3) @map("max_retries")
+  nextRetry  DateTime? @map("next_retry")
+  
+  // Context
+  workerId   String?  @map("worker_id") @db.VarChar(100)
+  hostname   String?  @db.VarChar(255)
+  
+  // Timestamps
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  
+  // Indexes
+  @@index([queue], name: "idx_failed_job_queue")
+  @@index([failedAt], name: "idx_failed_job_date")
+  @@index([nextRetry], name: "idx_failed_job_next_retry")
+  @@index([jobName], name: "idx_failed_job_name")
+  @@index([retryCount], name: "idx_failed_job_retries")
+  
+  @@map("failed_jobs")
+}
+
+model MaintenanceLog {
+  // Primary identifier
+  id          String   @id @default(cuid())
+  
+  // Operation details
+  operation   String   @db.VarChar(200)
+  description String?  @db.Text
+  category    String?  @db.VarChar(100)
+  
+  // Status tracking
+  status      String   @default("pending") @db.VarChar(20)
+  startedAt   DateTime @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  durationMs  Int?     @map("duration_ms")
+  
+  // Progress
+  progress    Float?   @default(0.0)
+  currentStep String?  @map("current_step") @db.VarChar(200)
+  totalSteps  Int?     @map("total_steps")
+  
+  // Logs and output
+  logs        String?  @db.Text // JSON array of log messages
+  output      String?  @db.Text
+  error       String?  @db.Text
+  warnings    String?  @db.Text // JSON array
+  
+  // Metadata
+  metadata    String?  @db.Text // JSON object
+  createdBy   String?  @map("created_by") @db.VarChar(100)
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Indexes
+  @@index([operation], name: "idx_maintenance_operation")
+  @@index([status], name: "idx_maintenance_status")
+  @@index([startedAt], name: "idx_maintenance_started")
+  @@index([category], name: "idx_maintenance_category")
+  @@index([createdBy], name: "idx_maintenance_creator")
+  
+  @@map("maintenance_logs")
+}

@@ -1,62 +1,48 @@
-import { PrismaClient } from "@prisma/client";
+// lib/prisma.ts
+// Prisma 7.2.0 Client with SQLite adapter
 
-/* -------------------------------------------------------------------------- */
-/* 1. RUNTIME DETECTION & POLYFILLS                                           */
-/* -------------------------------------------------------------------------- */
+import { PrismaClient } from '@prisma/client';
 
-// Safe access to global scope to avoid linter errors about "setImmediate"
-const globalAny = globalThis as any;
+// Try to load the SQLite adapter (may fail if not installed)
+let prisma: PrismaClient;
 
-// Polyfill setImmediate for Edge/Wasm environments if missing
-// We access it via string index to hide it from Next.js static analysis
-if (typeof globalAny['setImmediate'] === 'undefined') {
-  globalAny['setImmediate'] = (cb: (...args: any[]) => void, ...args: any[]) => {
-    return setTimeout(cb, 0, ...args);
-  };
-}
-
-const isEdge = process.env.NEXT_RUNTIME === 'edge';
-
-/* -------------------------------------------------------------------------- */
-/* 2. CLIENT FACTORY                                                          */
-/* -------------------------------------------------------------------------- */
-
-// Declare global extension for development mode
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma: PrismaClient | undefined;
-}
-
-function makePrismaClient() {
-  // PREVENT EDGE INSTANTIATION: 
-  // If this runs in Edge, we return undefined or a dummy to prevent crashes.
-  // Real database calls will fail, which is expected (Edge shouldn't touch SQLite).
-  if (isEdge) {
-    return new Proxy({} as PrismaClient, {
-      get: () => {
-        throw new Error("PrismaClient cannot be used in Edge Runtime with SQLite.");
-      }
-    });
-  }
-
-  const datasourceUrl = process.env.DATABASE_URL;
+try {
+  // Dynamic imports for optional dependencies
+  const { PrismaBetterSqlite3 } = await import('@prisma/adapter-better-sqlite3');
+  const BetterSqlite3 = (await import('better-sqlite3')).default;
   
-  return new PrismaClient({
-    datasourceUrl,
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-    errorFormat: "minimal",
+  // Get database path from environment
+  const dbPath = process.env.DATABASE_URL?.replace(/^file:/, '') || './dev.db';
+  
+  // Create SQLite instance and adapter
+  const sqlite = new BetterSqlite3(dbPath);
+  const adapter = new PrismaBetterSqlite3(sqlite);
+  
+  // Create PrismaClient with adapter for Prisma 7
+  prisma = new PrismaClient({ 
+    adapter,
+    log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
+  });
+  
+  console.log('✅ Prisma Client initialized with SQLite adapter');
+  
+} catch (error) {
+  // Fallback for development or if adapter not installed
+  console.warn('⚠️ SQLite adapter not available, using default PrismaClient');
+  console.warn('Install with: npm install @prisma/adapter-better-sqlite3 better-sqlite3');
+  
+  prisma = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/* 3. SINGLETON INSTANCE                                                      */
-/* -------------------------------------------------------------------------- */
+// Global singleton for development (prevents multiple instances during hot reload)
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient;
+};
 
-// Use global singleton in development
-const prisma = globalAny.__prisma ?? makePrismaClient();
-
-if (process.env.NODE_ENV !== "production" && !isEdge) {
-  globalAny.__prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
 }
 
 export default prisma;

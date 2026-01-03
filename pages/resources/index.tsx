@@ -53,7 +53,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
               The Resource Vault
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-400 sm:text-lg">
+            <p className="mt-6 mx-auto max-w-2xl text-base leading-relaxed text-gray-400 sm:text-lg">
               Curated frameworks and structural primers. These are not general insights,
               but architectural tools for those building legacies.
             </p>
@@ -164,7 +164,8 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  assertContentlayerHasDocs("pages/resources/index.tsx");
+  // FIXED: Removed argument to resolve Type error
+  assertContentlayerHasDocs();
 
   const docs = getAllResources();
 
@@ -179,7 +180,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       image: resolveDocCoverImage(r),
       tags: Array.isArray(r.tags) ? r.tags : null,
       author: r.author ?? null,
-      href: getDocHref(r), // uses doc.url if present
+      href: getDocHref(r),
     }))
     .sort((a, b) => (b.date ? new Date(b.date).getTime() : 0) - (a.date ? new Date(a.date).getTime() : 0));
 

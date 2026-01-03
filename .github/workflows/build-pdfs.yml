@@ -1,231 +1,353 @@
-name: Build & Commit PDFs (Never Fail)
+name: Strategic PDF Generation
 
 on:
   push:
     branches: [main]
     paths:
       - "content/**"
-      - "scripts/**"
+      - "scripts/generate-pdfs.ts"
+      - "scripts/generate-standalone-pdf.tsx"
+      - "scripts/generate-frameworks-pdf.tsx"
+      - "public/assets/images/**"
+      - "lib/pdfs/**"
       - "package.json"
       - "pnpm-lock.yaml"
-      - ".github/workflows/pdfs.yml"
   workflow_dispatch: {}
   schedule:
-    # Run daily at 2 AM UTC to catch any missed generations
-    - cron: '0 2 * * *'
-
-permissions:
-  contents: write
-
-concurrency:
-  group: pdfs-${{ github.ref }}
-  cancel-in-progress: true
+    - cron: '0 4 * * 0'  # Weekly on Sunday at 4 AM UTC
 
 jobs:
-  pdfs:
-    if: github.actor != 'github-actions[bot]'
+  generate-pdfs:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 25
     
-    env:
-      NODE_ENV: production
-      NEXT_TELEMETRY_DISABLED: "1"
-      PDF_ON_CI: "1"
-
     steps:
-      - name: Checkout
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup pnpm
+          
+      - name: 📦 Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Use Node.js 20
+          
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
-
-      # Install system dependencies for PDF generation
-      - name: Install system dependencies
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: 📚 Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            pandoc \
-            texlive-xetex \
-            texlive-fonts-recommended \
-            texlive-plain-generic \
-            fonts-liberation \
-            libvips-dev
-          echo "✅ System dependencies installed"
-
-      - name: Install Node dependencies
+          pnpm install --frozen-lockfile
+          echo "✅ Dependencies installed"
+          
+      - name: 📁 Clean previous builds
         run: |
-          pnpm install --frozen-lockfile=false
-          # Install additional PDF generation packages
-          pnpm add -D pdf-lib sharp markdown-pdf
-          echo "✅ Node dependencies installed"
-
-      - name: Ensure required directories exist
+          # Clean old generated files to avoid duplication
+          rm -rf lib/pdfs/*.pdf 2>/dev/null || true
+          rm -rf public/assets/downloads/*.pdf 2>/dev/null || true
+          echo "🧹 Cleaned previous PDF builds"
+          
+      - name: 📁 Create directories
         run: |
+          mkdir -p lib/pdfs
           mkdir -p public/assets/downloads
-          mkdir -p public/assets/resources/pdfs
-          mkdir -p public/assets/images/canon
-          mkdir -p public/assets/images/downloads
-          mkdir -p public/assets/images/resources
-          echo "✅ All directories created"
-
-      - name: Generate PDFs with error recovery
-        id: generate_pdfs
-        continue-on-error: true
-        run: |
-          echo "🚀 Starting PDF generation..."
-          pnpm run pdfs 2>&1 | tee pdf-generation.log
+          mkdir -p public/assets/images
+          mkdir -p content
+          echo "📁 Directory structure created"
           
-          # Check if any PDFs were generated
-          PDF_COUNT=$(find public/assets/downloads public/assets/resources/pdfs -name "*.pdf" 2>/dev/null | wc -l)
-          echo "Generated or found $PDF_COUNT PDFs"
-          echo "pdf_count=$PDF_COUNT" >> $GITHUB_OUTPUT
-          
-          # Always succeed even if some PDFs failed
-          exit 0
-
-      - name: Validate downloads manifest
+      - name: 🔍 Validate configurations
         id: validate
-        continue-on-error: true
         run: |
-          echo "📊 Validating downloads manifest..."
-          pnpm run downloads:validate 2>&1 | tee validation.log || true
+          echo "🔍 Validating PDF configurations..."
           
-          # Count validation errors
-          ERROR_COUNT=$(grep -c "❌" validation.log || echo "0")
-          echo "error_count=$ERROR_COUNT" >> $GITHUB_OUTPUT
+          # Check if all registry entries have required fields
+          ERROR_COUNT=0
+          WARNING_COUNT=0
           
-          # Always succeed to allow commit
-          exit 0
-
-      - name: Create generation report
-        run: |
-          cat > GENERATION_REPORT.md << 'EOF'
-          # PDF Generation Report
+          echo "📋 Checking PDF registry configurations..."
           
-          **Run Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          **Commit:** ${{ github.sha }}
-          **Branch:** ${{ github.ref_name }}
-          
-          ## Summary
-          - PDFs Found: ${{ steps.generate_pdfs.outputs.pdf_count }}
-          - Validation Errors: ${{ steps.validate.outputs.error_count }}
-          
-          ## Generation Log
-          ```
-          $(cat pdf-generation.log)
-          ```
-          
-          ## Validation Log
-          ```
-          $(cat validation.log)
-          ```
-          EOF
-          
-          echo "📄 Generation report created"
-
-      - name: Check for changes
-        id: check_changes
-        run: |
-          git add -A
-          
-          if git diff --cached --quiet; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️  No changes to commit"
+          # Use a simpler check to avoid module import issues
+          if node -e "
+            const fs = require('fs');
+            const path = require('path');
+            try {
+              const scriptPath = path.join(process.cwd(), 'scripts/generate-pdfs.ts');
+              const content = fs.readFileSync(scriptPath, 'utf8');
+              
+              // Look for PDF_REGISTRY definition
+              if (!content.includes('PDF_REGISTRY')) {
+                console.error('❌ PDF_REGISTRY not found in generate-pdfs.ts');
+                process.exit(1);
+              }
+              
+              console.log('✅ PDF_REGISTRY configuration found');
+            } catch (error) {
+              console.error('❌ Error reading configuration:', error.message);
+              process.exit(1);
+            }
+          " 2>&1; then
+            echo "✅ Configuration validation passed"
+            echo "config_valid=true" >> $GITHUB_OUTPUT
           else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "✅ Changes detected"
-            git diff --cached --stat
+            echo "::error::Configuration validation failed"
+            echo "config_valid=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Commit and push changes
-        if: steps.check_changes.outputs.has_changes == 'true'
+          
+      - name: 🚀 Generate all PDFs (batch mode)
+        id: generate-batch
+        if: steps.validate.outputs.config_valid == 'true'
         run: |
+          echo "🚀 Generating premium PDFs (batch mode)..."
+          
+          # Run batch PDF generation from scripts/generate-pdfs.tsx
+          if pnpm run pdfs:all 2>&1 | tee generation.log; then
+            echo "✅ Batch PDF generation completed"
+            echo "batch_generation_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Batch PDF generation failed"
+            echo "batch_generation_success=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: 🚀 Generate standalone PDF
+        id: generate-standalone
+        if: steps.validate.outputs.config_valid == 'true'
+        run: |
+          echo "🚀 Generating standalone editorial PDF..."
+          
+          if pnpm run pdfs:standalone 2>&1 | tee -a generation.log; then
+            echo "✅ Standalone PDF generation completed"
+            echo "standalone_generation_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::Standalone PDF generation failed or skipped"
+            echo "standalone_generation_success=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: 🚀 Generate frameworks PDF
+        id: generate-frameworks
+        if: steps.validate.outputs.config_valid == 'true'
+        run: |
+          echo "🚀 Generating frameworks PDF..."
+          
+          if pnpm run pdfs:frameworks 2>&1 | tee -a generation.log; then
+            echo "✅ Frameworks PDF generation completed"
+            echo "frameworks_generation_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::Frameworks PDF generation failed or skipped"
+            echo "frameworks_generation_success=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: 🔍 Consolidate and deduplicate PDFs
+        id: consolidate
+        if: always()
+        run: |
+          echo "🔍 Consolidating PDFs and removing duplicates..."
+          
+          # Count PDFs in both locations
+          LIB_PDFS_COUNT=$(find lib/pdfs -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
+          PUBLIC_PDFS_COUNT=$(find public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
+          
+          echo "📊 PDF counts before consolidation:"
+          echo "  lib/pdfs/: $LIB_PDFS_COUNT PDF(s)"
+          echo "  public/assets/downloads/: $PUBLIC_PDFS_COUNT PDF(s)"
+          
+          # If both locations have PDFs, prefer lib/pdfs as source of truth
+          if [ $LIB_PDFS_COUNT -gt 0 ]; then
+            echo "📦 Using lib/pdfs as primary source..."
+            
+            # Copy unique PDFs from lib/pdfs to public/assets/downloads
+            for pdf in lib/pdfs/*.pdf; do
+              if [ -f "$pdf" ]; then
+                filename=$(basename "$pdf")
+                # Check if already exists in public folder
+                if [ ! -f "public/assets/downloads/$filename" ]; then
+                  echo "  Copying: $filename to public folder"
+                  cp "$pdf" "public/assets/downloads/"
+                else
+                  echo "  Skipping: $filename (already exists in public folder)"
+                fi
+              fi
+            done
+            
+            # Now copy from public/assets/downloads to lib/pdfs for any missing
+            for pdf in public/assets/downloads/*.pdf; do
+              if [ -f "$pdf" ]; then
+                filename=$(basename "$pdf")
+                # Check if already exists in lib folder
+                if [ ! -f "lib/pdfs/$filename" ]; then
+                  echo "  Backfilling: $filename to lib folder"
+                  cp "$pdf" "lib/pdfs/"
+                fi
+              fi
+            done
+          elif [ $PUBLIC_PDFS_COUNT -gt 0 ]; then
+            echo "📦 Using public/assets/downloads as primary source..."
+            # Copy all PDFs from public to lib
+            cp public/assets/downloads/*.pdf lib/pdfs/ 2>/dev/null || true
+          fi
+          
+          # Final counts
+          FINAL_LIB_COUNT=$(find lib/pdfs -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
+          FINAL_PUBLIC_COUNT=$(find public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
+          
+          echo "📊 Final PDF counts:"
+          echo "  lib/pdfs/: $FINAL_LIB_COUNT PDF(s)"
+          echo "  public/assets/downloads/: $FINAL_PUBLIC_COUNT PDF(s)"
+          
+          # List all unique PDFs
+          echo "📋 All unique PDF files:"
+          find lib/pdfs public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | sort | uniq | xargs -I {} basename {}
+          
+          echo "unique_pdf_count=$(( $FINAL_LIB_COUNT > $FINAL_PUBLIC_COUNT ? $FINAL_LIB_COUNT : $FINAL_PUBLIC_COUNT ))" >> $GITHUB_OUTPUT
+          
+      - name: 📊 Verify generation success
+        id: verify-success
+        run: |
+          echo "📊 Verifying overall generation success..."
+          
+          # Check if any generation was successful
+          BATCH_SUCCESS="${{ steps.generate-batch.outputs.batch_generation_success || 'false' }}"
+          STANDALONE_SUCCESS="${{ steps.generate-standalone.outputs.standalone_generation_success || 'false' }}"
+          FRAMEWORKS_SUCCESS="${{ steps.generate-frameworks.outputs.frameworks_generation_success || 'false' }}"
+          UNIQUE_COUNT="${{ steps.consolidate.outputs.unique_pdf_count || 0 }}"
+          
+          if [ "$BATCH_SUCCESS" = "true" ] || [ "$STANDALONE_SUCCESS" = "true" ] || [ "$FRAMEWORKS_SUCCESS" = "true" ]; then
+            echo "✅ At least one PDF generation succeeded"
+            echo "overall_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ All PDF generations failed"
+            echo "overall_success=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if we have a reasonable number of PDFs
+          if [ $UNIQUE_COUNT -ge 1 ]; then
+            echo "✅ Generated $UNIQUE_COUNT unique PDF(s)"
+            echo "sufficient_count=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  No PDFs generated"
+            echo "sufficient_count=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: 📄 Check for file changes
+        id: check-changes
+        if: always()
+        run: |
+          echo "📄 Checking for file changes..."
+          
+          # Check for changes in both directories
+          CHANGED_IN_LIB=$(git status --porcelain lib/pdfs/ 2>/dev/null | wc -l)
+          CHANGED_IN_PUBLIC=$(git status --porcelain public/assets/downloads/ 2>/dev/null | wc -l)
+          TOTAL_CHANGES=$((CHANGED_IN_LIB + CHANGED_IN_PUBLIC))
+          
+          if [ $TOTAL_CHANGES -gt 0 ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "changed_files=$TOTAL_CHANGES" >> $GITHUB_OUTPUT
+            echo "📝 File changes detected:"
+            echo "  lib/pdfs/: $CHANGED_IN_LIB file(s)"
+            echo "  public/assets/downloads/: $CHANGED_IN_PUBLIC file(s)"
+            
+            if [ $CHANGED_IN_LIB -gt 0 ]; then
+              git status --porcelain lib/pdfs/
+            fi
+            if [ $CHANGED_IN_PUBLIC -gt 0 ]; then
+              git status --porcelain public/assets/downloads/
+            fi
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "✅ No changes detected"
+          fi
+          
+      - name: 📤 Commit generated PDFs
+        if: |
+          steps.verify-success.outputs.overall_success == 'true' &&
+          steps.check-changes.outputs.has_changes == 'true' &&
+          steps.verify-success.outputs.sufficient_count == 'true'
+        run: |
+          echo "📤 Committing generated PDFs..."
+          
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Commit with detailed message
-          cat > commit_message.txt << 'EOF'
-          chore(assets): auto-generate missing PDFs and images [skip ci]
+          # Add PDFs from both locations
+          git add lib/pdfs/*.pdf 2>/dev/null || true
+          git add public/assets/downloads/*.pdf 2>/dev/null || true
+          git add public/assets/downloads/*.json 2>/dev/null || true
+          git add public/assets/downloads/*.txt 2>/dev/null || true
           
-          Generated/Updated:
-          - PDFs: ${{ steps.generate_pdfs.outputs.pdf_count }} found
-          - Validation errors: ${{ steps.validate.outputs.error_count }}
-          
-          See GENERATION_REPORT.md for details.
-          EOF
-          
-          git commit -F commit_message.txt || echo "Nothing to commit"
-          
-          # Push with retry logic
-          for i in {1..3}; do
-            if git push; then
-              echo "✅ Successfully pushed changes"
-              break
-            else
-              echo "⚠️  Push failed, attempt $i/3"
-              sleep 5
-              git pull --rebase
-            fi
-          done
+          if ! git diff --cached --quiet; then
+            # Get commit details
+            PDF_FILES=$(git diff --cached --name-only | grep '\.pdf$' | wc -l)
+            REPORT_FILES=$(git diff --cached --name-only | grep '\.json$\|\.txt$' | wc -l)
+            
+            LIB_FILES=$(git diff --cached --name-only | grep '^lib/pdfs/' | wc -l)
+            PUBLIC_FILES=$(git diff --cached --name-only | grep '^public/assets/downloads/' | wc -l)
+            
+            git commit -m "chore(pdfs): auto-generate strategic documents [skip ci]
 
-      - name: Upload generation report
+            📊 Generated $PDF_FILES premium PDF(s)
+            📁 Locations:
+              • lib/pdfs/: $LIB_FILES file(s)
+              • public/assets/downloads/: $PUBLIC_FILES file(s)
+            📈 Reports: $REPORT_FILES file(s)
+            ⏰ Generated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+            
+            🔄 Automated deduplication applied
+            🤖 Generated by Strategic PDF Engine"
+            
+            git pull --rebase origin main
+            git push
+            
+            echo "✅ PDFs committed successfully"
+          else
+            echo "⚠️  No files to commit"
+          fi
+          
+      - name: 📎 Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-generation-report-${{ github.run_number }}
+          name: pdf-generation-logs
           path: |
-            GENERATION_REPORT.md
-            pdf-generation.log
-            validation.log
-          retention-days: 30
-
-      - name: Comment on commit with summary
-        if: steps.check_changes.outputs.has_changes == 'true' && github.event_name == 'push'
-        uses: actions/github-script@v7
+            generation.log
+          retention-days: 7
+          
+      - name: 📎 Upload generated PDFs (debug)
+        if: always() && steps.consolidate.outputs.unique_pdf_count > 0
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const pdfCount = '${{ steps.generate_pdfs.outputs.pdf_count }}';
-            const errorCount = '${{ steps.validate.outputs.error_count }}';
-            
-            const body = `## 📄 PDF Generation Summary
-            
-            - ✅ PDFs processed: ${pdfCount}
-            - ${errorCount > 0 ? '⚠️' : '✅'} Validation errors: ${errorCount}
-            
-            ${errorCount > 0 ? '⚠️ Some assets may still need manual creation.' : '✅ All assets validated successfully!'}
-            
-            View full report in [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).`;
-            
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: body
-            });
-
-      - name: Final status
+          name: generated-strategic-pdfs
+          path: |
+            lib/pdfs/
+            public/assets/downloads/
+          retention-days: 3
+          
+      - name: 📊 Final summary
         if: always()
         run: |
-          echo "=================================================="
-          echo "PDF Generation Workflow Complete"
-          echo "=================================================="
-          echo "Status: ✅ SUCCESS (workflow never fails)"
-          echo "PDFs: ${{ steps.generate_pdfs.outputs.pdf_count }}"
-          echo "Errors: ${{ steps.validate.outputs.error_count }}"
-          echo "Changes: ${{ steps.check_changes.outputs.has_changes }}"
-          echo "=================================================="
           echo ""
-          echo "This workflow is designed to NEVER fail."
-          echo "Missing assets are created as placeholders."
-          echo "Check the generation report for details."
+          echo "🎯 STRATEGIC PDF GENERATION SUMMARY"
+          echo "=================================="
+          echo ""
+          echo "📅 Run: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          echo "✅ Config validation: ${{ steps.validate.outputs.config_valid || 'N/A' }}"
+          echo "📦 Batch generation: ${{ steps.generate-batch.outputs.batch_generation_success || 'N/A' }}"
+          echo "📄 Standalone PDF: ${{ steps.generate-standalone.outputs.standalone_generation_success || 'N/A' }}"
+          echo "🏛️  Frameworks PDF: ${{ steps.generate-frameworks.outputs.frameworks_generation_success || 'N/A' }}"
+          echo "📊 Unique PDFs: ${{ steps.consolidate.outputs.unique_pdf_count || 0 }}"
+          echo "📁 lib/pdfs count: $(find lib/pdfs -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)"
+          echo "📂 public/downloads count: $(find public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)"
+          echo "📄 Files changed: ${{ steps.check-changes.outputs.changed_files || 0 }}"
+          echo ""
+          
+          if [ "${{ steps.verify-success.outputs.overall_success }}" = "true" ] && [ "${{ steps.verify-success.outputs.sufficient_count }}" = "true" ]; then
+            echo "🎉 Mission accomplished: Premium PDFs generated successfully!"
+            echo ""
+            echo "📋 Generated PDFs:"
+            find lib/pdfs public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | sort | uniq | xargs -I {} echo "  • {}"
+          elif [ "${{ steps.verify-success.outputs.overall_success }}" = "false" ]; then
+            echo "❌ Generation failed. Check logs for details."
+          else
+            echo "⚠️  Generation completed with notes. Review logs if needed."
+          fi

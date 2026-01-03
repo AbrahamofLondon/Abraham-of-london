@@ -30,12 +30,11 @@ type Props = {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  // Build safety check to ensure Contentlayer has processed the files
+  // CRITICAL FIX: Removed the argument to match function signature
   try {
-    assertContentlayerHasDocs("pages/prints/index.tsx");
+    assertContentlayerHasDocs();
   } catch (e) {
-    // Gracefully handle empty content in dev mode if needed, or let it fail in build
-    console.warn("Contentlayer check failed:", e);
+    console.warn("Institutional Contentlayer check failed:", e);
   }
 
   const raw = getAllPrints();
@@ -75,7 +74,6 @@ const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
       </Head>
 
       <main className="min-h-screen bg-black">
-        {/* Hero Header */}
         <section className="relative border-b border-gold/10 bg-gradient-to-b from-black to-zinc-950/50">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
             <div className="max-w-3xl">
@@ -89,16 +87,10 @@ const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
               <p className="mt-6 text-base leading-relaxed text-gray-400 sm:text-lg">
                 {pageDescription}
               </p>
-              <div className="mt-8 flex items-center gap-4 text-[11px] font-mono uppercase tracking-widest text-gray-500">
-                <span className="text-gold/60">{prints.length} Pieces in Collection</span>
-                <div className="h-1 w-1 rounded-full bg-gold/30" />
-                <span>London Edition</span>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* Prints Grid */}
         <section className="mx-auto max-w-6xl px-6 py-16 lg:px-8 lg:py-24">
           {prints.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] py-24 text-center">
@@ -114,7 +106,6 @@ const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
                   href={p.href}
                   className="group flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/30 transition-all duration-500 hover:border-gold/30 hover:bg-zinc-900/50"
                 >
-                  {/* Image Container - Aspect 3:4 for vertical art style */}
                   <div className="relative aspect-[3/4] overflow-hidden bg-black/40">
                     <Image
                       src={p.coverImage || "/assets/images/writing-desk.webp"}
@@ -123,10 +114,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                       sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                     />
-                    
-                    {/* Dark Overlay for depth */}
                     <div className="absolute inset-0 bg-black/10 transition-opacity group-hover:opacity-0" />
-
                     {p.featured && (
                       <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-black/60 backdrop-blur-md px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-gold shadow-2xl">
                         <Sparkles className="h-3 w-3" /> Featured
@@ -134,18 +122,15 @@ const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
                     )}
                   </div>
 
-                  {/* Content Container */}
                   <div className="flex flex-1 flex-col p-6">
                     <h2 className="font-serif text-xl font-semibold text-cream transition-colors duration-300 group-hover:text-gold">
                       {p.title}
                     </h2>
-                    
                     {p.excerpt && (
                       <p className="mt-3 text-sm leading-relaxed text-gray-400 line-clamp-2">
                         {p.excerpt}
                       </p>
                     )}
-
                     <div className="mt-auto pt-6">
                       <div className="flex items-center justify-between border-t border-white/5 pt-4">
                         <div className="flex flex-wrap gap-2">

@@ -49,7 +49,8 @@ function formatDateGB(value: string): string {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  assertContentlayerHasDocs("pages/events/index.tsx getStaticProps");
+  // Fixed: removed the argument that was causing the type error
+  assertContentlayerHasDocs();
 
   const eventsRaw = getAllEvents();
   const now = new Date();
