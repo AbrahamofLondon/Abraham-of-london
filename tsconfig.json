@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "es2022"],
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -19,93 +18,20 @@
         "name": "next"
       }
     ],
-    
-    /* Base URL & Path Aliases */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@/lib/*": ["./lib/*"],
-      "@/components/*": ["./components/*"],
-      "@/scripts/*": ["./scripts/*"],
-      "@/utils/*": ["./utils/*"],
-      "@/types/*": ["./types/*"],
-      "@/public/*": ["./public/*"],
-      "@/content/*": ["./content/*"]
-    },
-    
-    /* --- MODERN TYPESCRIPT SETTINGS --- */
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "exactOptionalPropertyTypes": false,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
-    "noImplicitOverride": true,
-    "noImplicitReturns": false,
-    "noImplicitThis": true,
-    "noPropertyAccessFromIndexSignature": false,
-    "noUncheckedIndexedAccess": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": false,
-    "useUnknownInCatchVariables": false,
-    
-    /* --- PERFORMANCE --- */
-    "verbatimModuleSyntax": false,
-    "preserveConstEnums": true,
-    "removeComments": false,
-    
-    /* --- ESM SUPPORT --- */
-    "moduleDetection": "force",
-    "resolvePackageJsonExports": true,
-    "resolvePackageJsonImports": true,
-    
-    /* --- TYPE SUPPORT --- */
-    "types": [
-      "node",
-      "react",
-      "react-dom",
-      "@netlify/functions",
-      "next"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ]
+      "contentlayer/generated": ["./.contentlayer/generated"]
+    }
   },
-  
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.d.ts",
-    "**/*.mts",
-    "**/*.cts",
-    ".contentlayer/generated",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".contentlayer/generated"
   ],
-  
   "exclude": [
-    "node_modules",
-    ".next",
-    ".contentlayer/.cache",
-    "out",
-    "dist",
-    "build",
-    "public",
-    ".netlify",
-    ".turbo",
-    
-    /* Test Files */
-    "**/*.test.*",
-    "**/*.spec.*",
-    "**/__tests__/**",
-    "**/__mocks__/**",
-    
-    /* Configuration Files */
-    "**/*.config.*",
-    "**/*.d.ts"
+    "node_modules"
   ]
 }

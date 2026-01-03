@@ -12,22 +12,14 @@
 
 export type { 
   PDFConfig, 
-  PDFId,
-  PDFType,
-  PDFTier,
-  PDFFormat 
+  PDFId
 } from './pdf-registry';
 
 export type { 
   GenerationOptions,
   PageDimensions,
-  LegacyCanvasResult
+  CanvasSection
 } from './generate-legacy-canvas';
-
-export type { 
-  PDFGenerationResult,
-  BatchGenerationResult
-} from './generate-pdfs';
 
 /* -------------------------------------------------------------------------- */
 /* REGISTRY & DISCOVERY                                                       */
@@ -62,9 +54,7 @@ export {
 // Legacy Canvas Generator
 export {
   LegacyCanvasGenerator,
-  generateLegacyCanvas,
-  generateAllCanvasFormats,
-  createCanvasBundle
+  generateLegacyCanvasProduction
 } from './generate-legacy-canvas';
 
 // PDF Generation Pipeline
@@ -341,7 +331,16 @@ export async function handleCLICommand(args: string[] = []): Promise<void> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* DEFAULT EXPORT                                                             */
+/* TYPE RE-EXPORTS FOR CONVENIENCE                                            */
+/* -------------------------------------------------------------------------- */
+
+// Re-export common types
+export type PDFType = 'editorial' | 'framework' | 'academic' | 'strategic' | 'tool' | 'canvas' | 'worksheet' | 'other';
+export type PDFTier = 'free' | 'member' | 'architect' | 'inner-circle';
+export type PDFFormat = 'PDF' | 'EXCEL' | 'POWERPOINT' | 'ZIP' | 'BINARY';
+
+/* -------------------------------------------------------------------------- */
+/* DEFAULT EXPORT (SINGLE EXPORT)                                             */
 /* -------------------------------------------------------------------------- */
 
 export default {
@@ -365,15 +364,3 @@ export default {
   // CLI
   handleCLICommand
 };
-
-/* -------------------------------------------------------------------------- */
-/* TYPE RE-EXPORTS FOR CONVENIENCE                                            */
-/* -------------------------------------------------------------------------- */
-
-// Re-export common types
-export type PDFType = 'editorial' | 'framework' | 'academic' | 'strategic' | 'tool' | 'canvas' | 'worksheet' | 'other';
-export type PDFTier = 'free' | 'member' | 'architect' | 'inner-circle';
-export type PDFFormat = 'PDF' | 'EXCEL' | 'POWERPOINT' | 'ZIP' | 'BINARY';
-
-export { LegacyCanvasGenerator } from './generate-legacy-canvas-fixed';
-export default LegacyCanvasGenerator;

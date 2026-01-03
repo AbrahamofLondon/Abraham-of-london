@@ -1,70 +1,68 @@
-.container {
-  border-left: 4px solid;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin: 2rem 0;
-  position: relative;
-  overflow: hidden;
-}
+import React from 'react';
 
-.container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.3) 50%);
-  z-index: 0;
-}
+const ProTip = ({ type = 'info', children }) => {
+  const getConfig = () => {
+    switch(type) {
+      case 'premium':
+        return {
+          icon: '⚡',
+          title: 'Premium Insight',
+          bgClass: 'bg-purple-50 dark:bg-purple-900/20',
+          borderClass: 'border-l-purple-500',
+          textClass: 'text-purple-700 dark:text-purple-300'
+        };
+      case 'implementation':
+        return {
+          icon: '🛠️',
+          title: 'Implementation Guidance',
+          bgClass: 'bg-green-50 dark:bg-green-900/20',
+          borderClass: 'border-l-green-500',
+          textClass: 'text-green-700 dark:text-green-300'
+        };
+      case 'warning':
+        return {
+          icon: '⚠️',
+          title: 'Important Consideration',
+          bgClass: 'bg-red-50 dark:bg-red-900/20',
+          borderClass: 'border-l-red-500',
+          textClass: 'text-red-700 dark:text-red-300'
+        };
+      default:
+        return {
+          icon: '💡',
+          title: 'Pro Tip',
+          bgClass: 'bg-blue-50 dark:bg-blue-900/20',
+          borderClass: 'border-l-blue-500',
+          textClass: 'text-blue-700 dark:text-blue-300'
+        };
+    }
+  };
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  position: relative;
-  z-index: 1;
-}
+  const config = getConfig();
 
-.icon {
-  font-size: 1.25rem;
-  line-height: 1;
-}
+  return (
+    <div 
+      className={`border-l-4 ${config.borderClass} ${config.bgClass} rounded-lg p-6 my-8 relative overflow-hidden`}
+    >
+      {/* Gradient corner effect */}
+      <div className="absolute top-0 right-0 w-24 h-24 opacity-10">
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-transparent via-current to-transparent" />
+      </div>
+      
+      <div className="flex items-center gap-3 mb-3 relative z-10">
+        <span className={`text-xl ${config.textClass}`}>
+          {config.icon}
+        </span>
+        <span className={`text-sm font-semibold uppercase tracking-wider ${config.textClass}`}>
+          {config.title}
+        </span>
+      </div>
+      
+      <div className="text-gray-700 dark:text-gray-300 leading-relaxed relative z-10 prose prose-gray dark:prose-invert max-w-none">
+        {children}
+      </div>
+    </div>
+  );
+};
 
-.title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: inherit;
-}
-
-.content {
-  position: relative;
-  z-index: 1;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #374151;
-}
-
-.content :global(strong) {
-  color: #111827;
-  font-weight: 600;
-}
-
-.content :global(em) {
-  font-style: italic;
-  color: #6B7280;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: 1.25rem;
-  }
-  
-  .content {
-    font-size: 0.95rem;
-  }
-}
+export default ProTip;

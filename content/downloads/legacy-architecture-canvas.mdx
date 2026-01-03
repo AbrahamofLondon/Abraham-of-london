@@ -1,5 +1,5 @@
 ---
-type: "MasterTool"
+type: "Download"
 title: "The Legacy Architecture Canvas"
 slug: "legacy-architecture-canvas"
 date: "2025-12-28"
@@ -10,79 +10,83 @@ coverImage: "/assets/images/canon/legacy-canvas-heirloom.jpg"
 tags: ["legacy-architecture", "intergenerational-governance", "family-sovereignty", "strategic-formation", "heirloom-tools"]
 accessLevel: "Architect"
 file: "/assets/downloads/legacy-architecture-canvas.fillable.pdf"
-fileSize: "Heirloom-Grade Fillable PDF (A3 & Letter)"
+fileSize: "2.1 MB"
+fileFormat: "PDF"
 featured: true
 draft: false
----
 
-import { ProTip, FeatureGrid, DownloadCTA } from '@/components/content'
-import LegacyDiagram from '@/components/diagrams/LegacyDiagram'
+# Component Configuration
+useLegacyDiagram: true
+useProTip: true
+useFeatureGrid: true
+useDownloadCTA: true
+proTipType: "premium"
+proTipContent: "This is not a document about death. It is the operating system for a living legacy. Designed for founders, leaders, and stewards who view their life's work as capital—human, intellectual, social, and financial—to be engineered for multigenerational impact."
+featureGridColumns: 2
+featureGridItems:
+  - title: "1. The Sovereign Thesis"
+    icon: "🎯"
+    content: "Define the core, non-negotiable principle of your legacy. What is the *why* that must survive all else?"
+    color: "#7C3AED"
+  - title: "2. The Capital Matrix"
+    icon: "🗺️"
+    content: "Map your key capitals: **Human** (character), **Intellectual** (philosophy), **Social** (networks), **Financial** (assets), and **Structural** (institutions)."
+    color: "#10B981"
+  - title: "3. Institutions & Stewardship"
+    icon: "🏛️"
+    content: "Design the formal/informal institutions (Family Council, Trust, Annual Retreat) that steward each capital."
+    color: "#3B82F6"
+  - title: "4. Risk Architecture"
+    icon: "🛡️"
+    content: "Identify failure modes—from dilution to dependency—and engineer specific safeguards and governance guardrails."
+    color: "#EF4444"
+  - title: "5. Rituals & Cadence"
+    icon: "🔄"
+    content: "Establish quarterly/annual review rhythms that institutionalize reflection, adaptation, and stewardship."
+    color: "#F59E0B"
+  - title: "6. Communication Protocol"
+    icon: "📜"
+    content: "Design how and when to transmit this framework to the next generation of stewards."
+    color: "#8B5CF6"
+ctaConfig:
+  badge: "Premium Download"
+  details:
+    - label: "Format"
+      value: "Fillable PDF"
+      icon: "📄"
+    - label: "Size"
+      value: "2.1 MB"
+      icon: "💾"
+    - label: "Pages"
+      value: "12"
+      icon: "📑"
+    - label: "Interactive"
+      value: "Yes"
+      icon: "✏️"
+  features:
+    - "Interactive fillable fields"
+    - "Multiple format options (A4, Letter, A3)"
+    - "Signature support"
+    - "Print-optimized layout"
+    - "Professional typography"
+---
 
 # The Legacy Architecture Canvas
 
 **Beyond Bequest. The Framework for Intentional Endurance.**
 
-<ProTip type="premium">
-This is not a document about death. It is the operating system for a living legacy. Designed for founders, leaders, and stewards who view their life's work as capital—human, intellectual, social, and financial—to be engineered for multigenerational impact.
-</ProTip>
-
 ## The Architecture Process
 
 This structured framework transforms abstract values into executable design:
 
-<FeatureGrid columns={2} items={[
-  {
-    title: "1. The Sovereign Thesis",
-    icon: "🎯",
-    content: "Define the core, non-negotiable principle of your legacy. What is the *why* that must survive all else?",
-    color: "#7C3AED"
-  },
-  {
-    title: "2. The Capital Matrix",
-    icon: "🗺️",
-    content: "Map your key capitals: **Human** (character), **Intellectual** (philosophy), **Social** (networks), **Financial** (assets), and **Structural** (institutions).",
-    color: "#10B981"
-  },
-  {
-    title: "3. Institutions & Stewardship",
-    icon: "🏛️",
-    content: "Design the formal/informal institutions (Family Council, Trust, Annual Retreat) that steward each capital.",
-    color: "#3B82F6"
-  },
-  {
-    title: "4. Risk Architecture",
-    icon: "🛡️",
-    content: "Identify failure modes—from dilution to dependency—and engineer specific safeguards and governance guardrails.",
-    color: "#EF4444"
-  },
-  {
-    title: "5. Rituals & Cadence",
-    icon: "🔄",
-    content: "Establish quarterly/annual review rhythms that institutionalize reflection, adaptation, and stewardship.",
-    color: "#F59E0B"
-  },
-  {
-    title: "6. Communication Protocol",
-    icon: "📜",
-    content: "Design how and when to transmit this framework to the next generation of stewards.",
-    color: "#8B5CF6"
-  }
-]} />
-
-## The Complete Framework
-
-<LegacyDiagram />
-
-### What This Produces
+## What This Produces
 
 - **A Living Legacy Constitution** – Not a static document, but a dynamic operating system for your values
 - **Intergenerational Governance Blueprint** – Clear roles, responsibilities, and decision-rights for stewards
 - **Risk Mitigation Framework** – Proactive design against the 7 classic failure modes of legacy
 - **Stewardship Rituals** – Quarterly and annual review cadences that institutionalize reflection and adaptation
 
-<ProTip type="implementation">
 **Implementation Note:** Begin with the Sovereign Thesis alone. Sit with it for one week. The clarity—or friction—it generates will illuminate the necessity of every subsequent component.
-</ProTip>
 
 ## Companion Resources
 
@@ -92,11 +96,3 @@ This canvas integrates with our full **Legacy Architecture** suite:
 - **Guardrail Design Workshop** – Video walkthrough of risk mitigation strategies
 - **Intergenerational Dialogue Guide** – Facilitating meaningful legacy conversations
 - **Family Council Operating Manual** – Procedures for effective multi-generational governance
-
-<DownloadCTA 
-  title="Download The Legacy Architecture Canvas"
-  description="Heirloom-grade PDF with integrated fillable fields and implementation notes"
-  fileSize="2.1 MB • Fillable PDF"
-  buttonText="Download for Architects"
-  level="premium"
-/>

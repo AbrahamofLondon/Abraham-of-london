@@ -1,243 +1,147 @@
-.container {
-  border: 2px solid;
-  border-radius: 16px;
-  padding: 2.5rem;
-  margin: 3rem 0;
-  position: relative;
-  overflow: hidden;
-}
+import React, { useState } from 'react';
 
-.container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
-  z-index: 0;
-}
+const DownloadCTA = ({ 
+  title = "Download Resource", 
+  description = "Get access to this premium resource",
+  badge = "Premium Download",
+  details = [],
+  features = [],
+  downloadUrl = "#",
+  requiresAuth = false,
+  fileSize = "2.5 MB",
+  fileFormat = "PDF",
+  buttonText = "Download Now"
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
 
-.header {
-  position: relative;
-  z-index: 1;
-  margin-bottom: 2rem;
-}
+  const handleDownload = async () => {
+    setIsLoading(true);
+    // Simulate download delay
+    setTimeout(() => {
+      window.open(downloadUrl, '_blank');
+      setIsLoading(false);
+    }, 1000);
+  };
 
-.badge {
-  display: inline-block;
-  padding: 0.35rem 1rem;
-  border-radius: 20px;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-}
+  return (
+    <div className="relative my-12 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 via-black/50 to-gold/5 p-8 overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(245, 158, 11, 0.2) 1px, transparent 0)`,
+          backgroundSize: '24px 24px'
+        }}></div>
+      </div>
 
-.title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 1rem 0;
-  line-height: 1.2;
-}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="mb-10">
+          <span className="inline-block px-4 py-2 rounded-full bg-gold/20 text-gold text-sm font-semibold uppercase tracking-wider mb-6">
+            {badge}
+          </span>
+          
+          <h2 className="font-serif text-3xl font-bold text-cream mb-4">{title}</h2>
+          <p className="text-xl text-gray-300 leading-relaxed">{description}</p>
+        </div>
 
-.description {
-  color: #4B5563;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin: 0;
-}
+        {/* Details Grid */}
+        {details.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 p-6 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+            {details.map((detail, index) => (
+              <div key={index} className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold">
+                    {detail.icon || '📄'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                    {detail.label}
+                  </div>
+                  <div className="text-lg font-semibold text-cream">
+                    {detail.value}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-.details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 1;
-}
+        {/* Features List */}
+        {features.length > 0 && (
+          <div className="mb-10 p-6 bg-white/5 rounded-xl border border-white/10">
+            <h3 className="text-xl font-semibold text-cream mb-6 flex items-center gap-3">
+              <span className="text-gold">✨</span>
+              <span>What's Included</span>
+            </h3>
+            <ul className="space-y-4">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-start gap-4">
+                  <span className="text-green-400 text-lg mt-0.5 flex-shrink-0">✓</span>
+                  <span className="text-gray-300 leading-relaxed">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-.detailItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-}
+        {/* Download Button */}
+        <div className="text-center">
+          <button
+            onClick={handleDownload}
+            disabled={isLoading || requiresAuth}
+            className="group relative inline-flex items-center justify-center gap-4 bg-gradient-to-r from-gold to-amber-600 text-black font-bold py-5 px-10 rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-gold/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-6 w-6 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Preparing Download...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-6 h-6 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span>{buttonText}</span>
+                <span className="text-sm opacity-80">({fileSize}, {fileFormat})</span>
+              </>
+            )}
+          </button>
 
-.icon {
-  width: 20px;
-  height: 20px;
-  color: #7C3AED;
-  flex-shrink: 0;
-  margin-top: 0.25rem;
-}
+          {/* Auth notice */}
+          {requiresAuth && (
+            <div className="mt-8 p-4 rounded-lg bg-charcoal/50 border border-white/10">
+              <p className="text-sm text-gray-400 flex items-center justify-center gap-3">
+                <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                <span>This resource requires <strong className="text-gold">authenticated access</strong>. Please log in to download.</span>
+              </p>
+            </div>
+          )}
 
-.detailLabel {
-  font-size: 0.8rem;
-  color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
-}
+          {/* File info */}
+          <div className="mt-6 text-sm text-gray-500 flex flex-wrap items-center justify-center gap-4">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              <span>Secure download</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+              <span>High-quality {fileFormat}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+              <span>Updated regularly</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-.detailValue {
-  font-size: 0.95rem;
-  color: #111827;
-  font-weight: 600;
-}
-
-.features {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 2rem 0;
-  position: relative;
-  z-index: 1;
-}
-
-.featuresTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 1rem 0;
-}
-
-.featuresList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 0.75rem;
-}
-
-.featuresList li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.checkIcon {
-  width: 18px;
-  height: 18px;
-  color: #10B981;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-}
-
-.featuresList span {
-  color: #374151;
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-.ctaSection {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-}
-
-.downloadButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background-color: #7C3AED;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 1.25rem 2.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto 1rem;
-  position: relative;
-}
-
-.downloadButton:hover:not(:disabled) {
-  background-color: var(--hover-bg, #6D28D9);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
-}
-
-.downloadButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.buttonIcon {
-  width: 20px;
-  height: 20px;
-}
-
-.spinner {
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
-}
-
-.spinnerCircle {
-  opacity: 0.25;
-}
-
-.spinnerPath {
-  opacity: 0.75;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: #6B7280;
-  font-size: 0.85rem;
-  margin: 1rem 0 0 0;
-}
-
-.lockIcon {
-  width: 16px;
-  height: 16px;
-  color: #6B7280;
-}
-
-.note strong {
-  color: #7C3AED;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: 1.5rem;
-  }
-  
-  .title {
-    font-size: 1.5rem;
-  }
-  
-  .description {
-    font-size: 1rem;
-  }
-  
-  .details {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .downloadButton {
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-  }
-}
+export default DownloadCTA;

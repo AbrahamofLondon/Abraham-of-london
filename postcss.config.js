@@ -1,4 +1,7 @@
-module.exports = {
+// postcss.config.js - FINAL FIXED VERSION
+const isProduction = process.env.NODE_ENV === 'production';
+
+const config = {
   plugins: {
     'postcss-import': {},
     'tailwindcss/nesting': {},
@@ -14,7 +17,7 @@ module.exports = {
         'nesting-rules': true,
       },
     },
-    ...(process.env.NODE_ENV === 'production'
+    ...(isProduction
       ? {
           '@fullhuman/postcss-purgecss': {
             content: [
@@ -33,3 +36,5 @@ module.exports = {
       : {}),
   },
 };
+
+module.exports = config;

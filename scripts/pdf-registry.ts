@@ -1,3 +1,4 @@
+// scripts/pdf-registry.ts - FIXED VERSION
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,11 +17,10 @@ export interface PDFConfig {
   outputPath: string;
   generationScript?: string;
   sourcePath?: string;
-  // Categorization expanded for ranged formats
   type: 'editorial' | 'framework' | 'academic' | 'strategic' | 'tool' | 'canvas' | 'worksheet' | 'other';
   format: 'PDF' | 'EXCEL' | 'POWERPOINT' | 'ZIP' | 'BINARY';
-  isInteractive: boolean; // True for fillable PDFs
-  isFillable: boolean; // Specific fillable forms
+  isInteractive: boolean;
+  isFillable: boolean;
   category: string;
   tier: 'free' | 'member' | 'architect' | 'inner-circle';
   formats: ('A4' | 'Letter' | 'A3' | 'bundle')[];
@@ -39,51 +39,41 @@ export type PDFId = string;
 // MASTER CONFIGURATION REGISTRY
 // -----------------------------------------------------------------------------
 const MASTER_PDF_REGISTRY: Record<string, Omit<PDFConfig, 'id' | 'format' | 'isInteractive' | 'isFillable' | 'fileSize' | 'lastModified' | 'exists' | 'sourceType'>> = {
-  // Legacy Architecture Canvas (Premium Interactive)
   'legacy-architecture-canvas': {
     title: 'The Legacy Architecture Canvas',
     description: 'Heirloom-grade fillable PDF for designing sovereign legacies',
     excerpt: 'The foundational instrument for designing a sovereign legacy. Move beyond sentiment to architect the durable transmission of values, capital, and culture.',
     outputPath: '/assets/downloads/legacy-architecture-canvas.pdf',
-    generationScript: './generate-legacy-canvas.tsx', // FIXED: Relative to scripts directory
+    generationScript: './scripts/generate-legacy-canvas.tsx',
     sourcePath: 'content/downloads/legacy-architecture-canvas.mdx',
     type: 'canvas',
     category: 'legacy',
-    isInteractive: true,
-    isFillable: true,
     tier: 'architect',
     formats: ['A4', 'Letter', 'A3', 'bundle'],
     requiresAuth: true,
     tags: ['legacy', 'governance', 'family', 'formation', 'architecture'],
     version: '1.0.0'
   },
-
-  // Featured Publications
   'ultimate-purpose-of-man': {
     title: 'The Ultimate Purpose of Man',
     description: 'Definitive editorial examining the structural logic of human purpose.',
     outputPath: '/assets/downloads/ultimate-purpose-of-man-premium.pdf',
-    generationScript: './generate-standalone-pdf.tsx',
+    generationScript: './scripts/generate-standalone-pdf.tsx',
     type: 'editorial',
     category: 'theology',
-    isInteractive: false,
-    isFillable: false,
     tier: 'member',
     formats: ['A4'],
     requiresAuth: false,
     tags: ['purpose', 'philosophy', 'theology', 'existence'],
     version: '1.0.0'
   },
-  
   'strategic-foundations': {
     title: 'Strategic Foundations',
     description: 'Core frameworks for institutional thinking and leadership.',
     outputPath: '/assets/downloads/strategic-foundations.pdf',
-    generationScript: './generate-frameworks-pdf.tsx',
+    generationScript: './scripts/generate-frameworks-pdf.tsx',
     type: 'framework',
     category: 'leadership',
-    isInteractive: false,
-    isFillable: false,
     tier: 'member',
     formats: ['A4', 'Letter'],
     requiresAuth: false,
@@ -130,7 +120,6 @@ export function scanForDynamicAssets(): PDFConfig[] {
   const files = fs.readdirSync(downloadsDir);
   
   for (const filename of files) {
-    // Ignore system files and source mdx
     if (filename.startsWith('.') || filename.endsWith('.mdx')) continue;
 
     const filePath = path.join(downloadsDir, filename);
@@ -144,20 +133,16 @@ export function scanForDynamicAssets(): PDFConfig[] {
     }
     
     const { format, isInteractive, isFillable } = resolveFileMeta(filename);
-    
-    // Normalize ID: remove extension and interactive suffixes for logic pairing
     const fileId = filename
       .replace(/\.[^/.]+$/, "")
       .toLowerCase()
       .replace(/(-fillable|-\d+\.\d+\.\d+)$/, "");
 
-    // Check if this file is already defined in master registry
     const isMasterDefined = Object.keys(MASTER_PDF_REGISTRY).some(key => 
       filename.includes(key.replace(/-/g, ''))
     );
 
     if (!isMasterDefined) {
-      // Determine type based on filename patterns
       let type: PDFConfig['type'] = 'other';
       const lowerName = filename.toLowerCase();
       
@@ -177,7 +162,6 @@ export function scanForDynamicAssets(): PDFConfig[] {
         type = 'tool';
       }
 
-      // Determine tier based on naming patterns
       let tier: PDFConfig['tier'] = 'free';
       if (lowerName.includes('premium') || lowerName.includes('architect') || lowerName.includes('pro')) {
         tier = 'architect';
@@ -199,7 +183,7 @@ export function scanForDynamicAssets(): PDFConfig[] {
         isFillable,
         category: 'archive',
         tier,
-        formats: ['A4'], // Default for discovered files
+        formats: ['A4'],
         fileSize: stats.size,
         lastModified: stats.mtime,
         exists: true,
@@ -225,9 +209,8 @@ export function needsRegeneration(config: PDFConfig, existingStats?: fs.Stats): 
     return false;
   }
 
-  if (!existingStats) return true; // File doesn't exist
+  if (!existingStats) return true;
 
-  // Check if source file is newer than generated file
   if (config.sourcePath) {
     const sourcePath = path.resolve(process.cwd(), config.sourcePath);
     if (fs.existsSync(sourcePath)) {
@@ -236,7 +219,6 @@ export function needsRegeneration(config: PDFConfig, existingStats?: fs.Stats): 
     }
   }
 
-  // Regenerate if older than 7 days for dynamic content
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   return existingStats.mtime < weekAgo;
@@ -248,15 +230,26 @@ export function needsRegeneration(config: PDFConfig, existingStats?: fs.Stats): 
 export function getPDFRegistry(): Record<PDFId, PDFConfig> {
   const registry: Record<PDFId, PDFConfig> = {};
   
-  // 1. Load Master Configurations
   Object.entries(MASTER_PDF_REGISTRY).forEach(([id, config]) => {
     const fullPath = path.resolve(process.cwd(), 'public', config.outputPath.replace(/^\//, ''));
     const exists = fs.existsSync(fullPath);
     const stats = exists ? fs.statSync(fullPath) : null;
     const { format, isInteractive, isFillable } = resolveFileMeta(config.outputPath);
-
-    // Check if regeneration is needed
-    const shouldRegenerate = needsRegeneration({ id, ...config, format, isInteractive, isFillable } as PDFConfig, stats || undefined);
+    const shouldRegenerate = needsRegeneration({ 
+      id, 
+      ...config, 
+      format, 
+      isInteractive, 
+      isFillable, 
+      exists, 
+      sourceType: 'static',
+      tags: config.tags || [],
+      category: config.category || '',
+      tier: config.tier || 'free',
+      formats: config.formats || ['A4'],
+      requiresAuth: config.requiresAuth || false,
+      version: config.version || '1.0.0'
+    }, stats || undefined);
 
     registry[id] = { 
       id, 
@@ -269,17 +262,19 @@ export function getPDFRegistry(): Record<PDFId, PDFConfig> {
       exists: exists && !shouldRegenerate, 
       sourceType: 'static',
       tags: config.tags || [],
+      category: config.category || '',
+      tier: config.tier || 'free',
+      formats: config.formats || ['A4'],
+      requiresAuth: config.requiresAuth || false,
       version: config.version || '1.0.0'
     };
   });
   
-  // 2. Blend with Dynamic Multi-Format Discoveries
   const discoveredAssets = scanForDynamicAssets();
   for (const asset of discoveredAssets) { 
     if (!registry[asset.id]) {
       registry[asset.id] = asset;
     } else {
-      // Update existing with dynamic data but preserve generation script if present
       registry[asset.id] = {
         ...registry[asset.id],
         fileSize: asset.fileSize,
@@ -297,16 +292,13 @@ export function getPDFById(id: string): PDFConfig | null {
 }
 
 export function getAllPDFs(): PDFConfig[] {
-  // Sort by tier, then type, then title
   return Object.values(getPDFRegistry())
     .filter(asset => asset.exists)
     .sort((a, b) => {
-      // Tier order: architect > member > free
       const tierOrder: Record<string, number> = { architect: 0, 'inner-circle': 1, member: 2, free: 3 };
       const tierDiff = (tierOrder[a.tier] || 4) - (tierOrder[b.tier] || 4);
       if (tierDiff !== 0) return tierDiff;
       
-      // Type order: canvas > framework > strategic > editorial > academic > worksheet > tool > other
       const typeOrder: Record<string, number> = { 
         canvas: 0, framework: 1, strategic: 2, 
         editorial: 3, academic: 4, worksheet: 5, tool: 6, other: 7 
@@ -337,16 +329,47 @@ export function getFillablePDFs(): PDFConfig[] {
 export function getPDFsRequiringGeneration(): PDFConfig[] {
   const registry = getPDFRegistry();
   return Object.values(registry).filter(pdf => 
-    pdf.generationScript && (!pdf.exists || needsRegeneration(pdf, pdf.lastModified ? { mtime: pdf.lastModified } as fs.Stats : undefined))
+    pdf.generationScript && (!pdf.exists || needsRegeneration(pdf, pdf.lastModified ? { 
+      mtime: pdf.lastModified,
+      size: pdf.fileSize || 0,
+      isFile: () => true,
+      isDirectory: () => false,
+      isBlockDevice: () => false,
+      isCharacterDevice: () => false,
+      isSymbolicLink: () => false,
+      isFIFO: () => false,
+      isSocket: () => false,
+      dev: 0,
+      ino: 0,
+      mode: 0,
+      nlink: 0,
+      uid: 0,
+      gid: 0,
+      rdev: 0,
+      blksize: 0,
+      blocks: 0,
+      atimeMs: 0,
+      mtimeMs: pdf.lastModified.getTime(),
+      ctimeMs: 0,
+      birthtimeMs: 0,
+      atime: pdf.lastModified,
+      ctime: pdf.lastModified,
+      birthtime: pdf.lastModified
+    } as fs.Stats : undefined))
   );
 }
 
 export const PDF_REGISTRY = getPDFRegistry();
 
 // -----------------------------------------------------------------------------
-// UTILITIES FOR GENERATION PIPELINE
+// GENERATION PIPELINE (SERVER-SIDE ONLY)
 // -----------------------------------------------------------------------------
 export async function generateMissingPDFs(): Promise<Array<{id: string; success: boolean; error?: string; duration?: number}>> {
+  // Only run on server
+  if (typeof window !== 'undefined') {
+    return [];
+  }
+
   const results: Array<{id: string; success: boolean; error?: string; duration?: number}> = [];
   const pdfsToGenerate = getPDFsRequiringGeneration();
   
@@ -359,11 +382,10 @@ export async function generateMissingPDFs(): Promise<Array<{id: string; success:
       console.log(`🚀 Generating: ${pdf.title} (${pdf.id})`);
       
       if (pdf.id === 'legacy-architecture-canvas') {
-        // FIXED: Import from the same directory
-        const { LegacyCanvasGenerator } = await import('./generate-legacy-canvas.tsx');
-        const generator = new LegacyCanvasGenerator();
+        // Use dynamic import for ESM
+        const module = await import('./generate-legacy-canvas.tsx');
+        const generator = new module.LegacyCanvasGenerator();
         
-        // Generate all formats
         for (const format of pdf.formats) {
           if (format !== 'bundle') {
             const pdfBytes = await generator.generate({
@@ -383,7 +405,6 @@ export async function generateMissingPDFs(): Promise<Array<{id: string; success:
           }
         }
         
-        // Also generate the bundle if specified
         if (pdf.formats.includes('bundle')) {
           await generator.generateAllFormats();
         }
@@ -396,30 +417,27 @@ export async function generateMissingPDFs(): Promise<Array<{id: string; success:
         });
         
       } else if (pdf.generationScript) {
-        // Standard generation via script
+        // Use dynamic import for child_process
         const { exec } = await import('child_process');
         const { promisify } = await import('util');
         const execAsync = promisify(exec);
         
         const scriptPath = path.resolve(process.cwd(), pdf.generationScript);
         
-        // Check if script exists
         if (!fs.existsSync(scriptPath)) {
           throw new Error(`Generation script not found: ${scriptPath}`);
         }
         
-        const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-        const command = `${npxCmd} tsx ${scriptPath}`;
+        // Use tsx directly without npx.cmd on Windows
+        const command = `npx tsx "${scriptPath}"`;
         
         await execAsync(command, {
           cwd: process.cwd(),
           env: { 
             ...process.env, 
-            PDF_ID: pdf.id, 
-            NODE_OPTIONS: '--max-old-space-size=4096',
-            FORCE_COLOR: '1'
+            PDF_ID: pdf.id
           },
-          timeout: 300000 // 5 minutes
+          timeout: 300000
         });
         
         const duration = Date.now() - startTime;
@@ -482,16 +500,13 @@ export function validatePDFRegistry(): { valid: boolean; errors: string[] } {
   const registry = getPDFRegistry();
   
   Object.entries(registry).forEach(([id, config]) => {
-    // Check required fields
     if (!config.title) errors.push(`PDF ${id}: Missing title`);
     if (!config.outputPath) errors.push(`PDF ${id}: Missing outputPath`);
     
-    // Check output path starts with /
     if (!config.outputPath.startsWith('/')) {
       errors.push(`PDF ${id}: outputPath must start with / (got: ${config.outputPath})`);
     }
     
-    // Check generation script exists if specified
     if (config.generationScript) {
       const scriptPath = path.resolve(process.cwd(), config.generationScript);
       if (!fs.existsSync(scriptPath)) {
@@ -499,7 +514,6 @@ export function validatePDFRegistry(): { valid: boolean; errors: string[] } {
       }
     }
     
-    // Check if file exists at output path
     const fullPath = path.resolve(process.cwd(), 'public', config.outputPath.replace(/^\//, ''));
     if (config.exists && !fs.existsSync(fullPath)) {
       errors.push(`PDF ${id}: Marked as exists but file not found: ${fullPath}`);
@@ -513,9 +527,9 @@ export function validatePDFRegistry(): { valid: boolean; errors: string[] } {
 }
 
 // -----------------------------------------------------------------------------
-// CLI INTERFACE
+// CLI INTERFACE (SERVER-ONLY)
 // -----------------------------------------------------------------------------
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+async function runCLI() {
   const args = process.argv.slice(2);
   
   if (args.includes('--scan') || args.includes('--discover')) {
@@ -555,34 +569,30 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     
   } else if (args.includes('--generate-missing')) {
     console.log('🔄 Generating missing PDFs...\n');
-    generateMissingPDFs().then(results => {
-      const successful = results.filter(r => r.success).length;
-      const failed = results.filter(r => !r.success).length;
-      
-      console.log('\n📊 Generation Results:');
-      console.log(`✅ Successful: ${successful}`);
-      console.log(`❌ Failed: ${failed}`);
-      console.log(`⏱️  Total time: ${results.reduce((sum, r) => sum + (r.duration || 0), 0)}ms`);
-      
-      if (successful > 0) {
-        console.log('\n✅ Successful generations:');
-        results.filter(r => r.success).forEach(r => {
-          console.log(`  • ${r.id} (${r.duration}ms)`);
-        });
-      }
-      
-      if (failed > 0) {
-        console.log('\n❌ Failed generations:');
-        results.filter(r => !r.success).forEach(r => {
-          console.log(`  • ${r.id}: ${r.error}`);
-        });
-      }
-      
-      process.exit(failed > 0 ? 1 : 0);
-    }).catch(error => {
-      console.error('💥 Fatal error:', error);
-      process.exit(1);
-    });
+    const results = await generateMissingPDFs();
+    const successful = results.filter(r => r.success).length;
+    const failed = results.filter(r => !r.success).length;
+    
+    console.log('\n📊 Generation Results:');
+    console.log(`✅ Successful: ${successful}`);
+    console.log(`❌ Failed: ${failed}`);
+    console.log(`⏱️  Total time: ${results.reduce((sum, r) => sum + (r.duration || 0), 0)}ms`);
+    
+    if (successful > 0) {
+      console.log('\n✅ Successful generations:');
+      results.filter(r => r.success).forEach(r => {
+        console.log(`  • ${r.id} (${r.duration}ms)`);
+      });
+    }
+    
+    if (failed > 0) {
+      console.log('\n❌ Failed generations:');
+      results.filter(r => !r.success).forEach(r => {
+        console.log(`  • ${r.id}: ${r.error}`);
+      });
+    }
+    
+    process.exit(failed > 0 ? 1 : 0);
     
   } else if (args.includes('--validate')) {
     console.log('🔍 Validating PDF registry...\n');
@@ -631,16 +641,12 @@ Commands:
   --help, -h            Show this help message
 
 Examples:
-  node pdf-registry.ts --list
-  node pdf-registry.ts --generate-missing
-  node pdf-registry.ts --validate
-
-Environment Variables:
-  NODE_OPTIONS=--max-old-space-size=4096  Increase memory limit for PDF generation
+  npx tsx scripts/pdf-registry.ts --list
+  npx tsx scripts/pdf-registry.ts --generate-missing
+  npx tsx scripts/pdf-registry.ts --validate
     `);
     
   } else {
-    // Default: Show registry summary
     const registry = getPDFRegistry();
     const allPDFs = getAllPDFs();
     const missing = Object.values(registry).filter(pdf => !pdf.exists);
@@ -658,11 +664,16 @@ Environment Variables:
       missing.forEach(pdf => {
         console.log(`  • ${pdf.title} (${pdf.id})`);
         if (pdf.generationScript) {
-          console.log(`    To generate: node pdf-registry.ts --generate-missing`);
+          console.log(`    To generate: npx tsx scripts/pdf-registry.ts --generate-missing`);
         }
       });
     }
     
     console.log('\n💡 Tip: Use --help for available commands');
   }
+}
+
+// Only run CLI if this is the main module (not imported)
+if (import.meta.url && process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  runCLI().catch(console.error);
 }

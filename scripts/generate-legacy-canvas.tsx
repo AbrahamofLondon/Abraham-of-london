@@ -1,5 +1,5 @@
-import { PDFDocument, rgb, StandardFonts } from '@react-pdf/renderer';
-import fontkit from '@pdf-lib/fontkit';
+// scripts/generate-legacy-canvas.ts - PRODUCTION READY
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,17 +7,17 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// -----------------------------------------------------------------------------
+// =============================================================================
 // TYPES & INTERFACES
-// -----------------------------------------------------------------------------
-interface GenerationOptions {
+// =============================================================================
+export interface GenerationOptions {
   format: 'A4' | 'Letter' | 'A3';
   includeWatermark: boolean;
   isPreview: boolean;
   quality: 'draft' | 'standard' | 'premium';
 }
 
-interface PageDimensions {
+export interface PageDimensions {
   width: number;
   height: number;
   margins: {
@@ -28,7 +28,7 @@ interface PageDimensions {
   };
 }
 
-interface CanvasSection {
+export interface CanvasSection {
   id: string;
   title: string;
   description: string;
@@ -44,10 +44,10 @@ interface CanvasSection {
   }>;
 }
 
-// -----------------------------------------------------------------------------
-// LEGACY ARCHITECTURE CANVAS GENERATOR (INSTITUTIONAL GRADE)
-// -----------------------------------------------------------------------------
-class LegacyCanvasGenerator {
+// =============================================================================
+// LEGACY CANVAS GENERATOR CLASS
+// =============================================================================
+export class LegacyCanvasGenerator {
   private doc: PDFDocument | null = null;
   private page: any = null;
   private fonts: Record<string, any> = {};
@@ -71,28 +71,22 @@ class LegacyCanvasGenerator {
     }
   };
 
-  // Premium color palette for institutional documents
   private readonly colors = {
-    // Primary brand colors
-    primary: rgb(124 / 255, 58 / 255, 237 / 255),     // Purple
-    primaryDark: rgb(89 / 255, 31 / 255, 191 / 255),   // Dark Purple
-    secondary: rgb(16 / 255, 185 / 255, 129 / 255),   // Teal
-    secondaryDark: rgb(5 / 255, 150 / 255, 105 / 255), // Dark Teal
-    accent: rgb(59 / 255, 130 / 255, 246 / 255),      // Blue
-    warning: rgb(239 / 255, 68 / 255, 68 / 255),      // Red
-    success: rgb(34 / 255, 197 / 255, 94 / 255),      // Green
-    
-    // Neutral tones
-    background: rgb(255 / 255, 255 / 255, 255 / 255), // White
-    paper: rgb(250 / 255, 250 / 255, 249 / 255),      // Off-white
-    border: rgb(229 / 255, 231 / 255, 235 / 255),     // Light gray
-    borderDark: rgb(209 / 255, 213 / 255, 219 / 255), // Medium gray
-    
-    // Text colors
-    heading: rgb(17 / 255, 24 / 255, 39 / 255),       // Near black
-    body: rgb(31 / 255, 41 / 255, 55 / 255),          // Dark gray
-    muted: rgb(107 / 255, 114 / 255, 128 / 255),      // Medium gray
-    caption: rgb(156 / 255, 163 / 255, 175 / 255)     // Light gray
+    primary: rgb(124 / 255, 58 / 255, 237 / 255),
+    primaryDark: rgb(89 / 255, 31 / 255, 191 / 255),
+    secondary: rgb(16 / 255, 185 / 255, 129 / 255),
+    secondaryDark: rgb(5 / 255, 150 / 255, 105 / 255),
+    accent: rgb(59 / 255, 130 / 255, 246 / 255),
+    warning: rgb(239 / 255, 68 / 255, 68 / 255),
+    success: rgb(34 / 255, 197 / 255, 94 / 255),
+    background: rgb(255 / 255, 255 / 255, 255 / 255),
+    paper: rgb(250 / 255, 250 / 255, 249 / 255),
+    border: rgb(229 / 255, 231 / 255, 235 / 255),
+    borderDark: rgb(209 / 255, 213 / 255, 219 / 255),
+    heading: rgb(17 / 255, 24 / 255, 39 / 255),
+    body: rgb(31 / 255, 41 / 255, 55 / 255),
+    muted: rgb(107 / 255, 114 / 255, 128 / 255),
+    caption: rgb(156 / 255, 163 / 255, 175 / 255)
   };
 
   private readonly canvasSections: CanvasSection[] = [
@@ -117,10 +111,10 @@ class LegacyCanvasGenerator {
       position: { x: 270, y: 0 },
       size: { width: 250, height: 180 },
       fields: [
-        { id: 'financial', label: 'Financial Capital', type: 'textarea', required: true, placeholder: 'Monetary resources and investments...' },
-        { id: 'social', label: 'Social Capital', type: 'textarea', required: true, placeholder: 'Relationships and networks...' },
-        { id: 'cultural', label: 'Cultural Capital', type: 'textarea', required: true, placeholder: 'Knowledge, skills, and traditions...' },
-        { id: 'spiritual', label: 'Spiritual Capital', type: 'textarea', required: true, placeholder: 'Meaning, purpose, and transcendence...' }
+        { id: 'financial', label: 'Financial Capital', type: 'textarea', required: true },
+        { id: 'social', label: 'Social Capital', type: 'textarea', required: true },
+        { id: 'cultural', label: 'Cultural Capital', type: 'textarea', required: true },
+        { id: 'spiritual', label: 'Spiritual Capital', type: 'textarea', required: true }
       ]
     },
     {
@@ -131,10 +125,10 @@ class LegacyCanvasGenerator {
       position: { x: 0, y: 200 },
       size: { width: 250, height: 180 },
       fields: [
-        { id: 'family', label: 'Family Structures', type: 'textarea', required: true, placeholder: 'Family governance and traditions...' },
-        { id: 'business', label: 'Business Entities', type: 'textarea', required: true, placeholder: 'Companies and ventures...' },
-        { id: 'philanthropy', label: 'Philanthropic Vehicles', type: 'textarea', required: true, placeholder: 'Charities and foundations...' },
-        { id: 'intellectual', label: 'Intellectual Property', type: 'textarea', required: true, placeholder: 'Patents, copyrights, trademarks...' }
+        { id: 'family', label: 'Family Structures', type: 'textarea', required: true },
+        { id: 'business', label: 'Business Entities', type: 'textarea', required: true },
+        { id: 'philanthropy', label: 'Philanthropic Vehicles', type: 'textarea', required: true },
+        { id: 'intellectual', label: 'Intellectual Property', type: 'textarea', required: true }
       ]
     },
     {
@@ -145,23 +139,20 @@ class LegacyCanvasGenerator {
       position: { x: 270, y: 200 },
       size: { width: 250, height: 180 },
       fields: [
-        { id: 'ethical', label: 'Ethical Boundaries', type: 'textarea', required: true, placeholder: 'Lines you will never cross...' },
-        { id: 'risk', label: 'Risk Management', type: 'textarea', required: true, placeholder: 'Protections against threats...' },
-        { id: 'succession', label: 'Succession Planning', type: 'textarea', required: true, placeholder: 'Transition and continuity...' },
-        { id: 'accountability', label: 'Accountability Systems', type: 'textarea', required: true, placeholder: 'Checks and balances...' }
+        { id: 'ethical', label: 'Ethical Boundaries', type: 'textarea', required: true },
+        { id: 'risk', label: 'Risk Management', type: 'textarea', required: true },
+        { id: 'succession', label: 'Succession Planning', type: 'textarea', required: true },
+        { id: 'accountability', label: 'Accountability Systems', type: 'textarea', required: true }
       ]
     }
   ];
 
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
   // INITIALIZATION
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
   async initialize(options: GenerationOptions): Promise<void> {
-    // Create document with high compression for quality
     this.doc = await PDFDocument.create();
-    this.doc.registerFontkit(fontkit);
     
-    // Embed professional fonts
     this.fonts = {
       heading: await this.doc.embedFont(StandardFonts.HelveticaBold),
       subheading: await this.doc.embedFont(StandardFonts.HelveticaBoldOblique),
@@ -170,18 +161,13 @@ class LegacyCanvasGenerator {
       caption: await this.doc.embedFont(StandardFonts.HelveticaOblique)
     };
     
-    // Add page with specified format
     const dim = this.dimensions[options.format];
     this.page = this.doc.addPage([dim.width, dim.height]);
-    
-    // Get form for interactive fields
     this.form = this.doc.getForm();
     
-    // Set premium background (subtle gradient effect)
     if (options.quality === 'premium' && !options.isPreview) {
       this.drawPremiumBackground(dim);
     } else {
-      // Standard white background
       this.page.drawRectangle({
         x: 0,
         y: 0,
@@ -193,17 +179,16 @@ class LegacyCanvasGenerator {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // DRAWING UTILITIES (ENHANCED FOR QUALITY)
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // DRAWING UTILITIES
+  // ===========================================================================
   private drawPremiumBackground(dim: PageDimensions): void {
-    // Subtle gradient from top to bottom
     const gradientSteps = 5;
     const stepHeight = dim.height / gradientSteps;
     
     for (let i = 0; i < gradientSteps; i++) {
       const y = i * stepHeight;
-      const intensity = 0.98 - (i * 0.015); // Slight darkening toward bottom
+      const intensity = 0.98 - (i * 0.015);
       
       this.page.drawRectangle({
         x: 0,
@@ -212,32 +197,6 @@ class LegacyCanvasGenerator {
         height: stepHeight,
         color: rgb(intensity, intensity, intensity),
         borderWidth: 0
-      });
-    }
-    
-    // Add subtle grid pattern for professional look
-    const gridSpacing = 20;
-    const gridColor = rgb(0.95, 0.95, 0.95);
-    
-    // Vertical lines
-    for (let x = gridSpacing; x < dim.width; x += gridSpacing) {
-      this.page.drawLine({
-        start: { x, y: 0 },
-        end: { x, y: dim.height },
-        thickness: 0.25,
-        color: gridColor,
-        opacity: 0.3
-      });
-    }
-    
-    // Horizontal lines
-    for (let y = gridSpacing; y < dim.height; y += gridSpacing) {
-      this.page.drawLine({
-        start: { x: 0, y },
-        end: { x: dim.width, y },
-        thickness: 0.25,
-        color: gridColor,
-        opacity: 0.3
       });
     }
   }
@@ -267,7 +226,6 @@ class LegacyCanvasGenerator {
     const pageHeight = this.page.getHeight();
     const drawY = pageHeight - y;
     
-    // Handle text wrapping
     const words = text.split(' ');
     let line = '';
     let currentY = drawY;
@@ -277,7 +235,6 @@ class LegacyCanvasGenerator {
       const testWidth = font.widthOfTextAtSize(testLine, size);
       
       if (maxWidth && testWidth > maxWidth && i > 0) {
-        // Draw the current line
         let drawX = x;
         if (align === 'center') drawX = x - (font.widthOfTextAtSize(line, size) / 2);
         if (align === 'right') drawX = x - font.widthOfTextAtSize(line, size);
@@ -290,7 +247,6 @@ class LegacyCanvasGenerator {
           color
         });
         
-        // Move to next line
         line = words[i] + ' ';
         currentY -= lineHeight;
       } else {
@@ -298,7 +254,6 @@ class LegacyCanvasGenerator {
       }
     }
     
-    // Draw the last line
     let drawX = x;
     if (align === 'center') drawX = x - (font.widthOfTextAtSize(line, size) / 2);
     if (align === 'right') drawX = x - font.widthOfTextAtSize(line, size);
@@ -336,7 +291,6 @@ class LegacyCanvasGenerator {
     const pageHeight = this.page.getHeight();
     const drawY = pageHeight - y - height;
     
-    // Draw filled rectangle (if needed)
     if (fill && color) {
       this.page.drawRectangle({
         x,
@@ -348,9 +302,7 @@ class LegacyCanvasGenerator {
       });
     }
     
-    // Draw border with rounded corners (simulated with lines)
     if (borderWidth > 0) {
-      // Top border
       this.page.drawLine({
         start: { x: x + radius, y: drawY + height },
         end: { x: x + width - radius, y: drawY + height },
@@ -358,7 +310,6 @@ class LegacyCanvasGenerator {
         color: borderColor
       });
       
-      // Bottom border
       this.page.drawLine({
         start: { x: x + radius, y: drawY },
         end: { x: x + width - radius, y: drawY },
@@ -366,7 +317,6 @@ class LegacyCanvasGenerator {
         color: borderColor
       });
       
-      // Left border
       this.page.drawLine({
         start: { x: x, y: drawY + radius },
         end: { x: x, y: drawY + height - radius },
@@ -374,73 +324,47 @@ class LegacyCanvasGenerator {
         color: borderColor
       });
       
-      // Right border
       this.page.drawLine({
         start: { x: x + width, y: drawY + radius },
         end: { x: x + width, y: drawY + height - radius },
         thickness: borderWidth,
         color: borderColor
       });
-      
-      // Corner circles for rounded effect
-      const cornerPoints = [
-        { x: x + radius, y: drawY + height - radius }, // Top-left
-        { x: x + width - radius, y: drawY + height - radius }, // Top-right
-        { x: x + radius, y: drawY + radius }, // Bottom-left
-        { x: x + width - radius, y: drawY + radius } // Bottom-right
-      ];
-      
-      cornerPoints.forEach(point => {
-        this.page.drawCircle({
-          x: point.x,
-          y: point.y,
-          size: radius,
-          borderWidth: borderWidth,
-          borderColor: borderColor
-        });
-      });
     }
   }
 
   private createFormField(
-  sectionId: string, 
-  fieldId: string, 
-  x: number, 
-  y: number, 
-  width: number, 
-  height: number,
-  options: {
-    type?: 'text' | 'textarea' | 'signature';
-    placeholder?: string;
-    required?: boolean;
-    multiline?: boolean;
-  } = {}
-): void {
-  const {
-    type = 'text',
-    placeholder = '',
-    required = false,
-    multiline = true
-  } = options;
-  
-  const pageHeight = this.page.getHeight();
-  const drawY = pageHeight - y - height;
-  
-  const fullFieldId = `${sectionId}_${fieldId}`;
-  
-  if (type === 'signature') {
-    const field = this.form.createSignature(fullFieldId);
-    field.addToPage(this.page, { x, y: drawY, width, height });
-  } else {
+    sectionId: string, 
+    fieldId: string, 
+    x: number, 
+    y: number, 
+    width: number, 
+    height: number,
+    options: {
+      type?: 'text' | 'textarea' | 'signature';
+      placeholder?: string;
+      required?: boolean;
+      multiline?: boolean;
+    } = {}
+  ): void {
+    const {
+      type = 'text',
+      placeholder = '',
+      required = false,
+      multiline = true
+    } = options;
+    
+    const pageHeight = this.page.getHeight();
+    const drawY = pageHeight - y - height;
+    
+    const fullFieldId = `${sectionId}_${fieldId}`;
+    
     const field = this.form.createTextField(fullFieldId);
     field.addToPage(this.page, { x, y: drawY, width, height });
-    
-    // Configure text field - FIXED: setFont doesn't exist, use setFontSize
     field.setFontSize(10);
     
     if (placeholder) {
       field.setText(placeholder);
-      field.setOpacity(0.5); // Gray out placeholder text
     }
     
     if (multiline) {
@@ -449,7 +373,6 @@ class LegacyCanvasGenerator {
     }
     
     if (required) {
-      // Visual indicator for required fields
       this.page.drawText('*', {
         x: x - 8,
         y: drawY + height - 12,
@@ -459,24 +382,20 @@ class LegacyCanvasGenerator {
       });
     }
   }
-}
 
-  // ---------------------------------------------------------------------------
-  // MAIN GENERATION LOGIC (ENHANCED FOR QUALITY)
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // MAIN GENERATION LOGIC
+  // ===========================================================================
   async generate(options: GenerationOptions): Promise<Uint8Array> {
     await this.initialize(options);
     const dim = this.dimensions[options.format];
     const { width, height } = this.page.getSize();
     
-    // Calculate scaling for different formats
     const scale = this.calculateScale(options.format);
     const offsetX = dim.margins.left;
-    const offsetY = dim.margins.top + 50; // Extra space for header
+    const offsetY = dim.margins.top + 50;
     
-    // -----------------------------------------------------------------------
-    // HEADER SECTION (Premium Design)
-    // -----------------------------------------------------------------------
+    // Header
     this.addText('THE LEGACY ARCHITECTURE CANVAS', width / 2, 80, {
       font: this.fonts.heading,
       size: 28 * scale,
@@ -491,7 +410,6 @@ class LegacyCanvasGenerator {
       align: 'center'
     });
     
-    // Separator line
     this.page.drawLine({
       start: { x: offsetX, y: height - 150 },
       end: { x: width - offsetX, y: height - 150 },
@@ -500,9 +418,7 @@ class LegacyCanvasGenerator {
       opacity: 0.5
     });
     
-    // -----------------------------------------------------------------------
-    // INSTRUCTIONS SECTION
-    // -----------------------------------------------------------------------
+    // Instructions
     this.addText('INSTRUCTIONS:', offsetX, 180, {
       font: this.fonts.heading,
       size: 12 * scale,
@@ -525,21 +441,17 @@ class LegacyCanvasGenerator {
       });
     });
     
-    // -----------------------------------------------------------------------
-    // CANVAS SECTIONS (Interactive)
-    // -----------------------------------------------------------------------
-    this.canvasSections.forEach((section, index) => {
+    // Canvas Sections
+    this.canvasSections.forEach((section) => {
       const x = offsetX + section.position.x;
       const y = offsetY + section.position.y;
       
-      // Section container with shadow effect
       this.drawRoundedRect(x - 5, y - 5, section.size.width + 10, section.size.height + 10, {
         color: rgb(0.98, 0.98, 0.98),
         borderWidth: 0,
         fill: true
       });
       
-      // Main section box
       this.drawRoundedRect(x, y, section.size.width, section.size.height, {
         borderColor: section.color,
         borderWidth: 2,
@@ -547,7 +459,6 @@ class LegacyCanvasGenerator {
         radius: 6
       });
       
-      // Section header with colored background
       this.page.drawRectangle({
         x,
         y: this.page.getHeight() - y - 30,
@@ -557,15 +468,13 @@ class LegacyCanvasGenerator {
         borderWidth: 0
       });
       
-      // Section title
       this.addText(section.title, x + 15, y + 20, {
         font: this.fonts.heading,
         size: 12 * scale,
-        color: rgb(1, 1, 1), // White text on colored background
+        color: rgb(1, 1, 1),
         maxWidth: section.size.width - 30
       });
       
-      // Section description
       this.addText(section.description, x + 15, y + 45, {
         font: this.fonts.caption,
         size: 9 * scale,
@@ -573,23 +482,20 @@ class LegacyCanvasGenerator {
         maxWidth: section.size.width - 30
       });
       
-      // Create form fields for this section
       section.fields.forEach((field, fieldIndex) => {
         const fieldY = y + 75 + (fieldIndex * 25);
         
-        // Field label
         this.addText(field.label + ':', x + 15, fieldY, {
           font: this.fonts.body,
           size: 9 * scale,
           color: this.colors.heading
         });
         
-        // Form field
         this.createFormField(
           section.id,
           field.id,
           x + 80,
-          fieldY - 20, // Adjust for PDF coordinate system
+          fieldY - 20,
           section.size.width - 95,
           15,
           {
@@ -602,12 +508,9 @@ class LegacyCanvasGenerator {
       });
     });
     
-    // -----------------------------------------------------------------------
-    // FOOTER SECTION
-    // -----------------------------------------------------------------------
+    // Footer
     const footerY = height - 40;
     
-    // Confidentiality notice
     if (!options.isPreview) {
       this.addText('CONFIDENTIAL & PROPRIETARY', width / 2, footerY - 20, {
         font: this.fonts.caption,
@@ -617,18 +520,15 @@ class LegacyCanvasGenerator {
       });
     }
     
-    // Watermark (subtle background)
     if (options.includeWatermark && !options.isPreview) {
       this.addText('Abraham of London • Legacy Architecture Suite', width / 2, height / 2, {
         font: this.fonts.italic,
         size: 48 * scale,
         color: rgb(0.9, 0.9, 0.9),
-        align: 'center',
-        opacity: 0.1
+        align: 'center'
       });
     }
     
-    // Generation info
     const infoText = `Generated: ${new Date().toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
@@ -642,14 +542,7 @@ class LegacyCanvasGenerator {
       align: 'right'
     });
     
-    // -----------------------------------------------------------------------
-    // FINALIZE DOCUMENT
-    // -----------------------------------------------------------------------
-    
-    // Don't flatten - keep form fields interactive
-    // this.form.flatten(); // REMOVED to keep fields fillable
-    
-    // Set document metadata
+    // Set metadata
     this.doc.setTitle('Legacy Architecture Canvas');
     this.doc.setAuthor('Abraham of London');
     this.doc.setSubject('Sovereign Legacy Design Framework');
@@ -659,7 +552,6 @@ class LegacyCanvasGenerator {
     this.doc.setCreationDate(new Date());
     this.doc.setModificationDate(new Date());
     
-    // Save with compression for quality
     return await this.doc.save({
       useObjectStreams: true,
       addDefaultPage: false,
@@ -669,23 +561,22 @@ class LegacyCanvasGenerator {
 
   private calculateScale(format: string): number {
     switch (format) {
-      case 'A3': return 1.1; // Larger scale for big format
-      case 'A4': return 1.0; // Standard scale
-      case 'Letter': return 0.95; // Slightly smaller for US format
+      case 'A3': return 1.1;
+      case 'A4': return 1.0;
+      case 'Letter': return 0.95;
       default: return 1.0;
     }
   }
 
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
   // PRODUCTION METHODS
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
   async generateAllFormats(quality: 'draft' | 'standard' | 'premium' = 'premium'): Promise<void> {
     console.log('🚀 Generating Legacy Architecture Canvas PDFs...\n');
     
     const formats: Array<'A4' | 'Letter' | 'A3'> = ['A4', 'Letter', 'A3'];
     const outputDir = path.join(process.cwd(), 'public/assets/downloads');
     
-    // Ensure output directory exists
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -708,11 +599,10 @@ class LegacyCanvasGenerator {
         
         fs.writeFileSync(filepath, Buffer.from(pdfBytes));
         
-        // Verify file quality
         const stats = fs.statSync(filepath);
         const fileSizeKB = (stats.size / 1024).toFixed(1);
         
-        if (stats.size < 5000) { // Less than 5KB is suspicious for a quality PDF
+        if (stats.size < 5000) {
           throw new Error(`Generated file is too small (${fileSizeKB} KB), likely incomplete`);
         }
         
@@ -737,12 +627,6 @@ class LegacyCanvasGenerator {
       }
     }
     
-    // Generate premium bundle if all formats succeeded
-    const successfulFormats = results.filter(r => r.success);
-    if (successfulFormats.length === formats.length) {
-      await this.createPremiumBundle(outputDir, successfulFormats);
-    }
-    
     console.log('\n📊 Generation Summary:');
     results.forEach(result => {
       if (result.success) {
@@ -752,315 +636,26 @@ class LegacyCanvasGenerator {
       }
     });
     
+    const successfulFormats = results.filter(r => r.success);
     if (successfulFormats.length > 0) {
       console.log(`\n🎉 ${successfulFormats.length}/${formats.length} formats generated successfully!`);
     }
   }
 
-  private async createPremiumBundle(outputDir: string, formats: any[]): Promise<void> {
-    console.log('📦 Creating premium bundle...');
-    
-    try {
-      const bundleDoc = await PDFDocument.create();
-      
-      // Premium cover page
-      const coverPage = bundleDoc.addPage([595.28, 841.89]); // A4
-      const font = await bundleDoc.embedFont(StandardFonts.HelveticaBold);
-      const subFont = await bundleDoc.embedFont(StandardFonts.Helvetica);
-      
-      // Cover design
-      coverPage.drawRectangle({
-        x: 0,
-        y: 0,
-        width: 595.28,
-        height: 841.89,
-        color: rgb(0.05, 0.05, 0.08), // Dark background
-        borderWidth: 0
-      });
-      
-      // Title with glow effect (multiple layers)
-      coverPage.drawText('LEGACY ARCHITECTURE', {
-        x: 50,
-        y: 600,
-        size: 36,
-        font,
-        color: rgb(1, 1, 1)
-      });
-      
-      coverPage.drawText('CANVAS BUNDLE', {
-        x: 50,
-        y: 550,
-        size: 36,
-        font,
-        color: rgb(0.8, 0.7, 1) // Light purple
-      });
-      
-      // Content listing
-      coverPage.drawText('This premium bundle contains:', {
-        x: 50,
-        y: 450,
-        size: 16,
-        font: subFont,
-        color: rgb(0.9, 0.9, 0.9)
-      });
-      
-      formats.forEach((format, i) => {
-        coverPage.drawText(`• ${format.format}: ${format.filename}`, {
-          x: 70,
-          y: 400 - (i * 25),
-          size: 12,
-          font: subFont,
-          color: rgb(0.8, 0.8, 0.8)
-        });
-      });
-      
-      // Save bundle
-      const bundleBytes = await bundleDoc.save();
-      const bundlePath = path.join(outputDir, 'legacy-architecture-premium-bundle.pdf');
-      fs.writeFileSync(bundlePath, Buffer.from(bundleBytes));
-      
-      const stats = fs.statSync(bundlePath);
-      const fileSizeKB = (stats.size / 1024).toFixed(1);
-      
-      console.log(`✅ Created premium bundle: ${bundlePath} (${fileSizeKB} KB)`);
-      
-    } catch (error: any) {
-      console.error('❌ Failed to create premium bundle:', error.message);
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// CLI INTERFACE
-// ---------------------------------------------------------------------------
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2);
-  
-  const generator = new LegacyCanvasGenerator();
-  
-  // Parse arguments
-  const singleFormat = args.find(arg => arg.startsWith('--format='))?.split('=')[1];
-  const quality = args.find(arg => arg.startsWith('--quality='))?.split('=')[1] || 'premium';
-  const isSingle = args.includes('--single');
-  
-  if (singleFormat && ['A4', 'Letter', 'A3'].includes(singleFormat) && isSingle) {
-    // Generate single format
-    console.log(`🚀 Generating single format: ${singleFormat} (${quality} quality)`);
-    
-    generator.generate({
-      format: singleFormat as 'A4' | 'Letter' | 'A3',
-      includeWatermark: true,
-      isPreview: false,
-      quality: quality as 'draft' | 'standard' | 'premium'
-    }).then(async (pdfBytes) => {
-      const outputDir = path.join(process.cwd(), 'public/assets/downloads');
-      
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-      
-      const filename = `legacy-architecture-canvas-${singleFormat.toLowerCase()}-${quality}.pdf`;
-      const filepath = path.join(outputDir, filename);
-      
-      fs.writeFileSync(filepath, Buffer.from(pdfBytes));
-      
-      const stats = fs.statSync(filepath);
-      const fileSizeKB = (stats.size / 1024).toFixed(1);
-      
-      console.log(`✅ Generated: ${filename} (${fileSizeKB} KB)`);
-      console.log(`📍 Saved to: ${filepath}`);
-      
-    }).catch(error => {
-      console.error('❌ Generation failed:', error);
-      process.exit(1);
-    });
-    
-  } else {
-    // Generate all formats with premium quality
-    generator.generateAllFormats('premium').then(() => {
-      console.log('\n✨ All generations completed!');
-      process.exit(0);
-    }).catch(error => {
-      console.error('💥 Fatal error:', error);
-      process.exit(1);
-    });
-  }
-}
-
-  /**
-   * Production-grade PDF optimization
-   */
-  private async optimizePDF(pdfBytes: Uint8Array): Promise<Uint8Array> {
-    try {
-      const pdfDoc = await PDFDocument.load(pdfBytes);
-      // Optimization logic here
-      pdfDoc.setTitle('Legacy Architecture Canvas');
-      pdfDoc.setAuthor('Abraham of London');
-      pdfDoc.setSubject('Strategic Planning Tool');
-      pdfDoc.setKeywords(['legacy', 'architecture', 'canvas', 'planning']);
-      pdfDoc.setCreationDate(new Date());
-      pdfDoc.setModificationDate(new Date());
-      
-      const optimizedBytes = await pdfDoc.save({
-        useObjectStreams: true,
-        addDefaultPage: false,
-        objectsPerTick: 50,
-      });
-      
-      return optimizedBytes;
-    } catch (error) {
-      console.warn('PDF optimization failed, returning original:', error);
-      return pdfBytes; // Return original if optimization fails
-    }
-  }
-
-  /**
-   * Generate with retry logic for production reliability
-   */
-  async generateWithRetry(
-    options: GenerationOptions, 
-    maxRetries: number = 3
-  ): Promise<Uint8Array> {
-    let lastError: Error;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        console.log(`Attempt ${attempt}/${maxRetries} to generate ${options.format} PDF`);
-        
-        const pdfBytes = await this.generate(options);
-        
-        // Validate generated PDF
-        if (pdfBytes.length < 1000) {
-          throw new Error(`Generated PDF is too small (${pdfBytes.length} bytes), likely corrupted`);
-        }
-        
-        // Optimize for production
-        if (!options.isPreview && options.quality === 'premium') {
-          return await this.optimizePDF(pdfBytes);
-        }
-        
-        return pdfBytes;
-        
-      } catch (error: any) {
-        lastError = error;
-        console.warn(`Attempt ${attempt} failed:`, error.message);
-        
-        // Exponential backoff
-        if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-        }
-      }
-    }
-    
-    throw new Error(`Failed to generate PDF after ${maxRetries} attempts: ${lastError?.message}`);
-  }
-
-  /**
-   * Generate PDF with progress tracking (for large PDFs)
-   */
-  async generateWithProgress(
-    options: GenerationOptions,
-    onProgress?: (progress: number, message: string) => void
-  ): Promise<Uint8Array> {
-    const steps = [
-      { progress: 10, message: 'Initializing document...' },
-      { progress: 25, message: 'Embedding fonts...' },
-      { progress: 40, message: 'Creating canvas sections...' },
-      { progress: 60, message: 'Adding form fields...' },
-      { progress: 80, message: 'Applying styling...' },
-      { progress: 95, message: 'Finalizing document...' },
-      { progress: 100, message: 'PDF generated successfully!' }
-    ];
-    
-    // Create a wrapper that reports progress
-    const progressGenerator = new Proxy(this, {
-      get(target, prop) {
-        if (prop === 'generate') {
-          return async function(...args: any[]) {
-            // Report progress at each major step
-            for (const step of steps) {
-              if (onProgress) {
-                onProgress(step.progress, step.message);
-                // Small delay to show progress
-                await new Promise(resolve => setTimeout(resolve, 100));
-              }
-            }
-            return await target.generate.apply(target, args);
-          };
-        }
-        return (target as any)[prop];
-      }
-    });
-    
-    return await progressGenerator.generate(options);
-  }
-
-  /**
-   * Batch generation for production
-   */
-  async generateBatch(
-    formats: Array<'A4' | 'Letter' | 'A3'>,
-    options: Partial<GenerationOptions> = {}
-  ): Promise<Array<{ format: string; success: boolean; size?: number; error?: string }>> {
-    const results = [];
-    
-    for (const format of formats) {
-      try {
-        console.log(`🔄 Generating ${format} format...`);
-        
-        const pdfBytes = await this.generateWithRetry({
-          format,
-          includeWatermark: true,
-          isPreview: false,
-          quality: 'premium',
-          ...options
-        });
-        
-        results.push({
-          format,
-          success: true,
-          size: pdfBytes.length
-        });
-        
-        console.log(`✅ ${format}: ${(pdfBytes.length / 1024).toFixed(1)} KB`);
-        
-      } catch (error: any) {
-        console.error(`❌ ${format}: ${error.message}`);
-        results.push({
-          format,
-          success: false,
-          error: error.message
-        });
-      }
-    }
-    
-    return results;
-  }
-
-  /**
-   * Generate and save to file with proper error handling
-   */
   async generateAndSave(
     options: GenerationOptions,
     outputPath: string
   ): Promise<{ success: boolean; size?: number; error?: string; path: string }> {
     try {
-      const pdfBytes = await this.generateWithRetry(options);
+      const pdfBytes = await this.generate(options);
       
-      // Ensure directory exists
       const dir = path.dirname(outputPath);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
       
-      // Write file with atomic write to prevent corruption
-      const tempPath = outputPath + '.tmp';
-      fs.writeFileSync(tempPath, Buffer.from(pdfBytes));
+      fs.writeFileSync(outputPath, Buffer.from(pdfBytes));
       
-      // Atomic rename (works on most systems)
-      fs.renameSync(tempPath, outputPath);
-      
-      // Verify file was written correctly
       const stats = fs.statSync(outputPath);
       if (stats.size === 0) {
         throw new Error('Generated file is empty');
@@ -1073,12 +668,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       };
       
     } catch (error: any) {
-      // Clean up temporary file if it exists
-      const tempPath = outputPath + '.tmp';
-      if (fs.existsSync(tempPath)) {
-        fs.unlinkSync(tempPath);
-      }
-      
       return {
         success: false,
         error: error.message,
@@ -1086,19 +675,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       };
     }
   }
+}
 
-// ---------------------------------------------------------------------------
-// PRODUCTION-READY EXPORT
-// ---------------------------------------------------------------------------
-export { 
- export class LegacyCanvasGenerator {
-  LegacyCanvasGenerator, 
-  type GenerationOptions,
-  type CanvasSection,
-  type PageDimensions
-};
-
-// Utility function for production use
+// =============================================================================
+// PRODUCTION UTILITY FUNCTION
+// =============================================================================
 export async function generateLegacyCanvasProduction(
   format: 'A4' | 'Letter' | 'A3',
   quality: 'draft' | 'standard' | 'premium' = 'premium',
@@ -1120,4 +701,18 @@ export async function generateLegacyCanvasProduction(
     outputPath
   );
 }
-export { LegacyCanvasGenerator };
+
+// =============================================================================
+// CLI INTERFACE
+// =============================================================================
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const generator = new LegacyCanvasGenerator();
+  
+  generator.generateAllFormats('premium').then(() => {
+    console.log('\n✨ All generations completed!');
+    process.exit(0);
+  }).catch(error => {
+    console.error('💥 Fatal error:', error);
+    process.exit(1);
+  });
+}

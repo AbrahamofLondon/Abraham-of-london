@@ -18,7 +18,8 @@ import prisma from "@/lib/prisma";
  * Logs unique principal views into the Prisma/Neon database.
  */
 export async function recordContentView(doc: ContentDoc, memberId?: string): Promise<void> {
-  const slug = doc.slug || doc._raw?.flattenedPath;
+  // Use the correct slug field based on updated Contentlayer configuration
+  const slug = (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath;
   if (!slug) return;
 
   try {
@@ -156,22 +157,51 @@ export const getPublishedShorts = (): ContentDoc[] => {
 // Utility: Check if document exists
 export const documentExists = (slug: string): boolean => {
   const allDocs = ContentHelper.getAllDocuments();
-  return allDocs.some(doc => 
-    doc.slug === slug || doc._raw?.flattenedPath.split('/').pop() === slug
-  );
+  return allDocs.some(doc => {
+    // Try multiple slug fields due to updated Contentlayer structure
+    const docSlug = (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath.split('/').pop();
+    return ContentHelper.normalizeSlug(docSlug) === ContentHelper.normalizeSlug(slug);
+  });
 };
 
 // Utility: Get document by slug (any type)
 export const getDocumentBySlug = (slug: string): ContentDoc | null => {
-  // Use the robust helper which checks all 24 types
-  // We pass 'post' as a default kind, but the logic inside actually scans correctly
-  // or we can iterate if we want to be explicit, but getAllDocuments().find is safer here
   const allDocs = ContentHelper.getAllDocuments();
-  
-  const normalized = ContentHelper.normalizeSlug(slug);
+  const normalizedSlug = ContentHelper.normalizeSlug(slug);
   
   return allDocs.find(doc => {
-    const docSlug = doc.slug || doc._raw?.flattenedPath.split('/').pop();
-    return ContentHelper.normalizeSlug(docSlug) === normalized;
+    // Check all possible slug fields in order of preference
+    const docSlug = (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath.split('/').pop();
+    return ContentHelper.normalizeSlug(docSlug) === normalizedSlug;
+  }) || null;
+};
+
+// New utility: Get all documents with their computed slugs
+export const getAllDocumentsWithSlugs = (): Array<ContentDoc & { slugComputed: string }> => {
+  const allDocs = ContentHelper.getAllDocuments();
+  return allDocs.map(doc => ({
+    ...doc,
+    // Ensure consistent slug field across all document types
+    slugComputed: (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath.split('/').pop() || ''
+  }));
+};
+
+// New utility: Get document by any identifier (slug, computed slug, or flattened path)
+export const getDocumentByIdentifier = (identifier: string): ContentDoc | null => {
+  const allDocs = ContentHelper.getAllDocuments();
+  const normalizedIdentifier = ContentHelper.normalizeSlug(identifier);
+  
+  return allDocs.find(doc => {
+    // Check all possible identifiers
+    const possibleIdentifiers = [
+      (doc as any).slugComputed,
+      doc.slug,
+      doc._raw?.flattenedPath,
+      doc._raw?.flattenedPath.split('/').pop()
+    ].filter(Boolean);
+    
+    return possibleIdentifiers.some(id => 
+      ContentHelper.normalizeSlug(id) === normalizedIdentifier
+    );
   }) || null;
 };
