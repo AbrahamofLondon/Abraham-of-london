@@ -239,4 +239,4 @@ public/downloads/temp/
 .image-cache/
 
 # User uploads in development
-public/user-uploads/
+public/user-uploads/.env.production
