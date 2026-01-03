@@ -374,3 +374,6 @@ export default {
 export type PDFType = 'editorial' | 'framework' | 'academic' | 'strategic' | 'tool' | 'canvas' | 'worksheet' | 'other';
 export type PDFTier = 'free' | 'member' | 'architect' | 'inner-circle';
 export type PDFFormat = 'PDF' | 'EXCEL' | 'POWERPOINT' | 'ZIP' | 'BINARY';
+
+export { LegacyCanvasGenerator } from './generate-legacy-canvas-fixed';
+export default LegacyCanvasGenerator;
