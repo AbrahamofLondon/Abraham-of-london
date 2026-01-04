@@ -1,6 +1,6 @@
 // pages/api/generate-pdfs/batch.ts 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PDFGenerationOrchestrator } from '../../../scripts/generate-pdfs';
+import { PDFGenerationPipeline } from '../../../scripts/generate-pdfs';
 import { PDF_REGISTRY } from '../../../scripts/pdf-registry';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -1,277 +1,303 @@
-import * as React from "react";
-import type { GetStaticPaths, GetStaticProps } from "next";
-import Head from "next/head";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Share2, Twitter, Linkedin, Mail, Link2, Check } from "lucide-react";
-import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import React, { useState } from 'react';
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import Head from 'next/head';
+import Layout from '@/components/Layout';
+import { getServerAllShorts, getServerShortBySlug } from "@/lib/server/content";
+import ShortHero from '@/components/shorts/ShortHero';
+import ShortContent from '@/components/shorts/ShortContent';
+import ShortNavigation from '@/components/shorts/ShortNavigation';
+import ShortActions from '@/components/shorts/ShortActions';
+import RelatedShorts from '@/components/shorts/RelatedShorts';
+import ShortMetadata from '@/components/shorts/ShortMetadata';
+import ShortComments from '@/components/shorts/ShortComments';
+import ShortShare from '@/components/shorts/ShortShare';
+import { Bookmark, Heart, MessageCircle, Share2, Clock, Eye, Zap } from 'lucide-react';
 
-import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import {
-  getPublishedShorts,
-  getShortBySlug,
-  normalizeSlug,
-  resolveDocCoverImage,
-  coerceShortTheme,
-} from "@/lib/contentlayer-helper";
+interface Short {
+  title: string;
+  excerpt: string | null;
+  description: string | null;
+  date: string | null;
+  coverImage: string | null;
+  tags: string[];
+  author: string | null;
+  url: string;
+  slugPath: string;
+  readTime?: string;
+  theme?: string;
+  views?: number;
+  likes?: number;
+}
 
-const SITE_URL = "https://www.abrahamoflondon.org";
-
-type ShortPageProps = {
-  short: {
-    slug: string;
-    title: string;
-    excerpt: string | null;
-    date: string | null;
-    readTime: string | null;
-    tags: string[];
-    theme: string | null;
-    cover: string | null;
-    body: { raw: string };
-  };
+interface Props {
+  short: Short;
   source: MDXRemoteSerializeResult;
+}
+
+const ShortPage: NextPage<Props> = ({ short, source }) => {
+  const [likes, setLikes] = useState(short.likes || 0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  
+  const metaDescription = short.excerpt || short.description || 'A short insight from Abraham of London';
+  const formattedDate = short.date ? new Date(short.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : '';
+
+  const handleLike = () => {
+    if (!isLiked) {
+      setLikes(likes + 1);
+      setIsLiked(true);
+      // In production, you would call an API to save the like
+    }
+  };
+
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+    // In production, you would call an API to save/remove bookmark
+  };
+
+  return (
+    <Layout>
+      <Head>
+        <title>{short.title} | Shorts | Abraham of London</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={short.title} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={short.coverImage || '/assets/images/short-default.jpg'} />
+        <meta property="og:type" content="article" />
+      </Head>
+
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        {/* Short Hero Section */}
+        <ShortHero 
+          title={short.title}
+          excerpt={short.excerpt}
+          theme={short.theme}
+          coverImage={short.coverImage}
+          author={short.author}
+          date={formattedDate}
+          readTime={short.readTime}
+        />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Quick Stats Bar */}
+          <div className="mb-8 flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <Eye className="w-4 h-4" />
+                <span>{short.views || '1k'}+ views</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4" />
+                <span>{short.readTime || '2 min'} read</span>
+              </div>
+              {short.theme && (
+                <div className="flex items-center space-x-2">
+                  <Zap className="w-4 h-4" />
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                    {short.theme}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleLike}
+                className={`flex items-center space-x-2 ${
+                  isLiked ? 'text-red-600' : 'text-gray-600 hover:text-red-600'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                <span>{likes}</span>
+              </button>
+              
+              <button
+                onClick={() => setShowComments(!showComments)}
+                className="flex items-center space-x-2 text-gray-600 hover:text-blue-600"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span>Comment</span>
+              </button>
+              
+              <button
+                onClick={handleBookmark}
+                className={`flex items-center space-x-2 ${
+                  isBookmarked ? 'text-amber-600' : 'text-gray-600 hover:text-amber-600'
+                }`}
+              >
+                <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Main Content */}
+            <main className="lg:col-span-8">
+              <div className="bg-white rounded-2xl shadow-xl p-8">
+                {/* Short Content */}
+                <ShortContent>
+                  <MDXRemote {...source} />
+                </ShortContent>
+
+                {/* Tags */}
+                {short.tags && short.tags.length > 0 && (
+                  <div className="mt-8 pt-8 border-t border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-900 mb-3">Topics</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {short.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  <ShortActions 
+                    title={short.title}
+                    url={`https://abrahamoflondon.com${short.url}`}
+                    onLike={handleLike}
+                    isLiked={isLiked}
+                    onBookmark={handleBookmark}
+                    isBookmarked={isBookmarked}
+                    likes={likes}
+                  />
+                </div>
+
+                {/* Share Section */}
+                <div className="mt-8">
+                  <ShortShare 
+                    title={short.title}
+                    url={`https://abrahamoflondon.com${short.url}`}
+                    excerpt={short.excerpt || ''}
+                  />
+                </div>
+
+                {/* Comments */}
+                <div className="mt-12">
+                  <ShortComments 
+                    showComments={showComments}
+                    shortId={short.slugPath}
+                    onToggleComments={() => setShowComments(!showComments)}
+                  />
+                </div>
+              </div>
+            </main>
+
+            {/* Sidebar */}
+            <aside className="lg:col-span-4">
+              <div className="sticky top-8 space-y-8">
+                {/* Short Metadata */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <ShortMetadata 
+                    author={short.author}
+                    date={formattedDate}
+                    readTime={short.readTime}
+                    theme={short.theme}
+                    views={short.views}
+                  />
+                </div>
+
+                {/* Navigation */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <ShortNavigation currentSlug={short.slugPath} />
+                </div>
+
+                {/* Related Shorts */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">More Shorts</h3>
+                  <RelatedShorts currentSlug={short.slugPath} />
+                </div>
+
+                {/* Newsletter CTA */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-lg p-6">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Zap className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Get Daily Shorts
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Receive curated insights directly in your inbox
+                    </p>
+                    <form className="space-y-3">
+                      <input
+                        type="email"
+                        placeholder="Your email"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      />
+                      <button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg px-4 py-2 hover:from-purple-700 hover:to-pink-700 transition-all"
+                      >
+                        Subscribe Now
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
 };
 
-function toAbsoluteUrl(maybeUrl: string | null | undefined): string | null {
-  if (!maybeUrl) return null;
-  if (maybeUrl.startsWith("http://") || maybeUrl.startsWith("https://")) return maybeUrl;
-  if (maybeUrl.startsWith("/")) return `${SITE_URL}${maybeUrl}`;
-  return `${SITE_URL}/${maybeUrl}`;
-}
-
-function safeDateLabel(dateLike?: string | null): string | null {
-  if (!dateLike) return null;
-  const d = new Date(dateLike);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-}
+export default ShortPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = getPublishedShorts().map((s) => ({
-    params: { slug: normalizeSlug(s) },
-  }));
-  return { paths, fallback: false };
+  const shorts = await getServerAllShorts();
+
+  const paths = shorts
+    .filter((short) => short && !short.draft)
+    .map((short) => short.slug)
+    .filter(Boolean)
+    .map((slug: string) => ({ params: { slug } }));
+
+  return { paths, fallback: 'blocking' };
 };
 
-export const getStaticProps: GetStaticProps<ShortPageProps> = async ({ params }) => {
-  const slugParam = params?.slug;
-  const slug =
-    typeof slugParam === "string"
-      ? slugParam.toLowerCase().trim()
-      : Array.isArray(slugParam)
-      ? String(slugParam[0] ?? "").toLowerCase().trim()
-      : "";
-
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = params?.slug as string;
   if (!slug) return { notFound: true };
 
-  const rawDoc = getShortBySlug(slug);
-  if (!rawDoc) return { notFound: true };
+  const shortData = await getServerShortBySlug(slug);
+  if (!shortData) return { notFound: true };
 
-  const stableSlug = normalizeSlug(rawDoc);
-  const cover = toAbsoluteUrl(resolveDocCoverImage(rawDoc)) ?? null;
-
-  // FIX: Explicit mapping avoids JSON hacks and ensures no "undefined" leaks
-  const short: ShortPageProps["short"] = {
-    slug: stableSlug,
-    title: rawDoc.title || "Untitled Short",
-    excerpt: rawDoc.excerpt || null,
-    date: rawDoc.date ? String(rawDoc.date) : null,
-    readTime: rawDoc.readTime || null,
-    tags: Array.isArray(rawDoc.tags) ? (rawDoc.tags as string[]) : [],
-    theme: coerceShortTheme(rawDoc) ?? null, // Safe coercion
-    cover,
-    body: { raw: rawDoc.body?.raw || "" },
+  const short = {
+    title: shortData.title || "Untitled Short",
+    excerpt: shortData.excerpt || null,
+    description: shortData.description || null,
+    date: shortData.date || null,
+    coverImage: shortData.coverImage || null,
+    tags: Array.isArray(shortData.tags) ? shortData.tags : [],
+    author: shortData.author || null,
+    url: `/shorts/${shortData.slug || slug}`,
+    slugPath: shortData.slug || slug,
+    readTime: shortData.readTime || shortData.readingTime,
+    theme: shortData.theme,
+    views: shortData.views,
+    likes: shortData.likes,
   };
 
   try {
-    const source = await serialize(short.body.raw);
-    return { props: { short, source } };
+    const source = await serialize(shortData.body || "");
+    return { props: { short, source }, revalidate: 3600 };
   } catch {
     return { notFound: true };
   }
 };
-
-const ShareButton: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  className?: string;
-}> = ({ icon, label, onClick, className = "" }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={[
-      "group flex items-center gap-2 rounded-lg border border-gold/20 bg-gold/5 px-4 py-2.5",
-      "text-sm font-medium text-gold transition-all hover:border-gold/40 hover:bg-gold/10 hover:scale-[1.03]",
-      "active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-gold/30",
-      className,
-    ].join(" ")}
-    aria-label={label}
-  >
-    {icon}
-    <span className="hidden sm:inline">{label}</span>
-  </button>
-);
-
-export default function ShortPage({ short, source }: ShortPageProps): JSX.Element {
-  const [copied, setCopied] = React.useState(false);
-
-  const shareUrl = `${SITE_URL}/shorts/${short.slug}`;
-  const shareTitle = short.title || "Shorts · Abraham of London";
-  const shareText =
-    short.excerpt ||
-    "A short reflection from Abraham of London — faith-rooted clarity without the noise.";
-
-  const dateLabel = safeDateLabel(short.date);
-
-  const handleShare = React.useCallback(
-    (platform: "twitter" | "linkedin" | "email" | "copy") => {
-      if (typeof window === "undefined") return;
-
-      const encodedUrl = encodeURIComponent(shareUrl);
-      const encodedTitle = encodeURIComponent(shareTitle);
-      const encodedText = encodeURIComponent(shareText);
-
-      switch (platform) {
-        case "twitter":
-          window.open(
-            `https://twitter.com/intent/tweet?text=${encodedTitle}%0A${encodedText}&url=${encodedUrl}`,
-            "_blank",
-            "noopener,noreferrer,width=550,height=420"
-          );
-          break;
-        case "linkedin":
-          window.open(
-            `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-            "_blank",
-            "noopener,noreferrer,width=550,height=420"
-          );
-          break;
-        case "email":
-          window.location.href = `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0ARead%3A%20${encodedUrl}`;
-          break;
-        case "copy":
-          if (!navigator?.clipboard?.writeText) return;
-          navigator.clipboard
-            .writeText(shareUrl)
-            .then(() => {
-              setCopied(true);
-              window.setTimeout(() => setCopied(false), 1800);
-            })
-            .catch(() => {});
-          break;
-      }
-    },
-    [shareUrl, shareTitle, shareText]
-  );
-
-  const handleNativeShare = React.useCallback(() => {
-    if (typeof window === "undefined") return;
-    if (!navigator?.share) return;
-    navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(() => {});
-  }, [shareUrl, shareTitle, shareText]);
-
-  return (
-    <Layout title={shareTitle} description={shareText} ogImage={short.cover ?? undefined}>
-      <Head>
-        <meta name="description" content={shareText} />
-        <meta property="og:title" content={shareTitle} />
-        <meta property="og:description" content={shareText} />
-        <meta property="og:url" content={shareUrl} />
-        <meta property="og:type" content="article" />
-        {short.cover ? <meta property="og:image" content={short.cover} /> : null}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={shareTitle} />
-        <meta name="twitter:description" content={shareText} />
-        <link rel="canonical" href={shareUrl} />
-      </Head>
-
-      <main className="mx-auto max-w-2xl px-6 py-20">
-        <Link
-          href="/shorts"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-gold/70 transition-colors hover:text-gold"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Shorts
-        </Link>
-
-        <header className="mb-12 border-b border-gold/10 pb-10 text-center">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gold">
-            {short.theme || "Reflection"}
-          </p>
-
-          <h1 className="mt-4 font-serif text-4xl text-white">{short.title}</h1>
-
-          {short.excerpt ? <p className="mt-4 text-lg text-gray-400 italic">{short.excerpt}</p> : null}
-
-          <div className="mt-6 flex items-center justify-center gap-3 text-xs text-gray-500">
-            {short.readTime ? <span>{short.readTime} read</span> : null}
-            {dateLabel ? (
-              <>
-                <span className="opacity-40">•</span>
-                <span>{dateLabel}</span>
-              </>
-            ) : null}
-          </div>
-        </header>
-
-        <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-p:text-gray-300 prose-strong:text-gold prose-a:text-gold">
-          <MDXRemote {...source} components={mdxComponents} />
-        </article>
-
-        <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-16 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 to-transparent p-8 backdrop-blur-sm"
-        >
-          <div className="mb-6 text-center">
-            <h2 className="mb-3 font-serif text-2xl text-cream">Share it forward</h2>
-            <p className="mx-auto max-w-md text-sm text-gray-400">
-              If this met you in the right moment, send it to someone who needs steady clarity.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <ShareButton icon={<Share2 className="h-4 w-4" />} label="Share" onClick={handleNativeShare} className="sm:hidden" />
-            <ShareButton icon={<Twitter className="h-4 w-4" />} label="Twitter" onClick={() => handleShare("twitter")} />
-            <ShareButton icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" onClick={() => handleShare("linkedin")} />
-            <ShareButton icon={<Mail className="h-4 w-4" />} label="Email" onClick={() => handleShare("email")} />
-            <ShareButton
-              icon={copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
-              label={copied ? "Copied" : "Copy link"}
-              onClick={() => handleShare("copy")}
-              className={copied ? "border-green-500/40 bg-green-500/10 text-green-400" : ""}
-            />
-          </div>
-
-          <div className="mt-6 border-t border-gold/10 pt-6 text-center">
-            <p className="mb-3 text-xs text-gray-500">Want another one like this?</p>
-            <Link
-              href="/shorts"
-              className="inline-flex items-center gap-2 text-sm font-medium text-gold transition-colors hover:text-gold/80"
-            >
-              Explore more Shorts
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-          </div>
-        </motion.section>
-
-        <nav className="mt-12 flex items-center justify-between border-t border-white/5 pt-8">
-          <Link href="/shorts" className="text-sm text-gray-500 transition-colors hover:text-gold">
-            ← All Shorts
-          </Link>
-          <Link href="/blog" className="text-sm text-gray-500 transition-colors hover:text-gold">
-            Read Essays →
-          </Link>
-        </nav>
-      </main>
-    </Layout>
-  );
-}

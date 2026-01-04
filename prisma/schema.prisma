@@ -1,11 +1,10 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
-  // NO url here - that goes in config.ts
+  url      = env("DATABASE_URL")
 }
 
 // ==================== AUDIT & ANALYTICS MODELS ====================
@@ -93,7 +92,7 @@ model StrategyRoomIntake {
 // ==================== CORE MEMBERSHIP MODELS ====================
 
 model InnerCircleMember {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   emailHash       String   @unique @map("email_hash")
   emailHashPrefix String   @map("email_hash_prefix")
   name            String?
@@ -109,7 +108,7 @@ model InnerCircleMember {
   keys            InnerCircleKey[]
   auditEvents     DownloadAuditEvent[]
   interactions    ShortInteraction[]
-  sessions        Session[]  // Added this relationship
+  sessions        Session[]
 
   @@index([status])
   @@index([tier])
@@ -118,7 +117,7 @@ model InnerCircleMember {
 }
 
 model InnerCircleKey {
-  id            String    @id @default(uuid())
+  id            String    @id @default(cuid())
   memberId      String    @map("member_id")
   member        InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
   keyHash       String    @unique @map("key_hash")
@@ -201,7 +200,7 @@ model SystemAuditLog {
   severity     String?  @default("low")
   errorMessage String?  @map("error_message")
   durationMs   Int?     @map("duration_ms")
-  metadata     Json?
+  metadata     String?  // CHANGED FROM Json? TO String?
   category     String?  // For grouping logs
   subCategory  String?  @map("sub_category")
   tags         String?  // JSON array for additional filtering
@@ -312,45 +311,3 @@ model MaintenanceLog {
   @@index([startedAt])
   @@map("maintenance_logs")
 }
-
-// ==================== ENUMS FOR TYPE SAFETY ====================
-
-// Note: SQLite doesn't support native enums, but we can use string constants
-// Uncomment if using PostgreSQL
-
-// enum MemberStatus {
-//   active
-//   inactive
-//   suspended
-//   pending
-// }
-
-// enum KeyStatus {
-//   active
-//   expired
-//   revoked
-//   pending
-// }
-
-// enum AuditSeverity {
-//   low
-//   medium
-//   high
-//   critical
-// }
-
-// enum AuditStatus {
-//   success
-//   failed
-//   warning
-//   pending
-// }
-
-// enum ActorType {
-//   system
-//   api
-//   member
-//   admin
-//   cron
-//   webhook
-// }

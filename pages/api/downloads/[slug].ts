@@ -1,73 +1,82 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { getDownloadBySlug, resolveDocDownloadUrl, getRequiredTier } from "@/lib/server/content";
-import { getUserTierFromCookies, tierAtLeast, signDownloadToken, newNonce, type InnerCircleTier } from "@/lib/downloads/security";
-import { logDownloadEvent } from "@/lib/downloads/audit";
+import { getServerAllPosts, getServerPostBySlug } from "@/lib/server/content";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "GET") return res.status(405).end();
+type Props = {
+  post: {
+    title: string;
+    excerpt: string | null;
+    author: string | null;
+    coverImage: string | null;
+    date: string | null;
+    slug: string;
+    url: string;
+  };
+  source: MDXRemoteSerializeResult;
+};
 
-  const slug = String(req.query.slug || "").toLowerCase().trim();
-  if (!slug) return res.status(400).send("ERR_MISS_SLUG");
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getServerAllPosts();
+  
+  return {
+    paths: posts.map((post) => ({
+      params: { slug: post.slug },
+    })),
+    fallback: false,
+  };
+};
+
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = params?.slug as string;
+  
+  if (!slug) {
+    return {
+      notFound: true,
+    };
+  }
 
   try {
-    const doc = getDownloadBySlug(slug);
-    if (!doc) return res.status(404).send("ERR_NOT_FOUND");
+    const post = await getServerPostBySlug(slug);
+    
+    if (!post) {
+      return {
+        notFound: true,
+      };
+    }
 
-    const url = resolveDocDownloadUrl(doc);
-    if (!url) return res.status(500).send("ERR_ASSET_UNREACHABLE");
-
-    const requiredTierRaw = getRequiredTier(doc);
-    const requiredTier: InnerCircleTier = requiredTierRaw as InnerCircleTier;
-    const userTier = getUserTierFromCookies(req.headers.cookie);
-
-    const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "0.0.0.0";
-    const ua = req.headers["user-agent"] || "unknown";
-    const ref = req.headers.referer || "direct";
-
-    // 1. Authorization Boundary
-    if (!tierAtLeast(userTier, requiredTier)) {
-      await logDownloadEvent({
-        eventType: "DOWNLOAD_DENIED",
-        slug, 
-        requiredTier, 
-        userTier, 
-        ip, 
-        userAgent: ua, 
-        referrer: ref,
-        note: "Access blocked: Insufficient institutional clearance",
+    // Serialize MDX content if it exists
+    let source: MDXRemoteSerializeResult | null = null;
+    if (post.body) {
+      source = await serialize(post.body, {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
+        },
       });
-      return res.redirect(302, "/inner-circle?auth_required=true");
     }
 
-    // 2. Signing Security Boundary
-    const secret = process.env.DOWNLOAD_SIGNING_SECRET;
-    if (!secret || secret.length < 32) {
-      throw new Error("Weak or missing DOWNLOAD_SIGNING_SECRET");
-    }
-
-    // 3. Short-lived Secure Token Creation
-    const exp = Math.floor(Date.now() / 1000) + (5 * 60); // 300 second TTL
-    const token = signDownloadToken({ 
-      slug, 
-      exp, 
-      requiredTier, 
-      nonce: newNonce() 
-    }, secret);
-
-    await logDownloadEvent({
-      eventType: "LINK_ISSUED",
-      slug, 
-      requiredTier, 
-      userTier, 
-      ip, 
-      userAgent: ua, 
-      referrer: ref,
-      tokenExp: exp,
-    });
-
-    return res.redirect(302, `/api/dl/${encodeURIComponent(token)}`);
+    return {
+      props: {
+        post: {
+          title: post.title,
+          excerpt: post.excerpt || null,
+          author: post.author || null,
+          coverImage: post.coverImage || null,
+          date: post.date || null,
+          slug: post.slug,
+          url: post.url || `/blog/${post.slug}`,
+        },
+        source,
+      },
+    };
   } catch (error) {
-    console.error("[ISSUER_FAULT]", error);
-    return res.status(500).send("ERR_SEC_ISSUANCE_FAILED");
+    console.error("[BLOG_PAGE_ERROR]", error);
+    return {
+      notFound: true,
+    };
   }
-}
+};

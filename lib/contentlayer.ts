@@ -1,147 +1,128 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* lib/contentlayer.ts - SIMPLIFIED VERSION */
 /**
- * Single canonical Contentlayer surface.
- * - Runtime data: Loaded safely via require() to prevent crashes.
- * - Types: Defined locally to prevent "Chicken & Egg" build errors.
+ * Simple contentlayer exports without Contentlayer dependencies
+ * Uses contentlayer-helper as the data source
  */
 
-// 1. DEFINE LOCAL TYPES (Breaks dependency on unbuilt files)
-export interface ContentlayerDocument {
-  _id: string;
-  _raw: {
-    flattenedPath: string;
-    sourceFileName: string;
-    sourceFilePath: string;
-    contentType: string;
-  };
-  type: string;
-  slug?: string;
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  excerpt?: string;
-  date?: string;
-  coverImage?: string;
-  coverimage?: string; // Legacy support
-  tags?: string[];
-  draft?: boolean;
-  featured?: boolean;
-  accessLevel?: string;
-  lockMessage?: string;
-  author?: string;
-  category?: string;
-  readTime?: string;
-  [key: string]: any;
-}
+import { 
+  getAllCanons,
+  getAllDownloads,
+  getAllShorts,
+  getAllBooks,
+  getAllPosts,
+  getAllEvents,
+  getAllResources,
+  getAllPrints,
+  getAllStrategies,
+  getAllArticles,
+  getAllGuides,
+  getAllTutorials,
+  getAllCaseStudies,
+  getAllWhitepapers,
+  getAllReports,
+  getAllNewsletters,
+  getAllSermons,
+  getAllDevotionals,
+  getAllPrayers,
+  getAllTestimonies,
+  getAllPodcasts,
+  getAllVideos,
+  getAllCourses,
+  getAllLessons,
+  ContentDoc as ContentDocBase,
+  DocKind
+} from "@/lib/contentlayer-helper";
 
-// Specific Type Interfaces
-export interface Post extends ContentlayerDocument { type: 'Post'; }
-export interface Book extends ContentlayerDocument { 
-  type: 'Book'; 
-  isbn?: string; 
-  publisher?: string; 
-}
-export interface Download extends ContentlayerDocument { 
-  type: 'Download'; 
-  file?: string; 
-  downloadUrl?: string; 
-  fileSize?: string;
-}
-export interface Canon extends ContentlayerDocument { 
-  type: 'Canon'; 
-  volumeNumber?: number | string; 
-  order?: number; 
-}
-export interface Event extends ContentlayerDocument { 
-  type: 'Event'; 
-  eventDate?: string; 
-  location?: string; 
-}
-export interface Short extends ContentlayerDocument { type: 'Short'; theme?: string; }
-export interface Print extends ContentlayerDocument { type: 'Print'; price?: string; available?: boolean; }
-export interface Strategy extends ContentlayerDocument { type: 'Strategy'; }
-export interface Resource extends ContentlayerDocument { type: 'Resource'; resourceType?: string; }
+// Re-export everything from contentlayer-helper
+export {
+  getAllCanons,
+  getAllDownloads,
+  getAllShorts,
+  getAllBooks,
+  getAllPosts,
+  getAllEvents,
+  getAllResources,
+  getAllPrints,
+  getAllStrategies,
+  getAllArticles,
+  getAllGuides,
+  getAllTutorials,
+  getAllCaseStudies,
+  getAllWhitepapers,
+  getAllReports,
+  getAllNewsletters,
+  getAllSermons,
+  getAllDevotionals,
+  getAllPrayers,
+  getAllTestimonies,
+  getAllPodcasts,
+  getAllVideos,
+  getAllCourses,
+  getAllLessons
+};
 
-// Union Type
-export type DocumentTypes = 
-  | Post | Book | Download | Canon | Event | Short | Print | Strategy | Resource;
+export type { ContentDocBase as ContentlayerDocument, DocKind };
 
-// Export Aliases for legacy files
-export type PostDocument = Post;
-export type BookDocument = Book;
-export type DownloadDocument = Download;
-export type CanonDocument = Canon;
-export type EventDocument = Event;
-export type ShortDocument = Short;
-export type PrintDocument = Print;
-export type StrategyDocument = Strategy;
-export type ResourceDocument = Resource;
+// Export type aliases for compatibility
+export type PostDocument = ContentDocBase;
+export type BookDocument = ContentDocBase;
+export type DownloadDocument = ContentDocBase;
+export type CanonDocument = ContentDocBase;
+export type EventDocument = ContentDocBase;
+export type ShortDocument = ContentDocBase;
+export type PrintDocument = ContentDocBase;
+export type StrategyDocument = ContentDocBase;
+export type ResourceDocument = ContentDocBase;
+export type DocumentTypes = ContentDocBase;
 
-/* -------------------------------------------------------------------------- */
-/* Runtime collections (Safe Loading)                                         */
-/* -------------------------------------------------------------------------- */
+// Collections
+export const allPosts = getAllPosts();
+export const allBooks = getAllBooks();
+export const allDownloads = getAllDownloads();
+export const allEvents = getAllEvents();
+export const allPrints = getAllPrints();
+export const allStrategies = getAllStrategies();
+export const allResources = getAllResources();
+export const allCanons = getAllCanons();
+export const allShorts = getAllShorts();
+export const allDocuments = [
+  ...allPosts,
+  ...allBooks,
+  ...allDownloads,
+  ...allEvents,
+  ...allPrints,
+  ...allStrategies,
+  ...allResources,
+  ...allCanons,
+  ...allShorts
+];
 
-const safeArray = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
+// Type guards (simplified)
+export function isPost(doc: any): boolean { return doc?.type === "Post" || doc?.type === "post"; }
+export function isBook(doc: any): boolean { return doc?.type === "Book" || doc?.type === "book"; }
+export function isDownload(doc: any): boolean { return doc?.type === "Download" || doc?.type === "download"; }
+export function isEvent(doc: any): boolean { return doc?.type === "Event" || doc?.type === "event"; }
+export function isPrint(doc: any): boolean { return doc?.type === "Print" || doc?.type === "print"; }
+export function isResource(doc: any): boolean { return doc?.type === "Resource" || doc?.type === "resource"; }
+export function isCanon(doc: any): boolean { return doc?.type === "Canon" || doc?.type === "canon"; }
+export function isStrategy(doc: any): boolean { return doc?.type === "Strategy" || doc?.type === "strategy"; }
+export function isShort(doc: any): boolean { return doc?.type === "Short" || doc?.type === "short"; }
 
-// Dynamic import holder
-let generatedContent: any = {};
-
-// Try to load content, fail silently if not built yet
-if (process.env.DISABLE_CONTENTLAYER !== 'true') {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    generatedContent = require(".contentlayer/generated");
-  } catch (error) {
-    // console.warn("⚠️ Contentlayer not built. Running in bootstrap mode.");
-    generatedContent = {};
-  }
-}
-
-// 3. EXPORT DATA COLLECTIONS (With type casting)
-export const allPosts = safeArray<Post>(generatedContent.allPosts);
-export const allBooks = safeArray<Book>(generatedContent.allBooks);
-export const allDownloads = safeArray<Download>(generatedContent.allDownloads);
-export const allEvents = safeArray<Event>(generatedContent.allEvents);
-export const allPrints = safeArray<Print>(generatedContent.allPrints);
-export const allStrategies = safeArray<Strategy>(generatedContent.allStrategies);
-export const allResources = safeArray<Resource>(generatedContent.allResources);
-export const allCanons = safeArray<Canon>(generatedContent.allCanons);
-export const allShorts = safeArray<Short>(generatedContent.allShorts);
-
-export const allDocuments = safeArray<ContentlayerDocument>(generatedContent.allDocuments);
-
-/* -------------------------------------------------------------------------- */
-/* Type guards                                                                */
-/* -------------------------------------------------------------------------- */
-
-export function isPost(doc: any): doc is Post { return doc?.type === "Post"; }
-export function isBook(doc: any): doc is Book { return doc?.type === "Book"; }
-export function isDownload(doc: any): doc is Download { return doc?.type === "Download"; }
-export function isEvent(doc: any): doc is Event { return doc?.type === "Event"; }
-export function isPrint(doc: any): doc is Print { return doc?.type === "Print"; }
-export function isResource(doc: any): doc is Resource { return doc?.type === "Resource"; }
-export function isCanon(doc: any): doc is Canon { return doc?.type === "Canon"; }
-export function isStrategy(doc: any): doc is Strategy { return doc?.type === "Strategy"; }
-export function isShort(doc: any): doc is Short { return doc?.type === "Short"; }
-
-/* -------------------------------------------------------------------------- */
-/* Helpers                                                                    */
-/* -------------------------------------------------------------------------- */
-
-export function getPublishedDocuments<T extends ContentlayerDocument>(docs: T[] = allDocuments as T[]): T[] {
+// Helper functions
+export function getPublishedDocuments<T extends ContentDocBase>(docs: T[] = allDocuments as T[]): T[] {
   return docs
     .filter((d) => d && !d.draft)
     .sort((a, b) => new Date(b.date || "").getTime() - new Date(a.date || "").getTime());
 }
 
-export function getDocumentBySlug(slug: string): ContentlayerDocument | undefined {
-  return allDocuments.find((d) => d._raw.flattenedPath.split('/').pop() === slug || d.slug === slug);
+export function getDocumentBySlug(slug: string): ContentDocBase | undefined {
+  return allDocuments.find((d) => {
+    const docSlug = d.slug || d._raw?.flattenedPath?.split('/').pop();
+    return docSlug === slug;
+  });
 }
 
-/* -------------------------------------------------------------------------- */
-/* UI UTILITIES                                                               */
-/* -------------------------------------------------------------------------- */
-
+// UI Utilities
 export function getCardFallbackConfig() {
   return {
     defaultImage: "/assets/images/placeholder.jpg",
@@ -169,13 +150,11 @@ export function formatCardDate(dateString: string | null | undefined): string {
   }
 }
 
-export function getCardPropsForDocument(doc: ContentlayerDocument) {
-  // Base properties available on all documents
+export function getCardPropsForDocument(doc: ContentDocBase) {
   const base = {
-    slug: doc.slug || doc._raw.flattenedPath.split('/').pop() || "unknown",
+    slug: doc.slug || doc._raw?.flattenedPath?.split('/').pop() || "unknown",
     title: doc.title || "Untitled",
     subtitle: doc.subtitle || null,
-    // Ensure both description AND excerpt are available
     description: doc.description || null,
     excerpt: doc.excerpt || doc.description || null,
     coverImage: doc.coverImage || doc.coverimage || null,
@@ -189,19 +168,24 @@ export function getCardPropsForDocument(doc: ContentlayerDocument) {
     readTime: doc.readTime || null,
   };
 
-  // Add specific fields based on type
   if (isCanon(doc)) {
-    return { ...base, volumeNumber: doc.volumeNumber, order: doc.order };
+    return { ...base, volumeNumber: (doc as any).volumeNumber, order: (doc as any).order };
   }
   if (isBook(doc)) {
-    return { ...base, isbn: doc.isbn, publisher: doc.publisher };
+    return { ...base, isbn: (doc as any).isbn, publisher: (doc as any).publisher };
   }
   if (isEvent(doc)) {
-    return { ...base, eventDate: doc.eventDate, location: doc.location };
+    return { ...base, eventDate: (doc as any).eventDate, location: (doc as any).location };
   }
   if (isPrint(doc)) {
-    return { ...base, price: doc.price, available: doc.available };
+    return { ...base, price: (doc as any).price, available: (doc as any).available };
   }
   
   return base;
+}
+
+// Export the missing function that index.tsx is looking for
+export function getRecentShorts(limit: number = 5): ContentDocBase[] {
+  return getPublishedDocuments(allShorts)
+    .slice(0, limit);
 }

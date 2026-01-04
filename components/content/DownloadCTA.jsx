@@ -1,10 +1,17 @@
+// DownloadCTA.jsx
 import React, { useState } from 'react';
 import styles from './DownloadCTA.module.css';
+import PropTypes from 'prop-types';
 
 const DownloadCTA = ({
   title = "Download The Legacy Architecture Canvas",
   description = "Heirloom-grade PDF with integrated fillable fields and implementation notes",
+  badge,
+  details,
+  features,
+  downloadUrl,
   fileSize = "Multiple formats available",
+  fileFormat,
   buttonText = "Download for Architects",
   level = "premium"
 }) => {
@@ -22,7 +29,14 @@ const DownloadCTA = ({
     setIsDownloading(true);
     
     try {
-      // In production, this would hit your API endpoint
+      // If downloadUrl is provided, use it directly
+      if (downloadUrl) {
+        window.open(downloadUrl, '_blank');
+        setIsDownloading(false);
+        return;
+      }
+
+      // Otherwise, use the API endpoint
       const response = await fetch(`/api/generate-pdf?format=${selectedFormat}`, {
         method: 'POST',
         headers: {
@@ -76,6 +90,16 @@ const DownloadCTA = ({
   
   const stylesConfig = getLevelStyles();
 
+  // Use provided features or default list
+  const featuresList = features || [
+    '✅ Fillable text fields for each section',
+    '✅ Interactive checkboxes and dropdowns',
+    '✅ Print-optimized layout (A4, Letter, A3)',
+    '✅ Professional typography and design',
+    '✅ Signature and date fields',
+    '✅ Implementation guidance notes',
+  ];
+
   return (
     <div 
       className={styles.container}
@@ -86,11 +110,22 @@ const DownloadCTA = ({
     >
       <div className={styles.header}>
         <div className={styles.badge} style={{ backgroundColor: stylesConfig.borderColor }}>
-          {level === 'premium' ? 'Premium Resource' : 'Master Tool'}
+          {badge || (level === 'premium' ? 'Premium Resource' : 'Master Tool')}
         </div>
         <h3 className={styles.title}>{title}</h3>
         <p className={styles.description}>{description}</p>
       </div>
+
+      {/* Optional details section */}
+      {details && details.length > 0 && (
+        <div className={styles.details}>
+          <ul className={styles.detailsList}>
+            {details.map((detail, index) => (
+              <li key={index}>{detail}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       
       <div className={styles.formatSelector}>
         <h4 className={styles.formatTitle}>Select Format:</h4>
@@ -116,12 +151,9 @@ const DownloadCTA = ({
       <div className={styles.features}>
         <h4 className={styles.featuresTitle}>What's Inside:</h4>
         <ul className={styles.featuresList}>
-          <li>✅ Fillable text fields for each section</li>
-          <li>✅ Interactive checkboxes and dropdowns</li>
-          <li>✅ Print-optimized layout (A4, Letter, A3)</li>
-          <li>✅ Professional typography and design</li>
-          <li>✅ Signature and date fields</li>
-          <li>✅ Implementation guidance notes</li>
+          {featuresList.map((feature, index) => (
+            <li key={index}>{feature}</li>
+          ))}
         </ul>
       </div>
       
@@ -148,7 +180,7 @@ const DownloadCTA = ({
               <svg className={styles.buttonIcon} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              Download {selectedFormat.toUpperCase()} Format
+              {buttonText || `Download ${selectedFormat.toUpperCase()} Format`}
             </>
           )}
         </button>
@@ -158,18 +190,37 @@ const DownloadCTA = ({
             <svg className={styles.infoIcon} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span>Fillable PDF</span>
+            <span>{fileFormat || 'Fillable PDF'}</span>
           </div>
           <div className={styles.fileInfoItem}>
             <svg className={styles.infoIcon} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <span>Architect Tier</span>
+            <span>{level === 'premium' ? 'Architect Tier' : level}</span>
           </div>
+          {fileSize && fileSize !== "Multiple formats available" && (
+            <div className={styles.fileInfoItem}>
+              <span>{fileSize}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+};
+
+// Add PropTypes for type checking (optional but recommended)
+DownloadCTA.propTypes = {
+  title: PropTypes.string,
+  description: PropTypes.string,
+  badge: PropTypes.string,
+  details: PropTypes.arrayOf(PropTypes.string),
+  features: PropTypes.arrayOf(PropTypes.string),
+  downloadUrl: PropTypes.string,
+  fileSize: PropTypes.string,
+  fileFormat: PropTypes.string,
+  buttonText: PropTypes.string,
+  level: PropTypes.oneOf(['premium', 'default'])
 };
 
 export default DownloadCTA;

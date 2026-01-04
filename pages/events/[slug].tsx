@@ -1,257 +1,274 @@
-import * as React from "react";
-import type { GetStaticProps, NextPage } from "next";
-import Head from "next/head";
-import Link from "next/link";
-import Layout from "@/components/Layout";
-import { assertContentlayerHasDocs, getAllEvents, normalizeSlug } from "@/lib/contentlayer-helper";
-import { ArrowRight, MapPin, Calendar as CalendarIcon } from "lucide-react";
-
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
+import React from 'react';
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import remarkGfm from 'remark-gfm';
+import rehypeSlug from 'rehype-slug';
+import Head from 'next/head';
+import Link from 'next/link';
+import Layout from '@/components/Layout';
+import { getServerAllEvents, getServerEventBySlug } from "@/lib/server/content";
+import EventHero from '@/components/events/EventHero';
+import EventDetails from '@/components/events/EventDetails';
+import EventContent from '@/components/events/EventContent';
+import EventRegistration from '@/components/events/EventRegistration';
+import EventSpeakers from '@/components/events/EventSpeakers';
+import EventSchedule from '@/components/events/EventSchedule';
+import RelatedEvents from '@/components/events/RelatedEvents';
+import ShareButtons from '@/components/ShareButtons';
+import { CalendarDays, MapPin, Clock, Users } from 'lucide-react';
 
 interface Event {
-  slug: string;
   title: string;
   excerpt: string | null;
   eventDate: string | null;
   location: string | null;
   registrationUrl: string | null;
   tags: string[];
-}
-
-interface EventsProps {
-  upcomingEvents: Event[];
-  pastEvents: Event[];
-}
-
-interface EventDoc {
-  title?: string;
-  eventDate?: string;
-  date?: string;
-  excerpt?: string;
-  description?: string;
-  location?: string;
+  coverImage?: string;
   venue?: string;
-  registrationUrl?: string;
-  link?: string;
-  tags?: string[];
-  [key: string]: any;
+  endDate?: string;
+  time?: string;
+  price?: string | number;
+  capacity?: number;
 }
 
-/* -------------------------------------------------------------------------- */
-/* DATA FETCHING                                                              */
-/* -------------------------------------------------------------------------- */
+interface Props {
+  event: Event;
+  source: MDXRemoteSerializeResult;
+}
 
-export const getStaticProps: GetStaticProps<EventsProps> = async () => {
-  // FIXED: No arguments as per updated helper signature
-  assertContentlayerHasDocs();
-
-  const eventsRaw = (getAllEvents() as unknown as EventDoc[]) || [];
-  const now = new Date();
-
-  const processedEvents = eventsRaw
-    .map((e) => {
-      const dateStr = e.eventDate ?? e.date ?? null;
-      let parsedDate: Date | null = null;
-
-      if (dateStr) {
-        const d = new Date(dateStr);
-        if (!isNaN(d.getTime())) parsedDate = d;
-      }
-
-      return {
-        slug: normalizeSlug(e),
-        title: e.title ?? "Untitled Gathering",
-        excerpt: e.excerpt ?? e.description ?? null,
-        eventDate: dateStr,
-        location: e.location ?? e.venue ?? null,
-        registrationUrl: e.registrationUrl ?? e.link ?? null,
-        tags: Array.isArray(e.tags) ? e.tags : [],
-        _parsedDate: parsedDate,
-      };
-    })
-    .filter((e) => e.slug && e.title);
-
-  // Principled Sorting: Sequential timeline
-  const sorted = [...processedEvents].sort((a, b) => {
-    const timeA = a._parsedDate?.getTime() ?? 0;
-    const timeB = b._parsedDate?.getTime() ?? 0;
-    return timeA - timeB;
-  });
-
-  const upcomingEvents = sorted
-    .filter((e) => e._parsedDate && e._parsedDate >= now)
-    .map(({ _parsedDate, ...rest }) => rest);
-
-  const pastEvents = sorted
-    .filter((e) => e._parsedDate && e._parsedDate < now)
-    .reverse() // Most recent past events first
-    .map(({ _parsedDate, ...rest }) => rest);
-
-  return {
-    props: {
-      upcomingEvents,
-      pastEvents,
-    },
-    revalidate: 3600,
-  };
-};
-
-/* -------------------------------------------------------------------------- */
-/* PAGE COMPONENT                                                             */
-/* -------------------------------------------------------------------------- */
-
-const EventsIndexPage: NextPage<EventsProps> = ({ upcomingEvents, pastEvents }) => {
-  const title = "Strategic Gatherings";
-  const description = "Private sessions and exclusive gatherings for those building the future.";
+const EventPage: NextPage<Props> = ({ event, source }) => {
+  const metaDescription = event.excerpt || 'An exclusive event by Abraham of London';
+  const formattedDate = event.eventDate ? new Date(event.eventDate).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : '';
+  const isPastEvent = event.eventDate ? new Date(event.eventDate) < new Date() : false;
 
   return (
-    <Layout title={title} description={description}>
+    <Layout>
       <Head>
-        <title>{title} | Abraham of London</title>
+        <title>{event.title} | Events | Abraham of London</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={event.title} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={event.coverImage || '/assets/images/event-default.jpg'} />
+        <meta property="og:type" content="event" />
+        {event.eventDate && <meta property="event:start_time" content={event.eventDate} />}
+        {event.location && <meta property="event:location" content={event.location} />}
       </Head>
 
-      <main className="min-h-screen bg-[#050607] text-white">
-        {/* HERO */}
-        <section className="relative overflow-hidden border-b border-white/5 py-20 lg:py-32">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent" />
-          <div className="container relative mx-auto max-w-7xl px-6">
-            <div className="max-w-3xl">
-              <p className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-gold/80">
-                Institutional Access
-              </p>
-              <h1 className="mb-6 font-serif text-5xl font-light italic leading-tight text-cream sm:text-7xl">
-                Strategic <span className="text-white/40">Intelligence Sessions</span>
-              </h1>
-              <p className="text-lg leading-relaxed text-gray-400">
-                Gated gatherings designed for high-agency individuals. We focus on structural clarity, civilisational resilience, and sovereign coordination.
-              </p>
-            </div>
-          </div>
-        </section>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        {/* Event Hero Section */}
+        <EventHero 
+          title={event.title}
+          date={formattedDate}
+          location={event.location}
+          coverImage={event.coverImage}
+          excerpt={event.excerpt}
+          isPast={isPastEvent}
+        />
 
-        <div className="container mx-auto max-w-7xl px-6 py-16">
-          <div className="space-y-24">
-            {/* UPCOMING */}
-            <section>
-              <div className="mb-10 flex items-end justify-between border-b border-white/5 pb-6">
-                <h2 className="font-serif text-3xl text-cream">Upcoming Calendars</h2>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                  {upcomingEvents.length} Active Intakes
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* Main Content */}
+            <main className="lg:col-span-8">
+              <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
+                {/* Quick Info Bar */}
+                <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg">
+                    <CalendarDays className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Date</p>
+                      <p className="font-semibold text-gray-900">{formattedDate}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg">
+                    <MapPin className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Location</p>
+                      <p className="font-semibold text-gray-900">{event.location || 'TBA'}</p>
+                    </div>
+                  </div>
+                  
+                  {event.time && (
+                    <div className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg">
+                      <Clock className="w-5 h-5 text-purple-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Time</p>
+                        <p className="font-semibold text-gray-900">{event.time}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {event.capacity && (
+                    <div className="flex items-center space-x-3 p-4 bg-amber-50 rounded-lg">
+                      <Users className="w-5 h-5 text-amber-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Capacity</p>
+                        <p className="font-semibold text-gray-900">{event.capacity} seats</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Details */}
+                <EventDetails 
+                  venue={event.venue}
+                  price={event.price}
+                  endDate={event.endDate}
+                />
+
+                {/* Event Content */}
+                <div className="mt-8">
+                  <EventContent>
+                    <MDXRemote {...source} />
+                  </EventContent>
+                </div>
+
+                {/* Event Schedule */}
+                {!isPastEvent && (
+                  <div className="mt-12">
+                    <EventSchedule eventId={event.title} />
+                  </div>
+                )}
+
+                {/* Event Speakers */}
+                <div className="mt-12">
+                  <EventSpeakers eventTitle={event.title} />
+                </div>
+
+                {/* Registration CTA */}
+                <div className="mt-12">
+                  <EventRegistration 
+                    isPast={isPastEvent}
+                    registrationUrl={event.registrationUrl}
+                    price={event.price}
+                  />
+                </div>
+
+                {/* Share Section */}
+                <div className="mt-12 pt-8 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Share this event</h3>
+                      <p className="text-sm text-gray-600">Spread the word with your network</p>
+                    </div>
+                    <ShareButtons 
+                      url={`https://abrahamoflondon.com/events/${event.title}`}
+                      title={event.title}
+                      excerpt={event.excerpt || ''}
+                    />
+                  </div>
                 </div>
               </div>
+            </main>
 
-              {upcomingEvents.length > 0 ? (
-                <div className="grid gap-8 lg:grid-cols-2">
-                  {upcomingEvents.map((event) => (
-                    <EventCard key={event.slug} event={event} variant="upcoming" />
-                  ))}
+            {/* Sidebar */}
+            <aside className="lg:col-span-4">
+              <div className="sticky top-8 space-y-8">
+                {/* Related Events */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Events</h3>
+                  <RelatedEvents currentEventTitle={event.title} />
                 </div>
-              ) : (
-                <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-12 text-center">
-                  <p className="text-gray-500 italic">No public sessions currently scheduled.</p>
-                  <Link href="/inner-circle" className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-gold hover:underline">
-                    Inquire via Inner Circle →
-                  </Link>
-                </div>
-              )}
-            </section>
 
-            {/* PAST */}
-            {pastEvents.length > 0 && (
-              <section>
-                <div className="mb-10 border-b border-white/5 pb-6">
-                  <h2 className="font-serif text-2xl text-white/60">Archive of Sessions</h2>
+                {/* Quick Actions */}
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl shadow-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Actions</h3>
+                  <div className="space-y-3">
+                    <button className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
+                      <CalendarDays className="w-4 h-4" />
+                      <span>Add to Calendar</span>
+                    </button>
+                    <button className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      <span>Download Info Pack</span>
+                    </button>
+                    <button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg px-4 py-3 hover:from-indigo-700 hover:to-purple-700 transition-all">
+                      Join Waitlist
+                    </button>
+                  </div>
                 </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {pastEvents.map((event) => (
-                    <EventCard key={event.slug} event={event} variant="past" />
-                  ))}
-                </div>
-              </section>
-            )}
+
+                {/* Tags */}
+                {event.tags && event.tags.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Topics</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {event.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </aside>
           </div>
         </div>
-      </main>
+      </div>
     </Layout>
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/* SUB-COMPONENTS                                                             */
-/* -------------------------------------------------------------------------- */
+export default EventPage;
 
-function EventCard({ event, variant }: { event: Event; variant: "upcoming" | "past" }) {
-  const dateObj = event.eventDate ? new Date(event.eventDate) : null;
-  const dateDisplay = dateObj?.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+export const getStaticPaths: GetStaticPaths = async () => {
+  const events = await getServerAllEvents();
 
-  return (
-    <article
-      className={`group relative overflow-hidden rounded-2xl border p-8 transition-all duration-500 ${
-        variant === "upcoming"
-          ? "border-gold/20 bg-white/[0.02] hover:border-gold/40 hover:bg-white/[0.04]"
-          : "border-white/5 bg-transparent grayscale hover:grayscale-0"
-      }`}
-    >
-      <div className="relative z-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold/60">
-            <CalendarIcon className="h-3 w-3" />
-            {dateDisplay}
-          </div>
-          {variant === "upcoming" && (
-            <span className="animate-pulse rounded-full bg-gold/10 px-2 py-1 text-[8px] font-black uppercase tracking-tighter text-gold">
-              In-Flow
-            </span>
-          )}
-        </div>
+  const paths = events
+    .filter((event) => event && !event.draft)
+    .map((event) => event.slug)
+    .filter(Boolean)
+    .map((slug: string) => ({ params: { slug } }));
 
-        <h3 className="mb-4 font-serif text-2xl text-cream group-hover:text-gold transition-colors">
-          {event.title}
-        </h3>
+  return { paths, fallback: 'blocking' };
+};
 
-        {event.location && (
-          <div className="mb-4 flex items-center gap-2 text-xs text-gray-500">
-            <MapPin className="h-3 w-3" />
-            {event.location}
-          </div>
-        )}
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = params?.slug as string;
+  if (!slug) return { notFound: true };
 
-        <p className="mb-8 text-sm leading-relaxed text-gray-400 line-clamp-2">
-          {event.excerpt}
-        </p>
+  const eventData = await getServerEventBySlug(slug);
+  if (!eventData) return { notFound: true };
 
-        {variant === "upcoming" ? (
-          event.registrationUrl ? (
-            <a
-              href={event.registrationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gold px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-black transition-transform active:scale-95"
-            >
-              Request Access <ArrowRight className="h-3 w-3" />
-            </a>
-          ) : (
-            <button disabled className="w-full rounded-lg border border-white/10 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-gray-600">
-              Session Full
-            </button>
-          )
-        ) : (
-          <Link
-            href={`/events/${event.slug}`}
-            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-colors"
-          >
-            Review Record <ArrowRight className="h-3 w-3" />
-          </Link>
-        )}
-      </div>
-    </article>
-  );
-}
+  const event = {
+    title: eventData.title || "Untitled Gathering",
+    excerpt: eventData.excerpt || eventData.description || null,
+    eventDate: eventData.eventDate || eventData.date || null,
+    location: eventData.location || eventData.venue || null,
+    registrationUrl: eventData.registrationUrl || eventData.link || null,
+    tags: Array.isArray(eventData.tags) ? eventData.tags : [],
+    coverImage: eventData.coverImage,
+    venue: eventData.venue,
+    endDate: eventData.endDate,
+    time: eventData.time,
+    price: eventData.price,
+    capacity: eventData.capacity,
+  };
 
-export default EventsIndexPage;
+  let source: MDXRemoteSerializeResult;
+  try {
+    source = await serialize(eventData.body || " ", {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug],
+      },
+    });
+  } catch {
+    source = await serialize("Content is being prepared.");
+  }
+
+  return { props: { event, source }, revalidate: 3600 };
+};

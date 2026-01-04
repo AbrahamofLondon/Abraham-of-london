@@ -1,141 +1,198 @@
-// next.config.mjs - ENTERPRISE PRODUCTION CONFIG (ES Module)
-import path from 'path';
+// next.config.mjs - COMPREHENSIVE RESTORATION
 import { fileURLToPath } from 'url';
+import path from 'path';
+import { createRequire } from 'module';
 
+const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ==================== CONTENTLAYER HANDLING ====================
+let withContentlayer;
+try {
+  console.log('🔄 Loading next-contentlayer...');
+  const contentlayerModule = await import('next-contentlayer');
+  withContentlayer = contentlayerModule.withContentlayer;
+  console.log('✅ Contentlayer loaded successfully');
+} catch (error) {
+  console.warn('⚠️ Contentlayer not available, proceeding without it');
+  withContentlayer = (config) => config;
+}
+
+// ==================== INSTITUTIONAL CONFIGURATION ====================
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  // =================== CORE CONFIGURATION ===================
+const institutionalConfig = {
+  // ==================== CORE PERFORMANCE ====================
   reactStrictMode: true,
   swcMinify: true,
   poweredByHeader: false,
   generateEtags: true,
   compress: true,
   
-  // =================== IMAGE OPTIMIZATION ===================
+  // ==================== SECURITY HEADERS ====================
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
+          }
+        ]
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow'
+          }
+        ]
+      }
+    ];
+  },
+  
+  // ==================== IMAGE OPTIMIZATION ====================
   images: {
-    deviceSizes: [320, 420, 768, 1024, 1200, 1440, 1920, 2560],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    deviceSizes: [320, 420, 768, 1024, 1200, 1920],
+    imageSizes: [16, 32, 64, 96, 128, 256],
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 86400, // 24 hours
-    dangerouslyAllowSVG: false,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
     ],
-    unoptimized: process.env.NODE_ENV === 'development',
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: false,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
-  // =================== ADVANCED WEBPACK CONFIG ===================
+  // ==================== REDIRECTS & REWRITES ====================
+  async redirects() {
+    return [
+      {
+        source: '/admin',
+        destination: '/board/dashboard',
+        permanent: true,
+      },
+      {
+        source: '/wp-admin',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/wp-login.php',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
+  
+  // ==================== WEBPACK CONFIGURATION ====================
   webpack: (config, { isServer, dev, webpack }) => {
-    // ========== WINDOWS-SPECIFIC OPTIMIZATIONS ==========
+    // ==================== ASSET HANDLING ====================
+    
+    // 1. SQL File Handling - Institutional Requirement
+    config.module.rules.push({
+      test: /\.sql$/,
+      use: 'raw-loader',
+    });
+    
+    // 2. PDF File Handling
+    config.module.rules.push({
+      test: /\.pdf$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name].[hash][ext]'
+      }
+    });
+    
+    // 3. Email Template Support
+    config.module.rules.push({
+      test: /\.(md|txt)$/,
+      use: 'raw-loader',
+    });
+    
+    // 4. Exclude heavy scripts from client bundle
+    config.module.rules.push({
+      test: /scripts\/.*\.(ts|tsx|js|jsx)$/,
+      include: path.resolve(__dirname, 'scripts'),
+      use: 'ignore-loader',
+    });
+    
+    // 5. Security: Ignore server-only utilities in client
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/server$/,
+        contextRegExp: /\/lib\//,
+      }),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /\.sql$/,
+      })
+    );
+    
+    // 6. Windows-specific optimizations
     if (process.platform === 'win32') {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
-        ignored: [
-          '**/.git/**',
-          '**/.next/**',
-          '**/node_modules/**',
-          '**/.contentlayer/**',
-          '**/public/**'
-        ]
+        ignored: /node_modules/,
       };
       
-      // Windows path resolution fixes
-      config.resolve = {
-        ...config.resolve,
-        extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-        alias: {
-          ...config.resolve.alias,
-          '@': path.resolve(__dirname),
-        },
-        fallback: {
-          ...config.resolve.fallback,
-          fs: false,
-        }
+      // Fix for Windows path issues
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
       };
     }
     
-    // ========== PERFORMANCE OPTIMIZATIONS ==========
-    if (!isServer) {
-      // Split vendor chunks for better caching
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        maxInitialRequests: 25,
-        maxAsyncRequests: 20,
-        minSize: 20000,
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          framework: {
-            name: 'framework',
-            test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
-            priority: 40,
-            enforce: true,
-          },
-          lib: {
-            test: /[\\/]node_modules[\\/]/,
-            name(module) {
-              const match = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
-              return match ? `npm.${match[1].replace('@', '')}` : null;
-            },
-            priority: 30,
-            minChunks: 1,
-            reuseExistingChunk: true,
-          },
-          commons: {
-            name: 'commons',
-            minChunks: 2,
-            priority: 20,
-          },
-          shared: {
-            name: 'shared',
-            test: /[\\/]src[\\/]shared[\\/]/,
-            priority: 10,
-            enforce: true,
-          },
-        },
-      };
-    }
+    // 7. Alias Configuration - CRITICAL FOR YOUR STRUCTURE
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+      '@components': path.resolve(__dirname, 'components'),
+      '@lib': path.resolve(__dirname, 'lib'),
+      '@utils': path.resolve(__dirname, 'utils'),
+      '@styles': path.resolve(__dirname, 'styles'),
+      '@pages': path.resolve(__dirname, 'pages'),
+      '@public': path.resolve(__dirname, 'public'),
+      '@types': path.resolve(__dirname, 'types'),
+      '@scripts': path.resolve(__dirname, 'scripts'),
+      '@email': path.resolve(__dirname, 'email'),
+      '@assets': path.resolve(__dirname, 'assets'),
+    };
     
-    // ========== ASSET HANDLING ==========
-    config.module.rules.push(
-      // PDF files
-      {
-        test: /\.(pdf)$/i,
-        type: 'asset/resource',
-        generator: {
-          filename: 'static/chunks/[path][name].[contenthash][ext]'
-        }
-      },
-      // Font files
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: 'asset/resource',
-        generator: {
-          filename: 'static/fonts/[name].[contenthash][ext]'
-        }
-      },
-      // SVG optimization
-      {
-        test: /\.svg$/i,
-        issuer: /\.[jt]sx?$/,
-        use: ['@svgr/webpack'],
-      }
-    );
-    
-    // ========== SECURITY & MONITORING ==========
-    if (!dev) {
+    // 8. Bundle Analyzer (Development only)
+    if (process.env.ANALYZE === 'true') {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
       config.plugins.push(
-        new webpack.DefinePlugin({
-          'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-          'process.env.BUILD_ID': JSON.stringify(process.env.BUILD_ID || Date.now()),
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'server',
+          analyzerPort: 8888,
+          openAnalyzer: true,
         })
       );
     }
@@ -143,114 +200,85 @@ const nextConfig = {
     return config;
   },
   
-  // =================== EXPERIMENTAL FEATURES ===================
-  experimental: {
-    // Performance
-    workerThreads: true,
-    cpus: process.env.NODE_ENV === 'production' ? 4 : 2,
-    optimizeCss: true,
-    scrollRestoration: true,
-    externalDir: true,
-    
-    // Modern features
-    turbo: {
-      resolveAlias: {
-        '@/*': ['./*'],
-      },
+  // ==================== DEVELOPMENT SETTINGS ====================
+  // Logging Configuration
+  logging: {
+    fetches: {
+      fullUrl: true,
     },
-    
-    // Memory management
-    largePageDataBytes: 128 * 1000, // 128KB
   },
   
-  // =================== PRODUCTION OPTIMIZATIONS ===================
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
-    reactRemoveProperties: process.env.NODE_ENV === 'production' ? {
-      properties: ['^data-test'],
-    } : false,
-  },
+  // ==================== PRODUCTION SETTINGS ====================
+  output: 'standalone',
+  productionBrowserSourceMaps: false,
   
-  // =================== SECURITY HEADERS ===================
-  headers: async () => {
-    const securityHeaders = [
-      {
-        key: 'X-DNS-Prefetch-Control',
-        value: 'on',
-      },
-      {
-        key: 'Strict-Transport-Security',
-        value: 'max-age=63072000; includeSubDomains; preload',
-      },
-      {
-        key: 'X-XSS-Protection',
-        value: '1; mode=block',
-      },
-      {
-        key: 'X-Frame-Options',
-        value: 'SAMEORIGIN',
-      },
-      {
-        key: 'Permissions-Policy',
-        value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-      },
-      {
-        key: 'X-Content-Type-Options',
-        value: 'nosniff',
-      },
-      {
-        key: 'Referrer-Policy',
-        value: 'origin-when-cross-origin',
-      },
-      {
-        key: 'Content-Security-Policy',
-        value: process.env.NODE_ENV === 'production' 
-          ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; media-src 'self'; object-src 'none'; frame-src 'self';"
-          : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
-      },
-    ];
-    
-    return [
-      {
-        source: '/:path*',
-        headers: securityHeaders,
-      },
-    ];
-  },
-  
-  // =================== ENVIRONMENT CONFIG ===================
-  env: {
-    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || '1.0.0',
-    NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().toISOString(),
-    NEXT_PUBLIC_ENVIRONMENT: process.env.NODE_ENV || 'development',
-    CONTENTLAYER_ENABLED: 'true',
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-  },
-  
-  // =================== BUILD OPTIMIZATIONS ===================
-  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
-  
-  // =================== ERROR HANDLING ===================
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000, // 25 seconds
-    pagesBufferLength: 5,
-  },
-  
-  // =================== DEVELOPMENT ONLY ===================
+  // ==================== ERROR HANDLING ====================
   typescript: {
-    ignoreBuildErrors: process.env.IGNORE_TYPECHECK === 'true',
+    ignoreBuildErrors: process.env.NODE_ENV === 'production' ? false : true,
   },
   
   eslint: {
-    ignoreDuringBuilds: process.env.IGNORE_LINT === 'true',
+    ignoreDuringBuilds: process.env.NODE_ENV === 'production' ? false : true,
   },
   
-  // =================== STATIC GENERATION ===================
-  trailingSlash: false,
-  skipTrailingSlashRedirect: true,
+  // ==================== ENVIRONMENT VARIABLES ====================
+  env: {
+    // Application Metadata
+    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || '1.0.0',
+    NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().toISOString(),
+    NEXT_PUBLIC_ENVIRONMENT: process.env.NODE_ENV || 'development',
+    NEXT_PUBLIC_APP_NAME: 'Abraham of London',
+    
+    // Feature Flags
+    NEXT_PUBLIC_ENABLE_EMAIL: process.env.NEXT_PUBLIC_ENABLE_EMAIL || 'false',
+    NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS || 'false',
+    NEXT_PUBLIC_ENABLE_PDF_GENERATION: process.env.NEXT_PUBLIC_ENABLE_PDF_GENERATION || 'true',
+    
+    // Security Configuration
+    NEXT_PUBLIC_SECURITY_LEVEL: 'institutional',
+    
+    // API Endpoints
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || '',
+    NEXT_PUBLIC_API_VERSION: 'v1',
+  },
+  
+  // ==================== EXPERIMENTAL FEATURES ====================
+  experimental: {
+    // Performance optimizations
+    optimizeCss: true,
+    scrollRestoration: true,
+    workerThreads: false,
+    cpus: 4,
+    
+    // Modern features
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    
+    // Turbopack (development only)
+    turbo: process.env.TURBOPACK === 'true' ? {} : undefined,
+  },
+  
+  // ==================== COMPRESSION ====================
+  compress: true,
+  
+  // ==================== CACHE SETTINGS ====================
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 5,
+  },
 };
 
-// Export without Contentlayer wrapper (it's causing issues)
-export default nextConfig;
+// ==================== CONTENTLAYER INTEGRATION ====================
+let finalConfig = institutionalConfig;
+if (withContentlayer) {
+  try {
+    finalConfig = withContentlayer(institutionalConfig);
+    console.log('✅ Contentlayer integrated successfully');
+  } catch (error) {
+    console.error('❌ Contentlayer integration failed:', error.message);
+    finalConfig = institutionalConfig;
+  }
+}
+
+export default finalConfig;

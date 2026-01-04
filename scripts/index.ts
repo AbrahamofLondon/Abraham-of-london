@@ -57,14 +57,10 @@ export {
   generateLegacyCanvasProduction
 } from './generate-legacy-canvas';
 
-// PDF Generation Pipeline
+// PDF Generation Pipeline - CORRECTED: Only exports what actually exists
 export {
-  PDFGenerationPipeline,
-  generateSinglePDF,
-  generatePDFBatch,
-  validatePDFConfigs,
-  getGenerationReport
-} from './generate-pdfs';
+  PDFGenerationPipeline
+  } from './generate-pdfs';
 
 /* -------------------------------------------------------------------------- */
 /* UTILITIES & HELPERS                                                        */
@@ -307,9 +303,10 @@ export async function handleCLICommand(args: string[] = []): Promise<void> {
   // Get all PDFs
   const pdfs = getAllPDFs();
   
-  // Generate PDFs
+  // Generate PDFs - CORRECT USAGE
   const pipeline = new PDFGenerationPipeline();
-  await pipeline.generateAll();
+  await pipeline.generatePDF('pdf-id');      // ✅ Generate single PDF
+  await pipeline.generateAll();              // ✅ Generate all PDFs
   
   // Generate legacy canvas
   const generator = new LegacyCanvasGenerator();
