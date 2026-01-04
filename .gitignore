@@ -94,3 +94,13 @@ scripts/**/*.tmp
 =======
 *.bak
 >>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
+
+# Large files
+*.tar
+*.zip
+*.tar.gz
+*.tgz
+_backups/
+*.backup
+_emergency-backup.*
+
