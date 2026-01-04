@@ -1,4 +1,26 @@
 # =====================================================
+# DATABASE FILES & CREDENTIALS
+# =====================================================
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+dev.db
+local.db
+.abraham.db
+
+# Database credentials & backups
+database-credentials.json
+backup/
+backups/
+*.backup
+*.dump
+
+# CRITICAL FIX: Ignore temporary SQL dumps but TRACK the institutional /sql folder
+*.sql
+!/sql/*.sql
+
+# =====================================================
 # CORE DEPENDENCIES & BUILDS
 # =====================================================
 node_modules/
@@ -19,109 +41,11 @@ build/
 # =====================================================
 # ENVIRONMENT FILES (SENSITIVE - DO NOT COMMIT)
 # =====================================================
-# NEVER commit these - keep sensitive data local
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Optional: You might want to commit .env.example
-# but NOT .env files with actual values
-
-# =====================================================
-# DATABASE FILES & CREDENTIALS
-# =====================================================
-# Local database files
-*.db
-*.sqlite
-*.sqlite3
-dev.db
-local.db
-.abraham.db
-
-# Database credentials & backups
-database-credentials.json
-backup/
-backups/
-*.backup
-*.dump
-*.sql
-
-# =====================================================
-# LOGS & REPORTS
-# =====================================================
-*.log
-logs/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Testing
-reports/
-.reports/
-coverage/
-.nyc_output/
-playwright-report/
-test-results/
-
-# =====================================================
-# OS / EDITOR JUNK
-# =====================================================
-.DS_Store
-Thumbs.db
-Desktop.ini
-*.lnk
-
-# IDE specific
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.swp
-*.swo
-
-# =====================================================
-# TEMPORARY FILES
-# =====================================================
-*.tmp
-*.temp
-.tmp/
-temp/
-tmp/
-
-# =====================================================
-# PACKAGE MANAGER
-# =====================================================
-.npm/
-.pnpm-store/
-.yarn/
-.yarn-integrity
-node_modules/.cache/
-node_modules/.vite/
-.pnp.*
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-
-# Lock files (choose one package manager)
-# Uncomment based on your package manager:
-# package-lock.json  # if using npm
-# yarn.lock          # if using yarn
-# pnpm-lock.yaml     # if using pnpm
-
-# =====================================================
-# GENERATED ARTIFACTS
-# =====================================================
-*.tsbuildinfo
-.next-env.d.ts
-generated/
-.generated/
-patches/
-_patches/
+.env
 
 # =====================================================
 # PDF CACHE / GENERATED EXPORTS
@@ -129,6 +53,7 @@ _patches/
 .pdfcache/
 exports/
 downloads/cache/
+scripts/output/
 
 # =====================================================
 # MEDIA OUTPUTS (GENERATED)
@@ -137,63 +62,17 @@ uploads/
 media/temp/
 output_*.mp4
 output_*.mp3
-output_*.pdf
+# If you generate PDFs during build, ignore them in assets to keep repo small
+# public/assets/downloads/*.pdf
 
 # =====================================================
-# SECRETS & CRYPTO
+# PRISMA SPECIFIC
 # =====================================================
-*.secret
-*.key
-*.pem
-*.crt
-secrets/
-credentials/
-certs/
-
-# =====================================================
-# USER UPLOADS (DEVELOPMENT)
-# =====================================================
-public/uploads/
-public/user-content/
-!public/uploads/.gitkeep  # Keep gitkeep if needed
-
-# =====================================================
-# ARCHIVES & INSTALLERS
-# =====================================================
-*.exe
-*.msi
-*.dmg
-*.pkg
-*.iso
-*.img
-*.tar
-*.gz
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-
-# =====================================================
-# DOCUMENTATION GENERATED
-# =====================================================
-docs/_build/
-docs/_site/
-
-# =====================================================
-# MISC
-# =====================================================
-# Prisma
+# Keep migrations, but ignore the lock file
 prisma/migrations/*/migration_lock.toml
 
-# Jest
-jest-cache/
-
-# Husky
-.husky/_/
-
 # =====================================================
-# IMPORTANT: DO NOT IGNORE THESE (SITE ASSETS)
+# INSTITUTIONAL ASSETS (NEVER IGNORE)
 # =====================================================
 !public/assets/
 !public/assets/**/*
@@ -206,37 +85,8 @@ jest-cache/
 !public/robots.txt
 
 # =====================================================
-# DEVELOPMENT SCRIPTS (temporary files only)
+# SCRIPTS & BACKUPS
 # =====================================================
 scripts/**/*.log
 scripts/**/*.tmp
-scripts/**/*.backup
-scripts/output/
-
-# =====================================================
-# PRISMA SPECIFIC
-# =====================================================
-# Only ignore the lock file, not migrations
-prisma/migrations/*/migration_lock.toml
-
-# =====================================================
-# CONTENTLAYER SPECIFIC
-# =====================================================
-.contentlayer/.cache
-.contentlayer/generated
-
-# =====================================================
-# DEBUG FILES
-# =====================================================
-debug/
-*.debug
-profile.json
-
-# Generated PDFs (if temporary)
-public/downloads/temp/
-
-# Image processing cache
-.image-cache/
-
-# User uploads in development
-public/user-uploads/.env.production
+*.bak

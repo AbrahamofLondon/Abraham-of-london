@@ -1,40 +1,10 @@
-// postcss.config.js - FINAL FIXED VERSION
-const isProduction = process.env.NODE_ENV === 'production';
-
+// postcss.config.js - ES Module format
+/** @type {import('postcss').Postcss} */
 const config = {
   plugins: {
-    'postcss-import': {},
-    'tailwindcss/nesting': {},
     tailwindcss: {},
-    'postcss-flexbugs-fixes': {},
-    'postcss-preset-env': {
-      autoprefixer: {
-        flexbox: 'no-2009',
-      },
-      stage: 3,
-      features: {
-        'custom-properties': false,
-        'nesting-rules': true,
-      },
-    },
-    ...(isProduction
-      ? {
-          '@fullhuman/postcss-purgecss': {
-            content: [
-              './pages/**/*.{js,jsx,ts,tsx}',
-              './components/**/*.{js,jsx,ts,tsx}',
-              './content/**/*.{md,mdx}',
-            ],
-            defaultExtractor: (content) =>
-              content.match(/[\w-/:]+(?<!:)/g) || [],
-            safelist: ['html', 'body', /^bg-/, /^text-/, /^border-/],
-          },
-          cssnano: {
-            preset: ['default', { discardComments: { removeAll: true } }],
-          },
-        }
-      : {}),
+    autoprefixer: {},
   },
 };
 
-module.exports = config;
+export default config;

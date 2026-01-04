@@ -1,6 +1,6 @@
-
 import React from "react";
 import Head from "next/head";
+import Link from "next/link";
 
 interface SiteLayoutProps {
   children: React.ReactNode;
@@ -23,11 +23,10 @@ const SiteLayout: React.FC<SiteLayoutProps> = ({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <div
         className={`min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white ${className}`}
       >
-        {/* Site header would go here */}
+        {/* Site header */}
         <header className="border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex justify-between items-center">
@@ -35,35 +34,33 @@ const SiteLayout: React.FC<SiteLayoutProps> = ({
                 Abraham of London
               </div>
               <nav className="hidden md:flex space-x-6">
-                <a href="/" className="hover:text-softGold transition-colors">
+                <Link href="/" className="hover:text-softGold transition-colors">
                   Home
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/resources"
                   className="hover:text-softGold transition-colors"
                 >
                   Resources
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/about"
                   className="hover:text-softGold transition-colors"
                 >
                   About
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/contact"
                   className="hover:text-softGold transition-colors"
                 >
                   Contact
-                </a>
+                </Link>
               </nav>
             </div>
           </div>
         </header>
-
         <main>{children}</main>
-
-        {/* Site footer would go here */}
+        {/* Site footer */}
         <footer className="border-t border-gray-200 dark:border-gray-700 mt-16">
           <div className="max-w-6xl mx-auto px-4 py-8">
             <div className="text-center text-gray-600 dark:text-gray-400">

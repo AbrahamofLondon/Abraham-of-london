@@ -1,103 +1,177 @@
-import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Head from "next/head";
-import Link from "next/link";
+import React from 'react';
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import remarkGfm from 'remark-gfm';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import Head from 'next/head';
+import Layout from '@/components/Layout';
+import { getServerAllCanons, getServerCanonBySlug } from "@/lib/server/content";
+import CanonHero from '@/components/canon/CanonHero';
+import CanonContent from '@/components/canon/CanonContent';
+import CanonNavigation from '@/components/canon/CanonNavigation';
+import CanonStudyGuide from '@/components/canon/CanonStudyGuide';
+import AccessGate from '@/components/AccessGate';
+import { useAuth } from '@/hooks/useAuth';
 
-import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-
-// FIX: Removed 'Canon' from named imports as it is not exported by the module
-import { getAllCanons, getCanonDocBySlug, getAccessLevel, resolveCanonSlug } from "@/lib/canon";
-
-type AccessLevel = "public" | "inner-circle" | "private";
-
-type CanonMeta = {
+interface Canon {
   title: string;
   excerpt: string | null;
   subtitle: string | null;
   slug: string;
-  accessLevel: AccessLevel;
+  accessLevel: string;
   lockMessage: string | null;
   coverImage: string | null;
+  volumeNumber?: string;
+  order?: number;
+}
+
+interface Props {
+  canon: Canon;
+  locked: boolean;
+  source?: MDXRemoteSerializeResult;
+}
+
+const CanonPage: NextPage<Props> = ({ canon, locked, source }) => {
+  const { user, isLoading } = useAuth();
+  const hasAccess = !locked || (user && user.accessLevel === 'inner-circle');
+  const metaDescription = canon.excerpt || 'A canonical work from Abraham of London';
+
+  if (locked && !hasAccess && !isLoading) {
+    return (
+      <Layout>
+        <Head>
+          <title>{canon.title} | Canon | Abraham of London</title>
+          <meta name="description" content={metaDescription} />
+        </Head>
+        <AccessGate 
+          title={canon.title}
+          message={canon.lockMessage || "This content is reserved for Inner Circle members."}
+          requiredTier="inner-circle"
+        />
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <Head>
+        <title>{canon.title} | Canon | Abraham of London</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={canon.title} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={canon.coverImage || '/assets/images/canon-default.jpg'} />
+        <meta property="og:type" content="article" />
+      </Head>
+
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+        {/* Canon Hero Section */}
+        <CanonHero 
+          title={canon.title}
+          subtitle={canon.subtitle}
+          volumeNumber={canon.volumeNumber}
+          coverImage={canon.coverImage}
+          excerpt={canon.excerpt}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* Navigation Sidebar */}
+            <div className="lg:col-span-3">
+              <CanonNavigation currentSlug={canon.slug} />
+            </div>
+
+            {/* Main Content */}
+            <main className="lg:col-span-6">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl p-8 lg:p-12">
+                {locked && hasAccess && (
+                  <div className="mb-8 p-4 bg-gradient-to-r from-purple-900/20 to-blue-900/20 rounded-lg border border-purple-500/30">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="text-sm text-purple-200">
+                        Inner Circle Exclusive Content
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <CanonContent>
+                  {source && <MDXRemote {...source} />}
+                </CanonContent>
+
+                <div className="mt-12 pt-8 border-t border-gray-700">
+                  <div className="flex flex-wrap gap-4">
+                    <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all">
+                      Save to Library
+                    </button>
+                    <button className="px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors">
+                      Download PDF
+                    </button>
+                    <button className="px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors">
+                      Share Insight
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </main>
+
+            {/* Study Guide Sidebar */}
+            <div className="lg:col-span-3">
+              <CanonStudyGuide canonTitle={canon.title} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
 };
 
-type LockedProps = { canon: CanonMeta; locked: true };
-type UnlockedProps = { canon: CanonMeta; locked: false; source: MDXRemoteSerializeResult };
-type Props = LockedProps | UnlockedProps;
-
-const SITE =
-  (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
-
-function safeString(v: unknown): string {
-  return typeof v === "string" ? v : v == null ? "" : String(v);
-}
-
-function cleanSlug(input: unknown): string {
-  const s = safeString(input).trim().toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "");
-  if (!s) return "";
-  if (s.includes("http://") || s.includes("https://")) return "";
-  if (s.includes("?") || s.includes("#")) return "";
-  if (s.includes("..")) return "";
-  if (!/^[a-z0-9/_-]+$/i.test(s)) return "";
-  return s;
-}
-
-function isDraft(doc: any): boolean {
-  return doc?.draft === true || doc?.draft === "true";
-}
-
-function toAccessLevel(v: unknown): AccessLevel {
-  const n = safeString(v).trim().toLowerCase();
-  if (n === "inner-circle" || n === "private" || n === "public") return n;
-  return "public";
-}
-
-function getCanonMeta(doc: any, slug: string): CanonMeta {
-  return {
-    title: safeString(doc?.title).trim() || "Canon",
-    excerpt: doc?.excerpt ? safeString(doc.excerpt) : null,
-    subtitle: doc?.subtitle ? safeString(doc.subtitle) : null,
-    slug,
-    accessLevel: toAccessLevel(getAccessLevel(doc)),
-    lockMessage: safeString(doc?.lockMessage).trim() || null,
-    coverImage: safeString(doc?.coverImage).trim() || null,
-  };
-}
+export default CanonPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // FIX: Removed explicit type ': Canon[]' to rely on inference
-  const canons = getAllCanons();
+  const canons = await getServerAllCanons();
 
   const paths = canons
-    .filter((c: any) => c && !isDraft(c))
-    .map((c: any) => cleanSlug(resolveCanonSlug(c)))
+    .filter((canon) => canon && !canon.draft)
+    .map((canon) => canon.slug)
     .filter(Boolean)
     .map((slug: string) => ({ params: { slug } }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
-  const slug = cleanSlug(ctx.params?.slug);
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = params?.slug as string;
   if (!slug) return { notFound: true };
 
-  const rawDoc = getCanonDocBySlug(slug);
-  if (!rawDoc || isDraft(rawDoc)) return { notFound: true };
+  const canonData = await getServerCanonBySlug(slug);
+  if (!canonData || canonData.draft) return { notFound: true };
 
-  const canon = getCanonMeta(rawDoc, slug);
+  const canon = {
+    title: canonData.title || "Canon",
+    excerpt: canonData.excerpt || null,
+    subtitle: canonData.subtitle || null,
+    slug: canonData.slug || slug,
+    accessLevel: canonData.accessLevel || "public",
+    lockMessage: canonData.lockMessage || null,
+    coverImage: canonData.coverImage || null,
+    volumeNumber: canonData.volumeNumber,
+    order: canonData.order,
+  };
 
-  // ✅ Gated: ship a lock page only (no MDX serialization = no content leakage)
+  // Gated: ship a lock page only
   if (canon.accessLevel !== "public") {
     return { props: { canon, locked: true }, revalidate: 1800 };
   }
 
-  const raw = typeof rawDoc?.body?.raw === "string" ? rawDoc.body.raw : "";
+  const raw = canonData.body || "";
 
   let source: MDXRemoteSerializeResult;
   try {
@@ -113,81 +187,3 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
 
   return { props: { canon, locked: false, source }, revalidate: 1800 };
 };
-
-const CanonPage: NextPage<Props> = (props) => {
-  const { canon } = props;
-  const canonicalUrl = `${SITE}/canon/${canon.slug}`;
-
-  const ogImage = canon.coverImage
-    ? canon.coverImage.startsWith("http")
-      ? canon.coverImage
-      : `${SITE}${canon.coverImage.startsWith("/") ? "" : "/"}${canon.coverImage}`
-    : undefined;
-
-  return (
-    <Layout title={canon.title} canonicalUrl={canonicalUrl}>
-      <Head>
-        <title>{canon.title} | Abraham of London</title>
-        <link rel="canonical" href={canonicalUrl} />
-
-        {canon.excerpt ? <meta name="description" content={canon.excerpt} /> : null}
-
-        <meta property="og:title" content={canon.title} />
-        {canon.excerpt ? <meta property="og:description" content={canon.excerpt} /> : null}
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:type" content="article" />
-        {ogImage ? <meta property="og:image" content={ogImage} /> : null}
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={canon.title} />
-        {canon.excerpt ? <meta name="twitter:description" content={canon.excerpt} /> : null}
-        {ogImage ? <meta name="twitter:image" content={ogImage} /> : null}
-      </Head>
-
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <header className="mb-8 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">Canon</p>
-
-          <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">{canon.title}</h1>
-
-          {canon.subtitle ? <p className="text-lg text-gray-300">{canon.subtitle}</p> : null}
-          {canon.excerpt ? <p className="text-sm text-gray-300">{canon.excerpt}</p> : null}
-
-          {canon.accessLevel !== "public" ? (
-            <div className="pt-2">
-              <span className="inline-flex items-center rounded-full border border-gold/25 bg-black/40 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-gold/70">
-                {canon.accessLevel === "inner-circle" ? "Inner Circle" : "Private"}
-              </span>
-            </div>
-          ) : null}
-        </header>
-
-        {props.locked ? (
-          <section className="rounded-2xl border border-gold/20 bg-black/40 p-6 backdrop-blur">
-            <h2 className="font-serif text-xl font-semibold text-cream">This entry is gated</h2>
-
-            <p className="mt-2 text-sm text-gold/70">
-              {canon.lockMessage || "Access is reserved. If you have an Inner Circle key, unlock below."}
-            </p>
-
-            <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-gold/60">
-              <Link href="/inner-circle" className="underline underline-offset-2 hover:text-amber-200">
-                What is Inner Circle?
-              </Link>
-              <span className="opacity-40">•</span>
-              <Link href="/canon" className="underline underline-offset-2 hover:text-amber-200">
-                Back to Canon
-              </Link>
-            </div>
-          </section>
-        ) : (
-          <article className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-cream prose-a:text-gold">
-            <MDXRemote {...(props as UnlockedProps).source} components={mdxComponents} />
-          </article>
-        )}
-      </main>
-    </Layout>
-  );
-};
-
-export default CanonPage;

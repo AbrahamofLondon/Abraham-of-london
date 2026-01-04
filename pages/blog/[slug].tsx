@@ -1,124 +1,151 @@
-// pages/blog/[slug].tsx
-import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Head from "next/head";
-import Link from "next/link";
-import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import React from 'react';
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import remarkGfm from 'remark-gfm';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import Head from 'next/head';
+import Layout from '@/components/Layout';
+import { getServerAllPosts, getServerPostBySlug } from "@/lib/server/content";
+import { sanitizeBlogMdx } from '@/lib/content/sanitize-mdx';
+import BlogHeader from '@/components/blog/BlogHeader';
+import BlogContent from '@/components/blog/BlogContent';
+import BlogSidebar from '@/components/blog/BlogSidebar';
+import BlogFooter from '@/components/blog/BlogFooter';
+import ShareButtons from '@/components/ShareButtons';
+import AuthorBio from '@/components/AuthorBio';
+import RelatedPosts from '@/components/blog/RelatedPosts';
 
-import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { getPublishedPosts } from "@/lib/contentlayer-helper";
+interface Post {
+  title: string;
+  excerpt: string | null;
+  author: string | null;
+  coverImage: string | null;
+  date: string | null;
+  slug: string;
+  url: string;
+}
 
-type Props = {
-  post: {
-    title: string;
-    excerpt: string | null;
-    author: string | null;
-    coverImage: string | null;
-    date: string | null; // ISO
-    slug: string;
-    url: string; // canonical /blog/<slug>
-  };
+interface Props {
+  post: Post;
   source: MDXRemoteSerializeResult;
-};
-
-const SITE =
-  (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
-
-function cleanPath(input: unknown): string {
-  let s = String(input ?? "").trim();
-  if (!s) return "";
-  s = s.split("#")[0]?.split("?")[0] ?? s;
-  s = s.replace(/^https?:\/\/[^/]+/i, "");
-  s = s.replace(/\/+$/, "");
-  s = s.replace(/^\/+/, "");
-  return s;
 }
 
-function lastSegment(input: unknown): string {
-  const s = cleanPath(input).toLowerCase();
-  if (!s) return "";
-  const parts = s.split("/").filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : s;
-}
-
-/**
- * MDX hardening:
- * Replace unknown Capitalized JSX tags with <div>.
- * Prevents build failures when MDX uses components not registered in mdxComponents.
- */
-function sanitizeBlogMdx(raw: string): string {
-  if (!raw) return raw;
-
-  // <MyComponent ... />
-  raw = raw.replace(/<([A-Z][A-Za-z0-9_]*)\b[^>]*\/>/g, "<div />");
-
-  // <MyComponent ...>
-  raw = raw.replace(/<([A-Z][A-Za-z0-9_]*)\b[^>]*>/g, "<div>");
-
-  // </MyComponent>
-  raw = raw.replace(/<\/([A-Z][A-Za-z0-9_]*)\s*>/g, "</div>");
-
-  return raw;
-}
-
-function deriveCanonical(doc: any): { slug: string; url: string } {
-  const fromUrl = lastSegment(doc?.url);
-  const fromSlug = lastSegment(doc?.slug);
-  const fromPath = lastSegment(doc?._raw?.flattenedPath);
-  const slug = fromUrl || fromSlug || fromPath;
-  return { slug, url: slug ? `/blog/${slug}` : "/blog" };
-}
-
-function findPostBySlug(requestedSlug: string, posts: any[]) {
-  const target = requestedSlug.toLowerCase();
+const BlogPostPage: NextPage<Props> = ({ post, source }) => {
+  const metaDescription = post.excerpt || 'An insightful post from Abraham of London';
+  const publishedDate = post.date ? new Date(post.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : '';
 
   return (
-    posts.find((p) => lastSegment(p?.url).toLowerCase() === target) ||
-    posts.find((p) => lastSegment(p?.slug).toLowerCase() === target) ||
-    posts.find((p) => lastSegment(p?._raw?.flattenedPath).toLowerCase() === target) ||
-    posts.find((p) => cleanPath(p?.url).toLowerCase() === `blog/${target}`) ||
-    null
+    <Layout>
+      <Head>
+        <title>{post.title} | Abraham of London</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={post.coverImage || '/assets/images/blog-default.jpg'} />
+        <meta property="og:type" content="article" />
+        <meta property="article:published_time" content={post.date || ''} />
+        <meta property="article:author" content={post.author || 'Abraham of London'} />
+        {post.tags && post.tags.map((tag, index) => (
+          <meta key={index} property="article:tag" content={tag} />
+        ))}
+      </Head>
+
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        {/* Hero Section */}
+        <BlogHeader 
+          title={post.title}
+          author={post.author}
+          date={publishedDate}
+          coverImage={post.coverImage}
+          tags={post.tags || []}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* Main Content */}
+            <main className="lg:col-span-8">
+              <article className="prose prose-lg max-w-none">
+                <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
+                  <BlogContent>
+                    <MDXRemote {...source} />
+                  </BlogContent>
+                  
+                  <div className="mt-12 pt-8 border-t border-gray-200">
+                    <ShareButtons 
+                      url={`https://abrahamoflondon.com${post.url}`}
+                      title={post.title}
+                      excerpt={post.excerpt || ''}
+                    />
+                  </div>
+
+                  {post.author && (
+                    <div className="mt-12">
+                      <AuthorBio author={post.author} />
+                    </div>
+                  )}
+                </div>
+              </article>
+
+              <div className="mt-12">
+                <RelatedPosts currentPostSlug={post.slug} />
+              </div>
+            </main>
+
+            {/* Sidebar */}
+            <aside className="lg:col-span-4">
+              <BlogSidebar 
+                author={post.author}
+                publishedDate={publishedDate}
+                tags={post.tags || []}
+              />
+            </aside>
+          </div>
+        </div>
+
+        <BlogFooter />
+      </div>
+    </Layout>
   );
-}
+};
+
+export default BlogPostPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = getPublishedPosts();
+  const posts = await getServerAllPosts();
 
   const paths = posts
-    .map((p: any) => deriveCanonical(p).slug)
+    .map((post) => post.slug)
     .filter(Boolean)
     .map((slug: string) => ({ params: { slug } }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const requestedSlug = lastSegment(params?.slug);
-  if (!requestedSlug) return { notFound: true };
+  const slug = params?.slug as string;
+  if (!slug) return { notFound: true };
 
-  const posts = getPublishedPosts();
-  const rawDoc = findPostBySlug(requestedSlug, posts);
-  if (!rawDoc) return { notFound: true };
-
-  const { slug, url } = deriveCanonical(rawDoc);
+  const postData = await getServerPostBySlug(slug);
+  if (!postData) return { notFound: true };
 
   const post = {
-    title: rawDoc?.title || "Insight",
-    excerpt: rawDoc?.excerpt || rawDoc?.description || null,
-    author: rawDoc?.author || null,
-    coverImage: rawDoc?.coverImage || null,
-    date: rawDoc?.date ? new Date(rawDoc.date).toISOString() : null,
-    slug: slug || requestedSlug,
-    url,
+    title: postData.title || "Insight",
+    excerpt: postData.excerpt || postData.description || null,
+    author: postData.author || null,
+    coverImage: postData.coverImage || null,
+    date: postData.date ? new Date(postData.date).toISOString() : null,
+    slug: postData.slug || slug,
+    url: postData.url || `/blog/${postData.slug || slug}`,
+    tags: Array.isArray(postData.tags) ? postData.tags : [],
   };
 
-  const raw = typeof rawDoc?.body?.raw === "string" ? rawDoc.body.raw : "";
-  const safeRaw = sanitizeBlogMdx(raw);
+  const safeRaw = sanitizeBlogMdx(postData.body || "");
 
   let source: MDXRemoteSerializeResult;
   try {
@@ -134,59 +161,3 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   return { props: { post, source }, revalidate: 1800 };
 };
-
-const PostPage: NextPage<Props> = ({ post, source }) => {
-  const canonicalUrl = `${SITE}${post.url}`;
-
-  return (
-    <Layout
-      title={post.title}
-      description={post.excerpt || undefined}
-      ogImage={post.coverImage || undefined}
-      ogType="article"
-      canonicalUrl={canonicalUrl}
-    >
-      <Head>
-        <link rel="canonical" href={canonicalUrl} />
-        <title>{post.title} | Blog | Abraham of London</title>
-      </Head>
-
-      <main className="mx-auto max-w-3xl px-6 py-12 lg:py-24">
-        <Link href="/blog" className="text-sm text-gold hover:underline">
-          ← Back to Essays
-        </Link>
-
-        <header className="mt-6 mb-10 border-b border-gold/10 pb-10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
-            Insight & Reflection
-          </p>
-
-          <h1 className="mt-4 font-serif text-3xl font-semibold text-cream sm:text-5xl">
-            {post.title}
-          </h1>
-
-          {post.excerpt ? <p className="mt-4 text-gray-300">{post.excerpt}</p> : null}
-
-          <div className="mt-4 flex gap-4 text-sm text-gray-400">
-            {post.author ? <span>{post.author}</span> : null}
-            {post.date ? (
-              <span>
-                {new Date(post.date).toLocaleDateString("en-GB", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            ) : null}
-          </div>
-        </header>
-
-        <article className="prose prose-invert prose-gold max-w-none">
-          <MDXRemote {...source} components={mdxComponents} />
-        </article>
-      </main>
-    </Layout>
-  );
-};
-
-export default PostPage;

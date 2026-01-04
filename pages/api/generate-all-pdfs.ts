@@ -1,8 +1,7 @@
-// pages/api/generate-all-pdfs.ts
+// pages/api/generate-all-pdfs.ts - UPDATED VERSION
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { LegacyCanvasGenerator } from '../../scripts/generate-legacy-canvas.tsx';
-import { getPDFsRequiringGeneration, generateMissingPDFs } from '../../scripts/pdf-registry';
-import path from 'path';
+import { getPDFsRequiringGeneration } from '../../scripts/pdf-registry';
+import { PDFGenerationPipeline } from '../../scripts/generate-pdfs'; // Import actual generator
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,7 +12,7 @@ export default async function handler(
   }
 
   try {
-    const { apiKey } = req.headers;
+    const apiKey = req.headers.authorization?.split(' ')[1] || req.query.apiKey as string;
     
     // Validate API key
     if (apiKey !== process.env.ADMIN_API_KEY) {
@@ -33,50 +32,31 @@ export default async function handler(
       });
     }
 
+    const pipeline = new PDFGenerationPipeline();
     const results = [];
     
     // Generate each PDF
     for (const pdf of pdfsToGenerate) {
       try {
-        if (pdf.id === 'legacy-architecture-canvas') {
-          const generator = new LegacyCanvasGenerator();
-          
-          // Generate all formats
-          for (const format of pdf.formats) {
-            if (format !== 'bundle') {
-              const pdfBytes = await generator.generate({
-                format,
-                includeWatermark: true,
-                isPreview: false,
-                quality: 'premium'
-              });
-              
-              const outputPath = path.resolve(
-                process.cwd(), 
-                'public/assets/downloads',
-                `legacy-architecture-canvas-${format.toLowerCase()}-premium.pdf`
-              );
-              
-              require('fs').writeFileSync(outputPath, Buffer.from(pdfBytes));
-              console.log(`✅ Generated ${format} format`);
-            }
-          }
-          
-          results.push({ id: pdf.id, success: true });
-        } else {
-          // Use the centralized generation function
-          const generationResults = await generateMissingPDFs();
-          const result = generationResults.find(r => r.id === pdf.id);
-          
-          if (result?.success) {
-            results.push({ id: pdf.id, success: true });
-          } else {
-            results.push({ id: pdf.id, success: false, error: result?.error });
-          }
-        }
+        console.log(`🔄 Generating: ${pdf.title} (${pdf.id})`);
+        
+        const result = await pipeline.generatePDF(pdf.id);
+        
+        results.push({ 
+          id: pdf.id, 
+          success: true,
+          duration: result.duration || 0
+        });
+        
+        console.log(`✅ Generated: ${pdf.title}`);
+        
       } catch (error: any) {
         console.error(`❌ Failed to generate ${pdf.id}:`, error.message);
-        results.push({ id: pdf.id, success: false, error: error.message });
+        results.push({ 
+          id: pdf.id, 
+          success: false, 
+          error: error.message 
+        });
       }
     }
 

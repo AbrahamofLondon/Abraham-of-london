@@ -1,10 +1,6 @@
-/* ============================================================================
- * ROBUST CONTENTLAYER HELPER v5.2.2
- * Features: 24-Context Registry + Complete Backward Compatibility
- * ============================================================================ */
-
+/* lib/contentlayer-helper.ts - UPDATED WITHOUT DYNAMIC IMPORT */
 /* -------------------------------------------------------------------------- */
-/* 1. TYPES & INTERFACES                                                      */
+/* 1. TYPES & REGISTRY                                                        */
 /* -------------------------------------------------------------------------- */
 
 export type DocKind = 
@@ -14,35 +10,17 @@ export type DocKind =
   | "devotional" | "prayer" | "testimony" | "podcast" | "video" 
   | "course" | "lesson" | "print";
 
-export type Tier = 'free' | 'basic' | 'premium' | 'enterprise' | 'restricted';
-
 export interface ContentDoc {
   _id: string;
-  _raw: {
-    flattenedPath: string;
-    sourceFileName: string;
-    sourceFilePath: string;
-    contentType: string;
-  };
+  _raw: { flattenedPath: string; sourceFileName: string; sourceFilePath: string; contentType: string; };
   type: string;
   title: string;
   slug?: string;
-  href?: string;
-  url?: string;
-  description?: string;
-  excerpt?: string;
-  coverImage?: string;
-  coverimage?: string;
+  date?: string;
   draft?: boolean | string;
   archived?: boolean | string;
-  featured?: boolean;
-  accessLevel?: string;
   [key: string]: any;
 }
-
-/* -------------------------------------------------------------------------- */
-/* 2. CORE REGISTRY & UTILITIES                                               */
-/* -------------------------------------------------------------------------- */
 
 const COLLECTION_MAP: Record<DocKind, string> = {
   post: "allPosts", book: "allBooks", download: "allDownloads",
@@ -55,38 +33,87 @@ const COLLECTION_MAP: Record<DocKind, string> = {
   course: "allCourses", lesson: "allLessons", print: "allPrints"
 };
 
-// Dynamic import to handle Contentlayer not being built yet
-let generated: any = {};
-let isContentlayerDisabled = false;
-
-// Try to load the generated contentlayer data
-try {
-  if (process.env.DISABLE_CONTENTLAYER !== 'true') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    generated = require(".contentlayer/generated");
-  } else {
-    isContentlayerDisabled = true;
-    console.log("ℹ️ Contentlayer is disabled via DISABLE_CONTENTLAYER env");
-  }
-} catch (error) {
-  console.warn("⚠️ Contentlayer not built yet or disabled. Run 'contentlayer build' first or use DISABLE_CONTENTLAYER=true.");
-  isContentlayerDisabled = true;
-  generated = {};
-}
-
-// Create empty collections when Contentlayer is disabled
-if (isContentlayerDisabled) {
-  Object.keys(COLLECTION_MAP).forEach(key => {
-    const collectionName = COLLECTION_MAP[key as DocKind];
-    generated[collectionName] = [];
-  });
-  generated.allDocuments = [];
-}
-
-const getCollection = (kind: DocKind): ContentDoc[] => {
-  const collectionName = COLLECTION_MAP[kind];
-  return (generated as any)[collectionName] || [];
+// Initialize with empty data
+let runtimeData: any = {
+  allPosts: [],
+  allBooks: [],
+  allDownloads: [],
+  allCanons: [],
+  allShorts: [],
+  allEvents: [],
+  allResources: [],
+  allPrints: [],
+  allStrategies: [],
+  allArticles: [],
+  allGuides: [],
+  allTutorials: [],
+  allCaseStudies: [],
+  allWhitepapers: [],
+  allReports: [],
+  allNewsletters: [],
+  allSermons: [],
+  allDevotionals: [],
+  allPrayers: [],
+  allTestimonies: [],
+  allPodcasts: [],
+  allVideos: [],
+  allCourses: [],
+  allLessons: [],
+  allDocuments: []
 };
+
+/* -------------------------------------------------------------------------- */
+/* 2. DYNAMIC DATA ACCESS - ALL EXPORTS                                       */
+/* -------------------------------------------------------------------------- */
+
+const getData = (collection: string): any[] => {
+  return runtimeData?.[collection] || [];
+};
+
+// Export ALL individual getters
+export const getAllPosts = () => getData("allPosts");
+export const getAllBooks = () => getData("allBooks");
+export const getAllDownloads = () => getData("allDownloads");
+export const getAllCanons = () => getData("allCanons");
+export const getAllShorts = () => getData("allShorts");
+export const getAllEvents = () => getData("allEvents");
+export const getAllResources = () => getData("allResources");
+export const getAllPrints = () => getData("allPrints");
+export const getAllStrategies = () => getData("allStrategies");
+export const getAllArticles = () => getData("allArticles");
+export const getAllGuides = () => getData("allGuides");
+export const getAllTutorials = () => getData("allTutorials");
+export const getAllCaseStudies = () => getData("allCaseStudies");
+export const getAllWhitepapers = () => getData("allWhitepapers");
+export const getAllReports = () => getData("allReports");
+export const getAllNewsletters = () => getData("allNewsletters");
+export const getAllSermons = () => getData("allSermons");
+export const getAllDevotionals = () => getData("allDevotionals");
+export const getAllPrayers = () => getData("allPrayers");
+export const getAllTestimonies = () => getData("allTestimonies");
+export const getAllPodcasts = () => getData("allPodcasts");
+export const getAllVideos = () => getData("allVideos");
+export const getAllCourses = () => getData("allCourses");
+export const getAllLessons = () => getData("allLessons");
+
+export const getAllDocuments = () => runtimeData?.allDocuments || [];
+
+/* -------------------------------------------------------------------------- */
+/* 3. PUBLISHED VARIANT GETTERS                                               */
+/* -------------------------------------------------------------------------- */
+
+export const getPublishedPosts = () => getAllPosts().filter(d => !d.draft);
+export const getPublishedDownloads = () => getAllDownloads().filter(d => !d.draft);
+export const getPublishedShorts = () => getAllShorts().filter(d => !d.draft);
+export const getRecentShorts = (limit: number = 5) => getPublishedShorts().slice(0, limit);
+
+export const getPublishedDocuments = <T extends ContentDoc>(docs: T[] = getAllPosts() as T[]): T[] => {
+  return docs.filter(doc => !doc.draft);
+};
+
+/* -------------------------------------------------------------------------- */
+/* 4. CORE UTILITIES                                                          */
+/* -------------------------------------------------------------------------- */
 
 export const normalizeSlug = (slug: any): string => {
   if (!slug) return '';
@@ -95,258 +122,116 @@ export const normalizeSlug = (slug: any): string => {
 };
 
 export const getDocKind = (doc: ContentDoc): DocKind => {
-  const path = doc._raw?.flattenedPath || '';
-  for (const [kind, folder] of Object.entries(COLLECTION_MAP)) {
-    const folderPrefix = folder.replace('all', '').toLowerCase().replace('ies', 'y').replace('s', '');
-    if (path.includes(folderPrefix)) return kind as DocKind;
-  }
-  return 'post'; 
+  return doc.type?.toLowerCase() as DocKind || 'post';
+};
+
+export const resolveDocCoverImage = (doc: any) => doc.coverImage || "/assets/images/placeholder.jpg";
+export const resolveDocDownloadUrl = (doc: any) => doc.downloadUrl || doc.file || "";
+export const resolveDocDownloadHref = (doc: any) => doc.downloadUrl || doc.file || "";
+export const getAccessLevel = (doc: any) => doc.accessLevel || 'public';
+
+export const getDocumentBySlug = (slug: string): ContentDoc | null => {
+  const allDocs = getAllDocuments();
+  const normalized = normalizeSlug(slug);
+  return allDocs.find(d => normalizeSlug(d.slug || d._raw.flattenedPath) === normalized) || null;
 };
 
 /* -------------------------------------------------------------------------- */
-/* 3. COMPATIBILITY UTILITIES (Restoring missing exports)                     */
+/* 5. ADDITIONAL UTILITIES                                                    */
 /* -------------------------------------------------------------------------- */
 
-export const getDocHref = (doc: any): string => {
-  return doc.url || doc.href || `/${doc._raw?.flattenedPath}`;
+export const getDocHref = (doc: ContentDoc): string => {
+  const slug = doc.slug || doc._raw?.flattenedPath?.split('/').pop();
+  const type = getDocKind(doc);
+  const typePlural = type === 'post' ? 'blog' : `${type}s`;
+  return `/${typePlural}/${slug}`;
 };
 
-export const resolveDocCoverImage = (doc: any): string => {
-  return doc.coverImage || doc.coverimage || "/assets/images/placeholder.jpg";
+export const getAllContentlayerDocs = getAllDocuments;
+export const isDraftContent = (doc: ContentDoc): boolean => doc.draft === true;
+export const isDraft = (doc: ContentDoc): boolean => doc.draft === true;
+
+export const getPrintBySlug = (slug: string): ContentDoc | null => {
+  const prints = getAllPrints();
+  return prints.find(p => p.slug === slug || p._raw.flattenedPath.includes(slug)) || null;
 };
 
-export const resolveDocDownloadUrl = (doc: any): string => {
-  return doc.downloadUrl || doc.pdfPath || doc.file || doc.downloadFile || "";
+export const getStrategyBySlug = (slug: string): ContentDoc | null => {
+  const strategies = getAllStrategies();
+  return strategies.find(s => s.slug === slug || s._raw.flattenedPath.includes(slug)) || null;
 };
 
-export const resolveDocDownloadHref = (doc: any): string => {
-  return resolveDocDownloadUrl(doc);
-};
-
-export const resolveDocDownloadSizeLabel = (doc: any): string => {
-  return doc.fileSize || "Unknown Size";
-};
-
-export const coerceShortTheme = (theme: any): string => {
-  return typeof theme === 'string' ? theme : 'default';
-};
-
-export const assertContentlayerHasDocs = (): void => {
-  const all = getAllDocuments();
-  if (all.length === 0) console.warn("Contentlayer has no documents.");
-};
-
-// Access & Draft Logic
-export const getAccessLevel = (doc: any): string => doc.accessLevel || 'public';
-export const isDraft = (doc: any): boolean => doc.draft === true || doc.draft === "true";
-export const isDraftContent = isDraft;
-export const isPublishedContent = (doc: any): boolean => !isDraft(doc) && !doc.archived;
-export const isPublic = (doc: any): boolean => getAccessLevel(doc) === 'public';
-
-const filterPublished = (docs: ContentDoc[]) => docs.filter(isPublishedContent);
-
-/* -------------------------------------------------------------------------- */
-/* 4. TIER LOGIC                                                              */
-/* -------------------------------------------------------------------------- */
-
-export const normalizeTier = (tier: string | undefined): Tier => {
-  if (!tier) return 'free';
-  const n = tier.toLowerCase().trim();
-  if (['basic', 'premium', 'enterprise', 'restricted'].includes(n)) return n as Tier;
-  return 'free';
-};
-
-export const getRequiredTier = (doc: any): Tier => {
-  return normalizeTier(doc.requiredTier || doc.tier || 'free');
-};
-
-export const isTierAllowed = (userTier: Tier | string, requiredTier: Tier | string): boolean => {
-  const tierOrder: Record<Tier, number> = { free: 0, basic: 1, premium: 2, enterprise: 3, restricted: 4 };
-  const user = normalizeTier(userTier);
-  const required = normalizeTier(requiredTier);
-  return tierOrder[user] >= tierOrder[required];
-};
-
-export const canAccessDoc = (doc: any, userTier: Tier | string): boolean => {
-  return isTierAllowed(userTier, getRequiredTier(doc));
-};
-
-/* -------------------------------------------------------------------------- */
-/* 5. UI & MAPPING                                                            */
-/* -------------------------------------------------------------------------- */
-
-export const getCardProps = (doc: ContentDoc | null | undefined) => {
-  if (!doc) {
-    return {
-      kind: "post" as DocKind,
-      slug: "unknown",
-      title: "Not Found",
-      href: "#",
-      coverImage: "/assets/images/placeholder.jpg",
-      layout: "default",
-      tags: [] as string[]
-    };
-  }
-
+export const toUiDoc = (doc: ContentDoc): any => {
   return {
-    kind: getDocKind(doc),
-    slug: doc.slug || doc._raw?.flattenedPath.split('/').pop() || "",
-    title: doc.title || "Untitled",
-    subtitle: doc.subtitle || "",
-    description: doc.description || doc.excerpt || "",
-    category: doc.category || "General",
-    author: doc.author || "Abraham of London",
+    ...doc,
     href: getDocHref(doc),
-    coverImage: resolveDocCoverImage(doc),
-    coverAspect: doc.coverAspect || "auto",
-    coverFit: doc.coverFit || "cover",
-    coverPosition: doc.coverPosition || "center",
-    dateISO: doc.date ? new Date(doc.date).toISOString() : null,
-    readTime: doc.readTime || doc.readtime || null,
-    tags: doc.tags || [],
-    layout: doc.layout || "default",
-    downloadUrl: resolveDocDownloadUrl(doc),
-    theme: doc.theme,
+    coverImage: doc.coverImage || doc.coverimage || '/assets/images/placeholder.jpg',
+    description: doc.description || doc.excerpt || '',
   };
 };
 
-export const toUiDoc = (doc: any) => getCardProps(doc);
-export const getCardPropsForDocument = getCardProps;
-
-/* -------------------------------------------------------------------------- */
-/* 6. GETTERS (Dynamic + Backward Compatible Aliases)                         */
-/* -------------------------------------------------------------------------- */
-
-const getters = {} as any;
-
-Object.keys(COLLECTION_MAP).forEach((key) => {
-  const kind = key as DocKind;
-  const capitalized = kind.charAt(0).toUpperCase() + kind.slice(1);
-  const getterFn = () => filterPublished(getCollection(kind));
-  
-  // Standard V5 Name: getAllPosts
-  getters[`getAll${capitalized}s`] = getterFn;
-  // Backward Compat Name: getPublishedPosts
-  getters[`getPublished${capitalized}s`] = getterFn;
-});
-
-// Initialize empty arrays if disabled
-if (isContentlayerDisabled) {
-  Object.keys(COLLECTION_MAP).forEach((key) => {
-    const kind = key as DocKind;
-    const capitalized = kind.charAt(0).toUpperCase() + kind.slice(1);
-    getters[`getAll${capitalized}s`] = () => [];
-    getters[`getPublished${capitalized}s`] = () => [];
-  });
-}
-
-// FIX: Explicitly Export ALL Content Types to satisfy TypeScript
-export const {
-  // Core
-  getAllPosts, getPublishedPosts,
-  getAllBooks, getPublishedBooks,
-  getAllDownloads, getPublishedDownloads,
-  getAllCanons, getPublishedCanons,
-  getAllShorts, getPublishedShorts, getRecentShorts, 
-  getAllEvents, getPublishedEvents,
-  getAllPrints, getPublishedPrints,
-  getAllResources, getPublishedResources,
-  getAllStrategies, getPublishedStrategies,
-  
-  // Extended Types (Fixes the unified-content.ts error)
-  getAllArticles, getPublishedArticles,
-  getAllGuides, getPublishedGuides,
-  getAllTutorials, getPublishedTutorials,
-  getAllCaseStudies, getPublishedCaseStudies,
-  getAllWhitepapers, getPublishedWhitepapers,
-  getAllReports, getPublishedReports,
-  getAllNewsletters, getPublishedNewsletters,
-  getAllSermons, getPublishedSermons,
-  getAllDevotionals, getPublishedDevotionals,
-  getAllPrayers, getPublishedPrayers,
-  getAllTestimonies, getPublishedTestimonies,
-  getAllPodcasts, getPublishedPodcasts,
-  getAllVideos, getPublishedVideos,
-  getAllCourses, getPublishedCourses,
-  getAllLessons, getPublishedLessons,
-} = {
-  ...getters,
-  getRecentShorts: getters.getAllShorts ? ((limit = 5) => getters.getAllShorts().slice(0, limit)) : () => []
-} as any;
-
-/* -------------------------------------------------------------------------- */
-/* 7. GLOBAL UTILITIES                                                        */
-/* -------------------------------------------------------------------------- */
-
-export const getAllDocuments = () => {
-  if (isContentlayerDisabled) return [];
-  return Object.values(COLLECTION_MAP).flatMap(name => {
-    return filterPublished((generated as any)[name] || []);
-  });
+export const isContentlayerLoaded = (): boolean => {
+  return runtimeData !== null;
 };
 
-export const getAllContentlayerDocs = getAllDocuments; 
-export const getPublishedDocuments = getAllDocuments; 
-
-export const getDocumentBySlug = (kind: DocKind, slug: string): ContentDoc | null => {
-  if (isContentlayerDisabled) return null;
-  const docs = filterPublished(getCollection(kind));
-  const normalized = normalizeSlug(slug);
-  return docs.find((d: ContentDoc) => 
-    normalizeSlug(d.slug || d._raw.flattenedPath.split("/").pop()) === normalized
-  ) || null;
+export const assertContentlayerHasDocs = (): boolean => {
+  const hasDocs = getAllDocuments().length > 0;
+  if (!hasDocs) console.warn("⚠️ Contentlayer: No documents loaded");
+  return hasDocs;
 };
-
-export function isContentlayerLoaded(): boolean {
-  try {
-    const docs = (generated as any).allDocuments;
-    return Array.isArray(docs) && docs.length >= 0;
-  } catch (e) {
-    return false;
-  }
-}
-
-// Backward compatible specific slug getters
-export const getPostBySlug = (s: string) => getDocumentBySlug('post', s);
-export const getBookBySlug = (s: string) => getDocumentBySlug('book', s);
-export const getDownloadBySlug = (s: string) => getDocumentBySlug('download', s);
-export const getShortBySlug = (s: string) => getDocumentBySlug('short', s);
-export const getPrintBySlug = (s: string) => getDocumentBySlug('print', s);
-export const getStrategyBySlug = (s: string) => getDocumentBySlug('strategy', s);
-export const getEventBySlug = (s: string) => getDocumentBySlug('event', s);
-export const getResourceBySlug = (s: string) => getDocumentBySlug('resource', s);
-export const getCanonBySlug = (s: string) => getDocumentBySlug('canon', s);
-
-export const getFeaturedDocuments = (kind?: DocKind, limit = 3) => {
-  if (isContentlayerDisabled) return [];
-  const docs = kind ? filterPublished(getCollection(kind)) : getAllDocuments();
-  return docs.filter(d => d.featured).slice(0, limit);
-};
-
-export const getFeaturedDocumentsByType = (kind: DocKind, limit = 3) => getFeaturedDocuments(kind, limit);
 
 /* -------------------------------------------------------------------------- */
-/* 8. DEFAULT EXPORT                                                          */
+/* 6. SYSTEM INTERFACE                                                       */
 /* -------------------------------------------------------------------------- */
 
 const ContentHelper = {
-  ...getters,
-  getCardProps,
-  getDocumentBySlug,
+  _setRuntimeData: (data: any) => { runtimeData = data; },
   getAllDocuments,
-  getDocKind,
+  getDocumentBySlug,
   normalizeSlug,
-  getPostBySlug, getBookBySlug, getDownloadBySlug, getShortBySlug,
-  getAllContentlayerDocs, getPublishedDocuments,
-  toUiDoc,
+  getDocKind,
   resolveDocCoverImage,
   resolveDocDownloadUrl,
-  canAccessDoc,
-  getRequiredTier,
-  isTierAllowed,
-  normalizeTier,
+  getAccessLevel,
+  assertContentlayerHasDocs,
+  getAllPosts,
+  getAllBooks,
+  getAllDownloads,
+  getAllCanons,
+  getAllShorts,
+  getAllEvents,
+  getAllResources,
+  getAllPrints,
+  getAllStrategies,
+  getAllArticles,
+  getAllGuides,
+  getAllTutorials,
+  getAllCaseStudies,
+  getAllWhitepapers,
+  getAllReports,
+  getAllNewsletters,
+  getAllSermons,
+  getAllDevotionals,
+  getAllPrayers,
+  getAllTestimonies,
+  getAllPodcasts,
+  getAllVideos,
+  getAllCourses,
+  getAllLessons,
+  getDocHref,
+  getPublishedShorts,
+  getRecentShorts,
+  getPublishedDocuments,
+  getAllContentlayerDocs,
+  isDraftContent,
+  isDraft,
+  getPublishedDownloads,
+  getPublishedPosts,
+  getPrintBySlug,
+  getStrategyBySlug,
+  toUiDoc,
   isContentlayerLoaded,
-  isContentlayerDisabled: () => isContentlayerDisabled
+  resolveDocDownloadHref
 };
 
 export default ContentHelper;

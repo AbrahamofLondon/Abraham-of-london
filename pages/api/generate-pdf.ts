@@ -1,6 +1,7 @@
-// pages/api/generate-pdf.ts
+// pages/api/generate-pdf.ts - UPDATED VERSION
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getPDFById, generateMissingPDFs } from '../../scripts/pdf-registry';
+import { getPDFById } from '../../scripts/pdf-registry';
+import { PDFGenerationPipeline } from '../../scripts/generate-pdfs'; // Import actual generator
 
 export default async function handler(
   req: NextApiRequest,
@@ -30,11 +31,13 @@ export default async function handler(
 
     console.log(`🚀 Generating PDF: ${pdf.title} (${pdf.id})`);
     
-    // Generate the specific PDF
-    const results = await generateMissingPDFs();
-    const result = results.find(r => r.id === id);
+    // Use the REAL PDF generator (not the client mock)
+    const pipeline = new PDFGenerationPipeline();
     
-    if (result?.success) {
+    try {
+      // Generate the specific PDF
+      const result = await pipeline.generatePDF(id);
+      
       res.status(200).json({
         message: `Successfully generated ${pdf.title}`,
         pdf: {
@@ -43,12 +46,12 @@ export default async function handler(
           url: pdf.outputPath,
           generated: new Date().toISOString()
         },
-        duration: result.duration
+        duration: result.duration || 0
       });
-    } else {
+    } catch (genError: any) {
       res.status(500).json({
         error: `Failed to generate ${pdf.title}`,
-        details: result?.error || 'Unknown error'
+        details: genError.message || 'Unknown generation error'
       });
     }
 
