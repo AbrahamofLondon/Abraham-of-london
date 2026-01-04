@@ -267,9 +267,12 @@ importers:
       concurrently:
         specifier: 8.2.2
         version: 8.2.2
+<<<<<<< HEAD
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
+=======
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
       crypto-browserify:
         specifier: 3.12.1
         version: 3.12.1
@@ -331,8 +334,13 @@ importers:
         specifier: 3.3.3
         version: 3.3.3
       prisma:
+<<<<<<< HEAD
         specifier: 5.10.2
         version: 5.10.2
+=======
+        specifier: 7.2.0
+        version: 7.2.0(@types/react@18.3.12)(better-sqlite3@12.5.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
       raw-loader:
         specifier: 4.0.2
         version: 4.0.2(webpack@5.104.1(esbuild@0.18.20))
@@ -4420,6 +4428,12 @@ packages:
   cipher-base@1.0.7:
     resolution: {integrity: sha512-Mz9QMT5fJe7bKI7MH31UilT5cEK5EHHRCccw/YRFsRY47AuNgaV6HY3rscp0/I4Q+tTW/5zoqpSeRRI54TkDWA==}
     engines: {node: '>= 0.10'}
+<<<<<<< HEAD
+=======
+
+  citty@0.1.6:
+    resolution: {integrity: sha512-tskPPKEs8D2KPafUypv2gxwJP8h/OaJmC82QQGGDQcHvXX43xF2VDACcJVmZ0EuSxkpO9Kc4MlrA3q0+FG58AQ==}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   cjs-module-lexer@2.2.0:
     resolution: {integrity: sha512-4bHTS2YuzUvtoLjdy+98ykbNB5jS0+07EvFNXerqZQJ89F7DI6ET7OQo/HJuW6K0aVsKA9hj9/RVb2kQVOrPDQ==}
@@ -4943,6 +4957,12 @@ packages:
 
   des.js@1.1.0:
     resolution: {integrity: sha512-r17GxjhUCjSRy8aiJpr8/UadFIzMzJGexI3Nmz4ADi9LYSFx4gTBp80+NaX/YsXWWLhpZ7v/v/ubEc/bCNfKwg==}
+<<<<<<< HEAD
+=======
+
+  destr@2.0.5:
+    resolution: {integrity: sha512-ugFTXCtDZunbzasqBxrK93Ik/DRYsO6S/fedkWEMKqt04xZ4csmnmwGDBAb07QWNaGMAmnTIemsYZCksjATwsA==}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
@@ -5113,6 +5133,13 @@ packages:
   emojis-list@3.0.0:
     resolution: {integrity: sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==}
     engines: {node: '>= 4'}
+<<<<<<< HEAD
+=======
+
+  empathic@2.0.0:
+    resolution: {integrity: sha512-i6UzDscO/XfAcNYD75CfICkmfLedpyPDdozrLMmQc5ORaQcdMoc21OnlEylMIqI7U8eniKrPMxxtj8k0vhmJhA==}
+    engines: {node: '>=14'}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   encoding-sniffer@0.2.1:
     resolution: {integrity: sha512-5gvq20T6vfpekVtqrYQsSCFZ1wEg5+wW0/QaZMWkFr6BqD3NfKs0rLCx4rrVlSWJeZb5NBJgVLswK/w2MWU+Gw==}
@@ -5988,6 +6015,13 @@ packages:
 
   hmac-drbg@1.0.1:
     resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
+<<<<<<< HEAD
+=======
+
+  hono@4.10.6:
+    resolution: {integrity: sha512-BIdolzGpDO9MQ4nu3AUuDwHZZ+KViNm+EZ75Ae55eMXMqLVhDFqEMXxtUe9Qh8hjL+pIna/frs2j6Y2yD5Ua/g==}
+    engines: {node: '>=16.9.0'}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   hosted-git-info@7.0.2:
     resolution: {integrity: sha512-puUZAUKT5m8Zzvs72XWy3HtvVbTWljRE66cP60bxJzAqf2DgICo7lYTY2IHUmLnNpjYvw5bvmoHvPc0QO2a62w==}
@@ -8330,6 +8364,12 @@ packages:
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
+<<<<<<< HEAD
+=======
+
+  rc9@2.1.2:
+    resolution: {integrity: sha512-btXCnMmRIBINM2LDZoEmOogIZU7Qe7zn4BpomSKZ/ykbLObuBdvG+mFq11DL6fjH1DRwHhrlgtYWG96bJiC7Cg==}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
@@ -9360,6 +9400,7 @@ packages:
     resolution: {integrity: sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==}
     engines: {node: '>=16'}
 
+<<<<<<< HEAD
   tough-cookie@6.0.0:
     resolution: {integrity: sha512-kXuRi1mtaKMrsLUxz3sQYvVl37B0Ns6MzfrtV5DvJceE9bPyspOqk9xxv7XbZWcfLWbFmm997vl83qUWVJA64w==}
     engines: {node: '>=16'}
@@ -9368,6 +9409,8 @@ packages:
     resolution: {integrity: sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==}
     engines: {node: '>=20'}
 
+=======
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
   tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
@@ -15365,6 +15408,15 @@ snapshots:
   ci-info@4.3.1: {}
 
   cipher-base@1.0.7:
+<<<<<<< HEAD
+=======
+    dependencies:
+      inherits: 2.0.4
+      safe-buffer: 5.2.1
+      to-buffer: 1.2.2
+
+  citty@0.1.6:
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     dependencies:
       inherits: 2.0.4
       safe-buffer: 5.2.1
@@ -15903,6 +15955,11 @@ snapshots:
     dependencies:
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
+<<<<<<< HEAD
+=======
+
+  destr@2.0.5: {}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   detect-libc@2.1.2: {}
 
@@ -16085,6 +16142,11 @@ snapshots:
   emoji-regex@9.2.2: {}
 
   emojis-list@3.0.0: {}
+<<<<<<< HEAD
+=======
+
+  empathic@2.0.0: {}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   encoding-sniffer@0.2.1:
     dependencies:
@@ -17292,6 +17354,11 @@ snapshots:
       hash.js: 1.1.7
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
+<<<<<<< HEAD
+=======
+
+  hono@4.10.6: {}
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
   hosted-git-info@7.0.2:
     dependencies:
@@ -20233,6 +20300,15 @@ snapshots:
   range-parser@1.2.0: {}
 
   raw-loader@4.0.2(webpack@5.104.1(esbuild@0.18.20)):
+<<<<<<< HEAD
+=======
+    dependencies:
+      loader-utils: 2.0.4
+      schema-utils: 3.3.0
+      webpack: 5.104.1(esbuild@0.18.20)
+
+  rc9@2.1.2:
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
@@ -21608,6 +21684,7 @@ snapshots:
     dependencies:
       tldts: 6.1.86
 
+<<<<<<< HEAD
   tough-cookie@6.0.0:
     dependencies:
       tldts: 7.0.19
@@ -21616,6 +21693,8 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
+=======
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
   tree-kill@1.2.2: {}
 
   trim-lines@3.0.1: {}

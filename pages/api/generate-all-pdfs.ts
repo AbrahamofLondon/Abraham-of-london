@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 // pages/api/generate-all-pdfs.ts - UPDATED FOR API ROUTE
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getPDFsRequiringGeneration } from '../../scripts/pdf-registry';
 import fs from 'fs';
 import path from 'path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+=======
+// pages/api/generate-all-pdfs.ts - UPDATED VERSION
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { getPDFsRequiringGeneration } from '../../scripts/pdf-registry';
+import { PDFGenerationPipeline } from '../../scripts/generate-pdfs'; // Import actual generator
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,7 +21,10 @@ export default async function handler(
   }
 
   try {
+<<<<<<< HEAD
     // Validate API key from environment
+=======
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     const apiKey = req.headers.authorization?.split(' ')[1] || req.query.apiKey as string;
     
     if (!apiKey || apiKey !== process.env.PDF_GENERATION_API_KEY) {
@@ -38,11 +48,15 @@ export default async function handler(
       });
     }
 
+<<<<<<< HEAD
     console.log(`📊 Found ${pdfsToGenerate.length} PDFs to generate:`);
     pdfsToGenerate.forEach(pdf => {
       console.log(`  - ${pdf.title} (${pdf.id})`);
     });
 
+=======
+    const pipeline = new PDFGenerationPipeline();
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     const results = [];
     
     // Generate each PDF
@@ -50,6 +64,7 @@ export default async function handler(
       try {
         console.log(`🔄 Generating: ${pdf.title} (${pdf.id})`);
         
+<<<<<<< HEAD
         const result = await generateSinglePDF(pdf);
         
         results.push({ 
@@ -59,6 +74,14 @@ export default async function handler(
           duration: result.duration,
           outputPath: result.outputPath,
           fileSize: result.fileSize
+=======
+        const result = await pipeline.generatePDF(pdf.id);
+        
+        results.push({ 
+          id: pdf.id, 
+          success: true,
+          duration: result.duration || 0
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
         });
         
         console.log(`✅ Generated: ${pdf.title}`);
@@ -66,8 +89,12 @@ export default async function handler(
       } catch (error: any) {
         console.error(`❌ Failed to generate ${pdf.id}:`, error.message);
         results.push({ 
+<<<<<<< HEAD
           id: pdf.id,
           title: pdf.title,
+=======
+          id: pdf.id, 
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
           success: false, 
           error: error.message 
         });

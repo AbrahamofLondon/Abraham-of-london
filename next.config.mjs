@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // next.config.mjs - COMPREHENSIVE RESTORATION
+=======
+// next.config.mjs - UPDATED WITH FIXED ALIASES & ASSET HARDENING
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { createRequire } from 'module';
@@ -7,6 +11,7 @@ const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+<<<<<<< HEAD
 // ==================== CONTENTLAYER HANDLING ====================
 let withContentlayer;
 try {
@@ -23,11 +28,26 @@ try {
 /** @type {import('next').NextConfig} */
 const institutionalConfig = {
   // ==================== CORE PERFORMANCE ====================
+=======
+// Try to load Contentlayer dynamically
+let withContentlayer;
+try {
+  console.log('🔄 Attempting to load next-contentlayer...');
+  const contentlayerModule = await import('next-contentlayer');
+  withContentlayer = contentlayerModule.withContentlayer;
+  console.log('✅ Next-Contentlayer loaded successfully');
+} catch (error) {
+  console.warn(⚠️ Next-contentlayer not available, running without it');
+  withContentlayer = (config) => config;
+}
+
+/** @type {import('next').NextConfig} */
+const baseConfig = {
+  // =================== CORE CONFIGURATION ===================
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
   reactStrictMode: true,
   swcMinify: true,
   poweredByHeader: false,
-  generateEtags: true,
-  compress: true,
   
   // ==================== SECURITY HEADERS ====================
   async headers() {
@@ -75,15 +95,22 @@ const institutionalConfig = {
   
   // ==================== IMAGE OPTIMIZATION ====================
   images: {
+<<<<<<< HEAD
     deviceSizes: [320, 420, 768, 1024, 1200, 1920],
     imageSizes: [16, 32, 64, 96, 128, 256],
     formats: ['image/webp', 'image/avif'],
+=======
+    deviceSizes: [320, 420, 768, 1024, 1200],
+    imageSizes: [16, 32, 64, 96, 128],
+    formats: ['image/webp'],
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
     ],
+<<<<<<< HEAD
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
@@ -115,11 +142,19 @@ const institutionalConfig = {
     // ==================== ASSET HANDLING ====================
     
     // 1. SQL File Handling - Institutional Requirement
+=======
+  },
+  
+  // =================== WEBPACK CONFIG ===================
+  webpack: (config, { isServer, dev, webpack }) => {
+    // Handle SQL files - Prevent parse errors by using raw-loader
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     config.module.rules.push({
       test: /\.sql$/,
       use: 'raw-loader',
     });
     
+<<<<<<< HEAD
     // 2. PDF File Handling
     config.module.rules.push({
       test: /\.pdf$/,
@@ -149,15 +184,32 @@ const institutionalConfig = {
         contextRegExp: /\/lib\//,
       }),
       new webpack.IgnorePlugin({
+=======
+    // Exclude scripts directory from processing to prevent build bloat
+    config.module.rules.push({
+      test: /scripts\/.*\.(ts|tsx|js|jsx)$/,
+      use: 'ignore-loader',
+    });
+
+    // INSTITUTIONAL FIX: Ignore SQL files during the lazy-loading/module discovery phase
+    // This stops Webpack from trying to parse .sql files in lib/server or root
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
         resourceRegExp: /\.sql$/,
       })
     );
     
+<<<<<<< HEAD
     // 6. Windows-specific optimizations
+=======
+    // Windows-specific fixes for file watching
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     if (process.platform === 'win32') {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
+<<<<<<< HEAD
         ignored: /node_modules/,
       };
       
@@ -196,10 +248,24 @@ const institutionalConfig = {
         })
       );
     }
+=======
+      };
+    }
+    
+    // Fix for Windows path resolution and Alias Hardening
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        ...config.resolve.alias,
+        '@': path.resolve(__dirname),
+      },
+    };
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     
     return config;
   },
   
+<<<<<<< HEAD
   // ==================== DEVELOPMENT SETTINGS ====================
   // Logging Configuration
   logging: {
@@ -278,6 +344,37 @@ if (withContentlayer) {
   } catch (error) {
     console.error('❌ Contentlayer integration failed:', error.message);
     finalConfig = institutionalConfig;
+=======
+  // =================== ERROR HANDLING ===================
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // =================== ENVIRONMENT VARIABLES ===================
+  env: {
+    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || '1.0.0',
+    NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().toISOString(),
+    NEXT_PUBLIC_ENVIRONMENT: process.env.NODE_ENV || 'development',
+  },
+  
+  // =================== OTHER SETTINGS ===================
+  trailingSlash: false,
+  compress: true,
+};
+
+// Apply Contentlayer wrapper if available
+let finalConfig = baseConfig;
+if (withContentlayer) {
+  try {
+    finalConfig = withContentlayer(baseConfig);
+  } catch (error) {
+    console.error('❌ Failed to apply Contentlayer wrapper:', error.message);
+    finalConfig = baseConfig;
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
   }
 }
 

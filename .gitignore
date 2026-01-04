@@ -89,4 +89,8 @@ prisma/migrations/*/migration_lock.toml
 # =====================================================
 scripts/**/*.log
 scripts/**/*.tmp
+<<<<<<< HEAD
 *.bak_emergency-backup.tar
+=======
+*.bak
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775

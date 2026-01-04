@@ -18,6 +18,7 @@
     "env:decrypt": "tsx scripts/environment/decrypt-env.ts",
     "env:rotate": "tsx scripts/environment/rotate-secrets.ts",
     "prisma:clean": "rimraf node_modules/.prisma",
+<<<<<<< HEAD
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --config=prisma/config.ts --name init",
     "prisma:migrate:deploy": "prisma migrate deploy --config=prisma/config.ts",
@@ -26,6 +27,16 @@
     "db:setup": "powershell -Command \"if (-Not (Test-Path 'prisma')) { New-Item -ItemType Directory -Path 'prisma' }; New-Item -ItemType File -Path 'prisma/dev.db' -Force\" && pnpm prisma:generate && pnpm prisma:push && pnpm db:seed",
     "db:reset": "del /f prisma\\dev.db 2>nul && pnpm db:setup",
     "db:seed": "tsx scripts/seed-database.ts",
+=======
+    "prisma:generate": "prisma generate --schema=./prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --config=prisma/config.ts --name init",
+    "prisma:migrate:deploy": "prisma migrate deploy --config=prisma/config.ts",
+    "prisma:push": "prisma db push --config=prisma/config.ts",
+    "prisma:studio": "prisma studio --config=prisma/config.ts",
+    "db:setup": "pnpm prisma:generate && pnpm prisma:migrate",
+    "db:reset": "prisma migrate reset --config=prisma/config.ts --force",
+    "db:seed": "tsx scripts/database/seed-database.ts",
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "db:seed:production": "tsx scripts/database/seed-production.ts",
     "db:seed:test": "tsx scripts/database/seed-test.ts",
     "db:verify": "tsx scripts/database/verify-database.ts",
@@ -45,7 +56,11 @@
     "contentlayer": "contentlayer build 2>&1 || echo \"Contentlayer completed (ignoring Windows exit code)\" && exit 0",
     "contentlayer:watch": "contentlayer dev || echo Contentlayer dev completed",
     "contentlayer:direct": "contentlayer build",
+<<<<<<< HEAD
     "dev": "next dev",
+=======
+    "dev": "concurrently --kill-others-on-fail=false \"pnpm contentlayer:watch\" \"next dev\"",
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "dev:content": "pnpm contentlayer:watch",
     "dev:full": "concurrently --kill-others-on-fail=false --names \"CONTENT,DEV\" \"pnpm contentlayer:watch\" \"next dev\"",
     "dev:with-pdfs": "pnpm pdfs:generate && pnpm dev",
@@ -55,6 +70,7 @@
     "dev:windows": "cross-env IS_WINDOWS=true next dev",
     "build:simple": "node build-simple.js",
     "build:no-contentlayer": "cross-env DISABLE_CONTENTLAYER=true next build",
+<<<<<<< HEAD
     "build": "next build",
     "build:check": "pnpm env:check && pnpm content:full && pnpm build",
     "build:netlify": "cross-env NETLIFY=true pnpm build",
@@ -65,12 +81,26 @@
     "build:windows:production": "cross-env IS_WINDOWS=true next build",
     "prebuild": "pnpm fix:yaml",
     "build:fixed": "pnpm fix:yaml && pnpm contentlayer:direct && pnpm build",
+=======
+    "build": "pnpm contentlayer && next build",
+    "build:check": "pnpm env:check && pnpm content:full && pnpm build",
+    "build:netlify": "cross-env NETLIFY=true pnpm build",
+    "build:windows": "cross-env IS_WINDOWS=true pnpm build",
+    "build:windows:netlify": "cross-env IS_WINDOWS=true NETLIFY=true pnpm build",
+    "build:windows:production": "cross-env IS_WINDOWS=true next build",
+    "prebuild": "pnpm prisma:generate && pnpm env:check",
+    "prebuild:production": "pnpm prisma:generate && pnpm env:production",
+    "prebuild:staging": "pnpm prisma:generate && pnpm env:staging",
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "start": "next start",
     "start:production": "next start",
     "start:staging": "cross-env NODE_OPTIONS=--max-old-space-size=4096 NODE_ENV=staging next start",
     "start:netlify": "cross-env NETLIFY=true next start",
+<<<<<<< HEAD
     "fix-content": "node scripts/fix-all-content.js",
     "validate-content": "node scripts/validate-content.js",
+=======
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "content:build": "tsx scripts/content/build-content.ts",
     "content:clean": "rimraf .contentlayer .next/content",
     "content:validate": "tsx scripts/content/validate-content.ts",
@@ -93,10 +123,13 @@
     "pdfs:canvas": "pnpm pdfs:legacy",
     "pdfs:standalone": "tsx scripts/pdf/generate-standalone-pdf.ts",
     "pdfs:frameworks": "tsx scripts/pdf/generate-frameworks-pdf.ts",
+<<<<<<< HEAD
     "fix:yaml": "node scripts/fix-yaml-files.js",
     "generate:api": "tsx scripts/trigger-pdf-generation.ts",
     "generate:all": "npm run generate:api",
     "pdfs:api": "curl -X POST -H \"Authorization: Bearer $PDF_GENERATION_API_KEY\" http://localhost:3000/api/generate-all-pdfs",
+=======
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "pdfs:list": "tsx scripts/pdf/pdf-registry.ts --list",
     "pdfs:scan": "tsx scripts/pdf/pdf-registry.ts --scan",
     "pdfs:missing": "tsx scripts/pdf/generate-missing-pdfs.ts",
@@ -115,6 +148,7 @@
     "pdfs:watch": "tsx scripts/pdf/watch-pdfs.ts",
     "pdfs:monitor": "tsx scripts/pdf/monitor-pdfs.ts",
     "pdfs:version:check": "tsx scripts/pdf/check-versions.ts",
+<<<<<<< HEAD
     "pdfs:legacy": "tsx scripts/generate-legacy-canvas.ts",
     "pdfs:compatibility:test": "tsx scripts/pdf/test-compatibility.ts",
     "pdfs:batch:generate:production": "tsx scripts/pdf/generate-production-batch.ts",
@@ -122,11 +156,17 @@
     "generate:visuals": "tsx scripts/visual-assets-generator.ts",
     "generate:emails": "tsx scripts/email-sequence-generator.ts",
     "pdf:generate": "tsx scripts/generate-pdf-assets.ts",
+    "pdfs:enterprise": "tsx scripts/generate-legacy-canvas.ts all enterprise",
+  "pdfs:single": "tsx scripts/generate-legacy-canvas.ts single",
     "pdf:validate": "tsx scripts/validate-pdf-registry.ts",
     "pdf:stats": "tsx scripts/pdf-stats.ts",
     "pdf:clean": "tsx scripts/clean-pdf-cache.ts",
     "fix:yaml:specific": "node scripts/fix-yaml-specific.js",
     "build:complete": "node scripts/fix-and-build.js",
+=======
+    "pdfs:compatibility:test": "tsx scripts/pdf/test-compatibility.ts",
+    "pdfs:batch:generate:production": "tsx scripts/pdf/generate-production-batch.ts",
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "clean": "rimraf .next .contentlayer .cache node_modules/.cache .turbo",
     "clean:build": "rimraf .next .cache .turbo",
     "clean:logs": "rimraf logs/*.log",
@@ -368,7 +408,10 @@
     "audit-ci": "7.1.0",
     "buffer": "6.0.3",
     "concurrently": "8.2.2",
+<<<<<<< HEAD
     "cross-env": "7.0.3",
+=======
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "crypto-browserify": "3.12.1",
     "esbuild": "0.18",
     "eslint": "8.57.0",
@@ -389,7 +432,11 @@
     "path-browserify": "1.0.1",
     "postcss-flexbugs-fixes": "5.0.2",
     "prettier": "3.3.3",
+<<<<<<< HEAD
     "prisma": "5.10.2",
+=======
+    "prisma": "7.2.0",
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
     "raw-loader": "4.0.2",
     "rimraf": "6.0.1",
     "serve": "14.2.4",

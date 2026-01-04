@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // lib/server/content.ts - CORRECTED VERSION
+=======
+// lib/server/content.ts - SIMPLIFIED IMPORT
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 // Remove all the problematic imports and just use contentlayer.ts
 import { 
   getAllCanons,
@@ -44,6 +48,7 @@ import {
 } from "@/lib/contentlayer";
 
 import prisma from "@/lib/prisma";
+<<<<<<< HEAD
 import ContentHelper from "@/lib/contentlayer-helper";
 
 // Re-export everything
@@ -94,6 +99,57 @@ export type { ContentDoc, DocKind };
 /* SIMPLIFIED CONTENT FUNCTIONS - NO CONTENTLAYER DEPENDENCY */
 /* -------------------------------------------------------------------------- */
 
+=======
+
+// Re-export everything
+export {
+  getAllCanons,
+  getAllDownloads,
+  getAllShorts,
+  getAllBooks,
+  getAllPosts,
+  getAllEvents,
+  getAllResources,
+  getAllPrints,
+  getAllStrategies,
+  getAllArticles,
+  getAllGuides,
+  getAllTutorials,
+  getAllCaseStudies,
+  getAllWhitepapers,
+  getAllReports,
+  getAllNewsletters,
+  getAllSermons,
+  getAllDevotionals,
+  getAllPrayers,
+  getAllTestimonies,
+  getAllPodcasts,
+  getAllVideos,
+  getAllCourses,
+  getAllLessons,
+  getDocumentBySlug,
+  normalizeSlug,
+  getDocHref,
+  getPublishedShorts,
+  getRecentShorts,
+  getPublishedDocuments,
+  getAllContentlayerDocs,
+  isDraftContent,
+  isDraft,
+  getPublishedDownloads,
+  getPublishedPosts,
+  getPrintBySlug,
+  getStrategyBySlug,
+  toUiDoc
+};
+
+export type { ContentDoc, DocKind };
+
+/* -------------------------------------------------------------------------- */
+/* SIMPLIFIED CONTENT FUNCTIONS - NO CONTENTLAYER DEPENDENCY */
+/* -------------------------------------------------------------------------- */
+
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 export async function recordContentView(doc: ContentDoc, memberId?: string): Promise<void> {
   const slug = (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath;
   if (!slug) return;
@@ -133,7 +189,13 @@ export const getCanonBySlug = (slug: string) => ContentHelper.getCanonBySlug(slu
 export const getDownloadBySlug = (slug: string) => ContentHelper.getDownloadBySlug(slug);
 export const getBookBySlug = (slug: string) => ContentHelper.getBookBySlug(slug);
 
+<<<<<<< HEAD
 // REMOVED DUPLICATE getPublishedShorts function - already imported from contentlayer
+=======
+export const getPublishedShorts = (): ContentDoc[] => {
+  return getAllShorts().filter(short => !short.draft);
+};
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
 export const documentExists = (slug: string): boolean => {
   const allDocs = ContentHelper.getAllDocuments();
@@ -169,7 +231,15 @@ export const getDocumentByIdentifier = (identifier: string): ContentDoc | null =
   }) || null;
 };
 
+<<<<<<< HEAD
 // REMOVED DUPLICATE getRecentShorts function - already imported from contentlayer
+=======
+export const getRecentShorts = (limit: number = 5): ContentDoc[] => {
+  return getAllShorts()
+    .filter(doc => !doc.draft)
+    .slice(0, limit);
+};
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
 /* -------------------------------------------------------------------------- */
 /* UTILITY FUNCTIONS */
