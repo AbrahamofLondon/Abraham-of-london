@@ -103,3 +103,10 @@ _emergency-backup.*
 _emergency-backup.tar
 _emergency-backup.tar.bak
 *.tar
+
+# emergency backups
+_emergency-backup.tar
+_emergency-backup.tar.bak
+*.tar
+*.tar.*
+
