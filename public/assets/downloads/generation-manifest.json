@@ -1,0 +1,40 @@
+{
+  "generated": "2026-01-05T10:42:01.815Z",
+  "quality": "premium",
+  "tier": "free",
+  "formats": [
+    "A4",
+    "LETTER",
+    "A3"
+  ],
+  "total": 3,
+  "successful": 3,
+  "failed": 0,
+  "files": [
+    {
+      "format": "A4",
+      "file": "legacy-architecture-canvas-a4-premium-alt.pdf",
+      "size": 203484,
+      "duration": 6824,
+      "method": "puppeteer",
+      "checksum": "e4170327887f6f87"
+    },
+    {
+      "format": "LETTER",
+      "file": "legacy-architecture-canvas-letter-premium-alt.pdf",
+      "size": 202987,
+      "duration": 3322,
+      "method": "puppeteer",
+      "checksum": "7577f619f2fdfc3b"
+    },
+    {
+      "format": "A3",
+      "file": "legacy-architecture-canvas-a3-premium-alt.pdf",
+      "size": 208079,
+      "duration": 3337,
+      "method": "puppeteer",
+      "checksum": "5a1a42eb7c57d8d0"
+    }
+  ],
+  "failures": []
+}

@@ -1,10 +1,11 @@
-<<<<<<< HEAD
-// lib/server/content.ts - CORRECTED VERSION
-=======
-// lib/server/content.ts - SIMPLIFIED IMPORT
->>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
-// Remove all the problematic imports and just use contentlayer.ts
-import { 
+// lib/server/content.ts - BUILD-SAFE SERVER UTILITIES
+// IMPORTANT: Do not import Prisma at module scope. Lazy-load it inside functions.
+
+export * from "@/lib/contentlayer-compat";
+
+import * as ContentHelper from "@/lib/contentlayer-helper";
+
+import {
   getAllCanons,
   getAllDownloads,
   getAllShorts,
@@ -14,21 +15,6 @@ import {
   getAllResources,
   getAllPrints,
   getAllStrategies,
-  getAllArticles,
-  getAllGuides,
-  getAllTutorials,
-  getAllCaseStudies,
-  getAllWhitepapers,
-  getAllReports,
-  getAllNewsletters,
-  getAllSermons,
-  getAllDevotionals,
-  getAllPrayers,
-  getAllTestimonies,
-  getAllPodcasts,
-  getAllVideos,
-  getAllCourses,
-  getAllLessons,
   getDocumentBySlug,
   normalizeSlug,
   getDocHref,
@@ -43,126 +29,42 @@ import {
   getPrintBySlug,
   getStrategyBySlug,
   toUiDoc,
-  type ContentDoc,
-  type DocKind
-} from "@/lib/contentlayer";
-
-import prisma from "@/lib/prisma";
-<<<<<<< HEAD
-import ContentHelper from "@/lib/contentlayer-helper";
-
-// Re-export everything
-export {
-  getAllCanons,
-  getAllDownloads,
-  getAllShorts,
-  getAllBooks,
-  getAllPosts,
-  getAllEvents,
-  getAllResources,
-  getAllPrints,
-  getAllStrategies,
-  getAllArticles,
-  getAllGuides,
-  getAllTutorials,
-  getAllCaseStudies,
-  getAllWhitepapers,
-  getAllReports,
-  getAllNewsletters,
-  getAllSermons,
-  getAllDevotionals,
-  getAllPrayers,
-  getAllTestimonies,
-  getAllPodcasts,
-  getAllVideos,
-  getAllCourses,
-  getAllLessons,
-  getDocumentBySlug,
-  normalizeSlug,
-  getDocHref,
-  getPublishedShorts,
-  getRecentShorts,
-  getPublishedDocuments,
-  getAllContentlayerDocs,
-  isDraftContent,
-  isDraft,
-  getPublishedDownloads,
-  getPublishedPosts,
-  getPrintBySlug,
-  getStrategyBySlug,
-  toUiDoc
-};
-
-export type { ContentDoc, DocKind };
+} from "@/lib/contentlayer-compat";
 
 /* -------------------------------------------------------------------------- */
-/* SIMPLIFIED CONTENT FUNCTIONS - NO CONTENTLAYER DEPENDENCY */
+/* PRISMA (LAZY IMPORT) */
 /* -------------------------------------------------------------------------- */
 
-=======
-
-// Re-export everything
-export {
-  getAllCanons,
-  getAllDownloads,
-  getAllShorts,
-  getAllBooks,
-  getAllPosts,
-  getAllEvents,
-  getAllResources,
-  getAllPrints,
-  getAllStrategies,
-  getAllArticles,
-  getAllGuides,
-  getAllTutorials,
-  getAllCaseStudies,
-  getAllWhitepapers,
-  getAllReports,
-  getAllNewsletters,
-  getAllSermons,
-  getAllDevotionals,
-  getAllPrayers,
-  getAllTestimonies,
-  getAllPodcasts,
-  getAllVideos,
-  getAllCourses,
-  getAllLessons,
-  getDocumentBySlug,
-  normalizeSlug,
-  getDocHref,
-  getPublishedShorts,
-  getRecentShorts,
-  getPublishedDocuments,
-  getAllContentlayerDocs,
-  isDraftContent,
-  isDraft,
-  getPublishedDownloads,
-  getPublishedPosts,
-  getPrintBySlug,
-  getStrategyBySlug,
-  toUiDoc
-};
-
-export type { ContentDoc, DocKind };
+async function getPrisma() {
+  // Your prisma module should export default OR named export.
+  // Handle both so you don't get stuck.
+  const mod: any = await import("@/lib/prisma");
+  return mod.default ?? mod.prisma ?? mod;
+}
 
 /* -------------------------------------------------------------------------- */
-/* SIMPLIFIED CONTENT FUNCTIONS - NO CONTENTLAYER DEPENDENCY */
+/* CONTENT VIEW TRACKING (SERVER ONLY) */
 /* -------------------------------------------------------------------------- */
 
->>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
-export async function recordContentView(doc: ContentDoc, memberId?: string): Promise<void> {
+export async function recordContentView(doc: any, memberId?: string): Promise<void> {
   const slug = (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath;
   if (!slug) return;
 
   try {
+    const prisma = await getPrisma();
+
+    // Fail-closed if prisma is not usable
+    if (!prisma?.shortInteraction?.create) return;
+
     await prisma.shortInteraction.create({
       data: {
-        shortSlug: slug,
+        shortSlug: normalizeSlug(slug),
         action: "view",
         memberId: memberId || null,
         metadata: JSON.stringify({
           title: doc.title || "Untitled",
-          type: ContentHelper.getDocKind(doc),
+          type: doc.type || doc._type || "Unknown",
+          href: getDocHref(doc),
           timestamp: new Date().toISOString(),
         }),
       },
@@ -172,255 +74,156 @@ export async function recordContentView(doc: ContentDoc, memberId?: string): Pro
   }
 }
 
-export const resolveDocDownloadUrl = (doc: any): string => {
-  return ContentHelper.resolveDocDownloadUrl(doc);
-};
-
-export const getRequiredTier = (doc: any): string => {
-  return ContentHelper.getRequiredTier(doc);
-};
-
 /* -------------------------------------------------------------------------- */
-/* SIMPLE GETTER FUNCTIONS USING CONTENTLAYER-HELPER */
+/* GENERIC HELPERS */
 /* -------------------------------------------------------------------------- */
-
-// These functions directly use contentlayer-helper which doesn't have Contentlayer import issues
-export const getCanonBySlug = (slug: string) => ContentHelper.getCanonBySlug(slug);
-export const getDownloadBySlug = (slug: string) => ContentHelper.getDownloadBySlug(slug);
-export const getBookBySlug = (slug: string) => ContentHelper.getBookBySlug(slug);
-
-<<<<<<< HEAD
-// REMOVED DUPLICATE getPublishedShorts function - already imported from contentlayer
-=======
-export const getPublishedShorts = (): ContentDoc[] => {
-  return getAllShorts().filter(short => !short.draft);
-};
->>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
 export const documentExists = (slug: string): boolean => {
-  const allDocs = ContentHelper.getAllDocuments();
-  return allDocs.some(doc => {
-    const docSlug = (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizeSlug(slug);
+  const allDocs = getAllContentlayerDocs();
+  const needle = normalizeSlug(slug);
+
+  return allDocs.some((doc: any) => {
+    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop();
+    return normalizeSlug(docSlug) === needle;
   });
 };
 
-export const getAllDocumentsWithSlugs = (): Array<ContentDoc & { slugComputed: string }> => {
-  const allDocs = ContentHelper.getAllDocuments();
-  return allDocs.map(doc => ({
+export const getAllDocumentsWithSlugs = (): Array<any & { slugComputed: string }> => {
+  const allDocs = getAllContentlayerDocs();
+  return allDocs.map((doc: any) => ({
     ...doc,
-    slugComputed: (doc as any).slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop() || ''
+    slugComputed:
+      doc.slugComputed ||
+      doc.slug ||
+      doc._raw?.flattenedPath?.split("/").pop() ||
+      "",
   }));
 };
 
-export const getDocumentByIdentifier = (identifier: string): ContentDoc | null => {
-  const allDocs = ContentHelper.getAllDocuments();
+export const getDocumentByIdentifier = (identifier: string): any | null => {
+  const allDocs = getAllContentlayerDocs();
   const normalizedIdentifier = normalizeSlug(identifier);
-  
-  return allDocs.find(doc => {
-    const possibleIdentifiers = [
-      (doc as any).slugComputed,
-      doc.slug,
-      doc._raw?.flattenedPath,
-      doc._raw?.flattenedPath?.split('/').pop()
-    ].filter(Boolean);
-    
-    return possibleIdentifiers.some(id => 
-      normalizeSlug(id) === normalizedIdentifier
-    );
-  }) || null;
-};
 
-<<<<<<< HEAD
-// REMOVED DUPLICATE getRecentShorts function - already imported from contentlayer
-=======
-export const getRecentShorts = (limit: number = 5): ContentDoc[] => {
-  return getAllShorts()
-    .filter(doc => !doc.draft)
-    .slice(0, limit);
+  return (
+    allDocs.find((doc: any) => {
+      const possible = [
+        doc.slugComputed,
+        doc.slug,
+        doc._raw?.flattenedPath,
+        doc._raw?.flattenedPath?.split("/").pop(),
+      ].filter(Boolean);
+
+      return possible.some((id: any) => normalizeSlug(String(id)) === normalizedIdentifier);
+    }) || null
+  );
 };
->>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
 
 /* -------------------------------------------------------------------------- */
-/* UTILITY FUNCTIONS */
+/* UTILS */
 /* -------------------------------------------------------------------------- */
 
 export const getDownloadSizeLabel = (size: string | number | undefined): string => {
-  if (!size) return 'Unknown size';
-  
-  if (typeof size === 'string') {
-    if (size.includes('KB') || size.includes('MB') || size.includes('GB')) {
-      return size;
-    }
-    const bytes = parseInt(size);
-    if (!isNaN(bytes)) {
-      return formatBytes(bytes);
-    }
+  if (!size) return "Unknown size";
+
+  if (typeof size === "string") {
+    // If it's already human-readable, keep it
+    if (/\b(KB|MB|GB|TB)\b/i.test(size)) return size;
+
+    const bytes = parseInt(size, 10);
+    if (!Number.isNaN(bytes)) return formatBytes(bytes);
+
     return size;
   }
-  
-  if (typeof size === 'number') {
-    return formatBytes(size);
-  }
-  
-  return 'Unknown size';
+
+  if (typeof size === "number") return formatBytes(size);
+
+  return "Unknown size";
 };
 
 const formatBytes = (bytes: number, decimals = 2): string => {
-  if (bytes === 0) return '0 Bytes';
-  
+  if (!bytes) return "0 Bytes";
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-};
-
-export const assertPublicAssetsForDownloadsAndResources = (): { missing: string[] } => {
-  const missingAssets: string[] = [];
-  
-  const downloads = getAllDownloads();
-  downloads.forEach(download => {
-    const filePath = ContentHelper.resolveDocDownloadUrl(download);
-    if (filePath && !filePath.includes('http') && !filePath.startsWith('/')) {
-      console.log(`[ASSET CHECK] Download: ${download.title} -> ${filePath}`);
-    }
-  });
-  
-  const resources = getAllResources();
-  resources.forEach(resource => {
-    const filePath = (resource as any).file || (resource as any).url;
-    if (filePath && !filePath.includes('http') && !filePath.startsWith('/')) {
-      console.log(`[ASSET CHECK] Resource: ${resource.title} -> ${filePath}`);
-    }
-  });
-  
-  return { missing: missingAssets };
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
 
 /* -------------------------------------------------------------------------- */
-/* SERVER-ONLY VERSIONS (For API routes that need async/await) */
+/* ASSET VALIDATION                                                           */
 /* -------------------------------------------------------------------------- */
 
-// Simple async wrappers for the synchronous functions
-export async function getServerAllCanons(): Promise<ContentDoc[]> {
-  return getAllCanons();
-}
-
-export async function getServerAllDownloads(): Promise<ContentDoc[]> {
-  return getAllDownloads();
-}
-
-export async function getServerAllBooks(): Promise<ContentDoc[]> {
-  return getAllBooks();
-}
-
-export async function getServerAllShorts(): Promise<ContentDoc[]> {
-  return getAllShorts();
-}
-
-export async function getServerAllPosts(): Promise<ContentDoc[]> {
-  return getAllPosts();
-}
-
-export async function getServerAllEvents(): Promise<ContentDoc[]> {
-  return getAllEvents();
-}
-
-export async function getServerAllResources(): Promise<ContentDoc[]> {
-  return getAllResources();
-}
-
-export async function getServerAllPrints(): Promise<ContentDoc[]> {
-  return getAllPrints();
-}
-
-export async function getServerAllStrategies(): Promise<ContentDoc[]> {
-  return getAllStrategies();
-}
-
-export async function getServerPostBySlug(slug: string): Promise<ContentDoc | null> {
-  const posts = getAllPosts();
-  const normalizedSlug = normalizeSlug(slug);
+export function assertPublicAssetsForDownloadsAndResources(): void {
+  // This is a placeholder function that does nothing in production
+  // In development, you could add asset validation logic here
+  console.log('[ASSETS] Validating public assets for downloads and resources...');
   
-  const foundDoc = posts.find((doc: any) => {
-    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizedSlug;
-  }) || null;
+  // Implementation notes:
+  // 1. Check if all referenced PDF files exist in public/assets
+  // 2. Validate file sizes and formats
+  // 3. Generate missing assets if needed
   
-  return foundDoc;
+  // For now, just log that we're called
+  if (process.env.NODE_ENV === 'development') {
+    const downloads = getAllDownloads();
+    const resources = getAllResources();
+    
+    console.log(`[ASSETS] Found ${downloads.length} downloads and ${resources.length} resources`);
+    
+    // Optional: Check for missing files
+    // downloads.forEach(download => {
+    //   if (download.fileUrl) {
+    //     // Check if file exists
+    //   }
+    // });
+  }
 }
 
-export async function getServerBookBySlug(slug: string): Promise<ContentDoc | null> {
-  const books = getAllBooks();
-  const normalizedSlug = normalizeSlug(slug);
-  
-  const foundDoc = books.find((doc: any) => {
-    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizedSlug;
-  }) || null;
-  
-  return foundDoc;
+/* -------------------------------------------------------------------------- */
+/* SERVER ASYNC WRAPPERS (IF YOU STILL NEED THEM) */
+/* -------------------------------------------------------------------------- */
+
+export async function getServerAllCanons() { return getAllCanons(); }
+export async function getServerAllDownloads() { return getAllDownloads(); }
+export async function getServerAllBooks() { return getAllBooks(); }
+export async function getServerAllShorts() { return getAllShorts(); }
+export async function getServerAllPosts() { return getAllPosts(); }
+export async function getServerAllEvents() { return getAllEvents(); }
+export async function getServerAllResources() { return getAllResources(); }
+export async function getServerAllPrints() { return getAllPrints(); }
+export async function getServerAllStrategies() { return getAllStrategies(); }
+
+export async function getServerPostBySlug(slug: string) {
+  const n = normalizeSlug(slug);
+  return (getAllPosts() as any[]).find((doc: any) => normalizeSlug(doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop()) === n) || null;
 }
 
-export async function getServerDownloadBySlug(slug: string): Promise<ContentDoc | null> {
-  const downloads = getAllDownloads();
-  const normalizedSlug = normalizeSlug(slug);
-  
-  const foundDoc = downloads.find((doc: any) => {
-    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizedSlug;
-  }) || null;
-  
-  return foundDoc;
+export async function getServerBookBySlug(slug: string) {
+  const n = normalizeSlug(slug);
+  return (getAllBooks() as any[]).find((doc: any) => normalizeSlug(doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop()) === n) || null;
 }
 
-export async function getServerCanonBySlug(slug: string): Promise<ContentDoc | null> {
-  const canons = getAllCanons();
-  const normalizedSlug = normalizeSlug(slug);
-  
-  const foundDoc = canons.find((doc: any) => {
-    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizedSlug;
-  }) || null;
-  
-  return foundDoc;
+export async function getServerDownloadBySlug(slug: string) {
+  const n = normalizeSlug(slug);
+  return (getAllDownloads() as any[]).find((doc: any) => normalizeSlug(doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop()) === n) || null;
 }
 
-export async function getServerShortBySlug(slug: string): Promise<ContentDoc | null> {
-  const shorts = getAllShorts();
-  const normalizedSlug = normalizeSlug(slug);
-  
-  const foundDoc = shorts.find((doc: any) => {
-    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizedSlug;
-  }) || null;
-  
-  return foundDoc;
+export async function getServerCanonBySlug(slug: string) {
+  const n = normalizeSlug(slug);
+  return (getAllCanons() as any[]).find((doc: any) => normalizeSlug(doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop()) === n) || null;
 }
 
-export async function getServerEventBySlug(slug: string): Promise<ContentDoc | null> {
-  const events = getAllEvents();
-  const normalizedSlug = normalizeSlug(slug);
-  
-  const foundDoc = events.find((doc: any) => {
-    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizedSlug;
-  }) || null;
-  
-  return foundDoc;
+export async function getServerShortBySlug(slug: string) {
+  const n = normalizeSlug(slug);
+  return (getAllShorts() as any[]).find((doc: any) => normalizeSlug(doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop()) === n) || null;
 }
 
-export async function getServerResourceBySlug(slug: string): Promise<ContentDoc | null> {
-  const resources = getAllResources();
-  const normalizedSlug = normalizeSlug(slug);
-  
-  const foundDoc = resources.find((doc: any) => {
-    const docSlug = doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split('/').pop();
-    return normalizeSlug(docSlug) === normalizedSlug;
-  }) || null;
-  
-  return foundDoc;
+export async function getServerEventBySlug(slug: string) {
+  const n = normalizeSlug(slug);
+  return (getAllEvents() as any[]).find((doc: any) => normalizeSlug(doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop()) === n) || null;
+}
+
+export async function getServerResourceBySlug(slug: string) {
+  const n = normalizeSlug(slug);
+  return (getAllResources() as any[]).find((doc: any) => normalizeSlug(doc.slugComputed || doc.slug || doc._raw?.flattenedPath?.split("/").pop()) === n) || null;
 }

@@ -1,0 +1,62 @@
+{
+  "summary": {
+    "total": 3,
+    "successful": 0,
+    "failed": 3,
+    "totalDuration": 26,
+    "quality": "premium",
+    "timestamp": "2026-01-05T02:21:27.582Z",
+    "platform": "win32",
+    "nodeVersion": "v20.19.4"
+  },
+  "steps": [
+    {
+      "name": "Legacy Canvas (A4)",
+      "success": false,
+      "error": "Script not found",
+      "duration": 0,
+      "timestamp": "2026-01-05T02:21:27.577Z"
+    },
+    {
+      "name": "Legacy Canvas (Letter)",
+      "success": false,
+      "error": "Script not found",
+      "duration": 0,
+      "timestamp": "2026-01-05T02:21:27.577Z"
+    },
+    {
+      "name": "Legacy Canvas (A3)",
+      "success": false,
+      "error": "Script not found",
+      "duration": 0,
+      "timestamp": "2026-01-05T02:21:27.578Z"
+    }
+  ],
+  "pdfs": [
+    {
+      "filename": "legacy-architecture-canvas-a4-premium.pdf",
+      "exists": false,
+      "size": 0,
+      "isValid": false,
+      "path": "C:\\Abraham-of-london\\public\\assets\\downloads\\legacy-architecture-canvas-a4-premium.pdf",
+      "checksum": null
+    },
+    {
+      "filename": "legacy-architecture-canvas-letter-premium.pdf",
+      "exists": false,
+      "size": 0,
+      "isValid": false,
+      "path": "C:\\Abraham-of-london\\public\\assets\\downloads\\legacy-architecture-canvas-letter-premium.pdf",
+      "checksum": null
+    },
+    {
+      "filename": "legacy-architecture-canvas-a3-premium.pdf",
+      "exists": false,
+      "size": 0,
+      "isValid": false,
+      "path": "C:\\Abraham-of-london\\public\\assets\\downloads\\legacy-architecture-canvas-a3-premium.pdf",
+      "checksum": null
+    }
+  ],
+  "outputDirectory": "C:\\Abraham-of-london\\public\\assets\\downloads"
+}

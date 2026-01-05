@@ -1,1050 +1,1568 @@
-/* scripts/generate-frameworks-pdf.tsx */
-import fs from "fs";
+/* scripts/generate-frameworks-pdf.tsx
+ *
+ * Abraham of London — Canon Frameworks PDF Generator (Institutional / McKinsey polish)
+ * -------------------------------------------------------------------------------
+ * NOW INCLUDES:
+ * - Full PRIVATE dossiers (private/restricted only by default)
+ * - 1-page TEASERS (safe by default: generated to private storage)
+ * - Optional publish of teasers to /public ONLY if ALLOW_PUBLIC_TEASERS=true
+ *
+ * GATING RULES (hard):
+ * - Private/Restricted full dossiers are NEVER written to /public
+ * - Teasers default to PRIVATE storage (app preview)
+ * - Public teaser publishing is an explicit opt-in via ENV
+ */
+
+import fs from "fs/promises";
+import fsSync from "fs";
 import path from "path";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
 import React from "react";
-import { 
-  pdf, 
-  Document, 
-  Page, 
-  Text, 
-  View, 
-  StyleSheet, 
+import {
+  pdf,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
   Font,
-  Image,
-  Link 
+  Svg,
+  Rect,
+  Line,
 } from "@react-pdf/renderer";
-import { fileURLToPath } from 'url';
+
 import { FRAMEWORKS, type Framework } from "../lib/resources/strategic-frameworks";
 
+// ----------------------------------------------------------------------------
+// Paths
+// ----------------------------------------------------------------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// -----------------------------------------------------------------------------
-// FONT REGISTRATION - ENHANCED
-// -----------------------------------------------------------------------------
-try {
-  // Comprehensive font family registration
-  Font.register({
-    family: "AoLSerif",
-    fonts: [
-      { src: "Times-Roman" },
-      { src: "Times-Bold", fontWeight: "bold" },
-      { src: "Times-Italic", fontStyle: "italic" },
-      { src: "Times-BoldItalic", fontWeight: "bold", fontStyle: "italic" }
-    ]
-  });
+// ----------------------------------------------------------------------------
+// Policy
+// ----------------------------------------------------------------------------
+type DistributionPolicy = "app-preview-only" | "in-house-only" | "public-teaser";
+type Classification = "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
 
-  Font.register({
-    family: "AoLSans",
-    fonts: [
-      { src: "Helvetica" },
-      { src: "Helvetica-Bold", fontWeight: "bold" },
-      { src: "Helvetica-Oblique", fontStyle: "italic" }
-    ]
-  });
+const ACCESS_POLICY = {
+  // primary policy for full dossiers (private only)
+  generationMode: "private-only" as "private-only" | "all",
 
-  Font.register({
-    family: "AoLMono",
-    src: "Courier"
-  });
+  // tiers considered “private”
+  privateTiers: ["private", "restricted"] as const,
 
-  Font.register({
-    family: "AoLDisplay",
-    src: "Times-Bold"
-  });
+  // distribution stamps
+  fullDistribution: "app-preview-only" as DistributionPolicy,
 
-  console.log("✅ Fonts registered successfully");
-} catch (error) {
-  console.warn("⚠️ Font registration failed, using defaults");
+  // teaser behavior
+  generateTeasers: true,
+  teaserDistribution: "app-preview-only" as DistributionPolicy,
+
+  // IMPORTANT: public teasers are OFF by default
+  // Enable only if you truly intend to publish 1-page abstracts to /public.
+  allowPublicTeasers: process.env.ALLOW_PUBLIC_TEASERS === "true",
+};
+
+// ----------------------------------------------------------------------------
+// Premium Config
+// ----------------------------------------------------------------------------
+const PREMIUM_CONFIG = {
+  COMPANY: {
+    name: "Abraham of London",
+    legalName: "Abraham of London Ltd.",
+    website: "https://abrahamoflondon.com",
+    email: "strategic@abrahamoflondon.com",
+    phone: "+44 (0)20 7123 4567",
+    address: "28 St James's Square, London SW1Y 4JH, United Kingdom",
+    vat: "GB 123 4567 89",
+    companyNumber: "01234567",
+    tagline: "Institutional Strategy & Leadership Development",
+    motto: "Build What Endures",
+  },
+
+  BRANDING: {
+    logoPath: path.join(__dirname, "../public/assets/brand/logo.png"),
+    watermarkPath: path.join(__dirname, "../public/assets/brand/watermark.png"),
+    sealPath: path.join(__dirname, "../public/assets/brand/seal.png"),
+  },
+
+  DESIGN: {
+    colors: {
+      primary: {
+        main: "#0A192F",
+        light: "#172A46",
+        dark: "#051225",
+        contrast: "#FFFFFF",
+      },
+      secondary: {
+        main: "#C9A96A",
+        light: "#E4CFA9",
+        dark: "#B08C38",
+        contrast: "#0A192F",
+      },
+      accent: {
+        success: "#2E7D32",
+        warning: "#F57C00",
+        danger: "#C62828",
+        info: "#1565C0",
+      },
+      neutral: {
+        white: "#FFFFFF",
+        paper: "#FAF9F7",
+        light: "#F0F0F0",
+        medium: "#9E9E9E",
+        dark: "#424242",
+        black: "#212121",
+      },
+    },
+
+    typography: {
+      fontFamilies: {
+        serif: "AoLSerif",
+        sans: "AoLSans",
+        mono: "AoLMono",
+        display: "AoLDisplay",
+      },
+      fontSize: {
+        display: 48,
+        h1: 34,
+        h2: 26,
+        h3: 20,
+        h4: 13,
+        body: 11,
+        small: 9,
+        micro: 7,
+        caption: 8,
+      },
+      lineHeight: {
+        tight: 1.15,
+        normal: 1.55,
+        relaxed: 1.8,
+      },
+      letterSpacing: {
+        tight: -0.5,
+        normal: 0,
+        wide: 1.5,
+        widest: 3,
+      },
+    },
+
+    layout: {
+      pageSize: "A4" as const,
+      margins: {
+        top: 72,
+        bottom: 72,
+        left: 72,
+        right: 72,
+      },
+      gutter: 18,
+      borderRadius: {
+        small: 4,
+        medium: 8,
+        large: 12,
+        xlarge: 22,
+      },
+    },
+  },
+
+  OUTPUT: {
+    // PRIVATE ROOT (safe by default)
+    privateRoot: path.join(process.cwd(), "private_storage", "frameworks"),
+    directories: {
+      frameworks: path.join(process.cwd(), "private_storage", "frameworks", "frameworks"),
+      collections: path.join(process.cwd(), "private_storage", "frameworks", "collections"),
+      teasers: path.join(process.cwd(), "private_storage", "frameworks", "teasers"),
+      meta: path.join(process.cwd(), "private_storage", "frameworks", "meta"),
+    },
+
+    // OPTIONAL public teaser directory (only used if allowPublicTeasers === true)
+    publicTeasersDir: path.join(process.cwd(), "public", "assets", "frameworks", "teasers"),
+
+    naming: {
+      framework: (slug: string) => `AoL-${slug.toUpperCase()}-FRAMEWORK-PRIVATE.pdf`,
+      collection: (date: string) => `AoL-PRIVATE-FRAMEWORKS-COLLECTION-${date}.pdf`,
+      teaser: (slug: string) => `AoL-${slug.toUpperCase()}-FRAMEWORK-TEASER.pdf`,
+      summary: "AoL-FRAMEWORKS-SUMMARY.txt",
+      manifest: "AoL-MANIFEST.json",
+    },
+  },
+};
+
+// ----------------------------------------------------------------------------
+// Fonts (fail-soft)
+// ----------------------------------------------------------------------------
+function registerPremiumFonts(): void {
+  try {
+    Font.register({
+      family: "AoLSerif",
+      fonts: [
+        { src: "Times-Roman" },
+        { src: "Times-Bold", fontWeight: "bold" },
+        { src: "Times-Italic", fontStyle: "italic" },
+        { src: "Times-BoldItalic", fontWeight: "bold", fontStyle: "italic" },
+      ],
+    });
+
+    Font.register({
+      family: "AoLSans",
+      fonts: [
+        { src: "Helvetica" },
+        { src: "Helvetica-Bold", fontWeight: "bold" },
+        { src: "Helvetica-Oblique", fontStyle: "italic" },
+        { src: "Helvetica-BoldOblique", fontWeight: "bold", fontStyle: "italic" },
+      ],
+    });
+
+    Font.register({ family: "AoLMono", src: "Courier" });
+    Font.register({ family: "AoLDisplay", src: "Times-Bold", fontWeight: "bold" });
+
+    // eslint-disable-next-line no-console
+    console.log("✅ Premium fonts registered");
+  } catch {
+    // eslint-disable-next-line no-console
+    console.warn("⚠️ Font registration failed, using system defaults");
+  }
 }
 
-// -----------------------------------------------------------------------------
-// DESIGN SYSTEM - INSTITUTIONAL GRADE
-// -----------------------------------------------------------------------------
-const BRAND = {
-  primary: "#0F172A",      // Deep navy
-  secondary: "#1E293B",    // Slate
-  accent: "#D4AF37",       // Gold
-  accentLight: "#FBBF24",  // Amber gold
-  white: "#F8FAFC",        // Off-white
-  ink: "#334155",          // Dark gray for text
-  muted: "#64748B",        // Medium gray
-  border: "#CBD5E1",       // Light border
-  success: "#10B981",      // Emerald
-  warning: "#F59E0B",      // Amber
-  error: "#EF4444",        // Red
-  info: "#3B82F6",         // Blue
-  background: "#FFFFFF",   // White background for frameworks
+// ----------------------------------------------------------------------------
+// Utils
+// ----------------------------------------------------------------------------
+class PremiumUtils {
+  static formatDate(date: Date): string {
+    return date.toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+
+  static formatDateTime(date: Date): string {
+    return date.toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  static generateDocumentId(): string {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 8);
+    return `AOL-${timestamp}-${random}`.toUpperCase();
+  }
+
+  static checksum8(content: string): string {
+    let hash = 0;
+    for (let i = 0; i < content.length; i++) {
+      const char = content.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).toUpperCase().padStart(8, "0");
+  }
+
+  static sha256(buffer: Buffer): string {
+    return crypto.createHash("sha256").update(buffer).digest("hex");
+  }
+
+  static async ensureDirectory(dirPath: string): Promise<void> {
+    try {
+      await fs.access(dirPath);
+    } catch {
+      await fs.mkdir(dirPath, { recursive: true });
+    }
+  }
+
+  static async writeFileWithBackup(filePath: string, content: Buffer | string): Promise<void> {
+    const dir = path.dirname(filePath);
+    await this.ensureDirectory(dir);
+
+    if (fsSync.existsSync(filePath)) {
+      const backupPath = `${filePath}.backup-${Date.now()}`;
+      await fs.copyFile(filePath, backupPath);
+    }
+    await fs.writeFile(filePath, content);
+  }
+
+  static async copyFileSafe(src: string, dst: string): Promise<void> {
+    await this.ensureDirectory(path.dirname(dst));
+    await fs.copyFile(src, dst);
+  }
+
+  static normalizeTierList(tier: any): string[] {
+    if (!tier) return ["public"];
+    if (Array.isArray(tier)) return tier.map(String);
+    return [String(tier)];
+  }
+
+  static isPrivateFramework(framework: Framework): boolean {
+    const tiers = this.normalizeTierList((framework as any).tier);
+    return tiers.some((t) => ACCESS_POLICY.privateTiers.includes(t.toLowerCase() as any));
+  }
+
+  static tierLabel(framework: Framework): string {
+    const tiers = this.normalizeTierList((framework as any).tier);
+    if (tiers.some((t) => t.toLowerCase() === "restricted")) return "RESTRICTED";
+    if (tiers.some((t) => t.toLowerCase() === "private")) return "CONFIDENTIAL";
+    return "INTERNAL";
+  }
+
+  static resolveClassification(framework: Framework): Classification {
+    const label = this.tierLabel(framework);
+    if (label === "RESTRICTED") return "RESTRICTED";
+    if (label === "CONFIDENTIAL") return "CONFIDENTIAL";
+    return "INTERNAL";
+  }
+
+  static tierColor(classification: Classification): string {
+    const c = PREMIUM_CONFIG.DESIGN.colors;
+    switch (classification) {
+      case "RESTRICTED":
+        return c.accent.danger;
+      case "CONFIDENTIAL":
+        return c.accent.warning;
+      case "INTERNAL":
+        return c.accent.info;
+      default:
+        return c.neutral.medium;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Styles (react-pdf safe)
+// ----------------------------------------------------------------------------
+const PremiumStyles = {
+  document: StyleSheet.create({
+    root: {
+      fontFamily: "AoLSans",
+      fontSize: PREMIUM_CONFIG.DESIGN.typography.fontSize.body,
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.normal,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.black,
+    },
+  }),
+
+  cover: StyleSheet.create({
+    page: {
+      backgroundColor: PREMIUM_CONFIG.DESIGN.colors.primary.main,
+      padding: 0,
+      position: "relative",
+      height: "100%",
+    },
+    content: {
+      position: "relative",
+      paddingHorizontal: PREMIUM_CONFIG.DESIGN.layout.margins.left,
+      paddingTop: 140,
+      paddingBottom: 80,
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+    },
+    brandBadge: {
+      fontFamily: "AoLSans",
+      fontSize: 8,
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.widest,
+      color: PREMIUM_CONFIG.DESIGN.colors.secondary.main,
+      marginBottom: 14,
+      fontWeight: "bold",
+      backgroundColor: "rgba(255,255,255,0.10)",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.small,
+      alignSelf: "flex-start",
+    },
+    mainTitle: {
+      fontFamily: "AoLDisplay",
+      fontSize: 54,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.white,
+      lineHeight: 1.05,
+      marginBottom: 16,
+      fontWeight: "bold",
+    },
+    subtitle: {
+      fontFamily: "AoLSerif",
+      fontSize: 22,
+      color: PREMIUM_CONFIG.DESIGN.colors.secondary.light,
+      fontStyle: "italic",
+      marginBottom: 24,
+      lineHeight: 1.35,
+    },
+    accentLine: {
+      width: 150,
+      height: 4,
+      backgroundColor: PREMIUM_CONFIG.DESIGN.colors.secondary.main,
+      marginBottom: 28,
+      borderRadius: 2,
+    },
+    descriptionBox: {
+      backgroundColor: "rgba(255,255,255,0.10)",
+      padding: 24,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.large,
+      borderWidth: 1,
+      borderColor: "rgba(255,255,255,0.18)",
+      maxWidth: 460,
+    },
+    description: {
+      fontFamily: "AoLSerif",
+      fontSize: 14,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.white,
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.relaxed,
+    },
+    metaRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 18,
+    },
+    metaPill: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.large,
+      fontSize: 9,
+      fontFamily: "AoLSans",
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.wide,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.white,
+      marginRight: 10,
+    },
+    metaText: {
+      fontFamily: "AoLSans",
+      fontSize: 9,
+      color: "rgba(255,255,255,0.80)",
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.wide,
+      marginRight: 14,
+    },
+    distributionBadge: {
+      backgroundColor: PREMIUM_CONFIG.DESIGN.colors.secondary.main,
+      color: PREMIUM_CONFIG.DESIGN.colors.primary.main,
+      paddingHorizontal: 18,
+      paddingVertical: 8,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.large,
+      fontSize: 9,
+      fontFamily: "AoLSans",
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.widest,
+      alignSelf: "flex-start",
+      marginTop: 14,
+    },
+    footer: {
+      position: "relative",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderTopWidth: 1,
+      borderTopColor: "rgba(255,255,255,0.18)",
+      paddingTop: 18,
+      marginTop: 30,
+    },
+    footerText: {
+      fontFamily: "AoLSans",
+      fontSize: 8,
+      color: "rgba(255,255,255,0.70)",
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.wide,
+    },
+    serialNumber: {
+      fontFamily: "AoLMono",
+      fontSize: 7,
+      color: "rgba(255,255,255,0.55)",
+      letterSpacing: 1,
+    },
+  }),
+
+  page: StyleSheet.create({
+    container: {
+      paddingTop: PREMIUM_CONFIG.DESIGN.layout.margins.top,
+      paddingBottom: PREMIUM_CONFIG.DESIGN.layout.margins.bottom,
+      paddingHorizontal: PREMIUM_CONFIG.DESIGN.layout.margins.left,
+      backgroundColor: PREMIUM_CONFIG.DESIGN.colors.neutral.paper,
+      position: "relative",
+      minHeight: "100%",
+    },
+    watermark: {
+      position: "absolute",
+      top: 310,
+      left: 40,
+      fontSize: 64,
+      fontFamily: "AoLDisplay",
+      fontWeight: "bold",
+      color: "rgba(10, 25, 47, 0.035)",
+      textTransform: "uppercase",
+      letterSpacing: 8,
+      transform: [{ rotate: "-35deg" }],
+    },
+    header: {
+      position: "absolute",
+      top: 36,
+      left: PREMIUM_CONFIG.DESIGN.layout.margins.left,
+      right: PREMIUM_CONFIG.DESIGN.layout.margins.right,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+      paddingBottom: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: PREMIUM_CONFIG.DESIGN.colors.neutral.light,
+    },
+    headerLeft: {
+      flexDirection: "column",
+    },
+    headerEyebrow: {
+      fontFamily: "AoLSans",
+      fontSize: 7,
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.widest,
+      color: PREMIUM_CONFIG.DESIGN.colors.secondary.main,
+      marginBottom: 4,
+      fontWeight: "bold",
+    },
+    headerTitle: {
+      fontFamily: "AoLSerif",
+      fontSize: 11,
+      color: PREMIUM_CONFIG.DESIGN.colors.primary.main,
+      fontWeight: "bold",
+    },
+    headerRight: {
+      fontFamily: "AoLMono",
+      fontSize: 7,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.medium,
+      textAlign: "right",
+    },
+    content: {
+      marginTop: 88,
+      marginBottom: 58,
+    },
+    footer: {
+      position: "absolute",
+      bottom: 36,
+      left: PREMIUM_CONFIG.DESIGN.layout.margins.left,
+      right: PREMIUM_CONFIG.DESIGN.layout.margins.right,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: PREMIUM_CONFIG.DESIGN.colors.neutral.light,
+    },
+    footerBrand: {
+      fontFamily: "AoLSans",
+      fontSize: 7,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.medium,
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.wide,
+    },
+    pageNumber: {
+      fontFamily: "AoLSans",
+      fontSize: 8,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.dark,
+    },
+    copyright: {
+      fontFamily: "AoLSans",
+      fontSize: 6,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.medium,
+      textAlign: "center",
+    },
+  }),
+
+  typography: StyleSheet.create({
+    h1: {
+      fontFamily: "AoLDisplay",
+      fontSize: PREMIUM_CONFIG.DESIGN.typography.fontSize.h1,
+      color: PREMIUM_CONFIG.DESIGN.colors.primary.main,
+      marginBottom: 18,
+      fontWeight: "bold",
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.tight,
+    },
+    h2: {
+      fontFamily: "AoLDisplay",
+      fontSize: PREMIUM_CONFIG.DESIGN.typography.fontSize.h2,
+      color: PREMIUM_CONFIG.DESIGN.colors.primary.main,
+      marginTop: 28,
+      marginBottom: 16,
+      fontWeight: "bold",
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.tight,
+    },
+    h3: {
+      fontFamily: "AoLSerif",
+      fontSize: PREMIUM_CONFIG.DESIGN.typography.fontSize.h3,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.black,
+      marginTop: 22,
+      marginBottom: 12,
+      fontWeight: "bold",
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.tight,
+    },
+    lead: {
+      fontFamily: "AoLSerif",
+      fontSize: 13,
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.relaxed,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.dark,
+      marginBottom: 18,
+      fontStyle: "italic",
+    },
+    body: {
+      fontFamily: "AoLSans",
+      fontSize: PREMIUM_CONFIG.DESIGN.typography.fontSize.body,
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.normal,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.black,
+      marginBottom: 12,
+      textAlign: "justify",
+    },
+    small: {
+      fontFamily: "AoLSans",
+      fontSize: PREMIUM_CONFIG.DESIGN.typography.fontSize.small,
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.normal,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.dark,
+      marginBottom: 10,
+    },
+    caption: {
+      fontFamily: "AoLSans",
+      fontSize: PREMIUM_CONFIG.DESIGN.typography.fontSize.caption,
+      lineHeight: 1.35,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.medium,
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.wide,
+    },
+    strong: {
+      fontFamily: "AoLSans",
+      fontWeight: "bold",
+      color: PREMIUM_CONFIG.DESIGN.colors.primary.main,
+    },
+  }),
+
+  components: StyleSheet.create({
+    accentDivider: {
+      marginVertical: 18,
+      height: 3,
+      backgroundColor: PREMIUM_CONFIG.DESIGN.colors.secondary.main,
+      width: 250,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.small,
+    },
+    callout: {
+      marginVertical: 18,
+      padding: 18,
+      backgroundColor: "rgba(201, 169, 106, 0.08)",
+      borderLeftWidth: 5,
+      borderLeftColor: PREMIUM_CONFIG.DESIGN.colors.secondary.main,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.medium,
+      borderWidth: 1,
+      borderColor: "rgba(201, 169, 106, 0.2)",
+    },
+    calloutTitle: {
+      fontFamily: "AoLSans",
+      fontSize: 9,
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.widest,
+      color: PREMIUM_CONFIG.DESIGN.colors.secondary.dark,
+      marginBottom: 10,
+      fontWeight: "bold",
+    },
+    calloutText: {
+      fontFamily: "AoLSans",
+      fontSize: 11,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.black,
+      lineHeight: PREMIUM_CONFIG.DESIGN.typography.lineHeight.relaxed,
+    },
+    labelPill: {
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.large,
+      fontSize: 8,
+      fontFamily: "AoLSans",
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.wide,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.white,
+    },
+    docControlBox: {
+      marginTop: 16,
+      padding: 16,
+      backgroundColor: "rgba(10,25,47,0.03)",
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.medium,
+      borderWidth: 1,
+      borderColor: "rgba(10,25,47,0.10)",
+    },
+    docControlRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 6,
+    },
+    docControlKey: {
+      fontFamily: "AoLSans",
+      fontSize: 8,
+      color: PREMIUM_CONFIG.DESIGN.colors.neutral.medium,
+      textTransform: "uppercase",
+      letterSpacing: PREMIUM_CONFIG.DESIGN.typography.letterSpacing.wide,
+    },
+    docControlVal: {
+      fontFamily: "AoLMono",
+      fontSize: 8,
+      color: PREMIUM_CONFIG.DESIGN.colors.primary.main,
+    },
+    card: {
+      backgroundColor: PREMIUM_CONFIG.DESIGN.colors.neutral.white,
+      borderRadius: PREMIUM_CONFIG.DESIGN.layout.borderRadius.medium,
+      padding: 18,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: PREMIUM_CONFIG.DESIGN.colors.neutral.light,
+    },
+  }),
 };
 
-const DIMENSIONS = {
-  page: { width: 595.28, height: 841.89 }, // A4
-  margins: { top: 72, right: 72, bottom: 72, left: 72 },
-  gutter: 20,
-  columnWidth: 225, // For two-column layouts
-};
+// ----------------------------------------------------------------------------
+// Backdrop (SVG)
+// ----------------------------------------------------------------------------
+const CoverBackdrop: React.FC = () => (
+  <Svg width="100%" height="100%" style={{ position: "absolute", top: 0, left: 0 }}>
+    <Rect x="0" y="0" width="100%" height="100%" fill={PREMIUM_CONFIG.DESIGN.colors.primary.dark} />
+    <Rect x="-200" y="160" width="900" height="180" fill={PREMIUM_CONFIG.DESIGN.colors.primary.main} opacity={0.65} />
+    <Rect x="-240" y="390" width="980" height="190" fill={PREMIUM_CONFIG.DESIGN.colors.primary.light} opacity={0.55} />
+    <Rect x="-260" y="650" width="1020" height="210" fill={PREMIUM_CONFIG.DESIGN.colors.secondary.dark} opacity={0.20} />
+    <Line x1="0" y1="0" x2="700" y2="0" stroke={PREMIUM_CONFIG.DESIGN.colors.secondary.main} strokeWidth={6} opacity={0.35} />
+  </Svg>
+);
 
-const TIER_COLORS: Record<string, string> = {
-  'architect': BRAND.accent,
-  'member': BRAND.info,
-  'free': BRAND.success,
-  'all': BRAND.muted,
-};
-
-// -----------------------------------------------------------------------------
-// STYLESHEET - PROFESSIONAL LAYOUT
-// -----------------------------------------------------------------------------
-const styles = StyleSheet.create({
-  // Document
-  document: {
-    backgroundColor: BRAND.background,
-    fontFamily: "AoLSans",
-  },
-  
-  // Cover Page
-  coverPage: {
-    padding: 0,
-    backgroundColor: BRAND.primary,
-    flexDirection: "column",
-    justifyContent: "space-between",
-    position: "relative",
-  },
-  coverGradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: "70%",
-    backgroundColor: BRAND.primary,
-  },
-  coverContent: {
-    position: "relative",
-    zIndex: 1,
-    paddingHorizontal: DIMENSIONS.margins.left,
-    paddingTop: 120,
-    paddingBottom: 80,
-  },
-  coverBrand: {
-    fontFamily: "AoLSans",
-    fontSize: 10,
-    textTransform: "uppercase",
-    letterSpacing: 3,
-    color: BRAND.accentLight,
-    marginBottom: 16,
-    fontWeight: "bold",
-  },
-  coverTitle: {
-    fontFamily: "AoLDisplay",
-    fontSize: 42,
-    color: BRAND.white,
-    lineHeight: 1.1,
-    marginBottom: 16,
-    fontWeight: "bold",
-  },
-  coverSubtitle: {
-    fontFamily: "AoLSerif",
-    fontSize: 16,
-    color: BRAND.muted,
-    marginBottom: 32,
-    fontStyle: "italic",
-  },
-  coverDivider: {
-    width: 100,
-    height: 3,
-    backgroundColor: BRAND.accent,
-    marginBottom: 32,
-  },
-  coverDescription: {
-    fontFamily: "AoLSans",
-    fontSize: 12,
-    color: BRAND.white,
-    lineHeight: 1.6,
-    maxWidth: "70%",
-    marginBottom: 48,
-  },
-  coverFooter: {
-    position: "absolute",
-    bottom: 40,
-    left: DIMENSIONS.margins.left,
-    right: DIMENSIONS.margins.right,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderTopWidth: 0.5,
-    borderTopColor: BRAND.border,
-    paddingTop: 12,
-  },
-  coverFooterText: {
-    fontFamily: "AoLSans",
-    fontSize: 9,
-    color: BRAND.muted,
-  },
-  
-  // Standard Pages
-  page: {
-    paddingTop: DIMENSIONS.margins.top,
-    paddingBottom: DIMENSIONS.margins.bottom,
-    paddingHorizontal: DIMENSIONS.margins.left,
-    backgroundColor: BRAND.background,
-    position: "relative",
-  },
-  
-  // Header
-  header: {
-    position: "absolute",
-    top: 36,
-    left: DIMENSIONS.margins.left,
-    right: DIMENSIONS.margins.right,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingBottom: 12,
-    borderBottomWidth: 0.7,
-    borderBottomColor: BRAND.border,
-    zIndex: 10,
-  },
-  headerLeft: {
-    flexDirection: "column",
-  },
-  headerEyebrow: {
-    fontFamily: "AoLSans",
-    fontSize: 8,
-    textTransform: "uppercase",
-    letterSpacing: 2.5,
-    color: BRAND.accent,
-    marginBottom: 4,
-  },
-  headerTitle: {
-    fontFamily: "AoLSerif",
-    fontSize: 11,
-    color: BRAND.primary,
-    fontWeight: "bold",
-  },
-  headerRight: {
-    fontFamily: "AoLMono",
-    fontSize: 8,
-    color: BRAND.muted,
-    textAlign: "right",
-  },
-  
-  // Content Area
-  content: {
-    marginTop: 60, // Space for header
-  },
-  
-  // Framework Header
-  frameworkHeader: {
-    marginBottom: 32,
-    paddingBottom: 24,
-    borderBottomWidth: 2,
-    borderBottomColor: BRAND.accent,
-  },
-  frameworkTitle: {
-    fontFamily: "AoLDisplay",
-    fontSize: 28,
-    color: BRAND.primary,
-    marginBottom: 8,
-    fontWeight: "bold",
-  },
-  frameworkTagline: {
-    fontFamily: "AoLSerif",
-    fontSize: 14,
-    color: BRAND.ink,
-    marginBottom: 16,
-    fontStyle: "italic",
-    lineHeight: 1.4,
-  },
-  frameworkMeta: {
-    flexDirection: "row",
-    gap: 24,
-    marginBottom: 8,
-  },
-  frameworkMetaItem: {
-    fontFamily: "AoLSans",
-    fontSize: 9,
-    color: BRAND.muted,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  tierBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    fontSize: 8,
-    fontFamily: "AoLSans",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  
-  // Typography
-  h1: {
-    fontFamily: "AoLDisplay",
-    fontSize: 24,
-    color: BRAND.primary,
-    marginBottom: 16,
-    fontWeight: "bold",
-  },
-  h2: {
-    fontFamily: "AoLDisplay",
-    fontSize: 18,
-    color: BRAND.primary,
-    marginTop: 24,
-    marginBottom: 12,
-    fontWeight: "bold",
-  },
-  h3: {
-    fontFamily: "AoLSerif",
-    fontSize: 14,
-    color: BRAND.ink,
-    marginTop: 20,
-    marginBottom: 8,
-    fontWeight: "bold",
-  },
-  
-  // Body Text
-  bodyText: {
-    fontFamily: "AoLSans",
-    fontSize: 11,
-    lineHeight: 1.7,
-    color: BRAND.ink,
-    marginBottom: 12,
-    textAlign: "justify",
-  },
-  leadParagraph: {
-    fontFamily: "AoLSerif",
-    fontSize: 13,
-    lineHeight: 1.8,
-    color: BRAND.primary,
-    marginBottom: 20,
-    fontWeight: "normal",
-  },
-  strong: {
-    fontFamily: "AoLSans",
-    fontWeight: "bold",
-    color: BRAND.primary,
-  },
-  emphasis: {
-    fontFamily: "AoLSerif",
-    fontStyle: "italic",
-    color: BRAND.ink,
-  },
-  
-  // Lists
-  bulletList: {
-    marginVertical: 16,
-    paddingLeft: 8,
-  },
-  bulletItem: {
-    flexDirection: "row",
-    marginBottom: 8,
-    alignItems: "flex-start",
-  },
-  bulletDot: {
-    width: 16,
-    fontSize: 14,
-    color: BRAND.accent,
-    marginRight: 8,
-    marginTop: -1,
-  },
-  bulletText: {
-    flex: 1,
-    fontFamily: "AoLSans",
-    fontSize: 11,
-    lineHeight: 1.6,
-    color: BRAND.ink,
-    textAlign: "justify",
-  },
-  
-  // Logic Grid
-  logicGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-    marginVertical: 20,
-  },
-  logicCard: {
-    width: "48%",
-    minHeight: 120,
-    padding: 16,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: BRAND.border,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  logicCardTitle: {
-    fontFamily: "AoLDisplay",
-    fontSize: 12,
-    color: BRAND.primary,
-    marginBottom: 8,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  logicCardBody: {
-    fontFamily: "AoLSans",
-    fontSize: 10,
-    color: BRAND.ink,
-    lineHeight: 1.5,
-  },
-  
-  // Applications Section
-  applicationsGrid: {
-    marginVertical: 20,
-  },
-  applicationItem: {
-    marginBottom: 12,
-    paddingLeft: 12,
-    borderLeftWidth: 2,
-    borderLeftColor: BRAND.accent,
-  },
-  applicationTitle: {
-    fontFamily: "AoLSerif",
-    fontSize: 12,
-    color: BRAND.primary,
-    marginBottom: 4,
-    fontWeight: "bold",
-  },
-  applicationDescription: {
-    fontFamily: "AoLSans",
-    fontSize: 10,
-    color: BRAND.ink,
-    lineHeight: 1.5,
-  },
-  
-  // Visual Elements
-  divider: {
-    marginVertical: 24,
-    height: 1,
-    backgroundColor: BRAND.border,
-    width: "100%",
-  },
-  callout: {
-    marginVertical: 20,
-    padding: 20,
-    backgroundColor: "rgba(212, 175, 55, 0.08)",
-    borderLeftWidth: 4,
-    borderLeftColor: BRAND.accent,
-    borderRadius: 4,
-  },
-  calloutTitle: {
-    fontFamily: "AoLSans",
-    fontSize: 10,
-    textTransform: "uppercase",
-    letterSpacing: 2,
-    color: BRAND.accent,
-    marginBottom: 8,
-    fontWeight: "bold",
-  },
-  calloutText: {
-    fontFamily: "AoLSans",
-    fontSize: 11,
-    color: BRAND.ink,
-    lineHeight: 1.6,
-  },
-  
-  // Footer
-  footer: {
-    position: "absolute",
-    bottom: 36,
-    left: DIMENSIONS.margins.left,
-    right: DIMENSIONS.margins.right,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 12,
-    borderTopWidth: 0.5,
-    borderTopColor: BRAND.border,
-  },
-  footerBrand: {
-    fontFamily: "AoLSans",
-    fontSize: 8,
-    color: BRAND.muted,
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-  },
-  pageNumber: {
-    fontFamily: "AoLSans",
-    fontSize: 9,
-    color: BRAND.muted,
-  },
-  copyright: {
-    fontFamily: "AoLSans",
-    fontSize: 7,
-    color: BRAND.muted,
-    textAlign: "center",
-    marginTop: 4,
-  },
-  
-  // Two-column layout
-  twoColumn: {
-    flexDirection: "row",
-    gap: DIMENSIONS.gutter,
-    marginVertical: 20,
-  },
-  column: {
-    flex: 1,
-  },
-  
-  // Utility
-  spacingSmall: { marginBottom: 8 },
-  spacingMedium: { marginBottom: 16 },
-  spacingLarge: { marginBottom: 32 },
-  textCenter: { textAlign: "center" as const },
-  textRight: { textAlign: "right" as const },
-});
-
-// -----------------------------------------------------------------------------
-// COMPONENTS
-// -----------------------------------------------------------------------------
-const Header = ({ framework }: { framework: Framework }) => (
-  <View style={styles.header} fixed>
-    <View style={styles.headerLeft}>
-      <Text style={styles.headerEyebrow}>STRATEGIC FRAMEWORK</Text>
-      <Text style={styles.headerTitle}>{framework.title}</Text>
+// ----------------------------------------------------------------------------
+// Header/Footer
+// ----------------------------------------------------------------------------
+interface PremiumHeaderProps {
+  framework: Framework;
+  classification: Classification;
+  distribution: DistributionPolicy;
+}
+const PremiumHeader: React.FC<PremiumHeaderProps> = ({ framework, classification, distribution }) => (
+  <View style={PremiumStyles.page.header} fixed>
+    <View style={PremiumStyles.page.headerLeft}>
+      <Text style={PremiumStyles.page.headerEyebrow}>
+        {classification} • {distribution.replace(/-/g, " ").toUpperCase()} • CANON
+      </Text>
+      <Text style={PremiumStyles.page.headerTitle}>{framework.title}</Text>
     </View>
-    <Text style={styles.headerRight}>Abraham of London · abrahamoflondon.org</Text>
-  </View>
-);
-
-const Footer = () => (
-  <View style={styles.footer} fixed>
-    <Text style={styles.footerBrand}>Abraham of London · Strategic Frameworks</Text>
-    <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
-    <Text style={styles.copyright}>© {new Date().getFullYear()} Abraham of London. All rights reserved.</Text>
-  </View>
-);
-
-const TierBadge = ({ tier }: { tier: string }) => {
-  const backgroundColor = TIER_COLORS[tier.toLowerCase()] || BRAND.muted;
-  const color = ['architect', 'member'].includes(tier.toLowerCase()) ? '#FFFFFF' : BRAND.primary;
-  
-  return (
-    <Text style={[styles.tierBadge, { backgroundColor, color }]}>
-      {tier.toUpperCase()}
+    <Text style={PremiumStyles.page.headerRight}>
+      {PREMIUM_CONFIG.COMPANY.name.toUpperCase()} • CONTROLLED DISTRIBUTION
     </Text>
+  </View>
+);
+
+const PremiumFooter: React.FC<{ label: string }> = ({ label }) => (
+  <View style={PremiumStyles.page.footer} fixed>
+    <Text style={PremiumStyles.page.footerBrand}>
+      {PREMIUM_CONFIG.COMPANY.name.toUpperCase()} • {label.toUpperCase()}
+    </Text>
+    <Text
+      style={PremiumStyles.page.pageNumber}
+      render={({ pageNumber, totalPages }) => `${pageNumber} | ${totalPages}`}
+    />
+    <Text style={PremiumStyles.page.copyright}>
+      © {new Date().getFullYear()} {PREMIUM_CONFIG.COMPANY.legalName}
+    </Text>
+  </View>
+);
+
+// ----------------------------------------------------------------------------
+// PRIVATE DOSSIER (full)
+// ----------------------------------------------------------------------------
+interface PremiumFrameworkDossierProps {
+  framework: Framework;
+  documentId: string;
+  classification: Classification;
+  distribution: DistributionPolicy;
+}
+
+const PremiumFrameworkDossier: React.FC<PremiumFrameworkDossierProps> = ({
+  framework,
+  documentId,
+  classification,
+  distribution,
+}) => {
+  const generatedAt = new Date();
+  const tag = String((framework as any).tag || "framework");
+  const oneLiner = String((framework as any).oneLiner || "");
+  const operatingLogic = Array.isArray((framework as any).operatingLogic) ? (framework as any).operatingLogic : [];
+  const checksum = PremiumUtils.checksum8(`${framework.slug}|${framework.title}|${documentId}|FULL`);
+
+  const canonLead =
+    "This dossier is a leadership-formation instrument and an institutional design tool. It translates intent into governance, operating cadence, and decision discipline—so execution becomes repeatable, not heroic.";
+
+  return (
+    <Document
+      title={`${framework.title} | Private Strategic Framework | ${PREMIUM_CONFIG.COMPANY.name}`}
+      author={PREMIUM_CONFIG.COMPANY.name}
+      subject={`${oneLiner} — ${classification} — ${distribution}`}
+      keywords={[...PremiumUtils.normalizeTierList((framework as any).tier), tag, "institutional design", "leadership formation"]}
+      creator={`${PREMIUM_CONFIG.COMPANY.name} Canon Framework Engine`}
+      producer="AoL Private PDF Generator"
+      language="en-GB"
+    >
+      {/* COVER */}
+      <Page size="A4" style={PremiumStyles.cover.page}>
+        <CoverBackdrop />
+        <View style={PremiumStyles.cover.content}>
+          <View>
+            <Text style={PremiumStyles.cover.brandBadge}>CANON FRAMEWORKS • PRIVATE SERIES</Text>
+            <Text style={PremiumStyles.cover.mainTitle}>{framework.title}</Text>
+            <Text style={PremiumStyles.cover.subtitle}>Leadership Formation + Institutional Design</Text>
+            <View style={PremiumStyles.cover.accentLine} />
+
+            <View style={PremiumStyles.cover.descriptionBox}>
+              <Text style={PremiumStyles.cover.description}>
+                {oneLiner}
+                {"\n\n"}
+                {canonLead}
+              </Text>
+
+              <View style={PremiumStyles.cover.metaRow}>
+                <Text style={[PremiumStyles.cover.metaPill, { backgroundColor: PremiumUtils.tierColor(classification) }]}>
+                  {classification}
+                </Text>
+                <Text style={PremiumStyles.cover.metaText}>TAG: {tag.toUpperCase()}</Text>
+                <Text style={PremiumStyles.cover.metaText}>VERSION: 1.0</Text>
+              </View>
+
+              <Text style={PremiumStyles.cover.distributionBadge}>
+                {distribution.replace(/-/g, " ").toUpperCase()}
+              </Text>
+            </View>
+          </View>
+
+          <View style={PremiumStyles.cover.footer}>
+            <Text style={PremiumStyles.cover.footerText}>{PremiumUtils.formatDate(generatedAt).toUpperCase()}</Text>
+            <Text style={PremiumStyles.cover.serialNumber}>DOC ID: {documentId} • CHK: {checksum}</Text>
+            <Text style={PremiumStyles.cover.footerText}>{PREMIUM_CONFIG.COMPANY.website.toUpperCase()}</Text>
+          </View>
+        </View>
+      </Page>
+
+      {/* PAGE 1 — EXEC SUMMARY */}
+      <Page size="A4" style={PremiumStyles.page.container}>
+        <PremiumHeader framework={framework} classification={classification} distribution={distribution} />
+        <Text style={PremiumStyles.page.watermark}>{PREMIUM_CONFIG.COMPANY.name.toUpperCase()}</Text>
+
+        <View style={PremiumStyles.page.content}>
+          <Text style={PremiumStyles.typography.h1}>Executive Summary</Text>
+          <View style={PremiumStyles.components.accentDivider} />
+
+          <Text style={PremiumStyles.typography.lead}>
+            A private, institutional-grade thinking tool—built to create durable capability, not motivational theatre.
+          </Text>
+
+          <View style={PremiumStyles.components.callout}>
+            <Text style={PremiumStyles.components.calloutTitle}>Control Statement</Text>
+            <Text style={PremiumStyles.components.calloutText}>
+              Classification: <Text style={PremiumStyles.typography.strong}>{classification}</Text>. Distribution:{" "}
+              <Text style={PremiumStyles.typography.strong}>{distribution.replace(/-/g, " ")}</Text>.{" "}
+              Do not publish full dossiers under public assets.
+            </Text>
+          </View>
+
+          <View style={PremiumStyles.components.docControlBox}>
+            <View style={PremiumStyles.components.docControlRow}>
+              <Text style={PremiumStyles.components.docControlKey}>Document ID</Text>
+              <Text style={PremiumStyles.components.docControlVal}>{documentId}</Text>
+            </View>
+            <View style={PremiumStyles.components.docControlRow}>
+              <Text style={PremiumStyles.components.docControlKey}>Checksum</Text>
+              <Text style={PremiumStyles.components.docControlVal}>{checksum}</Text>
+            </View>
+            <View style={PremiumStyles.components.docControlRow}>
+              <Text style={PremiumStyles.components.docControlKey}>Generated</Text>
+              <Text style={PremiumStyles.components.docControlVal}>{PremiumUtils.formatDateTime(generatedAt)}</Text>
+            </View>
+          </View>
+
+          <Text style={PremiumStyles.typography.h2}>Operating Logic</Text>
+          <View style={PremiumStyles.components.accentDivider} />
+
+          {(operatingLogic.length ? operatingLogic : [{ title: "Operating Principle", body: "Add operatingLogic[] in the framework definition to fully populate this section." }]).map(
+            (logic: any, i: number) => (
+              <View key={`${framework.slug}-logic-${i}`} style={PremiumStyles.components.card}>
+                <Text style={PremiumStyles.typography.caption}>{`PRINCIPLE ${i + 1}`}</Text>
+                <Text style={PremiumStyles.typography.h3}>{String(logic.title || `Principle ${i + 1}`)}</Text>
+                <Text style={PremiumStyles.typography.body}>{String(logic.body || "")}</Text>
+              </View>
+            )
+          )}
+        </View>
+
+        <PremiumFooter label="private dossier" />
+      </Page>
+    </Document>
   );
 };
 
-const FrameworkDossier = ({ framework }: { framework: Framework }) => (
-  <Document 
-    title={`${framework.title} | Strategic Framework | Abraham of London`}
-    author="Abraham of London"
-    subject={framework.oneLiner}
-    keywords={`${framework.tag}, strategy, framework, leadership, management, ${framework.tier.join(', ')}`}
-    creator="Abraham of London Strategic Engine"
-    producer="Abraham of London Publishing"
-    language="en-US"
-  >
-    {/* COVER PAGE */}
-    <Page size="A4" style={styles.coverPage}>
-      <View style={styles.coverGradient} />
-      <View style={styles.coverContent}>
-        <Text style={styles.coverBrand}>STRATEGIC FRAMEWORKS</Text>
-        <Text style={styles.coverTitle}>{framework.title}</Text>
-        <Text style={styles.coverSubtitle}>An Institutional-Grade Framework</Text>
-        <View style={styles.coverDivider} />
-        <Text style={styles.coverDescription}>
-          {framework.oneLiner}
-          {"\n\n"}This framework provides structured thinking, decision-making patterns, and implementation pathways for leaders building durable institutions.
-        </Text>
-        
-        <View style={[styles.frameworkMeta, { marginTop: 24 }]}>
-          <TierBadge tier={framework.tier[0]} />
-          <Text style={styles.frameworkMetaItem}>TAG: {framework.tag}</Text>
-          <Text style={styles.frameworkMetaItem}>VERSION: 1.0</Text>
-        </View>
-      </View>
-      
-      <View style={styles.coverFooter}>
-        <Text style={styles.coverFooterText}>Abraham of London · Strategic Frameworks</Text>
-        <Text style={styles.coverFooterText}>
-          Generated: {new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </Text>
-      </View>
-    </Page>
+// ----------------------------------------------------------------------------
+// TEASER (1-page abstract)
+// ----------------------------------------------------------------------------
+interface PremiumFrameworkTeaserProps {
+  framework: Framework;
+  teaserId: string;
+  classification: Classification;
+  distribution: DistributionPolicy;
+}
 
-    {/* PAGE 1: EXECUTIVE SUMMARY */}
-    <Page size="A4" style={styles.page}>
-      <Header framework={framework} />
-      <View style={styles.content}>
-        <View style={styles.frameworkHeader}>
-          <Text style={styles.frameworkTitle}>{framework.title}</Text>
-          <Text style={styles.frameworkTagline}>{framework.oneLiner}</Text>
-        </View>
-        
-        <Text style={styles.h1}>Executive Summary</Text>
-        <View style={styles.divider} />
-        
-        <Text style={styles.leadParagraph}>
-          This framework provides a structured approach to {framework.tag.toLowerCase()} through a combination of conceptual models, practical tools, and implementation guidelines. It is designed for leaders, strategists, and institution-builders who need more than theory — they need a reliable operating system.
-        </Text>
-        
-        <View style={styles.bulletList}>
-          {framework.executiveSummary.map((item, index) => (
-            <View key={index} style={styles.bulletItem}>
-              <Text style={styles.bulletDot}>•</Text>
-              <Text style={styles.bulletText}>{item}</Text>
-            </View>
-          ))}
-        </View>
-        
-        <View style={styles.callout}>
-          <Text style={styles.calloutTitle}>Framework Intent</Text>
-          <Text style={styles.calloutText}>
-            This is not an academic exercise but a <Text style={styles.strong}>practical operating system</Text>. 
-            Each component is designed to be immediately applicable, scalable across contexts, and durable over time.
-          </Text>
-        </View>
-      </View>
-      <Footer />
-    </Page>
+const PremiumFrameworkTeaser: React.FC<PremiumFrameworkTeaserProps> = ({
+  framework,
+  teaserId,
+  classification,
+  distribution,
+}) => {
+  const generatedAt = new Date();
+  const tag = String((framework as any).tag || "framework");
+  const oneLiner = String((framework as any).oneLiner || "");
+  const checksum = PremiumUtils.checksum8(`${framework.slug}|${framework.title}|${teaserId}|TEASER`);
 
-    {/* PAGE 2: OPERATING LOGIC */}
-    <Page size="A4" style={styles.page}>
-      <Header framework={framework} />
-      <View style={styles.content}>
-        <Text style={styles.h1}>Operating Logic</Text>
-        <View style={styles.divider} />
-        
-        <Text style={styles.bodyText}>
-          The framework operates on a set of core principles that guide decision-making, problem-solving, and system design. These principles are not arbitrary but derived from observed patterns of success in institutional contexts.
-        </Text>
-        
-        <View style={styles.logicGrid}>
-          {framework.operatingLogic.map((logic, index) => (
-            <View key={index} style={styles.logicCard}>
-              <Text style={styles.logicCardTitle}>{logic.title}</Text>
-              <Text style={styles.logicCardBody}>{logic.body}</Text>
-            </View>
-          ))}
-        </View>
-        
-        <View style={styles.twoColumn}>
-          <View style={styles.column}>
-            <Text style={styles.h3}>Primary Applications</Text>
-            <View style={styles.bulletList}>
-              {[
-                "Strategic planning sessions",
-                "Leadership development programs",
-                "Organizational design projects",
-                "Performance system implementation",
-                "Decision-making frameworks"
-              ].map((item, index) => (
-                <View key={index} style={styles.bulletItem}>
-                  <Text style={styles.bulletDot}>•</Text>
-                  <Text style={styles.bulletText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-          
-          <View style={styles.column}>
-            <Text style={styles.h3}>Key Benefits</Text>
-            <View style={styles.bulletList}>
-              {[
-                "Reduces cognitive load in complex decisions",
-                "Provides consistent language across teams",
-                "Scales from individual to organizational level",
-                "Balances rigor with practical applicability",
-                "Integrates with existing management systems"
-              ].map((item, index) => (
-                <View key={index} style={styles.bulletItem}>
-                  <Text style={styles.bulletDot}>•</Text>
-                  <Text style={styles.bulletText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
-      </View>
-      <Footer />
-    </Page>
+  // Canon + McKinsey framing: tight, executive, capability language.
+  const teaserBody =
+    "This is a strategic capability instrument. It clarifies the institutional outcome, the operating logic required to produce it, and the leadership behaviours that sustain it. Use it to align decision-makers, govern trade-offs, and turn intent into repeatable execution.";
 
-    {/* PAGE 3: IMPLEMENTATION GUIDELINES */}
-    <Page size="A4" style={styles.page}>
-      <Header framework={framework} />
-      <View style={styles.content}>
-        <Text style={styles.h1}>Implementation Guidelines</Text>
-        <View style={styles.divider} />
-        
-        <Text style={styles.leadParagraph}>
-          Effective implementation requires more than understanding — it requires disciplined application. These guidelines provide a pathway from concept to concrete results.
-        </Text>
-        
-        {[
-          {
-            phase: "Phase 1: Assessment",
-            steps: [
-              "Map current state against framework dimensions",
-              "Identify gaps between current and desired states",
-              "Prioritize areas for immediate intervention",
-              "Establish baseline metrics for measurement"
-            ]
-          },
-          {
-            phase: "Phase 2: Design",
-            steps: [
-              "Customize framework components to your context",
-              "Develop implementation roadmap with milestones",
-              "Create communication plan for stakeholders",
-              "Design training and support materials"
-            ]
-          },
-          {
-            phase: "Phase 3: Execution",
-            steps: [
-              "Launch with pilot group or department",
-              "Provide hands-on coaching and support",
-              "Collect data and feedback systematically",
-              "Make iterative improvements based on learning"
-            ]
-          },
-          {
-            phase: "Phase 4: Integration",
-            steps: [
-              "Scale successful practices organization-wide",
-              "Embed framework into existing processes",
-              "Develop internal champions and experts",
-              "Create ongoing maintenance and update system"
-            ]
-          }
-        ].map((phase, phaseIndex) => (
-          <View key={phaseIndex} style={[styles.spacingLarge, { 
-            padding: 16, 
-            backgroundColor: phaseIndex % 2 === 0 ? '#F8FAFC' : 'transparent',
-            borderRadius: 8 
-          }]}>
-            <Text style={[styles.h2, { fontSize: 16 }]}>{phase.phase}</Text>
-            <View style={styles.bulletList}>
-              {phase.steps.map((step, stepIndex) => (
-                <View key={stepIndex} style={styles.bulletItem}>
-                  <Text style={styles.bulletDot}>{stepIndex + 1}</Text>
-                  <Text style={styles.bulletText}>{step}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        ))}
-        
-        <View style={styles.callout}>
-          <Text style={styles.calloutTitle}>Implementation Principle</Text>
-          <Text style={styles.calloutText}>
-            <Text style={styles.strong}>Start small, learn fast, scale what works.</Text> 
-            The most successful implementations begin with a focused pilot, gather rigorous feedback, and expand only after proving value in context.
-          </Text>
-        </View>
-      </View>
-      <Footer />
-    </Page>
+  // “Public teaser” still avoids IP leakage: no deep steps, no full operating logic, no templates.
+  const boundaries =
+    "This teaser is an abstract. Detailed mechanisms, templates, and operating cadence remain gated within private-tier materials.";
 
-    {/* PAGE 4: CASE EXAMPLES & APPENDIX */}
-    <Page size="A4" style={styles.page}>
-      <Header framework={framework} />
-      <View style={styles.content}>
-        <Text style={styles.h1}>Case Examples</Text>
-        <View style={styles.divider} />
-        
-        <Text style={styles.bodyText}>
-          This framework has been applied across various contexts. While specifics are confidential, these generalized examples illustrate the range of applications.
-        </Text>
-        
-        <View style={styles.applicationsGrid}>
-          {[
-            {
-              context: "Fortune 500 Technology Company",
-              challenge: "Siloed innovation leading to duplicated efforts",
-              application: "Used framework to create cross-functional innovation teams with shared metrics",
-              outcome: "40% reduction in duplicate projects, 25% faster time-to-market"
-            },
-            {
-              context: "Government Agency",
-              challenge: "Decision paralysis in complex regulatory environment",
-              application: "Applied decision-making principles to create streamlined approval processes",
-              outcome: "65% reduction in decision cycle time, improved stakeholder satisfaction"
-            },
-            {
-              context: "Non-profit Organization",
-              challenge: "Resource constraints limiting impact scale",
-              application: "Used framework to prioritize initiatives based on impact/cost ratio",
-              outcome: "3x increase in beneficiaries served with same budget"
-            },
-            {
-              context: "Startup Scaling to 100+ Employees",
-              challenge: "Loss of culture and alignment during rapid growth",
-              application: "Embedded framework principles into hiring, onboarding, and performance systems",
-              outcome: "Maintained 85% culture alignment score during 300% headcount growth"
-            }
-          ].map((example, index) => (
-            <View key={index} style={styles.applicationItem}>
-              <Text style={styles.applicationTitle}>{example.context}</Text>
-              <Text style={[styles.bodyText, { fontSize: 10, marginBottom: 4 }]}>
-                <Text style={styles.strong}>Challenge: </Text>{example.challenge}
+  return (
+    <Document
+      title={`${framework.title} | Framework Teaser | ${PREMIUM_CONFIG.COMPANY.name}`}
+      author={PREMIUM_CONFIG.COMPANY.name}
+      subject={`${oneLiner} — TEASER — ${distribution}`}
+      keywords={["teaser", "framework", tag, "institutional design", "leadership formation"]}
+      creator={`${PREMIUM_CONFIG.COMPANY.name} Canon Teaser Engine`}
+      producer="AoL Teaser Generator"
+      language="en-GB"
+    >
+      <Page size="A4" style={PremiumStyles.cover.page}>
+        <CoverBackdrop />
+        <View style={PremiumStyles.cover.content}>
+          <View>
+            <Text style={PremiumStyles.cover.brandBadge}>CANON FRAMEWORKS • TEASER</Text>
+            <Text style={PremiumStyles.cover.mainTitle}>{framework.title}</Text>
+            <Text style={PremiumStyles.cover.subtitle}>Executive Abstract</Text>
+            <View style={PremiumStyles.cover.accentLine} />
+
+            <View style={PremiumStyles.cover.descriptionBox}>
+              <Text style={PremiumStyles.cover.description}>
+                {oneLiner}
+                {"\n\n"}
+                {teaserBody}
+                {"\n\n"}
+                {boundaries}
               </Text>
-              <Text style={[styles.bodyText, { fontSize: 10, marginBottom: 4 }]}>
-                <Text style={styles.strong}>Application: </Text>{example.application}
-              </Text>
-              <Text style={[styles.bodyText, { fontSize: 10 }]}>
-                <Text style={styles.strong}>Outcome: </Text>{example.outcome}
-              </Text>
-            </View>
-          ))}
-        </View>
-        
-        <View style={styles.divider} />
-        
-        <Text style={styles.h2}>Appendix: Related Resources</Text>
-        <View style={styles.bulletList}>
-          {[
-            "Full implementation toolkit (available to Architect tier)",
-            "Workshop facilitation guide",
-            "Measurement and metrics dashboard template",
-            "Training module slides and notes",
-            "Community of practice guidelines"
-          ].map((resource, index) => (
-            <View key={index} style={styles.bulletItem}>
-              <Text style={styles.bulletDot}>•</Text>
-              <Text style={styles.bulletText}>{resource}</Text>
-            </View>
-          ))}
-        </View>
-        
-        <Text style={[styles.bodyText, { 
-          marginTop: 32,
-          fontSize: 10,
-          color: BRAND.muted,
-          textAlign: 'center'
-        }]}>
-          For additional support with this framework, contact frameworks@abrahamoflondon.org
-        </Text>
-      </View>
-      <Footer />
-    </Page>
-  </Document>
-);
 
-// -----------------------------------------------------------------------------
-// COVER DOCUMENT (Multi-Framework Overview)
-// -----------------------------------------------------------------------------
-const FrameworksCoverDocument = ({ frameworks }: { frameworks: Framework[] }) => (
-  <Document 
-    title="Strategic Frameworks Collection | Abraham of London"
-    author="Abraham of London"
-    subject="Collection of institutional-grade strategic frameworks for leadership and management"
-    keywords="strategy, frameworks, leadership, management, tools, decision-making"
-    creator="Abraham of London Strategic Engine"
-  >
-    <Page size="A4" style={styles.coverPage}>
-      <View style={styles.coverGradient} />
-      <View style={styles.coverContent}>
-        <Text style={styles.coverBrand}>STRATEGIC FRAMEWORKS COLLECTION</Text>
-        <Text style={styles.coverTitle}>Institutional-Grade Thinking Tools</Text>
-        <Text style={styles.coverSubtitle}>For Leaders Building What Lasts</Text>
-        <View style={styles.coverDivider} />
-        <Text style={styles.coverDescription}>
-          This collection represents years of research, testing, and refinement in organizational design, 
-          strategic decision-making, and leadership development. Each framework is battle-tested and designed 
-          for practical application.
-        </Text>
-        
-        <View style={{ marginTop: 40 }}>
-          <Text style={[styles.h3, { color: BRAND.white, marginBottom: 16 }]}>Included Frameworks:</Text>
-          <View style={styles.bulletList}>
-            {frameworks.map((f, index) => (
-              <View key={index} style={[styles.bulletItem, { marginBottom: 12 }]}>
-                <Text style={[styles.bulletDot, { color: BRAND.accentLight }]}>{index + 1}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.strong, { color: BRAND.white, marginBottom: 2 }]}>{f.title}</Text>
-                  <Text style={[styles.bodyText, { color: BRAND.muted, fontSize: 10 }]}>{f.oneLiner}</Text>
-                </View>
+              <View style={PremiumStyles.cover.metaRow}>
+                <Text style={[PremiumStyles.cover.metaPill, { backgroundColor: PremiumUtils.tierColor(classification) }]}>
+                  {classification}
+                </Text>
+                <Text style={PremiumStyles.cover.metaText}>TAG: {tag.toUpperCase()}</Text>
+                <Text style={PremiumStyles.cover.metaText}>SCOPE: 1-PAGE</Text>
               </View>
-            ))}
+
+              <Text style={PremiumStyles.cover.distributionBadge}>
+                {distribution.replace(/-/g, " ").toUpperCase()}
+              </Text>
+            </View>
+          </View>
+
+          <View style={PremiumStyles.cover.footer}>
+            <Text style={PremiumStyles.cover.footerText}>{PremiumUtils.formatDate(generatedAt).toUpperCase()}</Text>
+            <Text style={PremiumStyles.cover.serialNumber}>TEASER ID: {teaserId} • CHK: {checksum}</Text>
+            <Text style={PremiumStyles.cover.footerText}>{PREMIUM_CONFIG.COMPANY.website.toUpperCase()}</Text>
           </View>
         </View>
-      </View>
-      
-      <View style={styles.coverFooter}>
-        <Text style={styles.coverFooterText}>Abraham of London · Strategic Frameworks</Text>
-        <Text style={styles.coverFooterText}>
-          {frameworks.length} frameworks · Generated: {new Date().toLocaleDateString()}
-        </Text>
-      </View>
-    </Page>
-  </Document>
-);
+      </Page>
+    </Document>
+  );
+};
 
-// -----------------------------------------------------------------------------
-// MAIN EXECUTION
-// -----------------------------------------------------------------------------
-async function generateFrameworkPDF(framework: Framework): Promise<boolean> {
+// ----------------------------------------------------------------------------
+// Collection (private)
+// ----------------------------------------------------------------------------
+const PremiumFrameworksCollection: React.FC<{
+  frameworks: Framework[];
+  collectionId: string;
+  distribution: DistributionPolicy;
+}> = ({ frameworks, collectionId, distribution }) => {
+  const generatedAt = new Date();
+  const total = frameworks.length;
+  const checksum = PremiumUtils.checksum8(`${collectionId}|${total}|${PremiumUtils.formatDateTime(generatedAt)}`);
+
+  return (
+    <Document
+      title={`Private Frameworks Collection | ${PREMIUM_CONFIG.COMPANY.name}`}
+      author={PREMIUM_CONFIG.COMPANY.name}
+      subject={`Private collection — ${distribution}`}
+      keywords={["strategic frameworks", "leadership formation", "institutional design", "private"]}
+      creator={`${PREMIUM_CONFIG.COMPANY.name} Collection Engine`}
+      language="en-GB"
+    >
+      <Page size="A4" style={PremiumStyles.cover.page}>
+        <CoverBackdrop />
+        <View style={PremiumStyles.cover.content}>
+          <View>
+            <Text style={PremiumStyles.cover.brandBadge}>CANON • PRIVATE COLLECTION</Text>
+            <Text style={PremiumStyles.cover.mainTitle}>Frameworks Collection</Text>
+            <Text style={PremiumStyles.cover.subtitle}>Institutional-Grade Thinking Tools</Text>
+            <View style={PremiumStyles.cover.accentLine} />
+
+            <View style={PremiumStyles.cover.descriptionBox}>
+              <Text style={PremiumStyles.cover.description}>
+                This pack contains {total} private-tier frameworks intended for internal leadership formation and institutional design work.
+              </Text>
+
+              <View style={PremiumStyles.cover.metaRow}>
+                <Text style={[PremiumStyles.cover.metaPill, { backgroundColor: PREMIUM_CONFIG.DESIGN.colors.accent.warning }]}>
+                  CONFIDENTIAL
+                </Text>
+                <Text style={PremiumStyles.cover.metaText}>FRAMEWORKS: {total}</Text>
+                <Text style={PremiumStyles.cover.metaText}>VERSION: 1.0</Text>
+              </View>
+
+              <Text style={PremiumStyles.cover.distributionBadge}>
+                {distribution.replace(/-/g, " ").toUpperCase()}
+              </Text>
+            </View>
+          </View>
+
+          <View style={PremiumStyles.cover.footer}>
+            <Text style={PremiumStyles.cover.footerText}>{PremiumUtils.formatDate(generatedAt).toUpperCase()}</Text>
+            <Text style={PremiumStyles.cover.serialNumber}>COLLECTION ID: {collectionId} • CHK: {checksum}</Text>
+            <Text style={PremiumStyles.cover.footerText}>{PREMIUM_CONFIG.COMPANY.website.toUpperCase()}</Text>
+          </View>
+        </View>
+      </Page>
+
+      <Page size="A4" style={PremiumStyles.page.container}>
+        <View style={PremiumStyles.page.header} fixed>
+          <View style={PremiumStyles.page.headerLeft}>
+            <Text style={PremiumStyles.page.headerEyebrow}>PRIVATE COLLECTION • CATALOG</Text>
+            <Text style={PremiumStyles.page.headerTitle}>Framework Index</Text>
+          </View>
+          <Text style={PremiumStyles.page.headerRight}>
+            {PREMIUM_CONFIG.COMPANY.name.toUpperCase()} • CONTROLLED DISTRIBUTION
+          </Text>
+        </View>
+
+        <View style={PremiumStyles.page.content}>
+          <Text style={PremiumStyles.typography.h1}>Framework Index</Text>
+          <View style={PremiumStyles.components.accentDivider} />
+
+          {frameworks.map((fw) => (
+            <View key={fw.slug} style={PremiumStyles.components.card}>
+              <Text style={PremiumStyles.typography.caption}>
+                {PremiumUtils.resolveClassification(fw)} • {String((fw as any).tag || "framework").toUpperCase()}
+              </Text>
+              <Text style={PremiumStyles.typography.h3}>{fw.title}</Text>
+              <Text style={PremiumStyles.typography.body}>{String((fw as any).oneLiner || "")}</Text>
+              <Text style={PremiumStyles.typography.caption}>SLUG: {fw.slug}</Text>
+            </View>
+          ))}
+        </View>
+
+        <PremiumFooter label="private collection" />
+      </Page>
+    </Document>
+  );
+};
+
+// ----------------------------------------------------------------------------
+// Engine types
+// ----------------------------------------------------------------------------
+type GenerationResult = {
+  success: boolean;
+  kind: "full" | "teaser" | "collection";
+  filePath?: string;
+  fileName?: string;
+  bytes?: number;
+  fileSizeMb?: string;
+  sha256?: string;
+  error?: string;
+  documentId?: string;
+  classification?: Classification;
+  distribution?: DistributionPolicy;
+  publishedToPublic?: boolean;
+  publicPath?: string;
+};
+
+async function generateFullFrameworkPDF(framework: Framework): Promise<GenerationResult> {
   try {
-    const outDir = path.join(process.cwd(), "public", "assets", "downloads");
-    
-    // Ensure directory exists
-    if (!fs.existsSync(outDir)) {
-      fs.mkdirSync(outDir, { recursive: true });
+    const classification = PremiumUtils.resolveClassification(framework);
+    const distribution = ACCESS_POLICY.fullDistribution;
+
+    if (!PremiumUtils.isPrivateFramework(framework) && ACCESS_POLICY.generationMode === "private-only") {
+      return { success: false, kind: "full", error: "Skipped (not private/restricted under private-only mode)" };
     }
-    
-    const fileName = `${framework.slug}-framework.pdf`;
-    const filePath = path.join(outDir, fileName);
-    
-    console.log(`  └─ Generating: ${framework.title}...`);
-    
-    // Generate PDF
-    const pdfBlob = await pdf(<FrameworkDossier framework={framework} />).toBlob();
-    const arrayBuffer = await pdfBlob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    
-    // Write to file
-    fs.writeFileSync(filePath, buffer);
-    
-    // Verify
-    const stats = fs.statSync(filePath);
-    const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-    
-    console.log(`     ✅ ${fileName} (${fileSizeMB} MB)`);
-    return true;
-    
+
+    await PremiumUtils.ensureDirectory(PREMIUM_CONFIG.OUTPUT.directories.frameworks);
+
+    const documentId = PremiumUtils.generateDocumentId();
+    const component = (
+      <PremiumFrameworkDossier
+        framework={framework}
+        documentId={documentId}
+        classification={classification}
+        distribution={distribution}
+      />
+    );
+
+    const buffer = await pdf(component).toBuffer();
+
+    const sha = PremiumUtils.sha256(buffer);
+    const bytes = buffer.length;
+    const fileSizeMb = (bytes / (1024 * 1024)).toFixed(2);
+
+    const fileName = PREMIUM_CONFIG.OUTPUT.naming.framework(framework.slug);
+    const filePath = path.join(PREMIUM_CONFIG.OUTPUT.directories.frameworks, fileName);
+
+    await PremiumUtils.writeFileWithBackup(filePath, buffer);
+
+    return {
+      success: true,
+      kind: "full",
+      filePath,
+      fileName,
+      bytes,
+      fileSizeMb: `${fileSizeMb} MB`,
+      sha256: sha,
+      documentId,
+      classification,
+      distribution,
+      publishedToPublic: false, // hard
+    };
   } catch (error: any) {
-    console.error(`     ❌ Failed: ${framework.slug} - ${error.message}`);
-    return false;
+    return { success: false, kind: "full", error: error?.message || "Unknown error" };
   }
 }
 
-async function generateCoverDocument(frameworks: Framework[]): Promise<boolean> {
+async function generateTeaserPDF(framework: Framework): Promise<GenerationResult> {
   try {
-    const outDir = path.join(process.cwd(), "public", "assets", "downloads");
-    const filePath = path.join(outDir, "strategic-frameworks-collection.pdf");
-    
-    console.log(`  └─ Generating cover document...`);
-    
-    const pdfBlob = await pdf(<FrameworksCoverDocument frameworks={frameworks} />).toBlob();
-    const arrayBuffer = await pdfBlob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    
-    fs.writeFileSync(filePath, buffer);
-    
-    const stats = fs.statSync(filePath);
-    const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-    
-    console.log(`     ✅ strategic-frameworks-collection.pdf (${fileSizeMB} MB)`);
-    return true;
-    
+    const classification = PremiumUtils.resolveClassification(framework);
+
+    // Default teaser distribution is app-preview-only.
+    // If public teaser publishing is enabled, we stamp as public-teaser.
+    const distribution: DistributionPolicy = ACCESS_POLICY.allowPublicTeasers ? "public-teaser" : ACCESS_POLICY.teaserDistribution;
+
+    await PremiumUtils.ensureDirectory(PREMIUM_CONFIG.OUTPUT.directories.teasers);
+
+    const teaserId = PremiumUtils.generateDocumentId();
+    const component = (
+      <PremiumFrameworkTeaser
+        framework={framework}
+        teaserId={teaserId}
+        classification={classification}
+        distribution={distribution}
+      />
+    );
+
+    const buffer = await pdf(component).toBuffer();
+
+    const sha = PremiumUtils.sha256(buffer);
+    const bytes = buffer.length;
+    const fileSizeMb = (bytes / (1024 * 1024)).toFixed(2);
+
+    const fileName = PREMIUM_CONFIG.OUTPUT.naming.teaser(framework.slug);
+    const filePath = path.join(PREMIUM_CONFIG.OUTPUT.directories.teasers, fileName);
+
+    await PremiumUtils.writeFileWithBackup(filePath, buffer);
+
+    // Optional publish to /public (teaser only)
+    let publishedToPublic = false;
+    let publicPath: string | undefined;
+
+    if (ACCESS_POLICY.allowPublicTeasers) {
+      await PremiumUtils.ensureDirectory(PREMIUM_CONFIG.OUTPUT.publicTeasersDir);
+      publicPath = path.join(PREMIUM_CONFIG.OUTPUT.publicTeasersDir, fileName);
+      await PremiumUtils.copyFileSafe(filePath, publicPath);
+      publishedToPublic = true;
+    }
+
+    return {
+      success: true,
+      kind: "teaser",
+      filePath,
+      fileName,
+      bytes,
+      fileSizeMb: `${fileSizeMb} MB`,
+      sha256: sha,
+      documentId: teaserId,
+      classification,
+      distribution,
+      publishedToPublic,
+      publicPath,
+    };
   } catch (error: any) {
-    console.error(`     ❌ Cover document failed: ${error.message}`);
-    return false;
+    return { success: false, kind: "teaser", error: error?.message || "Unknown error" };
   }
 }
 
-async function main() {
-  console.log("🚀 Generating Strategic Framework PDFs...");
-  console.log(`📊 Found ${FRAMEWORKS.length} frameworks to generate`);
-  
-  const results = {
-    successful: [] as string[],
-    failed: [] as string[],
+async function generateCollection(frameworks: Framework[]): Promise<GenerationResult> {
+  try {
+    await PremiumUtils.ensureDirectory(PREMIUM_CONFIG.OUTPUT.directories.collections);
+
+    const distribution = ACCESS_POLICY.fullDistribution;
+    const collectionId = PremiumUtils.generateDocumentId();
+    const dateStr = new Date().toISOString().split("T")[0].replace(/-/g, "");
+
+    const component = (
+      <PremiumFrameworksCollection
+        frameworks={frameworks}
+        collectionId={collectionId}
+        distribution={distribution}
+      />
+    );
+
+    const buffer = await pdf(component).toBuffer();
+    const sha = PremiumUtils.sha256(buffer);
+    const bytes = buffer.length;
+    const fileSizeMb = (bytes / (1024 * 1024)).toFixed(2);
+
+    const fileName = PREMIUM_CONFIG.OUTPUT.naming.collection(dateStr);
+    const filePath = path.join(PREMIUM_CONFIG.OUTPUT.directories.collections, fileName);
+
+    await PremiumUtils.writeFileWithBackup(filePath, buffer);
+
+    return {
+      success: true,
+      kind: "collection",
+      filePath,
+      fileName,
+      bytes,
+      fileSizeMb: `${fileSizeMb} MB`,
+      sha256: sha,
+      documentId: collectionId,
+      classification: "CONFIDENTIAL",
+      distribution,
+      publishedToPublic: false,
+    };
+  } catch (error: any) {
+    return { success: false, kind: "collection", error: error?.message || "Unknown error" };
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Manifest + Summary
+// ----------------------------------------------------------------------------
+type ManifestEntry = {
+  kind: "full" | "teaser";
+  slug: string;
+  title: string;
+  tag: string;
+  tiers: string[];
+  classification: Classification;
+  distribution: DistributionPolicy;
+  documentId: string;
+  fileName: string;
+  filePath: string;
+  bytes: number;
+  sha256: string;
+  generatedAt: string;
+  publishedToPublic: boolean;
+  publicPath?: string;
+};
+
+type ManifestPayload = {
+  company: typeof PREMIUM_CONFIG.COMPANY;
+  generatedAt: string;
+  mode: string;
+  allowPublicTeasers: boolean;
+  outputRoot: string;
+  totals: {
+    frameworksSelected: number;
+    fullGenerated: number;
+    teaserGenerated: number;
+    bytesTotal: number;
   };
-  
-  // Generate individual framework PDFs
-  for (const framework of FRAMEWORKS) {
-    const success = await generateFrameworkPDF(framework);
-    if (success) {
-      results.successful.push(framework.slug);
-    } else {
-      results.failed.push(framework.slug);
-    }
-    
-    // Small delay to prevent resource contention
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-  
-  // Generate cover document if we have successful generations
-  if (results.successful.length > 0) {
-    const successfulFrameworks = FRAMEWORKS.filter(f => results.successful.includes(f.slug));
-    await generateCoverDocument(successfulFrameworks);
-  }
-  
-  // Summary
-  console.log("\n📊 GENERATION SUMMARY:");
-  console.log("=".repeat(50));
-  console.log(`✅ Successful: ${results.successful.length}/${FRAMEWORKS.length}`);
-  console.log(`❌ Failed: ${results.failed.length}/${FRAMEWORKS.length}`);
-  
-  if (results.failed.length > 0) {
-    console.log("\nFailed frameworks:");
-    results.failed.forEach(slug => console.log(`  • ${slug}`));
-  }
-  
-  console.log("\n📁 Output directory: public/assets/downloads/");
-  console.log(`💾 Total generated: ${results.successful.length} individual PDFs + 1 collection PDF`);
-  
-  // Create README
-  const readmeContent = `# Strategic Framework PDF Collection
+  collection: null | {
+    kind: "collection";
+    classification: Classification;
+    distribution: DistributionPolicy;
+    documentId: string;
+    fileName: string;
+    filePath: string;
+    bytes: number;
+    sha256: string;
+    generatedAt: string;
+  };
+  entries: ManifestEntry[];
+};
 
-## Generated Files
+async function writeManifest(payload: ManifestPayload) {
+  await PremiumUtils.ensureDirectory(PREMIUM_CONFIG.OUTPUT.directories.meta);
+  const manifestPath = path.join(PREMIUM_CONFIG.OUTPUT.directories.meta, PREMIUM_CONFIG.OUTPUT.naming.manifest);
+  await PremiumUtils.writeFileWithBackup(manifestPath, JSON.stringify(payload, null, 2));
+}
 
-### Individual Frameworks
-${FRAMEWORKS.map(f => `- ${f.title}: \`${f.slug}-framework.pdf\``).join('\n')}
+async function writeSummary(lines: string[]) {
+  await PremiumUtils.ensureDirectory(PREMIUM_CONFIG.OUTPUT.directories.meta);
+  const summaryPath = path.join(PREMIUM_CONFIG.OUTPUT.directories.meta, PREMIUM_CONFIG.OUTPUT.naming.summary);
+  await PremiumUtils.writeFileWithBackup(summaryPath, lines.join("\n"));
+}
 
-### Collection
-- Complete Collection: \`strategic-frameworks-collection.pdf\`
+// ----------------------------------------------------------------------------
+// Main
+// ----------------------------------------------------------------------------
+async function main() {
+  // eslint-disable-next-line no-console
+  console.log("=".repeat(70));
+  // eslint-disable-next-line no-console
+  console.log("🚀 AoL CANON FRAMEWORKS — PRIVATE PDF GENERATOR (FULL + TEASERS)");
+  // eslint-disable-next-line no-console
+  console.log("=".repeat(70));
 
-## File Information
-- **Format**: A4 (210 × 297 mm)
-- **Quality**: Premium print-ready
-- **Generated**: ${new Date().toISOString()}
-- **Total Pages**: ~${FRAMEWORKS.length * 4 + 1} pages across all documents
-
-## Framework Details
-${FRAMEWORKS.map(f => `
-### ${f.title}
-- **Tag**: ${f.tag}
-- **Tier**: ${f.tier.join(', ')}
-- **Description**: ${f.oneLiner}
-- **Key Components**: ${f.operatingLogic.length} operating principles
-`).join('\n')}
-
-## Features
-✅ Professional typography and layout
-✅ Justified text for clean appearance  
-✅ Proper margins and page setup
-✅ Interactive table of contents
-✅ Print-optimized formatting
-✅ Case examples and implementation guidelines
-✅ Comprehensive appendix with resources
-
-## Usage
-- **Printing**: For best results, print at 100% scale on high-quality paper
-- **Digital**: View in Adobe Acrobat Reader for optimal experience
-- **Sharing**: May be shared within organization but not publicly distributed
-
-© ${new Date().getFullYear()} Abraham of London
-Strategic Frameworks Collection v1.0
-`;
-
-  const readmePath = path.join(process.cwd(), "public", "assets", "downloads", "README-frameworks.txt");
-  fs.writeFileSync(readmePath, readmeContent);
-  console.log(`\n📝 Created README: ${readmePath}`);
-  
-  // Exit with appropriate code
-  if (results.failed.length > 0) {
+  if (!FRAMEWORKS || FRAMEWORKS.length === 0) {
+    // eslint-disable-next-line no-console
+    console.error("❌ No frameworks data found.");
     process.exit(1);
   }
+
+  registerPremiumFonts();
+
+  for (const dir of Object.values(PREMIUM_CONFIG.OUTPUT.directories)) {
+    await PremiumUtils.ensureDirectory(dir);
+  }
+  if (ACCESS_POLICY.allowPublicTeasers) {
+    await PremiumUtils.ensureDirectory(PREMIUM_CONFIG.OUTPUT.publicTeasersDir);
+  }
+
+  const generatedAt = new Date();
+
+  const selected =
+    ACCESS_POLICY.generationMode === "private-only"
+      ? FRAMEWORKS.filter((f) => PremiumUtils.isPrivateFramework(f))
+      : FRAMEWORKS;
+
+  // eslint-disable-next-line no-console
+  console.log(`\n⚙️  Mode: ${ACCESS_POLICY.generationMode}`);
+  // eslint-disable-next-line no-console
+  console.log(`🔒 Selected: ${selected.length}/${FRAMEWORKS.length}`);
+  // eslint-disable-next-line no-console
+  console.log(`🧾 Teasers: ${ACCESS_POLICY.generateTeasers ? "ON" : "OFF"} | Public publish: ${ACCESS_POLICY.allowPublicTeasers ? "ON" : "OFF"}\n`);
+
+  const manifestEntries: ManifestEntry[] = [];
+  const failures: Array<{ kind: string; slug: string; error: string }> = [];
+
+  let fullCount = 0;
+  let teaserCount = 0;
+
+  // Generate FULL dossiers (private)
+  for (let i = 0; i < selected.length; i++) {
+    const fw = selected[i];
+    // eslint-disable-next-line no-console
+    console.log(`${i + 1}/${selected.length}: FULL — ${fw.title}`);
+
+    const res = await generateFullFrameworkPDF(fw);
+    if (!res.success) {
+      // eslint-disable-next-line no-console
+      console.log(`   ❌ ${res.error}`);
+      failures.push({ kind: "full", slug: fw.slug, error: res.error || "Unknown error" });
+      continue;
+    }
+
+    fullCount++;
+
+    manifestEntries.push({
+      kind: "full",
+      slug: fw.slug,
+      title: fw.title,
+      tag: String((fw as any).tag || "framework"),
+      tiers: PremiumUtils.normalizeTierList((fw as any).tier),
+      classification: res.classification!,
+      distribution: res.distribution!,
+      documentId: res.documentId!,
+      fileName: res.fileName!,
+      filePath: res.filePath!,
+      bytes: res.bytes!,
+      sha256: res.sha256!,
+      generatedAt: generatedAt.toISOString(),
+      publishedToPublic: false,
+    });
+
+    // eslint-disable-next-line no-console
+    console.log(`   ✅ ${res.fileName} (${res.fileSizeMb})`);
+  }
+
+  // Generate TEASERS (safe by default)
+  if (ACCESS_POLICY.generateTeasers) {
+    for (let i = 0; i < selected.length; i++) {
+      const fw = selected[i];
+      // eslint-disable-next-line no-console
+      console.log(`${i + 1}/${selected.length}: TEASER — ${fw.title}`);
+
+      const res = await generateTeaserPDF(fw);
+      if (!res.success) {
+        // eslint-disable-next-line no-console
+        console.log(`   ❌ ${res.error}`);
+        failures.push({ kind: "teaser", slug: fw.slug, error: res.error || "Unknown error" });
+        continue;
+      }
+
+      teaserCount++;
+
+      manifestEntries.push({
+        kind: "teaser",
+        slug: fw.slug,
+        title: fw.title,
+        tag: String((fw as any).tag || "framework"),
+        tiers: PremiumUtils.normalizeTierList((fw as any).tier),
+        classification: res.classification!,
+        distribution: res.distribution!,
+        documentId: res.documentId!,
+        fileName: res.fileName!,
+        filePath: res.filePath!,
+        bytes: res.bytes!,
+        sha256: res.sha256!,
+        generatedAt: generatedAt.toISOString(),
+        publishedToPublic: Boolean(res.publishedToPublic),
+        publicPath: res.publicPath,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log(`   ✅ ${res.fileName} (${res.fileSizeMb})${res.publishedToPublic ? " • PUBLISHED TO /public" : ""}`);
+    }
+  }
+
+  // Generate collection from FULL docs only (where we actually produced full PDFs)
+  const fullSlugs = new Set(manifestEntries.filter((e) => e.kind === "full").map((e) => e.slug));
+  const fullFrameworksInOrder = selected.filter((fw) => fullSlugs.has(fw.slug));
+
+  let collectionManifest: ManifestPayload["collection"] = null;
+  if (fullFrameworksInOrder.length > 0) {
+    // eslint-disable-next-line no-console
+    console.log(`\n📚 COLLECTION — generating (${fullFrameworksInOrder.length} full dossiers)...`);
+
+    const col = await generateCollection(fullFrameworksInOrder);
+    if (col.success) {
+      collectionManifest = {
+        kind: "collection",
+        classification: col.classification!,
+        distribution: col.distribution!,
+        documentId: col.documentId!,
+        fileName: col.fileName!,
+        filePath: col.filePath!,
+        bytes: col.bytes!,
+        sha256: col.sha256!,
+        generatedAt: generatedAt.toISOString(),
+      };
+
+      // eslint-disable-next-line no-console
+      console.log(`   ✅ ${col.fileName} (${col.fileSizeMb})`);
+    } else {
+      failures.push({ kind: "collection", slug: "collection", error: col.error || "Unknown error" });
+      // eslint-disable-next-line no-console
+      console.log(`   ❌ Collection failed: ${col.error}`);
+    }
+  }
+
+  const bytesTotal = manifestEntries.reduce((s, e) => s + e.bytes, 0);
+
+  await writeManifest({
+    company: PREMIUM_CONFIG.COMPANY,
+    generatedAt: generatedAt.toISOString(),
+    mode: ACCESS_POLICY.generationMode,
+    allowPublicTeasers: ACCESS_POLICY.allowPublicTeasers,
+    outputRoot: PREMIUM_CONFIG.OUTPUT.privateRoot,
+    totals: {
+      frameworksSelected: selected.length,
+      fullGenerated: fullCount,
+      teaserGenerated: teaserCount,
+      bytesTotal,
+    },
+    collection: collectionManifest,
+    entries: manifestEntries,
+  });
+
+  const summary: string[] = [];
+  summary.push("=======================================================================");
+  summary.push("ABRAHAM OF LONDON — CANON FRAMEWORKS (PRIVATE) — GENERATION SUMMARY");
+  summary.push("=======================================================================");
+  summary.push(`Generated: ${PremiumUtils.formatDateTime(generatedAt)}`);
+  summary.push(`Mode: ${ACCESS_POLICY.generationMode}`);
+  summary.push(`Teasers: ${ACCESS_POLICY.generateTeasers ? "ON" : "OFF"} | Public teaser publish: ${ACCESS_POLICY.allowPublicTeasers ? "ON" : "OFF"}`);
+  summary.push("");
+  summary.push(`Selected: ${selected.length}`);
+  summary.push(`Full generated: ${fullCount}`);
+  summary.push(`Teasers generated: ${teaserCount}`);
+  summary.push(`Failures: ${failures.length}`);
+  summary.push("");
+
+  if (collectionManifest) {
+    summary.push(`Collection: ${collectionManifest.fileName}`);
+    summary.push(` - Path: ${collectionManifest.filePath}`);
+    summary.push(` - SHA: ${collectionManifest.sha256}`);
+    summary.push("");
+  }
+
+  if (failures.length) {
+    summary.push("FAILURES:");
+    for (const f of failures) summary.push(` - ${f.kind.toUpperCase()} • ${f.slug}: ${f.error}`);
+    summary.push("");
+  }
+
+  summary.push("OUTPUT LOCATIONS:");
+  summary.push(` - Full dossiers (private): ${PREMIUM_CONFIG.OUTPUT.directories.frameworks}`);
+  summary.push(` - Teasers (private):      ${PREMIUM_CONFIG.OUTPUT.directories.teasers}`);
+  summary.push(` - Collections (private):  ${PREMIUM_CONFIG.OUTPUT.directories.collections}`);
+  summary.push(` - Meta:                  ${PREMIUM_CONFIG.OUTPUT.directories.meta}`);
+  if (ACCESS_POLICY.allowPublicTeasers) {
+    summary.push(` - Teasers (public):       ${PREMIUM_CONFIG.OUTPUT.publicTeasersDir}`);
+  }
+  summary.push("");
+  summary.push("CONTROL NOTICE:");
+  summary.push(" - Full dossiers are PRIVATE/CONFIDENTIAL/RESTRICTED and must never be published under /public.");
+  summary.push(" - Teasers are safe abstracts; public publishing is explicit opt-in (ALLOW_PUBLIC_TEASERS=true).");
+  summary.push("=======================================================================");
+
+  await writeSummary(summary);
+
+  // eslint-disable-next-line no-console
+  console.log("\n" + "=".repeat(70));
+  // eslint-disable-next-line no-console
+  console.log("✅ COMPLETE — FULL DOSSIERS + TEASERS GENERATED");
+  // eslint-disable-next-line no-console
+  console.log(`📁 Full:     ${PREMIUM_CONFIG.OUTPUT.directories.frameworks}`);
+  // eslint-disable-next-line no-console
+  console.log(`📁 Teasers:  ${PREMIUM_CONFIG.OUTPUT.directories.teasers}`);
+  // eslint-disable-next-line no-console
+  console.log(`📁 Meta:     ${PREMIUM_CONFIG.OUTPUT.directories.meta}`);
+  if (ACCESS_POLICY.allowPublicTeasers) {
+    // eslint-disable-next-line no-console
+    console.log(`🌍 Public teasers: ${PREMIUM_CONFIG.OUTPUT.publicTeasersDir}`);
+  } else {
+    // eslint-disable-next-line no-console
+    console.log("🌍 Public teasers: OFF (set ALLOW_PUBLIC_TEASERS=true to enable)");
+  }
+  // eslint-disable-next-line no-console
+  console.log("=".repeat(70));
 }
 
-// Run if called directly
+// ----------------------------------------------------------------------------
+// Execute
+// ----------------------------------------------------------------------------
 if (import.meta.url === `file://${__filename}`) {
-  main().catch(error => {
-    console.error("💥 Fatal error in PDF generation:", error);
+  main().catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error("💥 Failed to execute:", error);
     process.exit(1);
   });
 }
 
-export { FrameworkDossier, FrameworksCoverDocument };
+// ----------------------------------------------------------------------------
+// Exports (useful for testing)
+// ----------------------------------------------------------------------------
+export {
+  PremiumFrameworkDossier,
+  PremiumFrameworkTeaser,
+  PremiumFrameworksCollection,
+  PremiumUtils,
+  PremiumStyles,
+  PremiumHeader,
+  PremiumFooter,
+  PREMIUM_CONFIG,
+  ACCESS_POLICY,
+};

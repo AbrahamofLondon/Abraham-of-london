@@ -2,9 +2,11 @@
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { SessionProvider } from "next-auth/react";
 
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
+import { AuthProvider } from "@/hooks/useAuth"; // Updated import
 
 function usePageView() {
   const router = useRouter();
@@ -21,12 +23,19 @@ function usePageView() {
   }, [router.events]);
 }
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+export default function MyApp({
+  Component,
+  pageProps: { session, ...pageProps },
+}: AppProps) {
   usePageView();
 
   return (
-    <ThemeProvider defaultTheme="dark">
-      <Component {...pageProps} />
-    </ThemeProvider>
+    <SessionProvider session={session}>
+      <ThemeProvider defaultTheme="dark">
+        <AuthProvider>
+          <Component {...pageProps} />
+        </AuthProvider>
+      </ThemeProvider>
+    </SessionProvider>
   );
 }

@@ -1,0 +1,106 @@
+# =====================================================
+# DATABASE FILES & CREDENTIALS
+# =====================================================
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+dev.db
+local.db
+.abraham.db
+
+# Database credentials & backups
+database-credentials.json
+backup/
+backups/
+*.backup
+*.dump
+
+# CRITICAL FIX: Ignore temporary SQL dumps but TRACK the institutional /sql folder
+*.sql
+!/sql/*.sql
+
+# =====================================================
+# CORE DEPENDENCIES & BUILDS
+# =====================================================
+node_modules/
+.next/
+out/
+dist/
+build/
+.output/
+.cache/
+.turbo/
+.vercel/
+.netlify/
+.netlify-edge-functions/
+
+# Contentlayer generated output
+.contentlayer/
+
+# =====================================================
+# ENVIRONMENT FILES (SENSITIVE - DO NOT COMMIT)
+# =====================================================
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+# =====================================================
+# PDF CACHE / GENERATED EXPORTS
+# =====================================================
+.pdfcache/
+exports/
+downloads/cache/
+scripts/output/
+
+# =====================================================
+# MEDIA OUTPUTS (GENERATED)
+# =====================================================
+uploads/
+media/temp/
+output_*.mp4
+output_*.mp3
+# If you generate PDFs during build, ignore them in assets to keep repo small
+# public/assets/downloads/*.pdf
+
+# =====================================================
+# PRISMA SPECIFIC
+# =====================================================
+# Keep migrations, but ignore the lock file
+prisma/migrations/*/migration_lock.toml
+
+# =====================================================
+# INSTITUTIONAL ASSETS (NEVER IGNORE)
+# =====================================================
+!public/assets/
+!public/assets/**/*
+!public/favicon.ico
+!public/favicon.svg
+!public/apple-touch-icon.png
+!public/android-chrome-192x192.png
+!public/android-chrome-512x512.png
+!public/site.webmanifest
+!public/robots.txt
+
+# =====================================================
+# SCRIPTS & BACKUPS
+# =====================================================
+scripts/**/*.log
+scripts/**/*.tmp
+<<<<<<< HEAD
+*.bak_emergency-backup.tar
+=======
+*.bak
+>>>>>>> b942cc6bad8394ca91341ab394a4afcd7652e775
+
+# Large files
+*.tar
+*.zip
+*.tar.gz
+*.tgz
+_backups/
+*.backup
+_emergency-backup.*
+
