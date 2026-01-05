@@ -2,81 +2,82 @@ import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import { pathToFileURL } from "url";
 
-// ----------------------------
-// Helpers (safe + minimal)
-// ----------------------------
-const safeString = (v, fallback = "") =>
+const safeString = (v: unknown, fallback = "") =>
   typeof v === "string" ? v.trim() : fallback;
 
-const safeDate = (v) => {
+const safeDate = (v: unknown) => {
   if (!v) return new Date();
-  const d = new Date(v);
+  const d = new Date(String(v));
   return Number.isNaN(d.getTime()) ? new Date() : d;
 };
 
-const getSlug = (doc) => {
-  if (typeof doc.slug === "string" && doc.slug.trim()) return doc.slug.trim();
-  if (doc?._raw?.flattenedPath) {
-    return doc._raw.flattenedPath;
-  }
-  return "untitled";
+const getSlug = (doc: any) => {
+  const direct = safeString(doc?.slug, "");
+  if (direct) return direct;
+  const raw = safeString(doc?._raw?.flattenedPath, "");
+  return raw || "untitled";
 };
 
-const getUrl = (prefix) => (doc) => {
-  if (typeof doc.href === "string" && doc.href.trim()) return doc.href.trim();
-  return `/${prefix}/${getSlug(doc)}`;
-};
+const getUrl =
+  (prefix: string) =>
+  (doc: any): string => {
+    const href = safeString(doc?.href, "");
+    if (href) return href;
+    return `/${prefix}/${getSlug(doc)}`;
+  };
 
-// ----------------------------
-// Shared field blocks
-// ----------------------------
 const CORE_FIELDS = {
-  title: { type: "string", required: true },
-  date: { type: "date", required: true },
-  description: { type: "string", required: false },
-  excerpt: { type: "string", required: false },
-  draft: { type: "boolean", required: false, default: false },
-  featured: { type: "boolean", required: false, default: false },
-  tags: { type: "list", of: { type: "string" }, required: false },
-  author: { type: "string", required: false, default: "Abraham of London" },
-  slug: { type: "string", required: false },
-  published: { type: "boolean", required: false, default: true },
+  title: { type: "string", required: true as const },
+  date: { type: "date", required: true as const },
+  description: { type: "string", required: false as const },
+  excerpt: { type: "string", required: false as const },
+  draft: { type: "boolean", required: false as const, default: false },
+  featured: { type: "boolean", required: false as const, default: false },
+  tags: { type: "list", of: { type: "string" }, required: false as const },
+  author: {
+    type: "string",
+    required: false as const,
+    default: "Abraham of London",
+  },
+  slug: { type: "string", required: false as const },
+  published: { type: "boolean", required: false as const, default: true },
 };
 
 const SHARED_FIELDS = {
-  ogTitle: { type: "string", required: false },
-  ogDescription: { type: "string", required: false },
-  socialCaption: { type: "string", required: false },
-  readTime: { type: "string", required: false },
-  category: { type: "string", required: false },
-  coverImage: { type: "string", required: false },
+  ogTitle: { type: "string", required: false as const },
+  ogDescription: { type: "string", required: false as const },
+  socialCaption: { type: "string", required: false as const },
+  readTime: { type: "string", required: false as const },
+  category: { type: "string", required: false as const },
+  coverImage: { type: "string", required: false as const },
   coverAspect: {
     type: "enum",
-    required: false,
+    required: false as const,
     options: ["wide", "book", "square", "portrait"],
     default: "book",
   },
   coverFit: {
     type: "enum",
-    required: false,
+    required: false as const,
     options: ["cover", "contain", "fill", "none"],
     default: "cover",
   },
-  coverPosition: { type: "string", required: false, default: "center" },
-  authorTitle: { type: "string", required: false },
-  resources: { type: "json", required: false },
-  relatedDownloads: { type: "list", of: { type: "string" }, required: false },
-  subtitle: { type: "string", required: false },
-  layout: { type: "string", required: false },
-  href: { type: "string", required: false },
+  coverPosition: { type: "string", required: false as const, default: "center" },
+  authorTitle: { type: "string", required: false as const },
+  resources: { type: "json", required: false as const },
+  relatedDownloads: { type: "list", of: { type: "string" }, required: false as const },
+  subtitle: { type: "string", required: false as const },
+  layout: { type: "string", required: false as const },
+  href: { type: "string", required: false as const },
 };
 
-// ----------------------------
-// Factory
-// ----------------------------
-const createDocumentType = (name, filePathPattern, fields, computedFields = {}) =>
+const createDocumentType = (
+  name: string,
+  filePathPattern: string,
+  fields: Record<string, any>,
+  computedFields: Record<string, any> = {}
+) =>
   defineDocumentType(() => ({
     name,
     filePathPattern,
@@ -89,15 +90,12 @@ const createDocumentType = (name, filePathPattern, fields, computedFields = {}) 
     computedFields: {
       url: { type: "string", resolve: getUrl(name.toLowerCase()) },
       slugComputed: { type: "string", resolve: getSlug },
-      safeTitle: { type: "string", resolve: (doc) => safeString(doc.title, "Untitled") },
-      safeDate: { type: "date", resolve: (doc) => safeDate(doc.date) },
+      safeTitle: { type: "string", resolve: (doc: any) => safeString(doc?.title, "Untitled") },
+      safeDate: { type: "date", resolve: (doc: any) => safeDate(doc?.date) },
       ...computedFields,
     },
   }));
 
-// ----------------------------
-// Types
-// ----------------------------
 export const Post = createDocumentType("Post", "blog/**/*.{md,mdx}", {
   series: { type: "string", required: false },
   seriesOrder: { type: "number", required: false },
@@ -143,31 +141,12 @@ export const Download = createDocumentType(
       options: ["public", "registered", "inner-circle"],
       default: "public",
     },
-    fileFormat: { type: "string", required: false },
-    format: { type: "string", required: false },
-    useLegacyDiagram: { type: "boolean", required: false, default: false },
-    useProTip: { type: "boolean", required: false, default: false },
-    useFeatureGrid: { type: "boolean", required: false, default: false },
-    useDownloadCTA: { type: "boolean", required: false, default: false },
-    ctaConfig: { type: "json", required: false },
-    ctaPrimary: { type: "json", required: false },
-    ctaSecondary: { type: "json", required: false },
-    related: { type: "list", of: { type: "string" }, required: false },
-    canonicalUrl: { type: "string", required: false },
-    updated: { type: "date", required: false },
-    language: { type: "string", required: false, default: "en-GB" },
-    readingTime: { type: "string", required: false },
-    proTipType: { type: "string", required: false },
-    proTipContent: { type: "string", required: false },
-    featureGridColumns: { type: "number", required: false, default: 3 },
-    featureGridItems: { type: "json", required: false },
-    downloadProcess: { type: "json", required: false },
     tier: { type: "string", required: false },
   },
   {
     hasFile: {
       type: "boolean",
-      resolve: (doc) => !!(doc.fileUrl || doc.downloadUrl || doc.pdfPath || doc.file),
+      resolve: (doc: any) => Boolean(doc?.fileUrl || doc?.downloadUrl || doc?.pdfPath || doc?.file),
     },
   }
 );
@@ -238,13 +217,11 @@ export const Resource = createDocumentType(
   {
     isUpdated: {
       type: "boolean",
-      resolve: (doc) => {
-        if (!doc.lastUpdated || !doc.date) return false;
-        try {
-          return new Date(doc.lastUpdated) > new Date(doc.date);
-        } catch {
-          return false;
-        }
+      resolve: (doc: any) => {
+        const lu = doc?.lastUpdated ? new Date(doc.lastUpdated) : null;
+        const d = doc?.date ? new Date(doc.date) : null;
+        if (!lu || !d) return false;
+        return lu > d;
       },
     },
   }
@@ -272,48 +249,32 @@ export const Event = createDocumentType(
   {
     isUpcoming: {
       type: "boolean",
-      resolve: (doc) => (doc.eventDate ? new Date(doc.eventDate) > new Date() : false),
+      resolve: (doc: any) => (doc?.eventDate ? new Date(doc.eventDate) > new Date() : false),
     },
     isPast: {
       type: "boolean",
-      resolve: (doc) => (doc.eventDate ? new Date(doc.eventDate) <= new Date() : false),
+      resolve: (doc: any) => (doc?.eventDate ? new Date(doc.eventDate) <= new Date() : false),
     },
   }
 );
 
-// ----------------------------
-// makeSource with Windows-compatible onSuccess
-// ----------------------------
 export default makeSource({
   contentDirPath: "content",
   documentTypes: [Post, Book, Download, Canon, Short, Print, Resource, Event],
-  contentDirExclude: [
-    "node_modules",
-    ".git",
-    ".DS_Store",
-    "Thumbs.db",
-    ".next",
-    ".contentlayer",
-  ],
+  contentDirExclude: ["node_modules", ".git", ".DS_Store", "Thumbs.db", ".next", ".contentlayer"],
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [
       rehypeSlug,
-      [
-        rehypeAutolinkHeadings,
-        {
-          behavior: "wrap",
-          properties: { className: ["heading-anchor"], "aria-hidden": "true" },
-        },
-      ],
+      [rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ["heading-anchor"], "aria-hidden": "true" } }],
     ],
   },
   onSuccess: async (importData) => {
     try {
       const { allDocuments } = await importData();
       console.log(`✅ Contentlayer processed ${allDocuments.length} documents`);
-    } catch (error) {
-      console.error("⚠️ Error in onSuccess callback:", error.message);
+    } catch (err: any) {
+      console.error("⚠️ Contentlayer onSuccess error:", err?.message || err);
     }
   },
 });
