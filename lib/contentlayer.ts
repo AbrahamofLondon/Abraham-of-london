@@ -1,10 +1,6 @@
-/* lib/contentlayer.ts - SIMPLIFIED VERSION */
-/**
- * Simple contentlayer exports without Contentlayer dependencies
- * Uses contentlayer-helper as the data source
- */
-
+/* lib/contentlayer.ts - COMPLETE CORRECTED VERSION */
 import { 
+  // Collection getters
   getAllCanons,
   getAllDownloads,
   getAllShorts,
@@ -18,23 +14,66 @@ import {
   getAllGuides,
   getAllTutorials,
   getAllCaseStudies,
-  getAllWhitepapers,
-  getAllReports,
-  getAllNewsletters,
-  getAllSermons,
-  getAllDevotionals,
-  getAllPrayers,
-  getAllTestimonies,
-  getAllPodcasts,
-  getAllVideos,
-  getAllCourses,
-  getAllLessons,
+  getAllContentlayerDocs, // ADDED
+  
+  // Server-prefixed versions
+  getServerAllPosts,
+  getServerPostBySlug,
+  getServerAllBooks,
+  getServerBookBySlug,
+  getServerAllDownloads,
+  getServerDownloadBySlug,
+  getServerAllEvents,
+  getServerEventBySlug,
+  getServerAllShorts,
+  getServerShortBySlug,
+  getServerAllCanons,
+  getServerCanonBySlug,
+  getServerAllResources,
+  getServerResourceBySlug,
+  getServerAllDocuments,
+  getServerDocumentBySlug,
+  getServerAllPrints,
+  getServerAllStrategies,
+  
+  // Type-specific getters
+  getPostBySlug,
+  getBookBySlug,
+  getDownloadBySlug,
+  getEventBySlug,
+  getShortBySlug,
+  getCanonBySlug,
+  getResourceBySlug,
+  getPrintBySlug,
+  getStrategyBySlug,
+  getDocumentBySlug as helperGetDocumentBySlug,
+  
+  // Utilities
+  sanitizeData,
+  getDownloadSizeLabel,
+  assertPublicAssetsForDownloadsAndResources,
+  recordContentView,
+  resolveDocDownloadUrl,
+  resolveDocDownloadHref,
+  getAccessLevel,
+  resolveDocCoverImage,
+  normalizeSlug,
+  getDocKind,
+  getDocHref,
+  isDraftContent,
+  isDraft,
+  toUiDoc,
+  isContentlayerLoaded,
+  assertContentlayerHasDocs,
+  
+  // Types
   ContentDoc as ContentDocBase,
   DocKind
 } from "@/lib/contentlayer-helper";
 
-// Re-export everything from contentlayer-helper
+// Re-export everything
 export {
+  // Collection getters
   getAllCanons,
   getAllDownloads,
   getAllShorts,
@@ -48,22 +87,61 @@ export {
   getAllGuides,
   getAllTutorials,
   getAllCaseStudies,
-  getAllWhitepapers,
-  getAllReports,
-  getAllNewsletters,
-  getAllSermons,
-  getAllDevotionals,
-  getAllPrayers,
-  getAllTestimonies,
-  getAllPodcasts,
-  getAllVideos,
-  getAllCourses,
-  getAllLessons
+  getAllContentlayerDocs, // ADDED
+  
+  // Server-prefixed versions
+  getServerAllPosts,
+  getServerPostBySlug,
+  getServerAllBooks,
+  getServerBookBySlug,
+  getServerAllDownloads,
+  getServerDownloadBySlug,
+  getServerAllEvents,
+  getServerEventBySlug,
+  getServerAllShorts,
+  getServerShortBySlug,
+  getServerAllCanons,
+  getServerCanonBySlug,
+  getServerAllResources,
+  getServerResourceBySlug,
+  getServerAllDocuments,
+  getServerDocumentBySlug,
+  getServerAllPrints,
+  getServerAllStrategies,
+  
+  // Type-specific getters
+  getPostBySlug,
+  getBookBySlug,
+  getDownloadBySlug,
+  getEventBySlug,
+  getShortBySlug,
+  getCanonBySlug,
+  getResourceBySlug,
+  getPrintBySlug,
+  getStrategyBySlug,
+  
+  // Utilities
+  sanitizeData,
+  getDownloadSizeLabel,
+  assertPublicAssetsForDownloadsAndResources,
+  recordContentView,
+  resolveDocDownloadUrl,
+  resolveDocDownloadHref,
+  getAccessLevel,
+  resolveDocCoverImage,
+  normalizeSlug,
+  getDocKind,
+  getDocHref,
+  isDraftContent,
+  isDraft,
+  toUiDoc,
+  isContentlayerLoaded,
+  assertContentlayerHasDocs,
 };
 
 export type { ContentDocBase as ContentlayerDocument, DocKind };
 
-// Export type aliases for compatibility
+// Export type aliases
 export type PostDocument = ContentDocBase;
 export type BookDocument = ContentDocBase;
 export type DownloadDocument = ContentDocBase;
@@ -75,7 +153,7 @@ export type StrategyDocument = ContentDocBase;
 export type ResourceDocument = ContentDocBase;
 export type DocumentTypes = ContentDocBase;
 
-// Collections
+// Pre-computed collections
 export const allPosts = getAllPosts();
 export const allBooks = getAllBooks();
 export const allDownloads = getAllDownloads();
@@ -85,6 +163,8 @@ export const allStrategies = getAllStrategies();
 export const allResources = getAllResources();
 export const allCanons = getAllCanons();
 export const allShorts = getAllShorts();
+
+// Combined collection
 export const allDocuments = [
   ...allPosts,
   ...allBooks,
@@ -97,7 +177,26 @@ export const allDocuments = [
   ...allShorts
 ];
 
-// Type guards (simplified)
+// Legacy aliases
+export const getDocumentBySlug = helperGetDocumentBySlug;
+export const getAllDocuments = () => allDocuments; // ADDED for system-health.ts
+
+// Published documents helpers
+export const getPublishedDocuments = (docs: ContentDocBase[] = allDocuments) => {
+  return docs
+    .filter((d) => d && !d.draft)
+    .sort((a, b) => new Date(b.date || "").getTime() - new Date(a.date || "").getTime());
+};
+
+export const getPublishedPosts = () => getPublishedDocuments(allPosts);
+export const getPublishedShorts = () => getPublishedDocuments(allShorts);
+export const getPublishedBooks = () => getPublishedDocuments(allBooks);
+export const getPublishedDownloads = () => getPublishedDocuments(allDownloads);
+export const getPublishedEvents = () => getPublishedDocuments(allEvents);
+export const getPublishedResources = () => getPublishedDocuments(allResources);
+export const getPublishedCanons = () => getPublishedDocuments(allCanons);
+
+// Type guards
 export function isPost(doc: any): boolean { return doc?.type === "Post" || doc?.type === "post"; }
 export function isBook(doc: any): boolean { return doc?.type === "Book" || doc?.type === "book"; }
 export function isDownload(doc: any): boolean { return doc?.type === "Download" || doc?.type === "download"; }
@@ -107,20 +206,6 @@ export function isResource(doc: any): boolean { return doc?.type === "Resource" 
 export function isCanon(doc: any): boolean { return doc?.type === "Canon" || doc?.type === "canon"; }
 export function isStrategy(doc: any): boolean { return doc?.type === "Strategy" || doc?.type === "strategy"; }
 export function isShort(doc: any): boolean { return doc?.type === "Short" || doc?.type === "short"; }
-
-// Helper functions
-export function getPublishedDocuments<T extends ContentDocBase>(docs: T[] = allDocuments as T[]): T[] {
-  return docs
-    .filter((d) => d && !d.draft)
-    .sort((a, b) => new Date(b.date || "").getTime() - new Date(a.date || "").getTime());
-}
-
-export function getDocumentBySlug(slug: string): ContentDocBase | undefined {
-  return allDocuments.find((d) => {
-    const docSlug = d.slug || d._raw?.flattenedPath?.split('/').pop();
-    return docSlug === slug;
-  });
-}
 
 // UI Utilities
 export function getCardFallbackConfig() {
@@ -184,8 +269,79 @@ export function getCardPropsForDocument(doc: ContentDocBase) {
   return base;
 }
 
-// Export the missing function that index.tsx is looking for
+// Recent content helpers
 export function getRecentShorts(limit: number = 5): ContentDocBase[] {
-  return getPublishedDocuments(allShorts)
-    .slice(0, limit);
+  return getPublishedShorts().slice(0, limit);
 }
+
+export function getRecentPosts(limit: number = 5): ContentDocBase[] {
+  return getPublishedPosts().slice(0, limit);
+}
+
+export function getRecentDownloads(limit: number = 5): ContentDocBase[] {
+  return getPublishedDownloads().slice(0, limit);
+}
+
+// Default export
+const ContentlayerExports = {
+  // Collections
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allStrategies,
+  allResources,
+  allCanons,
+  allShorts,
+  allDocuments,
+  
+  // Functions
+  getAllPosts,
+  getAllBooks,
+  getAllDownloads,
+  getAllEvents,
+  getAllPrints,
+  getAllStrategies,
+  getAllResources,
+  getAllCanons,
+  getAllShorts,
+  getPostBySlug,
+  getBookBySlug,
+  getDownloadBySlug,
+  getEventBySlug,
+  getPrintBySlug,
+  getStrategyBySlug,
+  getResourceBySlug,
+  getCanonBySlug,
+  getShortBySlug,
+  getDocumentBySlug,
+  getServerAllPosts,
+  getServerPostBySlug,
+  getServerAllBooks,
+  getServerBookBySlug,
+  getServerAllDownloads,
+  getServerDownloadBySlug,
+  getServerAllEvents,
+  getServerEventBySlug,
+  getServerAllShorts,
+  getServerShortBySlug,
+  getServerAllCanons,
+  getServerCanonBySlug,
+  getServerAllResources,
+  getServerResourceBySlug,
+  getServerAllDocuments,
+  getServerDocumentBySlug,
+  getServerAllPrints,
+  getServerAllStrategies,
+  sanitizeData,
+  getRecentShorts,
+  getRecentPosts,
+  getRecentDownloads,
+  getPublishedPosts,
+  getPublishedShorts,
+  getPublishedDocuments,
+  getAllDocuments,
+};
+
+export default ContentlayerExports;

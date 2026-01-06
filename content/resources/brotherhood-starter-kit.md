@@ -1,18 +1,28 @@
 ---
 date: "2025-01-01"
-type: "Resource"
-title: "Brotherhood Starter Kit"
-description: "Essential resources for building strong brotherhood connections"
-slug: "brotherhood-starter-kit"
-author: "Abraham of London"
-href: "/resources/brotherhood-starter-kit"  # adjust to your actual page route
-readtime: "2 mins"
-coverImage: "/assets/images/resources/brotherhood-starter-kit.jpg"
-downloadUrl: "/assets/resources/pdfs/brotherhood-starter-kit.pdf"
-tags: 
+type: Resource
+title: Brotherhood Starter Kit
+description: Essential resources for building strong brotherhood connections
+slug: brotherhood-starter-kit
+author: Abraham of London
+href: /resources/brotherhood-starter-kit
+coverImage: /assets/images/resources/brotherhood-starter-kit.jpg
+downloadUrl: /assets/resources/pdfs/brotherhood-starter-kit.pdf
+tags:
   - brotherhood
   - leadership
   - community
+ogTitle: ""
+ogDescription: ""
+socialCaption: ""
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+accessLevel: public
+lockMessage: ""
+draft: false
+readTime: 2 mins
+resourceType: guide
 ---
 # Brotherhood Starter Kit
 

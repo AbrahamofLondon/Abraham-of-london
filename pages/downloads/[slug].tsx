@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
-import remarkGfm from 'remark-gfm';
-import rehypeSlug from 'rehype-slug';
-import Head from 'next/head';
-import Layout from '@/components/Layout';
-import { getServerAllDownloads, getServerDownloadBySlug } from "@/lib/server/content";
-import DownloadHero from '@/components/downloads/DownloadHero';
-import DownloadContent from '@/components/downloads/DownloadContent';
-import DownloadCard from '@/components/downloads/DownloadCard';
-import DownloadForm from '@/components/downloads/DownloadForm';
-import RelatedDownloads from '@/components/downloads/RelatedDownloads';
-import { useAuth } from '@/hooks/useAuth';
+/* pages/downloads/[slug].tsx - FIXED */
+import React, { useMemo, useState } from "react";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote";
+import Head from "next/head";
+import Layout from "@/components/Layout";
+
+// FIXED: Import from contentlayer-helper directly
+import {
+  getServerAllDownloads,
+  getServerDownloadBySlug,
+  sanitizeData,
+} from '@/lib/contentlayer-helper';
+
+import { prepareMDX, mdxComponents } from "@/lib/server/md-utils";
+
+import DownloadHero from "@/components/downloads/DownloadHero";
+import DownloadContent from "@/components/downloads/DownloadContent";
+import DownloadCard from "@/components/downloads/DownloadCard";
+import RelatedDownloads from "@/components/downloads/RelatedDownloads";
+
+// IMPORTANT: do NOT import useAuth if it reads browser APIs during SSR.
+// If you must use it, wrap usage to run only in browser.
+// import { useAuth } from "@/hooks/useAuth";
 
 interface Download {
   title: string;
@@ -20,14 +30,13 @@ interface Download {
   description: string | null;
   category: string;
   fileUrl: string | null;
-  fileHref: string | null;
-  coverImage: string | null;
   slug: string;
   date: string | null;
   tags: string[];
-  fileSize?: string;
-  fileFormat?: string;
-  requiresEmail?: boolean;
+  fileSize: string | null;
+  fileFormat: string | null;
+  requiresEmail: boolean;
+  coverImage: string | null;
 }
 
 interface Props {
@@ -36,199 +45,92 @@ interface Props {
 }
 
 const DownloadPage: NextPage<Props> = ({ download, source }) => {
-  const { user } = useAuth();
-  const [showForm, setShowForm] = useState(download.requiresEmail && !user);
-  const [email, setEmail] = useState('');
+  // SSR-safe “auth”: default to not logged in during prerender.
+  // If you need real auth gating, implement it client-side in useEffect.
+  const isBrowser = typeof window !== "undefined";
+  const user = null;
+
+  const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
 
-  const metaDescription = download.excerpt || download.description || 'A premium resource download from Abraham of London';
+  // Only decide gating after mount/browser is available
+  useMemo(() => {
+    if (!isBrowser) return;
+    if (download.requiresEmail && !user) setShowForm(true);
+  }, [isBrowser, download.requiresEmail, user]);
 
   const handleDownload = async () => {
-    if (download.requiresEmail && !user && !email) {
+    if (download.requiresEmail && !user) {
       setShowForm(true);
       return;
     }
-
     setIsSubmitting(true);
-    
-    // In a real app, you would:
-    // 1. Track the download
-    // 2. Send email if required
-    // 3. Trigger the actual download
-    
     setTimeout(() => {
       setDownloadStarted(true);
       setIsSubmitting(false);
-      
-      // Trigger download
-      if (download.fileUrl) {
-        window.open(download.fileUrl, '_blank');
+      if (download.fileUrl && typeof window !== "undefined") {
+        window.open(download.fileUrl, "_blank");
       }
-    }, 1500);
-  };
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Submit email to your API
-    try {
-      // await submitEmailForDownload(email, download.slug);
-      handleDownload();
-    } catch (error) {
-      console.error('Failed to submit email:', error);
-      setIsSubmitting(false);
-    }
+    }, 800);
   };
 
   return (
     <Layout>
       <Head>
-        <title>{download.title} | Downloads | Abraham of London</title>
-        <meta name="description" content={metaDescription} />
-        <meta property="og:title" content={download.title} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:image" content={download.coverImage || '/assets/images/download-default.jpg'} />
-        <meta property="og:type" content="article" />
+        <title>{download.title} | Abraham of London</title>
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        {/* Download Hero Section */}
-        <DownloadHero 
+      <div className="min-h-screen bg-[#050505] selection:bg-amber-500 selection:text-black">
+        <DownloadHero
           title={download.title}
           category={download.category}
-          excerpt={download.excerpt}
           coverImage={download.coverImage}
-          tags={download.tags}
+          tags={download.tags || []}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* Main Content */}
+        <div className="mx-auto max-w-7xl px-4 py-12">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
             <main className="lg:col-span-8">
-              <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
-                {/* Download Card */}
-                <DownloadCard 
+              <div className="rounded-3xl border border-white/5 bg-zinc-900/30 p-8 backdrop-blur-xl lg:p-12">
+                <DownloadCard
                   title={download.title}
-                  description={download.description}
-                  fileSize={download.fileSize}
-                  fileFormat={download.fileFormat}
-                  date={download.date}
-                  tags={download.tags}
+                  fileSize={download.fileSize || "Variable"}
+                  fileFormat={download.fileFormat || "PDF"}
+                  tags={download.tags || []}
                 />
 
-                {/* Download Content */}
-                <div className="mt-8">
+                <div className="prose prose-invert prose-amber mt-8 max-w-none">
                   <DownloadContent>
-                    <MDXRemote {...source} />
+                    <MDXRemote {...source} components={mdxComponents} />
                   </DownloadContent>
                 </div>
 
-                {/* Download CTA */}
                 <div className="mt-12">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
-                    <div className="text-center">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                        Ready to Download?
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        Get instant access to this premium resource
-                      </p>
-                      
-                      {showForm ? (
-                        <DownloadForm 
-                          email={email}
-                          setEmail={setEmail}
-                          onSubmit={handleEmailSubmit}
-                          isSubmitting={isSubmitting}
-                        />
-                      ) : (
-                        <button
-                          onClick={handleDownload}
-                          disabled={isSubmitting}
-                          className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
-                              Preparing Download...
-                            </>
-                          ) : downloadStarted ? (
-                            'Download Started!'
-                          ) : (
-                            <>
-                              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                              </svg>
-                              Download Now ({download.fileSize || 'Free'})
-                            </>
-                          )}
-                        </button>
-                      )}
-                      
-                      {downloadStarted && (
-                        <p className="mt-4 text-sm text-green-600">
-                          ✅ Your download has started. Check your browser's download folder.
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <button
+                    onClick={handleDownload}
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl bg-amber-500 px-10 py-4 font-bold text-black transition-all hover:bg-amber-400 disabled:opacity-50 sm:w-auto"
+                  >
+                    {isSubmitting
+                      ? "Preparing..."
+                      : downloadStarted
+                        ? "Started"
+                        : "Download Now"}
+                  </button>
                 </div>
+
+                {/* If you have a DownloadForm, render it here conditionally */}
+                {/* {showForm ? <DownloadForm ... /> : null} */}
               </div>
             </main>
 
-            {/* Sidebar */}
-            <aside className="lg:col-span-4">
-              <div className="sticky top-8 space-y-8">
-                {/* Related Downloads */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Resources</h3>
-                  <RelatedDownloads currentSlug={download.slug} />
-                </div>
-
-                {/* Download Stats */}
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Resource Details</h3>
-                  <dl className="space-y-3">
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Format</dt>
-                      <dd className="font-medium text-gray-900">{download.fileFormat || 'PDF'}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">File Size</dt>
-                      <dd className="font-medium text-gray-900">{download.fileSize || 'Variable'}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Pages</dt>
-                      <dd className="font-medium text-gray-900">Premium Quality</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">License</dt>
-                      <dd className="font-medium text-gray-900">Personal Use</dd>
-                    </div>
-                  </dl>
-                </div>
-
-                {/* Premium Notice */}
-                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl shadow-lg p-6 border border-amber-200">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Premium Resource</h4>
-                      <p className="mt-1 text-sm text-gray-600">
-                        This is a premium resource. Please do not redistribute without permission.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            <aside className="lg:col-span-4 self-start lg:sticky lg:top-8">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6">
+                <h3 className="mb-4 text-lg font-bold text-white">
+                  Related Intelligence
+                </h3>
+                <RelatedDownloads currentSlug={download.slug} />
               </div>
             </aside>
           </div>
@@ -242,45 +144,43 @@ export default DownloadPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const downloads = await getServerAllDownloads();
-
-  const paths = downloads
-    .filter((download) => download && !download.draft)
-    .map((download) => download.slug)
-    .filter(Boolean)
-    .map((slug: string) => ({ params: { slug } }));
-
-  return { paths, fallback: 'blocking' };
+  return {
+    paths: downloads
+.filter((x: any) => x && !(x as any).draft)
+.filter((x: any) => {
+  const slug = (x as any).slug || (x as any)._raw?.flattenedPath || "";
+  return slug && !String(slug).includes("replace");
+})
+.map((d: any) => ({ params: { slug: d.slug } })),
+    fallback: false, // ✅ REQUIRED for export
+  };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = params?.slug as string;
-  if (!slug) return { notFound: true };
+  const data = await getServerDownloadBySlug(slug);
 
-  const downloadData = await getServerDownloadBySlug(slug);
-  if (!downloadData || downloadData.draft) return { notFound: true };
+  if (!data) return { notFound: true };
 
-  const download = {
-    title: downloadData.title || "Download",
-    excerpt: downloadData.excerpt || null,
-    description: downloadData.description || downloadData.excerpt || null,
-    category: downloadData.category || "Strategic Resource",
-    fileUrl: downloadData.fileUrl || null,
-    fileHref: downloadData.fileHref || null,
-    coverImage: downloadData.coverImage || null,
-    slug: downloadData.slug || slug,
-    date: downloadData.date || null,
-    tags: Array.isArray(downloadData.tags) ? downloadData.tags : [],
-    fileSize: downloadData.fileSize,
-    fileFormat: downloadData.fileFormat,
-    requiresEmail: downloadData.requiresEmail || false,
+  const source = await prepareMDX(data.body?.raw || data.body || " ");
+
+  const download: Download = {
+    title: data.title || "Untitled Transmission",
+    excerpt: data.excerpt || null,
+    description: data.description || null,
+    category: data.category || "Strategic Resource",
+    fileUrl: data.fileUrl || data.downloadUrl || null,
+    slug: data.slug || slug,
+    date: data.date || null,
+    tags: Array.isArray(data.tags) ? data.tags : [],
+    fileSize: data.fileSize || null,
+    fileFormat: data.fileFormat || null,
+    requiresEmail: !!data.requiresEmail,
+    coverImage: data.coverImage || null,
   };
 
-  const source = await serialize(downloadData.body || " ", {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [rehypeSlug],
-    },
-  });
-
-  return { props: { download, source }, revalidate: 3600 };
+  return {
+    props: { download: sanitizeData(download), source },
+  };
 };
+

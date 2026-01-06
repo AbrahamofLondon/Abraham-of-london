@@ -1,6 +1,6 @@
-// lib/server/md-utils.ts
-import fs from "node:fs";
-import path from "node:path";
+/* lib/server/fs-utils.ts - NODE.JS ENVIRONMENT ONLY */
+import fs from "fs";
+import path from "path";
 import { safeListFiles } from "@/lib/fs-utils";
 
 export function readTextFile(absPath: string): string {
@@ -16,12 +16,7 @@ export function listMdxFiles(absDir: string): string[] {
   return listFilesByExt(absDir, ".mdx");
 }
 
-export function listJsonFiles(absDir: string): string[] {
-  return listFilesByExt(absDir, ".json");
-}
-
 export function toPublicPathFromPublicDir(absPathInsidePublic: string): string {
-  // Example: C:\repo\public\assets\images\x.jpg -> /assets/images/x.jpg
   const publicDir = path.join(process.cwd(), "public");
   const rel = path.relative(publicDir, absPathInsidePublic).split(path.sep).join("/");
   return `/${rel}`;

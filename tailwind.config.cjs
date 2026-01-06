@@ -1,4 +1,4 @@
-// tailwind.config.js - UPDATED
+/* tailwind.config.js - HARDENED INSTITUTIONAL VERSION */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
@@ -6,7 +6,10 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
+    // STRATEGIC FIX: Include the physical Contentlayer output to prevent purged styles
+    "./.contentlayer/generated/**/*.{js,mjs}",
   ],
   future: {
     hoverOnlyWhenSupported: true,

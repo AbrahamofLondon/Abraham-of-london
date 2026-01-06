@@ -5,9 +5,16 @@ import { serialize } from 'next-mdx-remote/serialize';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import Head from 'next/head';
-import Link from 'next/link';
 import Layout from '@/components/Layout';
-import { getServerAllEvents, getServerEventBySlug } from "@/lib/server/content";
+
+import { getServerAllEvents, getServerEventBySlug } from "@/lib/contentlayer";
+
+import {
+  getAllDownloads,
+  getDownloadBySlug,
+  sanitizeDownloadData,
+} from '@/lib/contentlayer';
+
 import EventHero from '@/components/events/EventHero';
 import EventDetails from '@/components/events/EventDetails';
 import EventContent from '@/components/events/EventContent';
@@ -226,10 +233,17 @@ export default EventPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const events = await getServerAllEvents();
+  
+  const filteredEvents = events
+    .filter((event: any) => event && !event.draft)
+    .filter((event: any) => {
+      const slug = event.slug || event._raw?.flattenedPath || "";
+      return slug && !String(slug).includes("replace");
+    });
 
-  const paths = events
-    .filter((event) => event && !event.draft)
-    .map((event) => event.slug)
+  const paths = filteredEvents
+    .filter((event: any) => event && !event.draft)
+    .map((event: any) => event.slug)
     .filter(Boolean)
     .map((slug: string) => ({ params: { slug } }));
 

@@ -1,12 +1,8 @@
 {
-  "generated": "2026-01-05T10:42:01.815Z",
+  "generated": "2026-01-06T14:30:00.000Z",
   "quality": "premium",
   "tier": "free",
-  "formats": [
-    "A4",
-    "LETTER",
-    "A3"
-  ],
+  "formats": ["A4", "LETTER", "A3"],
   "total": 3,
   "successful": 3,
   "failed": 0,
@@ -17,7 +13,9 @@
       "size": 203484,
       "duration": 6824,
       "method": "puppeteer",
-      "checksum": "e4170327887f6f87"
+      "checksum": "e4170327887f6f87",
+      "status": "success",
+      "timestamp": "2026-01-06T14:30:00.000Z"
     },
     {
       "format": "LETTER",
@@ -25,7 +23,9 @@
       "size": 202987,
       "duration": 3322,
       "method": "puppeteer",
-      "checksum": "7577f619f2fdfc3b"
+      "checksum": "7577f619f2fdfc3b",
+      "status": "success",
+      "timestamp": "2026-01-06T14:30:00.000Z"
     },
     {
       "format": "A3",
@@ -33,8 +33,16 @@
       "size": 208079,
       "duration": 3337,
       "method": "puppeteer",
-      "checksum": "5a1a42eb7c57d8d0"
+      "checksum": "5a1a42eb7c57d8d0",
+      "status": "success",
+      "timestamp": "2026-01-06T14:30:00.000Z"
     }
   ],
-  "failures": []
+  "failures": [],
+  "summary": {
+    "totalSize": 614550,
+    "averageSize": 204850,
+    "averageDuration": 4494,
+    "successRate": 100
+  }
 }

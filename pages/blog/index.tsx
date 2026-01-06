@@ -5,11 +5,7 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import {
-  assertContentlayerHasDocs,
-  getPublishedPosts,
-  normalizeSlug,
-} from "@/lib/contentlayer-helper";
+import { getPublishedPosts } from '@/lib/contentlayer';
 
 type CoverAspect = "wide" | "square" | "book";
 type CoverFit = "cover" | "contain";

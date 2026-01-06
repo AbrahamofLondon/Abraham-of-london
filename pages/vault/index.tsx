@@ -17,7 +17,7 @@ import {
   resolveDocCoverImage,
   resolveDocDownloadHref,
   getAccessLevel,
-} from "@/lib/contentlayer-helper";
+} from '@/lib/contentlayer';
 import { getPDFRegistry, type PDFTier } from "@/scripts/pdf-registry";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";

@@ -125,8 +125,19 @@ async function scanForPDFContent() {
 // HELPER FUNCTIONS
 // ============================================================================
 
+function isDirectory(p: string): boolean {
+  try {
+    return !!p && fs.existsSync(p) && fs.statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 function scanDirectory(dirPath: string, patterns: string[]): string[] {
-  const files: string[] = [];
+  
+  // Windows-safe: never scandir files (e.g., .pdf).
+  if (!isDirectory(dirPath)) return [];
+const files: string[] = [];
   
   function walk(currentPath: string) {
     try {

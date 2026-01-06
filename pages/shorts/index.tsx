@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getPublishedShorts } from "@/lib/contentlayer-helper";
+import { getPublishedShorts } from '@/lib/contentlayer';
 
 type ShortDoc = {
   _id: string;

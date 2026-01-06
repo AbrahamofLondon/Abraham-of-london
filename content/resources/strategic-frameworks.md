@@ -1,14 +1,28 @@
 ---
-title: "Strategic Frameworks"
-type: "Resource"
+title: Strategic Frameworks
+type: Resource
 date: "2024-01-10"
-description: "Collection of strategic frameworks for decision-making."
-excerpt: "Tools and models for thinking strategically about complex challenges."
-author: "Abraham of London"
-coverImage: "/assets/images/canon/canon-resources.jpg"
-tags: ["strategic", "frameworks", "tools", "decision-making"]
-href: "/resources/strategic-frameworks"
+description: Collection of strategic frameworks for decision-making.
+excerpt: Tools and models for thinking strategically about complex challenges.
+author: Abraham of London
+coverImage: /assets/images/canon/canon-resources.jpg
+tags:
+  - strategic
+  - frameworks
+  - tools
+  - decision-making
+href: /resources/strategic-frameworks
 draft: false
+slug: strategic-frameworks
+ogTitle: ""
+ogDescription: ""
+socialCaption: ""
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+accessLevel: public
+lockMessage: ""
+resourceType: guide
 ---
 # Strategic Frameworks Collection
 

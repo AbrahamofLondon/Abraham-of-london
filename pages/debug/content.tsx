@@ -3,15 +3,7 @@
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Layout from "@/components/Layout";
-import {
-  getAllContentlayerDocs,
-  getPublishedDocuments,
-  getDocKind,
-  getDocHref,
-  isDraft,
-  normalizeSlug,
-  type DocKind,
-} from "@/lib/contentlayer-helper";
+import { getAllContentlayerDocs } from '@/lib/contentlayer';
 
 type Row = {
   kind: DocKind;
@@ -208,3 +200,4 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 };
 
 export default DebugContentPage;
+

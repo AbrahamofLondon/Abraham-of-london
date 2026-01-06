@@ -1,213 +1,274 @@
-// contentlayer.config.ts — Robust, backward compatible, Windows-safe
+// contentlayer.config.ts
+// Windows compatibility shim - must be at the very top
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Force set working directory for Windows
+if (process.platform === 'win32') {
+  process.chdir(__dirname);
+}
+
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-const safeString = (v: unknown, fallback = "") =>
-  typeof v === "string" ? v.trim() : fallback;
+type FieldDef =
+  | { type: "string"; required?: boolean; default?: string }
+  | { type: "boolean"; required?: boolean; default?: boolean }
+  | { type: "date"; required?: boolean }
+  | { type: "number"; required?: boolean }
+  | { type: "list"; of: { type: "string" }; required?: boolean }
+  | { type: "json"; required?: boolean };
 
-const getSlug = (doc: any) => {
-  const direct = safeString(doc?.slug, "");
-  if (direct) return direct;
+const SharedFields: Record<string, FieldDef> = {
+  title: { type: "string", required: true },
+  slug: { type: "string", required: false },
+  href: { type: "string", required: false },
 
-  const flattened = safeString(doc?._raw?.flattenedPath, "");
-  if (flattened) return flattened;
+  date: { type: "date", required: false },
+  updated: { type: "date", required: false },
 
-  const file = safeString(doc?._raw?.sourceFileName, "");
-  return file.replace(/\.mdx?$/, "") || "untitled";
+  author: { type: "string", required: false },
+  authorTitle: { type: "string", required: false },
+
+  excerpt: { type: "string", required: false },
+  description: { type: "string", required: false },
+  subtitle: { type: "string", required: false },
+
+  readTime: { type: "string", required: false },
+  draft: { type: "boolean", required: false, default: false },
+  published: { type: "boolean", required: false },
+
+  tags: { type: "list", of: { type: "string" }, required: false },
+  category: { type: "string", required: false },
+
+  ogTitle: { type: "string", required: false },
+  ogDescription: { type: "string", required: false },
+  socialCaption: { type: "string", required: false },
+  canonicalUrl: { type: "string", required: false },
+
+  coverImage: { type: "string", required: false },
+  coverAspect: { type: "string", required: false },
+  coverFit: { type: "string", required: false },
+  coverPosition: { type: "string", required: false },
+
+  featured: { type: "boolean", required: false, default: false },
+  priority: { type: "number", required: false },
+
+  accessLevel: { type: "string", required: false },
+  lockMessage: { type: "string", required: false },
+
+  tier: { type: "string", required: false },
+  requiresAuth: { type: "boolean", required: false, default: false },
+  preload: { type: "boolean", required: false, default: false },
+  version: { type: "string", required: false },
 };
 
-const getUrl =
-  (prefix: string) =>
-  (doc: any): string => {
-    const href = safeString(doc?.href, "");
-    if (href) return href;
-    return `/${prefix}/${getSlug(doc)}`;
-  };
-
-const CORE_FIELDS = {
-  title: { type: "string", required: true as const },
-  date: { type: "date", required: false as const },
-  description: { type: "string", required: false as const },
-  excerpt: { type: "string", required: false as const },
-  draft: { type: "boolean", required: false as const, default: false },
-  featured: { type: "boolean", required: false as const, default: false },
-  tags: { type: "list", of: { type: "string" }, required: false as const },
-  author: { type: "string", required: false as const, default: "Abraham of London" },
-
-  slug: { type: "string", required: false as const },
-  href: { type: "string", required: false as const },
-
-  coverImage: { type: "string", required: false as const },
-  coverAspect: {
-    type: "enum",
-    required: false as const,
-    options: ["wide", "book", "square", "portrait"],
-    default: "book",
+const computedFields = {
+  slugComputed: {
+    type: "string" as const,
+    resolve: (doc: any) => doc.slug?.trim() || doc._raw.sourceFileName.replace(/\.mdx?$/, ""),
   },
-  coverFit: {
-    type: "enum",
-    required: false as const,
-    options: ["cover", "contain", "fill", "none"],
-    default: "cover",
+  hrefComputed: {
+    type: "string" as const,
+    resolve: (doc: any) => {
+      if (doc.href) return String(doc.href);
+      const slug = (doc.slug ?? doc._raw.sourceFileName.replace(/\.mdx?$/, "")).trim();
+      const fp = String(doc._raw.flattenedPath || "");
+      const prefix = fp.startsWith("blog/")
+        ? "/blog/"
+        : fp.startsWith("books/")
+          ? "/books/"
+          : fp.startsWith("canon/")
+            ? "/canon/"
+            : fp.startsWith("downloads/")
+              ? "/downloads/"
+              : fp.startsWith("shorts/")
+                ? "/shorts/"
+                : fp.startsWith("events/")
+                  ? "/events/"
+                  : fp.startsWith("prints/")
+                    ? "/prints/"
+                    : fp.startsWith("resources/")
+                      ? "/resources/"
+                      : fp.startsWith("strategy/")
+                        ? "/strategy/"
+                        : "/";
+      return `${prefix}${slug}`;
+    },
   },
-  coverPosition: { type: "string", required: false as const, default: "center" },
-
-  // Legacy time fields
-  readTime: { type: "string", required: false as const },
-  readingTime: { type: "string", required: false as const },
-
-  // Social
-  ogTitle: { type: "string", required: false as const },
-  ogDescription: { type: "string", required: false as const },
-  socialCaption: { type: "string", required: false as const },
-  subtitle: { type: "string", required: false as const },
-  category: { type: "string", required: false as const },
-  resources: { type: "json", required: false as const },
-  relatedDownloads: { type: "list", of: { type: "string" }, required: false as const },
-  layout: { type: "string", required: false as const },
 };
 
-const createType = (
-  name: string,
-  filePathPattern: string,
-  extraFields: Record<string, any> = {},
-  extraComputed: Record<string, any> = {}
-) =>
-  defineDocumentType(() => ({
-    name,
-    filePathPattern,
-    contentType: "mdx",
-    fields: {
-      ...CORE_FIELDS,
-      ...extraFields,
-    },
-    computedFields: {
-      slugComputed: { type: "string", resolve: (doc) => getSlug(doc) },
-      url: { type: "string", resolve: getUrl(name.toLowerCase()) },
-      safeTitle: { type: "string", resolve: (doc) => safeString(doc.title, "Untitled") },
-      effectiveReadingTime: {
-        type: "string",
-        resolve: (doc) => safeString(doc.readingTime, safeString(doc.readTime, "")),
-      },
-      ...extraComputed,
-    },
-  }));
-
-export const Post = createType("Post", "blog/**/*.{md,mdx}", {
-  series: { type: "string", required: false },
-  seriesOrder: { type: "number", required: false },
-  featuredImage: { type: "string", required: false },
-  downloads: { type: "json", required: false },
-  density: { type: "string", required: false },
-  isPartTwo: { type: "boolean", required: false, default: false },
-  previousPart: { type: "string", required: false },
-});
-
-export const Book = createType("Book", "books/**/*.{md,mdx}", {
-  isbn: { type: "string", required: false },
-  accessLevel: {
-    type: "enum",
-    required: false,
-    options: ["public", "inner-circle", "patron"],
-    default: "public",
+export const Post = defineDocumentType(() => ({
+  name: "Post",
+  filePathPattern: "blog/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    featuredImage: { type: "string", required: false },
+    isPartTwo: { type: "boolean", required: false, default: false },
+    previousPart: { type: "string", required: false },
+    layout: { type: "string", required: false },
+    density: { type: "string", required: false },
+    resources: { type: "json", required: false },
+    downloads: { type: "json", required: false },
+    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
   },
-  lockMessage: { type: "string", required: false },
-});
+  computedFields,
+}));
 
-export const Canon = createType("Canon", "canon/**/*.{md,mdx}", {
-  volumeNumber: { type: "string", required: false },
-  order: { type: "number", required: false },
-  lockMessage: { type: "string", required: false },
-  accessLevel: {
-    type: "enum",
-    required: false,
-    options: ["public", "inner-circle", "patron"],
-    default: "inner-circle",
+export const Book = defineDocumentType(() => ({
+  name: "Book",
+  filePathPattern: "books/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    series: { type: "string", required: false },
   },
-});
+  computedFields,
+}));
 
-export const Download = createType(
-  "Download",
-  "downloads/**/*.{md,mdx}",
-  {
+export const Canon = defineDocumentType(() => ({
+  name: "Canon",
+  filePathPattern: "canon/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    volumeNumber: { type: "string", required: false },
+    order: { type: "number", required: false },
+  },
+  computedFields,
+}));
+
+export const Download = defineDocumentType(() => ({
+  name: "Download",
+  filePathPattern: "downloads/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    downloadType: { type: "string", required: false },
+    format: { type: "string", required: false },
+    fileFormat: { type: "string", required: false },
+    paperFormats: { type: "list", of: { type: "string" }, required: false },
     fileUrl: { type: "string", required: false },
     downloadUrl: { type: "string", required: false },
     downloadFile: { type: "string", required: false },
     pdfPath: { type: "string", required: false },
     file: { type: "string", required: false },
     fileSize: { type: "string", required: false },
-
-    // The exact “extra fields” your logs complained about:
-    fileFormat: { type: "string", required: false }, // "PDF"
-    format: { type: "string", required: false }, // legacy
-    canonicalUrl: { type: "string", required: false },
-    updated: { type: "date", required: false },
-    language: { type: "string", required: false, default: "en-GB" },
-
+    checksumMd5: { type: "string", required: false },
+    isInteractive: { type: "boolean", required: false, default: false },
+    isFillable: { type: "boolean", required: false, default: false },
+    layout: { type: "string", required: false },
+    language: { type: "string", required: false },
+    ctaPrimary: { type: "json", required: false },
+    ctaSecondary: { type: "json", required: false },
+    related: { type: "json", required: false },
     useLegacyDiagram: { type: "boolean", required: false, default: false },
     useProTip: { type: "boolean", required: false, default: false },
     useFeatureGrid: { type: "boolean", required: false, default: false },
     useDownloadCTA: { type: "boolean", required: false, default: false },
-
     proTipType: { type: "string", required: false },
     proTipContent: { type: "string", required: false },
-
-    featureGridColumns: { type: "number", required: false, default: 3 },
+    featureGridColumns: { type: "number", required: false },
     featureGridItems: { type: "json", required: false },
-
     ctaConfig: { type: "json", required: false },
-    ctaPrimary: { type: "json", required: false },
-    ctaSecondary: { type: "json", required: false },
-
     downloadProcess: { type: "json", required: false },
-    related: { type: "list", of: { type: "string" }, required: false },
-
-    // Keep these for tiering evolution
-    tier: { type: "string", required: false },
-    accessLevel: {
-      type: "enum",
-      required: false,
-      options: ["public", "registered", "inner-circle"],
-      default: "public",
-    },
-
-    fileType: {
-      type: "enum",
-      required: false,
-      options: ["pdf", "docx", "xlsx", "zip", "image", "other"],
-      default: "pdf",
-    },
-    version: { type: "string", required: false, default: "1.0" },
+    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+    contentOnly: { type: "boolean", required: false, default: false },
   },
-  {
-    hasFile: {
-      type: "boolean",
-      resolve: (doc) => !!(doc.fileUrl || doc.downloadUrl || doc.pdfPath || doc.file),
-    },
-  }
-);
+  computedFields,
+}));
 
+export const Short = defineDocumentType(() => ({
+  name: "Short",
+  filePathPattern: "shorts/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    shortType: { type: "string", required: false },
+    audience: { type: "string", required: false },
+    theme: { type: "string", required: false },
+    hook: { type: "string", required: false },
+    callToAction: { type: "string", required: false },
+  },
+  computedFields,
+}));
+
+export const Event = defineDocumentType(() => ({
+  name: "Event",
+  filePathPattern: "events/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    eventType: { type: "string", required: false },
+    location: { type: "string", required: false },
+    startDate: { type: "string", required: false },
+    endDate: { type: "string", required: false },
+    registrationUrl: { type: "string", required: false },
+    eventDate: { type: "string", required: false },
+    time: { type: "string", required: false },
+  },
+  computedFields,
+}));
+
+export const Print = defineDocumentType(() => ({
+  name: "Print",
+  filePathPattern: "prints/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    printType: { type: "string", required: false },
+    format: { type: "string", required: false },
+    paperFormats: { type: "list", of: { type: "string" }, required: false },
+    fileSize: { type: "string", required: false },
+    fileUrl: { type: "string", required: false },
+    downloadUrl: { type: "string", required: false },
+  },
+  computedFields,
+}));
+
+export const Resource = defineDocumentType(() => ({
+  name: "Resource",
+  filePathPattern: "resources/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    resourceType: { type: "string", required: false },
+    fileUrl: { type: "string", required: false },
+    downloadUrl: { type: "string", required: false },
+    links: { type: "json", required: false },
+    resources: { type: "json", required: false },
+    readtime: { type: "string", required: false },
+    readingTime: { type: "string", required: false },
+  },
+  computedFields,
+}));
+
+export const Strategy = defineDocumentType(() => ({
+  name: "Strategy",
+  filePathPattern: "strategy/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...SharedFields,
+    strategyType: { type: "string", required: false },
+    stage: { type: "string", required: false },
+    industry: { type: "string", required: false },
+    region: { type: "string", required: false },
+  },
+  computedFields,
+}));
+
+// Windows-compatible configuration
 export default makeSource({
-  contentDirPath: "content",
-  documentTypes: [Post, Book, Canon, Download],
-  contentDirExclude: ["node_modules", ".git", ".DS_Store", "Thumbs.db", ".next", ".contentlayer"],
-
+  contentDirPath: "./content",
+  documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
   mdx: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [
-      rehypeSlug,
-      [rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ["heading-anchor"] } }],
-    ],
+    remarkPlugins: [],
+    rehypePlugins: [],
   },
-
-  // Be tolerant to legacy growth without nuking builds
-  onUnknownDocuments: "skip-warn",
+  // Skip problematic documents instead of failing
+  onUnknownDocuments: "skip-warn" as const,
   disableImportAliasWarning: true,
-
-  // Windows-safe: no dynamic import here
-  onSuccess: async () => {
-    console.log("✅ Contentlayer generated successfully");
-  },
 });

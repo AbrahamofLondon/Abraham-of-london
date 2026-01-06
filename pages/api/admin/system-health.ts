@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { requireAdmin, requireRateLimit } from "@/lib/server/guards";
-import { getAllDocuments, isContentlayerLoaded } from "@/lib/contentlayer-helper"; // FIX: Use safe helper
+import { allDocuments as getAllDocuments } from '@/lib/contentlayer';
 import { jsonOk, jsonErr } from "@/lib/server/http";
 
 /**

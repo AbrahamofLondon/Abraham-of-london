@@ -1,63 +1,49 @@
-// scripts/contentlayer-build-safe.ts — ESM, Windows-safe, artifact-aware
-import { execSync } from "child_process";
+/* scripts/contentlayer-build-safe.ts — Institutional Absolute Path Wrapper */
+import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
-import { pathToFileURL } from "url";
+import { fileURLToPath } from "url";
 
-function hasGeneratedContent(): boolean {
-  const dir = path.join(process.cwd(), ".contentlayer");
-  if (!fs.existsSync(dir)) return false;
-
-  const candidates = [path.join(dir, "generated"), dir];
-  for (const p of candidates) {
-    if (!fs.existsSync(p)) continue;
-    try {
-      const files = fs.readdirSync(p).filter((f) => /\.(json|mjs|js)$/i.test(f));
-      if (files.length > 0) return true;
-    } catch {
-      // ignore
-    }
-  }
-  return false;
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "..");
 
 export async function runContentlayer(): Promise<boolean> {
-  console.log("📚 Building Contentlayer (safe)…");
-
-  const commands = ["contentlayer build", "npx contentlayer build"];
-
-  for (const cmd of commands) {
-    try {
-      console.log(`🔄 ${cmd}`);
-      execSync(cmd, { stdio: "inherit", windowsHide: true });
-      console.log("✅ Contentlayer build completed");
-      return true;
-    } catch (err: any) {
-      console.warn(`⚠️ Failed: ${cmd}`);
-      console.warn(err?.message ?? String(err));
-    }
+  console.log("📚 Initiating Hardened Contentlayer Build...");
+  const binPath = path.resolve(PROJECT_ROOT, "node_modules/contentlayer2/bin/cli.cjs");
+  
+  if (!fs.existsSync(binPath)) {
+    console.error(`💥 Fatal: Binary not found at ${binPath}`);
+    return false;
   }
 
-  if (hasGeneratedContent()) {
-    console.warn("⚠️ Using existing .contentlayer artifacts (build failed but output exists)");
-    return true;
-  }
+  return new Promise((resolve) => {
+    const child = spawn("node", [binPath, "build"], {
+      cwd: PROJECT_ROOT,
+      stdio: "inherit",
+      env: { ...process.env, NODE_OPTIONS: "--no-warnings" }
+    });
 
-  console.error("💥 Contentlayer build failed and no artifacts exist.");
-  return false;
+    child.on("close", (code) => {
+      if (code === 0) {
+        console.log("✅ Contentlayer build complete.");
+        resolve(true);
+      } else {
+        const generated = path.join(PROJECT_ROOT, ".contentlayer/generated");
+        const exists = fs.existsSync(generated) && fs.readdirSync(generated).length > 0;
+        console.warn(`⚠️ Execution code ${code}. Recovery: ${exists}`);
+        resolve(exists);
+      }
+    });
+    child.on("error", (err) => { console.error("❌ Process Error:", err.message); resolve(false); });
+  });
 }
 
-// Correct ESM “is main” on Windows
 const argv1 = process.argv[1] ? path.resolve(process.argv[1]) : "";
-const isMain = argv1 && import.meta.url === pathToFileURL(argv1).href;
+const isMain = argv1 && import.meta.url === `file:///${argv1.replace(/\\/g, "/")}`;
 
 if (isMain) {
-  runContentlayer()
-    .then((ok) => process.exit(ok ? 0 : 1))
-    .catch((e) => {
-      console.error("Unhandled error:", e);
-      process.exit(1);
-    });
+  runContentlayer().then((ok) => process.exit(ok ? 0 : 1));
 }
 
 export default runContentlayer;

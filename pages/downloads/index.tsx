@@ -13,13 +13,13 @@ import {
   resolveDocDownloadHref,
   resolveDocDownloadUrl,
   getAccessLevel,
-} from "@/lib/contentlayer-helper";
+} from '@/lib/contentlayer';
 
 // ✅ Node-only checks/sizing belong here:
 import {
   assertPublicAssetsForDownloadsAndResources,
   getDownloadSizeLabel,
-} from "@/lib/server/content";
+} from '@/lib/contentlayer';
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
@@ -226,3 +226,4 @@ export default function DownloadsIndexPage(
     </Layout>
   );
 }
+

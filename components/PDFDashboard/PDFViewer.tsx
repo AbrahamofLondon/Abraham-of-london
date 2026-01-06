@@ -77,7 +77,11 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
     loadPdf();
 
     // Cleanup blob URL on unmount or when PDF changes
-    return () => {
+    const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+
+  return () => {
       if (pdfBlobUrl) {
         URL.revokeObjectURL(pdfBlobUrl);
       }
@@ -86,7 +90,11 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // Cleanup on unmount
   useEffect(() => {
-    return () => {
+    const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+
+  return () => {
       if (pdfBlobUrl) {
         URL.revokeObjectURL(pdfBlobUrl);
       }
@@ -167,7 +175,11 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
   const status = getPDFStatus();
 
   if (!pdf) {
-    return (
+    const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+
+  return (
       <div className="lg:col-span-8 bg-gradient-to-br from-gray-900/50 to-black/50 border border-gray-800 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[600px]">
         <FileText className="h-24 w-24 text-gray-600 mb-6" />
         <h3 className="text-xl font-semibold text-gray-400 mb-2">No PDF Selected</h3>
@@ -177,6 +189,10 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
       </div>
     );
   }
+
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
 
   return (
     <div className={`lg:col-span-8 bg-gradient-to-br from-gray-900/50 to-black/50 border border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ${

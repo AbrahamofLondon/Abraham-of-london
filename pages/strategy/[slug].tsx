@@ -6,7 +6,7 @@ import {
   getAllStrategies, 
   getStrategyBySlug, 
   normalizeSlug 
-} from "@/lib/contentlayer-helper";
+} from '@/lib/contentlayer';
 
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
@@ -28,7 +28,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
-  return { paths, fallback: "blocking" };
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
@@ -93,3 +93,4 @@ const StrategyPage: NextPage<Props> = ({ strategy, source }) => {
 };
 
 export default StrategyPage;
+

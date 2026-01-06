@@ -5,9 +5,12 @@ import { serialize } from 'next-mdx-remote/serialize';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import Head from 'next/head';
-import Link from 'next/link';
 import Layout from '@/components/Layout';
-import { getServerAllResources, getServerResourceBySlug } from "@/lib/server/content";
+import { getServerAllResources, getServerResourceBySlug } from '@/lib/contentlayer';
+
+
+import { sanitizeData, mdxComponents } from '@/lib/server/md-utils';
+// --- COMPONENTS ---
 import ResourceHero from '@/components/resources/ResourceHero';
 import ResourceContent from '@/components/resources/ResourceContent';
 import ResourceCard from '@/components/resources/ResourceCard';
@@ -59,7 +62,7 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
         <meta property="og:type" content="article" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="min-h-screen bg-black">
         {/* Resource Hero Section */}
         <ResourceHero 
           title={resource.title}
@@ -75,8 +78,7 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Main Content */}
             <main className="lg:col-span-8">
-              <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
-                {/* Resource Card */}
+              <div className="bg-zinc-900/50 border border-white/10 rounded-2xl shadow-xl p-8 lg:p-12 backdrop-blur-sm">
                 <ResourceCard 
                   title={resource.title}
                   description={resource.description}
@@ -86,53 +88,44 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
                   downloads={resource.downloads}
                 />
 
-                {/* Quick Stats */}
+                {/* Quick Stats Grid */}
                 <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-center p-4 bg-white/5 rounded-lg border border-white/5">
                     <div className="flex items-center justify-center space-x-2">
-                      <BookOpen className="w-5 h-5 text-blue-600" />
-                      <span className="font-semibold text-gray-900">{resource.resourceType || 'Resource'}</span>
+                      <BookOpen className="w-5 h-5 text-amber-400" />
+                      <span className="font-semibold text-white">{resource.resourceType || 'Resource'}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">Type</p>
+                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">Type</p>
                   </div>
-                  
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-center p-4 bg-white/5 rounded-lg border border-white/5">
                     <div className="flex items-center justify-center space-x-2">
-                      <FileText className="w-5 h-5 text-green-600" />
-                      <span className="font-semibold text-gray-900">{resource.fileFormat || 'PDF'}</span>
+                      <FileText className="w-5 h-5 text-emerald-400" />
+                      <span className="font-semibold text-white">{resource.fileFormat || 'PDF'}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">Format</p>
+                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">Format</p>
                   </div>
-                  
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-center p-4 bg-white/5 rounded-lg border border-white/5">
                     <div className="flex items-center justify-center space-x-2">
-                      <Users className="w-5 h-5 text-purple-600" />
-                      <span className="font-semibold text-gray-900">
-                        {resource.difficulty || 'Intermediate'}
-                      </span>
+                      <Users className="w-5 h-5 text-blue-400" />
+                      <span className="font-semibold text-white">{resource.difficulty || 'Expert'}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">Level</p>
+                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">Level</p>
                   </div>
-                  
-                  <div className="text-center p-4 bg-amber-50 rounded-lg">
+                  <div className="text-center p-4 bg-white/5 rounded-lg border border-white/5">
                     <div className="flex items-center justify-center space-x-2">
-                      <TrendingUp className="w-5 h-5 text-amber-600" />
-                      <span className="font-semibold text-gray-900">
-                        {resource.downloads || '100+'}+
-                      </span>
+                      <TrendingUp className="w-5 h-5 text-rose-400" />
+                      <span className="font-semibold text-white">{resource.downloads || '142'}+</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">Downloads</p>
+                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">Transmissions</p>
                   </div>
                 </div>
 
-                {/* Resource Content */}
-                <div className="mt-8">
+                <div className="mt-8 prose prose-invert max-w-none">
                   <ResourceContent>
-                    <MDXRemote {...source} />
+                    <MDXRemote {...source} components={mdxComponents} />
                   </ResourceContent>
                 </div>
 
-                {/* Download Section */}
                 <div className="mt-12">
                   <ResourceDownload 
                     title={resource.title}
@@ -142,8 +135,7 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
                   />
                 </div>
 
-                {/* Resource Actions */}
-                <div className="mt-12 pt-8 border-t border-gray-200">
+                <div className="mt-12 pt-8 border-t border-white/10">
                   <ResourceActions 
                     title={resource.title}
                     url={`https://abrahamoflondon.com${resource.url}`}
@@ -156,8 +148,7 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
             {/* Sidebar */}
             <aside className="lg:col-span-4">
               <div className="sticky top-8 space-y-8">
-                {/* Resource Metadata */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
                   <ResourceMetadata 
                     author={resource.author}
                     date={formattedDate}
@@ -167,59 +158,21 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
                   />
                 </div>
 
-                {/* Related Resources */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Resources</h3>
+                <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
+                  <h3 className="text-lg font-serif font-semibold text-white mb-4">Related Intelligence</h3>
                   <RelatedResources currentSlug={resource.slugPath} />
                 </div>
 
-                {/* Premium Features */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl shadow-lg p-6 border border-emerald-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Premium Features</h3>
+                <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-amber-200 mb-4">Institutional Features</h3>
                   <ul className="space-y-3">
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">Professional-grade content</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">Ready-to-use templates</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">Step-by-step guidance</span>
-                    </li>
-                    <li className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">Commercial license included</span>
-                    </li>
+                    {['Professional-grade content', 'Ready-to-use templates', 'Step-by-step guidance', 'Commercial license included'].map((item) => (
+                      <li key={item} className="flex items-start space-x-3 text-sm text-gray-300">
+                        <Download className="w-4 h-4 text-amber-500 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
                   </ul>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="bg-gradient-to-r from-gray-900 to-black rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-                  <div className="space-y-3">
-                    <button className="w-full bg-white text-gray-900 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2">
-                      <Download className="w-4 h-4" />
-                      <span>Download PDF</span>
-                    </button>
-                    <button className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2">
-                      <Share2 className="w-4 h-4" />
-                      <span>Share Resource</span>
-                    </button>
-                    <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg px-4 py-3 hover:from-emerald-600 hover:to-teal-600 transition-all">
-                      Save to Library
-                    </button>
-                  </div>
                 </div>
               </div>
             </aside>
@@ -230,45 +183,45 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
   );
 };
 
-export default ResourcePage;
-
 export const getStaticPaths: GetStaticPaths = async () => {
   const resources = await getServerAllResources();
 
   const paths = resources
-    .filter((resource) => resource && !resource.draft)
-    .map((resource) => {
-      // Convert the resource slug to array format for catch-all route
-      const slugPath = resource.slug || resource.url?.replace(/^\/resources\//, '');
-      if (!slugPath) return null;
+    .filter((resource) => {
+      if (!resource || resource.draft) return false;
+      const slug = resource.slug || resource.url?.replace(/^\/resources\//, '');
       
+      // INSTITUTIONAL GATEKEEPER: yield to existing static folders
+      return slug !== 'strategic-frameworks' && slug !== 'index';
+    })
+    .map((resource) => {
+      const slugPath = resource.slug || resource.url?.replace(/^\/resources\//, '');
       return {
         params: { slug: slugPath.split('/').filter(Boolean) }
       };
-    })
-    .filter(Boolean) as Array<{ params: { slug: string[] } }>;
+    });
 
-  return { paths, fallback: 'blocking' };
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slugArray = params?.slug as string[];
-  if (!slugArray || !Array.isArray(slugArray) || slugArray.length === 0) {
-    return { notFound: true };
-  }
+  const slug = slugArray?.join('/') || '';
 
-  const slug = slugArray.join('/');
+  // Prevent internal conflicts
+  if (slug === 'strategic-frameworks') return { notFound: true };
+
   const resourceData = await getServerResourceBySlug(slug);
   if (!resourceData || resourceData.draft) return { notFound: true };
 
   const resource = {
-    title: resourceData.title || "Untitled Resource",
+    title: resourceData.title || "Untitled Intelligence",
     excerpt: resourceData.excerpt || resourceData.description || null,
     description: resourceData.description || resourceData.excerpt || null,
     date: resourceData.date || null,
     coverImage: resourceData.coverImage || null,
     tags: Array.isArray(resourceData.tags) ? resourceData.tags : [],
-    author: resourceData.author || null,
+    author: resourceData.author || "Abraham of London",
     url: `/resources/${resourceData.slug || slug}`,
     slugPath: resourceData.slug || slug,
     resourceType: resourceData.resourceType,
@@ -286,5 +239,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     },
   });
 
-  return { props: { resource, source }, revalidate: 3600 };
+  return { props: { resource: sanitizeData(resource), source }, revalidate: 3600 };
 };
+
+export default ResourcePage;

@@ -1,18 +1,20 @@
-/* pages/api/content/initialize.ts */
+/* pages/api/content/initialize.ts - RECONCILED INSTITUTIONAL VERSION */
 import type { NextApiRequest, NextApiResponse } from "next";
+
+// STRATEGIC FIX: Use the getServer async wrappers for mandatory sanitization
 import { 
-  getAllCanons, 
-  getAllDownloads, 
-  getAllBooks, 
-  getPublishedShorts 
-} from "@/lib/server/content";
+  getServerAllCanons, 
+  getServerAllDownloads, 
+  getServerAllBooks, 
+  getServerAllShorts 
+} from '@/lib/contentlayer';
 
 type ContentMetadata = {
   slug: string;
   title: string;
   type: string;
-  date?: string;
-  excerpt?: string;
+  date: string | null;
+  excerpt: string | null;
 };
 
 type InitializeResponse = {
@@ -23,62 +25,72 @@ type InitializeResponse = {
 
 /**
  * CONTENT HYDRATION ENDPOINT
- * Outcome: Compiles a lightweight metadata index for client-side search/caching.
+ * Outcome: Compiles a lightweight, sanitized metadata index for search and caching.
  */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<InitializeResponse>
 ) {
+  // Method Guard: Only allow GET transmissions
   if (req.method !== "GET") {
     res.setHeader("Allow", ["GET"]);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
+    return res.status(405).json({
+      success: false,
+      content: [],
+      timestamp: new Date().toISOString()
+    });
   }
 
   try {
+    // Concurrent retrieval from the Hardened Content Engine
     const [canons, downloads, books, shorts] = await Promise.all([
-      getAllCanons(),
-      getAllDownloads(),
-      getAllBooks(),
-      getPublishedShorts()
+      getServerAllCanons(),
+      getServerAllDownloads(),
+      getServerAllBooks(),
+      getServerAllShorts()
     ]);
 
-    // FIXED: Ensured slug is always a string and mapped explicitly to satisfy ContentMetadata type
+    // Metadata Normalization: Strict mapping to ContentMetadata interface
     const normalizedContent: ContentMetadata[] = [
-      ...canons.map(c => ({
+      ...canons.map((c: any) => ({
         slug: c.slug || "",
         title: c.title || "Untitled",
         type: "canon",
-        date: c.date,
-        excerpt: c.excerpt || ""
+        date: c.date || null,
+        excerpt: c.excerpt || c.description || null
       })),
-      ...downloads.map(d => ({
+      ...downloads.map((d: any) => ({
         slug: d.slug || "",
-        title: d.title || "Untitled",
+        title: d.title || "Untitled Transmission",
         type: "download",
-        date: d.date,
-        excerpt: d.excerpt || ""
+        date: d.date || null,
+        excerpt: d.excerpt || d.description || null
       })),
-      ...books.map(b => ({
+      ...books.map((b: any) => ({
         slug: b.slug || "",
-        title: b.title || "Untitled",
+        title: b.title || "Untitled Volume",
         type: "book",
-        date: b.date,
-        excerpt: b.excerpt || ""
+        date: b.date || null,
+        excerpt: b.excerpt || b.description || null
       })),
-      ...shorts.map(s => ({
+      ...shorts.map((s: any) => ({
         slug: s.slug || "",
-        title: s.title || "Untitled",
+        title: s.title || "Field Note",
         type: "short",
-        date: s.date,
-        excerpt: s.excerpt || ""
+        date: s.date || null,
+        excerpt: s.excerpt || s.description || null
       }))
-    ].filter(item => item.slug !== ""); // Filter out any empty slugs to maintain index integrity
+    ].filter(item => item.slug !== ""); // Index Integrity Check
 
+    // Temporal Sorting: Newest transmissions first
     normalizedContent.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
+
+    // Cache Control: Allow client-side caching for 5 minutes
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
 
     return res.status(200).json({
       success: true,
@@ -87,7 +99,8 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error("[CONTENT_INITIALIZE_FAILURE]", error);
+    console.error("❌ [API_CONTENT_ERROR] Hydration failed:", error);
+    
     return res.status(500).json({
       success: false,
       content: [],

@@ -4,13 +4,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ArrowRight, Box, Terminal } from "lucide-react";
 import Layout from "@/components/Layout";
-import {
-  getPublishedDocuments,
-  getDocHref,
-  getDocKind,
-  normalizeSlug,
-  resolveDocCoverImage,
-} from "@/lib/contentlayer-helper";
+import { getPublishedDocuments } from '@/lib/contentlayer';
 
 type Item = {
   key: string;

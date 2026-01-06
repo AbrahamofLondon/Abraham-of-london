@@ -1,10 +1,10 @@
-// lib/imports.ts
+// lib/imports.ts - FIXED
 // Central barrel export for client-safe utilities
 
 export { siteConfig, getPageTitle, absUrl } from "./siteConfig";
 
 // Main exports - simple and direct
-export { default as ContentHelper } from "./contentlayer-helper";
+// Remove default export since contentlayer-helper doesn't have one
 export * from "./contentlayer-helper";
 
 // Export other utilities

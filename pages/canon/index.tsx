@@ -1,3 +1,4 @@
+/* pages/canon/index.tsx - HYDRATED INSTITUTIONAL VERSION */
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -5,12 +6,15 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 
-// FIX: Removed 'Canon' type import as it is not exported by the module
+// INSTITUTIONAL FIX: Import from the hardened compat layer instead of legacy lib/canon
 import {
   getAllCanons,
   getAccessLevel,
-  resolveCanonSlug,
-} from "@/lib/canon";
+  normalizeSlug,
+  getDocHref,
+  isDraftContent,
+} from "@/lib/contentlayer-compat";
+import { sanitizeData } from "@/lib/server/md-utils";
 
 // -----------------------------------------------------------------------------
 // TYPES
@@ -20,13 +24,14 @@ type AccessLevel = "public" | "inner-circle" | "private";
 
 type CanonItem = {
   title: string;
-  subtitle?: string | null;
-  excerpt?: string | null;
+  subtitle: string | null;
+  excerpt: string | null;
   slug: string;
+  href: string;
   accessLevel: AccessLevel;
-  coverImage?: string | null;
-  date?: string | null;
-  readTime?: string | null;
+  coverImage: string | null;
+  date: string | null;
+  readTime: string | null;
 };
 
 type CanonIndexProps = {
@@ -45,54 +50,17 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.o
 );
 
 // -----------------------------------------------------------------------------
-// HELPERS (EXPORT-SAFE)
+// HELPERS (SANITY CHECK)
 // -----------------------------------------------------------------------------
 
-function safeString(v: unknown): string {
-  return typeof v === "string" ? v : v == null ? "" : String(v);
-}
-
-function safeTitle(v: unknown): string {
-  const s = safeString(v).trim();
-  return s || "Canon Entry";
-}
-
-function cleanSlug(input: unknown): string {
-  const s = safeString(input)
-    .trim()
-    .toLowerCase()
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "");
-
-  if (!s) return "";
-  if (s.includes("http://") || s.includes("https://")) return "";
-  if (s.includes("?") || s.includes("#")) return "";
-  if (s.includes("..")) return "";
-  if (!/^[a-z0-9/_-]+$/i.test(s)) return "";
-
-  return s;
-}
-
-function isDraft(doc: any): boolean {
-  return doc?.draft === true || doc?.draft === "true";
-}
-
 function toAccessLevel(v: unknown): AccessLevel {
-  const n = safeString(v).trim().toLowerCase();
-  if (n === "inner-circle" || n === "private" || n === "public") return n;
+  const n = String(v || "").trim().toLowerCase();
+  if (n === "inner-circle" || n === "private" || n === "public") return n as AccessLevel;
   return "public";
 }
 
-function toIsoDate(v: unknown): string | null {
-  const s = safeString(v).trim();
-  if (!s) return null;
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
-}
-
 // -----------------------------------------------------------------------------
-// PAGE
+// PAGE COMPONENT
 // -----------------------------------------------------------------------------
 
 const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts }) => {
@@ -102,7 +70,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts }) => {
   const canonicalUrl = `${SITE}/canon`;
 
   return (
-    <Layout title={title} description={description} canonicalUrl={canonicalUrl} ogType="website">
+    <Layout title={title} description={description}>
       <Head>
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={title} />
@@ -111,150 +79,126 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts }) => {
         <meta property="og:url" content={canonicalUrl} />
       </Head>
 
-      {/* HERO (CANON ONLY) */}
-      <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-              Canon · Foundations
-            </p>
-
-            <h1 className="mt-3 font-serif text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              The Canon
-            </h1>
-
-            <p className="mt-5 text-base leading-relaxed text-gray-300 sm:text-lg">
-              This is the long-form spine of Abraham of London: purpose, governance,
-              civilisation, stewardship, and legacy — written for founders, fathers,
-              and leaders who prefer structure over noise.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3 text-xs uppercase tracking-[0.18em]">
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-gray-200">
-                Total: {counts.total}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-amber-200">
-                Public: {counts.public}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-amber-400/20 bg-black/20 px-4 py-2 text-amber-200/80">
-                Inner: {counts.inner}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-black/20 px-4 py-2 text-gray-300">
-                Private: {counts.private}
-              </span>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link
-                href="/canon/the-architecture-of-human-purpose"
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-7 py-3.5 text-sm font-semibold text-black shadow-lg shadow-amber-900/30 transition-all hover:scale-105 hover:shadow-xl"
-              >
-                Start with Volume One
-                <span>→</span>
-              </Link>
-
-              <Link
-                href="/inner-circle"
-                className="inline-flex items-center gap-2 rounded-xl border border-amber-400/60 bg-amber-400/5 px-7 py-3.5 text-sm font-semibold text-amber-100 transition-all hover:scale-105 hover:bg-amber-500/10"
-              >
-                Inner Circle access
-                <span>↗</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* LIST */}
-      <section className="bg-white py-14 dark:bg-slate-950">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
-                Library
+      <div className="min-h-screen bg-black text-white">
+        {/* HERO SECTION */}
+        <section className="relative isolate overflow-hidden border-b border-white/10 bg-slate-950">
+          <div className="mx-auto max-w-7xl px-6 py-20">
+            <div className="max-w-3xl">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400">
+                Canon · Foundations
               </p>
-              <h2 className="mt-2 font-serif text-3xl font-light tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                Browse canon entries
-              </h2>
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-gray-300">
-                Public entries are readable immediately. Inner Circle and Private entries
-                are listed for transparency, but remain gated.
+
+              <h1 className="mt-6 font-serif text-5xl font-bold tracking-tight text-white sm:text-6xl">
+                The Canon
+              </h1>
+
+              <p className="mt-8 text-lg leading-relaxed text-gray-400">
+                This is the long-form spine of Abraham of London: purpose, governance,
+                civilisation, stewardship, and legacy — written for founders, fathers,
+                and leaders who prefer structure over noise.
               </p>
-            </div>
 
-            <Link
-              href="/content"
-              className="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-700 transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200"
-            >
-              Explore all content
-            </Link>
-          </div>
+              {/* LIVE COUNTS */}
+              <div className="mt-10 flex flex-wrap gap-3 text-[10px] font-black uppercase tracking-[0.2em]">
+                <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-gray-400">
+                  Total: {counts.total}
+                </span>
+                <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-amber-200">
+                  Public: {counts.public}
+                </span>
+                <span className="rounded-full border border-amber-400/20 bg-black/40 px-4 py-2 text-amber-200/60">
+                  Inner: {counts.inner}
+                </span>
+              </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {items.map((item) => {
-              const href = `/canon/${item.slug}`;
-              const badge =
-                item.accessLevel === "public"
-                  ? { label: "Public", className: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200" }
-                  : item.accessLevel === "inner-circle"
-                  ? { label: "Inner Circle", className: "border-amber-500/20 bg-black/20 text-amber-700/80 dark:text-amber-200/80" }
-                  : { label: "Private", className: "border-slate-300 bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-black/20 dark:text-gray-300" };
-
-              const subtitle = safeString(item.subtitle).trim();
-              const excerpt = safeString(item.excerpt).trim();
-              const date = item.date ? new Date(item.date).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" }) : null;
-
-              return (
+              <div className="mt-12 flex flex-wrap gap-4">
                 <Link
-                  key={item.slug}
-                  href={href}
-                  className="group block rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
+                  href="/canon/the-architecture-of-human-purpose"
+                  className="rounded-xl bg-amber-500 px-8 py-4 text-sm font-bold text-black transition-all hover:scale-105 hover:bg-amber-400"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="font-serif text-xl font-semibold text-slate-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">
-                        {item.title}
-                      </h3>
+                  Start with Volume One →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                      {subtitle ? (
-                        <p className="mt-1 text-sm text-slate-600 dark:text-gray-300">
-                          {subtitle}
-                        </p>
-                      ) : null}
+        {/* LIBRARY LIST */}
+        <section className="py-20">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-500">
+                  Library
+                </p>
+                <h2 className="mt-3 font-serif text-4xl font-bold text-white">
+                  Browse Canon Entries
+                </h2>
+              </div>
+              <Link
+                href="/content"
+                className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gray-300 transition-all hover:bg-white/10"
+              >
+                Explore All Content
+              </Link>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {items.map((item) => {
+                const badgeClass =
+                  item.accessLevel === "public"
+                    ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+                    : item.accessLevel === "inner-circle"
+                    ? "border-amber-500/20 bg-black/40 text-amber-200/70"
+                    : "border-white/10 bg-white/5 text-gray-400";
+
+                return (
+                  <Link
+                    key={item.slug}
+                    href={item.href}
+                    className="group block rounded-3xl border border-white/5 bg-zinc-900/50 p-8 transition-all hover:border-amber-500/30 hover:bg-zinc-900/80"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-serif text-2xl font-bold text-white transition-colors group-hover:text-amber-400">
+                          {item.title}
+                        </h3>
+                        {item.subtitle && (
+                          <p className="mt-2 text-sm font-medium text-gray-400">
+                            {item.subtitle}
+                          </p>
+                        )}
+                      </div>
+                      <span
+                        className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${badgeClass}`}
+                      >
+                        {item.accessLevel.replace("-", " ")}
+                      </span>
                     </div>
 
-                    <span
-                      className={`inline-flex flex-shrink-0 items-center rounded-full border px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] ${badge.className}`}
-                    >
-                      {badge.label}
-                    </span>
-                  </div>
+                    {item.excerpt && (
+                      <p className="mt-6 line-clamp-3 text-sm leading-relaxed text-gray-400 group-hover:text-gray-300">
+                        {item.excerpt}
+                      </p>
+                    )}
 
-                  {excerpt ? (
-                    <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-slate-700 dark:text-gray-300">
-                      {excerpt}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4 text-xs text-slate-500 dark:border-slate-800 dark:text-gray-400">
-                    <span className="uppercase tracking-[0.15em]">/canon/{item.slug}</span>
-                    <span className="flex items-center gap-3">
-                      {date ? <span>{date}</span> : null}
-                      {item.readTime ? <span>{item.readTime}</span> : null}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-
-          {items.length === 0 ? (
-            <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-8 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-gray-300">
-              No canon entries found yet.
+                    <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-6 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      <span>{item.date || "Legacy Content"}</span>
+                      {item.readTime && <span>{item.readTime}</span>}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-          ) : null}
-        </div>
-      </section>
+
+            {items.length === 0 && (
+              <div className="rounded-3xl border border-dashed border-white/10 p-20 text-center text-gray-500">
+                Institutional documents are currently being indexed.
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </Layout>
   );
 };
@@ -266,33 +210,29 @@ export default CanonIndexPage;
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
-  // FIX: Removed explicit ': Canon[]' type annotation
+  // Use the hardened compat getter
   const canons = getAllCanons();
 
   const items: CanonItem[] = canons
-    .filter((c: any) => c && !isDraft(c))
+    .filter((c: any) => c && !isDraftContent(c))
     .map((c: any) => {
-      const slug = cleanSlug(resolveCanonSlug(c));
-      const accessLevel = toAccessLevel(getAccessLevel(c));
-
+      // Logic: Ensure we map Contentlayer fields to our sanitized CanonItem type
       return {
-        title: safeTitle((c as any)?.title),
-        subtitle: safeString((c as any)?.subtitle).trim() || null,
-        excerpt: safeString((c as any)?.excerpt).trim() || null,
-        coverImage: safeString((c as any)?.coverImage).trim() || null,
-        date: toIsoDate((c as any)?.date),
-        readTime: safeString((c as any)?.readTime).trim() || null,
-        slug,
-        accessLevel,
+        title: c.title || "Untitled Canon",
+        subtitle: c.subtitle || null,
+        excerpt: c.excerpt || c.description || null,
+        coverImage: c.coverImage || null,
+        slug: normalizeSlug(c.slug || c._raw.flattenedPath),
+        href: getDocHref(c),
+        accessLevel: toAccessLevel(getAccessLevel(c)),
+        date: c.date ? new Date(c.date).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" }) : null,
+        readTime: c.readTime || null,
       };
     })
-    .filter((x: any) => Boolean(x.slug))
-    // Sort newest-first if date exists; else stable by title
     .sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
-      if (da !== db) return db - da;
-      return a.title.localeCompare(b.title);
+      return db - da || a.title.localeCompare(b.title);
     });
 
   const counts = items.reduce(
@@ -306,8 +246,9 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     { total: 0, public: 0, inner: 0, private: 0 }
   );
 
+  // SANITIZE DATA: The final shield against serialization errors
   return {
-    props: { items, counts },
+    props: sanitizeData({ items, counts }),
     revalidate: 1800,
   };
 };

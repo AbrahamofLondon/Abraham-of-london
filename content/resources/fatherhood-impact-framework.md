@@ -1,14 +1,24 @@
 ---
 date: "2025-01-15"
-type: "Resource"
-title: "Fatherhood Impact Framework"
-description: "A strategic model for fathers who want to shape identity, character, and destiny across generations."
-slug: "fatherhood-impact-framework"
-author: "Abraham of London"
-readtime: "4 mins"
-coverImage: "/assets/images/canon/canon-resources.jpg"
-downloadUrl: "/assets/resources/pdfs/fatherhood-impact-framework.pdf"
-href: "/resources/fatherhood-impact-framework"  # adjust to your actual page route
+type: Resource
+title: Fatherhood Impact Framework
+description: A strategic model for fathers who want to shape identity, character, and destiny across generations.
+slug: fatherhood-impact-framework
+author: Abraham of London
+coverImage: /assets/images/canon/canon-resources.jpg
+downloadUrl: /assets/resources/pdfs/fatherhood-impact-framework.pdf
+href: /resources/fatherhood-impact-framework
+ogTitle: ""
+ogDescription: ""
+socialCaption: ""
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+accessLevel: public
+lockMessage: ""
+draft: false
+readTime: 4 mins
+resourceType: guide
 ---
 # Fatherhood Impact Framework
 
