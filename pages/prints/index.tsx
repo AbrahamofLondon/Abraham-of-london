@@ -12,7 +12,7 @@ import {
   normalizeSlug,
   getDocHref,
   resolveDocCoverImage,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/contentlayer";
 
 type PrintItem = {
   slug: string;

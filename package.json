@@ -112,7 +112,7 @@
     "dev:init": "pnpm env:setup && pnpm db:setup && pnpm db:seed && pnpm dev",
     "dev:init:full": "pnpm clean:full && pnpm install && pnpm env:setup && pnpm db:setup && pnpm db:seed && pnpm dev",
     "dev:windows": "cross-env IS_WINDOWS=true next dev",
-    "build": "next build",
+    "build": "pnpm env:check && pnpm content:full && next build",
     "build:simple": "node build-simple.js",
     "build:no-contentlayer": "cross-env DISABLE_CONTENTLAYER=true next build",
     "build:check": "pnpm env:check && pnpm content:full && pnpm build",

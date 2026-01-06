@@ -4,13 +4,20 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
-import { getAllContentlayerDocs } from '@/lib/contentlayer';
+
+import {
+  getAllContentlayerDocs,
+  getDocHref,
+  isDraftContent,
+  normalizeSlug,
+  toUiDoc,
+  type ContentDoc,
+} from "@/lib/contentlayer";
 
 // Use the institutional MDX pipeline (export-safe)
 import { prepareMDX } from "@/lib/server/md-utils";
 import { sanitizeData } from "@/lib/server/md-utils";
 
-// Define the return type of toUiDoc based on the helper file
 type UiDoc = ReturnType<typeof toUiDoc>;
 
 type Props = {
@@ -32,13 +39,12 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllContentlayerDocs()
-    .filter((d) => d && !isDraftContent(d))
-    .filter((d) => getDocHref(d).startsWith("/content/"));
+  const docs = (getAllContentlayerDocs() || [])
+    .filter((d: any) => d && !isDraftContent(d))
+    .filter((d: any) => getDocHref(d).startsWith("/content/"));
 
   const paths = docs
-    .map((d) => {
-      // Always derive slug from href (most robust across types)
+    .map((d: any) => {
       const href = getDocHref(d);
       const slug = normalizeSlug(String(href).replace(/^\/content\//, ""));
       return slug ? { params: { slug } } : null;
@@ -55,9 +61,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const targetHref = `/content/${slug}`;
 
-  const rawDoc: ContentDoc | undefined = getAllContentlayerDocs()
-    .filter((d) => d && !isDraftContent(d))
-    .find((d) => getDocHref(d) === targetHref);
+  const rawDoc: ContentDoc | undefined = (getAllContentlayerDocs() || [])
+    .filter((d: any) => d && !isDraftContent(d))
+    .find((d: any) => getDocHref(d) === targetHref);
 
   if (!rawDoc) {
     console.warn(`⚠️ Content not found for slug: ${slug}`);
@@ -66,14 +72,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const doc = toUiDoc(rawDoc);
 
-  // Central hardened MDX pipeline
-  const rawMdx = rawDoc?.body?.raw ?? rawDoc?.body ?? "";
+  const rawMdx = (rawDoc as any)?.body?.raw ?? (rawDoc as any)?.body ?? "";
   const source = await prepareMDX(typeof rawMdx === "string" ? rawMdx : "");
 
   return {
     props: {
-      doc: sanitizeData(doc), // JSON-safe
-      source, // DO NOT sanitize
+      doc: sanitizeData(doc),
+      source,
       canonicalPath: getDocHref(rawDoc),
     },
     revalidate: 1800,

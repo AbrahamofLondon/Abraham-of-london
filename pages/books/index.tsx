@@ -11,7 +11,7 @@ import {
   assertContentlayerHasDocs,
   getAllBooks,
   normalizeSlug,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/contentlayer";
 
 export type BookListItem = {
   slug: string;

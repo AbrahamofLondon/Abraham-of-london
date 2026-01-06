@@ -7,7 +7,7 @@ import {
   assertContentlayerHasDocs,
   getAllEvents,
   normalizeSlug,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/contentlayer";
 
 type EventItem = {
   _id: string;

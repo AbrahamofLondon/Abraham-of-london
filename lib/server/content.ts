@@ -3,5 +3,5 @@
 export * from "@/lib/contentlayer";
 
 // Default export
-import ContentHelper from "@/lib/contentlayer";
+import * as ContentHelper from "@/lib/contentlayer";
 export default ContentHelper;

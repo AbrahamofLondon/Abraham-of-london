@@ -11,7 +11,7 @@ import {
   getServerAllDownloads,
   getServerDownloadBySlug,
   sanitizeData,
-} from '@/lib/contentlayer-helper';
+} from "@/lib/contentlayer";
 
 import { prepareMDX, mdxComponents } from "@/lib/server/md-utils";
 
@@ -183,4 +183,5 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: { download: sanitizeData(download), source },
   };
 };
+
 

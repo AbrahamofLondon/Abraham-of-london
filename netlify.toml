@@ -9,9 +9,7 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    nextRuntime = "nodejs20.x"
-    generateStaticParams = true
+  # REMOVED unsupported inputs - the plugin works without these
 
 [build.environment]
   NODE_VERSION = "20.11.1"

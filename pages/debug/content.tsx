@@ -3,7 +3,26 @@
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Layout from "@/components/Layout";
-import { getAllContentlayerDocs } from '@/lib/contentlayer';
+
+import {
+  getAllContentlayerDocs,
+  getPublishedDocuments,
+  getDocKind,
+  normalizeSlug,
+  getDocHref,
+  isDraft,
+} from "@/lib/contentlayer";
+
+type DocKind =
+  | "post"
+  | "canon"
+  | "resource"
+  | "download"
+  | "print"
+  | "book"
+  | "event"
+  | "short"
+  | "strategy";
 
 type Row = {
   kind: DocKind;
@@ -33,7 +52,7 @@ const ALL_KINDS: DocKind[] = [
 ];
 
 const DebugContentPage: NextPage<Props> = ({ nodeEnv, totals, rows, warnings }) => {
-  // Hard gate in prod to avoid exposing internals
+  // Hard gate in prod to avoid exposing internals (AND avoid accidental prerender breakage)
   if (nodeEnv === "production") {
     return (
       <Layout title="Not Found">
@@ -51,10 +70,8 @@ const DebugContentPage: NextPage<Props> = ({ nodeEnv, totals, rows, warnings }) 
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
             System Diagnostics
           </p>
-          <h1 className="font-serif text-4xl font-semibold text-cream">
-            Contentlayer Registry
-          </h1>
-          
+          <h1 className="font-serif text-4xl font-semibold text-cream">Contentlayer Registry</h1>
+
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-black/40 p-5 shadow-xl">
               <div className="text-xs uppercase tracking-widest text-gray-500">Total documents</div>
@@ -72,7 +89,9 @@ const DebugContentPage: NextPage<Props> = ({ nodeEnv, totals, rows, warnings }) 
 
           {warnings.length > 0 && (
             <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
-              <div className="text-sm font-bold text-red-400 uppercase tracking-widest">Critical Warnings</div>
+              <div className="text-sm font-bold text-red-400 uppercase tracking-widest">
+                Critical Warnings
+              </div>
               <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-300">
                 {warnings.map((w, i) => (
                   <li key={i}>{w}</li>
@@ -103,7 +122,9 @@ const DebugContentPage: NextPage<Props> = ({ nodeEnv, totals, rows, warnings }) 
 
               <div className="col-span-4 space-y-3 pl-4">
                 {r.sample.length === 0 ? (
-                  <div className="text-[10px] uppercase tracking-widest text-gray-600 italic">Empty Collection</div>
+                  <div className="text-[10px] uppercase tracking-widest text-gray-600 italic">
+                    Empty Collection
+                  </div>
                 ) : (
                   r.sample.map((s, i) => (
                     <div key={i} className="rounded-xl border border-white/5 bg-white/[0.03] p-3 text-[11px]">
@@ -121,12 +142,12 @@ const DebugContentPage: NextPage<Props> = ({ nodeEnv, totals, rows, warnings }) 
         </div>
 
         <div className="mt-12 flex items-center gap-4 rounded-2xl border border-gold/20 bg-gold/5 p-6">
-            <div className="h-2 w-2 rounded-full bg-gold animate-pulse" />
-            <p className="text-xs leading-relaxed text-gray-300 italic">
-                <b>Internal Systems Note:</b> If the Kingdom Vault displays 0 items, check the <b>Total</b> column above. 
-                If <b>Total</b> is 0, verify the content folder names match the schema. If <b>Published</b> is 0 but <b>Total</b> is high, 
-                verify your frontmatter <code>draft</code> and <code>date</code> keys are valid.
-            </p>
+          <div className="h-2 w-2 rounded-full bg-gold animate-pulse" />
+          <p className="text-xs leading-relaxed text-gray-300 italic">
+            <b>Internal Systems Note:</b> If the Kingdom Vault displays 0 items, check the <b>Total</b> column above.
+            If <b>Total</b> is 0, verify the content folder names match the schema. If <b>Published</b> is 0 but <b>Total</b> is high,
+            verify your frontmatter <code>draft</code> and <code>date</code> keys are valid.
+          </p>
         </div>
       </main>
     </Layout>
@@ -136,43 +157,50 @@ const DebugContentPage: NextPage<Props> = ({ nodeEnv, totals, rows, warnings }) 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const nodeEnv = process.env.NODE_ENV ?? "development";
 
-  const all = getAllContentlayerDocs();
-  const publishedCount = getPublishedDocuments().length;
+  // Hard gate server-side as well: ensures Next export never leaks it
+  if (nodeEnv === "production") {
+    return { notFound: true };
+  }
+
+  const all = getAllContentlayerDocs() ?? [];
+  const published = getPublishedDocuments() ?? [];
+  const publishedCount = published.length;
   const draftDocs = all.filter((d: any) => isDraft(d));
 
   const warnings: string[] = [];
 
-  // 1. Sanity Check: Content Engine
+  // 1) Content Engine sanity check
   if (!Array.isArray(all) || all.length === 0) {
     warnings.push("FATAL: getAllContentlayerDocs() returned 0 documents. Contentlayer build step likely failed.");
   }
 
-  // 2. Collision Detection: Slug Safety
+  // 2) Collision detection (slug across kinds)
   const slugMap = new Map<string, string[]>();
   for (const d of all) {
-    const slug = normalizeSlug(d);
-    const kind = getDocKind(d);
+    const slug = String(normalizeSlug(d) ?? "");
+    const kind = String(getDocKind(d) ?? "document");
     const arr = slugMap.get(slug) ?? [];
     arr.push(kind);
     slugMap.set(slug, arr);
   }
   const dupes = [...slugMap.entries()].filter(([, kinds]) => new Set(kinds).size > 1);
   if (dupes.length > 0) {
+    const [slug, kinds] = dupes[0];
     warnings.push(
-      `COLLISION: Duplicate slugs found across collections. Fix immediately to avoid 404s. Example: "${dupes[0][0]}" exists in both [${[...new Set(dupes[0][1])].join(", ")}].`
+      `COLLISION: Duplicate slugs found across collections. Example: "${slug}" exists in both [${[...new Set(kinds)].join(", ")}].`
     );
   }
 
-  // 3. Bucket Construction: Manually sorting kinds
+  // 3) Rows per kind
   const rows: Row[] = ALL_KINDS.map((kind) => {
-    const allOfKind = all.filter((d: any) => getDocKind(d) === kind);
-    const publishedOfKind = allOfKind.filter((d: any) => !isDraft(d));
+    const allOfKind = all.filter((d: any) => String(getDocKind(d)) === kind);
     const draftsOfKind = allOfKind.filter((d: any) => isDraft(d));
+    const publishedOfKind = allOfKind.filter((d: any) => !isDraft(d));
 
     const sample = publishedOfKind.slice(0, 3).map((d: any) => ({
       title: String(d?.title ?? "Untitled"),
-      slug: normalizeSlug(d),
-      href: getDocHref(d),
+      slug: String(normalizeSlug(d) ?? ""),
+      href: String(getDocHref(d) ?? ""),
     }));
 
     return {
@@ -195,9 +223,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       rows,
       warnings,
     },
-    revalidate: 10, // Faster refresh for debugging
+    revalidate: 10,
   };
 };
 
 export default DebugContentPage;
-

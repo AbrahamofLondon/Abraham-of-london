@@ -12,7 +12,7 @@ import {
   getDocHref,
   normalizeSlug,
   resolveDocCoverImage,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/contentlayer";
 
 type ResourceMeta = {
   slug: string;
