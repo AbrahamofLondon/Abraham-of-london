@@ -2,6 +2,13 @@
 import * as React from "react";
 import * as Lucide from "lucide-react";
 
+import { CoverFrame } from "@/components/media/CoverFrame";
+import { createDynamicComponent as componentResolver } from "@/components/mdx/component-resolver";
+
+import { ctaPresets } from "@/components/mdx/cta-presets";
+import { CTAPreset } from "@/components/mdx/CTAPreset";
+import { ctas, CTA } from "@/components/mdx/ctas";
+
 // Core MDX components
 import Divider from "./Divider";
 import Rule from "./Rule";
@@ -32,7 +39,7 @@ import SectionHeading from "./ui/SectionHeading";
 import SilentSurface from "./ui/SilentSurface";
 
 // ===== MEDIA & ICONS =====
-import CoverFrame from "./media/CoverFrame";
+import { CoverFrame } from "./media/CoverFrame";
 import BrandLogo from "./icons/BrandLogo";
 import LockClosedIcon from "./icons/LockClosedIcon";
 

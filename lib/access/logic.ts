@@ -31,10 +31,16 @@ export type AccessDecision =
         | "AUTH_REQUIRED"
         | "INNER_CIRCLE_REQUIRED"
         | "INSUFFICIENT_TIER"
-        | "PRIVATE_ONLY";
+        | "PRIVATE_ONLY"
+        | "MAINTENANCE_MODE"
+        | "GEO_BLOCKED"
+        | "RATE_LIMITED";
       requiredTier?: Tier;
       currentTier?: Tier;
       redirectUrl?: string;
+      maintenanceUntil?: string;
+      retryAfter?: number; // seconds
+      suggestedAction?: "upgrade" | "login" | "contact_support";
     };
 
 export type AccessContext = {
@@ -57,6 +63,51 @@ export type AccessContext = {
    * (e.g., only certain emails can view a specific doc).
    */
   allowPrivate?: boolean;
+  
+  /**
+   * optional: User ID for audit logging and fine-grained permissions
+   */
+  userId?: string;
+  
+  /**
+   * optional: User email for allowlist checks
+   */
+  userEmail?: string;
+  
+  /**
+   * optional: User roles for advanced permission logic
+   */
+  roles?: string[];
+  
+  /**
+   * optional: IP address for geo-blocking or rate limiting
+   */
+  ipAddress?: string;
+  
+  /**
+   * optional: User agent for device/context awareness
+   */
+  userAgent?: string;
+  
+  /**
+   * optional: Request timestamp for time-based access rules
+   */
+  requestTime?: Date;
+  
+  /**
+   * optional: Session metadata
+   */
+  sessionId?: string;
+  
+  /**
+   * optional: Subscription status and expiration
+   */
+  subscription?: {
+    status: "active" | "canceled" | "expired" | "trialing";
+    expiresAt?: Date;
+    canceledAt?: Date;
+    planId?: string;
+  };
 };
 
 export type AccessControlledDocument = {
@@ -68,6 +119,32 @@ export type AccessControlledDocument = {
   requiresInnerCircle?: boolean;
   /** Optional. If true, disallow download and enforce inline-only in routes */
   previewOnly?: boolean;
+  /** Optional: Document-specific access rules */
+  accessRules?: {
+    /** Allow specific users by email */
+    allowedEmails?: string[];
+    /** Allow specific users by ID */
+    allowedUserIds?: string[];
+    /** Require specific roles */
+    requiredRoles?: string[];
+    /** Block specific countries by ISO code */
+    blockedCountries?: string[];
+    /** Allow access only during specific time windows (ISO time ranges) */
+    accessHours?: { start: string; end: string; timezone?: string }[];
+    /** Maximum views per user */
+    maxViewsPerUser?: number;
+    /** Expiration date for document access */
+    expiresAt?: string;
+    /** Available from date */
+    availableFrom?: string;
+  };
+  /** Audit logging metadata */
+  audit?: {
+    createdBy?: string;
+    createdAt?: string;
+    lastModifiedBy?: string;
+    lastModifiedAt?: string;
+  };
 };
 
 // -----------------------------------------------------------------------------
@@ -79,7 +156,7 @@ const TIER_ORDER: Record<Tier, number> = {
   "inner-circle-plus": 2,
   "inner-circle-elite": 3,
   private: 99, // not "higher"; it's "different class" (restricted)
-};
+} as const;
 
 // aliases -> canonical
 const TIER_ALIASES: Record<AccessTierAlias, Tier> = {
@@ -88,14 +165,45 @@ const TIER_ALIASES: Record<AccessTierAlias, Tier> = {
   premium: "inner-circle-plus",
   enterprise: "inner-circle-elite",
   restricted: "private",
-};
+} as const;
+
+const TIER_NAMES = Object.keys(TIER_ORDER) as Tier[];
+
+// Business configuration - can be environment-based
+export const ACCESS_CONFIG = {
+  // Enable maintenance mode for specific tiers
+  maintenanceMode: {
+    enabled: false,
+    allowedTiers: ["private", "inner-circle-elite"] as Tier[],
+    message: "System maintenance in progress",
+    estimatedCompletion: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+  },
+  // Rate limiting configuration
+  rateLimiting: {
+    enabled: process.env.NODE_ENV === "production",
+    requestsPerMinute: {
+      public: 30,
+      "inner-circle": 60,
+      "inner-circle-plus": 100,
+      "inner-circle-elite": 200,
+      private: 500,
+    },
+  },
+  // Geo-blocking configuration
+  geoBlocking: {
+    enabled: false,
+    blockedCountries: [] as string[], // ISO country codes
+    allowedCountries: ["US", "CA", "GB", "AU", "NZ"], // Allow only these
+  },
+  // Audit logging
+  auditLogging: {
+    enabled: process.env.NODE_ENV === "production",
+    logLevel: "info" as "info" | "warn" | "error",
+  },
+} as const;
 
 const isTier = (v: unknown): v is Tier =>
-  v === "public" ||
-  v === "inner-circle" ||
-  v === "inner-circle-plus" ||
-  v === "inner-circle-elite" ||
-  v === "private";
+  TIER_NAMES.includes(v as Tier);
 
 export function resolveTierName(tier: ContentTier | undefined | null): Tier {
   if (!tier) return "public";
@@ -177,7 +285,165 @@ export function requiresInnerCircle(doc: AccessControlledDocument): boolean {
 export function hasInnerCircleAccess(ctx: AccessContext): boolean {
   // If internal, allow.
   if (ctx.isInternal) return true;
+  
+  // Check subscription status
+  if (ctx.subscription) {
+    if (ctx.subscription.status !== "active") return false;
+    if (ctx.subscription.expiresAt && new Date(ctx.subscription.expiresAt) < new Date()) {
+      return false;
+    }
+  }
+  
   return ctx.innerCircleAccess === true;
+}
+
+// -----------------------------------------------------------------------------
+// Advanced access checks
+// -----------------------------------------------------------------------------
+function checkDocumentSpecificRules(
+  doc: AccessControlledDocument,
+  ctx: AccessContext
+): AccessDecision | null {
+  const rules = doc.accessRules;
+  if (!rules) return null;
+
+  const now = ctx.requestTime || new Date();
+  
+  // Check expiration
+  if (rules.expiresAt) {
+    const expiresAt = new Date(rules.expiresAt);
+    if (now > expiresAt) {
+      return {
+        ok: false,
+        reason: "INSUFFICIENT_TIER",
+        requiredTier: "private",
+        currentTier: deriveUserTier(ctx),
+        suggestedAction: "contact_support",
+      };
+    }
+  }
+
+  // Check availability date
+  if (rules.availableFrom) {
+    const availableFrom = new Date(rules.availableFrom);
+    if (now < availableFrom) {
+      return {
+        ok: false,
+        reason: "INSUFFICIENT_TIER",
+        requiredTier: "private",
+        currentTier: deriveUserTier(ctx),
+        suggestedAction: "contact_support",
+      };
+    }
+  }
+
+  // Check allowed emails
+  if (rules.allowedEmails && ctx.userEmail) {
+    const normalizedEmail = ctx.userEmail.toLowerCase().trim();
+    const isAllowed = rules.allowedEmails.some(
+      email => email.toLowerCase().trim() === normalizedEmail
+    );
+    if (!isAllowed) {
+      return {
+        ok: false,
+        reason: "PRIVATE_ONLY",
+        currentTier: deriveUserTier(ctx),
+        suggestedAction: "contact_support",
+      };
+    }
+  }
+
+  // Check allowed user IDs
+  if (rules.allowedUserIds && ctx.userId) {
+    if (!rules.allowedUserIds.includes(ctx.userId)) {
+      return {
+        ok: false,
+        reason: "PRIVATE_ONLY",
+        currentTier: deriveUserTier(ctx),
+        suggestedAction: "contact_support",
+      };
+    }
+  }
+
+  // Check required roles
+  if (rules.requiredRoles && ctx.roles) {
+    const hasRequiredRole = rules.requiredRoles.some(role =>
+      ctx.roles!.includes(role)
+    );
+    if (!hasRequiredRole) {
+      return {
+        ok: false,
+        reason: "PRIVATE_ONLY",
+        currentTier: deriveUserTier(ctx),
+        suggestedAction: "contact_support",
+      };
+    }
+  }
+
+  // Check access hours
+  if (rules.accessHours && rules.accessHours.length > 0) {
+    const userTimezone = rules.accessHours[0].timezone || "UTC";
+    const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
+    const currentHour = userNow.getHours();
+    
+    const isWithinAccessHours = rules.accessHours.some(({ start, end }) => {
+      const startHour = parseInt(start.split(':')[0]);
+      const endHour = parseInt(end.split(':')[0]);
+      return currentHour >= startHour && currentHour < endHour;
+    });
+    
+    if (!isWithinAccessHours) {
+      return {
+        ok: false,
+        reason: "INSUFFICIENT_TIER",
+        currentTier: deriveUserTier(ctx),
+        suggestedAction: "contact_support",
+      };
+    }
+  }
+
+  return null;
+}
+
+function checkMaintenanceMode(ctx: AccessContext): AccessDecision | null {
+  if (!ACCESS_CONFIG.maintenanceMode.enabled) return null;
+  
+  const userTier = deriveUserTier(ctx);
+  
+  if (!ACCESS_CONFIG.maintenanceMode.allowedTiers.includes(userTier)) {
+    return {
+      ok: false,
+      reason: "MAINTENANCE_MODE",
+      currentTier: userTier,
+      maintenanceUntil: ACCESS_CONFIG.maintenanceMode.estimatedCompletion.toISOString(),
+      suggestedAction: "contact_support",
+    };
+  }
+  
+  return null;
+}
+
+function checkGeoBlocking(ctx: AccessContext): AccessDecision | null {
+  if (!ACCESS_CONFIG.geoBlocking.enabled || !ctx.ipAddress) return null;
+  
+  // In a real implementation, you would:
+  // 1. Use a geo-IP service or local database
+  // 2. Check country against ACCESS_CONFIG.geoBlocking.blockedCountries
+  // 3. Or check against allowedCountries if using allowlist approach
+  
+  // This is a placeholder implementation
+  const mockCountryCode = "US"; // You would get this from IP
+  
+  if (ACCESS_CONFIG.geoBlocking.blockedCountries.includes(mockCountryCode)) {
+    return {
+      ok: false,
+      reason: "GEO_BLOCKED",
+      currentTier: deriveUserTier(ctx),
+      suggestedAction: "contact_support",
+    };
+  }
+  
+  return null;
 }
 
 // -----------------------------------------------------------------------------
@@ -222,6 +488,12 @@ export function getAccessRedirectUrl(
     case "PRIVATE_ONLY":
       // No upsell. Internal only.
       return withReturnTo("/access-denied");
+    case "MAINTENANCE_MODE":
+      return withReturnTo("/maintenance");
+    case "GEO_BLOCKED":
+      return withReturnTo("/geo-blocked");
+    case "RATE_LIMITED":
+      return withReturnTo("/rate-limited");
     default:
       return withReturnTo("/");
   }
@@ -229,6 +501,9 @@ export function getAccessRedirectUrl(
 
 /**
  * Main policy engine.
+ * - evaluates maintenance mode
+ * - evaluates geo-blocking
+ * - evaluates document-specific rules
  * - evaluates membership gate
  * - evaluates tier
  * - returns deterministic denial reason + redirect
@@ -237,6 +512,27 @@ export function checkDocumentAccess(
   doc: AccessControlledDocument,
   ctx: AccessContext
 ): AccessDecision {
+  // Check maintenance mode
+  const maintenanceCheck = checkMaintenanceMode(ctx);
+  if (maintenanceCheck) {
+    const decision: AccessDecision = maintenanceCheck;
+    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+  }
+
+  // Check geo-blocking
+  const geoCheck = checkGeoBlocking(ctx);
+  if (geoCheck) {
+    const decision: AccessDecision = geoCheck;
+    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+  }
+
+  // Check document-specific rules
+  const docRulesCheck = checkDocumentSpecificRules(doc, ctx);
+  if (docRulesCheck) {
+    const decision: AccessDecision = docRulesCheck;
+    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+  }
+
   const tiers = normalizeDocTiers(doc);
 
   // "all" means no tier restriction. Still may require inner-circle if doc flag set explicitly.
@@ -284,6 +580,11 @@ export function checkDocumentAccess(
     return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
   }
 
+  // Log successful access (in production)
+  if (ACCESS_CONFIG.auditLogging.enabled && ctx.userId) {
+    console.log(`[ACCESS] ${ctx.userId} accessed ${doc.slug} at ${new Date().toISOString()}`);
+  }
+
   return { ok: true };
 }
 
@@ -297,11 +598,83 @@ export function filterByAccess<T extends AccessControlledDocument>(
   return docs.filter((d) => checkDocumentAccess(d, ctx).ok);
 }
 
+/**
+ * Get accessible documents grouped by tier
+ */
+export function groupDocumentsByAccessibleTier<T extends AccessControlledDocument>(
+  docs: T[],
+  ctx: AccessContext
+): Record<Tier, T[]> {
+  const groups = {} as Record<Tier, T[]>;
+  
+  // Initialize groups
+  TIER_NAMES.forEach(tier => {
+    groups[tier] = [];
+  });
+  
+  // Group documents
+  docs.forEach(doc => {
+    const tiers = normalizeDocTiers(doc);
+    
+    // For each tier that the user can access, add the document
+    tiers.forEach(tier => {
+      if (canAccessByTier(tier, ctx)) {
+        groups[tier].push(doc);
+      }
+    });
+  });
+  
+  return groups;
+}
+
+/**
+ * Check if user can upgrade to a specific tier
+ */
+export function canUpgradeToTier(
+  currentTier: Tier,
+  targetTier: Tier
+): { allowed: boolean; reason?: string } {
+  if (currentTier === "private") {
+    return { allowed: false, reason: "Private tier cannot be upgraded from" };
+  }
+  
+  if (targetTier === "private") {
+    return { allowed: false, reason: "Private tier is invite-only" };
+  }
+  
+  if (isSameOrHigherTier(currentTier, targetTier)) {
+    return { allowed: false, reason: "Already at or above target tier" };
+  }
+  
+  return { allowed: true };
+}
+
 // -----------------------------------------------------------------------------
 // Internals
 // -----------------------------------------------------------------------------
 function deriveUserTier(ctx: AccessContext): Tier {
   if (ctx.isInternal) return "private";
+  
+  // Check subscription status
+  if (ctx.subscription) {
+    if (ctx.subscription.status !== "active") return "public";
+    if (ctx.subscription.expiresAt && new Date(ctx.subscription.expiresAt) < new Date()) {
+      return "public";
+    }
+    
+    // Map planId to tier if available
+    if (ctx.subscription.planId) {
+      const planTierMap: Record<string, Tier> = {
+        "basic-plan": "inner-circle",
+        "premium-plan": "inner-circle-plus",
+        "elite-plan": "inner-circle-elite",
+      };
+      
+      const tierFromPlan = planTierMap[ctx.subscription.planId];
+      if (tierFromPlan) return tierFromPlan;
+    }
+  }
+  
   return ctx.tier ?? "public";
 }
 
@@ -331,3 +704,40 @@ function highestTierFromList(tiers: Tier[]): Tier {
   }, tiers[0]);
 }
 
+/**
+ * Utility to create a mock access context for testing
+ */
+export function createMockAccessContext(overrides: Partial<AccessContext> = {}): AccessContext {
+  return {
+    tier: "public",
+    innerCircleAccess: false,
+    isInternal: false,
+    userId: "test-user-123",
+    userEmail: "test@example.com",
+    roles: ["user"],
+    ipAddress: "127.0.0.1",
+    userAgent: "Mozilla/5.0 Test",
+    requestTime: new Date(),
+    sessionId: "test-session-123",
+    ...overrides,
+  };
+}
+
+/**
+ * Parse access context from request (for server-side usage)
+ */
+export function parseAccessContextFromRequest(req: {
+  headers: Record<string, string | string[] | undefined>;
+  cookies: Record<string, string>;
+  ip?: string;
+}): AccessContext {
+  return {
+    tier: req.cookies["access-tier"] as Tier | undefined,
+    innerCircleAccess: req.cookies["inner-circle"] === "true",
+    isInternal: req.cookies["internal-access"] === "true",
+    ipAddress: req.ip || (req.headers["x-forwarded-for"] as string)?.split(",")[0] || undefined,
+    userAgent: req.headers["user-agent"] as string | undefined,
+    sessionId: req.cookies["session-id"],
+    requestTime: new Date(),
+  };
+}

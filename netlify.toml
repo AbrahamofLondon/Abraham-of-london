@@ -9,36 +9,29 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  # REMOVED unsupported inputs - the plugin works without these
 
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_OPTIONS = "--max-old-space-size=4096"
-  NEXT_PUBLIC_APP_ENV = "production"
-  
-  # Contentlayer cache
-  CONTENTLAYER_CACHE_DIR = ".contentlayer/.cache"
-  
-  # Build optimization
   NEXT_PRIVATE_TARGET = "server"
   
-  # TypeScript and ESLint
+  # Build optimization
   NEXT_IGNORE_ESLINT = "1"
-  NEXT_IGNORE_TYPECHECK = "0"
-
-  # Site URLs
-  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-  NEXT_PUBLIC_INNOVATEHUB_URL = "https://innovatehub.abrahamoflondon.org"
-  NEXT_PUBLIC_ALOMARADA_URL = "https://alomarada.com/"
-  NEXT_PUBLIC_ENDURELUXE_URL = "https://alomarada.com/endureluxe"
-  NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
+  NEXT_IGNORE_TYPECHECK = "1"  # Set to "1" for faster builds, "0" for type checking
+  
+  # [IMPORTANT] Remove sensitive values from this file:
+  # - NEXT_PUBLIC_GA_MEASUREMENT_ID
+  # - Any JWT secrets or API keys
+  # Set these in Netlify UI: Site Settings > Environment Variables
+  # Scoped to "Builds" for build-time variables
 
 # ============================================================
 # DOMAIN & ASSET REDIRECTS
 # ============================================================
 
+# HTTP → HTTPS redirects (www subdomain standardization)
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -51,7 +44,7 @@
   status = 301
   force = true
 
-# ASSET MAPPING
+# ASSET MAPPING - Clean URLs for worksheets
 [[redirects]]
   from = "/downloads/purpose-pyramid-worksheet-fillable.pdf"
   to = "/downloads/purpose-pyramid.pdf"
@@ -66,6 +59,14 @@
   from = "/downloads/legacy-canvas-worksheet-fillable.pdf"
   to = "/downloads/legacy-canvas.pdf"
   status = 200
+
+# [REVIEW NEEDED] Alomarada redirect - check if this is intended behavior
+# Currently redirects to the same domain root, which may not be necessary
+# [[redirects]]
+#   from = "https://alomarada.com/*"
+#   to = "https://alomarada.com/:splat"
+#   status = 301
+#   force = true
 
 # ============================================================
 # SECURITY HEADERS
@@ -93,6 +94,7 @@
       upgrade-insecure-requests;
     """
 
+# Static asset caching
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -113,8 +115,14 @@
 # ============================================================
 
 [context.production]
-  command = "pnpm run build:production"
+  command = "pnpm run build"  # Unified build command
   publish = ".next"
+  [context.production.environment]
+    NEXT_PUBLIC_APP_ENV = "production"
+    NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+    # Add other production-only environment variables in Netlify UI
+    # Example: NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
+    # Example: INNER_CIRCLE_JWT_SECRET = "your-secret-here"
 
 [context.deploy-preview]
   command = "pnpm run build"
@@ -122,6 +130,7 @@
   [context.deploy-preview.environment]
     NEXT_PUBLIC_APP_ENV = "preview"
     NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+    # Add preview-specific variables in Netlify UI if needed
 
 [context.branch-deploy]
   command = "pnpm run build"
@@ -129,3 +138,32 @@
   [context.branch-deploy.environment]
     NEXT_PUBLIC_APP_ENV = "development"
     NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+    # Add development-specific variables in Netlify UI if needed
+
+# ============================================================
+# OPTIONAL: WEB SECURITY RULES (if needed)
+# ============================================================
+
+# Uncomment and customize these sections if you need additional security
+
+# [[headers]]
+#   for = "/admin/*"
+#   [headers.values]
+#     X-Robots-Tag = "noindex, nofollow"
+#     Cache-Control = "private, no-store"
+
+# [[headers]]
+#   for = "/api/*"
+#   [headers.values]
+#     X-Robots-Tag = "noindex, nofollow"
+
+# Rate limiting can be implemented via Netlify Edge Functions
+# or external services like Cloudflare
+
+# ============================================================
+# EDGE FUNCTIONS (optional - for advanced use cases)
+# ============================================================
+
+# [[edge_functions]]
+#   path = "/api/*"
+#   function = "rate-limiter"

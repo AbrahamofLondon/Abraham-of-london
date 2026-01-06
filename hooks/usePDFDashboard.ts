@@ -1,144 +1,370 @@
-// hooks/usePDFDashboard.ts
-import { useState, useEffect, useCallback } from 'react';
-import { PDFItem, PDFStats } from '@/lib/pdf/types';
-import { getAllPDFItems } from '@/scripts/pdf-registry';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
-interface FilterState {
-  type: string;
-  status: string;
-  search: string;
+interface UsePDFDashboardOptions {
+  userId: string;
+  initialFilters?: {
+    search?: string;
+    category?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    status?: string;
+  };
 }
 
-interface GenerationStatus {
-  message: string;
-  type: 'success' | 'error' | 'info';
-}
+export const usePDFDashboard = (options: UsePDFDashboardOptions) => {
+  const { userId, initialFilters = {} } = options;
 
-export interface DashboardStats extends PDFStats {
-  availablePDFs: number;
-  missingPDFs: number;
-  categories: string[];
-}
-
-export const usePDFDashboard = () => {
-  const [pdfItems, setPdfs] = useState<PDFItem[]>([]);
+  // State
+  const [pdfs, setPdfs] = useState<any[]>([]);
   const [selectedPDFId, setSelectedPDFId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStatus, setGenerationStatus] = useState<GenerationStatus | null>(null);
-  const [filterState, setFilterState] = useState<FilterState>({
-    type: 'all',
-    status: 'all',
-    search: '',
+  const [generationStatus, setGenerationStatus] = useState<any>(null);
+  const [filters, setFilters] = useState({
+    search: initialFilters.search || '',
+    category: initialFilters.category || 'all',
+    status: initialFilters.status || 'all',
+    sortBy: initialFilters.sortBy || 'updatedAt',
+    sortOrder: initialFilters.sortOrder || 'desc',
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const refreshPDFList = useCallback(async () => {
+  // Load PDFs
+  const loadPDFs = useCallback(async () => {
     try {
-      // Use the static registry directly since this is client-side
-      const items = getAllPDFItems();
-      setPdfs(items);
-    } catch (error) {
-      console.error('Failed to fetch PDFs:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    refreshPDFList();
-  }, [refreshPDFList]);
-
-  const filteredPDFs: PDFItem[] = pdfItems.filter(pdf => {
-    if (filterState.type !== 'all' && pdf.type !== filterState.type) return false;
-    if (filterState.status !== 'all') {
-      if (filterState.status === 'generated' && !pdf.exists) return false;
-      if (filterState.status === 'missing' && pdf.exists) return false;
-      if (filterState.status === 'error' && !pdf.error) return false;
-    }
-    if (filterState.search && !pdf.title.toLowerCase().includes(filterState.search.toLowerCase())) {
-      return false;
-    }
-    return true;
-  });
-
-  // Get unique categories
-  const categories = Array.from(new Set(pdfItems.map(p => p.type)));
-
-  // Create dashboard stats with all required properties
-  const stats: DashboardStats = {
-    totalPDFs: pdfItems.length,
-    generated: pdfItems.filter(p => p.exists).length,
-    missing: pdfItems.filter(p => !p.exists && !p.error).length,
-    errors: pdfItems.filter(p => p.error).length,
-    // Map the existing stats to the required names
-    availablePDFs: pdfItems.filter(p => p.exists).length,
-    missingPDFs: pdfItems.filter(p => !p.exists && !p.error).length,
-    // Include categories in stats
-    categories: categories,
-  };
-
-  const generatePDF = useCallback(async (id: string) => {
-    setIsGenerating(true);
-    try {
-      const response = await fetch(`/api/pdfs/generate/${id}`, { method: 'POST' });
-      const result = await response.json();
+      setIsLoading(true);
+      setError(null);
       
-      if (result.success) {
-        setGenerationStatus({ message: `Generated ${id} successfully`, type: 'success' });
-        refreshPDFList();
+      const queryParams = new URLSearchParams();
+      if (filters.category !== 'all') queryParams.set('category', filters.category);
+      if (filters.search) queryParams.set('search', filters.search);
+      if (filters.status !== 'all') queryParams.set('status', filters.status);
+      
+      const response = await fetch(`/api/pdfs/list?${queryParams.toString()}`);
+      const data = await response.json();
+      
+      if (data.success && data.pdfs) {
+        setPdfs(data.pdfs);
+        if (data.pdfs.length > 0 && !selectedPDFId) {
+          setSelectedPDFId(data.pdfs[0].id);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to load PDFs'));
+      console.error('Error loading PDFs:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters, selectedPDFId]);
+
+  // Derived data
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(pdfs.map(pdf => pdf.category))];
+    return ['all', ...uniqueCategories];
+  }, [pdfs]);
+
+  const filteredPDFs = useMemo(() => {
+    let filtered = [...pdfs];
+
+    // Apply category filter
+    if (filters.category !== 'all') {
+      filtered = filtered.filter(pdf => pdf.category === filters.category);
+    }
+
+    // Apply status filter
+    if (filters.status !== 'all') {
+      filtered = filtered.filter(pdf => pdf.status === filters.status);
+    }
+
+    // Apply search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(pdf => 
+        pdf.title?.toLowerCase().includes(searchLower) ||
+        pdf.description?.toLowerCase().includes(searchLower) ||
+        pdf.id?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      const aValue = a[filters.sortBy];
+      const bValue = b[filters.sortBy];
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return filters.sortOrder === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      const aTime = new Date(aValue || 0).getTime();
+      const bTime = new Date(bValue || 0).getTime();
+      
+      return filters.sortOrder === 'asc'
+        ? aTime - bTime
+        : bTime - aTime;
+    });
+
+    return filtered;
+  }, [pdfs, filters]);
+
+  const selectedPDF = useMemo(() => 
+    pdfs.find(pdf => pdf.id === selectedPDFId) || null,
+    [pdfs, selectedPDFId]
+  );
+
+  const stats = useMemo(() => {
+    const totalPDFs = pdfs.length;
+    const generatedPDFs = pdfs.filter(pdf => pdf.status === 'generated').length;
+    const pendingPDFs = pdfs.filter(pdf => pdf.status === 'pending').length;
+    const failedPDFs = pdfs.filter(pdf => pdf.status === 'failed').length;
+    
+    return {
+      totalPDFs,
+      availablePDFs: generatedPDFs,
+      pendingPDFs,
+      failedPDFs,
+      categories: categories.length - 1,
+    };
+  }, [pdfs, categories]);
+
+  // Generate PDF
+  const generatePDF = useCallback(async (pdfId?: string) => {
+    setIsGenerating(true);
+    setGenerationStatus({
+      message: pdfId ? `Generating PDF...` : 'Starting generation...',
+      type: 'info',
+    });
+    
+    try {
+      const response = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id: pdfId,
+          userId 
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        setGenerationStatus({
+          message: `✅ ${data.filename || 'PDF'} generated successfully`,
+          type: 'success',
+        });
+        await loadPDFs();
       } else {
-        setGenerationStatus({ message: `Failed to generate ${id}: ${result.error}`, type: 'error' });
+        setGenerationStatus({
+          message: `❌ Failed to generate: ${data.error || 'Unknown error'}`,
+          type: 'error',
+        });
       }
     } catch (error) {
-      setGenerationStatus({ message: `Error generating ${id}`, type: 'error' });
+      setGenerationStatus({
+        message: `❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'error',
+      });
     } finally {
       setIsGenerating(false);
     }
-  }, [refreshPDFList]);
+  }, [loadPDFs, userId]);
 
+  // Generate all PDFs
   const generateAllPDFs = useCallback(async () => {
     setIsGenerating(true);
+    setGenerationStatus({
+      message: 'Generating all PDFs...',
+      type: 'info',
+    });
+    
     try {
-      const response = await fetch('/api/pdfs/generate-all', { method: 'POST' });
-      const result = await response.json();
+      const response = await fetch('/api/generate-all-pdfs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
       
-      if (result.success) {
-        setGenerationStatus({ 
-          message: `Generated ${result.generated} PDFs successfully`, 
-          type: 'success' 
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        setGenerationStatus({
+          message: `✅ Generated ${data.count || 0} PDFs successfully`,
+          type: 'success',
         });
-        refreshPDFList();
+        await loadPDFs();
       } else {
-        setGenerationStatus({ 
-          message: `Failed to generate PDFs: ${result.error}`, 
-          type: 'error' 
+        setGenerationStatus({
+          message: `❌ Bulk generation failed: ${data.error || 'Unknown error'}`,
+          type: 'error',
         });
       }
     } catch (error) {
-      setGenerationStatus({ message: 'Error generating PDFs', type: 'error' });
+      setGenerationStatus({
+        message: `❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'error',
+      });
     } finally {
-      setIsGenerating(false);
+      setIsLoading(false);
     }
-  }, [refreshPDFList]);
+  }, [loadPDFs, userId]);
 
-  const updateFilter = useCallback((updates: Partial<FilterState>) => {
-    setFilterState(prev => ({ ...prev, ...updates }));
+  // Delete PDF
+  const deletePDF = useCallback(async (pdfId: string) => {
+    try {
+      const response = await fetch(`/api/pdfs/${pdfId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        await loadPDFs();
+      } else {
+        throw new Error(data.error || 'Failed to delete PDF');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Delete failed'));
+    }
+  }, [loadPDFs, userId]);
+
+  // Duplicate PDF
+  const duplicatePDF = useCallback(async (pdfId: string) => {
+    try {
+      const response = await fetch('/api/pdfs/duplicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pdfId, userId }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        await loadPDFs();
+      } else {
+        throw new Error(data.error || 'Failed to duplicate PDF');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Duplicate failed'));
+    }
+  }, [loadPDFs, userId]);
+
+  // Rename PDF
+  const renamePDF = useCallback(async (pdfId: string, title: string) => {
+    try {
+      const response = await fetch(`/api/pdfs/${pdfId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, userId }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        await loadPDFs();
+      } else {
+        throw new Error(data.error || 'Failed to rename PDF');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Rename failed'));
+    }
+  }, [loadPDFs, userId]);
+
+  // Batch delete
+  const batchDelete = useCallback(async (pdfIds: string[]) => {
+    try {
+      const response = await fetch('/api/pdfs/batch-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pdfIds, userId }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        await loadPDFs();
+      } else {
+        throw new Error(data.error || 'Batch delete failed');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Batch delete failed'));
+    }
+  }, [loadPDFs, userId]);
+
+  // Batch export
+  const batchExport = useCallback(async (pdfIds: string[], format: string) => {
+    try {
+      const response = await fetch('/api/pdfs/batch-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pdfIds, format, userId }),
+      });
+      
+      return await response.json();
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Batch export failed'));
+      throw err;
+    }
+  }, [userId]);
+
+  // Update filters
+  const updateFilter = useCallback((updates: Partial<typeof filters>) => {
+    setFilters(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const selectedPDF = selectedPDFId 
-    ? pdfItems.find(p => p.id === selectedPDFId) 
-    : filteredPDFs[0] || null;
+  const searchPDFs = useCallback((search: string) => {
+    updateFilter({ search });
+  }, [updateFilter]);
+
+  const sortPDFs = useCallback((sortBy: string, sortOrder: 'asc' | 'desc' = 'desc') => {
+    updateFilter({ sortBy, sortOrder });
+  }, [updateFilter]);
+
+  const clearFilters = useCallback(() => {
+    setFilters({
+      search: '',
+      category: 'all',
+      status: 'all',
+      sortBy: 'updatedAt',
+      sortOrder: 'desc',
+    });
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    loadPDFs();
+  }, [loadPDFs]);
 
   return {
+    // State
+    pdfs,
+    filteredPDFs,
     selectedPDF,
+    selectedPDFId,
     isGenerating,
     generationStatus,
-    filterState,
-    filteredPDFs,
+    filters,
     categories,
     stats,
+    isLoading,
+    error,
+
+    // Actions
     setSelectedPDFId,
     generatePDF,
     generateAllPDFs,
-    refreshPDFList,
+    refreshPDFList: loadPDFs,
     updateFilter,
     setGenerationStatus,
+    deletePDF,
+    duplicatePDF,
+    renamePDF,
+    searchPDFs,
+    sortPDFs,
+    clearFilters,
+    batchDelete,
+    batchExport,
   };
 };

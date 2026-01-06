@@ -1,6 +1,6 @@
 /* lib/contentlayer-helper.ts - CANONICAL, SINGLE SOURCE OF TRUTH (NAMED EXPORTS ONLY) */
 
-import type { DocumentTypes } from "contentlayer2/generated";
+import type { DocumentTypes } from "contentlayer/generated";
 import {
   allDocuments as rawAllDocuments,
   allPosts as rawAllPosts,
@@ -12,7 +12,7 @@ import {
   allResources as rawAllResources,
   allPrints as rawAllPrints,
   allStrategies as rawAllStrategies,
-} from "contentlayer2/generated";
+} from "contentlayer/generated";
 
 export { assertContentlayerHasDocs, isContentlayerLoaded } from "./contentlayer-guards";
 

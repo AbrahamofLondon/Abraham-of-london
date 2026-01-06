@@ -217,38 +217,52 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = normalizeSlug((params as any)?.slug);
+  const rawParam = (params as any)?.slug;
+
+  const slug =
+    typeof rawParam === "string"
+      ? normalizeSlug(rawParam)
+      : Array.isArray(rawParam) && typeof rawParam[0] === "string"
+        ? normalizeSlug(rawParam[0])
+        : "";
+
   if (!slug) return { notFound: true };
 
   const eventData: any = getServerEventBySlug(slug);
   if (!eventData) return { notFound: true };
 
   const rawBody = eventData?.body?.raw ?? eventData?.body ?? "";
-  const raw = typeof rawBody === "string" ? rawBody : "";
+  const raw = typeof rawBody === "string" && rawBody.trim() ? rawBody : "Content is being prepared.";
 
   let source: MDXRemoteSerializeResult;
   try {
-    source = await serialize(raw || " ", {
+    source = await serialize(raw, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
         rehypePlugins: [rehypeSlug],
       },
     });
-  } catch {
+  } catch (err) {
     source = await serialize("Content is being prepared.");
   }
 
   const event: EventViewModel = {
     slug,
-    title: eventData.title || "Untitled Gathering",
-    excerpt: eventData.excerpt || eventData.description || null,
-    eventDate: eventData.eventDate || eventData.date || null,
-    location: eventData.location || eventData.venue || null,
-    registrationUrl: eventData.registrationUrl || eventData.link || null,
+    title: typeof eventData.title === "string" && eventData.title.trim() ? eventData.title : "Untitled Gathering",
+    excerpt:
+      (typeof eventData.excerpt === "string" && eventData.excerpt.trim()
+        ? eventData.excerpt
+        : typeof eventData.description === "string" && eventData.description.trim()
+          ? eventData.description
+          : null),
+
+    eventDate: eventData.eventDate ?? eventData.date ?? null,
+    location: eventData.location ?? eventData.venue ?? null,
+    registrationUrl: eventData.registrationUrl ?? eventData.link ?? null,
     tags: Array.isArray(eventData.tags) ? eventData.tags : [],
     coverImage: resolveDocCoverImage(eventData),
 
-    // ✅ force JSON-safe values
+    // JSON-safe fields
     venue: eventData.venue ?? null,
     endDate: eventData.endDate ?? null,
     time: eventData.time ?? null,
@@ -257,10 +271,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   return {
-    props: {
-      event,
-      source,
-    },
-    revalidate: 60, // Optional: revalidate every 60 seconds
+    props: { event, source },
+    revalidate: 60,
   };
 };

@@ -1,4 +1,3 @@
 // lib/contentlayer-generated.ts
-export * from "contentlayer2/generated";
-export type { DocumentTypes } from "contentlayer2/generated";
-
+export * from "contentlayer/generated";
+export { default } from "contentlayer/generated";

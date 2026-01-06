@@ -132,3 +132,5 @@ _emergency-backup.tar.bak
 *.tar
 *.tar.*
 
+#backup
+*.bak
