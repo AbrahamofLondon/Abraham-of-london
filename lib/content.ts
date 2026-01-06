@@ -22,7 +22,7 @@ import ContentHelper, {
   getAllStrategies,
   getAllCanons,
   getAllShorts,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/contentlayer";
 
 // ============================================
 // TYPE DEFINITIONS

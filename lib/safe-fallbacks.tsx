@@ -35,3 +35,4 @@ export function withSafeFallback<P extends object>(
   Wrapped.displayName = `WithSafeFallback(${Component.displayName || Component.name || "Component"})`;
   return Wrapped;
 }
+

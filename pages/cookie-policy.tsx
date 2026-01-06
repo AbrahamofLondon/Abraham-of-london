@@ -7,3 +7,4 @@ const CookiePolicyAliasPage: NextPage = () => {
 };
 
 export default CookiePolicyAliasPage;
+

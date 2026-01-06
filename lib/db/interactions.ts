@@ -104,3 +104,4 @@ export async function toggleInteraction(
     return await getInteractionStats(shortSlug, sessionId);
   });
 }
+

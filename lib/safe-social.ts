@@ -41,3 +41,4 @@ export function isValidSocialPlatform(platform: string): boolean {
 export function getSocialDisplayName(platform: string): string {
   return socialPlatforms[platform.toLowerCase()]?.name || platform;
 }
+

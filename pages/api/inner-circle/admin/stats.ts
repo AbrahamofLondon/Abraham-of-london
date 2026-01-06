@@ -159,3 +159,4 @@ export const config = {
     bodyParser: false, // No body needed for GET requests
   },
 };
+

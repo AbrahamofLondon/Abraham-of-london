@@ -1,235 +1,100 @@
-// lib/server/books-data.ts - COMPLETE FIXED VERSION
-import { allBooks } from "@/lib/contentlayer";
-import type { BookDocument } from "@/lib/contentlayer";
+// lib/server/books-data.ts - PRODUCTION-GRADE, NO ASSUMPTIONS
+import type { ContentDoc } from "@/lib/contentlayer";
+import { getPublishedBooks, normalizeSlug } from "@/lib/contentlayer";
 
-// Define a complete Book type that includes all properties we need
-export type Book = BookDocument & {
-  // Properties from Contentlayer config that aren't in BookDocument interface
-  readTime?: string;
-  published?: boolean;
-  archived?: boolean;
-  available?: boolean;
-  toc?: any[];
-  language?: string;
-  pages?: number;
-  weight?: number;
-  dimensions?: string;
-  edition?: string;
-  image?: string;
-  cover?: string;
-  
-  // Computed properties
+export type Book = ContentDoc & {
   normalizedReadTime: string;
   normalizedCoverImage: string;
 };
 
-// Helper to check if book is draft
-function isDraft(book: BookDocument & { published?: boolean }): boolean {
-  // Handle boolean or string "true"
-  if (book.draft === true || String(book.draft).toLowerCase() === "true") return true;
-  
-  // Check published property if it exists
-  const bookAny = book as any;
-  if ('published' in bookAny && bookAny.published === false) return true;
-  
-  // Check status field
-  if (book.status === 'draft') return true;
-  if (book.status === 'archived') return false;
-  
-  return false;
+function safeString(v: unknown): string {
+  return typeof v === "string" ? v : "";
 }
 
-// Helper to normalize slug
-function normalizeSlug(slug: string): string {
-  return String(slug || "").trim().toLowerCase();
-}
+function getReadTime(book: any): string {
+  const rt = safeString(book?.readTime) || safeString(book?.readingTime);
+  if (rt) return rt;
 
-// Helper to get book reading time
-function getBookReadTime(book: BookDocument & { readTime?: string }): string {
-  const bookAny = book as any;
-  
-  // Try readTime first
-  if (bookAny.readTime && typeof bookAny.readTime === 'string') {
-    return bookAny.readTime;
+  const raw = safeString(book?.body?.raw);
+  if (raw) {
+    const words = raw.trim().split(/\s+/).filter(Boolean).length;
+    const minutes = Math.max(1, Math.ceil(words / 200));
+    return `${minutes} min`;
   }
-  
-  // Try readingTime (might be in the data)
-  if (bookAny.readingTime && typeof bookAny.readingTime === 'string') {
-    return bookAny.readingTime;
-  }
-  
-  // Calculate from body content
-  if (book.body?.raw) {
-    const wordCount = book.body.raw.split(/\s+/).length;
-    const readingTime = Math.ceil(wordCount / 200);
-    return `${readingTime} min`;
-  }
-  
   return "5 min";
 }
 
-// Helper to get book cover image
-function getBookCoverImage(book: BookDocument & { image?: string; cover?: string }): string {
-  const bookAny = book as any;
-  
-  // Check all possible image properties
-  if (book.coverImage) return book.coverImage;
-  if (bookAny.image) return bookAny.image;
-  if (bookAny.cover) return bookAny.cover;
-  if (bookAny.coverImage) return bookAny.coverImage;
-  
-  return "/assets/images/writing-desk.webp";
+function getCoverImage(book: any): string {
+  return (
+    safeString(book?.coverImage) ||
+    safeString(book?.image) ||
+    safeString(book?.cover) ||
+    "/assets/images/writing-desk.webp"
+  );
 }
 
-// Helper to convert BookDocument to our enhanced Book type
-function enhanceBook(book: BookDocument): Book {
-  const bookAny = book as any;
-  
+function enhance(book: ContentDoc): Book {
   return {
-    ...book,
-    // Add computed properties
-    normalizedReadTime: getBookReadTime(book),
-    normalizedCoverImage: getBookCoverImage(book),
-    
-    // Ensure optional properties exist with defaults when needed
-    readTime: bookAny.readTime || bookAny.readingTime || undefined,
-    published: bookAny.published ?? (book.status === 'published'),
-    archived: bookAny.archived ?? (book.status === 'archived') ?? false,
-    available: bookAny.available ?? true,
-    toc: bookAny.toc ?? [],
-    language: bookAny.language ?? 'en',
-    pages: bookAny.pages ?? 0,
-    weight: bookAny.weight ?? 0,
-    dimensions: bookAny.dimensions ?? '',
-    edition: bookAny.edition ?? '',
-    image: bookAny.image,
-    cover: bookAny.cover,
+    ...(book as any),
+    normalizedReadTime: getReadTime(book),
+    normalizedCoverImage: getCoverImage(book),
   };
 }
 
-/**
- * Get all books metadata (non-draft only)
- */
 export function getAllBooksMeta(): Book[] {
   try {
-    const books = (allBooks || []).filter(book => !isDraft(book));
-    return books.map(enhanceBook);
-  } catch (error) {
-    console.error("Error fetching all books meta:", error);
+    return (getPublishedBooks() as ContentDoc[]).map(enhance);
+  } catch (err) {
+    console.error("getAllBooksMeta failed:", err);
     return [];
   }
 }
 
-/**
- * Get book by slug
- */
 export function getBookBySlug(slug: string): Book | null {
   try {
-    if (!slug || typeof slug !== 'string') {
-      return null;
-    }
-    
-    const normalizedSlug = normalizeSlug(slug);
-    
-    const book = (allBooks || []).find(b => {
-      if (isDraft(b)) return false;
-      
-      const bookSlug = b.slug || b._raw?.flattenedPath?.split('/').pop() || '';
-      return normalizeSlug(bookSlug) === normalizedSlug;
-    });
-    
-    if (!book) return null;
-    
-    return enhanceBook(book);
-  } catch (error) {
-    console.error(`Error fetching book by slug (${slug}):`, error);
+    const s = normalizeSlug(slug);
+    if (!s) return null;
+
+    const books = getAllBooksMeta();
+    const found =
+      books.find((b) => normalizeSlug(b.slug ?? b?._raw?.flattenedPath ?? "") === s) ?? null;
+
+    return found;
+  } catch (err) {
+    console.error("getBookBySlug failed:", err);
     return null;
   }
 }
 
-/**
- * Get all books with content
- */
 export function getAllBooks(): Book[] {
-  try {
-    return getAllBooksMeta();
-  } catch (error) {
-    console.error("Error fetching all books:", error);
-    return [];
-  }
+  return getAllBooksMeta();
 }
 
-/**
- * Get all book slugs
- */
 export function getBookSlugs(): string[] {
-  try {
-    const books = getAllBooksMeta();
-    return books.map(book => book.slug || book._raw?.flattenedPath?.split('/').pop() || '');
-  } catch (error) {
-    console.error("Error fetching book slugs:", error);
-    return [];
-  }
+  return getAllBooksMeta()
+    .map((b) => safeString(b.slug) || safeString(b?._raw?.flattenedPath?.split("/").pop()))
+    .filter(Boolean);
 }
 
-/**
- * Get featured books
- */
 export function getFeaturedBooks(count?: number): Book[] {
-  try {
-    const books = getAllBooksMeta();
-    const featured = books.filter(book => book.featured === true);
-    
-    if (count && count > 0) {
-      return featured.slice(0, count);
-    }
-    
-    return featured;
-  } catch (error) {
-    console.error("Error fetching featured books:", error);
-    return [];
-  }
+  const featured = getAllBooksMeta().filter((b: any) => b?.featured === true);
+  return typeof count === "number" && count > 0 ? featured.slice(0, count) : featured;
 }
 
-/**
- * Get recent books
- */
 export function getRecentBooks(count?: number): Book[] {
-  try {
-    const books = getAllBooksMeta();
-    
-    // Sort by date (most recent first)
-    const sorted = [...books].sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
-    });
-    
-    if (count && count > 0) {
-      return sorted.slice(0, count);
-    }
-    
-    return sorted;
-  } catch (error) {
-    console.error("Error fetching recent books:", error);
-    return [];
-  }
+  const sorted = [...getAllBooksMeta()].sort((a: any, b: any) => {
+    const ta = new Date(a?.date ?? 0).getTime();
+    const tb = new Date(b?.date ?? 0).getTime();
+    return (Number.isFinite(tb) ? tb : 0) - (Number.isFinite(ta) ? ta : 0);
+  });
+  return typeof count === "number" && count > 0 ? sorted.slice(0, count) : sorted;
 }
 
-// ---------------------------------------------------------------------------
-// DEFAULT EXPORT
-// ---------------------------------------------------------------------------
-
-const booksData = {
-  // Core functions
+export default {
   getAllBooksMeta,
   getBookBySlug,
   getAllBooks,
   getBookSlugs,
-  
-  // Filter functions
   getFeaturedBooks,
   getRecentBooks,
 };
-
-export default booksData;

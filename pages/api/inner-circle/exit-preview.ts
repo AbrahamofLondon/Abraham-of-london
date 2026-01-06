@@ -22,3 +22,4 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const returnTo = safeReturnTo(req.query?.returnTo);
   return res.redirect(302, returnTo);
 }
+

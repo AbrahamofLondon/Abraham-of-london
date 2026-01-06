@@ -21,3 +21,4 @@ declare module "@/lib/server/rateLimit" {
     options?: { interval?: number; uniqueTokenPerInterval?: number }
   ): T;
 }
+

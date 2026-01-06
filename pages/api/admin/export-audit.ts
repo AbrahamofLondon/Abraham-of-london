@@ -75,3 +75,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return jsonErr(res, 500, "INTERNAL_ERROR", "Could not compile institutional logs.");
   }
 }
+

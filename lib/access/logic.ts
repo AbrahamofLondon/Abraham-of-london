@@ -330,3 +330,4 @@ function highestTierFromList(tiers: Tier[]): Tier {
     return TIER_ORDER[t] > TIER_ORDER[acc] ? t : acc;
   }, tiers[0]);
 }
+

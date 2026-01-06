@@ -7,3 +7,4 @@ const SecurityPolicyAliasPage: NextPage = () => {
 };
 
 export default SecurityPolicyAliasPage;
+

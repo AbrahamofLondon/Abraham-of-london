@@ -40,3 +40,4 @@ export function toSSRSafeJSON<T>(value: T): T {
 export function safeProps<T>(props: T) {
   return toSSRSafeJSON(props);
 }
+

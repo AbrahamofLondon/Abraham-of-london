@@ -296,3 +296,4 @@ export default function VaultPage({ items, stats }: InferGetStaticPropsType<type
     </Layout>
   );
 }
+

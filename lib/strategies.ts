@@ -60,3 +60,4 @@ export function getStrategiesByType(type: string): StrategyMeta[] {
   const strategies = getPublicStrategies();
   return strategies.filter(s => s.strategyType === type);
 }
+

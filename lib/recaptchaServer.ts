@@ -148,3 +148,4 @@ export function validateRecaptchaConfig() {
     bypassEnabled: process.env.ALLOW_RECAPTCHA_BYPASS === "true",
   };
 }
+

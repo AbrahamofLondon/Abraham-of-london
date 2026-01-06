@@ -33,3 +33,4 @@ export async function logDownloadEvent(e: AuditEvent): Promise<void> {
     // Soft-fail: auditing must never break the site.
   }
 }
+

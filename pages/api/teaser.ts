@@ -360,3 +360,4 @@ export function isTeaserApiHealthy(): boolean {
   // Add any health checks needed (database, email service, etc.)
   return true;
 }
+

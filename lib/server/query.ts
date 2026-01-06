@@ -26,3 +26,4 @@ export function qDate(v: unknown): Date | null {
   const d = new Date(s);
   return Number.isNaN(d.getTime()) ? null : d;
 }
+

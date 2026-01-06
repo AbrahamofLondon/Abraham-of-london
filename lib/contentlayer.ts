@@ -1,2 +1,3 @@
-/* lib/contentlayer.ts - CANONICAL BARREL */
-export * from "./contentlayer-helper";
+// lib/contentlayer.ts
+export * from "@/lib/contentlayer";
+export { default } from "@/lib/contentlayer";

@@ -138,3 +138,4 @@ export function computeScore(payload: StrategyRoomIntakePayload) {
   const total = baseGravity + decisionWeight + tradeOffWeight + urgencyWeight;
   return { total: Math.min(25, total) };
 }
+

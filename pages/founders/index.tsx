@@ -94,3 +94,4 @@ const FoundersPage: NextPage = () => {
 };
 
 export default FoundersPage;
+

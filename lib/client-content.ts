@@ -49,3 +49,4 @@ export function searchInstitutionalContent(query: string): ContentMetadata[] {
 export function getCachedContentBySlug(slug: string): ContentMetadata | null {
   return contentCache.find(item => item.slug === slug) || null;
 }
+

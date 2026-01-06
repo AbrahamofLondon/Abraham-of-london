@@ -110,3 +110,4 @@ export async function getRecaptchaTokenSafe(action: string): Promise<string | nu
     return null;
   }
 }
+

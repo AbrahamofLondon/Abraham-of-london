@@ -51,3 +51,4 @@ export function getPublicDownloads(): DownloadMeta[] {
     return !(isDraft || isNotPublished || isStatusDraft);
   });
 }
+

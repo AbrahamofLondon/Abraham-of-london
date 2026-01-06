@@ -157,3 +157,4 @@ const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
 };
 
 export default PrintsIndexPage;
+

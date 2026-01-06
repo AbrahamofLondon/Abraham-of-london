@@ -149,3 +149,4 @@ export function emailHealthSnapshot() {
     hasNetlifyEndpoint: Boolean((process.env.NETLIFY_EMAILS_ENDPOINT || "").trim()),
   };
 }
+

@@ -34,3 +34,4 @@ const FONT_MAP: Record<FontKey, string> = {
   body: "text-base font-sans leading-relaxed",
   caption: "text-sm font-sans text-deepCharcoal/70",
 };
+

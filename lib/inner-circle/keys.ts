@@ -13,3 +13,4 @@ export function generateAccessKey() {
 export function getEmailHash(email: string): string {
   return crypto.createHash("sha256").update(email.toLowerCase().trim()).digest("hex");
 }
+

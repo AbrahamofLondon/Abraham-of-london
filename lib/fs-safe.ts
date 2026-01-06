@@ -21,3 +21,4 @@ export function safeReadDir(absPath: string): string[] {
     return [];
   }
 }
+

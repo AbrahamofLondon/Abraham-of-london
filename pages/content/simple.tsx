@@ -27,3 +27,4 @@ const SimpleContent: NextPage = () => {
 }
 
 export default SimpleContent
+

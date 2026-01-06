@@ -38,3 +38,4 @@ export function methodNotAllowed(res: NextApiResponse, allowed: string[]) {
   res.setHeader("Allow", allowed.join(", "));
   return jsonErr(res, 405, "METHOD_NOT_ALLOWED", `Allowed methods: ${allowed.join(", ")}`);
 }
+

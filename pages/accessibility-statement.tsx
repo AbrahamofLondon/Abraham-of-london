@@ -7,3 +7,4 @@ const AccessibilityStatementAliasPage: NextPage = () => {
 };
 
 export default AccessibilityStatementAliasPage;
+

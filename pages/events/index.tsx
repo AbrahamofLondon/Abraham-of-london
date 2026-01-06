@@ -166,3 +166,4 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
 };
 
 export default EventsIndexPage;
+

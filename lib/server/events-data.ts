@@ -190,3 +190,4 @@ export default {
   getUpcomingEvents,
   getPastEvents,
 };
+

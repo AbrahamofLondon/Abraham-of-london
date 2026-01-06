@@ -20,3 +20,4 @@ export const event = (
   if (!window.gtag) return;
   window.gtag("event", action, params);
 };
+

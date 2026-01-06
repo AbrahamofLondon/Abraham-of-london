@@ -23,3 +23,4 @@ export function log(level: LogLevel, message: string, meta: Record<string, unkno
   // eslint-disable-next-line no-console
   console[level === "debug" ? "log" : level](payload);
 }
+

@@ -14,3 +14,4 @@ export async function serializeMDX(content: string) {
     parseFrontmatter: false,
   });
 }
+

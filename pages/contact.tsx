@@ -627,3 +627,4 @@ const ContactPage = (): JSX.Element => {
 };
 
 export default ContactPage;
+

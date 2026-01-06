@@ -249,3 +249,4 @@ export function formatPrice(price?: number): string {
   if (price === undefined || price === null) return 'Price not available';
   return `$${price.toFixed(2)}`;
 }
+

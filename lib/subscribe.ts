@@ -50,3 +50,4 @@ export async function bulkSubscribe(
 export async function unsubscribe(email: string): Promise<SubscriptionResult> {
   return coreUnsubscribe(email);
 }
+

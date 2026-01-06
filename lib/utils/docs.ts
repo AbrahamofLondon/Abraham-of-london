@@ -162,3 +162,4 @@ export function paginateDocuments<T>(
     hasPrev: safePage > 1,
   };
 }
+

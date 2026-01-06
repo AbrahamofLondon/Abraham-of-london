@@ -347,3 +347,4 @@ export async function unsubscribe(email: string): Promise<SubscriptionResult> {
     status: 200,
   };
 }
+

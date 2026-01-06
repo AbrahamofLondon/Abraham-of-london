@@ -37,3 +37,4 @@ export function auditLog(action: string, metadata: Record<string, any> = {}) {
   const timestamp = new Date().toISOString();
   console.log(`[AUDIT] ${timestamp} | ${action} |`, JSON.stringify(metadata));
 }
+

@@ -384,3 +384,4 @@ function BrandCard({
     </motion.article>
   );
 }
+

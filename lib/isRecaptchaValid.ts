@@ -12,3 +12,4 @@ export function isRecaptchaValid(
 ): Promise<boolean> {
   return verifyRecaptcha(token, expectedAction, clientIp);
 }
+

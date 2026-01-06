@@ -77,7 +77,7 @@ interface PostList {
   hasPrevious: boolean;
 }
 
-import { getPublishedPosts as getPublishedPostDocs, normalizeSlug } from "@/lib/contentlayer-helper";
+import { getPublishedPosts as getPublishedPostDocs, normalizeSlug } from "@/lib/contentlayer";
 
 // -----------------------------
 // Local helpers
@@ -362,3 +362,4 @@ const postsAPI = {
 };
 
 export default postsAPI;
+

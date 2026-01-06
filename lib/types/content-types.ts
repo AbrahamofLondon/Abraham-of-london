@@ -71,3 +71,4 @@ export interface Canon extends ContentBase {
   volumeNumber?: string | number;
   order?: number;
 }
+

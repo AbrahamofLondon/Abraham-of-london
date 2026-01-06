@@ -55,3 +55,4 @@ export const safeBoolean = (v: unknown, fallback: boolean = false): boolean => {
   if (typeof v === "number") return v !== 0;
   return Boolean(v);
 };
+

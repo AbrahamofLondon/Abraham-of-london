@@ -78,3 +78,4 @@ export function withFonts<P extends object>(Component: React.ComponentType<P>) {
 export function FontPreloader() {
   return null;
 }
+

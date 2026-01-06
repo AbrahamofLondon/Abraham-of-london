@@ -45,3 +45,4 @@ export function getSlugParam(req: NextApiRequest): string | null {
   if (!s || typeof s !== "string" || !s.trim()) return null;
   return s.trim().toLowerCase();
 }
+

@@ -3,7 +3,7 @@
  * Version: 2.1.0
  * ============================================================================ */
 
-import type { Tier as TierType } from "@/lib/contentlayer-helper";
+import type { Tier as TierType } from "@/lib/contentlayer";
 import {
   getRequiredTier,
   normalizeTier,
@@ -13,7 +13,7 @@ import {
   isPublic as isPublicDoc,
   isDraft as isDraftDoc,
   isPublishedContent as isPublishedDoc,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/contentlayer";
 
 // Export the type so other files can use it
 export type Tier = TierType;

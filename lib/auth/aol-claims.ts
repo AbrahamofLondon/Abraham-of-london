@@ -17,3 +17,4 @@ export type AoLClaims = {
     flags?: string[]; // decoded from InnerCircleMember.flags JSON
   };
 };
+

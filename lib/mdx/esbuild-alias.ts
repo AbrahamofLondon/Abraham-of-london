@@ -12,3 +12,4 @@ export function withAppAliases(esbuildOptions: any) {
 
   return esbuildOptions;
 }
+

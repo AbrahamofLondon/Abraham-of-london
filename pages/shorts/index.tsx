@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getPublishedShorts } from '@/lib/contentlayer';
+import { getPublishedShorts } from "@/lib/contentlayer";
 
 type ShortDoc = {
   _id: string;
@@ -885,3 +885,4 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
 };
 
 export default ShortsIndexPage;
+

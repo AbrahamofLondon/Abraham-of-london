@@ -10,7 +10,7 @@ import ContentHelper, {
   getAllReports, getAllNewsletters, getAllSermons, getAllDevotionals,
   getAllPrayers, getAllTestimonies, getAllPodcasts, getAllVideos,
   getAllCourses, getAllLessons, getAllPrints
-} from "@/lib/contentlayer-helper";
+} from "@/lib/contentlayer";
 
 /* -------------------------------------------------------------------------- */
 /* 1. TYPES & INTERFACES                                                      */

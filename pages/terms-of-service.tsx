@@ -7,3 +7,4 @@ const TermsOfServiceAliasPage: NextPage = () => {
 };
 
 export default TermsOfServiceAliasPage;
+

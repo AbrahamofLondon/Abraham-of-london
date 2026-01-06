@@ -18,3 +18,4 @@ declare module "@/lib/innerCircleMembership" {
     args: CreateOrUpdateMemberArgs
   ): Promise<IssuedKey>;
 }
+

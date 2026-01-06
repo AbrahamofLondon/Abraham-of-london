@@ -8,8 +8,8 @@ import Layout from "@/components/Layout";
 import {
   getPublishedDocuments,
   getDocKind,
-  getDocHref,
   normalizeSlug,
+  getDocHref,
   resolveDocCoverImage,
 } from "@/lib/contentlayer";
 
