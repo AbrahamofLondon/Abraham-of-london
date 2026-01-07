@@ -1,7 +1,7 @@
 // lib/redis-enhanced.ts
 /**
  * Enhanced Redis client with fallbacks and error handling
- * Avoids direct node:crypto imports that cause Webpack issues
+ * Build-safe: avoids ioredis imports during webpack bundling
  */
 
 // Simple in-memory store as fallback
@@ -53,36 +53,45 @@ let redisInstance: any = null;
 
 async function getRedisClient() {
   if (redisInstance) return redisInstance;
-
-  try {
-    // Check if Redis URL is available
-    if (process.env.REDIS_URL) {
-      // Use dynamic import to avoid Webpack issues with node:crypto
-      const Redis = await import('ioredis').then(m => m.default || m);
-      redisInstance = new Redis(process.env.REDIS_URL, {
-        maxRetriesPerRequest: 3,
-        enableReadyCheck: true,
-        retryStrategy: (times: number) => {
-          return Math.min(times * 50, 2000);
-        }
-      });
-      
-      // Test connection
-      await redisInstance.ping();
-      console.log('[Redis] Connected successfully');
-    } else {
-      throw new Error('No REDIS_URL provided');
-    }
-  } catch (error) {
-    console.warn('[Redis] Connection failed, falling back to memory store:', error);
+  
+  // Only try to load ioredis if we're on the server AND have a Redis URL
+  const isServer = typeof window === 'undefined';
+  const hasRedisUrl = isServer && process.env.REDIS_URL;
+  
+  if (!hasRedisUrl) {
+    console.log('[Redis] Using memory store (no REDIS_URL or not on server)');
     redisInstance = new MemoryRedis();
+    return redisInstance;
   }
 
+  try {
+    // Use require with string concatenation to prevent webpack from bundling
+    // This makes it truly dynamic at runtime
+    const moduleName = 'io' + 'redis';
+    const Redis = require(moduleName);
+    const RedisConstructor = Redis.default || Redis;
+    
+    redisInstance = new RedisConstructor(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+      retryStrategy: (times: number) => {
+        return Math.min(times * 50, 2000);
+      }
+    });
+    
+    // Test connection
+    await redisInstance.ping();
+    console.log('[Redis] Connected successfully to ioredis');
+  } catch (error) {
+    console.warn('[Redis] ioredis not available, using memory store:', error);
+    redisInstance = new MemoryRedis();
+  }
+  
   return redisInstance;
 }
 
 // Public API
-export default {
+const redisClient = {
   async get(key: string): Promise<string | null> {
     const client = await getRedisClient();
     return client.get(key);
@@ -126,3 +135,9 @@ export default {
       : redisInstance?.status === 'ready';
   }
 };
+
+export default redisClient;
+
+// Named exports for compatibility
+export const getRedis = () => redisClient;
+export { redisClient as redis };

@@ -11,6 +11,7 @@ import type {
   VerifyInnerCircleKeyResult,
   IssuedKey
 } from './inner-circle-store';
+import { getRedis } from '@/lib/redis';
 
 export interface AccessLevel {
   level: 'basic' | 'premium' | 'vip' | 'admin';
@@ -62,11 +63,21 @@ export interface AccessAuditLog {
   metadata?: Record<string, any>;
 }
 
+export interface CachedAccessCheck {
+  result: AccessCheckResult;
+  cachedAt: Date;
+  expiresAt: Date;
+}
+
 class InnerCircleAccessManager {
   private static instance: InnerCircleAccessManager;
   private accessLevels: Map<AccessLevel['level'], AccessLevel>;
-  private auditLog: AccessAuditLog[] = [];
-  private maxAuditLogSize = 1000;
+  private memoryAuditLog: AccessAuditLog[] = [];
+  private maxMemoryAuditLogSize = 1000;
+  private auditLogRedisPrefix = 'ic:audit:';
+  private accessCacheRedisPrefix = 'ic:accesscache:';
+  private cacheTtl = 60000; // 1 minute cache for access checks
+  private redisAvailable = false;
 
   private constructor() {
     // Define access levels
@@ -110,6 +121,9 @@ class InnerCircleAccessManager {
         description: 'Administrator access'
       }]
     ]);
+
+    // Check Redis availability
+    this.checkRedis();
   }
 
   static getInstance(): InnerCircleAccessManager {
@@ -119,18 +133,126 @@ class InnerCircleAccessManager {
     return InnerCircleAccessManager.instance;
   }
 
-  private logAudit(entry: Omit<AccessAuditLog, 'timestamp'>): void {
+  private async checkRedis(): Promise<void> {
+    try {
+      const redis = getRedis();
+      if (redis) {
+        // Test Redis connection
+        await redis.ping();
+        this.redisAvailable = true;
+        console.log('[InnerCircleAccess] Redis audit logging enabled');
+      }
+    } catch (error) {
+      console.warn('[InnerCircleAccess] Redis not available, using memory audit log');
+      this.redisAvailable = false;
+    }
+  }
+
+  private async logAudit(entry: Omit<AccessAuditLog, 'timestamp'>): Promise<void> {
     const auditEntry: AccessAuditLog = {
       timestamp: new Date(),
       ...entry
     };
 
-    this.auditLog.unshift(auditEntry);
+    // Always keep in memory for immediate access
+    this.memoryAuditLog.unshift(auditEntry);
     
-    // Keep log at manageable size
-    if (this.auditLog.length > this.maxAuditLogSize) {
-      this.auditLog = this.auditLog.slice(0, this.maxAuditLogSize);
+    // Keep memory log at manageable size
+    if (this.memoryAuditLog.length > this.maxMemoryAuditLogSize) {
+      this.memoryAuditLog = this.memoryAuditLog.slice(0, this.maxMemoryAuditLogSize);
     }
+
+    // Also store in Redis for persistence if available
+    if (this.redisAvailable) {
+      try {
+        const redis = getRedis();
+        if (redis) {
+          const auditKey = `${this.auditLogRedisPrefix}${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
+          await redis.setex(
+            auditKey,
+            86400 * 7, // Keep for 7 days
+            JSON.stringify(auditEntry)
+          );
+
+          // Also add to time-sorted set for time-based queries
+          const sortedSetKey = `${this.auditLogRedisPrefix}sorted`;
+          await redis.zadd(
+            sortedSetKey,
+            auditEntry.timestamp.getTime(),
+            auditKey
+          );
+
+          // Trim old entries (keep last 10,000)
+          await redis.zremrangebyrank(sortedSetKey, 0, -10001);
+        }
+      } catch (error) {
+        console.error('[InnerCircleAccess] Redis audit log error:', error);
+        this.redisAvailable = false;
+      }
+    }
+  }
+
+  private async getCachedAccess(key: string, resource?: string): Promise<CachedAccessCheck | null> {
+    if (!this.redisAvailable) return null;
+
+    try {
+      const redis = getRedis();
+      if (!redis) return null;
+
+      const cacheKey = this.getCacheKey(key, resource);
+      const cached = await redis.get(cacheKey);
+      
+      if (!cached) return null;
+      
+      const parsed: CachedAccessCheck = JSON.parse(cached);
+      
+      // Check if cache is still valid
+      if (new Date(parsed.expiresAt) > new Date()) {
+        return parsed;
+      }
+      
+      // Cache expired, remove it
+      await redis.del(cacheKey);
+      return null;
+      
+    } catch (error) {
+      console.error('[InnerCircleAccess] Cache read error:', error);
+      return null;
+    }
+  }
+
+  private async setCachedAccess(
+    key: string, 
+    resource: string | undefined, 
+    result: AccessCheckResult
+  ): Promise<void> {
+    if (!this.redisAvailable || !result.granted) return;
+
+    try {
+      const redis = getRedis();
+      if (!redis) return;
+
+      const cacheEntry: CachedAccessCheck = {
+        result,
+        cachedAt: new Date(),
+        expiresAt: new Date(Date.now() + this.cacheTtl)
+      };
+
+      const cacheKey = this.getCacheKey(key, resource);
+      await redis.setex(
+        cacheKey,
+        Math.ceil(this.cacheTtl / 1000),
+        JSON.stringify(cacheEntry)
+      );
+    } catch (error) {
+      console.error('[InnerCircleAccess] Cache write error:', error);
+    }
+  }
+
+  private getCacheKey(key: string, resource?: string): string {
+    return resource 
+      ? `${this.accessCacheRedisPrefix}${key}:${resource}`
+      : `${this.accessCacheRedisPrefix}${key}`;
   }
 
   async verifyAccess(
@@ -140,14 +262,39 @@ class InnerCircleAccessManager {
       ip?: string;
       userAgent?: string;
       metadata?: Record<string, any>;
+      bypassCache?: boolean;
     }
   ): Promise<AccessCheckResult> {
+    // Check cache first (if not bypassing)
+    if (!context?.bypassCache) {
+      const cached = await this.getCachedAccess(key, resource);
+      if (cached) {
+        // Log cached access
+        await this.logAudit({
+          memberEmail: cached.result.member?.email || 'cached',
+          action: 'access_granted_cached',
+          resource,
+          granted: cached.result.granted,
+          ipAddress: context?.ip,
+          userAgent: context?.userAgent,
+          metadata: {
+            ...cached.result.metadata,
+            cached: true,
+            cachedAt: cached.cachedAt,
+            ...context?.metadata
+          }
+        });
+
+        return cached.result;
+      }
+    }
+
     try {
       // Verify the key
       const verification = await innerCircleStore.verifyInnerCircleKey(key);
       
       if (!verification.valid) {
-        this.logAudit({
+        await this.logAudit({
           memberEmail: 'unknown',
           action: 'access_denied',
           resource,
@@ -156,6 +303,7 @@ class InnerCircleAccessManager {
           userAgent: context?.userAgent,
           metadata: {
             reason: 'invalid_key',
+            verificationReason: verification.reason,
             ...context?.metadata
           }
         });
@@ -169,7 +317,7 @@ class InnerCircleAccessManager {
       const { member, issuedKey } = verification;
       
       if (!member || !issuedKey) {
-        this.logAudit({
+        await this.logAudit({
           memberEmail: 'unknown',
           action: 'access_denied',
           resource,
@@ -190,7 +338,7 @@ class InnerCircleAccessManager {
 
       // Check if key is expired
       if (issuedKey.expiresAt && new Date() > issuedKey.expiresAt) {
-        this.logAudit({
+        await this.logAudit({
           memberEmail: member.email,
           action: 'access_denied',
           resource,
@@ -215,7 +363,7 @@ class InnerCircleAccessManager {
 
       // Check remaining uses
       if (issuedKey.maxUses && issuedKey.usedCount >= issuedKey.maxUses) {
-        this.logAudit({
+        await this.logAudit({
           memberEmail: member.email,
           action: 'access_denied',
           resource,
@@ -244,7 +392,7 @@ class InnerCircleAccessManager {
       
       // Check if member is suspended
       if (member.suspended) {
-        this.logAudit({
+        await this.logAudit({
           memberEmail: member.email,
           action: 'access_denied',
           resource,
@@ -272,8 +420,21 @@ class InnerCircleAccessManager {
         ? Math.max(0, issuedKey.maxUses - issuedKey.usedCount)
         : undefined;
 
+      const result: AccessCheckResult = {
+        granted: true,
+        member,
+        key: issuedKey,
+        accessLevel,
+        remainingUses,
+        expiresAt: issuedKey.expiresAt,
+        metadata: {
+          permissions: accessLevel.permissions,
+          tier: member.tier
+        }
+      };
+
       // Log successful access
-      this.logAudit({
+      await this.logAudit({
         memberEmail: member.email,
         action: 'access_granted',
         resource,
@@ -288,26 +449,18 @@ class InnerCircleAccessManager {
         }
       });
 
+      // Cache successful access
+      await this.setCachedAccess(key, resource, result);
+
       // Increment usage count
       await innerCircleStore.recordInnerCircleUnlock(issuedKey.key);
 
-      return {
-        granted: true,
-        member,
-        key: issuedKey,
-        accessLevel,
-        remainingUses,
-        expiresAt: issuedKey.expiresAt,
-        metadata: {
-          permissions: accessLevel.permissions,
-          tier: member.tier
-        }
-      };
+      return result;
 
     } catch (error) {
       console.error('[InnerCircleAccess] Error verifying access:', error);
       
-      this.logAudit({
+      await this.logAudit({
         memberEmail: 'unknown',
         action: 'access_error',
         resource,
@@ -334,10 +487,14 @@ class InnerCircleAccessManager {
     context?: {
       ip?: string;
       userAgent?: string;
+      bypassCache?: boolean;
     }
   ): Promise<PremiumContentAccess> {
     const requiredLevel = this.getRequiredLevelForContent(contentType);
-    const accessCheck = await this.verifyAccess(key, contentId, context);
+    const accessCheck = await this.verifyAccess(key, contentId, {
+      ...context,
+      metadata: { contentType }
+    });
 
     const result: PremiumContentAccess = {
       contentId,
@@ -358,7 +515,7 @@ class InnerCircleAccessManager {
         this.compareAccessLevels(accessCheck.accessLevel.level, requiredLevel) < 0) {
       result.granted = false;
       
-      this.logAudit({
+      await this.logAudit({
         memberEmail: accessCheck.member!.email,
         action: 'content_access_denied',
         resource: contentId,
@@ -375,7 +532,7 @@ class InnerCircleAccessManager {
     }
 
     if (result.granted) {
-      this.logAudit({
+      await this.logAudit({
         memberEmail: accessCheck.member!.email,
         action: 'content_access_granted',
         resource: contentId,
@@ -399,9 +556,13 @@ class InnerCircleAccessManager {
     context?: {
       ip?: string;
       userAgent?: string;
+      bypassCache?: boolean;
     }
   ): Promise<BatchAccessCheck> {
-    const accessCheck = await this.verifyAccess(memberKey, undefined, context);
+    const accessCheck = await this.verifyAccess(memberKey, undefined, {
+      ...context,
+      metadata: { batchCheck: true, itemCount: items.length }
+    });
     
     if (!accessCheck.granted || !accessCheck.accessLevel) {
       // If basic access is denied, all items are denied
@@ -438,7 +599,7 @@ class InnerCircleAccessManager {
     const granted = Object.values(result).filter(Boolean).length;
     const denied = items.length - granted;
 
-    this.logAudit({
+    await this.logAudit({
       memberEmail: accessCheck.member!.email,
       action: 'batch_access_check',
       granted: granted > 0,
@@ -540,8 +701,57 @@ class InnerCircleAccessManager {
       limit?: number;
     }
   ): Promise<AccessAuditLog[]> {
-    let filtered = [...this.auditLog];
+    let filtered: AccessAuditLog[] = [];
 
+    // Combine memory and Redis logs if available
+    if (this.redisAvailable) {
+      try {
+        const redis = getRedis();
+        if (redis) {
+          const sortedSetKey = `${this.auditLogRedisPrefix}sorted`;
+          const start = filters?.startDate?.getTime() || 0;
+          const end = filters?.endDate?.getTime() || Date.now();
+          
+          const auditKeys = await redis.zrangebyscore(
+            sortedSetKey,
+            start,
+            end,
+            'WITHSCORES'
+          );
+
+          // Process in chunks to avoid too many Redis calls
+          const chunkSize = 100;
+          for (let i = 0; i < auditKeys.length; i += chunkSize * 2) {
+            const keysChunk = auditKeys.slice(i, i + chunkSize * 2);
+            const keys = [];
+            
+            for (let j = 0; j < keysChunk.length; j += 2) {
+              keys.push(keysChunk[j]);
+            }
+            
+            if (keys.length > 0) {
+              const auditData = await redis.mget(keys);
+              auditData.forEach((data, index) => {
+                if (data) {
+                  try {
+                    filtered.push(JSON.parse(data));
+                  } catch (error) {
+                    console.error('[InnerCircleAccess] Parse audit log error:', error);
+                  }
+                }
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[InnerCircleAccess] Redis audit log query error:', error);
+        filtered = [...this.memoryAuditLog];
+      }
+    } else {
+      filtered = [...this.memoryAuditLog];
+    }
+
+    // Apply filters
     if (filters?.memberEmail) {
       filtered = filtered.filter(log => 
         log.memberEmail.toLowerCase().includes(filters.memberEmail!.toLowerCase())
@@ -574,7 +784,23 @@ class InnerCircleAccessManager {
   }
 
   async clearAuditLog(): Promise<void> {
-    this.auditLog = [];
+    this.memoryAuditLog = [];
+    
+    if (this.redisAvailable) {
+      try {
+        const redis = getRedis();
+        if (redis) {
+          const sortedSetKey = `${this.auditLogRedisPrefix}sorted`;
+          const keys = await redis.zrange(sortedSetKey, 0, -1);
+          
+          if (keys.length > 0) {
+            await redis.del(...keys, sortedSetKey);
+          }
+        }
+      } catch (error) {
+        console.error('[InnerCircleAccess] Clear Redis audit log error:', error);
+      }
+    }
   }
 
   async getAccessStats(): Promise<{
@@ -584,10 +810,11 @@ class InnerCircleAccessManager {
     byLevel: Record<AccessLevel['level'], number>;
     recentActivity: AccessAuditLog[];
     peakHour?: string;
+    cacheHits?: number;
+    cacheMisses?: number;
   }> {
-    const last24Hours = this.auditLog.filter(log => {
-      const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      return log.timestamp > dayAgo;
+    const last24Hours = await this.getAuditLog({
+      startDate: new Date(Date.now() - 24 * 60 * 60 * 1000)
     });
 
     const byLevel: Record<AccessLevel['level'], number> = {
@@ -597,10 +824,19 @@ class InnerCircleAccessManager {
       admin: 0
     };
 
+    let cacheHits = 0;
+    let cacheMisses = 0;
+
     last24Hours.forEach(log => {
       if (log.metadata?.accessLevel) {
         const level = log.metadata.accessLevel as AccessLevel['level'];
         byLevel[level] = (byLevel[level] || 0) + 1;
+      }
+      
+      if (log.metadata?.cached) {
+        cacheHits++;
+      } else if (log.action.includes('access_')) {
+        cacheMisses++;
       }
     });
 
@@ -626,7 +862,9 @@ class InnerCircleAccessManager {
       denied: last24Hours.filter(log => !log.granted).length,
       byLevel,
       recentActivity: last24Hours.slice(0, 10),
-      peakHour
+      peakHour,
+      cacheHits,
+      cacheMisses
     };
   }
 
@@ -671,6 +909,61 @@ class InnerCircleAccessManager {
       };
     }
   }
+
+  async invalidateCache(key: string, resource?: string): Promise<void> {
+    try {
+      const redis = getRedis();
+      if (!redis) return;
+
+      const cacheKey = this.getCacheKey(key, resource);
+      await redis.del(cacheKey);
+    } catch (error) {
+      console.error('[InnerCircleAccess] Cache invalidation error:', error);
+    }
+  }
+
+  async flushAllCaches(): Promise<void> {
+    try {
+      const redis = getRedis();
+      if (!redis) return;
+
+      const keys = await redis.keys(`${this.accessCacheRedisPrefix}*`);
+      if (keys.length > 0) {
+        await redis.del(keys);
+      }
+    } catch (error) {
+      console.error('[InnerCircleAccess] Cache flush error:', error);
+    }
+  }
+
+  async getCacheStats(): Promise<{
+    cacheSize: number;
+    ttlMs: number;
+    redisAvailable: boolean;
+  }> {
+    try {
+      const redis = getRedis();
+      let cacheSize = 0;
+      
+      if (redis) {
+        const keys = await redis.keys(`${this.accessCacheRedisPrefix}*`);
+        cacheSize = keys.length;
+      }
+
+      return {
+        cacheSize,
+        ttlMs: this.cacheTtl,
+        redisAvailable: this.redisAvailable
+      };
+    } catch (error) {
+      console.error('[InnerCircleAccess] Cache stats error:', error);
+      return {
+        cacheSize: 0,
+        ttlMs: this.cacheTtl,
+        redisAvailable: false
+      };
+    }
+  }
 }
 
 // Export singleton instance
@@ -684,6 +977,7 @@ export async function verifyInnerCircleAccess(
     ip?: string;
     userAgent?: string;
     metadata?: Record<string, any>;
+    bypassCache?: boolean;
   }
 ) {
   return await innerCircleAccess.verifyAccess(key, resource, context);
@@ -696,6 +990,7 @@ export async function checkPremiumAccess(
   context?: {
     ip?: string;
     userAgent?: string;
+    bypassCache?: boolean;
   }
 ) {
   return await innerCircleAccess.checkPremiumContentAccess(
@@ -712,6 +1007,7 @@ export async function batchAccessCheck(
   context?: {
     ip?: string;
     userAgent?: string;
+    bypassCache?: boolean;
   }
 ) {
   return await innerCircleAccess.batchCheckAccess(items, memberKey, context);
@@ -729,6 +1025,18 @@ export async function validatePermissions(
     memberEmail,
     requiredPermissions
   );
+}
+
+export async function invalidateAccessCache(key: string, resource?: string) {
+  return await innerCircleAccess.invalidateCache(key, resource);
+}
+
+export async function flushAccessCaches() {
+  return await innerCircleAccess.flushAllCaches();
+}
+
+export async function getAccessCacheStats() {
+  return await innerCircleAccess.getCacheStats();
 }
 
 export default innerCircleAccess;

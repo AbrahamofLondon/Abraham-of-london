@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
+import { withContentlayer } from 'next-contentlayer2';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,7 +33,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  webpack: (config, { isServer, dev }) => {
+  webpack: (config, { isServer, dev, webpack }) => {
+    // Fallbacks for Node.js modules
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
@@ -44,8 +46,26 @@ const nextConfig = {
       url: false,
       assert: false,
       buffer: false,
+      net: false,
+      tls: false,
+      dns: false,
+      child_process: false,
     };
     
+    // CRITICAL: Ignore ioredis in client bundles
+    if (!isServer) {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^ioredis$/,
+        })
+      );
+      
+      // Also add to externals
+      config.externals = config.externals || [];
+      config.externals.push('ioredis');
+    }
+    
+    // Ignore warnings
     config.ignoreWarnings = [
       { module: /@react-pdf\/renderer/ },
       { module: /pdfkit/ },
@@ -55,6 +75,7 @@ const nextConfig = {
       { module: /sharp/ },
       { module: /better-sqlite3/ },
       { module: /node-gyp/ },
+      { module: /ioredis/ },
       { file: /routers\/.*/ },
       { file: /node_modules\/.*/ },
     ];
@@ -71,6 +92,7 @@ const nextConfig = {
       };
     }
     
+    // Windows-specific fixes
     if (process.platform === 'win32') {
       config.plugins = config.plugins || [];
       config.resolve.alias = {
@@ -94,6 +116,9 @@ const nextConfig = {
       'bcrypt',
       'crypto',
       'jsonwebtoken',
+      'ioredis', // Add ioredis here
+      '@prisma/client',
+      'prisma',
     ],
     
     optimizeCss: true,
@@ -162,4 +187,5 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrap with ContentLayer
+export default withContentlayer(nextConfig);

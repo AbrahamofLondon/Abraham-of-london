@@ -1,51 +1,69 @@
-// lib/prisma.ts - WITH OPTIONAL ADAPTER SUPPORT
+// lib/prisma.ts - Lazy Prisma initialization to avoid build-time errors
 import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient;
+  prisma: PrismaClient | undefined;
 };
 
-export const prisma: PrismaClient = globalForPrisma.prisma || initPrisma();
+let prismaInstance: PrismaClient | undefined = undefined;
 
-async function initPrisma(): Promise<PrismaClient> {
-  let client: PrismaClient;
-  
+function createPrismaClient(): PrismaClient {
   const logLevels = process.env.NODE_ENV === 'development' 
-    ? ['warn', 'error'] 
-    : ['error'];
+    ? ['warn', 'error'] as const
+    : ['error'] as const;
 
-  // OPTIONALLY use SQLite adapter if available AND requested
-  if (process.env.PRISMA_USE_SQLITE_ADAPTER === 'true') {
-    try {
-      // Dynamic import - will fail if packages not installed
-      const { PrismaBetterSqlite3 } = await import('@prisma/adapter-better-sqlite3');
-      const BetterSqlite3 = (await import('better-sqlite3')).default;
-      
-      const dbPath = process.env.DATABASE_URL?.replace(/^file:/, '') || './dev.db';
-      const sqlite = new BetterSqlite3(dbPath);
-      const adapter = new PrismaBetterSqlite3(sqlite);
-      
-      client = new PrismaClient({ 
-        adapter,
-        log: logLevels,
-      });
-      console.log('✅ Prisma Client initialized with SQLite adapter');
-    } catch (error) {
-      console.warn('⚠️ SQLite adapter unavailable, falling back to default');
-      console.warn('Install: npm install @prisma/adapter-better-sqlite3 better-sqlite3');
-      client = new PrismaClient({ log: logLevels });
-    }
-  } else {
-    // Default - no adapter
-    client = new PrismaClient({ log: logLevels });
+  try {
+    // Try to use adapter if packages are installed
+    const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+    const BetterSqlite3 = require('better-sqlite3');
+    
+    const dbPath = process.env.DATABASE_URL?.replace(/^file:/, '') || './dev.db';
+    const sqlite = new BetterSqlite3(dbPath);
+    const adapter = new PrismaBetterSqlite3(sqlite);
+    
+    console.log('✅ Prisma initialized with SQLite adapter');
+    return new PrismaClient({ 
+      adapter,
+      log: logLevels,
+    });
+  } catch (adapterError) {
+    console.warn('⚠️ Prisma adapter not available');
+    console.warn('Install with: pnpm add @prisma/adapter-better-sqlite3');
+    
+    // Return a mock client that won't crash but won't work either
+    // This allows the build to complete
+    return new Proxy({} as PrismaClient, {
+      get: (target, prop) => {
+        if (prop === '$connect' || prop === '$disconnect') {
+          return async () => {
+            console.warn('Prisma not properly initialized - adapter required');
+          };
+        }
+        return () => {
+          throw new Error(
+            'Prisma requires @prisma/adapter-better-sqlite3. ' +
+            'Install with: pnpm add @prisma/adapter-better-sqlite3'
+          );
+        };
+      }
+    });
   }
-
-  // Store in global for hot reload
-  if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = client;
-  }
-
-  return client;
 }
+
+// Lazy getter - only initializes when accessed
+export const prisma = new Proxy({} as PrismaClient, {
+  get: (target, prop) => {
+    // Initialize on first access, not at import time
+    if (!prismaInstance) {
+      prismaInstance = globalForPrisma.prisma ?? createPrismaClient();
+      
+      if (process.env.NODE_ENV !== 'production') {
+        globalForPrisma.prisma = prismaInstance;
+      }
+    }
+    
+    return (prismaInstance as any)[prop];
+  }
+});
 
 export default prisma;

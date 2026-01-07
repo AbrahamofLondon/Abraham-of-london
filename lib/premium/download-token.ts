@@ -119,10 +119,11 @@ class DownloadTokenManager {
   }
 
   private generateSecureToken(): string {
+    const randomBytes = crypto.randomBytes(32);
     return 'dl_' + 
       Date.now().toString(36) + 
       Math.random().toString(36).substr(2, 9) +
-      Buffer.from(crypto.randomUUID()).toString('base64').replace(/[^a-zA-Z0-9]/g, '').substr(0, 16);
+      randomBytes.toString('base64').replace(/[^a-zA-Z0-9]/g, '').substr(0, 16);
   }
 
   private cleanupExpiredTokens(): void {

@@ -188,3 +188,15 @@ export function createPublicApiHandler(handler: any) {
 export function createStrictApiHandler(handler: any) {
   return withInnerCircleAccess(handler, { requireAuth: true });
 }
+// Add this function near the bottom of the file
+export function hasInnerCircleAccess(): boolean {
+  // This is a client-side check - in a real app, you'd check cookies/localStorage
+  if (typeof window !== 'undefined') {
+    const cookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('innerCircleAccess='))
+      ?.split('=')[1];
+    return cookie === 'true';
+  }
+  return false;
+}

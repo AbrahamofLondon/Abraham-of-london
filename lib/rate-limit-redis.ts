@@ -1,112 +1,33 @@
 // lib/rate-limit-redis.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { getRedis } from "@/lib/redis";
+/**
+ * Redis-based rate limiting (SERVER ONLY)
+ * This file re-exports from server/rateLimit to avoid ioredis in browser builds
+ */
 
-export type RedisRateLimitOptions = {
-  windowMs: number;
-  max: number;
-  keyPrefix: string;
-  blockDuration?: number; // ms
-};
+// Just re-export everything from the memory-based rate limiter
+// This avoids any ioredis imports during build
+export {
+  rateLimit,
+  getClientIp,
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
+  type RateLimitOptions,
+  type RateLimitResult,
+} from './server/rateLimit';
 
-export type RedisRateLimitResult = {
-  allowed: boolean;
-  remaining: number;
-  resetAt: number; // epoch ms
-  limit: number;
-  blocked?: boolean;
-  blockUntil?: number; // epoch ms
-};
+export { default } from './server/rateLimit';
 
-function nowMs() {
-  return Date.now();
+// Safe Redis getter that doesn't import ioredis
+export function getRedis() {
+  // Return null - the enhanced redis client will be used instead
+  try {
+    // Only available at runtime, not build time
+    if (typeof window === 'undefined') {
+      const redis = require('./redis-enhanced').default;
+      return redis;
+    }
+  } catch (error) {
+    console.warn('[rate-limit-redis] Redis not available');
+  }
+  return null;
 }
-
-export const rateLimitRedis = {
-  async check(key: string, opts: RedisRateLimitOptions): Promise<RedisRateLimitResult> {
-    const redis = getRedis();
-    if (!redis) {
-      // caller will fallback elsewhere
-      return {
-        allowed: true,
-        remaining: opts.max - 1,
-        resetAt: nowMs() + opts.windowMs,
-        limit: opts.max,
-        blocked: false,
-      };
-    }
-
-    const storeKey = `${opts.keyPrefix}:${key}`;
-    const blockKey = `${storeKey}:block`;
-    const now = nowMs();
-
-    // 1) block check
-    const blockUntilStr = await redis.get(blockKey);
-    if (blockUntilStr) {
-      const blockUntil = Number(blockUntilStr);
-      if (blockUntil > now) {
-        return {
-          allowed: false,
-          remaining: 0,
-          resetAt: blockUntil,
-          limit: opts.max,
-          blocked: true,
-          blockUntil,
-        };
-      } else {
-        await redis.del(blockKey);
-      }
-    }
-
-    // 2) fixed window counter
-    const windowKey = `${storeKey}:win:${Math.floor(now / opts.windowMs)}`;
-    const multi = redis.multi();
-    multi.incr(windowKey);
-    multi.pttl(windowKey);
-    const [incrRes, ttlRes] = (await multi.exec()) as any[];
-
-    const count = Number(incrRes?.[1] ?? 1);
-    let ttl = Number(ttlRes?.[1] ?? -1);
-
-    if (ttl < 0) {
-      // first request in this window
-      await redis.pexpire(windowKey, opts.windowMs);
-      ttl = opts.windowMs;
-    }
-
-    const resetAt = now + ttl;
-    const exceeded = count > opts.max;
-
-    if (exceeded && opts.blockDuration) {
-      const blockUntil = now + opts.blockDuration;
-      await redis.set(blockKey, String(blockUntil), "PX", opts.blockDuration);
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt,
-        limit: opts.max,
-        blocked: true,
-        blockUntil,
-      };
-    }
-
-    return {
-      allowed: !exceeded,
-      remaining: Math.max(0, opts.max - count),
-      resetAt,
-      limit: opts.max,
-      blocked: false,
-    };
-  },
-
-  async getStats() {
-    const redis = getRedis();
-    if (!redis) return { ok: false, reason: "no_redis" };
-    try {
-      const pong = await redis.ping();
-      return { ok: true, pong };
-    } catch (e: any) {
-      return { ok: false, reason: e?.message ?? "redis_error" };
-    }
-  },
-};

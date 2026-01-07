@@ -213,3 +213,7 @@ export async function GET() {
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
+// Add default export if missing
+export default async function handler(request: NextRequest) {
+  return POST(request);
+}
