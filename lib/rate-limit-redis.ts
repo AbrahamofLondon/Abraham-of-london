@@ -1,4 +1,4 @@
-// lib/rate-limit-redis.ts
+// lib/rate-limit-redis.ts - Production Redis Rate Limiter
 import redis, { createNamespacedClient } from './redis-enhanced';
 
 export interface RedisRateLimitConfig {
@@ -46,7 +46,7 @@ class RedisRateLimiter {
         limit: max,
         resetAt: now + windowMs,
         blocked: true,
-        blockUntil: now + 365 * 24 * 60 * 60 * 1000, // 1 year
+        blockUntil: now + 365 * 24 * 60 * 60 * 1000,
       };
     }
     
@@ -93,7 +93,7 @@ class RedisRateLimiter {
       );
     }
     
-    // Apply permanent block if configured (e.g., for suspicious activity)
+    // Apply permanent block if configured
     if (!allowed && config.blockDuration === -1) {
       await this.client.set(blockKey, '1');
     }
@@ -121,18 +121,19 @@ class RedisRateLimiter {
   }
 
   async getStats() {
-    const clientStats = await redis.getStats();
     const keys = await this.client.keys('*');
+    const ping = await this.client.ping();
     
     return {
       namespace: this.namespace,
       totalKeys: keys.length,
-      redisStats: clientStats,
+      status: ping === 'PONG' ? 'connected' : 'disconnected',
+      ping,
     };
   }
 }
 
-// Export singleton instances for different use cases
+// Export singleton instances
 export const rateLimitRedis = new RedisRateLimiter('rate-limit');
 export const authRateLimitRedis = new RedisRateLimiter('auth-rate-limit');
 export const apiRateLimitRedis = new RedisRateLimiter('api-rate-limit');

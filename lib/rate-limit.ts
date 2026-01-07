@@ -1,5 +1,5 @@
 // lib/rate-limit.ts — dependency-free, serverless-safe
-import redis from '@/lib/redis-enhanced'; // Use enhanced Redis stub
+// FIXED: Remove broken import and use dynamic import instead
 
 export interface RateLimitConfig {
   windowMs: number;
@@ -27,8 +27,6 @@ export const RATE_LIMIT_CONFIGS = {
   SHORTS_INTERACTIONS: { windowMs: 60_000, max: 30, keyPrefix: "shorts_interactions", useRedis: !!process.env.REDIS_URL },
   TEASER_REQUEST: { windowMs: 60_000, max: 5, keyPrefix: "teaser", useRedis: !!process.env.REDIS_URL },
   NEWSLETTER_SUBSCRIBE: { windowMs: 60_000, max: 5, keyPrefix: "newsletter", blockDuration: 300_000, useRedis: !!process.env.REDIS_URL },
-
-  // For "always redis" configs, degrade safely to memory stub if REDIS_URL missing
   AUTH_LOGIN: { windowMs: 15 * 60_000, max: 5, keyPrefix: "auth_login", skipSuccessfulRequests: true, blockDuration: 900_000, useRedis: true },
   AUTH_REGISTER: { windowMs: 60 * 60_000, max: 3, keyPrefix: "auth_register", blockDuration: 3600_000, useRedis: true },
   INNER_CIRCLE_REGISTER: { windowMs: 15 * 60_000, max: 3, keyPrefix: "inner_circle_register_ip", blockDuration: 900_000, useRedis: true },
@@ -58,7 +56,7 @@ interface RateLimitStorage {
   }>;
 }
 
-// Memory storage (keep your existing implementation)
+// Memory storage implementation
 class MemoryStorage implements RateLimitStorage {
   private store = new Map<string, {
     count: number;
@@ -201,12 +199,72 @@ class MemoryStorage implements RateLimitStorage {
   }
 }
 
-/**
- * Redis-backed storage using our enhanced Redis stub
- */
+// Memory store for Redis fallback
+class MemoryStore {
+  private store = new Map<string, { value: string; expiresAt?: number }>();
+
+  async get(key: string): Promise<string | null> {
+    const item = this.store.get(key);
+    if (!item) return null;
+    if (item.expiresAt && item.expiresAt < Date.now()) {
+      this.store.delete(key);
+      return null;
+    }
+    return item.value;
+  }
+
+  async set(key: string, value: string, options?: { EX?: number }): Promise<void> {
+    const expiresAt = options?.EX ? Date.now() + (options.EX * 1000) : undefined;
+    this.store.set(key, { value, expiresAt });
+  }
+
+  async setex(key: string, seconds: number, value: string): Promise<void> {
+    return this.set(key, value, { EX: seconds });
+  }
+
+  async del(key: string): Promise<number> {
+    const existed = this.store.delete(key);
+    return existed ? 1 : 0;
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    const allKeys = Array.from(this.store.keys());
+    if (pattern === '*') return allKeys;
+    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+    return allKeys.filter(key => regex.test(key));
+  }
+
+  async ping(): Promise<string> {
+    return 'PONG';
+  }
+}
+
+// Redis storage implementation with dynamic import
 class RedisStorageCompat implements RateLimitStorage {
+  private memoryStore = new MemoryStore();
+  private redisAvailable = false;
+
+  constructor() {
+    this.redisAvailable = !!process.env.REDIS_URL;
+  }
+
+  private async getRedis() {
+    if (!this.redisAvailable) return this.memoryStore;
+    
+    try {
+      // Dynamic import to avoid build-time errors
+      const { default: redis } = await import('./redis-enhanced');
+      return redis;
+    } catch (error) {
+      console.warn('[RedisStorage] Failed to load redis-enhanced, falling back to memory:', error);
+      this.redisAvailable = false;
+      return this.memoryStore;
+    }
+  }
+
   async check(key: string, config: RateLimitConfig): Promise<RateLimitResult> {
     const now = Date.now();
+    const redis = await this.getRedis();
 
     // Check permanent block
     const perm = await redis.get(`block:${key}`);
@@ -270,6 +328,7 @@ class RedisStorageCompat implements RateLimitStorage {
   }
 
   async markSuccess(key: string): Promise<void> {
+    const redis = await this.getRedis();
     const bucketKey = `rl:${key}`;
     const raw = await redis.get(bucketKey);
     if (!raw) return;
@@ -285,6 +344,7 @@ class RedisStorageCompat implements RateLimitStorage {
 
   async getStatus(key: string, config: RateLimitConfig): Promise<RateLimitResult | null> {
     const now = Date.now();
+    const redis = await this.getRedis();
     
     // Check permanent block
     const perm = await redis.get(`block:${key}`);
@@ -316,17 +376,20 @@ class RedisStorageCompat implements RateLimitStorage {
   }
 
   async resetKey(key: string): Promise<boolean> {
+    const redis = await this.getRedis();
     await redis.del(`block:${key}`);
     const deleted = await redis.del(`rl:${key}`);
     return deleted > 0;
   }
 
   async blockPermanently(key: string): Promise<void> {
+    const redis = await this.getRedis();
     await redis.set(`block:${key}`, "1");
     console.warn(`[RateLimiter] PERMANENT BLOCK: ${key}`);
   }
 
   async unblock(key: string): Promise<void> {
+    const redis = await this.getRedis();
     await redis.del(`block:${key}`);
     
     // Also clear any temporary block
@@ -341,6 +404,7 @@ class RedisStorageCompat implements RateLimitStorage {
   }
 
   async getStats() {
+    const redis = await this.getRedis();
     const now = Date.now();
     
     try {
