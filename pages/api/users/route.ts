@@ -1,5 +1,7 @@
+// pages/api/users/route.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { withRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/server/rateLimit-unified';
+// CORRECTED: lowercase 'l' in rate-limit-unified
+import { withApiRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/server/rate-limit-unified';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   // 1. Method Guard (Pages Router doesn't separate exports by method)
@@ -12,7 +14,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 
 // 3. Export the wrapped handler
-export default withRateLimit(
+export default withApiRateLimit(
   handler,
   RATE_LIMIT_CONFIGS.API_GENERAL
 );
