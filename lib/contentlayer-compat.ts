@@ -1,43 +1,12 @@
-/* lib/contentlayer-compat.ts - INSTITUTIONAL RECONCILIATION - HARDENED */
+/* lib/contentlayer-compat.ts - HARDENED ABSOLUTE PATH LOADER */
 
-import { sanitizeData } from "@/lib/server/md-utils";
+import fs from "fs";
+import path from "path";
+import { pathToFileURL } from "url";
 
-/* -------------------------------------------------------------------------- */
-/* CORE LOGIC                                                                 */
-/* -------------------------------------------------------------------------- */
+export type ContentLayerDoc = any;
 
-export function normalizeSlug(input: any): string {
-  const raw =
-    typeof input === "string"
-      ? input
-      : Array.isArray(input)
-        ? input.join("/")
-        : (input ?? "").toString();
-
-  return raw
-    .trim()
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\.mdx?$/, "");
-}
-
-export function isDraftContent(doc: any): boolean {
-  if (!doc) return true;
-  const d = doc?.draft;
-  if (d === true || d === "true") return true;
-  return doc?.status === "draft";
-}
-
-// Legacy alias some pages expect
-export const isDraft = isDraftContent;
-
-/* -------------------------------------------------------------------------- */
-/* SAFE CONTENTLAYER IMPORTS                                                  */
-/* -------------------------------------------------------------------------- */
-
-type ContentLayerDoc = any;
-
-type GeneratedShape = {
+export type GeneratedShape = {
   allBooks?: ContentLayerDoc[];
   allCanons?: ContentLayerDoc[];
   allDownloads?: ContentLayerDoc[];
@@ -49,307 +18,204 @@ type GeneratedShape = {
   allStrategies?: ContentLayerDoc[];
 };
 
-let contentlayerData: GeneratedShape = {};
+const localGeneratedDir = path.join(process.cwd(), ".contentlayer", "generated");
+const localIndexMjs = path.join(localGeneratedDir, "index.mjs");
 
-try {
-  /**
-   * Prefer the official runtime module if present.
-   * (Works with Contentlayer’s standard output)
-   */
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const generated = require("contentlayer/generated") as GeneratedShape;
-  contentlayerData = generated;
-} catch (e1) {
+const log = (...args: any[]) => console.log("[contentlayer-compat]", ...args);
+const warn = (...args: any[]) => console.warn("[contentlayer-compat]", ...args);
+const err = (...args: any[]) => console.error("[contentlayer-compat]", ...args);
+
+function looksNonEmpty(mod: any): mod is GeneratedShape {
+  if (!mod || typeof mod !== "object") return false;
+  // If at least one collection exists and has length, treat as real.
+  const keys = [
+    "allPosts",
+    "allBooks",
+    "allCanons",
+    "allDownloads",
+    "allEvents",
+    "allPrints",
+    "allResources",
+    "allShorts",
+    "allStrategies",
+  ] as const;
+
+  return keys.some((k) => Array.isArray((mod as any)[k]) && (mod as any)[k].length > 0);
+}
+
+async function loadFromLocalGeneratedDir(): Promise<GeneratedShape | null> {
+  // 1) Best-case: require the directory (works if it’s CJS or has proper exports)
   try {
-    /**
-     * Fallback to local generated directory (some setups produce .contentlayer/generated)
-     */
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const generatedLocal = require("../.contentlayer/generated") as GeneratedShape;
-    contentlayerData = generatedLocal;
-  } catch (e2) {
-    console.warn("[contentlayer-compat] Contentlayer not available yet; using empty collections");
-    contentlayerData = {};
+    if (fs.existsSync(localGeneratedDir)) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const mod = require(localGeneratedDir) as GeneratedShape;
+      if (looksNonEmpty(mod)) {
+        log("SUCCESS: loaded from directory require:", localGeneratedDir);
+        return mod;
+      }
+      // Some setups return an object but empty; keep going.
+      if (mod && typeof mod === "object") {
+        warn("Directory require returned empty collections; trying index.mjs import next.");
+      }
+    }
+  } catch (e) {
+    warn("Directory require failed; trying index.mjs import next.", e);
   }
+
+  // 2) Correct ESM path: dynamic import of index.mjs
+  try {
+    if (fs.existsSync(localIndexMjs)) {
+      const url = pathToFileURL(localIndexMjs).href;
+      const mod = (await import(url)) as any;
+
+      // Some ESM outputs put exports under `default`; normalize
+      const normalized = (mod?.default && typeof mod.default === "object") ? mod.default : mod;
+
+      if (looksNonEmpty(normalized)) {
+        log("SUCCESS: loaded from ESM import:", localIndexMjs);
+        return normalized as GeneratedShape;
+      }
+
+      warn("ESM import worked but collections appear empty; will fallback.");
+    }
+  } catch (e) {
+    warn("ESM import of index.mjs failed; will fallback.", e);
+  }
+
+  return null;
 }
 
-// Safely extract collections with defaults
-export const allBooks = contentlayerData.allBooks ?? [];
-export const allCanons = contentlayerData.allCanons ?? [];
-export const allDownloads = contentlayerData.allDownloads ?? [];
-export const allEvents = contentlayerData.allEvents ?? [];
-export const allPosts = contentlayerData.allPosts ?? [];
-export const allPrints = contentlayerData.allPrints ?? [];
-export const allResources = contentlayerData.allResources ?? [];
-export const allShorts = contentlayerData.allShorts ?? [];
-export const allStrategies = contentlayerData.allStrategies ?? [];
-
-/* -------------------------------------------------------------------------- */
-/* COLLECTION PROVIDERS                                                       */
-/* -------------------------------------------------------------------------- */
-
-export const getAllPosts = () => allPosts.filter((d) => !isDraftContent(d));
-export const getAllBooks = () => allBooks.filter((d) => !isDraftContent(d));
-export const getAllDownloads = () => allDownloads.filter((d) => !isDraftContent(d));
-export const getAllCanons = () => allCanons.filter((d) => !isDraftContent(d));
-export const getAllShorts = () => allShorts.filter((d) => !isDraftContent(d));
-export const getAllResources = () => allResources.filter((d) => !isDraftContent(d));
-export const getAllStrategies = () => allStrategies.filter((d) => !isDraftContent(d));
-export const getAllEvents = () => allEvents.filter((d) => !isDraftContent(d));
-export const getAllPrints = () => allPrints.filter((d) => !isDraftContent(d));
-
-export const allDocuments = [
-  ...allPosts,
-  ...allBooks,
-  ...allCanons,
-  ...allDownloads,
-  ...allEvents,
-  ...allPrints,
-  ...allResources,
-  ...allShorts,
-  ...allStrategies,
-].filter((d) => !isDraftContent(d));
-
-/**
- * Pages in your repo import this name specifically.
- */
-export const getAllContentlayerDocs = () => allDocuments;
-
-/**
- * Alias a few “published” helpers used across pages
- */
-export const getPublishedDocuments = () => allDocuments;
-export const getPublishedPosts = getAllPosts;
-export const getPublishedDownloads = getAllDownloads;
-export const getPublishedShorts = getAllShorts;
-
-/* -------------------------------------------------------------------------- */
-/* TRACE-CRITICAL EXPORTS                                                     */
-/* -------------------------------------------------------------------------- */
-
-export function getDocKind(doc: any): string {
-  const t = String(doc?._type || doc?.type || "").toLowerCase();
-  return t;
+function loadFromModuleAlias(): GeneratedShape | null {
+  // 3) Module alias fallback
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require("contentlayer/generated") as GeneratedShape;
+    if (looksNonEmpty(mod)) {
+      log('SUCCESS: loaded from module alias "contentlayer/generated".');
+      return mod;
+    }
+    if (mod && typeof mod === "object") {
+      warn('Module alias loaded but collections empty; will try JSON last resort.');
+    }
+  } catch {
+    // ignore
+  }
+  return null;
 }
 
-export function getAccessLevel(doc: any): string {
-  return doc?.accessLevel || doc?.tier || "public";
-}
-
-export function resolveDocCoverImage(doc: any): string {
-  return doc?.coverImage || doc?.coverimage || "/assets/images/placeholder.jpg";
-}
-
-export function resolveDocDownloadUrl(doc: any): string {
-  if (!doc) return "";
-  return doc.downloadUrl || doc.fileUrl || doc.file || doc.pdfPath || "";
-}
-
-export function resolveDocDownloadHref(doc: any): string {
-  // In your project this is often same as URL; keep a separate export for callers.
-  return resolveDocDownloadUrl(doc);
-}
-
-export function getDownloadSizeLabel(doc: any): string {
-  const bytes =
-    typeof doc?.sizeBytes === "number"
-      ? doc.sizeBytes
-      : typeof doc?.fileSizeBytes === "number"
-        ? doc.fileSizeBytes
-        : null;
-
-  if (!bytes || bytes <= 0) return "";
-  const kb = bytes / 1024;
-  const mb = kb / 1024;
-  if (mb >= 1) return `${mb.toFixed(mb >= 10 ? 0 : 1)} MB`;
-  return `${Math.round(kb)} KB`;
-}
-
-/* -------------------------------------------------------------------------- */
-/* LOOKUP HELPERS                                                             */
-/* -------------------------------------------------------------------------- */
-
-function bySlug<T>(docs: T[], slug: string): T | null {
-  const n = normalizeSlug(slug);
-  return (
-    (docs as any[]).find((d: any) => {
-      const docSlug = d.slug || d.slugComputed || d._raw?.flattenedPath || "";
-      return normalizeSlug(docSlug) === n;
-    }) ?? null
-  );
-}
-
-export const getPostBySlug = (s: string) => bySlug(getAllPosts(), s);
-export const getBookBySlug = (s: string) => bySlug(getAllBooks(), s);
-export const getCanonBySlug = (s: string) => bySlug(getAllCanons(), s);
-export const getDownloadBySlug = (s: string) => bySlug(getAllDownloads(), s);
-export const getEventBySlug = (s: string) => bySlug(getAllEvents(), s);
-export const getShortBySlug = (s: string) => bySlug(getAllShorts(), s);
-export const getStrategyBySlug = (s: string) => bySlug(getAllStrategies(), s);
-export const getPrintBySlug = (s: string) => bySlug(getAllPrints(), s);
-export const getResourceBySlug = (s: string) => bySlug(getAllResources(), s);
-
-export const getDocumentBySlug = (s: string) => bySlug(allDocuments, s);
-
-/* -------------------------------------------------------------------------- */
-/* ROUTING                                                                    */
-/* -------------------------------------------------------------------------- */
-
-export function getDocHref(doc: any): string {
-  if (!doc) return "/";
-  const slug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "");
-  const type = getDocKind(doc);
-
-  const typeMap: Record<string, string> = {
-    book: "books",
-    canon: "canon",
-    download: "downloads",
-    short: "shorts",
-    print: "prints",
-    resource: "resources",
-    strategy: "strategy",
-    post: "blog",
-    event: "events",
+function loadFromCollectionJson(): GeneratedShape {
+  // 4) Last resort: parse individual _index.json files
+  const collectionMap: Record<string, keyof GeneratedShape> = {
+    Book: "allBooks",
+    Canon: "allCanons",
+    Download: "allDownloads",
+    Event: "allEvents",
+    Post: "allPosts",
+    Print: "allPrints",
+    Resource: "allResources",
+    Short: "allShorts",
+    Strategy: "allStrategies",
   };
 
-  return `/${typeMap[type] || "blog"}/${slug}`;
-}
+  const result: GeneratedShape = {};
+  let foundAny = false;
 
-/**
- * Some pages call `toUiDoc` — keep it stable and JSON-safe.
- */
-export function toUiDoc(doc: any) {
-  if (!doc) return null;
-  const safe = sanitizeData(doc);
-  return {
-    ...safe,
-    href: getDocHref(doc),
-    kind: getDocKind(doc),
-    accessLevel: getAccessLevel(doc),
-    coverImage: resolveDocCoverImage(doc),
-    downloadUrl: resolveDocDownloadUrl(doc),
-  };
-}
+  for (const [dirName, exportName] of Object.entries(collectionMap)) {
+    const indexPath = path.join(localGeneratedDir, dirName, "_index.json");
+    if (!fs.existsSync(indexPath)) continue;
 
-/* -------------------------------------------------------------------------- */
-/* ASSERTS / VALIDATORS                                                       */
-/* -------------------------------------------------------------------------- */
+    try {
+      const raw = fs.readFileSync(indexPath, "utf-8");
+      const data = JSON.parse(raw);
+      if (Array.isArray(data)) {
+        (result as any)[exportName] = data;
+        foundAny = true;
+        log(`Loaded ${exportName}: ${data.length} items (JSON fallback)`);
+      }
+    } catch (e) {
+      warn(`Failed to parse ${indexPath}`, e);
+    }
+  }
 
-export function assertContentlayerHasDocs() {
-  const hasDocs = allDocuments.length > 0;
-  if (!hasDocs) {
-    console.warn(
-      "[contentlayer-compat] No documents found. Ensure contentlayer generated content before build."
+  if (!foundAny) {
+    err(
+      `CRITICAL: No content data found. Expected .contentlayer at: ${localGeneratedDir}. ` +
+        `Collections will be empty until contentlayer build runs in this environment.`
     );
   }
-  return hasDocs;
+
+  return result;
 }
 
 /**
- * Some pages import this. Keep it non-fatal (warn-only) so builds don’t die.
+ * IMPORTANT:
+ * Next Pages router can evaluate this module at build/prerender time.
+ * We MUST avoid top-level async blocking. So we expose an async getter.
+ *
+ * Call `await getContentlayerData()` inside getStaticProps/getStaticPaths
+ * (or inside API handlers).
  */
-export function assertPublicAssetsForDownloadsAndResources() {
-  // You already have stronger checks elsewhere (scripts/validate-content.mjs).
-  // This stays as a build-safe placeholder.
-  return true;
+let _memo: GeneratedShape | null = null;
+
+export async function getContentlayerData(): Promise<GeneratedShape> {
+  if (_memo) return _memo;
+
+  log("Looking for generated files at:", localGeneratedDir);
+
+  const local = await loadFromLocalGeneratedDir();
+  if (local) {
+    _memo = local;
+    return _memo;
+  }
+
+  const alias = loadFromModuleAlias();
+  if (alias) {
+    _memo = alias;
+    return _memo;
+  }
+
+  _memo = loadFromCollectionJson();
+  return _memo;
 }
 
 /* -------------------------------------------------------------------------- */
-/* SERVER ALIASES (pages import these names)                                  */
+/* “SYNC” EXPORTS: safe defaults (empty until getContentlayerData() is used)   */
 /* -------------------------------------------------------------------------- */
+/**
+ * These are provided so legacy imports don’t crash.
+ * But to get real data reliably during build, prefer `await getContentlayerData()`.
+ */
+export const allBooks: ContentLayerDoc[] = [];
+export const allCanons: ContentLayerDoc[] = [];
+export const allDownloads: ContentLayerDoc[] = [];
+export const allEvents: ContentLayerDoc[] = [];
+export const allPosts: ContentLayerDoc[] = [];
+export const allPrints: ContentLayerDoc[] = [];
+export const allResources: ContentLayerDoc[] = [];
+export const allShorts: ContentLayerDoc[] = [];
+export const allStrategies: ContentLayerDoc[] = [];
 
-// “Server” variants — in pages/ dir they’re still run at build time.
-// Keep them as aliases so imports stop failing.
-
-export const getServerAllBooks = getAllBooks;
-export const getServerBookBySlug = getBookBySlug;
-
-export const getServerAllCanons = getAllCanons;
-export const getServerCanonBySlug = getCanonBySlug;
-
-export const getServerAllDownloads = getAllDownloads;
-export const getServerDownloadBySlug = getDownloadBySlug;
-
-export const getServerAllEvents = getAllEvents;
-export const getServerEventBySlug = getEventBySlug;
-
-export const getServerAllResources = getAllResources;
-export const getServerResourceBySlug = getResourceBySlug;
-
-export const getServerAllShorts = getAllShorts;
-export const getServerShortBySlug = getShortBySlug;
-
-/* -------------------------------------------------------------------------- */
-/* API COMPAT (no-op stubs to keep build green)                               */
-/* -------------------------------------------------------------------------- */
-
-export function recordContentView(..._args: any[]) {
-  // No-op: analytics implementation can live elsewhere
-  return true;
+export function getAllDocumentsSync(): ContentLayerDoc[] {
+  return [
+    ...allBooks,
+    ...allCanons,
+    ...allDownloads,
+    ...allEvents,
+    ...allPosts,
+    ...allPrints,
+    ...allResources,
+    ...allShorts,
+    ...allStrategies,
+  ];
 }
 
-// Re-export sanitizeData because pages import it from "@/lib/contentlayer"
-export { sanitizeData };
-
-/* -------------------------------------------------------------------------- */
-/* DEFAULT EXPORT                                                             */
-/* -------------------------------------------------------------------------- */
-
-const ContentHelper = {
-  // Collections
-  allBooks,
-  allCanons,
-  allDownloads,
-  allEvents,
-  allPosts,
-  allPrints,
-  allResources,
-  allShorts,
-  allStrategies,
-  allDocuments,
-
-  // Functions
-  getPublishedDocuments,
-  getAllContentlayerDocs,
-  getAllPosts,
-  getAllBooks,
-  getAllDownloads,
-  getAllCanons,
-  getAllShorts,
-  getAllResources,
-  getAllStrategies,
-  getAllEvents,
-  getAllPrints,
-
-  getPostBySlug,
-  getBookBySlug,
-  getCanonBySlug,
-  getDownloadBySlug,
-  getEventBySlug,
-  getShortBySlug,
-  getStrategyBySlug,
-  getPrintBySlug,
-  getResourceBySlug,
-  getDocumentBySlug,
-
-  getDocHref,
-  normalizeSlug,
-  isDraftContent,
-  isDraft,
-  getDocKind,
-  getAccessLevel,
-
-  resolveDocDownloadUrl,
-  resolveDocDownloadHref,
-  resolveDocCoverImage,
-  getDownloadSizeLabel,
-
-  toUiDoc,
-  assertContentlayerHasDocs,
-  assertPublicAssetsForDownloadsAndResources,
-  recordContentView,
-
-  sanitizeData,
-};
-
-export default ContentHelper;
+export type DocumentTypes =
+  | "Book"
+  | "Canon"
+  | "Download"
+  | "Event"
+  | "Post"
+  | "Print"
+  | "Resource"
+  | "Short"
+  | "Strategy";

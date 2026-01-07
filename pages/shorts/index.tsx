@@ -24,6 +24,7 @@ import {
 import Layout from "@/components/Layout";
 import { getPublishedShorts } from "@/lib/contentlayer";
 
+
 type ShortDoc = {
   _id: string;
   slug: string;
@@ -866,23 +867,20 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
 
 // ✅ /shorts uses getStaticProps ONLY - no getStaticPaths here.
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
-  // Transform the ContentDoc[] to ShortDoc[]
-  const allShorts = getPublishedShorts();
-  
-  const shorts: ShortDoc[] = allShorts.map((short: any) => ({
-    _id: short._id || short.slug || short.title,
-    slug: short.slug,
-    title: short.title,
-    excerpt: short.excerpt ?? null,
-    date: short.date ?? null,
-    readTime: short.readTime ?? null,
-    tags: short.tags ?? [],
-    // FIX: Fallback to null to prevent Next.js serialization error with undefined
-    theme: short.theme ?? null,
-  }));
-  
+  const { allShorts } = await getContentlayerData();
+
+  const shorts: ShortDoc[] = (allShorts ?? [])
+    .filter((s: any) => s && !isDraftContent(s))
+    .map((short: any) => ({
+      _id: short._id || short.slug || short.title,
+      slug: short.slug,
+      title: short.title,
+      excerpt: short.excerpt ?? null,
+      date: short.date ?? null,
+      readTime: short.readTime ?? null,
+      tags: short.tags ?? [],
+      theme: short.theme ?? null,
+    }));
+
   return { props: { shorts }, revalidate: 3600 };
 };
-
-export default ShortsIndexPage;
-

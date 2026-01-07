@@ -8,7 +8,7 @@ import Layout from "@/components/Layout";
 
 // INSTITUTIONAL FIX: Import from the hardened compat layer instead of legacy lib/canon
 import {
-  getAllCanons,
+  getContentlayerData,
   getAccessLevel,
   normalizeSlug,
   getDocHref,
@@ -210,25 +210,24 @@ export default CanonIndexPage;
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
-  // Use the hardened compat getter
-  const canons = getAllCanons();
+  const { allCanons } = await getContentlayerData();
+  const canons = allCanons;
 
   const items: CanonItem[] = canons
     .filter((c: any) => c && !isDraftContent(c))
-    .map((c: any) => {
-      // Logic: Ensure we map Contentlayer fields to our sanitized CanonItem type
-      return {
-        title: c.title || "Untitled Canon",
-        subtitle: c.subtitle || null,
-        excerpt: c.excerpt || c.description || null,
-        coverImage: c.coverImage || null,
-        slug: normalizeSlug(c.slug || c._raw.flattenedPath),
-        href: getDocHref(c),
-        accessLevel: toAccessLevel(getAccessLevel(c)),
-        date: c.date ? new Date(c.date).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" }) : null,
-        readTime: c.readTime || null,
-      };
-    })
+    .map((c: any) => ({
+      title: c.title || "Untitled Canon",
+      subtitle: c.subtitle || null,
+      excerpt: c.excerpt || c.description || null,
+      coverImage: c.coverImage || null,
+      slug: normalizeSlug(c.slug || c._raw?.flattenedPath),
+      href: getDocHref(c),
+      accessLevel: toAccessLevel(getAccessLevel(c)),
+      date: c.date
+        ? new Date(c.date).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" })
+        : null,
+      readTime: c.readTime || null,
+    }))
     .sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
@@ -246,7 +245,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     { total: 0, public: 0, inner: 0, private: 0 }
   );
 
-  // SANITIZE DATA: The final shield against serialization errors
   return {
     props: sanitizeData({ items, counts }),
     revalidate: 1800,

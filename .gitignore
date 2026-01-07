@@ -134,3 +134,11 @@ _emergency-backup.tar.bak
 
 #backup
 *.bak
+# Environment files
+.env.*.local
+!.env.example
+# Sensitive data
+*.db-journal
+*.pem
+*.key
+# Temporary files

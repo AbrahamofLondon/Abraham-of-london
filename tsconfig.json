@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "esnext", 
+    "target": "es2020",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true, 
+    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -18,24 +18,18 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "contentlayer/generated": ["./.contentlayer/generated"]
-    },
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true
+      "contentlayer/generated": ["./lib/contentlayer-compat.ts"]
+    }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".contentlayer/generated/**/*.mjs",
-    ".contentlayer/generated/**/*.d.ts"
+    "contentlayer.config.js",
+    ".contentlayer/generated"
   ],
-  "exclude": [
-    "node_modules",
-    "public/assets/downloads"
-  ]
+  "exclude": ["node_modules"]
 }

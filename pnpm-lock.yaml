@@ -29,24 +29,15 @@ importers:
       '@contentlayer/source-files':
         specifier: 0.3.4
         version: 0.3.4(esbuild@0.18.20)
-      '@emotion/is-prop-valid':
-        specifier: 1.4.0
-        version: 1.4.0
+      '@contentlayer2/source-files':
+        specifier: 0.5.8
+        version: 0.5.8(esbuild@0.18.20)
       '@heroicons/react':
         specifier: 2.2.0
         version: 2.2.0(react@18.3.1)
       '@next-auth/prisma-adapter':
         specifier: 1.0.7
         version: 1.0.7(@prisma/client@5.10.2(prisma@5.10.2))(next-auth@4.24.13(next@14.2.12(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
-      '@pdf-lib/fontkit':
-        specifier: 1.1.1
-        version: 1.1.1
-      '@pdftron/pdfnet-node':
-        specifier: 11.9.1
-        version: 11.9.1
-      '@prisma/adapter-better-sqlite3':
-        specifier: 7.2.0
-        version: 7.2.0
       '@prisma/client':
         specifier: 5.10.2
         version: 5.10.2(prisma@5.10.2)
@@ -56,9 +47,6 @@ importers:
       '@react-pdf/renderer':
         specifier: 4.3.1
         version: 4.3.1(react@18.3.1)
-      '@supabase/supabase-js':
-        specifier: 2.87.1
-        version: 2.87.1
       '@tailwindcss/typography':
         specifier: 0.5.19
         version: 0.5.19(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@20.11.30)(typescript@5.6.3)))
@@ -103,7 +91,7 @@ importers:
         version: 12.0.3
       framer-motion:
         specifier: 11.2.10
-        version: 11.2.10(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 11.2.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       fuse.js:
         specifier: 7.0.0
         version: 7.0.0
@@ -216,9 +204,6 @@ importers:
         specifier: 4.2.1
         version: 4.2.1
     devDependencies:
-      '@contentlayer2/source-files':
-        specifier: 0.5.8
-        version: 0.5.8(esbuild@0.18.20)
       '@netlify/functions':
         specifier: 5.1.2
         version: 5.1.2
@@ -1353,12 +1338,6 @@ packages:
 
   '@emnapi/wasi-threads@1.1.0':
     resolution: {integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==}
-
-  '@emotion/is-prop-valid@1.4.0':
-    resolution: {integrity: sha512-QgD4fyscGcbbKwJmqNvUMSE02OsHUa+lAWKdEUIJKgqe5IwRSKd7+KhibEWdaKwgjLj0DRSHA9biAIqGBk05lw==}
-
-  '@emotion/memoize@0.9.0':
-    resolution: {integrity: sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==}
 
   '@esbuild-plugins/node-resolve@0.1.4':
     resolution: {integrity: sha512-haFQ0qhxEpqtWWY0kx1Y5oE3sMyO1PcoSiWEPrAw6tm/ZOOLXjSs6Q+v1v9eyuVF0nNt50YEvrcrvENmyoMv5g==}
@@ -2541,18 +2520,11 @@ packages:
   '@paulirish/trace_engine@0.0.23':
     resolution: {integrity: sha512-2ym/q7HhC5K+akXkNV6Gip3oaHpbI6TsGjmcAsl7bcJ528MVbacPQeoauLFEeLXH4ulJvsxQwNDIg/kAEhFZxw==}
 
-  '@pdf-lib/fontkit@1.1.1':
-    resolution: {integrity: sha512-KjMd7grNapIWS/Dm0gvfHEilSyAmeLvrEGVcqLGi0VYebuqqzTbgF29efCx7tvx+IEbG3zQciRSWl3GkUSvjZg==}
-
   '@pdf-lib/standard-fonts@1.0.0':
     resolution: {integrity: sha512-hU30BK9IUN/su0Mn9VdlVKsWBS6GyhVfqjwl1FjZN4TxP6cCw0jP2w7V3Hf5uX7M0AZJ16vey9yE0ny7Sa59ZA==}
 
   '@pdf-lib/upng@1.0.1':
     resolution: {integrity: sha512-dQK2FUMQtowVP00mtIksrlZhdFXQZPC+taih1q4CvPZ5vqdxR/LKBaFg0oAfzd1GlHZXXSPdQfzQnt+ViGvEIQ==}
-
-  '@pdftron/pdfnet-node@11.9.1':
-    resolution: {integrity: sha512-WNO35sA1dVbfPzykP7xW0g0zN1mFn+rRSw1Uws9e9kt+vUTX8dUQtgL8jnYs/E3ApCNS23heCRqUTe9CByWumw==}
-    engines: {node: '>=10 <=24'}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2579,9 +2551,6 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@prisma/adapter-better-sqlite3@7.2.0':
-    resolution: {integrity: sha512-ZowCgDOnv0nk0VIUSPp6y8ns+wXRctVADPSu/vluznAYDx/Xy0dK4nTr7+7XVX/XqUrPPtOYdCBELwjEklS8vQ==}
-
   '@prisma/client@5.10.2':
     resolution: {integrity: sha512-ef49hzB2yJZCvM5gFHMxSFL9KYrIP9udpT5rYo0CsHD4P9IKj473MbhU1gjKKftiwWBTIyrt9jukprzZXazyag==}
     engines: {node: '>=16.13'}
@@ -2593,12 +2562,6 @@ packages:
 
   '@prisma/debug@5.10.2':
     resolution: {integrity: sha512-bkBOmH9dpEBbMKFJj8V+Zp8IZHIBjy3fSyhLhxj4FmKGb/UBSt9doyfA6k1UeUREsMJft7xgPYBbHSOYBr8XCA==}
-
-  '@prisma/debug@7.2.0':
-    resolution: {integrity: sha512-YSGTiSlBAVJPzX4ONZmMotL+ozJwQjRmZweQNIq/ER0tQJKJynNkRB3kyvt37eOfsbMCXk3gnLF6J9OJ4QWftw==}
-
-  '@prisma/driver-adapter-utils@7.2.0':
-    resolution: {integrity: sha512-gzrUcbI9VmHS24Uf+0+7DNzdIw7keglJsD5m/MHxQOU68OhGVzlphQRobLiDMn8CHNA2XN8uugwKjudVtnfMVQ==}
 
   '@prisma/engines-version@5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9':
     resolution: {integrity: sha512-uCy/++3Jx/O3ufM+qv2H1L4tOemTNqcP/gyEVOlZqTpBvYJUe0tWtW0y3o2Ueq04mll4aM5X3f6ugQftOSLdFQ==}
@@ -3169,30 +3132,6 @@ packages:
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
-  '@supabase/auth-js@2.87.1':
-    resolution: {integrity: sha512-6RDeOf5TVoaXFtEstN188ykp3pXLZaU9qoAWfx8dc50FFAAqt+kcFJ96V0IvSmcpb4mDAWcpTJ7BegmVDn/WIw==}
-    engines: {node: '>=20.0.0'}
-
-  '@supabase/functions-js@2.87.1':
-    resolution: {integrity: sha512-rWmYo4gRD0XAjMhYDlz7IH67bp4TIQ1UE4VqwIQtl1gGPwtLDq6wcRnu7jLKlXx0Gtrknw/eoiHYG9//XrCTzQ==}
-    engines: {node: '>=20.0.0'}
-
-  '@supabase/postgrest-js@2.87.1':
-    resolution: {integrity: sha512-Yzu5eL3iGmZW0C/8x+vEojAOou63FI9oVw8HI8YOq63+5yM8g8aGh7Y1E2vbXFb7+gHGsPqLnaC6dPhrYt7qBA==}
-    engines: {node: '>=20.0.0'}
-
-  '@supabase/realtime-js@2.87.1':
-    resolution: {integrity: sha512-XvLtEznxmYZXA7LYuy5zbSXpSYjDLJq2wQeRh3MzON2OR4U8Kq+RtPz2E2Wi8HEzvBfsc+nNu1TG8LQ9+3DRkA==}
-    engines: {node: '>=20.0.0'}
-
-  '@supabase/storage-js@2.87.1':
-    resolution: {integrity: sha512-0Uc8tNV4yzkNNmp1inpXru0RB4a7ECq05G2S6BDvSpMxTxJrDVJ4vVDwyhqB8ZZ+O9+8prHaQYoByQeuDnwpFQ==}
-    engines: {node: '>=20.0.0'}
-
-  '@supabase/supabase-js@2.87.1':
-    resolution: {integrity: sha512-tVgqZqnHZVum584KuUKSQZgcy6ZkhVd6gG8QWg2QfIXH9HmXdamauxdVsLXwaNPJxEdOyfAfwIyi5XUsiVYWtg==}
-    engines: {node: '>=20.0.0'}
-
   '@svgr/babel-plugin-add-jsx-attribute@8.0.0':
     resolution: {integrity: sha512-b9MIk7yhdS1pMCZM8VeNfUlSKVRhsHZNMl5O9SfaX0l0t5wjdgu4IDzGB8bpnGBBOjGST3rRFVsaaEtI4W6f7g==}
     engines: {node: '>=14'}
@@ -3590,9 +3529,6 @@ packages:
   '@types/pg@8.16.0':
     resolution: {integrity: sha512-RmhMd/wD+CF8Dfo+cVIy3RR5cl8CyfXQ0tGgW6XBL8L4LM/UTEbNXYRbLwU6w+CgrKBNbrQWt4FUtTfaU5jSYQ==}
 
-  '@types/phoenix@1.6.7':
-    resolution: {integrity: sha512-oN9ive//QSBkf19rfDv45M7eZPi0eEXylht2OLEXicu5b4KoQ1OzXIw+xDSGWxSxe1JmepRR/ZH283vsu518/Q==}
-
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
 
@@ -3630,9 +3566,6 @@ packages:
   '@types/uuid@11.0.0':
     resolution: {integrity: sha512-HVyk8nj2m+jcFRNazzqyVKiZezyhDKrGUA3jlEcg/nZ6Ms+qHwocba1Y/AaVaznJTAM9xpdFSh+ptbNrhOGvZA==}
     deprecated: This is a stub types definition. uuid provides its own type definitions, so you do not need this installed.
-
-  '@types/ws@8.18.1':
-    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
   '@types/ws@8.5.10':
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
@@ -6301,10 +6234,6 @@ packages:
 
   hyphen@1.13.0:
     resolution: {integrity: sha512-flZoIooovWALhu04Z3ooPWQldjTOgLDs5DlbUxTjnIyhQKu9ukljKWwElFCUyVi6TBk210bMBlaMG8eW3bXU+g==}
-
-  iceberg-js@0.8.1:
-    resolution: {integrity: sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA==}
-    engines: {node: '>=20.0.0'}
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -10217,10 +10146,6 @@ packages:
     resolution: {integrity: sha512-PSNhEJDejZYV7h50BohL09Er9VaIefr2LMAf3OEmpCkjOi34eYyQYAXUTjEQtZJTKcF0E2UKTh+osDLsgNim9Q==}
     engines: {node: '>=8'}
 
-  xhr2@0.2.1:
-    resolution: {integrity: sha512-sID0rrVCqkVNUn8t6xuv9+6FViXjUVXq8H5rWOH2rz9fDNQEd4g0EA2XlcEdJXRz5BMEn4O1pJFdT+z4YHhoWw==}
-    engines: {node: '>= 6'}
-
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
@@ -11917,12 +11842,6 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@emotion/is-prop-valid@1.4.0':
-    dependencies:
-      '@emotion/memoize': 0.9.0
-
-  '@emotion/memoize@0.9.0': {}
-
   '@esbuild-plugins/node-resolve@0.1.4(esbuild@0.18.20)':
     dependencies:
       '@types/resolve': 1.20.6
@@ -13195,10 +13114,6 @@ snapshots:
 
   '@paulirish/trace_engine@0.0.23': {}
 
-  '@pdf-lib/fontkit@1.1.1':
-    dependencies:
-      pako: 1.0.11
-
   '@pdf-lib/standard-fonts@1.0.0':
     dependencies:
       pako: 1.0.11
@@ -13206,12 +13121,6 @@ snapshots:
   '@pdf-lib/upng@1.0.1':
     dependencies:
       pako: 1.0.11
-
-  '@pdftron/pdfnet-node@11.9.1':
-    dependencies:
-      prebuild-install: 7.1.3
-      underscore: 1.13.7
-      xhr2: 0.2.1
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -13232,22 +13141,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@prisma/adapter-better-sqlite3@7.2.0':
-    dependencies:
-      '@prisma/driver-adapter-utils': 7.2.0
-      better-sqlite3: 12.5.0
-
   '@prisma/client@5.10.2(prisma@5.10.2)':
     optionalDependencies:
       prisma: 5.10.2
 
   '@prisma/debug@5.10.2': {}
-
-  '@prisma/debug@7.2.0': {}
-
-  '@prisma/driver-adapter-utils@7.2.0':
-    dependencies:
-      '@prisma/debug': 7.2.0
 
   '@prisma/engines-version@5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9': {}
 
@@ -14017,44 +13915,6 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@supabase/auth-js@2.87.1':
-    dependencies:
-      tslib: 2.8.1
-
-  '@supabase/functions-js@2.87.1':
-    dependencies:
-      tslib: 2.8.1
-
-  '@supabase/postgrest-js@2.87.1':
-    dependencies:
-      tslib: 2.8.1
-
-  '@supabase/realtime-js@2.87.1':
-    dependencies:
-      '@types/phoenix': 1.6.7
-      '@types/ws': 8.18.1
-      tslib: 2.8.1
-      ws: 8.18.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  '@supabase/storage-js@2.87.1':
-    dependencies:
-      iceberg-js: 0.8.1
-      tslib: 2.8.1
-
-  '@supabase/supabase-js@2.87.1':
-    dependencies:
-      '@supabase/auth-js': 2.87.1
-      '@supabase/functions-js': 2.87.1
-      '@supabase/postgrest-js': 2.87.1
-      '@supabase/realtime-js': 2.87.1
-      '@supabase/storage-js': 2.87.1
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
   '@svgr/babel-plugin-add-jsx-attribute@8.0.0(@babel/core@7.28.5)':
     dependencies:
       '@babel/core': 7.28.5
@@ -14605,8 +14465,6 @@ snapshots:
       pg-protocol: 1.10.3
       pg-types: 2.2.0
 
-  '@types/phoenix@1.6.7': {}
-
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.1':
@@ -14641,10 +14499,6 @@ snapshots:
   '@types/uuid@11.0.0':
     dependencies:
       uuid: 13.0.0
-
-  '@types/ws@8.18.1':
-    dependencies:
-      '@types/node': 20.11.30
 
   '@types/ws@8.5.10':
     dependencies:
@@ -17434,11 +17288,10 @@ snapshots:
 
   fraction.js@4.3.7: {}
 
-  framer-motion@11.2.10(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  framer-motion@11.2.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       tslib: 2.8.1
     optionalDependencies:
-      '@emotion/is-prop-valid': 1.4.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
@@ -17981,8 +17834,6 @@ snapshots:
   hyperlinker@1.0.0: {}
 
   hyphen@1.13.0: {}
-
-  iceberg-js@0.8.1: {}
 
   iconv-lite@0.6.3:
     dependencies:
@@ -23011,8 +22862,6 @@ snapshots:
   ws@8.18.3: {}
 
   xdg-basedir@4.0.0: {}
-
-  xhr2@0.2.1: {}
 
   xml-name-validator@5.0.0: {}
 
