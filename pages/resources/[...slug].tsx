@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import Head from 'next/head';
 import Layout from '@/components/Layout';
-import { getServerAllResources, getServerResourceBySlug } from '@/lib/contentlayer';
+import { getServerAllResources, getServerResourceBySlug , getContentlayerData} from "@/lib/contentlayer-compat";
 
 
 import { sanitizeData, mdxComponents } from '@/lib/server/md-utils';
@@ -184,6 +184,8 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const resources = await getServerAllResources();
 
   const paths = resources
@@ -243,3 +245,5 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 export default ResourcePage;
+
+

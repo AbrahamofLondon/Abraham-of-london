@@ -1,7 +1,7 @@
 // pages/api/dl/[token].ts
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getDownloadBySlug, resolveDocDownloadUrl } from '@/lib/contentlayer';
+import { getDownloadBySlug, resolveDocDownloadUrl } from "@/lib/contentlayer-compat";
 import {
   verifyDownloadToken,
   getUserTierFromCookies,
@@ -97,3 +97,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).send("ERR_INTERNAL_FLAKE");
   }
 }
+

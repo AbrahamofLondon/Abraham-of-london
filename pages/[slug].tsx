@@ -8,7 +8,7 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 
-// INSTITUTIONAL ENGINE IMPORTS
+// Import should include getContentlayerData:
 import {
   getPublishedDocuments,
   getDocHref,
@@ -18,6 +18,7 @@ import {
   getAccessLevel,
   resolveDocDownloadUrl,
   assertContentlayerHasDocs,
+  getContentlayerData, // THIS MUST BE HERE
 } from "@/lib/contentlayer-compat";
 import { prepareMDX, mdxComponents, sanitizeData } from "@/lib/server/md-utils";
 
@@ -250,7 +251,10 @@ const ContentPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  assertContentlayerHasDocs();
+  // FIXED: Call getContentlayerData first, then assert with the data
+  const data = await getContentlayerData();
+  assertContentlayerHasDocs(data); // PASS THE DATA
+  
   const docs = getPublishedDocuments();
 
   const paths = docs
@@ -267,6 +271,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slug = String(params?.slug || "");
+  
+  // FIXED: Also call getContentlayerData in getStaticProps
+  await getContentlayerData();
+  
   const docs = getPublishedDocuments();
 
   const found = docs.find((d) => normalizeSlug(d.slug || d._raw.flattenedPath) === slug);

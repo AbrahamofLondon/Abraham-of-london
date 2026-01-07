@@ -6,7 +6,7 @@ import Head from 'next/head';
 import Layout from '@/components/Layout';
 
 // INSTITUTIONAL LOGIC & SANITIZATION
-import { getServerAllShorts, getServerShortBySlug } from '@/lib/contentlayer';
+import { getServerAllShorts, getServerShortBySlug , getContentlayerData} from "@/lib/contentlayer-compat";
 import { prepareMDX, mdxComponents, sanitizeData } from '@/lib/server/md-utils';
 
 // BRAND UI COMPONENTS
@@ -197,6 +197,8 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
 export default ShortPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const shorts = await getServerAllShorts();
   return {
     paths: shorts
@@ -241,3 +243,5 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     revalidate: 3600 
   };
 };
+
+

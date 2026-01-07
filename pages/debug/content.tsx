@@ -11,7 +11,7 @@ import {
   normalizeSlug,
   getDocHref,
   isDraft,
-} from "@/lib/contentlayer";
+} from "@/lib/contentlayer-compat";
 
 type DocKind =
   | "post"
@@ -228,3 +228,4 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 };
 
 export default DebugContentPage;
+

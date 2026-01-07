@@ -38,12 +38,12 @@ import {
 // INSTITUTIONAL ENGINE IMPORTS
 import {
   getAllShorts,
-} from '@/lib/contentlayer';
+} from "@/lib/contentlayer-compat";
 
 import {
   getDocHref,
   normalizeSlug,
-} from '@/lib/contentlayer';
+} from "@/lib/contentlayer-compat";
 
 /* -----------------------------------------------------------------------------
    BOOKS IN DEVELOPMENT
@@ -471,5 +471,6 @@ const StrategicSessions: React.FC = () => (
     </div>
   </section>
 );
+
 
 

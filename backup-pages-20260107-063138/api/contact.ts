@@ -1,0 +1,407 @@
+// pages/api/contact.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import { withSecurity } from "@/lib/apiGuard";
+import {
+  rateLimit,
+  RATE_LIMIT_CONFIGS,
+  createRateLimitHeaders,
+} from "@/lib/server/rateLimit";
+import { getRateLimitKey } from "@/lib/server/ip";
+
+interface OkResponse {
+  ok: true;
+  message: string;
+}
+
+interface ErrorResponse {
+  ok: false;
+  message: string;
+  error?: string;
+}
+
+type ContactResponse = OkResponse | ErrorResponse;
+
+interface ContactRequestBody {
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
+  botField?: string;
+  teaserOptIn?: boolean;
+  newsletterOptIn?: boolean;
+  recaptchaToken?: string;
+}
+
+interface EmailPayload {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+  reply_to?: string;
+}
+
+interface ResendResponse {
+  ok: boolean;
+  status: number;
+  body?: unknown;
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const TEASER_A4 = "/downloads/Fathering_Without_Fear_Teaser-A4.pdf";
+const TEASER_MOB = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf";
+
+async function contactHandler(
+  req: NextApiRequest,
+  res: NextApiResponse<ContactResponse>,
+) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ ok: false, message: "Method Not Allowed" });
+  }
+
+  // 🔒 Per-IP rate limiting (shared infra)
+  const rlKey = getRateLimitKey(
+    req,
+    RATE_LIMIT_CONFIGS.CONTACT_FORM.keyPrefix,
+  );
+  const rl = rateLimit(rlKey, RATE_LIMIT_CONFIGS.CONTACT_FORM);
+  const rlHeaders = createRateLimitHeaders(rl);
+  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
+
+  if (!rl.allowed) {
+    return res.status(429).json({
+      ok: false,
+      message: "Too many requests. Please slow down.",
+      error: "RATE_LIMITED",
+    });
+  }
+
+  try {
+    const rawBody = req.body;
+    const body: ContactRequestBody =
+      typeof rawBody === "string" ? safeParse(rawBody) : (rawBody || {});
+
+    // Input sanitisation and limits
+    const name = String(body.name || "").trim().slice(0, 100);
+    const email = String(body.email || "").trim().toLowerCase();
+    const subject = String(body.subject || "Website contact")
+      .trim()
+      .slice(0, 120);
+    const message = String(body.message || "").trim();
+    const honeypot = String(body.botField || "").trim();
+
+    const teaserOptIn = !!body.teaserOptIn;
+    const newsletterOptIn = !!body.newsletterOptIn;
+
+    const SITE_URL =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.URL ||
+      process.env.DEPLOY_PRIME_URL ||
+      "https://www.abrahamoflondon.org";
+
+    const teaserA4Url = abs(SITE_URL, TEASER_A4);
+    const teaserMobUrl = abs(SITE_URL, TEASER_MOB);
+
+    // Primary honeypot (belt and braces on top of withSecurity)
+    if (honeypot) {
+      return res
+        .status(200)
+        .json({ ok: true, message: "Message sent successfully!" });
+    }
+
+    if (!email || !message) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "Required: email, message" });
+    }
+    if (!EMAIL_RE.test(email)) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "Invalid email format" });
+    }
+    if (message.length < 5) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "Message is too short" });
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      const maskedEmail = email.replace(/^(.).+(@.*)$/, "$1***$2");
+      // eslint-disable-next-line no-console
+      console.log("[contact] submission:", {
+        name: name || "-",
+        email: maskedEmail,
+        subject,
+        messageLength: message.length,
+        teaserOptIn,
+        newsletterOptIn,
+      });
+    }
+
+    const provider = (process.env.CONTACT_PROVIDER || "").toLowerCase();
+    if (provider === "resend") {
+      const apiKey = process.env.RESEND_API_KEY;
+      const to = process.env.MAIL_TO || "info@abrahamoflondon.org";
+      const from =
+        process.env.MAIL_FROM ||
+        "Abraham of London <no-reply@abrahamoflondon.org>";
+
+      if (!apiKey) {
+        return res.status(500).json({
+          ok: false,
+          message: "Email provider not configured",
+          error: "NO_PROVIDER",
+        });
+      }
+
+      // 1) Notify owner
+      const ownerHtml = ownerNoticeHtml({
+        name,
+        email,
+        subject,
+        message,
+        teaserOptIn,
+        newsletterOptIn,
+      });
+      const ownerResp = await sendViaResend({
+        apiKey,
+        from,
+        to,
+        subject: `New contact: ${name || "Anonymous"}`,
+        html: ownerHtml,
+        replyTo: { email, name: name || email },
+      });
+
+      if (!ownerResp.ok) {
+        // eslint-disable-next-line no-console
+        console.error("[contact] Resend owner send failed:", {
+          status: ownerResp.status,
+          body: ownerResp.body,
+        });
+        // Continue to auto-reply
+      }
+
+      // 2) Auto-reply with teaser (if opted in)
+      if (teaserOptIn) {
+        const autoHtml = teaserAutoReplyHtml({
+          teaserA4Url,
+          teaserMobUrl,
+          siteUrl: SITE_URL,
+        });
+        const autoText = teaserAutoReplyText({
+          teaserA4Url,
+          teaserMobUrl,
+          siteUrl: SITE_URL,
+        });
+        const autoResp = await sendViaResend({
+          apiKey,
+          from,
+          to: email,
+          subject: "Fathering Without Fear - Teaser (A4 + Mobile)",
+          html: autoHtml,
+          text: autoText,
+        });
+
+        if (!autoResp.ok) {
+          // eslint-disable-next-line no-console
+          console.error("[contact] Resend teaser auto-reply failed:", {
+            status: autoResp.status,
+            body: autoResp.body,
+          });
+        }
+      }
+
+      // 3) Newsletter opt-in notification
+      if (newsletterOptIn) {
+        const nlHtml = `
+        <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.5;color:#111">
+          <h3>Newsletter opt-in - Fathering Without Fear</h3>
+          <p><strong>Name:</strong> ${escapeHtml(name || "-")}</p>
+          <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+          <p>Please add to the launch/chapters list.</p>
+        </div>`.trim();
+
+        const nlResp = await sendViaResend({
+          apiKey,
+          from,
+          to,
+          subject: "Newsletter opt-in - Fathering Without Fear",
+          html: nlHtml,
+        });
+
+        if (!nlResp.ok) {
+          // eslint-disable-next-line no-console
+          console.error("[contact] Resend newsletter note failed:", {
+            status: nlResp.status,
+            body: nlResp.body,
+          });
+        }
+      }
+    }
+
+    return res
+      .status(200)
+      .json({ ok: true, message: "Message sent successfully!" });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[contact] handler error:", e);
+    return res
+      .status(500)
+      .json({ ok: false, message: "Internal Server Error" });
+  }
+}
+
+/* ---------------- helpers ---------------- */
+
+function abs(site: string, p: string): string {
+  if (!p) return site;
+  try {
+    return new URL(p, site).toString();
+  } catch {
+    return `${site}${p.startsWith("/") ? "" : "/"}${p}`;
+  }
+}
+
+function safeParse(s: string): ContactRequestBody {
+  try {
+    return JSON.parse(s) as ContactRequestBody;
+  } catch {
+    return {};
+  }
+}
+
+function escapeHtml(str: string): string {
+  return String(str).replace(/[&<>"']/g, (m) =>
+    (
+      {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      } as const
+    )[m] || m,
+  );
+}
+
+interface OwnerNoticeArgs {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  teaserOptIn: boolean;
+  newsletterOptIn: boolean;
+}
+
+function ownerNoticeHtml(args: OwnerNoticeArgs): string {
+  const { name, email, subject, message, teaserOptIn, newsletterOptIn } = args;
+  return `
+  <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.55;color:#111">
+    <h2>New website inquiry</h2>
+    <p><strong>Name:</strong> ${escapeHtml(name || "-")}</p>
+    <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+    <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+    <p><strong>Teaser requested:</strong> ${teaserOptIn ? "Yes" : "No"}</p>
+    <p><strong>Newsletter opt-in:</strong> ${newsletterOptIn ? "Yes" : "No"}</p>
+    <p><strong>Message:</strong></p>
+    <pre style="white-space:pre-wrap; background-color: #f7f7f7; padding: 10px; border-radius: 5px;">${escapeHtml(
+      message,
+    )}</pre>
+  </div>`.trim();
+}
+
+interface TeaserAutoReplyArgs {
+  teaserA4Url: string;
+  teaserMobUrl: string;
+  siteUrl: string;
+}
+
+function teaserAutoReplyHtml(args: TeaserAutoReplyArgs): string {
+  const { teaserA4Url, teaserMobUrl, siteUrl } = args;
+  return `
+  <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;color:#222">
+    <p>Friends-</p>
+    <p>I'm releasing <em>Fathering Without Fear</em>, a memoir forged in the middle of loss, legal storms, and a father's stubborn hope.</p>
+    <p>Here's your free, brand-styled teaser (A4 + Mobile) to read and share:</p>
+    <ul>
+      <li><a href="${teaserA4Url}">Teaser PDF (A4/Letter)</a></li>
+      <li><a href="${teaserMobUrl}">Teaser PDF (Mobile)</a></li>
+    </ul>
+    <p>If you want chapter drops and launch dates, reply "keep me posted" or join the list here:
+      <a href="${siteUrl}/contact">${siteUrl}/contact</a></p>
+    <p>Grace and courage,<br/>Abraham of London</p>
+  </div>`.trim();
+}
+
+function teaserAutoReplyText(args: TeaserAutoReplyArgs): string {
+  const { teaserA4Url, teaserMobUrl, siteUrl } = args;
+  return `
+Subject: Fathering Without Fear - the story they thought they knew
+
+Friends-
+I'm releasing Fathering Without Fear, a memoir forged in the middle of loss, legal storms, and a father's stubborn hope.
+
+Free teaser (A4 + Mobile):
+- ${teaserA4Url}
+- ${teaserMobUrl}
+
+For chapter drops and launch dates, reply "keep me posted" or join: ${siteUrl}/contact
+
+Grace and courage,
+Abraham of London
+`.trim();
+}
+
+interface SendViaResendArgs {
+  apiKey: string;
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+  replyTo?: { email: string; name?: string };
+}
+
+async function sendViaResend(args: SendViaResendArgs): Promise<ResendResponse> {
+  const { apiKey, from, to, subject, html, text, replyTo } = args;
+  const payload: EmailPayload = { from, to, subject, html };
+
+  if (text) payload.text = text;
+  if (replyTo?.email) {
+    payload.reply_to = replyTo.name
+      ? `${replyTo.name} <${replyTo.email}>`
+      : replyTo.email;
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let body: unknown = null;
+  try {
+    body = await response.json();
+  } catch {
+    body = null;
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    body,
+  };
+}
+
+// 🔐 export with guard
+export default withSecurity(contactHandler, {
+  requireRecaptcha: true,
+  expectedAction: "contact_form",
+  requireHoneypot: false,
+});
+

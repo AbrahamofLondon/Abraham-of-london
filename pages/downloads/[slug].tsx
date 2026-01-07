@@ -11,7 +11,7 @@ import {
   getServerAllDownloads,
   getServerDownloadBySlug,
   sanitizeData,
-} from "@/lib/contentlayer";
+} from "@/lib/contentlayer-compat";
 
 import { prepareMDX, mdxComponents } from "@/lib/server/md-utils";
 
@@ -143,6 +143,8 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
 export default DownloadPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const downloads = await getServerAllDownloads();
   return {
     paths: downloads
@@ -183,5 +185,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: { download: sanitizeData(download), source },
   };
 };
+
+
 
 

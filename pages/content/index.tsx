@@ -11,7 +11,7 @@ import {
   normalizeSlug,
   getDocHref,
   resolveDocCoverImage,
-} from "@/lib/contentlayer";
+} from "@/lib/contentlayer-compat";
 
 type Item = {
   key: string;
@@ -195,3 +195,4 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
 };
 
 export default ContentIndexPage;
+

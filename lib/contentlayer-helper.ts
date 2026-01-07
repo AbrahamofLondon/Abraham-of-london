@@ -1,23 +1,10 @@
-/* lib/contentlayer-helper.ts - CANONICAL, SINGLE SOURCE OF TRUTH (NAMED EXPORTS ONLY) */
+/* lib/contentlayer-helper.ts - CANONICAL, SINGLE SOURCE OF TRUTH (ASYNC, NO contentlayer/generated) */
 
-import type { DocumentTypes } from "contentlayer/generated";
-import {
-  allDocuments as rawAllDocuments,
-  allPosts as rawAllPosts,
-  allBooks as rawAllBooks,
-  allDownloads as rawAllDownloads,
-  allEvents as rawAllEvents,
-  allShorts as rawAllShorts,
-  allCanons as rawAllCanons,
-  allResources as rawAllResources,
-  allPrints as rawAllPrints,
-  allStrategies as rawAllStrategies,
-} from "contentlayer/generated";
-
+import { getContentlayerData } from "@/lib/contentlayer-compat";
 export { assertContentlayerHasDocs, isContentlayerLoaded } from "./contentlayer-guards";
 
 /** Broad doc type used across legacy pages/components */
-export type ContentDoc = DocumentTypes & {
+export type ContentDoc = {
   slug?: string;
   draft?: boolean;
   date?: string | null;
@@ -29,6 +16,13 @@ export type ContentDoc = DocumentTypes & {
   _raw?: any;
   type?: string;
   _type?: string;
+  body?: any;
+  title?: string;
+  excerpt?: string | null;
+  description?: string | null;
+  subtitle?: string | null;
+  tags?: string[];
+  [k: string]: any;
 };
 
 export type DocKind =
@@ -158,57 +152,100 @@ export const toUiDoc = (doc: any) => ({
 });
 
 // -------------------------
-// Collection getters (raw -> filtered)
+// Collection getters (async, single source)
 // -------------------------
-const filterPublished = (docs: any[]) => (Array.isArray(docs) ? docs : []).filter((d) => d && !d.draft);
+const filterPublished = (docs: any[]) =>
+  (Array.isArray(docs) ? docs : []).filter((d) => d && !d.draft);
 
-export const getAllDocuments = (): ContentDoc[] => filterPublished(rawAllDocuments as any[]) as ContentDoc[];
-export const getAllPosts = (): ContentDoc[] => filterPublished(rawAllPosts as any[]) as ContentDoc[];
-export const getAllBooks = (): ContentDoc[] => filterPublished(rawAllBooks as any[]) as ContentDoc[];
-export const getAllDownloads = (): ContentDoc[] => filterPublished(rawAllDownloads as any[]) as ContentDoc[];
-export const getAllEvents = (): ContentDoc[] => filterPublished(rawAllEvents as any[]) as ContentDoc[];
-export const getAllShorts = (): ContentDoc[] => filterPublished(rawAllShorts as any[]) as ContentDoc[];
-export const getAllCanons = (): ContentDoc[] => filterPublished(rawAllCanons as any[]) as ContentDoc[];
-export const getAllResources = (): ContentDoc[] => filterPublished(rawAllResources as any[]) as ContentDoc[];
-export const getAllPrints = (): ContentDoc[] => filterPublished(rawAllPrints as any[]) as ContentDoc[];
-export const getAllStrategies = (): ContentDoc[] => filterPublished(rawAllStrategies as any[]) as ContentDoc[];
+export async function getAllDocuments(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  const all = [
+    ...(d.allBooks ?? []),
+    ...(d.allCanons ?? []),
+    ...(d.allDownloads ?? []),
+    ...(d.allEvents ?? []),
+    ...(d.allPosts ?? []),
+    ...(d.allPrints ?? []),
+    ...(d.allResources ?? []),
+    ...(d.allShorts ?? []),
+    ...(d.allStrategies ?? []),
+  ];
+  return filterPublished(all) as ContentDoc[];
+}
+
+export async function getAllPosts(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allPosts ?? []) as ContentDoc[];
+}
+export async function getAllBooks(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allBooks ?? []) as ContentDoc[];
+}
+export async function getAllDownloads(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allDownloads ?? []) as ContentDoc[];
+}
+export async function getAllEvents(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allEvents ?? []) as ContentDoc[];
+}
+export async function getAllShorts(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allShorts ?? []) as ContentDoc[];
+}
+export async function getAllCanons(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allCanons ?? []) as ContentDoc[];
+}
+export async function getAllResources(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allResources ?? []) as ContentDoc[];
+}
+export async function getAllPrints(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allPrints ?? []) as ContentDoc[];
+}
+export async function getAllStrategies(): Promise<ContentDoc[]> {
+  const d = await getContentlayerData();
+  return filterPublished(d.allStrategies ?? []) as ContentDoc[];
+}
 
 export const getAllContentlayerDocs = getAllDocuments;
 
 // Legacy “extra buckets” (safe empty)
-export const getAllArticles = () => [] as ContentDoc[];
-export const getAllGuides = () => [] as ContentDoc[];
-export const getAllTutorials = () => [] as ContentDoc[];
-export const getAllCaseStudies = () => [] as ContentDoc[];
-export const getAllCourses = () => [] as ContentDoc[];
-export const getAllDevotionals = () => [] as ContentDoc[];
-export const getAllLessons = () => [] as ContentDoc[];
-export const getAllNewsletters = () => [] as ContentDoc[];
-export const getAllPodcasts = () => [] as ContentDoc[];
-export const getAllPrayers = () => [] as ContentDoc[];
+export const getAllArticles = async () => [] as ContentDoc[];
+export const getAllGuides = async () => [] as ContentDoc[];
+export const getAllTutorials = async () => [] as ContentDoc[];
+export const getAllCaseStudies = async () => [] as ContentDoc[];
+export const getAllCourses = async () => [] as ContentDoc[];
+export const getAllDevotionals = async () => [] as ContentDoc[];
+export const getAllLessons = async () => [] as ContentDoc[];
+export const getAllNewsletters = async () => [] as ContentDoc[];
+export const getAllPodcasts = async () => [] as ContentDoc[];
+export const getAllPrayers = async () => [] as ContentDoc[];
 
 // -------------------------
-// Stable “arrays” (LAZY) — avoids import-time freezing
+// Stable “arrays” (async) — prevents import-time freezing
 // -------------------------
-export const allDocuments = () => getAllDocuments();
-export const allPosts = () => getAllPosts();
-export const allBooks = () => getAllBooks();
-export const allDownloads = () => getAllDownloads();
-export const allEvents = () => getAllEvents();
-export const allShorts = () => getAllShorts();
-export const allCanons = () => getAllCanons();
-export const allResources = () => getAllResources();
-export const allPrints = () => getAllPrints();
-export const allStrategies = () => getAllStrategies();
+export const allDocuments = async () => getAllDocuments();
+export const allPosts = async () => getAllPosts();
+export const allBooks = async () => getAllBooks();
+export const allDownloads = async () => getAllDownloads();
+export const allEvents = async () => getAllEvents();
+export const allShorts = async () => getAllShorts();
+export const allCanons = async () => getAllCanons();
+export const allResources = async () => getAllResources();
+export const allPrints = async () => getAllPrints();
+export const allStrategies = async () => getAllStrategies();
 
 // -------------------------
-// Slug lookup
+// Slug lookup (async)
 // -------------------------
-export const getDocumentBySlug = (slug: string) => {
+export async function getDocumentBySlug(slug: string): Promise<ContentDoc | null> {
   const s = normalizeSlug(slug);
-  const docs = getAllDocuments();
+  const docs = await getAllDocuments();
   return (docs.find((d: any) => docSlugOf(d) === s) as ContentDoc) || null;
-};
+}
 
 // Type-specific getters (legacy)
 export const getPostBySlug = getDocumentBySlug;
@@ -242,15 +279,17 @@ export const getServerAllPrints = getAllPrints;
 export const getServerAllStrategies = getAllStrategies;
 
 // -------------------------
-// Published helpers
+// Published helpers (async)
 // -------------------------
-export const getPublishedDocuments = (docs: any[] = getAllDocuments()) =>
-  filterPublished(docs as any[]).slice().sort(byDateDesc);
+export async function getPublishedDocuments(docs?: any[]) {
+  const base = docs ?? (await getAllDocuments());
+  return filterPublished(base as any[]).slice().sort(byDateDesc);
+}
 
-export const getPublishedPosts = () => getPublishedDocuments(getAllPosts());
-export const getPublishedBooks = () => getPublishedDocuments(getAllBooks());
-export const getPublishedDownloads = () => getPublishedDocuments(getAllDownloads());
-export const getPublishedEvents = () => getPublishedDocuments(getAllEvents());
-export const getPublishedShorts = () => getPublishedDocuments(getAllShorts());
-export const getPublishedCanons = () => getPublishedDocuments(getAllCanons());
-export const getPublishedResources = () => getPublishedDocuments(getAllResources());
+export const getPublishedPosts = async () => getPublishedDocuments(await getAllPosts());
+export const getPublishedBooks = async () => getPublishedDocuments(await getAllBooks());
+export const getPublishedDownloads = async () => getPublishedDocuments(await getAllDownloads());
+export const getPublishedEvents = async () => getPublishedDocuments(await getAllEvents());
+export const getPublishedShorts = async () => getPublishedDocuments(await getAllShorts());
+export const getPublishedCanons = async () => getPublishedDocuments(await getAllCanons());
+export const getPublishedResources = async () => getPublishedDocuments(await getAllResources());

@@ -29,9 +29,6 @@ importers:
       '@contentlayer/source-files':
         specifier: 0.3.4
         version: 0.3.4(esbuild@0.18.20)
-      '@contentlayer2/source-files':
-        specifier: 0.5.8
-        version: 0.5.8(esbuild@0.18.20)
       '@heroicons/react':
         specifier: 2.2.0
         version: 2.2.0(react@18.3.1)
@@ -204,6 +201,9 @@ importers:
         specifier: 4.2.1
         version: 4.2.1
     devDependencies:
+      '@contentlayer2/source-files':
+        specifier: 0.5.8
+        version: 0.5.8(esbuild@0.18.20)
       '@netlify/functions':
         specifier: 5.1.2
         version: 5.1.2
@@ -216,6 +216,9 @@ importers:
       '@playwright/test':
         specifier: 1.57.0
         version: 1.57.0
+      '@prisma/adapter-better-sqlite3':
+        specifier: 7.2.0
+        version: 7.2.0
       '@signpdf/placeholder-pdf-lib':
         specifier: 3.3.0
         version: 3.3.0(pdf-lib@1.17.1)
@@ -2551,6 +2554,9 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
+  '@prisma/adapter-better-sqlite3@7.2.0':
+    resolution: {integrity: sha512-ZowCgDOnv0nk0VIUSPp6y8ns+wXRctVADPSu/vluznAYDx/Xy0dK4nTr7+7XVX/XqUrPPtOYdCBELwjEklS8vQ==}
+
   '@prisma/client@5.10.2':
     resolution: {integrity: sha512-ef49hzB2yJZCvM5gFHMxSFL9KYrIP9udpT5rYo0CsHD4P9IKj473MbhU1gjKKftiwWBTIyrt9jukprzZXazyag==}
     engines: {node: '>=16.13'}
@@ -2562,6 +2568,12 @@ packages:
 
   '@prisma/debug@5.10.2':
     resolution: {integrity: sha512-bkBOmH9dpEBbMKFJj8V+Zp8IZHIBjy3fSyhLhxj4FmKGb/UBSt9doyfA6k1UeUREsMJft7xgPYBbHSOYBr8XCA==}
+
+  '@prisma/debug@7.2.0':
+    resolution: {integrity: sha512-YSGTiSlBAVJPzX4ONZmMotL+ozJwQjRmZweQNIq/ER0tQJKJynNkRB3kyvt37eOfsbMCXk3gnLF6J9OJ4QWftw==}
+
+  '@prisma/driver-adapter-utils@7.2.0':
+    resolution: {integrity: sha512-gzrUcbI9VmHS24Uf+0+7DNzdIw7keglJsD5m/MHxQOU68OhGVzlphQRobLiDMn8CHNA2XN8uugwKjudVtnfMVQ==}
 
   '@prisma/engines-version@5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9':
     resolution: {integrity: sha512-uCy/++3Jx/O3ufM+qv2H1L4tOemTNqcP/gyEVOlZqTpBvYJUe0tWtW0y3o2Ueq04mll4aM5X3f6ugQftOSLdFQ==}
@@ -13141,11 +13153,22 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
+  '@prisma/adapter-better-sqlite3@7.2.0':
+    dependencies:
+      '@prisma/driver-adapter-utils': 7.2.0
+      better-sqlite3: 12.5.0
+
   '@prisma/client@5.10.2(prisma@5.10.2)':
     optionalDependencies:
       prisma: 5.10.2
 
   '@prisma/debug@5.10.2': {}
+
+  '@prisma/debug@7.2.0': {}
+
+  '@prisma/driver-adapter-utils@7.2.0':
+    dependencies:
+      '@prisma/debug': 7.2.0
 
   '@prisma/engines-version@5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9': {}
 

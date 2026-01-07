@@ -6,13 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-import {
-  assertContentlayerHasDocs,
-  getAllResources,
-  getDocHref,
-  normalizeSlug,
-  resolveDocCoverImage,
-} from "@/lib/contentlayer";
+import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
 
 type ResourceMeta = {
   slug: string;
@@ -165,9 +159,9 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   // FIXED: Removed argument to resolve Type error
-  assertContentlayerHasDocs();
+  const data = await getContentlayerData(); assertContentlayerHasDocs(data);
 
-  const docs = getAllResources();
+  const docs = (await getContentlayerData()).allResources;
 
   const resources: ResourceMeta[] = docs
     .map((r: any) => ({
@@ -188,4 +182,5 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 };
 
 export default ResourcesIndexPage;
+
 

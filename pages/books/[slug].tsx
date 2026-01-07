@@ -7,7 +7,7 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
 
 // Server content layer
-import { getServerAllBooks, getServerBookBySlug } from "@/lib/contentlayer";
+import { getServerAllBooks, getServerBookBySlug , getContentlayerData} from "@/lib/contentlayer-compat";
 
 // MDX utilities (use simple components for build safety)
 import { prepareMDX, simpleMdxComponents, sanitizeData } from "@/lib/server/md-utils";
@@ -148,6 +148,8 @@ const BookPage: NextPage<Props> = ({ book, source }) => {
 export default BookPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const books = await getServerAllBooks();
   
   const filteredBooks = books
@@ -204,3 +206,4 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     revalidate: 1800,
   };
 };
+

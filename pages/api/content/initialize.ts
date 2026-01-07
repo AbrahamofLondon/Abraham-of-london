@@ -7,7 +7,7 @@ import {
   getServerAllDownloads, 
   getServerAllBooks, 
   getServerAllShorts 
-} from '@/lib/contentlayer';
+} from "@/lib/contentlayer-compat";
 
 type ContentMetadata = {
   slug: string;
@@ -108,4 +108,5 @@ export default async function handler(
     });
   }
 }
+
 

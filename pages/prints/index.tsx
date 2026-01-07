@@ -6,13 +6,7 @@ import Image from "next/image";
 import { Sparkles, Palette, ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import {
-  assertContentlayerHasDocs,
-  getAllPrints,
-  normalizeSlug,
-  getDocHref,
-  resolveDocCoverImage,
-} from "@/lib/contentlayer";
+import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
 
 type PrintItem = {
   slug: string;
@@ -32,12 +26,12 @@ type Props = {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   // CRITICAL FIX: Removed the argument to match function signature
   try {
-    assertContentlayerHasDocs();
+    const data = await getContentlayerData(); assertContentlayerHasDocs(data);
   } catch (e) {
     console.warn("Institutional Contentlayer check failed:", e);
   }
 
-  const raw = getAllPrints();
+  const raw = (await getContentlayerData()).allPrints;
 
   const prints: PrintItem[] = raw
     .map((p: any) => ({
@@ -157,4 +151,5 @@ const PrintsIndexPage: NextPage<Props> = ({ prints }) => {
 };
 
 export default PrintsIndexPage;
+
 

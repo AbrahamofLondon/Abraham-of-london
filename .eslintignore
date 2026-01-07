@@ -1,4 +1,71 @@
 # .eslintignore
+# Build and cache directories
+.next
+.out
+dist
+build
+node_modules
+.cache
+.contentlayer
+.turbo
+
+# Generated files
+.generated
+.gradle
+.DS_Store
+*.log
+*.lock
+
+# Test and coverage
+coverage
+*.test.*
+*.spec.*
+__tests__
+__mocks__
+
+# Configuration files
+*.config.*
+.env*
+.eslintrc*
+.prettierrc*
+tsconfig.json
+next.config.*
+package.json
+
+# Legacy and problematic files
+components/downloads/LegacyCanvasInteractive.ts
+components/downloads/LegacyCanvasInteractive.js
+components/downloads/LegacyCanvasInteractive.jsx
+lib/pdf/legacy-canvas-generator.js
+
+# TypeScript declaration files
+*.d.ts
+
+# Content and assets
+public
+content
+*.md
+*.mdx
+*.pdf
+*.jpg
+*.png
+*.svg
+
+# Windows specific
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Temporary files
+.temp
+tmp
+*.tmp
+
 node_modules
 .next
 out
@@ -21,3 +88,9 @@ prisma/dev.db
 
 Update in pages/
 Update in pages/**
+
+# Ignore problematic files
+components/downloads/LegacyCanvasInteractive.ts
+components/downloads/LegacyCanvasInteractive.js
+components/downloads/LegacyCanvasInteractive.jsx
+

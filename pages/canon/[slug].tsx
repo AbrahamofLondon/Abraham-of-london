@@ -5,7 +5,7 @@ import Head from "next/head";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
-import { getServerAllCanons, getServerCanonBySlug } from '@/lib/contentlayer';
+import { getServerAllCanons, getServerCanonBySlug , getContentlayerData} from "@/lib/contentlayer-compat";
 
 import CanonHero from "@/components/canon/CanonHero";
 import CanonContent from "@/components/canon/CanonContent";
@@ -144,6 +144,8 @@ const CanonPage: NextPage<Props> = ({ canon, locked, source }) => {
 export default CanonPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const canons: any[] = await getServerAllCanons();
 
   const paths =
@@ -195,3 +197,5 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     revalidate: 1800,
   };
 };
+
+

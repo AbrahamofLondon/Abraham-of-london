@@ -12,7 +12,7 @@ import {
   normalizeSlug,
   toUiDoc,
   type ContentDoc,
-} from "@/lib/contentlayer";
+} from "@/lib/contentlayer-compat";
 
 // Use the institutional MDX pipeline (export-safe)
 import { prepareMDX } from "@/lib/server/md-utils";
@@ -39,6 +39,8 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const docs = (getAllContentlayerDocs() || [])
     .filter((d: any) => d && !isDraftContent(d))
     .filter((d: any) => getDocHref(d).startsWith("/content/"));
@@ -86,3 +88,4 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 export default ContentSlugPage;
+

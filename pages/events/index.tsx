@@ -3,11 +3,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import {
-  assertContentlayerHasDocs,
-  getAllEvents,
-  normalizeSlug,
-} from "@/lib/contentlayer";
+import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
 
 type EventItem = {
   _id: string;
@@ -50,9 +46,9 @@ function formatDateGB(value: string): string {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   // Fixed: removed the argument that was causing the type error
-  assertContentlayerHasDocs();
+  const data = await getContentlayerData(); assertContentlayerHasDocs(data);
 
-  const eventsRaw = getAllEvents();
+  const eventsRaw = (await getContentlayerData()).allEvents;
   const now = new Date();
 
   const events: EventItem[] = eventsRaw.map((e: any) => {
@@ -166,4 +162,5 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
 };
 
 export default EventsIndexPage;
+
 

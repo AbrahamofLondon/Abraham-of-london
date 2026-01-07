@@ -1,4 +1,4 @@
-import { getServerAllPosts, getServerPostBySlug } from '@/lib/contentlayer';
+import { getServerAllPosts, getServerPostBySlug , getContentlayerData} from "@/lib/contentlayer-compat";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -20,6 +20,8 @@ type Props = {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const posts = await getServerAllPosts();
   
   return {
@@ -80,3 +82,5 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     };
   }
 };
+
+

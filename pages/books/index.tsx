@@ -7,11 +7,7 @@ import { BookOpen, Calendar, Clock, Sparkles, ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import SilentSurface from "@/components/ui/SilentSurface";
-import {
-  assertContentlayerHasDocs,
-  getAllBooks,
-  normalizeSlug,
-} from "@/lib/contentlayer";
+import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
 
 export type BookListItem = {
   slug: string;
@@ -33,9 +29,9 @@ interface BooksPageProps {
 
 export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
   // FIX: Removed argument
-  assertContentlayerHasDocs();
+  const data = await getContentlayerData(); assertContentlayerHasDocs(data);
 
-  const raw = getAllBooks();
+  const raw = (await getContentlayerData()).allBooks;
 
   const books: BookListItem[] = raw.map((b: any) => {
     const publishedDate =
@@ -245,4 +241,5 @@ const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
 };
 
 export default BooksPage;
+
 

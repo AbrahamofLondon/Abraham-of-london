@@ -1,6 +1,6 @@
 /* pages/api/canon/[slug].ts - HYDRATED INSTITUTIONAL VERSION */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerAllCanons, recordContentView } from '@/lib/contentlayer';
+import { getServerAllCanons, recordContentView } from "@/lib/contentlayer-compat";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { slug } = req.query;
@@ -36,3 +36,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: "INTERNAL_CANON_FAULT" });
   }
 }
+

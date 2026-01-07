@@ -14,7 +14,7 @@ import {
   getServerEventBySlug,
   normalizeSlug,
   resolveDocCoverImage,
-} from "@/lib/contentlayer";
+} from "@/lib/contentlayer-compat";
 
 import EventHero from "@/components/events/EventHero";
 import EventDetails from "@/components/events/EventDetails";
@@ -206,6 +206,8 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
 export default EventPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  
+  await getContentlayerData();
   const events = getServerAllEvents() || [];
   const paths = events
     // tolerate different shapes, but never crash build
@@ -275,3 +277,4 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     revalidate: 60,
   };
 };
+

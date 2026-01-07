@@ -10,14 +10,7 @@ import {
   Search, Clock, UserCheck, Award, Lock, Eye, AlertCircle,
   ShieldCheck, Filter, Star, CheckCircle2, ChevronRight
 } from "lucide-react";
-import {
-  assertContentlayerHasDocs,
-  getAllDownloads,
-  normalizeSlug,
-  resolveDocCoverImage,
-  resolveDocDownloadHref,
-  getAccessLevel,
-} from '@/lib/contentlayer';
+import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
 import { getPDFRegistry, type PDFTier } from "@/scripts/pdf-registry";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,8 +54,8 @@ export const getStaticProps: GetStaticProps<{
   }
 }> = async () => {
   try {
-    assertContentlayerHasDocs();
-    const all = getAllDownloads();
+    const data = await getContentlayerData(); assertContentlayerHasDocs(data);
+    const all = (await getContentlayerData()).allDownloads;
     const registry = getPDFRegistry();
 
     const items: VaultItem[] = all
@@ -296,4 +289,5 @@ export default function VaultPage({ items, stats }: InferGetStaticPropsType<type
     </Layout>
   );
 }
+
 
