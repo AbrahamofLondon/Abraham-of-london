@@ -1,64 +1,71 @@
-// lib/canon.ts
-import { allCanons, type Canon } from "@/lib/contentlayer";
+// lib/canon.ts — CANONICAL (ASYNC, NO allCanons IMPORTS)
+
+import { getContentlayerData, isDraftContent, normalizeSlug, getAccessLevel as compatAccess } from "@/lib/contentlayer-compat";
+
+export type Canon = any;
 
 /* -------------------------------------------------------------------------- */
 /* Utilities                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const norm = (v: unknown) => String(v || "").trim().toLowerCase();
+const norm = (v: unknown) => normalizeSlug(String(v || "")).toLowerCase();
 
-/**
- * Determines visibility based on draft status and explicit access level
- */
 export function isPublicCanon(canon: Canon): boolean {
+  if (!canon) return false;
+  if (isDraftContent(canon)) return false;
   if (canon.draft) return false;
-  const access = canon.accessLevel || "public";
+
+  const access = String(canon.accessLevel || canon.tier || "public");
   return access === "public";
 }
 
-/**
- * RESTORED: Get access level for a document (required by pages/canon/[slug].tsx)
- */
+/** Required by pages/canon/[slug].tsx */
 export function getAccessLevel(canon: Canon | undefined): string {
   if (!canon) return "public";
-  return canon.accessLevel || "public";
+  return String(canon.accessLevel || canon.tier || compatAccess(canon) || "public");
 }
 
-/**
- * Robust slug resolver handling standard slug field and fallback to file path
- */
 export function resolveCanonSlug(canon: Canon): string {
+  if (!canon) return "";
   if (canon.slug) return norm(canon.slug).replace(/\/+$/, "");
-  
-  // Fallback to filename if slug is missing
-  const pathParts = canon._raw.flattenedPath.split('/');
-  return norm(pathParts[pathParts.length - 1]);
+
+  const fp = String(canon._raw?.flattenedPath || "");
+  const parts = fp.split("/").filter(Boolean);
+  return norm(parts[parts.length - 1] || "");
+}
+
+async function loadCanons(): Promise<Canon[]> {
+  const d = await getContentlayerData();
+  const canons = (d.allCanons ?? []) as any[];
+  return canons.filter((c) => c && !isDraftContent(c));
 }
 
 /* -------------------------------------------------------------------------- */
 /* Getters                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export function getAllCanons(): Canon[] {
-  return allCanons;
+export async function getAllCanons(): Promise<Canon[]> {
+  return loadCanons();
 }
 
-export function getPublicCanons(): Canon[] {
-  return allCanons.filter(isPublicCanon).sort((a, b) => (a.order || 0) - (b.order || 0));
+export async function getPublicCanons(): Promise<Canon[]> {
+  const canons = await loadCanons();
+  return canons
+    .filter(isPublicCanon)
+    .sort((a: any, b: any) => (Number(a?.order) || 0) - (Number(b?.order) || 0));
 }
 
-export function getCanonBySlug(slug: string): Canon | undefined {
+export async function getCanonBySlug(slug: string): Promise<Canon | undefined> {
   const target = norm(slug);
-  return allCanons.find(c => resolveCanonSlug(c) === target);
+  const canons = await loadCanons();
+  return canons.find((c) => resolveCanonSlug(c) === target);
 }
 
-/**
- * RESTORED: Alias for getCanonBySlug (required by existing pages)
- */
+/** Alias for legacy pages */
 export const getCanonDocBySlug = getCanonBySlug;
 
 /* -------------------------------------------------------------------------- */
-/* Index Mapping (For Grid Views)                                             */
+/* Index Mapping                                                               */
 /* -------------------------------------------------------------------------- */
 
 export type CanonIndexItem = {
@@ -70,13 +77,14 @@ export type CanonIndexItem = {
   accessLevel: string;
 };
 
-export function getCanonIndexItems(): CanonIndexItem[] {
-  return getPublicCanons().map((c) => ({
+export async function getCanonIndexItems(): Promise<CanonIndexItem[]> {
+  const canons = await getPublicCanons();
+  return canons.map((c) => ({
     slug: resolveCanonSlug(c),
-    title: c.title || "Untitled Canon",
-    volumeNumber: typeof c.volumeNumber === 'number' ? c.volumeNumber : null,
-    coverImage: c.coverImage || null,
-    excerpt: c.description || null,
-    accessLevel: c.accessLevel || "public",
+    title: c?.title || "Untitled Canon",
+    volumeNumber: typeof c?.volumeNumber === "number" ? c.volumeNumber : null,
+    coverImage: c?.coverImage || null,
+    excerpt: c?.description || c?.excerpt || null,
+    accessLevel: getAccessLevel(c),
   }));
 }

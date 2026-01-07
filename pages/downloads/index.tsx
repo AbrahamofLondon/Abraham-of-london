@@ -6,7 +6,14 @@ import Layout from "@/components/Layout";
 import DownloadCard from "@/components/downloads/DownloadCard";
 
 // ✅ SINGLE IMPORT - Remove the duplicate line below
-import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
+import {
+  getContentlayerData,
+  assertContentlayerHasDocs, // ADD THIS IMPORT
+  isDraftContent,
+  normalizeSlug,
+  getDocHref,
+  getAccessLevel,
+} from "@/lib/contentlayer-compat"; // FIXED PATH
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
@@ -26,11 +33,6 @@ type NormalisedDownload = {
 };
 
 // Helper functions (make sure these exist or add them)
-function const data = await getContentlayerData(); assertContentlayerHasDocs(data): void {
-  // Implementation depends on your project
-  console.log("Asserting contentlayer has docs...");
-}
-
 function assertPublicAssetsForDownloadsAndResources(): void {
   console.log("Asserting public assets...");
 }
@@ -53,7 +55,8 @@ function getDownloadSizeLabel(doc: any): string | null {
 
 export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }> = async () => {
   // ✅ Fixed: Remove the argument from assertContentlayerHasDocs
-  const data = await getContentlayerData(); assertContentlayerHasDocs(data);
+  const data = await getContentlayerData();
+  assertContentlayerHasDocs(data);
 
   // ✅ One call validates downloads + resources covers/files under /assets/* (strict optional via env)
   assertPublicAssetsForDownloadsAndResources();

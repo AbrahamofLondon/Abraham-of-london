@@ -11,6 +11,8 @@ import {
   normalizeSlug,
   getDocHref,
   resolveDocCoverImage,
+  getContentlayerData,
+  assertContentlayerHasDocs
 } from "@/lib/contentlayer-compat";
 
 type Item = {
@@ -26,6 +28,9 @@ type Item = {
 type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  const data = await getContentlayerData();
+  assertContentlayerHasDocs(data);
+  
   const docs = getPublishedDocuments();
 
   const items: Item[] = (docs ?? [])
@@ -195,4 +200,3 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
 };
 
 export default ContentIndexPage;
-

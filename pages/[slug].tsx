@@ -1,14 +1,11 @@
-/* pages/[slug].tsx - HYDRATED CATCH-ALL ROUTE */
+// pages/[slug].tsx - HYDRATED CATCH-ALL ROUTE
 import * as React from "react";
-import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 
-// Import should include getContentlayerData:
 import {
   getPublishedDocuments,
   getDocHref,
@@ -18,8 +15,9 @@ import {
   getAccessLevel,
   resolveDocDownloadUrl,
   assertContentlayerHasDocs,
-  getContentlayerData, // THIS MUST BE HERE
+  getContentlayerData,
 } from "@/lib/contentlayer-compat";
+
 import { prepareMDX, mdxComponents, sanitizeData } from "@/lib/server/md-utils";
 
 /* -------------------------------------------------------------------------- */
@@ -135,7 +133,6 @@ const SITE = "https://www.abrahamoflondon.org";
 function isSingleSegmentHref(href: string): boolean {
   const clean = String(href ?? "").split(/[?#]/)[0].replace(/\/+$/, "");
   const parts = clean.split("/").filter(Boolean);
-  // Root paths only: "/about" ✅, "/blog/post" ❌
   return parts.length === 1;
 }
 
@@ -156,6 +153,20 @@ const ContentPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // ✅ Cursor glow handled properly (no <script> tag)
+  React.useEffect(() => {
+    const glow = document.getElementById("cursor-glow");
+    if (!glow) return;
+
+    const onMove = (e: MouseEvent) => {
+      (glow as HTMLElement).style.left = `${e.clientX - 250}px`;
+      (glow as HTMLElement).style.top = `${e.clientY - 250}px`;
+    };
+
+    document.addEventListener("mousemove", onMove, { passive: true });
+    return () => document.removeEventListener("mousemove", onMove);
+  }, []);
+
   const isLocked = meta.accessLevel === "inner-circle" && !hasAccess;
   const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(meta.url)}`;
 
@@ -170,15 +181,19 @@ const ContentPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
       <ArticleHero
         title={meta.title}
         subtitle={meta.excerpt || meta.description || undefined}
-        category={meta.category || (meta.tags?.[0]) || "Intelligence"}
+        category={meta.category || meta.tags?.[0] || "Intelligence"}
         date={meta.date}
         readTime={meta.readTime}
         coverImage={meta.coverImage || undefined}
       />
 
-      <main className={`relative transition-all duration-1000 delay-500 ${
-          isContentVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}>
+      <main
+        className={`relative transition-all duration-1000 delay-500 ${
+          isContentVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-8"
+        }`}
+      >
         <article className="mx-auto max-w-4xl px-4 pb-32 pt-16">
           <div className="relative">
             {/* Structural Depth Indicator (Sidebar) */}
@@ -194,12 +209,13 @@ const ContentPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
 
             {isLocked ? (
               <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-12 text-center shadow-2xl">
-                <div className="mb-6 text-6xl opacity-20 text-amber-500">𓃲</div>
+                <div className="mb-6 text-6xl text-amber-500 opacity-20">𓃲</div>
                 <h3 className="mb-4 font-serif text-3xl font-bold text-white">
                   Dossier Access Restricted
                 </h3>
                 <p className="mx-auto mb-10 max-w-md text-zinc-400">
-                  {meta.lockMessage || "This architectural analysis is reserved for the Inner Circle. Unlock complete transmission access."}
+                  {meta.lockMessage ||
+                    "This architectural analysis is reserved for the Inner Circle. Unlock complete transmission access."}
                 </p>
                 <Link
                   href={joinUrl}
@@ -209,11 +225,13 @@ const ContentPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
                 </Link>
               </div>
             ) : (
-              <div className="prose prose-invert prose-amber max-w-none 
+              <div
+                className="prose prose-invert prose-amber max-w-none
                 prose-headings:font-serif prose-headings:font-bold
                 prose-p:text-zinc-300 prose-p:leading-relaxed
                 prose-blockquote:border-l-amber-500/50 prose-blockquote:bg-zinc-900/30 prose-blockquote:p-6
-                prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800">
+                prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800"
+              >
                 <MDXRemote {...mdxSource} components={mdxComponents} />
               </div>
             )}
@@ -221,27 +239,13 @@ const ContentPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
         </article>
       </main>
 
-      {/* Reading Progress & UI Enhancement */}
+      {/* UI Enhancement Layer */}
       <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-        <div 
+        <div
           id="cursor-glow"
-          className="absolute h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[120px]" 
+          className="absolute h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[120px]"
         />
       </div>
-
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            const glow = document.getElementById('cursor-glow');
-            document.addEventListener('mousemove', (e) => {
-              if(glow) {
-                glow.style.left = e.clientX - 250 + 'px';
-                glow.style.top = e.clientY - 250 + 'px';
-              }
-            });
-          `,
-        }}
-      />
     </Layout>
   );
 };
@@ -251,18 +255,18 @@ const ContentPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // FIXED: Call getContentlayerData first, then assert with the data
   const data = await getContentlayerData();
-  assertContentlayerHasDocs(data); // PASS THE DATA
-  
+  assertContentlayerHasDocs(data);
+
   const docs = getPublishedDocuments();
 
   const paths = docs
     .map((doc) => {
       const href = getDocHref(doc);
-      // ONLY generate paths for single-segment URLs like /about
       if (!isSingleSegmentHref(href)) return null;
-      return { params: { slug: normalizeSlug(doc.slug || doc._raw.flattenedPath) } };
+      return {
+        params: { slug: normalizeSlug(doc.slug || doc._raw.flattenedPath) },
+      };
     })
     .filter(Boolean) as { params: { slug: string } }[];
 
@@ -271,18 +275,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slug = String(params?.slug || "");
-  
-  // FIXED: Also call getContentlayerData in getStaticProps
   await getContentlayerData();
-  
+
   const docs = getPublishedDocuments();
 
-  const found = docs.find((d) => normalizeSlug(d.slug || d._raw.flattenedPath) === slug);
+  const found = docs.find(
+    (d) => normalizeSlug(d.slug || d._raw.flattenedPath) === slug
+  );
   if (!found) return { notFound: true };
 
   const canonicalHref = getDocHref(found);
 
-  // REDIRECT GUARD: If it belongs in /blog, /books, etc., move it there.
   if (!isSingleSegmentHref(canonicalHref)) {
     return { redirect: { destination: canonicalHref, permanent: true } };
   }

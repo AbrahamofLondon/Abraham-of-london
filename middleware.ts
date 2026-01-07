@@ -1,18 +1,18 @@
-/* middleware.ts - Enterprise V6.0
+/* middleware.ts - Enterprise V6.2
  * Enhanced Security & Performance Middleware
- * Merges existing enterprise features with additional security layers
+ * Updated with unified rate limiting system
  */
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { rateLimitRedis } from '@/lib/rate-limit-redis'; 
 
 import { 
-  rateLimit, 
-  getClientIp, 
-  getRateLimitKeys, 
-  checkMultipleRateLimits,
+  withEdgeRateLimit,
+  createRateLimitedResponse,
+  getClientIp,
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS 
-} from "@/lib/server/rateLimit-edge";
+} from "@/lib/server/rate-limit-unified";
 
 const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
 const PRODUCTION = process.env.NODE_ENV === 'production';
@@ -22,13 +22,48 @@ const PRODUCTION = process.env.NODE_ENV === 'production';
 /* -------------------------------------------------------------------------- */
 
 const ROUTE_SECURITY_CONFIG = {
-  "/board": { mode: "strict", type: "board", cache: "private, max-age=3600" },
-  "/inner-circle": { mode: "strict", type: "system", cache: "private, max-age=3600" },
-  "/strategies": { mode: "hybrid", type: "strategy", cache: "public, max-age=7200, stale-while-revalidate=86400" },
-  "/canons": { mode: "hybrid", type: "canon", cache: "public, max-age=7200, stale-while-revalidate=86400" },
-  "/resources": { mode: "public_default", type: "resource", cache: "public, max-age=86400, stale-while-revalidate=604800" },
-  "/blog": { mode: "public", type: "blog", cache: "public, max-age=86400, stale-while-revalidate=2592000" },
-  "/books": { mode: "public", type: "book", cache: "public, max-age=86400, immutable" },
+  "/board": { 
+    mode: "strict", 
+    type: "board", 
+    cache: "private, max-age=3600",
+    rateLimit: RATE_LIMIT_CONFIGS.API_STRICT
+  },
+  "/inner-circle": { 
+    mode: "strict", 
+    type: "system", 
+    cache: "private, max-age=3600",
+    rateLimit: RATE_LIMIT_CONFIGS.AUTH
+  },
+  "/strategies": { 
+    mode: "hybrid", 
+    type: "strategy", 
+    cache: "public, max-age=7200, stale-while-revalidate=86400",
+    rateLimit: RATE_LIMIT_CONFIGS.CONTENT
+  },
+  "/canons": { 
+    mode: "hybrid", 
+    type: "canon", 
+    cache: "public, max-age=7200, stale-while-revalidate=86400",
+    rateLimit: RATE_LIMIT_CONFIGS.CONTENT
+  },
+  "/resources": { 
+    mode: "public_default", 
+    type: "resource", 
+    cache: "public, max-age=86400, stale-while-revalidate=604800",
+    rateLimit: RATE_LIMIT_CONFIGS.API_GENERAL
+  },
+  "/blog": { 
+    mode: "public", 
+    type: "blog", 
+    cache: "public, max-age=86400, stale-while-revalidate=2592000",
+    rateLimit: RATE_LIMIT_CONFIGS.API_GENERAL
+  },
+  "/books": { 
+    mode: "public", 
+    type: "book", 
+    cache: "public, max-age=86400, immutable",
+    rateLimit: RATE_LIMIT_CONFIGS.API_GENERAL
+  },
 };
 
 // Routes that bypass all security checks
@@ -44,19 +79,22 @@ const SAFE_EXACT = [
   "/robots.txt",
   "/sitemap.xml",
   "/favicon.ico",
-  "/manifest.json"
+  "/manifest.json",
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/health",
+  "/api/ping"
 ];
 
 const SAFE_PREFIXES = [
   "/_next/", 
-  "/api/health", 
-  "/api/ping",
   "/api/public/",
   "/icons/", 
   "/fonts/", 
   "/images/",
   "/assets/fonts/",
-  "/assets/images/"
+  "/assets/images/public/",
+  "/assets/icons/"
 ];
 
 // Bot whitelist (allowed crawlers)
@@ -127,10 +165,14 @@ function shouldBypassSecurity(pathname: string): boolean {
   // Prefix match bypass
   if (SAFE_PREFIXES.some(prefix => pathname.startsWith(prefix))) return true;
   
+  // Static files with extensions
+  const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.json'];
+  if (staticExtensions.some(ext => pathname.endsWith(ext))) return true;
+  
   // API routes (but not all, some need protection)
   if (pathname.startsWith('/api/')) {
     // Only bypass for specific public API routes
-    const publicApiRoutes = ['/api/health', '/api/ping', '/api/public/'];
+    const publicApiRoutes = ['/api/health', '/api/ping', '/api/public/', '/api/auth/login', '/api/auth/register'];
     return publicApiRoutes.some(route => pathname.startsWith(route));
   }
   
@@ -163,7 +205,6 @@ function applySecurityHeaders(response: NextResponse, cacheControl?: string): Ne
   }
   
   // Additional headers for observability
-  response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-DNS-Prefetch-Control', 'on');
   response.headers.set('X-Download-Options', 'noopen');
   
@@ -181,36 +222,14 @@ function redirectLocked(req: NextRequest, returnTo: string, reason: string): Nex
   return applySecurityHeaders(response);
 }
 
-function createRateLimitedResponse(result: any): NextResponse {
-  const response = new NextResponse(
-    JSON.stringify({ 
-      error: "Rate limit exceeded", 
-      retryAfter: Math.ceil(result.retryAfterMs / 1000),
-      limit: result.limit,
-      remaining: result.remaining,
-      resetTime: new Date(Date.now() + result.retryAfterMs).toISOString()
-    }),
-    { 
-      status: 429, 
-      headers: { 
-        "Content-Type": "application/json", 
-        ...createRateLimitHeaders(result),
-        "Retry-After": Math.ceil(result.retryAfterMs / 1000).toString()
-      } 
-    }
-  );
-  
-  return applySecurityHeaders(response);
-}
-
 function shouldCacheAsset(pathname: string): boolean {
   const cacheableAssets = [
     '/_next/static/chunks/contentlayer',
     '/_next/static/',
     '/_next/image',
-    '/assets/downloads/',
     '/assets/fonts/',
-    '/assets/images/',
+    '/assets/images/public/',
+    '/assets/icons/',
     '/icons/',
     '/fonts/',
     '/images/'
@@ -220,7 +239,98 @@ function shouldCacheAsset(pathname: string): boolean {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. MAIN MIDDLEWARE LOGIC                                                   */
+/* 3. RATE LIMITING FUNCTION                                                 */
+/* -------------------------------------------------------------------------- */
+
+async function applyRouteSpecificRateLimit(
+  req: NextRequest, 
+  pathname: string,
+  hasAccess: boolean
+): Promise<{
+  allowed: boolean;
+  headers?: Record<string, string>;
+  result?: any;
+}> {
+  const ip = getClientIp(req);
+  
+  // Find route-specific configuration
+  let rateLimitConfig = RATE_LIMIT_CONFIGS.API_GENERAL;
+  let routeKeyPrefix = 'general';
+  
+  // Check if this is an API route
+  const isApiRoute = pathname.startsWith('/api/');
+  
+  // Find matching route configuration
+  for (const [routePrefix, config] of Object.entries(ROUTE_SECURITY_CONFIG)) {
+    if (pathname.startsWith(routePrefix)) {
+      if (config.rateLimit) {
+        rateLimitConfig = config.rateLimit;
+      }
+      routeKeyPrefix = config.type;
+      break;
+    }
+  }
+  
+  // Special handling for authenticated vs unauthenticated users
+  if (hasAccess) {
+    // Inner circle members get higher limits
+    if (rateLimitConfig === RATE_LIMIT_CONFIGS.API_STRICT) {
+      rateLimitConfig = {
+        ...rateLimitConfig,
+        limit: Math.floor(rateLimitConfig.limit * 1.5), // 50% higher limit
+        keyPrefix: `${routeKeyPrefix}_inner_circle`
+      };
+    }
+  }
+  
+  try {
+    // Try Redis-based rate limiting first
+    if (rateLimitRedis) {
+      const redisKey = `ratelimit:${routeKeyPrefix}:${ip}`;
+      const result = await rateLimitRedis.check(ip, {
+        windowMs: rateLimitConfig.windowMs,
+        max: rateLimitConfig.limit,
+        keyPrefix: rateLimitConfig.keyPrefix || routeKeyPrefix,
+      });
+      
+      if (result.remaining === 0) {
+        return {
+          allowed: false,
+          headers: createRateLimitHeaders(result),
+          result
+        };
+      }
+      
+      return {
+        allowed: true,
+        headers: createRateLimitHeaders(result),
+        result
+      };
+    }
+    
+    // Fallback to edge-based rate limiting
+    const { allowed, headers, result } = await withEdgeRateLimit(
+      req, 
+      rateLimitConfig
+    );
+    
+    return { allowed, headers, result };
+    
+  } catch (error) {
+    console.error('[RateLimit] Error applying rate limit:', error);
+    
+    // On error, allow the request but log it
+    return {
+      allowed: true,
+      headers: {
+        'X-RateLimit-Error': 'rate-limit-service-unavailable'
+      }
+    };
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 4. MAIN MIDDLEWARE LOGIC                                                   */
 /* -------------------------------------------------------------------------- */
 
 export async function middleware(req: NextRequest) {
@@ -250,7 +360,8 @@ export async function middleware(req: NextRequest) {
       status: 403,
       headers: {
         'X-Blocked-By': 'WAF',
-        'X-Blocked-Reason': 'malicious-pattern-detected'
+        'X-Blocked-Reason': 'malicious-pattern-detected',
+        'X-Request-ID': crypto.randomUUID()
       }
     });
   }
@@ -259,11 +370,18 @@ export async function middleware(req: NextRequest) {
   const isBot = /bot|crawler|spider|crawling/i.test(userAgent);
   if (isBot && !isAllowedBot(userAgent)) {
     console.warn(`[BOT] Blocked unauthorized bot: ${userAgent} from ${ip}`);
-    return NextResponse.rewrite(new URL('/api/blocked', req.url));
+    const response = new NextResponse('Access Denied', { 
+      status: 403,
+      headers: {
+        'X-Blocked-By': 'Bot-Protection',
+        'X-Request-ID': crypto.randomUUID()
+      }
+    });
+    return applySecurityHeaders(response);
   }
   
   // ==================== PHASE 3: ASSET GUARD ====================
-  if (pathname.startsWith("/assets/downloads/")) {
+  if (pathname.startsWith("/assets/downloads/") || pathname.startsWith("/assets/private/")) {
     if (!hasAccess) {
       console.warn(`[SECURITY] Blocked unauthorized asset request: ${pathname} from ${ip}`);
       return redirectLocked(req, pathname, "unauthorized-asset-access");
@@ -276,87 +394,149 @@ export async function middleware(req: NextRequest) {
   }
   
   // ==================== PHASE 4: RATE LIMITING ====================
-  const globalKeys = getRateLimitKeys(req, "global");
-  const { worstResult: globalResult } = checkMultipleRateLimits(globalKeys, RATE_LIMIT_CONFIGS.API_GENERAL);
+  const rateLimitResult = await applyRouteSpecificRateLimit(req, pathname, hasAccess);
   
-  if (!globalResult.allowed) {
-    console.warn(`[RATE_LIMIT] Blocked ${ip} for ${pathname}: ${globalResult.reason}`);
-    return createRateLimitedResponse(globalResult);
+  if (!rateLimitResult.allowed) {
+    console.warn(`[RATE_LIMIT] Blocked ${ip} for ${pathname}`, {
+      remaining: rateLimitResult.result?.remaining,
+      retryAfter: rateLimitResult.result?.retryAfterMs
+    });
+    
+    if (rateLimitResult.result?.retryAfterMs && rateLimitResult.result.retryAfterMs > 0) {
+      const response = createRateLimitedResponse(rateLimitResult.result);
+      return applySecurityHeaders(response);
+    }
+    
+    // Generic rate limit response if no retry time specified
+    const response = new NextResponse('Too Many Requests', { 
+      status: 429,
+      headers: {
+        'X-RateLimit-Reason': 'rate-limit-exceeded',
+        'X-Request-ID': crypto.randomUUID()
+      }
+    });
+    return applySecurityHeaders(response);
   }
   
   // ==================== PHASE 5: ROUTE CONTENT GATING ====================
   let routeCacheConfig = 'public, max-age=3600';
   let requiresAuth = false;
+  let routeType = 'public';
   
   for (const [routePrefix, config] of Object.entries(ROUTE_SECURITY_CONFIG)) {
     if (pathname.startsWith(routePrefix)) {
       routeCacheConfig = config.cache || routeCacheConfig;
+      routeType = config.type || 'public';
       
       if (config.mode === "strict" && !hasAccess) {
-        if (pathname === "/inner-circle/login") break;
+        // Allow access to login/register pages even in strict mode
+        if (pathname === "/inner-circle/login" || pathname === "/inner-circle/register") {
+          break; 
+        }
         requiresAuth = true;
         break;
       }
       
-      if (config.mode === "hybrid") {
-        const resourceResult = rateLimit(`resource:${ip}`, { limit: 30, windowMs: 60000 });
-        if (!resourceResult.allowed) {
-          console.warn(`[RATE_LIMIT] Resource limit exceeded for ${ip} on ${pathname}`);
-          return createRateLimitedResponse(resourceResult);
+      // Apply additional rate limiting for hybrid routes when user doesn't have access
+      if (config.mode === "hybrid" && !hasAccess) {
+        const hybridRateLimit = await applyRouteSpecificRateLimit(
+          req, 
+          pathname, 
+          false
+        );
+        
+        if (!hybridRateLimit.allowed) {
+          console.warn(`[RATE_LIMIT] Content limit exceeded for ${ip} on ${pathname}`);
+          const response = createRateLimitedResponse(hybridRateLimit.result);
+          return applySecurityHeaders(response);
         }
       }
     }
   }
   
   if (requiresAuth) {
-    return redirectLocked(req, pathname, `protected-${ROUTE_SECURITY_CONFIG[pathname]?.type || 'resource'}`);
+    return redirectLocked(req, pathname, `protected-${routeType}`);
   }
   
   // ==================== PHASE 6: RESPONSE PREPARATION ====================
   const response = NextResponse.next();
   
-  // Apply rate limit headers
-  Object.entries(createRateLimitHeaders(globalResult)).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
+  // Apply rate limit headers if available
+  if (rateLimitResult.headers) {
+    Object.entries(rateLimitResult.headers).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+  }
   
-  // Apply cache control
-  response.headers.set('Cache-Control', routeCacheConfig);
+  // Apply cache control based on route type and access level
+  let finalCacheControl = routeCacheConfig;
+  
+  // Adjust cache control for authenticated users
+  if (hasAccess && routeCacheConfig.includes('public')) {
+    // Change public cache to private for authenticated users
+    finalCacheControl = routeCacheConfig.replace('public', 'private');
+  }
+  
+  response.headers.set('Cache-Control', finalCacheControl);
   
   // Apply security headers with cache config
-  applySecurityHeaders(response, routeCacheConfig);
+  applySecurityHeaders(response, finalCacheControl);
   
   // Add observability headers
   response.headers.set('X-Access-Level', hasAccess ? 'inner-circle' : 'public');
   response.headers.set('X-Request-ID', crypto.randomUUID());
-  response.headers.set('X-Request-Path', pathname);
+  response.headers.set('X-Route-Type', routeType);
+  
+  // Add rate limit info headers
+  if (rateLimitResult.result) {
+    response.headers.set('X-RateLimit-Limit', rateLimitResult.result.limit?.toString() || '100');
+    response.headers.set('X-RateLimit-Remaining', rateLimitResult.result.remaining?.toString() || '99');
+    response.headers.set('X-RateLimit-Reset', rateLimitResult.result.resetTime?.toString() || Date.now().toString());
+  }
   
   // Add performance timing headers in development
   if (!PRODUCTION) {
-    response.headers.set('Server-Timing', 'middleware;dur=1');
+    const startTime = Date.now();
+    const endTime = Date.now();
+    response.headers.set('Server-Timing', `middleware;dur=${endTime - startTime}`);
+  }
+  
+  // Add CORS headers for API routes
+  if (pathname.startsWith('/api/')) {
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return new NextResponse(null, {
+        status: 200,
+        headers: response.headers
+      });
+    }
   }
   
   return response;
 }
 
 /* -------------------------------------------------------------------------- */
-/* 4. MIDDLEWARE CONFIGURATION                                                */
+/* 5. MIDDLEWARE CONFIGURATION                                                */
 /* -------------------------------------------------------------------------- */
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for:
-     * - Static files with extensions (js, css, png, etc.)
      * - Next.js internals
-     * - Specific public routes
+     * - Specific public routes (handled in shouldBypassSecurity)
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.json|.*\\.(?:ico|png|jpg|jpeg|gif|svg|css|js|woff|woff2|ttf|eot)$).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|manifest\\.json).*)',
     
     // Also match API routes that need protection
-    '/api/((?!health|ping|public/).*)',
+    '/api/((?!health|ping|public/|auth/(login|register)).*)',
   ],
   
   // Run middleware on Edge Runtime
-  runtime: 'experimental-edge',
+  runtime: 'edge',
 };

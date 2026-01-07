@@ -11,6 +11,8 @@ import {
   normalizeSlug,
   getDocHref,
   isDraft,
+  getContentlayerData,
+  assertContentlayerHasDocs
 } from "@/lib/contentlayer-compat";
 
 type DocKind =
@@ -162,6 +164,9 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     return { notFound: true };
   }
 
+  const data = await getContentlayerData();
+  assertContentlayerHasDocs(data);
+  
   const all = getAllContentlayerDocs() ?? [];
   const published = getPublishedDocuments() ?? [];
   const publishedCount = published.length;
@@ -228,4 +233,3 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 };
 
 export default DebugContentPage;
-

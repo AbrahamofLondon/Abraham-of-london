@@ -1,5 +1,5 @@
 # ============================================================
-# NETLIFY CONFIGURATION — Abraham of London
+# PRODUCTION NETLIFY CONFIG — Abraham of London
 # ============================================================
 
 [build]
@@ -10,28 +10,69 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# ============================================================
+# BUILD ENVIRONMENT
+# ============================================================
+
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
+
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_OPTIONS = "--max-old-space-size=4096"
-  NEXT_PRIVATE_TARGET = "server"
-  
-  # Build optimization
-  NEXT_IGNORE_ESLINT = "1"
-  NEXT_IGNORE_TYPECHECK = "1"  # Set to "1" for faster builds, "0" for type checking
-  
-  # [IMPORTANT] Remove sensitive values from this file:
-  # - NEXT_PUBLIC_GA_MEASUREMENT_ID
-  # - Any JWT secrets or API keys
-  # Set these in Netlify UI: Site Settings > Environment Variables
-  # Scoped to "Builds" for build-time variables
+
+  # Keep these OFF in production if you care about correctness.
+  # If you must speed builds, move them to deploy-preview only.
+  NEXT_IGNORE_ESLINT = "0"
+  NEXT_IGNORE_TYPECHECK = "0"
+
+  # Optional: only keep if your scripts truly use it
+  CONTENTLAYER_CACHE_DIR = "/opt/build/.contentlayer"
+
+# ============================================================
+# DEPLOYMENT CONTEXTS
+# ============================================================
+
+[context.production]
+  command = "pnpm run build"
+  publish = ".next"
+  [context.production.environment]
+    NODE_ENV = "production"
+    NEXT_PUBLIC_APP_ENV = "production"
+    NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+
+[context.deploy-preview]
+  command = "pnpm run build"
+  publish = ".next"
+  [context.deploy-preview.environment]
+    NODE_ENV = "production"
+    NEXT_PUBLIC_APP_ENV = "preview"
+    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+    # Speed previews if desired:
+    NEXT_IGNORE_ESLINT = "1"
+    NEXT_IGNORE_TYPECHECK = "1"
+
+[context.branch-deploy]
+  command = "pnpm run build"
+  publish = ".next"
+  [context.branch-deploy.environment]
+    NODE_ENV = "production"
+    NEXT_PUBLIC_APP_ENV = "development"
+    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+    # Speed branch deploys if desired:
+    NEXT_IGNORE_ESLINT = "1"
+    NEXT_IGNORE_TYPECHECK = "1"
 
 # ============================================================
 # DOMAIN & ASSET REDIRECTS
 # ============================================================
 
-# HTTP → HTTPS redirects (www subdomain standardization)
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -44,7 +85,6 @@
   status = 301
   force = true
 
-# ASSET MAPPING - Clean URLs for worksheets
 [[redirects]]
   from = "/downloads/purpose-pyramid-worksheet-fillable.pdf"
   to = "/downloads/purpose-pyramid.pdf"
@@ -60,14 +100,6 @@
   to = "/downloads/legacy-canvas.pdf"
   status = 200
 
-# [REVIEW NEEDED] Alomarada redirect - check if this is intended behavior
-# Currently redirects to the same domain root, which may not be necessary
-# [[redirects]]
-#   from = "https://alomarada.com/*"
-#   to = "https://alomarada.com/:splat"
-#   status = 301
-#   force = true
-
 # ============================================================
 # SECURITY HEADERS
 # ============================================================
@@ -79,20 +111,37 @@
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Permitted-Cross-Domain-Policies = "none"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-site"
+    # X-XSS-Protection is legacy, but harmless
+    X-XSS-Protection = "0"
+
     Permissions-Policy = "accelerometer=(), autoplay=(), camera=(), clipboard-read=(), clipboard-write=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=()"
+
+    # CSP: pragmatic baseline for Next + GA (tighten further if you add nonces)
     Content-Security-Policy = """
       default-src 'self' *.abrahamoflondon.org;
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com data:;
-      img-src 'self' data: https: blob: https://www.google-analytics.com;
-      connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com;
-      frame-src 'self';
       base-uri 'self';
       form-action 'self';
       frame-ancestors 'none';
+      object-src 'none';
       upgrade-insecure-requests;
+
+      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;
+      connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com data:;
+      img-src 'self' data: https: blob: https://www.google-analytics.com;
+      frame-src 'self';
     """
+
+# Optional: discourage indexing of API routes (adjust if you want them indexed)
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+    Cache-Control = "no-store"
 
 # Static asset caching
 [[headers]]
@@ -101,69 +150,11 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-[[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=86400"
 
-# ============================================================
-# DEPLOYMENT CONTEXTS
-# ============================================================
-
-[context.production]
-  command = "pnpm run build"  # Unified build command
-  publish = ".next"
-  [context.production.environment]
-    NEXT_PUBLIC_APP_ENV = "production"
-    NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-    # Add other production-only environment variables in Netlify UI
-    # Example: NEXT_PUBLIC_GA_MEASUREMENT_ID = "G-R2Y3YMY8F8"
-    # Example: INNER_CIRCLE_JWT_SECRET = "your-secret-here"
-
-[context.deploy-preview]
-  command = "pnpm run build"
-  publish = ".next"
-  [context.deploy-preview.environment]
-    NEXT_PUBLIC_APP_ENV = "preview"
-    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-    # Add preview-specific variables in Netlify UI if needed
-
-[context.branch-deploy]
-  command = "pnpm run build"
-  publish = ".next"
-  [context.branch-deploy.environment]
-    NEXT_PUBLIC_APP_ENV = "development"
-    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-    # Add development-specific variables in Netlify UI if needed
-
-# ============================================================
-# OPTIONAL: WEB SECURITY RULES (if needed)
-# ============================================================
-
-# Uncomment and customize these sections if you need additional security
-
-# [[headers]]
-#   for = "/admin/*"
-#   [headers.values]
-#     X-Robots-Tag = "noindex, nofollow"
-#     Cache-Control = "private, no-store"
-
-# [[headers]]
-#   for = "/api/*"
-#   [headers.values]
-#     X-Robots-Tag = "noindex, nofollow"
-
-# Rate limiting can be implemented via Netlify Edge Functions
-# or external services like Cloudflare
-
-# ============================================================
-# EDGE FUNCTIONS (optional - for advanced use cases)
-# ============================================================
-
-# [[edge_functions]]
-#   path = "/api/*"
-#   function = "rate-limiter"
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

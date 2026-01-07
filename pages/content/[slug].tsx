@@ -1,4 +1,3 @@
-// pages/content/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -11,7 +10,8 @@ import {
   isDraftContent,
   normalizeSlug,
   toUiDoc,
-  type ContentDoc,
+  getContentlayerData,
+  type ContentDoc
 } from "@/lib/contentlayer-compat";
 
 // Use the institutional MDX pipeline (export-safe)
@@ -39,7 +39,6 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  
   await getContentlayerData();
   const docs = (getAllContentlayerDocs() || [])
     .filter((d: any) => d && !isDraftContent(d))
@@ -88,4 +87,3 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 export default ContentSlugPage;
-

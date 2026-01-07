@@ -1,6 +1,4 @@
-/* lib/contentlayer-compat.server.ts - SERVER ONLY */
-import fs from "fs";
-import path from "path";
+/* lib/contentlayer-compat.ts - SAFE (client-bundle friendly) */
 
 export type ContentLayerDoc = any;
 
@@ -16,112 +14,123 @@ export type GeneratedShape = {
   allStrategies?: ContentLayerDoc[];
 };
 
-let _cache: GeneratedShape | null = null;
-
-function tryRequireGenerated(): GeneratedShape {
-  const localGeneratedDir = path.join(process.cwd(), ".contentlayer", "generated");
-  const localIndexJs = path.join(localGeneratedDir, "index.js");
-  const localIndexMjs = path.join(localGeneratedDir, "index.mjs");
-
-  console.log(`[contentlayer-compat] Looking for generated files at: ${localGeneratedDir}`);
-
-  if (fs.existsSync(localIndexJs)) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const mod = require(localIndexJs) as GeneratedShape;
-      if (mod && Object.keys(mod).length > 0) {
-        console.log(`[contentlayer-compat] SUCCESS: Loaded data from ${localIndexJs}`);
-        return mod;
-      }
-    } catch (err) {
-      console.warn(`[contentlayer-compat] Failed to load ${localIndexJs}:`, err);
-    }
-  }
-
-  // Note: require(.mjs) is not always reliable in Node CJS contexts.
-  // We keep it as best-effort.
-  if (fs.existsSync(localIndexMjs)) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const mod = require(localIndexMjs) as GeneratedShape;
-      if (mod && Object.keys(mod).length > 0) {
-        console.log(`[contentlayer-compat] SUCCESS: Loaded data from ${localIndexMjs}`);
-        return mod;
-      }
-    } catch (err) {
-      console.warn(`[contentlayer-compat] Failed to load ${localIndexMjs}:`, err);
-    }
-  }
-
-  // Fallback to module alias if present in the environment
-  try {
-    console.log(`[contentlayer-compat] Falling back to module alias "contentlayer/generated"...`);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require("contentlayer/generated") as GeneratedShape;
-    if (mod && Object.keys(mod).length > 0) {
-      console.log(`[contentlayer-compat] Loaded from module alias.`);
-      return mod;
-    }
-  } catch {
-    // ignore
-  }
-
-  // Last resort: parse collection JSON files
-  console.log(`[contentlayer-compat] Last resort: Parsing collection JSON files...`);
-
-  const collectionMap: Record<string, keyof GeneratedShape> = {
-    Post: "allPosts",
-    Book: "allBooks",
-    Canon: "allCanons",
-    Download: "allDownloads",
-    Event: "allEvents",
-    Print: "allPrints",
-    Resource: "allResources",
-    Short: "allShorts",
-    Strategy: "allStrategies",
-  };
-
-  const result: GeneratedShape = {};
-  let foundAny = false;
-
-  for (const [dirName, exportName] of Object.entries(collectionMap)) {
-    const indexPath = path.join(localGeneratedDir, dirName, "_index.json");
-    if (fs.existsSync(indexPath)) {
-      try {
-        const data = JSON.parse(fs.readFileSync(indexPath, "utf-8"));
-        (result as any)[exportName] = Array.isArray(data) ? data : [];
-        foundAny = true;
-        console.log(`  -> Loaded ${String(exportName)}: ${(result as any)[exportName].length} items`);
-      } catch (err) {
-        console.warn(`  -> Failed to parse ${indexPath}:`, err);
-      }
-    }
-  }
-
-  if (foundAny) return result;
-
-  console.error(
-    `[contentlayer-compat] CRITICAL: No content data found at ${localGeneratedDir}. Site will have empty collections.`
-  );
-  return {};
+// ---- pure helpers (safe in client bundle) ----
+export function normalizeSlug(input: any): string {
+  const raw =
+    typeof input === "string"
+      ? input
+      : input?.slug ?? input?._raw?.flattenedPath ?? "";
+  return String(raw || "")
+    .trim()
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
 }
 
+export function isDraftContent(doc: any): boolean {
+  return doc?.draft === true || doc?._raw?.sourceFileDir === "drafts";
+}
+
+export function getAccessLevel(doc: any): string {
+  return String(doc?.accessLevel ?? doc?.tier ?? "public");
+}
+
+export function getDocHref(doc: any): string {
+  const slug = normalizeSlug(doc);
+  const kind =
+    (doc?._type ?? doc?.type ?? "").toString().toLowerCase() ||
+    (doc?._raw?.sourceFileDir ?? "").split(/[\\/]/).pop()?.toLowerCase() ||
+    "";
+
+  if (kind.includes("post") || kind.includes("blog")) return `/blog/${slug}`;
+  if (kind.includes("book")) return `/books/${slug}`;
+  if (kind.includes("canon")) return `/canon/${slug}`;
+  if (kind.includes("download")) return `/downloads/${slug}`;
+  if (kind.includes("event")) return `/events/${slug}`;
+  if (kind.includes("print")) return `/prints/${slug}`;
+  if (kind.includes("resource")) return `/resources/${slug}`;
+  if (kind.includes("short")) return `/shorts/${slug}`;
+  if (kind.includes("strategy")) return `/strategy/${slug}`;
+
+  return `/${slug}`;
+}
+
+// ---- server loader (isolated) ----
+// Keep the import specifier STATIC to reduce bundler warnings.
+async function loadServer() {
+  return import("./contentlayer-compat.server");
+}
+
+// ---- async getter (server-only behind dynamic import) ----
 export async function getContentlayerData(): Promise<GeneratedShape> {
-  if (_cache) return _cache;
-  _cache = tryRequireGenerated();
-  return _cache;
+  const mod = await loadServer();
+  return mod.getContentlayerData();
 }
 
-export function getAllDocumentsSync(data: GeneratedShape): ContentLayerDoc[] {
-  return [
-    ...(data.allBooks ?? []),
-    ...(data.allCanons ?? []),
-    ...(data.allDownloads ?? []),
-    ...(data.allEvents ?? []),
-    ...(data.allPosts ?? []),
-    ...(data.allPrints ?? []),
-    ...(data.allResources ?? []),
-    ...(data.allShorts ?? []),
-    ...(data.allStrategies ?? []),
-  ];
+export async function getAllDocuments(): Promise<ContentLayerDoc[]> {
+  const mod = await loadServer();
+  const data = await mod.getContentlayerData();
+  return mod.getAllDocumentsSync(data);
 }
+
+// IMPORTANT:
+// Do NOT export fake sync arrays. They hide bugs and cause silent empty renders.
+// If any legacy code needs these names, export async functions instead:
+
+export async function allPosts(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allPosts ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allBooks(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allBooks ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allCanons(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allCanons ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allDownloads(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allDownloads ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allEvents(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allEvents ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allPrints(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allPrints ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allResources(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allResources ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allShorts(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allShorts ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+export async function allStrategies(): Promise<ContentLayerDoc[]> {
+  const d = await getContentlayerData();
+  return (d.allStrategies ?? []).filter((x: any) => x && !isDraftContent(x));
+}
+
+// Back-compat: keep this, but make it noisy in dev so it can’t silently break pages.
+export function getAllDocumentsSync(): ContentLayerDoc[] {
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[contentlayer-compat] getAllDocumentsSync() called in client-safe wrapper. Returning []. Use await getAllDocuments() instead."
+    );
+  }
+  return [];
+}
+
+// Default export for legacy `import Contentlayer from "@/lib/contentlayer"`
+const CompatDefault = {
+  normalizeSlug,
+  isDraftContent,
+  getAccessLevel,
+  getDocHref,
+  getContentlayerData,
+  getAllDocuments,
+};
+export default CompatDefault;

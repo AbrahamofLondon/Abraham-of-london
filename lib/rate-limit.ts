@@ -1,5 +1,5 @@
-// lib/rate-limit.ts
-// Comprehensive rate limiting with enhanced security features
+// lib/rate-limit.ts — dependency-free, serverless-safe
+import redis from '@/lib/redis-enhanced'; // Use enhanced Redis stub
 
 export interface RateLimitConfig {
   windowMs: number;
@@ -8,6 +8,7 @@ export interface RateLimitConfig {
   skipSuccessfulRequests?: boolean;
   skipFailedRequests?: boolean;
   blockDuration?: number;
+  useRedis?: boolean;
 }
 
 export interface RateLimitResult {
@@ -20,102 +21,242 @@ export interface RateLimitResult {
 }
 
 export const RATE_LIMIT_CONFIGS = {
-  API_READ: { windowMs: 60_000, max: 60, keyPrefix: "api_read" },
-  API_WRITE: { windowMs: 60_000, max: 30, keyPrefix: "api_write", skipSuccessfulRequests: true },
-  CONTENT_API: { windowMs: 60_000, max: 30, keyPrefix: "content" },
-  SHORTS_INTERACTIONS: { windowMs: 60_000, max: 30, keyPrefix: "shorts_interactions" },
-  TEASER_REQUEST: { windowMs: 60_000, max: 5, keyPrefix: "teaser" },
-  NEWSLETTER_SUBSCRIBE: { windowMs: 60_000, max: 5, keyPrefix: "newsletter", blockDuration: 300_000 },
-  AUTH_LOGIN: { windowMs: 15 * 60_000, max: 5, keyPrefix: "auth_login", skipSuccessfulRequests: true, blockDuration: 900_000 },
-  AUTH_REGISTER: { windowMs: 60 * 60_000, max: 3, keyPrefix: "auth_register", blockDuration: 3600_000 },
-  INNER_CIRCLE_REGISTER: { windowMs: 15 * 60_000, max: 3, keyPrefix: "inner_circle_register_ip", blockDuration: 900_000 },
-  INNER_CIRCLE_REGISTER_EMAIL: { windowMs: 60 * 60_000, max: 2, keyPrefix: "inner_circle_register_email", blockDuration: 3600_000 },
-  INNER_CIRCLE_UNLOCK: { windowMs: 60_000, max: 10, keyPrefix: "inner_circle_unlock", skipSuccessfulRequests: true, blockDuration: 300_000 },
-  ADMIN_OPERATIONS: { windowMs: 60_000, max: 30, keyPrefix: "admin" },
-  INNER_CIRCLE_ADMIN_EXPORT: { windowMs: 5 * 60_000, max: 5, keyPrefix: "inner_circle_admin_export" },
-  CONTACT_FORM: { windowMs: 60_000, max: 3, keyPrefix: "contact", blockDuration: 600_000 },
-  DOWNLOADS: { windowMs: 60_000, max: 10, keyPrefix: "downloads" },
-  WEBHOOK_RECEIVE: { windowMs: 60_000, max: 100, keyPrefix: "webhook" },
-  CACHE_BUST: { windowMs: 10_000, max: 5, keyPrefix: "cache" },
-  SUSPICIOUS_ACTIVITY: { windowMs: 60_000, max: 2, keyPrefix: "suspicious", blockDuration: 3600_000 },
+  API_READ: { windowMs: 60_000, max: 60, keyPrefix: "api_read", useRedis: !!process.env.REDIS_URL },
+  API_WRITE: { windowMs: 60_000, max: 30, keyPrefix: "api_write", skipSuccessfulRequests: true, useRedis: !!process.env.REDIS_URL },
+  CONTENT_API: { windowMs: 60_000, max: 30, keyPrefix: "content", useRedis: !!process.env.REDIS_URL },
+  SHORTS_INTERACTIONS: { windowMs: 60_000, max: 30, keyPrefix: "shorts_interactions", useRedis: !!process.env.REDIS_URL },
+  TEASER_REQUEST: { windowMs: 60_000, max: 5, keyPrefix: "teaser", useRedis: !!process.env.REDIS_URL },
+  NEWSLETTER_SUBSCRIBE: { windowMs: 60_000, max: 5, keyPrefix: "newsletter", blockDuration: 300_000, useRedis: !!process.env.REDIS_URL },
+
+  // For "always redis" configs, degrade safely to memory stub if REDIS_URL missing
+  AUTH_LOGIN: { windowMs: 15 * 60_000, max: 5, keyPrefix: "auth_login", skipSuccessfulRequests: true, blockDuration: 900_000, useRedis: true },
+  AUTH_REGISTER: { windowMs: 60 * 60_000, max: 3, keyPrefix: "auth_register", blockDuration: 3600_000, useRedis: true },
+  INNER_CIRCLE_REGISTER: { windowMs: 15 * 60_000, max: 3, keyPrefix: "inner_circle_register_ip", blockDuration: 900_000, useRedis: true },
+  INNER_CIRCLE_REGISTER_EMAIL: { windowMs: 60 * 60_000, max: 2, keyPrefix: "inner_circle_register_email", blockDuration: 3600_000, useRedis: true },
+  INNER_CIRCLE_UNLOCK: { windowMs: 60_000, max: 10, keyPrefix: "inner_circle_unlock", skipSuccessfulRequests: true, blockDuration: 300_000, useRedis: true },
+  ADMIN_OPERATIONS: { windowMs: 60_000, max: 30, keyPrefix: "admin", useRedis: true },
+  INNER_CIRCLE_ADMIN_EXPORT: { windowMs: 5 * 60_000, max: 5, keyPrefix: "inner_circle_admin_export", useRedis: true },
+  CONTACT_FORM: { windowMs: 60_000, max: 3, keyPrefix: "contact", blockDuration: 600_000, useRedis: !!process.env.REDIS_URL },
+  DOWNLOADS: { windowMs: 60_000, max: 10, keyPrefix: "downloads", useRedis: !!process.env.REDIS_URL },
+  WEBHOOK_RECEIVE: { windowMs: 60_000, max: 100, keyPrefix: "webhook", useRedis: !!process.env.REDIS_URL },
+  CACHE_BUST: { windowMs: 10_000, max: 5, keyPrefix: "cache", useRedis: !!process.env.REDIS_URL },
+  SUSPICIOUS_ACTIVITY: { windowMs: 60_000, max: 2, keyPrefix: "suspicious", blockDuration: 3600_000, useRedis: true },
 } as const;
 
-type Bucket = {
-  count: number;
-  resetAt: number;
-  firstRequestAt: number;
-  blockUntil?: number;
-  suspiciousActivity?: boolean;
-};
+interface RateLimitStorage {
+  check(key: string, config: RateLimitConfig): Promise<RateLimitResult>;
+  markSuccess(key: string): Promise<void>;
+  getStatus(key: string, config: RateLimitConfig): Promise<RateLimitResult | null>;
+  resetKey(key: string): Promise<boolean>;
+  blockPermanently(key: string): Promise<void>;
+  unblock(key: string): Promise<void>;
+  getStats(): Promise<{
+    totalBuckets: number;
+    activeBuckets: number;
+    blockedKeys: number;
+    permanentBlocks: number;
+  }>;
+}
 
-class RateLimiter {
-  private buckets = new Map<string, Bucket>();
-  private blockedIps = new Set<string>();
-  private cleanupInterval: NodeJS.Timeout | null = null;
+// Memory storage (keep your existing implementation)
+class MemoryStorage implements RateLimitStorage {
+  private store = new Map<string, {
+    count: number;
+    resetAt: number;
+    firstRequestAt: number;
+    blockUntil?: number;
+  }>();
+  private permanentBlocks = new Set<string>();
+  private lastCleanup = Date.now();
+  private readonly CLEANUP_INTERVAL = 30000;
 
-  constructor() {
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupExpiredBuckets();
-    }, 60_000);
-  }
-
-  private cleanupExpiredBuckets(): void {
+  private performCleanup(): void {
     const now = Date.now();
-    for (const [key, bucket] of this.buckets.entries()) {
-      if (bucket.resetAt <= now && (!bucket.blockUntil || bucket.blockUntil <= now)) {
-        this.buckets.delete(key);
+    
+    if (now - this.lastCleanup > this.CLEANUP_INTERVAL) {
+      for (const [key, entry] of this.store.entries()) {
+        const isExpired = now > entry.resetAt;
+        const blockExpired = entry.blockUntil && entry.blockUntil <= now;
+        const notPermanentlyBlocked = !this.permanentBlocks.has(key);
+        
+        if ((isExpired && (blockExpired || !entry.blockUntil)) && notPermanentlyBlocked) {
+          this.store.delete(key);
+        }
       }
+      this.lastCleanup = now;
     }
   }
 
-  isBlocked(key: string): boolean {
-    if (this.blockedIps.has(key)) return true;
-    const bucket = this.buckets.get(key);
-    if (bucket?.blockUntil) {
-      if (bucket.blockUntil > Date.now()) return true;
-      bucket.blockUntil = undefined;
-    }
-    return false;
-  }
-
-  blockPermanently(key: string): void {
-    this.blockedIps.add(key);
-    console.warn(`[RateLimiter] PERMANENT BLOCK: ${key}`);
-  }
-
-  unblock(key: string): void {
-    this.blockedIps.delete(key);
-    const bucket = this.buckets.get(key);
-    if (bucket) bucket.blockUntil = undefined;
-  }
-
-  checkSync(key: string, config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ): RateLimitResult {
+  async check(key: string, config: RateLimitConfig): Promise<RateLimitResult> {
+    this.performCleanup();
     const now = Date.now();
-
-    if (this.isBlocked(key)) {
-      const bucket = this.buckets.get(key);
+    
+    // Check permanent blocks
+    if (this.permanentBlocks.has(key)) {
       return {
         allowed: false,
         remaining: 0,
         limit: config.max,
-        resetAt: bucket?.resetAt || now + config.windowMs,
+        resetAt: now + config.windowMs,
         blocked: true,
-        blockUntil: bucket?.blockUntil,
+        blockUntil: now + 365 * 24 * 60 * 60 * 1000,
       };
     }
 
-    let bucket = this.buckets.get(key);
+    let entry = this.store.get(key);
+    
+    // Check temporary block
+    if (entry?.blockUntil && entry.blockUntil > now) {
+      return {
+        allowed: false,
+        remaining: 0,
+        limit: config.max,
+        resetAt: entry.resetAt,
+        blocked: true,
+        blockUntil: entry.blockUntil,
+      };
+    }
+
+    // Create new entry if expired or doesn't exist
+    if (!entry || now > entry.resetAt) {
+      entry = {
+        count: 0,
+        resetAt: now + config.windowMs,
+        firstRequestAt: now,
+      };
+    }
+
+    entry.count += 1;
+    this.store.set(key, entry);
+
+    const allowed = entry.count <= config.max;
+    
+    // Apply temporary block if configured and limit exceeded
+    if (!allowed && config.blockDuration && !entry.blockUntil) {
+      entry.blockUntil = now + config.blockDuration;
+    }
+
+    return {
+      allowed,
+      remaining: Math.max(0, config.max - entry.count),
+      limit: config.max,
+      resetAt: entry.resetAt,
+      blocked: !!entry.blockUntil && entry.blockUntil > now,
+      blockUntil: entry.blockUntil,
+    };
+  }
+
+  async markSuccess(key: string): Promise<void> {
+    const entry = this.store.get(key);
+    if (entry && entry.count > 0) {
+      entry.count = Math.max(0, entry.count - 1);
+    }
+  }
+
+  async getStatus(key: string, config: RateLimitConfig): Promise<RateLimitResult | null> {
+    const entry = this.store.get(key);
+    if (!entry) return null;
+    
+    const now = Date.now();
+    const blocked = this.permanentBlocks.has(key) || 
+                   (entry.blockUntil ? entry.blockUntil > now : false);
+    
+    return {
+      allowed: entry.count <= config.max && !blocked,
+      remaining: Math.max(0, config.max - entry.count),
+      limit: config.max,
+      resetAt: entry.resetAt,
+      blocked,
+      blockUntil: entry.blockUntil,
+    };
+  }
+
+  async resetKey(key: string): Promise<boolean> {
+    this.permanentBlocks.delete(key);
+    return this.store.delete(key);
+  }
+
+  async blockPermanently(key: string): Promise<void> {
+    this.permanentBlocks.add(key);
+    console.warn(`[RateLimiter] PERMANENT BLOCK: ${key}`);
+  }
+
+  async unblock(key: string): Promise<void> {
+    this.permanentBlocks.delete(key);
+    const entry = this.store.get(key);
+    if (entry) entry.blockUntil = undefined;
+  }
+
+  async getStats() {
+    const now = Date.now();
+    const activeBuckets = Array.from(this.store.values()).filter(b => b.resetAt > now).length;
+    const blockedKeys = Array.from(this.store.values()).filter(b => b.blockUntil && b.blockUntil > now).length;
+    
+    return {
+      totalBuckets: this.store.size,
+      activeBuckets,
+      blockedKeys,
+      permanentBlocks: this.permanentBlocks.size,
+    };
+  }
+}
+
+/**
+ * Redis-backed storage using our enhanced Redis stub
+ */
+class RedisStorageCompat implements RateLimitStorage {
+  async check(key: string, config: RateLimitConfig): Promise<RateLimitResult> {
+    const now = Date.now();
+
+    // Check permanent block
+    const perm = await redis.get(`block:${key}`);
+    if (perm === "1") {
+      return { 
+        allowed: false, 
+        remaining: 0, 
+        limit: config.max, 
+        resetAt: now + config.windowMs, 
+        blocked: true, 
+        blockUntil: now + 365 * 24 * 60 * 60 * 1000 
+      };
+    }
+
+    const bucketKey = `rl:${key}`;
+    const raw = await redis.get(bucketKey);
+    let bucket = raw ? JSON.parse(raw) : null;
+
     if (!bucket || bucket.resetAt <= now) {
-      bucket = { count: 0, resetAt: now + config.windowMs, firstRequestAt: now };
+      bucket = { 
+        count: 0, 
+        resetAt: now + config.windowMs, 
+        firstRequestAt: now,
+        blockUntil: undefined
+      };
+    }
+
+    // Check temporary block
+    if (bucket.blockUntil && bucket.blockUntil > now) {
+      return { 
+        allowed: false, 
+        remaining: 0, 
+        limit: config.max, 
+        resetAt: bucket.resetAt, 
+        blocked: true, 
+        blockUntil: bucket.blockUntil 
+      };
     }
 
     bucket.count += 1;
-    this.buckets.set(key, bucket);
+
+    const ttl = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+    await redis.setex(bucketKey, ttl, JSON.stringify(bucket));
 
     const allowed = bucket.count <= config.max;
-    
+
+    // Apply temporary block if limit exceeded
     if (!allowed && config.blockDuration && !bucket.blockUntil) {
       bucket.blockUntil = now + config.blockDuration;
+      await redis.setex(bucketKey, ttl, JSON.stringify(bucket));
     }
 
     return {
@@ -123,72 +264,227 @@ class RateLimiter {
       remaining: Math.max(config.max - bucket.count, 0),
       limit: config.max,
       resetAt: bucket.resetAt,
-      blocked: !!bucket.blockUntil,
+      blocked: !!bucket.blockUntil && bucket.blockUntil > now,
       blockUntil: bucket.blockUntil,
     };
   }
 
-  // Async alias for compatibility
-  async check(key: string, config: RateLimitConfig): Promise<RateLimitResult> {
-    return this.checkSync(key, config);
+  async markSuccess(key: string): Promise<void> {
+    const bucketKey = `rl:${key}`;
+    const raw = await redis.get(bucketKey);
+    if (!raw) return;
+    
+    const bucket = JSON.parse(raw);
+    if (bucket.count > 0) {
+      bucket.count = Math.max(0, bucket.count - 1);
+      const now = Date.now();
+      const ttl = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+      await redis.setex(bucketKey, ttl, JSON.stringify(bucket));
+    }
   }
 
-  markSuccess(key: string): void {
-    const bucket = this.buckets.get(key);
-    if (bucket && bucket.count > 0) bucket.count = Math.max(0, bucket.count - 1);
-  }
+  async getStatus(key: string, config: RateLimitConfig): Promise<RateLimitResult | null> {
+    const now = Date.now();
+    
+    // Check permanent block
+    const perm = await redis.get(`block:${key}`);
+    if (perm === "1") {
+      return { 
+        allowed: false, 
+        remaining: 0, 
+        limit: config.max, 
+        resetAt: now + config.windowMs, 
+        blocked: true, 
+        blockUntil: now + 365 * 24 * 60 * 60 * 1000 
+      };
+    }
 
-  getStatus(key: string): RateLimitResult | null {
-    const bucket = this.buckets.get(key);
-    if (!bucket) return null;
-    const config = Object.values(RATE_LIMIT_CONFIGS).find(c => c.keyPrefix && key.startsWith(c.keyPrefix)) || RATE_LIMIT_CONFIGS.API_READ;
+    const raw = await redis.get(`rl:${key}`);
+    if (!raw) return null;
+    
+    const bucket = JSON.parse(raw);
+    const blocked = (bucket.blockUntil && bucket.blockUntil > now);
+    
     return {
-      allowed: bucket.count <= config.max && !this.isBlocked(key),
+      allowed: bucket.count <= config.max && !blocked,
       remaining: Math.max(0, config.max - bucket.count),
       limit: config.max,
       resetAt: bucket.resetAt,
-      blocked: this.isBlocked(key),
+      blocked,
       blockUntil: bucket.blockUntil,
     };
   }
 
-  resetKey(key: string): boolean {
-    this.blockedIps.delete(key);
-    return this.buckets.delete(key);
+  async resetKey(key: string): Promise<boolean> {
+    await redis.del(`block:${key}`);
+    const deleted = await redis.del(`rl:${key}`);
+    return deleted > 0;
   }
 
-  getStats() {
-    return {
-      totalBuckets: this.buckets.size,
-      activeBuckets: Array.from(this.buckets.values()).filter(b => b.resetAt > Date.now()).length,
-      blockedKeys: Array.from(this.buckets.values()).filter(b => b.blockUntil && b.blockUntil > Date.now()).length,
-      permanentBlocks: this.blockedIps.size,
-    };
+  async blockPermanently(key: string): Promise<void> {
+    await redis.set(`block:${key}`, "1");
+    console.warn(`[RateLimiter] PERMANENT BLOCK: ${key}`);
   }
 
-  destroy(): void {
-    if (this.cleanupInterval) clearInterval(this.cleanupInterval);
-    this.buckets.clear();
-    this.blockedIps.clear();
+  async unblock(key: string): Promise<void> {
+    await redis.del(`block:${key}`);
+    
+    // Also clear any temporary block
+    const raw = await redis.get(`rl:${key}`);
+    if (raw) {
+      const bucket = JSON.parse(raw);
+      bucket.blockUntil = undefined;
+      const now = Date.now();
+      const ttl = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+      await redis.setex(`rl:${key}`, ttl, JSON.stringify(bucket));
+    }
+  }
+
+  async getStats() {
+    const now = Date.now();
+    
+    try {
+      const keys = await redis.keys("rl:*");
+      const blockKeys = await redis.keys("block:*");
+      
+      let activeBuckets = 0;
+      let blockedKeys = 0;
+      
+      // Sample some buckets for stats
+      const sample = keys.slice(0, 100);
+      for (const k of sample) {
+        const raw = await redis.get(k);
+        if (!raw) continue;
+        const bucket = JSON.parse(raw);
+        if (bucket.resetAt > now) activeBuckets++;
+        if (bucket.blockUntil && bucket.blockUntil > now) blockedKeys++;
+      }
+      
+      const ratio = sample.length ? activeBuckets / sample.length : 0;
+      
+      return {
+        totalBuckets: keys.length,
+        activeBuckets: Math.round(keys.length * ratio),
+        blockedKeys,
+        permanentBlocks: blockKeys.length,
+      };
+    } catch (error) {
+      console.error('Redis stats error:', error);
+      return {
+        totalBuckets: 0,
+        activeBuckets: 0,
+        blockedKeys: 0,
+        permanentBlocks: 0,
+      };
+    }
   }
 }
 
-const rateLimiter = new RateLimiter();
+// Factory function to create appropriate storage
+function createStorage(useRedis: boolean): RateLimitStorage {
+  if (useRedis && process.env.REDIS_URL) {
+    return new RedisStorageCompat();
+  }
+  return new MemoryStorage();
+}
 
+// Main RateLimiter class
+class RateLimiter {
+  private storage: RateLimitStorage;
+  private storageType: 'memory' | 'redis';
+
+  constructor() {
+    // Default to Redis if URL exists, otherwise memory
+    const defaultUseRedis = !!process.env.REDIS_URL;
+    this.storageType = defaultUseRedis ? 'redis' : 'memory';
+    this.storage = createStorage(defaultUseRedis);
+  }
+
+  async check(key: string, config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ): Promise<RateLimitResult> {
+    // Use configured storage preference or default
+    const useRedis = config.useRedis ?? this.storageType === 'redis';
+    
+    if (useRedis !== (this.storageType === 'redis')) {
+      this.storage = createStorage(useRedis);
+      this.storageType = useRedis ? 'redis' : 'memory';
+    }
+    
+    return this.storage.check(key, config);
+  }
+
+  async markSuccess(key: string): Promise<void> {
+    return this.storage.markSuccess(key);
+  }
+
+  async getStatus(key: string, config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ): Promise<RateLimitResult | null> {
+    return this.storage.getStatus(key, config);
+  }
+
+  async resetKey(key: string): Promise<boolean> {
+    return this.storage.resetKey(key);
+  }
+
+  async blockPermanently(key: string): Promise<void> {
+    return this.storage.blockPermanently(key);
+  }
+
+  async unblock(key: string): Promise<void> {
+    return this.storage.unblock(key);
+  }
+
+  async getStats() {
+    return this.storage.getStats();
+  }
+}
+
+// Singleton instance
+let rateLimiterInstance: RateLimiter | null = null;
+
+function getRateLimiter(): RateLimiter {
+  if (!rateLimiterInstance) {
+    rateLimiterInstance = new RateLimiter();
+  }
+  return rateLimiterInstance;
+}
+
+// Public API
 export async function rateLimitAsync(key: string, config?: RateLimitConfig): Promise<RateLimitResult> {
-  return rateLimiter.check(key, config || RATE_LIMIT_CONFIGS.API_READ);
+  const limiter = getRateLimiter();
+  return limiter.check(key, config || RATE_LIMIT_CONFIGS.API_READ);
 }
 
-export function rateLimit(key: string, config?: RateLimitConfig): RateLimitResult {
-  return rateLimiter.checkSync(key, config || RATE_LIMIT_CONFIGS.API_READ);
+// Alias for backward compatibility
+export const rateLimit = rateLimitAsync;
+
+export async function markRequestSuccess(key: string): Promise<void> {
+  const limiter = getRateLimiter();
+  return limiter.markSuccess(key);
 }
 
-export function markRequestSuccess(key: string): void { rateLimiter.markSuccess(key); }
-export function getRateLimitStatus(key: string) { return rateLimiter.getStatus(key); }
-export function resetRateLimit(key: string) { return rateLimiter.resetKey(key); }
-export function blockPermanently(key: string) { rateLimiter.blockPermanently(key); }
-export function unblock(key: string) { rateLimiter.unblock(key); }
-export function getRateLimiterStats() { return rateLimiter.getStats(); }
+export async function getRateLimitStatus(key: string, config?: RateLimitConfig): Promise<RateLimitResult | null> {
+  const limiter = getRateLimiter();
+  return limiter.getStatus(key, config || RATE_LIMIT_CONFIGS.API_READ);
+}
+
+export async function resetRateLimit(key: string): Promise<boolean> {
+  const limiter = getRateLimiter();
+  return limiter.resetKey(key);
+}
+
+export async function blockPermanently(key: string): Promise<void> {
+  const limiter = getRateLimiter();
+  return limiter.blockPermanently(key);
+}
+
+export async function unblock(key: string): Promise<void> {
+  const limiter = getRateLimiter();
+  return limiter.unblock(key);
+}
+
+export async function getRateLimiterStats() {
+  const limiter = getRateLimiter();
+  return limiter.getStats();
+}
 
 // Helper for HTTP Headers
 export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
@@ -197,10 +493,12 @@ export function createRateLimitHeaders(result: RateLimitResult): Record<string, 
     "X-RateLimit-Remaining": String(result.remaining),
     "X-RateLimit-Reset": String(Math.floor(result.resetAt / 1000)),
   };
+  
   if (result.blocked && result.blockUntil) {
     headers["X-RateLimit-Blocked-Until"] = new Date(result.blockUntil).toISOString();
     headers["Retry-After"] = String(Math.ceil((result.blockUntil - Date.now()) / 1000));
   }
+  
   return headers;
 }
 
@@ -220,7 +518,6 @@ export function isValidIp(ip: string): boolean {
     const ipWithoutScope = (cleanIp.split('%')[0] || ''); 
     const parts = ipWithoutScope.split(':');
     
-    // FIX: Safely access the last element
     const lastPart = parts[parts.length - 1];
 
     if (parts.length >= 2 && lastPart && lastPart.includes('.')) {
@@ -287,7 +584,7 @@ export function generateRateLimitKey(prefix: string, identifier: string, req?: a
 export async function checkRateLimit(req: any, res: any, config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ) {
   const ip = getClientIpFromRequest(req);
   const key = generateRateLimitKey(config.keyPrefix || 'default', ip, req);
-  const result = rateLimiter.checkSync(key, config);
+  const result = await rateLimitAsync(key, config);
   
   const headers = createRateLimitHeaders(result);
   Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
@@ -296,7 +593,7 @@ export async function checkRateLimit(req: any, res: any, config: RateLimitConfig
 }
 
 // Backoff wrapper alias
-export const rateLimitWithBackoff = rateLimit; 
+export const rateLimitWithBackoff = rateLimitAsync; 
 
 // Helpers for unified import
 export const getRateLimitKeys = (req: any, prefix = "global") => {
@@ -304,10 +601,10 @@ export const getRateLimitKeys = (req: any, prefix = "global") => {
   return [`${prefix}:${ip}`];
 };
 
-export const checkMultipleRateLimits = (keys: string[], config: RateLimitConfig) => {
+export const checkMultipleRateLimits = async (keys: string[], config: RateLimitConfig) => {
   let worstResult: RateLimitResult | null = null;
   for (const key of keys) {
-    const res = rateLimiter.checkSync(key, config);
+    const res = await rateLimitAsync(key, config);
     if (!worstResult || (!res.allowed && worstResult.allowed) || (res.remaining < worstResult.remaining)) {
       worstResult = res;
     }
@@ -317,11 +614,32 @@ export const checkMultipleRateLimits = (keys: string[], config: RateLimitConfig)
 
 export const getClientIp = getClientIpFromRequest;
 
-if (typeof process !== 'undefined') {
-  const cleanup = () => rateLimiter.destroy();
-  process.on('SIGTERM', cleanup);
-  process.on('SIGINT', cleanup);
-  process.on('beforeExit', cleanup);
+// Middleware for Next.js API routes
+export function withRateLimit(config: RateLimitConfig = RATE_LIMIT_CONFIGS.API_READ) {
+  return async function handler(req: any, res: any, next?: any) {
+    try {
+      const { allowed, headers, result } = await checkRateLimit(req, res, config);
+      
+      if (!allowed) {
+        res.status(429).json({
+          error: 'Too Many Requests',
+          message: 'Rate limit exceeded',
+          retryAfter: result.blockUntil ? Math.ceil((result.blockUntil - Date.now()) / 1000) : undefined
+        });
+        return;
+      }
+      
+      if (next) {
+        next();
+      }
+    } catch (error) {
+      console.error('[RateLimit] Error:', error);
+      // On error, allow the request (fail open for security)
+      if (next) {
+        next();
+      }
+    }
+  };
 }
 
 export default {
@@ -339,8 +657,8 @@ export default {
   anonymizeIp,
   generateRateLimitKey,
   checkRateLimit,
+  withRateLimit,
   RATE_LIMIT_CONFIGS,
-  // Unified export aliases
   getClientIp,
   getRateLimitKeys,
   checkMultipleRateLimits,

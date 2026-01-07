@@ -1,12 +1,11 @@
-// pages/api/admin/inner-circle/export.ts - CORRECTED IMPORTS
+/* pages/api/admin/inner-circle/export.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getPrivacySafeStats, getPrivacySafeKeyRows } from "@/lib/server/inner-circle-store";
-import {
-  rateLimitForRequestIp,
-  RATE_LIMIT_CONFIGS,
-  createRateLimitHeaders,
-  getClientIp,
-} from "@/lib/server/rateLimit";
+import { 
+  getPrivacySafeKeyExportWithRateLimit, 
+  getPrivacySafeStatsWithRateLimit,
+  withInnerCircleRateLimit,
+  createRateLimitHeaders 
+} from "@/lib/inner-circle";
 
 type AdminExportRow = {
   created_at: string;
@@ -19,82 +18,130 @@ type AdminExportRow = {
 type AdminExportResponse = {
   ok: boolean;
   rows?: AdminExportRow[];
-  stats?: unknown;
+  stats?: any;
   generatedAt?: string;
   error?: string;
+  rateLimit?: {
+    allowed: boolean;
+    remaining: number;
+    limit: number;
+    resetAt: number;
+  };
 };
 
-function normalizeExportRows(input: unknown): AdminExportRow[] {
-  const rows = Array.isArray(input) ? input : [];
-  return rows
-    .map((r: any) => {
-      const createdAt = r?.created_at ?? r?.createdAt ?? null;
-      const status = r?.status ?? null;
-      const keySuffix = r?.key_suffix ?? r?.keySuffix ?? null;
-      const emailHashPrefix = r?.email_hash_prefix ?? r?.emailHashPrefix ?? null;
-      const totalUnlocks = r?.total_unlocks ?? r?.totalUnlocks ?? 0;
-
-      if (!createdAt || !status || !keySuffix || !emailHashPrefix) return null;
-
-      const statusNorm = String(status).toLowerCase();
-      if (statusNorm !== "active" && statusNorm !== "revoked") return null;
-
-      return {
-        created_at: typeof createdAt === "string" ? createdAt : new Date(createdAt).toISOString(),
-        status: statusNorm,
-        key_suffix: String(keySuffix),
-        email_hash_prefix: String(emailHashPrefix),
-        total_unlocks: Number.isFinite(Number(totalUnlocks)) ? Number(totalUnlocks) : 0,
-      } satisfies AdminExportRow;
-    })
-    .filter(Boolean) as AdminExportRow[];
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse<AdminExportResponse>) {
+// Apply rate limiting middleware
+const rateLimitedHandler = withInnerCircleRateLimit({ 
+  adminOperation: true, 
+  adminId: 'export' 
+})(async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<AdminExportResponse>
+) {
   if (req.method !== "GET") {
     res.setHeader("Allow", ["GET"]);
-    return res.status(405).json({ ok: false, error: "Method requires GET for secure export." });
+    return res.status(405).json({ 
+      ok: false, 
+      error: "Method requires GET for secure export." 
+    });
   }
 
+  // Admin authentication
   const ADMIN_BEARER_TOKEN = process.env.INNER_CIRCLE_ADMIN_KEY;
   const authHeader = req.headers.authorization;
 
   if (!ADMIN_BEARER_TOKEN || !authHeader?.startsWith("Bearer ")) {
-    // eslint-disable-next-line no-console
+    const { getClientIp } = await import('@/lib/rate-limit');
     console.error(`[Security Alert] Unauthorized export attempt from IP: ${getClientIp(req)}`);
-    return res.status(401).json({ ok: false, error: "Authorization required." });
+    return res.status(401).json({ 
+      ok: false, 
+      error: "Authorization required." 
+    });
   }
 
   const token = authHeader.slice(7);
   if (token !== ADMIN_BEARER_TOKEN) {
-    return res.status(401).json({ ok: false, error: "Invalid security credentials." });
-  }
-
-  const rateLimitResult = rateLimitForRequestIp(req, "inner-circle-admin-export", RATE_LIMIT_CONFIGS.ADMIN_API);
-  const headers = createRateLimitHeaders(rateLimitResult.result);
-  for (const [key, value] of Object.entries(headers)) res.setHeader(key, value);
-
-  if (!rateLimitResult.result.allowed) {
-    return res.status(429).json({
-      ok: false,
-      error: "Intelligence requests are throttled. Please wait before re-exporting.",
+    return res.status(401).json({ 
+      ok: false, 
+      error: "Invalid security credentials." 
     });
   }
 
   try {
-    const [stats, rawRows] = await Promise.all([getPrivacySafeStats(), getPrivacySafeKeyRows()]);
-    const rows = normalizeExportRows(rawRows);
+    // Get pagination params
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    
+    // Get admin ID from token (extract from JWT or use token hash)
+    const adminId = `admin_${Buffer.from(token).toString('hex').slice(0, 16)}`;
+    
+    // Fetch data with rate limiting
+    const [{ data: exportData, rateLimit: exportRateLimit }, { stats, rateLimit: statsRateLimit }] = await Promise.all([
+      getPrivacySafeKeyExportWithRateLimit(
+        { page, limit },
+        adminId,
+        req
+      ),
+      getPrivacySafeStatsWithRateLimit(adminId, req)
+    ]);
+
+    // Use the stricter rate limit result
+    const rateLimit = !exportRateLimit?.allowed ? exportRateLimit : 
+                     (!statsRateLimit?.allowed ? statsRateLimit : exportRateLimit);
+
+    // Add rate limit headers
+    if (rateLimit) {
+      const headers = createRateLimitHeaders(rateLimit);
+      Object.entries(headers).forEach(([key, value]) => {
+        res.setHeader(key, value);
+      });
+    }
+
+    // Transform rows to match expected format
+    const rows = (exportData.items || []).map((row: any) => ({
+      created_at: row.createdAt || new Date().toISOString(),
+      status: (row.status || 'active').toLowerCase(),
+      key_suffix: row.keySuffix || '',
+      email_hash_prefix: row.emailHashPrefix || '',
+      total_unlocks: row.totalUnlocks || 0,
+    }));
 
     return res.status(200).json({
       ok: true,
-      stats,
+      stats: {
+        ...stats,
+        page: exportData.page,
+        limit: exportData.limit,
+        totalPages: exportData.totalPages,
+        totalItems: exportData.totalItems,
+      },
       rows,
       generatedAt: new Date().toISOString(),
+      rateLimit: rateLimit ? {
+        allowed: rateLimit.allowed,
+        remaining: rateLimit.remaining,
+        limit: rateLimit.limit,
+        resetAt: rateLimit.resetAt,
+      } : undefined,
     });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("[Admin Intelligence] System Exception:", error);
-    return res.status(500).json({ ok: false, error: "Export subsystem failure." });
-  }
-}
 
+  } catch (error: any) {
+    console.error("[Admin Intelligence] System Exception:", error);
+    
+    // Check if it's a rate limit error
+    if (error.message.includes('Rate limit') || error.message.includes('too many')) {
+      return res.status(429).json({
+        ok: false,
+        error: "Intelligence requests are throttled. Please wait before re-exporting.",
+        generatedAt: new Date().toISOString(),
+      });
+    }
+    
+    return res.status(500).json({ 
+      ok: false, 
+      error: "Export subsystem failure.",
+      generatedAt: new Date().toISOString(),
+    });
+  }
+});
+
+export default rateLimitedHandler;

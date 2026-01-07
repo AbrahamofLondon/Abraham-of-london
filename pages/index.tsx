@@ -12,38 +12,10 @@ import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 import { LinkItemWithIcon, LinkItemWithBadge } from "@/components/Cards/partials";
 
 import {
-  ArrowRight,
-  BadgeCheck,
-  BookOpen,
-  Briefcase,
-  Calendar,
-  Compass,
-  FileText,
-  Gauge,
-  Layers,
-  Shield,
-  Sparkles,
-  Users,
-  Wrench,
-  Building2,
-  Target,
-  Workflow,
-  Scale,
-  LineChart,
-  Map,
-  ClipboardList,
-  CheckCircle2,
-} from "lucide-react";
+  ArrowRight, BadgeCheck, BookOpen, Briefcase, Calendar, Compass, FileText, Gauge, Layers, Shield, Sparkles, Users, Wrench, Building2, Target, Workflow, Scale, LineChart, Map, ClipboardList, CheckCircle2, } from "lucide-react";
 
 // INSTITUTIONAL ENGINE IMPORTS
-import {
-  getAllShorts,
-} from "@/lib/contentlayer-compat";
-
-import {
-  getDocHref,
-  normalizeSlug,
-} from "@/lib/contentlayer-compat";
+import { getAllShorts, getDocHref, normalizeSlug } from "@/lib/contentlayer-compat";
 
 /* -----------------------------------------------------------------------------
    BOOKS IN DEVELOPMENT

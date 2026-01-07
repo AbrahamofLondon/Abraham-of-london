@@ -1,81 +1,115 @@
 // scripts/windows-fix.js
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('Running Windows build fix...');
+console.log("Running Windows build fix...");
 
-// Ensure cache directory exists
-const cacheDir = path.join(process.cwd(), '.contentlayer', '.cache');
-if (!fs.existsSync(cacheDir)) {
-  fs.mkdirSync(cacheDir, { recursive: true });
-  console.log(`✓ Created cache directory: ${cacheDir}`);
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-// Clear any problematic cache
-const versionDir = path.join(cacheDir, 'v0.5.8');
-if (fs.existsSync(versionDir)) {
+function rmSafe(target) {
+  if (!fs.existsSync(target)) return;
   try {
-    fs.rmSync(versionDir, { recursive: true, force: true });
-    console.log(`✓ Cleared cache version directory: ${versionDir}`);
+    fs.rmSync(target, { recursive: true, force: true });
   } catch (e) {
-    console.warn(`⚠ Could not clear cache: ${e.message}`);
+    console.warn(`⚠ Could not remove ${target}: ${e.message}`);
   }
 }
+
+function tryCmd(cmd) {
+  execSync(cmd, { stdio: "inherit", cwd: process.cwd(), env: { ...process.env, FORCE_COLOR: "1" } });
+}
+
+function writeFallbackGenerated(generatedDir) {
+  ensureDir(generatedDir);
+
+  const dummy = {
+    allBooks: [],
+    allCanons: [],
+    allDownloads: [],
+    allEvents: [],
+    allPosts: [],
+    allPrints: [],
+    allResources: [],
+    allShorts: [],
+    allStrategies: [],
+    allDocuments: [],
+  };
+
+  // CommonJS named exports (some tooling still resolves this)
+  fs.writeFileSync(
+    path.join(generatedDir, "index.js"),
+    [
+      "/* AUTO-GENERATED FALLBACK: contentlayer/generated */",
+      "module.exports = {",
+      ...Object.keys(dummy).map((k) => `  ${k}: ${JSON.stringify(dummy[k])},`),
+      "};",
+      "",
+    ].join("\n")
+  );
+
+  // ESM named exports (what modern Next/TS typically hits)
+  fs.writeFileSync(
+    path.join(generatedDir, "index.mjs"),
+    [
+      "/* AUTO-GENERATED FALLBACK: contentlayer/generated */",
+      ...Object.keys(dummy).map((k) => `export const ${k} = ${JSON.stringify(dummy[k])};`),
+      "export default {",
+      ...Object.keys(dummy).map((k) => `  ${k},`),
+      "};",
+      "",
+    ].join("\n")
+  );
+
+  // Minimal TS types so `import type { DocumentTypes } from "contentlayer/generated"` doesn't crash
+  fs.writeFileSync(
+    path.join(generatedDir, "index.d.ts"),
+    [
+      "/* AUTO-GENERATED FALLBACK TYPES: contentlayer/generated */",
+      "export type DocumentTypes = any;",
+      ...Object.keys(dummy).map((k) => `export const ${k}: any[];`),
+      "declare const _default: {",
+      ...Object.keys(dummy).map((k) => `  ${k}: any[];`),
+      "};",
+      "export default _default;",
+      "",
+    ].join("\n")
+  );
+
+  console.log("✓ Created fallback contentlayer/generated exports (named + default)");
+}
+
+// 1) Ensure cache dir exists
+const cacheDir = path.join(process.cwd(), ".contentlayer", ".cache");
+ensureDir(cacheDir);
+
+// 2) Clear the specific problematic cache version dir (keep this — it’s fine)
+rmSafe(path.join(cacheDir, "v0.5.8"));
 
 try {
-  // Try to build contentlayer
-  console.log('Running contentlayer build...');
-  execSync('npx contentlayer2 build', { stdio: 'inherit' });
-  console.log('✓ Contentlayer build successful!');
-} catch (e) {
-  console.warn('⚠ Contentlayer build failed, creating fallback...');
-  
-  // Create fallback generated content
-  const generatedDir = path.join(process.cwd(), '.contentlayer', 'generated');
-  if (!fs.existsSync(generatedDir)) {
-    fs.mkdirSync(generatedDir, { recursive: true });
-    
-    const dummyData = {
-      allBooks: [],
-      allCanons: [],
-      allDownloads: [],
-      allEvents: [],
-      allPosts: [],
-      allPrints: [],
-      allResources: [],
-      allShorts: [],
-      allStrategies: []
-    };
-    
-    // Create CommonJS export
-    fs.writeFileSync(
-      path.join(generatedDir, 'index.js'),
-      `module.exports = ${JSON.stringify(dummyData, null, 2)};`
-    );
-    
-    // Create ES Module export
-    fs.writeFileSync(
-      path.join(generatedDir, 'index.mjs'),
-      `export default ${JSON.stringify(dummyData, null, 2)};`
-    );
-    
-    // Create the contentlayer export file
-    const contentlayerDir = path.join(process.cwd(), 'node_modules', '.contentlayer', 'generated');
-    if (!fs.existsSync(contentlayerDir)) {
-      fs.mkdirSync(contentlayerDir, { recursive: true });
-      fs.writeFileSync(
-        path.join(contentlayerDir, 'index.mjs'),
-        `export default ${JSON.stringify(dummyData, null, 2)};`
-      );
-    }
-    
-    console.log('✓ Created fallback contentlayer data');
+  console.log("Running contentlayer build...");
+
+  // Prefer contentlayer2 if installed; --no-install prevents surprise downloads in CI
+  try {
+    tryCmd("npx --no-install contentlayer2 build");
+    console.log("✓ Contentlayer2 build successful!");
+  } catch (e1) {
+    console.warn("⚠ contentlayer2 build failed, trying contentlayer (v1)...");
+    tryCmd("npx --no-install contentlayer build");
+    console.log("✓ Contentlayer (v1) build successful!");
   }
+} catch (e) {
+  console.warn("⚠ Contentlayer build failed, creating fallback...");
+
+  // Write fallback module at .contentlayer/generated
+  const generatedDir = path.join(process.cwd(), ".contentlayer", "generated");
+  writeFallbackGenerated(generatedDir);
 }
 
-console.log('✅ Windows fix completed!');
+console.log("✅ Windows fix completed!");

@@ -1,7 +1,7 @@
 /* pages/api/blog/[slug].ts */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAllPosts } from "@/lib/contentlayer-compat"; // FIX: Use safe helper
-import { recordContentView } from "@/lib/contentlayer-compat";
+import { getAllPosts } from "/@/lib/contentlayer-compat"; // FIX: Use safe helper
+import { recordContentView } from "/@/lib/contentlayer-compat";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { slug } = req.query;

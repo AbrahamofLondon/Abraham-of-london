@@ -3,6 +3,10 @@ import type { NextApiRequest } from "next";
 import type { NextRequest } from "next/server";
 import crypto from "crypto";
 
+// === RUNTIME DETECTION ===
+const isEdgeRuntime = typeof EdgeRuntime !== 'undefined' || 
+  (typeof process !== 'undefined' && process.env.NEXT_RUNTIME === 'edge');
+
 // Explicit discriminated union type
 export type AdminAuthResult =
   | { valid: true; userId?: string; method: "api_key" | "dev_mode" | "jwt" }
@@ -21,26 +25,13 @@ export function isValidAdmin(
   return result.valid === true;
 }
 
-// Extended request type to support both Next.js and Edge runtimes
-type ExtendedRequest = NextApiRequest | NextRequest;
+// === HEADER UTILITIES (Runtime-specific) ===
 
 /**
- * Extract bearer token from request headers
+ * Extract bearer token from request (Node.js runtime)
  */
-function getBearerToken(req: ExtendedRequest): string | null {
-  if (!req.headers) return null;
-
-  let authHeader: string | undefined | null;
-
-  // 1. Edge Runtime / NextRequest (Headers object)
-  if (typeof (req.headers as any).get === 'function') {
-    authHeader = (req.headers as any).get('authorization');
-  } 
-  // 2. Node.js / NextApiRequest (IncomingHttpHeaders object)
-  else {
-    authHeader = (req.headers as any).authorization;
-  }
-  
+function getBearerTokenNode(req: NextApiRequest): string | null {
+  const authHeader = req.headers?.authorization;
   if (typeof authHeader === 'string') {
     const match = authHeader.match(/^Bearer\s+(.+)$/i);
     return match?.[1]?.trim() || null;
@@ -49,34 +40,53 @@ function getBearerToken(req: ExtendedRequest): string | null {
 }
 
 /**
- * Extract JWT token from request headers or cookies
+ * Extract bearer token from request (Edge runtime)
  */
-function getJwtToken(req: ExtendedRequest): string | null {
+function getBearerTokenEdge(req: NextRequest): string | null {
+  const authHeader = req.headers.get('authorization');
+  if (typeof authHeader === 'string') {
+    const match = authHeader.match(/^Bearer\s+(.+)$/i);
+    return match?.[1]?.trim() || null;
+  }
+  return null;
+}
+
+/**
+ * Extract JWT token from request (Node.js runtime)
+ */
+function getJwtTokenNode(req: NextApiRequest): string | null {
   // Check Authorization header first
-  const bearerToken = getBearerToken(req);
+  const bearerToken = getBearerTokenNode(req);
   if (bearerToken && bearerToken.includes('.')) {
-    return bearerToken; // JWT tokens contain dots
+    return bearerToken;
   }
 
   // Check cookie
-  if ('cookies' in req && req.cookies) {
-    // 1. Edge Runtime (cookies.get method)
-    if (typeof (req.cookies as any).get === 'function') {
-      const adminCookie = (req.cookies as any).get('admin_token');
-      const accessCookie = (req.cookies as any).get('access_token');
-      return adminCookie?.value || accessCookie?.value || null;
-    } 
-    // 2. Node.js (cookies object)
-    else {
-      return (req.cookies as any).admin_token || (req.cookies as any).access_token || null;
-    }
+  if (req.cookies) {
+    return req.cookies.admin_token || req.cookies.access_token || null;
   }
 
   return null;
 }
 
 /**
- * Validate JWT token (simplified - in production use a proper JWT library)
+ * Extract JWT token from request (Edge runtime)
+ */
+function getJwtTokenEdge(req: NextRequest): string | null {
+  // Check Authorization header first
+  const bearerToken = getBearerTokenEdge(req);
+  if (bearerToken && bearerToken.includes('.')) {
+    return bearerToken;
+  }
+
+  // Check cookie
+  const adminCookie = req.cookies.get('admin_token');
+  const accessCookie = req.cookies.get('access_token');
+  return adminCookie?.value || accessCookie?.value || null;
+}
+
+/**
+ * Validate JWT token
  */
 async function validateJwtToken(token: string): Promise<{ valid: boolean; userId?: string }> {
   try {
@@ -117,11 +127,13 @@ async function validateJwtToken(token: string): Promise<{ valid: boolean; userId
   }
 }
 
+// === SEPARATE VALIDATION FUNCTIONS BY RUNTIME ===
+
 /**
- * INSTITUTIONAL ADMIN VALIDATION
+ * INSTITUTIONAL ADMIN VALIDATION (Node.js runtime)
  */
-export async function validateAdminAccess(
-  req: ExtendedRequest
+export async function validateAdminAccessNode(
+  req: NextApiRequest
 ): Promise<AdminAuthResult> {
   const adminKey = process.env.ADMIN_API_KEY;
   const adminJwtEnabled = process.env.ADMIN_JWT_ENABLED === 'true';
@@ -131,7 +143,7 @@ export async function validateAdminAccess(
   }
 
   if (adminJwtEnabled) {
-    const jwtToken = getJwtToken(req);
+    const jwtToken = getJwtTokenNode(req);
     if (jwtToken) {
       const jwtResult = await validateJwtToken(jwtToken);
       if (jwtResult.valid) {
@@ -144,7 +156,7 @@ export async function validateAdminAccess(
     }
   }
 
-  const token = getBearerToken(req);
+  const token = getBearerTokenNode(req);
 
   if (!adminKey) {
     return { 
@@ -181,16 +193,99 @@ export async function validateAdminAccess(
     };
   }
 
-  let userId: string | undefined;
-  if (typeof (req.headers as any).get === 'function') {
-    userId = (req.headers as any).get('x-admin-user-id') || undefined;
-  } else {
-    const uid = (req.headers as any)['x-admin-user-id'];
-    userId = Array.isArray(uid) ? uid[0] : uid;
+  const userId = req.headers['x-admin-user-id'];
+  return { 
+    valid: true, 
+    userId: Array.isArray(userId) ? userId[0] : userId, 
+    method: "api_key" 
+  };
+}
+
+/**
+ * INSTITUTIONAL ADMIN VALIDATION (Edge runtime)
+ */
+export async function validateAdminAccessEdge(
+  req: NextRequest
+): Promise<AdminAuthResult> {
+  const adminKey = process.env.ADMIN_API_KEY;
+  const adminJwtEnabled = process.env.ADMIN_JWT_ENABLED === 'true';
+  
+  if (process.env.NODE_ENV !== "production" && !adminKey && !adminJwtEnabled) {
+    return { valid: true, method: "dev_mode" };
   }
 
+  if (adminJwtEnabled) {
+    const jwtToken = getJwtTokenEdge(req);
+    if (jwtToken) {
+      const jwtResult = await validateJwtToken(jwtToken);
+      if (jwtResult.valid) {
+        return { 
+          valid: true, 
+          userId: jwtResult.userId, 
+          method: "jwt" 
+        };
+      }
+    }
+  }
+
+  const token = getBearerTokenEdge(req);
+
+  if (!adminKey) {
+    return { 
+      valid: false, 
+      reason: "ADMIN_API_KEY is not configured on the server",
+      statusCode: 500
+    };
+  }
+
+  if (!token) {
+    return { 
+      valid: false, 
+      reason: "Missing Authorization Bearer token",
+      statusCode: 401
+    };
+  }
+
+  try {
+    const keyBuffer = Buffer.from(adminKey);
+    const tokenBuffer = Buffer.from(token);
+    
+    if (keyBuffer.length !== tokenBuffer.length || !crypto.timingSafeEqual(new Uint8Array(keyBuffer), new Uint8Array(tokenBuffer))) {
+      return { 
+        valid: false, 
+        reason: "Invalid admin token",
+        statusCode: 403
+      };
+    }
+  } catch (_err) {
+    return { 
+      valid: false, 
+      reason: "Internal security comparison failure",
+      statusCode: 500
+    };
+  }
+
+  const userId = req.headers.get('x-admin-user-id') || undefined;
   return { valid: true, userId, method: "api_key" };
 }
+
+/**
+ * Unified admin validation (detects runtime)
+ */
+export async function validateAdminAccess(
+  req: NextApiRequest | NextRequest
+): Promise<AdminAuthResult> {
+  // Runtime detection
+  if ('headers' in req && typeof (req.headers as any).get === 'function') {
+    // Edge runtime
+    return validateAdminAccessEdge(req as NextRequest);
+  } else {
+    // Node.js runtime
+    return validateAdminAccessNode(req as NextApiRequest);
+  }
+}
+
+// === UNIVERSAL VALIDATION FUNCTIONS ===
 
 /**
  * Validate IP address against allowlist
@@ -368,26 +463,60 @@ export function validateFileUpload(
   return { valid: true };
 }
 
+// === RUNTIME-SPECIFIC MIDDLEWARE ===
+
 /**
- * Middleware wrapper for validation
+ * Middleware wrapper for validation (Node.js runtime)
  */
-export function withValidation<T>(
-  // FIX: Explicitly allow extra arguments (...args) to be passed to handler
-  handler: (req: ExtendedRequest, validatedData: T, ...args: any[]) => Promise<any>,
+export function withValidationNode<T>(
+  handler: (req: NextApiRequest, validatedData: T) => Promise<any>,
   schema: Record<string, (value: any) => { valid: boolean; message?: string }>
 ) {
-  return async (req: ExtendedRequest, ...args: any[]) => {
+  return async (req: NextApiRequest) => {
     try {
-      let body: any;
+      const body = req.body;
       
-      if ('body' in req && req.body) {
-        body = req.body;
-      } else if ('json' in req) {
-        body = await req.json();
-      } else {
-        throw new Error('Unable to parse request body');
+      if (!body) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: 'Missing request body' })
+        };
       }
 
+      const validationResult = validateRequestBody<T>(body, schema);
+      
+      if (!validationResult.valid) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ 
+            error: 'Validation failed', 
+            details: validationResult.errors 
+          })
+        };
+      }
+
+      return handler(req, validationResult.data!);
+    } catch (error) {
+      console.error('[VALIDATION_ERROR]', error);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Internal validation error' })
+      };
+    }
+  };
+}
+
+/**
+ * Middleware wrapper for validation (Edge runtime)
+ */
+export function withValidationEdge<T>(
+  handler: (req: NextRequest, validatedData: T) => Promise<Response>,
+  schema: Record<string, (value: any) => { valid: boolean; message?: string }>
+) {
+  return async (req: NextRequest): Promise<Response> => {
+    try {
+      const body = await req.json();
+      
       const validationResult = validateRequestBody<T>(body, schema);
       
       if (!validationResult.valid) {
@@ -403,8 +532,7 @@ export function withValidation<T>(
         );
       }
 
-      // Spread args here is now valid because handler accepts ...args
-      return handler(req, validationResult.data!, ...args);
+      return handler(req, validationResult.data!);
     } catch (error) {
       console.error('[VALIDATION_ERROR]', error);
       return new Response(
@@ -418,8 +546,28 @@ export function withValidation<T>(
   };
 }
 
+/**
+ * Universal validation middleware (runtime detection)
+ */
+export function withValidation<T>(
+  handler: (req: NextApiRequest | NextRequest, validatedData: T) => Promise<any>,
+  schema: Record<string, (value: any) => { valid: boolean; message?: string }>
+) {
+  return async (req: NextApiRequest | NextRequest) => {
+    if ('headers' in req && typeof (req.headers as any).get === 'function') {
+      // Edge runtime
+      return withValidationEdge(handler as (req: NextRequest, data: T) => Promise<Response>, schema)(req as NextRequest);
+    } else {
+      // Node.js runtime
+      return withValidationNode(handler as (req: NextApiRequest, data: T) => Promise<any>, schema)(req as NextApiRequest);
+    }
+  };
+}
+
 export default {
   validateAdminAccess,
+  validateAdminAccessNode,
+  validateAdminAccessEdge,
   validateDateRange,
   validateEmail,
   validatePassword,
@@ -428,6 +576,9 @@ export default {
   validateFileUpload,
   validateIpAddress,
   withValidation,
+  withValidationNode,
+  withValidationEdge,
   isInvalidAdmin,
   isValidAdmin,
+  isEdgeRuntime,
 };
