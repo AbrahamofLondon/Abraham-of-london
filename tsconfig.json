@@ -38,10 +38,19 @@
     "sourceMap": true,
     "inlineSources": false,
     
-    // Path aliases
+    // Path aliases - UPDATED WITH ALL PATHS
     "paths": {
       "@/*": ["./*"],
       "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
+      "@/lib/contentlayer-compat": ["./lib/contentlayer-compat.ts"],
+      "@/lib/redis-enhanced": ["./lib/redis-enhanced.ts"],
+      "@/lib/server/rate-limit-unified": ["./lib/server/rate-limit-unified.ts"],
+      "@/lib/db": ["./lib/db.ts"],
+      "@/lib/contentlayer/status": ["./lib/contentlayer/status.ts"],
+      "@/lib/server/inner-circle-access": ["./lib/server/inner-circle-access.ts"],
+      "@/lib/rate-limit": ["./lib/rate-limit.ts"],
+      "@/lib/rate-limit-redis": ["./lib/rate-limit-redis.ts"],
+      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"],
       // Add edge runtime compatibility aliases
       "next/server": ["./node_modules/next/server-edge"],
       "next/headers": ["./node_modules/next/headers-edge"]
@@ -75,7 +84,11 @@
     "netlify/edge-functions/**/*.ts",
     // Include test files if needed
     "__tests__/**/*.ts",
-    "__tests__/**/*.tsx"
+    "__tests__/**/*.tsx",
+    // Include the new files
+    "lib/db.ts",
+    "lib/contentlayer/status.ts",
+    "lib/server/inner-circle-access.ts"
   ],
   
   "exclude": [

@@ -40,7 +40,7 @@ export interface LegacyIsRateLimitedResult {
   remaining: number;
 }
 
-// Default configurations
+// Default configurations - INCLUDING INNER CIRCLE CONFIGS
 export const RATE_LIMIT_CONFIGS = {
   API_GENERAL: { 
     limit: 100, 
@@ -83,12 +83,41 @@ export const RATE_LIMIT_CONFIGS = {
     keyPrefix: "webhooks",
     blockDuration: 300000,
     useRedis: !!process.env.REDIS_URL
+  },
+  // Inner Circle specific configs
+  INNER_CIRCLE_REGISTER: {
+    limit: 5,
+    windowMs: 3600000,
+    keyPrefix: "ic-register",
+    blockDuration: 7200000,
+    useRedis: !!process.env.REDIS_URL
+  },
+  INNER_CIRCLE_REGISTER_EMAIL: {
+    limit: 3,
+    windowMs: 86400000,
+    keyPrefix: "ic-register-email",
+    blockDuration: 86400000,
+    useRedis: !!process.env.REDIS_URL
+  },
+  INNER_CIRCLE_UNLOCK: {
+    limit: 30,
+    windowMs: 300000,
+    keyPrefix: "ic-unlock",
+    blockDuration: 900000,
+    useRedis: !!process.env.REDIS_URL
+  },
+  INNER_CIRCLE_ADMIN_EXPORT: {
+    limit: 10,
+    windowMs: 60000,
+    keyPrefix: "ic-admin-export",
+    blockDuration: 300000,
+    useRedis: !!process.env.REDIS_URL
   }
 } as const;
 
 // Interface for storage providers
 interface RateLimitStorage {
-  check(key: string, options: RateLimitOptions): RateLimitResult;
+  check(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult>;
   createRateLimitHeaders(result: RateLimitResult): Record<string, string>;
   getStats?(): Promise<any>;
 }
@@ -301,7 +330,7 @@ class UnifiedRateLimiter {
     return createStorage(options);
   }
 
-  check(key: string, options: RateLimitOptions): RateLimitResult {
+  check(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult> {
     const storage = this.getStorage(options);
     return storage.check(key, options);
   }
@@ -358,11 +387,20 @@ class UnifiedRateLimiter {
     return [`${keyPrefix}:${cleanIp}`];
   }
 
-  checkMultipleRateLimits(
+  async checkMultipleRateLimits(
     keys: string[], 
     options: RateLimitOptions
-  ): { worstResult: RateLimitResult } {
-    const results = keys.map(k => this.check(k, options));
+  ): Promise<{ worstResult: RateLimitResult }> {
+    const storage = this.getStorage(options);
+    const promises = keys.map(k => storage.check(k, options));
+    
+    // Handle both sync and async results
+    const results = await Promise.all(
+      promises.map(p => 
+        p instanceof Promise ? p : Promise.resolve(p)
+      )
+    );
+    
     const worstResult = results.reduce((prev, curr) => {
       if (!curr.allowed && !prev.allowed) {
         return curr.retryAfterMs > prev.retryAfterMs ? curr : prev;
@@ -408,7 +446,7 @@ async function rateLimitAsync(key: string, options: RateLimitOptions): Promise<R
 }
 
 // Public API functions
-export function rateLimit(key: string, options: RateLimitOptions): RateLimitResult {
+export function rateLimit(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult> {
   return getUnifiedLimiter().check(key, options);
 }
 
@@ -424,40 +462,37 @@ export function getRateLimitKeys(req: NextApiRequest | NextRequest, keyPrefix: s
   return getUnifiedLimiter().getRateLimitKeys(req, keyPrefix);
 }
 
-export function checkMultipleRateLimits(
-  keys: string[], 
-  options: RateLimitOptions
-): { worstResult: RateLimitResult } {
-  return getUnifiedLimiter().checkMultipleRateLimits(keys, options);
-}
-
 // Async version for use with Redis
-export async function checkRateLimitAsync(
+export async function checkMultipleRateLimits(
   keys: string[], 
   options: RateLimitOptions
 ): Promise<{ worstResult: RateLimitResult }> {
-  const limiter = getUnifiedLimiter();
-  const promises = keys.map(k => {
-    const result = limiter.check(k, options);
-    return result instanceof Promise ? result : Promise.resolve(result);
-  });
-  
-  const results = await Promise.all(promises);
-  const worstResult = results.reduce((prev, curr) => {
-    if (!curr.allowed && !prev.allowed) {
-      return curr.retryAfterMs > prev.retryAfterMs ? curr : prev;
-    }
-    if (!curr.allowed) return curr;
-    if (!prev.allowed) return prev;
-    return curr.remaining < prev.remaining ? curr : prev;
-  }, results[0]);
-
-  return { worstResult };
+  return await getUnifiedLimiter().checkMultipleRateLimits(keys, options);
 }
 
 // Backoff wrapper
-export function rateLimitWithBackoff(key: string, options: RateLimitOptions): RateLimitResult {
+export function rateLimitWithBackoff(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult> {
   const result = rateLimit(key, options);
+  
+  // Handle async results
+  if (result instanceof Promise) {
+    return result.then(res => {
+      if (!res.allowed && res.blockUntil) {
+        // Apply exponential backoff: double the block duration
+        const backoffResult = { ...res };
+        if (backoffResult.blockUntil) {
+          const originalBlockDuration = backoffResult.blockUntil - Date.now();
+          const newBlockDuration = Math.min(originalBlockDuration * 2, 3600000); // Max 1 hour
+          backoffResult.blockUntil = Date.now() + newBlockDuration;
+          backoffResult.retryAfterMs = newBlockDuration;
+        }
+        return backoffResult;
+      }
+      return res;
+    });
+  }
+  
+  // Handle sync results
   if (!result.allowed && result.blockUntil) {
     // Apply exponential backoff: double the block duration
     const backoffResult = { ...result };
@@ -469,6 +504,7 @@ export function rateLimitWithBackoff(key: string, options: RateLimitOptions): Ra
     }
     return backoffResult;
   }
+  
   return result;
 }
 
@@ -504,7 +540,7 @@ export function withApiRateLimit(
       const keys = getRateLimitKeys(req, options.keyPrefix || 'rl');
       
       // Use async version for Redis compatibility
-      const { worstResult } = await checkRateLimitAsync(keys, options);
+      const { worstResult } = await checkMultipleRateLimits(keys, options);
       
       // Add headers to response
       const headers = createRateLimitHeaders(worstResult);
@@ -543,7 +579,7 @@ export async function withEdgeRateLimit(
     const keys = getRateLimitKeys(req, options.keyPrefix || 'rl');
     
     // Use async version for Redis compatibility
-    const { worstResult } = await checkRateLimitAsync(keys, options);
+    const { worstResult } = await checkMultipleRateLimits(keys, options);
     
     if (!worstResult.allowed) {
       return {
@@ -606,6 +642,13 @@ export async function getRateLimitStorageInfo(options: RateLimitOptions): Promis
   };
 }
 
+// Get rate limiter stats
+export async function getRateLimiterStats(): Promise<any> {
+  const limiter = getUnifiedLimiter();
+  const stats = await limiter.getStorageStats(RATE_LIMIT_CONFIGS.API_GENERAL);
+  return stats;
+}
+
 // Unified export for convenience
 export default {
   // Core functions
@@ -616,7 +659,6 @@ export default {
   getClientIp,
   getRateLimitKeys,
   checkMultipleRateLimits,
-  checkRateLimitAsync,
   
   // Middleware
   withApiRateLimit,
@@ -628,6 +670,7 @@ export default {
   
   // Utilities
   getRateLimitStorageInfo,
+  getRateLimiterStats,
   
   // Configurations
   RATE_LIMIT_CONFIGS,
