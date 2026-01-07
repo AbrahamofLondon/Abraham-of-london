@@ -1,35 +1,107 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    // Modern target for better optimization
+    "target": "es2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    
+    // Strict mode optimizations
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    
+    // Module resolution for Edge Runtime compatibility
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    
+    // React settings
     "jsx": "preserve",
     "incremental": true,
+    
+    // Additional strict checks for production
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": false, // Keep false to avoid build issues
+    "noUnusedParameters": false, // Keep false to avoid build issues
+    
+    // Performance optimizations
+    "forceConsistentCasingInFileNames": true,
+    "exactOptionalPropertyTypes": true,
+    
+    // Output and debugging
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": true,
+    "inlineSources": false,
+    
+    // Path aliases
+    "paths": {
+      "@/*": ["./*"],
+      "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
+      // Add edge runtime compatibility aliases
+      "next/server": ["./node_modules/next/server-edge"],
+      "next/headers": ["./node_modules/next/headers-edge"]
+    },
+    
+    // Plugins
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": ["./*"],
-      "contentlayer/generated": ["./lib/contentlayer-compat.ts"]
-    }
+    
+    // Additional compiler options
+    "allowSyntheticDefaultImports": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "skipDefaultLibCheck": true
   },
+  
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
     "contentlayer.config.js",
-    ".contentlayer/generated"
+    ".contentlayer/generated",
+    // Include environment files for type checking
+    ".env*.local",
+    // Include middleware and edge functions
+    "middleware.ts",
+    "netlify/edge-functions/**/*.ts",
+    // Include test files if needed
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
   ],
-  "exclude": ["node_modules"]
+  
+  "exclude": [
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    "coverage",
+    ".turbo",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__mocks__/**",
+    // Exclude problematic directories
+    "**/.cache/**",
+    "**/.contentlayer/**",
+    "**/temp/**",
+    "**/tmp/**"
+  ],
+  
+  // TypeScript specific configurations
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }

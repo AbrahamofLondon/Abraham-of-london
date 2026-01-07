@@ -537,6 +537,6 @@ export const config = {
     '/api/((?!health|ping|public/|auth/(login|register)).*)',
   ],
   
-  // Run middleware on Edge Runtime
-  runtime: 'edge',
+  // Fix: Use 'experimental-edge' instead of 'edge' for Next.js 14.2.12
+  runtime: 'experimental-edge',
 };

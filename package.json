@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
   },
   "scripts": {
     "prebuild": "pnpm fix:windows && pnpm contentlayer:safe",
@@ -16,12 +17,14 @@
     "type-check": "tsc --noEmit --project tsconfig.json",
     "test": "jest --passWithNoTests",
     "clean": "rimraf .next .contentlayer .cache node_modules/.cache .turbo",
+    "postinstall": "pnpm prisma:generate",
+    "prestart": "pnpm env:check",
     "setup": "pnpm install",
     "env:setup": "tsx scripts/environment/setup-env.ts",
     "env:check": "tsx scripts/environment/check-env.ts",
-    "env:production": "tsx scripts/environment/generate-production-env.ts",
-    "env:staging": "tsx scripts/environment/generate-staging-env.ts",
-    "env:development": "tsx scripts/environment/generate-development-env.ts",
+    "env:production": "NODE_ENV=production tsx scripts/environment/generate-production-env.ts",
+    "env:staging": "NODE_ENV=staging tsx scripts/environment/generate-staging-env.ts",
+    "env:development": "NODE_ENV=development tsx scripts/environment/generate-development-env.ts",
     "env:validate": "tsx scripts/environment/validate-env.ts",
     "db:setup": "tsx scripts/database/setup-database.ts",
     "db:reset": "del /f prisma\\dev.db 2>nul && pnpm db:setup",
@@ -71,8 +74,8 @@
     "dev:full": "concurrently --kill-others-on-fail=false --names \"CONTENT,DEV,PDF\" \"pnpm contentlayer:watch\" \"next dev\" \"pnpm pdfs:generate\"",
     "build:simple": "next build",
     "build:windows": "cross-env IS_WINDOWS=true pnpm build",
-    "build:production": "pnpm env:production && pnpm type-check && pnpm build",
-    "build:staging": "pnpm env:staging && pnpm type-check && pnpm build",
+    "build:production": "NODE_ENV=production pnpm env:production && pnpm type-check && pnpm build",
+    "build:staging": "NODE_ENV=staging pnpm env:staging && pnpm type-check && pnpm build",
     "build:no-contentlayer": "cross-env DISABLE_CONTENTLAYER=true next build",
     "build:check": "pnpm env:check && pnpm content:full && pnpm build",
     "build:complete": "pnpm prisma:generate && pnpm pdfs:institutional:cycle && pnpm content:full && pnpm build",
@@ -94,8 +97,8 @@
     "security:full:audit": "pnpm security:scan && pnpm security:check",
     "performance:test": "artillery run scripts/performance/performance-test.yml",
     "performance:image:optimize": "tsx scripts/performance/optimize-images.ts",
-    "deploy:prepare": "pnpm env:production && pnpm type-check && pnpm test && pnpm build:production",
-    "deploy:staging": "pnpm env:staging && pnpm type-check && pnpm build:staging",
+    "deploy:prepare": "NODE_ENV=production pnpm env:production && pnpm type-check && pnpm test && pnpm build:production",
+    "deploy:staging": "NODE_ENV=staging pnpm env:staging && pnpm type-check && pnpm build:staging",
     "deploy:validate": "pnpm env:validate && pnpm db:verify && pnpm content:validate",
     "deploy:production:safe": "pnpm deploy:validate && pnpm backup:full:cycle && pnpm deploy:prepare",
     "analyze": "cross-env ANALYZE=true NODE_OPTIONS=--max-old-space-size=4096 next build",
@@ -120,7 +123,7 @@
     "release:candidate": "pnpm ci:full && pnpm build:production",
     "release:production": "pnpm release:candidate && pnpm deploy:production:safe",
     "platform:health": "pnpm health && pnpm db:health && pnpm content:stats",
-    "start:production": "cross-env NODE_ENV=production node server.js"
+    "start:production": "cross-env NODE_ENV=production NEXT_EDGE_RUNTIME=experimental-edge node server.js"
   },
   "dependencies": {
     "@contentlayer/source-files": "0.3.4",
