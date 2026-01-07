@@ -33,7 +33,7 @@ import {
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
   type RateLimitResult 
-} from "@/lib/rate-limit";
+} from "@/lib/server/rateLimit";
 
 /* ============================================================================
    PUBLIC FUNCTION EXPORTS (DIRECT PASSTHROUGH)
@@ -84,7 +84,7 @@ export async function rateLimitInnerCircleRegistration(
   ip: string
 ): Promise<RateLimitResult> {
   const key = `inner_circle_reg:${ip}:${email.toLowerCase().trim()}`;
-  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL);
+  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL || { limit: 3, windowMs: 3600000, keyPrefix: "ic-reg-email" });
 }
 
 /**
@@ -94,7 +94,7 @@ export async function rateLimitInnerCircleAccess(
   ip: string
 ): Promise<RateLimitResult> {
   const key = `inner_circle_access:${ip}`;
-  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK);
+  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK || { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" });
 }
 
 /**
@@ -105,7 +105,7 @@ export async function rateLimitInnerCircleAdmin(
   operation: string
 ): Promise<RateLimitResult> {
   const key = `inner_circle_admin:${adminId}:${operation}`;
-  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT);
+  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT || { limit: 5, windowMs: 300000, keyPrefix: "ic-admin-export" });
 }
 
 /**
@@ -189,9 +189,7 @@ export function withInnerCircleRateLimit(
         res.status(429).json({
           error: 'Too Many Requests',
           message: 'Rate limit exceeded for Inner Circle operation',
-          retryAfter: rateLimitResult.blockUntil 
-            ? Math.ceil((rateLimitResult.blockUntil - Date.now()) / 1000) 
-            : undefined
+          retryAfter: Math.ceil(rateLimitResult.retryAfterMs / 1000)
         });
         return;
       }
@@ -268,7 +266,7 @@ export async function createOrUpdateMemberAndIssueKeyWithRateLimit(
     const rateLimitResult = await rateLimitInnerCircleRegistration(args.email, ip);
     
     if (!rateLimitResult.allowed) {
-      throw new Error(`Rate limit exceeded: ${rateLimitResult.blockUntil ? 'Try again later' : 'Too many attempts'}`);
+      throw new Error(`Rate limit exceeded: Try again in ${Math.ceil(rateLimitResult.retryAfterMs / 1000)} seconds`);
     }
   }
   
@@ -331,14 +329,17 @@ export async function cleanupOldData(): Promise<CleanupOldDataStats> {
   
   // Add rate limiting storage info
   try {
-    const { getRateLimitStorageInfo } = await import('@/lib/server/rate-limit-unified');
-    const storageInfo = await getRateLimitStorageInfo(RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT);
+    const { getRateLimiterStats } = await import('@/lib/rate-limit');
+    const rateLimitStats = await getRateLimiterStats();
     stats.rateLimitInfo = {
-      storage: storageInfo.storage,
-      redisAvailable: storageInfo.redisAvailable,
+      storage: rateLimitStats.isRedisAvailable ? 'redis' : 'memory',
+      redisAvailable: rateLimitStats.isRedisAvailable,
     };
   } catch (error) {
-    // Ignore if rate limit module not available
+    stats.rateLimitInfo = {
+      storage: 'memory',
+      redisAvailable: false,
+    };
   }
   
   return stats;
@@ -518,10 +519,10 @@ export const INNER_CIRCLE_CONFIG = {
     enabled: true,
     storage: process.env.REDIS_URL ? 'redis' : 'memory' as 'redis' | 'memory',
     configs: {
-      register: RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER,
-      registerEmail: RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL,
-      unlock: RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK,
-      admin: RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT,
+      register: RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER || { limit: 20, windowMs: 900000, keyPrefix: "ic-reg" },
+      registerEmail: RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL || { limit: 3, windowMs: 3600000, keyPrefix: "ic-reg-email" },
+      unlock: RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK || { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" },
+      admin: RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT || { limit: 5, windowMs: 300000, keyPrefix: "ic-admin-export" },
     }
   },
   environment: process.env.NODE_ENV,
@@ -565,25 +566,44 @@ const enhancedInnerCircleStore = {
   // Health check with rate limiting info
   healthCheckEnhanced: async () => {
     const basicHealth = await innerCircleStore.healthCheck();
-    const rateLimitStats = await (async () => {
-      try {
-        const { getRateLimiterStats } = await import('@/lib/rate-limit');
-        return await getRateLimiterStats();
-      } catch (error) {
-        return { error: 'Rate limit stats unavailable' };
-      }
-    })();
     
-    return {
-      ...basicHealth,
-      rateLimiting: {
-        enabled: INNER_CIRCLE_CONFIG.rateLimiting.enabled,
-        storage: INNER_CIRCLE_CONFIG.rateLimiting.storage,
-        stats: rateLimitStats,
-      },
-      environment: INNER_CIRCLE_CONFIG.environment,
-    };
+    try {
+      const { getRateLimiterStats } = await import('@/lib/rate-limit');
+      const rateLimitStats = await getRateLimiterStats();
+      
+      return {
+        ...basicHealth,
+        rateLimiting: {
+          enabled: INNER_CIRCLE_CONFIG.rateLimiting.enabled,
+          storage: INNER_CIRCLE_CONFIG.rateLimiting.storage,
+          stats: rateLimitStats,
+        },
+        environment: INNER_CIRCLE_CONFIG.environment,
+      };
+    } catch (error) {
+      return {
+        ...basicHealth,
+        rateLimiting: {
+          enabled: INNER_CIRCLE_CONFIG.rateLimiting.enabled,
+          storage: INNER_CIRCLE_CONFIG.rateLimiting.storage,
+          stats: { error: 'Rate limit stats unavailable' },
+        },
+        environment: INNER_CIRCLE_CONFIG.environment,
+      };
+    }
   }
 };
 
 export default enhancedInnerCircleStore;
+
+// Ensure all the missing exports are available
+export { 
+  withInnerCircleRateLimit,
+  getPrivacySafeKeyExportWithRateLimit,
+  getPrivacySafeStatsWithRateLimit,
+  createRateLimitHeaders,
+  INNER_CIRCLE_CONFIG,
+  healthCheckEnhanced: enhancedInnerCircleStore.healthCheckEnhanced,
+  createOrUpdateMemberAndIssueKeyWithRateLimit,
+  verifyInnerCircleKeyWithRateLimit,
+};

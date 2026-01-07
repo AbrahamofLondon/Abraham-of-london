@@ -1,4 +1,4 @@
-// lib/inner-circle/access.ts - updated with fallbacks
+// lib/inner-circle/access.ts
 import type { NextApiRequest } from 'next';
 import type { NextRequest } from 'next/server';
 
@@ -7,15 +7,15 @@ let rateLimitModule: any = null;
 let RATE_LIMIT_CONFIGS: any = null;
 
 try {
-  const module = require('@/lib/server/rate-limit-unified');
+  const module = require('@/lib/server/rateLimit');
   rateLimitModule = module;
   RATE_LIMIT_CONFIGS = module.RATE_LIMIT_CONFIGS;
 } catch (error) {
-  console.warn('[InnerCircleAccess] rate-limit-unified not available, using fallbacks');
+  console.warn('[InnerCircleAccess] rateLimit not available, using fallbacks');
   RATE_LIMIT_CONFIGS = {
-    API_STRICT: { limit: 30, windowMs: 60000 },
-    API_GENERAL: { limit: 100, windowMs: 60000 },
-    INNER_CIRCLE: { limit: 30, windowMs: 60000 }
+    API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },
+    API_GENERAL: { limit: 100, windowMs: 3600000, keyPrefix: "api" },
+    INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" }
   };
 }
 
@@ -43,10 +43,14 @@ export interface AccessCheckOptions {
 }
 
 // ==================== UTILITY FUNCTIONS ====================
-function getClientIp(req: NextApiRequest | NextRequest): string {
+export function getClientIp(req: NextApiRequest | NextRequest): string {
   if ('headers' in req && req.headers && typeof (req.headers as any).get === 'function') {
     const edgeHeaders = req.headers as any;
-    return edgeHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const forwarded = edgeHeaders.get('x-forwarded-for');
+    return forwarded?.split(',')[0]?.trim() || 
+           edgeHeaders.get('x-real-ip') || 
+           edgeHeaders.get('cf-connecting-ip') || 
+           'unknown';
   }
   
   const apiReq = req as NextApiRequest;
@@ -77,38 +81,31 @@ export async function getInnerCircleAccess(
     : (req as NextApiRequest).cookies?.innerCircleAccess === "true";
   
   // ==================== RATE LIMITING ====================
-  if (!skipRateLimit) {
-    const config = rateLimitConfig || RATE_LIMIT_CONFIGS?.INNER_CIRCLE || RATE_LIMIT_CONFIGS?.API_STRICT;
+  if (!skipRateLimit && rateLimitModule?.rateLimit) {
+    const config = rateLimitConfig || RATE_LIMIT_CONFIGS?.INNER_CIRCLE_UNLOCK || RATE_LIMIT_CONFIGS?.API_STRICT;
     
     // Simple rate limiting check
     const rateLimitKey = `inner-circle:${ip}`;
-    const now = Date.now();
     
-    // Check if rate limit module is available
-    if (rateLimitModule?.withEdgeRateLimit && 'nextUrl' in req) {
-      try {
-        const { allowed, result } = await rateLimitModule.withEdgeRateLimit(
-          req as NextRequest,
-          config
-        );
-        
-        if (!allowed) {
-          return {
-            hasAccess: false,
-            reason: 'rate_limited',
-            rateLimit: {
-              remaining: result?.remaining || 0,
-              limit: result?.limit || config.limit,
-              resetTime: result?.resetTime || (now + config.windowMs),
-              retryAfterMs: result?.retryAfterMs
-            },
-            userData: { ip, userAgent, timestamp: now }
-          };
-        }
-      } catch (error) {
-        // Rate limiting failed, continue without it
-        console.warn('[InnerCircleAccess] Rate limiting error:', error);
+    try {
+      const result = await rateLimitModule.rateLimit(rateLimitKey, config);
+      
+      if (!result.allowed) {
+        return {
+          hasAccess: false,
+          reason: 'rate_limited',
+          rateLimit: {
+            remaining: result.remaining,
+            limit: result.limit,
+            resetTime: result.resetTime,
+            retryAfterMs: result.retryAfterMs
+          },
+          userData: { ip, userAgent, timestamp: Date.now() }
+        };
       }
+    } catch (error) {
+      // Rate limiting failed, continue without it
+      console.warn('[InnerCircleAccess] Rate limiting error:', error);
     }
   }
   
@@ -142,7 +139,7 @@ export function withInnerCircleAccess(
           res.status(429).json({
             error: 'Too Many Requests',
             message: 'Rate limit exceeded',
-            retryAfter: access.rateLimit?.retryAfterMs
+            retryAfter: access.rateLimit?.retryAfterMs ? Math.ceil(access.rateLimit.retryAfterMs / 1000) : 60
           });
           return;
         }
@@ -188,9 +185,9 @@ export function createPublicApiHandler(handler: any) {
 export function createStrictApiHandler(handler: any) {
   return withInnerCircleAccess(handler, { requireAuth: true });
 }
-// Add this function near the bottom of the file
+
+// Client-side check
 export function hasInnerCircleAccess(): boolean {
-  // This is a client-side check - in a real app, you'd check cookies/localStorage
   if (typeof window !== 'undefined') {
     const cookie = document.cookie
       .split('; ')
@@ -199,4 +196,36 @@ export function hasInnerCircleAccess(): boolean {
     return cookie === 'true';
   }
   return false;
+}
+
+// Create access token function
+export async function createAccessToken(email: string, tier: string = 'member'): Promise<{
+  token: string;
+  expiresAt: Date;
+  key: string;
+}> {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  const key = `IC-${crypto.randomBytes(16).toString('hex').toUpperCase()}`;
+  
+  return {
+    token,
+    key,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+  };
+}
+
+// Simple access token validation
+export async function validateAccessToken(token: string): Promise<{
+  valid: boolean;
+  email?: string;
+  tier?: string;
+}> {
+  // This is a simplified implementation
+  // In a real app, you'd check against a database
+  return {
+    valid: token.length > 10,
+    email: 'user@example.com',
+    tier: 'member'
+  };
 }

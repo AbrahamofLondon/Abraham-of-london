@@ -1039,4 +1039,23 @@ export async function getAccessCacheStats() {
   return await innerCircleAccess.getCacheStats();
 }
 
+// Add these exports to fix the import errors
+export function createStrictApiHandler(handler: any) {
+  return async (req: any, res: any) => {
+    // Add strict access checking logic here
+    const access = await innerCircleAccess.verifyAccess(req.headers.authorization || '', req.url);
+    if (!access.granted) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    return handler(req, res);
+  };
+}
+
+export function createPublicApiHandler(handler: any) {
+  return async (req: any, res: any) => {
+    // Public API - no access checking
+    return handler(req, res);
+  };
+}
+
 export default innerCircleAccess;

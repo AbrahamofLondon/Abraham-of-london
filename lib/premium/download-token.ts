@@ -3,6 +3,9 @@
  * Premium content download token system
  */
 
+// Import crypto properly
+import crypto from 'crypto';
+
 export interface DownloadToken {
   token: string;
   contentId: string;
@@ -182,5 +185,9 @@ export function getUserDownloadTokens(userId: string): DownloadToken[] {
 export function getContentDownloadTokens(contentId: string): DownloadToken[] {
   return downloadTokenManager.getTokensByContent(contentId);
 }
+
+// Create alias functions for compatibility
+export const createDownloadToken = generateDownloadToken;
+export const verifyDownloadToken = validateDownloadToken;
 
 export default downloadTokenManager;
