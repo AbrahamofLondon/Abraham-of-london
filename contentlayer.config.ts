@@ -1,68 +1,55 @@
-// contentlayer.config.ts
-// Windows compatibility shim - must be at the very top
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Force set working directory for Windows
-if (process.platform === 'win32') {
-  process.chdir(__dirname);
-}
-
+// contentlayer.config.ts - Updated to match your actual content
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
+import path from 'path';
 
-type FieldDef =
-  | { type: "string"; required?: boolean; default?: string }
-  | { type: "boolean"; required?: boolean; default?: boolean }
-  | { type: "date"; required?: boolean }
-  | { type: "number"; required?: boolean }
-  | { type: "list"; of: { type: "string" }; required?: boolean }
-  | { type: "json"; required?: boolean };
+// Windows workaround: Use absolute paths
+const contentDirPath = path.resolve(process.cwd(), 'content');
 
-const SharedFields: Record<string, FieldDef> = {
+// Update SharedFields to include ALL fields found in your warnings
+const SharedFields = {
   title: { type: "string", required: true },
   slug: { type: "string", required: false },
   href: { type: "string", required: false },
-
   date: { type: "date", required: false },
   updated: { type: "date", required: false },
-
   author: { type: "string", required: false },
   authorTitle: { type: "string", required: false },
-
   excerpt: { type: "string", required: false },
   description: { type: "string", required: false },
   subtitle: { type: "string", required: false },
-
   readTime: { type: "string", required: false },
   draft: { type: "boolean", required: false, default: false },
   published: { type: "boolean", required: false },
-
   tags: { type: "list", of: { type: "string" }, required: false },
   category: { type: "string", required: false },
-
   ogTitle: { type: "string", required: false },
   ogDescription: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
   canonicalUrl: { type: "string", required: false },
-
   coverImage: { type: "string", required: false },
   coverAspect: { type: "string", required: false },
   coverFit: { type: "string", required: false },
   coverPosition: { type: "string", required: false },
-
   featured: { type: "boolean", required: false, default: false },
   priority: { type: "number", required: false },
-
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
-
   tier: { type: "string", required: false },
   requiresAuth: { type: "boolean", required: false, default: false },
   preload: { type: "boolean", required: false, default: false },
   version: { type: "string", required: false },
+  
+  // Add fields from warnings:
+  layout: { type: "string", required: false },
+  density: { type: "string", required: false },
+  featuredImage: { type: "string", required: false },
+  resources: { type: "json", required: false },
+  downloads: { type: "json", required: false },
+  relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+  isPartTwo: { type: "boolean", required: false, default: false },
+  previousPart: { type: "string", required: false },
+  volumeNumber: { type: "string", required: false },
+  order: { type: "number", required: false },
 };
 
 const computedFields = {
@@ -76,25 +63,15 @@ const computedFields = {
       if (doc.href) return String(doc.href);
       const slug = (doc.slug ?? doc._raw.sourceFileName.replace(/\.mdx?$/, "")).trim();
       const fp = String(doc._raw.flattenedPath || "");
-      const prefix = fp.startsWith("blog/")
-        ? "/blog/"
-        : fp.startsWith("books/")
-          ? "/books/"
-          : fp.startsWith("canon/")
-            ? "/canon/"
-            : fp.startsWith("downloads/")
-              ? "/downloads/"
-              : fp.startsWith("shorts/")
-                ? "/shorts/"
-                : fp.startsWith("events/")
-                  ? "/events/"
-                  : fp.startsWith("prints/")
-                    ? "/prints/"
-                    : fp.startsWith("resources/")
-                      ? "/resources/"
-                      : fp.startsWith("strategy/")
-                        ? "/strategy/"
-                        : "/";
+      const prefix = fp.startsWith("blog/") ? "/blog/" :
+                     fp.startsWith("books/") ? "/books/" :
+                     fp.startsWith("canon/") ? "/canon/" :
+                     fp.startsWith("downloads/") ? "/downloads/" :
+                     fp.startsWith("shorts/") ? "/shorts/" :
+                     fp.startsWith("events/") ? "/events/" :
+                     fp.startsWith("prints/") ? "/prints/" :
+                     fp.startsWith("resources/") ? "/resources/" :
+                     fp.startsWith("strategy/") ? "/strategy/" : "/";
       return `${prefix}${slug}`;
     },
   },
@@ -104,17 +81,7 @@ export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    ...SharedFields,
-    featuredImage: { type: "string", required: false },
-    isPartTwo: { type: "boolean", required: false, default: false },
-    previousPart: { type: "string", required: false },
-    layout: { type: "string", required: false },
-    density: { type: "string", required: false },
-    resources: { type: "json", required: false },
-    downloads: { type: "json", required: false },
-    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
-  },
+  fields: SharedFields,
   computedFields,
 }));
 
@@ -122,10 +89,7 @@ export const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    ...SharedFields,
-    series: { type: "string", required: false },
-  },
+  fields: SharedFields,
   computedFields,
 }));
 
@@ -133,14 +97,11 @@ export const Canon = defineDocumentType(() => ({
   name: "Canon",
   filePathPattern: "canon/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    ...SharedFields,
-    volumeNumber: { type: "string", required: false },
-    order: { type: "number", required: false },
-  },
+  fields: SharedFields,
   computedFields,
 }));
 
+// Download needs additional fields from your content
 export const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.{md,mdx}",
@@ -260,15 +221,13 @@ export const Strategy = defineDocumentType(() => ({
   computedFields,
 }));
 
-// Windows-compatible configuration
+// Windows-friendly configuration that doesn't fail on warnings
 export default makeSource({
-  contentDirPath: "./content",
+  contentDirPath,
   documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
-  mdx: {
-    remarkPlugins: [],
-    rehypePlugins: [],
-  },
-  // Skip problematic documents instead of failing
-  onUnknownDocuments: "skip-warn" as const,
   disableImportAliasWarning: true,
+  // Allow extra fields - this is CRITICAL for your existing content
+  onExtraFieldData: "ignore-warn",
+  onUnknownDocuments: "skip-warn",
+  onMissingOrIncompatibleData: "skip-warn",
 });

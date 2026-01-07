@@ -4,8 +4,12 @@ interface Toast {
   id: string;
   title: string;
   message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
+  type: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 export const useToast = () => {
@@ -20,6 +24,8 @@ export const useToast = () => {
         setToasts(prev => prev.filter(t => t.id !== id));
       }, toast.duration || 5000);
     }
+    
+    return id;
   }, []);
 
   const removeToast = useCallback((id: string) => {
@@ -27,11 +33,19 @@ export const useToast = () => {
   }, []);
 
   const success = useCallback((title: string, message: string, duration?: number) => {
-    addToast({ title, message, type: 'success', duration });
+    return addToast({ title, message, type: 'success', duration });
   }, [addToast]);
 
   const error = useCallback((title: string, message: string, duration?: number) => {
-    addToast({ title, message, type: 'error', duration: duration || 10000 });
+    return addToast({ title, message, type: 'error', duration: duration || 10000 });
+  }, [addToast]);
+
+  const warning = useCallback((title: string, message: string, duration?: number) => {
+    return addToast({ title, message, type: 'warning', duration });
+  }, [addToast]);
+
+  const info = useCallback((title: string, message: string, duration?: number) => {
+    return addToast({ title, message, type: 'info', duration });
   }, [addToast]);
 
   return {
@@ -40,5 +54,7 @@ export const useToast = () => {
     removeToast,
     success,
     error,
+    warning,
+    info,
   };
 };

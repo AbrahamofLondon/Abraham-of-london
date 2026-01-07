@@ -1,4 +1,4 @@
-// components/mdx/CtaPrestComponent.tsx
+// components/mdx/CtaPresetComponent.tsx - FIXED VERSION
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -43,8 +43,7 @@ const getBadgeConfig = (badge: string | undefined) => {
       label: "Premium",
     },
     exclusive: {
-      color:
-        "bg-gradient-to-r from-gold to-yellow-400 text-slate-900 border-yellow-300",
+      color: "bg-gradient-to-r from-gold to-yellow-400 text-slate-900 border-yellow-300",
       label: "Exclusive",
     },
   } as const;
@@ -77,7 +76,7 @@ const LinkItemComponent: React.FC<{
         className={`group block relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
           featured
             ? `bg-gradient-to-br ${theme.primary} border-transparent text-white shadow-xl ${theme.glow}`
-            : `bg-white border-gray-100 hover:border-gray-200 text-gray-900 shadow-sm hover:shadow-lg ${theme.glow}`
+            : `bg-white border-gray-100 hover:border-gray-200 text-gray-900 shadow-sm hover:shadow-lg`
         } ${compact ? "p-4" : "p-6"}`}
         {...(item.external
           ? { target: "_blank", rel: "noopener noreferrer" }
@@ -185,8 +184,8 @@ const CategorySection: React.FC<{
           columns === 1
             ? "grid-cols-1"
             : columns === 2
-              ? "grid-cols-1 md:grid-cols-2"
-              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            ? "grid-cols-1 md:grid-cols-2"
+            : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
         }`}
       >
         {items.map((item, index) => (
@@ -292,9 +291,7 @@ const CtaPresetComponent: React.FC<CtaPresetProps> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
-      className={`my-8 rounded-3xl border border-gray-200/50 ${theme.gradient} backdrop-blur-sm ${
-        className ?? ""
-      }`}
+      className={`my-8 rounded-3xl border border-gray-200/50 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm ${className ?? ""}`}
     >
       <div className={compact ? "p-6" : "p-8"}>
         {/* Header */}

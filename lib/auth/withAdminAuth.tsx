@@ -1,6 +1,6 @@
 import React, { ComponentType, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface WithAdminAuthProps {
   user?: {

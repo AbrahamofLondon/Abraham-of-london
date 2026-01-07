@@ -5,7 +5,8 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { getPublishedPosts } from '@/lib/contentlayer';
+import { assertContentlayerHasDocs, getPublishedPosts } from "@/lib/contentlayer";
+
 
 type CoverAspect = "wide" | "square" | "book";
 type CoverFit = "cover" | "contain";
@@ -176,7 +177,7 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   // FIX: Removed argument from assertion call
-  assertContentlayerHasDocs();
+  assertContentlayerHasDocs?.();
 
   const published = getPublishedPosts();
 

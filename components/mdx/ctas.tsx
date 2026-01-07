@@ -1,4 +1,4 @@
-// components/mdx/ctas.tsx
+// components/mdx/ctas.tsx - FIXED VERSION
 import * as React from "react";
 import CtaPresetComponent from "./CtaPresetComponent";
 import type { CTAKey } from "./cta-presets";
@@ -30,6 +30,7 @@ export const CTA: React.FC<CTAProps> = ({
   );
 };
 
+// Individual CTA components for specific presets
 export const FatherhoodCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
   <CTA presetKey="fatherhood" {...props} />
 );
@@ -62,10 +63,18 @@ export const NewsletterCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
   <CTA presetKey="newsletter" {...props} />
 );
 
-/**
- * If other code expects `ctas`, give it a stable object.
- */
+// ===== CTA STYLES (What mdx-components.tsx expects) =====
 export const ctas = {
+  primary: "bg-gold text-black hover:bg-amber-500",
+  secondary: "bg-transparent border border-gold text-gold hover:bg-gold/10",
+  subtle: "bg-transparent text-gold hover:text-amber-300",
+  dark: "bg-charcoal text-cream hover:bg-slate-900",
+  white: "bg-white text-black hover:bg-gray-100",
+  gradient: "bg-gradient-to-r from-gold to-amber-500 text-black hover:from-amber-500 hover:to-gold",
+} as const;
+
+// ===== COMPONENT COLLECTION (for other uses) =====
+export const ctaComponents = {
   CTA,
   FatherhoodCTA,
   LeadershipCTA,

@@ -11,8 +11,8 @@ import StatusMessage from '@/components/StatusMessage';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import PDFFilters from '@/components/PDFFilters';
 import DashboardStats from '@/components/DashboardStats';
-import PDFActionsBar from '@/components/PDFActionsBar';
-import PDFQuickActions from '@/components/PDFQuickActions';
+import PDFQuickActions from "@/components/PDFQuickActions";
+import PDFActionsBar from "@/components/PDFActionsBar";
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Types

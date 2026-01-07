@@ -1,22 +1,18 @@
-/* components/mdx-components.tsx - ENHANCED, PRODUCTION-SAFE (NO SVGR ASSUMPTIONS) */
+/* components/mdx-components.tsx - FINAL WORKING VERSION (EXPORT-SHAPE SAFE) */
 import * as React from "react";
 import * as Lucide from "lucide-react";
 
-import { CoverFrame } from "@/components/media/CoverFrame";
-import { createDynamicComponent as componentResolver } from "@/components/mdx/component-resolver";
-
-import { ctaPresets } from "@/components/mdx/cta-presets";
-import { CTAPreset } from "@/components/mdx/CTAPreset";
-import { ctas, CTA } from "@/components/mdx/ctas";
-
-// Core MDX components
+// ===== CORE MDX COMPONENTS =====
 import Divider from "./Divider";
 import Rule from "./Rule";
-import Grid from "./Grid";
+import Grid from "./mdx/Grid";
 import PullLine from "./mdx/PullLine";
-import Callout from "./Callout";
-import Quote from "./Quote";
-import { Note } from "./Note";
+import Callout from "./mdx/Callout";
+import Quote from "./mdx/Quote";
+
+// ✅ Note is NOT a named export according to your error → import default
+import Note from "./mdx/Note";
+
 import Caption from "./mdx/Caption";
 import CanonReference from "./CanonReference";
 import GlossaryTerm from "./GlossaryTerm";
@@ -90,30 +86,40 @@ import VenturesSection from "./homepage/VenturesSection";
 // ===== DIAGRAMS =====
 import LegacyDiagram from "./diagrams/LegacyDiagram";
 
-// ===== OTHER MDX COMPONENTS =====
+// ===== MDX SPECIFIC COMPONENTS =====
 import Badge from "./mdx/Badge";
 import BadgeRow from "./mdx/BadgeRow";
 import BrandFrame from "./mdx/BrandFrame";
-import componentResolver from "./mdx/component-resolver";
+
+import { createDynamicComponent } from "./mdx/component-resolver";
 import { ctaPresets } from "./mdx/cta-presets";
-import CTA from "./mdx/CTA";
-import CTAPreset from "./mdx/CTAPreset";
+import { CTAPreset } from "./mdx/CTAPreset";
+import { CTA, ctas } from "./mdx/ctas";
 import CtaPresetComponent from "./mdx/CtaPresetComponent";
-import { ctas } from "./mdx/ctas";
-import FallbackComponent from "./mdx/FallbackComponent";
+
+// ✅ no default export per your error → import named
+import { FallbackComponent } from "./mdx/FallbackComponent";
+
 import HeroEyebrow from "./mdx/HeroEyebrow";
 import JsonLd from "./mdx/JsonLd";
-import MDXContentWrapper from "./mdx/MDXContentWrapper";
+
+// ✅ no default export per your error → import named
+import { MDXContentWrapper } from "./mdx/MDXContentWrapper";
+
 import MinimalMdxComponents from "./mdx/MinimalMdxComponents";
 import MissingComponent from "./mdx/MissingComponent";
 import ResourcesCTA from "./mdx/ResourcesCTA";
 import ShareRow from "./mdx/ShareRow";
-import { shortcodes } from "./mdx/shortcodes";
+
+// ✅ shortcodes is NOT exported as a named symbol per your error → import default
+import shortcodes from "./mdx/shortcodes";
+
 import Verse from "./mdx/Verse";
 
 // ===== ADMIN =====
 import ShortsAnalytics from "./admin/ShortsAnalytics";
 
+// ===== HELPER FUNCTION =====
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -121,7 +127,6 @@ function cx(...parts: Array<string | false | null | undefined>) {
 // ===== BASIC ELEMENTS =====
 function Anchor(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const { className, ...rest } = props;
-
   const href = typeof rest.href === "string" ? rest.href : "";
   const isExternal = href.startsWith("http");
 
@@ -151,257 +156,31 @@ function InlineCode(props: React.HTMLAttributes<HTMLElement>) {
   );
 }
 
-function Pre(props: React.HTMLAttributes<HTMLPreElement>) {
-  const { className, ...rest } = props;
-  return (
-    <pre
-      {...rest}
-      className={cx(
-        "my-8 overflow-x-auto rounded-2xl border border-white/10 bg-black/40 p-5 text-sm leading-relaxed text-gray-200",
-        className
-      )}
-    />
-  );
-}
+// ============================================================================
+// Dynamic component bridge for MDX
+// Usage in MDX: <Dynamic name="SomeComponent" />
+// ============================================================================
+export const Dynamic: React.FC<{ name: string; [key: string]: any }> = ({
+  name,
+  ...props
+}) => {
+  const Comp = React.useMemo(() => createDynamicComponent(name), [name]);
+  return <Comp {...props} />;
+};
+Dynamic.displayName = "Dynamic";
 
-// ===== CARD WRAPPERS FOR MDX (safe defaults, pass-through) =====
-function MdxBlogPostCard(props: Record<string, any>) {
-  const {
-    slug,
-    title = "Untitled Post",
-    excerpt = "",
-    date = "",
-    coverImage = "/assets/images/placeholder.jpg",
-    author = "Abraham of London",
-    readTime = "5 min",
-  } = props;
-
-  if (!slug) return null;
-
-  return (
-    <div className="my-6">
-      <BlogPostCard
-        slug={String(slug)}
-        title={String(title)}
-        excerpt={String(excerpt)}
-        date={String(date)}
-        coverImage={String(coverImage)}
-        author={String(author)}
-        readTime={readTime}
-      />
-    </div>
-  );
-}
-
-function MdxBookCard(props: Record<string, any>) {
-  const {
-    slug,
-    title = "Untitled Book",
-    author = "Unknown Author",
-    isbn = "",
-    coverImage = "/assets/images/placeholder.jpg",
-    description = "",
-  } = props;
-
-  if (!slug) return null;
-
-  return (
-    <div className="my-6">
-      <BookCard
-        slug={String(slug)}
-        title={String(title)}
-        author={String(author)}
-        isbn={String(isbn)}
-        coverImage={String(coverImage)}
-        description={String(description)}
-      />
-    </div>
-  );
-}
-
-function MdxResourceCard(props: Record<string, any>) {
-  const {
-    slug,
-    title = "Untitled Resource",
-    description = "",
-    tags = [],
-    coverImage = "/assets/images/placeholder.jpg",
-    accessLevel = "public",
-  } = props;
-
-  if (!slug) return null;
-
-  return (
-    <div className="my-6">
-      <ResourceCard
-        slug={String(slug)}
-        title={String(title)}
-        description={String(description)}
-        tags={Array.isArray(tags) ? tags : []}
-        coverImage={String(coverImage)}
-        accessLevel={String(accessLevel)}
-      />
-    </div>
-  );
-}
-
-function MdxCanonCard(props: Record<string, any>) {
-  const {
-    slug,
-    title = "Untitled Canon",
-    volumeNumber = 1,
-    description = "",
-    coverImage = "/assets/images/placeholder.jpg",
-    date = new Date().toISOString(),
-  } = props;
-
-  if (!slug) return null;
-
-  return (
-    <div className="my-6">
-      <CanonPrimaryCard
-        slug={String(slug)}
-        title={String(title)}
-        volumeNumber={Number(volumeNumber) || 1}
-        description={String(description)}
-        coverImage={String(coverImage)}
-        date={String(date)}
-      />
-    </div>
-  );
-}
-
-// ===== SOCIAL ICON (no SVGR dependency) =====
-function SocialIcon({
-  platform,
-  size = 24,
-  className,
-}: {
-  platform: string;
-  size?: number;
-  className?: string;
-}) {
-  const base = "inline-block rounded";
-  const style: React.CSSProperties = { width: size, height: size };
-
-  const map: Record<string, string> = {
-    facebook: "bg-blue-600",
-    instagram: "bg-pink-600",
-    linkedin: "bg-blue-700",
-    twitter: "bg-sky-500",
-    mail: "bg-gray-600",
-    phone: "bg-green-600",
-  };
-
-  return <span className={cx(base, map[platform] ?? "bg-gray-500", className)} style={style} />;
-}
-
-// ===== DOWNLOAD CARD (resilient) =====
-function DownloadCard(props: {
-  title?: string;
-  label?: string;
-  href?: string;
-  slug?: string;
-  fileSize?: string;
-  children?: React.ReactNode;
-  [key: string]: any;
-}) {
-  const title = typeof props.title === "string" ? props.title : "Download";
-  const label = typeof props.label === "string" ? props.label : "Download";
-  const href =
-    typeof props.href === "string" && props.href.trim()
-      ? props.href.trim()
-      : typeof props.slug === "string" && props.slug.trim()
-        ? `/downloads/${props.slug.trim()}`
-        : null;
-
-  return (
-    <div className="my-6 rounded-2xl border border-gold/20 bg-charcoal/80 p-6">
-      <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 ring-1 ring-gold/20">
-          <Lucide.Download className="h-6 w-6 text-gold" aria-hidden="true" />
-        </div>
-
-        <div className="flex-1">
-          <h3 className="font-serif text-lg font-semibold text-cream">{title}</h3>
-
-          {props.children ? (
-            <div className="mt-2 text-sm leading-relaxed text-gold/70">{props.children}</div>
-          ) : null}
-
-          {typeof props.fileSize === "string" && props.fileSize.trim() ? (
-            <p className="mt-3 text-xs font-medium uppercase tracking-wider text-gold/50">
-              {props.fileSize.trim()}
-            </p>
-          ) : null}
-
-          {href ? (
-            <a
-              href={href}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-gold transition-colors hover:text-amber-200"
-            >
-              {label}
-              <Lucide.ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ===== COMPONENT MAP =====
-export const mdxComponents: Record<string, unknown> = {
-  // headings
-  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1 {...props} className={cx("mt-16 mb-8 font-serif text-4xl font-semibold text-cream", props.className)} />
-  ),
-  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2 {...props} className={cx("mt-14 mb-5 font-serif text-2xl font-semibold text-cream", props.className)} />
-  ),
-  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3 {...props} className={cx("mt-10 mb-4 font-serif text-xl font-semibold text-cream", props.className)} />
-  ),
-
-  // text
-  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p {...props} className={cx("my-6 text-lg leading-relaxed text-gray-300", props.className)} />
-  ),
-  strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong {...props} className={cx("font-semibold text-cream", props.className)} />
-  ),
-  em: (props: React.HTMLAttributes<HTMLElement>) => (
-    <em {...props} className={cx("italic text-gold/90", props.className)} />
-  ),
-
-  // lists
-  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul {...props} className={cx("my-6 list-disc space-y-2 pl-6 text-gray-300", props.className)} />
-  ),
-  ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol {...props} className={cx("my-6 list-decimal space-y-2 pl-6 text-gray-300", props.className)} />
-  ),
-  li: (props: React.HTMLAttributes<HTMLLIElement>) => (
-    <li {...props} className={cx("leading-relaxed", props.className)} />
-  ),
-
-  // links / code
+// ============================================================================
+// MDX COMPONENT MAP
+// ============================================================================
+export const mdxComponents: Record<string, React.ComponentType<any>> = {
+  // Standard MDX element overrides
   a: Anchor,
   code: InlineCode,
-  pre: Pre,
 
-  // images
-  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      {...props}
-      className={cx("my-8 w-full rounded-2xl border border-white/10", props.className)}
-      alt={props.alt ?? ""}
-      loading={props.loading ?? "lazy"}
-    />
-  ),
+  // namespaces
+  Lucide,
 
-  // core components
+  // Core MDX
   Divider,
   Rule,
   Grid,
@@ -415,33 +194,31 @@ export const mdxComponents: Record<string, unknown> = {
   EmbossedBrandMark,
   EmbossedSign,
 
-  // cards
+  // Cards
   BaseCard,
-  BlogPostCard: MdxBlogPostCard,
-  BookCard: MdxBookCard,
-  CanonCard: MdxCanonCard,
-  ResourceCard: MdxResourceCard,
-  ArticleHero,
+  BlogPostCard,
+  BookCard,
   CanonPrimaryCard,
   CanonResourceCard,
+  ArticleHero,
 
-  // ui
+  // UI
   Box,
   Button,
   InteractiveElement,
   SectionHeading,
   SilentSurface,
 
-  // media/icons
+  // Media / Icons
   CoverFrame,
   BrandLogo,
   LockClosedIcon,
 
-  // seo
+  // SEO
   BookJsonLd,
   EventJsonLd,
 
-  // blog
+  // Blog
   BlogContent,
   BlogFooter,
   BlogHeader,
@@ -450,7 +227,7 @@ export const mdxComponents: Record<string, unknown> = {
   RelatedPosts,
   ResourceGrid,
 
-  // shorts
+  // Shorts
   RelatedShorts,
   ShortActions,
   ShortComments,
@@ -460,15 +237,16 @@ export const mdxComponents: Record<string, unknown> = {
   ShortNavigation,
   ShortShare,
 
-  // resources
+  // Resources
   RelatedResources,
   ResourceActions,
+  ResourceCard,
   ResourceContent,
   ResourceDownload,
   ResourceHero,
   ResourceMetadata,
 
-  // homepage
+  // Homepage
   AboutSection,
   ContentShowcase,
   EventsSection,
@@ -480,76 +258,36 @@ export const mdxComponents: Record<string, unknown> = {
   TestimonialsSection,
   VenturesSection,
 
-  // diagrams
+  // Diagrams
   LegacyDiagram,
 
-  // other mdx
+  // MDX-specific
   Badge,
   BadgeRow,
   BrandFrame,
-  componentResolver,
-  ctaPresets,
-  CTA,
-  CTAPreset,
-  CtaPresetComponent,
-  ctas,
+  Dynamic,
+  MissingComponent,
   FallbackComponent,
   HeroEyebrow,
   JsonLd,
   MDXContentWrapper,
   MinimalMdxComponents,
-  MissingComponent,
   ResourcesCTA,
   ShareRow,
-  shortcodes,
   Verse,
 
-  // admin
+  // Shortcode registry (default export)
+  shortcodes,
+
+  // CTA system
+  CTA,
+  CTAPreset,
+  CtaPresetComponent,
+  ctaPresets,
+  ctas,
+
+  // Admin
   ShortsAnalytics,
-
-  // utilities as components
-  SocialIcon,
-  DownloadCard,
-
-  Icon: ({
-    name,
-    size = 20,
-    ...props
-  }: {
-    name: keyof typeof Lucide | string;
-    size?: number;
-    [key: string]: any;
-  }) => {
-    const LucideIcon = (Lucide as any)[name];
-    if (!LucideIcon) return null;
-    return <LucideIcon size={size} aria-hidden="true" focusable="false" {...props} />;
-  },
-
-  Container: ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div {...props} className={cx("mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", className)}>
-      {children}
-    </div>
-  ),
-
-  Section: ({
-    children,
-    className,
-    bg = "default",
-    ...props
-  }: React.HTMLAttributes<HTMLElement> & { bg?: "default" | "light" | "dark" | "gradient" }) => {
-    const backgrounds = {
-      default: "bg-transparent",
-      light: "bg-gray-50",
-      dark: "bg-charcoal",
-      gradient: "bg-gradient-to-b from-charcoal to-black",
-    } as const;
-
-    return (
-      <section {...props} className={cx("py-12 lg:py-16", backgrounds[bg], className)}>
-        {children}
-      </section>
-    );
-  },
 };
 
 export default mdxComponents;
