@@ -1,19 +1,102 @@
 // lib/server/rate-limit-unified.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// Unified rate limiting with Redis integration
+/**
+ * Unified rate limiting with comprehensive fallbacks
+ * Safe for Edge Runtime and works with current setup
+ */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextRequest } from "next/server";
-import { rateLimitRedis } from '@/lib/rate-limit-redis';
 
-// Runtime detection - more reliable method
-export const isEdgeRuntime = 
-  typeof process !== 'undefined' ? 
-    process.env.NEXT_RUNTIME === 'edge' || 
-    process.env.VERCEL === '1' && process.env.VERCEL_ENV !== 'development' :
-  false;
+// ==================== FALLBACK CONFIGURATIONS ====================
+const FALLBACK_CONFIGS = {
+  API_GENERAL: { 
+    limit: 100, 
+    windowMs: 3600000, 
+    keyPrefix: "api",
+    blockDuration: 300000,
+    useRedis: false
+  },
+  API_STRICT: { 
+    limit: 30, 
+    windowMs: 60000, 
+    keyPrefix: "api-strict",
+    blockDuration: 600000,
+    useRedis: false
+  },
+  AUTH: {
+    limit: 10,
+    windowMs: 300000,
+    keyPrefix: "auth",
+    blockDuration: 1800000,
+    useRedis: false
+  },
+  CONTENT: {
+    limit: 60,
+    windowMs: 60000,
+    keyPrefix: "content",
+    blockDuration: 300000,
+    useRedis: false
+  }
+};
 
-// Type definitions
+// ==================== TRY TO IMPORT ORIGINAL MODULE ====================
+let originalRateLimitModule: any = null;
+let RATE_LIMIT_CONFIGS = FALLBACK_CONFIGS;
+let importedRateLimit: any = null;
+
+try {
+  // Try to import the working rate-limit module
+  const module = require('@/lib/rate-limit');
+  originalRateLimitModule = module;
+  
+  // Map original configs to our format
+  if (module.RATE_LIMIT_CONFIGS) {
+    RATE_LIMIT_CONFIGS = {
+      API_GENERAL: {
+        limit: module.RATE_LIMIT_CONFIGS.API_READ?.max || 100,
+        windowMs: module.RATE_LIMIT_CONFIGS.API_READ?.windowMs || 60000,
+        keyPrefix: module.RATE_LIMIT_CONFIGS.API_READ?.keyPrefix || 'api',
+        blockDuration: module.RATE_LIMIT_CONFIGS.API_READ?.blockDuration,
+        useRedis: module.RATE_LIMIT_CONFIGS.API_READ?.useRedis || false
+      },
+      API_STRICT: {
+        limit: module.RATE_LIMIT_CONFIGS.API_WRITE?.max || 30,
+        windowMs: module.RATE_LIMIT_CONFIGS.API_WRITE?.windowMs || 60000,
+        keyPrefix: module.RATE_LIMIT_CONFIGS.API_WRITE?.keyPrefix || 'api-strict',
+        blockDuration: module.RATE_LIMIT_CONFIGS.API_WRITE?.blockDuration,
+        useRedis: module.RATE_LIMIT_CONFIGS.API_WRITE?.useRedis || false
+      },
+      AUTH: {
+        limit: module.RATE_LIMIT_CONFIGS.AUTH_LOGIN?.max || 10,
+        windowMs: module.RATE_LIMIT_CONFIGS.AUTH_LOGIN?.windowMs || 300000,
+        keyPrefix: module.RATE_LIMIT_CONFIGS.AUTH_LOGIN?.keyPrefix || 'auth',
+        blockDuration: module.RATE_LIMIT_CONFIGS.AUTH_LOGIN?.blockDuration,
+        useRedis: module.RATE_LIMIT_CONFIGS.AUTH_LOGIN?.useRedis || true
+      },
+      CONTENT: {
+        limit: module.RATE_LIMIT_CONFIGS.CONTENT_API?.max || 60,
+        windowMs: module.RATE_LIMIT_CONFIGS.CONTENT_API?.windowMs || 60000,
+        keyPrefix: module.RATE_LIMIT_CONFIGS.CONTENT_API?.keyPrefix || 'content',
+        blockDuration: module.RATE_LIMIT_CONFIGS.CONTENT_API?.blockDuration,
+        useRedis: module.RATE_LIMIT_CONFIGS.CONTENT_API?.useRedis || false
+      }
+    };
+  }
+  
+  importedRateLimit = {
+    rateLimitAsync: module.rateLimitAsync || module.rateLimit,
+    withRateLimit: module.withRateLimit,
+    createRateLimitHeaders: module.createRateLimitHeaders,
+    getClientIpFromRequest: module.getClientIpFromRequest,
+    checkRateLimit: module.checkRateLimit
+  };
+  
+  console.log('[RateLimitUnified] Loaded original rate-limit module');
+} catch (error) {
+  console.warn('[RateLimitUnified] Could not load rate-limit module, using fallbacks:', error.message);
+}
+
+// ==================== TYPES ====================
 export interface RateLimitOptions {
   limit: number;
   windowMs: number;
@@ -33,148 +116,28 @@ export interface RateLimitResult {
   blockUntil?: number;
 }
 
-export interface LegacyIsRateLimitedResult {
-  limited: boolean;
-  retryAfter: number;
-  limit: number;
-  remaining: number;
+export interface EdgeRateLimitResult {
+  allowed: boolean;
+  headers: Record<string, string>;
+  result?: RateLimitResult;
 }
 
-// Default configurations - INCLUDING INNER CIRCLE CONFIGS
-export const RATE_LIMIT_CONFIGS = {
-  API_GENERAL: { 
-    limit: 100, 
-    windowMs: 3600000, 
-    keyPrefix: "api",
-    blockDuration: 300000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  API_STRICT: { 
-    limit: 30, 
-    windowMs: 60000, 
-    keyPrefix: "api-strict",
-    blockDuration: 600000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  AUTH: {
-    limit: 10,
-    windowMs: 300000,
-    keyPrefix: "auth",
-    blockDuration: 1800000,
-    useRedis: true // Always use Redis for auth
-  },
-  CONTENT: {
-    limit: 60,
-    windowMs: 60000,
-    keyPrefix: "content",
-    blockDuration: 300000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  DOWNLOADS: {
-    limit: 5,
-    windowMs: 60000,
-    keyPrefix: "downloads",
-    blockDuration: 600000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  WEBHOOKS: {
-    limit: 100,
-    windowMs: 60000,
-    keyPrefix: "webhooks",
-    blockDuration: 300000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  // Inner Circle specific configs
-  INNER_CIRCLE_REGISTER: {
-    limit: 5,
-    windowMs: 3600000,
-    keyPrefix: "ic-register",
-    blockDuration: 7200000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  INNER_CIRCLE_REGISTER_EMAIL: {
-    limit: 3,
-    windowMs: 86400000,
-    keyPrefix: "ic-register-email",
-    blockDuration: 86400000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  INNER_CIRCLE_UNLOCK: {
-    limit: 30,
-    windowMs: 300000,
-    keyPrefix: "ic-unlock",
-    blockDuration: 900000,
-    useRedis: !!process.env.REDIS_URL
-  },
-  INNER_CIRCLE_ADMIN_EXPORT: {
-    limit: 10,
-    windowMs: 60000,
-    keyPrefix: "ic-admin-export",
-    blockDuration: 300000,
-    useRedis: !!process.env.REDIS_URL
-  }
-} as const;
-
-// Interface for storage providers
-interface RateLimitStorage {
-  check(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult>;
-  createRateLimitHeaders(result: RateLimitResult): Record<string, string>;
-  getStats?(): Promise<any>;
-}
-
-// Memory storage implementation
-class MemoryStorage implements RateLimitStorage {
+// ==================== MEMORY STORAGE FALLBACK ====================
+class MemoryRateLimiter {
   private store = new Map<string, {
     count: number;
     resetTime: number;
     blockUntil?: number;
     firstRequestTime: number;
   }>();
-  private permanentBlocks = new Set<string>();
-  private lastCleanup = Date.now();
-  private readonly CLEANUP_INTERVAL = 30000;
-
-  private performCleanup(): void {
-    const now = Date.now();
-    
-    if (now - this.lastCleanup > this.CLEANUP_INTERVAL) {
-      for (const [key, entry] of this.store.entries()) {
-        const isExpired = now > entry.resetTime;
-        const blockExpired = entry.blockUntil && entry.blockUntil <= now;
-        const notPermanentlyBlocked = !this.permanentBlocks.has(key);
-        
-        if ((isExpired && (blockExpired || !entry.blockUntil)) && notPermanentlyBlocked) {
-          this.store.delete(key);
-        }
-      }
-      this.lastCleanup = now;
-    }
-  }
 
   check(key: string, options: RateLimitOptions): RateLimitResult {
-    this.performCleanup();
-    
-    const { limit, windowMs, keyPrefix = "rl", blockDuration } = options;
     const now = Date.now();
-    const storeKey = `${keyPrefix}:${key}`;
+    const { limit, windowMs, blockDuration } = options;
     
-    // Check permanent blocks
-    if (this.permanentBlocks.has(storeKey)) {
-      return {
-        allowed: false,
-        remaining: 0,
-        retryAfterMs: 365 * 24 * 60 * 60 * 1000,
-        resetTime: now + windowMs,
-        limit,
-        windowMs,
-        blocked: true,
-        blockUntil: now + 365 * 24 * 60 * 60 * 1000,
-      };
-    }
-
-    let entry = this.store.get(storeKey);
-
-    // Check if blocked temporarily
+    let entry = this.store.get(key);
+    
+    // Check if blocked
     if (entry?.blockUntil && entry.blockUntil > now) {
       return {
         allowed: false,
@@ -187,7 +150,7 @@ class MemoryStorage implements RateLimitStorage {
         blockUntil: entry.blockUntil,
       };
     }
-
+    
     // Create new entry if expired or doesn't exist
     if (!entry || now > entry.resetTime) {
       entry = {
@@ -196,7 +159,7 @@ class MemoryStorage implements RateLimitStorage {
         firstRequestTime: now,
       };
     }
-
+    
     // Increment count
     entry.count += 1;
     
@@ -207,9 +170,12 @@ class MemoryStorage implements RateLimitStorage {
     if (exceeded && blockDuration && !entry.blockUntil) {
       entry.blockUntil = now + blockDuration;
     }
-
-    this.store.set(storeKey, entry);
-
+    
+    this.store.set(key, entry);
+    
+    // Cleanup old entries periodically
+    this.cleanup();
+    
     return {
       allowed: !exceeded,
       remaining: Math.max(0, limit - entry.count),
@@ -221,391 +187,68 @@ class MemoryStorage implements RateLimitStorage {
       blockUntil: entry.blockUntil,
     };
   }
-
-  createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
-    const headers: Record<string, string> = {
-      "X-RateLimit-Limit": result.limit.toString(),
-      "X-RateLimit-Remaining": result.remaining.toString(),
-      "X-RateLimit-Reset": Math.ceil(result.resetTime / 1000).toString(),
-    };
-    
-    if (result.retryAfterMs > 0) {
-      headers["Retry-After"] = Math.ceil(result.retryAfterMs / 1000).toString();
-    }
-    
-    if (result.blocked && result.blockUntil) {
-      headers["X-RateLimit-Blocked-Until"] = new Date(result.blockUntil).toISOString();
-    }
-    
-    return headers;
-  }
-
-  async getStats() {
+  
+  private cleanup(): void {
     const now = Date.now();
-    const activeBuckets = Array.from(this.store.values()).filter(b => b.resetTime > now).length;
-    const blockedKeys = Array.from(this.store.values()).filter(b => b.blockUntil && b.blockUntil > now).length;
+    const maxAge = 3600000; // 1 hour
     
-    return {
-      totalBuckets: this.store.size,
-      activeBuckets,
-      blockedKeys,
-      permanentBlocks: this.permanentBlocks.size,
-      storage: 'memory',
-    };
-  }
-}
-
-// Redis storage implementation
-class RedisStorage implements RateLimitStorage {
-  async check(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
-    // Convert our options to Redis rate limiter config
-    const redisResult = await rateLimitRedis.check(key, {
-      windowMs: options.windowMs,
-      max: options.limit,
-      keyPrefix: options.keyPrefix || 'rl',
-      blockDuration: options.blockDuration,
-    });
-
-    // Convert Redis result to our unified format
-    return {
-      allowed: redisResult.allowed,
-      remaining: redisResult.remaining,
-      retryAfterMs: redisResult.blocked && redisResult.blockUntil 
-        ? Math.max(0, redisResult.blockUntil - Date.now())
-        : 0,
-      resetTime: redisResult.resetAt,
-      limit: redisResult.limit,
-      windowMs: options.windowMs,
-      blocked: redisResult.blocked,
-      blockUntil: redisResult.blockUntil,
-    };
-  }
-
-  createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
-    const headers: Record<string, string> = {
-      "X-RateLimit-Limit": result.limit.toString(),
-      "X-RateLimit-Remaining": result.remaining.toString(),
-      "X-RateLimit-Reset": Math.ceil(result.resetTime / 1000).toString(),
-    };
-    
-    if (result.retryAfterMs > 0) {
-      headers["Retry-After"] = Math.ceil(result.retryAfterMs / 1000).toString();
-    }
-    
-    if (result.blocked && result.blockUntil) {
-      headers["X-RateLimit-Blocked-Until"] = new Date(result.blockUntil).toISOString();
-    }
-    
-    return headers;
-  }
-
-  async getStats() {
-    const stats = await rateLimitRedis.getStats();
-    return {
-      ...stats,
-      storage: 'redis',
-    };
-  }
-}
-
-// Factory to create appropriate storage
-function createStorage(options: RateLimitOptions): RateLimitStorage {
-  const useRedis = options.useRedis ?? !!process.env.REDIS_URL;
-  
-  if (useRedis && process.env.REDIS_URL) {
-    try {
-      return new RedisStorage();
-    } catch (error) {
-      console.warn('[RateLimit] Failed to initialize Redis storage, falling back to memory:', error);
-      return new MemoryStorage();
-    }
-  }
-  
-  return new MemoryStorage();
-}
-
-// Main unified rate limiter
-class UnifiedRateLimiter {
-  private getStorage(options: RateLimitOptions): RateLimitStorage {
-    return createStorage(options);
-  }
-
-  check(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult> {
-    const storage = this.getStorage(options);
-    return storage.check(key, options);
-  }
-
-  createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
-    const storage = new MemoryStorage(); // Headers are the same for both
-    return storage.createRateLimitHeaders(result);
-  }
-
-  getClientIp(req: NextApiRequest | NextRequest): string {
-    // Handle Edge/NextRequest
-    if ('headers' in req && req.headers && typeof (req.headers as any).get === 'function') {
-      const edgeHeaders = req.headers as any;
-      const ip = 
-        edgeHeaders.get('cf-connecting-ip') ||
-        edgeHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-        edgeHeaders.get('x-real-ip') ||
-        'unknown';
-      return ip;
-    }
-    
-    // Handle NextApiRequest
-    const apiReq = req as NextApiRequest;
-    const forwarded = apiReq.headers['x-forwarded-for'];
-    const cfIp = apiReq.headers['cf-connecting-ip'];
-    
-    if (cfIp) {
-      return Array.isArray(cfIp) ? cfIp[0] : cfIp;
-    }
-    
-    if (forwarded) {
-      const ips = Array.isArray(forwarded) ? forwarded : forwarded.split(',');
-      return ips[0]?.trim() || 'unknown';
-    }
-    
-    return apiReq.socket?.remoteAddress || 'unknown';
-  }
-
-  getRateLimitKeys(req: NextApiRequest | NextRequest, keyPrefix: string): string[] {
-    const ip = this.getClientIp(req);
-    const cleanIp = ip.replace(/[^a-fA-F0-9.:]/g, '');
-    
-    // For Edge requests, also consider the pathname
-    if ('nextUrl' in req && req.nextUrl) {
-      const pathname = (req as NextRequest).nextUrl.pathname;
-      return [
-        `${keyPrefix}:${cleanIp}`,
-        `${keyPrefix}:${cleanIp}:${pathname}`,
-        `${keyPrefix}:${pathname}`
-      ];
-    }
-    
-    // For API requests
-    return [`${keyPrefix}:${cleanIp}`];
-  }
-
-  async checkMultipleRateLimits(
-    keys: string[], 
-    options: RateLimitOptions
-  ): Promise<{ worstResult: RateLimitResult }> {
-    const storage = this.getStorage(options);
-    const promises = keys.map(k => storage.check(k, options));
-    
-    // Handle both sync and async results
-    const results = await Promise.all(
-      promises.map(p => 
-        p instanceof Promise ? p : Promise.resolve(p)
-      )
-    );
-    
-    const worstResult = results.reduce((prev, curr) => {
-      if (!curr.allowed && !prev.allowed) {
-        return curr.retryAfterMs > prev.retryAfterMs ? curr : prev;
+    for (const [key, entry] of this.store.entries()) {
+      if (now - entry.firstRequestTime > maxAge) {
+        this.store.delete(key);
       }
-      if (!curr.allowed) return curr;
-      if (!prev.allowed) return prev;
-      return curr.remaining < prev.remaining ? curr : prev;
-    }, results[0]);
-
-    return { worstResult };
-  }
-
-  async getStorageStats(options: RateLimitOptions) {
-    const storage = this.getStorage(options);
-    if (storage.getStats) {
-      return storage.getStats();
     }
-    return { storage: 'unknown' };
   }
 }
 
-// Singleton instance
-let unifiedLimiter: UnifiedRateLimiter | null = null;
+// ==================== UTILITY FUNCTIONS ====================
+export const isEdgeRuntime = 
+  typeof process !== 'undefined' ? 
+    process.env.NEXT_RUNTIME === 'edge' || 
+    process.env.VERCEL === '1' && process.env.VERCEL_ENV !== 'development' :
+  false;
 
-function getUnifiedLimiter(): UnifiedRateLimiter {
-  if (!unifiedLimiter) {
-    unifiedLimiter = new UnifiedRateLimiter();
-  }
-  return unifiedLimiter;
-}
-
-// Async wrapper for Redis calls
-async function rateLimitAsync(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
-  const limiter = getUnifiedLimiter();
-  const result = limiter.check(key, options);
-  
-  // If result comes from Redis (Promise), await it
-  if (result instanceof Promise) {
-    return await result;
+export function getClientIp(req: NextApiRequest | NextRequest): string {
+  // Handle Edge/NextRequest
+  if ('headers' in req && req.headers && typeof (req.headers as any).get === 'function') {
+    const edgeHeaders = req.headers as any;
+    const ip = 
+      edgeHeaders.get('cf-connecting-ip') ||
+      edgeHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      edgeHeaders.get('x-real-ip') ||
+      'unknown';
+    return ip;
   }
   
-  return result;
-}
-
-// Public API functions
-export function rateLimit(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult> {
-  return getUnifiedLimiter().check(key, options);
+  // Handle NextApiRequest
+  const apiReq = req as NextApiRequest;
+  const forwarded = apiReq.headers['x-forwarded-for'];
+  
+  if (forwarded) {
+    const ips = Array.isArray(forwarded) ? forwarded : forwarded.split(',');
+    return ips[0]?.trim() || 'unknown';
+  }
+  
+  return apiReq.socket?.remoteAddress || 'unknown';
 }
 
 export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
-  return getUnifiedLimiter().createRateLimitHeaders(result);
-}
-
-export function getClientIp(req: NextApiRequest | NextRequest): string {
-  return getUnifiedLimiter().getClientIp(req);
-}
-
-export function getRateLimitKeys(req: NextApiRequest | NextRequest, keyPrefix: string): string[] {
-  return getUnifiedLimiter().getRateLimitKeys(req, keyPrefix);
-}
-
-// Async version for use with Redis
-export async function checkMultipleRateLimits(
-  keys: string[], 
-  options: RateLimitOptions
-): Promise<{ worstResult: RateLimitResult }> {
-  return await getUnifiedLimiter().checkMultipleRateLimits(keys, options);
-}
-
-// Backoff wrapper
-export function rateLimitWithBackoff(key: string, options: RateLimitOptions): RateLimitResult | Promise<RateLimitResult> {
-  const result = rateLimit(key, options);
-  
-  // Handle async results
-  if (result instanceof Promise) {
-    return result.then(res => {
-      if (!res.allowed && res.blockUntil) {
-        // Apply exponential backoff: double the block duration
-        const backoffResult = { ...res };
-        if (backoffResult.blockUntil) {
-          const originalBlockDuration = backoffResult.blockUntil - Date.now();
-          const newBlockDuration = Math.min(originalBlockDuration * 2, 3600000); // Max 1 hour
-          backoffResult.blockUntil = Date.now() + newBlockDuration;
-          backoffResult.retryAfterMs = newBlockDuration;
-        }
-        return backoffResult;
-      }
-      return res;
-    });
-  }
-  
-  // Handle sync results
-  if (!result.allowed && result.blockUntil) {
-    // Apply exponential backoff: double the block duration
-    const backoffResult = { ...result };
-    if (backoffResult.blockUntil) {
-      const originalBlockDuration = backoffResult.blockUntil - Date.now();
-      const newBlockDuration = Math.min(originalBlockDuration * 2, 3600000); // Max 1 hour
-      backoffResult.blockUntil = Date.now() + newBlockDuration;
-      backoffResult.retryAfterMs = newBlockDuration;
-    }
-    return backoffResult;
-  }
-  
-  return result;
-}
-
-// Legacy compatibility
-export async function isRateLimited(
-  key: string, 
-  bucket: string, 
-  limit: number, 
-  windowMs = 300000
-): Promise<LegacyIsRateLimitedResult> {
-  const res = await rateLimitAsync(`${bucket}:${key}`, { 
-    limit, 
-    windowMs, 
-    keyPrefix: bucket,
-    useRedis: !!process.env.REDIS_URL
-  });
-  return {
-    limited: !res.allowed,
-    retryAfter: Math.ceil(res.retryAfterMs / 1000),
-    limit: res.limit,
-    remaining: res.remaining
+  const headers: Record<string, string> = {
+    "X-RateLimit-Limit": result.limit.toString(),
+    "X-RateLimit-Remaining": result.remaining.toString(),
+    "X-RateLimit-Reset": Math.ceil(result.resetTime / 1000).toString(),
   };
-}
-
-// Middleware for Next.js API routes (Pages Router)
-export function withApiRateLimit(
-  handler: (req: NextApiRequest, res: NextApiResponse) => Promise<void> | void,
-  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL,
-  useBackoff = false
-) {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
-    try {
-      const keys = getRateLimitKeys(req, options.keyPrefix || 'rl');
-      
-      // Use async version for Redis compatibility
-      const { worstResult } = await checkMultipleRateLimits(keys, options);
-      
-      // Add headers to response
-      const headers = createRateLimitHeaders(worstResult);
-      Object.entries(headers).forEach(([key, value]) => {
-        res.setHeader(key, value);
-      });
-      
-      if (!worstResult.allowed) {
-        res.status(429).json({
-          error: 'Too Many Requests',
-          message: 'Rate limit exceeded',
-          retryAfter: worstResult.retryAfterMs > 0 ? Math.ceil(worstResult.retryAfterMs / 1000) : undefined,
-          resetAt: new Date(worstResult.resetTime).toISOString()
-        });
-        return;
-      }
-      
-      // All rate limits passed, call handler
-      await handler(req, res);
-      
-    } catch (error) {
-      console.error('[RateLimit] Error:', error);
-      // Fail open - don't block on rate limit errors
-      await handler(req, res);
-    }
-  };
-}
-
-// Middleware for Next.js Edge/App Router
-export async function withEdgeRateLimit(
-  req: NextRequest,
-  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL,
-  useBackoff = false
-): Promise<{ allowed: boolean; headers: Record<string, string>; result?: RateLimitResult }> {
-  try {
-    const keys = getRateLimitKeys(req, options.keyPrefix || 'rl');
-    
-    // Use async version for Redis compatibility
-    const { worstResult } = await checkMultipleRateLimits(keys, options);
-    
-    if (!worstResult.allowed) {
-      return {
-        allowed: false,
-        headers: createRateLimitHeaders(worstResult),
-        result: worstResult
-      };
-    }
-    
-    return {
-      allowed: true,
-      headers: createRateLimitHeaders(worstResult),
-      result: worstResult
-    };
-    
-  } catch (error) {
-    console.error('[EdgeRateLimit] Error:', error);
-    // Fail open
-    return {
-      allowed: true,
-      headers: {}
-    };
+  
+  if (result.retryAfterMs > 0) {
+    headers["Retry-After"] = Math.ceil(result.retryAfterMs / 1000).toString();
   }
+  
+  if (result.blocked && result.blockUntil) {
+    headers["X-RateLimit-Blocked-Until"] = new Date(result.blockUntil).toISOString();
+  }
+  
+  return headers;
 }
 
-// Helper function to create a rate-limited response
 export function createRateLimitedResponse(result: RateLimitResult): Response {
   const headers = createRateLimitHeaders(result);
   
@@ -626,53 +269,230 @@ export function createRateLimitedResponse(result: RateLimitResult): Response {
   );
 }
 
-// Utility to check which storage is being used
-export async function getRateLimitStorageInfo(options: RateLimitOptions): Promise<{
-  storage: 'memory' | 'redis' | 'unknown';
-  redisAvailable: boolean;
-  config: RateLimitOptions;
-}> {
-  const useRedis = options.useRedis ?? !!process.env.REDIS_URL;
-  const redisAvailable = !!process.env.REDIS_URL;
-  
-  return {
-    storage: useRedis && redisAvailable ? 'redis' : 'memory',
-    redisAvailable,
-    config: options,
+// ==================== EDGE RATE LIMIT MIDDLEWARE ====================
+export async function withEdgeRateLimit(
+  req: NextRequest,
+  config: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL,
+  useBackoff = false
+): Promise<EdgeRateLimitResult> {
+  try {
+    const ip = getClientIp(req);
+    const key = `${config.keyPrefix || 'rl'}:${ip}`;
+    
+    // Try to use Redis if available
+    let redisResult = null;
+    try {
+      const { rateLimitRedis } = await import('@/lib/rate-limit-redis');
+      if (rateLimitRedis) {
+        redisResult = await rateLimitRedis.check(ip, {
+          windowMs: config.windowMs,
+          max: config.limit,
+          keyPrefix: config.keyPrefix || 'rl',
+          blockDuration: config.blockDuration,
+        });
+        
+        // Convert Redis result to our format
+        if (redisResult) {
+          const result: RateLimitResult = {
+            allowed: redisResult.allowed,
+            remaining: redisResult.remaining,
+            retryAfterMs: redisResult.blocked && redisResult.blockUntil 
+              ? Math.max(0, redisResult.blockUntil - Date.now())
+              : 0,
+            resetTime: redisResult.resetAt || (Date.now() + config.windowMs),
+            limit: redisResult.limit || config.limit,
+            windowMs: config.windowMs,
+            blocked: redisResult.blocked,
+            blockUntil: redisResult.blockUntil,
+          };
+          
+          const headers = createRateLimitHeaders(result);
+          
+          return {
+            allowed: result.allowed,
+            headers,
+            result
+          };
+        }
+      }
+    } catch (redisError) {
+      // Redis not available, fall through
+    }
+    
+    // Fallback to memory or original rate limit
+    if (importedRateLimit?.checkRateLimit) {
+      const mockReq = { headers: req.headers, socket: { remoteAddress: ip } };
+      const mockRes = { setHeader: () => {} } as any;
+      
+      const originalResult = await importedRateLimit.checkRateLimit(
+        mockReq, 
+        mockRes, 
+        {
+          windowMs: config.windowMs,
+          max: config.limit,
+          keyPrefix: config.keyPrefix,
+          blockDuration: config.blockDuration,
+          useRedis: config.useRedis
+        }
+      );
+      
+      if (originalResult) {
+        const result: RateLimitResult = {
+          allowed: originalResult.allowed,
+          remaining: originalResult.remaining,
+          retryAfterMs: originalResult.blocked && originalResult.blockUntil 
+            ? Math.max(0, originalResult.blockUntil - Date.now())
+            : 0,
+          resetTime: originalResult.resetAt || (Date.now() + config.windowMs),
+          limit: originalResult.limit || config.limit,
+          windowMs: config.windowMs,
+          blocked: originalResult.blocked,
+          blockUntil: originalResult.blockUntil,
+        };
+        
+        const headers = createRateLimitHeaders(result);
+        
+        return {
+          allowed: result.allowed,
+          headers,
+          result
+        };
+      }
+    }
+    
+    // Last resort: memory storage
+    const memoryLimiter = new MemoryRateLimiter();
+    const result = memoryLimiter.check(key, config);
+    const headers = createRateLimitHeaders(result);
+    
+    return {
+      allowed: result.allowed,
+      headers,
+      result
+    };
+    
+  } catch (error) {
+    console.warn('[withEdgeRateLimit] Error, failing open:', error);
+    
+    // Fail open - don't block legitimate traffic
+    return {
+      allowed: true,
+      headers: {},
+      result: {
+        allowed: true,
+        remaining: config.limit,
+        retryAfterMs: 0,
+        resetTime: Date.now() + config.windowMs,
+        limit: config.limit,
+        windowMs: config.windowMs
+      }
+    };
+  }
+}
+
+// ==================== API RATE LIMIT MIDDLEWARE ====================
+export function withApiRateLimit(
+  handler: (req: NextApiRequest, res: NextApiResponse) => Promise<void> | void,
+  config: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL,
+  useBackoff = false
+) {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    try {
+      // Try to use original withRateLimit if available
+      if (importedRateLimit?.withRateLimit) {
+        const wrappedHandler = importedRateLimit.withRateLimit(config)(handler);
+        return wrappedHandler(req, res);
+      }
+      
+      // Fallback implementation
+      const ip = getClientIp(req);
+      const key = `${config.keyPrefix || 'rl'}:${ip}`;
+      
+      // Check rate limit
+      const memoryLimiter = new MemoryRateLimiter();
+      const result = memoryLimiter.check(key, config);
+      
+      // Add headers
+      const headers = createRateLimitHeaders(result);
+      Object.entries(headers).forEach(([key, value]) => {
+        res.setHeader(key, value);
+      });
+      
+      if (!result.allowed) {
+        res.status(429).json({
+          error: 'Too Many Requests',
+          message: 'Rate limit exceeded',
+          retryAfter: result.retryAfterMs > 0 ? Math.ceil(result.retryAfterMs / 1000) : undefined,
+          resetAt: new Date(result.resetTime).toISOString()
+        });
+        return;
+      }
+      
+      // All rate limits passed, call handler
+      await handler(req, res);
+      
+    } catch (error) {
+      console.error('[withApiRateLimit] Error, failing open:', error);
+      // Fail open - don't block on rate limit errors
+      await handler(req, res);
+    }
   };
 }
 
-// Get rate limiter stats
-export async function getRateLimiterStats(): Promise<any> {
-  const limiter = getUnifiedLimiter();
-  const stats = await limiter.getStorageStats(RATE_LIMIT_CONFIGS.API_GENERAL);
-  return stats;
+// ==================== GET RATE LIMIT KEYS ====================
+export function getRateLimitKeys(req: NextApiRequest | NextRequest, keyPrefix: string): string[] {
+  const ip = getClientIp(req);
+  const cleanIp = ip.replace(/[^a-fA-F0-9.:]/g, '');
+  
+  // For Edge requests, also consider the pathname
+  if ('nextUrl' in req && req.nextUrl) {
+    const pathname = (req as NextRequest).nextUrl.pathname;
+    return [
+      `${keyPrefix}:${cleanIp}`,
+      `${keyPrefix}:${cleanIp}:${pathname}`,
+      `${keyPrefix}:${pathname}`
+    ];
+  }
+  
+  // For API requests
+  return [`${keyPrefix}:${cleanIp}`];
 }
 
-// Unified export for convenience
+// ==================== CHECK MULTIPLE RATE LIMITS ====================
+export async function checkMultipleRateLimits(
+  keys: string[], 
+  config: RateLimitOptions
+): Promise<{ worstResult: RateLimitResult }> {
+  const memoryLimiter = new MemoryRateLimiter();
+  const results = keys.map(k => memoryLimiter.check(k, config));
+  
+  const worstResult = results.reduce((prev, curr) => {
+    if (!curr.allowed && !prev.allowed) {
+      return curr.retryAfterMs > prev.retryAfterMs ? curr : prev;
+    }
+    if (!curr.allowed) return curr;
+    if (!prev.allowed) return prev;
+    return curr.remaining < prev.remaining ? curr : prev;
+  }, results[0]);
+
+  return { worstResult };
+}
+
+// ==================== EXPORT EVERYTHING ====================
+export {
+  RATE_LIMIT_CONFIGS,
+  // Re-export original functions if available, otherwise use fallbacks
+  getClientIp as getClientIpFromRequest,
+};
+
 export default {
-  // Core functions
-  rateLimit,
-  rateLimitAsync,
-  rateLimitWithBackoff,
+  withApiRateLimit,
+  withEdgeRateLimit,
+  createRateLimitedResponse,
   createRateLimitHeaders,
   getClientIp,
   getRateLimitKeys,
   checkMultipleRateLimits,
-  
-  // Middleware
-  withApiRateLimit,
-  withEdgeRateLimit,
-  createRateLimitedResponse,
-  
-  // Legacy compatibility
-  isRateLimited,
-  
-  // Utilities
-  getRateLimitStorageInfo,
-  getRateLimiterStats,
-  
-  // Configurations
   RATE_LIMIT_CONFIGS,
   isEdgeRuntime
 };

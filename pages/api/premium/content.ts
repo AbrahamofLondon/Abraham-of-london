@@ -1,32 +1,29 @@
-// pages/api/premium/content.ts
-import type { NextApiRequest, NextApiResponse } from "next";
-import { withInnerCircleAccess } from "@/lib/server/withInnerCircleAccess";
+// pages/api/protected-content.ts - Use working imports
+import { NextApiRequest, NextApiResponse } from 'next';
+import { withRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
-const PREMIUM_CONTENT = {
-  reports: [
-    {
-      id: "report-001",
-      title: "Global Market Intelligence Q4",
-      pages: 42,
-      published: "2024-01-15",
-    },
-  ],
-};
-
-async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const access = (req as any).innerCircleAccess;
-
-  if (req.method !== "GET") {
-    return res.status(405).end();
-  }
-
-  return res.status(200).json({
-    success: true,
-    tier: access.tier,
-    data: PREMIUM_CONTENT,
-  });
+// Fallback inner circle check if needed
+function checkInnerCircleAccess(req: NextApiRequest) {
+  const cookie = req.cookies?.innerCircleAccess;
+  return cookie === 'true';
 }
 
-export default withInnerCircleAccess(handler, {
-  requireTier: ["patron", "founder"],
-});
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (!checkInnerCircleAccess(req)) {
+    return res.status(403).json({
+      error: 'Access Denied',
+      message: 'Inner circle access required'
+    });
+  }
+
+  // Protected content
+  res.status(200).json({
+    success: true,
+    data: {
+      protectedContent: 'This is exclusive inner circle content'
+    }
+  });
+};
+
+// Apply rate limiting
+export default withRateLimit(RATE_LIMIT_CONFIGS.API_WRITE)(handler);

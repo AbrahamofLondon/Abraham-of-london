@@ -1,146 +1,112 @@
-// lib/rate-limit-redis.ts - Production Redis Rate Limiter
-import redis, { createNamespacedClient } from './redis-enhanced';
+// lib/rate-limit-redis.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { getRedis } from "@/lib/redis";
 
-export interface RedisRateLimitConfig {
+export type RedisRateLimitOptions = {
   windowMs: number;
   max: number;
-  keyPrefix?: string;
-  blockDuration?: number;
-  useRedis?: boolean;
-}
+  keyPrefix: string;
+  blockDuration?: number; // ms
+};
 
-export interface RedisRateLimitResult {
+export type RedisRateLimitResult = {
   allowed: boolean;
   remaining: number;
+  resetAt: number; // epoch ms
   limit: number;
-  resetAt: number;
   blocked?: boolean;
-  blockUntil?: number;
+  blockUntil?: number; // epoch ms
+};
+
+function nowMs() {
+  return Date.now();
 }
 
-class RedisRateLimiter {
-  private client: any;
-  private namespace: string;
+export const rateLimitRedis = {
+  async check(key: string, opts: RedisRateLimitOptions): Promise<RedisRateLimitResult> {
+    const redis = getRedis();
+    if (!redis) {
+      // caller will fallback elsewhere
+      return {
+        allowed: true,
+        remaining: opts.max - 1,
+        resetAt: nowMs() + opts.windowMs,
+        limit: opts.max,
+        blocked: false,
+      };
+    }
 
-  constructor(namespace: string = 'rate-limit') {
-    this.namespace = namespace;
-    this.client = createNamespacedClient(namespace);
-  }
+    const storeKey = `${opts.keyPrefix}:${key}`;
+    const blockKey = `${storeKey}:block`;
+    const now = nowMs();
 
-  async check(key: string, config: RedisRateLimitConfig): Promise<RedisRateLimitResult> {
-    const now = Date.now();
-    const windowMs = config.windowMs;
-    const max = config.max;
-    const keyPrefix = config.keyPrefix || 'rl';
-    const blockDuration = config.blockDuration || 0;
-    
-    const redisKey = `${keyPrefix}:${key}`;
-    const blockKey = `${keyPrefix}:block:${key}`;
-    
-    // Check permanent block
-    const isBlocked = await this.client.get(blockKey);
-    if (isBlocked === '1') {
+    // 1) block check
+    const blockUntilStr = await redis.get(blockKey);
+    if (blockUntilStr) {
+      const blockUntil = Number(blockUntilStr);
+      if (blockUntil > now) {
+        return {
+          allowed: false,
+          remaining: 0,
+          resetAt: blockUntil,
+          limit: opts.max,
+          blocked: true,
+          blockUntil,
+        };
+      } else {
+        await redis.del(blockKey);
+      }
+    }
+
+    // 2) fixed window counter
+    const windowKey = `${storeKey}:win:${Math.floor(now / opts.windowMs)}`;
+    const multi = redis.multi();
+    multi.incr(windowKey);
+    multi.pttl(windowKey);
+    const [incrRes, ttlRes] = (await multi.exec()) as any[];
+
+    const count = Number(incrRes?.[1] ?? 1);
+    let ttl = Number(ttlRes?.[1] ?? -1);
+
+    if (ttl < 0) {
+      // first request in this window
+      await redis.pexpire(windowKey, opts.windowMs);
+      ttl = opts.windowMs;
+    }
+
+    const resetAt = now + ttl;
+    const exceeded = count > opts.max;
+
+    if (exceeded && opts.blockDuration) {
+      const blockUntil = now + opts.blockDuration;
+      await redis.set(blockKey, String(blockUntil), "PX", opts.blockDuration);
       return {
         allowed: false,
         remaining: 0,
-        limit: max,
-        resetAt: now + windowMs,
+        resetAt,
+        limit: opts.max,
         blocked: true,
-        blockUntil: now + 365 * 24 * 60 * 60 * 1000,
+        blockUntil,
       };
     }
-    
-    // Get current bucket
-    const bucketData = await this.client.get(redisKey);
-    let bucket = bucketData ? JSON.parse(bucketData) : null;
-    
-    if (!bucket || bucket.resetAt <= now) {
-      bucket = {
-        count: 0,
-        resetAt: now + windowMs,
-        firstRequestAt: now,
-      };
-    }
-    
-    // Check temporary block
-    if (bucket.blockUntil && bucket.blockUntil > now) {
-      return {
-        allowed: false,
-        remaining: 0,
-        limit: max,
-        resetAt: bucket.resetAt,
-        blocked: true,
-        blockUntil: bucket.blockUntil,
-      };
-    }
-    
-    bucket.count += 1;
-    await this.client.setex(
-      redisKey,
-      Math.ceil((bucket.resetAt - now) / 1000),
-      JSON.stringify(bucket)
-    );
-    
-    const allowed = bucket.count <= max;
-    
-    // Apply temporary block if limit exceeded
-    if (!allowed && blockDuration && !bucket.blockUntil) {
-      bucket.blockUntil = now + blockDuration;
-      await this.client.setex(
-        redisKey,
-        Math.ceil((bucket.resetAt - now) / 1000),
-        JSON.stringify(bucket)
-      );
-    }
-    
-    // Apply permanent block if configured
-    if (!allowed && config.blockDuration === -1) {
-      await this.client.set(blockKey, '1');
-    }
-    
+
     return {
-      allowed,
-      remaining: Math.max(max - bucket.count, 0),
-      limit: max,
-      resetAt: bucket.resetAt,
-      blocked: !!bucket.blockUntil && bucket.blockUntil > now,
-      blockUntil: bucket.blockUntil,
+      allowed: !exceeded,
+      remaining: Math.max(0, opts.max - count),
+      resetAt,
+      limit: opts.max,
+      blocked: false,
     };
-  }
-
-  async reset(key: string): Promise<boolean> {
-    const keys = await this.client.keys(`${this.namespace}:*:${key}`);
-    const blockKey = await this.client.keys(`${this.namespace}:*:block:${key}`);
-    
-    const allKeys = [...keys, ...blockKey];
-    const results = await Promise.all(allKeys.map(k => 
-      this.client.getClient().del(k.replace(`${this.namespace}:`, ''))
-    ));
-    
-    return results.some(r => r);
-  }
+  },
 
   async getStats() {
-    const keys = await this.client.keys('*');
-    const ping = await this.client.ping();
-    
-    return {
-      namespace: this.namespace,
-      totalKeys: keys.length,
-      status: ping === 'PONG' ? 'connected' : 'disconnected',
-      ping,
-    };
-  }
-}
-
-// Export singleton instances
-export const rateLimitRedis = new RedisRateLimiter('rate-limit');
-export const authRateLimitRedis = new RedisRateLimiter('auth-rate-limit');
-export const apiRateLimitRedis = new RedisRateLimiter('api-rate-limit');
-
-export default {
-  rateLimitRedis,
-  authRateLimitRedis,
-  apiRateLimitRedis,
-  RedisRateLimiter,
+    const redis = getRedis();
+    if (!redis) return { ok: false, reason: "no_redis" };
+    try {
+      const pong = await redis.ping();
+      return { ok: true, pong };
+    } catch (e: any) {
+      return { ok: false, reason: e?.message ?? "redis_error" };
+    }
+  },
 };

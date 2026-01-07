@@ -25,8 +25,8 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": false, // Keep false to avoid build issues
-    "noUnusedParameters": false, // Keep false to avoid build issues
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     
     // Performance optimizations
     "forceConsistentCasingInFileNames": true,
@@ -38,7 +38,7 @@
     "sourceMap": true,
     "inlineSources": false,
     
-    // Path aliases - UPDATED WITH ALL PATHS
+    // Path aliases - FIXED
     "paths": {
       "@/*": ["./*"],
       "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
@@ -49,11 +49,7 @@
       "@/lib/contentlayer/status": ["./lib/contentlayer/status.ts"],
       "@/lib/server/inner-circle-access": ["./lib/server/inner-circle-access.ts"],
       "@/lib/rate-limit": ["./lib/rate-limit.ts"],
-      "@/lib/rate-limit-redis": ["./lib/rate-limit-redis.ts"],
-      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"],
-      // Add edge runtime compatibility aliases
-      "next/server": ["./node_modules/next/server-edge"],
-      "next/headers": ["./node_modules/next/headers-edge"]
+      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"]
     },
     
     // Plugins
@@ -77,18 +73,11 @@
     ".next/types/**/*.ts",
     "contentlayer.config.js",
     ".contentlayer/generated",
-    // Include environment files for type checking
     ".env*.local",
-    // Include middleware and edge functions
     "middleware.ts",
     "netlify/edge-functions/**/*.ts",
-    // Include test files if needed
     "__tests__/**/*.ts",
-    "__tests__/**/*.tsx",
-    // Include the new files
-    "lib/db.ts",
-    "lib/contentlayer/status.ts",
-    "lib/server/inner-circle-access.ts"
+    "__tests__/**/*.tsx"
   ],
   
   "exclude": [
@@ -103,14 +92,12 @@
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "**/__mocks__/**",
-    // Exclude problematic directories
     "**/.cache/**",
     "**/.contentlayer/**",
     "**/temp/**",
     "**/tmp/**"
   ],
   
-  // TypeScript specific configurations
   "ts-node": {
     "transpileOnly": true,
     "compilerOptions": {
