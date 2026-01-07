@@ -1,44 +1,29 @@
 {
   "compilerOptions": {
-    // Modern target for better optimization
     "target": "es2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    
-    // Strict mode optimizations
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    
-    // Module resolution for Edge Runtime compatibility
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    
-    // React settings
     "jsx": "preserve",
     "incremental": true,
-    
-    // Additional strict checks for production
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    
-    // Performance optimizations
     "forceConsistentCasingInFileNames": true,
     "exactOptionalPropertyTypes": true,
-    
-    // Output and debugging
     "declaration": false,
     "declarationMap": false,
     "sourceMap": true,
     "inlineSources": false,
-    
-    // Path aliases - FIXED
     "paths": {
       "@/*": ["./*"],
       "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
@@ -49,23 +34,21 @@
       "@/lib/contentlayer/status": ["./lib/contentlayer/status.ts"],
       "@/lib/server/inner-circle-access": ["./lib/server/inner-circle-access.ts"],
       "@/lib/rate-limit": ["./lib/rate-limit.ts"],
-      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"]
+      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"],
+      "@/lib/premium/download-token": ["./lib/premium/download-token.ts"],
+      "@/lib/server/with-inner-circle-access": ["./lib/server/with-inner-circle-access.ts"],
+      "@/lib/inner-circle/access": ["./lib/inner-circle/access.ts"]
     },
-    
-    // Plugins
     "plugins": [
       {
         "name": "next"
       }
     ],
-    
-    // Additional compiler options
     "allowSyntheticDefaultImports": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "skipDefaultLibCheck": true
   },
-  
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -77,9 +60,14 @@
     "middleware.ts",
     "netlify/edge-functions/**/*.ts",
     "__tests__/**/*.ts",
-    "__tests__/**/*.tsx"
+    "__tests__/**/*.tsx",
+    "lib/contentlayer/status.ts",
+    "lib/db.ts",
+    "lib/server/inner-circle-access.ts",
+    "lib/server/rate-limit-unified.ts",
+    "lib/premium/download-token.ts",
+    "lib/server/with-inner-circle-access.ts"
   ],
-  
   "exclude": [
     "node_modules",
     ".next",
@@ -97,7 +85,6 @@
     "**/temp/**",
     "**/tmp/**"
   ],
-  
   "ts-node": {
     "transpileOnly": true,
     "compilerOptions": {

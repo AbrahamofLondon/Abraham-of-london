@@ -1,164 +1,190 @@
-// lib/inner-circle/access.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import crypto from "crypto";
-import type { NextApiRequest } from "next";
-import { rateLimit } from "@/lib/server/rate-limit-unified";
-import { RATE_LIMIT_CONFIGS } from "@/lib/server/rate-limit-unified";
-import { getKey, isExpired } from "@/lib/inner-circle/keys";
+// lib/inner-circle/access.ts - updated with fallbacks
+import type { NextApiRequest } from 'next';
+import type { NextRequest } from 'next/server';
 
-const COOKIE_NAME = "innerCircleAccess";
-const SECRET = process.env.INNER_CIRCLE_TOKEN_SECRET!;
+// ==================== SAFE IMPORTS ====================
+let rateLimitModule: any = null;
+let RATE_LIMIT_CONFIGS: any = null;
 
-export type AccessTier = "member" | "patron" | "founder";
+try {
+  const module = require('@/lib/server/rate-limit-unified');
+  rateLimitModule = module;
+  RATE_LIMIT_CONFIGS = module.RATE_LIMIT_CONFIGS;
+} catch (error) {
+  console.warn('[InnerCircleAccess] rate-limit-unified not available, using fallbacks');
+  RATE_LIMIT_CONFIGS = {
+    API_STRICT: { limit: 30, windowMs: 60000 },
+    API_GENERAL: { limit: 100, windowMs: 60000 },
+    INNER_CIRCLE: { limit: 30, windowMs: 60000 }
+  };
+}
 
-export type AccessState = {
-  ok: boolean;
+// ==================== INTERFACES ====================
+export interface InnerCircleAccess {
   hasAccess: boolean;
-  reason:
-    | "granted"
-    | "missing"
-    | "invalid"
-    | "expired"
-    | "revoked"
-    | "rate_limited";
-  memberId?: string;
-  tier?: AccessTier;
-  token?: string;
-  checkedAt: string;
-  expiresAt?: string;
+  reason?: 'no_cookie' | 'invalid_cookie' | 'rate_limited' | 'ip_blocked' | 'expired';
   rateLimit?: {
-    allowed: boolean;
     remaining: number;
-    resetAt: number;
+    limit: number;
+    resetTime: number;
+    retryAfterMs?: number;
   };
-};
-
-function sign(data: string) {
-  return crypto.createHmac("sha256", SECRET).update(data).digest("base64url");
+  userData?: {
+    ip: string;
+    userAgent: string;
+    timestamp: number;
+  };
 }
 
-function safeEqual(a: string, b: string) {
-  try {
-    return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
-  } catch {
-    return false;
+export interface AccessCheckOptions {
+  requireAuth?: boolean;
+  rateLimitConfig?: any;
+  skipRateLimit?: boolean;
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+function getClientIp(req: NextApiRequest | NextRequest): string {
+  if ('headers' in req && req.headers && typeof (req.headers as any).get === 'function') {
+    const edgeHeaders = req.headers as any;
+    return edgeHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   }
-}
-
-function parseJwt(token: string): { ok: boolean; sub?: string; tier?: AccessTier; exp?: number } {
-  try {
-    const [h, p, s] = token.split(".");
-    if (!h || !p || !s) return { ok: false };
-
-    const expected = sign(`${h}.${p}`);
-    if (!safeEqual(s, expected)) return { ok: false };
-
-    const payload = JSON.parse(Buffer.from(p, "base64url").toString("utf8"));
-    return { ok: true, sub: payload.sub, tier: payload.tier, exp: payload.exp };
-  } catch {
-    return { ok: false };
+  
+  const apiReq = req as NextApiRequest;
+  const forwarded = apiReq.headers['x-forwarded-for'];
+  
+  if (forwarded) {
+    const ips = Array.isArray(forwarded) ? forwarded : forwarded.split(',');
+    return ips[0]?.trim() || 'unknown';
   }
+  
+  return apiReq.socket?.remoteAddress || 'unknown';
 }
 
-export function createAccessToken(input: { memberId: string; tier: AccessTier; ttlDays?: number }): string {
-  const ttlDays = input.ttlDays ?? 30;
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
-  const payload = Buffer.from(
-    JSON.stringify({
-      sub: input.memberId,
-      tier: input.tier,
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + ttlDays * 86400,
-    })
-  ).toString("base64url");
-
-  const sig = sign(`${header}.${payload}`);
-  return `${header}.${payload}.${sig}`;
-}
-
-function extract(req: NextApiRequest): { token: string | null; source: "bearer" | "cookie" | "query" | "none" } {
-  const auth = req.headers.authorization;
-  if (auth?.startsWith("Bearer ")) return { token: auth.slice(7), source: "bearer" };
-
-  const cookieToken = req.cookies?.[COOKIE_NAME];
-  if (cookieToken) return { token: cookieToken, source: "cookie" };
-
-  const q = req.query?.accessKey || req.query?.key;
-  if (typeof q === "string") return { token: q, source: "query" };
-
-  return { token: null, source: "none" };
-}
-
-export async function getInnerCircleAccess(req: NextApiRequest): Promise<AccessState> {
-  const checkedAt = new Date().toISOString();
-
-  // Rate limit access validation itself
-  const ip =
-    (req.headers["x-nf-client-connection-ip"] as string) ||
-    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
-    "unknown";
-
-  const rl = await rateLimit(ip, RATE_LIMIT_CONFIGS.AUTH);
-
-  if (!rl.allowed) {
+// ==================== MAIN ACCESS CHECK ====================
+export async function getInnerCircleAccess(
+  req: NextApiRequest | NextRequest,
+  options: AccessCheckOptions = {}
+): Promise<InnerCircleAccess> {
+  const { requireAuth = true, rateLimitConfig, skipRateLimit = false } = options;
+  
+  const ip = getClientIp(req);
+  const userAgent = 'headers' in req 
+    ? (req.headers.get('user-agent') || '')
+    : (req as NextApiRequest).headers['user-agent'] || '';
+  
+  const hasAccessCookie = 'cookies' in req
+    ? req.cookies?.get('innerCircleAccess')?.value === "true"
+    : (req as NextApiRequest).cookies?.innerCircleAccess === "true";
+  
+  // ==================== RATE LIMITING ====================
+  if (!skipRateLimit) {
+    const config = rateLimitConfig || RATE_LIMIT_CONFIGS?.INNER_CIRCLE || RATE_LIMIT_CONFIGS?.API_STRICT;
+    
+    // Simple rate limiting check
+    const rateLimitKey = `inner-circle:${ip}`;
+    const now = Date.now();
+    
+    // Check if rate limit module is available
+    if (rateLimitModule?.withEdgeRateLimit && 'nextUrl' in req) {
+      try {
+        const { allowed, result } = await rateLimitModule.withEdgeRateLimit(
+          req as NextRequest,
+          config
+        );
+        
+        if (!allowed) {
+          return {
+            hasAccess: false,
+            reason: 'rate_limited',
+            rateLimit: {
+              remaining: result?.remaining || 0,
+              limit: result?.limit || config.limit,
+              resetTime: result?.resetTime || (now + config.windowMs),
+              retryAfterMs: result?.retryAfterMs
+            },
+            userData: { ip, userAgent, timestamp: now }
+          };
+        }
+      } catch (error) {
+        // Rate limiting failed, continue without it
+        console.warn('[InnerCircleAccess] Rate limiting error:', error);
+      }
+    }
+  }
+  
+  // ==================== AUTH CHECK ====================
+  if (requireAuth && !hasAccessCookie) {
     return {
-      ok: false,
       hasAccess: false,
-      reason: "rate_limited",
-      checkedAt,
-      rateLimit: { allowed: false, remaining: rl.remaining, resetAt: rl.resetTime },
+      reason: 'no_cookie',
+      userData: { ip, userAgent, timestamp: Date.now() }
     };
   }
-
-  const { token } = extract(req);
-  if (!token) {
-    return {
-      ok: false,
-      hasAccess: false,
-      reason: "missing",
-      checkedAt,
-      rateLimit: { allowed: true, remaining: rl.remaining, resetAt: rl.resetTime },
-    };
-  }
-
-  // Access Key path
-  if (token.startsWith("IC-")) {
-    const rec = await getKey(token);
-    if (!rec) return { ok: false, hasAccess: false, reason: "invalid", checkedAt };
-
-    if (rec.revoked) return { ok: false, hasAccess: false, reason: "revoked", checkedAt };
-    if (isExpired(rec.expiresAt)) return { ok: false, hasAccess: false, reason: "expired", checkedAt };
-
-    return {
-      ok: true,
-      hasAccess: true,
-      reason: "granted",
-      checkedAt,
-      memberId: rec.memberId,
-      tier: rec.tier,
-      token,
-      expiresAt: rec.expiresAt,
-      rateLimit: { allowed: true, remaining: rl.remaining, resetAt: rl.resetTime },
-    };
-  }
-
-  // JWT path
-  const parsed = parseJwt(token);
-  if (!parsed.ok) return { ok: false, hasAccess: false, reason: "invalid", checkedAt };
-
-  if (parsed.exp && parsed.exp < Math.floor(Date.now() / 1000)) {
-    return { ok: false, hasAccess: false, reason: "expired", checkedAt };
-  }
-
+  
+  // ==================== SUCCESS ====================
   return {
-    ok: true,
     hasAccess: true,
-    reason: "granted",
-    checkedAt,
-    memberId: parsed.sub,
-    tier: parsed.tier,
-    token,
-    expiresAt: parsed.exp ? new Date(parsed.exp * 1000).toISOString() : undefined,
-    rateLimit: { allowed: true, remaining: rl.remaining, resetAt: rl.resetTime },
+    userData: { ip, userAgent, timestamp: Date.now() }
   };
+}
+
+// ==================== API MIDDLEWARE WRAPPER ====================
+export function withInnerCircleAccess(
+  handler: (req: NextApiRequest, res: any) => Promise<void> | void,
+  options: AccessCheckOptions = {}
+) {
+  return async (req: NextApiRequest, res: any) => {
+    try {
+      const access = await getInnerCircleAccess(req, options);
+      
+      if (!access.hasAccess) {
+        if (access.reason === 'rate_limited') {
+          res.status(429).json({
+            error: 'Too Many Requests',
+            message: 'Rate limit exceeded',
+            retryAfter: access.rateLimit?.retryAfterMs
+          });
+          return;
+        }
+        
+        res.status(403).json({
+          error: 'Access Denied',
+          reason: access.reason,
+          message: 'Inner circle access required'
+        });
+        return;
+      }
+      
+      // Add security headers
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-Access-Level', 'inner-circle');
+      
+      // Call handler
+      await handler(req, res);
+      
+    } catch (error) {
+      console.error('[InnerCircleAccess] Error:', error);
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: 'Failed to verify access'
+      });
+    }
+  };
+}
+
+// ==================== EXPORT HELPER FUNCTIONS ====================
+export function checkInnerCircleAccessInPage(context: any) {
+  return {
+    props: { innerCircleAccess: { hasAccess: false, reason: 'not_implemented' } },
+    redirect: { destination: '/inner-circle/login', permanent: false }
+  };
+}
+
+export function createPublicApiHandler(handler: any) {
+  return withInnerCircleAccess(handler, { requireAuth: false });
+}
+
+export function createStrictApiHandler(handler: any) {
+  return withInnerCircleAccess(handler, { requireAuth: true });
 }

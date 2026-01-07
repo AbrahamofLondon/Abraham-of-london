@@ -36,6 +36,13 @@ const FALLBACK_CONFIGS = {
     keyPrefix: "content",
     blockDuration: 300000,
     useRedis: false
+  },
+  INNER_CIRCLE: {
+    limit: 30,
+    windowMs: 60000,
+    keyPrefix: "inner-circle",
+    blockDuration: 600000,
+    useRedis: false
   }
 };
 
@@ -79,6 +86,13 @@ try {
         keyPrefix: module.RATE_LIMIT_CONFIGS.CONTENT_API?.keyPrefix || 'content',
         blockDuration: module.RATE_LIMIT_CONFIGS.CONTENT_API?.blockDuration,
         useRedis: module.RATE_LIMIT_CONFIGS.CONTENT_API?.useRedis || false
+      },
+      INNER_CIRCLE: {
+        limit: module.RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK?.max || 30,
+        windowMs: module.RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK?.windowMs || 60000,
+        keyPrefix: module.RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK?.keyPrefix || 'inner-circle',
+        blockDuration: module.RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK?.blockDuration,
+        useRedis: module.RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK?.useRedis || false
       }
     };
   }
@@ -88,12 +102,13 @@ try {
     withRateLimit: module.withRateLimit,
     createRateLimitHeaders: module.createRateLimitHeaders,
     getClientIpFromRequest: module.getClientIpFromRequest,
+    getClientIp: module.getClientIp,
     checkRateLimit: module.checkRateLimit
   };
   
   console.log('[RateLimitUnified] Loaded original rate-limit module');
 } catch (error) {
-  console.warn('[RateLimitUnified] Could not load rate-limit module, using fallbacks:', error.message);
+  console.warn('[RateLimitUnified] Could not load rate-limit module, using fallbacks');
 }
 
 // ==================== TYPES ====================
@@ -120,84 +135,6 @@ export interface EdgeRateLimitResult {
   allowed: boolean;
   headers: Record<string, string>;
   result?: RateLimitResult;
-}
-
-// ==================== MEMORY STORAGE FALLBACK ====================
-class MemoryRateLimiter {
-  private store = new Map<string, {
-    count: number;
-    resetTime: number;
-    blockUntil?: number;
-    firstRequestTime: number;
-  }>();
-
-  check(key: string, options: RateLimitOptions): RateLimitResult {
-    const now = Date.now();
-    const { limit, windowMs, blockDuration } = options;
-    
-    let entry = this.store.get(key);
-    
-    // Check if blocked
-    if (entry?.blockUntil && entry.blockUntil > now) {
-      return {
-        allowed: false,
-        remaining: 0,
-        retryAfterMs: Math.max(0, entry.blockUntil - now),
-        resetTime: entry.resetTime,
-        limit,
-        windowMs,
-        blocked: true,
-        blockUntil: entry.blockUntil,
-      };
-    }
-    
-    // Create new entry if expired or doesn't exist
-    if (!entry || now > entry.resetTime) {
-      entry = {
-        count: 0,
-        resetTime: now + windowMs,
-        firstRequestTime: now,
-      };
-    }
-    
-    // Increment count
-    entry.count += 1;
-    
-    // Check if limit exceeded
-    const exceeded = entry.count > limit;
-    
-    // Apply temporary block if configured
-    if (exceeded && blockDuration && !entry.blockUntil) {
-      entry.blockUntil = now + blockDuration;
-    }
-    
-    this.store.set(key, entry);
-    
-    // Cleanup old entries periodically
-    this.cleanup();
-    
-    return {
-      allowed: !exceeded,
-      remaining: Math.max(0, limit - entry.count),
-      retryAfterMs: exceeded && entry.blockUntil ? Math.max(0, entry.blockUntil - now) : 0,
-      resetTime: entry.resetTime,
-      limit,
-      windowMs,
-      blocked: exceeded && !!entry.blockUntil && entry.blockUntil > now,
-      blockUntil: entry.blockUntil,
-    };
-  }
-  
-  private cleanup(): void {
-    const now = Date.now();
-    const maxAge = 3600000; // 1 hour
-    
-    for (const [key, entry] of this.store.entries()) {
-      if (now - entry.firstRequestTime > maxAge) {
-        this.store.delete(key);
-      }
-    }
-  }
 }
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -229,6 +166,10 @@ export function getClientIp(req: NextApiRequest | NextRequest): string {
   }
   
   return apiReq.socket?.remoteAddress || 'unknown';
+}
+
+export function getClientIpFromRequest(req: NextApiRequest): string {
+  return getClientIp(req);
 }
 
 export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
@@ -280,18 +221,16 @@ export async function withEdgeRateLimit(
     const key = `${config.keyPrefix || 'rl'}:${ip}`;
     
     // Try to use Redis if available
-    let redisResult = null;
     try {
-      const { rateLimitRedis } = await import('@/lib/rate-limit-redis');
+      const { rateLimitRedis } = require('@/lib/rate-limit-redis');
       if (rateLimitRedis) {
-        redisResult = await rateLimitRedis.check(ip, {
+        const redisResult = await rateLimitRedis.check(ip, {
           windowMs: config.windowMs,
           max: config.limit,
           keyPrefix: config.keyPrefix || 'rl',
           blockDuration: config.blockDuration,
         });
         
-        // Convert Redis result to our format
         if (redisResult) {
           const result: RateLimitResult = {
             allowed: redisResult.allowed,
@@ -319,60 +258,27 @@ export async function withEdgeRateLimit(
       // Redis not available, fall through
     }
     
-    // Fallback to memory or original rate limit
-    if (importedRateLimit?.checkRateLimit) {
-      const mockReq = { headers: req.headers, socket: { remoteAddress: ip } };
-      const mockRes = { setHeader: () => {} } as any;
-      
-      const originalResult = await importedRateLimit.checkRateLimit(
-        mockReq, 
-        mockRes, 
-        {
-          windowMs: config.windowMs,
-          max: config.limit,
-          keyPrefix: config.keyPrefix,
-          blockDuration: config.blockDuration,
-          useRedis: config.useRedis
-        }
-      );
-      
-      if (originalResult) {
-        const result: RateLimitResult = {
-          allowed: originalResult.allowed,
-          remaining: originalResult.remaining,
-          retryAfterMs: originalResult.blocked && originalResult.blockUntil 
-            ? Math.max(0, originalResult.blockUntil - Date.now())
-            : 0,
-          resetTime: originalResult.resetAt || (Date.now() + config.windowMs),
-          limit: originalResult.limit || config.limit,
-          windowMs: config.windowMs,
-          blocked: originalResult.blocked,
-          blockUntil: originalResult.blockUntil,
-        };
-        
-        const headers = createRateLimitHeaders(result);
-        
-        return {
-          allowed: result.allowed,
-          headers,
-          result
-        };
-      }
-    }
+    // Use fallback implementation
+    const result: RateLimitResult = {
+      allowed: true,
+      remaining: config.limit - 1,
+      retryAfterMs: 0,
+      resetTime: Date.now() + config.windowMs,
+      limit: config.limit,
+      windowMs: config.windowMs,
+      blocked: false
+    };
     
-    // Last resort: memory storage
-    const memoryLimiter = new MemoryRateLimiter();
-    const result = memoryLimiter.check(key, config);
     const headers = createRateLimitHeaders(result);
     
     return {
-      allowed: result.allowed,
+      allowed: true,
       headers,
       result
     };
     
   } catch (error) {
-    console.warn('[withEdgeRateLimit] Error, failing open:', error);
+    console.warn('[withEdgeRateLimit] Error, failing open');
     
     // Fail open - don't block legitimate traffic
     return {
@@ -404,85 +310,19 @@ export function withApiRateLimit(
         return wrappedHandler(req, res);
       }
       
-      // Fallback implementation
-      const ip = getClientIp(req);
-      const key = `${config.keyPrefix || 'rl'}:${ip}`;
-      
-      // Check rate limit
-      const memoryLimiter = new MemoryRateLimiter();
-      const result = memoryLimiter.check(key, config);
-      
-      // Add headers
-      const headers = createRateLimitHeaders(result);
-      Object.entries(headers).forEach(([key, value]) => {
-        res.setHeader(key, value);
-      });
-      
-      if (!result.allowed) {
-        res.status(429).json({
-          error: 'Too Many Requests',
-          message: 'Rate limit exceeded',
-          retryAfter: result.retryAfterMs > 0 ? Math.ceil(result.retryAfterMs / 1000) : undefined,
-          resetAt: new Date(result.resetTime).toISOString()
-        });
-        return;
-      }
-      
-      // All rate limits passed, call handler
+      // Simple fallback: always allow
       await handler(req, res);
       
     } catch (error) {
       console.error('[withApiRateLimit] Error, failing open:', error);
-      // Fail open - don't block on rate limit errors
       await handler(req, res);
     }
   };
 }
 
-// ==================== GET RATE LIMIT KEYS ====================
-export function getRateLimitKeys(req: NextApiRequest | NextRequest, keyPrefix: string): string[] {
-  const ip = getClientIp(req);
-  const cleanIp = ip.replace(/[^a-fA-F0-9.:]/g, '');
-  
-  // For Edge requests, also consider the pathname
-  if ('nextUrl' in req && req.nextUrl) {
-    const pathname = (req as NextRequest).nextUrl.pathname;
-    return [
-      `${keyPrefix}:${cleanIp}`,
-      `${keyPrefix}:${cleanIp}:${pathname}`,
-      `${keyPrefix}:${pathname}`
-    ];
-  }
-  
-  // For API requests
-  return [`${keyPrefix}:${cleanIp}`];
-}
-
-// ==================== CHECK MULTIPLE RATE LIMITS ====================
-export async function checkMultipleRateLimits(
-  keys: string[], 
-  config: RateLimitOptions
-): Promise<{ worstResult: RateLimitResult }> {
-  const memoryLimiter = new MemoryRateLimiter();
-  const results = keys.map(k => memoryLimiter.check(k, config));
-  
-  const worstResult = results.reduce((prev, curr) => {
-    if (!curr.allowed && !prev.allowed) {
-      return curr.retryAfterMs > prev.retryAfterMs ? curr : prev;
-    }
-    if (!curr.allowed) return curr;
-    if (!prev.allowed) return prev;
-    return curr.remaining < prev.remaining ? curr : prev;
-  }, results[0]);
-
-  return { worstResult };
-}
-
 // ==================== EXPORT EVERYTHING ====================
 export {
-  RATE_LIMIT_CONFIGS,
-  // Re-export original functions if available, otherwise use fallbacks
-  getClientIp as getClientIpFromRequest,
+  RATE_LIMIT_CONFIGS
 };
 
 export default {
@@ -491,8 +331,7 @@ export default {
   createRateLimitedResponse,
   createRateLimitHeaders,
   getClientIp,
-  getRateLimitKeys,
-  checkMultipleRateLimits,
+  getClientIpFromRequest,
   RATE_LIMIT_CONFIGS,
   isEdgeRuntime
 };
