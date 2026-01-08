@@ -315,7 +315,7 @@ export function getEmailHash(email: string): string {
     .substring(0, 32);
 }
 
-// Export everything for backward compatibility
+/// Export everything for backward compatibility
 export default {
   generateAccessKey,
   storeKey,
@@ -329,7 +329,5 @@ export default {
   cleanupExpiredKeys,
   isExpired,
   getMemoryStoreSize,
-  getEmailHash,
-  type StoredKey,
-  type KeyTier
+  getEmailHash
 };

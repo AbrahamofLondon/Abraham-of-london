@@ -661,7 +661,10 @@ const enhancedInnerCircleStore = {
 
 export default enhancedInnerCircleStore;
 
-// Re-export everything for compatibility
+// ============================================================================
+// EXPORT EVERYTHING NEEDED
+// ============================================================================
+
 export { 
   withInnerCircleRateLimit,
   getPrivacySafeKeyExportWithRateLimit,
@@ -671,5 +674,49 @@ export {
   healthCheckEnhanced: enhancedInnerCircleStore.healthCheckEnhanced,
   createOrUpdateMemberAndIssueKeyWithRateLimit,
   verifyInnerCircleKeyWithRateLimit,
+  // Export all the functions that were missing
+  sendInnerCircleEmail,
+  emailModuleAvailable,
+  cleanupOldData,
+  rateLimitInnerCircleRegistration,
+  rateLimitInnerCircleAccess,
+  rateLimitInnerCircleAdmin,
+  checkInnerCircleRateLimits,
+  getRateLimitConfigs: enhancedInnerCircleStore.getRateLimitConfigs,
+  // Export the base store functions
+  createOrUpdateMemberAndIssueKey,
+  verifyInnerCircleKey,
+  getPrivacySafeStats,
+  getPrivacySafeKeyRows,
+  getPrivacySafeKeyExport,
+  deleteMemberByEmail,
+  cleanupExpiredData,
+  getClientIp,
+  getMemberByEmail,
+  getMemberKeys,
+  getActiveKeysForMember,
+  recordInnerCircleUnlock,
+  revokeInnerCircleKey,
+  suspendKey,
+  renewKey,
+  healthCheck,
+  // Type exports
   type RateLimitResult,
+  type CleanupOldDataStats,
+};
+
+// Export all types
+export type {
+  InnerCircleStatus,
+  CreateOrUpdateMemberArgs,
+  IssuedKey,
+  VerifyInnerCircleKeyResult,
+  InnerCircleMember,
+  AdminExportRow,
+  CleanupResult,
+  PaginationParams,
+  PaginatedResult,
+  PrivacySafeKeyRow,
+  MemberKeyRow,
+  ActiveKeyRow,
 };

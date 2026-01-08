@@ -1,4 +1,4 @@
-// lib/prisma.ts - Fixed Prisma initialization
+// lib/prisma.ts - Simplified Prisma initialization without adapter dependencies
 import { PrismaClient } from '@prisma/client';
 
 // Global type for Prisma instance
@@ -26,17 +26,9 @@ const isEdgeRuntime = (): boolean => {
   return process.env.NEXT_RUNTIME === 'edge';
 };
 
-// Check if adapter is available (build-time safe)
-const isAdapterAvailable = (): boolean => {
-  try {
-    // Use dynamic import check instead of require
-    if (typeof require === 'undefined') return false;
-    const moduleExists = require.resolve('@prisma/adapter-better-sqlite3');
-    const betterSqliteExists = require.resolve('better-sqlite3');
-    return !!(moduleExists && betterSqliteExists);
-  } catch {
-    return false;
-  }
+// Check if we're in a browser
+const isBrowser = (): boolean => {
+  return typeof window !== 'undefined';
 };
 
 // Create Prisma client (build-time safe)
@@ -45,43 +37,61 @@ function createPrismaClient(): PrismaClient {
     ? ['warn', 'error'] as const
     : ['error'] as const;
 
-  // Edge Runtime Guard
-  if (isEdgeRuntime()) {
-    console.warn('⚠️ Prisma not available in Edge Runtime');
-    // Return a minimal compatible object for Edge
-    return {} as PrismaClient;
+  // Browser/Edge Runtime Guard
+  if (isBrowser() || isEdgeRuntime()) {
+    console.warn('⚠️ Prisma not available in Browser/Edge Runtime');
+    // Return a minimal compatible object
+    return new Proxy({} as PrismaClient, {
+      get: (target, prop) => {
+        if (prop === '$connect' || prop === '$disconnect' || prop === '$transaction') {
+          return async () => ({});
+        }
+        if (prop === '$queryRaw' || prop === '$executeRaw') {
+          return async () => [];
+        }
+        // Return mock functions for all other properties
+        return () => {
+          throw new Error('Prisma is not available in this runtime. Use server-side only.');
+        };
+      }
+    });
   }
 
+  // Server-side: Try to create real Prisma client
   try {
-    if (isAdapterAvailable()) {
-      // Dynamic imports at runtime only
-      const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-      const BetterSqlite3 = require('better-sqlite3');
-      
-      const dbPath = process.env.DATABASE_URL?.replace(/^file:/, '') || './dev.db';
-      const sqlite = new BetterSqlite3(dbPath);
-      const adapter = new PrismaBetterSqlite3(sqlite);
-      
-      console.log('✅ Prisma initialized with SQLite adapter');
-      return new PrismaClient({ 
-        adapter,
-        log: logLevels,
-      });
-    }
+    console.log('✅ Prisma initialized');
+    return new PrismaClient({
+      log: logLevels,
+      // Let Prisma handle the adapter automatically based on DATABASE_URL
+      // No need to manually specify adapter
+    });
   } catch (error) {
-    console.warn('⚠️ Prisma adapter initialization failed:', error);
+    console.error('⚠️ Prisma initialization failed:', error);
+    
+    // Return a mock client that won't crash
+    return new Proxy({} as PrismaClient, {
+      get: (target, prop) => {
+        if (prop === '$connect' || prop === '$disconnect') {
+          return async () => {
+            console.warn('Prisma not properly initialized');
+            return undefined;
+          };
+        }
+        if (prop === '$queryRaw' || prop === '$executeRaw') {
+          return async () => {
+            console.warn('Prisma not properly initialized');
+            return [];
+          };
+        }
+        return () => {
+          throw new Error(
+            'Prisma requires proper database configuration. ' +
+            'Set DATABASE_URL in your environment variables.'
+          );
+        };
+      }
+    });
   }
-
-  console.warn('⚠️ Using fallback Prisma client (read-only)');
-  
-  // Return a basic Prisma client without adapter (for build time)
-  // This allows TypeScript compilation but won't work at runtime
-  // unless the adapter is installed
-  return new PrismaClient({
-    log: logLevels,
-    // This will work if DATABASE_URL is set to a valid connection
-    // without requiring the adapter at build time
-  });
 }
 
 // Safe Prisma getter
@@ -119,5 +129,18 @@ export const getPrisma = async (): Promise<PrismaClient> => {
     return prisma;
   }
 };
+
+// Safe query helper
+export async function safePrismaQuery<T>(query: () => Promise<T>): Promise<T | null> {
+  try {
+    if (isBrowser() || isEdgeRuntime()) {
+      return null;
+    }
+    return await query();
+  } catch (error) {
+    console.error('Prisma query failed:', error);
+    return null;
+  }
+}
 
 export default prisma;
