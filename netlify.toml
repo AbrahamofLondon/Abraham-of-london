@@ -4,7 +4,7 @@
 # ============================================================
 
 [build]
-  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build"
+  command = "pnpm run build"
   publish = ".next"
   functions = "netlify/functions"
 
@@ -21,12 +21,16 @@
   NEXT_DISABLE_SOURCEMAPS = "true"
   NEXT_TELEMETRY_DISABLED = "1"
 
+  # Production environment variables
+  NODE_ENV = "production"
+  NEXT_PUBLIC_APP_ENV = "production"
+
 # ============================================================
 # DEPLOYMENT CONTEXTS
 # ============================================================
 
 [context.production]
-  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build:production"
+  command = "pnpm run build"
   publish = ".next"
   [context.production.environment]
     NODE_ENV = "production"
@@ -35,7 +39,7 @@
     NEXT_PUBLIC_APP_VERSION = "${GIT_COMMIT_SHA:-1.0.0}"
 
 [context.deploy-preview]
-  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build"
+  command = "pnpm run build"
   publish = ".next"
   [context.deploy-preview.environment]
     NODE_ENV = "production"
@@ -47,7 +51,7 @@
     NEXT_IGNORE_TYPECHECK = "1"
 
 [context.branch-deploy]
-  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build"
+  command = "pnpm run build"
   publish = ".next"
   [context.branch-deploy.environment]
     NODE_ENV = "production"
@@ -151,16 +155,19 @@
   for = "/_next/image/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/assets/fonts/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/assets/icons/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/inner-circle/*"
