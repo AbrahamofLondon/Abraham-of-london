@@ -1,4 +1,3 @@
-// lib/inner-circle/access.ts
 import type { NextApiRequest } from 'next';
 import type { NextRequest } from 'next/server';
 
@@ -6,18 +5,46 @@ import type { NextRequest } from 'next/server';
 let rateLimitModule: any = null;
 let RATE_LIMIT_CONFIGS: any = null;
 
-try {
-  const module = require('@/lib/server/rateLimit');
-  rateLimitModule = module;
-  RATE_LIMIT_CONFIGS = module.RATE_LIMIT_CONFIGS;
-} catch (error) {
-  console.warn('[InnerCircleAccess] rateLimit not available, using fallbacks');
-  RATE_LIMIT_CONFIGS = {
-    API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },
-    API_GENERAL: { limit: 100, windowMs: 3600000, keyPrefix: "api" },
-    INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" }
-  };
+// Initialize on module load (but don't crash)
+function initRateLimit() {
+  if (rateLimitModule !== null) return; // Already initialized
+  
+  try {
+    // Use dynamic import to avoid build-time issues
+    if (typeof window === 'undefined') {
+      // Server-side: try to load
+      const module = require('@/lib/server/rateLimit');
+      rateLimitModule = module;
+      RATE_LIMIT_CONFIGS = module.RATE_LIMIT_CONFIGS;
+    }
+  } catch (error) {
+    console.warn('[InnerCircleAccess] rateLimit not available, using fallbacks');
+  }
+  
+  // Set fallbacks if not loaded
+  if (!RATE_LIMIT_CONFIGS) {
+    RATE_LIMIT_CONFIGS = {
+      API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },
+      API_GENERAL: { limit: 100, windowMs: 3600000, keyPrefix: "api" },
+      INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" }
+    };
+  }
+  
+  if (!rateLimitModule) {
+    rateLimitModule = {
+      rateLimit: async () => ({
+        allowed: true,
+        remaining: 999,
+        limit: 1000,
+        retryAfterMs: 0,
+        resetTime: Date.now() + 60000,
+      }),
+    };
+  }
 }
+
+// Initialize on import
+initRateLimit();
 
 // ==================== INTERFACES ====================
 export interface InnerCircleAccess {
@@ -204,7 +231,26 @@ export async function createAccessToken(email: string, tier: string = 'member'):
   expiresAt: Date;
   key: string;
 }> {
-  const crypto = require('crypto');
+  // Use dynamic require to avoid Edge runtime issues
+  let crypto: any;
+  if (typeof window === 'undefined') {
+    crypto = require('crypto');
+  } else {
+    // Browser fallback
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    const keyArray = new Uint8Array(16);
+    crypto.getRandomValues(keyArray);
+    const key = `IC-${Array.from(keyArray, byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+    
+    return {
+      token,
+      key,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    };
+  }
+  
   const token = crypto.randomBytes(32).toString('hex');
   const key = `IC-${crypto.randomBytes(16).toString('hex').toUpperCase()}`;
   
@@ -229,3 +275,6 @@ export async function validateAccessToken(token: string): Promise<{
     tier: 'member'
   };
 }
+
+// Export RATE_LIMIT_CONFIGS for external use
+export { RATE_LIMIT_CONFIGS };

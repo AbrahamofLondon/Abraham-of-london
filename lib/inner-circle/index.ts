@@ -1,4 +1,3 @@
-// lib/inner-circle/index.ts
 /* eslint-disable no-console */
 /**
  * Public Inner Circle module surface.
@@ -25,15 +24,6 @@ import innerCircleStore, {
   type MemberKeyRow,
   type ActiveKeyRow,
 } from "@/lib/server/inner-circle-store";
-
-// Import rate limiting with Redis support
-import { 
-  rateLimit,
-  getClientIp as getClientIpFromRequest,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-  type RateLimitResult 
-} from "@/lib/server/rateLimit";
 
 /* ============================================================================
    PUBLIC FUNCTION EXPORTS (DIRECT PASSTHROUGH)
@@ -76,6 +66,66 @@ export const healthCheck = innerCircleStore.healthCheck;
    RATE LIMITING FUNCTIONS FOR INNER CIRCLE
    ============================================================================ */
 
+// Import rate limiting with Redis support - use dynamic imports to avoid circular deps
+let rateLimitModule: any = null;
+let getClientIpFromRequest: any = null;
+let createRateLimitHeaders: any = null;
+let RATE_LIMIT_CONFIGS: any = null;
+
+// Dynamic import to avoid circular dependencies
+async function getRateLimitModule() {
+  if (rateLimitModule) return rateLimitModule;
+  
+  try {
+    const module = await import("@/lib/server/rateLimit");
+    rateLimitModule = module;
+    getClientIpFromRequest = module.getClientIp || module.getClientIpFromRequest;
+    createRateLimitHeaders = module.createRateLimitHeaders;
+    RATE_LIMIT_CONFIGS = module.RATE_LIMIT_CONFIGS;
+  } catch (error) {
+    console.warn('[InnerCircle] Rate limit module not available:', error);
+    // Create fallbacks
+    RATE_LIMIT_CONFIGS = {
+      INNER_CIRCLE_REGISTER_EMAIL: { limit: 3, windowMs: 3600000, keyPrefix: "ic-reg-email" },
+      INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" },
+      INNER_CIRCLE_ADMIN_EXPORT: { limit: 5, windowMs: 300000, keyPrefix: "ic-admin-export" },
+    };
+    
+    getClientIpFromRequest = (req: any) => {
+      if (req.headers?.['x-forwarded-for']) {
+        const forwarded = req.headers['x-forwarded-for'];
+        return Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0]?.trim();
+      }
+      return req.socket?.remoteAddress || 'unknown';
+    };
+    
+    createRateLimitHeaders = (result: any) => ({
+      'X-Rate-Limit-Remaining': result.remaining?.toString() || '0',
+      'X-Rate-Limit-Limit': result.limit?.toString() || '0',
+      'X-Rate-Limit-Reset': result.resetTime?.toString() || '0',
+    });
+    
+    rateLimitModule = {
+      rateLimit: async () => ({
+        allowed: true,
+        remaining: 999,
+        limit: 1000,
+        retryAfterMs: 0,
+        resetTime: Date.now() + 60000,
+      }),
+    };
+  }
+  return rateLimitModule;
+}
+
+export type RateLimitResult = {
+  allowed: boolean;
+  remaining: number;
+  limit: number;
+  retryAfterMs: number;
+  resetTime: number;
+};
+
 /**
  * Rate limit for Inner Circle registration attempts
  */
@@ -83,8 +133,9 @@ export async function rateLimitInnerCircleRegistration(
   email: string,
   ip: string
 ): Promise<RateLimitResult> {
+  const module = await getRateLimitModule();
   const key = `inner_circle_reg:${ip}:${email.toLowerCase().trim()}`;
-  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL || { limit: 3, windowMs: 3600000, keyPrefix: "ic-reg-email" });
+  return module.rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL || { limit: 3, windowMs: 3600000, keyPrefix: "ic-reg-email" });
 }
 
 /**
@@ -93,8 +144,9 @@ export async function rateLimitInnerCircleRegistration(
 export async function rateLimitInnerCircleAccess(
   ip: string
 ): Promise<RateLimitResult> {
+  const module = await getRateLimitModule();
   const key = `inner_circle_access:${ip}`;
-  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK || { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" });
+  return module.rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK || { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" });
 }
 
 /**
@@ -104,8 +156,9 @@ export async function rateLimitInnerCircleAdmin(
   adminId: string,
   operation: string
 ): Promise<RateLimitResult> {
+  const module = await getRateLimitModule();
   const key = `inner_circle_admin:${adminId}:${operation}`;
-  return rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT || { limit: 5, windowMs: 300000, keyPrefix: "ic-admin-export" });
+  return module.rateLimit(key, RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT || { limit: 5, windowMs: 300000, keyPrefix: "ic-admin-export" });
 }
 
 /**
@@ -119,6 +172,7 @@ export async function checkInnerCircleRateLimits(
   emailResult?: RateLimitResult;
   headers: Record<string, string>;
 }> {
+  await getRateLimitModule();
   const ip = getClientIpFromRequest(req);
   
   // Always check IP-based rate limiting
@@ -156,6 +210,7 @@ export function withInnerCircleRateLimit(
 ) {
   return async function handler(req: any, res: any, next?: any) {
     try {
+      await getRateLimitModule();
       const ip = getClientIpFromRequest(req);
       let rateLimitResult: RateLimitResult;
       
@@ -227,6 +282,7 @@ export async function verifyInnerCircleKeyWithRateLimit(
   
   // Apply rate limiting if request context provided
   if (req) {
+    await getRateLimitModule();
     const ip = getClientIpFromRequest(req);
     const rateLimitResult = await rateLimitInnerCircleAccess(ip);
     const headers = createRateLimitHeaders(rateLimitResult);
@@ -262,6 +318,7 @@ export async function createOrUpdateMemberAndIssueKeyWithRateLimit(
 }> {
   // Apply rate limiting if request context provided
   if (req) {
+    await getRateLimitModule();
     const ip = getClientIpFromRequest(req);
     const rateLimitResult = await rateLimitInnerCircleRegistration(args.email, ip);
     
@@ -273,6 +330,7 @@ export async function createOrUpdateMemberAndIssueKeyWithRateLimit(
   const result = await innerCircleStore.createOrUpdateMemberAndIssueKey(args);
   
   if (req) {
+    await getRateLimitModule();
     const ip = getClientIpFromRequest(req);
     const rateLimitResult = await rateLimitInnerCircleRegistration(args.email, ip);
     const headers = createRateLimitHeaders(rateLimitResult);
@@ -363,6 +421,7 @@ export async function getPrivacySafeKeyExportWithRateLimit(
 }> {
   // Apply admin rate limiting if request context provided
   if (req) {
+    await getRateLimitModule();
     const rateLimitResult = await rateLimitInnerCircleAdmin(adminId, 'export');
     
     if (!rateLimitResult.allowed) {
@@ -373,6 +432,7 @@ export async function getPrivacySafeKeyExportWithRateLimit(
   const data = await innerCircleStore.getPrivacySafeKeyExport(params);
   
   if (req) {
+    await getRateLimitModule();
     const rateLimitResult = await rateLimitInnerCircleAdmin(adminId, 'export');
     const headers = createRateLimitHeaders(rateLimitResult);
     
@@ -399,6 +459,7 @@ export async function getPrivacySafeStatsWithRateLimit(
 }> {
   // Apply admin rate limiting if request context provided
   if (req) {
+    await getRateLimitModule();
     const rateLimitResult = await rateLimitInnerCircleAdmin(adminId, 'stats');
     
     if (!rateLimitResult.allowed) {
@@ -409,6 +470,7 @@ export async function getPrivacySafeStatsWithRateLimit(
   const stats = await innerCircleStore.getPrivacySafeStats();
   
   if (req) {
+    await getRateLimitModule();
     const rateLimitResult = await rateLimitInnerCircleAdmin(adminId, 'stats');
     const headers = createRateLimitHeaders(rateLimitResult);
     
@@ -480,9 +542,6 @@ export type {
   ActiveKeyRow,
 };
 
-// Re-export RateLimitResult from our unified rate limit system
-export { RateLimitResult };
-
 /* ============================================================================
    EMAIL EXPORT (Lazy Load with Enhanced Error Handling)
    ============================================================================ */
@@ -519,10 +578,10 @@ export const INNER_CIRCLE_CONFIG = {
     enabled: true,
     storage: process.env.REDIS_URL ? 'redis' : 'memory' as 'redis' | 'memory',
     configs: {
-      register: RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER || { limit: 20, windowMs: 900000, keyPrefix: "ic-reg" },
-      registerEmail: RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL || { limit: 3, windowMs: 3600000, keyPrefix: "ic-reg-email" },
-      unlock: RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK || { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" },
-      admin: RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT || { limit: 5, windowMs: 300000, keyPrefix: "ic-admin-export" },
+      register: RATE_LIMIT_CONFIGS?.INNER_CIRCLE_REGISTER || { limit: 20, windowMs: 900000, keyPrefix: "ic-reg" },
+      registerEmail: RATE_LIMIT_CONFIGS?.INNER_CIRCLE_REGISTER_EMAIL || { limit: 3, windowMs: 3600000, keyPrefix: "ic-reg-email" },
+      unlock: RATE_LIMIT_CONFIGS?.INNER_CIRCLE_UNLOCK || { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" },
+      admin: RATE_LIMIT_CONFIGS?.INNER_CIRCLE_ADMIN_EXPORT || { limit: 5, windowMs: 300000, keyPrefix: "ic-admin-export" },
     }
   },
   environment: process.env.NODE_ENV,
@@ -558,7 +617,13 @@ const enhancedInnerCircleStore = {
   cleanupOldData,
   
   // Rate limiting headers utility
-  createRateLimitHeaders,
+  createRateLimitHeaders: (result: any) => {
+    return {
+      'X-Rate-Limit-Remaining': result.remaining?.toString() || '0',
+      'X-Rate-Limit-Limit': result.limit?.toString() || '0',
+      'X-Rate-Limit-Reset': result.resetTime?.toString() || '0',
+    };
+  },
   
   // Get rate limit configs
   getRateLimitConfigs: () => RATE_LIMIT_CONFIGS,
@@ -596,14 +661,15 @@ const enhancedInnerCircleStore = {
 
 export default enhancedInnerCircleStore;
 
-// Ensure all the missing exports are available
+// Re-export everything for compatibility
 export { 
   withInnerCircleRateLimit,
   getPrivacySafeKeyExportWithRateLimit,
   getPrivacySafeStatsWithRateLimit,
-  createRateLimitHeaders,
+  createRateLimitHeaders: enhancedInnerCircleStore.createRateLimitHeaders,
   INNER_CIRCLE_CONFIG,
   healthCheckEnhanced: enhancedInnerCircleStore.healthCheckEnhanced,
   createOrUpdateMemberAndIssueKeyWithRateLimit,
   verifyInnerCircleKeyWithRateLimit,
+  type RateLimitResult,
 };

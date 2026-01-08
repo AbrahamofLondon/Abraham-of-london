@@ -1,4 +1,3 @@
-// lib/contentlayer/status.ts
 /* eslint-disable no-console */
 /**
  * ContentLayer status and health monitoring.
@@ -316,6 +315,19 @@ export async function getContentLayerBuildStatus() {
 
 export async function getContentLayerDocuments() {
   return await contentLayerStatus.getContentLayerData();
+}
+
+// Export the function that was being imported
+export async function checkContentlayerStatus() {
+  const health = await contentLayerStatus.getHealth();
+  return {
+    healthy: health.healthy,
+    status: health.status,
+    error: health.error,
+    warning: health.warning,
+    lastChecked: health.lastChecked,
+    stats: health.stats
+  };
 }
 
 // Initialize on import

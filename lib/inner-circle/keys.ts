@@ -304,3 +304,32 @@ export function isExpired(expiresAt?: string): boolean {
 export function getMemoryStoreSize(): number {
   return mem.size;
 }
+
+// Export the missing function
+export function getEmailHash(email: string): string {
+  const normalizedEmail = email.trim().toLowerCase();
+  return crypto
+    .createHash('sha256')
+    .update(normalizedEmail)
+    .digest('hex')
+    .substring(0, 32);
+}
+
+// Export everything for backward compatibility
+export default {
+  generateAccessKey,
+  storeKey,
+  getKey,
+  revokeKey,
+  renewKey,
+  incrementKeyUsage,
+  getKeysByMember,
+  getKeysByTier,
+  getActiveKeys,
+  cleanupExpiredKeys,
+  isExpired,
+  getMemoryStoreSize,
+  getEmailHash,
+  type StoredKey,
+  type KeyTier
+};

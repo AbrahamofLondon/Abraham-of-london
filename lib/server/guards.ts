@@ -158,3 +158,53 @@ export async function requireAdminRateLimit(
   
   return { ok: true as const };
 }
+
+// Wrapper for API handlers with rate limiting
+export async function withApiRateLimit(
+  handler: (req: NextApiRequest, res: NextApiResponse) => Promise<any>,
+  options?: {
+    bucket?: string;
+    limit?: number;
+    windowMs?: number;
+    adminOnly?: boolean;
+  }
+) {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    try {
+      // Apply rate limiting
+      const bucket = options?.bucket || 'api';
+      const limit = options?.limit || 100;
+      const windowMs = options?.windowMs || 5 * 60 * 1000;
+      
+      const ip = (req.headers["x-forwarded-for"] as string)?.split(',')[0]?.trim() || 
+                req.socket.remoteAddress || 
+                'unknown';
+      
+      const rateLimitResult = await isRateLimitedWithWindow(`ip:${ip}`, bucket, limit, windowMs);
+      
+      if (rateLimitResult.limited) {
+        res.setHeader("Retry-After", rateLimitResult.retryAfter.toString());
+        return jsonErr(res, 429, "RATE_LIMITED", "Rate limit exceeded");
+      }
+      
+      // Add rate limit headers
+      res.setHeader("X-Rate-Limit-Remaining", rateLimitResult.remaining.toString());
+      res.setHeader("X-Rate-Limit-Limit", rateLimitResult.limit.toString());
+      
+      // If admin only, check admin access
+      if (options?.adminOnly) {
+        const adminResult = await requireAdmin(req, res);
+        if (!adminResult.ok) {
+          return; // Response already handled
+        }
+      }
+      
+      // Call the handler
+      return await handler(req, res);
+      
+    } catch (error) {
+      console.error('API handler error:', error);
+      return jsonErr(res, 500, "INTERNAL_ERROR", "An unexpected error occurred");
+    }
+  };
+}

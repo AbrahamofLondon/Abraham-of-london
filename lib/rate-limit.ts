@@ -1,7 +1,24 @@
 // lib/server/rateLimit.ts - Universal Runtime compatible
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextRequest } from "next/server";
-import { logAuditEvent } from "./audit";
+
+// Import audit with safe fallback
+let logAuditEvent: any = async () => ({ success: false, fallback: true });
+
+// Safely import audit module to avoid circular dependencies
+try {
+  const auditModule = await import("./audit");
+  if (auditModule.logAuditEvent) {
+    logAuditEvent = auditModule.logAuditEvent;
+  }
+} catch (error) {
+  console.warn('[RateLimit] Audit module not available:', error);
+  // Create fallback audit function
+  logAuditEvent = async (event: any) => {
+    console.log('[RateLimit Audit Fallback]', event);
+    return { success: false, fallback: true };
+  };
+}
 
 // --- Types & Interfaces ---
 export interface RateLimitOptions {
@@ -106,7 +123,11 @@ class RedisRateLimitStore {
       // Try standard Redis if URL is provided
       if (process.env.REDIS_URL) {
         try {
-          // Try to import redis dynamically
+          // Use dynamic import for Edge runtime compatibility
+          if (isEdgeRuntime) {
+            throw new Error('Redis not available in Edge Runtime');
+          }
+          
           const redis = await import('redis');
           const { createClient } = redis;
           this.redis = createClient({ url: process.env.REDIS_URL });
@@ -325,6 +346,9 @@ export function getClientIp(req: NextApiRequest | NextRequest): string {
          (nodeReq as any).connection?.remoteAddress || 
          "unknown";
 }
+
+// Alias for compatibility
+export const getClientIpFromRequest = getClientIp;
 
 /**
  * Generate HTTP headers from rate limit result
@@ -619,6 +643,9 @@ export async function getRateLimitStats(): Promise<{
   };
 }
 
+// Alias for compatibility
+export const getRateLimiterStats = getRateLimitStats;
+
 /**
  * Legacy function for compatibility - check if rate limited
  */
@@ -644,6 +671,50 @@ export async function isRateLimited(
 }
 
 /**
+ * Check rate limit with window parameter (for compatibility)
+ */
+export async function isRateLimitedWithWindow(
+  key: string, 
+  bucket: string, 
+  limit: number, 
+  windowMs: number
+): Promise<{ 
+  limited: boolean; 
+  retryAfter: number; 
+  limit: number; 
+  remaining: number; 
+}> {
+  const result = await rateLimit(`${bucket}:${key}`, { limit, windowMs, keyPrefix: bucket });
+  
+  return {
+    limited: !result.allowed,
+    retryAfter: Math.ceil(result.retryAfterMs / 1000),
+    limit: result.limit,
+    remaining: result.remaining
+  };
+}
+
+/**
+ * Rate limit for request IP (for compatibility)
+ */
+export async function rateLimitForRequestIp(
+  req: NextApiRequest,
+  bucket: string,
+  limit: number,
+  windowMs?: number
+): Promise<{ 
+  limited: boolean; 
+  retryAfter: number; 
+  limit: number; 
+  remaining: number; 
+}> {
+  const ip = getClientIp(req);
+  const key = `ip:${ip}`;
+  
+  return isRateLimitedWithWindow(key, bucket, limit, windowMs || 5 * 60 * 1000);
+}
+
+/**
  * Check rate limit (alias for isRateLimited for compatibility)
  */
 export const checkRateLimit = isRateLimited;
@@ -662,11 +733,6 @@ export async function resetRateLimit(key: string, bucket: string): Promise<void>
  */
 export const unblock = resetRateLimit;
 
-/**
- * Get rate limiter statistics (alias for getRateLimitStats)
- */
-export const getRateLimiterStats = getRateLimitStats;
-
 // ============================================================================
 // Export everything
 // ============================================================================
@@ -675,6 +741,7 @@ export default {
   rateLimit,
   tokenBucketRateLimit,
   getClientIp,
+  getClientIpFromRequest,
   createRateLimitHeaders,
   withApiRateLimit,
   combinedRateLimit,
@@ -684,6 +751,8 @@ export default {
   getRateLimitStats,
   getRateLimiterStats,
   isRateLimited,
+  isRateLimitedWithWindow,
+  rateLimitForRequestIp,
   checkRateLimit,
   resetRateLimit,
   unblock,

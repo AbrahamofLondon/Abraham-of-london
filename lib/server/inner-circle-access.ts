@@ -1,4 +1,3 @@
-// lib/server/inner-circle-access.ts
 /* eslint-disable no-console */
 /**
  * Inner Circle access control and authorization.
@@ -1039,11 +1038,14 @@ export async function getAccessCacheStats() {
   return await innerCircleAccess.getCacheStats();
 }
 
-// Add these exports to fix the import errors
+// Export functions that were missing from the imports
 export function createStrictApiHandler(handler: any) {
   return async (req: any, res: any) => {
     // Add strict access checking logic here
-    const access = await innerCircleAccess.verifyAccess(req.headers.authorization || '', req.url);
+    const access = await innerCircleAccess.verifyAccess(
+      req.headers.authorization || '', 
+      req.url
+    );
     if (!access.granted) {
       return res.status(403).json({ error: 'Access denied' });
     }
@@ -1058,4 +1060,18 @@ export function createPublicApiHandler(handler: any) {
   };
 }
 
+// Export the instance and other needed exports
 export default innerCircleAccess;
+
+// Export manager class for testing/extensibility
+export { InnerCircleAccessManager };
+
+// Export types for external use
+export type {
+  AccessLevel,
+  AccessCheckResult,
+  PremiumContentAccess,
+  BatchAccessCheck,
+  AccessAuditLog,
+  CachedAccessCheck
+};

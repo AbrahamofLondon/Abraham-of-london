@@ -1,11 +1,13 @@
-// lib/redis.ts
 /**
  * Redis compatibility wrapper
  * Exports getRedis function that returns the enhanced Redis client
  */
 
-import redisEnhanced, { RedisClient, createNamespacedClient } from './redis-enhanced';
+import redisEnhanced, { createNamespacedClient } from './redis-enhanced';
 import type { RedisStats, RedisOptions } from './redis-enhanced';
+
+// Define RedisClient type based on what's actually exported
+export type RedisClient = ReturnType<typeof redisEnhanced.getClient>;
 
 /**
  * Get the Redis client instance
@@ -15,10 +17,34 @@ export function getRedis(): typeof redisEnhanced {
   return redisEnhanced;
 }
 
+/**
+ * Get Redis client (compatibility export)
+ */
+export function getRedisClient(): RedisClient | undefined {
+  try {
+    return redisEnhanced.getClient();
+  } catch {
+    return undefined;
+  }
+}
+
 // Re-export everything from redis-enhanced
-export { redisEnhanced as default, RedisClient, createNamespacedClient };
-export type { RedisStats, RedisOptions };
+export { 
+  redisEnhanced as default, 
+  createNamespacedClient 
+};
+
+// Export type-only re-exports
+export type { 
+  RedisStats, 
+  RedisOptions 
+};
 
 // Additional compatibility exports
 export const redis = redisEnhanced;
-export const redisClient = redisEnhanced;
+
+// Create and export a RedisClient type instance
+export const redisClient = {
+  ...redisEnhanced,
+  // Add any missing methods that might be expected
+};

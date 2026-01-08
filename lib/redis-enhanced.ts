@@ -1,4 +1,3 @@
-// lib/redis-enhanced.ts
 /**
  * Enhanced Redis client with fallbacks and error handling
  * Build-safe: avoids ioredis imports during webpack bundling
@@ -82,7 +81,7 @@ class MemoryRedis {
 }
 
 // Singleton instance
-let redisInstance: any = null;
+let redisInstance: MemoryRedis | any = null;
 
 async function getRedisClient() {
   if (redisInstance) return redisInstance;
@@ -99,6 +98,11 @@ async function getRedisClient() {
 
   try {
     // Use dynamic import to prevent webpack bundling issues
+    // Guard against Edge Runtime
+    if (process.env.NEXT_RUNTIME === 'edge') {
+      throw new Error('ioredis not available in Edge Runtime');
+    }
+    
     const Redis = await import('ioredis');
     const RedisConstructor = Redis.default || Redis;
     
@@ -123,6 +127,7 @@ async function getRedisClient() {
 
 // Public API - Create actual functions that work
 const redisClient = {
+  // Core Redis operations
   async get(key: string): Promise<string | null> {
     const client = await getRedisClient();
     return client.get(key);
@@ -160,6 +165,7 @@ const redisClient = {
     redisInstance = null;
   },
 
+  // Set operations
   async sadd(key: string, member: string): Promise<number> {
     const client = await getRedisClient();
     if (client.sadd) return client.sadd(key, member);
@@ -181,6 +187,7 @@ const redisClient = {
     return client.srem(key, member);
   },
 
+  // Multi-get
   async mget(keys: string[]): Promise<(string | null)[]> {
     const client = await getRedisClient();
     if (client.mget) return client.mget(keys);
@@ -188,6 +195,7 @@ const redisClient = {
     return client.mget(keys);
   },
 
+  // Sorted set operations
   async zadd(key: string, score: number, member: string): Promise<number> {
     const client = await getRedisClient();
     if (client.zadd) return client.zadd(key, score, member);
@@ -237,18 +245,22 @@ const redisClient = {
     return sliced.map(([member]: [string, any]) => member);
   },
 
+  // Status check
   isConnected(): boolean {
     return redisInstance instanceof MemoryRedis 
       ? true 
       : redisInstance?.status === 'ready';
-  }
+  },
+
+  // Expose the underlying client getter for type compatibility
+  getClient: getRedisClient
 };
 
 // Named exports
 export const getRedis = () => redisClient;
 export const redis = redisClient;
 
-// Type exports
+// Type exports - Fixed: RedisClient should be the type of redisClient
 export type RedisClient = typeof redisClient;
 export type RedisStats = {
   isConnected: boolean;

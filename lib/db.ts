@@ -1,4 +1,3 @@
-// lib/db.ts
 /* eslint-disable no-console */
 /**
  * Database abstraction layer for the application.
@@ -206,15 +205,20 @@ class Database {
       if (this.config.type === 'prisma') {
         // Try to initialize Prisma
         try {
-          const { PrismaClient } = await import('@prisma/client');
-          this.prismaClient = new PrismaClient({
-            log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-          });
-          
-          // Test connection
-          await this.prismaClient.$queryRaw`SELECT 1`;
-          this.config.connected = true;
-          console.log('[Database] Connected to Prisma/PostgreSQL');
+          // Use dynamic import for Edge runtime compatibility
+          if (typeof window === 'undefined') {
+            const { PrismaClient } = await import('@prisma/client');
+            this.prismaClient = new PrismaClient({
+              log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+            });
+            
+            // Test connection
+            await this.prismaClient.$queryRaw`SELECT 1`;
+            this.config.connected = true;
+            console.log('[Database] Connected to Prisma/PostgreSQL');
+          } else {
+            throw new Error('Prisma not available in browser');
+          }
         } catch (prismaError) {
           console.warn('[Database] Prisma connection failed:', prismaError);
           console.warn('[Database] Falling back to memory storage');
@@ -529,4 +533,13 @@ export async function checkDatabaseConnection() {
 // Initialize on import for convenience
 db.initialize().catch(console.error);
 
+// Export everything for compatibility
 export default db;
+export { db };
+
+// Export types for external use
+export type {
+  DatabaseConfig,
+  DatabaseStats,
+  QueryResult
+};

@@ -1,10 +1,41 @@
-// lib/premium/download-token.ts
 /**
  * Premium content download token system
  */
 
-// Import crypto properly
-import crypto from 'crypto';
+// Import crypto properly with edge runtime support
+let crypto: any;
+
+// Safely import crypto for different environments
+if (typeof window === 'undefined') {
+  // Node.js/Server environment
+  try {
+    crypto = require('crypto');
+  } catch (error) {
+    // Fallback for Edge runtime
+    crypto = {
+      randomBytes: (size: number) => {
+        const bytes = new Uint8Array(size);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+          crypto.getRandomValues(bytes);
+        } else {
+          for (let i = 0; i < size; i++) {
+            bytes[i] = Math.floor(Math.random() * 256);
+          }
+        }
+        return bytes;
+      }
+    };
+  }
+} else {
+  // Browser environment
+  crypto = {
+    randomBytes: (size: number) => {
+      const bytes = new Uint8Array(size);
+      window.crypto.getRandomValues(bytes);
+      return bytes;
+    }
+  };
+}
 
 export interface DownloadToken {
   token: string;
@@ -122,11 +153,20 @@ class DownloadTokenManager {
   }
 
   private generateSecureToken(): string {
-    const randomBytes = crypto.randomBytes(32);
-    return 'dl_' + 
-      Date.now().toString(36) + 
-      Math.random().toString(36).substr(2, 9) +
-      randomBytes.toString('base64').replace(/[^a-zA-Z0-9]/g, '').substr(0, 16);
+    try {
+      const randomBytes = crypto.randomBytes(32);
+      return 'dl_' + 
+        Date.now().toString(36) + 
+        Math.random().toString(36).substr(2, 9) +
+        randomBytes.toString('base64').replace(/[^a-zA-Z0-9]/g, '').substr(0, 16);
+    } catch (error) {
+      // Fallback token generation
+      return 'dl_' + 
+        Date.now().toString(36) + 
+        Math.random().toString(36).substr(2, 9) +
+        Math.random().toString(36).substr(2, 9) +
+        Math.random().toString(36).substr(2, 9);
+    }
   }
 
   private cleanupExpiredTokens(): void {
@@ -190,4 +230,8 @@ export function getContentDownloadTokens(contentId: string): DownloadToken[] {
 export const createDownloadToken = generateDownloadToken;
 export const verifyDownloadToken = validateDownloadToken;
 
+// Export the manager for advanced use
 export default downloadTokenManager;
+
+// Export all types
+export type { DownloadToken, TokenValidationResult };
