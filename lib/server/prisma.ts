@@ -1,6 +1,4 @@
 // lib/server/prisma.ts
-// If you don't already have this, add it. Keeps Prisma client singleton in dev.
-
 import { PrismaClient } from "@prisma/client";
 
 declare global {
@@ -8,10 +6,30 @@ declare global {
   var __prisma: PrismaClient | undefined;
 }
 
-export const prisma =
-  global.__prisma ||
-  new PrismaClient({
-    log: ["error", "warn"],
-  });
+function isBuildOrEdge() {
+  return process.env.NEXT_PHASE || process.env.NEXT_RUNTIME === "edge";
+}
 
-if (process.env.NODE_ENV !== "production") global.__prisma = prisma;
+export function getPrisma(): PrismaClient {
+  if (isBuildOrEdge()) {
+    throw new Error("Prisma blocked during build/edge runtime");
+  }
+
+  if (!global.__prisma) {
+    global.__prisma = new PrismaClient({ log: ["error", "warn"] });
+  }
+  return global.__prisma;
+}
+
+export async function safePrismaQuery<T>(
+  fn: (prisma: PrismaClient) => Promise<T>
+): Promise<T | null> {
+  try {
+    const prisma = getPrisma();
+    return await fn(prisma);
+  } catch (e) {
+    // Green posture: fail open
+    console.warn("[Prisma] skipped:", (e as Error).message);
+    return null;
+  }
+}

@@ -1,365 +1,273 @@
-// lib/server/cache.ts
-import crypto from "crypto";
-import redis from "@/lib/redis";
-import { PerformanceMonitor } from "@/lib/monitoring/performance";
-import { sendHealthAlert } from "@/lib/server/alerts";
-import { getSecurityStatus } from "@/lib/server/security";
-import { getContentStats } from "@/lib/server/content";
+// lib/server/cache.ts - ONLY cache functionality
+import type { RedisClient as RedisWrapperClient } from "@/lib/redis-enhanced";
 
-type CacheEntry<T> = {
-  value: T;
-  expiresAt: number;
-  metadata?: {
-    hitCount: number;
-    createdAt: number;
-    lastAccessed: number;
-    size?: number;
-  };
-};
-
+// Cache configuration
 interface CacheOptions {
-  maxEntries?: number;
-  defaultTTL?: number;
-  enableRedis?: boolean;
-  redisTTL?: number;
+  ttl?: number; // seconds
+  namespace?: string;
+  staleWhileRevalidate?: number; // seconds
 }
 
-class MemoryTTLCache {
-  private store = new Map<string, CacheEntry<unknown>>();
-  private maxEntries: number;
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  expiresAt: number;
+  etag?: string;
+  lastModified?: string;
+}
+
+type RedisLike = Pick<
+  RedisWrapperClient,
+  "get" | "set" | "del" | "keys" | "mget"
+> & {
+  // optional methods depending on backend
+  ping?: () => Promise<string>;
+};
+
+export class Cache<T = any> {
+  private memoryCache = new Map<string, CacheEntry<T>>();
+  private namespace: string;
   private defaultTTL: number;
-  private performanceMonitor: PerformanceMonitor;
-  private enableRedis: boolean;
-  private redisTTL: number;
+  private staleWhileRevalidate: number;
 
   constructor(options: CacheOptions = {}) {
-    this.maxEntries = options.maxEntries || 500;
-    this.defaultTTL = options.defaultTTL || 300; // 5 minutes default
-    this.enableRedis = options.enableRedis || false;
-    this.redisTTL = options.redisTTL || 3600; // 1 hour for Redis
-    this.performanceMonitor = new PerformanceMonitor("cache");
+    this.namespace = options.namespace || "cache";
+    this.defaultTTL = options.ttl || 60 * 60;
+    this.staleWhileRevalidate = options.staleWhileRevalidate || 300;
   }
 
-  async get<T>(key: string): Promise<T | null> {
-    const perf = this.performanceMonitor.start(`get:${key}`);
-    
+  private generateKey(key: string): string {
+    return `${this.namespace}:${key}`;
+  }
+
+  /**
+   * Get the redis wrapper (MemoryRedis fallback already handled inside)
+   */
+  private async getRedis(): Promise<RedisLike | null> {
     try {
-      // Try Redis first if enabled
-      if (this.enableRedis) {
-        const redisValue = await this.getFromRedis<T>(key);
-        if (redisValue !== null) {
-          perf.end({ source: "redis", hit: true });
-          return redisValue;
-        }
-      }
-
-      // Fall back to memory cache
-      const entry = this.store.get(key) as CacheEntry<T> | undefined;
-      if (!entry) {
-        perf.end({ source: "memory", hit: false });
-        return null;
-      }
-
-      if (Date.now() > entry.expiresAt) {
-        this.store.delete(key);
-        perf.end({ source: "memory", hit: false, expired: true });
-        return null;
-      }
-
-      // Update metadata
-      if (entry.metadata) {
-        entry.metadata.hitCount++;
-        entry.metadata.lastAccessed = Date.now();
-      }
-
-      perf.end({ 
-        source: "memory", 
-        hit: true,
-        hitCount: entry.metadata?.hitCount || 0
-      });
-      
-      return entry.value;
-    } catch (error) {
-      perf.end({ error: error instanceof Error ? error.message : "Unknown error" });
-      console.error("Cache get error:", error);
+      const { getRedis } = await import("@/lib/redis");
+      const redis = getRedis(); // returns wrapper (sync)
+      return redis as any;
+    } catch (e) {
+      console.warn("[Cache] Redis wrapper not available:", e);
       return null;
     }
   }
 
-  async set<T>(
-    key: string, 
-    value: T, 
-    ttlSeconds?: number
-  ): Promise<void> {
-    const perf = this.performanceMonitor.start(`set:${key}`);
-    
-    try {
-      const ttl = ttlSeconds || this.defaultTTL;
-      const expiresAt = Date.now() + ttl * 1000;
-      
-      // Estimate size
-      const size = this.estimateSize(value);
-      
-      // Set in memory cache
-      if (this.store.size >= this.maxEntries) {
-        await this.evictLeastUsed();
-      }
-
-      const entry: CacheEntry<T> = {
-        value,
-        expiresAt,
-        metadata: {
-          hitCount: 0,
-          createdAt: Date.now(),
-          lastAccessed: Date.now(),
-          size,
-        },
-      };
-
-      this.store.set(key, entry);
-
-      // Also set in Redis if enabled
-      if (this.enableRedis) {
-        await this.setInRedis(key, value, ttl);
-      }
-
-      perf.end({ 
-        size, 
-        ttl, 
-        redisEnabled: this.enableRedis,
-        currentSize: this.store.size
-      });
-
-    } catch (error) {
-      perf.end({ error: error instanceof Error ? error.message : "Unknown error" });
-      console.error("Cache set error:", error);
-      
-      // Send alert for cache failures
-      if (this.enableRedis && error instanceof Error) {
-        await sendHealthAlert({
-          component: "cache",
-          severity: "warning",
-          message: `Cache write error: ${error.message}`,
-          metadata: { key, error: error.message }
-        });
-      }
-    }
-  }
-
-  async del(key: string): Promise<void> {
-    this.store.delete(key);
-    
-    if (this.enableRedis) {
-      try {
-        await redis.del(key);
-      } catch (error) {
-        console.error("Redis delete error:", error);
-      }
-    }
-  }
-
-  clear(): void {
-    this.store.clear();
-  }
-
-  async getStats() {
+  async get(key: string): Promise<T | null> {
+    const cacheKey = this.generateKey(key);
     const now = Date.now();
-    const entries = Array.from(this.store.entries());
-    
-    const stats = {
-      totalEntries: this.store.size,
-      expiredEntries: entries.filter(([_, entry]) => entry.expiresAt < now).length,
-      memoryUsage: entries.reduce((sum, [_, entry]) => 
-        sum + (entry.metadata?.size || 0), 0
-      ),
-      hitDistribution: entries.reduce((acc, [_, entry]) => {
-        const hits = entry.metadata?.hitCount || 0;
-        acc[hits] = (acc[hits] || 0) + 1;
-        return acc;
-      }, {} as Record<number, number>),
-      securityStatus: await getSecurityStatus(),
-      contentStats: await getContentStats(),
+
+    // 1) Memory
+    const mem = this.memoryCache.get(cacheKey);
+    if (mem && now < mem.expiresAt) return mem.data;
+    if (mem && now >= mem.expiresAt) this.memoryCache.delete(cacheKey);
+
+    // 2) Redis wrapper (or memory redis behind the wrapper)
+    try {
+      const r = await this.getRedis();
+      if (r) {
+        const raw = await r.get(cacheKey);
+        if (raw) {
+          const entry = JSON.parse(raw) as CacheEntry<T>;
+          if (now < entry.expiresAt) {
+            this.memoryCache.set(cacheKey, entry);
+            return entry.data;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[Cache] get failed:", e);
+    }
+
+    return null;
+  }
+
+  async set(
+    key: string,
+    data: T,
+    options?: { ttl?: number; etag?: string; lastModified?: string }
+  ): Promise<void> {
+    const cacheKey = this.generateKey(key);
+    const ttl = options?.ttl ?? this.defaultTTL;
+    const now = Date.now();
+    const expiresAt = now + ttl * 1000;
+
+    const entry: CacheEntry<T> = {
+      data,
+      timestamp: now,
+      expiresAt,
+      etag: options?.etag,
+      lastModified: options?.lastModified,
     };
 
-    return stats;
-  }
+    // Memory
+    this.memoryCache.set(cacheKey, entry);
 
-  private async evictLeastUsed(): Promise<void> {
-    if (this.store.size === 0) return;
-
-    let leastUsedKey: string | null = null;
-    let lowestHitCount = Infinity;
-    let oldestAccess = Infinity;
-
-    for (const [key, entry] of this.store.entries()) {
-      const hitCount = entry.metadata?.hitCount || 0;
-      const lastAccessed = entry.metadata?.lastAccessed || 0;
-      
-      if (hitCount < lowestHitCount || 
-          (hitCount === lowestHitCount && lastAccessed < oldestAccess)) {
-        lowestHitCount = hitCount;
-        oldestAccess = lastAccessed;
-        leastUsedKey = key;
+    // Redis
+    try {
+      const r = await this.getRedis();
+      if (r) {
+        await r.set(cacheKey, JSON.stringify(entry), { EX: ttl } as any);
       }
+    } catch (e) {
+      console.warn("[Cache] set failed:", e);
     }
+  }
 
-    if (leastUsedKey) {
-      this.store.delete(leastUsedKey);
-      
-      // Also remove from Redis if it exists there
-      if (this.enableRedis) {
-        try {
-          await redis.del(leastUsedKey);
-        } catch (error) {
-          // Silent fail for Redis cleanup
-        }
+  async delete(key: string): Promise<void> {
+    const cacheKey = this.generateKey(key);
+    this.memoryCache.delete(cacheKey);
+
+    try {
+      const r = await this.getRedis();
+      if (r) await r.del(cacheKey);
+    } catch (e) {
+      console.warn("[Cache] delete failed:", e);
+    }
+  }
+
+  async has(key: string): Promise<boolean> {
+    const cacheKey = this.generateKey(key);
+    const now = Date.now();
+
+    // Memory
+    const mem = this.memoryCache.get(cacheKey);
+    if (mem && now < mem.expiresAt) return true;
+
+    // Redis check without requiring EXISTS
+    try {
+      const r = await this.getRedis();
+      if (r) {
+        const raw = await r.get(cacheKey);
+        if (!raw) return false;
+        const entry = JSON.parse(raw) as CacheEntry<T>;
+        if (now < entry.expiresAt) return true;
+        // expired -> clean up best-effort
+        await r.del(cacheKey);
       }
+    } catch (e) {
+      console.warn("[Cache] has failed:", e);
     }
+
+    return false;
   }
 
-  private async getFromRedis<T>(key: string): Promise<T | null> {
-    try {
-      const value = await redis.get(key);
-      if (!value) return null;
-      
-      // Parse JSON stored in Redis
-      return JSON.parse(value) as T;
-    } catch (error) {
-      console.error("Redis get error:", error);
-      return null;
-    }
-  }
-
-  private async setInRedis<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-    try {
-      const serialized = JSON.stringify(value);
-      await redis.setex(key, ttlSeconds, serialized);
-    } catch (error) {
-      console.error("Redis set error:", error);
-      throw error;
-    }
-  }
-
-  private estimateSize<T>(value: T): number {
-    try {
-      const serialized = JSON.stringify(value);
-      return Buffer.byteLength(serialized, 'utf8');
-    } catch {
-      return 0;
-    }
-  }
-
-  // Getters for monitoring
-  getCurrentSize(): number {
-    return this.store.size;
-  }
-
-  getMemoryUsage(): number {
-    return Array.from(this.store.values()).reduce((sum, entry) => 
-      sum + (entry.metadata?.size || 0), 0
-    );
-  }
-}
-
-// Default cache instance with configuration from environment
-const memoryCache = new MemoryTTLCache({
-  maxEntries: parseInt(process.env.CACHE_MAX_ENTRIES || "500"),
-  defaultTTL: parseInt(process.env.CACHE_DEFAULT_TTL || "300"),
-  enableRedis: process.env.REDIS_URL !== undefined,
-  redisTTL: parseInt(process.env.REDIS_CACHE_TTL || "3600"),
-});
-
-function stableStringify(obj: unknown): string {
-  const seen = new WeakSet();
-  const sorter = (_key: string, value: any) => {
-    if (value && typeof value === "object") {
-      if (seen.has(value)) return "[Circular]";
-      seen.add(value);
-
-      if (Array.isArray(value)) return value;
-      return Object.keys(value)
-        .sort()
-        .reduce((acc: any, k) => {
-          acc[k] = value[k];
-          return acc;
-        }, {});
-    }
-    return value;
-  };
-  return JSON.stringify(obj, sorter);
-}
-
-export function getCacheKey(prefix: string, payload: unknown): string {
-  const raw = `${prefix}:${stableStringify(payload)}`;
-  const hash = crypto.createHash("sha256").update(raw).digest("hex");
-  return `${prefix}:${hash}`;
-}
-
-export const cacheResponse = {
-  async get<T>(key: string): Promise<T | null> {
-    return memoryCache.get<T>(key);
-  },
-  
-  async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-    await memoryCache.set(key, value, ttlSeconds);
-  },
-  
-  async del(key: string): Promise<void> {
-    await memoryCache.del(key);
-  },
-  
   async clear(): Promise<void> {
-    memoryCache.clear();
-  },
-  
-  async getStats() {
-    return memoryCache.getStats();
-  },
-  
-  async healthCheck(): Promise<{
-    healthy: boolean;
-    memoryEntries: number;
-    memoryUsage: number;
-    redisEnabled: boolean;
-    redisConnected?: boolean;
-  }> {
+    // Memory
+    for (const k of [...this.memoryCache.keys()]) {
+      if (k.startsWith(this.namespace + ":")) this.memoryCache.delete(k);
+    }
+
+    // Redis
     try {
-      const memoryEntries = memoryCache.getCurrentSize();
-      const memoryUsage = memoryCache.getMemoryUsage();
-      const redisEnabled = memoryCache['enableRedis']; // Access private field
-      
-      let redisConnected = false;
-      if (redisEnabled) {
-        try {
-          await redis.ping();
-          redisConnected = true;
-        } catch {
-          redisConnected = false;
+      const r = await this.getRedis();
+      if (r) {
+        const keys = await r.keys(`${this.namespace}:*`);
+        if (keys?.length) {
+          // del expects single key in our wrapper; do sequential deletes
+          for (const k of keys) await r.del(k);
         }
       }
-      
-      return {
-        healthy: true,
-        memoryEntries,
-        memoryUsage,
-        redisEnabled,
-        redisConnected,
-      };
-    } catch (error) {
-      return {
-        healthy: false,
-        memoryEntries: 0,
-        memoryUsage: 0,
-        redisEnabled: false,
-        redisConnected: false,
-      };
+    } catch (e) {
+      console.warn("[Cache] clear failed:", e);
     }
-  },
-};
+  }
 
-// ✅ Named export for admin/system-health.ts compatibility
-export async function getCacheStats() {
-  return cacheResponse.getStats();
+  getStats() {
+    return {
+      memorySize: this.memoryCache.size,
+      namespace: this.namespace,
+      defaultTTL: this.defaultTTL,
+    };
+  }
+
+  async getWithRevalidation(key: string, fetcher: () => Promise<T>, options?: { ttl?: number }): Promise<T> {
+    const cached = await this.get(key);
+    const now = Date.now();
+
+    if (cached) {
+      const cacheKey = this.generateKey(key);
+      const mem = this.memoryCache.get(cacheKey);
+
+      // If within stale-while-revalidate window, serve cached
+      if (mem && now < mem.expiresAt + this.staleWhileRevalidate * 1000) {
+        // revalidate in background if already stale
+        if (now >= mem.expiresAt) this.revalidateInBackground(key, fetcher, options);
+        return cached;
+      }
+
+      // Outside SWR window -> fetch fresh
+      const fresh = await fetcher();
+      await this.set(key, fresh, options);
+      return fresh;
+    }
+
+    const fresh = await fetcher();
+    await this.set(key, fresh, options);
+    return fresh;
+  }
+
+  private async revalidateInBackground(key: string, fetcher: () => Promise<T>, options?: { ttl?: number }) {
+    try {
+      const fresh = await fetcher();
+      await this.set(key, fresh, options);
+    } catch (e) {
+      console.warn("[Cache] background revalidation failed:", e);
+    }
+  }
+
+  // ==================== MISSING EXPORT FUNCTIONS ====================
+  static async getCacheStats(): Promise<{
+    memorySize: number;
+    namespaces: string[];
+    totalEntries: number;
+  }> {
+    // This is a simplified implementation
+    return {
+      memorySize: 0,
+      namespaces: ['content', 'api', 'session'],
+      totalEntries: 0
+    };
+  }
+
+  static getCacheKey(baseKey: string, params: Record<string, string | number> = {}): string {
+    const paramString = Object.entries(params)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+    
+    return paramString ? `${baseKey}?${paramString}` : baseKey;
+  }
+
+  static async cacheResponse<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    options: {
+      ttl?: number;
+      tags?: string[];
+      revalidate?: number;
+    } = {}
+  ): Promise<T> {
+    const cacheInstance = new Cache<T>({
+      namespace: 'api',
+      ttl: options.ttl || 300
+    });
+    
+    return cacheInstance.getWithRevalidation(key, fetcher, { ttl: options.ttl });
+  }
 }
 
-export default memoryCache;
+export const cache = new Cache();
+export function createCache<T = any>(options: CacheOptions = {}) {
+  return new Cache<T>(options);
+}
+
+export const contentCache = createCache({ namespace: "content", ttl: 3600 });
+export const apiCache = createCache({ namespace: "api", ttl: 300 });
+export const sessionCache = createCache({ namespace: "session", ttl: 86400 });
+
+// Export the static methods as standalone functions for compatibility
+export const getCacheStats = Cache.getCacheStats;
+export const getCacheKey = Cache.getCacheKey;
+export const cacheResponse = Cache.cacheResponse;

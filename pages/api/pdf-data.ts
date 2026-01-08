@@ -1,12 +1,14 @@
 // pages/api/pdf-data.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getAllPDFs } from '@/scripts'; // Server-side import is OK
+import type { NextApiRequest, NextApiResponse } from "next";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const pdfs = getAllPDFs();
-    res.status(200).json({ pdfs });
+    // Use dynamic import to avoid build-time issues
+    const mod = await import("@/scripts/index");
+    const data = await mod.getPdfData?.();
+    res.status(200).json({ ok: true, data: data ?? null });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch PDF data' });
+    console.error("PDF data error:", error);
+    res.status(500).json({ ok: false, error: "Failed to generate PDF data" });
   }
 }

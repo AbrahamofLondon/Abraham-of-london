@@ -13,14 +13,26 @@ export * from "./contentlayer-helper";
 // Input validation
 export * from "./input-validator";
 
-// Rate limiting - use memory-based version to avoid ioredis
-export {
-  getClientIp,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-  type RateLimitOptions,
-  type RateLimitResult,
-} from "./server/rateLimit";
+// Rate limiting - import default and destructure
+import rateLimitModule from "./server/rateLimit";
+
+// Re-export what we can from the rate limit module
+export const rateLimit = rateLimitModule.rateLimit;
+export const getClientIp = rateLimitModule.getClientIp || ((req: any) => {
+  // Fallback IP extraction
+  const forwarded = req.headers?.['x-forwarded-for'];
+  if (forwarded) {
+    if (Array.isArray(forwarded)) return forwarded[0];
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || 'unknown';
+});
+export const createRateLimitHeaders = rateLimitModule.createRateLimitHeaders || (() => ({}));
+export const RATE_LIMIT_CONFIGS = rateLimitModule.RATE_LIMIT_CONFIGS || {};
+
+// Export types
+export type RateLimitOptions = rateLimitModule.RateLimitOptions;
+export type RateLimitResult = rateLimitModule.RateLimitResult;
 
 // IP utilities - safe implementations
 export function isValidIp(ip: string): boolean {
@@ -63,10 +75,10 @@ export async function getRateLimit() {
   try {
     const mod = await import("./server/rateLimit");
     return {
-      rateLimit: mod.rateLimit,
-      getClientIp: mod.getClientIp,
-      createRateLimitHeaders: mod.createRateLimitHeaders,
-      RATE_LIMIT_CONFIGS: mod.RATE_LIMIT_CONFIGS,
+      rateLimit: mod.default.rateLimit,
+      getClientIp: mod.default.getClientIp || getClientIp,
+      createRateLimitHeaders: mod.default.createRateLimitHeaders || createRateLimitHeaders,
+      RATE_LIMIT_CONFIGS: mod.default.RATE_LIMIT_CONFIGS || RATE_LIMIT_CONFIGS,
     };
   } catch (error) {
     console.warn('[imports] Rate limit module not available');
@@ -79,9 +91,9 @@ export async function getRateLimit() {
         limit: 100,
         windowMs: 3600000
       }),
-      getClientIp: () => 'unknown',
-      createRateLimitHeaders: () => ({}),
-      RATE_LIMIT_CONFIGS: {},
+      getClientIp,
+      createRateLimitHeaders,
+      RATE_LIMIT_CONFIGS,
     };
   }
 }

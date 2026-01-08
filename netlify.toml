@@ -55,6 +55,27 @@
     # Monitoring
     NEXT_PUBLIC_SENTRY_DSN = "${SENTRY_DSN}"
     NEXT_PUBLIC_GA_TRACKING_ID = "${GA_TRACKING_ID}"
+    
+    # Redis for rate limiting
+    REDIS_URL = "${REDIS_URL}"
+    REDIS_TOKEN = "${REDIS_TOKEN}"
+    
+    # Email service
+    RESEND_API_KEY = "${RESEND_API_KEY}"
+    EMAIL_FROM = "noreply@abrahamoflondon.org"
+    
+    # Analytics
+    GA_TRACKING_ID = "${GA_TRACKING_ID}"
+    SENTRY_DSN = "${SENTRY_DSN}"
+    
+    # Application secrets
+    JWT_SECRET = "${JWT_SECRET}"
+    ENCRYPTION_KEY = "${ENCRYPTION_KEY}"
+    
+    # Feature flags
+    ENABLE_MAINTENANCE_MODE = "false"
+    ENABLE_RATE_LIMITING = "true"
+    ENABLE_WAF = "true"
 
 [context.deploy-preview]
   command = "pnpm run build"
@@ -69,6 +90,11 @@
     NEXT_DISABLE_SOURCEMAPS = "true"
     NEXT_IGNORE_ESLINT = "1"
     NEXT_IGNORE_TYPECHECK = "1"
+    
+    REDIS_URL = "${PREVIEW_REDIS_URL}"
+    RESEND_API_KEY = "${PREVIEW_RESEND_API_KEY}"
+    ENABLE_RATE_LIMITING = "false"
+    ENABLE_WAF = "false"
 
 [context.branch-deploy]
   command = "pnpm run build"
@@ -82,6 +108,9 @@
     NEXT_DISABLE_SOURCEMAPS = "true"
     NEXT_IGNORE_ESLINT = "1"
     NEXT_IGNORE_TYPECHECK = "1"
+    
+    ENABLE_RATE_LIMITING = "false"
+    ENABLE_WAF = "false"
 
 # ============================================================
 # EDGE FUNCTIONS CONFIGURATION
@@ -395,53 +424,6 @@
     Content-Type = "text/plain"
 
 # ============================================================
-# ENVIRONMENT VARIABLES
-# ============================================================
-
-[context.production.environment]
-  # Redis for rate limiting
-  REDIS_URL = "${REDIS_URL}"
-  REDIS_TOKEN = "${REDIS_TOKEN}"
-  
-  # Email service
-  RESEND_API_KEY = "${RESEND_API_KEY}"
-  EMAIL_FROM = "noreply@abrahamoflondon.org"
-  
-  # Analytics
-  GA_TRACKING_ID = "${GA_TRACKING_ID}"
-  SENTRY_DSN = "${SENTRY_DSN}"
-  
-  # Application secrets
-  JWT_SECRET = "${JWT_SECRET}"
-  ENCRYPTION_KEY = "${ENCRYPTION_KEY}"
-  
-  # Feature flags
-  ENABLE_MAINTENANCE_MODE = "false"
-  ENABLE_RATE_LIMITING = "true"
-  ENABLE_WAF = "true"
-
-[context.deploy-preview.environment]
-  REDIS_URL = "${PREVIEW_REDIS_URL}"
-  RESEND_API_KEY = "${PREVIEW_RESEND_API_KEY}"
-  ENABLE_RATE_LIMITING = "false"
-  ENABLE_WAF = "false"
-
-[context.branch-deploy.environment]
-  ENABLE_RATE_LIMITING = "false"
-  ENABLE_WAF = "false"
-
-# ============================================================
-# BUILD HOOKS & NOTIFICATIONS
-# ============================================================
-
-[build.processing]
-  skip_processing = true
-
-# Notifications on build failures
-[notifications]
-  email = ["devops@abrahamoflondon.org"]
-
-# ============================================================
 # BACKUP REDIRECTS (Legacy Support)
 # ============================================================
 
@@ -454,3 +436,14 @@
   from = "/articles/*"
   to = "/blog/:splat"
   status = 301
+
+# ============================================================
+# BUILD HOOKS & NOTIFICATIONS
+# ============================================================
+
+[build.processing]
+  skip_processing = true
+
+# Notifications on build failures
+[notifications]
+  email = ["devops@abrahamoflondon.org"]

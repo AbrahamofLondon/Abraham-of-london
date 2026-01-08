@@ -1,140 +1,86 @@
-/**
- * Redis-based rate limiting (SERVER ONLY)
- * This file re-exports from server/rateLimit to avoid ioredis in browser builds
- */
+// lib/rate-limit-redis.ts
 
-// Import the default from server/rateLimit first
-import serverRateLimit, {
-  rateLimit,
-  getClientIp,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-  type RateLimitOptions,
-  type RateLimitResult,
-} from './server/rateLimit';
+// Import Redis with fallback
+let redisInstance: any;
 
-// Re-export everything from the server rate limit module
-export {
-  rateLimit,
-  getClientIp,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-  type RateLimitOptions,
-  type RateLimitResult,
-};
-
-// Safe Redis getter that doesn't import ioredis
-export function getRedis() {
-  // Return null - the enhanced redis client will be used instead
-  try {
-    // Only available at runtime, not build time
-    if (typeof window === 'undefined') {
-      const redis = require('./redis-enhanced').default;
-      return redis;
+async function getRedis() {
+  if (!redisInstance) {
+    try {
+      const { default: redisEnhanced } = await import("./redis-enhanced");
+      redisInstance = redisEnhanced;
+    } catch (error) {
+      // Fallback memory store
+      redisInstance = {
+        get: async () => null,
+        set: async () => {},
+        del: async () => {},
+        keys: async () => [],
+        ping: async () => "PONG"
+      };
     }
-  } catch (error) {
-    console.warn('[rate-limit-redis] Redis not available');
   }
-  return null;
+  return redisInstance;
 }
 
-// Create the missing rateLimitRedis function that was imported elsewhere
-export async function rateLimitRedis(
-  key: string,
-  options?: {
-    limit?: number;
-    windowMs?: number;
-    keyPrefix?: string;
-  }
-): Promise<{
+type RedisCheckResult = {
   allowed: boolean;
   remaining: number;
-  retryAfterMs: number;
-  resetTime: number;
+  resetAt: number;
   limit: number;
-  windowMs: number;
-}> {
-  const defaultOptions = {
-    limit: options?.limit || 100,
-    windowMs: options?.windowMs || 60000, // 1 minute default
-    keyPrefix: options?.keyPrefix || 'redis'
-  };
-  
-  return rateLimit(key, defaultOptions);
-}
-
-// Alias for backward compatibility
-export const redisRateLimit = rateLimitRedis;
-
-// Helper function for API routes using Redis rate limiting
-export async function withRedisRateLimit(
-  key: string,
-  options?: {
-    limit?: number;
-    windowMs?: number;
-    keyPrefix?: string;
-  }
-): Promise<boolean> {
-  const result = await rateLimitRedis(key, options);
-  return result.allowed;
-}
-
-// Legacy Redis rate limiter wrapper
-export class RedisRateLimiter {
-  private prefix: string;
-  
-  constructor(prefix: string = 'rate') {
-    this.prefix = prefix;
-  }
-  
-  async check(key: string, limit: number, windowMs: number): Promise<{
-    allowed: boolean;
-    remaining: number;
-    retryAfter: number;
-  }> {
-    const result = await rateLimitRedis(`${this.prefix}:${key}`, {
-      limit,
-      windowMs,
-      keyPrefix: this.prefix
-    });
-    
-    return {
-      allowed: result.allowed,
-      remaining: result.remaining,
-      retryAfter: Math.ceil(result.retryAfterMs / 1000)
-    };
-  }
-  
-  async reset(key: string): Promise<void> {
-    try {
-      const redis = getRedis();
-      if (redis) {
-        await redis.del(`${this.prefix}:${key}`);
-      }
-    } catch (error) {
-      console.warn('[RedisRateLimiter] Reset failed:', error);
-    }
-  }
-}
-
-// Create a wrapper object that includes everything
-const rateLimitRedisWrapper = {
-  // Core functions
-  rateLimit: rateLimitRedis,
-  rateLimitRedis,
-  redisRateLimit,
-  withRedisRateLimit,
-  RedisRateLimiter,
-  getRedis,
-  
-  // Re-exports from server/rateLimit
-  getClientIp,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-  
-  // Include everything from serverRateLimit for compatibility
-  ...serverRateLimit
+  blocked?: boolean;
+  blockUntil?: number;
 };
 
-// Export the wrapper as default
-export default rateLimitRedisWrapper;
+async function check(
+  key: string,
+  opts: { windowMs: number; max: number; keyPrefix?: string; blockDuration?: number }
+): Promise<RedisCheckResult> {
+  const now = Date.now();
+  const prefix = opts.keyPrefix || "rl";
+  const k = `${prefix}:${key}`;
+  const windowSec = Math.max(1, Math.ceil(opts.windowMs / 1000));
+  
+  const redis = await getRedis();
+
+  // Simple fixed-window counter in redis (memory fallback works too)
+  const current = await redis.get(k);
+  const count = current ? Number(current) : 0;
+
+  if (!current) {
+    await redis.set(k, "1", { EX: windowSec });
+    return {
+      allowed: true,
+      remaining: Math.max(0, opts.max - 1),
+      resetAt: now + opts.windowMs,
+      limit: opts.max,
+      blocked: false,
+    };
+  }
+
+  const next = count + 1;
+  await redis.set(k, String(next), { EX: windowSec });
+
+  const allowed = next <= opts.max;
+  return {
+    allowed,
+    remaining: allowed ? Math.max(0, opts.max - next) : 0,
+    resetAt: now + opts.windowMs,
+    limit: opts.max,
+    blocked: !allowed,
+    blockUntil: !allowed && opts.blockDuration ? now + opts.blockDuration : undefined,
+  };
+}
+
+async function getStats() {
+  try {
+    const redis = await getRedis();
+    await redis.ping();
+    return { ok: true, redisAvailable: true };
+  } catch {
+    return { ok: true, redisAvailable: false };
+  }
+}
+
+// ✅ named export expected by your codebase
+export const rateLimitRedis = { check, getStats };
+export default rateLimitRedis;

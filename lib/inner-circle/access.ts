@@ -91,6 +91,54 @@ export function getClientIp(req: NextApiRequest | NextRequest): string {
   return apiReq.socket?.remoteAddress || 'unknown';
 }
 
+// ==================== RATE LIMITING FUNCTIONS (MISSING EXPORTS) ====================
+export async function rateLimitForRequestIp(
+  ip: string, 
+  config?: any
+): Promise<{
+  allowed: boolean;
+  remaining: number;
+  limit: number;
+  resetTime: number;
+  retryAfterMs: number;
+}> {
+  const effectiveConfig = config || RATE_LIMIT_CONFIGS?.INNER_CIRCLE_UNLOCK;
+  
+  try {
+    if (rateLimitModule?.rateLimit) {
+      return await rateLimitModule.rateLimit(`inner-circle:ip:${ip}`, effectiveConfig);
+    }
+  } catch (error) {
+    console.warn('[InnerCircleAccess] Rate limiting failed, using fallback:', error);
+  }
+  
+  // Fallback implementation
+  return {
+    allowed: true,
+    remaining: effectiveConfig?.limit || 30,
+    limit: effectiveConfig?.limit || 30,
+    resetTime: Date.now() + (effectiveConfig?.windowMs || 600000),
+    retryAfterMs: 0
+  };
+}
+
+export function createRateLimitHeaders(rateLimitResult: {
+  allowed: boolean;
+  remaining: number;
+  limit: number;
+  resetTime: number;
+  retryAfterMs?: number;
+}): Record<string, string> {
+  return {
+    'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+    'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+    'X-RateLimit-Reset': Math.floor(rateLimitResult.resetTime / 1000).toString(),
+    ...(rateLimitResult.retryAfterMs && rateLimitResult.retryAfterMs > 0 
+      ? { 'Retry-After': Math.ceil(rateLimitResult.retryAfterMs / 1000).toString() }
+      : {})
+  };
+}
+
 // ==================== MAIN ACCESS CHECK ====================
 export async function getInnerCircleAccess(
   req: NextApiRequest | NextRequest,

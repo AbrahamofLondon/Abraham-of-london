@@ -1,9 +1,10 @@
-// pages/auth/signin.tsx - FIXED
+// pages/auth/signin.tsx
+import type { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { signIn } from "next-auth/react";
-import { GetServerSideProps } from "next";
+
 import Layout from "@/components/Layout";
+import { authOptions } from "@/lib/auth";
 
 export default function SignIn() {
   return (
@@ -15,18 +16,23 @@ export default function SignIn() {
               Sign in to your account
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-              Use any email with password &quot;demo&quot; for development
+              Use your credentials.
             </p>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
-            signIn("credentials", {
-              email: formData.get("email"),
-              password: formData.get("password"),
-              callbackUrl: "/",
-            });
-          }}>
+
+          <form
+            className="mt-8 space-y-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+
+              signIn("credentials", {
+                email: formData.get("email"),
+                password: formData.get("password"),
+                callbackUrl: "/",
+              });
+            }}
+          >
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
                 <label htmlFor="email" className="sr-only">
@@ -42,6 +48,7 @@ export default function SignIn() {
                   placeholder="Email address"
                 />
               </div>
+
               <div>
                 <label htmlFor="password" className="sr-only">
                   Password
@@ -53,7 +60,7 @@ export default function SignIn() {
                   autoComplete="current-password"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm dark:bg-gray-800"
-                  placeholder="Password (use &quot;demo&quot; for development)"
+                  placeholder="Password"
                 />
               </div>
             </div>
@@ -78,15 +85,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if (session) {
     return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
+      redirect: { destination: "/", permanent: false },
     };
   }
 
-  return {
-    props: {},
-  };
+  return { props: {} };
 };
-

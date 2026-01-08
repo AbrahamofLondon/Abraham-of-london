@@ -17,6 +17,44 @@ export type StoredKey = {
   metadata?: Record<string, any>;
 };
 
+export type CreateOrUpdateMemberArgs = {
+  email: string;
+  name?: string;
+  ipAddress: string;
+  source: 'api' | 'web' | 'admin';
+};
+
+export type IssuedKey = {
+  key: string;
+  keySuffix: string;
+  expiresAt: string;
+  memberId: string;
+  tier: KeyTier;
+};
+
+export type VerifyInnerCircleKeyResult = {
+  valid: boolean;
+  reason: 'valid' | 'invalid_format' | 'not_found' | 'revoked' | 'expired' | 'rate_limited';
+  memberId?: string;
+  keySuffix?: string;
+  tier?: KeyTier;
+};
+
+export type InnerCircleStats = {
+  totalMembers: number;
+  totalKeys: number;
+  activeKeys: number;
+  byTier: Record<KeyTier, number>;
+  recentUnlocks: number;
+  memoryStoreSize: number;
+};
+
+export type CleanupResult = {
+  deleted: number;
+  message: string;
+  details?: Record<string, number>;
+};
+
 const mem = new Map<string, StoredKey>();
 const PREFIX = "ic:key:";
 const INDEX_PREFIX = "ic:index:";
@@ -315,6 +353,218 @@ export function getEmailHash(email: string): string {
     .substring(0, 32);
 }
 
+// ==================== MISSING EXPORTS (NEW IMPLEMENTATIONS) ====================
+
+// Simple in-memory member store
+const memberStore = new Map<string, {
+  email: string;
+  name?: string;
+  createdAt: Date;
+  lastSeen: Date;
+}>();
+
+const keyUsageStore = new Map<string, {
+  keySuffix: string;
+  memberId: string;
+  timestamp: Date;
+  ipAddress?: string;
+}>();
+
+export async function createOrUpdateMemberAndIssueKey(
+  args: CreateOrUpdateMemberArgs
+): Promise<IssuedKey> {
+  // Generate member ID from email hash
+  const memberId = getEmailHash(args.email);
+  
+  // Create or update member
+  const existingMember = memberStore.get(memberId);
+  if (!existingMember) {
+    memberStore.set(memberId, {
+      email: args.email,
+      name: args.name,
+      createdAt: new Date(),
+      lastSeen: new Date()
+    });
+  } else {
+    memberStore.set(memberId, {
+      ...existingMember,
+      name: args.name || existingMember.name,
+      lastSeen: new Date()
+    });
+  }
+  
+  // Generate key
+  const key = generateAccessKey();
+  const keySuffix = key.slice(-8); // Last 8 chars
+  
+  // Store the key
+  const storedKey: StoredKey = {
+    key,
+    memberId,
+    tier: 'member' as KeyTier,
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days
+    maxUses: 1000,
+    usedCount: 0,
+    metadata: {
+      source: args.source,
+      ipAddress: args.ipAddress
+    }
+  };
+  
+  await storeKey(storedKey);
+  
+  return {
+    key,
+    keySuffix,
+    expiresAt: storedKey.expiresAt!,
+    memberId,
+    tier: 'member'
+  };
+}
+
+export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
+  // Basic format validation
+  if (!key.startsWith('IC-') || key.length !== 44) { // IC- + 40 hex chars
+    return { valid: false, reason: 'invalid_format' };
+  }
+  
+  const storedKey = await getKey(key);
+  
+  if (!storedKey) {
+    return { valid: false, reason: 'not_found' };
+  }
+  
+  if (storedKey.revoked) {
+    return { valid: false, reason: 'revoked' };
+  }
+  
+  if (storedKey.expiresAt && isExpired(storedKey.expiresAt)) {
+    return { valid: false, reason: 'expired' };
+  }
+  
+  if (storedKey.maxUses && (storedKey.usedCount || 0) >= storedKey.maxUses) {
+    return { valid: false, reason: 'rate_limited' };
+  }
+  
+  // Increment usage
+  await incrementKeyUsage(key);
+  
+  return {
+    valid: true,
+    reason: 'valid',
+    memberId: storedKey.memberId,
+    keySuffix: key.slice(-8),
+    tier: storedKey.tier
+  };
+}
+
+export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
+  const activeKeys = await getActiveKeys();
+  const allKeys = Array.from(mem.values());
+  
+  // Count by tier
+  const byTier: Record<KeyTier, number> = {
+    member: 0,
+    patron: 0,
+    founder: 0
+  };
+  
+  activeKeys.forEach(key => {
+    byTier[key.tier] = (byTier[key.tier] || 0) + 1;
+  });
+  
+  // Count recent unlocks (last 24 hours)
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentUnlocks = Array.from(keyUsageStore.values())
+    .filter(usage => usage.timestamp > twentyFourHoursAgo)
+    .length;
+  
+  return {
+    totalMembers: memberStore.size,
+    totalKeys: allKeys.length,
+    activeKeys: activeKeys.length,
+    byTier,
+    recentUnlocks,
+    memoryStoreSize: mem.size
+  };
+}
+
+export async function recordInnerCircleUnlock(
+  memberId: string,
+  keySuffix: string
+): Promise<{ success: boolean; timestamp: string }> {
+  const timestamp = new Date();
+  const key = `unlock:${memberId}:${keySuffix}:${timestamp.getTime()}`;
+  
+  keyUsageStore.set(key, {
+    keySuffix,
+    memberId,
+    timestamp
+  });
+  
+  // Clean old records (older than 30 days)
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  for (const [key, record] of keyUsageStore.entries()) {
+    if (record.timestamp < thirtyDaysAgo) {
+      keyUsageStore.delete(key);
+    }
+  }
+  
+  return {
+    success: true,
+    timestamp: timestamp.toISOString()
+  };
+}
+
+export async function cleanupExpiredData(): Promise<CleanupResult> {
+  let deleted = 0;
+  const details: Record<string, number> = {
+    keys: 0,
+    members: 0,
+    unlocks: 0
+  };
+  
+  // Clean expired keys
+  const keyResult = await cleanupExpiredKeys();
+  deleted += keyResult.cleaned;
+  details.keys = keyResult.cleaned;
+  
+  // Clean old members (inactive for 180 days)
+  const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
+  for (const [memberId, member] of memberStore.entries()) {
+    if (member.lastSeen < sixMonthsAgo) {
+      // Check if member has any active keys
+      const memberKeys = await getKeysByMember(memberId);
+      const hasActiveKeys = memberKeys.some(key => 
+        !key.revoked && (!key.expiresAt || !isExpired(key.expiresAt))
+      );
+      
+      if (!hasActiveKeys) {
+        memberStore.delete(memberId);
+        deleted++;
+        details.members++;
+      }
+    }
+  }
+  
+  // Clean old unlock records (older than 90 days)
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  for (const [key, record] of keyUsageStore.entries()) {
+    if (record.timestamp < ninetyDaysAgo) {
+      keyUsageStore.delete(key);
+      deleted++;
+      details.unlocks++;
+    }
+  }
+  
+  return {
+    deleted,
+    message: `Cleaned ${deleted} items`,
+    details
+  };
+}
+
 /// Export everything for backward compatibility
 export default {
   generateAccessKey,
@@ -329,5 +579,10 @@ export default {
   cleanupExpiredKeys,
   isExpired,
   getMemoryStoreSize,
-  getEmailHash
+  getEmailHash,
+  createOrUpdateMemberAndIssueKey,
+  verifyInnerCircleKey,
+  getPrivacySafeStats,
+  recordInnerCircleUnlock,
+  cleanupExpiredData
 };
