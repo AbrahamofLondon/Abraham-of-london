@@ -4,20 +4,24 @@
 # ============================================================
 
 [build]
-  command = "pnpm run build"
+  command = "pnpm install --force && pnpm run build"
   publish = ".next"
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
-  NODE_OPTIONS = "--max-old-space-size=4096"
-  NEXT_TELEMETRY_DISABLED = "1"
+  NODE_OPTIONS = "--max-old-space-size=8192"
+  
+  # Force install all dependencies
+  NPM_FLAGS = "--force"
+  PNPM_FLAGS = "--force"
   
   # ContentLayer configuration
   CONTENTLAYER_DISABLE_WARNINGS = "1"
+  CONTENTLAYER_LOG_LEVEL = "error"
   
-  # Production environment (NETLIFY NEEDS THESE IN [build.environment])
+  # Production environment
   NODE_ENV = "production"
   NEXT_PUBLIC_APP_ENV = "production"
   
@@ -25,9 +29,13 @@
   NEXT_DISABLE_SOURCEMAPS = "true"
   NEXT_IGNORE_ESLINT = "1"
   NEXT_IGNORE_TYPECHECK = "1"
+  NEXT_TELEMETRY_DISABLED = "1"
   
   # Force Node.js runtime (not Edge)
   NEXT_EDGE_RUNTIME = "nodejs"
+  
+  # Skip problematic prebuild steps
+  SKIP_CONTENTLAYER = "true"
 
 # ============================================================
 # DEPLOYMENT CONTEXTS
