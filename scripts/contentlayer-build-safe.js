@@ -1,4 +1,4 @@
-/* scripts/contentlayer-build-safe.ts - Safe Contentlayer build script (PNPM-FIRST, ESM-SAFE) */
+// scripts/contentlayer-build-safe.js - PURE JAVASCRIPT VERSION
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
@@ -10,7 +10,7 @@ console.log("🚀 Starting SAFE Contentlayer build process...");
 console.log(`📁 Current directory: ${process.cwd()}`);
 console.log(`📁 Node version: ${process.version}`);
 
-function hasPackage(name: string): boolean {
+function hasPackage(name) {
   try {
     require.resolve(name);
     return true;
@@ -19,7 +19,7 @@ function hasPackage(name: string): boolean {
   }
 }
 
-function run(cmd: string) {
+function run(cmd) {
   execSync(cmd, {
     stdio: "inherit",
     cwd: process.cwd(),
@@ -27,7 +27,7 @@ function run(cmd: string) {
   });
 }
 
-function createFallbackData(generatedDir: string) {
+function createFallbackData(generatedDir) {
   if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir, { recursive: true });
 
   const fallbackData = {
@@ -96,7 +96,7 @@ try {
   }
 
   console.log("🎉 Contentlayer build completed!");
-} catch (error: any) {
+} catch (error) {
   console.error("❌ Contentlayer build failed:", error?.message ?? error);
   console.log("🔄 Creating emergency fallback data...");
 
