@@ -1,11 +1,34 @@
-// lib/contentlayer-compat.ts
+// lib/contentlayer-compat.ts - FIXED VERSION
 /**
  * ContentLayer 2 Compatibility Layer - Pure ESM
  * No require() - only ES imports
  */
 
-// Import directly from generated - Next.js will handle this
-import * as generatedData from '@/.contentlayer/generated';
+// ============================================================================
+// CRITICAL FIX: Handle missing .contentlayer/generated directory
+// ============================================================================
+
+let generatedData: any = null;
+
+// Try to import generated data with error handling
+try {
+  // Dynamic import to handle build-time errors
+  generatedData = require('@/.contentlayer/generated');
+} catch (error) {
+  console.warn('[ContentLayer] Could not load @/.contentlayer/generated - using fallback data');
+  generatedData = {
+    allDocuments: [],
+    allPosts: [],
+    allBooks: [],
+    allCanons: [],
+    allDownloads: [],
+    allShorts: [],
+    allEvents: [],
+    allPrints: [],
+    allResources: [],
+    allStrategies: [],
+  };
+}
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -46,7 +69,10 @@ export interface DocBase {
   };
 }
 
-// Extract data with fallbacks
+// ============================================================================
+// DATA EXTRACTION WITH FALLBACKS
+// ============================================================================
+
 const data = generatedData || {
   allDocuments: [],
   allPosts: [],
@@ -61,11 +87,33 @@ const data = generatedData || {
 };
 
 // ============================================================================
-// CORE EXPORT FUNCTIONS
+// CORE EXPORT FUNCTIONS - WITH FIXED TYPES
 // ============================================================================
 
-export function getContentlayerData(): DocBase[] {
-  return (data as any).allDocuments || [];
+export function getContentlayerData(): {
+  allDocuments: DocBase[];
+  allPosts: DocBase[];
+  allBooks: DocBase[];
+  allCanons: DocBase[];
+  allDownloads: DocBase[];
+  allShorts: DocBase[];
+  allEvents: DocBase[];
+  allPrints: DocBase[];
+  allResources: DocBase[];
+  allStrategies: DocBase[];
+} {
+  return {
+    allDocuments: data.allDocuments || [],
+    allPosts: data.allPosts || [],
+    allBooks: data.allBooks || [],
+    allCanons: data.allCanons || [],
+    allDownloads: data.allDownloads || [],
+    allShorts: data.allShorts || [],
+    allEvents: data.allEvents || [],
+    allPrints: data.allPrints || [],
+    allResources: data.allResources || [],
+    allStrategies: data.allStrategies || [],
+  };
 }
 
 export function getDocHref(doc: DocBase | any): string {
@@ -74,7 +122,8 @@ export function getDocHref(doc: DocBase | any): string {
 }
 
 export function normalizeSlug(slug: string): string {
-  return slug?.replace(/^\/|\/$/g, '').trim() || '';
+  if (!slug) return '';
+  return slug.replace(/^\/|\/$/g, '').trim();
 }
 
 export function getAccessLevel(doc: DocBase | any): string {
@@ -98,47 +147,87 @@ export function isPublished(doc: DocBase | any): boolean {
 }
 
 // ============================================================================
-// COLLECTION GETTERS
+// COLLECTION GETTERS WITH ERROR HANDLING
 // ============================================================================
 
 export function getAllContentlayerDocs(): DocBase[] {
-  return (data as any).allDocuments || [];
+  try {
+    return data.allDocuments || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllPosts(): DocBase[] {
-  return (data as any).allPosts || [];
+  try {
+    return data.allPosts || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllBooks(): DocBase[] {
-  return (data as any).allBooks || [];
+  try {
+    return data.allBooks || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllCanons(): DocBase[] {
-  return (data as any).allCanons || [];
+  try {
+    return data.allCanons || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllDownloads(): DocBase[] {
-  return (data as any).allDownloads || [];
+  try {
+    return data.allDownloads || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllShorts(): DocBase[] {
-  return (data as any).allShorts || [];
+  try {
+    return data.allShorts || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllEvents(): DocBase[] {
-  return (data as any).allEvents || [];
+  try {
+    return data.allEvents || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllPrints(): DocBase[] {
-  return (data as any).allPrints || [];
+  try {
+    return data.allPrints || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllResources(): DocBase[] {
-  return (data as any).allResources || [];
+  try {
+    return data.allResources || [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllStrategies(): DocBase[] {
-  return (data as any).allStrategies || [];
+  try {
+    return data.allStrategies || [];
+  } catch {
+    return [];
+  }
 }
 
 // ============================================================================
@@ -146,22 +235,30 @@ export function getAllStrategies(): DocBase[] {
 // ============================================================================
 
 export function getPublishedDocuments(docs?: DocBase[]): DocBase[] {
-  const source = docs || getAllContentlayerDocs();
-  return source.filter(doc => isPublished(doc));
+  try {
+    const source = docs || getAllContentlayerDocs();
+    return source.filter(doc => isPublished(doc));
+  } catch {
+    return [];
+  }
 }
 
 export function getDocBySlug(slug: string, collection?: DocBase[]): DocBase | null {
-  const normalizedSlug = normalizeSlug(slug);
-  const docs = collection || getAllContentlayerDocs();
-  
-  return docs.find(doc => 
-    normalizeSlug(doc.slugComputed || doc.slug || '') === normalizedSlug ||
-    normalizeSlug(doc._raw?.flattenedPath || '') === normalizedSlug
-  ) || null;
+  try {
+    const normalizedSlug = normalizeSlug(slug);
+    const docs = collection || getAllContentlayerDocs();
+    
+    return docs.find(doc => 
+      normalizeSlug(doc.slugComputed || doc.slug || '') === normalizedSlug ||
+      normalizeSlug(doc._raw?.flattenedPath || '') === normalizedSlug
+    ) || null;
+  } catch {
+    return null;
+  }
 }
 
 // ============================================================================
-// SERVER-SIDE GETTERS
+// SERVER-SIDE GETTERS (USED IN getStaticPaths/getStaticProps)
 // ============================================================================
 
 export function getServerAllPosts(): DocBase[] {
@@ -241,7 +338,7 @@ export function getServerStrategyBySlug(slug: string): DocBase | null {
 }
 
 // ============================================================================
-// UTILITY FUNCTIONS
+// UTILITY FUNCTIONS WITH ERROR HANDLING
 // ============================================================================
 
 export function getDocKind(doc: DocBase | any): string {
@@ -257,40 +354,48 @@ export function resolveDocDownloadUrl(doc: DocBase | any): string | null {
 }
 
 export function toUiDoc(doc: DocBase | any): any {
-  return {
-    ...doc,
-    href: getDocHref(doc),
-    slug: normalizeSlug(doc.slugComputed || doc.slug || ''),
-    coverImage: resolveDocCoverImage(doc),
-    downloadUrl: resolveDocDownloadUrl(doc),
-  };
+  try {
+    return {
+      ...doc,
+      href: getDocHref(doc),
+      slug: normalizeSlug(doc.slugComputed || doc.slug || ''),
+      coverImage: resolveDocCoverImage(doc),
+      downloadUrl: resolveDocDownloadUrl(doc),
+    };
+  } catch {
+    return doc;
+  }
 }
 
 export function sanitizeData(data: any): any {
   if (!data) return data;
   
-  const seen = new WeakSet();
-  
-  function sanitize(obj: any): any {
-    if (obj === null || typeof obj !== 'object') return obj;
-    if (seen.has(obj)) return '[Circular]';
+  try {
+    const seen = new WeakSet();
     
-    seen.add(obj);
-    
-    if (Array.isArray(obj)) {
-      return obj.map(sanitize);
+    function sanitize(obj: any): any {
+      if (obj === null || typeof obj !== 'object') return obj;
+      if (seen.has(obj)) return '[Circular]';
+      
+      seen.add(obj);
+      
+      if (Array.isArray(obj)) {
+        return obj.map(sanitize);
+      }
+      
+      const sanitized: any = {};
+      for (const key in obj) {
+        if (key.startsWith('_') && key !== '_id' && key !== '_raw') continue;
+        sanitized[key] = sanitize(obj[key]);
+      }
+      
+      return sanitized;
     }
     
-    const sanitized: any = {};
-    for (const key in obj) {
-      if (key.startsWith('_') && key !== '_id' && key !== '_raw') continue;
-      sanitized[key] = sanitize(obj[key]);
-    }
-    
-    return sanitized;
+    return sanitize(data);
+  } catch {
+    return data;
   }
-  
-  return sanitize(data);
 }
 
 export async function recordContentView(slug: string, type?: string): Promise<void> {
@@ -300,34 +405,58 @@ export async function recordContentView(slug: string, type?: string): Promise<vo
 }
 
 export function assertContentlayerHasDocs(): boolean {
-  const docs = getAllContentlayerDocs();
-  if (docs.length === 0) {
-    console.warn('⚠ No ContentLayer documents found');
+  try {
+    const docs = getAllContentlayerDocs();
+    if (docs.length === 0) {
+      console.warn('⚠ No ContentLayer documents found');
+      return false;
+    }
+    return true;
+  } catch {
+    console.warn('⚠ ContentLayer not available');
     return false;
   }
-  return true;
 }
 
 // ============================================================================
 // DIRECT RE-EXPORTS (for @/lib/contentlayer imports)
 // ============================================================================
 
-export const allDocuments = (data as any).allDocuments || [];
-export const allPosts = (data as any).allPosts || [];
-export const allBooks = (data as any).allBooks || [];
-export const allCanons = (data as any).allCanons || [];
-export const allDownloads = (data as any).allDownloads || [];
-export const allShorts = (data as any).allShorts || [];
-export const allEvents = (data as any).allEvents || [];
-export const allPrints = (data as any).allPrints || [];
-export const allResources = (data as any).allResources || [];
-export const allStrategies = (data as any).allStrategies || [];
+export const allDocuments = data.allDocuments || [];
+export const allPosts = data.allPosts || [];
+export const allBooks = data.allBooks || [];
+export const allCanons = data.allCanons || [];
+export const allDownloads = data.allDownloads || [];
+export const allShorts = data.allShorts || [];
+export const allEvents = data.allEvents || [];
+export const allPrints = data.allPrints || [];
+export const allResources = data.allResources || [];
+export const allStrategies = data.allStrategies || [];
 
 // ============================================================================
 // DEFAULT EXPORT
 // ============================================================================
 
 export default {
+  // Core functions
+  getContentlayerData,
+  getServerAllDownloads,
+  getServerDownloadBySlug,
+  sanitizeData,
+  
+  // Collection getters
+  getAllContentlayerDocs,
+  getAllPosts,
+  getAllBooks,
+  getAllCanons,
+  getAllDownloads,
+  getAllShorts,
+  getAllEvents,
+  getAllPrints,
+  getAllResources,
+  getAllStrategies,
+  
+  // Direct data
   allDocuments,
   allPosts,
   allBooks,

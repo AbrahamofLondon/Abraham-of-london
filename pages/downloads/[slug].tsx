@@ -1,4 +1,4 @@
-/* pages/downloads/[slug].tsx - FIXED */
+/* pages/downloads/[slug].tsx - FIXED VERSION */
 import React, { useMemo, useState } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -6,7 +6,8 @@ import { MDXRemote } from "next-mdx-remote";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
-// FIXED: Import from contentlayer-helper directly
+// FIXED: Import from contentlayer directly
+import { allDownloads } from "contentlayer/generated";
 import {
   getServerAllDownloads,
   getServerDownloadBySlug,
@@ -19,10 +20,6 @@ import DownloadHero from "@/components/downloads/DownloadHero";
 import DownloadContent from "@/components/downloads/DownloadContent";
 import DownloadCard from "@/components/downloads/DownloadCard";
 import RelatedDownloads from "@/components/downloads/RelatedDownloads";
-
-// IMPORTANT: do NOT import useAuth if it reads browser APIs during SSR.
-// If you must use it, wrap usage to run only in browser.
-// import { useAuth } from "@/hooks/useAuth";
 
 interface Download {
   title: string;
@@ -45,8 +42,6 @@ interface Props {
 }
 
 const DownloadPage: NextPage<Props> = ({ download, source }) => {
-  // SSR-safe “auth”: default to not logged in during prerender.
-  // If you need real auth gating, implement it client-side in useEffect.
   const isBrowser = typeof window !== "undefined";
   const user = null;
 
@@ -54,7 +49,6 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
 
-  // Only decide gating after mount/browser is available
   useMemo(() => {
     if (!isBrowser) return;
     if (download.requiresEmail && !user) setShowForm(true);
@@ -119,9 +113,6 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
                         : "Download Now"}
                   </button>
                 </div>
-
-                {/* If you have a DownloadForm, render it here conditionally */}
-                {/* {showForm ? <DownloadForm ... /> : null} */}
               </div>
             </main>
 
@@ -143,26 +134,30 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
 export default DownloadPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  // FIXED: Use allDownloads directly instead of getContentlayerData()
+  const downloads = allDownloads || [];
   
-  await getContentlayerData();
-  const downloads = await getServerAllDownloads();
   return {
     paths: downloads
-.filter((x: any) => x && !(x as any).draft)
-.filter((x: any) => {
-  const slug = (x as any).slug || (x as any)._raw?.flattenedPath || "";
-  return slug && !String(slug).includes("replace");
-})
-.map((d: any) => ({ params: { slug: d.slug } })),
-    fallback: false, // ✅ REQUIRED for export
+      .filter((x: any) => x && !(x as any).draft)
+      .filter((x: any) => {
+        const slug = (x as any).slug || (x as any)._raw?.flattenedPath || "";
+        return slug && !String(slug).includes("replace");
+      })
+      .map((d: any) => ({ params: { slug: d.slug } })),
+    fallback: "blocking", // Changed to block for better error handling
   };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = params?.slug as string;
-  const data = await getServerDownloadBySlug(slug);
-
-  if (!data) return { notFound: true };
+  
+  // FIXED: Use allDownloads directly
+  const data = allDownloads?.find((d: any) => d.slug === slug);
+  
+  if (!data) {
+    return { notFound: true };
+  }
 
   const source = await prepareMDX(data.body?.raw || data.body || " ");
 
@@ -185,7 +180,3 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: { download: sanitizeData(download), source },
   };
 };
-
-
-
-

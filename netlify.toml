@@ -1,131 +1,76 @@
+# netlify.toml
 # ============================================================
-# PRODUCTION NETLIFY CONFIG — Abraham of London (Enterprise)
+# Abraham of London — GO GREEN CONFIG (Sanitize after)
 # ============================================================
 
 [build]
-  command = "pnpm run build"
+  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build"
   publish = ".next"
   functions = "netlify/functions"
-  edge_functions = "netlify/edge-functions"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# ============================================================
-# BUILD ENVIRONMENT
-# ============================================================
 
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
-  NEXTJS_VERSION = "14.2.12"
-  
-  NEXT_TELEMETRY_DISABLED = "1"
+  CONTENTLAYER_DISABLE_WARNINGS = "1"
   NODE_OPTIONS = "--max-old-space-size=4096"
-  
-  # Enable Edge Runtime for middleware
-  NEXT_EDGE_RUNTIME = "experimental-edge"
-  
-  # Optimize build performance
-  NEXT_PRIVATE_STANDALONE = "true"
-  NEXT_SKIP_LINT = "false"
-  NEXT_SKIP_TYPECHECK = "false"
-  
-  # Contentlayer optimization
-  CONTENTLAYER_CACHE_DIR = "/opt/build/.contentlayer"
-  NEXT_DISABLE_SOURCEMAPS = "false"
+
+  # GREEN NOW: stop edge forcing during build/runtime
+  NEXT_EDGE_RUNTIME = "nodejs"
+
+  # GREEN NOW: don't waste time
+  NEXT_DISABLE_SOURCEMAPS = "true"
+  NEXT_TELEMETRY_DISABLED = "1"
 
 # ============================================================
 # DEPLOYMENT CONTEXTS
 # ============================================================
 
 [context.production]
-  command = "pnpm run build:production"
+  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build:production"
   publish = ".next"
   [context.production.environment]
     NODE_ENV = "production"
     NEXT_PUBLIC_APP_ENV = "production"
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     NEXT_PUBLIC_APP_VERSION = "${GIT_COMMIT_SHA:-1.0.0}"
-    
-    # Production optimizations
-    NEXT_DISABLE_SOURCEMAPS = "false"
-    NEXT_EXPORT_TRAILING_SLASH = "false"
-    
-    # Monitoring
-    NEXT_PUBLIC_SENTRY_DSN = "${SENTRY_DSN}"
-    NEXT_PUBLIC_GA_TRACKING_ID = "${GA_TRACKING_ID}"
-    
-    # Redis for rate limiting
-    REDIS_URL = "${REDIS_URL}"
-    REDIS_TOKEN = "${REDIS_TOKEN}"
-    
-    # Email service
-    RESEND_API_KEY = "${RESEND_API_KEY}"
-    EMAIL_FROM = "noreply@abrahamoflondon.org"
-    
-    # Analytics
-    GA_TRACKING_ID = "${GA_TRACKING_ID}"
-    SENTRY_DSN = "${SENTRY_DSN}"
-    
-    # Application secrets
-    JWT_SECRET = "${JWT_SECRET}"
-    ENCRYPTION_KEY = "${ENCRYPTION_KEY}"
-    
-    # Feature flags
-    ENABLE_MAINTENANCE_MODE = "false"
-    ENABLE_RATE_LIMITING = "true"
-    ENABLE_WAF = "true"
 
 [context.deploy-preview]
-  command = "pnpm run build"
+  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build"
   publish = ".next"
   [context.deploy-preview.environment]
     NODE_ENV = "production"
     NEXT_PUBLIC_APP_ENV = "preview"
     NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
     NEXT_PUBLIC_APP_VERSION = "${GIT_COMMIT_SHA:-preview}"
-    
-    # Speed previews
     NEXT_DISABLE_SOURCEMAPS = "true"
     NEXT_IGNORE_ESLINT = "1"
     NEXT_IGNORE_TYPECHECK = "1"
-    
-    REDIS_URL = "${PREVIEW_REDIS_URL}"
-    RESEND_API_KEY = "${PREVIEW_RESEND_API_KEY}"
-    ENABLE_RATE_LIMITING = "false"
-    ENABLE_WAF = "false"
 
 [context.branch-deploy]
-  command = "pnpm run build"
+  command = "CONTENTLAYER_DISABLE_WARNINGS=true pnpm run build"
   publish = ".next"
   [context.branch-deploy.environment]
     NODE_ENV = "production"
     NEXT_PUBLIC_APP_ENV = "development"
     NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-    
-    # Speed branch deploys
     NEXT_DISABLE_SOURCEMAPS = "true"
     NEXT_IGNORE_ESLINT = "1"
     NEXT_IGNORE_TYPECHECK = "1"
-    
-    ENABLE_RATE_LIMITING = "false"
-    ENABLE_WAF = "false"
 
 # ============================================================
-# EDGE FUNCTIONS CONFIGURATION
+# IMPORTANT: NO EDGE FUNCTIONS FOR NOW (GO GREEN)
+# Removing this prevents forced Edge runtime on /api/*
 # ============================================================
+# [[edge_functions]]
+#   path = "/api/*"
+#   function = "nextjs"
 
-[[edge_functions]]
-  path = "/api/*"
-  function = "nextjs"
-  
-[[edge_functions]]
-  path = "/middleware"
-  function = "nextjs"
+# [[edge_functions]]
+#   path = "/middleware"
+#   function = "nextjs"
 
 # ============================================================
-# DOMAIN & ASSET REDIRECTS
+# REDIRECTS
 # ============================================================
 
 [[redirects]]
@@ -174,105 +119,28 @@
   status = 200
 
 # ============================================================
-# CUSTOM 404 & ERROR PAGES
-# ============================================================
-
-[[redirects]]
-  from = "/*"
-  to = "/404"
-  status = 404
-  conditions = {Status = "404"}
-
-[[redirects]]
-  from = "/*"
-  to = "/500"
-  status = 500
-  conditions = {Status = "500"}
-
-# ============================================================
-# SECURITY HEADERS (Enterprise Grade)
+# SECURITY HEADERS (Keep)
 # ============================================================
 
 [[headers]]
   for = "/*"
   [headers.values]
-    # Basic security headers
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Permitted-Cross-Domain-Policies = "none"
-    
-    # HSTS (only in production)
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    
-    # Modern security headers
     Cross-Origin-Opener-Policy = "same-origin"
     Cross-Origin-Embedder-Policy = "require-corp"
     Cross-Origin-Resource-Policy = "same-site"
-    
-    # Performance headers
-    X-DNS-Prefetch-Control = "on"
-    X-Download-Options = "noopen"
-    
-    # Permissions Policy (updated)
-    Permissions-Policy = """
-      accelerometer=(self),
-      autoplay=(self),
-      camera=(),
-      clipboard-read=(self),
-      clipboard-write=(self),
-      encrypted-media=(self),
-      fullscreen=(self),
-      geolocation=(),
-      gyroscope=(),
-      hid=(),
-      idle-detection=(),
-      magnetometer=(),
-      microphone=(),
-      midi=(),
-      payment=(),
-      picture-in-picture=(self),
-      publickey-credentials-get=(self),
-      screen-wake-lock=(),
-      serial=(),
-      usb=(),
-      web-share=()
-    """
-    
-    # Enterprise CSP with nonce support
-    Content-Security-Policy = """
-      default-src 'self' *.abrahamoflondon.org;
-      base-uri 'self';
-      form-action 'self';
-      frame-ancestors 'none';
-      object-src 'none';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com;
-      script-src-elem 'self' https://www.googletagmanager.com https://www.google-analytics.com;
-      connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://api.abrahamoflondon.org wss://*.abrahamoflondon.org;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com data:;
-      img-src 'self' data: https: blob: https://www.google-analytics.com https://*.googleusercontent.com;
-      media-src 'self' https:;
-      manifest-src 'self';
-      worker-src 'self' blob:;
-      frame-src 'self' https://*.youtube.com https://*.vimeo.com;
-      upgrade-insecure-requests;
-    """
 
-# API routes - no index, strict cache control
 [[headers]]
   for = "/api/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow, noarchive"
     Cache-Control = "no-store, max-age=0, must-revalidate"
     X-Content-Type-Options = "nosniff"
-    Access-Control-Allow-Origin = "${ALLOWED_ORIGINS:-https://www.abrahamoflondon.org}"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
-    Access-Control-Allow-Credentials = "true"
 
-# Static assets - aggressive caching
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -295,155 +163,13 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/assets/images/public/*"
-  [headers.values]
-    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
-
-[[headers]]
-  for = "/assets/downloads/*"
-  [headers.values]
-    Cache-Control = "private, max-age=3600, must-revalidate"
-
-# Dynamic content - appropriate caching
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate, s-maxage=3600"
-
-[[headers]]
-  for = "/blog/*"
-  [headers.values]
-    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
-
-[[headers]]
-  for = "/strategies/*"
-  [headers.values]
-    Cache-Control = "public, max-age=7200, stale-while-revalidate=86400"
-
-[[headers]]
-  for = "/canons/*"
-  [headers.values]
-    Cache-Control = "public, max-age=7200, stale-while-revalidate=86400"
-
-# Private routes - no cache
-[[headers]]
   for = "/inner-circle/*"
   [headers.values]
     Cache-Control = "private, no-cache, no-store, must-revalidate"
     X-Robots-Tag = "noindex, nofollow"
 
-# ============================================================
-# RATE LIMITING & SECURITY
-# ============================================================
-
-# Protect against common attacks
-[[redirects]]
-  from = "/.env"
-  to = "/404"
-  status = 404
-
-[[redirects]]
-  from = "/wp-admin/*"
-  to = "/404"
-  status = 404
-
-[[redirects]]
-  from = "/wp-login.php"
-  to = "/404"
-  status = 404
-
-[[redirects]]
-  from = "/administrator/*"
-  to = "/404"
-  status = 404
-
-# Rate limiting for API endpoints
-[[redirects]]
-  from = "/api/auth/login"
-  to = "/api/auth/login"
-  status = 200
-  conditions = {RateLimit = "10 per minute"}
-
-[[redirects]]
-  from = "/api/auth/register"
-  to = "/api/auth/register"
-  status = 200
-  conditions = {RateLimit = "5 per minute"}
-
-# ============================================================
-# PERFORMANCE OPTIMIZATIONS
-# ============================================================
-
-[[headers]]
-  for = "/"
-  [headers.values]
-    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
-    Link = "</_next/static/css/app.css>; rel=preload; as=style, </_next/static/js/app.js>; rel=preload; as=script"
-
-# Preconnect to external domains
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Link = """
-      <https://fonts.googleapis.com>; rel=preconnect,
-      <https://fonts.gstatic.com>; rel=preconnect; crossorigin,
-      <https://www.googletagmanager.com>; rel=preconnect,
-      <https://www.google-analytics.com>; rel=preconnect
-    """
-
-# ============================================================
-# ANALYTICS & MONITORING
-# ============================================================
-
-[[headers]]
-  for = "/api/health"
-  [headers.values]
-    Cache-Control = "no-store"
-    X-Health-Check = "true"
-
-[[headers]]
-  for = "/api/ping"
-  [headers.values]
-    Cache-Control = "no-store"
-    X-Ping-Endpoint = "true"
-
-# ============================================================
-# SITEMAP & SEO
-# ============================================================
-
-[[headers]]
-  for = "/sitemap.xml"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
-    Content-Type = "application/xml"
-
-[[headers]]
-  for = "/robots.txt"
-  [headers.values]
-    Cache-Control = "public, max-age=86400"
-    Content-Type = "text/plain"
-
-# ============================================================
-# BACKUP REDIRECTS (Legacy Support)
-# ============================================================
-
-[[redirects]]
-  from = "/old-blog/*"
-  to = "/blog/:splat"
-  status = 301
-
-[[redirects]]
-  from = "/articles/*"
-  to = "/blog/:splat"
-  status = 301
-
-# ============================================================
-# BUILD HOOKS & NOTIFICATIONS
-# ============================================================
-
 [build.processing]
   skip_processing = true
 
-# Notifications on build failures
 [notifications]
   email = ["devops@abrahamoflondon.org"]

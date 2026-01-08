@@ -1,12 +1,15 @@
+// lib/redis-enhanced.ts
 /**
- * Enhanced Redis client with fallbacks and error handling
- * Build-safe: avoids ioredis imports during webpack bundling
+ * Build-safe Redis wrapper:
+ * - No top-level process/env mutation (prevents SWC weirdness)
+ * - Uses MemoryRedis when REDIS_URL missing, on Edge runtime, or during build analysis
+ * - Dynamically imports ioredis only on Node runtime
  */
 
-type StringMap = Record<string, string>;
+type StoredValue = { value: string; expiresAt?: number };
 
 class MemoryRedis {
-  private store = new Map<string, { value: string; expiresAt?: number }>();
+  private store = new Map<string, StoredValue>();
 
   async get(key: string): Promise<string | null> {
     const item = this.store.get(key);
@@ -77,151 +80,166 @@ class MemoryRedis {
   async mget(keys: string[]): Promise<(string | null)[]> {
     return Promise.all(keys.map((k) => this.get(k)));
   }
+
+  // Optional compat for callers that check exists()
+  async exists(key: string): Promise<number> {
+    const v = await this.get(key);
+    return v === null ? 0 : 1;
+  }
 }
 
-// Underlying client can be ioredis OR memory
-type UnderlyingClient = MemoryRedis | any;
+type UnderlyingClient = any | MemoryRedis;
 
 let underlying: UnderlyingClient | null = null;
 
-// Safely check if we're in a browser environment
-const isBrowser = typeof window !== 'undefined';
+function isBrowser(): boolean {
+  return typeof window !== "undefined";
+}
 
-async function getUnderlyingClient(): Promise<UnderlyingClient> {
-  if (underlying) return underlying;
+function isEdgeRuntime(): boolean {
+  // Next.js sets NEXT_RUNTIME="edge" in Edge contexts
+  return typeof process !== "undefined" && process.env?.NEXT_RUNTIME === "edge";
+}
 
-  const hasRedisUrl = !!process.env.REDIS_URL;
-  const isEdge = process.env.NEXT_RUNTIME === "edge";
+function hasRedisUrl(): boolean {
+  return typeof process !== "undefined" && !!process.env?.REDIS_URL;
+}
 
-  // Return memory store for browser or if Redis is not configured
-  if (isBrowser || !hasRedisUrl || isEdge) {
-    underlying = new MemoryRedis();
-    return underlying;
-  }
+async function createUnderlying(): Promise<UnderlyingClient> {
+  // Always memory in browser/edge or if no REDIS_URL
+  if (isBrowser() || isEdgeRuntime() || !hasRedisUrl()) return new MemoryRedis();
 
+  // Node runtime + REDIS_URL: try ioredis (dynamic import)
   try {
-    // Dynamically import ioredis only on the server side
     const mod = await import("ioredis");
-    const RedisCtor = (mod as any).default || mod;
-
+    const RedisCtor = (mod as any).default ?? (mod as any);
     const client = new RedisCtor(process.env.REDIS_URL, {
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
       retryStrategy: (times: number) => Math.min(times * 50, 2000),
     });
 
-    // Don't hard-fail build if ping fails; just fallback to memory
+    // Don’t fail build if ping fails—fallback to memory
     try {
       await client.ping();
-      underlying = client;
-      return underlying;
+      return client;
     } catch {
-      underlying = new MemoryRedis();
-      return underlying;
+      return new MemoryRedis();
     }
   } catch {
-    underlying = new MemoryRedis();
-    return underlying;
+    return new MemoryRedis();
   }
 }
 
-// Wrapper (stable API regardless of backend)
-export const redis = {
-  async get(key: string) {
+async function getUnderlyingClient(): Promise<UnderlyingClient> {
+  if (underlying) return underlying;
+  underlying = await createUnderlying();
+  return underlying;
+}
+
+export interface RedisInterface {
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, options?: { EX?: number }): Promise<void>;
+  setex(key: string, seconds: number, value: string): Promise<void>;
+  del(key: string): Promise<number>;
+  keys(pattern: string): Promise<string[]>;
+  ping(): Promise<string>;
+  quit(): Promise<void>;
+  sadd(key: string, member: string): Promise<number>;
+  smembers(key: string): Promise<string[]>;
+  srem(key: string, member: string): Promise<number>;
+  mget(keys: string[]): Promise<(string | null)[]>;
+  exists?(key: string): Promise<number>;
+  getClient(): Promise<UnderlyingClient>;
+  getStats(): Promise<{ isConnected: boolean; usingMemoryStore: boolean }>;
+}
+
+export const redis: RedisInterface = {
+  async get(key) {
     return (await getUnderlyingClient()).get(key);
   },
-  async set(key: string, value: string, options?: { EX?: number }) {
+  async set(key, value, options) {
     return (await getUnderlyingClient()).set(key, value, options);
   },
-  async setex(key: string, seconds: number, value: string) {
+  async setex(key, seconds, value) {
     return (await getUnderlyingClient()).setex(key, seconds, value);
   },
-  async del(key: string) {
+  async del(key) {
     return (await getUnderlyingClient()).del(key);
   },
-  async keys(pattern: string) {
+  async keys(pattern) {
     return (await getUnderlyingClient()).keys(pattern);
   },
   async ping() {
     return (await getUnderlyingClient()).ping();
   },
   async quit() {
-    if (underlying && (underlying as any).quit) await (underlying as any).quit();
+    const c = underlying;
     underlying = null;
+    if (c && typeof (c as any).quit === "function") await (c as any).quit();
   },
-  async sadd(key: string, member: string) {
+  async sadd(key, member) {
     return (await getUnderlyingClient()).sadd(key, member);
   },
-  async smembers(key: string) {
+  async smembers(key) {
     return (await getUnderlyingClient()).smembers(key);
   },
-  async srem(key: string, member: string) {
+  async srem(key, member) {
     return (await getUnderlyingClient()).srem(key, member);
   },
-  async mget(keys: string[]) {
+  async mget(keys) {
     return (await getUnderlyingClient()).mget(keys);
   },
-  // expose raw client (for advanced libs)
-  async raw() {
+  async exists(key) {
+    const c = await getUnderlyingClient();
+    if (typeof (c as any).exists === "function") return (c as any).exists(key);
+    // memory fallback
+    const v = await c.get(key);
+    return v === null ? 0 : 1;
+  },
+  async getClient() {
     return getUnderlyingClient();
   },
-  
-  // Additional method to check connection status
-  isAvailable: async () => {
+  async getStats() {
+    const c = await getUnderlyingClient();
+    const usingMemoryStore = c instanceof MemoryRedis;
+    if (usingMemoryStore) return { isConnected: true, usingMemoryStore: true };
     try {
-      await getUnderlyingClient();
-      return true;
+      await (c as any).ping();
+      return { isConnected: true, usingMemoryStore: false };
     } catch {
-      return false;
+      return { isConnected: false, usingMemoryStore: false };
     }
   },
-  
-  // Get client instance (for compatibility)
-  getClient: async () => {
-    return getUnderlyingClient();
-  },
-  
-  // Get stats about the connection
-  getStats: async () => {
-    const client = await getUnderlyingClient();
-    return {
-      isConnected: client instanceof MemoryRedis ? true : await client.ping().then(() => true).catch(() => false),
-      usingMemoryStore: client instanceof MemoryRedis
-    };
-  }
 };
 
-export type RedisClient = Awaited<ReturnType<typeof redis.raw>>;
+export type RedisClient = Awaited<ReturnType<typeof redis.getClient>>;
 export type RedisStats = { isConnected: boolean; usingMemoryStore: boolean };
-export type RedisOptions = any; // Add proper type if needed
+export type RedisOptions = any;
 
-export function createNamespacedClient(namespace: string) {
+export interface NamespacedClient {
+  get(k: string): Promise<string | null>;
+  set(k: string, v: string, o?: { EX?: number }): Promise<void>;
+  del(k: string): Promise<number>;
+  sadd(k: string, m: string): Promise<number>;
+  smembers(k: string): Promise<string[]>;
+  srem(k: string, m: string): Promise<number>;
+}
+
+export function createNamespacedClient(namespace: string): NamespacedClient {
   const p = (k: string) => `${namespace}:${k}`;
   return {
-    get: (k: string) => redis.get(p(k)),
-    set: (k: string, v: string, o?: { EX?: number }) => redis.set(p(k), v, o),
-    del: (k: string) => redis.del(p(k)),
-    sadd: (k: string, m: string) => redis.sadd(p(k), m),
-    smembers: (k: string) => redis.smembers(p(k)),
-    srem: (k: string, m: string) => redis.srem(p(k), m),
+    get: (k) => redis.get(p(k)),
+    set: (k, v, o) => redis.set(p(k), v, o),
+    del: (k) => redis.del(p(k)),
+    sadd: (k, m) => redis.sadd(p(k), m),
+    smembers: (k) => redis.smembers(p(k)),
+    srem: (k, m) => redis.srem(p(k), m),
   };
 }
 
-export async function getRedis() {
+export async function getRedis(): Promise<RedisInterface> {
   return redis;
-}
-
-// Export a synchronous getter for the client (returns null if not initialized)
-export function getRedisClientSync() {
-  return underlying;
-}
-
-// Initialize on module load if in Node.js environment
-if (!isBrowser && typeof process !== 'undefined') {
-  // Initialize in the background but don't block
-  getUnderlyingClient().catch(() => {
-    // Silent catch - memory store will be used
-  });
 }
 
 export default redis;

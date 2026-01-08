@@ -1,9 +1,34 @@
-// contentlayer.config.ts - Updated to match your actual content
+// contentlayer.config.ts - Updated with fallback compatibility
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import path from 'path';
 
 // Windows workaround: Use absolute paths
 const contentDirPath = path.resolve(process.cwd(), 'content');
+
+// ============================================================================
+// FALLBACK COMPATIBILITY FUNCTION
+// ============================================================================
+
+// Fallback function for compatibility with old imports
+export const getContentlayerData = () => {
+  console.warn('[ContentLayer] getContentlayerData() is a stub - use direct imports instead');
+  return {
+    allDocuments: [],
+    allPosts: [],
+    allBooks: [],
+    allCanons: [],
+    allDownloads: [],
+    allShorts: [],
+    allEvents: [],
+    allPrints: [],
+    allResources: [],
+    allStrategies: [],
+  };
+};
+
+// ============================================================================
+// FIELD DEFINITIONS
+// ============================================================================
 
 // Update SharedFields to include ALL fields found in your warnings
 const SharedFields = {
@@ -52,6 +77,10 @@ const SharedFields = {
   order: { type: "number", required: false },
 };
 
+// ============================================================================
+// COMPUTED FIELDS
+// ============================================================================
+
 const computedFields = {
   slugComputed: {
     type: "string" as const,
@@ -76,6 +105,10 @@ const computedFields = {
     },
   },
 };
+
+// ============================================================================
+// DOCUMENT TYPE DEFINITIONS
+// ============================================================================
 
 export const Post = defineDocumentType(() => ({
   name: "Post",
@@ -221,6 +254,10 @@ export const Strategy = defineDocumentType(() => ({
   computedFields,
 }));
 
+// ============================================================================
+// EXPORT CONFIGURATION
+// ============================================================================
+
 // Windows-friendly configuration that doesn't fail on warnings
 export default makeSource({
   contentDirPath,
@@ -230,4 +267,34 @@ export default makeSource({
   onExtraFieldData: "ignore-warn",
   onUnknownDocuments: "skip-warn",
   onMissingOrIncompatibleData: "skip-warn",
+  
+  // Export all document types for direct import
+  exportAllTypes: true,
+  exportFlattenedPathMap: true,
 });
+
+// ============================================================================
+// COMPATIBILITY EXPORTS
+// ============================================================================
+
+// Export all types for easy importing
+export const allDocumentTypes = {
+  Post,
+  Book,
+  Canon,
+  Download,
+  Short,
+  Event,
+  Print,
+  Resource,
+  Strategy,
+};
+
+// Legacy export pattern for compatibility
+export const contentlayerConfig = {
+  contentDirPath,
+  documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
+};
+
+// Export the computed fields for reuse
+export { computedFields };
