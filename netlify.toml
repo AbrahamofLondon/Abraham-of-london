@@ -1,6 +1,6 @@
 # netlify.toml
 # ============================================================
-# Abraham of London — GO GREEN CONFIG (Sanitize after)
+# Abraham of London — GO GREEN CONFIG
 # ============================================================
 
 [build]
@@ -11,70 +11,46 @@
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
-  CONTENTLAYER_DISABLE_WARNINGS = "1"
   NODE_OPTIONS = "--max-old-space-size=4096"
-
-  # GREEN NOW: stop edge forcing during build/runtime
-  NEXT_EDGE_RUNTIME = "nodejs"
-
-  # GREEN NOW: don't waste time
-  NEXT_DISABLE_SOURCEMAPS = "true"
   NEXT_TELEMETRY_DISABLED = "1"
-
-  # Production environment variables
+  
+  # ContentLayer configuration
+  CONTENTLAYER_DISABLE_WARNINGS = "1"
+  
+  # Production environment (NETLIFY NEEDS THESE IN [build.environment])
   NODE_ENV = "production"
   NEXT_PUBLIC_APP_ENV = "production"
+  
+  # Build performance
+  NEXT_DISABLE_SOURCEMAPS = "true"
+  NEXT_IGNORE_ESLINT = "1"
+  NEXT_IGNORE_TYPECHECK = "1"
+  
+  # Force Node.js runtime (not Edge)
+  NEXT_EDGE_RUNTIME = "nodejs"
 
 # ============================================================
 # DEPLOYMENT CONTEXTS
 # ============================================================
 
 [context.production]
-  command = "pnpm run build"
-  publish = ".next"
   [context.production.environment]
-    NODE_ENV = "production"
-    NEXT_PUBLIC_APP_ENV = "production"
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     NEXT_PUBLIC_APP_VERSION = "${GIT_COMMIT_SHA:-1.0.0}"
 
 [context.deploy-preview]
-  command = "pnpm run build"
-  publish = ".next"
   [context.deploy-preview.environment]
-    NODE_ENV = "production"
     NEXT_PUBLIC_APP_ENV = "preview"
     NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
     NEXT_PUBLIC_APP_VERSION = "${GIT_COMMIT_SHA:-preview}"
-    NEXT_DISABLE_SOURCEMAPS = "true"
-    NEXT_IGNORE_ESLINT = "1"
-    NEXT_IGNORE_TYPECHECK = "1"
 
 [context.branch-deploy]
-  command = "pnpm run build"
-  publish = ".next"
   [context.branch-deploy.environment]
-    NODE_ENV = "production"
     NEXT_PUBLIC_APP_ENV = "development"
     NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-    NEXT_DISABLE_SOURCEMAPS = "true"
-    NEXT_IGNORE_ESLINT = "1"
-    NEXT_IGNORE_TYPECHECK = "1"
 
 # ============================================================
-# IMPORTANT: NO EDGE FUNCTIONS FOR NOW (GO GREEN)
-# Removing this prevents forced Edge runtime on /api/*
-# ============================================================
-# [[edge_functions]]
-#   path = "/api/*"
-#   function = "nextjs"
-
-# [[edge_functions]]
-#   path = "/middleware"
-#   function = "nextjs"
-
-# ============================================================
-# REDIRECTS
+# REDIRECTS (Keep your existing redirects)
 # ============================================================
 
 [[redirects]]
