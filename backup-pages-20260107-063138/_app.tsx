@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { SessionProvider } from "next-auth/react";
 
-import "@/styles/globals.css";
+import "@/styles/globals.scss";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth"; // Updated import
 
@@ -39,3 +39,4 @@ export default function MyApp({
     </SessionProvider>
   );
 }
+

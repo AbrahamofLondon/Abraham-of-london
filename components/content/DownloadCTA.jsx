@@ -1,6 +1,6 @@
 // DownloadCTA.jsx
 import React, { useState } from 'react';
-import styles from './DownloadCTA.module.css';
+import styles from './DownloadCTA.module.scss';
 import PropTypes from 'prop-types';
 
 const DownloadCTA = ({

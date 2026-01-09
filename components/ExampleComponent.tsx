@@ -1,5 +1,5 @@
 // components/ExampleComponent.tsx
-import styles from './ExampleComponent.module.css'
+import styles from './.module.scss'
 import { getFontClass } from '@/lib/fonts'
 
 export default function ExampleComponent() {

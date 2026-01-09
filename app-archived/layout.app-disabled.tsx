@@ -1,5 +1,5 @@
 // app/layout.tsx
-import "../styles/globals.css";
+import "../styles/globals.scss";
 import type { Metadata } from "next";
 import { fontConfig } from "@/lib/next-fonts";
 import { Inter } from 'next/font/google'

@@ -1,0 +1,131 @@
+/* styles/globals.css */
+/* Import all your CSS modules */
+
+/* 1. Font variables */
+@import './fonts.css';
+
+/* 2. Base styles */
+@import './Home.module.css';
+
+/* 3. Components */
+@import './components.css';
+
+/* 4. Theme transitions */
+@import './theme-transitions.css';
+
+/*
+ * ----------------------------------------------------------------------
+ * Global Reset & Base Styles
+ * ----------------------------------------------------------------------
+ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-family-inter);
+  background-color: var(--color-background, #050608);
+  color: var(--color-on-background, #f4f1ea);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+img, svg, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-primary, #d6b26a);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Selection styles */
+::selection {
+  background-color: rgba(214, 178, 106, 0.3);
+  color: var(--color-on-background);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(21, 23, 28, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(214, 178, 106, 0.5);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(214, 178, 106, 0.7);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Utility Classes
+ * ----------------------------------------------------------------------
+ */
+
+.#{container} {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.#{sr-only} {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.#{text-balance} {
+  text-wrap: balance;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Print Styles
+ * ----------------------------------------------------------------------
+ */
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .#{no-print} {
+    display: none !important;
+  }
+}
+
