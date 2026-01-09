@@ -538,6 +538,14 @@ export const Strategy = defineDocumentType(() => ({
 // ============================================================================
 
 export default makeSource({
+  // CRITICAL FIX: YAML parsing to handle duplicate keys gracefully
+  yaml: {
+    onDuplicateKey: (key, value1, value2, context) => {
+      console.warn(`⚠️ Duplicate YAML key "${key}" found in ${context.filename}. Using first value.`);
+      return value1;
+    },
+    strict: false,
+  },
   contentDirPath,
   documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
   disableImportAliasWarning: true,

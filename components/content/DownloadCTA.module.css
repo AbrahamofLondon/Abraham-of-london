@@ -10,7 +10,7 @@
 }
 
 .container::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -189,15 +189,15 @@
   .container {
     padding: 24px;
   }
-  
+
   .details {
     grid-template-columns: 1fr;
   }
-  
+
   .features {
     grid-template-columns: 1fr;
   }
-  
+
   .steps {
     flex-direction: column;
   }

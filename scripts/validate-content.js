@@ -44,141 +44,173 @@ try {
 }
 
 const validateFile = (filePath, contentlayerDocuments = []) => {
-  const relativePath = path.relative(contentDir, filePath)
-  
+  const relativeToContentDir = path.relative(contentDir, filePath).replace(/\\/g, "/"); // blog/x.mdx
+  const relativeToProjectRoot = path
+    .relative(projectRoot, filePath)
+    .replace(/\\/g, "/"); // content/blog/x.mdx
+
   try {
-    const content = fs.readFileSync(filePath, 'utf8')
-    
+    const content = fs.readFileSync(filePath, "utf8");
+
     // Check for frontmatter
-    if (!content.startsWith('---')) {
+    if (!content.startsWith("---")) {
       return {
         valid: false,
-        path: relativePath,
-        errors: ['No frontmatter (missing --- at start)'],
-        warnings: []
-      }
+        path: relativeToContentDir,
+        errors: ["No frontmatter (missing --- at start)"],
+        warnings: [],
+      };
     }
-    
-    const match = content.match(/^---\n([\s\S]*?)\n---/)
-    if (!match) {
+
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fmMatch) {
       return {
         valid: false,
-        path: relativePath,
-        errors: ['Malformed frontmatter (missing closing ---)'],
-        warnings: []
-      }
+        path: relativeToContentDir,
+        errors: ["Malformed frontmatter (missing closing ---)"],
+        warnings: [],
+      };
     }
-    
-    const yamlContent = match[1]
-    const parsed = yaml.load(yamlContent)
-    
-    const errors = []
-    const warnings = []
-    
-    // Check required fields
+
+    const yamlContent = fmMatch[1];
+    const parsed = yaml.load(yamlContent) || {};
+
+    const errors = [];
+    const warnings = [];
+
+    // Required fields
     if (!parsed.title) {
-      errors.push('Missing required field: title')
-    } else if (parsed.title.trim() === '') {
-      errors.push('Title is empty')
-    } else if (parsed.title === 'Untitled Document') {
-      warnings.push('Title is default value "Untitled Document"')
+      errors.push("Missing required field: title");
+    } else if (String(parsed.title).trim() === "") {
+      errors.push("Title is empty");
+    } else if (parsed.title === "Untitled Document") {
+      warnings.push('Title is default value "Untitled Document"');
     }
-    
+
     if (!parsed.date) {
-      errors.push('Missing required field: date')
-    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.date)) {
-      errors.push(`Invalid date format: "${parsed.date}" (must be YYYY-MM-DD)`)
+      errors.push("Missing required field: date");
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(String(parsed.date))) {
+      errors.push(`Invalid date format: "${parsed.date}" (must be YYYY-MM-DD)`);
     }
-    
-    // Check slug consistency
-    const expectedSlug = path.basename(filePath, path.extname(filePath))
-    if (parsed.slug && parsed.slug !== expectedSlug) {
-      warnings.push(`Slug "${parsed.slug}" doesn't match filename "${expectedSlug}"`)
+
+    // Slug consistency (NOTE: keep warning only; slug can legitimately differ from filename if you prefer)
+    const expectedSlug = path.basename(filePath, path.extname(filePath));
+    if (parsed.slug && String(parsed.slug) !== expectedSlug) {
+      warnings.push(`Slug "${parsed.slug}" doesn't match filename "${expectedSlug}"`);
     }
-    
-    // Check for common issues
+
+    // Tags
     if (parsed.tags && !Array.isArray(parsed.tags)) {
-      warnings.push('Tags should be an array')
+      warnings.push("Tags should be an array");
     }
-    
-    // Check draft status
+
+    // Draft exclusion heads-up
     if (parsed.draft === true) {
-      warnings.push('Document is marked as draft (will be excluded from production)')
+      warnings.push("Document is marked as draft (will be excluded from production)");
     }
-    
-    // Check for legacy fields
+
+    // Legacy fields
     const legacyFields = {
-      'downloadFile': 'Use downloadUrl instead',
-      'fileUrl': 'Use downloadUrl instead',
-      'pdfPath': 'Use downloadUrl instead',
-      'readtime': 'Use readTime instead',
-      'readingTime': 'Use readTime instead',
-      'isDraft': 'Use draft instead',
-      'isPublished': 'Use published instead',
-    }
-    
-    Object.keys(parsed).forEach(field => {
+      downloadFile: "Use downloadUrl instead",
+      fileUrl: "Use downloadUrl instead",
+      pdfPath: "Use downloadUrl instead",
+      readtime: "Use readTime instead",
+      readingTime: "Use readTime instead",
+      isDraft: "Use draft instead",
+      isPublished: "Use published instead",
+    };
+
+    Object.keys(parsed).forEach((field) => {
       if (legacyFields[field]) {
-        warnings.push(`Legacy field "${field}": ${legacyFields[field]}`)
+        warnings.push(`Legacy field "${field}": ${legacyFields[field]}`);
       }
-    })
-    
-    // Check if file exists in Contentlayer data
-    const inContentlayer = contentlayerDocuments.some(doc => 
-      doc._raw.sourceFilePath === relativePath
-    )
-    
+    });
+
+    // ✅ Contentlayer inclusion check (FIXED PATH LOGIC)
+    // Contentlayer typically stores sourceFilePath like: "content/blog/foo.mdx"
+    // Your prior code compared it to "blog/foo.mdx" — guaranteed mismatch.
+    const inContentlayer =
+      contentlayerDocuments.length === 0
+        ? true // if caller didn't supply CL docs, don't warn
+        : contentlayerDocuments.some((doc) => {
+            const docPath = String(doc?._raw?.sourceFilePath || "").replace(/\\/g, "/");
+            return docPath === relativeToProjectRoot || docPath === relativeToContentDir;
+          });
+
     if (!inContentlayer && contentlayerDocuments.length > 0) {
-      warnings.push('File not found in Contentlayer generated data (may be excluded)')
+      warnings.push("File not found in Contentlayer generated data (may be excluded)");
     }
-    
-    // Validate content length
-    const contentBody = content.slice(match[0].length).trim()
-    const hasContent = contentBody.length > 10
-    const isTooShort = contentBody.length < 50
-    
-    if (!hasContent) {
-      warnings.push('Very little or no content after frontmatter')
-    }
-    
-    if (isTooShort) {
-      warnings.push('Content is very short (less than 50 characters)')
-    }
-    
-    // Check for broken links
-    const markdownLinks = contentBody.match(/\[([^\]]+)\]\(([^)]+)\)/g) || []
-    markdownLinks.forEach(link => {
-      const match = link.match(/\[([^\]]+)\]\(([^)]+)\)/)
-      if (match) {
-        const url = match[2]
-        if (url.startsWith('/')) {
-          // Check if internal link exists
-          const linkedPath = path.join(projectRoot, url)
-          if (!fs.existsSync(linkedPath) && !fs.existsSync(linkedPath + '.md') && !fs.existsSync(linkedPath + '.mdx')) {
-            warnings.push(`Possible broken internal link: ${url}`)
-          }
+
+    // Content length
+    const contentBody = content.slice(fmMatch[0].length).trim();
+    const hasContent = contentBody.length > 10;
+    const isTooShort = contentBody.length < 50;
+
+    if (!hasContent) warnings.push("Very little or no content after frontmatter");
+    if (isTooShort) warnings.push("Content is very short (less than 50 characters)");
+
+    // Broken internal links (more accurate)
+    // - Ignore anchors (#)
+    // - Ignore querystring (?x=)
+    // - Check both exact path + common extensions + index variants
+    const markdownLinks = contentBody.match(/\[([^\]]+)\]\(([^)]+)\)/g) || [];
+    markdownLinks.forEach((l) => {
+      const m = l.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      if (!m) return;
+
+      const rawUrl = m[2].trim();
+      if (!rawUrl.startsWith("/")) return;
+
+      const url = rawUrl.split("#")[0].split("?")[0];
+      if (!url || url === "/") return;
+
+      // Likely route, not file — check only for static assets under /public
+      // If it looks like an asset (has extension), validate existence in /public
+      const hasExt = path.posix.basename(url).includes(".");
+      if (hasExt) {
+        const assetPath = path.join(projectRoot, "public", url).replace(/\\/g, "/");
+        if (!fs.existsSync(assetPath)) {
+          warnings.push(`Possible broken internal link: ${rawUrl}`);
         }
+        return;
       }
-    })
-    
+
+      // For route-like URLs, try to resolve to content files (md/mdx) or known page files.
+      const candidates = [
+        path.join(projectRoot, "content", url + ".mdx"),
+        path.join(projectRoot, "content", url + ".md"),
+        path.join(projectRoot, "pages", url + ".tsx"),
+        path.join(projectRoot, "pages", url + ".ts"),
+        path.join(projectRoot, "pages", url + ".jsx"),
+        path.join(projectRoot, "pages", url + ".js"),
+        path.join(projectRoot, "pages", url, "index.tsx"),
+        path.join(projectRoot, "pages", url, "index.ts"),
+        path.join(projectRoot, "pages", url, "index.jsx"),
+        path.join(projectRoot, "pages", url, "index.js"),
+      ];
+
+      const exists = candidates.some((p) => fs.existsSync(p));
+      if (!exists) warnings.push(`Possible broken internal link: ${rawUrl}`);
+    });
+
     return {
       valid: errors.length === 0,
-      path: relativePath,
+      path: relativeToContentDir,
       errors,
       warnings,
       hasContent,
       contentLength: contentBody.length,
-      parsedFrontmatter: parsed
-    }
+      parsedFrontmatter: parsed,
+    };
   } catch (error) {
     return {
       valid: false,
-      path: relativePath,
+      path: relativeToContentDir,
       errors: [`YAML parsing error: ${error.message}`],
-      warnings: []
-    }
+      warnings: [],
+    };
   }
-}
+};
 
 const main = async () => {
   console.log('='.repeat(70))

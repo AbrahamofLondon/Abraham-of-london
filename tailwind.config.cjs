@@ -481,7 +481,20 @@ module.exports = {
   // Plugins
   plugins: [
     require('@tailwindcss/typography'),
-    require('@tailwindcss/forms'),
+    let formsPlugin;
+try {
+  formsPlugin = require("@tailwindcss/forms");
+} catch (e) {
+  formsPlugin = null;
+}
+
+module.exports = {
+  // ...
+  plugins: [
+    ...(formsPlugin ? [formsPlugin] : []),
+    // other plugins...
+  ],
+};
     require('@tailwindcss/aspect-ratio'),
     function({ addUtilities }) {
       const newUtilities = {

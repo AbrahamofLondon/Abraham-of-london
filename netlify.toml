@@ -1,61 +1,45 @@
 # netlify.toml
 # ============================================================
-# Abraham of London — GO GREEN CONFIG
+# Abraham of London — GO GREEN CONFIG (Production-safe)
 # ============================================================
 
 [build]
-  command = "pnpm install --force && pnpm run build"
-  publish = ".next"
+  command = "pnpm install --frozen-lockfile && pnpm run build"
+  publish = "."
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
   NODE_OPTIONS = "--max-old-space-size=8192"
-  
-  # Force install all dependencies
-  NPM_FLAGS = "--force"
-  PNPM_FLAGS = "--force"
-  
-  # ContentLayer configuration
+
+  # Contentlayer
   CONTENTLAYER_DISABLE_WARNINGS = "1"
   CONTENTLAYER_LOG_LEVEL = "error"
-  
-  # Production environment
-  NODE_ENV = "production"
-  NEXT_PUBLIC_APP_ENV = "production"
-  
-  # Build performance
-  NEXT_DISABLE_SOURCEMAPS = "true"
-  NEXT_IGNORE_ESLINT = "1"
-  NEXT_IGNORE_TYPECHECK = "1"
+
+  # Build hygiene
   NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_DISABLE_SOURCEMAPS = "true"
+
+  # Do NOT skip content generation
   
-  # Force Node.js runtime (not Edge)
-  NEXT_EDGE_RUNTIME = "nodejs"
-  
-  # Skip problematic prebuild steps
-  SKIP_CONTENTLAYER = "true"
+
+[context.production.environment]
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+
+[context.deploy-preview.environment]
+  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_APP_ENV = "preview"
+
+[context.branch-deploy.environment]
+  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_APP_ENV = "development"
 
 # ============================================================
-# DEPLOYMENT CONTEXTS
+# NETLIFY NEXT.JS PLUGIN
 # ============================================================
-
-[context.production]
-  [context.production.environment]
-    NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-    NEXT_PUBLIC_APP_VERSION = "${GIT_COMMIT_SHA:-1.0.0}"
-
-[context.deploy-preview]
-  [context.deploy-preview.environment]
-    NEXT_PUBLIC_APP_ENV = "preview"
-    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-    NEXT_PUBLIC_APP_VERSION = "${GIT_COMMIT_SHA:-preview}"
-
-[context.branch-deploy]
-  [context.branch-deploy.environment]
-    NEXT_PUBLIC_APP_ENV = "development"
-    NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 # ============================================================
 # REDIRECTS (Keep your existing redirects)
@@ -106,7 +90,8 @@
   to = "/downloads/legacy-canvas.pdf"
   status = 200
 
-
+# IMPORTANT: these redirects only make sense if your routes truly use the prefixed slugs.
+# If you adopt clean slugs, these should be removed/changed.
 [[redirects]]
   from = "/blog/when-the-system-breaks-you"
   to = "/blog/post-when-the-system-breaks-you"
@@ -128,7 +113,7 @@
   status = 301
 
 # ============================================================
-# SECURITY HEADERS (Keep)
+# SECURITY HEADERS
 # ============================================================
 
 [[headers]]
@@ -174,15 +159,5 @@
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
 
-[[headers]]
-  for = "/inner-circle/*"
-  [headers.values]
-    Cache-Control = "private, no-cache, no-store, must-revalidate"
-    X-Robots-Tag = "noindex, nofollow"
-
 [build.processing]
   skip_processing = true
-
-[notifications]
-  email = ["devops@abrahamoflondon.org"]
-
