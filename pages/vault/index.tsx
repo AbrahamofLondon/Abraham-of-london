@@ -1,4 +1,3 @@
-// pages/vault/index.tsx
 import * as React from "react";
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
@@ -10,7 +9,8 @@ import {
   Search, Clock, UserCheck, Award, Lock, Eye, AlertCircle,
   ShieldCheck, Filter, Star, CheckCircle2, ChevronRight
 } from "lucide-react";
-import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
+import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
+import { getContentlayerData, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
 import { getPDFRegistry, type PDFTier } from "@/scripts/pdf-registry";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,7 +54,8 @@ export const getStaticProps: GetStaticProps<{
   }
 }> = async () => {
   try {
-    const data = await getContentlayerData(); assertContentlayerHasDocs(data);
+    const data = await getContentlayerData();
+    assertContentlayerHasDocs(data);
     const all = (await getContentlayerData()).allDownloads;
     const registry = getPDFRegistry();
 
@@ -290,4 +291,11 @@ export default function VaultPage({ items, stats }: InferGetStaticPropsType<type
   );
 }
 
+// Helper functions
+function resolveDocCoverImage(doc: any): string | null {
+  return doc.coverImage || doc.image || null;
+}
 
+function resolveDocDownloadHref(doc: any): string | null {
+  return doc.fileHref || doc.downloadHref || null;
+}

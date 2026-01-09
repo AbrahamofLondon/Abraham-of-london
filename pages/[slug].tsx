@@ -1,12 +1,11 @@
-// pages/[slug].tsx - HYDRATED CATCH-ALL ROUTE (ENHANCED)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import dynamic from "next/dynamic";
+import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
 
 import Layout from "@/components/Layout";
-
 import {
   getPublishedDocuments,
   getDocHref,
@@ -15,7 +14,6 @@ import {
   resolveDocCoverImage,
   getAccessLevel,
   resolveDocDownloadUrl,
-  assertContentlayerHasDocs,
   getContentlayerData,
   type DocBase
 } from "@/lib/contentlayer-compat";

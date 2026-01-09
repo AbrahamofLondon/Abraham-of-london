@@ -1,19 +1,17 @@
-// pages/downloads/index.tsx
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import DownloadCard from "@/components/downloads/DownloadCard";
+import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
 
-// ✅ SINGLE IMPORT - Remove the duplicate line below
 import {
   getContentlayerData,
-  assertContentlayerHasDocs, // ADD THIS IMPORT
   isDraftContent,
   normalizeSlug,
   getDocHref,
   getAccessLevel,
-} from "@/lib/contentlayer-compat"; // FIXED PATH
+} from "@/lib/contentlayer-compat";
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
@@ -56,7 +54,7 @@ function getDownloadSizeLabel(doc: any): string | null {
 export const getStaticProps: GetStaticProps<{ downloads: NormalisedDownload[] }> = async () => {
   // ✅ Fixed: Remove the argument from assertContentlayerHasDocs
   const data = await getContentlayerData();
-  assertContentlayerHasDocs(data);
+  assertContentlayerHasDocs();
 
   // ✅ One call validates downloads + resources covers/files under /assets/* (strict optional via env)
   assertPublicAssetsForDownloadsAndResources();

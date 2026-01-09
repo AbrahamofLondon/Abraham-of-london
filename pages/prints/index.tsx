@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, Palette, ArrowRight } from "lucide-react";
+import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
 
 import Layout from "@/components/Layout";
 import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";

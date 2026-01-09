@@ -225,6 +225,12 @@ importers:
         specifier: 4.2.1
         version: 4.2.1
     devDependencies:
+      '@contentlayer2/cli':
+        specifier: 0.5.8
+        version: 0.5.8(esbuild@0.18.20)
+      '@contentlayer2/core':
+        specifier: 0.5.8
+        version: 0.5.8(esbuild@0.18.20)
       '@contentlayer2/source-files':
         specifier: 0.5.8
         version: 0.5.8(esbuild@0.18.20)

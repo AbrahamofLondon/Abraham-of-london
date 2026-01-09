@@ -5,32 +5,55 @@ import { randomBytes, timingSafeEqual } from "crypto";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// ==================== OPTIONAL MODULES (safe, static specifiers) ====================
-// These are static strings so webpack can analyze them, but we still load defensively.
-async function loadRateLimitRedis() {
+// ==================== SAFE IMPORTS (dynamic) ====================
+type RateLimitResult = { allowed: boolean; [k: string]: any };
+
+type RateLimitRedisModule = {
+  rateLimitRedis?: { check: (key: string, opts: any) => Promise<RateLimitResult> };
+  default?: { check: (key: string, opts: any) => Promise<RateLimitResult> };
+};
+
+type UnifiedRateLimitModule = {
+  withEdgeRateLimit?: (
+    req: NextRequest,
+    cfg: any
+  ) => Promise<{ allowed: boolean; result?: any }>;
+  RATE_LIMIT_CONFIGS?: { AUTH?: any };
+  createRateLimitedResponse?: (result: any) => Response;
+  createRateLimitHeaders?: (result: any) => Record<string, string>;
+};
+
+async function safeImport<T = any>(specifier: string): Promise<T | null> {
   try {
-    const mod = await import("@/lib/rate-limit-redis");
-    return mod?.rateLimitRedis ?? mod?.default ?? null;
+    return (await import(specifier)) as unknown as T;
   } catch {
     return null;
   }
 }
 
-async function loadUnifiedLimiter() {
-  try {
-    const mod = await import("@/lib/server/rate-limit-unified");
-    return mod ?? null;
-  } catch {
-    return null;
-  }
+async function loadRateLimiters() {
+  const redisModule = await safeImport<RateLimitRedisModule>("@/lib/rate-limit-redis");
+  const unifiedModule = await safeImport<UnifiedRateLimitModule>(
+    "@/lib/server/rate-limit-unified"
+  );
+
+  const rateLimitRedis = redisModule?.rateLimitRedis || redisModule?.default || null;
+  return { rateLimitRedis, rateLimitModule: unifiedModule };
 }
 
 // ==================== CONFIGURATION ====================
+// IMPORTANT: In production, do not store users in code.
+// Use a DB + bcrypt hash + proper session storage.
 const ADMIN_USERS = [
-  { id: "1", username: "admin", role: "superadmin", mfaEnabled: false },
+  {
+    id: "1",
+    username: "admin",
+    role: "superadmin",
+    mfaEnabled: false,
+  },
 ];
 
-// ==================== UTILITY ====================
+// ==================== UTILITY FUNCTIONS ====================
 function getClientIp(req: NextRequest): string {
   const xff = req.headers.get("x-forwarded-for");
   if (xff) return xff.split(",")[0]?.trim() || "unknown";
@@ -44,9 +67,11 @@ function jsonError(message: string, status: number) {
 function normalizeUsername(v: unknown): string {
   return typeof v === "string" ? v.trim().toLowerCase() : "";
 }
+
 function normalizePassword(v: unknown): string {
   return typeof v === "string" ? v : "";
 }
+
 function normalizeRememberMe(v: unknown): boolean {
   return v === true;
 }
@@ -66,8 +91,9 @@ async function validatePassword(inputPassword: string): Promise<boolean> {
   }
 
   if (process.env.NODE_ENV !== "production") {
-    return inputPassword === "admin123";
+    return inputPassword === "admin123"; // CHANGE THIS if you ever use it.
   }
+
   return false;
 }
 
@@ -88,16 +114,16 @@ function setAdminSessionCookie(res: NextResponse, userId: string, rememberMe: bo
   });
 }
 
-// ==================== HANDLERS ====================
+// ==================== MAIN HANDLERS ====================
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request);
+    const { rateLimitRedis, rateLimitModule } = await loadRateLimiters();
 
-    const rateLimitRedis = await loadRateLimitRedis();
-    const unified = await loadUnifiedLimiter();
+    // ==================== RATE LIMITING ====================
+    let rateLimitResult: any = null;
 
     // 1) Redis limiter (preferred)
-    let rateLimitResult: any = null;
     if (rateLimitRedis?.check) {
       try {
         rateLimitResult = await rateLimitRedis.check(`auth:${ip}`, {
@@ -107,7 +133,7 @@ export async function POST(request: NextRequest) {
           blockDuration: 300_000,
         });
 
-        if (rateLimitResult?.allowed === false) {
+        if (rateLimitResult && rateLimitResult.allowed === false) {
           return NextResponse.json({ error: "Too many login attempts" }, { status: 429 });
         }
       } catch (e) {
@@ -115,23 +141,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2) Unified fallback
-    if (!rateLimitResult && unified?.withEdgeRateLimit) {
+    // 2) Unified limiter fallback (only if present)
+    if (!rateLimitResult && rateLimitModule?.withEdgeRateLimit) {
       try {
-        const cfg = unified.RATE_LIMIT_CONFIGS?.AUTH ?? { limit: 10, windowMs: 300_000 };
-        const { allowed, result } = await unified.withEdgeRateLimit(request, cfg);
+        const cfg =
+          rateLimitModule.RATE_LIMIT_CONFIGS?.AUTH ?? { limit: 10, windowMs: 300_000 };
+
+        const { allowed, result } = await rateLimitModule.withEdgeRateLimit(request, cfg);
 
         if (!allowed) {
-          if (unified.createRateLimitedResponse) return unified.createRateLimitedResponse(result);
+          if (rateLimitModule.createRateLimitedResponse) {
+            return rateLimitModule.createRateLimitedResponse(result);
+          }
           return NextResponse.json({ error: "Too many requests" }, { status: 429 });
         }
+
         rateLimitResult = result;
       } catch (e) {
         console.warn("[AdminLogin] Unified rate limit error:", e);
       }
     }
 
-    // Body
+    // ==================== BODY VALIDATION ====================
     let body: any = null;
     try {
       body = await request.json();
@@ -143,9 +174,13 @@ export async function POST(request: NextRequest) {
     const password = normalizePassword(body?.password);
     const rememberMe = normalizeRememberMe(body?.rememberMe);
 
-    if (!username || !password) return jsonError("Username and password required", 400);
+    if (!username || !password) {
+      return jsonError("Username and password required", 400);
+    }
 
+    // ==================== CREDENTIAL CHECK ====================
     const user = ADMIN_USERS.find((u) => u.username.toLowerCase() === username);
+
     if (!user) {
       await new Promise((r) => setTimeout(r, 350));
       return jsonError("Invalid credentials", 401);
@@ -154,28 +189,37 @@ export async function POST(request: NextRequest) {
     const ok = await validatePassword(password);
     if (!ok) return jsonError("Invalid credentials", 401);
 
+    // ==================== RESPONSE ====================
     const res = NextResponse.json(
       {
         success: true,
-        user: { id: user.id, username: user.username, role: user.role, mfaEnabled: user.mfaEnabled },
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          mfaEnabled: user.mfaEnabled,
+        },
       },
       { status: 200 }
     );
 
     setAdminSessionCookie(res, user.id, rememberMe);
 
-    // Rate limit headers if available
-    if (rateLimitResult && unified?.createRateLimitHeaders) {
+    // Rate-limit headers (if module provides them)
+    if (rateLimitResult && rateLimitModule?.createRateLimitHeaders) {
       try {
-        const headers = unified.createRateLimitHeaders(rateLimitResult);
+        const headers = rateLimitModule.createRateLimitHeaders(rateLimitResult);
         for (const [k, v] of Object.entries(headers)) res.headers.set(k, String(v));
       } catch (e) {
         console.warn("[AdminLogin] Could not set rate limit headers:", e);
       }
     }
 
+    // Security headers (minimal but sensible)
     res.headers.set("X-Content-Type-Options", "nosniff");
     res.headers.set("Cache-Control", "no-store");
+    res.headers.set("X-Login-Success", "true");
+    res.headers.set("X-User-Role", user.role);
 
     return res;
   } catch (error) {

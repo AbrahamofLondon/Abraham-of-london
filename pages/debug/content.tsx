@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Layout from "@/components/Layout";
+import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
 
 import {
   getAllContentlayerDocs,
@@ -11,8 +12,7 @@ import {
   normalizeSlug,
   getDocHref,
   isDraft,
-  getContentlayerData,
-  assertContentlayerHasDocs
+  getContentlayerData
 } from "@/lib/contentlayer-compat";
 
 type DocKind =

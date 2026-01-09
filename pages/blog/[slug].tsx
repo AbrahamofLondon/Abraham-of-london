@@ -1,11 +1,12 @@
-/* pages/blog/[slug].tsx — FULL FIXED VERSION */
+/* pages/blog/[slug].tsx — ENHANCED VERSION */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 import Layout from "@/components/Layout";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
-// Content + MDX utilities (keep only what we use)
+// Content + MDX utilities
 import {
   getContentlayerData,
   isDraftContent,
@@ -17,7 +18,7 @@ import {
   sanitizeData,
 } from "@/lib/server/md-utils";
 
-// UI components (keep only what we use)
+// UI components
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogContent from "@/components/blog/BlogContent";
 import BlogSidebar from "@/components/blog/BlogSidebar";
@@ -26,6 +27,27 @@ import ShareButtons from "@/components/ShareButtons";
 import AuthorBio from "@/components/AuthorBio";
 import RelatedPosts from "@/components/blog/RelatedPosts";
 import ResourceGrid from "@/components/blog/ResourceGrid";
+
+// Enhanced components for better UX
+const ReadingProgress = dynamic(
+  () => import("@/components/enhanced/ReadingProgress"),
+  { ssr: false }
+);
+
+const BackToTop = dynamic(
+  () => import("@/components/enhanced/BackToTop"),
+  { ssr: false }
+);
+
+const TableOfContents = dynamic(
+  () => import("@/components/enhanced/TableOfContents"),
+  { ssr: false }
+);
+
+const ReadTime = dynamic(
+  () => import("@/components/enhanced/ReadTime"),
+  { ssr: false }
+);
 
 /**
  * MDX Component Registry
@@ -45,6 +67,7 @@ interface Props {
     description: string | null;
     coverImage: string | null;
     tags: string[];
+    readTime?: string | null;
   };
   source: MDXRemoteSerializeResult;
 }
@@ -74,6 +97,9 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
         />
       </Head>
 
+      {/* Reading progress bar at top */}
+      <ReadingProgress />
+
       <div className="min-h-screen bg-black selection:bg-amber-500 selection:text-black">
         <BlogHeader
           title={post.title}
@@ -86,6 +112,13 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
             <main className="lg:col-span-8">
+              {/* Read time indicator */}
+              {post.readTime && (
+                <div className="mb-8">
+                  <ReadTime minutes={post.readTime} />
+                </div>
+              )}
+
               <article className="prose prose-invert prose-amber max-w-none">
                 <div className="bg-zinc-900/30 backdrop-blur-sm border border-white/5 rounded-3xl p-8 lg:p-16 shadow-2xl">
                   <BlogContent>
@@ -113,7 +146,12 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
               </div>
             </main>
 
-            <aside className="lg:col-span-4 sticky top-24 self-start">
+            <aside className="lg:col-span-4 sticky top-24 self-start space-y-8">
+              {/* Table of contents for long articles */}
+              <div className="bg-zinc-900/30 backdrop-blur-sm border border-white/5 rounded-2xl p-6">
+                <TableOfContents />
+              </div>
+
               <BlogSidebar
                 author={post.author}
                 publishedDate={publishedDate}
@@ -125,6 +163,9 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
 
         <BlogFooter />
       </div>
+
+      {/* Back to top button */}
+      <BackToTop />
     </Layout>
   );
 };
@@ -141,7 +182,6 @@ function toBlogSlug(p: any): string | null {
   const raw = String(p?._raw?.flattenedPath ?? "").trim();
   if (!raw) return null;
 
-  // Accept "posts/foo", "blog/foo", or "foo" and normalize to "foo"
   return normalizeSlug(raw.replace(/^\/?(posts|blog)\//, "").replace(/^\/+/, ""));
 }
 
@@ -192,6 +232,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     description: doc.description || null,
     coverImage: doc.coverImage || null,
     tags: Array.isArray(doc.tags) ? doc.tags : [],
+    readTime: doc.readTime || null,
   });
 
   return { props: { post, source }, revalidate: 1800 };

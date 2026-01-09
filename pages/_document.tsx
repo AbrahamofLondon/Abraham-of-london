@@ -1,14 +1,13 @@
 // pages/_document.tsx
-import Document, { Html, Head, Main, NextScript } from "next/document";
-
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+import Document, { Html, Head, Main, NextScript, DocumentContext } from "next/document";
 
 class MyDocument extends Document {
-  render() {
-    const hasRecaptcha =
-      typeof RECAPTCHA_SITE_KEY === "string" &&
-      RECAPTCHA_SITE_KEY.trim().length > 10;
+  static async getInitialProps(ctx: DocumentContext) {
+    const initialProps = await Document.getInitialProps(ctx);
+    return { ...initialProps };
+  }
 
+  render() {
     return (
       <Html lang="en-GB" className="dark">
         <Head>
@@ -16,12 +15,9 @@ class MyDocument extends Document {
           <meta name="theme-color" content="#854d0e" />
 
           <link rel="icon" href="/favicon.ico" />
-          <link
-            rel="apple-touch-icon"
-            href="/assets/icons/web-app-manifest-192x192.png"
-          />
+          <link rel="apple-touch-icon" href="/assets/icons/web-app-manifest-192x192.png" />
 
-          {/* Fonts (ok to load here) */}
+          {/* Fonts (OK in _document) */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
@@ -40,16 +36,10 @@ class MyDocument extends Document {
           <meta name="format-detection" content="telephone=no" />
           <meta name="mobile-web-app-capable" content="yes" />
 
-          {/* reCAPTCHA v3 (only when configured) */}
-          {hasRecaptcha ? (
-            <script
-              src={`https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(
-                RECAPTCHA_SITE_KEY!.trim()
-              )}`}
-              async
-              defer
-            />
-          ) : null}
+          {/* IMPORTANT:
+              Do NOT put reCAPTCHA script here. Put it in _app.tsx using next/script.
+              That avoids bundling weirdness in Document build step.
+           */}
         </Head>
 
         <body className="bg-white dark:bg-slate-950 font-sans antialiased">

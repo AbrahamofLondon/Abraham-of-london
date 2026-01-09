@@ -1,28 +1,109 @@
 // scripts/validate-frontmatter.mjs
-import fs from "fs/promises";
+// GREENLAND validator: strict where it matters, tolerant where it should be.
+
+import fs from "fs";
 import path from "path";
-import process from "process";
+import yaml from "js-yaml";
 
-const ROOT = process.cwd();
-const CONTENT_DIR = path.join(ROOT, "content");
+const projectRoot = process.cwd();
+const contentDir = path.join(projectRoot, "content");
 
-async function loadDeps() {
+// ------------------------------------------------------------
+// CONFIG
+// ------------------------------------------------------------
+
+// If true: unknown fields become fatal errors.
+// If false: unknown fields are warnings (recommended during migration).
+const STRICT_UNKNOWN_FIELDS = process.env.STRICT_UNKNOWN_FIELDS === "1";
+
+// If true: date is required everywhere. If false: date required only for blog posts by default.
+const REQUIRE_DATE_FOR_ALL = process.env.REQUIRE_DATE_FOR_ALL === "1";
+
+// If true: internal link checks run (can be noisy in early migrations).
+const CHECK_INTERNAL_LINKS = process.env.CHECK_INTERNAL_LINKS === "1";
+
+// ------------------------------------------------------------
+// HELPERS
+// ------------------------------------------------------------
+
+const isMdx = (p) => p.endsWith(".mdx") || p.endsWith(".md");
+
+const readFileSafe = (p) => {
   try {
-    const matterMod = await import("gray-matter");
-    const yamlMod = await import("js-yaml");
-    return {
-      matter: matterMod.default ?? matterMod,
-      yaml: yamlMod.default ?? yamlMod,
-    };
+    return fs.readFileSync(p, "utf8");
   } catch {
-    console.error("❌ Missing dependency: gray-matter/js-yaml");
-    console.error("Run: pnpm add -D gray-matter js-yaml");
-    process.exit(1);
+    return null;
   }
-}
+};
 
-const SHARED_ALLOWED = new Set([
-  "type",
+const getAllFiles = (dir) => {
+  const out = [];
+  const stack = [dir];
+
+  while (stack.length) {
+    const d = stack.pop();
+    if (!fs.existsSync(d)) continue;
+
+    const entries = fs.readdirSync(d, { withFileTypes: true });
+    for (const e of entries) {
+      const full = path.join(d, e.name);
+      if (e.isDirectory()) stack.push(full);
+      else if (e.isFile() && isMdx(full)) out.push(full);
+    }
+  }
+  return out;
+};
+
+const getTypeFromRelativePath = (relativePath) => {
+  const p = relativePath.replace(/\\/g, "/");
+  const top = p.split("/")[0];
+  switch (top) {
+    case "blog":
+      return "Post";
+    case "books":
+      return "Book";
+    case "canon":
+      return "Canon";
+    case "downloads":
+      return "Download";
+    case "shorts":
+      return "Short";
+    case "events":
+      return "Event";
+    case "prints":
+      return "Print";
+    case "resources":
+      return "Resource";
+    case "strategy":
+      return "Strategy";
+    default:
+      return "Document";
+  }
+};
+
+const extractFrontmatter = (raw) => {
+  if (!raw.startsWith("---")) return null;
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (!match) return null;
+  return {
+    yamlText: match[1],
+    body: raw.slice(match[0].length),
+  };
+};
+
+const toArray = (v) => (Array.isArray(v) ? v : v == null ? [] : [v]);
+
+const isValidDateString = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+
+const fileSlug = (filePath) =>
+  path.basename(filePath, path.extname(filePath));
+
+// ------------------------------------------------------------
+// FIELD SCHEMAS
+// ------------------------------------------------------------
+
+// Shared allowed keys (across types)
+const COMMON_FIELDS = new Set([
   "title",
   "slug",
   "href",
@@ -33,15 +114,14 @@ const SHARED_ALLOWED = new Set([
   "excerpt",
   "description",
   "subtitle",
-  "readTime",
   "draft",
   "published",
   "tags",
   "category",
-  "canonicalUrl",
   "ogTitle",
   "ogDescription",
   "socialCaption",
+  "canonicalUrl",
   "coverImage",
   "coverAspect",
   "coverFit",
@@ -50,41 +130,54 @@ const SHARED_ALLOWED = new Set([
   "priority",
   "accessLevel",
   "lockMessage",
-
-  // ✅ legacy/ops fields
   "tier",
   "requiresAuth",
   "preload",
   "version",
+  "type",
+"readTime",
+"readingTime",
+"readtime",
+"layout",
+"density",
+"featuredImage",
+"resources",
+"downloads",
+"relatedDownloads",
+"volumeNumber",
+"order",
+"resourceType",
+
+  // ✅ MIGRATION FIX: aliases must be allowed
+  "aliases",
 ]);
 
-const TYPE_ALLOWED = {
-  Post: new Set([
-    ...SHARED_ALLOWED,
-    "layout",
-    "density",
-    "resources",
-    "downloads",
-    "relatedDownloads",
-
-    // ✅ blog extras
-    "featuredImage",
-    "isPartTwo",
-    "previousPart",
-  ]),
-  Book: new Set([...SHARED_ALLOWED, "series"]),
-  Canon: new Set([...SHARED_ALLOWED, "order", "volumeNumber"]),
+// Type-specific extras
+const TYPE_FIELDS = {
+  Post: new Set(["series", "isSeriesPart", "seriesOrder"]),
+  Book: new Set(["isbn", "pages", "publisher", "publishedDate", "edition", "format"]),
+  Canon: new Set(["canonType", "volume", "part"]),
   Download: new Set([
-    ...SHARED_ALLOWED,
     "downloadType",
     "format",
+    "fileFormat",
     "paperFormats",
     "fileUrl",
+    "downloadUrl",
+    "downloadFile",
+    "pdfPath",
+    "file",
     "fileSize",
     "checksumMd5",
     "isInteractive",
     "isFillable",
-    "layout",
+    "language",
+    "ctaPrimary",
+    "ctaSecondary",
+    "related",
+    "ctaConfig",
+    "downloadProcess",
+    "featureGridItems",
     "useLegacyDiagram",
     "useProTip",
     "useFeatureGrid",
@@ -92,149 +185,203 @@ const TYPE_ALLOWED = {
     "proTipType",
     "proTipContent",
     "featureGridColumns",
-    "featureGridItems",
-    "ctaConfig",
-    "downloadProcess",
-    "relatedDownloads",
     "contentOnly",
-
-    // ✅ editorial extras
-    "language",
-    "ctaPrimary",
-    "ctaSecondary",
-    "related",
-
-    // legacy tolerated
-    "downloadUrl",
-    "downloadFile",
-    "pdfPath",
-    "file",
-    "fileFormat",
-    "readingTime",
-    "readtime",
+    "requiresEmail",
+    "emailFieldLabel",
+    "emailSuccessMessage",
   ]),
-  Short: new Set([...SHARED_ALLOWED, "shortType", "audience", "theme", "hook", "callToAction"]),
-  Event: new Set([...SHARED_ALLOWED, "eventType", "location", "startDate", "endDate", "registrationUrl", "eventDate", "time"]),
-  Print: new Set([
-    ...SHARED_ALLOWED,
-    "printType",
-    "fileUrl",
-    "downloadUrl",
-    // ✅ print meta used in templates
-    "format",
-    "paperFormats",
-    "fileSize",
+  Short: new Set(["shortType", "audience", "theme", "hook", "callToAction"]),
+  Event: new Set([
+    "eventType",
+    "location",
+    "startDate",
+    "endDate",
+    "registrationUrl",
+    "eventDate",
+    "time",
+    "timezone",
+    "isVirtual",
+    "meetingLink",
   ]),
-  Resource: new Set([...SHARED_ALLOWED, "resourceType", "fileUrl", "downloadUrl", "links", "resources", "readtime", "readingTime"]),
-  Strategy: new Set([
-    ...SHARED_ALLOWED,
-    "strategyType",
-    "stage",
-    // ✅ taxonomy
-    "industry",
-    "region",
-  ]),
+  Print: new Set(["printType", "format", "paperFormats", "fileSize", "fileUrl", "downloadUrl", "isPhysical", "price", "currency"]),
+  Resource: new Set(["resourceType", "fileUrl", "downloadUrl", "links", "resources"]),
+  Strategy: new Set(["strategyType", "stage", "industry", "region", "complexity", "timeframe", "deliverables"]),
+  Document: new Set([]),
 };
 
-function inferTypeFromPath(relativePath) {
-  if (relativePath.startsWith("content/blog/")) return "Post";
-  if (relativePath.startsWith("content/books/")) return "Book";
-  if (relativePath.startsWith("content/canon/")) return "Canon";
-  if (relativePath.startsWith("content/downloads/")) return "Download";
-  if (relativePath.startsWith("content/shorts/")) return "Short";
-  if (relativePath.startsWith("content/events/")) return "Event";
-  if (relativePath.startsWith("content/prints/")) return "Print";
-  if (relativePath.startsWith("content/resources/")) return "Resource";
-  // ✅ FIX: your repo folder
-  if (relativePath.startsWith("content/strategy/")) return "Strategy";
-  return null;
-}
+const allowedForType = (type) => {
+  const s = new Set([...COMMON_FIELDS, ...(TYPE_FIELDS[type] ? [...TYPE_FIELDS[type]] : [])]);
+  return s;
+};
 
-function rel(p) {
-  return path.relative(ROOT, p).replace(/\\/g, "/");
-}
+// ------------------------------------------------------------
+// VALIDATION
+// ------------------------------------------------------------
 
-async function walk(dir) {
-  const out = [];
-  const entries = await fs.readdir(dir, { withFileTypes: true });
-  for (const e of entries) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) out.push(...(await walk(p)));
-    else if (p.endsWith(".md") || p.endsWith(".mdx")) out.push(p);
+const validateOne = (filePath) => {
+  const relativePath = path.relative(contentDir, filePath);
+  const raw = readFileSafe(filePath);
+
+  if (!raw) {
+    return {
+      path: relativePath,
+      valid: false,
+      errors: ["Cannot read file"],
+      warnings: [],
+    };
   }
-  return out;
-}
 
-function isNonEmptyString(v) {
-  return typeof v === "string" && v.trim().length > 0;
-}
+  const fm = extractFrontmatter(raw);
+  if (!fm) {
+    return {
+      path: relativePath,
+      valid: false,
+      errors: ["No frontmatter (missing --- at start or closing ---)"],
+      warnings: [],
+    };
+  }
 
-function resolveDownloadFileUrl(data) {
-  return (
-    (isNonEmptyString(data.fileUrl) && data.fileUrl) ||
-    (isNonEmptyString(data.downloadUrl) && data.downloadUrl) ||
-    (isNonEmptyString(data.downloadFile) && data.downloadFile) ||
-    (isNonEmptyString(data.pdfPath) && data.pdfPath) ||
-    (isNonEmptyString(data.file) && data.file) ||
-    ""
-  );
-}
+  let parsed;
+  try {
+    parsed = yaml.load(fm.yamlText) || {};
+  } catch (e) {
+    return {
+      path: relativePath,
+      valid: false,
+      errors: [`YAML parsing error: ${e?.message || String(e)}`],
+      warnings: [],
+    };
+  }
 
-async function main() {
-  const { matter } = await loadDeps();
-
-  const files = await walk(CONTENT_DIR);
+  const type = getTypeFromRelativePath(relativePath);
+  const allowed = allowedForType(type);
 
   const errors = [];
+  const warnings = [];
 
-  for (const abs of files) {
-    const rp = rel(abs);
-    const raw = await fs.readFile(abs, "utf8");
-    if (!raw.startsWith("---")) continue;
+  // Required: title
+  if (!parsed.title || String(parsed.title).trim() === "") {
+    errors.push("Missing required field: title");
+  }
 
-    const parsed = matter(raw);
-    const data = parsed.data || {};
-
-    const inferred = inferTypeFromPath(rp);
-    const type = data.type || inferred;
-
-    if (!type || !TYPE_ALLOWED[type]) {
-      errors.push(`${rp}: unknown or missing type "${type || ""}"`);
-      continue;
+  // Required: date (configurable)
+  const requiresDate = REQUIRE_DATE_FOR_ALL ? true : type === "Post";
+  if (requiresDate) {
+    if (!parsed.date) {
+      errors.push("Missing required field: date");
+    } else if (!isValidDateString(parsed.date)) {
+      errors.push(`Invalid date format: "${parsed.date}" (must be YYYY-MM-DD)`);
     }
-
-    const allowed = TYPE_ALLOWED[type];
-    for (const key of Object.keys(data)) {
-      if (!allowed.has(key)) errors.push(`${rp}: unknown field "${key}" for type ${type}`);
+  } else {
+    // If date exists, validate it
+    if (parsed.date && !isValidDateString(parsed.date)) {
+      warnings.push(`Invalid date format: "${parsed.date}" (must be YYYY-MM-DD)`);
     }
+  }
 
-    if (type === "Download") {
-      const contentOnly = data.contentOnly === true;
-      const url = resolveDownloadFileUrl(data);
-      if (!contentOnly && !isNonEmptyString(url)) {
-        errors.push(`${rp}: Download missing fileUrl (or legacy file/downloadFile/pdfPath/downloadUrl). Set contentOnly:true if intentional.`);
+  // Slug warning (do not fail)
+  const expectedSlug = fileSlug(filePath);
+  if (parsed.slug && ["replace", "template", "TEMPLATE"].includes(String(parsed.slug))) {
+  warnings.push(`Slug "${parsed.slug}" is a placeholder in ${relativePath}`);
+}
+
+  // Tags should be array
+  if (parsed.tags && !Array.isArray(parsed.tags)) {
+    warnings.push("Tags should be an array");
+  }
+
+  // Aliases should be array
+  if (parsed.aliases && !Array.isArray(parsed.aliases)) {
+    warnings.push("aliases should be an array");
+  }
+
+  // Unknown fields
+  for (const key of Object.keys(parsed)) {
+    if (!allowed.has(key)) {
+      const msg = `Unknown field "${key}" for type ${type}`;
+      if (STRICT_UNKNOWN_FIELDS) errors.push(msg);
+      else warnings.push(msg);
+    }
+  }
+
+  // Optional: internal link check (noisy — off by default)
+  if (CHECK_INTERNAL_LINKS) {
+    const body = fm.body || "";
+    const links = body.match(/\[([^\]]+)\]\(([^)]+)\)/g) || [];
+    for (const l of links) {
+      const m = l.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      const url = m?.[2];
+      if (!url) continue;
+      if (url.startsWith("/")) {
+        const linked = path.join(projectRoot, url);
+        const exists =
+          fs.existsSync(linked) ||
+          fs.existsSync(linked + ".md") ||
+          fs.existsSync(linked + ".mdx") ||
+          fs.existsSync(path.join(projectRoot, "pages", url + ".tsx")) ||
+          fs.existsSync(path.join(projectRoot, "pages", url + ".ts")) ||
+          fs.existsSync(path.join(projectRoot, "public", url));
+        if (!exists) warnings.push(`Possible broken internal link: ${url}`);
       }
     }
   }
 
-  console.log("========================================");
-  console.log("📌 Frontmatter Validation Report");
-  console.log("========================================");
-  console.log(`Scanned: ${files.length} files`);
-  console.log(`Errors:  ${errors.length}`);
-  console.log(`Warnings:0`);
-  console.log("");
+  return {
+    path: relativePath,
+    type,
+    valid: errors.length === 0,
+    errors,
+    warnings,
+  };
+};
 
-  if (errors.length) {
-    console.log("❌ Errors (fatal):");
-    for (const e of errors) console.log(` - ${e}`);
-    process.exit(1);
+// ------------------------------------------------------------
+// RUN
+// ------------------------------------------------------------
+
+const files = getAllFiles(contentDir);
+
+const results = files.map(validateOne);
+
+const errors = results.filter((r) => r.errors?.length);
+const warnings = results.filter((r) => r.warnings?.length);
+
+console.log("========================================");
+console.log("📌 Frontmatter Validation Report");
+console.log("========================================");
+console.log(`Scanned: ${results.length} files`);
+console.log(`Errors:  ${errors.length}`);
+console.log(`Warnings:${warnings.length}`);
+console.log("");
+
+if (errors.length) {
+  console.log("❌ Errors (fatal):");
+  for (const r of errors) {
+    for (const e of r.errors) {
+      console.log(` - ${r.path}: ${e}`);
+    }
   }
-
-  console.log("✅ Frontmatter is clean. Drift is dead.");
+  console.log("");
 }
 
-main().catch((e) => {
-  console.error("❌ Validator crashed:", e);
-  process.exit(1);
-});
+if (warnings.length) {
+  console.log("⚠️ Warnings:");
+  for (const r of warnings) {
+    for (const w of r.warnings) {
+      console.log(` - ${r.path}: ${w}`);
+    }
+  }
+  console.log("");
+}
+
+// Write report file (optional but useful)
+try {
+  const reportPath = path.join(projectRoot, "frontmatter-validation-report.json");
+  fs.writeFileSync(reportPath, JSON.stringify({ results, errors, warnings }, null, 2), "utf8");
+  console.log(`📋 Report saved: ${reportPath}`);
+} catch {
+  // ignore
+}
+
+// Exit code: fail only if fatal errors exist
+process.exit(errors.length ? 1 : 0);

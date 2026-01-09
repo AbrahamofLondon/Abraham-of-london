@@ -279,6 +279,7 @@ export function getServerCanonBySlug(slug: string): DocBase | null {
 export function getServerAllDownloads(): DocBase[] {
   return getPublishedDocuments(getAllDownloads());
 }
+
 export function getServerDownloadBySlug(slug: string): DocBase | null {
   return getDocBySlug(slug, getAllDownloads());
 }
@@ -307,11 +308,21 @@ export function getServerEventBySlug(slug: string): DocBase | null {
   return getDocBySlug(slug, getAllEvents());
 }
 
+
+export function getServerResourceBySlug(slug: string): DocBase | null {
+  return getDocBySlug(slug, getAllResources());
+}
+
+export function getAllDocuments(): DocBase[] {
+  return getAllContentlayerDocs();
+}
+
 export function getServerAllResources(): DocBase[] {
   return getPublishedDocuments(getAllResources());
 }
-export function getServerResourceBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllResources());
+
+export async function getAllDocumentsAsync(): Promise<DocBase[]> {
+  return Promise.resolve(getAllDocuments());
 }
 
 /** Direct exports some code may import */

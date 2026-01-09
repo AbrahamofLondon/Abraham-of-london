@@ -3,6 +3,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Search, ArrowRight, Box, Terminal } from "lucide-react";
+import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
 
 import Layout from "@/components/Layout";
 import {
@@ -11,8 +12,7 @@ import {
   normalizeSlug,
   getDocHref,
   resolveDocCoverImage,
-  getContentlayerData,
-  assertContentlayerHasDocs
+  getContentlayerData
 } from "@/lib/contentlayer-compat";
 
 type Item = {

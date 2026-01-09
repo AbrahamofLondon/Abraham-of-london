@@ -217,6 +217,8 @@
     "zod": "4.2.1"
   },
   "devDependencies": {
+    "@contentlayer2/cli": "0.5.8",
+    "@contentlayer2/core": "0.5.8",
     "@contentlayer2/source-files": "0.5.8",
     "@netlify/functions": "5.1.2",
     "@netlify/plugin-nextjs": "5.14.5",
