@@ -106,6 +106,27 @@
   to = "/downloads/legacy-canvas.pdf"
   status = 200
 
+
+[[redirects]]
+  from = "/blog/when-the-system-breaks-you"
+  to = "/blog/post-when-the-system-breaks-you"
+  status = 301
+
+[[redirects]]
+  from = "/books/fathering-without-fear"
+  to = "/books/book-fathering-without-fear"
+  status = 301
+
+[[redirects]]
+  from = "/canon/fathering-without-fear"
+  to = "/canon/canon-fathering-without-fear"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/legacy-architecture-canvas"
+  to = "/downloads/download-legacy-architecture-canvas"
+  status = 301
+
 # ============================================================
 # SECURITY HEADERS (Keep)
 # ============================================================
@@ -164,3 +185,4 @@
 
 [notifications]
   email = ["devops@abrahamoflondon.org"]
+

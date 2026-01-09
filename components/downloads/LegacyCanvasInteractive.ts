@@ -220,7 +220,7 @@ const LegacyCanvasInteractive: React.FC = () => {
 
   const handleExportPDF = () => {
     // Trigger PDF download
-    window.open('/assets/downloads/legacy-architecture-canvas-a4-premium.pdf', '_blank')
+    window.open('/assets/downloads/download-legacy-architecture-canvas-a4-premium.pdf', '_blank')
   }
 
   const handlePrint = () => {

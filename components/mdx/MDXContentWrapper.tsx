@@ -4,7 +4,11 @@ import * as React from "react";
 import LegacyDiagram from "@/components/diagrams/LegacyDiagram";
 import ProTip from "@/components/content/ProTip";
 import FeatureGrid from "@/components/content/FeatureGrid";
-import DownloadCTA from "@/components/content/DownloadCTA";
+import dynamic from "next/dynamic";
+
+const DownloadCTA = dynamic(() => import("@/components/content/DownloadCTA"), {
+  ssr: false,
+});
 
 export interface MDXContentWrapperProps {
   content: React.ReactNode;

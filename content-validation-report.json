@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-09T12:16:46.018Z",
+  "timestamp": "2026-01-09T14:01:34.068Z",
   "summary": {
     "totalFiles": 154,
     "validFiles": 154,
@@ -96,6 +96,13 @@
       ]
     },
     {
+      "path": "blog\\post-when-the-system-breaks-you.mdx",
+      "warnings": [
+        "Slug \"when-the-system-breaks-you\" doesn't match filename \"post-when-the-system-breaks-you\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
       "path": "blog\\principles-for-my-son.mdx",
       "warnings": [
         "File not found in Contentlayer generated data (may be excluded)",
@@ -107,7 +114,7 @@
     {
       "path": "blog\\reclaiming-the-narrative.mdx",
       "warnings": [
-        "Slug \"when-the-system-breaks-you\" doesn't match filename \"reclaiming-the-narrative\"",
+        "Slug \"reclaiming-the-narrative.mdx\" doesn't match filename \"reclaiming-the-narrative\"",
         "File not found in Contentlayer generated data (may be excluded)",
         "Possible broken internal link: /downloads/fathers_in_the_family_court_practical_pack.pdf"
       ]
@@ -155,12 +162,6 @@
       ]
     },
     {
-      "path": "blog\\when-the-system-breaks-you.mdx",
-      "warnings": [
-        "File not found in Contentlayer generated data (may be excluded)"
-      ]
-    },
-    {
       "path": "blog\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
@@ -170,8 +171,9 @@
       ]
     },
     {
-      "path": "books\\fathering-without-fear.mdx",
+      "path": "books\\book-fathering-without-fear.mdx",
       "warnings": [
+        "Slug \"fathering-without-fear\" doesn't match filename \"book-fathering-without-fear\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
@@ -206,7 +208,6 @@
     {
       "path": "canon\\builders-catechism.mdx",
       "warnings": [
-        "Slug \"volume-x-the-arc-of-future-civilisation\" doesn't match filename \"builders-catechism\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
@@ -288,6 +289,7 @@
     {
       "path": "downloads\\abraham-vault-pack.mdx",
       "warnings": [
+        "Slug \"download-abraham-vault-pack\" doesn't match filename \"abraham-vault-pack\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -295,6 +297,7 @@
     {
       "path": "downloads\\board-decision-log-template.mdx",
       "warnings": [
+        "Slug \"download-board-decision-log-template\" doesn't match filename \"board-decision-log-template\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -302,6 +305,7 @@
     {
       "path": "downloads\\board-investor-onepager.mdx",
       "warnings": [
+        "Slug \"download-board-investor-onepager\" doesn't match filename \"board-investor-onepager\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "Legacy field \"pdfPath\": Use downloadUrl instead",
@@ -311,12 +315,14 @@
     {
       "path": "downloads\\brotherhood-covenant.mdx",
       "warnings": [
+        "Slug \"download-brotherhood-covenant\" doesn't match filename \"brotherhood-covenant\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\canon-volume-iv-diagnostic-toolkit.mdx",
       "warnings": [
+        "Slug \"download-canon-volume-iv-diagnostic-toolkit\" doesn't match filename \"canon-volume-iv-diagnostic-toolkit\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -324,6 +330,7 @@
     {
       "path": "downloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
       "warnings": [
+        "Slug \"download-canon-volume-v-governance-diagnostic-toolkit\" doesn't match filename \"canon-volume-v-governance-diagnostic-toolkit\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -331,18 +338,28 @@
     {
       "path": "downloads\\communication-script-bpf.mdx",
       "warnings": [
+        "Slug \"download-communication-script-bpf\" doesn't match filename \"communication-script-bpf\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\decision-log-template.mdx",
       "warnings": [
+        "Slug \"download-decision-log-template\" doesn't match filename \"decision-log-template\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\decision-matrix-scorecard.mdx",
+      "warnings": [
+        "Slug \"download-decision-matrix-scorecard\" doesn't match filename \"decision-matrix-scorecard\"",
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads\\download-legacy-architecture-canvas.mdx",
       "warnings": [
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
@@ -351,44 +368,42 @@
     {
       "path": "downloads\\entrepreneur-operating-pack.mdx",
       "warnings": [
+        "Slug \"download-entrepreneur-operating-pack\" doesn't match filename \"entrepreneur-operating-pack\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\entrepreneur-survival-checklist.mdx",
       "warnings": [
+        "Slug \"download-entrepreneur-survival-checklist\" doesn't match filename \"entrepreneur-survival-checklist\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\family-altar-liturgy.mdx",
       "warnings": [
+        "Slug \"download-family-altar-liturgy\" doesn't match filename \"family-altar-liturgy\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\leaders-cue-card-two-up.mdx",
       "warnings": [
+        "Slug \"download-leaders-cue-card-two-up\" doesn't match filename \"leaders-cue-card-two-up\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\leadership-playbook.mdx",
       "warnings": [
-        "File not found in Contentlayer generated data (may be excluded)"
-      ]
-    },
-    {
-      "path": "downloads\\legacy-architecture-canvas.mdx",
-      "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "Slug \"download-leadership-playbook\" doesn't match filename \"leadership-playbook\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\legacy-canvas.mdx",
       "warnings": [
-        "Slug \"legacy-architecture-canvas\" doesn't match filename \"legacy-canvas\"",
+        "Slug \"download-legacy-architecture-canvas\" doesn't match filename \"legacy-canvas\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -396,6 +411,7 @@
     {
       "path": "downloads\\mentorship-starter-kit.mdx",
       "warnings": [
+        "Slug \"download-mentorship-starter-kit\" doesn't match filename \"mentorship-starter-kit\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
@@ -404,6 +420,7 @@
     {
       "path": "downloads\\operating-cadence-pack.mdx",
       "warnings": [
+        "Slug \"download-operating-cadence-pack\" doesn't match filename \"operating-cadence-pack\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -411,12 +428,14 @@
     {
       "path": "downloads\\principles-for-my-son-cue-card.mdx",
       "warnings": [
+        "Slug \"download-principles-for-my-son-cue-card\" doesn't match filename \"principles-for-my-son-cue-card\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\principles-for-my-son.mdx",
       "warnings": [
+        "Slug \"download-principles-for-my-son\" doesn't match filename \"principles-for-my-son\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
@@ -425,6 +444,7 @@
     {
       "path": "downloads\\purpose-pyramid-worksheet.mdx",
       "warnings": [
+        "Slug \"download-purpose-pyramid-worksheet\" doesn't match filename \"purpose-pyramid-worksheet\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -432,6 +452,7 @@
     {
       "path": "downloads\\scripture-track-john14.mdx",
       "warnings": [
+        "Slug \"download-scripture-track-john14\" doesn't match filename \"scripture-track-john14\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
@@ -440,12 +461,14 @@
     {
       "path": "downloads\\standards-brief.mdx",
       "warnings": [
+        "Slug \"download-standards-brief\" doesn't match filename \"standards-brief\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\ultimate-purpose-of-man-editorial.mdx",
       "warnings": [
+        "Slug \"download-ultimate-purpose-of-man-editorial\" doesn't match filename \"ultimate-purpose-of-man-editorial\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
@@ -453,6 +476,7 @@
     {
       "path": "downloads\\weekly-operating-rhythm.mdx",
       "warnings": [
+        "Slug \"download-weekly-operating-rhythm\" doesn't match filename \"weekly-operating-rhythm\"",
         "File not found in Contentlayer generated data (may be excluded)"
       ]
     },

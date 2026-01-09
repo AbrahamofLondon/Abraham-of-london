@@ -271,7 +271,7 @@ const LegacyCanvasInteractive: React.FC = () => {
       // In production, this would call your backend PDF generation service
       // For now, we'll use the existing PDFs and simulate generation
       
-      const pdfUrl = `/assets/downloads/legacy-architecture-canvas-${format.toLowerCase()}-premium.pdf`;
+      const pdfUrl = `/assets/downloads/download-legacy-architecture-canvas-${format.toLowerCase()}-premium.pdf`;
       
       // Create download link
       const link = document.createElement('a');
