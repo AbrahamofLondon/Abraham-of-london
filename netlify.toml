@@ -5,7 +5,7 @@
 
 [build]
   command = "pnpm install --frozen-lockfile && pnpm run build"
-  publish = "."
+  publish = ".next"
   functions = "netlify/functions"
 
 [build.environment]

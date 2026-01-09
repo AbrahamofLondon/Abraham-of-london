@@ -1,3 +1,4 @@
+// lib/inner-circle/access.ts - FIXED VERSION
 import type { NextApiRequest } from 'next';
 import type { NextRequest } from 'next/server';
 
@@ -7,10 +8,9 @@ let RATE_LIMIT_CONFIGS: any = null;
 
 // Initialize on module load (but don't crash)
 function initRateLimit() {
-  if (rateLimitModule !== null) return; // Already initialized
+  if (rateLimitModule !== null) return;
   
   try {
-    // Use dynamic import to avoid build-time issues
     if (typeof window === 'undefined') {
       // Server-side: try to load
       const module = require('@/lib/server/rateLimit');
@@ -49,7 +49,7 @@ initRateLimit();
 // ==================== INTERFACES ====================
 export interface InnerCircleAccess {
   hasAccess: boolean;
-  reason?: 'no_cookie' | 'invalid_cookie' | 'rate_limited' | 'ip_blocked' | 'expired';
+  reason?: 'no_cookie' | 'invalid_cookie' | 'rate_limited' | 'ip_blocked' | 'expired' | 'no_request' | 'build_time';
   rateLimit?: {
     remaining: number;
     limit: number;
@@ -70,28 +70,41 @@ export interface AccessCheckOptions {
 }
 
 // ==================== UTILITY FUNCTIONS ====================
-export function getClientIp(req: NextApiRequest | NextRequest): string {
+export function getClientIp(req?: NextApiRequest | NextRequest | null): string {
+  // ✅ FIXED: Add null/undefined check for build time
+  if (!req || !req.headers) {
+    return '127.0.0.1'; // Default for build time
+  }
+  
   if ('headers' in req && req.headers && typeof (req.headers as any).get === 'function') {
     const edgeHeaders = req.headers as any;
-    const forwarded = edgeHeaders.get('x-forwarded-for');
-    return forwarded?.split(',')[0]?.trim() || 
-           edgeHeaders.get('x-real-ip') || 
-           edgeHeaders.get('cf-connecting-ip') || 
-           'unknown';
+    try {
+      const forwarded = edgeHeaders.get('x-forwarded-for');
+      return forwarded?.split(',')[0]?.trim() || 
+             edgeHeaders.get('x-real-ip') || 
+             edgeHeaders.get('cf-connecting-ip') || 
+             '127.0.0.1';
+    } catch {
+      return '127.0.0.1';
+    }
   }
   
   const apiReq = req as NextApiRequest;
-  const forwarded = apiReq.headers['x-forwarded-for'];
-  
-  if (forwarded) {
-    const ips = Array.isArray(forwarded) ? forwarded : forwarded.split(',');
-    return ips[0]?.trim() || 'unknown';
+  try {
+    const forwarded = apiReq.headers?.['x-forwarded-for'];
+    
+    if (forwarded) {
+      const ips = Array.isArray(forwarded) ? forwarded : forwarded.split(',');
+      return ips[0]?.trim() || '127.0.0.1';
+    }
+    
+    return apiReq.socket?.remoteAddress || '127.0.0.1';
+  } catch {
+    return '127.0.0.1';
   }
-  
-  return apiReq.socket?.remoteAddress || 'unknown';
 }
 
-// ==================== RATE LIMITING FUNCTIONS (MISSING EXPORTS) ====================
+// ==================== RATE LIMITING FUNCTIONS ====================
 export async function rateLimitForRequestIp(
   ip: string, 
   config?: any
@@ -141,28 +154,50 @@ export function createRateLimitHeaders(rateLimitResult: {
 
 // ==================== MAIN ACCESS CHECK ====================
 export async function getInnerCircleAccess(
-  req: NextApiRequest | NextRequest,
+  req?: NextApiRequest | NextRequest | null,
   options: AccessCheckOptions = {}
 ): Promise<InnerCircleAccess> {
+  // ✅ FIXED: Handle build time (no request)
+  if (!req) {
+    return {
+      hasAccess: false,
+      reason: 'build_time',
+      userData: { ip: '127.0.0.1', userAgent: 'static-build', timestamp: Date.now() }
+    };
+  }
+  
   const { requireAuth = true, rateLimitConfig, skipRateLimit = false } = options;
   
   const ip = getClientIp(req);
-  const userAgent = 'headers' in req 
-    ? (req.headers.get('user-agent') || '')
-    : (req as NextApiRequest).headers['user-agent'] || '';
   
-  const hasAccessCookie = 'cookies' in req
-    ? req.cookies?.get('innerCircleAccess')?.value === "true"
-    : (req as NextApiRequest).cookies?.innerCircleAccess === "true";
+  // ✅ FIXED: Safe user agent extraction
+  let userAgent = '';
+  try {
+    userAgent = 'headers' in req 
+      ? (req.headers?.get?.('user-agent') || '')
+      : (req as NextApiRequest).headers?.['user-agent'] || '';
+  } catch {
+    userAgent = '';
+  }
+  
+  // ✅ FIXED: Safe cookie extraction
+  let hasAccessCookie = false;
+  try {
+    if ('cookies' in req && req.cookies) {
+      hasAccessCookie = req.cookies?.get?.('innerCircleAccess')?.value === "true";
+    } else {
+      hasAccessCookie = (req as NextApiRequest).cookies?.innerCircleAccess === "true";
+    }
+  } catch {
+    hasAccessCookie = false;
+  }
   
   // ==================== RATE LIMITING ====================
   if (!skipRateLimit && rateLimitModule?.rateLimit) {
     const config = rateLimitConfig || RATE_LIMIT_CONFIGS?.INNER_CIRCLE_UNLOCK || RATE_LIMIT_CONFIGS?.API_STRICT;
     
-    // Simple rate limiting check
-    const rateLimitKey = `inner-circle:${ip}`;
-    
     try {
+      const rateLimitKey = `inner-circle:${ip}`;
       const result = await rateLimitModule.rateLimit(rateLimitKey, config);
       
       if (!result.allowed) {
@@ -179,7 +214,6 @@ export async function getInnerCircleAccess(
         };
       }
     } catch (error) {
-      // Rate limiting failed, continue without it
       console.warn('[InnerCircleAccess] Rate limiting error:', error);
     }
   }
@@ -232,7 +266,6 @@ export function withInnerCircleAccess(
       res.setHeader('X-Frame-Options', 'DENY');
       res.setHeader('X-Access-Level', 'inner-circle');
       
-      // Call handler
       await handler(req, res);
       
     } catch (error) {
@@ -245,7 +278,7 @@ export function withInnerCircleAccess(
   };
 }
 
-// ==================== EXPORT HELPER FUNCTIONS ====================
+// ==================== HELPER FUNCTIONS ====================
 export function checkInnerCircleAccessInPage(context: any) {
   return {
     props: { innerCircleAccess: { hasAccess: false, reason: 'not_implemented' } },
@@ -264,11 +297,15 @@ export function createStrictApiHandler(handler: any) {
 // Client-side check
 export function hasInnerCircleAccess(): boolean {
   if (typeof window !== 'undefined') {
-    const cookie = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('innerCircleAccess='))
-      ?.split('=')[1];
-    return cookie === 'true';
+    try {
+      const cookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('innerCircleAccess='))
+        ?.split('=')[1];
+      return cookie === 'true';
+    } catch {
+      return false;
+    }
   }
   return false;
 }
@@ -279,12 +316,17 @@ export async function createAccessToken(email: string, tier: string = 'member'):
   expiresAt: Date;
   key: string;
 }> {
-  // Use dynamic require to avoid Edge runtime issues
-  let crypto: any;
   if (typeof window === 'undefined') {
-    crypto = require('crypto');
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+    const key = `IC-${crypto.randomBytes(16).toString('hex').toUpperCase()}`;
+    
+    return {
+      token,
+      key,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    };
   } else {
-    // Browser fallback
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
@@ -295,18 +337,9 @@ export async function createAccessToken(email: string, tier: string = 'member'):
     return {
       token,
       key,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     };
   }
-  
-  const token = crypto.randomBytes(32).toString('hex');
-  const key = `IC-${crypto.randomBytes(16).toString('hex').toUpperCase()}`;
-  
-  return {
-    token,
-    key,
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-  };
 }
 
 // Simple access token validation
@@ -315,10 +348,8 @@ export async function validateAccessToken(token: string): Promise<{
   email?: string;
   tier?: string;
 }> {
-  // This is a simplified implementation
-  // In a real app, you'd check against a database
   return {
-    valid: token.length > 10,
+    valid: token?.length > 10 || false,
     email: 'user@example.com',
     tier: 'member'
   };

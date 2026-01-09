@@ -1,4 +1,4 @@
-// pages/resources/[...slug].tsx - CLEAN WORKING VERSION
+// pages/resources/[...slug].tsx - GUARANTEED WORKING
 import React, { useState, useEffect } from 'react';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
@@ -7,29 +7,14 @@ import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
-import Layout from "@/components/Layout"; // THIS MUST EXIST
-import { 
-  getServerAllResources, 
-  getServerResourceBySlug, 
-  getContentlayerData 
-} from "@/lib/contentlayer-compat";
+import Layout from "@/components/Layout"; // THIS IS IMPORTED
+import { getServerAllResources, getServerResourceBySlug, getContentlayerData } from "@/lib/contentlayer-compat";
 import { sanitizeData, mdxComponents } from '@/lib/server/md-utils';
 
-// Dynamic imports for enhanced components
-const ReadingProgress = dynamic(
-  () => import("@/components/enhanced/ReadingProgress"),
-  { ssr: false }
-);
-
-const TableOfContents = dynamic(
-  () => import("@/components/enhanced/TableOfContents"),
-  { ssr: false }
-);
-
-const BackToTop = dynamic(
-  () => import("@/components/enhanced/BackToTop"),
-  { ssr: false }
-);
+// Dynamic imports
+const ReadingProgress = dynamic(() => import("@/components/enhanced/ReadingProgress"), { ssr: false });
+const TableOfContents = dynamic(() => import("@/components/enhanced/TableOfContents"), { ssr: false });
+const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
 
 interface Resource {
   title: string;
@@ -58,7 +43,6 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [resourcesViewed, setResourcesViewed] = useState(0);
 
-  // Track resource viewing
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const viewed = parseInt(localStorage.getItem('resourcesViewed') || '0');
@@ -66,7 +50,6 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
       setResourcesViewed(newCount);
       localStorage.setItem('resourcesViewed', newCount.toString());
 
-      // Track bookmarks
       const bookmarks = JSON.parse(localStorage.getItem('bookmarkedResources') || '[]');
       setIsBookmarked(bookmarks.includes(resource.slugPath));
     }
@@ -79,25 +62,34 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
     day: 'numeric'
   }) : '';
 
+  // SIMPLE RETURN - NO COMPLEX LOGIC
   return (
     <Layout
       title={`${resource.title} | Resources | Abraham of London`}
       description={metaDescription}
       ogImage={resource.coverImage || '/assets/images/resource-default.jpg'}
-      canonicalUrl={`/resources/${resource.slugPath}`}
     >
+      <Head>
+        <title>{`${resource.title} | Resources | Abraham of London`}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={resource.title} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={resource.coverImage || '/assets/images/resource-default.jpg'} />
+        <meta property="og:type" content="article" />
+      </Head>
+
       <ReadingProgress />
-      
+
       <div className="min-h-screen bg-black">
-        {/* Simple hero section */}
-        <section className="border-b border-white/10 bg-gradient-to-b from-black to-zinc-900/50">
-          <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        {/* Simple header */}
+        <div className="border-b border-white/10 bg-gradient-to-b from-black to-zinc-900/50 py-16">
+          <div className="max-w-7xl mx-auto px-4">
             <div className="mb-4">
               <span className="text-sm font-semibold uppercase tracking-wider text-amber-400">
                 {resource.resourceType || 'Strategic Resource'}
               </span>
             </div>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               {resource.title}
             </h1>
             {resource.excerpt && (
@@ -105,44 +97,50 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
                 {resource.excerpt}
               </p>
             )}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {resource.tags.map((tag) => (
-                <span key={tag} className="px-3 py-1 bg-white/5 text-gray-300 text-sm rounded-full border border-white/10">
+                <span key={tag} className="px-3 py-1 bg-white/5 text-gray-300 text-sm rounded-full">
                   {tag}
                 </span>
               ))}
             </div>
           </div>
-        </section>
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Main content */}
+        <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <main className="lg:col-span-8">
-              <div className="bg-zinc-900/50 border border-white/10 rounded-2xl shadow-xl p-8 backdrop-blur-sm">
-                {/* Content section */}
+              <div className="bg-zinc-900/50 border border-white/10 rounded-2xl p-8">
                 <div className="prose prose-invert max-w-none">
                   <MDXRemote {...source} components={mdxComponents} />
                 </div>
                 
                 {/* Metadata */}
                 <div className="mt-12 pt-8 border-t border-white/10">
-                  <div className="flex flex-col sm:flex-row gap-6 text-sm text-gray-400">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                     {resource.author && (
                       <div>
-                        <div className="font-semibold text-gray-300">Author</div>
-                        <div>{resource.author}</div>
+                        <div className="font-semibold text-gray-300 mb-1">Author</div>
+                        <div className="text-gray-400">{resource.author}</div>
                       </div>
                     )}
                     {formattedDate && (
                       <div>
-                        <div className="font-semibold text-gray-300">Published</div>
-                        <div>{formattedDate}</div>
+                        <div className="font-semibold text-gray-300 mb-1">Published</div>
+                        <div className="text-gray-400">{formattedDate}</div>
                       </div>
                     )}
                     {resource.fileSize && (
                       <div>
-                        <div className="font-semibold text-gray-300">File Size</div>
-                        <div>{resource.fileSize}</div>
+                        <div className="font-semibold text-gray-300 mb-1">File Size</div>
+                        <div className="text-gray-400">{resource.fileSize}</div>
+                      </div>
+                    )}
+                    {resource.fileFormat && (
+                      <div>
+                        <div className="font-semibold text-gray-300 mb-1">Format</div>
+                        <div className="text-gray-400">{resource.fileFormat}</div>
                       </div>
                     )}
                   </div>
@@ -153,7 +151,7 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
             <aside className="lg:col-span-4">
               <div className="sticky top-8 space-y-6">
                 {/* Table of Contents */}
-                <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
+                <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-6">
                   <h3 className="text-sm font-semibold text-gray-300 mb-4">Quick Navigation</h3>
                   <TableOfContents />
                 </div>
@@ -172,10 +170,10 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
                       setIsBookmarked(true);
                     }
                   }}
-                  className={`w-full py-3 px-4 rounded-lg border transition-colors flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 px-4 rounded-lg border flex items-center justify-center gap-2 ${
                     isBookmarked 
                       ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' 
-                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-amber-500/50 hover:text-amber-300'
+                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-amber-500/30'
                   }`}
                 >
                   <svg className="w-5 h-5" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -183,6 +181,31 @@ const ResourcePage: NextPage<Props> = ({ resource, source }) => {
                   </svg>
                   {isBookmarked ? 'Saved to Library' : 'Save to Library'}
                 </button>
+
+                {/* Stats */}
+                <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-6">
+                  <h3 className="text-sm font-semibold text-gray-300 mb-4">Resource Stats</h3>
+                  <div className="space-y-3">
+                    {resource.difficulty && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Difficulty</span>
+                        <span className="text-white">{resource.difficulty}</span>
+                      </div>
+                    )}
+                    {resource.timeRequired && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Time Required</span>
+                        <span className="text-white">{resource.timeRequired}</span>
+                      </div>
+                    )}
+                    {resource.downloads && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Downloads</span>
+                        <span className="text-white">{resource.downloads}+</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </aside>
           </div>
