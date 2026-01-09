@@ -1,7 +1,6 @@
 // pages/api/frameworks/[slug]/protected.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { verifyInnerCircleToken } from '@/lib/inner-circle/jwt';
-import { getFrameworkProtectedContent } from '@/lib/resources/strategic-frameworks';
+import { getInnerCircleAccess } from '@/lib/inner-circle'; // Use your working version
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,33 +11,38 @@ export default async function handler(
   }
 
   const { slug } = req.query;
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const token = authHeader.slice(7);
   
-  try {
-    const decoded = await verifyInnerCircleToken(token);
-    
-    if (!['inner-circle', 'founder'].includes(decoded.role)) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
-    }
-
-    const protectedContent = await getFrameworkProtectedContent(slug as string);
-    
-    if (!protectedContent) {
-      return res.status(404).json({ error: 'Framework not found' });
-    }
-
-    // Log access for audit trail
-    console.log(`Inner Circle access: ${decoded.email} accessed ${slug} at ${new Date().toISOString()}`);
-
-    res.status(200).json(protectedContent);
-  } catch (error) {
-    console.error('Protected content access failed:', error);
-    res.status(401).json({ error: 'Invalid token' });
+  // Use your working getInnerCircleAccess function
+  const access = await getInnerCircleAccess(req);
+  
+  if (!access.hasAccess) {
+    return res.status(403).json({ 
+      error: 'Access denied', 
+      reason: access.reason 
+    });
   }
+
+  // Return mock protected content for now
+  const protectedContent = {
+    operatingLogic: [
+      {
+        title: "Inner Circle Exclusive Logic",
+        body: "This content is only available to Inner Circle members. The full strategic framework includes proprietary insights, detailed implementation guides, and institutional-grade templates."
+      }
+    ],
+    applicationPlaybook: [
+      "Step 1: Institutional alignment",
+      "Step 2: Resource allocation",
+      "Step 3: Governance setup",
+      "Step 4: Performance tracking"
+    ],
+    boardQuestions: [
+      "What are the non-negotiable constraints?",
+      "How do we measure institutional progress?",
+      "What are the failure scenarios?",
+      "How does this align with long-term vision?"
+    ]
+  };
+
+  res.status(200).json(protectedContent);
 }
