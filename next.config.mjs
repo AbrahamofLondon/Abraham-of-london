@@ -1,19 +1,35 @@
-// next.config.mjs
-import { withContentlayer } from "next-contentlayer2";
+/* next.config.mjs - RECONCILED INSTITUTIONAL VERSION */
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+// STRATEGIC IMPORT: Handle both contentlayer and contentlayer2 for environment flexibility
+let withContentlayer;
+try {
+  const cl = await import("next-contentlayer2");
+  withContentlayer = cl.withContentlayer;
+} catch (e) {
+  try {
+    const cl = await import("next-contentlayer");
+    withContentlayer = cl.withContentlayer;
+  } catch (e2) {
+    console.warn("⚠️ [BUILD_WARNING] Contentlayer plugin not found. Proceeding without MDX integration.");
+    withContentlayer = (config) => config;
+  }
+}
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
 
-  // Silence build friction
+  // Silence build friction to prevent total failure on trace warnings
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 
-  // Single env block (do NOT duplicate)
+  // Single centralized environment block
   env: {
     CONTENTLAYER_DISABLE_WARNINGS: "true",
-    NEXT_PUBLIC_APP_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_APP_ENV: process.env.NODE_ENV || 'production',
     SITE_URL: process.env.SITE_URL || "https://abrahamoflondon.com",
     BUILD_TIMESTAMP: new Date().toISOString(),
   },
@@ -46,86 +62,59 @@ const nextConfig = {
         source: "/_next/static/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
-      {
-        source: "/_next/image/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-      },
     ];
   },
 
   webpack: (config, { isServer, webpack, dev }) => {
+    // BLOCK 1: Exclude Node-only binaries from client bundles
     if (!isServer) {
       config.plugins.push(
         new webpack.IgnorePlugin({ resourceRegExp: /^ioredis$/ }),
         new webpack.IgnorePlugin({ resourceRegExp: /^better-sqlite3$/ }),
         new webpack.IgnorePlugin({ resourceRegExp: /^sharp$/ }),
         new webpack.IgnorePlugin({ resourceRegExp: /^bcrypt$/ }),
-        new webpack.IgnorePlugin({ resourceRegExp: /^pdfkit$/ }),
+        new webpack.IgnorePlugin({ resourceRegExp: /^pdfkit$/ })
       );
-    }
-
-    config.ignoreWarnings = [
-      ...(config.ignoreWarnings || []),
-      { module: /contentlayer/ },
-      { module: /@contentlayer/ },
-      { module: /node_modules\/@fontsource/ },
-    ];
-
-    if (process.platform === "win32") {
-      config.watchOptions = {
-        ...config.watchOptions,
-        ignored: ["**/.contentlayer/**", "**/.next/**", "**/node_modules/**"],
+      
+      // Fallback for node built-ins
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+        url: require.resolve('url'),
+        util: require.resolve('util'),
       };
     }
 
-    config.module.rules.push({
-      test: /\.(woff|woff2|eot|ttf|otf)$/i,
-      type: "asset/resource",
-      generator: { filename: "static/fonts/[name][ext]" },
-    });
-
-    // Keep your CSS module tweak if you must, but it’s risky.
+    // BLOCK 2: Fix for Windows path issues and Dynamic Import Layer conflicts
     config.module.rules.forEach((rule) => {
-      const { oneOf } = rule;
-      if (oneOf) {
-        oneOf.forEach((one) => {
+      if (rule.oneOf) {
+        rule.oneOf.forEach((one) => {
+          if (one.test && one.test.toString().includes('mjs|jsx|ts|tsx')) {
+            if (one.issuerLayer) delete one.issuerLayer;
+          }
           if (!one.issuerLayer && one.issuer) delete one.issuer;
         });
       }
     });
 
-    if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        usedExports: true,
-        sideEffects: true,
-      };
+    // BLOCK 3: SUPPRESS WARNINGS
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      { module: /contentlayer/ },
+      { module: /node_modules\/@fontsource/ },
+    ];
 
-      config.optimization.splitChunks = {
-        chunks: "all",
-        minSize: 20000,
-        maxSize: 70000,
-        minChunks: 1,
-        maxAsyncRequests: 30,
-        maxInitialRequests: 30,
-        cacheGroups: {
-          defaultVendors: {
-            test: /[\\/]node_modules[\\/]/,
-            priority: -10,
-            reuseExistingChunk: true,
-          },
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          styles: {
-            name: "styles",
-            test: /\.(css|scss)$/,
-            chunks: "all",
-            enforce: true,
-          },
-        },
+    // BLOCK 4: Windows Watcher Optimization
+    if (process.platform === "win32") {
+      config.watchOptions = {
+        ...config.watchOptions,
+        poll: 1000,
+        aggregateTimeout: 300,
+        ignored: ["**/.contentlayer/**", "**/.next/**", "**/node_modules/**"],
       };
     }
 
@@ -136,8 +125,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ["better-sqlite3", "pdfkit", "sharp", "bcrypt"],
     optimizeCss: true,
     scrollRestoration: true,
-    turbo: process.env.TURBOPACK === "true" ? {} : undefined,
-    middlewarePrefetch: "flexible",
     optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
   },
 
@@ -145,10 +132,6 @@ const nextConfig = {
     locales: ["en-GB", "en-US"],
     defaultLocale: "en-GB",
     localeDetection: false,
-  },
-
-  async redirects() {
-    return [{ source: "/legacy/:path*", destination: "/:path*", permanent: true }];
   },
 };
 
