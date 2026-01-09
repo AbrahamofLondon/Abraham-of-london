@@ -1,25 +1,9 @@
 // lib/rate-limit-redis.ts
+import { redis, type RedisInterface } from "./redis-enhanced";
 
-// Import Redis with fallback
-let redisInstance: any;
-
-async function getRedis() {
-  if (!redisInstance) {
-    try {
-      const { default: redisEnhanced } = await import("./redis-enhanced");
-      redisInstance = redisEnhanced;
-    } catch (error) {
-      // Fallback memory store
-      redisInstance = {
-        get: async () => null,
-        set: async () => {},
-        del: async () => {},
-        keys: async () => [],
-        ping: async () => "PONG"
-      };
-    }
-  }
-  return redisInstance;
+// Get the underlying client if needed, but use the safe interface
+async function getRedisClient(): Promise<RedisInterface> {
+  return redis;
 }
 
 type RedisCheckResult = {
@@ -40,14 +24,14 @@ async function check(
   const k = `${prefix}:${key}`;
   const windowSec = Math.max(1, Math.ceil(opts.windowMs / 1000));
   
-  const redis = await getRedis();
+  const redisClient = await getRedisClient();
 
   // Simple fixed-window counter in redis (memory fallback works too)
-  const current = await redis.get(k);
+  const current = await redisClient.get(k);
   const count = current ? Number(current) : 0;
 
   if (!current) {
-    await redis.set(k, "1", { EX: windowSec });
+    await redisClient.set(k, "1", { EX: windowSec });
     return {
       allowed: true,
       remaining: Math.max(0, opts.max - 1),
@@ -58,7 +42,7 @@ async function check(
   }
 
   const next = count + 1;
-  await redis.set(k, String(next), { EX: windowSec });
+  await redisClient.set(k, String(next), { EX: windowSec });
 
   const allowed = next <= opts.max;
   return {
@@ -73,8 +57,8 @@ async function check(
 
 async function getStats() {
   try {
-    const redis = await getRedis();
-    await redis.ping();
+    const redisClient = await getRedisClient();
+    await redisClient.ping();
     return { ok: true, redisAvailable: true };
   } catch {
     return { ok: true, redisAvailable: false };

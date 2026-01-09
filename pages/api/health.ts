@@ -1,8 +1,6 @@
 // pages/api/health.ts - Production Health Check with Monitoring
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getRedisClient } from '@/lib/redis';
-import { checkDatabaseConnection } from '@/lib/db';
-import { checkContentlayerStatus } from '@/lib/contentlayer/status';
+import { getRedis } from '@/lib/redis'; // Changed from getRedisClient to getRedis
 
 // Types for health check responses
 type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
@@ -45,6 +43,9 @@ type HealthResponse = {
     region?: string;
     deploymentId?: string;
     buildId?: string;
+    cached?: boolean;
+    cacheAge?: number;
+    responseTime?: number;
   };
 };
 
@@ -230,11 +231,34 @@ async function checkApiStatus(): Promise<ServiceStatus> {
   }
 }
 
+async function checkDatabaseConnection(): Promise<ServiceStatus> {
+  const start = Date.now();
+  
+  try {
+    // Try dynamic import
+    const dbModule = await import('@/lib/db');
+    const checkFn = dbModule.checkDatabaseConnection || (() => Promise.resolve({ connected: false, type: 'memory' }));
+    const result = await checkFn();
+    
+    return {
+      status: result.connected ? 'healthy' : 'degraded',
+      message: result.connected ? undefined : `Database: ${result.error || 'Not connected'}`,
+      latency: Date.now() - start,
+    };
+  } catch (error) {
+    return {
+      status: 'degraded', // Not unhealthy because app can run without DB
+      message: 'Database check module not available',
+      latency: Date.now() - start,
+    };
+  }
+}
+
 async function checkRedisConnection(): Promise<ServiceStatus> {
   const start = Date.now();
   
   try {
-    const redis = getRedisClient();
+    const redis = await getRedis();
     
     if (!redis) {
       return {

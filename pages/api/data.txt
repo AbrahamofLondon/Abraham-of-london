@@ -1,9 +1,9 @@
 // pages/api/data.js
 export default function handler(req, res) {
-  const dynamicData = {
+  res.status(200).json({
+    ok: true,
     timestamp: new Date().toISOString(),
     randomValue: Math.random(),
-    message: "This is server-generated content"
-  }
-  res.status(200).json(dynamicData)
+    message: "This is server-generated content",
+  });
 }

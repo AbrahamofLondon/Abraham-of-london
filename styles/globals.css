@@ -1,780 +1,100 @@
 /* styles/globals.css */
+/* Import all your CSS modules */
 
-/* Tailwind layers */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* 1. Font variables */
+@import './fonts.css';
 
-/* -------------------------------------------------------------------------- */
-/* ANIMATIONS                                                                 */
-/* -------------------------------------------------------------------------- */
+/* 2. Base styles */
+@import './Home.module.css';
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+/* 3. Components */
+@import './components.css';
+
+/* 4. Theme transitions */
+@import './theme-transitions.css';
+
+/*
+ * ----------------------------------------------------------------------
+ * Global Reset & Base Styles
+ * ----------------------------------------------------------------------
+ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@keyframes gentle-pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.02);
-  }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+body {
+  font-family: var(--font-family-inter);
+  background-color: var(--color-background, #050608);
+  color: var(--color-on-background, #f4f1ea);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+img, svg, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
 }
 
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-primary, #d6b26a);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ANIMATION UTILITY CLASSES                                                  */
-/* -------------------------------------------------------------------------- */
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-}
-
-.animate-gentle-pulse {
-  animation: gentle-pulse 3s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.5s ease-out forwards;
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
-}
-
-/* -------------------------------------------------------------------------- */
-/* CUSTOM UTILITIES                                                           */
-/* -------------------------------------------------------------------------- */
-
-/* Glass morphism effect */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Gold gradient text */
-.text-gold-gradient {
-  background: linear-gradient(135deg, var(--aol-softGold) 0%, #e6c878 50%, #fff0b3 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Gold gradient background */
-.bg-gold-gradient {
-  background: linear-gradient(135deg, var(--aol-softGold) 0%, #e6c878 50%, #fff0b3 100%);
-}
-
-/* Subtle border animation */
-.hover-border-gold {
-  position: relative;
-}
-
-.hover-border-gold::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, transparent, var(--aol-softGold), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.hover-border-gold:hover::before {
-  opacity: 1;
-}
-
-/* Underline animation */
-.hover-underline-gold {
-  position: relative;
-}
-
-.hover-underline-gold::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -4px;
-  left: 0;
-  background: linear-gradient(90deg, transparent, var(--aol-softGold), transparent);
-  transition: width 0.3s ease;
-}
-
-.hover-underline-gold:hover::after {
-  width: 100%;
+/* Selection styles */
+::selection {
+  background-color: rgba(214, 178, 106, 0.3);
+  color: var(--color-on-background);
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--aol-bg);
+  background: rgba(21, 23, 28, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, var(--aol-softGold), rgba(214, 178, 106, 0.7));
+  background: rgba(214, 178, 106, 0.5);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, var(--aol-softGold), rgba(214, 178, 106, 0.9));
+  background: rgba(214, 178, 106, 0.7);
 }
 
-/* Selection styling enhancement */
-::selection {
-  background-color: rgba(214, 178, 106, 0.35);
-  color: var(--aol-text);
-}
+/*
+ * ----------------------------------------------------------------------
+ * Utility Classes
+ * ----------------------------------------------------------------------
+ */
 
-::-moz-selection {
-  background-color: rgba(214, 178, 106, 0.35);
-  color: var(--aol-text);
-}
-
-/* -------------------------------------------------------------------------- */
-/* BASE TOKENS – LIGHT + CINEMATIC DARK (Fixed Syntax)                       */
-/* -------------------------------------------------------------------------- */
-
-/* Light theme defaults (High Contrast) */
-:root {
-  --aol-bg: #f9fafb; /* Lighter off-white for better contrast */
-  --aol-surface: #ffffff;
-  --aol-text: #111827; /* Dark text */
-  --aol-muted: #4b5563;
-  --aol-softGold: #d6b26a;
-  --aol-border-subtle: rgba(148, 163, 184, 0.35);
-}
-
-/* Dark theme overrides – driven by next-themes .dark class on <html> (Smooth, Cinematic) */
-html.dark {
-  --aol-bg: #050608; /* Deep cinematic background */
-  --aol-surface: #0b0d10;
-  --aol-text: #f9fafb; /* Light text */
-  --aol-muted: #cbd5f5;
-  --aol-softGold: #d6b26a;
-  --aol-border-subtle: rgba(71, 85, 105, 0.5);
-}
-
-/* -------------------------------------------------------------------------- */
-/* RESET & BASE                                                               */
-/* -------------------------------------------------------------------------- */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100vh;
-  margin: 0;
-  background-color: var(--aol-bg);
-  color: var(--aol-text);
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
-  transition:
-    background-color 0.5s ease-in-out,
-    color 0.5s ease-in-out;
-}
-
-main {
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Media */
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-/* Typography reset */
-h1, h2, h3, h4, h5, h6, p, ul, ol, li, blockquote, pre, code {
-  margin: 0;
-  padding: 0;
-}
-
-/* Links */
-a {
-  color: inherit;
-  text-decoration: none;
-  text-decoration-skip-ink: auto;
-  transition:
-    color 0.2s ease-in-out,
-    opacity 0.2s ease-in-out;
-}
-
-a:focus-visible {
-  outline: 2px solid var(--aol-softGold);
-  outline-offset: 4px;
-  border-radius: 2px;
-}
-
-/* Buttons */
-button {
-  cursor: pointer;
-  font-family: inherit;
-}
-
-button:focus-visible {
-  outline: 2px solid var(--aol-softGold);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* Inputs */
-input, textarea, select {
-  font-family: inherit;
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: 2px solid var(--aol-softGold);
-  outline-offset: 2px;
-}
-
-/* -------------------------------------------------------------------------- */
-/* PAGE SHELL & CARDS                                                         */
-/* -------------------------------------------------------------------------- */
-
-.page-shell {
-  min-height: 100vh;
-  color: var(--aol-text);
-  background-color: var(--aol-bg);
-  position: relative;
-}
-
-/* Only apply full cinematic gradient in dark mode */
-html.dark .page-shell {
-  background: radial-gradient(
-      circle at top left,
-      rgba(214, 178, 106, 0.12),
-      transparent 60%
-    ),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.25), #050608);
-}
-
-.section-divider {
-  border-top: 1px solid var(--aol-border-subtle);
-  margin: 4rem 0;
-}
-
-.lux-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background-color: var(--aol-surface);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.lux-card-hover {
-  transition:
-    transform 0.35s ease-out,
-    box-shadow 0.35s ease-out,
-    border-color 0.35s ease-out;
-}
-
-.lux-card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
-  border-color: rgba(214, 178, 106, 0.7);
-}
-
-/* Pills */
-.lux-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid var(--aol-border-subtle);
-  background-color: rgba(11, 13, 16, 0.95);
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--aol-text);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: all 0.3s ease;
-}
-
-.lux-pill:hover {
-  border-color: rgba(214, 178, 106, 0.5);
-  transform: scale(1.05);
-}
-
-.lux-pill-active {
-  border-color: rgba(214, 178, 106, 0.9);
-  background-color: var(--aol-softGold);
-  color: #111827;
-  box-shadow: 0 8px 24px rgba(214, 178, 106, 0.4);
-}
-
-/* -------------------------------------------------------------------------- */
-/* TYPOGRAPHY                                                                 */
-/* -------------------------------------------------------------------------- */
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  font-weight: 700;
-  color: var(--aol-text);
-  line-height: 1.2;
-}
-
-h1 {
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
-  letter-spacing: -0.02em;
-}
-
-h2 {
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  letter-spacing: -0.015em;
-}
-
-h3 {
-  font-size: clamp(1.5rem, 3vw, 1.875rem);
-}
-
-p {
-  color: var(--aol-text);
-  line-height: 1.7;
-  margin-bottom: 1rem;
-}
-
-p:last-child {
-  margin-bottom: 0;
-}
-
-.lead-text {
-  font-size: 1.25rem;
-  line-height: 1.8;
-  color: var(--aol-muted);
-}
-
-/* -------------------------------------------------------------------------- */
-/* MDX / PROSE                                                                */
-/* -------------------------------------------------------------------------- */
-
-.prose {
-  max-width: none;
-  color: var(--aol-text);
-  font-size: 1.0625rem;
-  line-height: 1.75;
-}
-
-.prose p,
-.prose li {
-  color: var(--aol-text);
-  line-height: 1.75;
-}
-
-.prose h1,
-.prose h2,
-.prose h3,
-.prose h4 {
-  color: var(--aol-text);
-  letter-spacing: -0.03em;
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-  margin-top: 2em;
-  margin-bottom: 0.75em;
-}
-
-.prose h1:first-child,
-.prose h2:first-child,
-.prose h3:first-child,
-.prose h4:first-child {
-  margin-top: 0;
-}
-
-.prose strong {
-  color: var(--aol-text);
-  font-weight: 600;
-}
-
-/* Links inside prose – gold accent */
-.prose a {
-  color: var(--aol-softGold);
-  font-weight: 500;
-  text-decoration: none;
-  position: relative;
-  padding: 0 2px;
-}
-
-.prose a:hover {
-  color: var(--aol-text);
-  text-decoration: underline;
-}
-
-/* Blockquotes */
-.prose blockquote {
-  border-left: 4px solid var(--aol-softGold);
-  background-color: rgba(148, 163, 184, 0.1);
-  color: var(--aol-text);
-  padding: 1rem 1rem 1rem 1.5rem;
-  margin: 1.75rem 0;
-  border-radius: 0 1rem 1rem 0;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  font-style: italic;
-}
-
-.prose blockquote p {
-  margin: 0;
-}
-
-/* Dark mode blockquote */
-html.dark .prose blockquote {
-  background-color: rgba(15, 23, 42, 0.8);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
-}
-
-.prose ul li::marker,
-.prose ol li::marker {
-  color: var(--aol-softGold);
-}
-
-.prose ul, .prose ol {
-  padding-left: 1.5rem;
-  margin: 1rem 0;
-}
-
-.prose li {
-  margin: 0.5rem 0;
-}
-
-.prose hr {
-  border-color: var(--aol-border-subtle);
-  margin: 2.5rem 0;
-  border-width: 1px;
-  border-style: solid;
-}
-
-.prose code {
-  color: var(--aol-text);
-  background-color: rgba(148, 163, 184, 0.15);
-  border-radius: 6px;
-  padding: 0.15rem 0.4rem;
-  font-size: 0.85em;
-  font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-}
-
-/* Dark mode code */
-html.dark .prose code {
-  color: var(--aol-softGold);
-  background-color: rgba(0, 0, 0, 0.6);
-}
-
-.prose pre {
-  background-color: rgba(148, 163, 184, 0.08);
-  color: var(--aol-text);
-  border-radius: 1.25rem;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-  overflow-x: auto;
-  margin: 1.5rem 0;
-}
-
-.prose pre code {
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
-  font-size: 0.95em;
-}
-
-/* Dark mode pre */
-html.dark .prose pre {
-  background-color: rgba(0, 0, 0, 0.85);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
-}
-
-/* Tables */
-.prose table {
+.container {
   width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-}
-
-.prose th, .prose td {
-  border: 1px solid var(--aol-border-subtle);
-  padding: 0.75rem;
-  text-align: left;
-}
-
-.prose th {
-  background-color: rgba(148, 163, 184, 0.1);
-  font-weight: 600;
-}
-
-html.dark .prose th {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* -------------------------------------------------------------------------- */
-/* HEADER UTIL                                                                */
-/* -------------------------------------------------------------------------- */
-
-body.has-fixed-header main {
-  padding-top: 5rem;
-}
-
-/* -------------------------------------------------------------------------- */
-/* PRINT & REDUCED MOTION                                                     */
-/* -------------------------------------------------------------------------- */
-
-@media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    background: transparent !important;
-    color: black !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  a, a:visited {
-    text-decoration: underline;
-  }
-
-  img {
-    page-break-inside: avoid;
-    max-width: 100% !important;
-  }
-
-  h2, h3 {
-    page-break-after: avoid;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* -------------------------------------------------------------------------- */
-/* CANON CAMPAIGN – DESIGN RESTORATION                                        */
-/* -------------------------------------------------------------------------- */
-
-.canon-campaign-page .canon-shell {
-  max-width: 78ch;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem 1.25rem 4rem;
+  padding: 0 20px;
 }
-
-.canon-campaign-page .canon-hero-inner {
-  position: relative;
-  border-radius: 1.75rem;
-  padding: 2rem 1.5rem 2.25rem;
-  background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.16), transparent 55%),
-              radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.24), var(--aol-surface) 80%);
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  overflow: hidden;
-}
-
-.canon-campaign-page .canon-title {
-  font-family: var(--font-serif, ui-serif);
-  font-size: 2.4rem;
-  line-height: 1.05;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, var(--aol-text), #e5e7eb, var(--aol-softGold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.canon-campaign-page .canon-pill {
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  border: 1px solid var(--aol-border-subtle);
-  background: var(--aol-surface);
-  font-size: 0.7rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.canon-campaign-page .canon-hero-card {
-  border-radius: 1rem;
-  padding: 0.85rem 0.9rem;
-  background: var(--aol-surface);
-  border: 1px solid var(--aol-border-subtle);
-}
-
-.canon-campaign-page .canon-chip {
-  font-size: 0.75rem;
-  padding: 0.4rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid var(--aol-border-subtle);
-  background: var(--aol-surface);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.canon-campaign-page .canon-final-pill {
-  display: inline-flex;
-  padding: 0.5rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--aol-border-subtle);
-  background: var(--aol-surface);
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--aol-text);
-}
-
-/* -------------------------------------------------------------------------- */
-/* RESPONSIVE BREAKPOINTS                                                     */
-/* -------------------------------------------------------------------------- */
-
-@media (max-width: 768px) {
-  .section-divider {
-    margin: 3rem 0;
-  }
-  
-  .prose {
-    font-size: 1rem;
-  }
-  
-  .prose h1 {
-    font-size: 2rem;
-  }
-  
-  .prose h2 {
-    font-size: 1.75rem;
-  }
-  
-  .prose h3 {
-    font-size: 1.5rem;
-  }
-  
-  .canon-campaign-page .canon-shell {
-    padding: 1.5rem 1rem 3rem;
-  }
-  
-  .canon-campaign-page .canon-title {
-    font-size: 1.75rem;
-  }
-}
-
-@media (max-width: 640px) {
-  body.has-fixed-header main {
-    padding-top: 4rem;
-  }
-  
-  .lux-card {
-    border-radius: 0.75rem;
-  }
-  
-  .prose pre {
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-  }
-}
-
-/* -------------------------------------------------------------------------- */
-/* ACCESSIBILITY UTILITIES                                                    */
-/* -------------------------------------------------------------------------- */
 
 .sr-only {
   position: absolute;
@@ -788,38 +108,23 @@ body.has-fixed-header main {
   border: 0;
 }
 
-.focus-visible {
-  outline: 2px solid var(--aol-softGold);
-  outline-offset: 2px;
-  border-radius: 4px;
+.text-balance {
+  text-wrap: balance;
 }
 
-/* -------------------------------------------------------------------------- */
-/* LOADING STATES                                                             */
-/* -------------------------------------------------------------------------- */
+/*
+ * ----------------------------------------------------------------------
+ * Print Styles
+ * ----------------------------------------------------------------------
+ */
 
-.loading-shimmer {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(255, 255, 255, 0.1) 50%, 
-    rgba(255, 255, 255, 0) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-html.dark .loading-shimmer {
-  background: linear-gradient(90deg, 
-    rgba(0, 0, 0, 0) 0%, 
-    rgba(255, 255, 255, 0.05) 50%, 
-    rgba(0, 0, 0, 0) 100%);
-  background-size: 200% 100%;
-}
-
-/* -------------------------------------------------------------------------- */
-/* CUSTOM SCROLLBAR FOR FIREFOX                                               */
-/* -------------------------------------------------------------------------- */
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--aol-softGold) var(--aol-bg);
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
 }

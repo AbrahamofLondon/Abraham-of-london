@@ -1,4 +1,4 @@
-// middleware.ts - Enterprise V6.3 with fallbacks
+// middleware.ts - Enterprise V7.0 with Font Security & Performance
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -11,7 +11,6 @@ let createRateLimitedResponse: any = null;
 let createRateLimitHeaders: any = null;
 
 try {
-  // Try to import rate limit redis
   const redisModule = require('@/lib/rate-limit-redis');
   rateLimitRedis = redisModule.rateLimitRedis || redisModule.default;
 } catch (error) {
@@ -19,7 +18,6 @@ try {
 }
 
 try {
-  // Try to import unified rate limit module
   const unifiedModule = require('@/lib/server/rate-limit-unified');
   rateLimitModule = unifiedModule;
   RATE_LIMIT_CONFIGS = unifiedModule.RATE_LIMIT_CONFIGS || {};
@@ -29,12 +27,12 @@ try {
 } catch (error) {
   console.warn('[Middleware] rate-limit-unified not available, using fallbacks:', error.message);
   
-  // Create fallback implementations
   RATE_LIMIT_CONFIGS = {
     API_GENERAL: { limit: 100, windowMs: 60000, keyPrefix: "api" },
     API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },
     AUTH: { limit: 10, windowMs: 300000, keyPrefix: "auth" },
-    CONTENT: { limit: 60, windowMs: 60000, keyPrefix: "content" }
+    CONTENT: { limit: 60, windowMs: 60000, keyPrefix: "content" },
+    FONT: { limit: 50, windowMs: 60000, keyPrefix: "font" }
   };
   
   withEdgeRateLimit = async () => ({ 
@@ -59,8 +57,21 @@ try {
 function getClientIp(req: NextRequest): string {
   return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
          req.headers.get('cf-connecting-ip') || 
+         req.headers.get('x-real-ip') ||
          'unknown';
 }
+
+// ==================== FONT SECURITY CONFIG ====================
+const FONT_SECURITY_CONFIG = {
+  allowedFontTypes: ['woff2', 'woff', 'ttf', 'otf'],
+  maxFontSize: 5 * 1024 * 1024, // 5MB
+  allowedFontPaths: ['/fonts/', '/_next/static/media/'],
+  fontCorsHeaders: {
+    'Access-Control-Allow-Origin': '*',
+    'Timing-Allow-Origin': '*',
+    'Vary': 'Accept-Encoding'
+  }
+};
 
 // ==================== CONFIGURATION ====================
 const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
@@ -108,7 +119,8 @@ const SAFE_EXACT = [
   "/robots.txt",
   "/sitemap.xml",
   "/favicon.ico",
-  "/manifest.json"
+  "/manifest.json",
+  "/font-manifest.json"
 ];
 
 const SAFE_PREFIXES = [
@@ -123,15 +135,58 @@ const SAFE_PREFIXES = [
 
 // ==================== SECURITY HEADERS ====================
 function applySecurityHeaders(response: NextResponse, cacheControl?: string): NextResponse {
+  const isFontRequest = response.headers.get('content-type')?.includes('font') || 
+                       response.url.includes('/fonts/');
+  
+  // Core security headers
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
   
+  // Content Security Policy for fonts
+  if (!isFontRequest) {
+    response.headers.set(
+      'Content-Security-Policy',
+      [
+        "default-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        "script-src 'self'",
+        "font-src 'self' data: https:",
+        "img-src 'self' data: https:",
+        "connect-src 'self'",
+        "frame-ancestors 'none'"
+      ].join('; ')
+    );
+  }
+  
+  // Cache headers
   if (cacheControl) {
     response.headers.set('Cache-Control', cacheControl);
   }
   
+  // Feature Policy
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+  );
+  
   return response;
+}
+
+// ==================== FONT SECURITY ====================
+function validateFontRequest(pathname: string): boolean {
+  // Check if it's a font request
+  const isFontPath = FONT_SECURITY_CONFIG.allowedFontPaths.some(path => pathname.startsWith(path));
+  if (!isFontPath) return true;
+  
+  // Check font type
+  const extension = pathname.split('.').pop()?.toLowerCase();
+  if (!extension || !FONT_SECURITY_CONFIG.allowedFontTypes.includes(extension)) {
+    return false;
+  }
+  
+  return true;
 }
 
 // ==================== RATE LIMITING ====================
@@ -141,11 +196,18 @@ async function applyRouteRateLimit(req: NextRequest, pathname: string, hasAccess
   let rateLimitConfig = RATE_LIMIT_CONFIGS?.API_GENERAL || { limit: 100, windowMs: 60000 };
   let routeKeyPrefix = 'general';
   
-  for (const [routePrefix, config] of Object.entries(ROUTE_SECURITY_CONFIG)) {
-    if (pathname.startsWith(routePrefix)) {
-      rateLimitConfig = config.rateLimit || rateLimitConfig;
-      routeKeyPrefix = config.type;
-      break;
+  // Check for font-specific rate limiting
+  if (pathname.includes('/fonts/') || pathname.includes('/_next/static/media/')) {
+    rateLimitConfig = RATE_LIMIT_CONFIGS?.FONT || { limit: 50, windowMs: 60000, keyPrefix: 'font' };
+    routeKeyPrefix = 'font';
+  } else {
+    // Check other routes
+    for (const [routePrefix, config] of Object.entries(ROUTE_SECURITY_CONFIG)) {
+      if (pathname.startsWith(routePrefix)) {
+        rateLimitConfig = config.rateLimit || rateLimitConfig;
+        routeKeyPrefix = config.type;
+        break;
+      }
     }
   }
   
@@ -201,11 +263,43 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const ip = getClientIp(req);
   const hasAccess = req.cookies.get(INNER_CIRCLE_COOKIE_NAME)?.value === "true";
+  const userAgent = req.headers.get('user-agent') || '';
   
   // Skip static files and safe routes
   if (SAFE_EXACT.includes(pathname) || 
       SAFE_PREFIXES.some(prefix => pathname.startsWith(prefix)) ||
       pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json)$/)) {
+    
+    // Validate font requests
+    if ((pathname.includes('/fonts/') || pathname.includes('/_next/static/media/')) && 
+        pathname.match(/\.(woff|woff2|ttf|eot|otf)$/)) {
+      
+      if (!validateFontRequest(pathname)) {
+        return new NextResponse('Forbidden', { status: 403 });
+      }
+      
+      const response = NextResponse.next();
+      
+      // Apply font-specific headers
+      Object.entries(FONT_SECURITY_CONFIG.fontCorsHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+      
+      // Long cache for fonts
+      response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+      
+      // Content type
+      if (pathname.endsWith('.woff2')) {
+        response.headers.set('Content-Type', 'font/woff2');
+      } else if (pathname.endsWith('.woff')) {
+        response.headers.set('Content-Type', 'font/woff');
+      } else if (pathname.endsWith('.ttf')) {
+        response.headers.set('Content-Type', 'font/ttf');
+      }
+      
+      return applySecurityHeaders(response);
+    }
+    
     const response = NextResponse.next();
     
     // Cache static assets
@@ -213,12 +307,34 @@ export async function middleware(req: NextRequest) {
       response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
     }
     
+    // Cache CSS/JS with versioning
+    if (pathname.match(/\.(css|js)$/)) {
+      response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    
     return applySecurityHeaders(response);
   }
   
   // Block malicious patterns
-  const maliciousPatterns = [/wp-admin/i, /\.php$/i, /\.env$/i, /\.git/i, /\.\.\//];
+  const maliciousPatterns = [
+    /wp-admin/i, /\.php$/i, /\.env$/i, /\.git/i, /\.\.\//,
+    /\.(exe|bat|sh|cmd|dmg|pkg)$/i,
+    /(php|asp|jsp|perl|cgi)-/i
+  ];
+  
   if (maliciousPatterns.some(pattern => pattern.test(pathname))) {
+    console.warn(`[Middleware] Blocked malicious request: ${ip} -> ${pathname}`);
+    return new NextResponse('Forbidden', { status: 403 });
+  }
+  
+  // Block suspicious user agents
+  const suspiciousAgents = [
+    'sqlmap', 'nikto', 'acunetix', 'nessus', 'metasploit',
+    'dirbuster', 'gobuster', 'wpscan', 'joomscan'
+  ];
+  
+  if (suspiciousAgents.some(agent => userAgent.toLowerCase().includes(agent))) {
+    console.warn(`[Middleware] Blocked suspicious user agent: ${userAgent}`);
     return new NextResponse('Forbidden', { status: 403 });
   }
   
@@ -226,18 +342,24 @@ export async function middleware(req: NextRequest) {
   const rateLimitResult = await applyRouteRateLimit(req, pathname, hasAccess);
   
   if (!rateLimitResult.allowed) {
-    console.warn(`[Middleware] Rate limited: ${ip} -> ${pathname}`);
+    console.warn(`[Middleware] Rate limited: ${ip} -> ${pathname} (UA: ${userAgent})`);
     
     if (createRateLimitedResponse && rateLimitResult.result) {
       return createRateLimitedResponse(rateLimitResult.result);
     }
     
-    return new NextResponse('Too Many Requests', { status: 429 });
+    return new NextResponse('Too Many Requests', { 
+      status: 429,
+      headers: {
+        'Retry-After': '60',
+        'Content-Type': 'application/json'
+      }
+    });
   }
   
   // Check access for protected routes
   let requiresAuth = false;
-  let routeCache = 'public, max-age=3600';
+  let routeCache = 'public, max-age=3600, stale-while-revalidate=86400';
   
   for (const [routePrefix, config] of Object.entries(ROUTE_SECURITY_CONFIG)) {
     if (pathname.startsWith(routePrefix)) {
@@ -263,11 +385,11 @@ export async function middleware(req: NextRequest) {
   // Add rate limit headers
   if (rateLimitResult.headers) {
     Object.entries(rateLimitResult.headers).forEach(([key, value]) => {
-      response.headers.set(key, value);
+      response.headers.set(key, value.toString());
     });
   }
   
-  // Set cache control
+  // Set cache control based on access level
   if (hasAccess && routeCache.includes('public')) {
     routeCache = routeCache.replace('public', 'private');
   }
@@ -276,15 +398,40 @@ export async function middleware(req: NextRequest) {
   // Apply security headers
   applySecurityHeaders(response, routeCache);
   
-  // Add custom headers
+  // Add custom headers for monitoring
   response.headers.set('X-Access-Level', hasAccess ? 'inner-circle' : 'public');
   response.headers.set('X-Client-IP', ip);
+  response.headers.set('X-Request-Path', pathname);
+  
+  // Add performance headers
+  response.headers.set('X-DNS-Prefetch-Control', 'on');
+  response.headers.set('X-Download-Options', 'noopen');
   
   // Handle API CORS
   if (pathname.startsWith('/api/')) {
+    const origin = req.headers.get('origin');
+    const allowedOrigins = [
+      process.env.SITE_URL || 'https://abrahamoflondon.com',
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ];
+    
+    const isAllowedOrigin = origin && allowedOrigins.some(allowed => 
+      origin.startsWith(allowed)
+    );
+    
+    if (isAllowedOrigin) {
+      response.headers.set('Access-Control-Allow-Origin', origin);
+    } else {
+      response.headers.set('Access-Control-Allow-Origin', allowedOrigins[0]);
+    }
+    
     response.headers.set('Access-Control-Allow-Credentials', 'true');
-    response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 
+      'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version'
+    );
+    response.headers.set('Access-Control-Max-Age', '86400');
     
     if (req.method === 'OPTIONS') {
       return new NextResponse(null, {
@@ -294,11 +441,27 @@ export async function middleware(req: NextRequest) {
     }
   }
   
+  // Add preload headers for critical fonts
+  if (pathname === '/' || pathname === '') {
+    response.headers.set(
+      'Link',
+      '</fonts/inter/Inter-Regular.woff2>; rel=preload; as=font; type=font/woff2; crossorigin=anonymous'
+    );
+  }
+  
   return response;
 }
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - sitemap.xml (sitemap)
+     * - robots.txt (robots file)
+     */
     '/((?!_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt).*)',
   ],
   runtime: 'experimental-edge',

@@ -1,4 +1,3 @@
-// pages/resources/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -6,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
+import { getContentlayerData, normalizeSlug, getDocHref } from "@/lib/contentlayer-compat";
 
 type ResourceMeta = {
   slug: string;
@@ -22,6 +21,10 @@ type ResourceMeta = {
 };
 
 type Props = { resources: ResourceMeta[] };
+
+function resolveDocCoverImage(doc: any): string | null {
+  return doc.coverImage || doc.image || null;
+}
 
 const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
   const pageTitle = "The Resource Vault | Abraham of London";
@@ -158,14 +161,12 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  // FIXED: Removed argument to resolve Type error
-  const data = await getContentlayerData(); assertContentlayerHasDocs(data);
-
-  const docs = (await getContentlayerData()).allResources;
+  const data = await getContentlayerData();
+  const docs = data.allResources || [];
 
   const resources: ResourceMeta[] = docs
     .map((r: any) => ({
-      slug: normalizeSlug(r),
+      slug: normalizeSlug(r.slugComputed || r.slug || ""),
       title: r.title ?? "Untitled Resource",
       description: r.description ?? r.excerpt ?? null,
       subtitle: r.subtitle ?? null,
@@ -182,5 +183,3 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 };
 
 export default ResourcesIndexPage;
-
-

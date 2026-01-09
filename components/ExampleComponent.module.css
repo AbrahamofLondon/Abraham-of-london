@@ -1,0 +1,21 @@
+/* components/ExampleComponent.module.css */
+
+.container {
+  padding: var(--space-xl);
+}
+
+.h1 {
+  composes: h1 from '@/styles/Home.module.css';
+  /* Additional specific styles */
+  margin-bottom: var(--space-lg);
+}
+
+.body {
+  composes: p from '@/styles/Home.module.css';
+  color: var(--color-secondary);
+}
+
+.btn {
+  composes: btn btnPrimary from '@/styles/components.css';
+  margin-top: var(--space-md);
+}

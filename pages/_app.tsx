@@ -7,6 +7,7 @@ import { SessionProvider } from "next-auth/react";
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth"; // Updated import
+import '@/lib/global-contentlayer-fix';
 
 function usePageView() {
   const router = useRouter();

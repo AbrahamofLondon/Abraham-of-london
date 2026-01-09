@@ -6,12 +6,15 @@ import { MDXRemote } from "next-mdx-remote";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
-// FIXED: Import from contentlayer directly
+// Import from contentlayer directly
 import { allDownloads } from "contentlayer/generated";
+// Import compatibility layer functions
 import {
+  getAllDownloads,
+  getDownloadBySlug,
+  sanitizeData,
   getServerAllDownloads,
   getServerDownloadBySlug,
-  sanitizeData,
 } from "@/lib/contentlayer-compat";
 
 import { prepareMDX, mdxComponents } from "@/lib/server/md-utils";
@@ -133,50 +136,93 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
 
 export default DownloadPage;
 
+// Fixed: getStaticPaths now uses the imported getAllDownloads function
 export const getStaticPaths: GetStaticPaths = async () => {
-  // FIXED: Use allDownloads directly instead of getContentlayerData()
-  const downloads = allDownloads || [];
-  
-  return {
-    paths: downloads
-      .filter((x: any) => x && !(x as any).draft)
-      .filter((x: any) => {
-        const slug = (x as any).slug || (x as any)._raw?.flattenedPath || "";
+  try {
+    // Use the correctly imported function
+    const downloads = await getAllDownloads();
+    
+    if (!downloads || downloads.length === 0) {
+      console.warn("[getStaticPaths] No downloads found, generating minimal paths");
+      return {
+        paths: [],
+        fallback: "blocking",
+      };
+    }
+
+    const paths = downloads
+      .filter((doc) => doc && !doc.draft)
+      .filter((doc) => {
+        const slug = doc.slug || doc._raw?.flattenedPath || "";
         return slug && !String(slug).includes("replace");
       })
-      .map((d: any) => ({ params: { slug: d.slug } })),
-    fallback: "blocking", // Changed to block for better error handling
-  };
+      .map((doc) => ({
+        params: { slug: doc.slug || doc._raw?.flattenedPath || "" },
+      }));
+
+    console.log(`[getStaticPaths] Generated ${paths.length} paths for downloads`);
+    
+    return {
+      paths,
+      fallback: "blocking",
+    };
+  } catch (error) {
+    console.error("[getStaticPaths] Error generating paths:", error);
+    // Fallback to empty paths on error
+    return {
+      paths: [],
+      fallback: "blocking",
+    };
+  }
 };
 
+// Fixed: getStaticProps uses consistent function names
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = params?.slug as string;
   
-  // FIXED: Use allDownloads directly
-  const data = allDownloads?.find((d: any) => d.slug === slug);
-  
-  if (!data) {
+  if (!slug) {
+    console.error("[getStaticProps] No slug provided");
     return { notFound: true };
   }
 
-  const source = await prepareMDX(data.body?.raw || data.body || " ");
+  try {
+    // Use the compatibility layer function
+    const data = await getDownloadBySlug(slug);
+    
+    if (!data) {
+      console.warn(`[getStaticProps] No download found for slug: ${slug}`);
+      return { notFound: true };
+    }
 
-  const download: Download = {
-    title: data.title || "Untitled Transmission",
-    excerpt: data.excerpt || null,
-    description: data.description || null,
-    category: data.category || "Strategic Resource",
-    fileUrl: data.fileUrl || data.downloadUrl || null,
-    slug: data.slug || slug,
-    date: data.date || null,
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    fileSize: data.fileSize || null,
-    fileFormat: data.fileFormat || null,
-    requiresEmail: !!data.requiresEmail,
-    coverImage: data.coverImage || null,
-  };
+    // Prepare MDX content
+    const source = await prepareMDX(data.body?.raw || data.body || " ");
 
-  return {
-    props: { download: sanitizeData(download), source },
-  };
+    // Map data to Download interface
+    const download: Download = {
+      title: data.title || "Untitled Transmission",
+      excerpt: data.excerpt || null,
+      description: data.description || null,
+      category: data.category || "Strategic Resource",
+      fileUrl: data.fileUrl || (data as any)?.downloadUrl || null,
+      slug: data.slug || slug,
+      date: data.date || null,
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      fileSize: data.fileSize || null,
+      fileFormat: data.fileFormat || null,
+      requiresEmail: !!data.requiresEmail,
+      coverImage: data.coverImage || null,
+    };
+
+    return {
+      props: { 
+        download: sanitizeData(download), 
+        source 
+      },
+      // Revalidate every hour
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error(`[getStaticProps] Error processing download ${slug}:`, error);
+    return { notFound: true };
+  }
 };

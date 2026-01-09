@@ -1,0 +1,256 @@
+/* styles/fonts.css - Simplified version for CSS variable setup */
+
+/*
+ * ----------------------------------------------------------------------
+ * 14. Font CSS Variables (For use with Next.js font optimization)
+ * ----------------------------------------------------------------------
+ */
+
+/*
+ * CSS variables for font families
+ * These will be populated by Next.js font loader
+ */
+:root {
+  /* Primary font family */
+  --font-family-inter: var(--font-inter, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  
+  /* Fallback font stacks */
+  --font-family-sans: var(--font-inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  --font-family-serif: Georgia, 'Times New Roman', Times, serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  
+  /* Font weights as variables */
+  --font-weight-thin: 100;
+  --font-weight-extra-light: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extra-bold: 800;
+  --font-weight-black: 900;
+  
+  /* Letter spacing variables */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  
+  /* Line height variables */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+}
+
+/*
+ * Font loading states
+ */
+.fontLoading {
+  font-display: swap;
+}
+
+.fontLoaded body {
+  /* Smooth transition when fonts load */
+  transition: font-family 0.3s ease;
+}
+
+/*
+ * Font optimization
+ */
+.optimizeLegibility {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/*
+ * Utility classes for font weights
+ */
+.fontThin { font-weight: var(--font-weight-thin); }
+.fontExtraLight { font-weight: var(--font-weight-extra-light); }
+.fontLight { font-weight: var(--font-weight-light); }
+.fontNormal { font-weight: var(--font-weight-normal); }
+.fontMedium { font-weight: var(--font-weight-medium); }
+.fontSemibold { font-weight: var(--font-weight-semibold); }
+.fontBold { font-weight: var(--font-weight-bold); }
+.fontExtraBold { font-weight: var(--font-weight-extra-bold); }
+.fontBlack { font-weight: var(--font-weight-black); }
+
+/*
+ * Utility classes for letter spacing
+ */
+.trackingTight { letter-spacing: var(--tracking-tight); }
+.trackingNormal { letter-spacing: var(--tracking-normal); }
+.trackingWide { letter-spacing: var(--tracking-wide); }
+.trackingWider { letter-spacing: var(--tracking-wider); }
+.trackingWidest { letter-spacing: var(--tracking-widest); }
+
+/*
+ * Utility classes for line heights
+ */
+.leadingTight { line-height: var(--line-height-tight); }
+.leadingSnug { line-height: var(--line-height-snug); }
+.leadingNormal { line-height: var(--line-height-normal); }
+.leadingRelaxed { line-height: var(--line-height-relaxed); }
+.leadingLoose { line-height: var(--line-height-loose); }
+
+/*
+ * Font family utility classes
+ */
+.fontSans { font-family: var(--font-family-sans); }
+.fontSerif { font-family: var(--font-family-serif); }
+.fontMono { font-family: var(--font-family-mono); }
+
+/*
+ * System font stack for fallback
+ */
+.systemFont {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/*
+ * Font loading animation
+ */
+@keyframes fontFadeIn {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fontFadeIn {
+  animation: fontFadeIn 0.3s ease-out;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Text Utilities & Helpers
+ * ----------------------------------------------------------------------
+ */
+
+/* Line clamping utilities */
+.lineClamp1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lineClamp2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lineClamp3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lineClamp4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lineClamp5 {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lineClamp6 {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fallback for non-webkit browsers */
+@supports not (-webkit-line-clamp: 2) {
+  .lineClamp1,
+  .lineClamp2,
+  .lineClamp3,
+  .lineClamp4,
+  .lineClamp5,
+  .lineClamp6 {
+    max-height: calc(1.5em * var(--lines, 2));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+  }
+  
+  .lineClamp1 { --lines: 1; }
+  .lineClamp2 { --lines: 2; }
+  .lineClamp3 { --lines: 3; }
+  .lineClamp4 { --lines: 4; }
+  .lineClamp5 { --lines: 5; }
+  .lineClamp6 { --lines: 6; }
+}
+
+/* Truncate utilities */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.textOverflowEllipsis {
+  text-overflow: ellipsis;
+}
+
+/* Word break utilities */
+.breakNormal {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.breakWords {
+  overflow-wrap: break-word;
+}
+
+.breakAll {
+  word-break: break-all;
+}
+
+.keepAll {
+  word-break: keep-all;
+}
+
+/* White space utilities */
+.whitespaceNormal {
+  white-space: normal;
+}
+
+.whitespaceNowrap {
+  white-space: nowrap;
+}
+
+.whitespacePre {
+  white-space: pre;
+}
+
+.whitespacePreLine {
+  white-space: pre-line;
+}
+
+.whitespacePreWrap {
+  white-space: pre-wrap;
+}

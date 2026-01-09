@@ -1,3 +1,4 @@
+// lib/contentlayer/status.ts
 /* eslint-disable no-console */
 /**
  * ContentLayer status and health monitoring.
@@ -105,20 +106,7 @@ class ContentLayerStatusManager {
         }
       }
       
-      // Check for generated types
-      try {
-        // Dynamic import to avoid build-time errors
-        const contentlayer = await import('contentlayer/generated');
-        return contentlayer !== undefined;
-      } catch {
-        // Try alternative import path
-        try {
-          const contentlayer = await import('@/lib/contentlayer-compat');
-          return contentlayer !== undefined;
-        } catch {
-          return false;
-        }
-      }
+      return false;
     } catch (error) {
       console.warn('[ContentLayerStatus] Detection failed:', error);
       return false;
@@ -233,31 +221,78 @@ class ContentLayerStatusManager {
   async getContentLayerData(): Promise<any> {
     try {
       // Try to get actual ContentLayer data
-      const contentlayer = await import('contentlayer/generated');
-      const allDocuments = contentlayer.allDocuments || [];
-      
-      return {
-        available: true,
-        documentCount: allDocuments.length,
-        documents: allDocuments.slice(0, 10), // Return first 10 for sampling
-        types: [...new Set(allDocuments.map((doc: any) => doc._raw?.sourceFileDir || doc.type))]
-      };
-    } catch (error) {
-      try {
-        // Fallback to compatibility layer
-        const compat = await import('@/lib/contentlayer-compat');
-        return {
-          available: true,
-          viaCompat: true,
-          documentCount: compat.allDocuments?.length || 0
-        };
-      } catch (compatError) {
+      // This function is called from pages during build, so we need to be careful
+      if (typeof window !== 'undefined') {
+        // Browser context - return empty
         return {
           available: false,
-          error: 'ContentLayer data not available',
-          suggestion: 'Run `npm run build` or `npm run contentlayer:build` to generate content'
+          documentCount: 0,
+          documents: [],
+          types: []
         };
       }
+      
+      // Node.js context
+      let contentlayerData: any = null;
+      
+      try {
+        // First try direct import
+        const contentlayer = await import('contentlayer/generated');
+        contentlayerData = contentlayer;
+      } catch {
+        // Try alternative path
+        try {
+          const contentlayer = await import('@/lib/contentlayer-compat');
+          contentlayerData = contentlayer;
+        } catch {
+          // Last resort - try to read from filesystem
+          const fs = require('fs');
+          const path = require('path');
+          const contentlayerPath = path.join(process.cwd(), '.contentlayer', 'generated');
+          
+          if (fs.existsSync(contentlayerPath)) {
+            const files = fs.readdirSync(contentlayerPath);
+            const documentFiles = files.filter((f: string) => f.endsWith('.json'));
+            const documents: any[] = [];
+            
+            for (const file of documentFiles.slice(0, 10)) {
+              try {
+                const content = fs.readFileSync(path.join(contentlayerPath, file), 'utf-8');
+                documents.push(JSON.parse(content));
+              } catch {}
+            }
+            
+            return {
+              available: true,
+              documentCount: documentFiles.length,
+              documents,
+              types: [...new Set(documents.map((doc: any) => doc._raw?.sourceFileDir || doc.type || 'unknown'))]
+            };
+          }
+        }
+      }
+      
+      if (contentlayerData) {
+        const allDocuments = contentlayerData.allDocuments || contentlayerData.documents || [];
+        return {
+          available: true,
+          documentCount: allDocuments.length,
+          documents: allDocuments.slice(0, 10),
+          types: [...new Set(allDocuments.map((doc: any) => doc._raw?.sourceFileDir || doc.type || 'unknown'))]
+        };
+      }
+      
+      return {
+        available: false,
+        error: 'ContentLayer data not available',
+        suggestion: 'Run `npm run build` or `npm run contentlayer:build` to generate content'
+      };
+    } catch (error) {
+      return {
+        available: false,
+        error: 'ContentLayer data not available',
+        suggestion: 'Run `npm run build` or `npm run contentlayer:build` to generate content'
+      };
     }
   }
 
@@ -328,6 +363,11 @@ export async function checkContentlayerStatus() {
     lastChecked: health.lastChecked,
     stats: health.stats
   };
+}
+
+// Export getContentlayerData function - THIS IS THE MISSING FUNCTION
+export async function getContentlayerData() {
+  return await contentLayerStatus.getContentLayerData();
 }
 
 // Initialize on import

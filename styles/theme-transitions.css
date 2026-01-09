@@ -1,394 +1,436 @@
-/* styles/theme-transitions.css */
+/* styles/theme-transitions.css - Integrated Theme Transitions */
 
 /*
  * ----------------------------------------------------------------------
- * Theme Transition Utilities
+ * 13. Theme Transition Utilities (Integrated)
  * ----------------------------------------------------------------------
- * These classes enable smooth theme transitions for the entire application.
- * Apply .theme-transition to the <html> or <body> element.
- * Use .no-transition to temporarily disable transitions during theme changes.
- * ----------------------------------------------------------------------
+ * Seamlessly integrated with your existing theme variables and components
  */
 
 /*
- * Base transition class for smooth theme changes
- * Apply this to the root element (html or body)
+ * Root transition class - Add to <html> or <body>
+ * Uses your existing transition variables for consistency
  */
-.theme-transition {
+.themeTransition {
   transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    color 0.3s ease;
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
 }
 
 /*
- * Apply transitions to all elements and pseudo-elements
- * This ensures all UI components transition smoothly
+ * Cascade transitions to all child elements
+ * Respects your existing component transitions
  */
-.theme-transition *,
-.theme-transition *::before,
-.theme-transition *::after {
+.themeTransition *,
+.themeTransition *::before,
+.themeTransition *::after {
   transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    color 0.3s ease,
-    fill 0.3s ease,
-    stroke 0.3s ease;
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    fill var(--transition-base),
+    stroke var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 /*
- * Exclude media elements and non-theme-related SVGs from transitions
- * These elements don't need theme transitions and can cause performance issues
+ * Exclude media and complex elements for performance
+ * Preserves your existing image and video styles
  */
-.theme-transition img,
-.theme-transition video,
-.theme-transition canvas,
-.theme-transition iframe,
-.theme-transition svg:not([class*="icon"]) {
+.themeTransition img,
+.themeTransition video,
+.themeTransition canvas,
+.themeTransition iframe,
+.themeTransition svg:not([class*="icon"]) {
   transition: none;
 }
 
 /*
- * Disable transitions temporarily
- * Use this class when you need to update multiple theme properties
- * without triggering multiple transitions
+ * Utility to disable transitions temporarily
+ * Useful for batch theme updates
  */
-.no-transition,
-.no-transition *,
-.no-transition *::before,
-.no-transition *::after {
+.noTransition,
+.noTransition *,
+.noTransition *::before,
+.noTransition *::after {
   transition: none !important;
 }
 
 /*
  * ----------------------------------------------------------------------
- * Specific Element Transitions
+ * Integrated Component Transitions
  * ----------------------------------------------------------------------
- * These classes can be applied to specific elements for more control
+ * These work with your existing component classes
  */
 
-/* Text color transitions */
-.theme-transition-text {
-  transition: color 0.3s ease;
+/* Button transitions that match your btn styles */
+.btn {
+  transition: all var(--transition-base);
 }
 
-/* Background color transitions */
-.theme-transition-bg {
-  transition: background-color 0.3s ease;
+.btnPrimary {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
-/* Border color transitions */
-.theme-transition-border {
-  transition: border-color 0.3s ease;
+.btnSecondary,
+.btnDanger {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-base);
 }
 
-/* Fill color transitions (for SVGs) */
-.theme-transition-fill {
-  transition: fill 0.3s ease;
+/* Card transitions with glass effect */
+.card {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
 }
 
-/* Stroke color transitions (for SVGs) */
-.theme-transition-stroke {
-  transition: stroke 0.3s ease;
+/* Input transitions */
+.input,
+.inputSearch,
+.select,
+.selectCategory {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
-/* Box shadow transitions */
-.theme-transition-shadow {
-  transition: box-shadow 0.3s ease;
+/* List item transitions */
+.pdfListItem {
+  transition: all var(--transition-base);
 }
 
-/* Opacity transitions */
-.theme-transition-opacity {
-  transition: opacity 0.3s ease;
+.pdfListItemSelected {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
-/* Transform transitions */
-.theme-transition-transform {
-  transition: transform 0.3s ease;
+.pdfListItemNormal:hover {
+  transition: 
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+/* Stat card transitions */
+.statCard {
+  transition: 
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 /*
  * ----------------------------------------------------------------------
- * Transition Delays
+ * Typography Transitions
  * ----------------------------------------------------------------------
- * Stagger transitions for a more natural feel
+ * Seamless text color transitions for legacy content
  */
 
-/* First layer (fastest) */
-.theme-transition-fast {
-  transition-duration: 0.2s;
+.legacyContent {
+  transition: color var(--transition-base);
 }
 
-/* Second layer */
-.theme-transition-medium {
-  transition-duration: 0.3s;
+.legacyContent h1,
+.legacyContent h2,
+.legacyContent h3,
+.legacyContent h4 {
+  transition: color var(--transition-base);
 }
 
-/* Third layer (slowest) */
-.theme-transition-slow {
-  transition-duration: 0.5s;
+.legacyContent p,
+.legacyContent li,
+.legacyContent a,
+.legacyContent strong,
+.legacyContent em {
+  transition: 
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base);
 }
 
-/* Staggered delays */
-.theme-transition-delay-1 {
-  transition-delay: 0.05s;
+.legacyContent blockquote {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
 }
 
-.theme-transition-delay-2 {
-  transition-delay: 0.1s;
-}
-
-.theme-transition-delay-3 {
-  transition-delay: 0.15s;
-}
-
-.theme-transition-delay-4 {
-  transition-delay: 0.2s;
+.legacyContent code,
+.legacyContent pre {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
 }
 
 /*
  * ----------------------------------------------------------------------
- * Transition Timing Functions
+ * Main Layout Transitions
  * ----------------------------------------------------------------------
- * Different easing curves for different effects
  */
 
-.theme-transition-ease {
-  transition-timing-function: ease;
+.page {
+  transition: 
+    background var(--transition-base),
+    color var(--transition-base);
 }
 
-.theme-transition-ease-in {
-  transition-timing-function: ease-in;
+.main {
+  transition: 
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
-.theme-transition-ease-out {
-  transition-timing-function: ease-out;
+.hero {
+  transition: 
+    background var(--transition-base),
+    color var(--transition-base);
 }
 
-.theme-transition-ease-in-out {
-  transition-timing-function: ease-in-out;
+.nav {
+  transition: 
+    border-color var(--transition-base),
+    background-color var(--transition-base);
 }
 
-.theme-transition-linear {
-  transition-timing-function: linear;
+.navLogo {
+  transition: color var(--transition-base);
 }
 
-/* Material Design easing curve */
-.theme-transition-material {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+.navLink {
+  transition: color var(--transition-fast);
 }
 
-/* Apple-style easing curve */
-.theme-transition-apple {
-  transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+.footer {
+  transition: 
+    border-color var(--transition-base),
+    color var(--transition-base);
+}
+
+.footerLink {
+  transition: color var(--transition-fast);
 }
 
 /*
  * ----------------------------------------------------------------------
- * Performance Optimizations
+ * Performance-Optimized Transitions
  * ----------------------------------------------------------------------
+ * Respects user motion preferences
  */
 
-/*
- * Only enable transitions when the user hasn't requested reduced motion
- * This respects accessibility preferences
- */
 @media (prefers-reduced-motion: no-preference) {
-  .theme-transition-reduced-motion {
+  .themeTransitionReduced {
     transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease,
-      color 0.3s ease;
+      background-color var(--transition-base),
+      border-color var(--transition-base),
+      color var(--transition-base);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .theme-transition-reduced-motion,
-  .theme-transition-reduced-motion *,
-  .theme-transition-reduced-motion *::before,
-  .theme-transition-reduced-motion *::after {
+  .themeTransitionReduced,
+  .themeTransitionReduced *,
+  .themeTransitionReduced *::before,
+  .themeTransitionReduced *::after {
     transition: none !important;
   }
 }
 
 /*
- * Hardware acceleration for smoother transitions
- * Only apply to elements that actually change during theme transitions
+ * Hardware acceleration for complex transitions
  */
-.theme-transition-hardware {
+.themeTransitionHardware {
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+  will-change: transform;
 }
 
 /*
  * ----------------------------------------------------------------------
- * Theme Transition Events
+ * Theme Change States
  * ----------------------------------------------------------------------
- * These classes can be used to trigger specific transition states
+ * Use with JavaScript for controlled transitions
  */
 
-/* Apply when theme change starts */
-.theme-changing {
+.themeChanging {
   pointer-events: none;
   cursor: wait;
+  opacity: 0.95;
 }
 
-/* Apply when theme change is complete */
-.theme-changed {
-  /* Can be used to trigger animations or other effects */
+.themeChanging .btn,
+.themeChanging .card,
+.themeChanging .input {
+  opacity: 0.8;
+}
+
+.themeChanged {
+  animation: themeChangedPulse 0.5s ease-out;
+}
+
+@keyframes themeChangedPulse {
+  0% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.98;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /*
  * ----------------------------------------------------------------------
- * Theme-Specific Transitions
+ * Staggered Transitions
+ * ----------------------------------------------------------------------
+ * Creates natural-feeling transition sequences
+ */
+
+.themeTransitionDelay1 {
+  transition-delay: 0.05s;
+}
+
+.themeTransitionDelay2 {
+  transition-delay: 0.1s;
+}
+
+.themeTransitionDelay3 {
+  transition-delay: 0.15s;
+}
+
+.themeTransitionDelay4 {
+  transition-delay: 0.2s;
+}
+
+/* Apply delays to component layers */
+.nav {
+  transition-delay: 0.05s;
+}
+
+.hero {
+  transition-delay: 0.1s;
+}
+
+.main {
+  transition-delay: 0.15s;
+}
+
+.card {
+  transition-delay: 0.2s;
+}
+
+.btn {
+  transition-delay: 0.25s;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Dark/Light Theme Specific Transitions
  * ----------------------------------------------------------------------
  */
 
-/* Smooth transition for dark mode */
-html.dark .theme-transition-dark {
+/* Enhanced transitions for dark mode */
+:global(html.dark) .darkThemeTransition {
   transition-duration: 0.4s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Smooth transition for light mode */
-html:not(.dark) .theme-transition-light {
+/* Enhanced transitions for light mode */
+:global(html:not(.dark)) .lightThemeTransition {
   transition-duration: 0.4s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/*
- * ----------------------------------------------------------------------
- * Component-Specific Transitions
- * ----------------------------------------------------------------------
- */
-
-/* Button theme transitions */
-.button-theme-transition {
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-/* Card theme transitions */
-.card-theme-transition {
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-/* Input theme transitions */
-.input-theme-transition {
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    color 0.3s ease;
-}
-
-/* Link theme transitions */
-.link-theme-transition {
-  transition: color 0.3s ease;
+/* Specific adjustments for light theme transitions */
+@media (prefers-color-scheme: light) {
+  :global(html:not(.dark)) .lightThemeTransition {
+    transition-duration: 0.35s;
+  }
 }
 
 /*
  * ----------------------------------------------------------------------
- * Utility Classes for JavaScript Control
+ * JavaScript Control Classes
  * ----------------------------------------------------------------------
  */
 
-/* Use with JavaScript to temporarily disable transitions */
-.js-no-transition {
-  transition: none !important;
+.jsThemeChanging {
+  overflow: hidden;
 }
 
-/* Use when programmatically changing themes */
-.js-theme-changing {
-  overflow: hidden !important;
-}
-
-/* Use to indicate theme loading state */
-.js-theme-loading {
+.jsThemeLoading {
   opacity: 0.7;
-  filter: blur(1px);
+  filter: blur(0.5px);
+  transition: 
+    opacity var(--transition-base),
+    filter var(--transition-base);
 }
 
-/* Use to indicate theme loaded state */
-.js-theme-loaded {
+.jsThemeLoaded {
   opacity: 1;
   filter: blur(0);
-  transition:
-    opacity 0.3s ease,
-    filter 0.3s ease;
-}
-
-/*
- * ----------------------------------------------------------------------
- * Debug Classes
- * ----------------------------------------------------------------------
- * These can be used during development to visualize transitions
- */
-
-/* Highlight all transitioning elements */
-.debug-transitions * {
-  outline: 1px solid rgba(255, 0, 0, 0.3) !important;
-}
-
-/* Show transition timing */
-.debug-transition-timing::after {
-  content: attr(style);
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  z-index: 9999;
+  transition: 
+    opacity var(--transition-base),
+    filter var(--transition-base);
 }
 
 /*
  * ----------------------------------------------------------------------
  * Responsive Transition Adjustments
  * ----------------------------------------------------------------------
+ * Faster transitions on mobile for better UX
  */
 
-/* Faster transitions on mobile for better performance */
 @media (max-width: 768px) {
-  .theme-transition-mobile {
+  .themeTransition {
+    transition-duration: 0.2s;
+  }
+  
+  .themeTransition *,
+  .themeTransition *::before,
+  .themeTransition *::after {
+    transition-duration: 0.2s;
+  }
+  
+  .btn,
+  .card,
+  .input {
     transition-duration: 0.2s;
   }
 }
 
-/* Even faster transitions on very small screens */
 @media (max-width: 480px) {
-  .theme-transition-mobile-small {
+  .themeTransition {
     transition-duration: 0.15s;
   }
 }
 
-/* Slower transitions on desktop for more cinematic feel */
 @media (min-width: 1024px) {
-  .theme-transition-desktop {
+  .themeTransition {
     transition-duration: 0.4s;
   }
-}
-
-/*
- * ----------------------------------------------------------------------
- * Print Styles
- * ----------------------------------------------------------------------
- */
-
-@media print {
-  .theme-transition,
-  .theme-transition *,
-  .theme-transition *::before,
-  .theme-transition *::after {
-    transition: none !important;
+  
+  .btn:hover,
+  .card:hover {
+    transition-duration: 0.3s;
   }
 }
 
@@ -399,33 +441,97 @@ html:not(.dark) .theme-transition-light {
  */
 
 @media (prefers-contrast: high) {
-  .theme-transition-high-contrast {
+  .themeTransition {
     transition-duration: 0.1s;
   }
 }
 
 /*
  * ----------------------------------------------------------------------
- * Final Utility Class for Easy Application
+ * Print Styles
  * ----------------------------------------------------------------------
  */
 
-/* Apply this to your app's root element for complete theme transition support */
-.theme-transition-app {
-  composes: theme-transition;
+@media print {
+  .themeTransition,
+  .themeTransition *,
+  .themeTransition *::before,
+  .themeTransition *::after {
+    transition: none !important;
+  }
 }
 
-.theme-transition-app *,
-.theme-transition-app *::before,
-.theme-transition-app *::after {
-  composes: theme-transition;
+/*
+ * ----------------------------------------------------------------------
+ * Debug & Development Utilities
+ * ----------------------------------------------------------------------
+ */
+
+.debugTransitionOutline * {
+  outline: 1px solid rgba(var(--color-primary), 0.3) !important;
 }
 
-/* Exclusions remain the same */
-.theme-transition-app img,
-.theme-transition-app video,
-.theme-transition-app canvas,
-.theme-transition-app iframe,
-.theme-transition-app svg:not([class*="icon"]) {
+.debugTransitionTiming::after {
+  content: 'Transition: ' attr(data-transition);
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: var(--color-surface);
+  color: var(--color-on-background);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  font-family: var(--font-family-mono);
+  border: 1px solid var(--ui-alpha-border);
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Complete Application Transition Class
+ * ----------------------------------------------------------------------
+ * Apply this to your root element for full theme transition support
+ */
+
+.appThemeTransition {
+  composes: themeTransition;
+}
+
+.appThemeTransition *,
+.appThemeTransition *::before,
+.appThemeTransition *::after {
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    fill var(--transition-base),
+    stroke var(--transition-base);
+}
+
+/* Match your existing exclusions */
+.appThemeTransition img,
+.appThemeTransition video,
+.appThemeTransition canvas,
+.appThemeTransition iframe,
+.appThemeTransition svg:not([class*="icon"]) {
   transition: none;
+}
+
+/*
+ * Smooth loading animation for initial theme application
+ */
+.appThemeLoading {
+  animation: appThemeFadeIn 0.6s ease-out;
+}
+
+@keyframes appThemeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

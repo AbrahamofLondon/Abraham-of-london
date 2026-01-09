@@ -1,5 +1,5 @@
 // lib/fonts.ts
-// Central, tree-shakeable font utility (no React imports)
+// Updated to work with CSS modules instead of Tailwind
 
 export type FontKey =
   | "button"
@@ -8,30 +8,53 @@ export type FontKey =
   | "h1"
   | "h2"
   | "h3"
+  | "h4"
   | "subtitle"
   | "articleBody"
   | "body"
-  | "caption";
+  | "caption"
+  | "code"
+  | "mono";
 
 // Backwards-compatible alias for consumers expecting FontFamilyKey
 export type FontFamilyKey = FontKey;
 
-/** Map semantic keys to Tailwind classes for typography. */
-const FONT_MAP: Record<FontKey, string> = {
+/** Map semantic keys to CSS module class names */
+export const FONT_MAP: Record<FontKey, string> = {
   // Button styles
-  "button-sm": "font-sans text-sm tracking-wide",
-  button: "font-sans text-base tracking-wide",
-  "button-lg": "font-sans text-lg tracking-wide",
+  "button-sm": "btn btnSmall",
+  "button": "btn",
+  "button-lg": "btn btnLarge",
 
   // Heading styles
-  h1: "text-4xl md:text-5xl font-bold font-serif tracking-tight",
-  h2: "text-3xl md:text-4xl font-semibold font-serif tracking-tight",
-  h3: "text-2xl md:text-3xl font-semibold font-serif",
+  "h1": "h1",
+  "h2": "h2", 
+  "h3": "h3",
+  "h4": "h4",
 
   // Text styles
-  subtitle: "text-lg md:text-xl font-sans text-deepCharcoal/80",
-  articleBody: "text-lg font-sans leading-relaxed md:leading-loose",
-  body: "text-base font-sans leading-relaxed",
-  caption: "text-sm font-sans text-deepCharcoal/70",
+  "subtitle": "p textSecondary",
+  "articleBody": "legacyContent p",
+  "body": "p",
+  "caption": "pSmall",
+
+  // Code/mono styles
+  "code": "codeInline",
+  "mono": "codeBlock",
 };
 
+/** Helper function to get font class names */
+export function getFontClass(key: FontKey): string {
+  return FONT_MAP[key] || "";
+}
+
+/** Typography scale for consistent sizing */
+export const TYPOGRAPHY_SCALE = {
+  h1: "clamp(3rem, 8vw, 4.5rem)",
+  h2: "clamp(2.5rem, 5vw, 3.5rem)",
+  h3: "clamp(1.875rem, 4vw, 2.5rem)",
+  h4: "clamp(1.5rem, 3vw, 1.875rem)",
+  body: "1.125rem",
+  small: "1rem",
+  caption: "0.875rem",
+} as const;

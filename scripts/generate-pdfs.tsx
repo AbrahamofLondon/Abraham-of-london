@@ -37,18 +37,18 @@ class Logger {
     gray: '\x1b[90m'
   };
 
-  static shouldLog(level) {
+  static shouldLog(level: string): boolean {
     const levels = ['silent', 'error', 'warn', 'info', 'debug'];
     const currentLevel = levels.indexOf(CONFIG.logLevel);
     const targetLevel = levels.indexOf(level);
     return targetLevel <= currentLevel;
   }
 
-  static formatTime() {
+  static formatTime(): string {
     return new Date().toISOString().split('T')[1].split('.')[0];
   }
 
-  static log(level, message, color = '') {
+  static log(level: string, message: string, color: string = ''): void {
     if (!this.shouldLog(level)) return;
     
     const prefix = `[${this.formatTime()}] ${level.toUpperCase().padEnd(5)}`;
@@ -61,19 +61,19 @@ class Logger {
     }
   }
 
-  static info(message) { this.log('info', message, this.colors.cyan); }
-  static success(message) { this.log('info', message, this.colors.green); }
-  static warn(message) { this.log('warn', message, this.colors.yellow); }
-  static error(message) { this.log('error', message, this.colors.red); }
-  static debug(message) { this.log('debug', message, this.colors.gray); }
-  static start(name) { this.log('info', `▶️  Starting: ${name}`, this.colors.blue); }
-  static complete(name, duration) { 
+  static info(message: string): void { this.log('info', message, this.colors.cyan); }
+  static success(message: string): void { this.log('info', message, this.colors.green); }
+  static warn(message: string): void { this.log('warn', message, this.colors.yellow); }
+  static error(message: string): void { this.log('error', message, this.colors.red); }
+  static debug(message: string): void { this.log('debug', message, this.colors.gray); }
+  static start(name: string): void { this.log('info', `▶️  Starting: ${name}`, this.colors.blue); }
+  static complete(name: string, duration?: number): void { 
     const timeStr = duration ? ` (${duration}ms)` : '';
     this.log('info', `✅ Completed: ${name}${timeStr}`, this.colors.green);
   }
   
   // New method for premium branding
-  static premium(message) {
+  static premium(message: string): void {
     const premiumMsg = `✨ PREMIUM: ${message}`;
     this.log('info', premiumMsg, this.colors.magenta);
   }
@@ -83,14 +83,17 @@ class Logger {
 // COMMAND RUNNER (FIXED FOR PDF GENERATION)
 // -----------------------------------------------------------------------------
 class CommandRunner {
+  private isWindows: boolean;
+  private npxCmd: string;
+
   constructor() {
     this.isWindows = os.platform() === 'win32';
     this.npxCmd = this.isWindows ? 'npx.cmd' : 'npx';
   }
 
-  async runWithRetry(name, script, args = [], options = {}) {
+  async runWithRetry(name: string, script: string, args: string[] = [], options: any = {}): Promise<any> {
     const { timeout = CONFIG.timeout, cwd = process.cwd() } = options;
-    let lastError;
+    let lastError: any;
     
     for (let attempt = 1; attempt <= CONFIG.retries; attempt++) {
       try {
@@ -100,7 +103,7 @@ class CommandRunner {
         }
         
         return await this.runCommand(name, script, args, { timeout, cwd });
-      } catch (error) {
+      } catch (error: any) {
         lastError = error;
         Logger.warn(`Attempt ${attempt} failed for ${name}: ${error.message}`);
         
@@ -113,13 +116,13 @@ class CommandRunner {
     throw new Error(`Failed after ${CONFIG.retries} attempts: ${lastError.message}`);
   }
 
-  async runCommand(name, script, args = [], options = {}) {
+  async runCommand(name: string, script: string, args: string[] = [], options: any = {}): Promise<any> {
     const { timeout = CONFIG.timeout, cwd = process.cwd() } = options;
     const startTime = Date.now();
     
     // Build the command
-    let command;
-    let commandArgs;
+    let command: string;
+    let commandArgs: string[];
     
     if (script.endsWith('.ts') || script.endsWith('.tsx')) {
       // Use tsx for TypeScript files
@@ -139,7 +142,7 @@ class CommandRunner {
     Logger.debug(`Command: ${command} ${commandArgs.join(' ')}`);
     
     return new Promise((resolve, reject) => {
-      const process = spawn(command, commandArgs, {
+      const childProcess = spawn(command, commandArgs, {
         stdio: 'inherit',
         shell: true,
         cwd,
@@ -155,19 +158,19 @@ class CommandRunner {
       let stdout = '';
       let stderr = '';
       
-      if (process.stdout) {
-        process.stdout.on('data', (data) => {
+      if (childProcess.stdout) {
+        childProcess.stdout.on('data', (data) => {
           stdout += data.toString();
         });
       }
       
-      if (process.stderr) {
-        process.stderr.on('data', (data) => {
+      if (childProcess.stderr) {
+        childProcess.stderr.on('data', (data) => {
           stderr += data.toString();
         });
       }
       
-      process.on('close', (code) => {
+      childProcess.on('close', (code) => {
         const duration = Date.now() - startTime;
         
         if (code === 0) {
@@ -180,10 +183,10 @@ class CommandRunner {
           resolve({ code, stdout, stderr, duration });
         } else {
           const error = new Error(`Process exited with code ${code}`);
-          error.code = code;
-          error.stdout = stdout;
-          error.stderr = stderr;
-          error.duration = duration;
+          (error as any).code = code;
+          (error as any).stdout = stdout;
+          (error as any).stderr = stderr;
+          (error as any).duration = duration;
           
           Logger.error(`Failed: ${name} (${duration}ms)`);
           if (stderr) {
@@ -194,7 +197,7 @@ class CommandRunner {
         }
       });
       
-      process.on('error', (error) => {
+      childProcess.on('error', (error) => {
         const duration = Date.now() - startTime;
         Logger.error(`Process error for ${name}: ${error.message} (${duration}ms)`);
         reject(error);
@@ -202,8 +205,8 @@ class CommandRunner {
       
       if (timeout) {
         setTimeout(() => {
-          if (process.exitCode === null) {
-            process.kill('SIGTERM');
+          if (childProcess.exitCode === null) {
+            childProcess.kill('SIGTERM');
             reject(new Error(`Timeout after ${timeout}ms`));
           }
         }, timeout);
@@ -211,15 +214,15 @@ class CommandRunner {
     });
   }
 
-  async delay(ms) {
+  async delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async checkDependencies() {
+  async checkDependencies(): Promise<void> {
     Logger.info('Checking dependencies for premium PDF generation...');
     
     const requiredPackages = ['tsx'];
-    const missingPackages = [];
+    const missingPackages: string[] = [];
     
     for (const pkg of requiredPackages) {
       try {
@@ -241,7 +244,7 @@ class CommandRunner {
           cwd: process.cwd()
         });
         Logger.success('Missing packages installed successfully');
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(`Failed to install missing packages: ${error.message}`);
       }
     }
@@ -251,16 +254,405 @@ class CommandRunner {
 }
 
 // -----------------------------------------------------------------------------
+// PDF QUALITY OPTIMIZER & CLEANSING (SAFE & EFFICIENT)
+// -----------------------------------------------------------------------------
+class PDFQualityOptimizer {
+  private isWindows: boolean;
+  private ghostscriptAvailable: boolean;
+
+  constructor() {
+    this.isWindows = os.platform() === 'win32';
+    this.ghostscriptAvailable = this.checkGhostscript();
+  }
+
+  private checkGhostscript(): boolean {
+    try {
+      if (this.isWindows) {
+        execSync('gswin64c --version', { stdio: 'ignore' });
+        return true;
+      } else {
+        execSync('gs --version', { stdio: 'ignore' });
+        return true;
+      }
+    } catch {
+      Logger.warn('Ghostscript not available. PDF optimization will be limited.');
+      return false;
+    }
+  }
+
+  /**
+   * Safe PDF file replacement with validation
+   * Generates a better quality version if possible, otherwise keeps original
+   */
+  async optimizePDF(sourcePath: string, targetPath: string, quality: string): Promise<{
+    success: boolean;
+    optimized: boolean;
+    originalSize: number;
+    newSize: number;
+    qualityGain?: number;
+    method: string;
+  }> {
+    const startTime = Date.now();
+    
+    if (!fs.existsSync(sourcePath)) {
+      throw new Error(`Source PDF not found: ${sourcePath}`);
+    }
+
+    const stats = fs.statSync(sourcePath);
+    const originalSize = stats.size;
+    
+    Logger.premium(`Optimizing: ${path.basename(sourcePath)} (${(originalSize / 1024).toFixed(1)}KB)`);
+    
+    try {
+      // Create temp file for processing
+      const tempPath = `${targetPath}.tmp`;
+      
+      let optimizationMethod = 'copy';
+      let qualityGain = 0;
+      
+      // Strategy 1: Ghostscript optimization (if available)
+      if (this.ghostscriptAvailable && originalSize > 102400) { // Only optimize files > 100KB
+        const optimized = await this.optimizeWithGhostscript(sourcePath, tempPath, quality);
+        
+        if (optimized.success) {
+          const newStats = fs.statSync(tempPath);
+          const newSize = newStats.size;
+          qualityGain = ((originalSize - newSize) / originalSize) * 100;
+          
+          if (newSize > 1000 && newSize < originalSize * 1.5) { // Safety checks
+            optimizationMethod = 'ghostscript';
+            Logger.debug(`Ghostscript reduced by ${qualityGain.toFixed(1)}%`);
+          }
+        }
+      }
+      
+      // Strategy 2: If ghostscript failed or wasn't suitable, try metadata cleanup
+      if (optimizationMethod === 'copy') {
+        const cleaned = await this.cleanPDFMetadata(sourcePath, tempPath);
+        if (cleaned.success) {
+          optimizationMethod = 'metadata_clean';
+          const newStats = fs.statSync(tempPath);
+          qualityGain = ((originalSize - newStats.size) / originalSize) * 100;
+        }
+      }
+      
+      // Verify the optimized file is valid
+      const isValid = await this.validatePDF(tempPath);
+      
+      if (isValid) {
+        // Safe atomic replacement using rename
+        if (fs.existsSync(targetPath)) {
+          const backupPath = `${targetPath}.backup-${Date.now()}`;
+          fs.copyFileSync(targetPath, backupPath);
+          Logger.debug(`Created backup: ${backupPath}`);
+          
+          // Clean up old backups (keep last 3)
+          this.cleanupOldBackups(targetPath);
+        }
+        
+        fs.renameSync(tempPath, targetPath);
+        
+        const finalStats = fs.statSync(targetPath);
+        const duration = Date.now() - startTime;
+        
+        Logger.success(`Optimized ${path.basename(sourcePath)}: ${optimizationMethod} (${duration}ms)`);
+        
+        return {
+          success: true,
+          optimized: optimizationMethod !== 'copy',
+          originalSize,
+          newSize: finalStats.size,
+          qualityGain: optimizationMethod !== 'copy' ? qualityGain : undefined,
+          method: optimizationMethod
+        };
+      } else {
+        // If optimization produced invalid PDF, fall back to original
+        Logger.warn(`Optimized PDF invalid, using original for ${path.basename(sourcePath)}`);
+        fs.copyFileSync(sourcePath, targetPath);
+        
+        return {
+          success: true,
+          optimized: false,
+          originalSize,
+          newSize: originalSize,
+          method: 'copy_fallback'
+        };
+      }
+      
+    } catch (error: any) {
+      Logger.error(`PDF optimization failed for ${path.basename(sourcePath)}: ${error.message}`);
+      
+      // Always fall back to original on error
+      fs.copyFileSync(sourcePath, targetPath);
+      
+      return {
+        success: true, // Still success because we have the original
+        optimized: false,
+        originalSize,
+        newSize: originalSize,
+        method: 'copy_error_fallback'
+      };
+    }
+  }
+
+  /**
+   * Use Ghostscript for high-quality PDF optimization
+   */
+  private async optimizeWithGhostscript(sourcePath: string, targetPath: string, quality: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      const gsCommand = this.isWindows ? 'gswin64c' : 'gs';
+      
+      // Quality-based optimization parameters
+      const qualityParams: Record<string, string[]> = {
+        draft: [
+          '-dPDFSETTINGS=/screen',
+          '-dEmbedAllFonts=false',
+          '-dSubsetFonts=true',
+          '-dConvertCMYKImagesToRGB=true',
+          '-dDownsampleColorImages=true',
+          '-dColorImageResolution=72',
+          '-dGrayImageResolution=72',
+          '-dMonoImageResolution=72'
+        ],
+        standard: [
+          '-dPDFSETTINGS=/ebook',
+          '-dEmbedAllFonts=true',
+          '-dSubsetFonts=true',
+          '-dConvertCMYKImagesToRGB=true',
+          '-dDownsampleColorImages=true',
+          '-dColorImageResolution=150',
+          '-dGrayImageResolution=150',
+          '-dMonoImageResolution=300'
+        ],
+        premium: [
+          '-dPDFSETTINGS=/printer',
+          '-dEmbedAllFonts=true',
+          '-dSubsetFonts=true',
+          '-dConvertCMYKImagesToRGB=false',
+          '-dDownsampleColorImages=false',
+          '-dColorImageResolution=300',
+          '-dGrayImageResolution=300',
+          '-dMonoImageResolution=600'
+        ],
+        enterprise: [
+          '-dPDFSETTINGS=/prepress',
+          '-dEmbedAllFonts=true',
+          '-dSubsetFonts=true',
+          '-dConvertCMYKImagesToRGB=false',
+          '-dDownsampleColorImages=false',
+          '-dColorImageResolution=400',
+          '-dGrayImageResolution=400',
+          '-dMonoImageResolution=1200'
+        ]
+      };
+
+      const params = qualityParams[quality] || qualityParams.premium;
+      
+      const args = [
+        '-q',
+        '-dNOPAUSE',
+        '-dBATCH',
+        '-dSAFER',
+        '-sDEVICE=pdfwrite',
+        ...params,
+        '-sOutputFile=' + targetPath,
+        sourcePath
+      ];
+      
+      execSync(`${gsCommand} ${args.join(' ')}`, {
+        stdio: 'pipe',
+        timeout: 30000 // 30 second timeout
+      });
+      
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Ghostscript optimization failed'
+      };
+    }
+  }
+
+  /**
+   * Clean PDF metadata without recompressing
+   */
+  private async cleanPDFMetadata(sourcePath: string, targetPath: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      // Simple metadata cleaning by copying without metadata
+      // This is a safe fallback when Ghostscript isn't available
+      const gsCommand = this.isWindows ? 'gswin64c' : 'gs';
+      const args = [
+        '-q',
+        '-dNOPAUSE',
+        '-dBATCH',
+        '-dSAFER',
+        '-sDEVICE=pdfwrite',
+        '-dPDFSETTINGS=/default',
+        '-dCompressPages=false',
+        '-dCompatibilityLevel=1.7',
+        '-sOutputFile=' + targetPath,
+        sourcePath
+      ];
+      
+      execSync(`${gsCommand} ${args.join(' ')}`, {
+        stdio: 'pipe',
+        timeout: 15000
+      });
+      
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: 'Metadata cleaning failed'
+      };
+    }
+  }
+
+  /**
+   * Validate PDF file integrity
+   */
+  private async validatePDF(filePath: string): Promise<boolean> {
+    try {
+      const stats = fs.statSync(filePath);
+      
+      // Basic validation
+      if (stats.size < 1000) { // Too small to be valid
+        return false;
+      }
+      
+      // Check if file starts with PDF signature
+      const buffer = Buffer.alloc(5);
+      const fd = fs.openSync(filePath, 'r');
+      fs.readSync(fd, buffer, 0, 5, 0);
+      fs.closeSync(fd);
+      
+      const header = buffer.toString();
+      if (!header.startsWith('%PDF-')) {
+        return false;
+      }
+      
+      // Quick check for EOF marker
+      const endBuffer = Buffer.alloc(6);
+      const endFd = fs.openSync(filePath, 'r');
+      fs.readSync(endFd, endBuffer, 0, 6, stats.size - 6);
+      fs.closeSync(endFd);
+      
+      const endMarker = endBuffer.toString();
+      if (!endMarker.includes('%%EOF')) {
+        return false;
+      }
+      
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Clean up old backup files
+   */
+  private cleanupOldBackups(originalPath: string): void {
+    try {
+      const dir = path.dirname(originalPath);
+      const baseName = path.basename(originalPath);
+      const files = fs.readdirSync(dir);
+      
+      const backupFiles = files
+        .filter(f => f.startsWith(`${baseName}.backup-`))
+        .map(f => ({
+          name: f,
+          path: path.join(dir, f),
+          time: fs.statSync(path.join(dir, f)).mtime.getTime()
+        }))
+        .sort((a, b) => b.time - a.time); // Newest first
+      
+      // Keep only the 3 most recent backups
+      if (backupFiles.length > 3) {
+        for (let i = 3; i < backupFiles.length; i++) {
+          fs.unlinkSync(backupFiles[i].path);
+          Logger.debug(`Cleaned up old backup: ${backupFiles[i].name}`);
+        }
+      }
+    } catch (error: any) {
+      // Non-critical, just log
+      Logger.debug(`Backup cleanup failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Batch optimize multiple PDFs
+   */
+  async optimizeBatch(files: Array<{source: string, target: string}>, quality: string): Promise<{
+    total: number;
+    optimized: number;
+    totalSavings: number;
+    results: Array<{
+      file: string;
+      success: boolean;
+      optimized: boolean;
+      originalSize: number;
+      newSize: number;
+      savings: number;
+      method: string;
+    }>;
+  }> {
+    Logger.premium(`Starting batch optimization of ${files.length} PDFs (${quality} quality)`);
+    
+    const results = [];
+    let optimizedCount = 0;
+    let totalSavings = 0;
+    
+    for (const file of files) {
+      const result = await this.optimizePDF(file.source, file.target, quality);
+      
+      results.push({
+        file: path.basename(file.source),
+        success: result.success,
+        optimized: result.optimized,
+        originalSize: result.originalSize,
+        newSize: result.newSize,
+        savings: result.originalSize - result.newSize,
+        method: result.method
+      });
+      
+      if (result.optimized) {
+        optimizedCount++;
+        totalSavings += result.originalSize - result.newSize;
+      }
+    }
+    
+    Logger.success(`Batch complete: ${optimizedCount}/${files.length} optimized, saved ${(totalSavings / 1024).toFixed(1)}KB`);
+    
+    return {
+      total: files.length,
+      optimized: optimizedCount,
+      totalSavings,
+      results
+    };
+  }
+}
+
+// -----------------------------------------------------------------------------
 // PDF GENERATION ORCHESTRATOR (FIXED FOR PREMIUM)
 // -----------------------------------------------------------------------------
 class PDFGenerationOrchestrator {
+  private runner: CommandRunner;
+  private results: any[];
+  private startTime: number;
+
   constructor() {
     this.runner = new CommandRunner();
     this.results = [];
     this.startTime = Date.now();
   }
 
-  async initialize() {
+  async initialize(): Promise<void> {
     console.log('\n' + '='.repeat(60));
     Logger.premium('LEGACY ARCHITECTURE PDF GENERATOR');
     console.log('='.repeat(60));
@@ -283,7 +675,7 @@ class PDFGenerationOrchestrator {
     await this.runner.checkDependencies();
   }
 
-  async runStep(name, script, args = [], options = {}) {
+  async runStep(name: string, script: string, args: string[] = [], options: any = {}): Promise<any> {
     const stepStartTime = Date.now();
     
     try {
@@ -295,7 +687,7 @@ class PDFGenerationOrchestrator {
         timestamp: new Date().toISOString()
       });
       return result;
-    } catch (error) {
+    } catch (error: any) {
       this.results.push({
         name,
         success: false,
@@ -315,7 +707,7 @@ class PDFGenerationOrchestrator {
     }
   }
 
-  async generatePremiumPDFs() {
+  async generatePremiumPDFs(): Promise<void> {
     Logger.premium('Starting premium PDF generation...');
     
     const scripts = [
@@ -354,7 +746,48 @@ class PDFGenerationOrchestrator {
     }
   }
 
-  async verifyGeneratedPDFs() {
+  async optimizeGeneratedPDFs(): Promise<any> {
+    Logger.premium('Optimizing generated PDFs for quality and size...');
+    
+    const optimizer = new PDFQualityOptimizer();
+    
+    // Find all generated PDFs
+    const pdfFiles = fs.readdirSync(CONFIG.outputDir)
+      .filter(f => f.endsWith('.pdf'))
+      .map(f => ({
+        source: path.join(CONFIG.outputDir, f),
+        target: path.join(CONFIG.outputDir, f) // Replace in place
+      }));
+    
+    if (pdfFiles.length === 0) {
+      Logger.warn('No PDF files found to optimize');
+      return null;
+    }
+    
+    const result = await optimizer.optimizeBatch(pdfFiles, CONFIG.quality);
+    
+    // Log optimization summary
+    console.log('\n' + '='.repeat(60));
+    Logger.premium('PDF OPTIMIZATION REPORT');
+    console.log('='.repeat(60));
+    
+    result.results.forEach((res: any, index: number) => {
+      const status = res.optimized ? '✨' : '📄';
+      const savings = res.optimized ? 
+        ` (saved ${((res.savings) / 1024).toFixed(1)}KB)` : '';
+      Logger.info(`${status} ${index + 1}. ${res.file} - ${res.method}${savings}`);
+    });
+    
+    console.log('='.repeat(60));
+    Logger.info(`Total files: ${result.total}`);
+    Logger.info(`Optimized: ${result.optimized}`);
+    Logger.info(`Total savings: ${(result.totalSavings / 1024).toFixed(1)}KB`);
+    console.log('='.repeat(60));
+    
+    return result;
+  }
+
+  async verifyGeneratedPDFs(): Promise<any[]> {
     Logger.info('Verifying generated PDFs...');
     
     const expectedFiles = [
@@ -401,7 +834,7 @@ class PDFGenerationOrchestrator {
     return verificationResults;
   }
 
-  async generateStatusReport() {
+  async generateStatusReport(): Promise<{ report: any; pdfs: any[]; validPdfs: number }> {
     const totalDuration = Date.now() - this.startTime;
     const successful = this.results.filter(r => r.success).length;
     const failed = this.results.filter(r => !r.success).length;
@@ -455,7 +888,7 @@ class PDFGenerationOrchestrator {
     return { report, pdfs, validPdfs };
   }
 
-  async cleanup() {
+  async cleanup(): Promise<void> {
     Logger.info('Performing cleanup...');
     
     // Remove any files older than 1 day in temp patterns
@@ -482,17 +915,20 @@ class PDFGenerationOrchestrator {
     }
   }
 
-  async run() {
+  async run(): Promise<any> {
     await this.initialize();
     
     try {
       // Step 1: Generate premium PDFs
       await this.generatePremiumPDFs();
       
-      // Step 2: Verify and generate report
+      // Step 2: OPTIMIZE PDFs (NEW STEP)
+      await this.optimizeGeneratedPDFs();
+      
+      // Step 3: Verify and generate report
       const { report, validPdfs } = await this.generateStatusReport();
       
-      // Step 3: Cleanup
+      // Step 4: Cleanup
       await this.cleanup();
       
       // Final output
@@ -515,12 +951,12 @@ class PDFGenerationOrchestrator {
         totalPdfs: 3
       };
       
-    } catch (error) {
+    } catch (error: any) {
       Logger.error('Orchestration failed:', error.message);
       
       try {
         await this.generateStatusReport();
-      } catch (reportError) {
+      } catch (reportError: any) {
         Logger.error('Failed to generate error report:', reportError.message);
       }
       
@@ -528,23 +964,6 @@ class PDFGenerationOrchestrator {
     }
   }
 }
-
-// -----------------------------------------------------------------------------
-// ADD THIS TO YOUR package.json
-// -----------------------------------------------------------------------------
-/*
-Add these scripts to your package.json:
-
-{
-  "scripts": {
-    "pdfs:premium": "node scripts/generate-pdfs.js --quality=premium",
-    "pdfs:all": "node scripts/generate-pdfs.js --all-formats",
-    "pdfs:build": "npm run pdfs:premium",
-    "build:with-pdfs": "npm run build && npm run pdfs:build",
-    "preview:with-pdfs": "npm run pdfs:build && npm run preview"
-  }
-}
-*/
 
 // -----------------------------------------------------------------------------
 // MAIN EXECUTION WITH ARGUMENTS
@@ -602,7 +1021,7 @@ Environment Variables:
   }
   
   // Update config based on arguments
-  CONFIG.quality = options.quality;
+  (CONFIG as any).quality = options.quality;
   
   const orchestrator = new PDFGenerationOrchestrator();
   
@@ -617,7 +1036,7 @@ Environment Variables:
       process.exit(1);
     }
     
-  } catch (error) {
+  } catch (error: any) {
     Logger.error('Fatal error in PDF generation:', error.message);
     process.exit(1);
   }

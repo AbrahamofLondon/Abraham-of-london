@@ -1,34 +1,19 @@
-// scripts/generate-pdfs.ts - Enhanced with better cleanup
+// scripts/generate-pdfs.ts — Enhanced, ESM-safe, build-safe, real async FS
 import { spawn, execSync } from "child_process";
-import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import os from "os";
 import crypto from "crypto";
-import { createRequire } from "module";
+import { fileURLToPath } from "url";
+import fs from "fs";
 
-const require = createRequire(import.meta.url);
+const fsp = fs.promises;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ----------------------------------------------------------------------------
-// ENHANCED CONFIGURATION
+// CONFIGURATION
 // ----------------------------------------------------------------------------
-const CONFIG = {
-  timeout: 10 * 60 * 1000,
-  retries: 3,
-  retryDelay: 1500,
-  logLevel: (process.env.LOG_LEVEL as LogLevel) || "info",
-  outputDir: path.join(process.cwd(), "public/assets/downloads"),
-  libDir: path.join(process.cwd(), "lib/pdfs"),
-  scriptDir: __dirname,
-  quality: ((process.env.PDF_QUALITY as Quality) || "premium") as Quality,
-  tier: ((process.env.PDF_TIER as Tier) || "premium") as Tier,
-  maxConcurrent: 1,
-  maxOldFileAge: 5 * 60 * 1000, // 5 minutes - consider files older than this as stale
-};
-
 type LogLevel = "silent" | "error" | "warn" | "info" | "debug";
 type Quality = "premium" | "enterprise";
 type Tier = "public" | "basic" | "premium" | "enterprise" | "restricted";
@@ -48,8 +33,27 @@ const TIER_SLUG: Record<Tier, string> = {
   restricted: "restricted",
 };
 
+const CONFIG = {
+  timeout: 10 * 60 * 1000,
+  retries: 3,
+  retryDelay: 1500,
+  maxConcurrent: 1,
+
+  logLevel: (process.env.LOG_LEVEL as LogLevel) || "info",
+
+  outputDir: path.join(process.cwd(), "public/assets/downloads"),
+  libDir: path.join(process.cwd(), "lib/pdfs"),
+  scriptDir: __dirname,
+
+  quality: ((process.env.PDF_QUALITY as Quality) || "premium") as Quality,
+  tier: ((process.env.PDF_TIER as Tier) || "premium") as Tier,
+
+  // Files older than this are considered stale for cleanup
+  maxOldFileAge: 5 * 60 * 1000, // 5 minutes
+} as const;
+
 // ----------------------------------------------------------------------------
-// ENHANCED LOGGER
+// LOGGER
 // ----------------------------------------------------------------------------
 class Logger {
   static colors = {
@@ -89,107 +93,133 @@ class Logger {
 }
 
 // ----------------------------------------------------------------------------
+// FS HELPERS
+// ----------------------------------------------------------------------------
+async function exists(p: string) {
+  try {
+    await fsp.access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureDir(p: string) {
+  if (!(await exists(p))) await fsp.mkdir(p, { recursive: true });
+}
+
+function checksum16(filePath: string) {
+  try {
+    const buf = fs.readFileSync(filePath);
+    return crypto.createHash("sha256").update(buf).digest("hex").slice(0, 16);
+  } catch {
+    return null;
+  }
+}
+
+// ----------------------------------------------------------------------------
 // FILE CLEANUP UTILITIES
 // ----------------------------------------------------------------------------
 class FileCleaner {
   static async cleanupOldFiles() {
     Logger.start("Cleaning up old PDF files...");
-    
+
     const now = Date.now();
     let cleanedCount = 0;
-    
+
     // Clean downloads directory
-    const downloadsDir = CONFIG.outputDir;
-    if (fs.existsSync(downloadsDir)) {
-      const files = await fs.readdir(downloadsDir).catch(() => []);
-      
+    if (await exists(CONFIG.outputDir)) {
+      const files = await fsp.readdir(CONFIG.outputDir).catch(() => []);
       for (const file of files) {
-        const filePath = path.join(downloadsDir, file);
-        const stat = await fs.stat(filePath).catch(() => null);
-        
-        if (stat && (now - stat.mtimeMs) > CONFIG.maxOldFileAge) {
-          await fs.unlink(filePath).catch(() => {});
+        const filePath = path.join(CONFIG.outputDir, file);
+        const stat = await fsp.stat(filePath).catch(() => null);
+        if (!stat) continue;
+
+        // Only touch PDFs + JSON reports
+        const isTarget = file.endsWith(".pdf") || file.endsWith(".json");
+        if (!isTarget) continue;
+
+        if (now - stat.mtimeMs > CONFIG.maxOldFileAge) {
+          await fsp.unlink(filePath).catch(() => {});
           cleanedCount++;
           Logger.debug(`Removed old file: ${file}`);
         }
       }
     }
-    
+
     // Clean lib/pdfs directory
-    const libDir = CONFIG.libDir;
-    if (fs.existsSync(libDir)) {
-      const files = await fs.readdir(libDir).catch(() => []);
-      
+    if (await exists(CONFIG.libDir)) {
+      const files = await fsp.readdir(CONFIG.libDir).catch(() => []);
       for (const file of files) {
-        const filePath = path.join(libDir, file);
-        const stat = await fs.stat(filePath).catch(() => null);
-        
-        if (stat && (now - stat.mtimeMs) > CONFIG.maxOldFileAge) {
-          await fs.unlink(filePath).catch(() => {});
+        const filePath = path.join(CONFIG.libDir, file);
+        const stat = await fsp.stat(filePath).catch(() => null);
+        if (!stat) continue;
+
+        const isTarget = file.endsWith(".pdf") || file.endsWith(".json");
+        if (!isTarget) continue;
+
+        if (now - stat.mtimeMs > CONFIG.maxOldFileAge) {
+          await fsp.unlink(filePath).catch(() => {});
           cleanedCount++;
           Logger.debug(`Removed old file from lib: ${file}`);
         }
       }
     }
-    
+
     Logger.success(`Cleaned ${cleanedCount} old files`);
     return cleanedCount;
   }
-  
+
   static async ensureDirectories() {
-    for (const dir of [CONFIG.outputDir, CONFIG.libDir]) {
-      if (!fs.existsSync(dir)) {
-        await fs.mkdir(dir, { recursive: true });
-        Logger.info(`Created directory: ${dir}`);
-      }
-    }
+    await ensureDir(CONFIG.outputDir);
+    await ensureDir(CONFIG.libDir);
   }
-  
+
   static async validateGeneratedFiles() {
     Logger.start("Validating generated files...");
-    
+
     const issues: string[] = [];
-    
-    // Check downloads directory
-    const downloadsFiles = await fs.readdir(CONFIG.outputDir).catch(() => []);
-    const pdfFiles = downloadsFiles.filter(f => f.endsWith('.pdf'));
-    
+
+    const downloadsFiles = await fsp.readdir(CONFIG.outputDir).catch(() => []);
+    const pdfFiles = downloadsFiles.filter((f) => f.endsWith(".pdf"));
+
+    const now = Date.now();
+
     for (const pdf of pdfFiles) {
       const filePath = path.join(CONFIG.outputDir, pdf);
-      const stat = await fs.stat(filePath).catch(() => null);
-      
+      const stat = await fsp.stat(filePath).catch(() => null);
+
       if (!stat) {
         issues.push(`Cannot stat file: ${pdf}`);
         continue;
       }
-      
-      if (stat.size < 1024) { // Less than 1KB
+
+      if (stat.size < 1024) {
         issues.push(`Suspiciously small file: ${pdf} (${stat.size} bytes)`);
       }
-      
-      const now = Date.now();
-      if ((now - stat.mtimeMs) > CONFIG.maxOldFileAge) {
-        issues.push(`Old file detected: ${pdf} (modified ${Math.round((now - stat.mtimeMs) / 60000)} minutes ago)`);
+
+      if (now - stat.mtimeMs > CONFIG.maxOldFileAge) {
+        issues.push(
+          `Old file detected: ${pdf} (modified ${Math.round(
+            (now - stat.mtimeMs) / 60000
+          )} minutes ago)`
+        );
       }
     }
-    
+
     if (issues.length > 0) {
       Logger.warn(`Found ${issues.length} issues:`);
-      issues.forEach(issue => Logger.warn(`  ${issue}`));
+      issues.forEach((issue) => Logger.warn(`  ${issue}`));
     } else {
       Logger.success(`All ${pdfFiles.length} PDF files validated`);
     }
-    
-    return {
-      totalPdfs: pdfFiles.length,
-      issues,
-      fileList: pdfFiles
-    };
+
+    return { totalPdfs: pdfFiles.length, issues, fileList: pdfFiles };
   }
 }
 
 // ----------------------------------------------------------------------------
-// ENHANCED COMMAND RUNNER
+// ENHANCED COMMAND RUNNER (TSX / NODE / CLI)
 // ----------------------------------------------------------------------------
 class CommandRunner {
   private isWindows = os.platform() === "win32";
@@ -222,7 +252,9 @@ class CommandRunner {
       }
     }
 
-    throw new Error(`Failed after ${CONFIG.retries} attempts: ${lastError?.message || String(lastError)}`);
+    throw new Error(
+      `Failed after ${CONFIG.retries} attempts: ${lastError?.message || String(lastError)}`
+    );
   }
 
   async runCommand(
@@ -259,7 +291,7 @@ class CommandRunner {
           NODE_OPTIONS: process.env.NODE_OPTIONS || "--max-old-space-size=4096",
           PDF_QUALITY: CONFIG.quality,
           PDF_TIER: CONFIG.tier,
-          PDF_CLEANUP: "true", // Signal to child scripts to clean up
+          PDF_CLEANUP: "true",
         },
       });
 
@@ -293,35 +325,41 @@ class CommandRunner {
     });
   }
 
-  checkDependencies() {
-    const required = ["tsx", "puppeteer"];
+  /**
+   * Build-safe dependency checks:
+   * - Uses STATIC literal imports (no webpack "expression" dependency)
+   * - Works in ESM
+   * - Falls back to npm install --no-save
+   */
+  async checkDependencies() {
     const missing: string[] = [];
-    
-    for (const pkg of required) {
-      try {
-        require.resolve(pkg);
-      } catch {
-        missing.push(pkg);
-      }
+
+    // STATIC LITERAL CHECKS (webpack-safe if ever analyzed)
+    try { await import("tsx"); } catch { missing.push("tsx"); }
+    try { await import("puppeteer"); } catch { missing.push("puppeteer"); }
+
+    if (!missing.length) {
+      Logger.success("Dependencies OK (tsx, puppeteer)");
+      return;
     }
-    
-    if (missing.length) {
-      Logger.warn(`Missing dependencies: ${missing.join(", ")}; attempting install...`);
-      try {
-        execSync(`npm install ${missing.join(" ")} --no-save`, { 
-          stdio: "inherit", 
-          cwd: process.cwd() 
-        });
-        Logger.success("Dependencies installed");
-      } catch (error) {
-        Logger.error(`Failed to install dependencies: ${error}`);
-      }
+
+    Logger.warn(`Missing dependencies: ${missing.join(", ")}; attempting install...`);
+    try {
+      execSync(`npm install ${missing.join(" ")} --no-save`, {
+        stdio: "inherit",
+        cwd: process.cwd(),
+      });
+      Logger.success("Dependencies installed");
+    } catch (error: any) {
+      Logger.error(`Failed to install dependencies: ${error?.message || String(error)}`);
+      // Hard fail: generator cannot reliably run without these
+      throw error;
     }
   }
 }
 
 // ----------------------------------------------------------------------------
-// ENHANCED PDF GENERATION ORCHESTRATOR
+// PDF GENERATION ORCHESTRATOR
 // ----------------------------------------------------------------------------
 class PDFGenerationOrchestrator {
   private runner = new CommandRunner();
@@ -342,12 +380,10 @@ class PDFGenerationOrchestrator {
     Logger.info(`Output: ${CONFIG.outputDir}`);
     Logger.info(`Lib: ${CONFIG.libDir}`);
 
-    // Clean up old files first
     await FileCleaner.cleanupOldFiles();
     await FileCleaner.ensureDirectories();
-    
-    this.runner.checkDependencies();
-    
+    await this.runner.checkDependencies();
+
     Logger.success("Initialization complete");
   }
 
@@ -367,16 +403,19 @@ class PDFGenerationOrchestrator {
       this.pushStep({ name, ok: true, duration: r.duration });
       return r;
     } catch (e: any) {
-      this.pushStep({ name, ok: false, duration: Date.now() - stepStart, error: e?.message || String(e) });
+      this.pushStep({
+        name,
+        ok: false,
+        duration: Date.now() - stepStart,
+        error: e?.message || String(e),
+      });
       throw e;
     }
   }
 
   async generateLegacyCanvas(formats: Format[]) {
     const script = this.canvasScriptPath();
-    if (!fs.existsSync(script)) {
-      throw new Error(`Missing script: ${script}`);
-    }
+    if (!(await exists(script))) throw new Error(`Missing script: ${script}`);
 
     for (const f of formats) {
       await this.runStep(
@@ -385,17 +424,15 @@ class PDFGenerationOrchestrator {
         [f, CONFIG.quality, CONFIG.tier],
         5 * 60 * 1000
       );
-      
-      // Record generated file
+
       const filename = this.expectedCanvasFilename(f);
       this.generatedFiles.push(filename);
     }
   }
 
   async runAdditionalGenerators() {
-    // Run standalone PDF generator
     const standaloneScript = path.join(CONFIG.scriptDir, "generate-standalone-pdf.tsx");
-    if (fs.existsSync(standaloneScript)) {
+    if (await exists(standaloneScript)) {
       await this.runStep(
         "Standalone Editorial PDF",
         standaloneScript,
@@ -404,9 +441,8 @@ class PDFGenerationOrchestrator {
       );
     }
 
-    // Run frameworks PDF generator
     const frameworksScript = path.join(CONFIG.scriptDir, "generate-frameworks-pdf.tsx");
-    if (fs.existsSync(frameworksScript)) {
+    if (await exists(frameworksScript)) {
       await this.runStep(
         "Strategic Frameworks PDF",
         frameworksScript,
@@ -416,23 +452,24 @@ class PDFGenerationOrchestrator {
     }
   }
 
-  verifyCanvas(formats: Format[]) {
+  async verifyCanvas(formats: Format[]) {
     const results: any[] = [];
+
     for (const f of formats) {
       const filename = this.expectedCanvasFilename(f);
       const downloadsPath = path.join(CONFIG.outputDir, filename);
       const libPath = path.join(CONFIG.libDir, filename);
-      
-      // Check both locations
+
       const locations = [
-        { path: downloadsPath, location: 'downloads' },
-        { path: libPath, location: 'lib' }
+        { filePath: downloadsPath, location: "downloads" as const },
+        { filePath: libPath, location: "lib" as const },
       ];
-      
+
       for (const loc of locations) {
-        if (fs.existsSync(loc.path)) {
-          const st = fs.statSync(loc.path);
+        if (await exists(loc.filePath)) {
+          const st = await fsp.stat(loc.filePath);
           const valid = st.size > 10_000;
+
           results.push({
             format: f,
             filename,
@@ -441,38 +478,39 @@ class PDFGenerationOrchestrator {
             valid,
             size: st.size,
             sizeKB: +(st.size / 1024).toFixed(1),
-            checksum: checksum16(loc.path),
+            checksum: checksum16(loc.filePath),
             mtime: st.mtime.toISOString(),
           });
         }
       }
     }
+
     return results;
   }
 
   async consolidateFiles() {
     Logger.start("Consolidating generated files...");
-    
-    // Copy from lib to downloads
-    const libFiles = await fs.readdir(CONFIG.libDir).catch(() => []);
-    for (const file of libFiles.filter(f => f.endsWith('.pdf'))) {
+
+    const libFiles = (await fsp.readdir(CONFIG.libDir).catch(() => []))
+      .filter((f) => f.endsWith(".pdf"));
+
+    for (const file of libFiles) {
       const src = path.join(CONFIG.libDir, file);
       const dest = path.join(CONFIG.outputDir, file);
-      
-      if (!fs.existsSync(dest)) {
-        await fs.copyFile(src, dest);
+      if (!(await exists(dest))) {
+        await fsp.copyFile(src, dest);
         Logger.info(`Copied: ${file} from lib to downloads`);
       }
     }
-    
-    // Copy from downloads to lib (for any missing)
-    const downloadFiles = await fs.readdir(CONFIG.outputDir).catch(() => []);
-    for (const file of downloadFiles.filter(f => f.endsWith('.pdf'))) {
+
+    const downloadFiles = (await fsp.readdir(CONFIG.outputDir).catch(() => []))
+      .filter((f) => f.endsWith(".pdf"));
+
+    for (const file of downloadFiles) {
       const src = path.join(CONFIG.outputDir, file);
       const dest = path.join(CONFIG.libDir, file);
-      
-      if (!fs.existsSync(dest)) {
-        await fs.copyFile(src, dest);
+      if (!(await exists(dest))) {
+        await fsp.copyFile(src, dest);
         Logger.info(`Backfilled: ${file} from downloads to lib`);
       }
     }
@@ -483,7 +521,7 @@ class PDFGenerationOrchestrator {
     const ok = this.steps.filter((s) => s.ok).length;
     const fail = this.steps.filter((s) => !s.ok).length;
 
-    const pdfs = this.verifyCanvas(formats);
+    const pdfs = await this.verifyCanvas(formats);
     const validPdfs = pdfs.filter((p) => p.valid).length;
 
     const validation = await FileCleaner.validateGeneratedFiles();
@@ -509,62 +547,41 @@ class PDFGenerationOrchestrator {
     };
 
     const reportPath = path.join(CONFIG.outputDir, "pdf-generation-report.json");
-    fs.writeFileSync(reportPath, JSON.stringify(payload, null, 2), "utf8");
+    await fsp.writeFile(reportPath, JSON.stringify(payload, null, 2), "utf8");
 
-    // Also create a simple manifest file
     const manifest = {
       generatedAt: new Date().toISOString(),
-      files: pdfs.map(p => ({
+      files: pdfs.map((p) => ({
         name: p.filename,
         sizeKB: p.sizeKB,
         location: p.location,
         format: p.format,
-      }))
+      })),
     };
-    
+
     const manifestPath = path.join(CONFIG.outputDir, "manifest.json");
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf8");
+    await fsp.writeFile(manifestPath, JSON.stringify(manifest, null, 2), "utf8");
 
     Logger.success(`Report saved: ${reportPath}`);
     Logger.success(`Manifest saved: ${manifestPath}`);
     Logger.info(`PDFs valid: ${validPdfs}/${pdfs.length}`);
-    Logger.info(`Total files in downloads: ${validation.totalPdfs}`);
+    Logger.info(`Total PDFs in downloads: ${validation.totalPdfs}`);
 
     return { payload, pdfs, validPdfs, validation };
   }
 
   async run(formats: Format[]) {
     await this.initialize();
-    
-    try {
-      await this.generateLegacyCanvas(formats);
-      await this.runAdditionalGenerators();
-      await this.consolidateFiles();
-    } catch (error) {
-      Logger.error(`Generation failed: ${error}`);
-      throw error;
-    }
-    
+    await this.generateLegacyCanvas(formats);
+    await this.runAdditionalGenerators();
+    await this.consolidateFiles();
     return await this.report(formats);
   }
 }
 
 // ----------------------------------------------------------------------------
-// UTILITIES
+// ARG PARSERS
 // ----------------------------------------------------------------------------
-function ensureDir(p: string) {
-  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
-}
-
-function checksum16(filePath: string) {
-  try {
-    const buf = fs.readFileSync(filePath);
-    return crypto.createHash("sha256").update(buf).digest("hex").slice(0, 16);
-  } catch {
-    return null;
-  }
-}
-
 function parseFormats(arg?: string): Format[] {
   const v = (arg || "all").toLowerCase().trim();
   if (v === "all") return ["A4", "Letter", "A3"];
@@ -589,7 +606,7 @@ function parseQuality(v?: string): Quality {
 }
 
 // ----------------------------------------------------------------------------
-// CLI ENTRY POINT
+// CLI ENTRY
 // ----------------------------------------------------------------------------
 async function cliMain() {
   const args = process.argv.slice(2);
@@ -614,29 +631,25 @@ async function cliMain() {
       continue;
     }
     if (a === "--verbose" || a === "-v") {
-      CONFIG.logLevel = "debug";
+      (CONFIG as any).logLevel = "debug";
       continue;
     }
     if (a === "--silent" || a === "-s") {
-      CONFIG.logLevel = "error";
+      (CONFIG as any).logLevel = "error";
       continue;
     }
     if (a === "--force-clean" || a === "-f") {
-      // Force clean all files
-      const downloadsDir = CONFIG.outputDir;
-      const libDir = CONFIG.libDir;
-      
-      [downloadsDir, libDir].forEach(dir => {
-        if (fs.existsSync(dir)) {
-          const files = fs.readdirSync(dir);
-          files.forEach(file => {
-            if (file.endsWith('.pdf') || file.endsWith('.json')) {
-              fs.unlinkSync(path.join(dir, file));
+      for (const dir of [CONFIG.outputDir, CONFIG.libDir]) {
+        if (await exists(dir)) {
+          const files = await fsp.readdir(dir).catch(() => []);
+          for (const file of files) {
+            if (file.endsWith(".pdf") || file.endsWith(".json")) {
+              await fsp.unlink(path.join(dir, file)).catch(() => {});
             }
-          });
+          }
         }
-      });
-      Logger.success("Force cleaned all PDF files");
+      }
+      Logger.success("Force cleaned all PDF + JSON outputs");
       continue;
     }
     if (a === "--help" || a === "-h") {
@@ -648,12 +661,12 @@ Usage:
   pnpm tsx scripts/generate-pdfs.ts [options]
 
 Options:
-  --formats <all|a4|letter|a3>          PDF formats (default: all)
-  --quality <premium|enterprise>        Quality level (default: premium)
-  --tier <public|basic|premium|enterprise|restricted> Access tier
-  --force-clean, -f                     Force clean all existing PDFs
-  --verbose, -v                         Verbose output
-  --silent, -s                          Silent mode (errors only)
+  --formats <all|a4|letter|a3>
+  --quality <premium|enterprise>
+  --tier <public|basic|premium|enterprise|restricted>
+  --force-clean, -f
+  --verbose, -v
+  --silent, -s
 
 Examples:
   pnpm tsx scripts/generate-pdfs.ts
@@ -661,7 +674,7 @@ Examples:
   pnpm tsx scripts/generate-pdfs.ts --formats a4 --tier public
   pnpm tsx scripts/generate-pdfs.ts --force-clean
 
-Environment Variables:
+Env:
   LOG_LEVEL=debug|info|warn|error|silent
   PDF_QUALITY=premium|enterprise
   PDF_TIER=public|basic|premium|enterprise|restricted
@@ -670,30 +683,29 @@ Environment Variables:
     }
   }
 
-  CONFIG.quality = parseQuality(qualityArg);
-  CONFIG.tier = parseTier(tierArg);
+  (CONFIG as any).quality = parseQuality(qualityArg);
+  (CONFIG as any).tier = parseTier(tierArg);
 
   const formats = parseFormats(formatsArg);
   const orch = new PDFGenerationOrchestrator();
 
   try {
     const result = await orch.run(formats);
+
+    // “validPdfs === pdfs.length” is strict; you can loosen if needed
     const ok = result.validPdfs === result.pdfs.length;
-    
-    if (ok) {
-      Logger.success("🎉 PDF generation completed successfully!");
-    } else {
-      Logger.warn(`⚠️  PDF generation completed with ${result.pdfs.length - result.validPdfs} invalid files`);
-    }
-    
+
+    if (ok) Logger.success("🎉 PDF generation completed successfully!");
+    else Logger.warn(`Completed with invalid files: ${result.pdfs.length - result.validPdfs}`);
+
     process.exit(ok ? 0 : 1);
   } catch (e: any) {
-    Logger.error(`❌ Fatal error: ${e?.message || String(e)}`);
+    Logger.error(`Fatal error: ${e?.message || String(e)}`);
     process.exit(1);
   }
 }
 
-// ESM-safe entry detection
+// ESM-safe: run only when invoked directly
 const invokedAsScript = (() => {
   const argv1 = process.argv[1] ? path.resolve(process.argv[1]) : "";
   const here = path.resolve(__filename);

@@ -5,28 +5,21 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
-
+import { getContentlayerData, normalizeSlug, getDocHref } from "@/lib/contentlayer-compat";
 
 type CoverAspect = "wide" | "square" | "book";
 type CoverFit = "cover" | "contain";
 type CoverPosition = "center" | "top" | "bottom" | "left" | "right";
 
 type Item = {
-  // We keep slug for fallback and keys
   slug: string;
-
-  // ✅ Single source of truth for routing (from Contentlayer computedFields.url)
   url: string;
-
   title: string;
   excerpt?: string | null;
   date?: string | null;
   readTime?: string | null;
   coverImage?: string | null;
   tags?: string[] | null;
-
-  // frontmatter controls
   coverAspect?: CoverAspect | null;
   coverFit?: CoverFit | null;
   coverPosition?: CoverPosition | null;
@@ -47,7 +40,6 @@ function aspectClass(aspect?: CoverAspect | null) {
 }
 
 function fitClass(fit?: CoverFit | null) {
-  // Normalize legacy "fit"
   if (fit === ("fit" as unknown as CoverFit)) return "object-contain";
   return fit === "contain" ? "object-contain" : "object-cover";
 }
@@ -67,24 +59,13 @@ function positionClass(pos?: CoverPosition | null) {
   }
 }
 
-/**
- * Normalize url to:
- * - always start with "/"
- * - never end with "/" (except root "/")
- */
 function normalizeUrl(input: unknown): string {
   const raw = typeof input === "string" ? input.trim() : "";
   if (!raw) return "";
 
   let u = raw;
-
-  // strip domain if someone accidentally set full url
   u = u.replace(/^https?:\/\/[^/]+/i, "");
-
-  // ensure leading slash
   if (!u.startsWith("/")) u = `/${u}`;
-
-  // remove trailing slash (but not root)
   if (u.length > 1) u = u.replace(/\/+$/, "");
 
   return u;
@@ -121,7 +102,7 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
             return (
               <Link
                 key={p.url || p.slug}
-                href={p.url} // ✅ Use computed URL (matches the pages that get exported)
+                href={p.url}
                 className="group overflow-hidden rounded-2xl border border-black/10 bg-white/60 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-black/25"
               >
                 <div className={`relative ${aClass} bg-black/5 dark:bg-white/5`}>
@@ -133,7 +114,6 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
                     sizes="(min-width: 1024px) 40vw, 100vw"
                   />
 
-                  {/* If contain causes letterbox, keep it intentional */}
                   {p.coverFit === "contain" && (
                     <div
                       className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"
@@ -176,14 +156,15 @@ const BlogIndex: NextPage<Props> = ({ items }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  // FIX: Removed argument from assertion call
-  assertContentlayerHasDocs?.();
-
-  const published = ((await getContentlayerData()).allPosts ?? []).filter((d:any)=>d && !isDraftContent(d));
+  const data = await getContentlayerData();
+  const allPosts = data.allPosts || [];
+  
+  // Filter out draft posts
+  const published = allPosts.filter((d: any) => d && !d.draft);
 
   const items: Item[] = published
     .map((p: any) => {
-      const slug = normalizeSlug(p);
+      const slug = normalizeSlug(p.slugComputed || p.slug || "");
       const url = normalizeUrl(p?.url) || `/blog/${slug}`;
 
       return {
@@ -195,7 +176,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         readTime: p.readTime ?? null,
         coverImage: p.coverImage ?? p.image ?? null,
         tags: Array.isArray(p.tags) ? p.tags : null,
-
         coverAspect: (p.coverAspect ?? null) as Item["coverAspect"],
         coverFit: (p.coverFit ?? null) as Item["coverFit"],
         coverPosition: (p.coverPosition ?? null) as Item["coverPosition"],

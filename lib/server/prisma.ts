@@ -21,6 +21,9 @@ export function getPrisma(): PrismaClient {
   return global.__prisma;
 }
 
+// Create and export a prisma instance for backward compatibility
+export const prisma = getPrisma();
+
 export async function safePrismaQuery<T>(
   fn: (prisma: PrismaClient) => Promise<T>
 ): Promise<T | null> {

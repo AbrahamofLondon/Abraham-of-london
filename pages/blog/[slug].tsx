@@ -1,15 +1,23 @@
-/* pages/blog/[slug].tsx - COMPLETE FIXED VERSION */
-import React from "react";
-import { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+/* pages/blog/[slug].tsx — FULL FIXED VERSION */
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
-// CLEAN IMPORTS - Direct from contentlayer-helper
-import { getContentlayerData, isDraftContent, normalizeSlug, getDocHref, getAccessLevel } from "@/lib/contentlayer-compat";
-import { prepareMDX, simpleMdxComponents, sanitizeData } from "@/lib/server/md-utils";
+// Content + MDX utilities (keep only what we use)
+import {
+  getContentlayerData,
+  isDraftContent,
+  normalizeSlug,
+} from "@/lib/contentlayer-compat";
+import {
+  prepareMDX,
+  simpleMdxComponents,
+  sanitizeData,
+} from "@/lib/server/md-utils";
 
-// BRAND UI COMPONENTS
+// UI components (keep only what we use)
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogContent from "@/components/blog/BlogContent";
 import BlogSidebar from "@/components/blog/BlogSidebar";
@@ -20,7 +28,7 @@ import RelatedPosts from "@/components/blog/RelatedPosts";
 import ResourceGrid from "@/components/blog/ResourceGrid";
 
 /**
- * INSTITUTIONAL COMPONENT REGISTRY
+ * MDX Component Registry
  */
 const extendedComponents = {
   ...simpleMdxComponents,
@@ -75,7 +83,7 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
           tags={post.tags || []}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
             <main className="lg:col-span-8">
               <article className="prose prose-invert prose-amber max-w-none">
@@ -86,17 +94,17 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
 
                   <div className="mt-16 pt-8 border-t border-white/10">
                     <ShareButtons
-                      url={`https://abrahamoflondon.com/blog/${post.slug}`}
+                      url={`https://www.abrahamoflondon.org/blog/${post.slug}`}
                       title={post.title}
                       excerpt={metaDescription}
                     />
                   </div>
 
-                  {post.author && (
+                  {post.author ? (
                     <div className="mt-16">
                       <AuthorBio author={post.author} />
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </article>
 
@@ -121,37 +129,41 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
   );
 };
 
+export default BlogPostPage;
+
+// -------------------------------
+// Helpers
+// -------------------------------
 function toBlogSlug(p: any): string | null {
   const s = String(p?.slug ?? "").trim();
-  if (s) return s;
+  if (s) return normalizeSlug(s);
 
   const raw = String(p?._raw?.flattenedPath ?? "").trim();
   if (!raw) return null;
 
   // Accept "posts/foo", "blog/foo", or "foo" and normalize to "foo"
-  return raw.replace(/^\/?(posts|blog)\//, "").replace(/^\/+/, "") || null;
+  return normalizeSlug(raw.replace(/^\/?(posts|blog)\//, "").replace(/^\/+/, ""));
 }
 
+// -------------------------------
+// SSG
+// -------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
-  // SIMPLE: Use (await getContentlayerData()).allPosts directly
-  const posts = (await getContentlayerData()).allPosts;
-  
-  const filteredPosts = posts
+  const { allPosts } = await getContentlayerData();
+
+  const filtered = (allPosts || [])
     .filter((x: any) => x && !x.draft)
     .filter((x: any) => {
       const slug = x.slug || x._raw?.flattenedPath || "";
       return slug && !String(slug).includes("replace");
     });
 
-  const paths = (filteredPosts || [])
+  const paths = filtered
     .map((p: any) => toBlogSlug(p))
     .filter(Boolean)
     .map((slug: string) => ({ params: { slug } }));
 
-  return {
-    paths,
-    fallback: false,
-  };
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
@@ -161,7 +173,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const { allPosts } = await getContentlayerData();
 
   const doc =
-    (allPosts ?? []).find((p: any) => {
+    (allPosts || []).find((p: any) => {
       const s = normalizeSlug(p?.slug ?? p?._raw?.flattenedPath ?? "");
       return s === normalizeSlug(slug);
     }) ?? null;

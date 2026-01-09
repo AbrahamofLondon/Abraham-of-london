@@ -14,6 +14,7 @@ import {
   getServerEventBySlug,
   normalizeSlug,
   resolveDocCoverImage,
+  getContentlayerData
 } from "@/lib/contentlayer-compat";
 
 import EventHero from "@/components/events/EventHero";
@@ -25,7 +26,7 @@ import EventSchedule from "@/components/events/EventSchedule";
 import RelatedEvents from "@/components/events/RelatedEvents";
 import ShareButtons from "@/components/ShareButtons";
 import { CalendarDays, MapPin, Clock, Users } from "lucide-react";
-import { mdxComponents } from "@/lib/server/md-utils"; // Add this import
+import { mdxComponents } from "@/lib/server/md-utils";
 
 // Fix the interface to include ALL properties used in the component
 interface EventViewModel {
@@ -206,16 +207,21 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
 export default EventPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  
-  await getContentlayerData();
-  const events = getServerAllEvents() || [];
-  const paths = events
-    // tolerate different shapes, but never crash build
-    .map((e: any) => normalizeSlug(e?.slug || e?._raw?.flattenedPath || ""))
-    .filter((slug: string) => slug && slug !== "index" && !slug.includes("replace"))
-    .map((slug: string) => ({ params: { slug } }));
+  try {
+    // FIXED: Add await to the async function
+    const events = await getServerAllEvents();
+    const eventArray = Array.isArray(events) ? events : [];
+    
+    const paths = eventArray
+      .map((e: any) => normalizeSlug(e?.slug || e?.slugComputed || e?._raw?.flattenedPath || ""))
+      .filter((slug: string) => slug && slug !== "index" && !slug.includes("replace"))
+      .map((slug: string) => ({ params: { slug } }));
 
-  return { paths, fallback: "blocking" };
+    return { paths, fallback: "blocking" };
+  } catch (error) {
+    console.error("Error generating event paths:", error);
+    return { paths: [], fallback: "blocking" };
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
@@ -230,51 +236,58 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   if (!slug) return { notFound: true };
 
-  const eventData: any = getServerEventBySlug(slug);
-  if (!eventData) return { notFound: true };
-
-  const rawBody = eventData?.body?.raw ?? eventData?.body ?? "";
-  const raw = typeof rawBody === "string" && rawBody.trim() ? rawBody : "Content is being prepared.";
-
-  let source: MDXRemoteSerializeResult;
   try {
-    source = await serialize(raw, {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug],
-      },
-    });
-  } catch (err) {
-    source = await serialize("Content is being prepared.");
+    // FIXED: Add await to the async function
+    const eventData = await getServerEventBySlug(slug);
+    if (!eventData) return { notFound: true };
+
+    const rawBody = eventData?.body?.raw ?? eventData?.body ?? "";
+    const raw = typeof rawBody === "string" && rawBody.trim() ? rawBody : "Content is being prepared.";
+
+    let source: MDXRemoteSerializeResult;
+    try {
+      source = await serialize(raw, {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [rehypeSlug],
+        },
+      });
+    } catch (err) {
+      source = await serialize("Content is being prepared.");
+    }
+
+    const event: EventViewModel = {
+      slug,
+      title: typeof eventData.title === "string" && eventData.title.trim() ? eventData.title : "Untitled Gathering",
+      excerpt:
+        (typeof eventData.excerpt === "string" && eventData.excerpt.trim()
+          ? eventData.excerpt
+          : typeof eventData.description === "string" && eventData.description.trim()
+            ? eventData.description
+            : null),
+
+      eventDate: eventData.eventDate ?? eventData.date ?? null,
+      location: eventData.location ?? eventData.venue ?? null,
+      registrationUrl: eventData.registrationUrl ?? eventData.link ?? null,
+      tags: Array.isArray(eventData.tags) ? eventData.tags : [],
+      coverImage: resolveDocCoverImage(eventData) || "/assets/images/event-default.jpg",
+
+      // JSON-safe fields
+      venue: eventData.venue ?? null,
+      endDate: eventData.endDate ?? null,
+      time: eventData.time ?? null,
+      price: eventData.price ?? null,
+      capacity: typeof eventData.capacity === "number" ? eventData.capacity : null,
+    };
+
+    return {
+      props: { event, source },
+      revalidate: 60,
+    };
+  } catch (error) {
+    console.error("Error fetching event:", error);
+    return {
+      notFound: true,
+    };
   }
-
-  const event: EventViewModel = {
-    slug,
-    title: typeof eventData.title === "string" && eventData.title.trim() ? eventData.title : "Untitled Gathering",
-    excerpt:
-      (typeof eventData.excerpt === "string" && eventData.excerpt.trim()
-        ? eventData.excerpt
-        : typeof eventData.description === "string" && eventData.description.trim()
-          ? eventData.description
-          : null),
-
-    eventDate: eventData.eventDate ?? eventData.date ?? null,
-    location: eventData.location ?? eventData.venue ?? null,
-    registrationUrl: eventData.registrationUrl ?? eventData.link ?? null,
-    tags: Array.isArray(eventData.tags) ? eventData.tags : [],
-    coverImage: resolveDocCoverImage(eventData),
-
-    // JSON-safe fields
-    venue: eventData.venue ?? null,
-    endDate: eventData.endDate ?? null,
-    time: eventData.time ?? null,
-    price: eventData.price ?? null,
-    capacity: typeof eventData.capacity === "number" ? eventData.capacity : null,
-  };
-
-  return {
-    props: { event, source },
-    revalidate: 60,
-  };
 };
-

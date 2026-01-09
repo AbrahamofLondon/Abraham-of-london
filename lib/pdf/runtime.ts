@@ -1,13 +1,16 @@
 /**
  * ABRAHAM OF LONDON: PDF RUNTIME EXPORTS (Next-safe)
  * - SAFE to import from Next.js pages/components/api routes
- * - No dynamic require
+ * - No require()
  * - No child_process usage
  */
+
+import { getAllPDFs, getPDFById } from "./pdf-registry";
 
 export {
   PDF_REGISTRY,
   getPDFRegistry,
+  // getPDFById is imported above, but we can still re-export it:
   getPDFById,
   getAllPDFs,
   getPDFsByTier,
@@ -101,10 +104,7 @@ export function getPDFDownloadUrl(
   userId?: string,
   userTier?: string,
 ): { url: string; requiresAuth: boolean; accessGranted: boolean } {
-  // Note: getPDFById is re-exported above
-  const { getPDFById } = require("./pdf-registry") as typeof import("./pdf-registry");
   const pdf = getPDFById(pdfId);
-
   if (!pdf) throw new Error(`PDF with ID "${pdfId}" not found`);
 
   const requiresAuth = pdf.requiresAuth;
@@ -131,7 +131,6 @@ export function generatePDFManifest(): {
     requiresAuth: boolean;
   }>;
 } {
-  const { getAllPDFs } = require("./pdf-registry") as typeof import("./pdf-registry");
   const allPDFs = getAllPDFs();
   const now = new Date().toISOString();
 
