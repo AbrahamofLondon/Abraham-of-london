@@ -46,6 +46,10 @@ build/
 .env.test.local
 .env.production.local
 .env
+.env.*
+
+# Exception: Keep example file
+!.env.example
 
 # =====================================================
 # PDF CACHE / GENERATED EXPORTS
@@ -56,14 +60,27 @@ downloads/cache/
 scripts/output/
 
 # =====================================================
+# OFFICE DOCUMENTS IN PUBLIC (CAUSING BUILD ERRORS)
+# =====================================================
+# CRITICAL: Ignore Office files in downloads folder to prevent Windows lock errors
+public/downloads/*.pptx
+public/downloads/*.docx
+public/downloads/*.xlsx
+public/downloads/*.ppt
+public/downloads/*.doc
+public/downloads/*.xls
+
+# Temporary/generated downloads
+public/downloads/temp/
+public/downloads/generated/
+
+# =====================================================
 # MEDIA OUTPUTS (GENERATED)
 # =====================================================
 uploads/
 media/temp/
 output_*.mp4
 output_*.mp3
-# If you generate PDFs during build, ignore them in assets to keep repo small
-# public/assets/downloads/*.pdf
 
 # =====================================================
 # PRISMA SPECIFIC
@@ -91,29 +108,9 @@ scripts/**/*.log
 scripts/**/*.tmp
 *.bak_emergency-backup.tar
 
-PS C:\Abraham-of-london> git status
-On branch main
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        modified:   contentlayer.config.js
-
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-        .git_backup/
-
-no changes added to commit (use "git add" and/or "git commit -a")
-PS C:\Abraham-of-london> git clean -fd
-Removing .git_backup/
-Removing .image-cache/
-Removing .temp/pdf-conversion/
-Removing fixlogs/
-Removing public/assets/downloads/enterprise/
-Removing public/assets/downloads/generated/
-Removing public/downloads/temp/
-Removing public/user-uploads/
-
-# Large files
+# =====================================================
+# LARGE FILES & BACKUPS
+# =====================================================
 *.tar
 *.zip
 *.tar.gz
@@ -122,23 +119,41 @@ _backups/
 *.backup
 _emergency-backup.*
 
+# Emergency backups (remove duplicates)
 _emergency-backup.tar
 _emergency-backup.tar.bak
-*.tar
 
-# emergency backups
-_emergency-backup.tar
-_emergency-backup.tar.bak
-*.tar
-*.tar.*
-
-#backup
-*.bak
-# Environment files
-.env.*.local
-!.env.example
-# Sensitive data
-*.db-journal
+# =====================================================
+# SENSITIVE DATA
+# =====================================================
 *.pem
 *.key
-# Temporary files
+*.cert
+*.crt
+id_rsa
+id_dsa
+
+# =====================================================
+# TEMPORARY FILES & CACHES
+# =====================================================
+*.tmp
+*.temp
+.temp/
+tmp/
+temp/
+.image-cache/
+.fixlogs/
+
+# =====================================================
+# USER UPLOADS (GENERATED CONTENT)
+# =====================================================
+public/user-uploads/
+
+# =====================================================
+# SYSTEM FILES
+# =====================================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~

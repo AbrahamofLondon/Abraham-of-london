@@ -106,6 +106,7 @@ const nextConfig = {
       ...(config.ignoreWarnings || []),
       { module: /contentlayer/ },
       { module: /node_modules\/@fontsource/ },
+      { file: /public\/downloads\// },
     ];
 
     // BLOCK 4: Windows Watcher Optimization

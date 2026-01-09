@@ -1,6 +1,7 @@
 // DownloadCTA.jsx
+"use client"; 
 import React, { useState } from 'react';
-import styles from './DownloadCTA.module.scss';
+import styles from './DownloadCTA.module.scss'; 
 import PropTypes from 'prop-types';
 
 const DownloadCTA = ({
