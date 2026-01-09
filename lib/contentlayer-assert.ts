@@ -1,13 +1,11 @@
 // lib/contentlayer-assert.ts
 let warned: Set<string> | null = null;
 
-function shouldWarn(): boolean {
-  // Only warn in dev/CI diagnostics, not in production build noise
+function isProd(): boolean {
   try {
-    // eslint-disable-next-line no-undef
-    return typeof process !== "undefined" && process.env?.NODE_ENV !== "production";
+    return typeof process !== "undefined" && process.env?.NODE_ENV === "production";
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -22,7 +20,8 @@ export function assertContentlayerHasDocs<T>(
 ): T[] {
   if (docs && docs.length > 0) return docs;
 
-  if (shouldWarn()) {
+  // Don't pollute production build/deploy logs
+  if (!isProd()) {
     const safeLabel = (label && String(label).trim()) || "unknown";
     const key = `no-docs:${safeLabel}`;
 
