@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-01-09T14:09:47.047Z",
+  "timestamp": "2026-01-09T14:14:26.406Z",
   "summary": {
     "totalFiles": 154,
     "validFiles": 154,
     "invalidFiles": 0,
-    "warningFiles": 47,
-    "contentlayerDocs": 0
+    "warningFiles": 154,
+    "contentlayerDocs": 154
   },
   "fileDistribution": {
     "posts": 0,
@@ -20,21 +20,28 @@
     "other": 154
   },
   "contentlayerCounts": {
-    "posts": 0,
-    "downloads": 0,
-    "books": 0,
-    "canons": 0,
-    "shorts": 0,
-    "events": 0,
-    "prints": 0,
-    "resources": 0,
-    "strategies": 0
+    "posts": 20,
+    "downloads": 27,
+    "books": 5,
+    "canons": 13,
+    "shorts": 61,
+    "events": 3,
+    "prints": 7,
+    "resources": 17,
+    "strategies": 1
   },
   "invalidFiles": [],
   "warningFiles": [
     {
+      "path": "blog\\christianity-not-extremism.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
       "path": "blog\\fathering-principles.mdx",
       "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
         "Possible broken internal link: /blog/reclaiming-the-narrative",
         "Possible broken internal link: /blog/the-brotherhood-code",
         "Possible broken internal link: /blog/leadership-begins-at-home",
@@ -47,19 +54,58 @@
     {
       "path": "blog\\fathering-without-fear-teaser.mdx",
       "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
         "Possible broken internal link: /contact",
         "Possible broken internal link: /blog/fathering-without-fear"
       ]
     },
     {
+      "path": "blog\\fathering-without-fear.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\in-my-fathers-house.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\kingdom-strategies-for-a-loving-legacy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\leadership-begins-at-home.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\lessons-from-noah.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\out-of-context-truth.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
       "path": "blog\\post-when-the-system-breaks-you.mdx",
       "warnings": [
-        "Slug \"when-the-system-breaks-you\" doesn't match filename \"post-when-the-system-breaks-you\""
+        "Slug \"when-the-system-breaks-you\" doesn't match filename \"post-when-the-system-breaks-you\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "blog\\principles-for-my-son.mdx",
       "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
         "Possible broken internal link: /downloads/principles-for-my-son",
         "Possible broken internal link: /downloads/principles-for-my-son-cue-card",
         "Possible broken internal link: /contact"
@@ -69,13 +115,57 @@
       "path": "blog\\reclaiming-the-narrative.mdx",
       "warnings": [
         "Slug \"reclaiming-the-narrative.mdx\" doesn't match filename \"reclaiming-the-narrative\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Possible broken internal link: /downloads/fathers_in_the_family_court_practical_pack.pdf"
+      ]
+    },
+    {
+      "path": "blog\\surrender-not-submission.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\surrender-operational-framework.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\the-brotherhood-code.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\ultimate-purpose-of-man.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\when-gods-sovereignty-collides-with-our-pain.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\when-the-foundation-is-destroyed.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "blog\\when-the-storm-finds-you.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "blog\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
       ]
@@ -83,27 +173,115 @@
     {
       "path": "books\\book-fathering-without-fear.mdx",
       "warnings": [
-        "Slug \"fathering-without-fear\" doesn't match filename \"book-fathering-without-fear\""
+        "Slug \"fathering-without-fear\" doesn't match filename \"book-fathering-without-fear\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "books\\the-architecture-of-human-purpose.mdx",
       "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
         "Possible broken internal link: /subscribe"
+      ]
+    },
+    {
+      "path": "books\\the-builders-catechism.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "books\\the-fiction-adaptation.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "books\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
+      ]
+    },
+    {
+      "path": "canon\\builders-catechism.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\canon-campaign.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\canon-introduction-letter.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\canon-master-index-preview.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-i-foundations-of-purpose.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-i-teaching-edition.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-ii-governance-and-formation.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-ii-teaching-edition.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-iii-teaching-edition.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-iv-teaching-edition.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-x-filename.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "canon\\volume-x-the-arc-of-future-civilisation.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "canon\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
       ]
@@ -112,14 +290,16 @@
       "path": "downloads\\abraham-vault-pack.mdx",
       "warnings": [
         "Slug \"download-abraham-vault-pack\" doesn't match filename \"abraham-vault-pack\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\board-decision-log-template.mdx",
       "warnings": [
         "Slug \"download-board-decision-log-template\" doesn't match filename \"board-decision-log-template\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
@@ -128,90 +308,104 @@
         "Slug \"download-board-investor-onepager\" doesn't match filename \"board-investor-onepager\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
-        "Legacy field \"pdfPath\": Use downloadUrl instead"
+        "Legacy field \"pdfPath\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\brotherhood-covenant.mdx",
       "warnings": [
-        "Slug \"download-brotherhood-covenant\" doesn't match filename \"brotherhood-covenant\""
+        "Slug \"download-brotherhood-covenant\" doesn't match filename \"brotherhood-covenant\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\canon-volume-iv-diagnostic-toolkit.mdx",
       "warnings": [
         "Slug \"download-canon-volume-iv-diagnostic-toolkit\" doesn't match filename \"canon-volume-iv-diagnostic-toolkit\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
       "warnings": [
         "Slug \"download-canon-volume-v-governance-diagnostic-toolkit\" doesn't match filename \"canon-volume-v-governance-diagnostic-toolkit\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\communication-script-bpf.mdx",
       "warnings": [
-        "Slug \"download-communication-script-bpf\" doesn't match filename \"communication-script-bpf\""
+        "Slug \"download-communication-script-bpf\" doesn't match filename \"communication-script-bpf\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\decision-log-template.mdx",
       "warnings": [
         "Slug \"download-decision-log-template\" doesn't match filename \"decision-log-template\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\decision-matrix-scorecard.mdx",
       "warnings": [
         "Slug \"download-decision-matrix-scorecard\" doesn't match filename \"decision-matrix-scorecard\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\download-legacy-architecture-canvas.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\entrepreneur-operating-pack.mdx",
       "warnings": [
-        "Slug \"download-entrepreneur-operating-pack\" doesn't match filename \"entrepreneur-operating-pack\""
+        "Slug \"download-entrepreneur-operating-pack\" doesn't match filename \"entrepreneur-operating-pack\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\entrepreneur-survival-checklist.mdx",
       "warnings": [
-        "Slug \"download-entrepreneur-survival-checklist\" doesn't match filename \"entrepreneur-survival-checklist\""
+        "Slug \"download-entrepreneur-survival-checklist\" doesn't match filename \"entrepreneur-survival-checklist\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\family-altar-liturgy.mdx",
       "warnings": [
-        "Slug \"download-family-altar-liturgy\" doesn't match filename \"family-altar-liturgy\""
+        "Slug \"download-family-altar-liturgy\" doesn't match filename \"family-altar-liturgy\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\leaders-cue-card-two-up.mdx",
       "warnings": [
-        "Slug \"download-leaders-cue-card-two-up\" doesn't match filename \"leaders-cue-card-two-up\""
+        "Slug \"download-leaders-cue-card-two-up\" doesn't match filename \"leaders-cue-card-two-up\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\leadership-playbook.mdx",
       "warnings": [
-        "Slug \"download-leadership-playbook\" doesn't match filename \"leadership-playbook\""
+        "Slug \"download-leadership-playbook\" doesn't match filename \"leadership-playbook\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\legacy-canvas.mdx",
       "warnings": [
         "Slug \"download-legacy-architecture-canvas\" doesn't match filename \"legacy-canvas\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
@@ -219,20 +413,23 @@
       "warnings": [
         "Slug \"download-mentorship-starter-kit\" doesn't match filename \"mentorship-starter-kit\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\operating-cadence-pack.mdx",
       "warnings": [
         "Slug \"download-operating-cadence-pack\" doesn't match filename \"operating-cadence-pack\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\principles-for-my-son-cue-card.mdx",
       "warnings": [
-        "Slug \"download-principles-for-my-son-cue-card\" doesn't match filename \"principles-for-my-son-cue-card\""
+        "Slug \"download-principles-for-my-son-cue-card\" doesn't match filename \"principles-for-my-son-cue-card\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
@@ -240,14 +437,16 @@
       "warnings": [
         "Slug \"download-principles-for-my-son\" doesn't match filename \"principles-for-my-son\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\purpose-pyramid-worksheet.mdx",
       "warnings": [
         "Slug \"download-purpose-pyramid-worksheet\" doesn't match filename \"purpose-pyramid-worksheet\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
@@ -255,26 +454,30 @@
       "warnings": [
         "Slug \"download-scripture-track-john14\" doesn't match filename \"scripture-track-john14\"",
         "Legacy field \"downloadFile\": Use downloadUrl instead",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\standards-brief.mdx",
       "warnings": [
-        "Slug \"download-standards-brief\" doesn't match filename \"standards-brief\""
+        "Slug \"download-standards-brief\" doesn't match filename \"standards-brief\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\ultimate-purpose-of-man-editorial.mdx",
       "warnings": [
         "Slug \"download-ultimate-purpose-of-man-editorial\" doesn't match filename \"ultimate-purpose-of-man-editorial\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "downloads\\weekly-operating-rhythm.mdx",
       "warnings": [
-        "Slug \"download-weekly-operating-rhythm\" doesn't match filename \"weekly-operating-rhythm\""
+        "Slug \"download-weekly-operating-rhythm\" doesn't match filename \"weekly-operating-rhythm\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
@@ -282,16 +485,66 @@
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
+      ]
+    },
+    {
+      "path": "events\\founders-salon.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "events\\leadership-workshop.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "events\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
+      ]
+    },
+    {
+      "path": "prints\\entrepreneur-operating-pack.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "prints\\fatherhood-standards-card.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "prints\\leadership-playbook.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "prints\\mentorship-starter-kit.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "prints\\standards-brief.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "prints\\weekly-operating-rhythm.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
@@ -299,19 +552,28 @@
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
         "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
       ]
     },
     {
+      "path": "resources\\brotherhood-starter-kit.md",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
       "path": "resources\\canon-builders-rule-of-life.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "resources\\canon-campaign.mdx",
       "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
         "Possible broken internal link: /canon/the-architecture-of-human-purpose",
         "Possible broken internal link: /inner-circle"
       ]
@@ -319,47 +581,474 @@
     {
       "path": "resources\\canon-council-table-agenda.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "resources\\canon-household-charter.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "resources\\canon-reading-plan-year-one.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\destiny-mapping-worksheet.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\fatherhood-impact-framework.md",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\getting-started.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\institutional-health-scorecard.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\leadership-standards-blueprint.md",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "resources\\multi-generational-legacy-ledger.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Legacy field \"fileUrl\": Use downloadUrl instead",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\purpose-alignment-checklist.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\strategic-frameworks.md",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\strategy-room-intake.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources\\vault.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "resources\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
+      ]
+    },
+    {
+      "path": "shorts\\when-a-single-yes-changes-everything.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-all-you-can-do-is-breathe.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-avoidance-becomes-your-personality.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-busyness-becomes-your-brand.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-comfort-becomes-your-cage.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-conflict-feels-like-betrayal.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-doctrine-feels-safer-than-god.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-every-promotion-feels-hollow.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-grace-finds-you-in-the-mess.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-hope-feels-reckless.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-kindness-feels-like-rebellion.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-later-became-never.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-numbness-feels-safer-than-joy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-productivity-becomes-punishment.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-rest-starts-to-feel-dangerous.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-argue-with-god-in-your-head.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-cant-tell-if-youre-growing-or-drifting.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-dont-know-what-you-want-anymore.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-fear-being-wrong-about-god.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-fear-success-more-than-failure.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-feel-too-busy-to-care.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-finally-let-yourself-cry.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-give-more-than-you-get.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-keep-choosing-people-who-cant-choose-you.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-miss-who-you-used-to-be.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-mistake-familiarity-for-loyalty.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-need-god-to-interrupt-you.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-no-longer-recognise-your-own-voice.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-outgrow-your-circle.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-realise-you-were-the-problem.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-stop-waiting-for-permission.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-you-want-to-quit-but-cant.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-calendar-is-full-but-your-life-is-empty.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-calling-stops-being-cute.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-character-is-leaking.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-confidence-feels-manufactured.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-convictions-feel-like-costumes.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-dreams-feel-too-heavy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-excuses-become-your-identity.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-faith-feels-numb.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-hustle-has-no-soul.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-legacy-terrifies-you.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-silence-says-too-much.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-standards-keep-you-lonely.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-vision-outgrows-your-environment.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-your-work-becomes-your-hiding-place.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-addicted-to-distraction.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-afraid-of-your-own-potential.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-always-the-strong-one.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-building-someone-elses-legacy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-done-fixing-adults.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-exhausted-but-still-available.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-keeping-faith-out-of-habit.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-measuring-everything-but-meaning.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-preparing-for-rooms-you-havent-entered.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-productive-but-not-present.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-scared-to-start-over.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-tired-of-being-the-bigger-person.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youre-winning-at-work-but-losing-yourself.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "shorts\\when-youve-worshipped-the-wrong-metrics.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "shorts\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
+      ]
+    },
+    {
+      "path": "strategy\\sample-strategy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
       "path": "strategy\\[slug].mdx",
       "warnings": [
         "Slug \"replace\" doesn't match filename \"[slug]\"",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Very little or no content after frontmatter",
         "Content is very short (less than 50 characters)"
       ]
