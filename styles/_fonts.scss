@@ -1,17 +1,14 @@
-// styles/_fonts.scss
-@use "@fontsource/inter/scss/mixins" as inter-mixins;
-@use "@fontsource/inter/scss/metadata" as inter-metadata;
+// styles/_fonts.scss - FIXED VERSION
+// Simple version without complex imports
 
-// Generate all font faces
-@include inter-mixins.faces(
-  $metadata: inter-metadata.$metadata,
-  $formats: (woff2),
-  $display: swap
-);
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
-// Define CSS custom properties
+// Or use local font files - simpler approach
+// Remove the @use statements that are causing errors
+
 :root {
   --font-family-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-serif: 'Playfair Display', Georgia, serif;
 }
 
 // Font utility classes
@@ -19,9 +16,13 @@
   font-family: var(--font-family-inter);
 }
 
-// Font weight utilities
-@for $weight from 1 through 9 {
-  .font-weight-#{$weight * 100} {
-    font-weight: #{$weight * 100};
-  }
+.font-serif {
+  font-family: var(--font-family-serif);
 }
+
+// Font weight utilities
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
