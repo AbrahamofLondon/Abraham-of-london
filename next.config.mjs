@@ -1,4 +1,4 @@
-/* next.config.mjs - ENHANCED WITH OFFICE FILE EXCLUSION */
+/* next.config.mjs - FIXED SYNTAX WITH COMPREHENSIVE FILE EXCLUSION */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
@@ -53,7 +53,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // ✅ Clean headers - REMOVE Content-Type override
+  // ✅ Clean headers
   async headers() {
     return [
       {
@@ -77,15 +77,14 @@ const nextConfig = {
     ];
   },
 
-  // ✅ ENHANCED webpack config with Office file exclusion
+  // ✅ FIXED webpack config with comprehensive file exclusion
   webpack: (config, { isServer, webpack, dev }) => {
-    // CRITICAL: Ignore Office files in Webpack build to prevent Windows lock errors
+    // CRITICAL: Ignore problematic files in Webpack build to prevent Windows lock errors
+    // Single plugin with combined regex for all file types
     config.plugins.push(
       new webpack.IgnorePlugin({
-        resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.odt|\.ods|\.odp)$/i,
-        contextRegExp: /public[\\/]downloads/,
-       resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.pdf)$/i,
-       contextRegExp: /public[\\/]assets[\\/]downloads/, // Update the path to match your structure
+        resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.odt|\.ods|\.odp|\.pdf)$/i,
+        contextRegExp: /public[\\/](assets[\\/]downloads|downloads)/,
       })
     );
 
@@ -111,17 +110,17 @@ const nextConfig = {
       };
     }
 
-    // Suppress warnings including Office file warnings
+    // Suppress warnings including problematic file warnings
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       { module: /contentlayer/ },
       { module: /node_modules[\\/]+@fontsource/ },
       { 
-        module: /public[\\/]+downloads[\\/]+.*\.(xlsx|docx|pptx|xls|doc|ppt|odt|ods|odp)$/i 
+        module: /public[\\/]+(assets[\\/]+downloads|downloads)[\\/]+.*\.(xlsx|docx|pptx|xls|doc|ppt|odt|ods|odp|pdf)$/i 
       },
     ];
 
-    // Windows compatibility - Exclude Office files from watching
+    // Windows compatibility - Exclude problematic files from watching
     if (dev) {
       config.watchOptions = {
         ...(config.watchOptions || {}),
@@ -131,7 +130,17 @@ const nextConfig = {
           "**/.contentlayer/**",
           "**/.next/**", 
           "**/node_modules/**",
-          // CRITICAL: Exclude Office files from file watching
+          // CRITICAL: Exclude problematic files from file watching
+          "**/public/assets/downloads/**/*.xlsx",
+          "**/public/assets/downloads/**/*.docx", 
+          "**/public/assets/downloads/**/*.pptx",
+          "**/public/assets/downloads/**/*.xls",
+          "**/public/assets/downloads/**/*.doc",
+          "**/public/assets/downloads/**/*.ppt",
+          "**/public/assets/downloads/**/*.odt",
+          "**/public/assets/downloads/**/*.ods",
+          "**/public/assets/downloads/**/*.odp",
+          "**/public/assets/downloads/**/*.pdf",
           "**/public/downloads/*.xlsx",
           "**/public/downloads/*.docx", 
           "**/public/downloads/*.pptx",
@@ -141,13 +150,12 @@ const nextConfig = {
           "**/public/downloads/*.odt",
           "**/public/downloads/*.ods",
           "**/public/downloads/*.odp",
+          "**/public/downloads/*.pdf",
           // Windows temp files
           "**/*.tmp",
           "**/Thumbs.db",
           "**/desktop.ini",
           "**/~$*",
-         resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.pdf)$/i,
-         contextRegExp: /public[\\/]assets[\\/]downloads/, // Update the path to match your structure
         ],
       };
     }
