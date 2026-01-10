@@ -1,13 +1,17 @@
-# netlify.toml — CLEAN & COMPATIBLE VERSION
+# netlify.toml — WINDOWS-FRIENDLY VERSION
 
 [build]
-  command = "pnpm install --frozen-lockfile && pnpm run content:full && pnpm run build"
+  # FIXED: Add pre-build step to handle Windows file locking
+  command = "pnpm install --frozen-lockfile && node scripts/pre-build.js && pnpm contentlayer build && pnpm build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
   NODE_OPTIONS = "--max-old-space-size=8192"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
+  # Disable Next.js image optimization for download files
+  NEXT_DISABLE_SENTRY = "1"
+  NEXT_TELEMETRY_DISABLED = "1"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -18,11 +22,15 @@
 [context.branch-deploy.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
 
+# ============================================================
+# ESSENTIAL PLUGIN
+# ============================================================
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 # ============================================================
-# REDIRECTS
+# ESSENTIAL REDIRECTS
 # ============================================================
 
 [[redirects]]
@@ -47,17 +55,35 @@
 [[redirects]]
   from = "/downloads/purpose-pyramid-worksheet-fillable.pdf"
   to = "/downloads/purpose-pyramid.pdf"
-  status = 200
+  status = 301
 
 [[redirects]]
   from = "/downloads/decision-matrix-worksheet-fillable.pdf"
   to = "/downloads/decision-matrix.pdf"
-  status = 200
+  status = 301
 
 [[redirects]]
   from = "/downloads/legacy-canvas-worksheet-fillable.pdf"
   to = "/downloads/legacy-canvas.pdf"
-  status = 200
+  status = 301
+
+# ============================================================
+# DOWNLOAD FILE HANDLING - SKIP OPTIMIZATION
+# ============================================================
+
+[[headers]]
+  for = "/downloads/*"
+  [headers.values]
+    Content-Type = "application/octet-stream"
+    Cache-Control = "public, max-age=31536000"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/assets/downloads/*"
+  [headers.values]
+    Content-Type = "application/octet-stream"
+    Cache-Control = "public, max-age=31536000"
+    X-Content-Type-Options = "nosniff"
 
 # ============================================================
 # SECURITY HEADERS
@@ -76,5 +102,24 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# ============================================================
+# FALLBACK ROUTES
+# ============================================================
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {StatusCode = "404"}
+
+# ============================================================
+# DISABLE PROCESSING FOR DOWNLOAD FILES
+# ============================================================
+
 [build.processing]
   skip_processing = true
+
+[[headers]]
+  for = "/public/downloads/*"
+  [headers.values]
+    Content-Disposition = "attachment"

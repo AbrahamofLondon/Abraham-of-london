@@ -1,26 +1,8 @@
-/* next.config.mjs - FIXED SYNTAX WITH COMPREHENSIVE FILE EXCLUSION */
+/* next.config.mjs - WINDOWS FILE LOCKING FIX */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-
-// -------------------- Contentlayer plugin --------------------
-async function resolveWithContentlayer() {
-  try {
-    const cl2 = await import("next-contentlayer2");
-    if (typeof cl2.withContentlayer === "function") return cl2.withContentlayer;
-  } catch {}
-
-  try {
-    const cl1 = await import("next-contentlayer");
-    if (typeof cl1.withContentlayer === "function") return cl1.withContentlayer;
-  } catch {}
-
-  console.warn(
-    "⚠️ [BUILD_WARNING] Contentlayer plugin not found. Proceeding without MDX integration."
-  );
-  return (config) => config;
-}
-
-const withContentlayer = await resolveWithContentlayer();
+import path from "path";
+import fs from "fs";
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
@@ -77,27 +59,37 @@ const nextConfig = {
     ];
   },
 
-  // ✅ FIXED webpack config with comprehensive file exclusion
+  // ✅ WINDOWS FIX: Minimal webpack config that excludes problematic files
   webpack: (config, { isServer, webpack, dev }) => {
-    // CRITICAL: Ignore problematic files in Webpack build to prevent Windows lock errors
-    // Single plugin with combined regex for all file types
+    // CRITICAL: Exclude Office/PDF files from Webpack processing entirely
+    // This prevents Windows file locking issues
     config.plugins.push(
       new webpack.IgnorePlugin({
-        resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.odt|\.ods|\.odp|\.pdf)$/i,
-        contextRegExp: /public[\\/](assets[\\/]downloads|downloads)/,
+        checkResource: (resource, context) => {
+          // Skip Office and PDF files in public/downloads/ and public/assets/downloads/
+          const absolutePath = path.resolve(context, resource);
+          
+          // Check if it's a problematic file type
+          const isProblematicFile = /\.(xlsx?|docx?|pptx?|pdf|od[tsp])$/i.test(resource);
+          
+          // Check if it's in a downloads directory
+          const isInDownloads = 
+            absolutePath.includes(path.sep + 'public' + path.sep + 'downloads' + path.sep) ||
+            absolutePath.includes(path.sep + 'public' + path.sep + 'assets' + path.sep + 'downloads' + path.sep);
+          
+          // Exclude problematic files in downloads directories
+          if (isProblematicFile && isInDownloads) {
+            console.log(`[Webpack] Skipping Windows-locked file: ${resource}`);
+            return true;
+          }
+          
+          return false;
+        }
       })
     );
 
-    // Handle client-side modules
+    // Handle client-side modules only
     if (!isServer) {
-      config.plugins.push(
-        new webpack.IgnorePlugin({ resourceRegExp: /^ioredis$/ }),
-        new webpack.IgnorePlugin({ resourceRegExp: /^better-sqlite3$/ }),
-        new webpack.IgnorePlugin({ resourceRegExp: /^sharp$/ }),
-        new webpack.IgnorePlugin({ resourceRegExp: /^bcrypt$/ }),
-        new webpack.IgnorePlugin({ resourceRegExp: /^pdfkit$/ })
-      );
-
       config.resolve.fallback = {
         ...(config.resolve.fallback || {}),
         fs: false,
@@ -110,47 +102,18 @@ const nextConfig = {
       };
     }
 
-    // Suppress warnings including problematic file warnings
-    config.ignoreWarnings = [
-      ...(config.ignoreWarnings || []),
-      { module: /contentlayer/ },
-      { module: /node_modules[\\/]+@fontsource/ },
-      { 
-        module: /public[\\/]+(assets[\\/]+downloads|downloads)[\\/]+.*\.(xlsx|docx|pptx|xls|doc|ppt|odt|ods|odp|pdf)$/i 
-      },
-    ];
-
-    // Windows compatibility - Exclude problematic files from watching
+    // Windows compatibility - EXCLUDE DOWNLOAD FILES FROM WATCHING
     if (dev) {
       config.watchOptions = {
         ...(config.watchOptions || {}),
         poll: 1000,
         aggregateTimeout: 300,
         ignored: [
-          "**/.contentlayer/**",
           "**/.next/**", 
           "**/node_modules/**",
-          // CRITICAL: Exclude problematic files from file watching
-          "**/public/assets/downloads/**/*.xlsx",
-          "**/public/assets/downloads/**/*.docx", 
-          "**/public/assets/downloads/**/*.pptx",
-          "**/public/assets/downloads/**/*.xls",
-          "**/public/assets/downloads/**/*.doc",
-          "**/public/assets/downloads/**/*.ppt",
-          "**/public/assets/downloads/**/*.odt",
-          "**/public/assets/downloads/**/*.ods",
-          "**/public/assets/downloads/**/*.odp",
-          "**/public/assets/downloads/**/*.pdf",
-          "**/public/downloads/*.xlsx",
-          "**/public/downloads/*.docx", 
-          "**/public/downloads/*.pptx",
-          "**/public/downloads/*.xls",
-          "**/public/downloads/*.doc",
-          "**/public/downloads/*.ppt",
-          "**/public/downloads/*.odt",
-          "**/public/downloads/*.ods",
-          "**/public/downloads/*.odp",
-          "**/public/downloads/*.pdf",
+          // CRITICAL: Exclude ALL download files from file watching
+          "**/public/downloads/**",
+          "**/public/assets/downloads/**",
           // Windows temp files
           "**/*.tmp",
           "**/Thumbs.db",
@@ -163,16 +126,30 @@ const nextConfig = {
     return config;
   },
 
+  // ✅ Disable static file optimization for downloads
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Skip optimization for download files
+        {
+          source: '/downloads/:path*',
+          has: [
+            {
+              type: 'header',
+              key: 'Accept',
+              value: '.*'
+            }
+          ],
+          destination: '/downloads/:path*',
+        }
+      ]
+    };
+  },
+
   experimental: {
     serverComponentsExternalPackages: ["better-sqlite3", "pdfkit", "sharp", "bcrypt"],
-    
-    // Remove optimizeCss - Next.js handles this automatically
     scrollRestoration: true,
     optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
-    
-    // Reduce file system scanning
-    webpackBuildWorker: true,
-    cpus: 1,
   },
 
   i18n: {
@@ -189,4 +166,68 @@ const nextConfig = {
   ],
 };
 
-export default withContentlayer(nextConfig);
+// Add a pre-build hook to check for locked files
+nextConfig.onBeforeBuild = async () => {
+  console.log('[Build] Checking for locked files...');
+  
+  // List of directories containing problematic files
+  const downloadDirs = [
+    path.join(process.cwd(), 'public', 'downloads'),
+    path.join(process.cwd(), 'public', 'assets', 'downloads')
+  ];
+  
+  // Function to check if a file is accessible
+  const isFileAccessible = (filePath) => {
+    try {
+      fs.accessSync(filePath, fs.constants.R_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  
+  for (const dir of downloadDirs) {
+    if (fs.existsSync(dir)) {
+      try {
+        const files = fs.readdirSync(dir);
+        const problematicFiles = files.filter(f => 
+          /\.(xlsx?|docx?|pptx?|pdf|od[tsp])$/i.test(f)
+        );
+        
+        if (problematicFiles.length > 0) {
+          console.log(`[Build] Found ${problematicFiles.length} download files in ${dir}`);
+          
+          // Check each file
+          for (const file of problematicFiles) {
+            const filePath = path.join(dir, file);
+            if (!isFileAccessible(filePath)) {
+              console.warn(`[Build] WARNING: File may be locked: ${filePath}`);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn(`[Build] Could not read directory ${dir}:`, err.message);
+      }
+    }
+  }
+  
+  console.log('[Build] File check complete');
+};
+
+// ✅ SIMPLE CONTENTLAYER INTEGRATION
+try {
+  // Try Contentlayer v2 first
+  const { withContentlayer } = await import("next-contentlayer2");
+  console.log("✅ Using Contentlayer v2");
+  export default withContentlayer(nextConfig);
+} catch (error) {
+  console.log("⚠️ Contentlayer v2 not found, trying v1...");
+  try {
+    const { withContentlayer } = await import("next-contentlayer");
+    console.log("✅ Using Contentlayer v1");
+    export default withContentlayer(nextConfig);
+  } catch (error) {
+    console.log("⚠️ Contentlayer not found, proceeding without it");
+    export default nextConfig;
+  }
+}

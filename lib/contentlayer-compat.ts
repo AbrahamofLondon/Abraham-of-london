@@ -7,8 +7,11 @@
  * - Provide consistent slug/kind/href logic
  * - Provide "published" filtering that doesn't accidentally zero everything
  *
- * This file loads Contentlayer2 output from /.contentlayer/generated (repo root).
+ * Fixed for Contentlayer v2 with Windows/Unix compatible paths
  */
+
+import fs from 'fs';
+import path from 'path';
 
 export interface DocBase {
   _id?: string;
@@ -81,43 +84,170 @@ const FALLBACK: GeneratedShape = {
 };
 
 function safeArray<T>(v: any): T[] {
-  return Array.isArray(v) ? v : [];
+  if (!v) return [];
+  if (Array.isArray(v)) return v;
+  // Contentlayer v2 often exports as { allDocuments: [...] }
+  if (v.allDocuments && Array.isArray(v.allDocuments)) return v.allDocuments;
+  // Some exports might be the array directly
+  if (typeof v === 'object' && !Array.isArray(v)) {
+    // Try to find any array property
+    for (const key in v) {
+      if (Array.isArray(v[key])) return v[key];
+    }
+  }
+  return [];
 }
 
 let DATA: GeneratedShape = FALLBACK;
 let LOADED = false;
 
-try {
-  // lib/* -> repo root is ../
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mod = require("../.contentlayer/generated");
+// Helper to clear module cache in development
+const clearCache = (modulePath: string) => {
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      const resolvedPath = require.resolve(modulePath);
+      delete require.cache[resolvedPath];
+    } catch (e) {
+      // ignore if module not resolved yet
+    }
+  }
+};
 
-  DATA = {
-    allDocuments: safeArray<DocBase>(mod.allDocuments),
-    allPosts: safeArray<DocBase>(mod.allPosts),
-    allBooks: safeArray<DocBase>(mod.allBooks),
-    allCanons: safeArray<DocBase>(mod.allCanons),
-    allDownloads: safeArray<DocBase>(mod.allDownloads),
-    allShorts: safeArray<DocBase>(mod.allShorts),
-    allEvents: safeArray<DocBase>(mod.allEvents),
-    allPrints: safeArray<DocBase>(mod.allPrints),
-    allResources: safeArray<DocBase>(mod.allResources),
-    allStrategies: safeArray<DocBase>(mod.allStrategies),
-  };
+// Helper to safely load a module with fallbacks
+const loadModule = (modulePath: string): any => {
+  try {
+    clearCache(modulePath);
+    return require(modulePath);
+  } catch (e) {
+    console.warn(`[Contentlayer] Failed to load module: ${modulePath}`, e?.message || e);
+    return null;
+  }
+};
+
+// Helper to check if file exists
+const fileExists = (filePath: string): boolean => {
+  try {
+    return fs.existsSync(filePath);
+  } catch (e) {
+    return false;
+  }
+};
+
+try {
+  // METHOD 1: Try to load from the main index.mjs (Contentlayer v2's main export)
+  const mainIndexPath = path.join(process.cwd(), '.contentlayer', 'generated', 'index.mjs');
+  
+  if (fileExists(mainIndexPath)) {
+    const mainIndex = loadModule(mainIndexPath);
+    
+    if (mainIndex) {
+      DATA = {
+        allDocuments: safeArray<DocBase>(mainIndex.allDocuments),
+        allPosts: safeArray<DocBase>(mainIndex.allPosts || mainIndex.Post),
+        allBooks: safeArray<DocBase>(mainIndex.allBooks || mainIndex.Book),
+        allCanons: safeArray<DocBase>(mainIndex.allCanons || mainIndex.Canon),
+        allDownloads: safeArray<DocBase>(mainIndex.allDownloads || mainIndex.Download),
+        allShorts: safeArray<DocBase>(mainIndex.allShorts || mainIndex.Short),
+        allEvents: safeArray<DocBase>(mainIndex.allEvents || mainIndex.Event),
+        allPrints: safeArray<DocBase>(mainIndex.allPrints || mainIndex.Print),
+        allResources: safeArray<DocBase>(mainIndex.allResources || mainIndex.Resource),
+        allStrategies: safeArray<DocBase>(mainIndex.allStrategies || mainIndex.Strategy),
+      };
+    }
+  }
+
+  // METHOD 2: If main index didn't work or is incomplete, load individual collections
+  // Check if we got any data from the main index
+  const totalFromMain = Object.values(DATA).reduce((sum, arr) => sum + arr.length, 0);
+  
+  if (totalFromMain === 0) {
+    console.log('[Contentlayer] Main index empty, loading individual collections...');
+    
+    // Load each collection individually
+    const collections = [
+      { name: 'Post', key: 'allPosts' },
+      { name: 'Book', key: 'allBooks' },
+      { name: 'Canon', key: 'allCanons' },
+      { name: 'Download', key: 'allDownloads' },
+      { name: 'Short', key: 'allShorts' },
+      { name: 'Event', key: 'allEvents' },
+      { name: 'Print', key: 'allPrints' },
+      { name: 'Resource', key: 'allResources' },
+      { name: 'Strategy', key: 'allStrategies' },
+    ];
+
+    for (const collection of collections) {
+      const collectionPath = path.join(process.cwd(), '.contentlayer', 'generated', collection.name, '_index.mjs');
+      if (fileExists(collectionPath)) {
+        const module = loadModule(collectionPath);
+        if (module) {
+          DATA[collection.key as keyof GeneratedShape] = safeArray<DocBase>(module);
+          console.log(`[Contentlayer] Loaded ${collection.name}: ${DATA[collection.key as keyof GeneratedShape].length} items`);
+        }
+      } else {
+        console.log(`[Contentlayer] Collection not found: ${collectionPath}`);
+      }
+    }
+  }
+
+  // Combine all documents
+  DATA.allDocuments = [
+    ...DATA.allPosts,
+    ...DATA.allBooks,
+    ...DATA.allCanons,
+    ...DATA.allDownloads,
+    ...DATA.allShorts,
+    ...DATA.allEvents,
+    ...DATA.allPrints,
+    ...DATA.allResources,
+    ...DATA.allStrategies,
+  ];
 
   LOADED = true;
-  // Minimal log: useful in Netlify build logs, not noisy
-  // eslint-disable-next-line no-console
   console.log(
-    `[Contentlayer] Loaded: posts=${DATA.allPosts.length} books=${DATA.allBooks.length} canon=${DATA.allCanons.length} downloads=${DATA.allDownloads.length} docs=${DATA.allDocuments.length}`
+    `[Contentlayer] Loaded: posts=${DATA.allPosts.length} books=${DATA.allBooks.length} canon=${DATA.allCanons.length} downloads=${DATA.allDownloads.length} shorts=${DATA.allShorts.length} events=${DATA.allEvents.length} prints=${DATA.allPrints.length} resources=${DATA.allResources.length} strategies=${DATA.allStrategies.length} total=${DATA.allDocuments.length}`
   );
+  
+  // Log a warning if we have no data
+  if (DATA.allDocuments.length === 0) {
+    console.warn('[Contentlayer] No documents loaded - check .contentlayer/generated structure');
+    console.warn('[Contentlayer] Generated directory contents:', fs.readdirSync(path.join(process.cwd(), '.contentlayer', 'generated'), { withFileTypes: true }).map(d => d.name));
+  }
 } catch (e: any) {
-  LOADED = false;
-  DATA = FALLBACK;
-  // eslint-disable-next-line no-console
-  console.warn("[Contentlayer] Generated module unavailable — using empty collections.");
-  // eslint-disable-next-line no-console
-  console.warn("[Contentlayer] Error:", e?.message || e);
+  // METHOD 3: Fallback to Contentlayer v1 structure
+  try {
+    console.log('[Contentlayer] Trying v1 fallback...');
+    const v1Path = path.join(process.cwd(), '.contentlayer', 'generated');
+    const v1Module = loadModule(v1Path);
+    
+    if (v1Module) {
+      DATA = {
+        allDocuments: safeArray<DocBase>(v1Module.allDocuments),
+        allPosts: safeArray<DocBase>(v1Module.allPosts),
+        allBooks: safeArray<DocBase>(v1Module.allBooks),
+        allCanons: safeArray<DocBase>(v1Module.allCanons),
+        allDownloads: safeArray<DocBase>(v1Module.allDownloads),
+        allShorts: safeArray<DocBase>(v1Module.allShorts),
+        allEvents: safeArray<DocBase>(v1Module.allEvents),
+        allPrints: safeArray<DocBase>(v1Module.allPrints),
+        allResources: safeArray<DocBase>(v1Module.allResources),
+        allStrategies: safeArray<DocBase>(v1Module.allStrategies),
+      };
+      
+      LOADED = true;
+      console.log(
+        `[Contentlayer] Loaded (v1 fallback): posts=${DATA.allPosts.length} books=${DATA.allBooks.length} canon=${DATA.allCanons.length} downloads=${DATA.allDownloads.length}`
+      );
+    } else {
+      throw new Error('No v1 module found');
+    }
+  } catch (e2: any) {
+    LOADED = false;
+    DATA = FALLBACK;
+    console.warn('[Contentlayer] All loading methods failed — using empty collections.');
+    console.warn('[Contentlayer] V2 error:', e?.message || e);
+    console.warn('[Contentlayer] V1 error:', e2?.message || e2);
+  }
 }
 
 /** SYNC getter — Pages Router safe */
@@ -145,7 +275,6 @@ export function assertContentlayerHasDocs(data?: GeneratedShape): boolean {
     (d.allStrategies?.length ?? 0);
 
   if (total <= 0) {
-    // eslint-disable-next-line no-console
     console.warn("⚠ Contentlayer: no documents detected (all collections empty).");
     return false;
   }
@@ -532,5 +661,20 @@ export default {
   getAllPosts,
   getServerAllPosts,
   getServerPostBySlug,
+  getServerAllBooksAsync,
+  getServerAllCanonsAsync,
+  getServerAllDownloadsAsync,
+  getServerAllShortsAsync,
   recordContentView,
+  // Direct exports
+  allDocuments,
+  allPosts,
+  allBooks,
+  allCanons,
+  allDownloads,
+  allShorts,
+  allEvents,
+  allPrints,
+  allResources,
+  allStrategies,
 };
