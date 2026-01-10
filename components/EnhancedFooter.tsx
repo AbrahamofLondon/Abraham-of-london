@@ -22,26 +22,6 @@ import {
 
 import { siteConfig } from "@/lib/imports";
 
-const useDeviceType = () => {
-  const [deviceType, setDeviceType] =
-    React.useState<"mobile" | "tablet" | "desktop">("desktop");
-
-  React.useEffect(() => {
-    const checkDevice = () => {
-      const width = window.innerWidth;
-      if (width < 768) setDeviceType("mobile");
-      else if (width < 1024) setDeviceType("tablet");
-      else setDeviceType("desktop");
-    };
-
-    checkDevice();
-    window.addEventListener("resize", checkDevice);
-    return () => window.removeEventListener("resize", checkDevice);
-  }, []);
-
-  return deviceType;
-};
-
 type SocialPlatform =
   | "twitter"
   | "linkedin"
@@ -63,14 +43,50 @@ const iconMap: Record<
   instagram: Instagram,
   youtube: Youtube,
   tiktok: MessageCircle,
-  whatsapp: MessageCircle, // WhatsApp icon alternative (lucide has MessageCircle; ok)
+  whatsapp: MessageCircle,
   facebook: Facebook,
   email: Mail,
   phone: Phone,
   website: Globe,
 };
 
-const footerSections = [
+function cleanTel(phone: string): string {
+  return phone.replace(/\s+/g, "");
+}
+
+function isExternal(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+
+/**
+ * Only link what you actually have.
+ * Add to this list as you implement routes. This stops “random” footer 404s.
+ */
+const KNOWN_ROUTES = new Set<string>([
+  "/",
+  "/about",
+  "/content",
+  "/shorts",
+  "/blog",
+  "/canon",
+  "/books",
+  "/downloads",
+  "/ventures",
+  "/strategy",
+  "/contact",
+  "/inner-circle",
+  "/privacy",
+  "/terms",
+  "/cookies",
+  "/accessibility",
+  "/security",
+]);
+
+const footerSections: Array<{
+  title: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  links: Array<{ label: string; href: string }>;
+}> = [
   {
     title: "Explore",
     icon: Globe,
@@ -82,14 +98,16 @@ const footerSections = [
       { label: "The Canon", href: "/canon" },
       { label: "Books", href: "/books" },
       { label: "Downloads", href: "/downloads" },
-      { label: "Events", href: "/events" },
+      { label: "Ventures", href: "/ventures" },
+      { label: "Strategy", href: "/strategy" },
     ],
   },
   {
     title: "Resources",
     icon: FileText,
     links: [
-      { label: "Fatherhood Frameworks", href: "/fatherhood" },
+      // Only keep these as links if you’ve built the pages.
+      { label: "Resources Hub", href: "/resources" },
       { label: "Founder Tools", href: "/founders" },
       { label: "Leadership Resources", href: "/leadership" },
       { label: "Canon Campaign", href: "/canon-campaign" },
@@ -101,10 +119,10 @@ const footerSections = [
     icon: Users,
     links: [
       { label: "Contact", href: "/contact" },
+      { label: "Inner Circle", href: "/inner-circle" },
       { label: "Newsletter", href: "/newsletter" },
       { label: "Speaking", href: "/speaking" },
       { label: "Consulting", href: "/consulting" },
-      { label: "Inner Circle", href: "/inner-circle" },
     ],
   },
 ];
@@ -112,56 +130,68 @@ const footerSections = [
 const FadeIn: React.FC<{
   children: React.ReactNode;
   delay?: number;
-  direction?: "up" | "down" | "left" | "right";
-}> = ({ children, delay = 0, direction = "up" }) => {
-  const directions = {
-    up: { y: 20 },
-    down: { y: -20 },
-    left: { x: 20 },
-    right: { x: -20 },
-  };
+}> = ({ children, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay, ease: "easeOut" }}
+    viewport={{ once: true, margin: "-60px" }}
+  >
+    {children}
+  </motion.div>
+);
+
+function FooterLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}): JSX.Element {
+  const enabled = KNOWN_ROUTES.has(href) || isExternal(href);
+
+  if (!enabled) {
+    // Not a link. Stops 404. Still communicates intent.
+    return (
+      <span className="group flex items-center gap-2 py-1 text-sm text-gray-500 cursor-not-allowed">
+        <span className="w-1 h-1 rounded-full bg-gray-700" />
+        <span>
+          {label} <span className="text-[10px] uppercase tracking-[0.2em]">(Soon)</span>
+        </span>
+      </span>
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, ...directions[direction] }}
-      whileInView={{ opacity: 1, y: 0, x: 0 }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
-      viewport={{ once: true, margin: "-50px" }}
+    <Link
+      href={href}
+      className="group flex items-center gap-2 py-1 text-sm text-gray-400 hover:text-white transition-colors"
+      prefetch={false}
     >
-      {children}
-    </motion.div>
+      <span className="w-1 h-1 rounded-full bg-amber-400/30 group-hover:bg-amber-400 transition-colors" />
+      <span>{label}</span>
+    </Link>
   );
-};
-
-function cleanTel(phone: string): string {
-  return phone.replace(/\s+/g, "");
 }
 
-function isExternal(href: string): boolean {
-  return /^https?:\/\//i.test(href);
-}
+export default function EnhancedFooter(): JSX.Element {
+  const year = new Date().getFullYear();
 
-export default function EnhancedFooter() {
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === "mobile";
-  const isTablet = deviceType === "tablet";
-  const [currentYear, setCurrentYear] = React.useState<number>(new Date().getFullYear());
-
-  React.useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
-
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
-  const email = siteConfig?.contact?.email || siteConfig?.email || "info@abrahamoflondon.org";
+  const email =
+    siteConfig?.contact?.email || siteConfig?.email || "info@abrahamoflondon.org";
   const phone = siteConfig?.contact?.phone || "+44 20 8622 5909";
-  const location = siteConfig?.contact?.address || "Based in London, working globally";
+  const location =
+    siteConfig?.contact?.address || "Based in London, working globally";
 
   const description =
     siteConfig?.description ||
-    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.";
+    "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.";
 
-  const socials = Array.isArray(siteConfig?.socialLinks) ? siteConfig.socialLinks : [];
+  const socials = Array.isArray(siteConfig?.socialLinks)
+    ? siteConfig.socialLinks
+    : [];
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-amber-500/10">
@@ -169,17 +199,11 @@ export default function EnhancedFooter() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        {/* ✅ Avoid dynamic Tailwind class names */}
-        <div
-          className={[
-            "grid gap-8",
-            isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2" : "grid-cols-4",
-          ].join(" ")}
-        >
-          {/* Brand column */}
-          <div className={isMobile ? "col-span-1" : isTablet ? "col-span-2" : "col-span-1"}>
-            <FadeIn delay={0.1} direction="up">
-              <Link href="/" className="group inline-block mb-4 lg:mb-6" aria-label="Go to homepage">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand */}
+          <div className="md:col-span-2 lg:col-span-1">
+            <FadeIn delay={0.05}>
+              <Link href="/" className="group inline-block mb-5" aria-label="Go to homepage">
                 <div className="flex flex-col gap-1">
                   <h2 className="font-serif text-2xl lg:text-3xl font-bold text-white">
                     Abraham<span className="text-amber-400"> of London</span>
@@ -190,7 +214,7 @@ export default function EnhancedFooter() {
                 </div>
               </Link>
 
-              <p className="mb-4 lg:mb-6 text-sm lg:text-base text-gray-300 leading-relaxed">
+              <p className="mb-6 text-sm lg:text-base text-gray-300 leading-relaxed">
                 {description}
               </p>
 
@@ -221,12 +245,11 @@ export default function EnhancedFooter() {
                 </div>
               </div>
 
-              {/* Socials */}
               {socials.length > 0 && (
-                <div className="mb-6">
+                <div className="mb-2">
                   <p className="mb-3 text-sm font-semibold text-white">Follow</p>
                   <div className="flex flex-wrap gap-2">
-                    {socials.map((social) => {
+                    {socials.map((social: any) => {
                       const kind = (social.kind || "website") as SocialPlatform;
                       const Icon = iconMap[kind] ?? Globe;
                       const external = isExternal(social.href);
@@ -255,42 +278,37 @@ export default function EnhancedFooter() {
             </FadeIn>
           </div>
 
-          {/* Link sections */}
-          {footerSections.map((section, index) => (
-            <div key={section.title} className={isMobile ? "col-span-1" : ""}>
-              <FadeIn delay={0.1 + index * 0.1} direction="up">
-                <div className={isMobile ? "border-t border-gray-800 pt-6 first:pt-0 first:border-t-0" : ""}>
+          {/* Sections */}
+          {footerSections.map((section, idx) => {
+            const Icon = section.icon;
+            return (
+              <div key={section.title}>
+                <FadeIn delay={0.1 + idx * 0.08}>
                   <div className="flex items-center gap-2 mb-4">
-                    {React.createElement(section.icon, { className: "h-4 w-4 text-amber-400" })}
+                    <Icon className="h-4 w-4 text-amber-400" />
                     <h3 className="text-lg font-semibold text-white">{section.title}</h3>
                   </div>
+
                   <ul className="space-y-2">
-                    {section.links.map((link) => (
-                      <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-1"
-                          prefetch={false}
-                        >
-                          <span className="w-1 h-1 rounded-full bg-amber-400/30 group-hover:bg-amber-400 transition-colors" />
-                          <span>{link.label}</span>
-                        </Link>
+                    {section.links.map((l) => (
+                      <li key={l.href}>
+                        <FooterLink href={l.href} label={l.label} />
                       </li>
                     ))}
                   </ul>
-                </div>
-              </FadeIn>
-            </div>
-          ))}
+                </FadeIn>
+              </div>
+            );
+          })}
         </div>
 
         {/* Bottom bar */}
-        <FadeIn delay={0.4} direction="up">
+        <FadeIn delay={0.35}>
           <div className="mt-12 pt-8 border-t border-gray-800">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="text-center lg:text-left">
                 <p className="text-sm text-gray-400">
-                  © {currentYear} {siteConfig?.title ?? "Abraham of London"}. All rights reserved.
+                  © {year} {siteConfig?.title ?? "Abraham of London"}. All rights reserved.
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   Built for those who still believe in duty, consequence, and legacy.
@@ -359,4 +377,3 @@ export default function EnhancedFooter() {
     </footer>
   );
 }
-

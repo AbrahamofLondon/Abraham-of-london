@@ -11,6 +11,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 type RouteId =
   | "home"
   | "about"
+  | "framework"
   | "blogIndex"
   | "contentIndex"
   | "booksIndex"
@@ -30,6 +31,7 @@ type LuxuryNavbarProps = {
 const LOCAL_ROUTES: Record<RouteId, string> = {
   home: "/",
   about: "/about",
+  framework: "/strategy", // ✅ Strategic Framework lives here
   blogIndex: "/blog",
   contentIndex: "/content",
   booksIndex: "/books",
@@ -53,11 +55,11 @@ const getRoutePath = (route: RouteId): string => {
   return LOCAL_ROUTES[route] || "/";
 };
 
-// *** Central navigation items ***
-// Shorts is explicitly present and will be highlighted.
+// Central nav items
 const NAV_ITEMS: { route: RouteId; label: string }[] = [
   { route: "booksIndex", label: "Books" },
   { route: "canonIndex", label: "Canon" },
+  { route: "framework", label: "Framework" }, // ✅ Added
   { route: "shorts", label: "Shorts" },
   { route: "blogIndex", label: "Insights" },
   { route: "ventures", label: "Ventures" },
@@ -75,19 +77,12 @@ export default function LuxuryNavbar({
 
   const currentPath = usePathname();
 
-  // Mark mounted to avoid SSR/CSR mismatch
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  React.useEffect(() => setMounted(true), []);
 
-  // Scroll behaviour
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      setScrolled(isScrolled);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
 
     let ticking = false;
     const scrollListener = () => {
@@ -102,20 +97,16 @@ export default function LuxuryNavbar({
 
     window.addEventListener("scroll", scrollListener, { passive: true });
     handleScroll();
-
     return () => window.removeEventListener("scroll", scrollListener);
   }, []);
 
-  // Lock body scroll when mobile menu is open
   React.useEffect(() => {
     if (typeof document === "undefined") return;
-
     if (!isOpen) return;
 
     const scrollY = window.scrollY;
     const body = document.body;
 
-    // Store original styles
     const originalStyles = {
       position: body.style.position,
       top: body.style.top,
@@ -176,16 +167,14 @@ export default function LuxuryNavbar({
       >
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-20 items-center justify-between">
-            {/* Brand */}
             <Link
               href={getRoutePath("home")}
               className="font-serif text-2xl font-bold text-amber-500 transition-all duration-300 hover:scale-105 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-amber-500/50 rounded-lg"
-              prefetch={true}
+              prefetch
             >
               Abraham of London
             </Link>
 
-            {/* Desktop nav */}
             <div className="hidden items-center gap-8 lg:flex">
               <ul className="flex items-center gap-8">
                 {NAV_ITEMS.map((item) => {
@@ -206,7 +195,7 @@ export default function LuxuryNavbar({
                         href={getRoutePath(item.route)}
                         className={`${baseClasses} ${shortsClasses}`}
                         aria-current={active ? "page" : undefined}
-                        prefetch={true}
+                        prefetch
                       >
                         {item.label}
                       </Link>
@@ -214,9 +203,7 @@ export default function LuxuryNavbar({
                         <span
                           aria-hidden="true"
                           className={`pointer-events-none absolute -bottom-1 left-0 block h-0.5 transition-all duration-300 ${
-                            active
-                              ? `w-full ${activeUnderline}`
-                              : "w-0 opacity-0"
+                            active ? `w-full ${activeUnderline}` : "w-0 opacity-0"
                           }`}
                         />
                       )}
@@ -226,7 +213,6 @@ export default function LuxuryNavbar({
               </ul>
             </div>
 
-            {/* Desktop actions */}
             <div className="hidden items-center gap-6 lg:flex">
               <a
                 href={`mailto:${EMAIL}`}
@@ -245,14 +231,13 @@ export default function LuxuryNavbar({
               <Link
                 href={getRoutePath("contact")}
                 className="rounded-full bg-amber-500 px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 focus:ring-offset-black"
-                prefetch={true}
+                prefetch
               >
                 Enquire
               </Link>
               <ThemeToggle size="sm" />
             </div>
 
-            {/* Mobile controls */}
             <div className="flex items-center gap-3 lg:hidden">
               <ThemeToggle size="sm" />
               <button
@@ -267,16 +252,11 @@ export default function LuxuryNavbar({
                 aria-expanded={isOpen}
                 aria-controls="mobile-nav"
               >
-                {isOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile menu */}
           {isOpen && (
             <div
               id="mobile-nav"
@@ -298,11 +278,11 @@ export default function LuxuryNavbar({
                             ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                             : "bg-amber-500/10 text-gray-900 border border-amber-500/20"
                           : isDarkVariant
-                            ? "text-gray-100 hover:text-amber-400 hover:bg-white/10 border border-transparent"
-                            : "text-gray-700 hover:text-gray-900 hover:bg-black/5 border border-transparent"
+                          ? "text-gray-100 hover:text-amber-400 hover:bg-white/10 border border-transparent"
+                          : "text-gray-700 hover:text-gray-900 hover:bg-black/5 border border-transparent"
                       } ${isShorts ? "border-amber-500/40" : ""}`}
                       aria-current={active ? "page" : undefined}
-                      prefetch={true}
+                      prefetch
                     >
                       {item.label}
                     </Link>
@@ -329,7 +309,7 @@ export default function LuxuryNavbar({
                         isDarkVariant
                           ? "bg-gray-800 text-gray-100 hover:bg-gray-700"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
+                    } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
                     >
                       Call Us
                     </a>
@@ -338,7 +318,7 @@ export default function LuxuryNavbar({
                     href={getRoutePath("contact")}
                     onClick={() => setIsOpen(false)}
                     className="block rounded-full bg-amber-500 px-6 py-4 text-center text-base font-bold text-white transition-all duration-300 hover:scale-105 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2"
-                    prefetch={true}
+                    prefetch
                   >
                     Enquire Now
                   </Link>
@@ -349,21 +329,11 @@ export default function LuxuryNavbar({
         </nav>
       </header>
 
-      {/* Enhanced global styles */}
+      {/* ✅ Global behaviour ONLY (no layout hijacking) */}
       <style jsx global>{`
-        main {
-          padding-top: 5rem;
-        }
-        @media (max-width: 1024px) {
-          main {
-            padding-top: 5rem;
-          }
-        }
-
         html {
           scroll-behavior: smooth;
         }
-
         *:focus-visible {
           outline: 2px solid #f59e0b;
           outline-offset: 2px;
@@ -372,4 +342,3 @@ export default function LuxuryNavbar({
     </>
   );
 }
-

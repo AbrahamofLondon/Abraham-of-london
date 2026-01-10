@@ -1,11 +1,10 @@
-// pages/index.tsx — INSTITUTIONAL (CLEAN SHELL / NO SELF-SABOTAGE)
+// pages/index.tsx — INSTITUTIONAL (CLEAN SHELL / ROUTE-SAFE)
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import AnimatedStatsBar from "@/components/enhanced/AnimatedStatsBar";
 import EnhancedVenturesSection from "@/components/enhanced/VenturesSection";
 import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
 
@@ -60,7 +59,7 @@ type HomePageProps = {
 };
 
 /* -----------------------------------------------------------------------------
-   CONSTANTS (ROUTES YOU CONFIRMED EXIST)
+   ROUTES (MATCH YOUR REAL APP ROUTES)
 ----------------------------------------------------------------------------- */
 const ROUTES = {
   consulting: "/consulting",
@@ -154,20 +153,18 @@ const Card: React.FC<{
 );
 
 /* -----------------------------------------------------------------------------
-   HERO — CLEAN (NO WASHED OVERLAYS, NO CLIENT-SIDE DEPENDENCY)
+   HERO
 ----------------------------------------------------------------------------- */
 const HeroSection: React.FC = () => {
   return (
     <section className="relative overflow-hidden bg-black">
-      {/* Decorative background kept subtle (no muddy wash) */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.12),transparent_55%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(59,130,246,0.08),transparent_55%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
       </div>
 
-      {/* IMPORTANT: top padding so fixed header never eats the hero */}
-      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-8 lg:pb-24 lg:pt-28">
+      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 lg:px-8 lg:pb-24">
         <div className="mb-8 flex flex-wrap gap-3">
           <Pill icon={<Landmark className="h-3.5 w-3.5" />}>Institutional OS</Pill>
           <Pill icon={<Target className="h-3.5 w-3.5" />}>Strategy</Pill>
@@ -251,7 +248,6 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Image block — crisp, controlled overlays, high quality */}
         <div className="relative mt-14 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
           <div className="relative aspect-[16/9]">
             <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/0 via-black/20 to-black/55" />
@@ -519,24 +515,44 @@ const DeliveryModel: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   STRATEGIC FRAMEWORK STRIP — use EXISTING /strategy route + /resources
+   STRATEGIC FRAMEWORK STRIP (REPLACES THE “0+” TILE SECTION)
 ----------------------------------------------------------------------------- */
 const StrategicFrameworkStrip: React.FC = () => {
   const items = [
-    { icon: <Target className="h-6 w-6" />, title: "Mandate", body: "Define the mission boundary. No mandate = no strategy." },
-    { icon: <Map className="h-6 w-6" />, title: "Terrain", body: "Market structure, rivals, constraints. Reality first." },
-    { icon: <Scale className="h-6 w-6" />, title: "Choices", body: "Trade-offs written. If it’s not written, it isn’t real." },
-    { icon: <Workflow className="h-6 w-6" />, title: "OS", body: "Decision rights + cadence. Strategy becomes routine." },
-    { icon: <Gauge className="h-6 w-6" />, title: "Governance", body: "Accountability that keeps the machine honest." },
+    {
+      icon: <Target className="h-6 w-6" />,
+      title: "Mandate",
+      body: "Define the mission boundary. No mandate = no strategy.",
+    },
+    {
+      icon: <Map className="h-6 w-6" />,
+      title: "Terrain",
+      body: "Market structure, rivals, constraints. Reality first.",
+    },
+    {
+      icon: <Scale className="h-6 w-6" />,
+      title: "Choices",
+      body: "Trade-offs written. If it’s not written, it isn’t real.",
+    },
+    {
+      icon: <Workflow className="h-6 w-6" />,
+      title: "Operating System",
+      body: "Decision rights + cadence. Strategy becomes routine.",
+    },
+    {
+      icon: <Gauge className="h-6 w-6" />,
+      title: "Governance",
+      body: "Accountability that keeps the machine honest.",
+    },
   ] as const;
 
   return (
     <section className="bg-black py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              Strategic framework
+              Strategic Framework
             </p>
             <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
               Capacity is proven by method.
@@ -549,13 +565,13 @@ const StrategicFrameworkStrip: React.FC = () => {
           <div className="flex flex-wrap gap-3">
             <Link
               href={ROUTES.strategy}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-400/40 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-400/40 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
             >
-              Strategy <ArrowRight className="h-4 w-4" />
+              Strategic Framework <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={ROUTES.resources}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/20"
             >
               Resources <ArrowRight className="h-4 w-4" />
             </Link>
@@ -602,7 +618,7 @@ const CanonShowcase: React.FC = () => (
 
         <Link
           href={ROUTES.canon}
-          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
+          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
         >
           <span>Browse Canon</span>
           <ArrowRight className="h-4 w-4" />
@@ -645,7 +661,7 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
 
           <Link
             href={ROUTES.shorts}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
           >
             <span>View all shorts</span>
             <ArrowRight className="h-4 w-4" />
@@ -715,7 +731,7 @@ const BooksInDevelopment: React.FC = () => (
 
         <Link
           href={ROUTES.books}
-          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
+          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
         >
           <span>View all books</span>
           <ArrowRight className="h-4 w-4" />
@@ -850,18 +866,11 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
       fullWidth
       className="bg-black"
     >
-      {/* IMPORTANT: Layout wraps <main>. We keep sections responsible for width. */}
       <HeroSection />
 
       <TrustSignals />
 
       <ServiceLines />
-
-      <section className="border-y border-white/10 bg-black">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <AnimatedStatsBar />
-        </div>
-      </section>
 
       <SectionDivider />
 
@@ -869,6 +878,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
       <SectionDivider withOrnament={false} />
 
+      {/* ✅ Replaces the “0+ tiles” section */}
       <StrategicFrameworkStrip />
 
       <SectionDivider />
@@ -908,7 +918,6 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
     return { props: { featuredShorts }, revalidate: 3600 };
   } catch (error) {
-    // Don’t crash the homepage because “shorts” had a bad day.
     console.error("Error fetching shorts:", error);
     return { props: { featuredShorts: [] }, revalidate: 3600 };
   }

@@ -1,0 +1,42 @@
+/* styles/Home.module.css - Required base styles */
+
+.h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-body, #4a5568);
+}
+
+/* styles/components.css - Required button styles */
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.btnPrimary {
+  background-color: var(--color-primary, #d4af37);
+  color: var(--color-primary-text, #000);
+}
+
+.btnPrimary:hover {
+  background-color: var(--color-primary-hover, #c19b2a);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.btnPrimary:active {
+  transform: translateY(0);
+}

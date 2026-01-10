@@ -1,7 +1,4 @@
-# netlify.toml
-# ============================================================
-# Abraham of London — GO GREEN CONFIG (Production-safe)
-# ============================================================
+# netlify.toml — CLEAN + ROUTE-SAFE (Next.js on Netlify)
 
 [build]
   command = "pnpm install --frozen-lockfile && pnpm run build"
@@ -12,17 +9,10 @@
   NODE_VERSION = "20.11.1"
   PNPM_VERSION = "9.15.9"
   NODE_OPTIONS = "--max-old-space-size=8192"
-
-  # Contentlayer
   CONTENTLAYER_DISABLE_WARNINGS = "1"
   CONTENTLAYER_LOG_LEVEL = "error"
-
-  # Build hygiene
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
-
-  # Do NOT skip content generation
-  
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -35,14 +25,11 @@
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "development"
 
-# ============================================================
-# NETLIFY NEXT.JS PLUGIN
-# ============================================================
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 # ============================================================
-# REDIRECTS (Keep your existing redirects)
+# REDIRECTS — SAFE ONLY (NO ROUTE REWRITES THAT BREAK PAGES)
 # ============================================================
 
 [[redirects]]
@@ -63,18 +50,7 @@
   status = 301
   force = true
 
-[[redirects]]
-  from = "/canon/*"
-  to = "/canons/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/strategy/*"
-  to = "/strategies/:splat"
-  status = 301
-  force = true
-
+# File-level redirects (keep)
 [[redirects]]
   from = "/downloads/purpose-pyramid-worksheet-fillable.pdf"
   to = "/downloads/purpose-pyramid.pdf"
@@ -89,28 +65,6 @@
   from = "/downloads/legacy-canvas-worksheet-fillable.pdf"
   to = "/downloads/legacy-canvas.pdf"
   status = 200
-
-# IMPORTANT: these redirects only make sense if your routes truly use the prefixed slugs.
-# If you adopt clean slugs, these should be removed/changed.
-[[redirects]]
-  from = "/blog/when-the-system-breaks-you"
-  to = "/blog/post-when-the-system-breaks-you"
-  status = 301
-
-[[redirects]]
-  from = "/books/fathering-without-fear"
-  to = "/books/book-fathering-without-fear"
-  status = 301
-
-[[redirects]]
-  from = "/canon/fathering-without-fear"
-  to = "/canon/canon-fathering-without-fear"
-  status = 301
-
-[[redirects]]
-  from = "/downloads/legacy-architecture-canvas"
-  to = "/downloads/download-legacy-architecture-canvas"
-  status = 301
 
 # ============================================================
 # SECURITY HEADERS
