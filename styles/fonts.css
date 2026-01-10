@@ -1,0 +1,32 @@
+/* styles/fonts.css - Font declarations for your site */
+@font-face {
+  font-family: 'AoLSerif-Italic';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/AoLSerif-Italic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Geist-Black';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/geist-black.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'GeistMono-Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrainsMono-Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+}

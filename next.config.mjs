@@ -1,8 +1,8 @@
-/* next.config.mjs - PRODUCTION-SAFE RECONCILED VERSION */
+/* next.config.mjs - CLEAN & PRODUCTION READY */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
-// -------------------- Contentlayer plugin (dual support) --------------------
+// -------------------- Contentlayer plugin --------------------
 async function resolveWithContentlayer() {
   try {
     const cl2 = await import("next-contentlayer2");
@@ -27,7 +27,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
 
-  // You chose build resilience over strictness:
+  // ✅ Build resilience
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 
@@ -39,6 +39,11 @@ const nextConfig = {
     BUILD_TIMESTAMP: new Date().toISOString(),
   },
 
+  // Remove sassOptions unless you're using SCSS
+  // sassOptions: {
+  //   silenceDeprecations: ['legacy-js-api'],
+  // },
+
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
     formats: ["image/avif", "image/webp"],
@@ -46,8 +51,6 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
-    // NOTE: Don't force attachment unless you really want downloads on images.
-    // contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
@@ -55,6 +58,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
 
+  // ✅ Clean headers - REMOVE Content-Type override
   async headers() {
     return [
       {
@@ -62,17 +66,26 @@ const nextConfig = {
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
           { key: "Access-Control-Allow-Origin", value: "*" },
+          // REMOVE Content-Type - let Next.js handle it automatically
         ],
       },
       {
         source: "/_next/static/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
     ];
   },
 
+  // ✅ SIMPLIFIED webpack config - Remove all CSS handling
   webpack: (config, { isServer, webpack }) => {
-    // ✅ Keep client bundles free of Node-only binaries
+    // Handle client-side modules
     if (!isServer) {
       config.plugins.push(
         new webpack.IgnorePlugin({ resourceRegExp: /^ioredis$/ }),
@@ -94,10 +107,7 @@ const nextConfig = {
       };
     }
 
-    // ✅ Do NOT mutate issuer/issuerLayer rules — that breaks loaders and causes
-    // “Final loader didn't return Buffer or String” and bogus CSS/_document errors.
-
-    // Noise suppression only
+    // Suppress warnings
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       { module: /contentlayer/ },
@@ -105,7 +115,7 @@ const nextConfig = {
       { file: /public[\\/]+downloads[\\/]+/ },
     ];
 
-    // Windows watcher sanity
+    // Windows compatibility
     if (process.platform === "win32") {
       config.watchOptions = {
         ...(config.watchOptions || {}),
@@ -119,10 +129,12 @@ const nextConfig = {
   },
 
   experimental: {
-    // Keep this: helps server bundling for certain native deps.
     serverComponentsExternalPackages: ["better-sqlite3", "pdfkit", "sharp", "bcrypt"],
-
-    // Safer set:
+    
+    // Remove optimizeCss - Next.js handles this automatically
+    // optimizeCss: true,
+    
+    // Other optimizations
     scrollRestoration: true,
     optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
   },
@@ -132,6 +144,13 @@ const nextConfig = {
     defaultLocale: "en-GB",
     localeDetection: false,
   },
+
+  transpilePackages: [
+    "lucide-react",
+    "date-fns",
+    "clsx",
+    "tailwind-merge",
+  ],
 };
 
 export default withContentlayer(nextConfig);

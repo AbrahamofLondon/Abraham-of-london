@@ -1,28 +1,424 @@
-// styles/_fonts.scss - FIXED VERSION
-// Simple version without complex imports
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
-
-// Or use local font files - simpler approach
-// Remove the @use statements that are causing errors
+/* styles/fonts.css - PRODUCTION READY with fixes */
+/* ------------------------------------------------------------------ */
+/* 14. Font System (Fixed for Safari, Accessibility, Build Safety)   */
+/* ------------------------------------------------------------------ */
 
 :root {
-  --font-family-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-serif: 'Playfair Display', Georgia, serif;
+  /* Font Families - Direct fallbacks for reliability */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                        'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+                        'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-serif: Georgia, 'Times New Roman', Times, serif;
+  --font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo,
+                     Monaco, 'Courier New', monospace;
+
+  /* Font Weights */
+  --font-weight-thin: 100;
+  --font-weight-extra-light: 200;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extra-bold: 800;
+  --font-weight-black: 900;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Line Heights */
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Focus Rings - CRITICAL: Accessibility */
+  --focus-ring: 0 0 0 3px rgba(214, 178, 106, 0.25);
+  --focus-ring-strong: 0 0 0 3px rgba(59, 130, 246, 0.35);
+  --focus-ring-inset: inset 0 0 0 3px rgba(214, 178, 106, 0.25);
+
+  /* Text Selection - Brand coherent */
+  --selection-color: rgba(214, 178, 106, 0.3);
+  --selection-text-color: #f4f1ea;
 }
 
-// Font utility classes
-.font-inter {
-  font-family: var(--font-family-inter);
+/* ------------------------------------------------------------------ */
+/* Font Declarations (Self-hosted for reliability)                    */
+/* ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: 
+    local('Inter Light'),
+    local('Inter-Light'),
+    url('/fonts/inter-light.woff2') format('woff2'),
+    url('/fonts/inter-light.woff') format('woff');
 }
 
-.font-serif {
-  font-family: var(--font-family-serif);
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: 
+    local('Inter Regular'),
+    local('Inter-Regular'),
+    url('/fonts/inter-regular.woff2') format('woff2'),
+    url('/fonts/inter-regular.woff') format('woff');
 }
 
-// Font weight utilities
-.font-light { font-weight: 300; }
-.font-normal { font-weight: 400; }
-.font-medium { font-weight: 500; }
-.font-semibold { font-weight: 600; }
-.font-bold { font-weight: 700; }
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: 
+    local('Inter Medium'),
+    local('Inter-Medium'),
+    url('/fonts/inter-medium.woff2') format('woff2'),
+    url('/fonts/inter-medium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: 
+    local('Inter SemiBold'),
+    local('Inter-SemiBold'),
+    url('/fonts/inter-semibold.woff2') format('woff2'),
+    url('/fonts/inter-semibold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: 
+    local('Inter Bold'),
+    local('Inter-Bold'),
+    url('/fonts/inter-bold.woff2') format('woff2'),
+    url('/fonts/inter-bold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: 
+    local('Inter ExtraBold'),
+    local('Inter-ExtraBold'),
+    url('/fonts/inter-extrabold.woff2') format('woff2'),
+    url('/fonts/inter-extrabold.woff') format('woff');
+}
+
+/* ------------------------------------------------------------------ */
+/* Base Styles (Performance Optimized)                                */
+/* ------------------------------------------------------------------ */
+
+body {
+  font-family: var(--font-family-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Performance: Use auto rendering for body text */
+  text-rendering: auto;
+}
+
+/* Optimize headings and short text */
+h1, h2, h3, h4, h5, h6,
+.optimize-legibility {
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* Text Selection - Fixed to match brand */
+::selection {
+  background-color: var(--selection-color);
+  color: var(--selection-text-color);
+}
+
+/* ------------------------------------------------------------------ */
+/* Font Loading States (Fixed FOIT issue)                            */
+/* ------------------------------------------------------------------ */
+
+.font-loaded {
+  animation: font-fade-in 0.2s ease-out;
+}
+
+/* CRITICAL FIX: DO NOT hide content during loading */
+/* Removed: .font-loading { visibility: hidden; } */
+
+@keyframes font-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Focus Management (Accessibility)                                  */
+/* ------------------------------------------------------------------ */
+
+/* Base focus styles for interactive elements */
+.focus-ring {
+  &:focus-visible {
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+}
+
+.focus-ring-inset {
+  &:focus-visible {
+    box-shadow: var(--focus-ring-inset);
+    outline: none;
+  }
+}
+
+.focus-ring-strong {
+  &:focus-visible {
+    box-shadow: var(--focus-ring-strong);
+    outline: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Glass Effect Mixin (Safari Fixed)                                 */
+/* ------------------------------------------------------------------ */
+
+.glass-effect {
+  background: rgba(10, 11, 13, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  
+  /* Safari fix with support query */
+  @supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+    background: rgba(10, 11, 13, 0.70);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Text Utilities (Fixed line-clamp bug)                             */
+/* ------------------------------------------------------------------ */
+
+/* Truncation */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Line Clamp - WebKit standard */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.line-clamp-4 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.line-clamp-5 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+
+.line-clamp-6 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+}
+
+/* CRITICAL FIX: Browser-specific fallback only when needed */
+@supports not (-webkit-line-clamp: 1) {
+  .line-clamp-1 { 
+    overflow: hidden;
+    line-height: 1.2;
+    max-height: 1.2em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    /* Removed incorrect -webkit-line-clamp here */
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    line-height: 1.2;
+    max-height: 2.4em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    line-height: 1.2;
+    max-height: 3.6em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+  
+  .line-clamp-4 {
+    overflow: hidden;
+    line-height: 1.2;
+    max-height: 4.8em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+  
+  .line-clamp-5 {
+    overflow: hidden;
+    line-height: 1.2;
+    max-height: 6em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+  
+  .line-clamp-6 {
+    overflow: hidden;
+    line-height: 1.2;
+    max-height: 7.2em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Font Family Utilities (Compatible with Tailwind)                  */
+/* ------------------------------------------------------------------ */
+
+/* Only include what Tailwind doesn't provide or what you need to override */
+.font-primary { font-family: var(--font-family-primary); }
+.font-serif { font-family: var(--font-family-serif); }
+.font-mono { font-family: var(--font-family-mono); }
+
+/* ------------------------------------------------------------------ */
+/* Letter Spacing Utilities (Optional - Tailwind has these)          */
+/* ------------------------------------------------------------------ */
+
+.tracking-tighter { letter-spacing: var(--tracking-tighter); }
+.tracking-tight { letter-spacing: var(--tracking-tight); }
+.tracking-normal { letter-spacing: var(--tracking-normal); }
+.tracking-wide { letter-spacing: var(--tracking-wide); }
+.tracking-wider { letter-spacing: var(--tracking-wider); }
+.tracking-widest { letter-spacing: var(--tracking-widest); }
+
+/* ------------------------------------------------------------------ */
+/* Line Height Utilities (Optional - Tailwind has these)             */
+/* ------------------------------------------------------------------ */
+
+.leading-none { line-height: var(--line-height-none); }
+.leading-tight { line-height: var(--line-height-tight); }
+.leading-snug { line-height: var(--line-height-snug); }
+.leading-normal { line-height: var(--line-height-normal); }
+.leading-relaxed { line-height: var(--line-height-relaxed); }
+.leading-loose { line-height: var(--line-height-loose); }
+
+/* ------------------------------------------------------------------ */
+/* Performance & Accessibility Optimizations                          */
+/* ------------------------------------------------------------------ */
+
+/* Reduce motion support */
+@media (prefers-reduced-motion: reduce) {
+  .font-loaded {
+    animation: none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  body {
+    /* Optional: Adjust font smoothing for dark mode */
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  body {
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .optimize-legibility {
+    font-feature-settings: normal;
+  }
+}
+
+/* Print styles */
+@media print {
+  .font-primary,
+  .font-sans {
+    font-family: Georgia, 'Times New Roman', Times, serif !important;
+  }
+  
+  .print-font-reset {
+    font-family: Georgia, 'Times New Roman', Times, serif !important;
+  }
+  
+  /* Ensure good contrast for printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive Typography Helpers (Optional)                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+  .responsive-text {
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .responsive-text {
+    font-size: 1rem;
+    line-height: 1.375;
+  }
+}

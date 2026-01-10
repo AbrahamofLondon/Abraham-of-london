@@ -1,77 +1,220 @@
-// styles/_variables.scss
-// CSS Custom Properties for theming
+// styles/_variables.scss - PRODUCTION HARDENED (Dark Luxury)
+// Token-first. Tailwind should map to these vars, not invent new ones.
 
 :root {
-  // Brand palette (dark-first editorial)
+  // ==================== COLOR SYSTEM ====================
+  // Background & Surface
   --color-background: #050608;
-  --color-surface: rgba(21, 23, 28, 0.92);
-  --color-on-background: #f4f1ea;
+  --color-surface: #0a0b0d;
+  --color-surface-elevated: #111214;
+  --color-surface-hover: #1a1b1e;
+
+  // Overlays / Scrims (prevent hardcoding later)
+  --color-overlay: rgba(10, 11, 13, 0.92);   // modal panels
+  --color-scrim: rgba(0, 0, 0, 0.60);        // backdrops behind modals
+  --color-hairline: rgba(244, 241, 234, 0.06); // ultra-subtle separators
+
+  // Borders & Dividers (harmonised with text tone)
+  --color-border: rgba(244, 241, 234, 0.10);
+  --color-border-light: rgba(244, 241, 234, 0.16);
+  --color-border-strong: rgba(244, 241, 234, 0.22);
+
+  // Text Colors
+  --color-text-primary: #f4f1ea;
+  --color-text-heading: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-text-tertiary: #707070;
+
+  // Inverse (for use on gold/light surfaces)
+  --color-text-inverse: #0a0b0d;
+  --color-text-disabled: #555555;
+
+  // Primary Colors (Gold/Amber)
   --color-primary: #d6b26a;
-  --color-primary-light: #e4cfa2;
-  --color-accent: #0e3b33;
-  --color-secondary: #9ca3af;
+  --color-primary-light: #e6c993;
+  --color-primary-dark: #b89440;
+  --color-primary-bg: rgba(214, 178, 106, 0.10);
+
+  // Accent Colors
+  --color-accent-blue: #3b82f6;
+  --color-accent-emerald: #10b981;
+  --color-accent-rose: #f43f5e;
+  --color-accent-purple: #8b5cf6;
+  --color-accent-amber: #f59e0b;
+
+  // Status Colors (SEMANTIC API)
+  // Map semantics to accents so components never use accent tokens directly.
+  --color-success: var(--color-accent-emerald);
+  --color-warning: var(--color-accent-amber);
   --color-error: #ef4444;
-  --color-success: #10b981;
-  
-  // UI Colors as RGB for alpha transparency
-  --ui-border: 255, 255, 255;
-  --ui-shadow: 0, 0, 0;
-  
-  // Alpha variants
-  --ui-alpha-border: rgba(var(--ui-border), 0.16);
-  --ui-alpha-subtle: rgba(var(--ui-border), 0.06);
-  --ui-alpha-heavy: rgba(var(--ui-border), 0.1);
-  
-  // Button tokens
-  --button-primary-bg: var(--color-primary);
-  --button-primary-text: #15171c;
-  --button-primary-hover-bg: var(--color-primary-light);
-  --button-secondary-hover-bg: rgba(15, 23, 42, 0.85);
-  
-  // Typography
-  --font-family-sans: var(--font-inter, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
-  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  
-  // Spacing scale
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
-  
-  // Border radius
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-2xl: 32px;
+  --color-info: var(--color-accent-blue);
+
+  // Focus rings (accessibility + consistency)
+  --focus-ring: 0 0 0 3px rgba(214, 178, 106, 0.25);
+  --focus-ring-strong: 0 0 0 3px rgba(59, 130, 246, 0.35);
+
+  // Ring tokens (for Tailwind ring mapping + SCSS consistency)
+  --ring-color: rgba(214, 178, 106, 0.35);
+  --ring-offset-color: var(--color-background);
+
+  // ==================== TYPOGRAPHY ====================
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Source Serif Pro", Georgia, serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Monaco, "Cascadia Code", monospace;
+
+  // Font Weights
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  // Font Sizes
+  --text-xs: 0.75rem;     // 12px
+  --text-sm: 0.875rem;    // 14px
+  --text-base: 1rem;      // 16px
+  --text-lg: 1.125rem;    // 18px
+  --text-xl: 1.25rem;     // 20px
+  --text-2xl: 1.5rem;     // 24px
+  --text-3xl: 1.875rem;   // 30px
+  --text-4xl: 2.25rem;    // 36px
+  --text-5xl: 3rem;       // 48px
+  --text-6xl: 3.75rem;    // 60px
+
+  // Line Heights
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  // Letter Spacing
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  // ==================== SPACING ====================
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;   // 4px
+  --spacing-2: 0.5rem;    // 8px
+  --spacing-3: 0.75rem;   // 12px
+  --spacing-4: 1rem;      // 16px
+  --spacing-5: 1.25rem;   // 20px
+  --spacing-6: 1.5rem;    // 24px
+  --spacing-8: 2rem;      // 32px
+  --spacing-10: 2.5rem;   // 40px
+  --spacing-12: 3rem;     // 48px
+  --spacing-16: 4rem;     // 64px
+  --spacing-20: 5rem;     // 80px
+  --spacing-24: 6rem;     // 96px
+  --spacing-32: 8rem;     // 128px
+
+  // ==================== BORDER RADIUS ====================
+  --radius-none: 0;
+  --radius-sm: 0.125rem;  // 2px
+  --radius-md: 0.375rem;  // 6px
+  --radius-lg: 0.5rem;    // 8px
+  --radius-xl: 0.75rem;   // 12px
+  --radius-2xl: 1rem;     // 16px
+  --radius-3xl: 1.5rem;   // 24px
   --radius-full: 9999px;
-  
-  // Shadows
-  --shadow-sm: 0 2px 8px rgba(var(--ui-shadow), 0.1);
-  --shadow-md: 0 10px 30px rgba(var(--ui-shadow), 0.5);
-  --shadow-lg: 0 26px 60px rgba(var(--ui-shadow), 0.85);
-  --shadow-xl: 0 35px 80px rgba(var(--ui-shadow), 0.95);
-  
+
+  // ==================== SHADOWS (DARK UI SAFE) ====================
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 14px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.65);
+  --shadow-2xl: 0 32px 80px rgba(0, 0, 0, 0.75);
+  --shadow-inner: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+
+  // Optional: luxury glow
+  --shadow-gold: 0 10px 30px rgba(214, 178, 106, 0.12);
+
+  // ==================== MOTION ====================
+  // Keep easing consistent; prevents random "ease-out" hardcoding.
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+
   // Transitions
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --transition-slow: 350ms ease;
+  --transition-fast: 150ms var(--ease-standard);
+  --transition-normal: 300ms var(--ease-standard);
+  --transition-slow: 500ms var(--ease-standard);
+
+  // ==================== Z-INDEX ====================
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+
+  // Container sizing (tokenised)
+  --container-max: 1200px;
 }
 
-// Light theme overrides
-:global(html:not(.dark)) {
-  --color-background: #f7f7f5;
-  --color-surface: rgba(255, 255, 255, 0.92);
-  --color-on-background: #1a1a1a;
-  --color-secondary: #4b5563;
-  
-  --ui-border: 0, 0, 0;
-  --ui-alpha-border: rgba(var(--ui-border), 0.12);
-  --ui-alpha-subtle: rgba(var(--ui-border), 0.04);
-  --ui-alpha-heavy: rgba(var(--ui-border), 0.08);
-  
-  --button-primary-text: #1a1a1a;
+// ==================== BREAKPOINTS ====================
+$breakpoint-xs: 480px !default;
+$breakpoint-sm: 640px !default;
+$breakpoint-md: 768px !default;
+$breakpoint-lg: 1024px !default;
+$breakpoint-xl: 1280px !default;
+$breakpoint-2xl: 1536px !default;
+
+// ==================== MIXINS ====================
+@mixin container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 1rem;
+
+  @media (min-width: $breakpoint-md) {
+    padding: 0 2rem;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin grid-responsive($columns: 1) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: var(--spacing-6);
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin glass-effect {
+  // Fallback (works everywhere)
+  background: rgba(10, 11, 13, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+
+  // Only enable blur when supported
+  @supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+    background: rgba(10, 11, 13, 0.70);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+}
+
+@mixin gradient-text($from, $to) {
+  background: linear-gradient(135deg, $from, $to);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; // more robust than -webkit-text-fill-color alone
 }

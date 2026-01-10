@@ -17,6 +17,8 @@
     "dev:windows": "cross-env IS_WINDOWS=true next dev",
     "dev:simple": "next dev",
     "build": "next build",
+    "tailwind:build": "tailwindcss -i ./styles/globals.css -o ./styles/tailwind.css --minify",
+    "tailwind:watch": "tailwindcss -i ./styles/globals.css -o ./styles/tailwind.css --watch",
     "build:analyze": "cross-env ANALYZE=true next build",
     "build:production": "cross-env NODE_ENV=production next build",
     "build:fonts": "cross-env FONT_OPTIMIZATION=true next build",

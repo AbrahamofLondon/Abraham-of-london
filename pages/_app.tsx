@@ -1,4 +1,4 @@
-// pages/_app.tsx
+// pages/_app.tsx - UPDATED FOR PRODUCTION
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
@@ -6,20 +6,19 @@ import Head from "next/head";
 import Script from "next/script";
 import { SessionProvider } from "next-auth/react";
 
-import "../styles/globals.scss"; // ✅ Global styles must live here (and only here)
+// ✅ IMPORTANT: Change from .scss to .css since we fixed the build
+import "../styles/tailwind.css";
 
 import { ThemeProvider } from "@/lib/ThemeContext";
-import { AuthProvider } from "@/hooks/useAuth"; // Your existing admin auth
-import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext"; // New provider
+import { AuthProvider } from "@/hooks/useAuth";
+import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
-// Route protection middleware (client-side only)
 function useRouteProtection() {
   const router = useRouter();
   
   useEffect(() => {
-    // List of protected routes that require inner-circle access
     const protectedRoutes = [
       /^\/strategic-frameworks\/.*-canon/,
       /^\/strategic-frameworks\/ultimate-purpose/,
@@ -31,10 +30,8 @@ function useRouteProtection() {
     const isProtectedRoute = protectedRoutes.some(pattern => pattern.test(currentPath));
     
     if (isProtectedRoute && typeof window !== 'undefined') {
-      // Check for inner-circle access token
       const token = localStorage.getItem('innerCircleToken');
       if (!token) {
-        // Store the intended destination
         const returnTo = encodeURIComponent(router.asPath);
         router.push(`/inner-circle/locked?returnTo=${returnTo}`);
       }
@@ -42,13 +39,11 @@ function useRouteProtection() {
   }, [router]);
 }
 
-// Track page views for analytics
 function usePageView() {
   const router = useRouter();
 
   useEffect(() => {
     const handleRouteChange = (url: string) => {
-      // GA/Plausible integration
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', 'page_view', {
           page_title: document.title,
@@ -57,12 +52,10 @@ function usePageView() {
         });
       }
       
-      // Track inner-circle access attempts
       const isProtected = url.includes('canon') || url.includes('strategic-frameworks');
       if (isProtected && typeof window !== 'undefined') {
         const token = localStorage.getItem('innerCircleToken');
         if (token) {
-          // Log successful access
           console.log('Inner Circle access to:', url);
         }
       }
@@ -73,11 +66,9 @@ function usePageView() {
   }, [router.events]);
 }
 
-// Performance monitoring
 function usePerformanceMonitoring() {
   useEffect(() => {
     if (typeof window !== 'undefined' && 'performance' in window) {
-      // Report LCP, FID, CLS if needed
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           console.log(`${entry.name}: ${entry.startTime}`);
@@ -97,13 +88,12 @@ export default function MyApp({
 }: AppProps) {
   usePageView();
   usePerformanceMonitoring();
-  useRouteProtection(); // Add route protection
+  useRouteProtection();
 
   const hasRecaptcha = useMemo(() => {
     return typeof RECAPTCHA_SITE_KEY === "string" && RECAPTCHA_SITE_KEY.trim().length > 10;
   }, []);
 
-  // Check if we're on a protected route
   const isProtectedRoute = useMemo(() => {
     if (typeof window === 'undefined') return false;
     
@@ -118,15 +108,40 @@ export default function MyApp({
 
   return (
     <>
-      {/* Baseline document head defaults (safe in _app) */}
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Add security headers */}
-        <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline';" />
-        <meta name="referrer" content="strict-origin-when-cross-origin" />
+        {/* Add favicon */}
+        <link rel="icon" href="/favicon.ico" />
+        {/* Preconnect to fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </Head>
 
-      {/* ✅ reCAPTCHA v3 should live in _app via next/script (NOT in _document) */}
+      {/* Global CSS for performance */}
+      <style jsx global>{`
+        /* Critical CSS for initial load */
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        /* Prevent layout shift */
+        html, body {
+          overflow-x: hidden;
+        }
+        
+        /* Improve font rendering */
+        * {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Focus styles for accessibility */
+        :focus-visible {
+          outline: 2px solid #d6b26a;
+          outline-offset: 2px;
+        }
+      `}</style>
+
       {hasRecaptcha ? (
         <Script
           id="recaptcha-v3"
@@ -140,29 +155,24 @@ export default function MyApp({
         />
       ) : null}
 
-      {/* Optional: Load inner-circle token restoration script */}
       <Script
         id="inner-circle-init"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              // Restore inner-circle session if available
               if (typeof window !== 'undefined') {
                 const token = localStorage.getItem('innerCircleToken');
                 if (token) {
-                  // Validate token on load
                   try {
                     const decoded = JSON.parse(atob(token.split('.')[1]));
                     const now = Date.now() / 1000;
                     
                     if (decoded.exp < now) {
-                      // Token expired
                       localStorage.removeItem('innerCircleToken');
                       localStorage.removeItem('innerCircleUser');
                       console.log('Inner Circle token expired');
                     } else {
-                      // Token valid
                       console.log('Inner Circle session restored');
                     }
                   } catch (error) {
@@ -180,9 +190,7 @@ export default function MyApp({
       <SessionProvider session={session}>
         <ThemeProvider defaultTheme="dark">
           <AuthProvider>
-            {/* Wrap with InnerCircleProvider for context access */}
             <InnerCircleProvider>
-              {/* Show loading state for protected routes */}
               {isProtectedRoute ? (
                 <div className="fixed inset-0 bg-slate-950 flex items-center justify-center z-50">
                   <div className="text-center">
