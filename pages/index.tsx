@@ -1,9 +1,8 @@
-/* pages/index.tsx — BOSS VERSION (CONSULTING / INSTITUTIONAL) */
+// pages/index.tsx — INSTITUTIONAL (CLEAN SHELL / NO SELF-SABOTAGE)
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
 import AnimatedStatsBar from "@/components/enhanced/AnimatedStatsBar";
@@ -15,17 +14,13 @@ import {
   Award,
   BarChart3,
   BookOpen,
-  Brain,
   Briefcase,
   Building2,
-  Castle,
   CheckCircle2,
   ChevronRight,
   Clock,
-  Crown,
   Cpu,
   Gauge,
-  Gem,
   Globe,
   Landmark,
   Layers,
@@ -40,23 +35,46 @@ import {
   Workflow,
 } from "lucide-react";
 
-// Institutional content utilities (server-safe wrapper)
+// Content (server-safe wrapper)
 import { getAllShorts, getDocHref } from "@/lib/contentlayer-compat";
 
-// Dynamically import enhanced components
-const AnimatedGradientBackground = dynamic(
-  () => import("@/components/enhanced/AnimatedGradientBackground"),
-  { ssr: false }
-);
+/* -----------------------------------------------------------------------------
+   TYPES
+----------------------------------------------------------------------------- */
+type LooseShort = {
+  title?: string;
+  excerpt?: string | null;
+  description?: string | null;
+  readTime?: string | null;
+  url?: string | null;
+  slug?: string | null;
+  _type?: string;
+  draft?: boolean;
+  published?: boolean;
+  date?: string | Date | null;
+  _raw?: { sourceFileName?: string; flattenedPath?: string };
+};
 
-const ParticleBackground = dynamic(
-  () => import("@/components/enhanced/ParticleBackground"),
-  { ssr: false }
-);
+type HomePageProps = {
+  featuredShorts: LooseShort[];
+};
 
 /* -----------------------------------------------------------------------------
-   BOOKS IN DEVELOPMENT
+   CONSTANTS (ROUTES YOU CONFIRMED EXIST)
 ----------------------------------------------------------------------------- */
+const ROUTES = {
+  consulting: "/consulting",
+  canon: "/canon",
+  canonVolume1: "/canon/volume-i-foundations-of-purpose",
+  blog: "/blog",
+  shorts: "/shorts",
+  books: "/books",
+  ventures: "/ventures",
+  strategy: "/strategy",
+  resources: "/resources",
+  downloads: "/downloads",
+  contact: "/contact",
+} as const;
 
 const BOOKS_IN_DEV = [
   {
@@ -82,48 +100,25 @@ const BOOKS_IN_DEV = [
 ] as const;
 
 /* -----------------------------------------------------------------------------
-   TYPES
------------------------------------------------------------------------------ */
-
-type LooseShort = {
-  title?: string;
-  excerpt?: string | null;
-  description?: string | null;
-  readTime?: string | null;
-  url?: string | null;
-  slug?: string | null;
-  _type?: string;
-  draft?: boolean;
-  published?: boolean;
-  date?: string | Date | null;
-  _raw?: { sourceFileName?: string; flattenedPath?: string };
-};
-
-type HomePageProps = {
-  featuredShorts: LooseShort[];
-};
-
-/* -----------------------------------------------------------------------------
    UI HELPERS
 ----------------------------------------------------------------------------- */
-
 const SectionDivider: React.FC<{ withOrnament?: boolean }> = ({
   withOrnament = true,
 }) => (
-  <div className="relative h-24 overflow-hidden bg-white dark:bg-slate-950">
-    {withOrnament && (
+  <div className="relative h-20 overflow-hidden bg-black">
+    {withOrnament ? (
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative">
-          <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-300/40 to-transparent dark:via-amber-500/30" />
+          <div className="h-px w-28 bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
           <div className="mx-8 flex items-center gap-3">
-            <div className="h-3 w-3 animate-pulse rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
-            <div className="h-2 w-2 animate-ping rounded-full bg-amber-400/60" />
-            <div className="h-3 w-3 animate-pulse rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
+            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-80" />
+            <div className="h-1.5 w-1.5 rounded-full bg-amber-300/60" />
+            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-80" />
           </div>
-          <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-300/40 to-transparent dark:via-amber-500/30" />
+          <div className="h-px w-28 bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
         </div>
       </div>
-    )}
+    ) : null}
   </div>
 );
 
@@ -131,99 +126,69 @@ const Pill: React.FC<{ children: React.ReactNode; icon?: React.ReactNode }> = ({
   children,
   icon,
 }) => (
-  <span className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-amber-400/30 bg-gradient-to-r from-amber-500/10 to-amber-600/5 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-100 backdrop-blur-sm transition-all hover:border-amber-400/50 hover:from-amber-500/20 hover:to-amber-600/10">
-    <span className="relative z-10 flex items-center gap-2">
-      {icon}
-      {children}
-    </span>
-    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
+    {icon}
+    {children}
   </span>
 );
 
-const Kpi: React.FC<{
+const Card: React.FC<{
+  title: string;
   icon: React.ReactNode;
-  label: string;
-  value: string;
-  note?: string;
-}> = ({ icon, label, value, note }) => (
-  <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-slate-800/40 to-slate-900/40 p-6 shadow-2xl backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-amber-400/30 hover:shadow-amber-900/20">
+  body: string;
+}> = ({ title, icon, body }) => (
+  <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
     <div className="flex items-start justify-between gap-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">
-          {label}
+          {title}
         </p>
-        <p className="mt-3 font-serif text-3xl font-semibold text-white">
-          {value}
-        </p>
-        {note ? (
-          <p className="mt-2 text-sm text-gray-300">{note}</p>
-        ) : null}
+        <p className="mt-3 text-sm leading-relaxed text-gray-200">{body}</p>
       </div>
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-300">
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
         {icon}
       </div>
     </div>
-    <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-500 group-hover:w-full" />
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(245,158,11,0.08),transparent_55%)]" />
   </div>
 );
 
 /* -----------------------------------------------------------------------------
-   HERO (CONSULTING-GRADE POSITIONING)
+   HERO — CLEAN (NO WASHED OVERLAYS, NO CLIENT-SIDE DEPENDENCY)
 ----------------------------------------------------------------------------- */
-
 const HeroSection: React.FC = () => {
-  const [scrollProgress, setScrollProgress] = React.useState(0);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const progress = (window.scrollY / 520) * 100;
-      setScrollProgress(Math.min(progress, 100));
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      <div className="absolute inset-0">
-        <AnimatedGradientBackground />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/80 to-slate-950/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.16),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(59,130,246,0.10),transparent_55%)]" />
+    <section className="relative overflow-hidden bg-black">
+      {/* Decorative background kept subtle (no muddy wash) */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.12),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(59,130,246,0.08),transparent_55%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
       </div>
 
-      {/* subtle progress bar = “operator” vibe */}
-      <div className="absolute left-0 right-0 top-0 h-1 bg-white/5">
-        <div
-          className="h-full bg-gradient-to-r from-amber-400 to-amber-600"
-          style={{ width: `${scrollProgress}%` }}
-        />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 py-24 lg:py-32">
+      {/* IMPORTANT: top padding so fixed header never eats the hero */}
+      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-8 lg:pb-24 lg:pt-28">
         <div className="mb-8 flex flex-wrap gap-3">
-          <Pill icon={<Crown className="h-3.5 w-3.5" />}>Institutional OS</Pill>
-          <Pill icon={<Brain className="h-3.5 w-3.5" />}>Strategy</Pill>
-          <Pill icon={<Castle className="h-3.5 w-3.5" />}>Governance</Pill>
-          <Pill icon={<Gem className="h-3.5 w-3.5" />}>Execution</Pill>
+          <Pill icon={<Landmark className="h-3.5 w-3.5" />}>Institutional OS</Pill>
+          <Pill icon={<Target className="h-3.5 w-3.5" />}>Strategy</Pill>
+          <Pill icon={<Scale className="h-3.5 w-3.5" />}>Governance</Pill>
+          <Pill icon={<Workflow className="h-3.5 w-3.5" />}>Execution</Pill>
         </div>
 
         <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
           <div className="lg:col-span-7">
-            <h1 className="relative mb-6 font-serif text-5xl font-semibold leading-tight text-white sm:text-7xl lg:text-8xl">
-              <span className="block bg-gradient-to-r from-amber-100 via-amber-300 to-amber-400 bg-clip-text text-transparent">
-                Abraham of London
-              </span>
-              <span className="mt-6 block text-2xl font-normal text-amber-100/90 sm:text-4xl lg:text-5xl">
+            <h1 className="mb-6 font-serif text-5xl font-semibold leading-tight text-amber-100 sm:text-7xl lg:text-8xl">
+              Abraham of London
+              <span className="mt-5 block text-2xl font-normal text-amber-100/85 sm:text-4xl lg:text-5xl">
                 Less theatre.{" "}
                 <span className="relative inline-block">
                   <span className="relative z-10">More operating system.</span>
-                  <span className="absolute -bottom-1 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-transparent" />
+                  <span className="absolute -bottom-1 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-transparent opacity-80" />
                 </span>
               </span>
             </h1>
 
-            <p className="mb-10 max-w-3xl text-xl text-gray-300 lg:text-2xl">
+            <p className="mb-10 max-w-3xl text-lg leading-relaxed text-gray-200 sm:text-xl lg:text-2xl">
               Consulting-grade diagnostics and governance — built for founders,
               leadership teams, and institutions that must survive pressure,
               scrutiny, and scale.
@@ -231,27 +196,21 @@ const HeroSection: React.FC = () => {
 
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/consulting"
-                className="group relative rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-8 py-4 text-base font-bold text-black shadow-2xl shadow-amber-900/40 transition-all hover:scale-105 hover:shadow-amber-900/60"
+                href={ROUTES.consulting}
+                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-base font-bold text-black shadow-lg shadow-amber-900/25 transition-transform hover:scale-[1.02]"
               >
-                <span className="relative z-10 flex items-center gap-3">
-                  <Briefcase className="h-5 w-5" />
-                  Engage Advisory
-                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
-                </span>
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                <Briefcase className="h-5 w-5" />
+                Engage Advisory
+                <ArrowRight className="h-5 w-5" />
               </Link>
 
               <Link
-                href="/canon"
-                className="group relative rounded-xl border-2 border-amber-400/40 bg-gradient-to-r from-amber-400/5 via-amber-500/5 to-amber-600/5 px-8 py-4 text-base font-bold text-amber-100 backdrop-blur-sm transition-all hover:scale-105 hover:border-amber-400/60 hover:bg-amber-500/10"
+                href={ROUTES.canon}
+                className="inline-flex items-center gap-3 rounded-xl border border-amber-400/35 bg-white/5 px-7 py-4 text-base font-bold text-amber-100 backdrop-blur-sm transition-transform hover:scale-[1.02] hover:border-amber-400/55"
               >
-                <span className="relative z-10 flex items-center gap-3">
-                  <BookOpen className="h-5 w-5" />
-                  Read the Canon
-                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
-                </span>
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-amber-400/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <BookOpen className="h-5 w-5" />
+                Read the Canon
+                <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
 
@@ -273,89 +232,55 @@ const HeroSection: React.FC = () => {
 
           <div className="lg:col-span-5">
             <div className="grid gap-6">
-              <Kpi
+              <Card
+                title="Delivery posture"
                 icon={<Landmark className="h-6 w-6" />}
-                label="Delivery posture"
-                value="Institutional"
-                note="Decision rights, controls, and cadence — not vibes."
+                body="Decision rights, controls, and cadence — not vibes."
               />
-              <Kpi
+              <Card
+                title="Outcome bias"
                 icon={<LineChart className="h-6 w-6" />}
-                label="Outcome bias"
-                value="Deployable"
-                note="Every engagement ends in assets + owners + milestones."
+                body="Every engagement ends in assets + owners + milestones."
               />
-              <Kpi
+              <Card
+                title="Operating context"
                 icon={<Globe className="h-6 w-6" />}
-                label="Operating context"
-                value="UK ↔ Africa"
-                note="Grounded in real constraints, not idealised models."
+                body="UK ↔ Africa — grounded in real constraints, not idealised models."
               />
             </div>
           </div>
         </div>
 
-        <div className="relative mt-16 lg:mt-24">
-          <div className="relative overflow-hidden rounded-3xl border-2 border-white/10 bg-black/40 shadow-2xl backdrop-blur-xl">
-            <div className="relative aspect-video overflow-hidden">
-              <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-black/20 to-black/50" />
-              <Image
-                src="/assets/images/abraham-of-london-banner.webp"
-                alt="Abraham of London — Institutional Advisory Platform"
-                fill
-                priority
-                className="object-cover transition-transform duration-1000 hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-              />
-            </div>
-
-            <div className="relative bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 px-8 py-6 backdrop-blur-sm">
-              <div className="flex items-start gap-4">
-                <div className="mt-1 h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 p-2.5">
-                  <Cpu className="h-full w-full text-amber-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-lg font-medium text-white">
-                    Blueprint → pressure-test → deploy. The platform is built to
-                    convert strategy into routine.
-                  </p>
-                  <p className="mt-2 text-sm text-gray-300">
-                    — Institutional architecture since 2024
-                  </p>
-                </div>
-
-                <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200 md:flex">
-                  <CheckCircle2 className="h-4 w-4 text-amber-300" />
-                  Partner-led
-                </div>
-              </div>
-            </div>
+        {/* Image block — crisp, controlled overlays, high quality */}
+        <div className="relative mt-14 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
+          <div className="relative aspect-[16/9]">
+            <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/0 via-black/20 to-black/55" />
+            <Image
+              src="/assets/images/abraham-of-london-banner.webp"
+              alt="Abraham of London — Institutional Advisory Platform"
+              fill
+              priority
+              quality={95}
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+            />
           </div>
-        </div>
 
-        {/* “logos” strip without claiming real clients */}
-        <div className="mt-12 rounded-3xl border border-white/10 bg-gradient-to-r from-white/5 to-white/0 px-6 py-6 backdrop-blur-xl">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-                Industry coverage
+          <div className="flex items-start gap-4 px-6 py-6 sm:px-8">
+            <div className="mt-1 h-12 w-12 rounded-xl bg-amber-500/10 p-2.5">
+              <Cpu className="h-full w-full text-amber-300" />
+            </div>
+            <div className="flex-1">
+              <p className="text-base font-medium text-amber-100 sm:text-lg">
+                Blueprint → pressure-test → deploy. Convert strategy into routine.
               </p>
               <p className="mt-2 text-sm text-gray-300">
-                Advisory patterns that generalise across sectors — without
-                pretending every client is a trophy photo.
+                Institutional architecture since 2024.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {["Energy", "Infrastructure", "Digital", "Public Systems"].map(
-                (x) => (
-                  <div
-                    key={x}
-                    className="flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200"
-                  >
-                    {x}
-                  </div>
-                )
-              )}
+            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200 md:flex">
+              <CheckCircle2 className="h-4 w-4 text-amber-300" />
+              Partner-led
             </div>
           </div>
         </div>
@@ -365,75 +290,58 @@ const HeroSection: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   TRUST SIGNALS (CONSULTING PROOF STACK)
+   TRUST SIGNALS
 ----------------------------------------------------------------------------- */
-
 const TrustSignals: React.FC = () => {
   const signals = [
     {
-      icon: <Award className="h-6 w-6" />,
+      icon: <Award className="h-6 w-6 text-amber-300" />,
       title: "Governance-grade thinking",
       description:
-        "Mandates, controls, decision rights, and operating cadence — built to survive audit, scrutiny, and scale.",
-      color: "from-amber-500/20 to-amber-600/10",
-      iconColor: "text-amber-400",
+        "Mandates, controls, decision rights, cadence — built to survive audit, scrutiny, and scale.",
     },
     {
-      icon: <BarChart3 className="h-6 w-6" />,
+      icon: <BarChart3 className="h-6 w-6 text-emerald-300" />,
       title: "Strategy → execution linkage",
       description:
-        "No deck theatre. We translate decisions into deployable assets, measurable milestones, and named ownership.",
-      color: "from-emerald-500/20 to-emerald-600/10",
-      iconColor: "text-emerald-400",
+        "No deck theatre. Decisions become deployable assets, measurable milestones, and named ownership.",
     },
     {
-      icon: <Shield className="h-6 w-6" />,
+      icon: <Shield className="h-6 w-6 text-blue-300" />,
       title: "Conviction, not vibes",
       description:
         "Christian ethics + historical realism + disciplined incentives — because systems reveal character under stress.",
-      color: "from-blue-500/20 to-blue-600/10",
-      iconColor: "text-blue-400",
     },
   ];
 
   return (
-    <section className="bg-white py-16 dark:bg-slate-950">
+    <section className="bg-black py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+        <div className="mb-10 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
             Institutional assurance
           </p>
-          <h2 className="mt-4 font-serif text-3xl font-light text-slate-900 dark:text-white sm:text-4xl">
+          <h2 className="mt-4 font-serif text-3xl font-light text-amber-100 sm:text-4xl">
             Built to survive pressure
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 dark:text-gray-300">
-            The consulting world respects one thing: repeatable method that
-            holds under cross-examination.
+          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-300">
+            Repeatable method that holds under cross-examination.
           </p>
         </div>
 
-        <div className="grid gap-8 rounded-3xl border border-slate-200/50 bg-gradient-to-b from-slate-50 to-white p-8 dark:border-slate-800/50 dark:from-slate-900 dark:to-slate-950 md:grid-cols-3">
-          {signals.map((signal) => (
+        <div className="grid gap-6 md:grid-cols-3">
+          {signals.map((s) => (
             <div
-              key={signal.title}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200/50 bg-white/50 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-slate-300/50 hover:shadow-xl dark:border-slate-800/50 dark:bg-slate-900/50 dark:hover:border-slate-700/50"
+              key={s.title}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl"
             >
-              <div className="relative z-10">
-                <div
-                  className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${signal.color}`}
-                >
-                  <div className={signal.iconColor}>{signal.icon}</div>
-                </div>
-
-                <h3 className="mb-3 text-lg font-semibold text-slate-900 dark:text-white">
-                  {signal.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-gray-300">
-                  {signal.description}
-                </p>
+              <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5">
+                {s.icon}
               </div>
-
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <h3 className="text-lg font-semibold text-amber-100">{s.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-300">
+                {s.description}
+              </p>
             </div>
           ))}
         </div>
@@ -443,9 +351,8 @@ const TrustSignals: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   SERVICE LINES (CONSULTING FIRM STRUCTURE)
+   SERVICE LINES
 ----------------------------------------------------------------------------- */
-
 const ServiceLines: React.FC = () => {
   const lines = [
     {
@@ -478,65 +385,61 @@ const ServiceLines: React.FC = () => {
   ] as const;
 
   return (
-    <section className="bg-white py-20 dark:bg-slate-950">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+    <section className="bg-black py-18">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Service lines
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
               A proper consulting spine
             </h2>
-            <p className="mt-4 text-lg text-slate-600 dark:text-gray-300">
-              We don’t “help.” We build the decision system that makes help
-              unnecessary.
+            <p className="mt-4 text-lg text-gray-300">
+              We don’t “help.” We build the decision system that makes help unnecessary.
             </p>
           </div>
 
           <Link
-            href="/consulting"
-            className="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/5 to-amber-600/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-700 transition-all hover:border-amber-500/80 hover:from-amber-500/10 hover:to-amber-600/10 dark:text-amber-300"
+            href={ROUTES.consulting}
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
           >
             <span>See engagements</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {lines.map((l) => (
             <div
               key={l.title}
-              className="group relative overflow-hidden rounded-3xl border-2 border-slate-200/50 bg-gradient-to-b from-white to-slate-50 p-8 shadow-2xl transition-all hover:-translate-y-2 hover:border-amber-400/50 hover:shadow-amber-900/20 dark:border-slate-800/50 dark:from-slate-900 dark:to-slate-950"
+              className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl"
             >
-              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/15 to-amber-600/5 text-amber-500 dark:text-amber-400">
+              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {l.icon}
               </div>
 
-              <h3 className="mb-4 font-serif text-2xl font-semibold text-slate-900 dark:text-white">
+              <h3 className="font-serif text-2xl font-semibold text-amber-100">
                 {l.title}
               </h3>
 
-              <ul className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-gray-300">
+              <ul className="mt-5 space-y-3 text-sm text-gray-300">
                 {l.bullets.map((b) => (
                   <li key={b} className="flex gap-3">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500 dark:text-amber-400" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
                     <span>{b}</span>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-8 flex items-center justify-between border-t border-slate-200/60 pt-6 dark:border-slate-800/60">
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-gray-400">
+              <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
                   Output-driven
                 </span>
-                <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
-                  Learn more
-                  <ChevronRight className="h-4 w-4" />
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
+                  Learn more <ChevronRight className="h-4 w-4" />
                 </span>
               </div>
-
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-400/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             </div>
           ))}
         </div>
@@ -546,9 +449,8 @@ const ServiceLines: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   DELIVERY MODEL (CONSULTING “HOW WE WORK”)
+   DELIVERY MODEL
 ----------------------------------------------------------------------------- */
-
 const DeliveryModel: React.FC = () => {
   const steps = [
     {
@@ -569,57 +471,45 @@ const DeliveryModel: React.FC = () => {
   ] as const;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(245,158,11,0.08),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(59,130,246,0.05),transparent_55%)]" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+    <section className="relative bg-black py-16">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_60%,rgba(245,158,11,0.10),transparent_55%)]" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Delivery model
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
+            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
               Method beats motivation.
             </h2>
             <p className="mt-4 text-lg text-gray-300">
-              Your organisation doesn’t need hype — it needs an operating
-              cadence that doesn’t collapse when the room gets hot.
+              Your organisation needs cadence that doesn’t collapse when the room gets hot.
             </p>
           </div>
 
           <Link
-            href="/consulting"
-            className="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-amber-400/50 bg-gradient-to-r from-amber-400/5 to-amber-500/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all hover:border-amber-400/80 hover:from-amber-400/10 hover:to-amber-500/10 hover:shadow-xl hover:shadow-amber-900/20"
+            href={ROUTES.consulting}
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
           >
             <span>Engagement formats</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {steps.map((s, idx) => (
             <div
               key={s.title}
-              className="group relative overflow-hidden rounded-3xl border-2 border-white/10 bg-gradient-to-b from-slate-800/40 to-slate-900/40 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-amber-400/40 hover:shadow-amber-900/20"
-              style={{ animationDelay: `${idx * 80}ms` }}
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl"
             >
-              <div className="absolute -right-2 -top-2 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-slate-800 to-slate-900 text-xs font-bold text-white shadow-lg">
+              <div className="absolute -right-2 -top-2 flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-xs font-bold text-amber-100">
                 {idx + 1}
               </div>
-
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-300 shadow-lg">
+              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {s.icon}
               </div>
-
-              <h3 className="mb-3 text-2xl font-semibold text-white">
-                {s.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-300">{s.body}</p>
-
-              <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-500 group-hover:w-full" />
+              <h3 className="text-2xl font-semibold text-amber-100">{s.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300">{s.body}</p>
             </div>
           ))}
         </div>
@@ -629,101 +519,60 @@ const DeliveryModel: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   STRATEGIC FRAMEWORK STRIP (yours, tightened copy)
+   STRATEGIC FRAMEWORK STRIP — use EXISTING /strategy route + /resources
 ----------------------------------------------------------------------------- */
-
 const StrategicFrameworkStrip: React.FC = () => {
   const items = [
-    {
-      icon: <Target className="h-6 w-6" />,
-      title: "Mandate",
-      body: "Define the mission boundary. No mandate = no strategy.",
-      color: "from-red-500/20 to-red-600/10",
-      iconColor: "text-red-400",
-    },
-    {
-      icon: <Map className="h-6 w-6" />,
-      title: "Terrain",
-      body: "Market structure, rivals, and constraints. Reality first.",
-      color: "from-blue-500/20 to-blue-600/10",
-      iconColor: "text-blue-400",
-    },
-    {
-      icon: <Scale className="h-6 w-6" />,
-      title: "Choices",
-      body: "Trade-offs written. If it’s not written, it isn’t real.",
-      color: "from-emerald-500/20 to-emerald-600/10",
-      iconColor: "text-emerald-400",
-    },
-    {
-      icon: <Workflow className="h-6 w-6" />,
-      title: "OS",
-      body: "Decision rights + cadence. Strategy becomes routine.",
-      color: "from-purple-500/20 to-purple-600/10",
-      iconColor: "text-purple-400",
-    },
-    {
-      icon: <Gauge className="h-6 w-6" />,
-      title: "Governance",
-      body: "Accountability that keeps the machine honest.",
-      color: "from-amber-500/20 to-amber-600/10",
-      iconColor: "text-amber-400",
-    },
+    { icon: <Target className="h-6 w-6" />, title: "Mandate", body: "Define the mission boundary. No mandate = no strategy." },
+    { icon: <Map className="h-6 w-6" />, title: "Terrain", body: "Market structure, rivals, constraints. Reality first." },
+    { icon: <Scale className="h-6 w-6" />, title: "Choices", body: "Trade-offs written. If it’s not written, it isn’t real." },
+    { icon: <Workflow className="h-6 w-6" />, title: "OS", body: "Decision rights + cadence. Strategy becomes routine." },
+    { icon: <Gauge className="h-6 w-6" />, title: "Governance", body: "Accountability that keeps the machine honest." },
   ] as const;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[url('/assets/images/grid.svg')] bg-center [mask-image:radial-gradient(white,transparent_70%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-950" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+    <section className="bg-black py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Strategic framework
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
+            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
               Capacity is proven by method.
             </h2>
             <p className="mt-4 text-lg text-gray-300">
-              Five layers that prevent strategy from collapsing at first contact
-              with reality.
+              Five layers that prevent strategy from collapsing at first contact with reality.
             </p>
           </div>
-          <Link
-            href="/resources/strategic-frameworks"
-            className="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-amber-400/50 bg-gradient-to-r from-amber-400/5 to-amber-500/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all hover:border-amber-400/80 hover:from-amber-400/10 hover:to-amber-500/10 hover:shadow-xl hover:shadow-amber-900/20"
-          >
-            <span>View frameworks</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
-          </Link>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={ROUTES.strategy}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-400/40 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
+            >
+              Strategy <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href={ROUTES.resources}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200"
+            >
+              Resources <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-          {items.map((it, index) => (
+          {items.map((it) => (
             <div
               key={it.title}
-              className="group relative overflow-hidden rounded-3xl border-2 border-white/10 bg-gradient-to-b from-slate-800/40 to-slate-900/40 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-amber-400/40 hover:shadow-amber-900/20"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl"
             >
-              <div className="absolute -right-2 -top-2 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-slate-800 to-slate-900 text-xs font-bold text-white shadow-lg">
-                {index + 1}
+              <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
+                {it.icon}
               </div>
-
-              <div
-                className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${it.color} shadow-lg`}
-              >
-                <div className={it.iconColor}>{it.icon}</div>
-              </div>
-
-              <h3 className="mb-3 text-xl font-semibold text-white">
-                {it.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-300">{it.body}</p>
-
-              <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-500 group-hover:w-full" />
+              <h3 className="text-xl font-semibold text-amber-100">{it.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300">{it.body}</p>
             </div>
           ))}
         </div>
@@ -733,37 +582,36 @@ const StrategicFrameworkStrip: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   CANON SHOWCASE
+   CANON
 ----------------------------------------------------------------------------- */
-
 const CanonShowcase: React.FC = () => (
-  <section className="bg-white py-20 dark:bg-slate-950">
+  <section className="bg-black py-16">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
             Canon · Core backbone
           </p>
-          <h2 className="mt-4 font-serif text-4xl font-light tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+          <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
             The blueprint that underwrites the firm
           </h2>
-          <p className="mt-4 text-lg text-slate-600 dark:text-gray-300">
-            First principles and operating logic — written to last longer than a
-            trend cycle.
+          <p className="mt-4 text-lg text-gray-300">
+            First principles and operating logic — written to last longer than a trend cycle.
           </p>
         </div>
+
         <Link
-          href="/canon"
-          className="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/5 to-amber-600/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-700 transition-all hover:border-amber-500/80 hover:from-amber-500/10 hover:to-amber-600/10 dark:text-amber-300"
+          href={ROUTES.canon}
+          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
         >
-          <span>Browse Canon entries</span>
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
+          <span>Browse Canon</span>
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
       <CanonPrimaryCard
         title="The Architecture of Human Purpose"
-        href="/canon/volume-i-foundations-of-purpose"
+        href={ROUTES.canonVolume1}
         volumeNumber={1}
         image="/assets/images/canon/architecture-of-human-purpose-cover.jpg"
         className="mx-auto max-w-4xl"
@@ -774,53 +622,47 @@ const CanonShowcase: React.FC = () => (
 );
 
 /* -----------------------------------------------------------------------------
-   SHORTS STRIP (EXECUTIVE FIELD NOTES)
+   SHORTS STRIP
 ----------------------------------------------------------------------------- */
-
 const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
   if (!shorts || shorts.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(245,158,11,0.1),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(59,130,246,0.05),transparent_50%)]" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+    <section className="bg-black py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Shorts · Field signals
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
+            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
               Executive notes for builders.
             </h2>
             <p className="mt-4 text-lg text-gray-300">
               Concise insights that cut through noise and translate into action.
             </p>
           </div>
+
           <Link
-            href="/shorts"
-            className="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-amber-400/60 bg-gradient-to-r from-amber-400/5 to-amber-500/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all hover:border-amber-400/80 hover:from-amber-400/10 hover:to-amber-500/10 hover:shadow-xl hover:shadow-amber-900/20"
+            href={ROUTES.shorts}
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
           >
             <span>View all shorts</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {shorts.map((short, index) => {
+        <div className="grid gap-6 md:grid-cols-3">
+          {shorts.map((short) => {
             const href = getDocHref(short);
             return (
               <Link
                 key={short.slug ?? short._raw?.flattenedPath ?? short.title ?? href}
                 href={href}
-                className="group relative overflow-hidden rounded-3xl border-2 border-white/10 bg-gradient-to-b from-slate-800/40 to-slate-900/40 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-amber-400/40 hover:shadow-amber-900/20"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl hover:border-amber-400/35"
               >
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-600/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
+                <div className="mb-5 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
                     <Sparkles className="h-3.5 w-3.5" />
                     Field note
                   </span>
@@ -830,23 +672,19 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
                   </span>
                 </div>
 
-                <h3 className="mb-4 line-clamp-2 font-serif text-2xl font-semibold text-white">
+                <h3 className="mb-3 line-clamp-2 font-serif text-2xl font-semibold text-amber-100">
                   {short.title}
                 </h3>
-                <p className="mb-6 line-clamp-3 text-base leading-relaxed text-gray-300">
+                <p className="line-clamp-3 text-sm leading-relaxed text-gray-300">
                   {short.excerpt || short.description}
                 </p>
 
-                <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-6">
-                  <span className="text-sm font-medium text-gray-400">
-                    Read analysis
+                <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+                  <span className="text-sm font-medium text-gray-400">Read analysis</span>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/5">
+                    <ArrowRight className="h-5 w-5 text-amber-200" />
                   </span>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-amber-400/30 bg-gradient-to-r from-amber-400/10 to-amber-500/5 transition-all group-hover:border-amber-400/60 group-hover:from-amber-400/20 group-hover:to-amber-500/10">
-                    <ArrowRight className="h-5 w-5 text-amber-300 transition-transform group-hover:translate-x-1" />
-                  </div>
                 </div>
-
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-400/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               </Link>
             );
           })}
@@ -859,51 +697,52 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
 /* -----------------------------------------------------------------------------
    BOOKS IN DEVELOPMENT
 ----------------------------------------------------------------------------- */
-
 const BooksInDevelopment: React.FC = () => (
-  <section className="bg-white py-20 dark:bg-slate-950">
+  <section className="bg-black py-16">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
             Books & manuscripts
           </p>
-          <h2 className="mt-4 font-serif text-4xl font-light tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+          <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
             Long-form work for longevity
           </h2>
-          <p className="mt-4 text-lg text-slate-600 dark:text-gray-300">
+          <p className="mt-4 text-lg text-gray-300">
             Deep-dive explorations currently in development.
           </p>
         </div>
+
         <Link
-          href="/books"
-          className="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/5 to-amber-600/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-700 transition-all hover:border-amber-500/80 hover:from-amber-500/10 hover:to-amber-600/10 dark:text-amber-300"
+          href={ROUTES.books}
+          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200"
         >
           <span>View all books</span>
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {BOOKS_IN_DEV.map((book) => (
           <Link
             key={book.slug}
-            href={`/books/${book.slug}`}
-            className="group relative overflow-hidden rounded-3xl border-2 border-slate-200/50 bg-gradient-to-b from-white to-slate-50 shadow-2xl transition-all hover:-translate-y-2 hover:border-amber-400/50 hover:shadow-amber-900/20 dark:border-slate-800/50 dark:from-slate-900 dark:to-slate-950"
+            href={`${ROUTES.books}/${book.slug}`}
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-amber-400/35"
           >
             <article className="flex h-full">
               <div className="relative w-40 flex-shrink-0 overflow-hidden">
-                <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/20 to-transparent" />
+                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-black/25 to-transparent" />
                 <Image
                   src={book.cover}
                   alt={book.title}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  quality={90}
+                  className="object-cover"
                 />
                 <div className="absolute bottom-4 left-4 right-4 z-20">
-                  <div className="h-2 rounded-full bg-slate-800/80 backdrop-blur-sm">
+                  <div className="h-2 rounded-full bg-black/60 backdrop-blur-sm">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-1000"
+                      className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600"
                       style={{ width: `${book.progress}%` }}
                     />
                   </div>
@@ -913,31 +752,29 @@ const BooksInDevelopment: React.FC = () => (
                 </div>
               </div>
 
-              <div className="flex flex-1 flex-col p-8">
-                <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500/10 to-amber-600/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+              <div className="flex flex-1 flex-col p-7">
+                <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
                   {book.tag}
                 </span>
 
-                <h3 className="mb-4 font-serif text-2xl font-semibold text-slate-900 dark:text-white">
+                <h3 className="mb-3 font-serif text-2xl font-semibold text-amber-100">
                   {book.title}
                 </h3>
 
-                <p className="mb-6 flex-1 text-base leading-relaxed text-slate-600 dark:text-gray-300">
+                <p className="mb-6 flex-1 text-sm leading-relaxed text-gray-300">
                   {book.blurb}
                 </p>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                  <span className="text-sm font-medium text-amber-200">
                     In development
                   </span>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-amber-600/5 transition-all group-hover:border-amber-500/60 group-hover:from-amber-500/20 group-hover:to-amber-600/10">
-                    <ArrowRight className="h-5 w-5 text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400" />
-                  </div>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/5">
+                    <ArrowRight className="h-5 w-5 text-amber-200" />
+                  </span>
                 </div>
               </div>
             </article>
-
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-400/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
           </Link>
         ))}
       </div>
@@ -946,67 +783,55 @@ const BooksInDevelopment: React.FC = () => (
 );
 
 /* -----------------------------------------------------------------------------
-   STRATEGIC SESSIONS CTA (CONSULTING CTA)
+   STRATEGIC SESSIONS CTA
 ----------------------------------------------------------------------------- */
-
 const StrategicSessions: React.FC = () => (
-  <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-28">
-    <div className="absolute inset-0">
-      <div className="absolute inset-0 bg-[url('/assets/images/grid-dark.svg')] bg-center opacity-30" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-950" />
-      <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-amber-500/10 to-transparent blur-3xl" />
-      <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-blue-500/10 to-transparent blur-3xl" />
-    </div>
+  <section className="relative overflow-hidden bg-black py-20">
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(245,158,11,0.10),transparent_60%)]" />
+    <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
+        Advisory engagement
+      </p>
+      <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
+        Advisory that produces{" "}
+        <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+          deployable systems
+        </span>
+      </h2>
+      <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-300">
+        Diagnose, decide, deploy — with governance and cadence that stick.
+      </p>
 
-    <div className="relative mx-auto max-w-7xl px-4 text-center">
-      <div className="mb-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-          Advisory engagement
-        </p>
-        <h2 className="mt-6 font-serif text-5xl font-light text-white sm:text-6xl">
-          Advisory that produces
-          <br />
-          <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
-            deployable systems
-          </span>
-        </h2>
-        <p className="mx-auto mt-6 max-w-2xl text-xl text-gray-300">
-          Diagnose, decide, deploy — with institutional-grade governance and a
-          cadence that sticks.
-        </p>
-      </div>
-
-      <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+      <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
         <Link
-          href="/consulting"
-          className="group relative inline-flex items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-12 py-6 text-lg font-bold text-black shadow-2xl shadow-amber-900/40 transition-all hover:scale-105 hover:shadow-amber-900/60"
+          href={ROUTES.consulting}
+          className="inline-flex items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-10 py-5 text-lg font-bold text-black"
         >
           <Briefcase className="h-6 w-6" />
           <span>Book a Strategic Session</span>
-          <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-2" />
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 opacity-0 transition-opacity group-hover:opacity-100" />
+          <ArrowRight className="h-6 w-6" />
         </Link>
 
         <Link
-          href="/consulting#offer"
-          className="group inline-flex items-center justify-center gap-3 rounded-2xl border-2 border-white/15 bg-white/5 px-10 py-6 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-all hover:border-amber-400/50 hover:bg-white/10"
+          href={`${ROUTES.consulting}#offer`}
+          className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-9 py-5 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200"
         >
           <span>View offer</span>
-          <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+          <ChevronRight className="h-5 w-5" />
         </Link>
       </div>
 
-      <div className="mt-16 grid gap-8 sm:grid-cols-3">
+      <div className="mt-14 grid gap-8 sm:grid-cols-3">
         {[
           { icon: <Target className="h-6 w-6" />, text: "Diagnostic-first approach" },
           { icon: <Users2 className="h-6 w-6" />, text: "Direct partner access" },
           { icon: <TrendingUp className="h-6 w-6" />, text: "Accountability cadence" },
         ].map((item) => (
           <div key={item.text} className="flex items-center justify-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
               <div className="text-amber-300">{item.icon}</div>
             </div>
-            <span className="text-lg font-medium text-white">{item.text}</span>
+            <span className="text-base font-medium text-amber-100">{item.text}</span>
           </div>
         ))}
       </div>
@@ -1017,24 +842,23 @@ const StrategicSessions: React.FC = () => (
 /* -----------------------------------------------------------------------------
    PAGE
 ----------------------------------------------------------------------------- */
-
 const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
   return (
     <Layout
       title="Abraham of London — Consulting-Grade Advisory"
       description="Consulting-grade diagnostics and governance: mandate clarity, operating models, execution cadence, and deployable systems that survive pressure."
-      className="overflow-hidden"
+      fullWidth
+      className="bg-black"
     >
-      <ParticleBackground />
-
+      {/* IMPORTANT: Layout wraps <main>. We keep sections responsible for width. */}
       <HeroSection />
 
       <TrustSignals />
 
       <ServiceLines />
 
-      <section className="border-y border-slate-200/50 bg-gradient-to-b from-white to-slate-50 dark:border-slate-800/50 dark:from-slate-900 dark:to-slate-950">
-        <div className="mx-auto max-w-7xl px-4">
+      <section className="border-y border-white/10 bg-black">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedStatsBar />
         </div>
       </section>
@@ -1053,41 +877,13 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
       <SectionDivider withOrnament={false} />
 
-      {featuredShorts.length > 0 && <ShortsStrip shorts={featuredShorts} />}
+      {featuredShorts.length > 0 ? <ShortsStrip shorts={featuredShorts} /> : null}
 
       <EnhancedVenturesSection />
 
       <BooksInDevelopment />
 
       <StrategicSessions />
-
-      <style jsx global>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-        @keyframes gradient-shift {
-          0%,
-          100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        .animate-gradient-shift {
-          background-size: 200% 200%;
-          animation: gradient-shift 15s ease infinite;
-        }
-      `}</style>
     </Layout>
   );
 };
@@ -1097,7 +893,6 @@ export default HomePage;
 /* -----------------------------------------------------------------------------
    BUILD-TIME DATA
 ----------------------------------------------------------------------------- */
-
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   try {
     const allShorts = await getAllShorts();
@@ -1105,21 +900,16 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     const featuredShorts = (allShorts as any[])
       .filter((s) => s && (s.published ?? true) && !(s.draft ?? false))
       .sort((a, b) => {
-        const da = a.date ? new Date(a.date).getTime() : 0;
-        const db = b.date ? new Date(b.date).getTime() : 0;
+        const da = a?.date ? new Date(a.date).getTime() : 0;
+        const db = b?.date ? new Date(b.date).getTime() : 0;
         return db - da;
       })
       .slice(0, 3);
 
-    return {
-      props: { featuredShorts },
-      revalidate: 3600,
-    };
+    return { props: { featuredShorts }, revalidate: 3600 };
   } catch (error) {
+    // Don’t crash the homepage because “shorts” had a bad day.
     console.error("Error fetching shorts:", error);
-    return {
-      props: { featuredShorts: [] },
-      revalidate: 3600,
-    };
+    return { props: { featuredShorts: [] }, revalidate: 3600 };
   }
 };
