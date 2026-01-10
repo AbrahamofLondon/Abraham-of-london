@@ -2,7 +2,7 @@
 
 [build]
   # FIXED: Add pre-build step to handle Windows file locking
-  command = "pnpm install --frozen-lockfile && node scripts/pre-build.js && pnpm contentlayer build && pnpm build"
+  command = "pnpm install --frozen-lockfile && node scripts/prebuild.js && pnpm contentlayer build && pnpm build"
   publish = ".next"
 
 [build.environment]
