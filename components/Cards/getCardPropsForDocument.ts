@@ -119,3 +119,4 @@ export function getCardPropsForDocument(doc: any): PostLike {
     type: toStr(doc?.type) ?? (type ? type : null),
   };
 }
+

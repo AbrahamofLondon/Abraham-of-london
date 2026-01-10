@@ -122,3 +122,4 @@ export function searchDocuments(query: string, limit: number = 20): SearchDoc[] 
     })
     .slice(0, limit);
 }
+

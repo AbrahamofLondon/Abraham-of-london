@@ -47,3 +47,4 @@ export const handler: Handler = async (event): Promise<HandlerResponse> => {
 
   return bad("Method Not Allowed", 405, origin);
 };
+

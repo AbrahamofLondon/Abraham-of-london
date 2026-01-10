@@ -34,3 +34,4 @@ export function BrandLogo(props: BrandLogoProps): JSX.Element {
 }
 
 export default BrandLogo;
+

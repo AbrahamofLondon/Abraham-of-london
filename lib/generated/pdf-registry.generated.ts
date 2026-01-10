@@ -15,3 +15,4 @@ export type GeneratedPDFOverlayItem = {
 };
 
 export const GENERATED_PDF_OVERLAY: Record<string, GeneratedPDFOverlayItem> = {};
+

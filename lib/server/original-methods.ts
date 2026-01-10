@@ -451,3 +451,4 @@ export async function healthCheck(): Promise<{ ok: boolean; details: string }> {
     return { ok: false, details: `Database health check failed: ${msg}` };
   }
 }
+

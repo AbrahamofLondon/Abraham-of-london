@@ -49,3 +49,4 @@ export const getSafeComponents = (custom: ComponentMap = {}): ComponentMap => {
 };
 
 export default MDXComponents;
+

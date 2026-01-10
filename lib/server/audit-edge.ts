@@ -18,3 +18,4 @@ export async function logAuditEvent(event: {
     console.error('Failed to log audit event:', await response.text());
   }
 }
+

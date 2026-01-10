@@ -38,3 +38,4 @@ export function auditLog(action: string, metadata: Record<string, any> = {}) {
   console.log(`[AUDIT] ${timestamp} | ${action} |`, JSON.stringify(metadata));
 }
 
+

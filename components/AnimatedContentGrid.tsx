@@ -174,3 +174,4 @@ export function AnimatedContentGrid({ filteredDocs, filter, TYPE_CONFIG }: Props
     </AnimatePresence>
   );
 }
+

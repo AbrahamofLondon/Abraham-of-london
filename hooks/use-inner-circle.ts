@@ -62,3 +62,4 @@ export function useInnerCircle(): UseInnerCircleResult {
 
   return { isUnlocked, isLoading, unlock, lock };
 }
+

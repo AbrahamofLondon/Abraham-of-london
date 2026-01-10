@@ -13,3 +13,4 @@ const Divider: React.FC<DividerProps> = ({ className = "", ...props }) => (
 );
 
 export default Divider;
+

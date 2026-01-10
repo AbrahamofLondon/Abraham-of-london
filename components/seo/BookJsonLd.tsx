@@ -47,3 +47,4 @@ export default function BookJsonLd({
     </Head>
   );
 }
+

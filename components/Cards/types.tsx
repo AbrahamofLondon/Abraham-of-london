@@ -63,3 +63,4 @@ export type { BookCardProps } from "./BookCard";
 export type { BlogPostCardProps } from "./BlogPostCard";
 export type { CanonCardProps } from "./CanonResourceCard";
 export type { HeroCardProps } from "./ArticleHero";
+

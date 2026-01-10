@@ -26,3 +26,4 @@ export default function Grid({ children, className = "" }: GridProps) {
     </div>
   );
 }
+

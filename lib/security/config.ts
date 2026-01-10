@@ -83,3 +83,4 @@ class SecurityConfiguration {
 }
 
 export default SecurityConfiguration;
+

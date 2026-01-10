@@ -12,3 +12,4 @@ export default function HeroEyebrow({
 }: HeroEyebrowProps) {
   return <div className={`heroeyebrow ${className}`}>{children}</div>;
 }
+

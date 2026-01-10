@@ -29,3 +29,4 @@ const InnerCircleBadge: React.FC<InnerCircleBadgeProps> = ({
 };
 
 export default InnerCircleBadge;
+

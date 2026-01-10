@@ -13,3 +13,4 @@ type Props = {
 export default function ResourcesCTA(props: Props) {
   return <CtaPresetComponent {...props} />;
 }
+

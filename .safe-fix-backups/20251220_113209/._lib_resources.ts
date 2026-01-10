@@ -51,3 +51,4 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 export default ResourceSlugPage;
+

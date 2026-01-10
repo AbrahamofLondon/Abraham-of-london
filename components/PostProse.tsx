@@ -13,3 +13,4 @@ export default function PostProse({ children }: { children: ReactNode }) {
     </article>
   );
 }
+

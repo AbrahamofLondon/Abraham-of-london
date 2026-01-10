@@ -22,3 +22,4 @@ describe("Layout", () => {
     expect(document.title).toContain("Test Page");
   });
 });
+

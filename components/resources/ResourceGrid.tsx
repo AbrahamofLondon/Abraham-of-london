@@ -110,3 +110,4 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
     </div>
   );
 }
+

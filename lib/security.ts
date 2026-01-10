@@ -225,3 +225,4 @@ export function createSessionId(): string {
 export function isValidSessionId(sessionId: string): boolean {
   return /^sess_[a-f0-9]{32}_[a-z0-9]+$/.test(sessionId);
 }
+

@@ -14,3 +14,4 @@ export const rehypePlugins = [
   ],
   [rehypeExternalLinks, { target: "_blank", rel: ["noopener", "noreferrer"] }],
 ] as any[]; // next-mdx-remote/CL tolerate tuple form
+

@@ -229,3 +229,4 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
 
 // Optional: Export helper functions for reuse
 export { formatDate, formatReadTime, getCoverImage };
+

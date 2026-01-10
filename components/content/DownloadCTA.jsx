@@ -1,5 +1,5 @@
 import * as React from "react";
-import styles from './DownloadCTA.module.css';
+import styles from './DownloadCTA.module.scss';
 
 export default function DownloadCTA({
   title = "Download",

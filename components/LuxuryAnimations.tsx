@@ -23,3 +23,4 @@ export const Parallax: React.FC<ParallaxProps> = ({ className, children }) => {
 const LuxuryAnimations = { FadeIn, Parallax };
 
 export default LuxuryAnimations;
+

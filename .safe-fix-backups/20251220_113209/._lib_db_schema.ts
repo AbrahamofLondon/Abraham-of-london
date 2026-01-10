@@ -38,3 +38,4 @@ CREATE TRIGGER update_short_interactions_modtime
     BEFORE UPDATE ON short_interactions
     FOR EACH ROW
     EXECUTE PROCEDURE update_updated_at_column();
+

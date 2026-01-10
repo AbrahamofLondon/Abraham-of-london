@@ -50,3 +50,4 @@ export function getSlugParam(req: NextApiRequest): string | null {
   return slug;
 }
 
+

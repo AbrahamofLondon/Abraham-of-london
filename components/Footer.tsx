@@ -2,3 +2,4 @@
 "use client";
 
 export { default } from "./EnhancedFooter";
+

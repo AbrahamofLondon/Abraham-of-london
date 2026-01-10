@@ -13,3 +13,4 @@ export const JsonLd: FC<JsonLdProps> = ({ data }) => {
     />
   );
 };
+

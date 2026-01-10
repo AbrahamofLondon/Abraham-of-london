@@ -37,3 +37,4 @@ export default function AddToCalendar({ event }: AddToCalendarProps) {
     </a>
   );
 }
+

@@ -8,3 +8,4 @@ interface NoteProps {
 export const Note: FC<NoteProps> = ({ children, className = "" }) => {
   return <div className={`note-container ${className}`}>{children}</div>;
 };
+

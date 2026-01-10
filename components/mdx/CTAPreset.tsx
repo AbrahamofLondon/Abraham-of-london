@@ -12,3 +12,4 @@ export interface CTAPresetProps {
 export function CTAPreset({ presetKey, className, compact }: CTAPresetProps) {
   return <CTA presetKey={presetKey} className={className} compact={compact} />;
 }
+

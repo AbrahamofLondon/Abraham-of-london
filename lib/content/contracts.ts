@@ -114,3 +114,4 @@ export type ShortType = (typeof SHORT_TYPES)[number];
 
 export const EVENT_TYPES = ["other", "workshop", "salon", "webinar", "training", "live"] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
+

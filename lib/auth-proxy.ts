@@ -11,3 +11,4 @@ export const getServerSession = async () => null;
 export const signIn = async () => ({ error: 'Auth not configured' });
 export const signOut = async () => ({ error: 'Auth not configured' });
 
+

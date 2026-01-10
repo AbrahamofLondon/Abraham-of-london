@@ -32,3 +32,4 @@ export default function CTA({ title, body, href, label }: CTAProps) {
     </div>
   );
 }
+

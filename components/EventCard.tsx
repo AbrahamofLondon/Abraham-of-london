@@ -142,3 +142,4 @@ export default function EventCard(props: EventCardProps): JSX.Element {
     </article>
   );
 }
+

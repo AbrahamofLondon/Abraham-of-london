@@ -64,3 +64,4 @@ export default function MDXRenderer({
 
   return <div className={className}>{content}</div>;
 }
+

@@ -24,3 +24,4 @@ export function log(level: LogLevel, message: string, meta: Record<string, unkno
   console[level === "debug" ? "log" : level](payload);
 }
 
+

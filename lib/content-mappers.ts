@@ -93,3 +93,4 @@ export function getCardPropsForDocument(doc: AnyDoc) {
   if (t === "Canon") return mapToCanonCardProps(doc as Canon);
   return mapToBaseCardProps(doc);
 }
+

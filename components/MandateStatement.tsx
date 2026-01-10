@@ -71,3 +71,4 @@ export default function MandateStatement(): JSX.Element {
     </motion.section>
   );
 }
+

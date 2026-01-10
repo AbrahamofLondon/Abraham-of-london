@@ -29,3 +29,4 @@ export default function SafeMDXRemote({
 
   return <MDXRemote {...source} components={components} />;
 }
+

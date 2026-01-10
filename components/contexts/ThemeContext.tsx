@@ -40,3 +40,4 @@ export function useTheme(): ThemeContextValue {
   // Even if no provider is present, React will fall back to `defaultValue`
   return React.useContext(ThemeContext);
 }
+

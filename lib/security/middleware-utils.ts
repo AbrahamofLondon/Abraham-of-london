@@ -62,3 +62,4 @@ export class SecurityMonitor {
 
 // Singleton instance
 export const securityMonitor = new SecurityMonitor();
+

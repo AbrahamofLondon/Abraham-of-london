@@ -131,3 +131,4 @@ export function useShortInteractions(slug: string) {
     handleSave: () => handleInteraction('save'),
   };
 }
+

@@ -51,3 +51,4 @@ const BadgeRow: React.FC<BadgeRowProps> = ({
 };
 
 export default BadgeRow;
+

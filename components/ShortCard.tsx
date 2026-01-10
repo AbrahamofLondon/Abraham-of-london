@@ -106,3 +106,4 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
 };
 
 export default ShortCard;
+

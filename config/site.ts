@@ -144,3 +144,4 @@ export const authorImage =
   siteConfig.author.image || "/assets/images/profile-portrait.webp";
 export const canonicalUrl = (path = "/") =>
   `${siteConfig.url}${path.startsWith("/") ? path : `/${path}`}`;
+

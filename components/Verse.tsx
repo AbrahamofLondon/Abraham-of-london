@@ -13,3 +13,4 @@ export const Verse: FC<VerseProps> = ({ children, reference }) => {
     </div>
   );
 };
+

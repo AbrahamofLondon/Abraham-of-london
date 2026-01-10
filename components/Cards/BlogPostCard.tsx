@@ -162,3 +162,4 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
 };
 
 export default BlogPostCard;
+

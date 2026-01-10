@@ -118,3 +118,4 @@ export function removeUndefined<T extends Record<string, any>>(obj: T): T {
 export function isValidSlug(slug: unknown): slug is string {
   return typeof slug === "string" && slug.trim().length > 0;
 }
+

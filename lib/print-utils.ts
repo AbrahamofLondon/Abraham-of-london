@@ -203,3 +203,4 @@ export function getPrintPaths(): { params: { slug: string } }[] {
   return getAllPrintSlugs().map((slug) => ({ params: { slug } }));
 }
 
+

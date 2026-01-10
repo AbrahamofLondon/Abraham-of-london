@@ -113,3 +113,4 @@ export class DatabaseClient {
     return this.withClient(operation, fn, fallback, true);
   }
 }
+

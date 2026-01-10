@@ -120,3 +120,4 @@ const BrandFrame: React.FC<BrandFrameProps> = ({
 };
 
 export default BrandFrame;
+

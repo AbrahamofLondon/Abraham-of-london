@@ -50,3 +50,4 @@ export function createDynamicComponent(componentName: string): React.FC<any> {
     return <Component {...props} />;
   };
 }
+

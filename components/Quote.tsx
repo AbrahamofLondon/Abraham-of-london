@@ -25,3 +25,4 @@ const Quote: FC<QuoteProps> = ({ children, cite, ...props }) => {
 };
 
 export default Quote;
+

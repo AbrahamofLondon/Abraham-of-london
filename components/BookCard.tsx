@@ -159,3 +159,4 @@ export default function BookCard(props: BookCardProps): JSX.Element {
     </article>
   );
 }
+

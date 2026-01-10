@@ -15,3 +15,4 @@ export function safeEnum<T extends string>(
   return (allowed as readonly string[]).includes(String(v)) ? (v as T) : d;
 }
 
+

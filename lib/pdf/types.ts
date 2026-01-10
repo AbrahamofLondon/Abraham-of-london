@@ -44,3 +44,4 @@ export const configToItem = (config: PDFConfig): PDFItem => ({
 // Utility function to convert array of PDFConfig to PDFItem
 export const configsToItems = (configs: PDFConfig[]): PDFItem[] => 
   configs.map(configToItem);
+

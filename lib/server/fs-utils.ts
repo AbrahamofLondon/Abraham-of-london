@@ -21,3 +21,4 @@ export function toPublicPathFromPublicDir(absPathInsidePublic: string): string {
   const rel = path.relative(publicDir, absPathInsidePublic).split(path.sep).join("/");
   return `/${rel}`;
 }
+

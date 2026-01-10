@@ -179,3 +179,4 @@ const CanonResourceCard: React.FC<CanonCardProps> = ({
 };
 
 export default CanonResourceCard;
+

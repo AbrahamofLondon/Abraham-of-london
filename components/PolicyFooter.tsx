@@ -80,3 +80,4 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
     </section>
   );
 }
+

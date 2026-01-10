@@ -48,3 +48,4 @@ export function getFrameworkBySlug(slug: string): Framework | null {
 export function getAllFrameworkSlugs(): string[] {
   return FRAMEWORKS.map((f) => f.slug);
 }
+

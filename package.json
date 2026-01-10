@@ -283,6 +283,7 @@
     "prettier": "3.3.3",
     "raw-loader": "4.0.2",
     "rimraf": "6.0.1",
+    "sass": "1.97.2",
     "serve": "14.2.4",
     "shx": "0.3.4",
     "stream-browserify": "3.0.0",

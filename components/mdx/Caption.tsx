@@ -48,3 +48,4 @@ const Caption: React.FC<CaptionProps> = ({
 };
 
 export default Caption;
+

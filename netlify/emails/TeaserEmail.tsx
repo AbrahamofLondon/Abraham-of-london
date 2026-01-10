@@ -63,3 +63,4 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
     </div>
   );
 }
+

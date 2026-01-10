@@ -12,3 +12,4 @@ export default function LockClosedIcon(
 ): JSX.Element {
   return <Lock {...props} />;
 }
+

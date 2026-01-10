@@ -63,3 +63,4 @@ export function createDynamicComponent(componentName: string): React.FC<any> {
   DynamicComponent.displayName = `DynamicComponent(${componentName})`;
   return DynamicComponent;
 }
+

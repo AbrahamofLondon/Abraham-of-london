@@ -188,3 +188,4 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
 // Export as default for backward compatibility
 export default HeroBanner;
+

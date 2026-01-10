@@ -67,3 +67,4 @@ export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
     </div>
   );
 }
+

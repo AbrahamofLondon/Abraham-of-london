@@ -57,3 +57,4 @@ const sectionTitle = { fontSize: "14px", fontWeight: "bold", textTransform: "upp
 const link = { color: "#FBBF24", textDecoration: "underline", display: "block", marginTop: "8px" };
 const hr = { borderColor: "#1b2230", margin: "40px 0" };
 const footer = { color: "#9CA3AF", fontSize: "12px", textAlign: "center" as const };
+

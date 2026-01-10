@@ -175,3 +175,4 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
     </Link>
   );
 }
+

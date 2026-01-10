@@ -204,3 +204,4 @@ export function getRateLimitKey(req: NextApiRequest, prefix: string): string {
   const anon = anonymizeIp(ip);
   return `${prefix}:${anon}`;
 }
+

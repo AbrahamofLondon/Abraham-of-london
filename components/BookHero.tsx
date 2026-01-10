@@ -257,3 +257,4 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
     </section>
   );
 }
+
