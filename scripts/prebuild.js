@@ -1,64 +1,34 @@
-// scripts/prebuild.js
+// scripts/pre-build.js
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
-console.log('Running prebuild fixes for Windows...');
+console.log('🔧 [Pre-build] Running pre-build checks...');
 
-// Ensure cache directory exists
-const cacheDir = path.join(process.cwd(), '.contentlayer', '.cache');
-if (!fs.existsSync(cacheDir)) {
-  fs.mkdirSync(cacheDir, { recursive: true });
-  console.log(`Created cache directory: ${cacheDir}`);
-}
+// Simple pre-build checks
+const downloadDirs = [
+  path.join(process.cwd(), 'public', 'downloads'),
+  path.join(process.cwd(), 'public', 'assets', 'downloads')
+];
 
-// Clear any problematic cache
-const versionDir = path.join(cacheDir, 'v0.5.8');
-if (fs.existsSync(versionDir)) {
-  try {
-    fs.rmSync(versionDir, { recursive: true, force: true });
-    console.log(`Cleared cache version directory: ${versionDir}`);
-  } catch (e) {
-    console.warn(`Could not clear cache: ${e.message}`);
+console.log('📁 [Pre-build] Checking for download directories...');
+for (const dir of downloadDirs) {
+  if (fs.existsSync(dir)) {
+    try {
+      const files = fs.readdirSync(dir);
+      console.log(`   Found ${files.length} files in ${path.basename(dir)}`);
+    } catch (err) {
+      console.warn(`   Could not read ${dir}: ${err.message}`);
+    }
+  } else {
+    console.log(`   Directory not found: ${path.basename(dir)}`);
   }
 }
 
-// Run contentlayer build
-console.log('Running contentlayer build...');
-try {
-  execSync('npx contentlayer2 build', { stdio: 'inherit' });
-  console.log('Contentlayer build successful!');
-} catch (e) {
-  console.error('Contentlayer build failed, but continuing...');
-  // Create dummy data to prevent build failures
-  const generatedDir = path.join(process.cwd(), '.contentlayer', 'generated');
-  if (!fs.existsSync(generatedDir)) {
-    fs.mkdirSync(generatedDir, { recursive: true });
-    
-    const dummyData = {
-      allBooks: [],
-      allCanons: [],
-      allDownloads: [],
-      allEvents: [],
-      allPosts: [],
-      allPrints: [],
-      allResources: [],
-      allShorts: [],
-      allStrategies: []
-    };
-    
-    fs.writeFileSync(
-      path.join(generatedDir, 'index.js'),
-      `module.exports = ${JSON.stringify(dummyData, null, 2)};`
-    );
-    
-    fs.writeFileSync(
-      path.join(generatedDir, 'index.mjs'),
-      `export default ${JSON.stringify(dummyData, null, 2)};`
-    );
-    
-    console.log('Created dummy contentlayer data to prevent build failures');
-  }
+// Ensure .contentlayer directory exists
+const contentlayerDir = path.join(process.cwd(), '.contentlayer');
+if (!fs.existsSync(contentlayerDir)) {
+  fs.mkdirSync(contentlayerDir, { recursive: true });
+  console.log('📁 Created .contentlayer directory');
 }
 
-console.log('Prebuild complete!');
+console.log('✅ [Pre-build] Complete');
