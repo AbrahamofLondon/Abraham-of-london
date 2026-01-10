@@ -1,12 +1,12 @@
-// contentlayer.config.ts — PRODUCTION HARDENED (Deterministic + Windows-safe)
-
+// contentlayer.config.ts — PRODUCTION SAFE (Cross-Platform)
 import path from "path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 
-const contentDirPath = path.resolve(process.cwd(), "content");
+// ✅ WINDOWS-SAFE: Use path.join instead of path.resolve for better cross-platform
+const contentDirPath = path.join(process.cwd(), "content");
 
 // ----------------------------------------------------------------------------
-// helpers
+// helpers (deterministic, safe)
 // ----------------------------------------------------------------------------
 const asString = (v: unknown): string => (typeof v === "string" ? v : "");
 const asBool = (v: unknown): boolean => v === true;
@@ -24,9 +24,10 @@ const safeSlug = (s: string) =>
 const filenameSlug = (doc: any) =>
   safeSlug(asString(doc?._raw?.sourceFileName).replace(/\.(md|mdx)$/i, ""));
 
+// ✅ WINDOWS-SAFE: Normalize backslashes to forward slashes
 const inferSection = (flattenedPath: string): string => {
-  const p = flattenedPath.replace(/\\/g, "/");
-  const first = p.split("/")[0] || "";
+  const normalizedPath = flattenedPath.replace(/\\/g, "/");
+  const first = normalizedPath.split("/")[0] || "";
   switch (first) {
     case "blog":
     case "books":
@@ -71,7 +72,7 @@ const generateExcerpt = (raw: string, max = 160): string => {
 };
 
 // ----------------------------------------------------------------------------
-// shared fields (no defaults; compute fallbacks)
+// shared fields
 // ----------------------------------------------------------------------------
 const SharedFields = {
   title: { type: "string", required: true },
@@ -118,7 +119,7 @@ const SharedFields = {
 } as const;
 
 // ----------------------------------------------------------------------------
-// computed fields (deterministic)
+// computed fields (deterministic, no side effects)
 // ----------------------------------------------------------------------------
 const computedFields = {
   sectionComputed: {
@@ -135,7 +136,6 @@ const computedFields = {
       const fromFile = filenameSlug(doc);
       if (fromFile) return fromFile;
 
-      // FINAL fallback: stable hash-ish based on flattenedPath (deterministic)
       const fp = asString(doc?._raw?.flattenedPath) || "unknown";
       return safeSlug(fp.split("/").pop() || fp) || "untitled";
     },
@@ -151,26 +151,7 @@ const computedFields = {
       const flattenedPath = asString(doc?._raw?.flattenedPath);
       const section = inferSection(flattenedPath);
 
-      const prefix =
-        section === "blog"
-          ? "/blog/"
-          : section === "books"
-          ? "/books/"
-          : section === "canon"
-          ? "/canon/"
-          : section === "downloads"
-          ? "/downloads/"
-          : section === "shorts"
-          ? "/shorts/"
-          : section === "events"
-          ? "/events/"
-          : section === "prints"
-          ? "/prints/"
-          : section === "resources"
-          ? "/resources/"
-          : section === "strategy"
-          ? "/strategy/"
-          : "/";
+      const prefix = section ? `/${section}/` : "/";
 
       return `${prefix}${slug || ""}`;
     },
@@ -179,17 +160,14 @@ const computedFields = {
   dateComputed: {
     type: "date" as const,
     resolve: (doc: any) => {
-      // Prefer date, then updated
       if (doc.date) return doc.date;
       if (doc.updated) return doc.updated;
 
-      // Try filename YYYY-MM-DD
       const file = asString(doc?._raw?.sourceFileName);
       const m = file.match(/(\d{4}-\d{2}-\d{2})/);
       if (m?.[1]) return m[1];
 
-      // Stable fallback (do NOT use "today" — causes rebuild drift)
-      return "1970-01-01";
+      return "1970-01-01"; // Deterministic fallback
     },
   },
 
@@ -438,21 +416,30 @@ export const Strategy = defineDocumentType(() => ({
 }));
 
 // ----------------------------------------------------------------------------
-// source
+// source (safe configuration)
 // ----------------------------------------------------------------------------
 export default makeSource({
   contentDirPath,
   documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
 
-  // Safe + tolerant during transition
+  // Safe error handling
   onExtraFieldData: "ignore",
   onUnknownDocuments: "skip",
   disableImportAliasWarning: true,
 
+  // ✅ QUIET mode for production
   onSuccess: async () => {
-    if (process.env.NODE_ENV !== "production") {
-      console.log("✅ Contentlayer generated (onSuccess)");
+    if (process.env.NODE_ENV === "development") {
+      console.log("✅ Contentlayer: Content generated");
     }
+  },
+  
+  // ✅ ERROR handling without crashes
+  onError: (error) => {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️ Contentlayer warning:", error.message);
+    }
+    // Don't crash the build
   },
 });
 

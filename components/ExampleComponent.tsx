@@ -1,5 +1,5 @@
 // components/ExampleComponent.tsx
-import styles from './.module.scss'
+import styles from './.module.css'
 import { getFontClass } from '@/lib/fonts'
 
 export default function ExampleComponent() {
@@ -21,3 +21,4 @@ export default function ExampleComponent() {
     </div>
   )
 }
+
