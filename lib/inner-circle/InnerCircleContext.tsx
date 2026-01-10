@@ -1,8 +1,8 @@
-// lib/inner-circle/InnerCircleContext.tsx - UPDATED
+// lib/inner-circle/InnerCircleContext.tsx - CLIENT-SAFE VERSION
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/router';
 
-// No longer importing redis-enhanced directly
+// NO Redis imports - client-side only
 
 interface InnerCircleUser {
   id: string;
@@ -19,6 +19,7 @@ interface InnerCircleContextType {
   login: (token: string, userData: InnerCircleUser) => void;
   logout: () => void;
   checkAccess: (path: string) => boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const InnerCircleContext = createContext<InnerCircleContextType | undefined>(undefined);
@@ -83,6 +84,38 @@ export const InnerCircleProvider: React.FC<InnerCircleProviderProps> = ({ childr
     }
   };
 
+  const refreshUser = async () => {
+    if (typeof window === 'undefined') return;
+    
+    const token = localStorage.getItem('innerCircleToken');
+    if (!token) {
+      logout();
+      return;
+    }
+
+    try {
+      // Client-side API call to refresh user
+      const response = await fetch('/api/inner-circle/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('innerCircleToken', data.token);
+        localStorage.setItem('innerCircleUser', JSON.stringify(data.user));
+        setUser(data.user);
+      } else {
+        logout();
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   const checkAccess = (path: string): boolean => {
     if (!user) return false;
     
@@ -97,7 +130,6 @@ export const InnerCircleProvider: React.FC<InnerCircleProviderProps> = ({ childr
     if (!isProtected) return true;
     
     // Check if user has access to this specific content
-    // This would typically check against a user's permissions
     return user.tier !== 'free'; // Example: free tier has no access
   };
 
@@ -109,6 +141,7 @@ export const InnerCircleProvider: React.FC<InnerCircleProviderProps> = ({ childr
         login,
         logout,
         checkAccess,
+        refreshUser,
       }}
     >
       {children}

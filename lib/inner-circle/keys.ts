@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// lib/inner-circle/keys.ts - CLIENT-SAFE VERSION
 import crypto from "crypto";
-import { getRedis } from "@/lib/redis";
 
 export type KeyTier = "member" | "patron" | "founder";
 
@@ -55,20 +55,59 @@ export type CleanupResult = {
   details?: Record<string, number>;
 };
 
+// In-memory storage (client-safe)
 const mem = new Map<string, StoredKey>();
 const PREFIX = "ic:key:";
 const INDEX_PREFIX = "ic:index:";
 
+// Helper to get Redis only on server
+const getRedis = () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: return null or a stub
+    return null;
+  }
+  
+  // Server-side: dynamic import to avoid bundling ioredis on client
+  try {
+    const redis = require('@/lib/redis').redisClient;
+    return redis;
+  } catch (error) {
+    console.warn('Redis not available:', error.message);
+    return null;
+  }
+};
+
 export function generateAccessKey(): string {
+  // Use crypto only on server, fallback on client
+  if (typeof window !== 'undefined') {
+    // Client-side fallback
+    const array = new Uint8Array(20);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      crypto.getRandomValues(array);
+    } else {
+      // Fallback for older browsers
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    const hex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return `IC-${hex.toUpperCase()}`;
+  }
+  
+  // Server-side
   return `IC-${crypto.randomBytes(20).toString("hex").toUpperCase()}`;
 }
 
 export async function storeKey(record: StoredKey): Promise<void> {
-  const redis = getRedis();
-  
   // Always store in memory as fallback
   mem.set(record.key, record);
   
+  // Only use Redis on server
+  if (typeof window !== 'undefined') {
+    return; // Client-side: memory only
+  }
+  
+  const redis = getRedis();
   if (!redis) return;
 
   try {
@@ -104,6 +143,11 @@ export async function getKey(key: string): Promise<StoredKey | null> {
   const memKey = mem.get(key);
   if (memKey) return memKey;
   
+  // Only use Redis on server
+  if (typeof window !== 'undefined') {
+    return null;
+  }
+  
   const redis = getRedis();
   if (!redis) return null;
 
@@ -133,13 +177,15 @@ export async function revokeKey(key: string): Promise<boolean> {
 
   await storeKey(updated);
   
-  // Remove from active index
-  const redis = getRedis();
-  if (redis) {
-    try {
-      await redis.srem(`${INDEX_PREFIX}active`, key);
-    } catch (error) {
-      console.error("[InnerCircleKeys] Redis index removal error:", error);
+  // Remove from active index (server only)
+  if (typeof window === 'undefined') {
+    const redis = getRedis();
+    if (redis) {
+      try {
+        await redis.srem(`${INDEX_PREFIX}active`, key);
+      } catch (error) {
+        console.error("[InnerCircleKeys] Redis index removal error:", error);
+      }
     }
   }
   
@@ -164,8 +210,8 @@ export async function renewKey(
 
   await storeKey(updated);
   
-  // Add back to active index if not expired
-  if (!newExpiresAt || new Date(newExpiresAt) > new Date()) {
+  // Add back to active index if not expired (server only)
+  if (typeof window === 'undefined' && (!newExpiresAt || new Date(newExpiresAt) > new Date())) {
     const redis = getRedis();
     if (redis) {
       try {
@@ -201,8 +247,20 @@ export async function incrementKeyUsage(key: string): Promise<boolean> {
 }
 
 export async function getKeysByMember(memberId: string): Promise<StoredKey[]> {
-  const redis = getRedis();
   const results: StoredKey[] = [];
+  
+  // Client-side: memory only
+  if (typeof window !== 'undefined') {
+    for (const key of mem.values()) {
+      if (key.memberId === memberId) {
+        results.push(key);
+      }
+    }
+    return results;
+  }
+  
+  // Server-side: try Redis, fallback to memory
+  const redis = getRedis();
   
   if (!redis) {
     // Memory-only lookup
@@ -237,8 +295,20 @@ export async function getKeysByMember(memberId: string): Promise<StoredKey[]> {
 }
 
 export async function getKeysByTier(tier: KeyTier): Promise<StoredKey[]> {
-  const redis = getRedis();
   const results: StoredKey[] = [];
+  
+  // Client-side: memory only
+  if (typeof window !== 'undefined') {
+    for (const key of mem.values()) {
+      if (key.tier === tier) {
+        results.push(key);
+      }
+    }
+    return results;
+  }
+  
+  // Server-side: try Redis, fallback to memory
+  const redis = getRedis();
   
   if (!redis) {
     // Memory-only lookup
@@ -273,8 +343,20 @@ export async function getKeysByTier(tier: KeyTier): Promise<StoredKey[]> {
 }
 
 export async function getActiveKeys(): Promise<StoredKey[]> {
-  const redis = getRedis();
   const results: StoredKey[] = [];
+  
+  // Client-side: memory only
+  if (typeof window !== 'undefined') {
+    for (const key of mem.values()) {
+      if (!key.revoked && (!key.expiresAt || !isExpired(key.expiresAt))) {
+        results.push(key);
+      }
+    }
+    return results;
+  }
+  
+  // Server-side: try Redis, fallback to memory
+  const redis = getRedis();
   
   if (!redis) {
     // Memory-only lookup
@@ -312,18 +394,21 @@ export async function getActiveKeys(): Promise<StoredKey[]> {
 }
 
 export async function cleanupExpiredKeys(): Promise<{ cleaned: number }> {
-  const redis = getRedis();
   const now = new Date();
   let cleaned = 0;
   
-  const allKeys = redis ? await getActiveKeys() : Array.from(mem.values());
+  const allKeys = Array.from(mem.values());
   
   for (const key of allKeys) {
     if (key.expiresAt && new Date(key.expiresAt) <= now) {
-      if (redis) {
-        await redis.srem(`${INDEX_PREFIX}active`, key.key);
-        await redis.srem(`${INDEX_PREFIX}member:${key.memberId}`, key.key);
-        await redis.srem(`${INDEX_PREFIX}tier:${key.tier}`, key.key);
+      // Server-side: clean Redis indices
+      if (typeof window === 'undefined') {
+        const redis = getRedis();
+        if (redis) {
+          await redis.srem(`${INDEX_PREFIX}active`, key.key);
+          await redis.srem(`${INDEX_PREFIX}member:${key.memberId}`, key.key);
+          await redis.srem(`${INDEX_PREFIX}tier:${key.tier}`, key.key);
+        }
       }
       mem.delete(key.key);
       cleaned++;
@@ -346,6 +431,30 @@ export function getMemoryStoreSize(): number {
 // Export the missing function
 export function getEmailHash(email: string): string {
   const normalizedEmail = email.trim().toLowerCase();
+  
+  if (typeof window !== 'undefined') {
+    // Client-side: use Web Crypto API
+    const encoder = new TextEncoder();
+    const data = encoder.encode(normalizedEmail);
+    return crypto.subtle.digest('SHA-256', data)
+      .then(hash => {
+        const hex = Array.from(new Uint8Array(hash))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+        return hex.substring(0, 32);
+      })
+      .catch(() => {
+        // Fallback for older browsers
+        let hash = 0;
+        for (let i = 0; i < normalizedEmail.length; i++) {
+          hash = ((hash << 5) - hash) + normalizedEmail.charCodeAt(i);
+          hash |= 0;
+        }
+        return Math.abs(hash).toString(16).padStart(32, '0').substring(0, 32);
+      }) as any;
+  }
+  
+  // Server-side: use Node.js crypto
   return crypto
     .createHash('sha256')
     .update(normalizedEmail)
@@ -374,7 +483,7 @@ export async function createOrUpdateMemberAndIssueKey(
   args: CreateOrUpdateMemberArgs
 ): Promise<IssuedKey> {
   // Generate member ID from email hash
-  const memberId = getEmailHash(args.email);
+  const memberId = await getEmailHash(args.email);
   
   // Create or update member
   const existingMember = memberStore.get(memberId);

@@ -1,4 +1,4 @@
-// lib/redis.ts - CONDITIONAL IMPORTS
+// lib/redis.ts - CLIENT SAFE VERSION
 let redisClient: any = null;
 let redisPromise: Promise<any> | null = null;
 
@@ -38,3 +38,13 @@ if (typeof window === 'undefined') {
 }
 
 export { redisClient, redisPromise };
+
+// Export a getter that's safe for both
+export const getRedis = () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: return the stub
+    return redisClient;
+  }
+  // Server-side: return the real Redis client
+  return redisClient;
+};
