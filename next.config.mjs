@@ -1,4 +1,4 @@
-/* next.config.mjs - FIXED EXPORT SYNTAX */
+/* next.config.mjs - FIXED WITH REDIS WEBPACK CONFIG */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
@@ -57,7 +57,7 @@ const nextConfig = {
     ];
   },
 
-  // ✅ WINDOWS FIX: Minimal webpack config that excludes problematic files
+  // ✅ WEBPACK CONFIG WITH REDIS FIXES
   webpack: (config, { isServer, webpack, dev }) => {
     // CRITICAL: Exclude Office/PDF files from Webpack processing entirely
     // This prevents Windows file locking issues
@@ -88,15 +88,56 @@ const nextConfig = {
 
     // Handle client-side modules only
     if (!isServer) {
+      // ✅ CRITICAL: Exclude Redis/ioredis and Node.js modules from client bundles
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^ioredis$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^redis$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^dns$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^net$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^tls$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^fs$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^child_process$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^better-sqlite3$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^pdfkit$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^sharp$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^bcrypt$/,
+        })
+      );
+
       config.resolve.fallback = {
         ...(config.resolve.fallback || {}),
         fs: false,
         net: false,
         tls: false,
+        dns: false,
+        child_process: false,
         crypto: require.resolve("crypto-browserify"),
         stream: require.resolve("stream-browserify"),
         url: require.resolve("url/"),
         util: require.resolve("util/"),
+        path: false,
+        os: false,
       };
     }
 
