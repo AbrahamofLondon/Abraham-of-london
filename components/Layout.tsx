@@ -10,12 +10,12 @@ import { useRouter } from "next/router";
 // ---------------------------------------------------------------------
 const LuxuryNavbar = dynamic(() => import("@/components/LuxuryNavbar"), {
   ssr: false,
-  loading: () => <div className="h-20 border-b border-white/5 bg-black/80 backdrop-blur-md" />,
+  loading: () => <div className="h-20 border-b border-white/10 bg-black/70 backdrop-blur-md" />,
 });
 
 const Footer = dynamic(() => import("@/components/Footer"), {
   ssr: false,
-  loading: () => <div className="h-64 bg-zinc-950 border-t border-white/5" />,
+  loading: () => <div className="h-64 bg-zinc-950 border-t border-white/10" />,
 });
 
 // ---------------------------------------------------------------------
@@ -84,7 +84,7 @@ export default function Layout({
     : toAbsoluteUrl(currentPath);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-black text-cream selection:bg-gold/30 ${className}`}>
+    <div className={`min-h-screen flex flex-col bg-black text-foreground selection:bg-primary/30 ${className}`}>
       <Head>
         <title>{siteTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -146,4 +146,5 @@ export default function Layout({
     </div>
   );
 }
+
 
