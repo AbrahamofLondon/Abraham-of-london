@@ -1,67 +1,50 @@
-// @/lib/imports.ts - MAIN EXPORT FILE
+// @/lib/client/imports.ts - CLIENT-SAFE RE-EXPORTS ONLY
 /**
- * Main imports file - exports everything needed by the app
- * This should be safe for both client and server
+ * Client-safe re-exports from the main imports file
+ * This ensures no server modules accidentally get imported on client
  */
 
-// Site configuration
-export const siteConfig = {
-  title: "Abraham of London",
-  description: "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
-  brand: {
-    tagline: "Faith · Strategy · Fatherhood",
-    mission: "To restore faith-rooted leadership and strategy in a world that has outsourced responsibility."
-  },
-  contact: {
-    email: "info@abrahamoflondon.org",
-    phone: "+44 20 8622 5909",
-    address: "Based in London, working globally"
-  },
-  socialLinks: [
-    { kind: "twitter", label: "Twitter", href: "https://twitter.com/abrahamoflondon" },
-    { kind: "linkedin", label: "LinkedIn", href: "https://linkedin.com/company/abrahamoflondon" },
-    { kind: "instagram", label: "Instagram", href: "https://instagram.com/abrahamoflondon" },
-    { kind: "youtube", label: "YouTube", href: "https://youtube.com/@abrahamoflondon" },
-    { kind: "website", label: "Website", href: "https://www.abrahamoflondon.org" }
-  ],
-  navigation: {
-    main: [
-      { name: "Home", href: "/" },
-      { name: "Essays", href: "/blog" },
-      { name: "The Canon", href: "/canon" },
-      { name: "Books", href: "/books" },
-      { name: "Downloads", href: "/downloads" },
-      { name: "Contact", href: "/contact" }
-    ],
-    footer: [
-      { name: "Privacy", href: "/privacy" },
-      { name: "Terms", href: "/terms" },
-      { name: "Accessibility", href: "/accessibility" },
-      { name: "Security", href: "/security" }
-    ]
-  }
-};
-
-// Utility functions
-export function getPageTitle(pageTitle?: string): string {
-  return pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
-}
-
-export function absUrl(path: string): string {
-  const base = siteConfig.url.replace(/\/$/, '');
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${base}${cleanPath}`;
-}
-
-// Simple validation utilities (client-safe)
+export { siteConfig, getPageTitle, absUrl } from "@/lib/imports";
 export * from "@/lib/input-validator";
 
-// Contentlayer helpers - client-safe versions
-import { getContentlayerData, getPublishedDocuments } from "./contentlayer-compat";
+// Client-safe versions of utilities
+export function getClientIpFallback(): string {
+  return 'client-unknown';
+}
 
+export function isValidIp(ip: string): boolean {
+  // Simple client-side validation
+  if (!ip || ip === 'unknown') return false;
+  return /^[\d.:a-fA-F]+$/.test(ip);
+}
+
+export function anonymizeIp(ip: string): string {
+  return 'anonymized';
+}
+
+// Stub functions for client
+export const rateLimit = async () => ({ 
+  allowed: true, 
+  remaining: 100 
+});
+
+export const createRateLimitHeaders = () => ({});
+export const RATE_LIMIT_CONFIGS = {};
+
+export function checkImports() {
+  return {
+    ok: true,
+    timestamp: new Date().toISOString(),
+    environment: 'client'
+  };
+}
+
+// Contentlayer stubs for client
 export const contentlayerHelper = {
-  getAllDocuments: () => getContentlayerData().allDocuments || [],
+  getAllDocuments: () => [],
+  getDocumentBySlug: () => null,
+  getPublishedDocuments: () => [],
+};],
   getDocumentBySlug: (slug: string) => {
     const data = getContentlayerData();
     return data.allDocuments?.find(doc => 

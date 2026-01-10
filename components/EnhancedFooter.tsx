@@ -1,4 +1,3 @@
-// components/EnhancedFooter.tsx
 "use client";
 
 import * as React from "react";
@@ -20,6 +19,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 
+// Import the actual site config or use fallbacks
 import { siteConfig } from "@/lib/imports";
 
 type SocialPlatform =
@@ -50,6 +50,28 @@ const iconMap: Record<
   website: Globe,
 };
 
+// FALLBACK SITE CONFIG in case imports fail
+const fallbackSiteConfig = {
+  title: "Abraham of London",
+  description: "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.",
+  brand: {
+    tagline: "Faith · Strategy · Fatherhood"
+  },
+  contact: {
+    email: "info@abrahamoflondon.org",
+    phone: "+44 20 8622 5909",
+    address: "Based in London, working globally"
+  },
+  socialLinks: [
+    { kind: "twitter" as const, label: "Twitter", href: "https://twitter.com/abrahamoflondon" },
+    { kind: "linkedin" as const, label: "LinkedIn", href: "https://linkedin.com/company/abrahamoflondon" },
+    { kind: "instagram" as const, label: "Instagram", href: "https://instagram.com/abrahamoflondon" },
+  ]
+};
+
+// Use actual config or fallback
+const config = siteConfig || fallbackSiteConfig;
+
 function cleanTel(phone: string): string {
   return phone.replace(/\s+/g, "");
 }
@@ -60,7 +82,7 @@ function isExternal(href: string): boolean {
 
 /**
  * Only link what you actually have.
- * Add to this list as you implement routes. This stops “random” footer 404s.
+ * Add to this list as you implement routes. This stops "random" footer 404s.
  */
 const KNOWN_ROUTES = new Set<string>([
   "/",
@@ -80,6 +102,7 @@ const KNOWN_ROUTES = new Set<string>([
   "/cookies",
   "/accessibility",
   "/security",
+  "/resources",
 ]);
 
 const footerSections: Array<{
@@ -106,7 +129,6 @@ const footerSections: Array<{
     title: "Resources",
     icon: FileText,
     links: [
-      // Only keep these as links if you’ve built the pages.
       { label: "Resources Hub", href: "/resources" },
       { label: "Founder Tools", href: "/founders" },
       { label: "Leadership Resources", href: "/leadership" },
@@ -153,10 +175,10 @@ function FooterLink({
   if (!enabled) {
     // Not a link. Stops 404. Still communicates intent.
     return (
-      <span className="group flex items-center gap-2 py-1 text-sm text-gray-500 cursor-not-allowed">
+      <span className="group flex items-center gap-2 py-1 text-sm text-gray-400 cursor-not-allowed">
         <span className="w-1 h-1 rounded-full bg-gray-700" />
         <span>
-          {label} <span className="text-[10px] uppercase tracking-[0.2em]">(Soon)</span>
+          {label} <span className="text-[10px] uppercase tracking-[0.2em] text-amber-400/60">(Soon)</span>
         </span>
       </span>
     );
@@ -177,24 +199,26 @@ function FooterLink({
 export default function EnhancedFooter(): JSX.Element {
   const year = new Date().getFullYear();
 
-  const email =
-    siteConfig?.contact?.email || siteConfig?.email || "info@abrahamoflondon.org";
-  const phone = siteConfig?.contact?.phone || "+44 20 8622 5909";
-  const location =
-    siteConfig?.contact?.address || "Based in London, working globally";
+  const email = config.contact?.email || "info@abrahamoflondon.org";
+  const phone = config.contact?.phone || "+44 20 8622 5909";
+  const location = config.contact?.address || "Based in London, working globally";
 
-  const description =
-    siteConfig?.description ||
+  const description = config.description || 
     "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.";
 
-  const socials = Array.isArray(siteConfig?.socialLinks)
-    ? siteConfig.socialLinks
-    : [];
+  const socials = Array.isArray(config.socialLinks) ? config.socialLinks : [];
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-amber-500/10">
+      {/* Debug overlay - remove in production */}
+      {!siteConfig && (
+        <div className="absolute top-0 left-0 right-0 bg-red-500/10 text-red-300 text-xs p-1 text-center z-50">
+          Using fallback site config - check @/lib/imports
+        </div>
+      )}
+
       <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
 
@@ -209,7 +233,7 @@ export default function EnhancedFooter(): JSX.Element {
                     Abraham<span className="text-amber-400"> of London</span>
                   </h2>
                   <p className="text-xs font-medium tracking-[0.2em] text-amber-400/70 uppercase">
-                    {siteConfig?.brand?.tagline ?? "Faith · Strategy · Fatherhood"}
+                    {config.brand?.tagline ?? "Faith · Strategy · Fatherhood"}
                   </p>
                 </div>
               </Link>
@@ -249,14 +273,14 @@ export default function EnhancedFooter(): JSX.Element {
                 <div className="mb-2">
                   <p className="mb-3 text-sm font-semibold text-white">Follow</p>
                   <div className="flex flex-wrap gap-2">
-                    {socials.map((social: any) => {
+                    {socials.map((social: any, index: number) => {
                       const kind = (social.kind || "website") as SocialPlatform;
                       const Icon = iconMap[kind] ?? Globe;
                       const external = isExternal(social.href);
 
                       return (
                         <motion.a
-                          key={`${social.label}-${social.href}`}
+                          key={`${social.label}-${social.href}-${index}`}
                           href={social.href}
                           target={external ? "_blank" : "_self"}
                           rel={external ? "noopener noreferrer" : undefined}
@@ -308,7 +332,7 @@ export default function EnhancedFooter(): JSX.Element {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="text-center lg:text-left">
                 <p className="text-sm text-gray-400">
-                  © {year} {siteConfig?.title ?? "Abraham of London"}. All rights reserved.
+                  © {year} {config.title || "Abraham of London"}. All rights reserved.
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   Built for those who still believe in duty, consequence, and legacy.

@@ -1,8 +1,6 @@
-/* next.config.mjs - WINDOWS FILE LOCKING FIX */
+/* next.config.mjs - FIXED EXPORT SYNTAX */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-import path from "path";
-import fs from "fs";
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
@@ -67,15 +65,15 @@ const nextConfig = {
       new webpack.IgnorePlugin({
         checkResource: (resource, context) => {
           // Skip Office and PDF files in public/downloads/ and public/assets/downloads/
-          const absolutePath = path.resolve(context, resource);
+          const absolutePath = require('path').resolve(context, resource);
           
           // Check if it's a problematic file type
           const isProblematicFile = /\.(xlsx?|docx?|pptx?|pdf|od[tsp])$/i.test(resource);
           
           // Check if it's in a downloads directory
           const isInDownloads = 
-            absolutePath.includes(path.sep + 'public' + path.sep + 'downloads' + path.sep) ||
-            absolutePath.includes(path.sep + 'public' + path.sep + 'assets' + path.sep + 'downloads' + path.sep);
+            absolutePath.includes(require('path').sep + 'public' + require('path').sep + 'downloads' + require('path').sep) ||
+            absolutePath.includes(require('path').sep + 'public' + require('path').sep + 'assets' + require('path').sep + 'downloads' + require('path').sep);
           
           // Exclude problematic files in downloads directories
           if (isProblematicFile && isInDownloads) {
@@ -126,26 +124,6 @@ const nextConfig = {
     return config;
   },
 
-  // ✅ Disable static file optimization for downloads
-  async rewrites() {
-    return {
-      beforeFiles: [
-        // Skip optimization for download files
-        {
-          source: '/downloads/:path*',
-          has: [
-            {
-              type: 'header',
-              key: 'Accept',
-              value: '.*'
-            }
-          ],
-          destination: '/downloads/:path*',
-        }
-      ]
-    };
-  },
-
   experimental: {
     serverComponentsExternalPackages: ["better-sqlite3", "pdfkit", "sharp", "bcrypt"],
     scrollRestoration: true,
@@ -171,6 +149,8 @@ nextConfig.onBeforeBuild = async () => {
   console.log('[Build] Checking for locked files...');
   
   // List of directories containing problematic files
+  const fs = require('fs');
+  const path = require('path');
   const downloadDirs = [
     path.join(process.cwd(), 'public', 'downloads'),
     path.join(process.cwd(), 'public', 'assets', 'downloads')
@@ -190,6 +170,8 @@ nextConfig.onBeforeBuild = async () => {
     if (fs.existsSync(dir)) {
       try {
         const files = fs.readdirSync(dir);
+        console.log(`[Build] Found ${files.length} files in ${dir}`);
+        
         const problematicFiles = files.filter(f => 
           /\.(xlsx?|docx?|pptx?|pdf|od[tsp])$/i.test(f)
         );
@@ -214,20 +196,24 @@ nextConfig.onBeforeBuild = async () => {
   console.log('[Build] File check complete');
 };
 
-// ✅ SIMPLE CONTENTLAYER INTEGRATION
+// ✅ SIMPLE CONTENTLAYER INTEGRATION - FIXED EXPORT
+let configWithContentlayer;
+
 try {
   // Try Contentlayer v2 first
   const { withContentlayer } = await import("next-contentlayer2");
   console.log("✅ Using Contentlayer v2");
-  export default withContentlayer(nextConfig);
+  configWithContentlayer = withContentlayer(nextConfig);
 } catch (error) {
   console.log("⚠️ Contentlayer v2 not found, trying v1...");
   try {
     const { withContentlayer } = await import("next-contentlayer");
     console.log("✅ Using Contentlayer v1");
-    export default withContentlayer(nextConfig);
+    configWithContentlayer = withContentlayer(nextConfig);
   } catch (error) {
     console.log("⚠️ Contentlayer not found, proceeding without it");
-    export default nextConfig;
+    configWithContentlayer = nextConfig;
   }
 }
+
+export default configWithContentlayer;
