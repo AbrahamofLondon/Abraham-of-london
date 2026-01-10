@@ -1,9 +1,22 @@
-// contentlayer.config.ts — PRODUCTION SAFE (Cross-Platform)
+// contentlayer.config.ts — ENHANCED WITH FILE FILTERING
 import path from "path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
+import fs from "fs";
 
 // ✅ WINDOWS-SAFE: Use path.join instead of path.resolve for better cross-platform
 const contentDirPath = path.join(process.cwd(), "content");
+
+// ✅ FUNCTION TO CHECK IF FILE SHOULD BE IGNORED
+const shouldIgnoreFile = (filePath: string): boolean => {
+  // Skip Office files that cause Windows locks
+  const officeExtensions = [
+    '.xlsx', '.docx', '.pptx', '.xls', '.doc', '.ppt',
+    '.odt', '.ods', '.odp', '.numbers', '.pages', '.key'
+  ];
+  
+  const ext = path.extname(filePath).toLowerCase();
+  return officeExtensions.includes(ext);
+};
 
 // ----------------------------------------------------------------------------
 // helpers (deterministic, safe)
@@ -265,7 +278,16 @@ export const Canon = defineDocumentType(() => ({
 
 export const Download = defineDocumentType(() => ({
   name: "Download",
-  filePathPattern: "downloads/**/*.{md,mdx}",
+  // CRITICAL: Filter out Office files by using a function instead of pattern
+  filePathPattern: (filePath) => {
+    // Skip if it's an Office file
+    if (shouldIgnoreFile(filePath)) return false;
+    
+    // Only process MDX files in downloads directory
+    const ext = path.extname(filePath).toLowerCase();
+    const normalizedPath = filePath.replace(/\\/g, "/");
+    return normalizedPath.includes("downloads/") && (ext === ".md" || ext === ".mdx");
+  },
   contentType: "mdx",
   fields: {
     ...SharedFields,
@@ -416,11 +438,32 @@ export const Strategy = defineDocumentType(() => ({
 }));
 
 // ----------------------------------------------------------------------------
-// source (safe configuration)
+// source (safe configuration with file filtering)
 // ----------------------------------------------------------------------------
 export default makeSource({
   contentDirPath,
   documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
+
+  // ✅ FILE FILTERING: Skip Office files before Contentlayer processes them
+  contentDirExclude: [
+    "**/node_modules",
+    "**/.*", // hidden files
+    "**/*.xlsx",
+    "**/*.docx", 
+    "**/*.pptx",
+    "**/*.xls",
+    "**/*.doc",
+    "**/*.ppt",
+    "**/*.odt",
+    "**/*.ods",
+    "**/*.odp",
+    "**/*.numbers",
+    "**/*.pages",
+    "**/*.key",
+    "**/Thumbs.db",
+    "**/desktop.ini",
+    "**/~$*", // Windows temp files
+  ],
 
   // Safe error handling
   onExtraFieldData: "ignore",
@@ -430,16 +473,27 @@ export default makeSource({
   // ✅ QUIET mode for production
   onSuccess: async () => {
     if (process.env.NODE_ENV === "development") {
-      console.log("✅ Contentlayer: Content generated");
+      console.log("✅ Contentlayer: Content generated (Office files excluded)");
     }
   },
   
   // ✅ ERROR handling without crashes
   onError: (error) => {
+    // Don't crash on Office file errors
+    if (error.message.includes("xlsx") || 
+        error.message.includes("docx") || 
+        error.message.includes("pptx") ||
+        error.message.includes("EPERM") ||
+        error.message.includes("operation not permitted")) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("⚠️ Contentlayer: Skipped Office file (Windows lock):", error.message.split('\n')[0]);
+      }
+      return;
+    }
+    
     if (process.env.NODE_ENV === "development") {
       console.warn("⚠️ Contentlayer warning:", error.message);
     }
-    // Don't crash the build
   },
 });
 

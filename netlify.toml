@@ -1,7 +1,7 @@
-# netlify.toml — CLEAN + ROUTE-SAFE (Next.js on Netlify)
+# netlify.toml — ENHANCED VERSION
 
 [build]
-  command = "pnpm install --frozen-lockfile && pnpm run build"
+  command = "pnpm install --frozen-lockfile && pnpm run content:build && pnpm run build"
   publish = ".next"
   functions = "netlify/functions"
 
@@ -13,6 +13,9 @@
   CONTENTLAYER_LOG_LEVEL = "error"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
+  # CRITICAL: Prevent Webpack from scanning Office files
+  WATCHPACK_IGNORED = "**/public/downloads/*.xlsx,**/public/downloads/*.docx,**/public/downloads/*.pptx"
+  WEBPACK_IGNORED = "**/public/downloads/*.xlsx,**/public/downloads/*.docx,**/public/downloads/*.pptx"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"

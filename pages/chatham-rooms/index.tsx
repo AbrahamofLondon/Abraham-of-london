@@ -273,7 +273,7 @@ export default function ChathamRoomsPage(): JSX.Element {
                 should be in the room.
               </p>
               <Link
-                href="/contact"
+                href="/contact?source=chatham-rooms&intent=propose-room"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-softGold/70 px-4 py-2 text-sm font-semibold text-softGold transition-all hover:bg-softGold hover:text-charcoal md:px-6 md:py-3 md:text-base sm:w-auto"
               >
                 Propose a room
@@ -283,7 +283,40 @@ export default function ChathamRoomsPage(): JSX.Element {
           </motion.div>
         </div>
       </section>
+
+      {/* CTA Section */}
+      <section className="border-t border-softGold/20 bg-deepCharcoal py-12 md:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="mb-4 font-serif text-2xl font-semibold text-white md:text-3xl">
+              Ready for honest conversation?
+            </h2>
+            <p className="mx-auto mb-8 max-w-2xl text-base text-softGold/90 md:text-lg">
+              Join a room of leaders who value substance over spectacle.
+            </p>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Link
+                href="/events"
+                className="rounded-xl bg-gradient-to-r from-softGold to-amber-200 px-6 py-3 text-base font-semibold text-charcoal shadow-lg transition-all hover:shadow-xl md:px-8 md:py-4"
+              >
+                View upcoming events
+              </Link>
+              <Link
+                href="/contact?source=chatham-rooms"
+                className="rounded-xl border border-softGold/60 px-6 py-3 text-base font-semibold text-softGold transition-all hover:border-softGold hover:bg-softGold/10 md:px-8 md:py-4"
+              >
+                Request invitation
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </Layout>
   );
 }
-

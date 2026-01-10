@@ -1,28 +1,27 @@
 /**
- * Contentlayer Compatibility Layer - Next.js (Pages Router) SYNC-FIRST
- * - Works with existing pages that call getters synchronously
- * - Falls back to empty collections if generated module is unavailable
+ * lib/contentlayer-compat.ts — SINGLE SOURCE OF TRUTH (Pages Router, SYNC-FIRST)
  *
- * IMPORTANT:
- * This file is intended for Next.js Pages Router (getStaticProps/getStaticPaths),
- * where synchronous arrays are commonly used in legacy code.
+ * Goals:
+ * - Never require async to read content at build-time in Pages Router
+ * - Always provide stable arrays (empty instead of crashing)
+ * - Provide consistent slug/kind/href logic
+ * - Provide "published" filtering that doesn't accidentally zero everything
+ *
+ * This file loads Contentlayer2 output from /.contentlayer/generated (repo root).
  */
 
 export interface DocBase {
-  _id: string;
-  _raw: {
-    sourceFilePath: string;
-    sourceFileName: string;
-    sourceFileDir: string;
-    contentType: string;
-    flattenedPath: string;
+  _id?: string;
+  _raw?: {
+    sourceFilePath?: string;
+    sourceFileName?: string;
+    sourceFileDir?: string;
+    contentType?: string;
+    flattenedPath?: string;
   };
-  type: string;
-  title: string;
+  type?: string; // contentlayer "type"
+  title?: string;
   slug?: string;
-  slugComputed?: string;
-  href?: string;
-  hrefComputed?: string;
   date?: string;
   updated?: string;
   author?: string;
@@ -37,16 +36,22 @@ export interface DocBase {
   accessLevel?: string;
   tier?: string;
   requiresAuth?: boolean;
+  subtitle?: string | null;
+  readTime?: string | null;
+  volume?: string | null;
   body?: {
     raw?: string;
     code?: string;
   };
-  // Download-specific fields
+  // download-ish
   fileUrl?: string;
   downloadUrl?: string;
   fileSize?: string;
   fileFormat?: string;
   requiresEmail?: boolean;
+
+  // allow extra fields
+  [k: string]: any;
 }
 
 type GeneratedShape = {
@@ -80,11 +85,10 @@ function safeArray<T>(v: any): T[] {
 }
 
 let DATA: GeneratedShape = FALLBACK;
+let LOADED = false;
 
-// Try load generated content synchronously.
-// If it fails (e.g., contentlayer not installed / not generated), we keep FALLBACK.
 try {
-  // Static import path for Contentlayer2 output in your repo
+  // lib/* -> repo root is ../
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mod = require("../.contentlayer/generated");
 
@@ -100,229 +104,242 @@ try {
     allResources: safeArray<DocBase>(mod.allResources),
     allStrategies: safeArray<DocBase>(mod.allStrategies),
   };
-  console.log(`[Contentlayer] Loaded ${DATA.allDownloads.length} downloads`);
-} catch (error) {
-  console.warn("[Contentlayer] Generated module unavailable — using fallback empty collections.");
-  console.warn("Error details:", error.message);
+
+  LOADED = true;
+  // Minimal log: useful in Netlify build logs, not noisy
+  // eslint-disable-next-line no-console
+  console.log(
+    `[Contentlayer] Loaded: posts=${DATA.allPosts.length} books=${DATA.allBooks.length} canon=${DATA.allCanons.length} downloads=${DATA.allDownloads.length} docs=${DATA.allDocuments.length}`
+  );
+} catch (e: any) {
+  LOADED = false;
   DATA = FALLBACK;
+  // eslint-disable-next-line no-console
+  console.warn("[Contentlayer] Generated module unavailable — using empty collections.");
+  // eslint-disable-next-line no-console
+  console.warn("[Contentlayer] Error:", e?.message || e);
 }
 
-/** Core getters */
+/** SYNC getter — Pages Router safe */
 export function getContentlayerData(): GeneratedShape {
   return DATA;
 }
 
-/** Helpers */
-export function normalizeSlug(slug: string): string {
-  return (slug || "").replace(/^\/|\/$/g, "").trim();
+/** Status helpers */
+export function isContentlayerLoaded(): boolean {
+  return LOADED;
 }
 
-export function getDocHref(doc: DocBase | any): string {
-  if (!doc) return "/";
-  return doc.hrefComputed || doc.href || `/${normalizeSlug(doc.slugComputed || doc.slug || "")}`;
-}
+export function assertContentlayerHasDocs(data?: GeneratedShape): boolean {
+  const d = data ?? DATA;
+  const total =
+    (d.allDocuments?.length ?? 0) +
+    (d.allPosts?.length ?? 0) +
+    (d.allBooks?.length ?? 0) +
+    (d.allCanons?.length ?? 0) +
+    (d.allDownloads?.length ?? 0) +
+    (d.allShorts?.length ?? 0) +
+    (d.allEvents?.length ?? 0) +
+    (d.allPrints?.length ?? 0) +
+    (d.allResources?.length ?? 0) +
+    (d.allStrategies?.length ?? 0);
 
-export function getAccessLevel(doc: DocBase | any): string {
-  return doc?.accessLevel || doc?.tier || "public";
-}
-
-export function isDraft(doc: DocBase | any): boolean {
-  return doc?.draft === true;
-}
-
-export function isDraftContent(doc: DocBase | any): boolean {
-  return isDraft(doc);
-}
-
-export function isPublished(doc: DocBase | any): boolean {
-  return !isDraft(doc) && doc?.published !== false;
-}
-
-/** Legacy exports your pages import */
-export function assertContentlayerHasDocs(): boolean {
-  const docs = DATA.allDocuments ?? [];
-  if (docs.length === 0) {
-    console.warn("⚠ No ContentLayer documents found");
+  if (total <= 0) {
+    // eslint-disable-next-line no-console
+    console.warn("⚠ Contentlayer: no documents detected (all collections empty).");
     return false;
   }
   return true;
 }
 
-export function getDocKind(doc: DocBase | any): string {
-  return doc?.type || "unknown";
+/** Slug utils */
+export function normalizeSlug(input: any): string {
+  return (input ?? "")
+    .toString()
+    .trim()
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
 }
 
+function slugOf(doc: DocBase | any): string {
+  return normalizeSlug(
+    doc?.slug ||
+      doc?._raw?.flattenedPath ||
+      doc?._raw?.sourceFileName?.replace(/\.mdx?$/, "") ||
+      ""
+  );
+}
+
+/** Kind logic: folder-derived, stable */
+export type DocKind =
+  | "post"
+  | "book"
+  | "canon"
+  | "download"
+  | "event"
+  | "short"
+  | "print"
+  | "resource"
+  | "strategy"
+  | "document"
+  | string;
+
+export function getDocKind(doc: DocBase | any): DocKind {
+  const fp = String(doc?._raw?.flattenedPath ?? "");
+  if (fp.startsWith("blog/")) return "post";
+  if (fp.startsWith("books/")) return "book";
+  if (fp.startsWith("canon/")) return "canon";
+  if (fp.startsWith("downloads/")) return "download";
+  if (fp.startsWith("events/")) return "event";
+  if (fp.startsWith("shorts/")) return "short";
+  if (fp.startsWith("prints/")) return "print";
+  if (fp.startsWith("resources/")) return "resource";
+  if (fp.startsWith("strategy/")) return "strategy";
+
+  return (doc?.type || doc?._type || "document") as DocKind;
+}
+
+export function getDocHref(doc: DocBase | any): string {
+  const s = slugOf(doc);
+  const k = getDocKind(doc);
+  if (!s) return "/";
+
+  switch (k) {
+    case "post":
+      return `/blog/${s}`;
+    case "book":
+      return `/books/${s}`;
+    case "canon":
+      return `/canon/${s}`;
+    case "download":
+      return `/downloads/${s}`;
+    case "event":
+      return `/events/${s}`;
+    case "short":
+      return `/shorts/${s}`;
+    case "print":
+      return `/prints/${s}`;
+    case "strategy":
+      return `/strategy/${s}`;
+    case "resource":
+      return `/resources/${s}`;
+    default:
+      return `/content/${s}`;
+  }
+}
+
+export function getAccessLevel(doc: DocBase | any): string {
+  return String(doc?.accessLevel || doc?.tier || "public").trim().toLowerCase();
+}
+
+/**
+ * Draft logic:
+ * - `draft: true` => draft
+ * - `published: false` => draft/unpublished
+ * Everything else => published
+ */
+export function isDraftContent(doc: DocBase | any): boolean {
+  if (!doc) return true;
+  if (doc?.draft === true) return true;
+  if (doc?.published === false) return true;
+  return false;
+}
+
+export function isPublished(doc: DocBase | any): boolean {
+  return !isDraftContent(doc);
+}
+
+/** Media resolvers */
 export function resolveDocCoverImage(doc: DocBase | any): string | null {
-  return doc?.coverImage || (doc as any)?.featuredImage || null;
+  return (doc?.coverImage || doc?.featuredImage || doc?.image || null) as string | null;
 }
 
 export function resolveDocDownloadUrl(doc: DocBase | any): string | null {
-  return (doc as any)?.downloadUrl || (doc as any)?.fileUrl || (doc as any)?.downloadFile || null;
+  return (doc?.downloadUrl || doc?.fileUrl || doc?.downloadFile || null) as string | null;
 }
 
-export function toUiDoc(doc: DocBase | any): any {
-  if (!doc) return doc;
+/** UI normalizer */
+export function toUiDoc<T extends DocBase>(doc: T): T & {
+  slug: string;
+  href: string;
+  kind: DocKind;
+  coverImage: string | null;
+  downloadUrl: string | null;
+  accessLevel: string;
+} {
   return {
-    ...doc,
+    ...(doc as any),
+    slug: slugOf(doc),
     href: getDocHref(doc),
-    slug: normalizeSlug(doc.slugComputed || doc.slug || ""),
+    kind: getDocKind(doc),
     coverImage: resolveDocCoverImage(doc),
     downloadUrl: resolveDocDownloadUrl(doc),
+    accessLevel: getAccessLevel(doc),
   };
 }
 
-export function sanitizeData(input: any): any {
-  if (!input) return input;
-  try {
-    const seen = new WeakSet();
-    const walk = (obj: any): any => {
-      if (obj === null || typeof obj !== "object") return obj;
-      if (seen.has(obj)) return "[Circular]";
-      seen.add(obj);
-      if (Array.isArray(obj)) return obj.map(walk);
-
-      const out: any = {};
-      for (const k of Object.keys(obj)) {
-        if (k.startsWith("_") && k !== "_id" && k !== "_raw") continue;
-        out[k] = walk(obj[k]);
-      }
-      return out;
-    };
-    return walk(input);
-  } catch {
-    return input;
-  }
+/** Combined docs (the #1 reason your indexes went "0") */
+export function getAllCombinedDocs(): DocBase[] {
+  const d = DATA;
+  return [
+    ...(d.allPosts ?? []),
+    ...(d.allBooks ?? []),
+    ...(d.allCanons ?? []),
+    ...(d.allDownloads ?? []),
+    ...(d.allEvents ?? []),
+    ...(d.allShorts ?? []),
+    ...(d.allPrints ?? []),
+    ...(d.allResources ?? []),
+    ...(d.allStrategies ?? []),
+    ...(d.allDocuments ?? []),
+  ];
 }
 
-export async function recordContentView(slug: string, type?: string): Promise<void> {
-  if (typeof window !== "undefined") {
-    console.log(`Content view: ${type || "unknown"}/${slug}`);
-  }
-}
-
-/** Collection getters (SYNC) */
-export function getAllContentlayerDocs(): DocBase[] {
-  return DATA.allDocuments ?? [];
-}
-export function getAllPosts(): DocBase[] {
-  return DATA.allPosts ?? [];
-}
-export function getAllBooks(): DocBase[] {
-  return DATA.allBooks ?? [];
-}
-export function getAllCanons(): DocBase[] {
-  return DATA.allCanons ?? [];
-}
-export function getAllDownloads(): DocBase[] {
-  return DATA.allDownloads ?? [];
-}
-export function getAllShorts(): DocBase[] {
-  return DATA.allShorts ?? [];
-}
-export function getAllEvents(): DocBase[] {
-  return DATA.allEvents ?? [];
-}
-export function getAllPrints(): DocBase[] {
-  return DATA.allPrints ?? [];
-}
-export function getAllResources(): DocBase[] {
-  return DATA.allResources ?? [];
-}
-export function getAllStrategies(): DocBase[] {
-  return DATA.allStrategies ?? [];
+/** Published filter + stable sort */
+function safeDateMs(v: any): number {
+  const t = new Date(v ?? "").getTime();
+  return Number.isFinite(t) ? t : 0;
 }
 
 export function getPublishedDocuments(docs?: DocBase[]): DocBase[] {
-  const source = docs ?? getAllContentlayerDocs();
-  return (source ?? []).filter((d) => isPublished(d));
+  const source = docs ?? getAllCombinedDocs();
+  return (source ?? [])
+    .filter((x) => x && isPublished(x))
+    .slice()
+    .sort((a, b) => safeDateMs(b?.date) - safeDateMs(a?.date));
 }
 
+/** Slug lookup (across combined docs by default) */
 export function getDocBySlug(slug: string, collection?: DocBase[]): DocBase | null {
-  const normalizedSlug = normalizeSlug(slug);
-  const docs = collection ?? getAllContentlayerDocs();
+  const s = normalizeSlug(slug);
+  const src = collection ?? getAllCombinedDocs();
 
-  const foundDoc = (docs ?? []).find((doc) => {
-    const a = normalizeSlug(doc.slugComputed || doc.slug || "");
-    const b = normalizeSlug(doc._raw?.flattenedPath || "");
-    return a === normalizedSlug || b === normalizedSlug;
+  const found = (src ?? []).find((doc) => {
+    const a = normalizeSlug(doc?.slug || "");
+    const b = normalizeSlug(doc?._raw?.flattenedPath || "");
+    return a === s || b === s;
   });
 
-  if (!foundDoc) {
-    console.warn(`[getDocBySlug] No document found for slug: ${normalizedSlug}`);
-  }
-  
-  return foundDoc ?? null;
+  return found ?? null;
 }
 
-/** Server convenience (SYNC signatures expected by legacy pages) */
-export function getServerAllPosts(): DocBase[] {
-  return getPublishedDocuments(getAllPosts());
-}
-export function getServerPostBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllPosts());
-}
-
-export function getServerAllBooks(): DocBase[] {
-  return getPublishedDocuments(getAllBooks());
-}
-export function getServerBookBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllBooks());
+/** Sanitize for Next.js serialization */
+export function sanitizeData<T>(input: T): T {
+  if (input === null || input === undefined) return input as any;
+  return JSON.parse(
+    JSON.stringify(input, (_k, v) => (v === undefined ? null : v))
+  );
 }
 
-export function getServerAllCanons(): DocBase[] {
-  return getPublishedDocuments(getAllCanons());
+/** Optional async wrappers (for callers that insist on await) */
+export async function getContentlayerDataAsync(): Promise<GeneratedShape> {
+  return Promise.resolve(getContentlayerData());
 }
-export function getServerCanonBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllCanons());
+export async function getPublishedDocumentsAsync(docs?: DocBase[]): Promise<DocBase[]> {
+  return Promise.resolve(getPublishedDocuments(docs));
 }
-
-export function getServerAllDownloads(): DocBase[] {
-  return getPublishedDocuments(getAllDownloads());
-}
-
-export function getServerDownloadBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllDownloads());
-}
-
-// ADDED: Export for consistent naming - This was missing!
-export function getDownloadBySlug(slug: string): DocBase | null {
-  return getServerDownloadBySlug(slug);
-}
-
-// ADDED: Export getAllDownloads for async/await usage
-export async function getAllDownloadsAsync(): Promise<DocBase[]> {
-  return Promise.resolve(getAllDownloads());
-}
-
-export function getServerAllShorts(): DocBase[] {
-  return getPublishedDocuments(getAllShorts());
-}
-export function getServerShortBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllShorts());
-}
-
-export function getServerAllEvents(): DocBase[] {
-  return getPublishedDocuments(getAllEvents());
-}
-export function getServerEventBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllEvents());
-}
-
-
-export function getServerResourceBySlug(slug: string): DocBase | null {
-  return getDocBySlug(slug, getAllResources());
-}
-
-export function getAllDocuments(): DocBase[] {
-  return getAllContentlayerDocs();
-}
-
-export function getServerAllResources(): DocBase[] {
-  return getPublishedDocuments(getAllResources());
-}
-
-export async function getAllDocumentsAsync(): Promise<DocBase[]> {
-  return Promise.resolve(getAllDocuments());
+export async function getDocBySlugAsync(slug: string, collection?: DocBase[]): Promise<DocBase | null> {
+  return Promise.resolve(getDocBySlug(slug, collection));
 }
 
 /** Direct exports some code may import */
@@ -337,13 +354,20 @@ export const allPrints = DATA.allPrints ?? [];
 export const allResources = DATA.allResources ?? [];
 export const allStrategies = DATA.allStrategies ?? [];
 
-// Ensure all exports are available
 export default {
-  getAllDownloads,
-  getDownloadBySlug,
-  getServerAllDownloads,
-  getServerDownloadBySlug,
-  getAllDownloadsAsync,
+  getContentlayerData,
+  getPublishedDocuments,
+  getDocBySlug,
+  getDocKind,
+  getDocHref,
+  normalizeSlug,
+  isDraftContent,
+  isPublished,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl,
+  getAccessLevel,
   sanitizeData,
-  allDownloads,
+  toUiDoc,
+  isContentlayerLoaded,
+  assertContentlayerHasDocs,
 };

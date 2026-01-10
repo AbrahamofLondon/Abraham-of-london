@@ -1,4 +1,4 @@
-// pages/index.tsx — INSTITUTIONAL (CLEAN SHELL / ROUTE-SAFE)
+// pages/index.tsx — INSTITUTIONAL HOME (FIXED LINKS + STRATEGIC FRAMEWORK STRIP)
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
@@ -7,6 +7,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import EnhancedVenturesSection from "@/components/enhanced/VenturesSection";
 import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
+import AnimatedStatsBar from "@/components/enhanced/AnimatedStatsBar";
 
 import {
   ArrowRight,
@@ -59,13 +60,13 @@ type HomePageProps = {
 };
 
 /* -----------------------------------------------------------------------------
-   ROUTES (MATCH YOUR REAL APP ROUTES)
+   ROUTES (MUST MATCH REAL PAGES)
+   IMPORTANT: If you do NOT have these pages implemented, they will 404.
 ----------------------------------------------------------------------------- */
 const ROUTES = {
   consulting: "/consulting",
   canon: "/canon",
-  canonVolume1: "/canon/volume-i-foundations-of-purpose",
-  blog: "/blog",
+  canonVolume1: "/canon/volume-i-foundations-of-purpose", // if this 404s, your canon slug/page is wrong (we will fix canon pages next)
   shorts: "/shorts",
   books: "/books",
   ventures: "/ventures",
@@ -74,29 +75,6 @@ const ROUTES = {
   downloads: "/downloads",
   contact: "/contact",
 } as const;
-
-const BOOKS_IN_DEV = [
-  {
-    slug: "fathering-without-fear",
-    title: "Fathering Without Fear",
-    tag: "Fatherhood · Household",
-    blurb:
-      "Standards, rituals, and household architecture for men building families that outlast culture wars.",
-    cover: "/assets/images/books/fathering-without-fear.jpg",
-    status: "in-development",
-    progress: 75,
-  },
-  {
-    slug: "the-fiction-adaptation",
-    title: "The Fiction Adaptation",
-    tag: "Fiction · Drama",
-    blurb:
-      "A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact.",
-    cover: "/assets/images/books/the-fiction-adaptation.jpg",
-    status: "in-development",
-    progress: 40,
-  },
-] as const;
 
 /* -----------------------------------------------------------------------------
    UI HELPERS
@@ -164,7 +142,7 @@ const HeroSection: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 lg:px-8 lg:pb-24">
+      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pb-24">
         <div className="mb-8 flex flex-wrap gap-3">
           <Pill icon={<Landmark className="h-3.5 w-3.5" />}>Institutional OS</Pill>
           <Pill icon={<Target className="h-3.5 w-3.5" />}>Strategy</Pill>
@@ -347,11 +325,12 @@ const TrustSignals: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   SERVICE LINES
+   SERVICE LINES (NOW CLICKABLE)
 ----------------------------------------------------------------------------- */
 const ServiceLines: React.FC = () => {
   const lines = [
     {
+      href: `${ROUTES.consulting}#mandate`,
       icon: <Target className="h-6 w-6" />,
       title: "Strategy & Mandate",
       bullets: [
@@ -361,6 +340,7 @@ const ServiceLines: React.FC = () => {
       ],
     },
     {
+      href: `${ROUTES.consulting}#governance`,
       icon: <Workflow className="h-6 w-6" />,
       title: "Operating Model & Governance",
       bullets: [
@@ -370,6 +350,7 @@ const ServiceLines: React.FC = () => {
       ],
     },
     {
+      href: `${ROUTES.consulting}#deployment`,
       icon: <Building2 className="h-6 w-6" />,
       title: "Institution Build & Deployment",
       bullets: [
@@ -407,9 +388,10 @@ const ServiceLines: React.FC = () => {
 
         <div className="grid gap-6 md:grid-cols-3">
           {lines.map((l) => (
-            <div
+            <Link
               key={l.title}
-              className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl"
+              href={l.href}
+              className="block rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl hover:border-amber-400/35"
             >
               <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {l.icon}
@@ -436,7 +418,7 @@ const ServiceLines: React.FC = () => {
                   Learn more <ChevronRight className="h-4 w-4" />
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -515,44 +497,24 @@ const DeliveryModel: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   STRATEGIC FRAMEWORK STRIP (REPLACES THE “0+” TILE SECTION)
+   STRATEGIC FRAMEWORK STRIP (THE VALUE REPLACEMENT)
 ----------------------------------------------------------------------------- */
 const StrategicFrameworkStrip: React.FC = () => {
   const items = [
-    {
-      icon: <Target className="h-6 w-6" />,
-      title: "Mandate",
-      body: "Define the mission boundary. No mandate = no strategy.",
-    },
-    {
-      icon: <Map className="h-6 w-6" />,
-      title: "Terrain",
-      body: "Market structure, rivals, constraints. Reality first.",
-    },
-    {
-      icon: <Scale className="h-6 w-6" />,
-      title: "Choices",
-      body: "Trade-offs written. If it’s not written, it isn’t real.",
-    },
-    {
-      icon: <Workflow className="h-6 w-6" />,
-      title: "Operating System",
-      body: "Decision rights + cadence. Strategy becomes routine.",
-    },
-    {
-      icon: <Gauge className="h-6 w-6" />,
-      title: "Governance",
-      body: "Accountability that keeps the machine honest.",
-    },
+    { icon: <Target className="h-6 w-6" />, title: "Mandate", body: "Define mission boundary. No mandate = no strategy." },
+    { icon: <Map className="h-6 w-6" />, title: "Terrain", body: "Market structure, rivals, constraints. Reality first." },
+    { icon: <Scale className="h-6 w-6" />, title: "Choices", body: "Trade-offs written. If it’s not written, it isn’t real." },
+    { icon: <Workflow className="h-6 w-6" />, title: "Operating System", body: "Decision rights + cadence. Strategy becomes routine." },
+    { icon: <Gauge className="h-6 w-6" />, title: "Governance", body: "Accountability that keeps the machine honest." },
   ] as const;
 
   return (
     <section className="bg-black py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              Strategic Framework
+              Strategic framework
             </p>
             <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
               Capacity is proven by method.
@@ -567,7 +529,7 @@ const StrategicFrameworkStrip: React.FC = () => {
               href={ROUTES.strategy}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-400/40 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
             >
-              Strategic Framework <ArrowRight className="h-4 w-4" />
+              Strategy <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={ROUTES.resources}
@@ -711,94 +673,6 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
 };
 
 /* -----------------------------------------------------------------------------
-   BOOKS IN DEVELOPMENT
------------------------------------------------------------------------------ */
-const BooksInDevelopment: React.FC = () => (
-  <section className="bg-black py-16">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-            Books & manuscripts
-          </p>
-          <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
-            Long-form work for longevity
-          </h2>
-          <p className="mt-4 text-lg text-gray-300">
-            Deep-dive explorations currently in development.
-          </p>
-        </div>
-
-        <Link
-          href={ROUTES.books}
-          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
-        >
-          <span>View all books</span>
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {BOOKS_IN_DEV.map((book) => (
-          <Link
-            key={book.slug}
-            href={`${ROUTES.books}/${book.slug}`}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-amber-400/35"
-          >
-            <article className="flex h-full">
-              <div className="relative w-40 flex-shrink-0 overflow-hidden">
-                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-black/25 to-transparent" />
-                <Image
-                  src={book.cover}
-                  alt={book.title}
-                  fill
-                  quality={90}
-                  className="object-cover"
-                />
-                <div className="absolute bottom-4 left-4 right-4 z-20">
-                  <div className="h-2 rounded-full bg-black/60 backdrop-blur-sm">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600"
-                      style={{ width: `${book.progress}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-xs font-medium text-white">
-                    {book.progress}% complete
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-1 flex-col p-7">
-                <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
-                  {book.tag}
-                </span>
-
-                <h3 className="mb-3 font-serif text-2xl font-semibold text-amber-100">
-                  {book.title}
-                </h3>
-
-                <p className="mb-6 flex-1 text-sm leading-relaxed text-gray-300">
-                  {book.blurb}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-amber-200">
-                    In development
-                  </span>
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/5">
-                    <ArrowRight className="h-5 w-5 text-amber-200" />
-                  </span>
-                </div>
-              </div>
-            </article>
-          </Link>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-/* -----------------------------------------------------------------------------
    STRATEGIC SESSIONS CTA
 ----------------------------------------------------------------------------- */
 const StrategicSessions: React.FC = () => (
@@ -830,7 +704,7 @@ const StrategicSessions: React.FC = () => (
 
         <Link
           href={`${ROUTES.consulting}#offer`}
-          className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-9 py-5 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200"
+          className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-9 py-5 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/25"
         >
           <span>View offer</span>
           <ChevronRight className="h-5 w-5" />
@@ -867,31 +741,29 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
       className="bg-black"
     >
       <HeroSection />
-
       <TrustSignals />
-
       <ServiceLines />
 
-      <SectionDivider />
+      <section className="border-y border-white/10 bg-black">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <AnimatedStatsBar />
+        </div>
+      </section>
 
+      <SectionDivider />
       <DeliveryModel />
 
+      {/* REPLACEMENT: Strategic value strip (instead of “0+” tiles) */}
       <SectionDivider withOrnament={false} />
-
-      {/* ✅ Replaces the “0+ tiles” section */}
       <StrategicFrameworkStrip />
 
       <SectionDivider />
-
       <CanonShowcase />
 
       <SectionDivider withOrnament={false} />
-
       {featuredShorts.length > 0 ? <ShortsStrip shorts={featuredShorts} /> : null}
 
       <EnhancedVenturesSection />
-
-      <BooksInDevelopment />
 
       <StrategicSessions />
     </Layout>
@@ -908,7 +780,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     const allShorts = await getAllShorts();
 
     const featuredShorts = (allShorts as any[])
-      .filter((s) => s && (s.published ?? true) && !(s.draft ?? false))
+      .filter((s) => (s?.published ?? true) && !(s?.draft ?? false))
       .sort((a, b) => {
         const da = a?.date ? new Date(a.date).getTime() : 0;
         const db = b?.date ? new Date(b.date).getTime() : 0;
@@ -918,7 +790,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
     return { props: { featuredShorts }, revalidate: 3600 };
   } catch (error) {
-    console.error("Error fetching shorts:", error);
+    // ✅ Gracefully handle the error: log it and return empty props.
+    console.error("Error fetching shorts for homepage:", error);
+    // Return empty featuredShorts to allow the page to render.
     return { props: { featuredShorts: [] }, revalidate: 3600 };
   }
 };

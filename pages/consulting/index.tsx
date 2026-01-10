@@ -8,14 +8,23 @@ import {
   Target,
   Globe,
   ShieldCheck,
-  Layers,
-  Library,
-  Workflow,
-  Lock,
   FileText,
-  BadgeCheck,
+  Library,
+  BookOpen,
+  ScrollText,
+  GraduationCap,
+  Building2,
+  Hammer,
+  Cpu,
+  Map,
+  Layers,
+  Workflow,
+  FileSpreadsheet,
+  Presentation,
+  ClipboardCheck,
   Landmark,
-  Radar,
+  Network,
+  Shield,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -34,22 +43,23 @@ type WorkStep = {
   desc: string;
 };
 
-type PipelineCard = {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+type CanonVolume = {
+  volume: string;
   title: string;
-  subtitle: string;
-  body: string;
-  outputs: string[];
+  description: string;
+  pageCount?: string;
+  href: string;
+  status: 'public' | 'inner-circle' | 'consulting';
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-type FrameworkCard = {
+type FrameworkArtifact = {
   title: string;
-  solves: string;
-  when: string;
-  outputs: string;
-  publicHref: string;
-  gated: boolean;
-  tag: string;
+  type: 'template' | 'worksheet' | 'toolkit' | 'charter' | 'agenda' | 'plan';
+  description: string;
+  href: string;
+  fileType?: string;
+  status: 'public' | 'inner-circle' | 'consulting';
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
@@ -58,10 +68,6 @@ type BoardOutcome = {
   desc: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
-
-function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
 
 const easeSettle: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -137,118 +143,164 @@ export default function ConsultingPage(): JSX.Element {
   ];
 
   const isForYou: string[] = [
-    "Carry responsibility for others’ livelihoods and outcomes",
+    "Carry responsibility for others' livelihoods and outcomes",
     "Want strategy that respects both Faith and Data",
     "Are willing to be challenged, not entertained",
     "Prefer documented decisions over vibes and improvisation",
   ];
 
-  // Canon → Framework → Deployment (pipeline cards)
-  const pipeline: PipelineCard[] = [
+  // Canon Volumes (actual materials from your filesystem)
+  const canonVolumes: CanonVolume[] = [
     {
-      icon: Layers,
-      title: "Principle",
-      subtitle: "Canon doctrine",
-      body:
-        "The Canon is the philosophical spine — a durable operating philosophy that defines truth, responsibility, legitimacy, and authority.",
-      outputs: [
-        "Worldview alignment & decision boundaries",
-        "Definitions (what we mean by key terms)",
-        "Non-negotiables & governing constraints",
-      ],
+      volume: "Volume I",
+      title: "Foundations of Purpose",
+      description: "Teaching edition on epistemology, authority, responsibility, and truth",
+      pageCount: "Teaching Edition",
+      href: "/canon/volume-i-teaching-edition",
+      status: 'inner-circle',
+      icon: ScrollText,
     },
     {
+      volume: "Volume II",
+      title: "Governance and Formation",
+      description: "Teaching edition on board mechanics, stakeholder alignment, ethical boundaries",
+      pageCount: "Teaching Edition",
+      href: "/canon/volume-ii-teaching-edition",
+      status: 'inner-circle',
+      icon: Shield,
+    },
+    {
+      volume: "Volume III",
+      title: "Teaching Edition",
+      description: "Advanced decision architecture and trade-off frameworks",
+      pageCount: "Teaching Edition",
+      href: "/canon/volume-iii-teaching-edition",
+      status: 'inner-circle',
       icon: Workflow,
-      title: "Framework",
-      subtitle: "Tooling",
-      body:
-        "Principles become practical instruments: templates, matrices, canvases, and board-ready models that compress complexity into clarity.",
-      outputs: [
-        "Decision matrices & prioritisation logic",
-        "Governance and cadence templates",
-        "Stakeholder maps and operating playbooks",
-      ],
     },
     {
-      icon: ShieldCheck,
-      title: "Deployment",
-      subtitle: "Applied force",
-      body:
-        "Consulting is applied force — frameworks deployed into real decisions, governance, operating cadence, and execution discipline.",
-      outputs: [
-        "Board decisions with documented trade-offs",
-        "Operating cadence that survives reality",
-        "Execution accountability and risk containment",
-      ],
+      volume: "Volume IV",
+      title: "Teaching Edition",
+      description: "Market reality and execution discipline for frontier contexts",
+      pageCount: "Teaching Edition",
+      href: "/canon/volume-iv-teaching-edition",
+      status: 'inner-circle',
+      icon: Globe,
+    },
+    {
+      volume: "Volume X",
+      title: "The Arc of Future Civilisation",
+      description: "Integration and deployment of full implementation stack",
+      pageCount: "Complete Edition",
+      href: "/canon/volume-x-the-arc-of-future-civilisation",
+      status: 'consulting',
+      icon: Cpu,
     },
   ];
 
-  // Flagship frameworks (samples)
-  const frameworks: FrameworkCard[] = [
+  // Framework Artifacts (actual materials from your resources)
+  const frameworkArtifacts: FrameworkArtifact[] = [
     {
-      title: "Purpose Pyramid",
-      tag: "Mandate clarity",
-      icon: BadgeCheck,
-      solves:
-        "Mission drift, competing priorities, and leadership noise by forcing a hierarchy of purpose.",
-      when:
-        "Annual strategy, culture reset, founder transitions, post-crisis mandate clarification.",
-      outputs:
-        "One-page purpose hierarchy; alignment narrative; priorities tied to mandate.",
-      publicHref: "/resources/strategic-frameworks",
-      gated: true,
+      title: "Board Decision Log Template",
+      type: 'template',
+      description: "Excel template for board-level decision documentation and accountability",
+      href: "/resources/board-decision-log-template",
+      fileType: "Excel (.xlsx)",
+      status: 'public',
+      icon: FileSpreadsheet,
     },
     {
-      title: "Decision Matrix",
-      tag: "Trade-off discipline",
-      icon: Radar,
-      solves:
-        "Slow decisions and false urgency by scoring reality — impact, effort, risk, and certainty.",
-      when:
-        "Portfolio prioritisation, resourcing, product bets, capability investment decisions.",
-      outputs:
-        "Decision scorecard; options ranking; risk notes; next actions.",
-      publicHref: "/resources/strategic-frameworks",
-      gated: true,
+      title: "Operating Cadence Pack",
+      type: 'toolkit',
+      description: "Complete presentation deck for board meeting design and execution rhythm",
+      href: "/resources/operating-cadence-pack",
+      fileType: "PowerPoint (.pptx)",
+      status: 'inner-circle',
+      icon: Presentation,
     },
     {
-      title: "Legacy Canvas",
-      tag: "Long-range architecture",
+      title: "Builder's Catechism",
+      type: 'worksheet',
+      description: "Authoritative question-set for founder legitimacy and execution discipline",
+      href: "/canon/builders-catechism",
+      status: 'inner-circle',
+      icon: Hammer,
+    },
+    {
+      title: "Canon Council Table Agenda",
+      type: 'agenda',
+      description: "Structured agenda format for board-level strategic conversations",
+      href: "/resources/canon-council-table-agenda",
+      status: 'inner-circle',
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Multi-Generational Legacy Ledger",
+      type: 'worksheet',
+      description: "Framework for legacy mapping across financial, intellectual, relational domains",
+      href: "/resources/multi-generational-legacy-ledger",
+      status: 'inner-circle',
       icon: Landmark,
-      solves:
-        "Short-termism by mapping legacy domains (financial, intellectual, relational, spiritual) into a coherent plan.",
-      when:
-        "Succession, personal brand consolidation, household planning, foundation design.",
-      outputs:
-        "Legacy map; stewardship plan; multi-year milestones; accountability cadence.",
-      publicHref: "/resources/strategic-frameworks",
-      gated: true,
     },
     {
-      title: "Governance Grid",
-      tag: "Legitimacy & control",
-      icon: ShieldCheck,
-      solves:
-        "Blurry authority and weak execution by defining decision rights, controls, cadence, and accountability.",
-      when:
-        "Board resets, operating model upgrades, investor readiness, post-merger alignment.",
-      outputs:
-        "Decision rights map; meeting cadence; escalation rules; accountability structure.",
-      publicHref: "/resources/strategic-frameworks",
-      gated: true,
+      title: "Strategic Frameworks",
+      type: 'toolkit',
+      description: "Complete collection of decision matrices, prioritization logic, and governance templates",
+      href: "/resources/strategic-frameworks",
+      status: 'public',
+      icon: Map,
+    },
+  ];
+
+  // Implementation Tools (additional resources)
+  const implementationTools: FrameworkArtifact[] = [
+    {
+      title: "Canon Household Charter",
+      type: 'charter',
+      description: "Template for family governance and household operating principles",
+      href: "/resources/canon-household-charter",
+      status: 'inner-circle',
+      icon: Building2,
     },
     {
-      title: "Stakeholder Heatmap",
-      tag: "Political reality",
-      icon: Globe,
-      solves:
-        "Surprises, resistance, and hidden veto power by mapping influence, incentives, risk, and alignment.",
-      when:
-        "Market entry, public/private partnerships, transformation programmes, high-stakes changes.",
-      outputs:
-        "Stakeholder map; influence score; engagement plan; risk mitigations.",
-      publicHref: "/resources/strategic-frameworks",
-      gated: true,
+      title: "Canon Reading Plan - Year One",
+      type: 'plan',
+      description: "Structured reading curriculum for canonical doctrine and strategic thinking",
+      href: "/resources/canon-reading-plan-year-one",
+      status: 'inner-circle',
+      icon: BookOpen,
+    },
+    {
+      title: "Institutional Health Scorecard",
+      type: 'worksheet',
+      description: "Diagnostic tool for organizational legitimacy and operational health",
+      href: "/resources/institutional-health-scorecard",
+      status: 'public',
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Leadership Standards Blueprint",
+      type: 'template',
+      description: "Framework for defining and measuring leadership performance",
+      href: "/resources/leadership-standards-blueprint",
+      status: 'public',
+      icon: Target,
+    },
+    {
+      title: "Purpose Alignment Checklist",
+      type: 'checklist',
+      description: "Operational checklist for mandate clarity and strategic focus",
+      href: "/resources/purpose-alignment-checklist",
+      status: 'public',
+      icon: CheckCircle,
+    },
+    {
+      title: "Strategy Room Intake",
+      type: 'template',
+      description: "Client intake framework for strategic advisory engagements",
+      href: "/resources/strategy-room-intake",
+      status: 'consulting',
+      icon: Network,
     },
   ];
 
@@ -264,7 +316,7 @@ export default function ConsultingPage(): JSX.Element {
       title: "Legitimacy & trust",
       desc:
         "Governance clarity, ethical boundaries, and consistent decision-making that protects reputation and authority.",
-      icon: BadgeCheck,
+      icon: GraduationCap,
     },
     {
       title: "Execution cadence",
@@ -276,7 +328,7 @@ export default function ConsultingPage(): JSX.Element {
       title: "Stakeholder alignment",
       desc:
         "Map incentives and power honestly — then align actions to reality, not wishful thinking.",
-      icon: Radar,
+      icon: Network,
     },
     {
       title: "Strategic focus",
@@ -298,7 +350,7 @@ export default function ConsultingPage(): JSX.Element {
       <section className="relative overflow-hidden border-b border-gold/10 bg-gradient-to-b from-black via-zinc-950 to-black pt-24 pb-16 lg:pt-32 lg:pb-24">
         <div className="absolute inset-0 bg-[url('/assets/images/texture-grain.png')] opacity-20 mix-blend-overlay" />
 
-        <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <motion.header
             className="max-w-3xl"
             initial={{ opacity: 0, y: 30 }}
@@ -322,7 +374,7 @@ export default function ConsultingPage(): JSX.Element {
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
               <Link
-                href="/contact"
+                href="/contact?source=consulting&intent=consultation"
                 className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gold px-8 py-4 text-sm font-bold uppercase tracking-widest text-black transition-all hover:bg-gold/80"
               >
                 Request Consultation
@@ -335,13 +387,6 @@ export default function ConsultingPage(): JSX.Element {
               >
                 View Strategic Frameworks
                 <Library className="ml-2 h-4 w-4" />
-              </Link>
-
-              <Link
-                href="/events"
-                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-bold uppercase tracking-widest text-cream transition-colors hover:bg-white/10"
-              >
-                View Salons
               </Link>
             </div>
 
@@ -356,7 +401,7 @@ export default function ConsultingPage(): JSX.Element {
           MANDATE / STRIP
          ========================================================= */}
       <section className="bg-black py-16 lg:py-24">
-        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <MandateStatement />
         </div>
         <div className="mt-16">
@@ -365,177 +410,69 @@ export default function ConsultingPage(): JSX.Element {
       </section>
 
       {/* =========================================================
-          STRATEGIC FRAMEWORKS ENGINE (CANON → FRAMEWORK → DEPLOYMENT)
+          CANON VOLUMES (Showcasing actual materials)
          ========================================================= */}
       <section className="relative bg-zinc-950 py-20 lg:py-28">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.08),transparent_60%)]" />
-        <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="mb-12"
-          >
-            <motion.p
-              variants={fadeUp}
-              className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold"
-            >
-              Strategic Frameworks Engine
-            </motion.p>
-
-            <motion.h2
-              variants={fadeUp}
-              className="mt-6 font-serif text-3xl font-semibold text-white sm:text-4xl"
-            >
-              From Canon → Framework → Deployment
-            </motion.h2>
-
-            <motion.p
-              variants={fadeUp}
-              className="mt-4 max-w-3xl text-base leading-relaxed text-gray-400 sm:text-lg"
-            >
-              The Canon is the spine. Resources are the muscles. Consulting is applied force.
-              This is how ancient principles become modern execution — without turning the page into a
-              lead-gen gimmick.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid gap-6 lg:grid-cols-3">
-            {pipeline.map((card) => {
-              const Icon = card.icon;
-              return (
-                <motion.div
-                  key={card.title}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={reduceMotion ? { duration: 0.01 } : { duration: 0.6, ease: easeSettle }}
-                  className="rounded-3xl border border-white/8 bg-white/[0.03] p-8 hover:border-gold/25"
-                >
-                  <div className="mb-5 inline-flex items-center gap-3">
-                    <div className="rounded-2xl border border-gold/25 bg-gold/10 p-3">
-                      <Icon className="h-6 w-6 text-gold" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.32em] text-gold/90">
-                        {card.subtitle}
-                      </p>
-                      <h3 className="font-serif text-xl font-semibold text-white">
-                        {card.title}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <p className="text-sm leading-relaxed text-gray-400">{card.body}</p>
-
-                  <div className="mt-6">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-gray-500">
-                      Typical outputs
-                    </p>
-                    <ul className="mt-3 space-y-2">
-                      {card.outputs.map((o) => (
-                        <li key={o} className="flex items-start gap-3 text-xs text-gray-300">
-                          <CheckCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-gold/60" />
-                          <span>{o}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Link
-              href="/resources/strategic-frameworks"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-7 py-4 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-gold/80"
-            >
-              Enter the Framework Library
-              <Library className="h-4 w-4" />
-            </Link>
-
-            <Link
-              href="/inner-circle"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-7 py-4 text-sm font-bold uppercase tracking-widest text-gold transition hover:bg-gold/15"
-            >
-              Unlock the Full Library
-              <Lock className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================
-          FLAGSHIP FRAMEWORKS (SAMPLES)
-         ========================================================= */}
-      <section className="bg-black py-20 lg:py-28">
-        <div className="mx-auto max-w-6xl px-6 lg:px-8">
-          <div className="mb-12 max-w-3xl">
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12">
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">
-              Flagship frameworks
+              The Canon
             </p>
             <h2 className="mt-6 font-serif text-3xl font-semibold text-white sm:text-4xl">
-              Samples that prove the method
+              Volumes I-X: The intellectual foundation
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-gray-400 sm:text-lg">
-              Not “thought leadership.” Instruments. Each framework compresses complexity into a usable board artifact.
-              View what’s public — unlock the full library for templates, PDFs, and the deeper operating notes.
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-gray-400 sm:text-lg">
+              A complete doctrinal architecture developed and tested over 17 years. 
+              Each volume addresses a specific domain of leadership responsibility.
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-3">
-            {frameworks.map((f) => {
-              const Icon = f.icon;
+          <div className="grid gap-6 lg:grid-cols-2">
+            {canonVolumes.map((volume) => {
+              const Icon = volume.icon;
               return (
                 <div
-                  key={f.title}
-                  className="group rounded-3xl border border-white/8 bg-white/[0.02] p-8 transition-all hover:border-gold/30 hover:bg-white/[0.04]"
+                  key={volume.volume}
+                  className="group rounded-3xl border border-white/8 bg-white/[0.02] p-8 transition-all hover:border-gold/25 hover:bg-white/[0.04]"
                 >
-                  <div className="mb-5 flex items-start justify-between gap-4">
-                    <div className="rounded-2xl border border-gold/25 bg-gold/10 p-3">
-                      <Icon className="h-6 w-6 text-gold" />
+                  <div className="mb-6 flex items-start justify-between gap-4">
+                    <div>
+                      <div className="mb-2 inline-flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500">
+                          {volume.volume}
+                        </span>
+                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.3em] ${
+                          volume.status === 'public' 
+                            ? 'bg-green-500/10 text-green-400' 
+                            : volume.status === 'inner-circle'
+                            ? 'bg-gold/10 text-gold'
+                            : 'bg-blue-500/10 text-blue-400'
+                        }`}>
+                          {volume.status}
+                        </span>
+                      </div>
+                      <h3 className="font-serif text-xl font-semibold text-white group-hover:text-gold">
+                        {volume.title}
+                      </h3>
                     </div>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-gray-300">
-                      {f.tag}
+                    <Icon className="h-8 w-8 text-gold/60" />
+                  </div>
+
+                  <p className="text-sm leading-relaxed text-gray-400">
+                    {volume.description}
+                  </p>
+
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-xs text-gray-500">
+                      {volume.pageCount}
                     </span>
-                  </div>
-
-                  <h3 className="font-serif text-xl font-semibold text-white group-hover:text-gold">
-                    {f.title}
-                  </h3>
-
-                  <div className="mt-5 space-y-4 text-sm text-gray-400">
-                    <p>
-                      <span className="font-bold text-gray-200">What it solves:</span>{" "}
-                      {f.solves}
-                    </p>
-                    <p>
-                      <span className="font-bold text-gray-200">When to use:</span>{" "}
-                      {f.when}
-                    </p>
-                    <p>
-                      <span className="font-bold text-gray-200">Typical outputs:</span>{" "}
-                      {f.outputs}
-                    </p>
-                  </div>
-
-                  <div className="mt-8 flex flex-col gap-3">
                     <Link
-                      href={f.publicHref}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-widest text-cream transition hover:bg-white/10"
+                      href={volume.href}
+                      className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-gold transition hover:text-gold/80"
                     >
-                      View (Public)
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-
-                    <Link
-                      href="/inner-circle"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-5 py-3 text-xs font-bold uppercase tracking-widest text-gold transition hover:bg-gold/15"
-                    >
-                      Unlock full library
-                      <Lock className="h-4 w-4" />
+                      View {volume.status === 'public' ? 'public' : 'preview'}
+                      <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
                 </div>
@@ -543,35 +480,32 @@ export default function ConsultingPage(): JSX.Element {
             })}
           </div>
 
-          <div className="mt-12 rounded-3xl border border-gold/20 bg-gold/5 p-8 lg:p-10">
+          <div className="mt-8 rounded-3xl border border-gold/20 bg-gold/5 p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-3xl">
-                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">
-                  Prelude
-                </p>
-                <h3 className="mt-4 font-serif text-2xl font-semibold text-white">
-                  Strategic Frameworks — how tools are built from the Canon
+                <h3 className="font-serif text-xl font-semibold text-white">
+                  Complete Canon Collection
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-gray-400">
-                  A short, board-legible document that explains the engine: principles → instruments → decisions.
-                  Read the prelude publicly; unlock the full artifacts through Inner Circle access.
+                <p className="mt-2 text-sm leading-relaxed text-gray-400">
+                  Access all volumes, teaching editions, and implementation guides through 
+                  Inner Circle membership or as part of a consulting engagement.
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/resources/strategic-frameworks"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-4 text-xs font-bold uppercase tracking-widest text-black transition hover:bg-gold/80"
+                  href="/inner-circle?section=canon"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition hover:bg-gold/80"
                 >
-                  Read the Prelude
-                  <FileText className="h-4 w-4" />
+                  Inner Circle Access
+                  <BookOpen className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="/inner-circle"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-6 py-4 text-xs font-bold uppercase tracking-widest text-gold transition hover:bg-gold/15"
+                  href="/contact?source=consulting&intent=canon-access"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold transition hover:bg-gold/15"
                 >
-                  Inner Circle access
-                  <Lock className="h-4 w-4" />
+                  Consulting Access
+                  <GraduationCap className="h-4 w-4" />
                 </Link>
               </div>
             </div>
@@ -580,10 +514,116 @@ export default function ConsultingPage(): JSX.Element {
       </section>
 
       {/* =========================================================
-          AREAS OF ENGAGEMENT (existing)
+          FRAMEWORK ARTIFACTS (Actual tools and templates)
+         ========================================================= */}
+      <section className="bg-black py-20 lg:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12">
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">
+              Implementation Tools
+            </p>
+            <h2 className="mt-6 font-serif text-3xl font-semibold text-white sm:text-4xl">
+              Board-ready frameworks and templates
+            </h2>
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-gray-400 sm:text-lg">
+              Operational artifacts that transform doctrine into execution. 
+              Each tool is designed for immediate deployment.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {frameworkArtifacts.map((artifact) => {
+              const Icon = artifact.icon;
+              return (
+                <div
+                  key={artifact.title}
+                  className="group rounded-3xl border border-white/8 bg-white/[0.02] p-6 transition-all hover:border-gold/25 hover:bg-white/[0.04]"
+                >
+                  <div className="mb-4 flex items-start justify-between gap-3">
+                    <div className="rounded-2xl border border-gold/25 bg-gold/10 p-3">
+                      <Icon className="h-5 w-5 text-gold" />
+                    </div>
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.3em] ${
+                      artifact.status === 'public' 
+                        ? 'bg-green-500/10 text-green-400' 
+                        : artifact.status === 'inner-circle'
+                        ? 'bg-gold/10 text-gold'
+                        : 'bg-blue-500/10 text-blue-400'
+                    }`}>
+                      {artifact.status}
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-lg font-semibold text-white group-hover:text-gold">
+                    {artifact.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-relaxed text-gray-400">
+                    {artifact.description}
+                  </p>
+
+                  {artifact.fileType && (
+                    <p className="mt-3 text-xs text-gray-500">
+                      {artifact.fileType}
+                    </p>
+                  )}
+
+                  <div className="mt-6">
+                    <Link
+                      href={artifact.href}
+                      className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-gold transition hover:text-gold/80"
+                    >
+                      {artifact.status === 'public' ? 'Download' : 'View preview'}
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {implementationTools.map((tool) => {
+              const Icon = tool.icon;
+              return (
+                <div
+                  key={tool.title}
+                  className="group rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-all hover:border-gold/20 hover:bg-white/[0.03]"
+                >
+                  <div className="mb-3 flex items-center gap-3">
+                    <Icon className="h-4 w-4 text-gold/60" />
+                    <h4 className="text-sm font-semibold text-white group-hover:text-gold">
+                      {tool.title}
+                    </h4>
+                  </div>
+
+                  <p className="text-xs leading-relaxed text-gray-400">
+                    {tool.description}
+                  </p>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-gray-500">
+                      {tool.type}
+                    </span>
+                    <Link
+                      href={tool.href}
+                      className="text-xs font-medium text-gold transition hover:text-gold/80"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          AREAS OF ENGAGEMENT
          ========================================================= */}
       <section className="relative bg-zinc-950 py-20 lg:py-32">
-        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 max-w-2xl">
             <h2 className="font-serif text-3xl font-semibold text-white sm:text-4xl">
               Areas of Engagement
@@ -633,10 +673,10 @@ export default function ConsultingPage(): JSX.Element {
       </section>
 
       {/* =========================================================
-          BOARD-LEVEL OUTCOMES (inserted)
+          BOARD-LEVEL OUTCOMES
          ========================================================= */}
       <section className="bg-black py-20 lg:py-28">
-        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 max-w-3xl">
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">
               Board-level outcomes
@@ -670,7 +710,7 @@ export default function ConsultingPage(): JSX.Element {
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
             <Link
-              href="/contact"
+              href="/contact?source=consulting&intent=consultation"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-7 py-4 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-gold/80"
             >
               Request Consultation
@@ -678,29 +718,29 @@ export default function ConsultingPage(): JSX.Element {
             </Link>
 
             <Link
-              href="/resources/strategic-frameworks"
+              href="/resources/board-decision-log-template"
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-bold uppercase tracking-widest text-cream transition hover:bg-white/10"
             >
-              Download a sample framework
+              Download sample template
               <FileText className="h-4 w-4" />
             </Link>
 
             <Link
-              href="/inner-circle"
+              href="/inner-circle?source=consulting-outcomes"
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-7 py-4 text-sm font-bold uppercase tracking-widest text-gold transition hover:bg-gold/15"
             >
               Inner Circle preview
-              <Lock className="h-4 w-4" />
+              <Library className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </section>
 
       {/* =========================================================
-          HOW I WORK (existing)
+          HOW I WORK
          ========================================================= */}
       <section className="bg-black py-20 lg:py-32">
-        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-16 lg:grid-cols-2">
             <div>
               <h2 className="font-serif text-3xl font-semibold text-white">How I Work</h2>
@@ -743,7 +783,7 @@ export default function ConsultingPage(): JSX.Element {
 
               <div className="mt-12">
                 <Link
-                  href="/contact"
+                  href="/contact?source=consulting&intent=context-note"
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold/50 py-4 text-sm font-bold uppercase tracking-widest text-gold transition-all hover:bg-gold hover:text-black"
                 >
                   Share Context Note
@@ -771,7 +811,7 @@ export default function ConsultingPage(): JSX.Element {
                     <Library className="h-4 w-4" />
                   </Link>
                   <Link
-                    href="/inner-circle"
+                    href="/inner-circle?source=consulting-proof"
                     className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-5 py-3 text-xs font-bold uppercase tracking-widest text-gold transition hover:bg-gold/15"
                   >
                     Unlock full library
@@ -786,18 +826,18 @@ export default function ConsultingPage(): JSX.Element {
           <div className="mt-14 border-t border-white/10 pt-10">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-gray-500">
-                If you want a “call for vibes,” this isn’t it. If you want board-legible strategy, we can talk.
+                If you want a "call for vibes," this isn't it. If you want board-legible strategy, we can talk.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/resources/strategic-frameworks"
+                  href="/canon/volume-i-foundations-of-purpose"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition hover:bg-gold/80"
                 >
-                  Read the Prelude
-                  <FileText className="h-4 w-4" />
+                  Read Volume I Preview
+                  <BookOpen className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="/contact"
+                  href="/contact?source=consulting&intent=consultation"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/50 bg-transparent px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold transition hover:bg-gold hover:text-black"
                 >
                   Request Consultation
@@ -811,4 +851,3 @@ export default function ConsultingPage(): JSX.Element {
     </Layout>
   );
 }
-

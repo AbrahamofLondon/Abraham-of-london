@@ -1,4 +1,4 @@
-/* next.config.mjs - CLEAN & PRODUCTION READY */
+/* next.config.mjs - ENHANCED WITH OFFICE FILE EXCLUSION */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
@@ -39,11 +39,6 @@ const nextConfig = {
     BUILD_TIMESTAMP: new Date().toISOString(),
   },
 
-  // Remove sassOptions unless you're using SCSS
-  // sassOptions: {
-  //   silenceDeprecations: ['legacy-js-api'],
-  // },
-
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
     formats: ["image/avif", "image/webp"],
@@ -66,7 +61,6 @@ const nextConfig = {
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
           { key: "Access-Control-Allow-Origin", value: "*" },
-          // REMOVE Content-Type - let Next.js handle it automatically
         ],
       },
       {
@@ -83,8 +77,18 @@ const nextConfig = {
     ];
   },
 
-  // ✅ SIMPLIFIED webpack config - Remove all CSS handling
-  webpack: (config, { isServer, webpack }) => {
+  // ✅ ENHANCED webpack config with Office file exclusion
+  webpack: (config, { isServer, webpack, dev }) => {
+    // CRITICAL: Ignore Office files in Webpack build to prevent Windows lock errors
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.odt|\.ods|\.odp)$/i,
+        contextRegExp: /public[\\/]downloads/,
+       resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.pdf)$/i,
+       contextRegExp: /public[\\/]assets[\\/]downloads/, // Update the path to match your structure
+      })
+    );
+
     // Handle client-side modules
     if (!isServer) {
       config.plugins.push(
@@ -107,21 +111,44 @@ const nextConfig = {
       };
     }
 
-    // Suppress warnings
+    // Suppress warnings including Office file warnings
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       { module: /contentlayer/ },
       { module: /node_modules[\\/]+@fontsource/ },
-      { file: /public[\\/]+downloads[\\/]+/ },
+      { 
+        module: /public[\\/]+downloads[\\/]+.*\.(xlsx|docx|pptx|xls|doc|ppt|odt|ods|odp)$/i 
+      },
     ];
 
-    // Windows compatibility
-    if (process.platform === "win32") {
+    // Windows compatibility - Exclude Office files from watching
+    if (dev) {
       config.watchOptions = {
         ...(config.watchOptions || {}),
         poll: 1000,
         aggregateTimeout: 300,
-        ignored: ["**/.contentlayer/**", "**/.next/**", "**/node_modules/**"],
+        ignored: [
+          "**/.contentlayer/**",
+          "**/.next/**", 
+          "**/node_modules/**",
+          // CRITICAL: Exclude Office files from file watching
+          "**/public/downloads/*.xlsx",
+          "**/public/downloads/*.docx", 
+          "**/public/downloads/*.pptx",
+          "**/public/downloads/*.xls",
+          "**/public/downloads/*.doc",
+          "**/public/downloads/*.ppt",
+          "**/public/downloads/*.odt",
+          "**/public/downloads/*.ods",
+          "**/public/downloads/*.odp",
+          // Windows temp files
+          "**/*.tmp",
+          "**/Thumbs.db",
+          "**/desktop.ini",
+          "**/~$*",
+         resourceRegExp: /(\.xlsx|\.docx|\.pptx|\.xls|\.doc|\.ppt|\.pdf)$/i,
+         contextRegExp: /public[\\/]assets[\\/]downloads/, // Update the path to match your structure
+        ],
       };
     }
 
@@ -132,11 +159,12 @@ const nextConfig = {
     serverComponentsExternalPackages: ["better-sqlite3", "pdfkit", "sharp", "bcrypt"],
     
     // Remove optimizeCss - Next.js handles this automatically
-    // optimizeCss: true,
-    
-    // Other optimizations
     scrollRestoration: true,
     optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
+    
+    // Reduce file system scanning
+    webpackBuildWorker: true,
+    cpus: 1,
   },
 
   i18n: {

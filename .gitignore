@@ -157,3 +157,32 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# =====================================================
+# OFFICE DOCUMENTS IN PUBLIC (CAUSING BUILD ERRORS)
+# =====================================================
+# CRITICAL: Ignore Office files in downloads folder to prevent Windows lock errors
+public/downloads/*.pptx
+public/downloads/*.docx
+public/downloads/*.xlsx
+public/downloads/*.ppt
+public/downloads/*.doc
+public/downloads/*.xls
+public/downloads/*.odt
+public/downloads/*.ods
+public/downloads/*.odp
+public/downloads/*.numbers
+public/downloads/*.pages
+public/downloads/*.key
+
+# Temporary/generated downloads
+public/downloads/temp/
+public/downloads/generated/
+
+# Windows Thumbs.db and desktop.ini
+public/downloads/Thumbs.db
+public/downloads/desktop.ini
+
+# Lock files
+public/downloads/~$*
+public/downloads/._*

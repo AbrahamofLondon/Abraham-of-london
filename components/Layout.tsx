@@ -1,34 +1,18 @@
-// components/Layout.tsx — SINGLE SOURCE OF TRUTH FOR NAV OFFSET
+// components/Layout.tsx — SINGLE SOURCE OF TRUTH (NO DYNAMIC IMPORTS, NO GHOST UI)
 import * as React from "react";
 import Head from "next/head";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 
-// ---------------------------------------------------------------------
-// Dynamic Shells (Production Guardrails)
-// ---------------------------------------------------------------------
-const LuxuryNavbar = dynamic(() => import("@/components/LuxuryNavbar"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-20 border-b border-white/10 bg-black/70 backdrop-blur-md" />
-  ),
-});
+import LuxuryNavbar from "@/components/LuxuryNavbar";
+import Footer from "@/components/Footer";
 
-const Footer = dynamic(() => import("@/components/Footer"), {
-  ssr: false,
-  loading: () => <div className="h-64 bg-zinc-950 border-t border-white/10" />,
-});
-
-// ---------------------------------------------------------------------
-// Core Logic & SEO Standards
-// ---------------------------------------------------------------------
-const NAV_HEIGHT = 80; // keep aligned with LuxuryNavbar h-20
+// Keep aligned with LuxuryNavbar h-20
+const NAV_HEIGHT = 80;
 
 const DEFAULT_SEO = {
   siteName: "Abraham of London",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
-  defaultDescription:
-    "Faith-rooted strategy and leadership for high-capacity builders.",
+  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, ""),
+  defaultDescription: "Faith-rooted strategy and leadership for high-capacity builders.",
   defaultOgImage: "/assets/images/social/og-image.jpg",
   twitterHandle: "@abrahamoflondon",
 } as const;
@@ -40,9 +24,27 @@ const DEFAULT_SEO = {
 function toAbsoluteUrl(pathOrUrl: unknown): string {
   const s = typeof pathOrUrl === "string" ? pathOrUrl.trim() : "";
   if (!s) return `${DEFAULT_SEO.siteUrl}${DEFAULT_SEO.defaultOgImage}`;
-  if (s.startsWith("http")) return s;
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
   const cleanPath = s.startsWith("/") ? s : `/${s}`;
   return `${DEFAULT_SEO.siteUrl}${cleanPath}`;
+}
+
+function buildTitle(inputTitle: string | undefined): string {
+  const base = DEFAULT_SEO.siteName;
+
+  const t = (inputTitle || "").trim();
+  if (!t) return base;
+
+  // Prevent "X | Abraham of London | Abraham of London"
+  const normalized = t.replace(/\s+/g, " ");
+  const lower = normalized.toLowerCase();
+  const baseLower = base.toLowerCase();
+
+  if (lower === baseLower) return base;
+  if (lower.endsWith(`| ${baseLower}`)) return normalized; // already has it
+  if (lower.includes(baseLower) && lower.includes("|")) return normalized; // likely already composed
+
+  return `${normalized} | ${base}`;
 }
 
 export interface LayoutProps {
@@ -58,12 +60,6 @@ export interface LayoutProps {
   transparentHeader?: boolean;
   className?: string;
   fullWidth?: boolean;
-
-  /**
-   * ✅ Use on hero/landing pages where the first section already includes its own top padding
-   * (e.g., pt-24 / pt-28) to avoid double-spacing under the fixed navbar.
-   */
-  disableNavOffset?: boolean;
 }
 
 export default function Layout({
@@ -79,49 +75,31 @@ export default function Layout({
   transparentHeader = false,
   className = "",
   fullWidth = false,
-  disableNavOffset = false,
 }: LayoutProps) {
   const router = useRouter();
 
-  // Resolution Logic
-  const siteTitle = title
-    ? `${title} | ${DEFAULT_SEO.siteName}`
-    : DEFAULT_SEO.siteName;
-
-  const siteDesc = description || DEFAULT_SEO.defaultDescription;
+  const siteTitle = buildTitle(title);
+  const siteDesc = (description || DEFAULT_SEO.defaultDescription).trim();
   const siteOgImage = toAbsoluteUrl(ogImage);
 
   // Canonical Handling: Uses provided prop or derives from current router path
-  const currentPath = router?.asPath?.split("?")[0]?.split("#")[0] || "/";
-  const finalCanonical = canonicalUrl
-    ? toAbsoluteUrl(canonicalUrl)
-    : toAbsoluteUrl(currentPath);
-
-  // ✅ The only place nav offset is managed
-  const mainStyle: React.CSSProperties | undefined = disableNavOffset
-    ? undefined
-    : { paddingTop: NAV_HEIGHT };
+  const currentPath = (router?.asPath || "/").split("?")[0]?.split("#")[0] || "/";
+  const finalCanonical = canonicalUrl ? toAbsoluteUrl(canonicalUrl) : toAbsoluteUrl(currentPath);
 
   return (
-    <div
-      suppressHydrationWarning
-      className={`min-h-screen flex flex-col bg-black text-white selection:bg-yellow-300/30 ${className}`}
-    >
+    <div className={`min-h-screen flex flex-col bg-black text-white ${className}`}>
       <Head>
         <title>{siteTitle}</title>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
+
+        {/* Viewport */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+        {/* Core SEO */}
         <meta name="description" content={siteDesc} />
-
-        {/* SEO Integrity */}
         <link rel="canonical" href={finalCanonical} />
-        {keywords.length > 0 && (
-          <meta name="keywords" content={keywords.join(", ")} />
-        )}
+        {keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
 
-        {/* Open Graph Architecture */}
+        {/* Open Graph */}
         <meta property="og:site_name" content={DEFAULT_SEO.siteName} />
         <meta property="og:title" content={siteTitle} />
         <meta property="og:description" content={siteDesc} />
@@ -131,51 +109,56 @@ export default function Layout({
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
 
-        {/* Twitter/X Command */}
+        {/* Twitter/X */}
         <meta name="twitter:card" content={twitterCard} />
         <meta name="twitter:site" content={DEFAULT_SEO.twitterHandle} />
         <meta name="twitter:title" content={siteTitle} />
+        <meta name="twitter:description" content={siteDesc} />
         <meta name="twitter:image" content={siteOgImage} />
 
-        {/* JSON-LD Security */}
+        {/* JSON-LD */}
         {structuredData && (
           <script
             type="application/ld+json"
-            // eslint-disable-next-line react/no-danger
+            // JSON.stringify is safe here: script tag content, not rendered HTML
             dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
           />
         )}
       </Head>
 
+      {/* Fixed header */}
       <LuxuryNavbar transparent={transparentHeader} />
 
+      {/* Content offset under fixed navbar */}
       <main
-        className={`flex-1 ${
-          fullWidth ? "w-full" : "mx-auto max-w-7xl px-6 lg:px-8"
-        }`}
-        style={mainStyle}
+        className={`flex-1 ${fullWidth ? "w-full" : "mx-auto max-w-7xl px-6 lg:px-8"}`}
+        style={{ paddingTop: NAV_HEIGHT }}
       >
         {children}
       </main>
 
       <Footer />
 
-      {/* Global CSS Overrides for Structural Reading */}
+      {/* Global CSS (minimal, no overlays, no click-blockers) */}
       <style jsx global>{`
         html {
           scroll-behavior: smooth;
           -webkit-tap-highlight-color: transparent;
         }
+
         body {
-          overscroll-behavior-y: none;
+          margin: 0;
           background: #000;
+          color: #fff;
+          overscroll-behavior-y: none;
         }
+
         ::selection {
           background: rgba(212, 175, 55, 0.2);
           color: #fff;
         }
 
-        /* High-fidelity scrollbar */
+        /* Scrollbar (subtle, not a gimmick) */
         ::-webkit-scrollbar {
           width: 6px;
         }
@@ -190,7 +173,7 @@ export default function Layout({
           background: #d4af37;
         }
 
-        /* Mobile polish */
+        /* Mobile: ensure fixed header doesn’t create text “underlap” illusions */
         @media (max-width: 768px) {
           html {
             scroll-padding-top: ${NAV_HEIGHT}px;

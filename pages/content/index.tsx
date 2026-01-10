@@ -1,18 +1,31 @@
+// pages/content/index.tsx — FULL INDEX (SYNC CONTENTLAYER)
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { motion } from "framer-motion";
-import { Search, ArrowRight, Box, Terminal } from "lucide-react";
-import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
+import {
+  Search,
+  ArrowRight,
+  Box,
+  Terminal,
+  X,
+  Calendar,
+  Clock,
+  Filter,
+  BookOpen,
+  Layers,
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
 import {
+  assertContentlayerHasDocs,
+  getContentlayerData,
   getPublishedDocuments,
   getDocKind,
-  normalizeSlug,
   getDocHref,
   resolveDocCoverImage,
-  getContentlayerData
+  sanitizeData,
 } from "@/lib/contentlayer-compat";
 
 type Item = {
@@ -23,167 +36,349 @@ type Item = {
   excerpt?: string | null;
   date?: string | null;
   image?: string | null;
+  readTime?: string | null;
+  tags?: string[];
+  category?: string | null;
 };
 
 type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const data = await getContentlayerData();
-  assertContentlayerHasDocs(data);
-  
-  const docs = getPublishedDocuments();
+  try {
+    const data = getContentlayerData();
+    assertContentlayerHasDocs(data);
 
-  const items: Item[] = (docs ?? [])
-    .map((d: any) => {
-      const kind = String(getDocKind(d) ?? "document");
-      const href = String(getDocHref(d) ?? "");
-      const title = String(d?.title ?? "Untitled");
+    const docs = getPublishedDocuments(); // combined published docs
 
-      // Deterministic stable key (never undefined)
-      const safeSlug = String(normalizeSlug(d) ?? "");
-      const key = String(d?._id ?? `${kind}:${safeSlug || href || title}`);
+    const items: Item[] = (docs ?? [])
+      .map((d: any) => {
+        const kind = String(getDocKind(d) ?? "document");
+        const href = String(getDocHref(d) ?? "");
+        const title = String(d?.title ?? "Untitled");
+        const slugish = String(d?.slug || d?._raw?.flattenedPath || href || title);
 
-      const date = d?.date ? String(d.date) : null;
+        const key = String(d?._id ?? `${kind}:${slugish}`);
 
-      return {
-        key,
-        kind,
-        title,
-        href,
-        excerpt: (d?.excerpt ?? d?.description ?? null) as string | null,
-        date,
-        image: (resolveDocCoverImage(d) ?? null) as string | null,
-      };
-    })
-    .filter((x) => Boolean(x.href) && Boolean(x.title))
-    .sort((a, b) => {
-      const bd = b.date ? new Date(b.date).getTime() : 0;
-      const ad = a.date ? new Date(a.date).getTime() : 0;
-      return bd - ad;
-    });
+        return {
+          key,
+          kind,
+          title,
+          href,
+          excerpt: (d?.excerpt ?? d?.description ?? null) as string | null,
+          date: d?.date ? String(d.date) : null,
+          image: (resolveDocCoverImage(d) ?? null) as string | null,
+          readTime: d?.readTime ?? null,
+          tags: Array.isArray(d?.tags) ? d.tags : [],
+          category: d?.category ?? null,
+        };
+      })
+      .filter((x) => Boolean(x.href) && Boolean(x.title))
+      .sort((a, b) => {
+        const bd = b.date ? new Date(b.date).getTime() : 0;
+        const ad = a.date ? new Date(a.date).getTime() : 0;
+        return bd - ad;
+      });
 
-  return { props: { items }, revalidate: 1800 };
+    return {
+      props: sanitizeData({ items }),
+      revalidate: 1800,
+    };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error generating static props for content index:", error);
+    return {
+      props: { items: [] },
+      revalidate: 1800,
+    };
+  }
 };
 
 const ContentIndexPage: NextPage<Props> = ({ items }) => {
-  const [q, setQ] = React.useState("");
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedKind, setSelectedKind] = React.useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+  const [showFilters, setShowFilters] = React.useState(false);
 
-  const filtered = React.useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter((it) => {
-      const t = it.title.toLowerCase();
-      const k = it.kind.toLowerCase();
-      const e = (it.excerpt ?? "").toLowerCase();
-      return t.includes(s) || k.includes(s) || e.includes(s);
+  const allKinds = React.useMemo(() => {
+    const kinds = new Set<string>();
+    items.forEach((item) => kinds.add(item.kind));
+    return Array.from(kinds).sort();
+  }, [items]);
+
+  const allCategories = React.useMemo(() => {
+    const categories = new Set<string>();
+    items.forEach((item) => {
+      if (item.category) categories.add(item.category);
     });
-  }, [q, items]);
+    return Array.from(categories).sort();
+  }, [items]);
+
+  const filteredItems = React.useMemo(() => {
+    let filtered = items;
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(
+        (item) =>
+          item.title.toLowerCase().includes(term) ||
+          item.excerpt?.toLowerCase().includes(term) ||
+          item.tags?.some((tag) => tag.toLowerCase().includes(term)) ||
+          item.category?.toLowerCase().includes(term)
+      );
+    }
+
+    if (selectedKind) filtered = filtered.filter((item) => item.kind === selectedKind);
+    if (selectedCategory) filtered = filtered.filter((item) => item.category === selectedCategory);
+
+    return filtered;
+  }, [items, searchTerm, selectedKind, selectedCategory]);
 
   const groups = React.useMemo(() => {
     const map: Record<string, Item[]> = {};
-    for (const it of filtered) {
+    for (const it of filteredItems) {
       const groupName = it.kind || "document";
       if (!map[groupName]) map[groupName] = [];
       map[groupName].push(it);
     }
     return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
-  }, [filtered]);
+  }, [filteredItems]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedKind(null);
+    setSelectedCategory(null);
+  };
+
+  const getKindLabel = (kind: string) => {
+    const labels: Record<string, string> = {
+      post: "Essays",
+      blog: "Blog Posts",
+      canon: "Canon",
+      download: "Downloads",
+      event: "Events",
+      book: "Books",
+      short: "Shorts",
+      print: "Prints",
+      resource: "Resources",
+      document: "Documents",
+      strategy: "Strategy",
+    };
+    return labels[kind] || `${kind.charAt(0).toUpperCase()}${kind.slice(1)}s`;
+  };
+
+  const getKindIcon = (kind: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      post: <BookOpen className="w-4 h-4" />,
+      blog: <BookOpen className="w-4 h-4" />,
+      canon: <Terminal className="w-4 h-4" />,
+      download: <Layers className="w-4 h-4" />,
+      event: <Calendar className="w-4 h-4" />,
+      book: <BookOpen className="w-4 h-4" />,
+      short: <Terminal className="w-4 h-4" />,
+      print: <Layers className="w-4 h-4" />,
+      resource: <Layers className="w-4 h-4" />,
+      strategy: <Terminal className="w-4 h-4" />,
+    };
+    return icons[kind] || <BookOpen className="w-4 h-4" />;
+  };
+
+  const latestYear = React.useMemo(() => {
+    const ms = Math.max(...items.map((i) => (i.date ? new Date(i.date).getTime() : 0)));
+    const yr = ms > 0 ? new Date(ms).getFullYear() : new Date().getFullYear();
+    return yr;
+  }, [items]);
 
   return (
-    <Layout title="The Kingdom Vault" description="Centralized Strategic Repository.">
-      <main className="min-h-screen bg-[#050505] text-cream">
-        {/* Header Section */}
-        <section className="relative overflow-hidden border-b border-white/5 pb-16 pt-32 lg:pt-40">
-          <div className="absolute inset-0 opacity-[0.02] [background-image:radial-gradient(circle_at_center,_#d4af37_1px,_transparent_1px)] [background-size:32px_32px]" />
-
-          <div className="relative z-10 mx-auto max-w-5xl px-6">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1">
-              <Terminal size={12} className="text-gold" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">
+    <Layout
+      title="The Kingdom Vault"
+      description="Centralized strategic repository containing essays, books, events, and exclusive resources from Abraham of London."
+      fullWidth
+    >
+      <main className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-gray-300">
+        <section className="relative overflow-hidden border-b border-white/5 pb-16 pt-24 lg:pt-32">
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_#d4af37_1px,_transparent_1px)] bg-[length:32px_32px]" />
+          <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
+              <Terminal size={14} className="text-amber-500" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-amber-500">
                 System: Central Vault
               </span>
             </div>
 
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-white sm:text-6xl">
-              Everything. <span className="italic text-gold/80">Organised.</span>
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6">
+              Everything. <span className="italic text-amber-400">Organised.</span>
             </h1>
 
-            <div className="mt-12 relative group max-w-2xl">
-              <Search
-                className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-gold"
-                size={18}
-              />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search collections, themes, or keywords..."
-                className="w-full rounded-2xl border border-white/10 bg-white/5 py-5 pl-14 pr-6 text-base text-cream outline-none transition-all focus:border-gold/40 focus:ring-4 focus:ring-gold/5"
-              />
-              {q && (
+            <p className="text-lg text-gray-400 mb-12 max-w-3xl">
+              Centralized strategic repository containing essays, books, events, and exclusive resources.
+            </p>
+
+            <div className="space-y-4 max-w-3xl">
+              <div className="relative group">
+                <Search
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-amber-500"
+                  size={20}
+                />
+                <input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search collections, themes, or keywords..."
+                  className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-10 text-base text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-500 transition-colors p-1"
+                    aria-label="Clear search"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
                 <button
-                  onClick={() => setQ("")}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-gold"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500/30 hover:text-amber-400 transition-colors"
                 >
-                  Clear
+                  <Filter className="w-4 h-4" />
+                  <span className="text-sm font-medium">Filters</span>
                 </button>
+
+                {(selectedKind || selectedCategory) && (
+                  <button
+                    onClick={clearFilters}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors text-sm"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+
+              {showFilters && (
+                <div className="p-6 rounded-2xl border border-white/10 bg-black/50 backdrop-blur-sm space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-300 mb-2">Content Type</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {allKinds.map((kind) => (
+                          <button
+                            key={kind}
+                            onClick={() => setSelectedKind(selectedKind === kind ? null : kind)}
+                            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                              selectedKind === kind
+                                ? "bg-amber-500 text-black"
+                                : "bg-white/5 text-gray-400 hover:text-gray-300 hover:bg-white/10"
+                            }`}
+                          >
+                            {getKindLabel(kind)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-300 mb-2">Categories</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {allCategories.map((category) => (
+                          <button
+                            key={category}
+                            onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                              selectedCategory === category
+                                ? "bg-blue-500 text-white"
+                                : "bg-white/5 text-gray-400 hover:text-gray-300 hover:bg-white/10"
+                            }`}
+                          >
+                            {category}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(searchTerm || selectedKind || selectedCategory) && (
+                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
+                  <span>
+                    Showing {filteredItems.length} of {items.length} items
+                  </span>
+                </div>
               )}
             </div>
           </div>
         </section>
 
-        {/* Unified Collections Grid */}
-        <section className="mx-auto max-w-5xl px-6 py-20">
+        <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           {groups.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="rounded-3xl border border-dashed border-white/10 py-32 text-center"
-            >
-              <Box className="mx-auto mb-4 text-gray-700" size={40} />
-              <p className="font-serif text-xl italic text-gray-500">
-                No assets matching the current query.
-              </p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-3xl border border-dashed border-white/10 py-24 text-center">
+              <Box className="mx-auto mb-4 text-gray-700" size={48} />
+              <p className="font-serif text-xl italic text-gray-500 mb-6">No assets matching the current filters.</p>
+              <button onClick={clearFilters} className="px-6 py-3 bg-white/5 border border-white/10 text-gray-400 rounded-xl hover:bg-white/10 hover:text-white transition-colors">
+                Clear all filters
+              </button>
             </motion.div>
           ) : (
-            <div className="space-y-24">
+            <div className="space-y-16">
               {groups.map(([kind, kindItems]) => (
-                <div key={kind} className="space-y-10">
-                  <div className="flex items-center gap-6">
-                    <h2 className="font-serif text-2xl font-bold uppercase tracking-tight text-gold/90 sm:text-3xl">
-                      {kind === "post" ? "Essays" : `${kind}s`}
-                    </h2>
-                    <div className="h-px flex-1 bg-gradient-to-r from-gold/20 to-transparent" />
-                    <span className="font-mono text-[10px] text-gray-600 uppercase tracking-widest">
-                      {kindItems.length} Volumes
-                    </span>
+                <div key={kind} className="space-y-8">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-white/5">{getKindIcon(kind)}</div>
+                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-white">{getKindLabel(kind)}</h2>
+                    </div>
+                    <div className="h-px flex-1 bg-gradient-to-r from-amber-500/20 to-transparent" />
+                    <span className="font-mono text-xs text-gray-500 uppercase tracking-widest">{kindItems.length} Volumes</span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    {kindItems.map((it) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {kindItems.map((item) => (
                       <motion.div
-                        key={it.key}
+                        key={item.key}
                         whileHover={{ y: -4 }}
-                        className="group relative flex flex-col justify-between rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent p-8 transition-all hover:border-gold/30 hover:shadow-2xl hover:shadow-gold/5"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-black/50 p-6 transition-all hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10"
                       >
-                        <Link href={it.href} className="flex h-full flex-col">
-                          <h3 className="mb-4 font-serif text-2xl font-semibold leading-tight text-cream group-hover:text-gold transition-colors">
-                            {it.title}
+                        <Link href={item.href} className="flex h-full flex-col">
+                          <h3 className="mb-3 font-serif text-xl font-semibold leading-tight text-white group-hover:text-amber-400 transition-colors line-clamp-2">
+                            {item.title}
                           </h3>
 
-                          {it.excerpt && (
-                            <p className="mb-8 text-sm leading-relaxed text-gray-400 line-clamp-2">
-                              {it.excerpt}
-                            </p>
-                          )}
+                          {item.excerpt && <p className="mb-6 text-sm leading-relaxed text-gray-400 line-clamp-2">{item.excerpt}</p>}
 
-                          <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
-                            <span className="font-mono text-[9px] uppercase tracking-widest text-gray-600 group-hover:text-gold/50 transition-colors">
-                              {it.href.replace(/^\//, "").replace(/\//g, " · ")}
-                            </span>
-                            <ArrowRight
-                              size={16}
-                              className="text-gold opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0"
-                            />
+                          <div className="mt-auto space-y-3 pt-4 border-t border-white/5">
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <div className="flex items-center gap-2">
+                                {item.date && (
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>
+                                      {new Date(item.date).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      })}
+                                    </span>
+                                  </div>
+                                )}
+                                {item.readTime && (
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    <span>{item.readTime}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {item.category && <span className="px-2 py-0.5 bg-white/5 rounded text-[10px]">{item.category}</span>}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-[10px] uppercase tracking-widest text-gray-600 group-hover:text-amber-500/50 transition-colors truncate max-w-[70%]">
+                                {item.href.replace(/^\//, "").replace(/\//g, " · ")}
+                              </span>
+                              <ArrowRight size={14} className="text-amber-500 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 flex-shrink-0" />
+                            </div>
                           </div>
                         </Link>
                       </motion.div>
@@ -193,6 +388,27 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
               ))}
             </div>
           )}
+
+          <div className="mt-16 pt-8 border-t border-white/10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-2xl font-bold text-white mb-1">{items.length}</div>
+                <div className="text-sm text-gray-400">Total Assets</div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-2xl font-bold text-white mb-1">{allKinds.length}</div>
+                <div className="text-sm text-gray-400">Content Types</div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-2xl font-bold text-white mb-1">{latestYear}</div>
+                <div className="text-sm text-gray-400">Latest Update</div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-2xl font-bold text-white mb-1">{allCategories.length}</div>
+                <div className="text-sm text-gray-400">Categories</div>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </Layout>
