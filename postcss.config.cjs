@@ -1,15 +1,7 @@
-// postcss.config.js
-module.exports = {
+// postcss.config.js - FIXED for ES modules
+export default {
   plugins: {
-    'postcss-import': {},
-    'tailwindcss': {},
-    'autoprefixer': {},
-    ...(process.env.NODE_ENV === 'production'
-      ? {
-          'cssnano': {
-            preset: 'default',
-          },
-        }
-      : {}),
-  },
+    tailwindcss: {},
+    autoprefixer: {},
+  }
 };
