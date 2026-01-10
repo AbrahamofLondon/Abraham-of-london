@@ -90,15 +90,12 @@
     "content:full": "pnpm content:clean && pnpm contentlayer:safe && pnpm content:validate",
     "content:audit": "pnpm content:validate",
     "pdfs:all": "tsx scripts/generate-pdfs.ts --force-clean",
+    "refresh:downloads": "node scripts/refresh-downloads.js",
     "pdfs:standalone": "tsx scripts/generate-standalone-pdf.tsx",
     "pdfs:frameworks": "tsx scripts/generate-frameworks-pdf.tsx",
     "pdfs:canvas": "tsx scripts/generate-legacy-canvas.ts",
-    "pdfs:refresh": "node scripts/refresh-downloads.js",
     "pdfs:generate": "tsx scripts/pdf/unified-pdf-generator.ts",
     "pdfs:institutional:cycle": "tsx scripts/pdf/unified-pdf-generator.ts --tier all",
-    "pdfs:validate": "tsx scripts/pdf/validate-pdfs.ts",
-    "pdfs:sync": "tsx scripts/pdf/sync-pdfs.ts",
-    "refresh:downloads": "node scripts/refresh-downloads.js",
     "pdfs:cleanup": "tsx scripts/pdf/cleanup-pdfs.ts",
     "pdfs:optimize": "tsx scripts/pdf/optimize-pdfs.ts",
     "pdfs:list": "tsx scripts/pdf/list-pdfs.ts",
@@ -148,7 +145,28 @@
     "release:major": "npm version major && git push && git push --tags",
     "release:candidate": "pnpm ci:full && pnpm build:production",
     "release:production": "pnpm release:candidate && pnpm deploy:production:safe",
-    "platform:health": "pnpm health && pnpm db:health && pnpm content:stats"
+    "platform:health": "pnpm health && pnpm db:health && pnpm content:stats",
+    "content:build": "pnpm contentlayer:build",
+    "build:direct": "next build",
+    "netlify:build": "node scripts/netlify-build.mjs",
+    "netlify:dev": "next dev",
+    "vercel:build": "next build",
+    "build:file-safe": "node scripts/pre-build-cleanup.mjs && contentlayer build && next build",
+    "pre-build:cleanup": "node scripts/pre-build-cleanup.mjs",
+    "emergency:build": "node scripts/emergency-build.mjs",
+    "build:robust": "pnpm pre-build:cleanup && pnpm content:full && pnpm build:check",
+    "windows:build": "cross-env IS_WINDOWS=true pnpm build:file-safe",
+    "ci:netlify": "pnpm env:check && pnpm content:full && pnpm build",
+    "ci:vercel": "pnpm build",
+    "deploy:netlify": "pnpm netlify:build",
+    "deploy:vercel": "pnpm vercel:build",
+    "asset:cleanup": "node scripts/clean-office-files.mjs",
+    "asset:validate": "tsx scripts/validate-assets.ts",
+    "asset:audit": "pnpm asset:cleanup && pnpm asset:validate",
+    "system:check": "tsx scripts/system/check-os-compatibility.ts",
+    "build:platform": "pnpm system:check && pnpm asset:audit && pnpm build:robust",
+    "pdfs:sync": "pnpm refresh:downloads",
+    "pdfs:validate": "pnpm refresh:downloads"
   },
   "dependencies": {
     "@contentlayer/source-files": "0.3.4",
@@ -326,4 +344,3 @@
     ]
   }
 }
-

@@ -1,10 +1,39 @@
-// contentlayer.config.ts — ENHANCED WITH FILE FILTERING
+// contentlayer.config.ts — ENHANCED WITH DEBUGGING & FILE FILTERING
 import path from "path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import fs from "fs";
 
 // ✅ WINDOWS-SAFE: Use path.join instead of path.resolve for better cross-platform
 const contentDirPath = path.join(process.cwd(), "content");
+
+// ✅ DEBUG FUNCTION: Check what files are being scanned
+const debugFileScanning = () => {
+  if (process.env.NODE_ENV === 'development' || process.env.CONTENTLAYER_DEBUG) {
+    console.log('🔍 Contentlayer scanning:', contentDirPath);
+    try {
+      if (fs.existsSync(contentDirPath)) {
+        const dirs = fs.readdirSync(contentDirPath);
+        console.log('📁 Content directories found:', dirs.join(', ') || 'none');
+        
+        // Check for MDX files in each expected directory
+        const expectedDirs = ['blog', 'books', 'canon', 'downloads', 'shorts', 'events', 'prints', 'resources', 'strategy'];
+        expectedDirs.forEach(dir => {
+          const dirPath = path.join(contentDirPath, dir);
+          if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
+            const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.mdx') || f.endsWith('.md'));
+            if (files.length > 0) {
+              console.log(`  📂 ${dir}/: ${files.length} document(s) found`);
+            }
+          }
+        });
+      } else {
+        console.error('❌ Content directory does not exist:', contentDirPath);
+      }
+    } catch (error) {
+      console.error('❌ Error reading content:', error.message);
+    }
+  }
+};
 
 // ✅ FUNCTION TO CHECK IF FILE SHOULD BE IGNORED
 const shouldIgnoreFile = (filePath: string): boolean => {
@@ -440,6 +469,8 @@ export const Strategy = defineDocumentType(() => ({
 // ----------------------------------------------------------------------------
 // source (safe configuration with file filtering)
 // ----------------------------------------------------------------------------
+debugFileScanning(); // DEBUG: Show what's being scanned
+
 export default makeSource({
   contentDirPath,
   documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
@@ -470,14 +501,31 @@ export default makeSource({
   onUnknownDocuments: "skip",
   disableImportAliasWarning: true,
 
-  // ✅ QUIET mode for production
-  onSuccess: async () => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ Contentlayer: Content generated (Office files excluded)");
+  // ✅ ENHANCED SUCCESS HANDLER with document counting
+  onSuccess: async (importData) => {
+    try {
+      const { allDocuments } = await importData();
+      const docCount = allDocuments.length;
+      
+      if (docCount === 0) {
+        console.warn('⚠️ Contentlayer: No documents found. Check your content directory structure.');
+        console.warn('   Expected directories: blog/, books/, canon/, downloads/, shorts/, events/, prints/, resources/, strategy/');
+        console.warn('   Expected file types: .mdx or .md files');
+      } else {
+        const docTypes = allDocuments.reduce((acc, doc) => {
+          const type = doc.type || 'unknown';
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        
+        console.log(`✅ Contentlayer: Generated ${docCount} documents:`, Object.entries(docTypes).map(([k, v]) => `${k}:${v}`).join(', '));
+      }
+    } catch (error) {
+      console.error('❌ Contentlayer generation failed:', error.message);
     }
   },
   
-  // ✅ ERROR handling without crashes
+  // ✅ ENHANCED ERROR HANDLER
   onError: (error) => {
     // Don't crash on Office file errors
     if (error.message.includes("xlsx") || 
@@ -491,6 +539,13 @@ export default makeSource({
       return;
     }
     
+    // Document detection issues
+    if (error.message.includes("no documents") || error.message.includes("empty")) {
+      console.warn('⚠️ Contentlayer: Document detection issue - check content directory structure');
+      return;
+    }
+    
+    // Log other errors
     if (process.env.NODE_ENV === "development") {
       console.warn("⚠️ Contentlayer warning:", error.message);
     }

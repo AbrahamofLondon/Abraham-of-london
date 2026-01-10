@@ -1,19 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import prisma from "@/lib/prisma"; // This is your instantiated client
-import { isRateLimited } from "@/lib/server/rate-limit";
+import prisma from "@/lib/prisma";
+import { isRateLimited } from "@/lib/rate-limit";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { cacheResponse, getCacheKey } from "@/lib/server/cache";
-import { logAuditEvent } from "@/lib/server/audit";
-import { Prisma } from "@prisma/client"; // Import Prisma as a namespace for SQL helpers
-
-// ---------------------------
-// FIX: Prisma Static Helpers
-// ---------------------------
-// We use 'Prisma' (capitalized) for SQL utilities like sql, join, and raw.
-const PrismaAny = Prisma as any;
-const sql = PrismaAny.sql;
-const join = PrismaAny.join;
-const raw = PrismaAny.raw;
+import { logAuditEvent } from "@/lib/audit";
 
 // ---------------------------
 // Types (JSON-safe)
@@ -181,7 +171,6 @@ export default async function handler(
     const cached = await cacheResponse.get<AnalyticsResponse>(cacheKey);
     if (cached) {
       cached.meta.cacheHit = true;
-      // FIX: Added 'status' field here
       await logAuditEvent({
         actorType: "system",
         action: "cache_hit",
@@ -358,24 +347,6 @@ function validateQuery(query: NextApiRequest["query"]) {
   return { since, until, days, filters, page, limit };
 }
 
-function whereSql(since: Date, until: Date, filters: Record<string, string[]>) {
-  const parts = [
-    sql`created_at BETWEEN ${since} AND ${until}`,
-  ];
-
-  if (filters.success?.length) {
-    const bools = filters.success.map((s) => (s === "true" ? 1 : 0));
-    parts.push(sql`success IN (${join(bools)})`);
-  }
-
-  if (filters.contentType?.length) parts.push(sql`content_type IN (${join(filters.contentType)})`);
-  if (filters.eventType?.length) parts.push(sql`event_type IN (${join(filters.eventType)})`);
-  if (filters.tier?.length) parts.push(sql`tier IN (${join(filters.tier)})`);
-  if (filters.countryCode?.length) parts.push(sql`country_code IN (${join(filters.countryCode)})`);
-
-  return join(parts, " AND ");
-}
-
 function toInt(v: unknown, fallback = 0): number {
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : fallback;
@@ -406,58 +377,85 @@ function toSizeString(v: unknown): string {
 }
 
 // ---------------------------
-// Data access
+// Data access - Updated to use Prisma directly without raw SQL helpers
 // ---------------------------
 
 async function getSummaryStats(since: Date, until: Date, filters: Record<string, string[]>) {
-  const where = whereSql(since, until, filters);
-
-  const row = (await prisma.$queryRaw(sql`
-    SELECT
-      COUNT(*) AS total_downloads,
-      COUNT(DISTINCT slug) AS unique_content,
-      COUNT(DISTINCT email_hash) AS unique_users,
-      SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) AS successful_downloads,
-      COALESCE(SUM(COALESCE(file_size, 0)), 0) AS total_size
-    FROM download_audit_events
-    WHERE ${where}
-  `)) as Array<{
-    total_downloads: unknown;
-    unique_content: unknown;
-    unique_users: unknown;
-    successful_downloads: unknown;
-    total_size: unknown;
-  }>;
-
-  const stats = row[0] ?? {
-    total_downloads: 0,
-    unique_content: 0,
-    unique_users: 0,
-    successful_downloads: 0,
-    total_size: 0,
+  const where: any = {
+    created_at: {
+      gte: since,
+      lte: until,
+    }
   };
 
-  const totalDownloads = toInt(stats.total_downloads);
-  const successfulDownloads = toInt(stats.successful_downloads);
+  // Apply filters
+  if (filters.success?.length) {
+    where.success = { in: filters.success.map(s => s === "true") };
+  }
+  if (filters.contentType?.length) {
+    where.content_type = { in: filters.contentType };
+  }
+  if (filters.eventType?.length) {
+    where.event_type = { in: filters.eventType };
+  }
+  if (filters.tier?.length) {
+    where.tier = { in: filters.tier };
+  }
+  if (filters.countryCode?.length) {
+    where.country_code = { in: filters.countryCode };
+  }
+
+  // Get counts
+  const [
+    totalDownloads,
+    uniqueContent,
+    uniqueUsers,
+    successfulDownloads,
+    totalSizeResult,
+  ] = await Promise.all([
+    prisma.download_audit_events.count({ where }),
+    prisma.download_audit_events.groupBy({
+      by: ['slug'],
+      where,
+      _count: true,
+    }).then(results => results.length),
+    prisma.download_audit_events.groupBy({
+      by: ['email_hash'],
+      where,
+      _count: true,
+    }).then(results => results.length),
+    prisma.download_audit_events.count({
+      where: { ...where, success: true }
+    }),
+    prisma.download_audit_events.aggregate({
+      where,
+      _sum: { file_size: true }
+    }),
+  ]);
+
   const avgSuccessRate = totalDownloads > 0 ? (successfulDownloads / totalDownloads) * 100 : 0;
 
-  const byPeriod = (await prisma.$queryRaw(sql`
+  // Get daily trends
+  const byPeriod = await prisma.$queryRaw`
     SELECT
       DATE(created_at) AS date,
       COUNT(*) AS count
     FROM download_audit_events
-    WHERE ${where}
+    WHERE created_at BETWEEN ${since} AND ${until}
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at) ASC
-  `)) as Array<{ date: unknown; count: unknown }>;
+  ` as Array<{ date: Date; count: bigint }>;
 
   return {
     totalDownloads,
-    uniqueContent: toInt(stats.unique_content),
-    uniqueUsers: toInt(stats.unique_users),
-    totalSize: toSizeString(stats.total_size),
+    uniqueContent,
+    uniqueUsers,
+    totalSize: totalSizeResult._sum.file_size?.toString() || "0",
     avgSuccessRate,
-    byPeriod: byPeriod.map((r) => ({ date: toIsoDate(r.date), count: toInt(r.count) })),
+    byPeriod: byPeriod.map((r) => ({ 
+      date: toIsoDate(r.date), 
+      count: Number(r.count) 
+    })),
   };
 }
 
@@ -468,10 +466,28 @@ async function getTopContent(
   page: number,
   limit: number
 ): Promise<DownloadSummary[]> {
-  const where = whereSql(since, until, filters);
+  const where: any = {
+    created_at: {
+      gte: since,
+      lte: until,
+    }
+  };
+
+  // Apply filters
+  if (filters.success?.length) {
+    where.success = { in: filters.success.map(s => s === "true") };
+  }
+  if (filters.contentType?.length) {
+    where.content_type = { in: filters.contentType };
+  }
+  if (filters.eventType?.length) {
+    where.event_type = { in: filters.eventType };
+  }
+
   const offset = (page - 1) * limit;
 
-  const rows = (await prisma.$queryRaw(sql`
+  // Use Prisma's raw query for complex grouping
+  const rows = await prisma.$queryRaw`
     SELECT
       slug,
       COALESCE(content_type, 'unknown') AS content_type,
@@ -486,32 +502,32 @@ async function getTopContent(
         ELSE (SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*))
       END AS success_rate
     FROM download_audit_events
-    WHERE ${where}
+    WHERE created_at BETWEEN ${since} AND ${until}
     GROUP BY slug, content_type, event_type
     ORDER BY count DESC
     LIMIT ${limit} OFFSET ${offset}
-  `)) as Array<{
+  ` as Array<{
     slug: string;
     content_type: string;
     event_type: string;
-    count: unknown;
-    unique_users: unknown;
-    last_download: unknown;
-    total_size: unknown;
-    avg_latency: unknown;
-    success_rate: unknown;
+    count: bigint;
+    unique_users: bigint;
+    last_download: Date | null;
+    total_size: bigint;
+    avg_latency: number | null;
+    success_rate: number;
   }>;
 
   return rows.map((r) => ({
     slug: r.slug,
     contentType: r.content_type,
     eventType: r.event_type,
-    count: toInt(r.count),
-    uniqueUsers: toInt(r.unique_users),
-    lastDownload: r.last_download ? new Date(String(r.last_download)).toISOString() : null,
-    totalSize: toSizeString(r.total_size),
-    avgLatency: toFloat(r.avg_latency),
-    successRate: toFloat(r.success_rate) ?? 0,
+    count: Number(r.count),
+    uniqueUsers: Number(r.unique_users),
+    lastDownload: r.last_download ? r.last_download.toISOString() : null,
+    totalSize: r.total_size.toString(),
+    avgLatency: r.avg_latency,
+    successRate: r.success_rate,
   }));
 }
 
@@ -521,19 +537,24 @@ async function getGroupedCounts(
   filters: Record<string, string[]>,
   column: "content_type" | "event_type" | "tier" | "country_code"
 ): Promise<Record<string, number>> {
-  const where = whereSql(since, until, filters);
+  const where: any = {
+    created_at: {
+      gte: since,
+      lte: until,
+    },
+    [column]: { not: null }
+  };
 
-  const rows = (await prisma.$queryRaw(sql`
-    SELECT ${raw(column)} AS key, COUNT(*) AS count
-    FROM download_audit_events
-    WHERE ${where} AND ${raw(column)} IS NOT NULL
-    GROUP BY ${raw(column)}
-  `)) as Array<{ key: unknown; count: unknown }>;
+  const results = await prisma.download_audit_events.groupBy({
+    by: [column as any],
+    where,
+    _count: true,
+  });
 
   const out: Record<string, number> = {};
-  for (const r of rows) {
-    const k = typeof r.key === "string" ? r.key : String(r.key);
-    out[k] = toInt(r.count);
+  for (const r of results) {
+    const key = r[column] as string;
+    out[key] = r._count;
   }
   return out;
 }
@@ -543,39 +564,45 @@ async function getDailyTrends(
   until: Date,
   filters: Record<string, string[]>
 ): Promise<Array<{ date: string; downloads: number; users: number }>> {
-  const where = whereSql(since, until, filters);
+  const where: any = {
+    created_at: {
+      gte: since,
+      lte: until,
+    }
+  };
 
-  const rows = (await prisma.$queryRaw(sql`
+  const rows = await prisma.$queryRaw`
     SELECT
       DATE(created_at) AS date,
       COUNT(*) AS downloads,
       COUNT(DISTINCT email_hash) AS users
     FROM download_audit_events
-    WHERE ${where}
+    WHERE created_at BETWEEN ${since} AND ${until}
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at) ASC
-  `)) as Array<{ date: unknown; downloads: unknown; users: unknown }>;
+  ` as Array<{ date: Date; downloads: bigint; users: bigint }>;
 
   return rows.map((r) => ({
     date: toIsoDate(r.date),
-    downloads: toInt(r.downloads),
-    users: toInt(r.users),
+    downloads: Number(r.downloads),
+    users: Number(r.users),
   }));
 }
 
 async function getTotalContentCount(since: Date, until: Date, filters: Record<string, string[]>) {
-  const where = whereSql(since, until, filters);
+  const where: any = {
+    created_at: {
+      gte: since,
+      lte: until,
+    }
+  };
 
-  const rows = (await prisma.$queryRaw(sql`
-    SELECT COUNT(*) AS total FROM (
-      SELECT 1
-      FROM download_audit_events
-      WHERE ${where}
-      GROUP BY slug, content_type, event_type
-    ) t
-  `)) as Array<{ total: unknown }>;
+  const uniqueContent = await prisma.download_audit_events.groupBy({
+    by: ['slug'],
+    where,
+  });
 
-  return toInt(rows[0]?.total);
+  return uniqueContent.length;
 }
 
 async function enrichContentBreakdowns(
@@ -586,51 +613,45 @@ async function enrichContentBreakdowns(
 ): Promise<DownloadSummary[]> {
   if (!top.length) return top;
 
-  const where = whereSql(since, until, filters);
+  const where: any = {
+    created_at: {
+      gte: since,
+      lte: until,
+    },
+    OR: top.map(t => ({
+      slug: t.slug,
+      content_type: t.contentType,
+      event_type: t.eventType,
+    }))
+  };
 
-  const orParts = top.map((t) => sql`
-    (slug = ${t.slug} AND COALESCE(content_type,'unknown') = ${t.contentType} AND COALESCE(event_type,'download') = ${t.eventType})
-  `);
+  // Get tier breakdowns
+  const tierResults = await prisma.download_audit_events.groupBy({
+    by: ['slug', 'content_type', 'event_type', 'tier'],
+    where: { ...where, tier: { not: null } },
+    _count: true,
+  });
 
-  const scope = join(orParts, " OR ");
-
-  const tierRows = (await prisma.$queryRaw(sql`
-    SELECT
-      slug,
-      COALESCE(content_type,'unknown') AS content_type,
-      COALESCE(event_type,'download') AS event_type,
-      tier,
-      COUNT(*) AS count
-    FROM download_audit_events
-    WHERE ${where} AND (${scope}) AND tier IS NOT NULL
-    GROUP BY slug, content_type, event_type, tier
-  `)) as Array<{ slug: string; content_type: string; event_type: string; tier: string | null; count: unknown }>;
-
-  const countryRows = (await prisma.$queryRaw(sql`
-    SELECT
-      slug,
-      COALESCE(content_type,'unknown') AS content_type,
-      COALESCE(event_type,'download') AS event_type,
-      country_code,
-      COUNT(*) AS count
-    FROM download_audit_events
-    WHERE ${where} AND (${scope}) AND country_code IS NOT NULL
-    GROUP BY slug, content_type, event_type, country_code
-  `)) as Array<{ slug: string; content_type: string; event_type: string; country_code: string | null; count: unknown }>;
+  // Get country breakdowns
+  const countryResults = await prisma.download_audit_events.groupBy({
+    by: ['slug', 'content_type', 'event_type', 'country_code'],
+    where: { ...where, country_code: { not: null } },
+    _count: true,
+  });
 
   const tierMap = new Map<string, Record<string, number>>();
-  for (const r of tierRows) {
+  for (const r of tierResults) {
     const key = `${r.slug}||${r.content_type}||${r.event_type}`;
     const obj = tierMap.get(key) ?? {};
-    obj[r.tier ?? "unknown"] = toInt(r.count);
+    obj[r.tier as string] = r._count;
     tierMap.set(key, obj);
   }
 
   const countryMap = new Map<string, Record<string, number>>();
-  for (const r of countryRows) {
+  for (const r of countryResults) {
     const key = `${r.slug}||${r.content_type}||${r.event_type}`;
     const obj = countryMap.get(key) ?? {};
-    obj[r.country_code ?? "??"] = toInt(r.count);
+    obj[r.country_code as string] = r._count;
     countryMap.set(key, obj);
   }
 

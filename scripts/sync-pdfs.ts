@@ -1,100 +1,89 @@
-// scripts/sync-pdfs.ts
-import fs from 'fs';
-import path from 'path';
+// scripts/pdf/sync-pdfs.ts
+// Purpose: post-PDF-generation sync step.
+// This is intentionally minimal and safe.
+// It ensures we have a deterministic manifest for /public/downloads assets.
 
-/**
- * Syncs PDFs between lib/pdfs and public/assets/downloads
- * - Copies missing PDFs from lib to public
- * - Removes duplicates
- * - Creates a manifest of all available PDFs
- */
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
 
-async function syncPDFs() {
-  console.log('🔄 Syncing PDFs between directories...');
-  
-  const libDir = path.join(process.cwd(), 'lib', 'pdfs');
-  const publicDir = path.join(process.cwd(), 'public', 'assets', 'downloads');
-  
-  // Ensure directories exist
-  [libDir, publicDir].forEach(dir => {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-      console.log(`   Created directory: ${dir}`);
-    }
-  });
-  
-  // Get files from both directories
-  const libFiles = fs.existsSync(libDir) ? fs.readdirSync(libDir).filter(f => f.endsWith('.pdf')) : [];
-  const publicFiles = fs.existsSync(publicDir) ? fs.readdirSync(publicDir).filter(f => f.endsWith('.pdf')) : [];
-  
-  console.log(`   lib/pdfs: ${libFiles.length} PDF(s)`);
-  console.log(`   public/assets/downloads: ${publicFiles.length} PDF(s)`);
-  
-  // Sync from lib to public (copy missing files)
-  let copiedCount = 0;
-  for (const file of libFiles) {
-    const libPath = path.join(libDir, file);
-    const publicPath = path.join(publicDir, file);
-    
-    if (!fs.existsSync(publicPath)) {
-      fs.copyFileSync(libPath, publicPath);
-      console.log(`   📄 Copied: ${file} → public/`);
-      copiedCount++;
-    }
+const ROOT = process.cwd();
+const PUBLIC_DIR = path.join(ROOT, "public");
+const DOWNLOADS_DIR = path.join(PUBLIC_DIR, "downloads");
+
+const OUTPUT = path.join(ROOT, "content", "downloads", "_generated.downloads.json");
+
+const ALLOWED_EXT = new Set([
+  ".pdf",
+  ".zip",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".svg",
+]);
+
+function sha1(input: string) {
+  return crypto.createHash("sha1").update(input).digest("hex");
+}
+
+async function exists(p: string) {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
   }
-  
-  // Create manifest
-  const allPDFs = [...new Set([...libFiles, ...publicFiles])].sort();
-  const manifest = {
-    generated: new Date().toISOString(),
-    total: allPDFs.length,
-    libCount: libFiles.length,
-    publicCount: publicFiles.length,
-    files: allPDFs.map(filename => {
-      const libPath = path.join(libDir, filename);
-      const publicPath = path.join(publicDir, filename);
-      const libExists = fs.existsSync(libPath);
-      const publicExists = fs.existsSync(publicPath);
-      
-      let size = 0;
-      let location = '';
-      
-      if (libExists) {
-        const stats = fs.statSync(libPath);
-        size = stats.size;
-        location = 'lib';
-      } else if (publicExists) {
-        const stats = fs.statSync(publicPath);
-        size = stats.size;
-        location = 'public';
-      }
-      
+}
+
+async function walk(dir: string): Promise<string[]> {
+  const out: string[] = [];
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  for (const e of entries) {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) out.push(...(await walk(full)));
+    else out.push(full);
+  }
+  return out;
+}
+
+function toWebPath(absPath: string) {
+  const rel = path.relative(PUBLIC_DIR, absPath);
+  return "/" + rel.split(path.sep).join("/");
+}
+
+async function main() {
+  if (!(await exists(DOWNLOADS_DIR))) {
+    console.warn(`⚠️ No downloads folder found: ${DOWNLOADS_DIR}`);
+    process.exit(0);
+  }
+
+  const files = await walk(DOWNLOADS_DIR);
+
+  const assets = files
+    .filter((f) => ALLOWED_EXT.has(path.extname(f).toLowerCase()))
+    .map((f) => {
+      const webPath = toWebPath(f);
       return {
-        filename,
-        size,
-        sizeMB: (size / 1024 / 1024).toFixed(2),
-        location,
-        libExists,
-        publicExists,
+        id: sha1(webPath),
+        filename: path.basename(f),
+        path: webPath,
+        ext: path.extname(f).toLowerCase(),
       };
-    }),
-  };
-  
-  // Save manifest
-  const manifestPath = path.join(publicDir, 'pdf-manifest.json');
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-  
-  console.log(`\n✅ Sync completed:`);
-  console.log(`   Copied ${copiedCount} new PDF(s) to public directory`);
-  console.log(`   Total unique PDFs: ${allPDFs.length}`);
-  console.log(`   Manifest saved to: ${manifestPath}`);
-  
-  return manifest;
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
+
+  await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
+  await fs.writeFile(
+    OUTPUT,
+    JSON.stringify({ generatedAt: new Date().toISOString(), assets }, null, 2),
+    "utf8"
+  );
+
+  console.log(`✅ pdfs:sync wrote ${assets.length} assets → ${OUTPUT}`);
 }
 
-// Run if called directly
-if (import.meta.url.includes('sync-pdfs.ts')) {
-  syncPDFs().catch(console.error);
-}
-
-export { syncPDFs };
+main().catch((err) => {
+  console.error("❌ pdfs:sync failed:", err);
+  process.exit(1);
+});

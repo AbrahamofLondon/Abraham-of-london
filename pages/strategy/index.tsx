@@ -1,10 +1,13 @@
-// pages/strategy/index.tsx
 import * as React from "react";
 import type { NextPage } from "next";
 import Link from "next/link";
 import { motion } from "framer-motion";
+// Single import with renamed duplicates to avoid conflicts
 import {
-  Target,
+  Calendar,
+  Users as UsersIcon,
+  Target as TargetIcon,
+  BookOpen as BookOpenIcon,
   ShieldCheck,
   Workflow,
   Map,
@@ -12,14 +15,12 @@ import {
   Presentation,
   ClipboardCheck,
   Landmark,
-  BookOpen,
   Hammer,
   Layers,
   Compass,
   ArrowRight,
   Download,
   Lock,
-  Users,
   Building2,
   Home,
   GraduationCap,
@@ -128,7 +129,7 @@ const StrategyPage: NextPage = () => {
       description: "Teaching edition on epistemology, authority, responsibility, and truth",
       href: "/canon/volume-i-teaching-edition",
       status: 'inner-circle' as const,
-      icon: BookOpen,
+      icon: BookOpenIcon,
       focus: "First principles of strategy"
     },
     {
@@ -146,7 +147,7 @@ const StrategyPage: NextPage = () => {
       description: "Market reality and execution discipline for frontier contexts",
       href: "/canon/volume-iv-teaching-edition",
       status: 'inner-circle' as const,
-      icon: Target,
+      icon: TargetIcon,
       focus: "Execution in reality"
     },
     {
@@ -191,7 +192,7 @@ const StrategyPage: NextPage = () => {
       title: "Brotherhood Formation",
       description: "Strategic frameworks for building accountable community",
       href: "/resources/brotherhood-starter-kit",
-      icon: Users,
+      icon: UsersIcon,
       tools: ["Brotherhood Starter Kit", "Accountability Frameworks", "Community Governance"]
     }
   ];

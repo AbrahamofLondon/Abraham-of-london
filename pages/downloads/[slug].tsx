@@ -1,4 +1,3 @@
-// pages/downloads/[slug].tsx - HIGH-INTENT CONVERSION EXPERIENCE
 import React, { useMemo, useState, useEffect } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -337,14 +336,17 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
                   )}
                 </div>
 
-                <DownloadCard
-                  title={download.title}
-                  fileSize={download.fileSize || "Variable"}
-                  fileFormat={download.fileFormat || "PDF"}
-                  tags={download.tags || []}
-                  date={formattedDate}
-                  category={download.category}
-                />
+                <div className="mb-8 p-6 rounded-xl border border-white/10 bg-white/5">
+                  <h1 className="text-3xl font-bold text-white mb-3">{download.title}</h1>
+                  <p className="text-gray-300 mb-4">{download.description || download.excerpt}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {download.tags?.map((tag) => (
+                      <span key={tag} className="px-3 py-1 bg-amber-500/10 text-amber-300 rounded-full text-sm">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Success Message */}
                 {showSuccessMessage && (
@@ -366,7 +368,7 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
                 )}
 
                 <div className="prose prose-invert prose-lg mt-8 max-w-none">
-                  {download.body?.raw ? (
+                  {source ? (
                     <DownloadContent>
                       <MDXRemote {...source} components={mdxComponents} />
                     </DownloadContent>
@@ -615,8 +617,6 @@ const DownloadPage: NextPage<Props> = ({ download, source }) => {
   );
 };
 
-export default DownloadPage;
-
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const downloads = await getServerAllDownloads();
@@ -682,3 +682,5 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 };
+
+export default DownloadPage;

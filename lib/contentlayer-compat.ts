@@ -342,6 +342,143 @@ export async function getDocBySlugAsync(slug: string, collection?: DocBase[]): P
   return Promise.resolve(getDocBySlug(slug, collection));
 }
 
+/** ==================== MISSING EXPORTS FOR PAGE IMPORTS ==================== */
+
+// For ./pages/books/[slug].tsx and similar
+export function getAllBooks() {
+  return DATA.allBooks ?? [];
+}
+
+export function getServerAllBooks() {
+  return getAllBooks();
+}
+
+export function getServerBookBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  return (DATA.allBooks ?? []).find(book => normalizeSlug(book.slug) === normalizedSlug) || null;
+}
+
+// For ./pages/canon/[slug].tsx
+export function getAllCanons() {
+  return DATA.allCanons ?? [];
+}
+
+export function getServerAllCanons() {
+  return getAllCanons();
+}
+
+export function getServerCanonBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  return (DATA.allCanons ?? []).find(canon => normalizeSlug(canon.slug) === normalizedSlug) || null;
+}
+
+// For ./pages/downloads/[slug].tsx
+export function getAllDownloads() {
+  return DATA.allDownloads ?? [];
+}
+
+export function getServerAllDownloads() {
+  return getAllDownloads();
+}
+
+export function getServerDownloadBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  return (DATA.allDownloads ?? []).find(download => normalizeSlug(download.slug) === normalizedSlug) || null;
+}
+
+export function getDownloadBySlug(slug: string) {
+  return getServerDownloadBySlug(slug);
+}
+
+// For ./pages/events/[slug].tsx
+export function getAllEvents() {
+  return DATA.allEvents ?? [];
+}
+
+export function getServerAllEvents() {
+  return getAllEvents();
+}
+
+export function getServerEventBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  return (DATA.allEvents ?? []).find(event => normalizeSlug(event.slug) === normalizedSlug) || null;
+}
+
+// For ./pages/index.tsx and ./pages/shorts/[slug].tsx
+export function getAllShorts() {
+  return DATA.allShorts ?? [];
+}
+
+export function getServerAllShorts() {
+  return getAllShorts();
+}
+
+export function getServerShortBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  return (DATA.allShorts ?? []).find(short => normalizeSlug(short.slug) === normalizedSlug) || null;
+}
+
+// For ./pages/resources/[...slug].tsx
+export function getAllResources() {
+  return DATA.allResources ?? [];
+}
+
+export function getServerAllResources() {
+  return getAllResources();
+}
+
+export function getServerResourceBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  return (DATA.allResources ?? []).find(resource => normalizeSlug(resource.slug) === normalizedSlug) || null;
+}
+
+// For ./pages/content/[slug].tsx and ./pages/debug/content.tsx
+export function getAllContentlayerDocs() {
+  return getAllCombinedDocs();
+}
+
+// For ./pages/debug/content.tsx
+export function isDraft(doc: DocBase | any): boolean {
+  return isDraftContent(doc);
+}
+
+// For ./pages/api/blog/[slug].tsx and ./pages/api/canon/[slug].tsx
+export function getAllPosts() {
+  return DATA.allPosts ?? [];
+}
+
+export function getServerAllPosts() {
+  return getAllPosts();
+}
+
+export function getServerPostBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  return (DATA.allPosts ?? []).find(post => normalizeSlug(post.slug) === normalizedSlug) || null;
+}
+
+// For ./pages/api/content/initialize.ts
+export function getServerAllBooksAsync() {
+  return Promise.resolve(getAllBooks());
+}
+
+export function getServerAllCanonsAsync() {
+  return Promise.resolve(getAllCanons());
+}
+
+export function getServerAllDownloadsAsync() {
+  return Promise.resolve(getAllDownloads());
+}
+
+export function getServerAllShortsAsync() {
+  return Promise.resolve(getAllShorts());
+}
+
+// For ./pages/api/blog/[slug].tsx and ./pages/api/canon/[slug].tsx
+export function recordContentView(slug: string, type: string) {
+  // Implementation depends on your analytics setup
+  console.log(`Recorded view: ${type} - ${slug}`);
+}
+
 /** Direct exports some code may import */
 export const allDocuments = DATA.allDocuments ?? [];
 export const allPosts = DATA.allPosts ?? [];
@@ -370,4 +507,30 @@ export default {
   toUiDoc,
   isContentlayerLoaded,
   assertContentlayerHasDocs,
+  // New exports
+  getAllBooks,
+  getServerAllBooks,
+  getServerBookBySlug,
+  getAllCanons,
+  getServerAllCanons,
+  getServerCanonBySlug,
+  getAllDownloads,
+  getServerAllDownloads,
+  getServerDownloadBySlug,
+  getDownloadBySlug,
+  getAllEvents,
+  getServerAllEvents,
+  getServerEventBySlug,
+  getAllShorts,
+  getServerAllShorts,
+  getServerShortBySlug,
+  getAllResources,
+  getServerAllResources,
+  getServerResourceBySlug,
+  getAllContentlayerDocs,
+  isDraft,
+  getAllPosts,
+  getServerAllPosts,
+  getServerPostBySlug,
+  recordContentView,
 };

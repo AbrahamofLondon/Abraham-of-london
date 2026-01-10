@@ -1,4 +1,4 @@
-// pages/downloads/index.tsx - DOWNLOADS INDEX PAGE
+// pages/downloads/index.tsx
 import * as React from "react";
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
@@ -24,7 +24,6 @@ import {
   getContentlayerData,
   isDraftContent,
   normalizeSlug,
-  getDocHref,
   getAccessLevel,
   getPublishedDocuments
 } from "@/lib/contentlayer-compat";
@@ -78,6 +77,25 @@ function getDownloadSizeLabel(doc: any): string | null {
   return null;
 }
 
+// Helper function to extract numeric size value
+function extractSizeInMB(sizeString: string | null): number {
+  if (!sizeString) return 0;
+  
+  // Match patterns like "2.5 MB", "1GB", "500 KB"
+  const match = sizeString.match(/(\d+\.?\d*)\s*(KB|MB|GB)/i);
+  if (!match) return 0;
+  
+  const value = parseFloat(match[1]);
+  const unit = match[2].toUpperCase();
+  
+  switch (unit) {
+    case 'KB': return value / 1024; // Convert KB to MB
+    case 'MB': return value;
+    case 'GB': return value * 1024; // Convert GB to MB
+    default: return 0;
+  }
+}
+
 // Helper function to get formatted date
 function formatDownloadDate(dateString: string | null): string | null {
   if (!dateString) return null;
@@ -97,7 +115,7 @@ export const getStaticProps: GetStaticProps<{
   downloads: NormalisedDownload[];
   featuredCount: number;
   categories: string[];
-  totalSize?: string;
+  totalSize: string | null;
 }> = async () => {
   try {
     // Load contentlayer data once
@@ -184,17 +202,20 @@ export const getStaticProps: GetStaticProps<{
     const featuredCount = downloads.filter(d => d.featured).length;
     const categories = [...new Set(downloads.map(d => d.category).filter(Boolean))] as string[];
     
-    // Optional: Calculate total size (simplified example)
-    const totalSize = downloads
-      .filter(d => d.size)
-      .reduce((total, d) => {
-        const size = d.size || "0 MB";
-        const match = size.match(/(\d+\.?\d*)/);
-        if (match) {
-          return total + parseFloat(match[1]);
-        }
-        return total;
-      }, 0);
+    // Calculate total size in MB
+    const totalSizeInMB = downloads.reduce((total, d) => {
+      return total + extractSizeInMB(d.size);
+    }, 0);
+
+    // Format total size for display
+    let totalSize: string | null = null;
+    if (totalSizeInMB > 0) {
+      if (totalSizeInMB >= 1024) {
+        totalSize = `${(totalSizeInMB / 1024).toFixed(1)} GB`;
+      } else {
+        totalSize = `${totalSizeInMB.toFixed(1)} MB`;
+      }
+    }
 
     console.log(`📥 Downloads index: Loaded ${downloads.length} resources, ${featuredCount} featured`);
 
@@ -203,7 +224,7 @@ export const getStaticProps: GetStaticProps<{
         downloads, 
         featuredCount,
         categories,
-        totalSize: totalSize > 0 ? `${totalSize.toFixed(1)} MB` : undefined
+        totalSize
       }, 
       revalidate: 3600 
     };
@@ -214,7 +235,8 @@ export const getStaticProps: GetStaticProps<{
       props: { 
         downloads: [], 
         featuredCount: 0,
-        categories: []
+        categories: [],
+        totalSize: null
       },
       revalidate: 3600,
     };

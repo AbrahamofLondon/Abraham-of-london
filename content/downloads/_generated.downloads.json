@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-01-10T15:52:25.051Z",
+  "assets": [
+    {
+      "id": "3d3bcdc6f0b356f0d0e62475c7d18c3e431e60c7",
+      "filename": "decision-matrix.pdf",
+      "path": "/downloads/decision-matrix.pdf",
+      "ext": ".pdf"
+    },
+    {
+      "id": "efb0463b4eefcc960d3985a700d090b6f81bcb08",
+      "filename": "decision-matrix.pdf",
+      "path": "/downloads/frameworks/decision-matrix.pdf",
+      "ext": ".pdf"
+    },
+    {
+      "id": "dfa14e8452490c614c1dac7b948124d4c202fbf3",
+      "filename": "legacy-canvas.pdf",
+      "path": "/downloads/frameworks/legacy-canvas.pdf",
+      "ext": ".pdf"
+    },
+    {
+      "id": "01fcafd1b3203e8482e252ac7e3ce1cbb3b09030",
+      "filename": "purpose-pyramid.pdf",
+      "path": "/downloads/frameworks/purpose-pyramid.pdf",
+      "ext": ".pdf"
+    },
+    {
+      "id": "a0399b28a2f7b7fa89bb266cbc0eb891e41c0e5b",
+      "filename": "legacy-canvas.pdf",
+      "path": "/downloads/legacy-canvas.pdf",
+      "ext": ".pdf"
+    },
+    {
+      "id": "f753a548500fde5f990bc376f8d207a45edb47c0",
+      "filename": "purpose-pyramid.pdf",
+      "path": "/downloads/purpose-pyramid.pdf",
+      "ext": ".pdf"
+    }
+  ]
+}

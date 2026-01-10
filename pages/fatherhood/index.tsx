@@ -3,18 +3,19 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  BookOpen,
+  Calendar,
+  Users as UsersIcon, // RENAMED
+  Target as TargetIcon, // RENAMED
+  BookOpen as BookOpenIcon, // RENAMED
   Hammer,
   Landmark,
   ScrollText,
   Shield,
   Home,
   TreePine,
-  Users,
   FileSpreadsheet,
   ClipboardCheck,
   Building2,
-  Target,
   ArrowRight,
   Library,
   Heart,
@@ -31,7 +32,7 @@ import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
 
 const FatherhoodPage: NextPage = () => {
-  // Fatherhood-focused blog articles
+  // Fatherhood-focused blog articles - UPDATE ICON REFERENCES
   const fatherhoodEssays = [
     {
       title: "Fathering Without Fear",
@@ -46,7 +47,7 @@ const FatherhoodPage: NextPage = () => {
       description: "Principles for building lasting brotherhood and accountability",
       href: "/blog/the-brotherhood-code",
       readTime: "25 min",
-      icon: Users,
+      icon: UsersIcon, // CHANGED
       tags: ["brotherhood", "accountability", "community"]
     },
     {
@@ -83,7 +84,7 @@ const FatherhoodPage: NextPage = () => {
     }
   ];
 
-  // Implementation tools for fathers
+  // Implementation tools for fathers - UPDATE ICON REFERENCES
   const fatherhoodTools = [
     {
       title: "Canon Household Charter",
@@ -99,7 +100,7 @@ const FatherhoodPage: NextPage = () => {
       description: "Measurement framework for fatherhood's long-term impact",
       href: "/resources/fatherhood-impact-framework",
       status: 'public' as const,
-      icon: Target,
+      icon: TargetIcon, // CHANGED
       type: "Framework",
       purpose: "Impact measurement"
     },
@@ -117,7 +118,7 @@ const FatherhoodPage: NextPage = () => {
       description: "Structured reading curriculum for canonical doctrine",
       href: "/resources/canon-reading-plan-year-one",
       status: 'inner-circle' as const,
-      icon: BookOpen,
+      icon: BookOpenIcon, // CHANGED
       type: "Curriculum",
       purpose: "Doctrinal formation"
     },
@@ -135,7 +136,7 @@ const FatherhoodPage: NextPage = () => {
       description: "Framework for initiating and maintaining accountability groups",
       href: "/resources/brotherhood-starter-kit",
       status: 'public' as const,
-      icon: Users,
+      icon: UsersIcon, // CHANGED
       type: "Starter kit",
       purpose: "Community formation"
     }
@@ -207,7 +208,7 @@ const FatherhoodPage: NextPage = () => {
                 className="inline-flex items-center justify-center rounded-xl border border-gold/30 bg-gold/10 px-8 py-4 text-sm font-bold uppercase tracking-widest text-gold transition-colors hover:bg-gold/15"
               >
                 Fatherhood Impact Framework
-                <Target className="ml-2 h-4 w-4" />
+                <TargetIcon className="ml-2 h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -427,7 +428,7 @@ const FatherhoodPage: NextPage = () => {
                     className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-6 py-4 text-xs font-bold uppercase tracking-widest text-black transition hover:bg-gold/80"
                   >
                     Brotherhood Starter Kit
-                    <Users className="h-4 w-4" />
+                    <UsersIcon className="h-4 w-4" />
                   </Link>
                   
                   <Link
