@@ -20,42 +20,46 @@ const nextConfig = {
   },
 
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
-    formats: ["image/avif", "image/webp"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-  },
+  remotePatterns: [{ protocol: "https", hostname: "**" }],
+  formats: ["image/avif", "image/webp"],
+  deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+  imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  minimumCacheTTL: 60,
+  dangerouslyAllowSVG: true,
+  // ✅ REMOVE OR FIX CSP:
+  contentSecurityPolicy: "default-src 'self'; script-src 'self' https://www.google.com/recaptcha https://www.gstatic.com; style-src 'self' 'unsafe-inline';",
+},
 
   trailingSlash: false,
   compress: true,
   poweredByHeader: false,
 
   // ✅ Clean headers
-  async headers() {
-    return [
-      {
-        source: "/fonts/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
-        ],
-      },
-      {
-        source: "/_next/static/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-      },
-      {
-        source: "/(.*)",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        ],
-      },
-    ];
-  },
+  // next.config.mjs - UPDATE HEADERS SECTION
+async headers() {
+  return [
+    {
+      source: "/fonts/:path*",
+      headers: [
+        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        { key: "Access-Control-Allow-Origin", value: "*" },
+      ],
+    },
+    {
+      source: "/_next/static/:path*",
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+    },
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        // ✅ REMOVE OR RELAX CSP HEADER:
+        // { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self';" },
+      ],
+    },
+  ];
+},
 
   // ✅ WEBPACK CONFIG WITH REDIS FIXES
   webpack: (config, { isServer, webpack, dev }) => {
