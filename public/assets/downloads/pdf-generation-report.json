@@ -2,9 +2,11 @@
   "summary": {
     "ok": 5,
     "fail": 0,
-    "totalMs": 26287,
+    "fallbacks": 0,
+    "totalMs": 14983,
     "quality": "premium",
     "tier": "premium",
+    "tierDisplay": "Inner Circle Plus",
     "formats": [
       "A4",
       "Letter",
@@ -12,50 +14,56 @@
     ],
     "platform": "win32",
     "node": "v20.19.4",
-    "when": "2026-01-10T14:25:31.641Z",
+    "when": "2026-01-11T15:18:25.082Z",
     "generatedFiles": [
       "legacy-architecture-canvas-a4-premium-architect.pdf",
       "legacy-architecture-canvas-letter-premium-architect.pdf",
-      "legacy-architecture-canvas-a3-premium-architect.pdf"
+      "legacy-architecture-canvas-a3-premium-architect.pdf",
+      "ultimate-purpose-of-man-premium.pdf"
     ]
   },
   "steps": [
     {
       "name": "Legacy Canvas (A4)",
       "ok": true,
-      "duration": 7892,
-      "at": "2026-01-10T14:25:17.434Z"
+      "duration": 3555,
+      "fallback": false,
+      "at": "2026-01-11T15:18:13.773Z"
     },
     {
       "name": "Legacy Canvas (Letter)",
       "ok": true,
-      "duration": 3225,
-      "at": "2026-01-10T14:25:20.659Z"
+      "duration": 3201,
+      "fallback": false,
+      "at": "2026-01-11T15:18:16.974Z"
     },
     {
       "name": "Legacy Canvas (A3)",
       "ok": true,
-      "duration": 3158,
-      "at": "2026-01-10T14:25:23.817Z"
+      "duration": 3195,
+      "fallback": false,
+      "at": "2026-01-11T15:18:20.169Z"
     },
     {
       "name": "Standalone Editorial PDF",
       "ok": true,
-      "duration": 4961,
-      "at": "2026-01-10T14:25:28.779Z"
+      "duration": 2429,
+      "fallback": false,
+      "at": "2026-01-11T15:18:22.599Z"
     },
     {
       "name": "Strategic Frameworks PDF",
       "ok": true,
-      "duration": 2856,
-      "at": "2026-01-10T14:25:31.637Z"
+      "duration": 2478,
+      "fallback": false,
+      "at": "2026-01-11T15:18:25.078Z"
     }
   ],
   "pdfs": [],
   "validation": {
-    "totalPdfs": 0,
+    "validFiles": [],
     "issues": [],
-    "fileList": []
+    "total": 0
   },
   "outputDir": "C:\\Abraham-of-london\\public\\assets\\downloads",
   "libDir": "C:\\Abraham-of-london\\lib\\pdfs"
