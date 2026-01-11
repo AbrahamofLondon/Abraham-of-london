@@ -85,7 +85,7 @@
     "tsx": "4.20.6",
     "uuid": "13.0.0",
     "ws": "8.18.3",
-    "zod": "4.2.1"
+    "zod": "4.3.5"
   },
   "devDependencies": {
     "@contentlayer2/cli": "0.5.8",
