@@ -154,10 +154,10 @@ const FadeIn: React.FC<{
   delay?: number;
 }> = ({ children, delay = 0 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 16 }}
+    initial={{ opacity: 0, y: 12 }}
     whileInView={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay, ease: "easeOut" }}
-    viewport={{ once: true, margin: "-60px" }}
+    transition={{ duration: 0.6, delay, ease: "easeOut" }}
+    viewport={{ once: true, margin: "-40px" }}
   >
     {children}
   </motion.div>
@@ -173,12 +173,11 @@ function FooterLink({
   const enabled = KNOWN_ROUTES.has(href) || isExternal(href);
 
   if (!enabled) {
-    // Not a link. Stops 404. Still communicates intent.
     return (
-      <span className="group flex items-center gap-2 py-1 text-sm text-gray-400 cursor-not-allowed">
-        <span className="w-1 h-1 rounded-full bg-gray-700" />
+      <span className="group flex items-center gap-2.5 py-2 text-sm text-gray-400/80 cursor-not-allowed">
+        <span className="w-1.5 h-1.5 rounded-full bg-gray-700/60" />
         <span>
-          {label} <span className="text-[10px] uppercase tracking-[0.2em] text-amber-400/60">(Soon)</span>
+          {label} <span className="text-[10px] uppercase tracking-[0.15em] text-amber-400/50">(Soon)</span>
         </span>
       </span>
     );
@@ -187,11 +186,14 @@ function FooterLink({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-2 py-1 text-sm text-gray-400 hover:text-white transition-colors"
+      className="group flex items-center gap-2.5 py-2 text-sm text-gray-300 hover:text-white transition-colors duration-200"
       prefetch={false}
     >
-      <span className="w-1 h-1 rounded-full bg-amber-400/30 group-hover:bg-amber-400 transition-colors" />
-      <span>{label}</span>
+      <span className="w-1.5 h-1.5 rounded-full bg-amber-400/40 group-hover:bg-amber-400 transition-colors duration-200" />
+      <span className="relative">
+        {label}
+        <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-amber-400 group-hover:w-full transition-all duration-300" />
+      </span>
     </Link>
   );
 }
@@ -211,67 +213,65 @@ export default function EnhancedFooter(): JSX.Element {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-amber-500/10">
-      {/* Debug overlay - remove in production */}
-      {!siteConfig && (
-        <div className="absolute top-0 left-0 right-0 bg-red-500/10 text-red-300 text-xs p-1 text-center z-50">
-          Using fallback site config - check @/lib/imports
-        </div>
-      )}
+    <footer className="relative bg-black border-t border-gray-800/50">
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/[0.02] via-transparent to-transparent" />
+      
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/15 to-transparent" />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-
-      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
+      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand Column */}
           <div className="md:col-span-2 lg:col-span-1">
             <FadeIn delay={0.05}>
-              <Link href="/" className="group inline-block mb-5" aria-label="Go to homepage">
-                <div className="flex flex-col gap-1">
-                  <h2 className="font-serif text-2xl lg:text-3xl font-bold text-white">
+              <Link href="/" className="group inline-block mb-6" aria-label="Go to homepage">
+                <div className="flex flex-col gap-1.5">
+                  <h2 className="font-serif text-2xl lg:text-3xl font-bold text-white tracking-tight">
                     Abraham<span className="text-amber-400"> of London</span>
                   </h2>
-                  <p className="text-xs font-medium tracking-[0.2em] text-amber-400/70 uppercase">
+                  <p className="text-xs font-medium tracking-[0.2em] text-amber-400/80 uppercase">
                     {config.brand?.tagline ?? "Faith · Strategy · Fatherhood"}
                   </p>
                 </div>
               </Link>
 
-              <p className="mb-6 text-sm lg:text-base text-gray-300 leading-relaxed">
+              <p className="mb-8 text-sm lg:text-base text-gray-300/90 leading-relaxed font-light">
                 {description}
               </p>
 
-              <div className="space-y-3 mb-6">
+              {/* Contact Info */}
+              <div className="space-y-4 mb-8">
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-amber-400/70 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-300">{location}</span>
+                  <MapPin className="h-4 w-4 text-amber-400/80 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-300/90 font-light">{location}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
+                  <Mail className="h-4 w-4 text-amber-400/80 flex-shrink-0" />
                   <a
                     href={`mailto:${email}`}
-                    className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
+                    className="text-sm text-gray-300/90 hover:text-amber-400 transition-colors duration-200 font-light"
                   >
                     {email}
                   </a>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-amber-400/70 flex-shrink-0" />
+                  <Phone className="h-4 w-4 text-amber-400/80 flex-shrink-0" />
                   <a
                     href={`tel:${cleanTel(phone)}`}
-                    className="text-sm text-gray-300 hover:text-amber-400 transition-colors"
+                    className="text-sm text-gray-300/90 hover:text-amber-400 transition-colors duration-200 font-light"
                   >
                     {phone}
                   </a>
                 </div>
               </div>
 
+              {/* Social Links */}
               {socials.length > 0 && (
                 <div className="mb-2">
-                  <p className="mb-3 text-sm font-semibold text-white">Follow</p>
+                  <p className="mb-4 text-sm font-semibold text-white tracking-wide">Follow</p>
                   <div className="flex flex-wrap gap-2">
                     {socials.map((social: any, index: number) => {
                       const kind = (social.kind || "website") as SocialPlatform;
@@ -284,13 +284,13 @@ export default function EnhancedFooter(): JSX.Element {
                           href={social.href}
                           target={external ? "_blank" : "_self"}
                           rel={external ? "noopener noreferrer" : undefined}
-                          className="group flex items-center gap-2 rounded-lg px-3 py-2 text-xs border border-amber-400/20 bg-amber-400/5 transition-all duration-200 hover:border-amber-400/40 hover:bg-amber-400/10"
-                          whileHover={{ x: 2 }}
+                          className="group flex items-center gap-2 rounded-lg px-3 py-2 text-xs border border-amber-400/15 bg-amber-400/[0.03] transition-all duration-200 hover:border-amber-400/30 hover:bg-amber-400/[0.08]"
+                          whileHover={{ x: 2, scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           aria-label={`Follow on ${social.label}`}
                         >
-                          <Icon className="h-3 w-3 text-amber-400" />
-                          <span className="text-gray-300 group-hover:text-white transition-colors">
+                          <Icon className="h-3.5 w-3.5 text-amber-400" />
+                          <span className="text-gray-300/90 group-hover:text-white transition-colors duration-200 font-medium">
                             {social.label}
                           </span>
                         </motion.a>
@@ -308,12 +308,14 @@ export default function EnhancedFooter(): JSX.Element {
             return (
               <div key={section.title}>
                 <FadeIn delay={0.1 + idx * 0.08}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Icon className="h-4 w-4 text-amber-400" />
-                    <h3 className="text-lg font-semibold text-white">{section.title}</h3>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/10">
+                      <Icon className="h-4 w-4 text-amber-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white tracking-tight">{section.title}</h3>
                   </div>
 
-                  <ul className="space-y-2">
+                  <ul className="space-y-1">
                     {section.links.map((l) => (
                       <li key={l.href}>
                         <FooterLink href={l.href} label={l.label} />
@@ -326,34 +328,34 @@ export default function EnhancedFooter(): JSX.Element {
           })}
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom Bar */}
         <FadeIn delay={0.35}>
-          <div className="mt-12 pt-8 border-t border-gray-800">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-16 pt-8 border-t border-gray-800/60">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="text-center lg:text-left">
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-400/90 font-light">
                   © {year} {config.title || "Abraham of London"}. All rights reserved.
                 </p>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-500/80 font-light">
                   Built for those who still believe in duty, consequence, and legacy.
                 </p>
               </div>
 
               <div className="flex-1">
-                <div className="flex flex-wrap justify-center gap-4 lg:gap-6 text-xs">
-                  <Link href="/privacy" className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap">
+                <div className="flex flex-wrap justify-center gap-5 lg:gap-6 text-xs">
+                  <Link href="/privacy" className="text-gray-400/90 hover:text-amber-400 transition-colors duration-200 whitespace-nowrap font-light">
                     Privacy Policy
                   </Link>
-                  <Link href="/terms" className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap">
+                  <Link href="/terms" className="text-gray-400/90 hover:text-amber-400 transition-colors duration-200 whitespace-nowrap font-light">
                     Terms of Service
                   </Link>
-                  <Link href="/cookies" className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap">
+                  <Link href="/cookies" className="text-gray-400/90 hover:text-amber-400 transition-colors duration-200 whitespace-nowrap font-light">
                     Cookie Policy
                   </Link>
-                  <Link href="/accessibility" className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap">
+                  <Link href="/accessibility" className="text-gray-400/90 hover:text-amber-400 transition-colors duration-200 whitespace-nowrap font-light">
                     Accessibility
                   </Link>
-                  <Link href="/security" className="text-gray-400 hover:text-amber-400 transition-colors whitespace-nowrap">
+                  <Link href="/security" className="text-gray-400/90 hover:text-amber-400 transition-colors duration-200 whitespace-nowrap font-light">
                     Security
                   </Link>
                 </div>
@@ -361,24 +363,26 @@ export default function EnhancedFooter(): JSX.Element {
 
               <motion.button
                 onClick={scrollToTop}
-                className="group flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-amber-500 text-black font-semibold text-sm hover:bg-amber-400 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                whileHover={{ y: -2 }}
+                className="group flex items-center justify-center gap-2.5 rounded-xl px-5 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-semibold text-sm hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 shadow-lg shadow-amber-500/10"
+                whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 aria-label="Scroll back to top"
               >
                 Back to Top
-                <ArrowUp className="h-3 w-3 transition-transform group-hover:-translate-y-0.5" />
+                <ArrowUp className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-1" />
               </motion.button>
             </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">Designed in London · Built with purpose</p>
+            <div className="mt-8 text-center">
+              <p className="text-xs text-gray-500/70 font-light tracking-wide">
+                Designed in London · Built with purpose
+              </p>
             </div>
           </div>
         </FadeIn>
       </div>
 
-      {/* Touch targets + motion reduction */}
+      {/* Ensure text is always legible */}
       <style jsx global>{`
         @media (max-width: 768px) {
           a[role="button"],
@@ -388,6 +392,7 @@ export default function EnhancedFooter(): JSX.Element {
             min-width: 44px;
           }
         }
+        
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,
@@ -396,6 +401,19 @@ export default function EnhancedFooter(): JSX.Element {
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
           }
+        }
+        
+        /* Ensure all text has proper contrast */
+        .text-gray-300 {
+          color: rgba(209, 213, 219, 0.95) !important;
+        }
+        
+        .text-gray-400 {
+          color: rgba(156, 163, 175, 0.95) !important;
+        }
+        
+        .text-gray-500 {
+          color: rgba(107, 114, 128, 0.95) !important;
         }
       `}</style>
     </footer>

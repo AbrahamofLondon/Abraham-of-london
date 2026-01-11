@@ -87,7 +87,7 @@ export default function Layout({
   const finalCanonical = canonicalUrl ? toAbsoluteUrl(canonicalUrl) : toAbsoluteUrl(currentPath);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-black text-white ${className}`}>
+    <div className={`min-h-screen flex flex-col bg-black ${className}`}>
       <Head>
         <title>{siteTitle}</title>
 
@@ -129,14 +129,18 @@ export default function Layout({
       {/* Fixed header */}
       <LuxuryNavbar transparent={transparentHeader} />
 
-      {/* Content offset under fixed navbar */}
-      <main
-        className={`flex-1 ${fullWidth ? "w-full" : "mx-auto max-w-7xl px-6 lg:px-8"}`}
-        style={{ paddingTop: NAV_HEIGHT }}
+      {/* Main content with proper spacing */}
+      <main 
+        className={`flex-1 ${fullWidth ? "w-full" : "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"}`}
+        style={{ 
+          paddingTop: NAV_HEIGHT,
+          minHeight: `calc(100vh - ${NAV_HEIGHT}px - 400px)` // Ensures footer is pushed down
+        }}
       >
         {children}
       </main>
 
+      {/* Footer - will now be properly positioned */}
       <Footer />
 
       {/* Global CSS (minimal, no overlays, no click-blockers) */}
@@ -151,33 +155,55 @@ export default function Layout({
           background: #000;
           color: #fff;
           overscroll-behavior-y: none;
+          font-feature-settings: "kern" 1, "liga" 1;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
 
         ::selection {
-          background: rgba(212, 175, 55, 0.2);
+          background: rgba(212, 175, 55, 0.25);
           color: #fff;
         }
 
         /* Scrollbar (subtle, not a gimmick) */
         ::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         ::-webkit-scrollbar-track {
-          background: #050505;
+          background: #0a0a0a;
         }
         ::-webkit-scrollbar-thumb {
           background: #1a1a1a;
-          border-radius: 10px;
+          border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
           background: #d4af37;
         }
 
-        /* Mobile: ensure fixed header doesn’t create text “underlap” illusions */
+        /* Mobile: ensure fixed header doesn't create text "underlap" illusions */
         @media (max-width: 768px) {
           html {
             scroll-padding-top: ${NAV_HEIGHT}px;
           }
+          body {
+            -webkit-text-size-adjust: 100%;
+          }
+        }
+
+        /* Improve font rendering */
+        * {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Ensure proper contrast */
+        .text-gray-300 {
+          color: rgba(209, 213, 219, 0.95) !important;
+        }
+
+        .text-gray-400 {
+          color: rgba(156, 163, 175, 0.95) !important;
         }
       `}</style>
     </div>

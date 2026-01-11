@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone, Mail } from "lucide-react";
+import { Menu, X, Phone, Mail, ChevronRight } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 // --- Types & Constants -------------------------------------------------------
@@ -30,12 +30,12 @@ type NavItem = {
   route: RouteId;
   label: string;
   description?: string;
+  highlight?: boolean;
 };
 
 // Device detection for optimal styling
 const useDeviceType = () => {
-  const [deviceType, setDeviceType] =
-    React.useState<"mobile" | "tablet" | "desktop">("desktop");
+  const [deviceType, setDeviceType] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -77,58 +77,73 @@ const getRoutePath = (route: RouteId): string =>
   LOCAL_SITE_CONFIG.routes[route]?.path || "/";
 
 // *** CENTRAL, ORDERED NAV ITEMS ***
-// Shorts is in the middle and will always render.
+// Optimized for desktop and mobile viewing
 const NAV_ITEMS: NavItem[] = [
-  { route: "booksIndex", label: "Books", description: "Curated volumes" },
   { route: "canonIndex", label: "Canon", description: "The 10-volume system" },
+  { route: "booksIndex", label: "Books", description: "Curated volumes" },
   { route: "blogIndex", label: "Insights", description: "Strategic wisdom" },
-  { route: "shorts", label: "Shorts", description: "Sharp. Brief. Undeniable." },
+  { route: "shorts", label: "Shorts", description: "Sharp. Brief. Undeniable.", highlight: true },
   { route: "ventures", label: "Ventures", description: "Business pursuits" },
+  { route: "strategyLanding", label: "Strategy", description: "Frameworks" },
   { route: "about", label: "About", description: "My journey" },
   { route: "contact", label: "Contact", description: "Get in touch" },
 ];
 
-const SCROLL_THRESHOLD = 5;
+// Optional: Additional items that can be toggled based on screen size
+const OPTIONAL_ITEMS: NavItem[] = [
+  { route: "contentIndex", label: "Content", description: "All writings" },
+  { route: "downloadsIndex", label: "Downloads", description: "Resources" },
+];
 
-// Optimized header heights for all devices
+const SCROLL_THRESHOLD = 10;
+
+// Responsive header heights
 const HEADER_HEIGHTS = {
-  mobile: { normal: "4rem", scrolled: "3.5rem" },
-  tablet: { normal: "4.5rem", scrolled: "4rem" },
-  desktop: { normal: "5rem", scrolled: "4.5rem" },
+  mobile: { normal: "4.5rem", scrolled: "4rem" },
+  tablet: { normal: "5rem", scrolled: "4.5rem" },
+  desktop: { normal: "5.5rem", scrolled: "5rem" },
 } as const;
 
-// Enhanced color system with better contrast for accessibility
+// Professional color system with proper contrast
 const COLOR_SYSTEM = {
   light: {
     shell: {
-      normal:
-        "bg-white/98 border-b border-gray-100 shadow-sm backdrop-blur-md",
-      transparent: "bg-transparent border-transparent",
+      normal: "bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm",
+      transparent: "bg-transparent backdrop-blur-none border-transparent shadow-none",
     },
     text: {
-      primary: "text-gray-900 font-semibold",
+      primary: "text-gray-900 font-medium",
       secondary: "text-gray-600",
       accent: "text-amber-700 font-bold",
+      inverse: "text-white",
     },
     interactive: {
-      base: "hover:text-amber-700 active:text-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50",
-      active: "text-amber-700 scale-105",
+      base: "hover:text-amber-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 transition-colors duration-200",
+      active: "text-amber-700 font-semibold",
+    },
+    background: {
+      nav: "bg-white",
+      overlay: "bg-white/95",
     },
   },
   dark: {
     shell: {
-      normal:
-        "bg-gray-900/98 border-b border-gray-800 shadow-sm backdrop-blur-md",
-      transparent: "bg-transparent border-transparent",
+      normal: "bg-gray-900/95 backdrop-blur-md border-b border-gray-800 shadow-lg",
+      transparent: "bg-transparent backdrop-blur-none border-transparent shadow-none",
     },
     text: {
-      primary: "text-white font-semibold",
-      secondary: "text-gray-300",
+      primary: "text-gray-100 font-medium",
+      secondary: "text-gray-400",
       accent: "text-amber-400 font-bold",
+      inverse: "text-gray-900",
     },
     interactive: {
-      base: "hover:text-amber-400 active:text-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50",
-      active: "text-amber-400 scale-105",
+      base: "hover:text-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 transition-colors duration-200",
+      active: "text-amber-400 font-semibold",
+    },
+    background: {
+      nav: "bg-gray-900",
+      overlay: "bg-gray-900/95",
     },
   },
 } as const;
@@ -168,12 +183,10 @@ const useSafeArea = () => {
 
     const updateSafeArea = () => {
       const top = parseInt(
-        getComputedStyle(document.documentElement).getPropertyValue("--sat") ||
-          "0",
+        getComputedStyle(document.documentElement).getPropertyValue("--sat") || "0",
       );
       const bottom = parseInt(
-        getComputedStyle(document.documentElement).getPropertyValue("--sab") ||
-          "0",
+        getComputedStyle(document.documentElement).getPropertyValue("--sab") || "0",
       );
       setSafeArea({ top, bottom });
     };
@@ -197,12 +210,14 @@ const useBodyScrollLock = (isLocked: boolean) => {
       body.style.top = `-${scrollY}px`;
       body.style.width = "100%";
       body.style.overflowY = "hidden";
+      body.style.paddingRight = "15px"; // Prevent layout shift
       
       return () => {
         body.style.position = "";
         body.style.top = "";
         body.style.width = "";
         body.style.overflowY = "";
+        body.style.paddingRight = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -215,71 +230,71 @@ const useBodyScrollLock = (isLocked: boolean) => {
 interface NavLinkProps {
   item: NavItem;
   isActive: boolean;
-  isHighlight?: boolean;
   theme: "light" | "dark";
   onClick?: () => void;
-  variant?: "desktop" | "mobile";
+  variant?: "desktop" | "mobile" | "compact";
 }
 
 const NavLink: React.FC<NavLinkProps> = ({
   item,
   isActive,
-  isHighlight = false,
   theme,
   onClick,
   variant = "desktop",
 }) => {
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
-
-  const highlightClasses =
-    !isMobile && isHighlight
-      ? "rounded-full px-3 py-1 border border-amber-500/40 bg-amber-500/10 text-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.35)]"
-      : "";
+  const isCompact = variant === "compact";
 
   const baseClasses = `
-    transition-all duration-200 ease-out
-    ${isMobile ? "text-lg py-3 px-4 rounded-xl active:scale-95" : "text-sm lg:text-base py-1"}
+    relative transition-all duration-200 ease-out
+    ${isMobile ? "text-base py-3 px-4 rounded-lg" : "text-sm lg:text-base"}
+    ${isCompact ? "text-xs px-2 py-1" : ""}
     ${colors.text.primary}
     ${isActive ? colors.interactive.active : colors.interactive.base}
+    ${!isMobile && !isCompact ? "hover:scale-105 active:scale-95" : ""}
     focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
-    ${isMobile ? "touch-manipulation" : ""}
-    ${highlightClasses}
+    touch-manipulation select-none
   `;
 
-  const activeBg =
-    isMobile && isActive
-      ? theme === "dark"
-        ? "bg-white/10"
-        : "bg-gray-100"
-      : "";
+  const highlightClasses = item.highlight ? `
+    ${theme === "dark" 
+      ? "bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-2 border-amber-400/50" 
+      : "bg-gradient-to-r from-amber-100/50 via-amber-50/30 to-transparent border-l-2 border-amber-500/50"}
+    rounded-r-md pl-3
+  ` : "";
 
   return (
     <li className={isMobile ? "w-full" : ""}>
       <Link
         href={getRoutePath(item.route)}
         onClick={onClick}
-        className={`${baseClasses} ${isMobile ? activeBg : ""} block`}
+        className={`${baseClasses} ${highlightClasses} ${isMobile ? "block" : ""}`}
         aria-current={isActive ? "page" : undefined}
         prefetch={true}
       >
-        <div className={`flex ${isMobile ? "flex-col" : "items-center gap-1"}`}>
-          <span className={isMobile ? "font-semibold" : ""}>{item.label}</span>
+        <div className={`flex ${isMobile ? "flex-col" : "items-center gap-2"}`}>
+          <span className={`${isMobile ? "font-medium" : ""} ${isCompact ? "truncate max-w-[80px]" : ""}`}>
+            {item.label}
+          </span>
           {isMobile && item.description && (
-            <span className={`mt-0.5 text-sm ${colors.text.secondary}`}>
+            <span className={`mt-1 text-sm ${colors.text.secondary}`}>
               {item.description}
             </span>
           )}
+          {isMobile && (
+            <ChevronRight className={`absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 ${colors.text.secondary}`} />
+          )}
         </div>
+        {(!isMobile && !isCompact && !item.highlight) && (
+          <motion.div
+            className={`absolute bottom-0 left-0 h-0.5 ${isActive ? "bg-amber-500" : "bg-transparent"}`}
+            initial={{ width: 0 }}
+            animate={{ width: isActive ? "100%" : 0 }}
+            transition={{ duration: 0.3 }}
+          />
+        )}
       </Link>
-      {!isMobile && !isHighlight && (
-        <motion.div
-          className={`h-0.5 ${isActive ? "bg-amber-500" : "bg-transparent"}`}
-          initial={{ width: 0 }}
-          animate={{ width: isActive ? "100%" : 0 }}
-          transition={{ duration: 0.2 }}
-        />
-      )}
     </li>
   );
 };
@@ -302,8 +317,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
 
-  const href =
-    type === "email" ? `mailto:${value}` : `tel:${value.replace(/\s+/g, "")}`;
+  const href = type === "email" ? `mailto:${value}` : `tel:${value.replace(/\s+/g, "")}`;
   const label = type === "email" ? "Email" : "Call";
   const Icon = type === "email" ? Mail : Phone;
 
@@ -313,18 +327,17 @@ const ContactButton: React.FC<ContactButtonProps> = ({
       onClick={onClick}
       className={`
         flex items-center gap-2 transition-all duration-200
-        ${isMobile ? "text-base py-2 px-3" : "text-sm"}
+        ${isMobile ? "text-base py-2 px-3 rounded-lg" : "text-sm px-3 py-1.5 rounded-md"}
         ${colors.text.secondary}
         ${colors.interactive.base}
+        hover:bg-white/5 active:scale-95
         focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
-        rounded-lg touch-manipulation
+        touch-manipulation
       `}
       aria-label={`${label} Abraham`}
     >
-      <Icon
-        className={`${isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} flex-shrink-0`}
-      />
-      <span className="font-medium">{label}</span>
+      <Icon className={`${isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} flex-shrink-0`} />
+      <span className="font-medium whitespace-nowrap">{label}</span>
     </a>
   );
 };
@@ -352,16 +365,14 @@ export default function Header({
 
   useBodyScrollLock(isOpen);
 
-  // FIX: Properly type and handle null values for usePathname
+  // Active route detection
   const isActive = React.useCallback(
     (route: RouteId): boolean => {
-      // If path is missing, it cannot match
       if (!currentPath) return false;
 
       const href = getRoutePath(route);
       if (href === "/") return currentPath === "/";
       
-      // Strict boolean return
       return currentPath === href || currentPath.startsWith(`${href}/`);
     },
     [currentPath],
@@ -382,10 +393,45 @@ export default function Header({
     desktop: scrolled ? "text-2xl lg:text-3xl" : "text-3xl lg:text-4xl",
   }[deviceType];
 
+  // Determine visible items based on screen width
+  const [visibleItems, setVisibleItems] = React.useState(NAV_ITEMS);
+  const [showMoreMenu, setShowMoreMenu] = React.useState(false);
+
+  React.useEffect(() => {
+    const updateVisibleItems = () => {
+      const width = window.innerWidth;
+      if (width >= 1280) {
+        // XL screens: Show all items
+        setVisibleItems([...NAV_ITEMS, ...OPTIONAL_ITEMS]);
+        setShowMoreMenu(false);
+      } else if (width >= 1024) {
+        // LG screens: Show main items
+        setVisibleItems(NAV_ITEMS);
+        setShowMoreMenu(false);
+      } else if (width >= 768) {
+        // MD screens: Show 6 items + "More"
+        setVisibleItems(NAV_ITEMS.slice(0, 6));
+        setShowMoreMenu(true);
+      } else {
+        setVisibleItems(NAV_ITEMS.slice(0, 6));
+        setShowMoreMenu(true);
+      }
+    };
+
+    updateVisibleItems();
+    window.addEventListener("resize", updateVisibleItems);
+    return () => window.removeEventListener("resize", updateVisibleItems);
+  }, []);
+
+  // Get items for "More" dropdown
+  const moreItems = showMoreMenu 
+    ? [...NAV_ITEMS.slice(6), ...OPTIONAL_ITEMS]
+    : [];
+
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${shellStyle}`}
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${shellStyle}`}
         style={{
           height: headerHeight,
           paddingTop: safeArea.top > 0 ? `${safeArea.top}px` : undefined,
@@ -393,7 +439,7 @@ export default function Header({
         role="banner"
         aria-label="Primary navigation"
       >
-        <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto h-full max-w-8xl px-4 sm:px-6 lg:px-8">
           <nav className="flex h-full items-center justify-between">
             {/* Brand Logo */}
             <Link
@@ -402,9 +448,9 @@ export default function Header({
                 font-serif font-bold tracking-tight
                 ${brandSize}
                 ${colors.text.accent}
-                transition-all duration-300
+                transition-all duration-300 hover:opacity-80
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
-                rounded-lg touch-manipulation
+                rounded-lg touch-manipulation shrink-0
               `}
               aria-label="Abraham of London - Home"
               prefetch={true}
@@ -413,23 +459,60 @@ export default function Header({
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden items-center gap-6 lg:flex lg:gap-8">
-              <ul className="flex items-center gap-6 lg:gap-8">
-                {NAV_ITEMS.map((item) => (
+            <div className="hidden lg:flex items-center gap-4 xl:gap-6">
+              <ul className="flex items-center gap-3 xl:gap-4">
+                {visibleItems.map((item) => (
                   <NavLink
                     key={item.route}
                     item={item}
                     isActive={isActive(item.route)}
-                    isHighlight={item.route === "shorts"}
                     theme={theme}
-                    variant="desktop"
+                    variant={deviceType === "tablet" ? "compact" : "desktop"}
                   />
                 ))}
+                
+                {/* "More" dropdown for medium screens */}
+                {showMoreMenu && moreItems.length > 0 && (
+                  <li className="relative group">
+                    <button
+                      className={`
+                        text-sm lg:text-base px-3 py-1 rounded-md
+                        ${colors.text.primary}
+                        ${colors.interactive.base}
+                        hover:bg-white/5 active:scale-95
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
+                        transition-all duration-200
+                      `}
+                    >
+                      More
+                    </button>
+                    <div className="absolute right-0 top-full mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                      <div className={`py-2 rounded-lg shadow-xl ${colors.background.overlay} backdrop-blur-md border ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+                        {moreItems.map((item) => (
+                          <Link
+                            key={item.route}
+                            href={getRoutePath(item.route)}
+                            className={`
+                              block px-4 py-2 text-sm
+                              ${colors.text.primary}
+                              ${colors.interactive.base}
+                              hover:bg-white/5
+                              ${isActive(item.route) ? colors.interactive.active : ''}
+                            `}
+                            prefetch={true}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </li>
+                )}
               </ul>
 
               {/* Desktop Actions */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-4 border-r border-current/20 pr-4">
+              <div className="flex items-center gap-3 pl-3 border-l border-current/20">
+                <div className="flex items-center gap-2">
                   <ContactButton
                     type="email"
                     value={LOCAL_SITE_CONFIG.email}
@@ -445,35 +528,35 @@ export default function Header({
                 </div>
 
                 <Link
-                  href="/books/the-architecture-of-human-purpose-landing"
+                  href="/canon/volume-i-foundations-of-purpose"
                   className={`
-                    hidden rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wider
-                    transition-all duration-200 hover:scale-105 active:scale-95
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
-                    xl:inline-block touch-manipulation
-                    ${
-                      theme === "dark"
-                        ? "border-amber-400/50 text-amber-400 hover:bg-amber-400/10"
-                        : "border-amber-600/50 text-amber-600 hover:bg-amber-600/10"
-                    }
-                  `}
-                  aria-label="The Canon Prelude - Architecture of Human Purpose"
-                  prefetch={true}
-                >
-                  Canon Prelude
-                </Link>
-
-                <Link
-                  href={getRoutePath("contact")}
-                  className={`
-                    rounded-full px-5 py-2.5 text-sm font-semibold
+                    rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap
                     transition-all duration-200 hover:scale-105 active:scale-95
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                     touch-manipulation
                     ${
                       theme === "dark"
-                        ? "bg-amber-400 text-gray-900 hover:bg-amber-300"
-                        : "bg-amber-600 text-white hover:bg-amber-700"
+                        ? "border-amber-400/40 text-amber-400 hover:bg-amber-400/10"
+                        : "border-amber-600/40 text-amber-600 hover:bg-amber-600/10"
+                    }
+                  `}
+                  aria-label="Canon Volume I - Foundations of Purpose"
+                  prefetch={true}
+                >
+                  Canon Vol. I
+                </Link>
+
+                <Link
+                  href={getRoutePath("contact")}
+                  className={`
+                    rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap
+                    transition-all duration-200 hover:scale-105 active:scale-95
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
+                    touch-manipulation shadow-sm
+                    ${
+                      theme === "dark"
+                        ? "bg-amber-400 text-gray-900 hover:bg-amber-300 shadow-amber-400/20"
+                        : "bg-amber-600 text-white hover:bg-amber-700 shadow-amber-600/20"
                     }
                   `}
                   aria-label="Go to contact form"
@@ -487,13 +570,33 @@ export default function Header({
             </div>
 
             {/* Mobile Controls */}
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-3 lg:hidden">
+              <Link
+                href={getRoutePath("contact")}
+                className={`
+                  rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap
+                  transition-all duration-200 active:scale-95
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
+                  touch-manipulation
+                  ${
+                    theme === "dark"
+                      ? "bg-amber-400 text-gray-900"
+                      : "bg-amber-600 text-white"
+                  }
+                `}
+                aria-label="Contact"
+                prefetch={true}
+              >
+                Contact
+              </Link>
+              
               <ThemeToggle />
+              
               <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
-                  inline-flex h-10 w-10 items-center justify-center rounded-lg p-2
+                  inline-flex h-10 w-10 items-center justify-center rounded-lg
                   transition-all duration-200 active:scale-95
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                   touch-manipulation
@@ -529,14 +632,13 @@ export default function Header({
             aria-label="Mobile navigation menu"
           >
             <div
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
+            
             <motion.div
-              className={`absolute right-0 top-0 h-full w-[85vw] max-w-sm overflow-y-auto overscroll-contain ${
-                theme === "dark" ? "bg-gray-900" : "bg-white"
-              }`}
+              className={`absolute right-0 top-0 h-full w-[85vw] max-w-md ${colors.background.nav} shadow-2xl`}
               style={{
                 paddingTop: `calc(${headerHeight} + ${safeArea.top}px)`,
                 paddingBottom: `${safeArea.bottom}px`,
@@ -546,84 +648,109 @@ export default function Header({
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
             >
-              <nav className="h-full px-5 py-6">
-                <ul className="space-y-1">
-                  {NAV_ITEMS.map((item) => (
-                    <NavLink
-                      key={item.route}
-                      item={item}
-                      isActive={isActive(item.route)}
-                      isHighlight={item.route === "shorts"}
-                      theme={theme}
-                      onClick={() => setIsOpen(false)}
-                      variant="mobile"
-                    />
-                  ))}
-                </ul>
+              <nav className="h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto px-4 py-6">
+                  <ul className="space-y-1">
+                    {[...NAV_ITEMS, ...OPTIONAL_ITEMS].map((item) => (
+                      <NavLink
+                        key={item.route}
+                        item={item}
+                        isActive={isActive(item.route)}
+                        theme={theme}
+                        onClick={() => setIsOpen(false)}
+                        variant="mobile"
+                      />
+                    ))}
+                  </ul>
 
-                <div className="mt-8 space-y-6">
-                  <div className="space-y-4">
-                    <h3
-                      className={`text-sm font-semibold uppercase tracking-wider ${colors.text.secondary}`}
-                    >
-                      Get in Touch
-                    </h3>
-                    <div className="flex gap-4">
-                      <ContactButton
-                        type="email"
-                        value={LOCAL_SITE_CONFIG.email}
-                        theme={theme}
+                  <div className="mt-8 pt-6 border-t border-current/10">
+                    <div className="space-y-4">
+                      <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text.secondary} px-4`}>
+                        Get in Touch
+                      </h3>
+                      <div className="flex flex-col gap-2">
+                        <ContactButton
+                          type="email"
+                          value={LOCAL_SITE_CONFIG.email}
+                          theme={theme}
+                          onClick={() => setIsOpen(false)}
+                          variant="mobile"
+                        />
+                        <ContactButton
+                          type="phone"
+                          value={LOCAL_SITE_CONFIG.phone}
+                          theme={theme}
+                          onClick={() => setIsOpen(false)}
+                          variant="mobile"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-6 space-y-3">
+                      <Link
+                        href="/canon/volume-i-foundations-of-purpose"
                         onClick={() => setIsOpen(false)}
-                        variant="mobile"
-                      />
-                      <ContactButton
-                        type="phone"
-                        value={LOCAL_SITE_CONFIG.phone}
-                        theme={theme}
+                        className={`
+                          block rounded-xl border px-4 py-3 text-center text-sm font-semibold
+                          transition-all duration-200 active:scale-95
+                          focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
+                          touch-manipulation
+                          ${
+                            theme === "dark"
+                              ? "border-amber-400/30 text-amber-400 active:bg-amber-400/10"
+                              : "border-amber-600/30 text-amber-600 active:bg-amber-600/10"
+                          }
+                        `}
+                        prefetch={true}
+                      >
+                        Canon Volume I
+                      </Link>
+
+                      <Link
+                        href={getRoutePath("contact")}
                         onClick={() => setIsOpen(false)}
-                        variant="mobile"
-                      />
+                        className={`
+                          block rounded-xl px-4 py-3 text-center text-sm font-semibold
+                          transition-all duration-200 active:scale-95
+                          focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
+                          touch-manipulation
+                          ${
+                            theme === "dark"
+                              ? "bg-amber-400 text-gray-900 active:bg-amber-300"
+                              : "bg-amber-600 text-white active:bg-amber-700"
+                          }
+                        `}
+                        prefetch={true}
+                      >
+                        Enquire Now
+                      </Link>
                     </div>
                   </div>
+                </div>
 
-                  <div className="space-y-4">
-                    <Link
-                      href="/books/the-architecture-of-human-purpose-landing"
+                {/* Mobile footer in drawer */}
+                <div className={`border-t border-current/10 px-4 py-4 ${colors.background.nav}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`text-xs ${colors.text.secondary}`}>
+                        Abraham of London
+                      </p>
+                      <p className={`text-xs ${colors.text.secondary} mt-1`}>
+                        Institutional Strategy & Governance
+                      </p>
+                    </div>
+                    <button
                       onClick={() => setIsOpen(false)}
                       className={`
-                        block rounded-xl border px-5 py-3 text-center text-sm font-semibold
+                        rounded-lg px-3 py-1.5 text-sm font-medium
                         transition-all duration-200 active:scale-95
                         focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
                         touch-manipulation
-                        ${
-                          theme === "dark"
-                            ? "border-amber-400/50 text-amber-400 active:bg-amber-400/10"
-                            : "border-amber-600/50 text-amber-600 active:bg-amber-600/10"
-                        }
+                        ${theme === "dark" ? "bg-white/10" : "bg-black/5"}
                       `}
-                      prefetch={true}
                     >
-                      Canon Prelude
-                    </Link>
-
-                    <Link
-                      href={getRoutePath("contact")}
-                      onClick={() => setIsOpen(false)}
-                      className={`
-                        block rounded-xl px-5 py-3 text-center text-sm font-semibold
-                        transition-all duration-200 active:scale-95
-                        focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
-                        touch-manipulation
-                        ${
-                          theme === "dark"
-                            ? "bg-amber-400 text-gray-900 active:bg-amber-300"
-                            : "bg-amber-600 text-white active:bg-amber-700"
-                        }
-                      `}
-                      prefetch={true}
-                    >
-                      Enquire Now
-                    </Link>
+                      Close
+                    </button>
                   </div>
                 </div>
               </nav>
@@ -645,8 +772,32 @@ export default function Header({
         main {
           padding-top: calc(var(--header-height) + var(--sat, 0px));
         }
+
+        /* Smooth transitions */
+        * {
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* Better touch targets */
+        @media (max-width: 768px) {
+          button, a[role="button"] {
+            min-height: 44px;
+            min-width: 44px;
+          }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+        }
       `}</style>
     </>
   );
 }
-

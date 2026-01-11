@@ -82,20 +82,22 @@ const ROUTES = {
 const SectionDivider: React.FC<{ withOrnament?: boolean }> = ({
   withOrnament = true,
 }) => (
-  <div className="relative h-20 overflow-hidden bg-black">
+  <div className="relative h-24 overflow-hidden bg-black">
     {withOrnament ? (
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative">
-          <div className="h-px w-28 bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
-          <div className="mx-8 flex items-center gap-3">
-            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-80" />
-            <div className="h-1.5 w-1.5 rounded-full bg-amber-300/60" />
-            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-80" />
+          <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
+          <div className="mx-10 flex items-center gap-3">
+            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-90" />
+            <div className="h-1.5 w-1.5 rounded-full bg-amber-300/70" />
+            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-90" />
           </div>
-          <div className="h-px w-28 bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
+          <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
         </div>
       </div>
-    ) : null}
+    ) : (
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/[0.02] to-transparent" />
+    )}
   </div>
 );
 
@@ -103,7 +105,7 @@ const Pill: React.FC<{ children: React.ReactNode; icon?: React.ReactNode }> = ({
   children,
   icon,
 }) => (
-  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
+  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
     {icon}
     {children}
   </span>
@@ -114,19 +116,19 @@ const Card: React.FC<{
   icon: React.ReactNode;
   body: string;
 }> = ({ title, icon, body }) => (
-  <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
+  <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/20 hover:bg-white/[0.05]">
     <div className="flex items-start justify-between gap-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">
           {title}
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-gray-200">{body}</p>
+        <p className="mt-3.5 text-sm leading-relaxed text-gray-200 font-light">{body}</p>
       </div>
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
         {icon}
       </div>
     </div>
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(245,158,11,0.08),transparent_55%)]" />
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(245,158,11,0.05),transparent_55%)]" />
   </div>
 );
 
@@ -137,24 +139,24 @@ const HeroSection: React.FC = () => {
   return (
     <section className="relative overflow-hidden bg-black">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.12),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(59,130,246,0.08),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.08),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(59,130,246,0.04),transparent_55%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pb-24">
-        <div className="mb-8 flex flex-wrap gap-3">
+        <div className="mb-10 flex flex-wrap gap-3">
           <Pill icon={<Landmark className="h-3.5 w-3.5" />}>Institutional OS</Pill>
           <Pill icon={<Target className="h-3.5 w-3.5" />}>Strategy</Pill>
           <Pill icon={<Scale className="h-3.5 w-3.5" />}>Governance</Pill>
           <Pill icon={<Workflow className="h-3.5 w-3.5" />}>Execution</Pill>
         </div>
 
-        <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
+        <div className="grid gap-14 lg:grid-cols-12 lg:items-start">
           <div className="lg:col-span-7">
-            <h1 className="mb-6 font-serif text-5xl font-semibold leading-tight text-amber-100 sm:text-7xl lg:text-8xl">
+            <h1 className="mb-8 font-serif text-5xl font-semibold leading-tight text-amber-100 sm:text-7xl lg:text-8xl">
               Abraham of London
-              <span className="mt-5 block text-2xl font-normal text-amber-100/85 sm:text-4xl lg:text-5xl">
+              <span className="mt-6 block text-2xl font-normal text-amber-100/90 sm:text-4xl lg:text-5xl">
                 Less theatre.{" "}
                 <span className="relative inline-block">
                   <span className="relative z-10">More operating system.</span>
@@ -163,7 +165,7 @@ const HeroSection: React.FC = () => {
               </span>
             </h1>
 
-            <p className="mb-10 max-w-3xl text-lg leading-relaxed text-gray-200 sm:text-xl lg:text-2xl">
+            <p className="mb-12 max-w-3xl text-lg leading-relaxed text-gray-200 font-light sm:text-xl lg:text-2xl">
               Consulting-grade diagnostics and governance — built for founders,
               leadership teams, and institutions that must survive pressure,
               scrutiny, and scale.
@@ -172,7 +174,7 @@ const HeroSection: React.FC = () => {
             <div className="flex flex-wrap gap-4">
               <Link
                 href={ROUTES.consulting}
-                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-base font-bold text-black shadow-lg shadow-amber-900/25 transition-transform hover:scale-[1.02]"
+                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-8 py-4.5 text-base font-bold text-black shadow-lg shadow-amber-900/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-amber-900/40"
               >
                 <Briefcase className="h-5 w-5" />
                 Engage Advisory
@@ -181,7 +183,7 @@ const HeroSection: React.FC = () => {
 
               <Link
                 href={ROUTES.canon}
-                className="inline-flex items-center gap-3 rounded-xl border border-amber-400/35 bg-white/5 px-7 py-4 text-base font-bold text-amber-100 backdrop-blur-sm transition-transform hover:scale-[1.02] hover:border-amber-400/55"
+                className="inline-flex items-center gap-3 rounded-xl border border-amber-400/25 bg-white/5 px-8 py-4.5 text-base font-bold text-amber-100 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-amber-400/45 hover:bg-white/8"
               >
                 <BookOpen className="h-5 w-5" />
                 Read the Canon
@@ -189,24 +191,24 @@ const HeroSection: React.FC = () => {
               </Link>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-gray-300">
-              <span className="inline-flex items-center gap-2">
-                <Shield className="h-4 w-4 text-amber-300" />
+            <div className="mt-12 flex flex-wrap items-center gap-7 text-sm text-gray-300 font-light">
+              <span className="inline-flex items-center gap-2.5">
+                <Shield className="h-4.5 w-4.5 text-amber-300" />
                 Conviction-led ethics
               </span>
-              <span className="inline-flex items-center gap-2">
-                <Scale className="h-4 w-4 text-amber-300" />
+              <span className="inline-flex items-center gap-2.5">
+                <Scale className="h-4.5 w-4.5 text-amber-300" />
                 Audit-ready governance
               </span>
-              <span className="inline-flex items-center gap-2">
-                <Workflow className="h-4 w-4 text-amber-300" />
+              <span className="inline-flex items-center gap-2.5">
+                <Workflow className="h-4.5 w-4.5 text-amber-300" />
                 Deployment cadence
               </span>
             </div>
           </div>
 
           <div className="lg:col-span-5">
-            <div className="grid gap-6">
+            <div className="grid gap-7">
               <Card
                 title="Delivery posture"
                 icon={<Landmark className="h-6 w-6" />}
@@ -226,9 +228,9 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="relative mt-14 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
+        <div className="relative mt-16 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
           <div className="relative aspect-[16/9]">
-            <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/0 via-black/20 to-black/55" />
+            <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/0 via-black/25 to-black/60" />
             <Image
               src="/assets/images/abraham-of-london-banner.webp"
               alt="Abraham of London — Institutional Advisory Platform"
@@ -240,7 +242,7 @@ const HeroSection: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-start gap-4 px-6 py-6 sm:px-8">
+          <div className="flex items-start gap-5 px-7 py-7 sm:px-9">
             <div className="mt-1 h-12 w-12 rounded-xl bg-amber-500/10 p-2.5">
               <Cpu className="h-full w-full text-amber-300" />
             </div>
@@ -248,11 +250,11 @@ const HeroSection: React.FC = () => {
               <p className="text-base font-medium text-amber-100 sm:text-lg">
                 Blueprint → pressure-test → deploy. Convert strategy into routine.
               </p>
-              <p className="mt-2 text-sm text-gray-300">
+              <p className="mt-2.5 text-sm text-gray-300 font-light">
                 Institutional architecture since 2024.
               </p>
             </div>
-            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200 md:flex">
+            <div className="hidden items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200 md:flex">
               <CheckCircle2 className="h-4 w-4 text-amber-300" />
               Partner-led
             </div>
@@ -289,31 +291,31 @@ const TrustSignals: React.FC = () => {
   ];
 
   return (
-    <section className="bg-black py-16">
+    <section className="bg-black py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
+        <div className="mb-14 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
             Institutional assurance
           </p>
-          <h2 className="mt-4 font-serif text-3xl font-light text-amber-100 sm:text-4xl">
+          <h2 className="mt-6 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
             Built to survive pressure
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-300">
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-gray-300 font-light">
             Repeatable method that holds under cross-examination.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-3">
           {signals.map((s) => (
             <div
               key={s.title}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl"
+              className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/20 hover:bg-white/[0.05]"
             >
-              <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5">
+              <div className="mb-7 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5">
                 {s.icon}
               </div>
-              <h3 className="text-lg font-semibold text-amber-100">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-gray-300">
+              <h3 className="text-xl font-semibold text-amber-100">{s.title}</h3>
+              <p className="mt-3.5 text-sm leading-relaxed text-gray-300 font-light">
                 {s.description}
               </p>
             </div>
@@ -362,38 +364,38 @@ const ServiceLines: React.FC = () => {
   ] as const;
 
   return (
-    <section className="bg-black py-18">
+    <section className="bg-black py-20">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Service lines
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
+            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               A proper consulting spine
             </h2>
-            <p className="mt-4 text-lg text-gray-300">
-              We don’t “help.” We build the decision system that makes help unnecessary.
+            <p className="mt-5 text-xl text-gray-300 font-light">
+              We don't "help." We build the decision system that makes help unnecessary.
             </p>
           </div>
 
           <Link
             href={ROUTES.consulting}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
           >
             <span>See engagements</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-3">
           {lines.map((l) => (
             <Link
               key={l.title}
               href={l.href}
-              className="block rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl hover:border-amber-400/35"
+              className="block rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/30 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-amber-500/5"
             >
-              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
+              <div className="mb-8 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {l.icon}
               </div>
 
@@ -401,20 +403,20 @@ const ServiceLines: React.FC = () => {
                 {l.title}
               </h3>
 
-              <ul className="mt-5 space-y-3 text-sm text-gray-300">
+              <ul className="mt-7 space-y-3.5 text-sm text-gray-300 font-light">
                 {l.bullets.map((b) => (
-                  <li key={b} className="flex gap-3">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
+                  <li key={b} className="flex gap-3.5">
+                    <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 flex-shrink-0 text-amber-300" />
                     <span>{b}</span>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+              <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-7">
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
                   Output-driven
                 </span>
-                <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
+                <span className="inline-flex items-center gap-2.5 text-sm font-semibold text-amber-200">
                   Learn more <ChevronRight className="h-4 w-4" />
                 </span>
               </div>
@@ -449,45 +451,45 @@ const DeliveryModel: React.FC = () => {
   ] as const;
 
   return (
-    <section className="relative bg-black py-16">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_60%,rgba(245,158,11,0.10),transparent_55%)]" />
+    <section className="relative bg-black py-20">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_60%,rgba(245,158,11,0.05),transparent_55%)]" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Delivery model
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
+            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               Method beats motivation.
             </h2>
-            <p className="mt-4 text-lg text-gray-300">
-              Your organisation needs cadence that doesn’t collapse when the room gets hot.
+            <p className="mt-5 text-xl text-gray-300 font-light">
+              Your organisation needs cadence that doesn't collapse when the room gets hot.
             </p>
           </div>
 
           <Link
             href={ROUTES.consulting}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
           >
             <span>Engagement formats</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-3">
           {steps.map((s, idx) => (
             <div
               key={s.title}
-              className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl"
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/20 hover:bg-white/[0.05]"
             >
-              <div className="absolute -right-2 -top-2 flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-xs font-bold text-amber-100">
+              <div className="absolute -right-3 -top-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-sm font-bold text-amber-100">
                 {idx + 1}
               </div>
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
+              <div className="mb-8 inline-flex h-18 w-18 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {s.icon}
               </div>
               <h3 className="text-2xl font-semibold text-amber-100">{s.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-gray-300">{s.body}</p>
+              <p className="mt-4 text-sm leading-relaxed text-gray-300 font-light">{s.body}</p>
             </div>
           ))}
         </div>
@@ -503,54 +505,54 @@ const StrategicFrameworkStrip: React.FC = () => {
   const items = [
     { icon: <Target className="h-6 w-6" />, title: "Mandate", body: "Define mission boundary. No mandate = no strategy." },
     { icon: <Map className="h-6 w-6" />, title: "Terrain", body: "Market structure, rivals, constraints. Reality first." },
-    { icon: <Scale className="h-6 w-6" />, title: "Choices", body: "Trade-offs written. If it’s not written, it isn’t real." },
+    { icon: <Scale className="h-6 w-6" />, title: "Choices", body: "Trade-offs written. If it's not written, it isn't real." },
     { icon: <Workflow className="h-6 w-6" />, title: "Operating System", body: "Decision rights + cadence. Strategy becomes routine." },
     { icon: <Gauge className="h-6 w-6" />, title: "Governance", body: "Accountability that keeps the machine honest." },
   ] as const;
 
   return (
-    <section className="bg-black py-16">
+    <section className="bg-black py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Strategic framework
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
+            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               Capacity is proven by method.
             </h2>
-            <p className="mt-4 text-lg text-gray-300">
+            <p className="mt-5 text-xl text-gray-300 font-light">
               Five layers that prevent strategy from collapsing at first contact with reality.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3.5">
             <Link
               href={ROUTES.strategy}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-400/40 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
+              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-amber-400/30 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
             >
               Strategy <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={ROUTES.resources}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/20"
+              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/8"
             >
               Resources <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
           {items.map((it) => (
             <div
               key={it.title}
-              className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl"
+              className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/20 hover:bg-white/[0.05]"
             >
-              <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
+              <div className="mb-7 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {it.icon}
               </div>
               <h3 className="text-xl font-semibold text-amber-100">{it.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-gray-300">{it.body}</p>
+              <p className="mt-3.5 text-sm leading-relaxed text-gray-300 font-light">{it.body}</p>
             </div>
           ))}
         </div>
@@ -563,24 +565,24 @@ const StrategicFrameworkStrip: React.FC = () => {
    CANON
 ----------------------------------------------------------------------------- */
 const CanonShowcase: React.FC = () => (
-  <section className="bg-black py-16">
+  <section className="bg-black py-20">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
             Canon · Core backbone
           </p>
-          <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
+          <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
             The blueprint that underwrites the firm
           </h2>
-          <p className="mt-4 text-lg text-gray-300">
+          <p className="mt-5 text-xl text-gray-300 font-light">
             First principles and operating logic — written to last longer than a trend cycle.
           </p>
         </div>
 
         <Link
           href={ROUTES.canon}
-          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
+          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
         >
           <span>Browse Canon</span>
           <ArrowRight className="h-4 w-4" />
@@ -606,61 +608,61 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
   if (!shorts || shorts.length === 0) return null;
 
   return (
-    <section className="bg-black py-16">
+    <section className="bg-black py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
               Shorts · Field signals
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
+            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               Executive notes for builders.
             </h2>
-            <p className="mt-4 text-lg text-gray-300">
+            <p className="mt-5 text-xl text-gray-300 font-light">
               Concise insights that cut through noise and translate into action.
             </p>
           </div>
 
           <Link
             href={ROUTES.shorts}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/40 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/60"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
           >
             <span>View all shorts</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-3">
           {shorts.map((short) => {
             const href = getDocHref(short);
             return (
               <Link
                 key={short.slug ?? short._raw?.flattenedPath ?? short.title ?? href}
                 href={href}
-                className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl hover:border-amber-400/35"
+                className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/30 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-amber-500/5"
               >
-                <div className="mb-5 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
+                <div className="mb-7 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2.5 rounded-full bg-amber-500/10 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
                     <Sparkles className="h-3.5 w-3.5" />
                     Field note
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-gray-400">
+                  <span className="flex items-center gap-2 text-xs font-medium text-gray-400">
                     <Clock className="h-3.5 w-3.5" />
                     {short.readTime ?? "3 min"}
                   </span>
                 </div>
 
-                <h3 className="mb-3 line-clamp-2 font-serif text-2xl font-semibold text-amber-100">
+                <h3 className="mb-4 line-clamp-2 font-serif text-2xl font-semibold text-amber-100">
                   {short.title}
                 </h3>
-                <p className="line-clamp-3 text-sm leading-relaxed text-gray-300">
+                <p className="line-clamp-3 text-sm leading-relaxed text-gray-300 font-light">
                   {short.excerpt || short.description}
                 </p>
 
-                <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+                <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-7">
                   <span className="text-sm font-medium text-gray-400">Read analysis</span>
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/5">
-                    <ArrowRight className="h-5 w-5 text-amber-200" />
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/5 transition-all duration-300 group-hover:border-amber-400/40 group-hover:bg-amber-500/10">
+                    <ArrowRight className="h-5 w-5 text-amber-200 transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>
@@ -676,26 +678,26 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
    STRATEGIC SESSIONS CTA
 ----------------------------------------------------------------------------- */
 const StrategicSessions: React.FC = () => (
-  <section className="relative overflow-hidden bg-black py-20">
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(245,158,11,0.10),transparent_60%)]" />
+  <section className="relative overflow-hidden bg-black py-24">
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(245,158,11,0.05),transparent_60%)]" />
     <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
       <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
         Advisory engagement
       </p>
-      <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
+      <h2 className="mt-8 font-serif text-5xl font-light text-amber-100 sm:text-6xl lg:text-7xl">
         Advisory that produces{" "}
         <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
           deployable systems
         </span>
       </h2>
-      <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-300">
+      <p className="mx-auto mt-7 max-w-2xl text-xl text-gray-300 font-light">
         Diagnose, decide, deploy — with governance and cadence that stick.
       </p>
 
-      <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+      <div className="mt-14 flex flex-col items-center justify-center gap-5 sm:flex-row">
         <Link
           href={ROUTES.consulting}
-          className="inline-flex items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-10 py-5 text-lg font-bold text-black"
+          className="inline-flex items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-12 py-6 text-lg font-bold text-black shadow-2xl shadow-amber-900/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-amber-900/50"
         >
           <Briefcase className="h-6 w-6" />
           <span>Book a Strategic Session</span>
@@ -704,24 +706,24 @@ const StrategicSessions: React.FC = () => (
 
         <Link
           href={`${ROUTES.consulting}#offer`}
-          className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-9 py-5 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/25"
+          className="inline-flex items-center justify-center gap-3.5 rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/25 hover:bg-white/8"
         >
           <span>View offer</span>
           <ChevronRight className="h-5 w-5" />
         </Link>
       </div>
 
-      <div className="mt-14 grid gap-8 sm:grid-cols-3">
+      <div className="mt-20 grid gap-10 sm:grid-cols-3">
         {[
           { icon: <Target className="h-6 w-6" />, text: "Diagnostic-first approach" },
           { icon: <Users2 className="h-6 w-6" />, text: "Direct partner access" },
           { icon: <TrendingUp className="h-6 w-6" />, text: "Accountability cadence" },
         ].map((item) => (
-          <div key={item.text} className="flex items-center justify-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
+          <div key={item.text} className="flex items-center justify-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-500/10 transition-all duration-300 hover:bg-amber-500/15">
               <div className="text-amber-300">{item.icon}</div>
             </div>
-            <span className="text-base font-medium text-amber-100">{item.text}</span>
+            <span className="text-lg font-medium text-amber-100">{item.text}</span>
           </div>
         ))}
       </div>
@@ -740,32 +742,34 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
       fullWidth
       className="bg-black"
     >
-      <HeroSection />
-      <TrustSignals />
-      <ServiceLines />
+      <div className="min-h-screen">
+        <HeroSection />
+        <TrustSignals />
+        <ServiceLines />
 
-      <section className="border-y border-white/10 bg-black">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <AnimatedStatsBar />
-        </div>
-      </section>
+        <section className="border-y border-white/10 bg-black">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <AnimatedStatsBar />
+          </div>
+        </section>
 
-      <SectionDivider />
-      <DeliveryModel />
+        <SectionDivider />
+        <DeliveryModel />
 
-      {/* REPLACEMENT: Strategic value strip (instead of “0+” tiles) */}
-      <SectionDivider withOrnament={false} />
-      <StrategicFrameworkStrip />
+        {/* REPLACEMENT: Strategic value strip (instead of "0+" tiles) */}
+        <SectionDivider withOrnament={false} />
+        <StrategicFrameworkStrip />
 
-      <SectionDivider />
-      <CanonShowcase />
+        <SectionDivider />
+        <CanonShowcase />
 
-      <SectionDivider withOrnament={false} />
-      {featuredShorts.length > 0 ? <ShortsStrip shorts={featuredShorts} /> : null}
+        <SectionDivider withOrnament={false} />
+        {featuredShorts.length > 0 ? <ShortsStrip shorts={featuredShorts} /> : null}
 
-      <EnhancedVenturesSection />
+        <EnhancedVenturesSection />
 
-      <StrategicSessions />
+        <StrategicSessions />
+      </div>
     </Layout>
   );
 };

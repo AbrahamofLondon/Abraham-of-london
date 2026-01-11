@@ -1,6 +1,6 @@
 # netlify.toml — CONFIRMED CONFIGURATION
 [build]
-  command = "pnpm install --frozen-lockfile && pnpm contentlayer:build && pnpm build"
+  command = "pnpm install --frozen-lockfile && pnpm build"
   publish = ".next"
 
 [build.environment]
@@ -16,11 +16,11 @@
   NEXT_PUBLIC_APP_ENV = "production"
 
 [context.deploy-preview.environment]
-  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_SITE_URL = "`${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
 
 [context.branch-deploy.environment]
-  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_SITE_URL = "`${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
 
 [[plugins]]
