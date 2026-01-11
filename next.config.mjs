@@ -185,58 +185,6 @@ const nextConfig = {
   ],
 };
 
-// Add a pre-build hook to check for locked files
-nextConfig.onBeforeBuild = async () => {
-  console.log('[Build] Checking for locked files...');
-  
-  // List of directories containing problematic files
-  const fs = require('fs');
-  const path = require('path');
-  const downloadDirs = [
-    path.join(process.cwd(), 'public', 'downloads'),
-    path.join(process.cwd(), 'public', 'assets', 'downloads')
-  ];
-  
-  // Function to check if a file is accessible
-  const isFileAccessible = (filePath) => {
-    try {
-      fs.accessSync(filePath, fs.constants.R_OK);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-  
-  for (const dir of downloadDirs) {
-    if (fs.existsSync(dir)) {
-      try {
-        const files = fs.readdirSync(dir);
-        console.log(`[Build] Found ${files.length} files in ${dir}`);
-        
-        const problematicFiles = files.filter(f => 
-          /\.(xlsx?|docx?|pptx?|pdf|od[tsp])$/i.test(f)
-        );
-        
-        if (problematicFiles.length > 0) {
-          console.log(`[Build] Found ${problematicFiles.length} download files in ${dir}`);
-          
-          // Check each file
-          for (const file of problematicFiles) {
-            const filePath = path.join(dir, file);
-            if (!isFileAccessible(filePath)) {
-              console.warn(`[Build] WARNING: File may be locked: ${filePath}`);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn(`[Build] Could not read directory ${dir}:`, err.message);
-      }
-    }
-  }
-  
-  console.log('[Build] File check complete');
-};
-
 // ✅ SIMPLE CONTENTLAYER INTEGRATION - FIXED EXPORT
 let configWithContentlayer;
 
