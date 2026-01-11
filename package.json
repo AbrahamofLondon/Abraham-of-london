@@ -26,7 +26,6 @@
     "@fontsource/inter": "^5.0.0",
     "@heroicons/react": "2.2.0",
     "@next-auth/prisma-adapter": "1.0.7",
-    "@next/font": "14.2.15",
     "@prisma/client": "7.2.0",
     "@react-email/components": "0.0.23",
     "@react-pdf/renderer": "4.3.1",

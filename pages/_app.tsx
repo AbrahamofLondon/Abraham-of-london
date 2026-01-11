@@ -1,4 +1,4 @@
-// pages/_app.tsx - UPDATED FOR PRODUCTION
+// pages/_app.tsx - PROFESSIONAL PRODUCTION VERSION
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
@@ -6,9 +6,13 @@ import Head from "next/head";
 import Script from "next/script";
 import { SessionProvider } from "next-auth/react";
 
-// ✅ IMPORTANT: Change from .scss to .css since we fixed the build
+// Font configuration
+import { fontVariables, fontBodyClass } from "@/lib/next-fonts";
+
+// Styles
 import "../styles/tailwind.css";
 
+// Context providers
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext";
@@ -109,51 +113,66 @@ export default function MyApp({
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Add favicon */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#030712" />
         <link rel="icon" href="/favicon.ico" />
-        {/* Preconnect to fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        
+        {/* Font variables */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            :root {
+              ${fontVariables}
+              --font-family-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+              --font-family-mono: var(--font-mono), monospace;
+              --font-family-serif: var(--font-editorial), Georgia, serif;
+            }
+          `
+        }} />
       </Head>
 
-      {/* Global CSS for performance */}
+      {/* Global performance CSS */}
       <style jsx global>{`
-        /* Critical CSS for initial load */
         html {
+          font-family: var(--font-family-sans);
           scroll-behavior: smooth;
+          -webkit-tap-highlight-color: transparent;
         }
         
-        /* Prevent layout shift */
-        html, body {
+        body {
           overflow-x: hidden;
-        }
-        
-        /* Improve font rendering */
-        * {
+          text-rendering: optimizeLegibility;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Focus styles for accessibility */
         :focus-visible {
-          outline: 2px solid #d6b26a;
+          outline: 2px solid var(--color-primary);
           outline-offset: 2px;
+        }
+        
+        /* Selection styling */
+        ::selection {
+          background-color: rgba(245, 158, 11, 0.3);
+          color: inherit;
+        }
+        
+        /* Smooth scrolling for anchor links */
+        html:has(:target) {
+          scroll-behavior: smooth;
+          scroll-padding-top: 5rem;
         }
       `}</style>
 
-      {hasRecaptcha ? (
+      {hasRecaptcha && (
         <Script
           id="recaptcha-v3"
           src={`https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(
             RECAPTCHA_SITE_KEY!.trim()
           )}`}
           strategy="afterInteractive"
-          onLoad={() => {
-            console.log('reCAPTCHA loaded successfully');
-          }}
         />
-      ) : null}
+      )}
 
       <Script
         id="inner-circle-init"
@@ -171,12 +190,8 @@ export default function MyApp({
                     if (decoded.exp < now) {
                       localStorage.removeItem('innerCircleToken');
                       localStorage.removeItem('innerCircleUser');
-                      console.log('Inner Circle token expired');
-                    } else {
-                      console.log('Inner Circle session restored');
                     }
-                  } catch (error) {
-                    console.error('Invalid inner-circle token');
+                  } catch {
                     localStorage.removeItem('innerCircleToken');
                     localStorage.removeItem('innerCircleUser');
                   }
@@ -200,7 +215,9 @@ export default function MyApp({
                 </div>
               ) : null}
               
-              <Component {...pageProps} />
+              <div className={`min-h-screen ${fontBodyClass}`}>
+                <Component {...pageProps} />
+              </div>
             </InnerCircleProvider>
           </AuthProvider>
         </ThemeProvider>

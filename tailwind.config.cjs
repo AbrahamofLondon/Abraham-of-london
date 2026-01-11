@@ -1,18 +1,15 @@
-// tailwind.config.js - FIXED WITH ALL DIRECTORIES
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js - PROFESSIONAL PRODUCTION CONFIGURATION
 
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
   
   content: [
-    // Include ALL possible file locations
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
-    "./content/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}", // If using src directory
+    "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
   ],
 
   theme: {
@@ -22,114 +19,118 @@ module.exports = {
         DEFAULT: '1rem',
         sm: '1.5rem',
         lg: '2rem',
+        xl: '3rem',
+      },
+      screens: {
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1536px',
       },
     },
     
     extend: {
       colors: {
-        // Base colors with proper fallbacks
-        background: 'rgb(var(--color-background) / <alpha-value>)',
-        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+        // CSS Custom Properties with fallbacks
+        background: 'rgb(var(--color-background, 3 7 18) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground, 249 250 251) / <alpha-value>)',
+        surface: 'rgb(var(--color-surface, 17 24 39) / <alpha-value>)',
         
         primary: {
-          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
-          light: 'rgb(var(--color-primary-light) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--color-primary, 245 158 11) / <alpha-value>)',
+          light: 'rgb(var(--color-primary-light, 251 191 36) / <alpha-value>)',
+          dark: 'rgb(var(--color-primary-dark, 217 119 6) / <alpha-value>)',
         },
         
-        secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
-        destructive: 'rgb(var(--color-error) / <alpha-value>)',
-        success: 'rgb(var(--color-success) / <alpha-value>)',
-        accent: 'rgb(var(--color-accent) / <alpha-value>)',
+        secondary: 'rgb(var(--color-secondary, 107 114 128) / <alpha-value>)',
+        muted: 'rgb(var(--color-muted, 75 85 99) / <alpha-value>)',
+        accent: 'rgb(var(--color-accent, 139 92 246) / <alpha-value>)',
+        destructive: 'rgb(var(--color-destructive, 239 68 68) / <alpha-value>)',
+        success: 'rgb(var(--color-success, 34 197 94) / <alpha-value>)',
         
-        // Grayscale for better visibility
-        gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
-          950: '#030712',
-        },
+        border: 'rgb(var(--color-border, 55 65 81) / <alpha-value>)',
+        ring: 'rgb(var(--color-ring, 245 158 11) / <alpha-value>)',
         
-        // Your brand colors with opacity support
-        'aol-bg': 'rgb(var(--color-background) / <alpha-value>)',
-        'aol-surface': 'rgb(var(--color-surface) / <alpha-value>)',
-        'aol-text': 'rgb(var(--color-on-background) / <alpha-value>)',
-        'aol-muted': 'rgb(var(--color-secondary) / <alpha-value>)',
-        'aol-border': 'rgb(var(--ui-alpha-border) / <alpha-value>)',
-        'softGold': 'rgb(var(--color-primary) / <alpha-value>)',
-        
-        // Amber palette (for your gold theme)
-        amber: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-          950: '#451a03',
-        },
+        // Semantic colors
+        'soft-gold': 'rgb(var(--color-primary, 245 158 11) / <alpha-value>)',
       },
       
       fontFamily: {
-        sans: ['var(--font-family-sans)', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['var(--font-family-mono)', 'monospace'],
-        serif: ['var(--font-family-serif)', 'Georgia', 'serif'],
+        sans: ['var(--font-family-sans)'],
+        mono: ['var(--font-family-mono)'],
+        serif: ['var(--font-family-serif)'],
+        editorial: ['var(--font-editorial)', 'serif'],
+      },
+      
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        '3xs': ['0.5rem', { lineHeight: '0.75rem' }],
       },
       
       spacing: {
-        'xs': '0.5rem',
-        'sm': '1rem',
-        'md': '1.5rem',
-        'lg': '2rem',
-        'xl': '3rem',
-        '2xl': '4rem',
-        '3xl': '6rem',
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+        '144': '36rem',
       },
       
       borderRadius: {
-        'sm': '0.25rem',
-        'md': '0.5rem',
-        'lg': '0.75rem',
-        'xl': '1rem',
-        '2xl': '1.5rem',
-        'full': '9999px',
+        '4xl': '2rem',
+        '5xl': '2.5rem',
       },
       
       boxShadow: {
-        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        'md': '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-        'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1)',
-        'gold': '0 0 20px rgba(245, 158, 11, 0.3)',
-        'focus': '0 0 0 3px rgba(245, 158, 11, 0.5)',
-        'focus-strong': '0 0 0 3px rgba(245, 158, 11, 0.8)',
+        'soft': '0 2px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        'elevation': '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        'inner-strong': 'inset 0 2px 4px 0 rgb(0 0 0 / 0.15)',
+        'gold-glow': '0 0 25px rgba(245, 158, 11, 0.25)',
+        'gold-glow-strong': '0 0 40px rgba(245, 158, 11, 0.4)',
       },
       
       animation: {
-        'fade-in': 'fade-in 0.3s ease-in-out',
-        'fade-in-up': 'fade-in-up 0.5s ease-out',
-        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'slide-in': 'slide-in 0.3s ease-out',
+        'slide-out': 'slide-out 0.3s ease-in',
       },
       
       keyframes: {
-        'fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
-        'fade-in-up': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        'slide-in': {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
         },
+        'slide-out': {
+          '0%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(100%)', opacity: '0' },
+        },
+      },
+      
+      transitionDuration: {
+        '400': '400ms',
+        '600': '600ms',
+        '800': '800ms',
+      },
+      
+      opacity: {
+        '15': '0.15',
+        '85': '0.85',
+      },
+      
+      backdropBlur: {
+        'xs': '2px',
+      },
+      
+      zIndex: {
+        '60': '60',
+        '70': '70',
+        '80': '80',
+        '90': '90',
+        '100': '100',
       },
     },
   },
