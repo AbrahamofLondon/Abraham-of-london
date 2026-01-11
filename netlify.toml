@@ -1,6 +1,6 @@
 # netlify.toml — CONFIRMED CONFIGURATION
 [build]
-  command = "npm ci && npm run contentlayer:build && npm run build"
+  command = "pnpm install --frozen-lockfile && pnpm contentlayer:build && pnpm build"
   publish = ".next"
 
 [build.environment]
@@ -180,3 +180,4 @@
   to = "/index.html"
   status = 200
   conditions = { StatusCode = "404" }
+

@@ -17,7 +17,7 @@
     "build": "next build",
     "dev": "next dev",
     "clean": "rd /s /q .next 2>nul && rd /s /q .contentlayer 2>nul && rd /s /q node_modules\\.cache 2>nul",
-    "build:netlify": "npm ci && npm run contentlayer:build && npm run build",
+    "build:netlify": "pnpm install --frozen-lockfile && pnpm contentlayer:build && pnpm build",
     "audit:prod": "node scripts/check-links.js --prod"
   },
   "dependencies": {
