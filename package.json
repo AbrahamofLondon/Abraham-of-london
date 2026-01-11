@@ -116,7 +116,7 @@
     "@types/ws": "8.5.10",
     "@typescript-eslint/eslint-plugin": "8.50.1",
     "@typescript-eslint/parser": "8.50.1",
-    "artillery": "2.0.16",
+    "artillery": "2.0.27",
     "assert": "2.1.0",
     "audit-ci": "7.1.0",
     "buffer": "6.0.3",
