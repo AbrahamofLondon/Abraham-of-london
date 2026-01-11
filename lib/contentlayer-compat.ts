@@ -1,17 +1,8 @@
 /**
  * lib/contentlayer-compat.ts — SINGLE SOURCE OF TRUTH (Pages Router, SYNC-FIRST)
  *
- * Goals:
- * - Never require async to read content at build-time in Pages Router
- * - Always provide stable arrays (empty instead of crashing)
- * - Provide consistent slug/kind/href logic
- * - Provide "published" filtering that doesn't accidentally zero everything
- *
- * Fixed for Contentlayer v2 with Windows/Unix compatible paths
+ * This is the client-safe version that delegates to server-only logic
  */
-
-import fs from 'fs';
-import path from 'path';
 
 export interface DocBase {
   _id?: string;
@@ -22,7 +13,7 @@ export interface DocBase {
     contentType?: string;
     flattenedPath?: string;
   };
-  type?: string; // contentlayer "type"
+  type?: string;
   title?: string;
   slug?: string;
   date?: string;
@@ -46,14 +37,11 @@ export interface DocBase {
     raw?: string;
     code?: string;
   };
-  // download-ish
   fileUrl?: string;
   downloadUrl?: string;
   fileSize?: string;
   fileFormat?: string;
   requiresEmail?: boolean;
-
-  // allow extra fields
   [k: string]: any;
 }
 
@@ -83,174 +71,51 @@ const FALLBACK: GeneratedShape = {
   allStrategies: [],
 };
 
-function safeArray<T>(v: any): T[] {
-  if (!v) return [];
-  if (Array.isArray(v)) return v;
-  // Contentlayer v2 often exports as { allDocuments: [...] }
-  if (v.allDocuments && Array.isArray(v.allDocuments)) return v.allDocuments;
-  // Some exports might be the array directly
-  if (typeof v === 'object' && !Array.isArray(v)) {
-    // Try to find any array property
-    for (const key in v) {
-      if (Array.isArray(v[key])) return v[key];
-    }
-  }
-  return [];
-}
-
+// Client-side fallback data
 let DATA: GeneratedShape = FALLBACK;
 let LOADED = false;
 
-// Helper to clear module cache in development
-const clearCache = (modulePath: string) => {
-  if (process.env.NODE_ENV !== 'production') {
+// Server-side data loading - will only execute on server
+async function loadServerData(): Promise<GeneratedShape> {
+  // Only import server module on server
+  if (typeof window === 'undefined') {
     try {
-      const resolvedPath = require.resolve(modulePath);
-      delete require.cache[resolvedPath];
-    } catch (e) {
-      // ignore if module not resolved yet
-    }
-  }
-};
-
-// Helper to safely load a module with fallbacks
-const loadModule = (modulePath: string): any => {
-  try {
-    clearCache(modulePath);
-    return require(modulePath);
-  } catch (e) {
-    console.warn(`[Contentlayer] Failed to load module: ${modulePath}`, e?.message || e);
-    return null;
-  }
-};
-
-// Helper to check if file exists
-const fileExists = (filePath: string): boolean => {
-  try {
-    return fs.existsSync(filePath);
-  } catch (e) {
-    return false;
-  }
-};
-
-try {
-  // METHOD 1: Try to load from the main index.mjs (Contentlayer v2's main export)
-  const mainIndexPath = path.join(process.cwd(), '.contentlayer', 'generated', 'index.mjs');
-  
-  if (fileExists(mainIndexPath)) {
-    const mainIndex = loadModule(mainIndexPath);
-    
-    if (mainIndex) {
-      DATA = {
-        allDocuments: safeArray<DocBase>(mainIndex.allDocuments),
-        allPosts: safeArray<DocBase>(mainIndex.allPosts || mainIndex.Post),
-        allBooks: safeArray<DocBase>(mainIndex.allBooks || mainIndex.Book),
-        allCanons: safeArray<DocBase>(mainIndex.allCanons || mainIndex.Canon),
-        allDownloads: safeArray<DocBase>(mainIndex.allDownloads || mainIndex.Download),
-        allShorts: safeArray<DocBase>(mainIndex.allShorts || mainIndex.Short),
-        allEvents: safeArray<DocBase>(mainIndex.allEvents || mainIndex.Event),
-        allPrints: safeArray<DocBase>(mainIndex.allPrints || mainIndex.Print),
-        allResources: safeArray<DocBase>(mainIndex.allResources || mainIndex.Resource),
-        allStrategies: safeArray<DocBase>(mainIndex.allStrategies || mainIndex.Strategy),
-      };
-    }
-  }
-
-  // METHOD 2: If main index didn't work or is incomplete, load individual collections
-  // Check if we got any data from the main index
-  const totalFromMain = Object.values(DATA).reduce((sum, arr) => sum + arr.length, 0);
-  
-  if (totalFromMain === 0) {
-    console.log('[Contentlayer] Main index empty, loading individual collections...');
-    
-    // Load each collection individually
-    const collections = [
-      { name: 'Post', key: 'allPosts' },
-      { name: 'Book', key: 'allBooks' },
-      { name: 'Canon', key: 'allCanons' },
-      { name: 'Download', key: 'allDownloads' },
-      { name: 'Short', key: 'allShorts' },
-      { name: 'Event', key: 'allEvents' },
-      { name: 'Print', key: 'allPrints' },
-      { name: 'Resource', key: 'allResources' },
-      { name: 'Strategy', key: 'allStrategies' },
-    ];
-
-    for (const collection of collections) {
-      const collectionPath = path.join(process.cwd(), '.contentlayer', 'generated', collection.name, '_index.mjs');
-      if (fileExists(collectionPath)) {
-        const module = loadModule(collectionPath);
-        if (module) {
-          DATA[collection.key as keyof GeneratedShape] = safeArray<DocBase>(module);
-          console.log(`[Contentlayer] Loaded ${collection.name}: ${DATA[collection.key as keyof GeneratedShape].length} items`);
-        }
-      } else {
-        console.log(`[Contentlayer] Collection not found: ${collectionPath}`);
-      }
-    }
-  }
-
-  // Combine all documents
-  DATA.allDocuments = [
-    ...DATA.allPosts,
-    ...DATA.allBooks,
-    ...DATA.allCanons,
-    ...DATA.allDownloads,
-    ...DATA.allShorts,
-    ...DATA.allEvents,
-    ...DATA.allPrints,
-    ...DATA.allResources,
-    ...DATA.allStrategies,
-  ];
-
-  LOADED = true;
-  console.log(
-    `[Contentlayer] Loaded: posts=${DATA.allPosts.length} books=${DATA.allBooks.length} canon=${DATA.allCanons.length} downloads=${DATA.allDownloads.length} shorts=${DATA.allShorts.length} events=${DATA.allEvents.length} prints=${DATA.allPrints.length} resources=${DATA.allResources.length} strategies=${DATA.allStrategies.length} total=${DATA.allDocuments.length}`
-  );
-  
-  // Log a warning if we have no data
-  if (DATA.allDocuments.length === 0) {
-    console.warn('[Contentlayer] No documents loaded - check .contentlayer/generated structure');
-    console.warn('[Contentlayer] Generated directory contents:', fs.readdirSync(path.join(process.cwd(), '.contentlayer', 'generated'), { withFileTypes: true }).map(d => d.name));
-  }
-} catch (e: any) {
-  // METHOD 3: Fallback to Contentlayer v1 structure
-  try {
-    console.log('[Contentlayer] Trying v1 fallback...');
-    const v1Path = path.join(process.cwd(), '.contentlayer', 'generated');
-    const v1Module = loadModule(v1Path);
-    
-    if (v1Module) {
-      DATA = {
-        allDocuments: safeArray<DocBase>(v1Module.allDocuments),
-        allPosts: safeArray<DocBase>(v1Module.allPosts),
-        allBooks: safeArray<DocBase>(v1Module.allBooks),
-        allCanons: safeArray<DocBase>(v1Module.allCanons),
-        allDownloads: safeArray<DocBase>(v1Module.allDownloads),
-        allShorts: safeArray<DocBase>(v1Module.allShorts),
-        allEvents: safeArray<DocBase>(v1Module.allEvents),
-        allPrints: safeArray<DocBase>(v1Module.allPrints),
-        allResources: safeArray<DocBase>(v1Module.allResources),
-        allStrategies: safeArray<DocBase>(v1Module.allStrategies),
-      };
+      const { getContentlayerData, getAllDocumentsSync } = await import('./contentlayer-compat.server');
+      const serverData = await getContentlayerData();
       
-      LOADED = true;
-      console.log(
-        `[Contentlayer] Loaded (v1 fallback): posts=${DATA.allPosts.length} books=${DATA.allBooks.length} canon=${DATA.allCanons.length} downloads=${DATA.allDownloads.length}`
-      );
-    } else {
-      throw new Error('No v1 module found');
+      return {
+        allDocuments: getAllDocumentsSync(serverData),
+        allPosts: serverData.allPosts || [],
+        allBooks: serverData.allBooks || [],
+        allCanons: serverData.allCanons || [],
+        allDownloads: serverData.allDownloads || [],
+        allShorts: serverData.allShorts || [],
+        allEvents: serverData.allEvents || [],
+        allPrints: serverData.allPrints || [],
+        allResources: serverData.allResources || [],
+        allStrategies: serverData.allStrategies || [],
+      };
+    } catch (error) {
+      console.warn('[Contentlayer] Failed to load server data:', error);
+      return FALLBACK;
     }
-  } catch (e2: any) {
-    LOADED = false;
-    DATA = FALLBACK;
-    console.warn('[Contentlayer] All loading methods failed — using empty collections.');
-    console.warn('[Contentlayer] V2 error:', e?.message || e);
-    console.warn('[Contentlayer] V1 error:', e2?.message || e2);
   }
+  return FALLBACK;
 }
 
-/** SYNC getter — Pages Router safe */
+// Initialize data (async, only works on server)
+if (typeof window === 'undefined') {
+  loadServerData().then(serverData => {
+    DATA = serverData;
+    LOADED = true;
+    console.log(`[Contentlayer] Loaded server data: ${DATA.allDocuments.length} documents`);
+  }).catch(() => {
+    // Keep fallback data
+    LOADED = false;
+  });
+}
+
+/** SYNC getter — Pages Router safe (client-side returns fallback) */
 export function getContentlayerData(): GeneratedShape {
   return DATA;
 }
@@ -262,23 +127,8 @@ export function isContentlayerLoaded(): boolean {
 
 export function assertContentlayerHasDocs(data?: GeneratedShape): boolean {
   const d = data ?? DATA;
-  const total =
-    (d.allDocuments?.length ?? 0) +
-    (d.allPosts?.length ?? 0) +
-    (d.allBooks?.length ?? 0) +
-    (d.allCanons?.length ?? 0) +
-    (d.allDownloads?.length ?? 0) +
-    (d.allShorts?.length ?? 0) +
-    (d.allEvents?.length ?? 0) +
-    (d.allPrints?.length ?? 0) +
-    (d.allResources?.length ?? 0) +
-    (d.allStrategies?.length ?? 0);
-
-  if (total <= 0) {
-    console.warn("⚠ Contentlayer: no documents detected (all collections empty).");
-    return false;
-  }
-  return true;
+  const total = d.allDocuments?.length ?? 0;
+  return total > 0;
 }
 
 /** Slug utils */
@@ -407,21 +257,9 @@ export function toUiDoc<T extends DocBase>(doc: T): T & {
   };
 }
 
-/** Combined docs (the #1 reason your indexes went "0") */
+/** Combined docs */
 export function getAllCombinedDocs(): DocBase[] {
-  const d = DATA;
-  return [
-    ...(d.allPosts ?? []),
-    ...(d.allBooks ?? []),
-    ...(d.allCanons ?? []),
-    ...(d.allDownloads ?? []),
-    ...(d.allEvents ?? []),
-    ...(d.allShorts ?? []),
-    ...(d.allPrints ?? []),
-    ...(d.allResources ?? []),
-    ...(d.allStrategies ?? []),
-    ...(d.allDocuments ?? []),
-  ];
+  return DATA.allDocuments;
 }
 
 /** Published filter + stable sort */
@@ -462,11 +300,18 @@ export function sanitizeData<T>(input: T): T {
 
 /** Optional async wrappers (for callers that insist on await) */
 export async function getContentlayerDataAsync(): Promise<GeneratedShape> {
-  return Promise.resolve(getContentlayerData());
+  if (typeof window === 'undefined') {
+    // On server, load fresh data
+    return await loadServerData();
+  }
+  // On client, return cached data
+  return Promise.resolve(DATA);
 }
+
 export async function getPublishedDocumentsAsync(docs?: DocBase[]): Promise<DocBase[]> {
   return Promise.resolve(getPublishedDocuments(docs));
 }
+
 export async function getDocBySlugAsync(slug: string, collection?: DocBase[]): Promise<DocBase | null> {
   return Promise.resolve(getDocBySlug(slug, collection));
 }
@@ -586,20 +431,36 @@ export function getServerPostBySlug(slug: string) {
 }
 
 // For ./pages/api/content/initialize.ts
-export function getServerAllBooksAsync() {
-  return Promise.resolve(getAllBooks());
+export async function getServerAllBooksAsync() {
+  if (typeof window === 'undefined') {
+    const data = await loadServerData();
+    return data.allBooks;
+  }
+  return Promise.resolve(DATA.allBooks);
 }
 
-export function getServerAllCanonsAsync() {
-  return Promise.resolve(getAllCanons());
+export async function getServerAllCanonsAsync() {
+  if (typeof window === 'undefined') {
+    const data = await loadServerData();
+    return data.allCanons;
+  }
+  return Promise.resolve(DATA.allCanons);
 }
 
-export function getServerAllDownloadsAsync() {
-  return Promise.resolve(getAllDownloads());
+export async function getServerAllDownloadsAsync() {
+  if (typeof window === 'undefined') {
+    const data = await loadServerData();
+    return data.allDownloads;
+  }
+  return Promise.resolve(DATA.allDownloads);
 }
 
-export function getServerAllShortsAsync() {
-  return Promise.resolve(getAllShorts());
+export async function getServerAllShortsAsync() {
+  if (typeof window === 'undefined') {
+    const data = await loadServerData();
+    return data.allShorts;
+  }
+  return Promise.resolve(DATA.allShorts);
 }
 
 // For ./pages/api/blog/[slug].tsx and ./pages/api/canon/[slug].tsx
@@ -636,7 +497,6 @@ export default {
   toUiDoc,
   isContentlayerLoaded,
   assertContentlayerHasDocs,
-  // New exports
   getAllBooks,
   getServerAllBooks,
   getServerBookBySlug,
@@ -666,7 +526,6 @@ export default {
   getServerAllDownloadsAsync,
   getServerAllShortsAsync,
   recordContentView,
-  // Direct exports
   allDocuments,
   allPosts,
   allBooks,

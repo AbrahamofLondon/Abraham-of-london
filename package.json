@@ -8,16 +8,136 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
-    "audit:staging": "node scripts/check-links.js --url=https://staging.abrahamoflondon.org",
-    "contentlayer:build": "contentlayer build",
-    "start": "next start",
-    "audit:files": "node -e \"const { checkLocalFiles } = require('./scripts/check-links.js'); const fs = require('fs'); const paths = JSON.parse(fs.readFileSync('./scripts/actual-paths.json', 'utf8')); const results = checkLocalFiles([...paths.pdfDownloads, ...paths.criticalAssets]); console.log('Local File Audit:'); results.forEach(r => console.log(r.exists ? '✅' : '❌', r.path, r.exists ? ( bytes) : 'MISSING'));\"",
-    "reset": "npm run clean && npm cache clean --force && npm install",
-    "audit:local": "node scripts/check-links.js --local",
-    "build": "next build",
     "dev": "next dev",
-    "clean": "rd /s /q .next 2>nul && rd /s /q .contentlayer 2>nul && rd /s /q node_modules\\.cache 2>nul",
+    "dev:full": "pnpm contentlayer:dev & pnpm dev",
+    "dev:turbo": "cross-env TURBOPACK_DISABLED=false next dev --turbo",
+    
+    "build": "cross-env TURBOPACK_DISABLED=true next build",
+    "build:fast": "cross-env TURBOPACK_DISABLED=false next build",
     "build:netlify": "pnpm install --frozen-lockfile && pnpm contentlayer:build && pnpm build",
+    "start": "next start",
+    "lint": "next lint",
+    
+    "contentlayer:build": "contentlayer build",
+    "contentlayer:dev": "contentlayer build --watch",
+    "contentlayer:generate": "contentlayer generate",
+    
+    "audit:staging": "node scripts/check-links.js --url=https://staging.abrahamoflondon.org",
+    "audit:production": "node scripts/check-links.js --url=https://www.abrahamoflondon.org",
+    "audit:local": "node scripts/check-links.js --local",
+    "audit:files": "node -e \"const { checkLocalFiles } = require('./scripts/check-links.js'); const fs = require('fs'); const paths = JSON.parse(fs.readFileSync('./scripts/actual-paths.json', 'utf8')); const results = checkLocalFiles([...paths.pdfDownloads, ...paths.criticalAssets]); console.log('Local File Audit:'); results.forEach(r => console.log(r.exists ? '✅' : '❌', r.path, r.exists ? (r.bytes + ' bytes') : 'MISSING'));\"",
+    
+    "clean": "rd /s /q .next 2>nul && rd /s /q .contentlayer 2>nul && rd /s /q node_modules\\.cache 2>nul",
+    "clean:all": "rd /s /q .next 2>nul && rd /s /q .contentlayer 2>nul && rd /s /q node_modules 2>nul && rd /s /q package-lock.json 2>nul && rd /s /q yarn.lock 2>nul && rd /s /q pnpm-lock.yaml 2>nul",
+    "reset": "npm run clean && npm cache clean --force && npm install",
+    "reset:full": "npm run clean:all && npm cache clean --force && npm install",
+    
+    "pdf:generate": "node scripts/pdf/intelligent-generator.js",
+    "pdf:generate:all": "node scripts/pdf/generate-all-pdfs.js",
+    "pdf:cleanup": "node scripts/pdf/cleanup-pdf-files.js",
+    "pdf:optimize": "node scripts/pdf/optimize-pdfs.js",
+    "pdf:thumbnails": "node scripts/pdf/generate-thumbnails.js",
+    
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    
+    "content:validate": "node scripts/content/validate-content.js",
+    "content:migrate": "node scripts/content/migrate-content.js",
+    "content:audit": "node scripts/content/audit-content.js",
+    
+    "database:backup": "node scripts/database/backup-database.js",
+    "database:restore": "node scripts/database/restore-database.js",
+    "database:clean": "node scripts/database/cleanup-database.js",
+    
+    "maintenance:run": "node scripts/maintenance/run-maintenance.js",
+    
+    "admin:reports": "node scripts/admin/generate-reports.js",
+    "admin:analytics": "node scripts/admin/analytics-report.js",
+    
+    "system:health": "node scripts/system/health-check.js",
+    
+    "utils:format": "node scripts/utils/format-files.js",
+    "utils:backup": "node scripts/utils/backup-utils.js",
+    
+    "client:setup": "node scripts/client/setup-client.js",
+    
+    "server:deploy": "node scripts/server/deploy-scripts.js",
+    
+    "assets:optimize": "node scripts/asset-optimizer.js",
+    "assets:audit": "node scripts/audit-assets.js",
+    
+    "links:check": "node scripts/check-links.js",
+    "links:validate": "node scripts/validate-links.js",
+    
+    "sitemap:generate": "node scripts/generate-sitemap.js",
+    "sitemap:validate": "node scripts/validate-sitemap.js",
+    
+    "seo:audit": "node scripts/seo-audit.js",
+    "seo:optimize": "node scripts/seo-optimize.js",
+    
+    "analytics:process": "node scripts/process-analytics.js",
+    "analytics:report": "node scripts/analytics-report.js",
+    
+    "images:optimize": "node scripts/optimize-images.js",
+    "images:resize": "node scripts/resize-images.js",
+    
+    "fonts:optimize": "node scripts/optimize-fonts.js",
+    
+    "security:scan": "node scripts/security-scan.js",
+    "security:headers": "node scripts/check-security-headers.js",
+    
+    "performance:test": "node scripts/performance-test.js",
+    "performance:audit": "node scripts/performance-audit.js",
+    
+    "backup:create": "node scripts/create-backup.js",
+    "backup:restore": "node scripts/restore-backup.js",
+    
+    "docs:generate": "node scripts/generate-docs.js",
+    "docs:validate": "node scripts/validate-docs.js",
+    
+    "test:unit": "jest --testPathPattern=.*\\.test\\.js$",
+    "test:integration": "jest --testPathPattern=.*\\.spec\\.js$",
+    "test:e2e": "node scripts/run-e2e-tests.js",
+    "test:coverage": "jest --coverage",
+    
+    "monitor:start": "node scripts/monitor-application.js",
+    "monitor:status": "node scripts/check-status.js",
+    
+    "deploy:staging": "node scripts/deploy-staging.js",
+    "deploy:production": "node scripts/deploy-production.js",
+    
+    "ci:setup": "node scripts/setup-ci.js",
+    "ci:test": "node scripts/run-ci-tests.js",
+    
+    "debug:content": "node scripts/debug-contentlayer.js",
+    "debug:build": "node scripts/debug-build.js",
+    "debug:performance": "node scripts/debug-performance.js",
+    
+    "export:data": "node scripts/export-data.js",
+    "import:data": "node scripts/import-data.js",
+    
+    "migrate:data": "node scripts/migrate-data.js",
+    "migrate:content": "node scripts/migrate-content-structure.js",
+    
+    "update:dependencies": "node scripts/update-dependencies.js",
+    "update:content": "node scripts/update-content.js",
+    
+    "validate:build": "node scripts/validate-build.js",
+    "validate:deploy": "node scripts/validate-deployment.js",
+    
+    "optimize:all": "npm run assets:optimize && npm run images:optimize && npm run fonts:optimize",
+    "audit:all": "npm run audit:production && npm run seo:audit && npm run security:scan",
+    
+    "prebuild": "npm run contentlayer:build",
+    "predeploy": "npm run audit:all && npm run type-check",
+    "postbuild": "npm run sitemap:generate",
+    
+    "environment:check": "npx tsx scripts/environment/check-env.ts",
+    "environment:setup": "npx tsx scripts/environment/setup-env.ts",
+    "environment:validate": "npx tsx scripts/environment/validate-env.ts",
+    "environment:dev": "npx tsx scripts/environment/generate-development-env.ts",
+    "environment:prod": "npx tsx scripts/environment/generate-production-env.ts",
+    "postinstall": "npm run environment:check",
     "audit:prod": "node scripts/check-links.js --prod"
   },
   "dependencies": {

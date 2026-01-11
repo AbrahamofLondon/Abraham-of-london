@@ -1,4 +1,4 @@
-/* next.config.mjs - FIXED REDIRECTS */
+/* next.config.mjs - FIXED for Contentlayer v2 + Turbopack */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
@@ -15,6 +15,40 @@ const nextConfig = {
         : "http://localhost:3000",
     BUILD_TIMESTAMP: new Date().toISOString(),
   },
+
+  // Disable Turbopack for production builds if needed
+  experimental: {
+    turbo: {
+      // Resolve Turbopack module resolution issues
+      resolveExtensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.json'],
+      // Disable Turbopack for problematic packages
+      rules: {
+        // Exclude problematic modules from Turbopack bundling
+        '*.contentlayer-compat.ts': {
+          client: false,
+          server: true
+        },
+        '*.server.ts': {
+          client: false,
+          server: true
+        }
+      }
+    },
+    scrollRestoration: true,
+    optimizePackageImports: [
+      "lucide-react",
+      "date-fns",
+      "clsx",
+      "tailwind-merge",
+    ],
+  },
+
+  // Turbopack build workaround - disable for production if issues persist
+  ...(process.env.TURBOPACK_DISABLED === 'true' ? {
+    experimental: {
+      turbo: undefined
+    }
+  } : {}),
 
   async redirects() {
     const redirects = [
@@ -262,16 +296,6 @@ const nextConfig = {
     ];
   },
 
-  experimental: {
-    scrollRestoration: true,
-    optimizePackageImports: [
-      "lucide-react",
-      "date-fns",
-      "clsx",
-      "tailwind-merge",
-    ],
-  },
-
   transpilePackages: [
     "lucide-react",
     "date-fns",
@@ -280,6 +304,18 @@ const nextConfig = {
   ],
 
   webpack: (config, { isServer, dev, webpack }) => {
+    // Ignore Contentlayer dynamic requires in client bundles
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^contentlayer\/generated$/,
+        contextRegExp: /lib\/contentlayer-compat/,
+      }),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /\.contentlayer\/generated\/.*\.mjs$/,
+        contextRegExp: /lib\/contentlayer-compat/,
+      })
+    );
+
     config.plugins.push(
       new webpack.IgnorePlugin({
         resourceRegExp: /\.(pdf|pptx|docx|xlsx|od[tsp])$/i,
@@ -287,6 +323,25 @@ const nextConfig = {
       })
     );
 
+    // Fix for fs module in client builds
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        url: require.resolve("url/"),
+        util: require.resolve("util/"),
+        path: require.resolve("path-browserify"),
+        os: require.resolve("os-browserify"),
+      };
+    }
+
+    // Windows-specific settings
     if (process.platform === "win32") {
       if (dev) {
         config.watchOptions = {
@@ -309,40 +364,34 @@ const nextConfig = {
       }
     }
 
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        dns: false,
-        child_process: false,
-        crypto: require.resolve("crypto-browserify"),
-        stream: require.resolve("stream-browserify"),
-        url: require.resolve("url/"),
-        util: require.resolve("util/"),
-        path: require.resolve("path-browserify"),
-        os: require.resolve("os-browserify"),
-      };
-    }
-
     return config;
   },
 };
 
 async function applyContentlayer(config) {
+  // Disable Contentlayer in production build if TURBOPACK is enabled
   if (process.env.NODE_ENV === "production" && !process.env.ENABLE_CONTENTLAYER_PROD) {
     console.log("⚡ Contentlayer disabled in production");
     return config;
   }
 
   try {
+    // Try Contentlayer v2 (next-contentlayer2)
     const { withContentlayer } = await import("next-contentlayer2");
-    console.log("✅ Contentlayer enabled");
+    console.log("✅ Contentlayer v2 enabled");
     return withContentlayer(config);
   } catch (error) {
-    console.warn("⚠️ Contentlayer not available:", error.message);
-    return config;
+    console.warn("⚠️ Contentlayer v2 not available:", error.message);
+    
+    try {
+      // Fallback to Contentlayer v1
+      const { withContentlayer } = await import("contentlayer");
+      console.log("✅ Contentlayer v1 enabled");
+      return withContentlayer(config);
+    } catch (error2) {
+      console.warn("⚠️ Contentlayer v1 not available:", error2.message);
+      return config;
+    }
   }
 }
 
