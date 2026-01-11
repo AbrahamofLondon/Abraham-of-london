@@ -1,5 +1,6 @@
 // lib/rate-limit-redis.ts
-import { redis, type RedisInterface } from "./redis-enhanced";
+mport { getRedis } from '@/lib/redis';
+import enhancedRedis from '@/lib/redis-enhanced'; 
 
 async function getRedisClient(): Promise<RedisInterface> {
   return redis;

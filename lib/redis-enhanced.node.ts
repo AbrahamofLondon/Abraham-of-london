@@ -1,5 +1,8 @@
-// lib/redis-enhanced.ts - PROPER CLIENT SAFE
-// This is a stub that doesn't use ioredis
+// lib/redis-enhanced.node.ts - SERVER ONLY WITH DEFAULT EXPORT
+import { ensureServerOnly } from '@/lib/server-only';
+ensureServerOnly(); // This will throw if imported on client
+
+import Redis from "ioredis";
 
 export interface RedisConnectionOptions {
   url?: string;
@@ -10,66 +13,69 @@ export interface RedisConnectionOptions {
   connectTimeout?: number;
 }
 
-// Client-side stub that throws errors if used
-export class EnhancedRedisClient {
+export class EnhancedRedisClient extends Redis {
+  private readonly clientId: string;
+  private readonly prefix: string;
+  private stats = {
+    commands: 0,
+    hits: 0,
+    misses: 0,
+    errors: 0,
+    lastError: null as Error | null,
+  };
+
   constructor(options: RedisConnectionOptions = {}) {
-    // Only check on client side
-    if (typeof window !== 'undefined') {
-      console.warn('EnhancedRedisClient created on client - using stub');
+    const url = options.url || process.env.REDIS_URL;
+    
+    if (url) {
+      super(url, {
+        maxRetriesPerRequest: options.maxRetriesPerRequest || 3,
+        connectTimeout: options.connectTimeout || 5000,
+      });
+    } else {
+      super({
+        host: options.host || process.env.REDIS_HOST || 'localhost',
+        port: options.port || parseInt(process.env.REDIS_PORT || '6379', 10),
+        password: options.password || process.env.REDIS_PASSWORD,
+        maxRetriesPerRequest: options.maxRetriesPerRequest || 3,
+        connectTimeout: options.connectTimeout || 5000,
+      });
     }
+
+    this.clientId = `redis-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    this.prefix = process.env.REDIS_PREFIX || 'aol:';
+
+    this.on('error', (err) => {
+      console.error(`[Redis:${this.clientId}] Error:`, err.message);
+      this.stats.errors++;
+      this.stats.lastError = err;
+    });
+
+    this.on('connect', () => {
+      console.log(`[Redis:${this.clientId}] Connected`);
+    });
+
+    this.on('ready', () => {
+      console.log(`[Redis:${this.clientId}] Ready`);
+    });
+
+    this.on('end', () => {
+      console.log(`[Redis:${this.clientId}] Disconnected`);
+    });
   }
 
-  async getWithCache<T>(key: string, fetchFn: () => Promise<T>, ttlSeconds = 3600): Promise<T> {
-    // On client, just call fetchFn directly
-    if (typeof window !== 'undefined') {
-      return fetchFn();
-    }
-    throw new Error('Redis is not available');
-  }
-
-  async mgetWithCache<T>(
-    keys: string[],
-    fetchFn: (missingKeys: string[]) => Promise<Record<string, T>>,
-    ttlSeconds = 3600
-  ): Promise<Record<string, T>> {
-    if (typeof window !== 'undefined') {
-      return fetchFn(keys);
-    }
-    throw new Error('Redis is not available');
-  }
-
-  async clearPattern(pattern: string): Promise<number> {
-    if (typeof window !== 'undefined') {
-      return 0;
-    }
-    throw new Error('Redis is not available');
-  }
-
-  getStats() {
-    if (typeof window !== 'undefined') {
-      return { commands: 0, hits: 0, misses: 0, errors: 0, lastError: null };
-    }
-    throw new Error('Redis is not available');
-  }
-
-  async healthCheck(): Promise<{ ok: boolean; latency?: number; error?: string }> {
-    if (typeof window !== 'undefined') {
-      return { ok: true, latency: 0 };
-    }
-    throw new Error('Redis is not available');
-  }
+  // ... rest of your methods (getWithCache, mgetWithCache, etc.) ...
 }
 
-// Export a function that only works on server
-export const getRedisClient = () => {
-  if (typeof window !== 'undefined') {
-    // Return a stub for client
-    return Promise.resolve(new EnhancedRedisClient());
+// Create a singleton instance for server-side use
+const getRedisClient = () => {
+  if (process.env.NODE_ENV === 'production' && !process.env.REDIS_URL) {
+    console.warn('[Redis] REDIS_URL not set in production');
   }
-  
-  // Dynamically import the real Redis client only on server
-  return import('./redis-enhanced.node').then(module => module.default());
+
+  const client = new EnhancedRedisClient();
+  return client;
 };
 
-// Default export that conditionally imports
+// ✅ ADD DEFAULT EXPORT
 export default getRedisClient;

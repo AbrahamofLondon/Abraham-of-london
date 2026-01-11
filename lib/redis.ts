@@ -1,4 +1,4 @@
-// lib/redis.ts - CLIENT SAFE VERSION
+// lib/redis.ts - CLIENT SAFE VERSION WITH DEFAULT EXPORT
 let redisClient: any = null;
 let redisPromise: Promise<any> | null = null;
 
@@ -37,6 +37,7 @@ if (typeof window === 'undefined') {
   redisPromise = Promise.resolve(redisClient);
 }
 
+// Named exports
 export { redisClient, redisPromise };
 
 // Export a getter that's safe for both
@@ -48,3 +49,6 @@ export const getRedis = () => {
   // Server-side: return the real Redis client
   return redisClient;
 };
+
+// ✅ ADD DEFAULT EXPORT (for compatibility with existing imports)
+export default redisClient;

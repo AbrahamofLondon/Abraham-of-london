@@ -1,9 +1,9 @@
-/* pages/api/admin/system-health.ts */
+/* pages/api/admin/system-health.ts - FIXED VERSION */
 import type { NextApiRequest, NextApiResponse } from "next";
 import os from "node:os";
 import { createHash } from "node:crypto";
 import prisma from "@/lib/prisma";
-import redis from "@/lib/redis"; // Now uses dependency-free version
+import { redis } from "@/lib/redis"; // ✅ CHANGED: Named export instead of default
 import { requireAdmin, requireRateLimit } from "@/lib/server/guards";
 import { jsonOk, jsonErr } from "@/lib/server/http";
 import { getCacheStats } from "@/lib/server/cache";
@@ -14,6 +14,11 @@ import { sendHealthAlert } from "@/lib/server/alerts";
 import { HealthCheckMetrics } from "@/types/health";
 import { SecurityAuditLogger } from "@/lib/security/audit";
 import { PerformanceMonitor } from "@/lib/monitoring/performance";
+
+// ✅ REMOVE OR CHANGE RUNTIME FROM EDGE TO NODEJS
+// Either remove this entirely (defaults to Node.js runtime)
+// OR explicitly set to Node.js runtime:
+export const runtime = 'nodejs'; // Changed from 'edge' to 'nodejs'
 
 const auditLogger = new SecurityAuditLogger();
 const performanceMonitor = new PerformanceMonitor();
@@ -189,7 +194,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 11. CACHE HEALTH REPORT (for monitoring dashboards)
-    if (process.env.REDIS_URL) {
+    if (process.env.REDIS_URL && redis) {
       await redis.setex(`health:${requestId}`, 300, JSON.stringify(healthReport));
     }
 
@@ -371,19 +376,25 @@ async function checkCacheHealth(): Promise<SubsystemHealth> {
     // Check Redis if configured
     if (process.env.REDIS_URL) {
       const startTime = Date.now();
-      await redis.ping();
-      metrics.redisLatency = Date.now() - startTime;
-      metrics.redisConnected = true;
+      if (redis) {
+        await redis.ping();
+        metrics.redisLatency = Date.now() - startTime;
+        metrics.redisConnected = true;
 
-      // Get Redis info
-      const info = await redis.info();
-      metrics.redisInfo = {
-        version: info.split('\n').find(line => line.startsWith('redis_version'))?.split(':')[1]?.trim(),
-        uptime: info.split('\n').find(line => line.startsWith('uptime_in_seconds'))?.split(':')[1]?.trim(),
-        memory: info.split('\n').find(line => line.startsWith('used_memory_human'))?.split(':')[1]?.trim(),
-      };
+        // Get Redis info
+        const info = await redis.info();
+        metrics.redisInfo = {
+          version: info.split('\n').find(line => line.startsWith('redis_version'))?.split(':')[1]?.trim(),
+          uptime: info.split('\n').find(line => line.startsWith('uptime_in_seconds'))?.split(':')[1]?.trim(),
+          memory: info.split('\n').find(line => line.startsWith('used_memory_human'))?.split(':')[1]?.trim(),
+        };
+      } else {
+        metrics.redisConnected = false;
+        metrics.redisError = "Redis client not available";
+      }
     } else {
       metrics.redisConnected = false;
+      metrics.redisNotConfigured = true;
     }
 
     // Check in-memory cache
