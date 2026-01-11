@@ -208,6 +208,11 @@ class FileManager {
     let cleanedCount = 0;
     let backupCount = 0;
 
+    // CRITICAL: DO NOT DELETE ZIP FILES
+      if (file.endsWith('.zip')) {
+        Logger.debug(`Skipping ZIP file: ${file}`);
+        continue;
+
     // Create backup directory
     const backupDir = path.join(os.tmpdir(), `pdf-backup-${Date.now()}`);
     await FileManager.ensureDir(backupDir);

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /downloads/*.pdf$
+
+Sitemap: https://www.abrahamoflondon.org/sitemap.xml

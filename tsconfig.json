@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
@@ -25,24 +29,60 @@
     "sourceMap": true,
     "inlineSources": false,
     "paths": {
-      "@/*": ["./*"],
-      "@/styles/*": ["./styles/*"],
-      "@/components/*": ["./components/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/fonts/*": ["./fonts/*"],
-      "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
-      "@/lib/contentlayer-compat": ["./lib/contentlayer-compat.ts"],
-      "@/lib/redis-enhanced": ["./lib/redis-enhanced.ts"],
-      "@/lib/server/rate-limit-unified": ["./lib/server/rate-limit-unified.ts"],
-      "@/lib/db": ["./lib/db.ts"],
-      "@/lib/contentlayer/status": ["./lib/contentlayer/status.ts"],
-      "@/lib/server/inner-circle-access": ["./lib/server/inner-circle-access.ts"],
-      "@/lib/rate-limit": ["./lib/rate-limit.ts"],
-      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"],
-      "@/lib/premium/download-token": ["./lib/premium/download-token.ts"],
-      "@/lib/server/with-inner-circle-access": ["./lib/server/with-inner-circle-access.ts"],
-      "@/lib/inner-circle/access": ["./lib/inner-circle/access.ts"],
-      "@/lib/next-fonts": ["./lib/next-fonts.ts"]
+      "@/*": [
+        "./*"
+      ],
+      "@/styles/*": [
+        "./styles/*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
+      "@/fonts/*": [
+        "./fonts/*"
+      ],
+      "contentlayer/generated": [
+        "./lib/contentlayer-compat.ts"
+      ],
+      "@/lib/contentlayer-compat": [
+        "./lib/contentlayer-compat.ts"
+      ],
+      "@/lib/redis-enhanced": [
+        "./lib/redis-enhanced.ts"
+      ],
+      "@/lib/server/rate-limit-unified": [
+        "./lib/server/rate-limit-unified.ts"
+      ],
+      "@/lib/db": [
+        "./lib/db.ts"
+      ],
+      "@/lib/contentlayer/status": [
+        "./lib/contentlayer/status.ts"
+      ],
+      "@/lib/server/inner-circle-access": [
+        "./lib/server/inner-circle-access.ts"
+      ],
+      "@/lib/rate-limit": [
+        "./lib/rate-limit.ts"
+      ],
+      "@/lib/server/inner-circle-store": [
+        "./lib/server/inner-circle-store.ts"
+      ],
+      "@/lib/premium/download-token": [
+        "./lib/premium/download-token.ts"
+      ],
+      "@/lib/server/with-inner-circle-access": [
+        "./lib/server/with-inner-circle-access.ts"
+      ],
+      "@/lib/inner-circle/access": [
+        "./lib/inner-circle/access.ts"
+      ],
+      "@/lib/next-fonts": [
+        "./lib/next-fonts.ts"
+      ]
     },
     "plugins": [
       {
@@ -73,7 +113,8 @@
     "lib/premium/download-token.ts",
     "lib/server/with-inner-circle-access.ts",
     "lib/next-fonts.ts",
-    "lib/fonts.ts"
+    "lib/fonts.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

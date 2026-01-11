@@ -1,16 +1,14 @@
 {
-  "root": true,
-  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "extends": "next/core-web-vitals",
   "rules": {
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }
-    ]
+    "@typescript-eslint/no-unused-vars": "warn",
+    "react/no-unescaped-entities": "off"
   },
-  "ignorePatterns": ["node_modules/", ".next/", "dist/", "out/", "coverage/", "prisma/"]
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    ".contentlayer/",
+    "public/downloads/",
+    "public/assets/downloads/"
+  ]
 }

@@ -1,136 +1,317 @@
-/* next.config.mjs - FIXED WITH REDIS WEBPACK CONFIG */
+/* next.config.mjs - FIXED REDIRECTS */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-
-  // ✅ Build resilience
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
 
   env: {
     CONTENTLAYER_DISABLE_WARNINGS: "true",
     NEXT_PUBLIC_APP_ENV: process.env.NODE_ENV || "production",
     NEXT_PUBLIC_SITE_URL:
-      process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
+      process.env.NODE_ENV === "production"
+        ? "https://www.abrahamoflondon.org"
+        : "http://localhost:3000",
     BUILD_TIMESTAMP: new Date().toISOString(),
   },
 
+  async redirects() {
+    const redirects = [
+      // Workshop redirects
+      {
+        source: '/workshop/purpose-pyramid',
+        destination: '/workshops/purpose-pyramid',
+        permanent: true,
+      },
+      {
+        source: '/workshop/decision-matrix',
+        destination: '/workshops/decision-matrix',
+        permanent: true,
+      },
+      {
+        source: '/workshop/legacy-canvas',
+        destination: '/workshops/legacy-canvas',
+        permanent: true,
+      },
+      {
+        source: '/workshops/purpose-pyramid-workshop',
+        destination: '/workshops/purpose-pyramid',
+        permanent: true,
+      },
+      {
+        source: '/workshops/decision-matrix-workshop',
+        destination: '/workshops/decision-matrix',
+        permanent: true,
+      },
+      {
+        source: '/workshops/legacy-canvas-workshop',
+        destination: '/workshops/legacy-canvas',
+        permanent: true,
+      },
+      
+      // Resource redirects
+      {
+        source: '/resources/leadership-standards',
+        destination: '/resources/leadership-standards-blueprint',
+        permanent: true,
+      },
+      {
+        source: '/resources/purpose-pyramid-guide',
+        destination: '/resources/purpose-pyramid',
+        permanent: true,
+      },
+      {
+        source: '/resources/legacy-framework',
+        destination: '/resources/legacy-canvas',
+        permanent: true,
+      },
+      
+      // PDF download redirects
+      {
+        source: '/downloads/purpose-pyramid-worksheet-fillable.pdf',
+        destination: '/downloads/purpose-pyramid.pdf',
+        permanent: true,
+      },
+      {
+        source: '/downloads/decision-matrix-worksheet-fillable.pdf',
+        destination: '/downloads/decision-matrix.pdf',
+        permanent: true,
+      },
+      {
+        source: '/downloads/legacy-canvas-worksheet-fillable.pdf',
+        destination: '/downloads/legacy-canvas.pdf',
+        permanent: true,
+      },
+      {
+        source: '/public/downloads/purpose-pyramid.pdf',
+        destination: '/downloads/purpose-pyramid.pdf',
+        permanent: true,
+      },
+      {
+        source: '/public/downloads/decision-matrix.pdf',
+        destination: '/downloads/decision-matrix.pdf',
+        permanent: true,
+      },
+      {
+        source: '/public/downloads/legacy-canvas.pdf',
+        destination: '/downloads/legacy-canvas.pdf',
+        permanent: true,
+      },
+      
+      // Domain canonicalization
+      {
+        source: '/index.html',
+        destination: '/',
+        permanent: true,
+      },
+      
+      // Page redirects
+      {
+        source: '/about-us',
+        destination: '/about',
+        permanent: true,
+      },
+      {
+        source: '/contact-us',
+        destination: '/contact',
+        permanent: true,
+      },
+      {
+        source: '/get-in-touch',
+        destination: '/contact',
+        permanent: true,
+      },
+      {
+        source: '/services/coaching',
+        destination: '/services/executive-coaching',
+        permanent: true,
+      },
+      {
+        source: '/services/consulting',
+        destination: '/services/leadership-development',
+        permanent: true,
+      },
+    ];
+
+    // Only add redirects if destinations exist or are valid
+    const validRedirects = redirects.filter(redirect => 
+      redirect.destination && 
+      typeof redirect.destination === 'string' && 
+      redirect.destination.trim() !== ''
+    );
+
+    // Add blog/content redirects
+    validRedirects.push(
+      {
+        source: '/blog/:slug',
+        destination: '/insights/:slug',
+        permanent: true,
+      },
+      {
+        source: '/articles/:slug',
+        destination: '/insights/:slug',
+        permanent: true,
+      },
+      {
+        source: '/news/:slug',
+        destination: '/insights/:slug',
+        permanent: true,
+      }
+    );
+
+    // Add download alias
+    validRedirects.push({
+      source: '/downloads/leadership-standards-blueprint.pdf',
+      destination: '/downloads/leadership-standards-blueprint',
+      permanent: true,
+    });
+
+    return validRedirects;
+  },
+
   images: {
-  remotePatterns: [{ protocol: "https", hostname: "**" }],
-  formats: ["image/avif", "image/webp"],
-  deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-  imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-  minimumCacheTTL: 60,
-  dangerouslyAllowSVG: true,
-  // ✅ REMOVE OR FIX CSP:
-  contentSecurityPolicy: "default-src 'self'; script-src 'self' https://www.google.com/recaptcha https://www.gstatic.com; style-src 'self' 'unsafe-inline';",
-},
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
+  },
 
   trailingSlash: false,
   compress: true,
   poweredByHeader: false,
 
-  // ✅ Clean headers
-  // next.config.mjs - UPDATE HEADERS SECTION
-async headers() {
-  return [
-    {
-      source: "/fonts/:path*",
-      headers: [
-        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        { key: "Access-Control-Allow-Origin", value: "*" },
-      ],
-    },
-    {
-      source: "/_next/static/:path*",
-      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-    },
-    {
-      source: "/(.*)",
-      headers: [
-        { key: "X-Content-Type-Options", value: "nosniff" },
-        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        // ✅ REMOVE OR RELAX CSP HEADER:
-        // { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self';" },
-      ],
-    },
-  ];
-},
+  async headers() {
+    return [
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+        ],
+      },
+      {
+        source: "/downloads/:path*.pdf",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/pdf",
+          },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+        ],
+      },
+      {
+        source: "/assets/downloads/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
 
-  // ✅ WEBPACK CONFIG WITH REDIS FIXES
-  webpack: (config, { isServer, webpack, dev }) => {
-    // CRITICAL: Exclude Office/PDF files from Webpack processing entirely
-    // This prevents Windows file locking issues
+  experimental: {
+    scrollRestoration: true,
+    optimizePackageImports: [
+      "lucide-react",
+      "date-fns",
+      "clsx",
+      "tailwind-merge",
+    ],
+  },
+
+  transpilePackages: [
+    "lucide-react",
+    "date-fns",
+    "clsx",
+    "tailwind-merge",
+  ],
+
+  webpack: (config, { isServer, dev, webpack }) => {
     config.plugins.push(
       new webpack.IgnorePlugin({
-        checkResource: (resource, context) => {
-          // Skip Office and PDF files in public/downloads/ and public/assets/downloads/
-          const absolutePath = require('path').resolve(context, resource);
-          
-          // Check if it's a problematic file type
-          const isProblematicFile = /\.(xlsx?|docx?|pptx?|pdf|od[tsp])$/i.test(resource);
-          
-          // Check if it's in a downloads directory
-          const isInDownloads = 
-            absolutePath.includes(require('path').sep + 'public' + require('path').sep + 'downloads' + require('path').sep) ||
-            absolutePath.includes(require('path').sep + 'public' + require('path').sep + 'assets' + require('path').sep + 'downloads' + require('path').sep);
-          
-          // Exclude problematic files in downloads directories
-          if (isProblematicFile && isInDownloads) {
-            console.log(`[Webpack] Skipping Windows-locked file: ${resource}`);
-            return true;
-          }
-          
-          return false;
-        }
+        resourceRegExp: /\.(pdf|pptx|docx|xlsx|od[tsp])$/i,
+        contextRegExp: /[\\/]public[\\/](downloads|assets[\\/]downloads)[\\/]/,
       })
     );
 
-    // Handle client-side modules only
-    if (!isServer) {
-      // ✅ CRITICAL: Exclude Redis/ioredis and Node.js modules from client bundles
-      config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^ioredis$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^redis$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^dns$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^net$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^tls$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^fs$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^child_process$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^better-sqlite3$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^pdfkit$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^sharp$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^bcrypt$/,
-        })
-      );
+    if (process.platform === "win32") {
+      if (dev) {
+        config.watchOptions = {
+          ...config.watchOptions,
+          poll: 1000,
+          aggregateTimeout: 300,
+          ignored: [
+            "**/node_modules/**",
+            "**/.next/**",
+            "**/public/assets/downloads/**",
+            "**/public/downloads/**",
+            "**/*.pdf",
+            "**/*.pptx",
+            "**/*.docx",
+            "**/*.xlsx",
+            "**/Thumbs.db",
+            "**/desktop.ini",
+          ],
+        };
+      }
+    }
 
+    if (!isServer) {
       config.resolve.fallback = {
-        ...(config.resolve.fallback || {}),
+        ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
@@ -140,73 +321,29 @@ async headers() {
         stream: require.resolve("stream-browserify"),
         url: require.resolve("url/"),
         util: require.resolve("util/"),
-        path: false,
-        os: false,
-      };
-    }
-
-    // Windows compatibility - EXCLUDE DOWNLOAD FILES FROM WATCHING
-    if (dev) {
-      config.watchOptions = {
-        ...(config.watchOptions || {}),
-        poll: 1000,
-        aggregateTimeout: 300,
-        ignored: [
-          "**/.next/**", 
-          "**/node_modules/**",
-          // CRITICAL: Exclude ALL download files from file watching
-          "**/public/downloads/**",
-          "**/public/assets/downloads/**",
-          // Windows temp files
-          "**/*.tmp",
-          "**/Thumbs.db",
-          "**/desktop.ini",
-          "**/~$*",
-        ],
+        path: require.resolve("path-browserify"),
+        os: require.resolve("os-browserify"),
       };
     }
 
     return config;
   },
-
-  experimental: {
-    serverComponentsExternalPackages: ["better-sqlite3", "pdfkit", "sharp", "bcrypt"],
-    scrollRestoration: true,
-    optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
-  },
-
-  i18n: {
-    locales: ["en-GB", "en-US"],
-    defaultLocale: "en-GB",
-    localeDetection: false,
-  },
-
-  transpilePackages: [
-    "lucide-react",
-    "date-fns",
-    "clsx",
-    "tailwind-merge",
-  ],
 };
 
-// ✅ SIMPLE CONTENTLAYER INTEGRATION - FIXED EXPORT
-let configWithContentlayer;
+async function applyContentlayer(config) {
+  if (process.env.NODE_ENV === "production" && !process.env.ENABLE_CONTENTLAYER_PROD) {
+    console.log("⚡ Contentlayer disabled in production");
+    return config;
+  }
 
-try {
-  // Try Contentlayer v2 first
-  const { withContentlayer } = await import("next-contentlayer2");
-  console.log("✅ Using Contentlayer v2");
-  configWithContentlayer = withContentlayer(nextConfig);
-} catch (error) {
-  console.log("⚠️ Contentlayer v2 not found, trying v1...");
   try {
-    const { withContentlayer } = await import("next-contentlayer");
-    console.log("✅ Using Contentlayer v1");
-    configWithContentlayer = withContentlayer(nextConfig);
+    const { withContentlayer } = await import("next-contentlayer2");
+    console.log("✅ Contentlayer enabled");
+    return withContentlayer(config);
   } catch (error) {
-    console.log("⚠️ Contentlayer not found, proceeding without it");
-    configWithContentlayer = nextConfig;
+    console.warn("⚠️ Contentlayer not available:", error.message);
+    return config;
   }
 }
 
-export default configWithContentlayer;
+export default applyContentlayer(nextConfig);

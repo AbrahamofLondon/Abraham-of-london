@@ -1,0 +1,15 @@
+# Windows file locking workaround
+# These files/directories are excluded from Webpack/Turbopack scanning
+
+/public/downloads/
+/public/assets/downloads/
+*.pptx
+*.docx
+*.xlsx
+*.odt
+*.ods
+*.odp
+*.tmp
+Thumbs.db
+desktop.ini
+~$*

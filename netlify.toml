@@ -1,43 +1,35 @@
-# netlify.toml — WINDOWS-FRIENDLY VERSION
-
+# netlify.toml — CONFIRMED CONFIGURATION
 [build]
-  # FIXED: Add pre-build step to handle Windows file locking
-  command = "pnpm install --frozen-lockfile && pnpm contentlayer build && pnpm build"
+  command = "npm ci && npm run contentlayer:build && npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
-  NODE_OPTIONS = "--max-old-space-size=8192"
+  NODE_OPTIONS = "--max-old-space-size=4096"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
-  # Disable Next.js image optimization for download files
-  NEXT_DISABLE_SENTRY = "1"
   NEXT_TELEMETRY_DISABLED = "1"
+  NODE_ENV = "production"
+  NEXT_PUBLIC_APP_ENV = "production"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+  NEXT_PUBLIC_APP_ENV = "production"
 
 [context.deploy-preview.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_APP_ENV = "staging"
 
 [context.branch-deploy.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-
-# ============================================================
-# ESSENTIAL PLUGIN
-# ============================================================
+  NEXT_PUBLIC_APP_ENV = "staging"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# ============================================================
-# ESSENTIAL REDIRECTS
-# ============================================================
 
 [[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
-  force = true
 
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
@@ -51,7 +43,36 @@
   status = 301
   force = true
 
-# File-level redirects
+[[redirects]]
+  from = "/workshop/purpose-pyramid"
+  to = "/workshops/purpose-pyramid"
+  status = 301
+
+[[redirects]]
+  from = "/workshop/decision-matrix"
+  to = "/workshops/decision-matrix"
+  status = 301
+
+[[redirects]]
+  from = "/workshop/legacy-canvas"
+  to = "/workshops/legacy-canvas"
+  status = 301
+
+[[redirects]]
+  from = "/workshops/purpose-pyramid-workshop"
+  to = "/workshops/purpose-pyramid"
+  status = 301
+
+[[redirects]]
+  from = "/workshops/decision-matrix-workshop"
+  to = "/workshops/decision-matrix"
+  status = 301
+
+[[redirects]]
+  from = "/workshops/legacy-canvas-workshop"
+  to = "/workshops/legacy-canvas"
+  status = 301
+
 [[redirects]]
   from = "/downloads/purpose-pyramid-worksheet-fillable.pdf"
   to = "/downloads/purpose-pyramid.pdf"
@@ -67,59 +88,95 @@
   to = "/downloads/legacy-canvas.pdf"
   status = 301
 
-# ============================================================
-# DOWNLOAD FILE HANDLING - SKIP OPTIMIZATION
-# ============================================================
+[[redirects]]
+  from = "/resources/leadership-standards"
+  to = "/resources/leadership-standards-blueprint"
+  status = 301
+
+[[redirects]]
+  from = "/resources/purpose-pyramid-guide"
+  to = "/resources/purpose-pyramid"
+  status = 301
+
+[[redirects]]
+  from = "/resources/legacy-framework"
+  to = "/resources/legacy-canvas"
+  status = 301
+
+[[redirects]]
+  from = "/public/downloads/purpose-pyramid.pdf"
+  to = "/downloads/purpose-pyramid.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/public/downloads/decision-matrix.pdf"
+  to = "/downloads/decision-matrix.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/public/downloads/legacy-canvas.pdf"
+  to = "/downloads/legacy-canvas.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/about-us"
+  to = "/about"
+  status = 301
+
+[[redirects]]
+  from = "/contact-us"
+  to = "/contact"
+  status = 301
+
+[[redirects]]
+  from = "/get-in-touch"
+  to = "/contact"
+  status = 301
+
+[[redirects]]
+  from = "/services/coaching"
+  to = "/services/executive-coaching"
+  status = 301
+
+[[redirects]]
+  from = "/services/consulting"
+  to = "/services/leadership-development"
+  status = 301
 
 [[headers]]
-  for = "/downloads/*"
+  for = "/downloads/*.pdf"
   [headers.values]
-    Content-Type = "application/octet-stream"
-    Cache-Control = "public, max-age=31536000"
+    Content-Type = "application/pdf"
+    Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/assets/downloads/*"
   [headers.values]
-    Content-Type = "application/octet-stream"
-    Cache-Control = "public, max-age=31536000"
+    Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
-
-# ============================================================
-# SECURITY HEADERS
-# ============================================================
 
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
 
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# ============================================================
-# FALLBACK ROUTES
-# ============================================================
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {StatusCode = "404"}
-
-# ============================================================
-# DISABLE PROCESSING FOR DOWNLOAD FILES
-# ============================================================
-
-[build.processing]
-  skip_processing = true
-
-[[headers]]
-  for = "/public/downloads/*"
-  [headers.values]
-    Content-Disposition = "attachment"
+  conditions = { StatusCode = "404" }
