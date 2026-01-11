@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link'; // ADD THIS IMPORT
+import Link from 'next/link';
 import AdminLayout from '@/components/AdminLayout';
 import { 
   TrendingUp, 
@@ -8,7 +8,7 @@ import {
   Database,
   AlertCircle,
   CheckCircle2,
-  ChevronRight // ADD THIS IMPORT
+  ChevronRight
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
@@ -51,8 +51,9 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const quickActions = [
-    { title: 'Generate All PDFs', href: '/admin/pdf-dashboard', color: 'bg-gradient-to-r from-amber-500 to-orange-500' },
-    { title: 'View System Logs', href: '/admin/settings/logs', color: 'bg-gradient-to-r from-blue-500 to-cyan-500' },
+    { title: 'PDF Management', href: '/admin/pdf-dashboard', color: 'bg-gradient-to-r from-amber-500 to-orange-500' },
+    { title: 'PDF File Status', href: '/admin/pdf-status', color: 'bg-gradient-to-r from-blue-500 to-cyan-500' },
+    { title: 'View System Logs', href: '/admin/settings/logs', color: 'bg-gradient-to-r from-indigo-500 to-purple-500' },
     { title: 'Manage Users', href: '/admin/users', color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
     { title: 'API Documentation', href: '/admin/settings/api', color: 'bg-gradient-to-r from-green-500 to-emerald-500' },
   ];
@@ -127,13 +128,21 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-gray-600 mb-4">
                   Access advanced PDF generation, management, and analytics tools.
                 </p>
-                <Link
-                  href="/admin/pdf-dashboard"
-                  className="inline-flex items-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium hover:shadow-lg transition-all"
-                >
-                  Open Dashboard
-                  <ChevronRight size={16} className="ml-2" />
-                </Link>
+                <div className="flex gap-3">
+                  <Link
+                    href="/admin/pdf-dashboard"
+                    className="inline-flex items-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium hover:shadow-lg transition-all"
+                  >
+                    Open Dashboard
+                    <ChevronRight size={16} className="ml-2" />
+                  </Link>
+                  <Link
+                    href="/admin/pdf-status"
+                    className="inline-flex items-center px-5 py-2.5 rounded-lg border-2 border-amber-500 text-amber-700 font-medium hover:bg-amber-50 transition-all"
+                  >
+                    File Status
+                  </Link>
+                </div>
               </div>
               <div className="hidden md:block">
                 <div className="text-4xl">📊</div>
