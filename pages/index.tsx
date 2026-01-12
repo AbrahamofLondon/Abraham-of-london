@@ -738,7 +738,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
   return (
     <Layout
       title="Abraham of London — Consulting-Grade Advisory"
-      description="Consulting-grade diagnostics and governance: mandate clarity, operating models, execution cadence, and deployable systems that survive pressure."
+      description="Consulting-grade diagnostics and governance: mandate clarity, operating models, execution cadence, and deployable systems that survive field pressure."
       fullWidth
       className="bg-black"
     >
@@ -755,10 +755,10 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
         <SectionDivider />
         <DeliveryModel />
-
+        
         {/* REPLACEMENT: Strategic value strip (instead of "0+" tiles) */}
         <SectionDivider withOrnament={false} />
-        <StrategicFrameworkStrip />
+        <StrategicFrameworkStrip /> {/* ✅ This component is now rendered */}
 
         <SectionDivider />
         <CanonShowcase />

@@ -1,4 +1,4 @@
-# netlify.toml — CONFIRMED CONFIGURATION
+# netlify.toml — PRODUCTION READY CONFIGURATION
 [build]
   command = "pnpm install --frozen-lockfile && pnpm build"
   publish = ".next"
@@ -10,27 +10,31 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_ENV = "production"
   NEXT_PUBLIC_APP_ENV = "production"
+  # Security: disable Next.js source maps in production
+  NEXT_DISABLE_SOURCEMAPS = "true"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
+  # Enable production optimizations
+  NEXT_OPTIMIZE_FONTS = "true"
+  NEXT_OPTIMIZE_IMAGES = "true"
 
 [context.deploy-preview.environment]
-  NEXT_PUBLIC_SITE_URL = "`${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
+  # Keep sourcemaps for debugging previews
+  NEXT_DISABLE_SOURCEMAPS = "false"
 
 [context.branch-deploy.environment]
-  NEXT_PUBLIC_SITE_URL = "`${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
+  NEXT_DISABLE_SOURCEMAPS = "false"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[[redirects]]
-  from = "/index.html"
-  to = "/"
-  status = 301
-
+# =============== DOMAIN REDIRECTS ===============
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -43,6 +47,13 @@
   status = 301
   force = true
 
+# =============== CANONICAL REDIRECTS ===============
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+
+# =============== WORKSHOP REDIRECTS ===============
 [[redirects]]
   from = "/workshop/purpose-pyramid"
   to = "/workshops/purpose-pyramid"
@@ -73,6 +84,7 @@
   to = "/workshops/legacy-canvas"
   status = 301
 
+# =============== PDF DOWNLOAD REDIRECTS ===============
 [[redirects]]
   from = "/downloads/purpose-pyramid-worksheet-fillable.pdf"
   to = "/downloads/purpose-pyramid.pdf"
@@ -86,21 +98,6 @@
 [[redirects]]
   from = "/downloads/legacy-canvas-worksheet-fillable.pdf"
   to = "/downloads/legacy-canvas.pdf"
-  status = 301
-
-[[redirects]]
-  from = "/resources/leadership-standards"
-  to = "/resources/leadership-standards-blueprint"
-  status = 301
-
-[[redirects]]
-  from = "/resources/purpose-pyramid-guide"
-  to = "/resources/purpose-pyramid"
-  status = 301
-
-[[redirects]]
-  from = "/resources/legacy-framework"
-  to = "/resources/legacy-canvas"
   status = 301
 
 [[redirects]]
@@ -118,6 +115,23 @@
   to = "/downloads/legacy-canvas.pdf"
   status = 301
 
+# =============== RESOURCE REDIRECTS ===============
+[[redirects]]
+  from = "/resources/leadership-standards"
+  to = "/resources/leadership-standards-blueprint"
+  status = 301
+
+[[redirects]]
+  from = "/resources/purpose-pyramid-guide"
+  to = "/resources/purpose-pyramid"
+  status = 301
+
+[[redirects]]
+  from = "/resources/legacy-framework"
+  to = "/resources/legacy-canvas"
+  status = 301
+
+# =============== PAGE ALIAS REDIRECTS ===============
 [[redirects]]
   from = "/about-us"
   to = "/about"
@@ -143,19 +157,36 @@
   to = "/services/leadership-development"
   status = 301
 
-[[headers]]
-  for = "/downloads/*.pdf"
-  [headers.values]
-    Content-Type = "application/pdf"
-    Cache-Control = "public, max-age=31536000, immutable"
-    X-Content-Type-Options = "nosniff"
+# =============== CONTENT ALIAS REDIRECTS ===============
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/insights/:slug"
+  status = 301
 
-[[headers]]
-  for = "/assets/downloads/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    X-Content-Type-Options = "nosniff"
+[[redirects]]
+  from = "/articles/:slug"
+  to = "/insights/:slug"
+  status = 301
 
+[[redirects]]
+  from = "/news/:slug"
+  to = "/insights/:slug"
+  status = 301
+
+# =============== DOWNLOAD ALIAS REDIRECTS ===============
+[[redirects]]
+  from = "/downloads/leadership-standards-blueprint.pdf"
+  to = "/downloads/leadership-standards-blueprint"
+  status = 301
+
+# =============== 404 CATCH-ALL ===============
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = { StatusCode = "404" }
+
+# =============== SECURITY HEADERS ===============
 [[headers]]
   for = "/*"
   [headers.values]
@@ -163,6 +194,8 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Production-only HSTS
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
 [[headers]]
   for = "/_next/static/*"
@@ -175,9 +208,29 @@
     Cache-Control = "public, max-age=31536000, immutable"
     Access-Control-Allow-Origin = "*"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = { StatusCode = "404" }
+[[headers]]
+  for = "/downloads/*.pdf"
+  [headers.values]
+    Content-Type = "application/pdf"
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+    Content-Disposition = "inline"  # Show in browser instead of download
 
+[[headers]]
+  for = "/assets/downloads/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# =============== IMAGE CACHE HEADERS ===============
+[[headers]]
+  for = "/_next/image/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# =============== API ROUTES (if you have them) ===============
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    X-Content-Type-Options = "nosniff"

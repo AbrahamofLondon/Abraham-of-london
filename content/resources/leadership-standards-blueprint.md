@@ -1,26 +1,26 @@
 ---
 date: "2025-01-05"
-title: Leadership Standards Blueprint
+title: "Leadership Standards Blueprint"
 description: >-
   A structural framework outlining the 12 non-negotiable standards that define leaders who build enduring organisations
   and legacies.
-type: Resource
-slug: leadership-standards-blueprint
-author: Abraham of London
-href: /resources/leadership-standards-blueprint
-coverImage: /assets/images/resources/leadership-standards-blueprint.jpg
-downloadUrl: /assets/resources/pdfs/leadership-standards-blueprint.pdf
+type: "Resource"
+slug: "leadership-standards-blueprint"
+author: "Abraham of London"
+href: "/resources/leadership-standards-blueprint"
+coverImage: "/assets/images/resources/leadership-standards-blueprint.jpg"
+downloadUrl: "/assets/resources/pdfs/leadership-standards-blueprint.pdf"
 ogTitle: ""
 ogDescription: ""
 socialCaption: ""
-coverAspect: wide
-coverFit: cover
-coverPosition: center
-accessLevel: public
+coverAspect: "wide"
+coverFit: "cover"
+coverPosition: "center"
+accessLevel: "public"
 lockMessage: ""
 draft: false
-readTime: 3 mins
-resourceType: guide
+readTime: "3 mins"
+resourceType: "guide"
 ---
 # Leadership Standards Blueprint
 
@@ -46,3 +46,5 @@ This resource distills the highest-order patterns shared by leaders who build le
 > "Legacies don't emerge from gifts - they emerge from standards."
 
 Use this blueprint to audit your leadership or evaluate those you follow.
+
+

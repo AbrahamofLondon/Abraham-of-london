@@ -1,19 +1,71 @@
 // scripts/fix-yaml-specific.js
 import fs from 'fs'
-import path from 'path'
+import path from 'path'  // <-- Add this import
 import { fileURLToPath } from 'url'
+import { glob } from 'glob'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const contentDir = path.join(__dirname, '..', 'content')
 
 const fixFiles = () => {
-  console.log('🔧 Fixing specific YAML issues...\n')
+  console.log('🔧 Fixing all YAML issues...\n')
+  
+  // Fix all shorts files with theme issues
+  const shortsFiles = glob.sync(path.join(contentDir, 'shorts', '*.mdx'))
+  let fixedShorts = 0
+  
+  shortsFiles.forEach(filePath => {
+    try {
+      let content = fs.readFileSync(filePath, 'utf8')
+      const originalContent = content
+      
+      // Fix theme field without quotes (matching your error pattern)
+      content = content.replace(/theme:\s*([^\s\n"']+)/g, 'theme: "$1"')
+      
+      // Fix other common unquoted string fields in frontmatter
+      const frontmatterRegex = /^---\n([\s\S]*?)\n---/
+      const match = content.match(frontmatterRegex)
+      
+      if (match) {
+        let frontmatter = match[1]
+        // Fix unquoted string values (simple ones without spaces)
+        frontmatter = frontmatter.replace(/(\w+):\s*([^\s\n"'][^\n]*)(?=\n|$)/g, (match, key, value) => {
+          // Don't fix boolean values
+          if (value === 'true' || value === 'false') return match
+          // Don't fix numbers
+          if (/^\d+$/.test(value)) return match
+          // Don't fix arrays
+          if (value.startsWith('[')) return match
+          return `${key}: "${value.trim()}"`
+        })
+        
+        content = content.replace(frontmatterRegex, `---\n${frontmatter}\n---`)
+      }
+      
+      if (content !== originalContent) {
+        fs.writeFileSync(filePath, content)
+        fixedShorts++
+        console.log(`   ✅ Fixed: ${path.basename(filePath)}`)
+      }
+    } catch (error) {
+      console.log(`   ❌ Error fixing ${path.basename(filePath)}: ${error.message}`)
+    }
+  })
+  
+  if (fixedShorts > 0) {
+    console.log(`\n✅ Fixed ${fixedShorts} shorts files`)
+  } else {
+    console.log('✅ No shorts files needed fixing')
+  }
+  
+  // Keep your existing specific fixes
+  console.log('\n🔧 Applying specific file fixes...')
   
   // 1. Fix surrender-not-submission.mdx
   const file1 = path.join(contentDir, 'blog', 'surrender-not-submission.mdx')
   if (fs.existsSync(file1)) {
-    console.log('1. Fixing surrender-not-submission.mdx...')
+    console.log('\n1. Fixing surrender-not-submission.mdx...')
     let content = fs.readFileSync(file1, 'utf8')
     
     // Fix category array formatting
@@ -78,11 +130,13 @@ const fixFiles = () => {
     console.log('   ✅ Fixed array formatting')
   }
   
-  console.log('\n🎉 All specific fixes applied!')
+  console.log('\n🎉 All YAML fixes applied!')
   console.log('\nNext steps:')
   console.log('1. Run: pnpm clean:win')
   console.log('2. Run: pnpm contentlayer:direct')
   console.log('3. Run: pnpm build')
 }
 
+// Add glob to dependencies if not already installed
+console.log('Note: Ensure "glob" is installed: pnpm add -D glob')
 fixFiles()

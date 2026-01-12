@@ -1,351 +1,306 @@
-// contentlayer.config.ts — ENHANCED WITH DEBUGGING & FILE FILTERING
-import path from "path";
-import { defineDocumentType, makeSource } from "contentlayer2/source-files";
-import fs from "fs";
+// contentlayer.config.ts
+import {
+  defineDocumentType,
+  defineNestedType,
+  makeSource,
+} from "contentlayer2/source-files";
 
-// ✅ WINDOWS-SAFE: Use path.join instead of path.resolve for better cross-platform
-const contentDirPath = path.join(process.cwd(), "content");
-
-// ✅ DEBUG FUNCTION: Check what files are being scanned
-const debugFileScanning = () => {
-  if (process.env.NODE_ENV === 'development' || process.env.CONTENTLAYER_DEBUG) {
-    console.log('🔍 Contentlayer scanning:', contentDirPath);
-    try {
-      if (fs.existsSync(contentDirPath)) {
-        const dirs = fs.readdirSync(contentDirPath);
-        console.log('📁 Content directories found:', dirs.join(', ') || 'none');
-        
-        // Check for MDX files in each expected directory
-        const expectedDirs = ['blog', 'books', 'canon', 'downloads', 'shorts', 'events', 'prints', 'resources', 'strategy'];
-        expectedDirs.forEach(dir => {
-          const dirPath = path.join(contentDirPath, dir);
-          if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
-            const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.mdx') || f.endsWith('.md'));
-            if (files.length > 0) {
-              console.log(`  📂 ${dir}/: ${files.length} document(s) found`);
-            }
-          }
-        });
-      } else {
-        console.error('❌ Content directory does not exist:', contentDirPath);
-      }
-    } catch (error) {
-      console.error('❌ Error reading content:', error.message);
-    }
-  }
-};
-
-// ✅ FUNCTION TO CHECK IF FILE SHOULD BE IGNORED
-const shouldIgnoreFile = (filePath: string): boolean => {
-  // Skip Office files that cause Windows locks
-  const officeExtensions = [
-    '.xlsx', '.docx', '.pptx', '.xls', '.doc', '.ppt',
-    '.odt', '.ods', '.odp', '.numbers', '.pages', '.key'
-  ];
-  
-  const ext = path.extname(filePath).toLowerCase();
-  return officeExtensions.includes(ext);
-};
-
-// ----------------------------------------------------------------------------
-// helpers (deterministic, safe)
-// ----------------------------------------------------------------------------
-const asString = (v: unknown): string => (typeof v === "string" ? v : "");
-const asBool = (v: unknown): boolean => v === true;
-const asArray = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
-
-const safeSlug = (s: string) =>
-  s
+// ------------------------------------------------------------
+// Helpers
+// ------------------------------------------------------------
+function estimateReadTime(text: string): string {
+  const words = text
+    .replace(/[`*_>#~\[\]\(\)\{\}.,;:!?'"“”‘’\\\/|-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9\-._]/g, "")
-    .toLowerCase();
+    .split(" ")
+    .filter(Boolean).length;
 
-const filenameSlug = (doc: any) =>
-  safeSlug(asString(doc?._raw?.sourceFileName).replace(/\.(md|mdx)$/i, ""));
+  const minutes = Math.max(1, Math.ceil(words / 200));
+  return `${minutes} min read`;
+}
 
-// ✅ WINDOWS-SAFE: Normalize backslashes to forward slashes
-const inferSection = (flattenedPath: string): string => {
-  const normalizedPath = flattenedPath.replace(/\\/g, "/");
-  const first = normalizedPath.split("/")[0] || "";
-  switch (first) {
-    case "blog":
-    case "books":
-    case "canon":
-    case "downloads":
-    case "shorts":
-    case "events":
-    case "prints":
-    case "resources":
-    case "strategy":
-      return first;
-    default:
-      return "";
-  }
-};
+// ------------------------------------------------------------
+// Nested types (Contentlayer2-safe)
+// RULE:
+// - list:   of: NestedType
+// - nested: { type: "nested", of: NestedType }
+// ------------------------------------------------------------
+const DownloadLink = defineNestedType(() => ({
+  name: "DownloadLink",
+  fields: {
+    title: { type: "string", required: true },
+    url: { type: "string", required: true },
+    format: { type: "string", required: false },
+    size: { type: "string", required: false },
+  },
+}));
 
-const calculateReadingTime = (raw: string): number => {
-  const text = raw
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`[^`]*`/g, " ")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/[#*_~>|`]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+const CTADetail = defineNestedType(() => ({
+  name: "CTADetail",
+  fields: {
+    label: { type: "string", required: true },
+    value: { type: "string", required: true },
+    icon: { type: "string", required: false },
+    detail: { type: "string", required: false },
+  },
+}));
 
-  const words = text ? text.split(/\s+/).length : 0;
-  return Math.max(1, Math.ceil(words / 200));
-};
+const CTAFeature = defineNestedType(() => ({
+  name: "CTAFeature",
+  fields: {
+    title: { type: "string", required: true },
+    description: { type: "string", required: false },
+    icon: { type: "string", required: false },
+  },
+}));
 
-const generateExcerpt = (raw: string, max = 160): string => {
-  const text = raw
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`[^`]*`/g, " ")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/[#*_~>|`]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+const CTAConfig = defineNestedType(() => ({
+  name: "CTAConfig",
+  fields: {
+    badge: { type: "string", required: false },
+    tier: { type: "string", required: false },
 
-  if (!text) return "Read this document for practical insight and direction.";
-  if (text.length <= max) return text;
-  return `${text.slice(0, max).trim()}...`;
-};
+    details: { type: "list", of: CTADetail, required: false },
 
-// ----------------------------------------------------------------------------
-// shared fields
-// ----------------------------------------------------------------------------
-const SharedFields = {
+    // some files store as strings, some as objects
+    featuresText: { type: "list", of: { type: "string" }, required: false },
+    features: { type: "list", of: CTAFeature, required: false },
+  },
+}));
+
+const ProcessStep = defineNestedType(() => ({
+  name: "ProcessStep",
+  fields: {
+    step: { type: "number", required: false },
+    title: { type: "string", required: true },
+    description: { type: "string", required: false },
+    icon: { type: "string", required: false },
+  },
+}));
+
+const DownloadProcess = defineNestedType(() => ({
+  name: "DownloadProcess",
+  fields: {
+    steps: { type: "list", of: ProcessStep, required: false },
+  },
+}));
+
+const FeatureGridItem = defineNestedType(() => ({
+  name: "FeatureGridItem",
+  fields: {
+    title: { type: "string", required: true },
+    icon: { type: "string", required: false },
+    content: { type: "string", required: false },
+    color: { type: "string", required: false },
+    badge: { type: "string", required: false },
+  },
+}));
+
+const CTAButton = defineNestedType(() => ({
+  name: "CTAButton",
+  fields: {
+    label: { type: "string", required: true },
+    href: { type: "string", required: true },
+  },
+}));
+
+// ------------------------------------------------------------
+// Shared field fragments
+// ------------------------------------------------------------
+const seoFields = {
+  ogTitle: { type: "string", required: false },
+  ogDescription: { type: "string", required: false },
+  ogImage: { type: "string", required: false },
+  twitterTitle: { type: "string", required: false },
+  twitterDescription: { type: "string", required: false },
+  twitterImage: { type: "string", required: false },
+} as const;
+
+const coreFields = {
+  type: { type: "string", required: false },
+
   title: { type: "string", required: true },
-  slug: { type: "string", required: false },
-  href: { type: "string", required: false },
+  description: { type: "string", required: false },
+  excerpt: { type: "string", required: false },
+
   date: { type: "date", required: false },
   updated: { type: "date", required: false },
+
+  draft: { type: "boolean", required: false, default: false },
+  featured: { type: "boolean", required: false, default: false },
+
+  slug: { type: "string", required: false },
+  href: { type: "string", required: false },
 
   author: { type: "string", required: false },
   authorTitle: { type: "string", required: false },
 
-  excerpt: { type: "string", required: false },
-  description: { type: "string", required: false },
-  subtitle: { type: "string", required: false },
-
-  draft: { type: "boolean", required: false },
-  published: { type: "boolean", required: false },
-
   tags: { type: "list", of: { type: "string" }, required: false },
+  theme: { type: "string", required: false },
   category: { type: "string", required: false },
 
-  ogTitle: { type: "string", required: false },
-  ogDescription: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
+
+  layout: { type: "string", required: false },
+  subtitle: { type: "string", required: false },
+
   canonicalUrl: { type: "string", required: false },
+  density: { type: "string", required: false },
 
   coverImage: { type: "string", required: false },
+  featuredImage: { type: "string", required: false },
   coverAspect: { type: "string", required: false },
   coverFit: { type: "string", required: false },
   coverPosition: { type: "string", required: false },
 
-  featured: { type: "boolean", required: false },
-  priority: { type: "number", required: false },
-
+  // access controls used across content
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
   tier: { type: "string", required: false },
   requiresAuth: { type: "boolean", required: false },
-
+  priority: { type: "number", required: false },
   preload: { type: "boolean", required: false },
-  version: { type: "string", required: false },
 
-  aliases: { type: "list", of: { type: "string" }, required: false },
+  // fields you showed as "extra"
+  audience: { type: "string", required: false },      // shorts
+  resourceType: { type: "string", required: false },  // resources
+
+  // allow object or list variants without schema fights
+  resources: { type: "json", required: false },
+
+  contentOnly: { type: "boolean", required: false },
+
+  readTime: { type: "string", required: false },
+
+  published: { type: "boolean", required: false, default: true },
+  shortType: { type: "string", required: false },
+
+
+  ...seoFields,
 } as const;
 
-// ----------------------------------------------------------------------------
-// computed fields (deterministic, no side effects)
-// ----------------------------------------------------------------------------
-const computedFields = {
-  sectionComputed: {
-    type: "string" as const,
-    resolve: (doc: any) => inferSection(asString(doc?._raw?.flattenedPath)),
-  },
-
-  slugComputed: {
-    type: "string" as const,
-    resolve: (doc: any) => {
-      const explicit = safeSlug(asString(doc.slug));
-      if (explicit) return explicit;
-
-      const fromFile = filenameSlug(doc);
-      if (fromFile) return fromFile;
-
-      const fp = asString(doc?._raw?.flattenedPath) || "unknown";
-      return safeSlug(fp.split("/").pop() || fp) || "untitled";
-    },
-  },
-
-  hrefComputed: {
-    type: "string" as const,
-    resolve: (doc: any) => {
-      const explicit = asString(doc.href).trim();
-      if (explicit) return explicit;
-
-      const slug = safeSlug(asString(doc.slug)) || filenameSlug(doc);
-      const flattenedPath = asString(doc?._raw?.flattenedPath);
-      const section = inferSection(flattenedPath);
-
-      const prefix = section ? `/${section}/` : "/";
-
-      return `${prefix}${slug || ""}`;
-    },
-  },
-
-  dateComputed: {
-    type: "date" as const,
-    resolve: (doc: any) => {
-      if (doc.date) return doc.date;
-      if (doc.updated) return doc.updated;
-
-      const file = asString(doc?._raw?.sourceFileName);
-      const m = file.match(/(\d{4}-\d{2}-\d{2})/);
-      if (m?.[1]) return m[1];
-
-      return "1970-01-01"; // Deterministic fallback
-    },
-  },
-
-  readTime: {
-    type: "number" as const,
-    resolve: (doc: any) => {
-      const rt = (doc as any).readTime;
-      if (typeof rt === "number" && Number.isFinite(rt) && rt > 0) return rt;
-
-      const raw = asString(doc?.body?.raw) || asString(doc?.body?.code) || "";
-      return calculateReadingTime(raw);
-    },
-  },
-
-  excerptComputed: {
-    type: "string" as const,
-    resolve: (doc: any) => {
-      const ex = asString(doc.excerpt).trim();
-      if (ex) return ex;
-
-      const desc = asString(doc.description).trim();
-      if (desc) return desc;
-
-      const raw = asString(doc?.body?.raw) || asString(doc?.body?.code) || "";
-      return generateExcerpt(raw);
-    },
-  },
-
-  publishedComputed: {
-    type: "boolean" as const,
-    resolve: (doc: any) => {
-      if (asBool(doc.draft)) return false;
-      if (typeof doc.published === "boolean") return doc.published;
-      return true;
-    },
-  },
-
-  tagsComputed: {
-    type: "list" as const,
-    of: { type: "string" as const },
-    resolve: (doc: any) => asArray<string>(doc.tags).filter(Boolean),
-  },
-};
-
-// ----------------------------------------------------------------------------
-// document types
-// ----------------------------------------------------------------------------
+// ------------------------------------------------------------
+// Document Types
+// ------------------------------------------------------------
 export const Post = defineDocumentType(() => ({
   name: "Post",
-  filePathPattern: "blog/**/*.{md,mdx}",
+  filePathPattern: `blog/**/*.mdx`,
   contentType: "mdx",
   fields: {
-    ...SharedFields,
-    series: { type: "string", required: false },
-    isSeriesPart: { type: "boolean", required: false },
-    seriesOrder: { type: "number", required: false },
+    ...coreFields,
+    downloads: { type: "list", of: DownloadLink, required: false },
+    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
   },
   computedFields: {
-    ...computedFields,
-    readTimeString: {
-      type: "string" as const,
-      resolve: (doc: any) => `${computedFields.readTime.resolve(doc)} min read`,
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^blog\//, ""),
+    },
+    href: {
+      type: "string",
+      resolve: (doc) =>
+        doc.href ?? `/blog/${doc._raw.flattenedPath.replace(/^blog\//, "")}`,
+    },
+    readingTime: {
+      type: "string",
+      resolve: (doc) => estimateReadTime(doc.body.raw),
+    },
+  },
+}));
+
+export const Short = defineDocumentType(() => ({
+  name: "Short",
+  filePathPattern: `shorts/**/*.mdx`,
+  contentType: "mdx",
+  fields: { ...coreFields },
+  computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^shorts\//, ""),
+    },
+    href: {
+      type: "string",
+      resolve: (doc) =>
+        doc.href ??
+        `/shorts/${doc._raw.flattenedPath.replace(/^shorts\//, "")}`,
+    },
+    readingTime: {
+      type: "string",
+      resolve: (doc) => estimateReadTime(doc.body.raw),
     },
   },
 }));
 
 export const Book = defineDocumentType(() => ({
   name: "Book",
-  filePathPattern: "books/**/*.{md,mdx}",
+  filePathPattern: `books/**/*.mdx`,
   contentType: "mdx",
   fields: {
-    ...SharedFields,
-    isbn: { type: "string", required: false },
-    pages: { type: "number", required: false },
-    publisher: { type: "string", required: false },
-    publishedDate: { type: "date", required: false },
-    edition: { type: "string", required: false },
-    format: { type: "string", required: false },
+    ...coreFields,
+    aliases: { type: "list", of: { type: "string" }, required: false },
+    order: { type: "number", required: false },
   },
-  computedFields,
+  computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^books\//, ""),
+    },
+    href: {
+      type: "string",
+      resolve: (doc) =>
+        doc.href ?? `/books/${doc._raw.flattenedPath.replace(/^books\//, "")}`,
+    },
+  },
 }));
 
 export const Canon = defineDocumentType(() => ({
   name: "Canon",
-  filePathPattern: "canon/**/*.{md,mdx}",
+  filePathPattern: `canon/**/*.mdx`,
   contentType: "mdx",
   fields: {
-    ...SharedFields,
-    canonType: { type: "string", required: false },
-    volume: { type: "string", required: false },
-    part: { type: "string", required: false },
+    ...coreFields,
+    volumeNumber: { type: "string", required: false },
+    order: { type: "number", required: false },
   },
-  computedFields,
+  computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^canon\//, ""),
+    },
+    href: {
+      type: "string",
+      resolve: (doc) =>
+        doc.href ?? `/canon/${doc._raw.flattenedPath.replace(/^canon\//, "")}`,
+    },
+  },
 }));
 
 export const Download = defineDocumentType(() => ({
   name: "Download",
-  // CRITICAL: Filter out Office files by using a function instead of pattern
-  filePathPattern: (filePath) => {
-    // Skip if it's an Office file
-    if (shouldIgnoreFile(filePath)) return false;
-    
-    // Only process MDX files in downloads directory
-    const ext = path.extname(filePath).toLowerCase();
-    const normalizedPath = filePath.replace(/\\/g, "/");
-    return normalizedPath.includes("downloads/") && (ext === ".md" || ext === ".mdx");
-  },
+  filePathPattern: `downloads/**/*.mdx`,
   contentType: "mdx",
   fields: {
-    ...SharedFields,
+    ...coreFields,
 
-    downloadType: { type: "string", required: false },
-    format: { type: "string", required: false },
-    fileFormat: { type: "string", required: false },
-    paperFormats: { type: "list", of: { type: "string" }, required: false },
-
-    fileUrl: { type: "string", required: false },
-    downloadUrl: { type: "string", required: false },
-    downloadFile: { type: "string", required: false },
-    pdfPath: { type: "string", required: false },
     file: { type: "string", required: false },
-
+    downloadUrl: { type: "string", required: false },
     fileSize: { type: "string", required: false },
-    checksumMd5: { type: "string", required: false },
 
+    format: { type: "string", required: false },
+    downloadType: { type: "string", required: false },
+    paperFormats: { type: "list", of: { type: "string" }, required: false },
     isInteractive: { type: "boolean", required: false },
     isFillable: { type: "boolean", required: false },
 
+    fileFormat: { type: "string", required: false },
+    version: { type: "string", required: false },
     language: { type: "string", required: false },
-
-    ctaPrimary: { type: "json", required: false },
-    ctaSecondary: { type: "json", required: false },
-    related: { type: "json", required: false },
-    ctaConfig: { type: "json", required: false },
-    downloadProcess: { type: "json", required: false },
-    featureGridItems: { type: "json", required: false },
+    aliases: { type: "list", of: { type: "string" }, required: false },
 
     useLegacyDiagram: { type: "boolean", required: false },
     useProTip: { type: "boolean", required: false },
@@ -356,212 +311,96 @@ export const Download = defineDocumentType(() => ({
     proTipContent: { type: "string", required: false },
 
     featureGridColumns: { type: "number", required: false },
+    featureGridItems: { type: "list", of: FeatureGridItem, required: false },
 
-    contentOnly: { type: "boolean", required: false },
-    requiresEmail: { type: "boolean", required: false },
-    emailFieldLabel: { type: "string", required: false },
-    emailSuccessMessage: { type: "string", required: false },
+    ctaConfig: { type: "nested", of: CTAConfig, required: false },
+    downloadProcess: { type: "nested", of: DownloadProcess, required: false },
+
+    ctaPrimary: { type: "nested", of: CTAButton, required: false },
+    ctaSecondary: { type: "nested", of: CTAButton, required: false },
+
+    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+    related: { type: "list", of: { type: "string" }, required: false },
+
+    // ✅ THIS kills your one remaining mismatch:
+    // legacy-canvas.mdx has `features: "Interactive fillable fields"`
+    // Other files may use list/object -> we accept all safely.
+    features: { type: "json", required: false },
   },
   computedFields: {
-    ...computedFields,
-    downloadUrlComputed: {
-      type: "string" as const,
-      resolve: (doc: any) => {
-        const url =
-          asString(doc.downloadUrl).trim() ||
-          asString(doc.fileUrl).trim() ||
-          asString(doc.downloadFile).trim() ||
-          asString(doc.pdfPath).trim() ||
-          asString(doc.file).trim();
-
-        return url || "";
-      },
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^downloads\//, ""),
+    },
+    href: {
+      type: "string",
+      resolve: (doc) =>
+        doc.href ??
+        `/downloads/${doc._raw.flattenedPath.replace(/^downloads\//, "")}`,
     },
   },
 }));
 
-export const Short = defineDocumentType(() => ({
-  name: "Short",
-  filePathPattern: "shorts/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    ...SharedFields,
-    shortType: { type: "string", required: false },
-    audience: { type: "string", required: false },
-    theme: { type: "string", required: false },
-    hook: { type: "string", required: false },
-    callToAction: { type: "string", required: false },
-  },
-  computedFields,
-}));
-
 export const Event = defineDocumentType(() => ({
   name: "Event",
-  filePathPattern: "events/**/*.{md,mdx}",
+  filePathPattern: `events/**/*.mdx`,
   contentType: "mdx",
   fields: {
-    ...SharedFields,
-    eventType: { type: "string", required: false },
+    ...coreFields,
     location: { type: "string", required: false },
-    startDate: { type: "string", required: false },
-    endDate: { type: "string", required: false },
     registrationUrl: { type: "string", required: false },
-    eventDate: { type: "string", required: false },
-    time: { type: "string", required: false },
-    timezone: { type: "string", required: false },
-    isVirtual: { type: "boolean", required: false },
-    meetingLink: { type: "string", required: false },
+
+    // your content shows a non-ISO combined string; keep it as string
+    startDate: { type: "string", required: false },
   },
-  computedFields,
 }));
 
 export const Print = defineDocumentType(() => ({
   name: "Print",
-  filePathPattern: "prints/**/*.{md,mdx}",
+  filePathPattern: `prints/**/*.mdx`,
   contentType: "mdx",
-  fields: {
-    ...SharedFields,
-    printType: { type: "string", required: false },
-    format: { type: "string", required: false },
-    paperFormats: { type: "list", of: { type: "string" }, required: false },
-    fileSize: { type: "string", required: false },
-    fileUrl: { type: "string", required: false },
-    downloadUrl: { type: "string", required: false },
-    isPhysical: { type: "boolean", required: false },
-    price: { type: "number", required: false },
-    currency: { type: "string", required: false },
-  },
-  computedFields,
+  fields: { ...coreFields },
 }));
 
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
-  filePathPattern: "resources/**/*.{md,mdx}",
+  filePathPattern: `resources/**/*.{md,mdx}`,
   contentType: "mdx",
   fields: {
-    ...SharedFields,
-    resourceType: { type: "string", required: false },
-    fileUrl: { type: "string", required: false },
+    ...coreFields,
     downloadUrl: { type: "string", required: false },
-    links: { type: "json", required: false },
-    resources: { type: "json", required: false },
   },
-  computedFields,
 }));
 
 export const Strategy = defineDocumentType(() => ({
   name: "Strategy",
-  filePathPattern: "strategy/**/*.{md,mdx}",
+  filePathPattern: `strategy/**/*.mdx`,
   contentType: "mdx",
   fields: {
-    ...SharedFields,
+    ...coreFields,
+    version: { type: "string", required: false },
     strategyType: { type: "string", required: false },
-    stage: { type: "string", required: false },
     industry: { type: "string", required: false },
     region: { type: "string", required: false },
-    complexity: { type: "string", required: false },
-    timeframe: { type: "string", required: false },
-    deliverables: { type: "list", of: { type: "string" }, required: false },
   },
-  computedFields,
 }));
 
-// ----------------------------------------------------------------------------
-// source (safe configuration with file filtering)
-// ----------------------------------------------------------------------------
-debugFileScanning(); // DEBUG: Show what's being scanned
-
 export default makeSource({
-  contentDirPath,
-  documentTypes: [Post, Book, Canon, Download, Short, Event, Print, Resource, Strategy],
+  contentDirPath: "content",
+  documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy],
 
-  // ✅ FILE FILTERING: Skip Office files before Contentlayer processes them
-  contentDirExclude: [
-    "**/node_modules",
-    "**/.*", // hidden files
-    "**/*.xlsx",
-    "**/*.docx", 
-    "**/*.pptx",
-    "**/*.xls",
-    "**/*.doc",
-    "**/*.ppt",
-    "**/*.odt",
-    "**/*.ods",
-    "**/*.odp",
-    "**/*.numbers",
-    "**/*.pages",
-    "**/*.key",
-    "**/Thumbs.db",
-    "**/desktop.ini",
-    "**/~$*", // Windows temp files
-  ],
+  // IMPORTANT: ignore templates & backups & generated json
+  ignore: [
+  "**/_*/**",
+  "**/*BACKUP*/**",
+  "**/.*/**",
+  "downloads/_generated.downloads.json",
+  "_templates/**",
+  "**/_templates/**",
+  "content/_templates/**",
+  "**/content/_templates/**",
+],
 
-  // Safe error handling
-  onExtraFieldData: "ignore",
-  onUnknownDocuments: "skip",
   disableImportAliasWarning: true,
-
-  // ✅ ENHANCED SUCCESS HANDLER with document counting
-  onSuccess: async (importData) => {
-    try {
-      const { allDocuments } = await importData();
-      const docCount = allDocuments.length;
-      
-      if (docCount === 0) {
-        console.warn('⚠️ Contentlayer: No documents found. Check your content directory structure.');
-        console.warn('   Expected directories: blog/, books/, canon/, downloads/, shorts/, events/, prints/, resources/, strategy/');
-        console.warn('   Expected file types: .mdx or .md files');
-      } else {
-        const docTypes = allDocuments.reduce((acc, doc) => {
-          const type = doc.type || 'unknown';
-          acc[type] = (acc[type] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-        
-        console.log(`✅ Contentlayer: Generated ${docCount} documents:`, Object.entries(docTypes).map(([k, v]) => `${k}:${v}`).join(', '));
-      }
-    } catch (error) {
-      console.error('❌ Contentlayer generation failed:', error.message);
-    }
-  },
-  
-  // ✅ ENHANCED ERROR HANDLER
-  onError: (error) => {
-    // Don't crash on Office file errors
-    if (error.message.includes("xlsx") || 
-        error.message.includes("docx") || 
-        error.message.includes("pptx") ||
-        error.message.includes("EPERM") ||
-        error.message.includes("operation not permitted")) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("⚠️ Contentlayer: Skipped Office file (Windows lock):", error.message.split('\n')[0]);
-      }
-      return;
-    }
-    
-    // Document detection issues
-    if (error.message.includes("no documents") || error.message.includes("empty")) {
-      console.warn('⚠️ Contentlayer: Document detection issue - check content directory structure');
-      return;
-    }
-    
-    // Log other errors
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ Contentlayer warning:", error.message);
-    }
-  },
 });
-
-export const allDocumentTypes = {
-  Post,
-  Book,
-  Canon,
-  Download,
-  Short,
-  Event,
-  Print,
-  Resource,
-  Strategy,
-};
-
-export { computedFields };
