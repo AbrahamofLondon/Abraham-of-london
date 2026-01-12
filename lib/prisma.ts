@@ -53,23 +53,17 @@ function createRealPrismaClient(): PrismaClient {
     throw new Error("DATABASE_URL is missing. Prisma cannot connect.");
   }
 
-  // Root-cause guard: client engine requires adapter or accelerateUrl
-  const engineType = process.env.PRISMA_CLIENT_ENGINE_TYPE;
-  const accelerateUrl =
-    process.env.PRISMA_ACCELERATE_URL || process.env.ACCELERATE_URL;
+  // For Prisma 7.2.0 with SQLite
+  const log =
+    process.env.NODE_ENV === "development"
+      ? (["warn", "error"] as const)
+      : (["error"] as const);
 
-  if (engineType === "client" && !accelerateUrl) {
-    throw new Error(
-      [
-        "Prisma is running with PRISMA_CLIENT_ENGINE_TYPE=client.",
-        "That engine requires either:",
-        "- a Prisma Driver Adapter (adapter: ...), or",
-        "- Prisma Accelerate (PRISMA_ACCELERATE_URL).",
-        "",
-        "Fix: remove PRISMA_CLIENT_ENGINE_TYPE (recommended) unless you are using adapters/Accelerate.",
-      ].join("\n")
-    );
-  }
+  // Return with datasourceUrl for Prisma 7.2.0
+  return new PrismaClient({ 
+    datasourceUrl: process.env.DATABASE_URL || "file:./dev.db"
+  });
+}
 
   const log =
     process.env.NODE_ENV === "development"

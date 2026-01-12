@@ -1,1401 +1,1073 @@
 {
+  "summary": {
+    "scanned": 160,
+    "fatal": 0,
+    "warnings": 1
+  },
   "results": [
     {
       "path": "strategy\\sample-strategy.mdx",
       "type": "Strategy",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Frontmatter type \"Resource\" conflicts with folder type \"Strategy\". Folder wins."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-a-single-yes-changes-everything.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-all-you-can-do-is-breathe.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-avoidance-becomes-your-personality.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-busyness-becomes-your-brand.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-comfort-becomes-your-cage.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-conflict-feels-like-betrayal.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-doctrine-feels-safer-than-god.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-every-promotion-feels-hollow.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-grace-finds-you-in-the-mess.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-hope-feels-reckless.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-kindness-feels-like-rebellion.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-later-became-never.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-numbness-feels-safer-than-joy.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-productivity-becomes-punishment.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-rest-starts-to-feel-dangerous.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-argue-with-god-in-your-head.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-cant-stop-overthinking.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-cant-tell-if-youre-growing-or-drifting.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-dont-know-what-you-want-anymore.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-dont-trust-your-own-decisions.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-fear-being-wrong-about-god.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-fear-success-more-than-failure.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-feel-like-god-is-delaying-you.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-feel-too-busy-to-care.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-finally-let-yourself-cry.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-give-more-than-you-get.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-keep-blaming-your-childhood.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-keep-choosing-people-who-cant-choose-you.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-keep-confusing-niceness-with-goodness.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-miss-who-you-used-to-be.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-mistake-familiarity-for-loyalty.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-need-god-to-interrupt-you.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-no-longer-recognise-your-own-voice.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-outgrow-your-circle.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-realise-prayer-is-war.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-realise-you-were-the-problem.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-realise-youre-not-behind.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-stop-waiting-for-permission.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-you-want-to-quit-but-cant.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-calendar-is-full-but-your-life-is-empty.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-calling-stops-being-cute.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-character-is-leaking.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-confidence-feels-manufactured.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-convictions-feel-like-costumes.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-dreams-feel-too-heavy.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-excuses-become-your-identity.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-faith-feels-numb.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-hustle-has-no-soul.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-legacy-terrifies-you.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-silence-says-too-much.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-standards-keep-you-lonely.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-vision-outgrows-your-environment.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-your-work-becomes-your-hiding-place.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-addicted-to-distraction.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-afraid-of-your-own-potential.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-afraid-to-be-radical.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-always-the-strong-one.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-attracted-to-potential-not-reality.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-building-someone-elses-legacy.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-done-fixing-adults.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-exhausted-but-still-available.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-keeping-faith-out-of-habit.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-living-for-weekends.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-loved-without-earning-it.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-measuring-everything-but-meaning.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-not-lazy-youre-undisciplined.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-preparing-for-rooms-you-havent-entered.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-productive-but-not-present.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-scared-to-start-over.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-the-only-one-doing-the-work.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-tired-of-being-the-bigger-person.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-tired-of-starting-over.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youre-winning-at-work-but-losing-yourself.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youve-become-chronically-online.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-youve-worshipped-the-wrong-metrics.mdx",
       "type": "Short",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\brotherhood-starter-kit.md",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\canon-builders-rule-of-life.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\canon-campaign.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\canon-council-table-agenda.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\canon-household-charter.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\canon-reading-plan-year-one.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\destiny-mapping-worksheet.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\fatherhood-impact-framework.md",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\getting-started.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\institutional-health-scorecard.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\leadership-standards-blueprint.md",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\multi-generational-legacy-ledger.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\purpose-alignment-checklist.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\strategic-frameworks.md",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\strategy-room-intake.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "resources\\vault.mdx",
       "type": "Resource",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Frontmatter type \"Download\" conflicts with folder type \"Resource\". Folder wins."
-      ]
+      "warnings": []
     },
     {
       "path": "prints\\entrepreneur-operating-pack.mdx",
       "type": "Print",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "prints\\fatherhood-standards-card.mdx",
       "type": "Print",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "prints\\leadership-playbook.mdx",
       "type": "Print",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "prints\\mentorship-starter-kit.mdx",
       "type": "Print",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "prints\\standards-brief.mdx",
       "type": "Print",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "prints\\weekly-operating-rhythm.mdx",
       "type": "Print",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "events\\founders-salon.mdx",
       "type": "Event",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "events\\leadership-workshop.mdx",
       "type": "Event",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\abraham-vault-pack.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-abraham-vault-pack\" differs from filename \"abraham-vault-pack\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\board-decision-log-template.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-board-decision-log-template\" differs from filename \"board-decision-log-template\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\board-investor-onepager.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-board-investor-onepager\" differs from filename \"board-investor-onepager\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\brotherhood-covenant.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 10). Only the first is used.",
-        "Slug \"download-brotherhood-covenant\" differs from filename \"brotherhood-covenant\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\canon-volume-iv-diagnostic-toolkit.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used.",
-        "Slug \"download-canon-volume-iv-diagnostic-toolkit\" differs from filename \"canon-volume-iv-diagnostic-toolkit\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used.",
-        "Slug \"download-canon-volume-v-governance-diagnostic-toolkit\" differs from filename \"canon-volume-v-governance-diagnostic-toolkit\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\communication-script-bpf.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used.",
-        "Slug \"download-communication-script-bpf\" differs from filename \"communication-script-bpf\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\decision-log-template.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-decision-log-template\" differs from filename \"decision-log-template\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\decision-matrix-scorecard.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-decision-matrix-scorecard\" differs from filename \"decision-matrix-scorecard\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\download-legacy-architecture-canvas.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used.",
-        "Slug \"legacy-architecture-canvas\" differs from filename \"download-legacy-architecture-canvas\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\entrepreneur-operating-pack.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-entrepreneur-operating-pack\" differs from filename \"entrepreneur-operating-pack\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\entrepreneur-survival-checklist.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used.",
-        "Slug \"download-entrepreneur-survival-checklist\" differs from filename \"entrepreneur-survival-checklist\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\family-altar-liturgy.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used.",
-        "Slug \"download-family-altar-liturgy\" differs from filename \"family-altar-liturgy\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\leaders-cue-card-two-up.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-leaders-cue-card-two-up\" differs from filename \"leaders-cue-card-two-up\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\leadership-playbook.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-leadership-playbook\" differs from filename \"leadership-playbook\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\legacy-canvas.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-legacy-architecture-canvas\" differs from filename \"legacy-canvas\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\mentorship-starter-kit.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used.",
-        "Slug \"download-mentorship-starter-kit\" differs from filename \"mentorship-starter-kit\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\operating-cadence-pack.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-operating-cadence-pack\" differs from filename \"operating-cadence-pack\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\principles-for-my-son-cue-card.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-principles-for-my-son-cue-card\" differs from filename \"principles-for-my-son-cue-card\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\principles-for-my-son.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used.",
-        "Slug \"download-principles-for-my-son\" differs from filename \"principles-for-my-son\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\purpose-pyramid-worksheet.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-purpose-pyramid-worksheet\" differs from filename \"purpose-pyramid-worksheet\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\scripture-track-john14.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 12). Only the first is used.",
-        "Slug \"download-scripture-track-john14\" differs from filename \"scripture-track-john14\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\standards-brief.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-standards-brief\" differs from filename \"standards-brief\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\ultimate-purpose-of-man-editorial.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 15). Only the first is used.",
-        "Slug \"download-ultimate-purpose-of-man-editorial\" differs from filename \"ultimate-purpose-of-man-editorial\""
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\weekly-operating-rhythm.mdx",
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-weekly-operating-rhythm\" differs from filename \"weekly-operating-rhythm\""
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\builders-catechism.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 14). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\canon-campaign.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\canon-introduction-letter.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\canon-master-index-preview.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-i-foundations-of-purpose.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 10). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-i-teaching-edition.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 12). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-ii-governance-and-formation.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-ii-teaching-edition.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-iii-teaching-edition.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-iv-teaching-edition.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 14). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-x-filename.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "canon\\volume-x-the-arc-of-future-civilisation.mdx",
       "type": "Canon",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 14). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "books\\book-fathering-without-fear.mdx",
       "type": "Book",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 10). Only the first is used.",
-        "Slug \"fathering-without-fear\" differs from filename \"book-fathering-without-fear\""
-      ]
+      "warnings": []
     },
     {
       "path": "books\\the-architecture-of-human-purpose.mdx",
       "type": "Book",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "books\\the-builders-catechism.mdx",
       "type": "Book",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "books\\the-fiction-adaptation.mdx",
       "type": "Book",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 7). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\christianity-not-extremism.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\fathering-principles.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\fathering-without-fear-teaser.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\fathering-without-fear.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\in-my-fathers-house.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\kingdom-strategies-for-a-loving-legacy.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\leadership-begins-at-home.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\lessons-from-noah.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 12). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\out-of-context-truth.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\post-when-the-system-breaks-you.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 15). Only the first is used.",
-        "Slug \"when-the-system-breaks-you\" differs from filename \"post-when-the-system-breaks-you\""
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\principles-for-my-son.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\reclaiming-the-narrative.mdx",
@@ -1403,8 +1075,8 @@
       "valid": true,
       "errors": [],
       "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"reclaiming-the-narrative.mdx\" differs from filename \"reclaiming-the-narrative\""
+        "Unknown field \"keyInsights\" for type Post",
+        "Unknown field \"authorNote\" for type Post"
       ]
     },
     {
@@ -1412,1536 +1084,107 @@
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 7). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\surrender-operational-framework.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 11). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\the-brotherhood-code.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\ultimate-purpose-of-man.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 19). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\when-gods-sovereignty-collides-with-our-pain.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\when-the-foundation-is-destroyed.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 11). Only the first is used."
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\when-the-storm-finds-you.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 7). Only the first is used."
-      ]
+      "warnings": []
     }
   ],
-  "fatal": [],
-  "noisy": [
-    {
-      "path": "strategy\\sample-strategy.mdx",
-      "type": "Strategy",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Frontmatter type \"Resource\" conflicts with folder type \"Strategy\". Folder wins."
-      ]
-    },
-    {
-      "path": "shorts\\when-a-single-yes-changes-everything.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-all-you-can-do-is-breathe.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-avoidance-becomes-your-personality.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-busyness-becomes-your-brand.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-comfort-becomes-your-cage.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-conflict-feels-like-betrayal.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-doctrine-feels-safer-than-god.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-every-promotion-feels-hollow.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-grace-finds-you-in-the-mess.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-hope-feels-reckless.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-kindness-feels-like-rebellion.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-later-became-never.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-numbness-feels-safer-than-joy.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-productivity-becomes-punishment.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-rest-starts-to-feel-dangerous.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-argue-with-god-in-your-head.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-cant-stop-overthinking.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-cant-tell-if-youre-growing-or-drifting.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-dont-know-what-you-want-anymore.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-dont-trust-your-own-decisions.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-fear-being-wrong-about-god.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-fear-success-more-than-failure.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-feel-like-god-is-delaying-you.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-feel-too-busy-to-care.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-finally-let-yourself-cry.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-give-more-than-you-get.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-keep-blaming-your-childhood.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-keep-choosing-people-who-cant-choose-you.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-keep-confusing-niceness-with-goodness.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-miss-who-you-used-to-be.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-mistake-familiarity-for-loyalty.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-need-god-to-interrupt-you.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-no-longer-recognise-your-own-voice.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-outgrow-your-circle.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-realise-prayer-is-war.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-realise-you-were-the-problem.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-realise-youre-not-behind.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-stop-waiting-for-permission.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-you-want-to-quit-but-cant.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-calendar-is-full-but-your-life-is-empty.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-calling-stops-being-cute.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-character-is-leaking.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-confidence-feels-manufactured.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-convictions-feel-like-costumes.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-dreams-feel-too-heavy.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-excuses-become-your-identity.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-faith-feels-numb.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-hustle-has-no-soul.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-legacy-terrifies-you.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-silence-says-too-much.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-standards-keep-you-lonely.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-vision-outgrows-your-environment.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-your-work-becomes-your-hiding-place.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-addicted-to-distraction.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-afraid-of-your-own-potential.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-afraid-to-be-radical.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-always-the-strong-one.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-attracted-to-potential-not-reality.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-building-someone-elses-legacy.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-done-fixing-adults.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-exhausted-but-still-available.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-keeping-faith-out-of-habit.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-living-for-weekends.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-loved-without-earning-it.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-measuring-everything-but-meaning.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 4). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-not-lazy-youre-undisciplined.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-preparing-for-rooms-you-havent-entered.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-productive-but-not-present.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-scared-to-start-over.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-the-only-one-doing-the-work.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-tired-of-being-the-bigger-person.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-tired-of-starting-over.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youre-winning-at-work-but-losing-yourself.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youve-become-chronically-online.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "shorts\\when-youve-worshipped-the-wrong-metrics.mdx",
-      "type": "Short",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\brotherhood-starter-kit.md",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\canon-builders-rule-of-life.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\canon-campaign.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 5). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\canon-council-table-agenda.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\canon-household-charter.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\canon-reading-plan-year-one.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\destiny-mapping-worksheet.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\fatherhood-impact-framework.md",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\getting-started.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\institutional-health-scorecard.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\leadership-standards-blueprint.md",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\multi-generational-legacy-ledger.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\purpose-alignment-checklist.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\strategic-frameworks.md",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\strategy-room-intake.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "resources\\vault.mdx",
-      "type": "Resource",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Frontmatter type \"Download\" conflicts with folder type \"Resource\". Folder wins."
-      ]
-    },
-    {
-      "path": "prints\\entrepreneur-operating-pack.mdx",
-      "type": "Print",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "prints\\fatherhood-standards-card.mdx",
-      "type": "Print",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "prints\\leadership-playbook.mdx",
-      "type": "Print",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "prints\\mentorship-starter-kit.mdx",
-      "type": "Print",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "prints\\standards-brief.mdx",
-      "type": "Print",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "prints\\weekly-operating-rhythm.mdx",
-      "type": "Print",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "events\\founders-salon.mdx",
-      "type": "Event",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
-    },
-    {
-      "path": "events\\leadership-workshop.mdx",
-      "type": "Event",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
-    },
-    {
-      "path": "downloads\\abraham-vault-pack.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-abraham-vault-pack\" differs from filename \"abraham-vault-pack\""
-      ]
-    },
-    {
-      "path": "downloads\\board-decision-log-template.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-board-decision-log-template\" differs from filename \"board-decision-log-template\""
-      ]
-    },
-    {
-      "path": "downloads\\board-investor-onepager.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-board-investor-onepager\" differs from filename \"board-investor-onepager\""
-      ]
-    },
-    {
-      "path": "downloads\\brotherhood-covenant.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 10). Only the first is used.",
-        "Slug \"download-brotherhood-covenant\" differs from filename \"brotherhood-covenant\""
-      ]
-    },
-    {
-      "path": "downloads\\canon-volume-iv-diagnostic-toolkit.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used.",
-        "Slug \"download-canon-volume-iv-diagnostic-toolkit\" differs from filename \"canon-volume-iv-diagnostic-toolkit\""
-      ]
-    },
-    {
-      "path": "downloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used.",
-        "Slug \"download-canon-volume-v-governance-diagnostic-toolkit\" differs from filename \"canon-volume-v-governance-diagnostic-toolkit\""
-      ]
-    },
-    {
-      "path": "downloads\\communication-script-bpf.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used.",
-        "Slug \"download-communication-script-bpf\" differs from filename \"communication-script-bpf\""
-      ]
-    },
-    {
-      "path": "downloads\\decision-log-template.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-decision-log-template\" differs from filename \"decision-log-template\""
-      ]
-    },
-    {
-      "path": "downloads\\decision-matrix-scorecard.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-decision-matrix-scorecard\" differs from filename \"decision-matrix-scorecard\""
-      ]
-    },
-    {
-      "path": "downloads\\download-legacy-architecture-canvas.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used.",
-        "Slug \"legacy-architecture-canvas\" differs from filename \"download-legacy-architecture-canvas\""
-      ]
-    },
-    {
-      "path": "downloads\\entrepreneur-operating-pack.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-entrepreneur-operating-pack\" differs from filename \"entrepreneur-operating-pack\""
-      ]
-    },
-    {
-      "path": "downloads\\entrepreneur-survival-checklist.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used.",
-        "Slug \"download-entrepreneur-survival-checklist\" differs from filename \"entrepreneur-survival-checklist\""
-      ]
-    },
-    {
-      "path": "downloads\\family-altar-liturgy.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 8). Only the first is used.",
-        "Slug \"download-family-altar-liturgy\" differs from filename \"family-altar-liturgy\""
-      ]
-    },
-    {
-      "path": "downloads\\leaders-cue-card-two-up.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-leaders-cue-card-two-up\" differs from filename \"leaders-cue-card-two-up\""
-      ]
-    },
-    {
-      "path": "downloads\\leadership-playbook.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-leadership-playbook\" differs from filename \"leadership-playbook\""
-      ]
-    },
-    {
-      "path": "downloads\\legacy-canvas.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-legacy-architecture-canvas\" differs from filename \"legacy-canvas\""
-      ]
-    },
-    {
-      "path": "downloads\\mentorship-starter-kit.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 6). Only the first is used.",
-        "Slug \"download-mentorship-starter-kit\" differs from filename \"mentorship-starter-kit\""
-      ]
-    },
-    {
-      "path": "downloads\\operating-cadence-pack.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-operating-cadence-pack\" differs from filename \"operating-cadence-pack\""
-      ]
-    },
-    {
-      "path": "downloads\\principles-for-my-son-cue-card.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-principles-for-my-son-cue-card\" differs from filename \"principles-for-my-son-cue-card\""
-      ]
-    },
-    {
-      "path": "downloads\\principles-for-my-son.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used.",
-        "Slug \"download-principles-for-my-son\" differs from filename \"principles-for-my-son\""
-      ]
-    },
-    {
-      "path": "downloads\\purpose-pyramid-worksheet.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-purpose-pyramid-worksheet\" differs from filename \"purpose-pyramid-worksheet\""
-      ]
-    },
-    {
-      "path": "downloads\\scripture-track-john14.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 12). Only the first is used.",
-        "Slug \"download-scripture-track-john14\" differs from filename \"scripture-track-john14\""
-      ]
-    },
-    {
-      "path": "downloads\\standards-brief.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-standards-brief\" differs from filename \"standards-brief\""
-      ]
-    },
-    {
-      "path": "downloads\\ultimate-purpose-of-man-editorial.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 15). Only the first is used.",
-        "Slug \"download-ultimate-purpose-of-man-editorial\" differs from filename \"ultimate-purpose-of-man-editorial\""
-      ]
-    },
-    {
-      "path": "downloads\\weekly-operating-rhythm.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"download-weekly-operating-rhythm\" differs from filename \"weekly-operating-rhythm\""
-      ]
-    },
-    {
-      "path": "canon\\builders-catechism.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 14). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\canon-campaign.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\canon-introduction-letter.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\canon-master-index-preview.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-i-foundations-of-purpose.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 10). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-i-teaching-edition.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 12). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-ii-governance-and-formation.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 9). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-ii-teaching-edition.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-iii-teaching-edition.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 13). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-iv-teaching-edition.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 14). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-x-filename.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 3). Only the first is used."
-      ]
-    },
-    {
-      "path": "canon\\volume-x-the-arc-of-future-civilisation.mdx",
-      "type": "Canon",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 14). Only the first is used."
-      ]
-    },
-    {
-      "path": "books\\book-fathering-without-fear.mdx",
-      "type": "Book",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 10). Only the first is used.",
-        "Slug \"fathering-without-fear\" differs from filename \"book-fathering-without-fear\""
-      ]
-    },
-    {
-      "path": "books\\the-architecture-of-human-purpose.mdx",
-      "type": "Book",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "books\\the-builders-catechism.mdx",
-      "type": "Book",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "books\\the-fiction-adaptation.mdx",
-      "type": "Book",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 7). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\christianity-not-extremism.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\fathering-principles.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\fathering-without-fear-teaser.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\fathering-without-fear.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\in-my-fathers-house.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\kingdom-strategies-for-a-loving-legacy.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\leadership-begins-at-home.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\lessons-from-noah.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 12). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\out-of-context-truth.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\post-when-the-system-breaks-you.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 15). Only the first is used.",
-        "Slug \"when-the-system-breaks-you\" differs from filename \"post-when-the-system-breaks-you\""
-      ]
-    },
-    {
-      "path": "blog\\principles-for-my-son.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
+  "errors": [],
+  "warnings": [
     {
       "path": "blog\\reclaiming-the-narrative.mdx",
       "type": "Post",
       "valid": true,
       "errors": [],
       "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used.",
-        "Slug \"reclaiming-the-narrative.mdx\" differs from filename \"reclaiming-the-narrative\""
-      ]
-    },
-    {
-      "path": "blog\\surrender-not-submission.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 7). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\surrender-operational-framework.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 11). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\the-brotherhood-code.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\ultimate-purpose-of-man.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 19). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\when-gods-sovereignty-collides-with-our-pain.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 2). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\when-the-foundation-is-destroyed.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 11). Only the first is used."
-      ]
-    },
-    {
-      "path": "blog\\when-the-storm-finds-you.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Multiple frontmatter blocks detected (found 7). Only the first is used."
-      ]
+        "Unknown field \"keyInsights\" for type Post",
+        "Unknown field \"authorNote\" for type Post"
+      ],
+      "frontmatter": {
+        "type": "Post",
+        "title": "Reclaiming The Narrative",
+        "description": "For fathers crushed by bias and bureaucracy: how to walk through legal fire with faith, clarity, and strategy-and come out forged, not finished.",
+        "excerpt": "There's a kind of pain that doesn't have language. When the system turns on you-not because you failed as a father, but because you dared to be one-it doesn't just hurt. It unmans you. Quietly. Systematically. Legally.",
+        "author": "Abraham of London",
+        "authorTitle": "Abraham of London",
+        "date": "2025-04-01",
+        "slug": "reclaiming-the-narrative",
+        "href": "/blog/reclaiming-the-narrative",
+        "tags": [
+          "fatherhood",
+          "family court",
+          "legacy",
+          "resilience",
+          "faith"
+        ],
+        "category": "Fatherhood",
+        "draft": false,
+        "coverImage": "/assets/images/blog/post-when-the-system-breaks-you.jpg",
+        "coverAspect": "book",
+        "coverFit": "cover",
+        "coverPosition": "center",
+        "accessLevel": "public",
+        "readTime": "9 min read",
+        "resources": {
+          "downloads": [
+            {
+              "href": "/downloads/fathers-in-family-court-practical-pack",
+              "label": "Fathers in Family Court - Practical Pack",
+              "kind": "practical-pack"
+            }
+          ]
+        },
+        "ogTitle": "",
+        "ogDescription": "",
+        "socialCaption": "",
+        "lockMessage": "",
+        "keyInsights": [
+          "The system can wound you deeply, but it cannot define you unless you agree with its verdict.",
+          "Fathers must move from emotional reaction to strategic response: document, prepare, and communicate with clarity.",
+          "Your case is not just a legal battle; it is a legacy moment for your children and for the men who will walk this road after you."
+        ],
+        "authorNote": "This piece is for every father who has been treated like a problem simply because he insists on being present. You are not alone, and you are not finished."
+      }
     }
   ]
 }

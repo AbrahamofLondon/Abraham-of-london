@@ -63,6 +63,9 @@ importers:
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.47)
+      bcryptjs:
+        specifier: ^3.0.3
+        version: 3.0.3
       better-sqlite3:
         specifier: 12.5.0
         version: 12.5.0
@@ -96,6 +99,9 @@ importers:
       google-fonts:
         specifier: 1.0.0
         version: 1.0.0
+      hi-base32:
+        specifier: ^0.5.1
+        version: 0.5.1
       ioredis:
         specifier: 5.9.0
         version: 5.9.0
@@ -120,6 +126,9 @@ importers:
       next-mdx-remote:
         specifier: 5.0.0
         version: 5.0.0(@types/react@18.3.12)(react@18.3.1)
+      otplib:
+        specifier: ^13.1.0
+        version: 13.1.0
       pdf-lib:
         specifier: 1.17.1
         version: 1.17.1
@@ -2681,6 +2690,10 @@ packages:
   '@ngneat/falso@7.4.0':
     resolution: {integrity: sha512-7MzPP0YGNHDrohf/epmz6SVIjHGhKyHbh0bm+iZ1z/7KVW4xZi9Dx6Tl9NMPy6a4lWh/t3WXSsCGkgkuJ/eroQ==}
 
+  '@noble/hashes@2.0.1':
+    resolution: {integrity: sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw==}
+    engines: {node: '>= 20.19.0'}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -3159,6 +3172,24 @@ packages:
     peerDependencies:
       '@opentelemetry/api': 1.9.0
 
+  '@otplib/core@13.1.0':
+    resolution: {integrity: sha512-bMCuRi5U4m86JnKiijEPTyM1KQlmanlcg/uleTCo4ewtqsYgnIvdNqIOUA6x1cS4X+U9XalmX6zF1N4ddZBdoA==}
+
+  '@otplib/hotp@13.1.0':
+    resolution: {integrity: sha512-lqeRLsUwpJ5l4RzhgSOw5uNmY19RayIf3SBnghHnP7uPhA0VccgaVzfk7QliiCkClkhyTpx4T+DTrgdnseOXEg==}
+
+  '@otplib/plugin-base32-scure@13.1.0':
+    resolution: {integrity: sha512-bCyIZd9vZ4qoBErW4LzdyI1L3naKLGY1GuxseriN/Pb4gKlOXKpSmP6i/XK6E1CpQ1GtAd7P6TkcP9CyNDIFWg==}
+
+  '@otplib/plugin-crypto-noble@13.1.0':
+    resolution: {integrity: sha512-/8mIOQSK08gccqpgGK6cW45he0YRL/eSl4QVSfLlaXhtBJZz78UEr/gnzIhIy9ftVgS9jZDsSDMWnozCasQYww==}
+
+  '@otplib/totp@13.1.0':
+    resolution: {integrity: sha512-mEukKW8gxb8pEGL2VPu5zcOwH3lAXTrC6VLo7uhNpn83q9/BTFqDP8m47eygq7kz1MHSDSdL5xbbHJh8OfXY0g==}
+
+  '@otplib/uri@13.1.0':
+    resolution: {integrity: sha512-uSUzIa5F1TSUsHXSUA8xUkYaeYGXyFDq1mpPzQ2eGa+KzDBgw24GLJini2G/VGNjpNth6Q92GuAbcZQ29U0QUA==}
+
   '@panva/hkdf@1.2.1':
     resolution: {integrity: sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==}
 
@@ -3620,6 +3651,9 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@scure/base@2.0.0':
+    resolution: {integrity: sha512-3E1kpuZginKkek01ovG8krQ0Z44E3DHPjc5S2rjJw9lZn3KSQOs8S7wqikF/AH7iRanHypj85uGyxk0XAyC37w==}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
@@ -4936,6 +4970,10 @@ packages:
 
   bcrypt-pbkdf@1.0.2:
     resolution: {integrity: sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w==}
+
+  bcryptjs@3.0.3:
+    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
+    hasBin: true
 
   better-sqlite3@12.5.0:
     resolution: {integrity: sha512-WwCZ/5Diz7rsF29o27o0Gcc1Du+l7Zsv7SYtVPG0X3G/uUI1LqdxrQI7c9Hs2FWpqXXERjW9hp6g3/tH7DlVKg==}
@@ -6844,6 +6882,9 @@ packages:
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
 
+  hi-base32@0.5.1:
+    resolution: {integrity: sha512-EmBBpvdYh/4XxsnUybsPag6VikPYnN30td+vQk+GI3qpahVEG9+gTkG0aXVxTjBqQ5T6ijbWIu77O+C5WFWsnA==}
+
   highlight.js@11.11.1:
     resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
     engines: {node: '>=12.0.0'}
@@ -8516,6 +8557,9 @@ packages:
 
   os-browserify@0.3.0:
     resolution: {integrity: sha512-gjcpUc3clBf9+210TRaDWbf+rZZZEshZ+DlXMRCeAjp0xhTrnQsKHypIy1J3d5hKdUzj69t708EHtU8P6bUn0A==}
+
+  otplib@13.1.0:
+    resolution: {integrity: sha512-QQ8tHgo6j1yo4Jpq5yOGmqpyYbgmjGOBoNZKMLTzZ2sdGKJ4GUN/7P557/5Ti9GNUH/WMsnToQ2gqmPtI1hz0Q==}
 
   own-keys@1.0.1:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
@@ -14284,6 +14328,8 @@ snapshots:
       seedrandom: 3.0.5
       uuid: 8.3.2
 
+  '@noble/hashes@2.0.1': {}
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -14892,6 +14938,33 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
 
+  '@otplib/core@13.1.0': {}
+
+  '@otplib/hotp@13.1.0':
+    dependencies:
+      '@otplib/core': 13.1.0
+      '@otplib/uri': 13.1.0
+
+  '@otplib/plugin-base32-scure@13.1.0':
+    dependencies:
+      '@otplib/core': 13.1.0
+      '@scure/base': 2.0.0
+
+  '@otplib/plugin-crypto-noble@13.1.0':
+    dependencies:
+      '@noble/hashes': 2.0.1
+      '@otplib/core': 13.1.0
+
+  '@otplib/totp@13.1.0':
+    dependencies:
+      '@otplib/core': 13.1.0
+      '@otplib/hotp': 13.1.0
+      '@otplib/uri': 13.1.0
+
+  '@otplib/uri@13.1.0':
+    dependencies:
+      '@otplib/core': 13.1.0
+
   '@panva/hkdf@1.2.1': {}
 
   '@parcel/watcher-android-arm64@2.5.1':
@@ -15380,6 +15453,8 @@ snapshots:
       react-redux: 9.2.0(@types/react@18.3.12)(react@18.3.1)(redux@5.0.1)
 
   '@rtsao/scc@1.1.0': {}
+
+  '@scure/base@2.0.0': {}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     dependencies:
@@ -17136,6 +17211,8 @@ snapshots:
   bcrypt-pbkdf@1.0.2:
     dependencies:
       tweetnacl: 0.14.5
+
+  bcryptjs@3.0.3: {}
 
   better-sqlite3@12.5.0:
     dependencies:
@@ -19487,6 +19564,8 @@ snapshots:
     dependencies:
       hermes-estree: 0.25.1
 
+  hi-base32@0.5.1: {}
+
   highlight.js@11.11.1: {}
 
   highlight.js@9.18.5: {}
@@ -21692,6 +21771,15 @@ snapshots:
       wcwidth: 1.0.1
 
   os-browserify@0.3.0: {}
+
+  otplib@13.1.0:
+    dependencies:
+      '@otplib/core': 13.1.0
+      '@otplib/hotp': 13.1.0
+      '@otplib/plugin-base32-scure': 13.1.0
+      '@otplib/plugin-crypto-noble': 13.1.0
+      '@otplib/totp': 13.1.0
+      '@otplib/uri': 13.1.0
 
   own-keys@1.0.1:
     dependencies:

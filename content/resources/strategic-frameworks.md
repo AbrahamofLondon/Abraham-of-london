@@ -1,28 +1,28 @@
 ---
-title: "Strategic Frameworks"
-type: "Resource"
+type: Resource
+title: Strategic Frameworks
+description: Collection of strategic frameworks for decision-making.
+excerpt: Tools and models for thinking strategically about complex challenges.
+author: Abraham of London
 date: "2024-01-10"
-description: "Collection of strategic frameworks for decision-making."
-excerpt: "Tools and models for thinking strategically about complex challenges."
-author: "Abraham of London"
-coverImage: "/assets/images/canon/canon-resources.jpg"
+slug: strategic-frameworks
 tags:
   - strategic
   - frameworks
   - tools
   - decision-making
-href: "/resources/strategic-frameworks"
 draft: false
-slug: "strategic-frameworks"
+coverImage: /assets/images/canon/canon-resources.jpg
+accessLevel: public
+resourceType: guide
+href: /resources/strategic-frameworks
 ogTitle: ""
 ogDescription: ""
 socialCaption: ""
-coverAspect: "wide"
-coverFit: "cover"
-coverPosition: "center"
-accessLevel: "public"
+coverAspect: wide
+coverFit: cover
+coverPosition: center
 lockMessage: ""
-resourceType: "guide"
 ---
 # Strategic Frameworks Collection
 
@@ -53,16 +53,10 @@ tags:
   ["strategic", "frameworks", "tools", "decision-making", "governance", "leadership", "execution"]
 href: "/resources/strategic-frameworks"
 draft: false
----
 
-# Strategic Frameworks Collection
-## *Ancient precision. Modern deployment.*
 
-> This is not a “frameworks list.”
->  
-> It is a **strategic library**: doctrine compressed into decision tools — built for leaders who govern reality, not vibes.
+<!-- stripped: duplicate frontmatter block -->
 
----
 
 ## Why this exists
 
@@ -81,23 +75,10 @@ This resource collection is the **translation layer**:
 
 These frameworks are designed to be used in boardrooms, founding teams, households, and institutions — because *the same human problems repeat; only the costumes change.*
 
----
 
-## How to use this library
 
-Each framework is delivered in a standard format (so your team can deploy, not admire):
+<!-- stripped: duplicate frontmatter block -->
 
-- **Purpose** — what problem it solves
-- **When to use** — triggers and moments
-- **Inputs** — what you must know first
-- **Process** — steps to execute
-- **Outputs** — what decisions / artifacts it creates
-- **Failure modes** — how leaders misuse it
-- **Canon root** — the ancient principle behind the tool
-
-This makes every tool **auditable**, repeatable, and teachable.
-
----
 
 ## The Core Library
 
@@ -154,63 +135,10 @@ A four-level progression:
 **The Garden Mandate:** identity precedes assignment; assignment precedes stewardship.  
 Purpose is not emotion — it’s *placement + responsibility + order*.
 
----
 
-### 2) The Decision Matrix (Impact, Effort, Risk, Moral Cost)
-**Use:** Making complex decisions without ideology, panic, or ego  
-**Best for:** Boards, investment decisions, pivots, hiring, partnerships
 
-Most matrices stop at “impact vs effort.” That’s business-school neat and spiritually naive.
+<!-- stripped: duplicate frontmatter block -->
 
-This version adds what boards *actually* face:
-
-- **Impact** (how much does it move outcomes?)
-- **Effort** (cost: time, money, energy, attention)
-- **Risk** (probability × downside)
-- **Moral Cost** (what does it do to integrity, reputation, conscience?)
-
-**When to use**
-- High-stakes trade-offs
-- “We can do it, but should we?” situations
-- Shortcut temptations
-- Partnerships you can’t easily undo
-
-**Inputs**
-- Options list (3–7 maximum)
-- Objective constraints (budget, timeline, legal reality)
-- Second-order effects (staff morale, customer trust, future flexibility)
-
-**Process**
-1. Score each option 1–5 on Impact and Effort
-2. Add a risk score (1–5) based on downside and probability
-3. Add a moral cost score (1–5) based on:
-   - integrity compromises
-   - reputational fragility
-   - dependency on deception
-   - harm to others
-4. Plot decisions into four categories:
-
-- **Greenlight:** high impact / acceptable effort / low moral cost
-- **Delay:** high impact / high effort (needs sequencing)
-- **Decline:** low impact or high moral cost
-- **Red Flag:** anything requiring dishonesty to work
-
-**Outputs**
-- A ranked decision stack
-- Clear rationale (audit trail)
-- Risk mitigation actions
-- A moral boundary statement
-
-**Failure modes**
-- Calling moral cost “subjective” (it’s not — it’s predictive)
-- Optimism bias (risk denial)
-- Leadership ego overriding the matrix
-
-**Canon root**
-**Proverbs wisdom tradition:** discipline, foresight, integrity as long-run strategy.  
-Also: “What profits a man…” — the ancient warning against winning with self-destruction.
-
----
 
 ### 3) The Legacy Canvas
 **Use:** Long-term legacy planning that doesn’t collapse into money-talk  
@@ -258,26 +186,10 @@ For each dimension:
 **Canon root**
 **Generational stewardship**: the biblical pattern is not “success” but inheritance — wisdom transmitted, culture built, altars restored.
 
----
 
-## The Canon-to-Tool Pipeline
-This section is the “strategic reveal” for board-level visitors: it shows your architecture.
 
-### The Translation Engine (how doctrine becomes tools)
-**Canon Principle → Modern Diagnosis → Framework → Artifact → Cadence → Training**
+<!-- stripped: duplicate frontmatter block -->
 
-Example:
-- **Principle:** Stewardship under authority
-- **Diagnosis:** Teams lack accountability and clarity
-- **Framework:** Operating Cadence System
-- **Artifact:** Monthly KPI + governance deck + decision log
-- **Cadence:** Weekly execution + monthly board rhythm
-- **Training:** Leadership formation + onboarding
-
-This is what separates a content creator from a strategist:
-**you don’t just teach ideas; you build operating systems.**
-
----
 
 ## What’s coming next in this library
 This makes the page feel “alive” and signals your seriousness.
@@ -289,31 +201,10 @@ This makes the page feel “alive” and signals your seriousness.
 - **The Integrity Moat Model** (trust as a competitive advantage)
 - **The Institutional Design Kit** (how you build structures that don’t rot)
 
----
 
-## For board-level readers
-If you’re reading this from a boardroom context, here’s the bottom line:
 
-This house runs a disciplined model:
-- worldview clarity
-- decision rigor
-- governance design
-- execution cadence
-- leadership formation
+<!-- stripped: duplicate frontmatter block -->
 
-If you want **frameworks that produce outcomes**, not a workshop that produces applause, the consulting work is built for that.
-
-### Engagement modes (high signal)
-- **Board Strategy Room (1–2 sessions):** mandate, priorities, governance
-- **Operating System Build (30–60 days):** cadence + roles + decision process
-- **Narrative & Positioning Reset:** strategic story with execution alignment
-- **Founder/Executive Advisory:** high-accountability decision support
-
-> No performance. No motivational fog.
->  
-> Just strategic clarity and deployable structure.
-
----
 
 ## Downloadable artifacts (recommended structure)
 You can attach real assets here over time. Start with placeholders, then iterate.
