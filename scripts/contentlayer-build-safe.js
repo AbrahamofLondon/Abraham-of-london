@@ -106,7 +106,7 @@ function verifyGenerated() {
 }
 
 function checkRequiredDeps() {
-  const requiredDeps = ["contentlayer2"];
+  const requiredDeps = ["@contentlayer2/cli", "@contentlayer2/core"];
   const missingDeps = [];
   
   for (const dep of requiredDeps) {
@@ -191,7 +191,7 @@ try {
       writeFallback(GENERATED_DIR);
       process.exit(0);
     } else {
-      console.error(`🔴 Please install: pnpm add -D ${missingDeps.join(" ")}`);
+      console.error(`🔴 Please install: pnpm add -D @contentlayer2/cli @contentlayer2/core`);
       process.exit(1);
     }
   }

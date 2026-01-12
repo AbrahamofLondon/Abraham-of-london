@@ -1,30 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getInnerCircleAccess } from "@/lib/inner-circle/access";
-import { getPrivacySafeKeyExportWithRateLimit } from "@/lib/inner-circle";
+import { timingSafeEqual } from "crypto";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
-export async function GET(req: NextRequest) {
-  const access = await getInnerCircleAccess(req, { requireAuth: true, skipRateLimit: false });
+export async function POST(req: NextRequest) {
+  try {
+    const { password } = await req.json();
 
-  if (!access?.hasAccess) {
-    return NextResponse.json({ error: "Access Denied", message: "Admin access required" }, { status: 403 });
+    // Get the dev password from environment
+    const devPassword = process.env.DEV_ADMIN_PASSWORD;
+    if (!devPassword) {
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
+
+    // ✅ FIXED: Convert both to Uint8Array for TypeScript compatibility
+    const a = new TextEncoder().encode(password || "");
+    const b = new TextEncoder().encode(devPassword);
+
+    // ✅ FIXED: Use proper type-safe comparison
+    let isValid = false;
+    
+    if (a.length === b.length) {
+      try {
+        // This is the safe way that works with both Buffer and Uint8Array
+        isValid = timingSafeEqual(
+          Buffer.from(a.buffer, a.byteOffset, a.byteLength),
+          Buffer.from(b.buffer, b.byteOffset, b.byteLength)
+        );
+      } catch {
+        isValid = false;
+      }
+    }
+
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    // Create a secure session token
+    const token = crypto.randomUUID();
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    const response = NextResponse.json({
+      success: true,
+      token,
+      expires: expires.toISOString(),
+    });
+
+    // Set secure HTTP-only cookie
+    response.cookies.set("admin_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      expires,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Admin login error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
+}
 
-  const url = new URL(req.url);
-  const page = Number(url.searchParams.get("page") || "1");
-  const limit = Number(url.searchParams.get("limit") || "50");
-
-  const { data, headers } = await getPrivacySafeKeyExportWithRateLimit({ page, limit }, "admin", req);
-
-  const res = new NextResponse(JSON.stringify(data, null, 2), { status: 200 });
-  res.headers.set("Content-Type", "application/json; charset=utf-8");
-  res.headers.set("Content-Disposition", 'attachment; filename="inner-circle-export.json"');
-  res.headers.set("Cache-Control", "no-store");
-
-  for (const [k, v] of Object.entries(headers || {})) res.headers.set(k, v);
-
-  return res;
+export async function GET() {
+  return NextResponse.json(
+    { error: "Method not allowed" },
+    { status: 405 }
+  );
 }
