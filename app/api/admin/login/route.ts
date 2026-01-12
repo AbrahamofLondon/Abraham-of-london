@@ -1,4 +1,4 @@
-// app/api/admin/login/route.ts
+// app/api/admin/login/route.ts - FIXED VERSION
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, timingSafeEqual } from "crypto";
 
@@ -81,13 +81,22 @@ function getDevPassword(): string | null {
   return typeof p === "string" && p.trim().length > 0 ? p.trim() : null;
 }
 
+// ✅ FIXED: Use Uint8Array instead of Buffer for timingSafeEqual
 async function validatePassword(inputPassword: string): Promise<boolean> {
   const devPassword = getDevPassword();
   if (devPassword) {
-    const a = Buffer.from(inputPassword);
-    const b = Buffer.from(devPassword);
+    // Use Uint8Array instead of Buffer for TypeScript compatibility
+    const encoder = new TextEncoder();
+    const a = encoder.encode(inputPassword);
+    const b = encoder.encode(devPassword);
+    
     if (a.length !== b.length) return false;
-    return timingSafeEqual(a, b);
+    
+    // Convert Uint8Array to Buffer for timingSafeEqual
+    return timingSafeEqual(
+      Buffer.from(a.buffer, a.byteOffset, a.byteLength),
+      Buffer.from(b.buffer, b.byteOffset, b.byteLength)
+    );
   }
 
   if (process.env.NODE_ENV !== "production") {
@@ -96,6 +105,27 @@ async function validatePassword(inputPassword: string): Promise<boolean> {
 
   return false;
 }
+
+// ✅ ALTERNATIVE SIMPLER FIX (if above still has issues):
+// async function validatePassword(inputPassword: string): Promise<boolean> {
+//   const devPassword = getDevPassword();
+//   if (devPassword) {
+//     // Simple timing-safe comparison for strings
+//     if (inputPassword.length !== devPassword.length) return false;
+//     
+//     let result = 0;
+//     for (let i = 0; i < inputPassword.length; i++) {
+//       result |= inputPassword.charCodeAt(i) ^ devPassword.charCodeAt(i);
+//     }
+//     return result === 0;
+//   }
+// 
+//   if (process.env.NODE_ENV !== "production") {
+//     return inputPassword === "admin123";
+//   }
+// 
+//   return false;
+// }
 
 function createSessionCookieValue(userId: string): string {
   const nonce = randomBytes(24).toString("hex");

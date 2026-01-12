@@ -22,6 +22,13 @@ const REQUIRE_DATE_FOR_ALL = process.env.REQUIRE_DATE_FOR_ALL === "1";
 // If true: internal link checks run (can be noisy in early migrations).
 const CHECK_INTERNAL_LINKS = process.env.CHECK_INTERNAL_LINKS === "1";
 
+// If true: slug must match filename (recommended once migration settles)
+const ENFORCE_SLUG_MATCH_FILENAME = process.env.ENFORCE_SLUG_MATCH_FILENAME === "1";
+
+// If true: require tags for Shorts/Posts (recommended for your content strategy)
+const REQUIRE_TAGS_FOR_SHORTS = process.env.REQUIRE_TAGS_FOR_SHORTS === "1";
+const REQUIRE_TAGS_FOR_POSTS = process.env.REQUIRE_TAGS_FOR_POSTS === "1";
+
 // ------------------------------------------------------------
 // HELPERS
 // ------------------------------------------------------------
@@ -54,6 +61,31 @@ const getAllFiles = (dir) => {
   return out;
 };
 
+const normalizeType = (t) => {
+  if (!t) return null;
+  const s = String(t).trim();
+  const map = {
+    post: "Post",
+    posts: "Post",
+    short: "Short",
+    shorts: "Short",
+    book: "Book",
+    books: "Book",
+    canon: "Canon",
+    download: "Download",
+    downloads: "Download",
+    event: "Event",
+    events: "Event",
+    print: "Print",
+    prints: "Print",
+    resource: "Resource",
+    resources: "Resource",
+    strategy: "Strategy",
+    document: "Document",
+  };
+  return map[s.toLowerCase()] || s;
+};
+
 const getTypeFromRelativePath = (relativePath) => {
   const p = relativePath.replace(/\\/g, "/");
   const top = p.split("/")[0];
@@ -82,21 +114,81 @@ const getTypeFromRelativePath = (relativePath) => {
 };
 
 const extractFrontmatter = (raw) => {
+  // Enforce frontmatter must be first bytes of file (prevents accidental BOM/whitespace regression)
   if (!raw.startsWith("---")) return null;
+
+  // Only the first frontmatter block is valid; if more than one, warn later.
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) return null;
+
   return {
     yamlText: match[1],
     body: raw.slice(match[0].length),
+    fmBlock: match[0],
   };
 };
 
-const toArray = (v) => (Array.isArray(v) ? v : v == null ? [] : [v]);
-
 const isValidDateString = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
 
-const fileSlug = (filePath) =>
-  path.basename(filePath, path.extname(filePath));
+const fileSlug = (filePath) => path.basename(filePath, path.extname(filePath));
+
+const isPlaceholderSlug = (s) => {
+  const v = String(s || "").trim().toLowerCase();
+  return v === "replace" || v === "template" || v === "todo" || v === "tbd";
+};
+
+const normalizeStringArray = (v) => {
+  if (v == null) return { arr: [], changed: false, reason: null };
+  if (Array.isArray(v)) {
+    const cleaned = v
+      .map((x) => (x == null ? "" : String(x).trim()))
+      .filter(Boolean);
+    return { arr: cleaned, changed: cleaned.length !== v.length, reason: "cleaned" };
+  }
+  // string => attempt split on commas if it looks like a list
+  if (typeof v === "string") {
+    const s = v.trim();
+    // If it was accidentally serialized like '["a","b"]' keep it as warning only
+    if (s.startsWith("[") && s.endsWith("]")) {
+      return { arr: [s], changed: false, reason: "stringified-array" };
+    }
+    const parts = s.includes(",")
+      ? s.split(",").map((x) => x.trim()).filter(Boolean)
+      : [s].filter(Boolean);
+    return { arr: parts, changed: true, reason: "string-to-array" };
+  }
+  // number/bool/object => stringify as single
+  return { arr: [String(v)], changed: true, reason: "coerced-to-string" };
+};
+
+// Detect the exact YAML anti-patterns that previously broke Contentlayer,
+// BEFORE parsing with js-yaml (because js-yaml might “accept” some, but CL won’t)
+const scanYamlTextForKnownFootguns = (yamlText) => {
+  const issues = [];
+
+  // 1) excerpt: "|" (quoted pipe) — indicates someone wrote excerpt as a literal marker, not a scalar
+  //    You want excerpt: "..." (single line) or excerpt: | (unquoted block scalar)
+  if (/\nexcerpt:\s*"\|"\s*(\r?\n|$)/.test("\n" + yamlText + "\n")) {
+    issues.push(`excerpt is set to the literal string "|" (should be a real string, not a marker)`);
+  }
+
+  // 2) tags: "- foo" (string starting with dash) — exactly your previous regression
+  if (/\ntags:\s*"-\s+/.test("\n" + yamlText + "\n")) {
+    issues.push(`tags is a string that looks like a list (use tags: ["a","b"] or tags:\n  - a\n  - b)`);
+  }
+
+  // 3) Any key assigned to quoted block markers (rare but deadly)
+  if (/\n\w+:\s*"\|"\s*(\r?\n|$)/.test("\n" + yamlText + "\n")) {
+    issues.push(`found a field using the literal string "|" (quoted). Likely a broken block scalar conversion.`);
+  }
+
+  // 4) accidental second frontmatter inside yaml text
+  if (yamlText.includes("\n---\n")) {
+    issues.push(`frontmatter contains an extra "---" delimiter (double-frontmatter)`);
+  }
+
+  return issues;
+};
 
 // ------------------------------------------------------------
 // FIELD SCHEMAS
@@ -135,18 +227,18 @@ const COMMON_FIELDS = new Set([
   "preload",
   "version",
   "type",
-"readTime",
-"readingTime",
-"readtime",
-"layout",
-"density",
-"featuredImage",
-"resources",
-"downloads",
-"relatedDownloads",
-"volumeNumber",
-"order",
-"resourceType",
+  "readTime",
+  "readingTime",
+  "readtime",
+  "layout",
+  "density",
+  "featuredImage",
+  "resources",
+  "downloads",
+  "relatedDownloads",
+  "volumeNumber",
+  "order",
+  "resourceType",
 
   // ✅ MIGRATION FIX: aliases must be allowed
   "aliases",
@@ -214,6 +306,20 @@ const allowedForType = (type) => {
   return s;
 };
 
+// Per-type required fields (to prevent “Contentlayer skipped documents” surprises)
+const REQUIRED_FIELDS_BY_TYPE = {
+  Post: ["title", "date", "slug"],
+  Short: ["title", "date", "slug", "excerpt"],
+  Book: ["title", "slug"],
+  Canon: ["title", "slug"],
+  Download: ["title", "slug"],
+  Event: ["title", "slug"],
+  Print: ["title", "slug"],
+  Resource: ["title", "slug"],
+  Strategy: ["title", "slug"],
+  Document: ["title", "slug"],
+};
+
 // ------------------------------------------------------------
 // VALIDATION
 // ------------------------------------------------------------
@@ -241,6 +347,17 @@ const validateOne = (filePath) => {
     };
   }
 
+  const errors = [];
+  const warnings = [];
+
+  // Double-frontmatter detection (common after merges / template concatenation)
+  const occurrences = (raw.match(/^---\r?\n/gm) || []).length;
+  if (occurrences > 1) warnings.push(`Multiple frontmatter blocks detected (found ${occurrences}). Only the first is used.`);
+
+  // Pre-scan for known regressions
+  const footguns = scanYamlTextForKnownFootguns(fm.yamlText);
+  for (const i of footguns) errors.push(`YAML footgun: ${i}`);
+
   let parsed;
   try {
     parsed = yaml.load(fm.yamlText) || {};
@@ -253,46 +370,63 @@ const validateOne = (filePath) => {
     };
   }
 
-  const type = getTypeFromRelativePath(relativePath);
-  const allowed = allowedForType(type);
+  // Determine type: folder is authoritative, but we sanity-check frontmatter 'type'
+  const folderType = getTypeFromRelativePath(relativePath);
+  const fmType = normalizeType(parsed.type);
+  const type = folderType;
 
-  const errors = [];
-  const warnings = [];
-
-  // Required: title
-  if (!parsed.title || String(parsed.title).trim() === "") {
-    errors.push("Missing required field: title");
+  if (fmType && fmType !== folderType) {
+    warnings.push(`Frontmatter type "${fmType}" conflicts with folder type "${folderType}". Folder wins.`);
   }
 
-  // Required: date (configurable)
-  const requiresDate = REQUIRE_DATE_FOR_ALL ? true : type === "Post";
+  const allowed = allowedForType(type);
+
+  // Required fields by type (configurable date behavior remains)
+  const requiredFields = REQUIRED_FIELDS_BY_TYPE[type] || ["title"];
+
+  for (const k of requiredFields) {
+    if (!parsed[k] || String(parsed[k]).trim() === "") {
+      // date handled separately for format clarity
+      if (k !== "date") errors.push(`Missing required field: ${k}`);
+    }
+  }
+
+  // Date rules (your previous default behavior preserved but safer)
+  const requiresDate = REQUIRE_DATE_FOR_ALL ? true : type === "Post" || type === "Short";
   if (requiresDate) {
     if (!parsed.date) {
       errors.push("Missing required field: date");
     } else if (!isValidDateString(parsed.date)) {
       errors.push(`Invalid date format: "${parsed.date}" (must be YYYY-MM-DD)`);
     }
+  } else if (parsed.date && !isValidDateString(parsed.date)) {
+    warnings.push(`Invalid date format: "${parsed.date}" (must be YYYY-MM-DD)`);
+  }
+
+  // Slug discipline
+  const expectedSlug = fileSlug(filePath);
+  if (!parsed.slug) warnings.push(`Missing slug (recommended: "${expectedSlug}")`);
+  if (parsed.slug && isPlaceholderSlug(parsed.slug)) warnings.push(`Slug "${parsed.slug}" is a placeholder`);
+  if (parsed.slug && ENFORCE_SLUG_MATCH_FILENAME && String(parsed.slug).trim() !== expectedSlug) {
+    errors.push(`Slug "${parsed.slug}" does not match filename "${expectedSlug}"`);
+  } else if (parsed.slug && String(parsed.slug).trim() !== expectedSlug) {
+    warnings.push(`Slug "${parsed.slug}" differs from filename "${expectedSlug}"`);
+  }
+
+  // Tags normalization (warn if not array OR if coercion would change)
+  if (parsed.tags != null) {
+    const { arr, changed, reason } = normalizeStringArray(parsed.tags);
+    if (!Array.isArray(parsed.tags)) warnings.push(`Tags should be an array (detected ${typeof parsed.tags}); would normalize via ${reason} => ${JSON.stringify(arr)}`);
   } else {
-    // If date exists, validate it
-    if (parsed.date && !isValidDateString(parsed.date)) {
-      warnings.push(`Invalid date format: "${parsed.date}" (must be YYYY-MM-DD)`);
+    if ((type === "Short" && REQUIRE_TAGS_FOR_SHORTS) || (type === "Post" && REQUIRE_TAGS_FOR_POSTS)) {
+      errors.push("Missing required field: tags");
     }
   }
 
-  // Slug warning (do not fail)
-  const expectedSlug = fileSlug(filePath);
-  if (parsed.slug && ["replace", "template", "TEMPLATE"].includes(String(parsed.slug))) {
-  warnings.push(`Slug "${parsed.slug}" is a placeholder in ${relativePath}`);
-}
-
-  // Tags should be array
-  if (parsed.tags && !Array.isArray(parsed.tags)) {
-    warnings.push("Tags should be an array");
-  }
-
-  // Aliases should be array
-  if (parsed.aliases && !Array.isArray(parsed.aliases)) {
-    warnings.push("aliases should be an array");
+  // Aliases normalization
+  if (parsed.aliases != null) {
+    const { arr, reason } = normalizeStringArray(parsed.aliases);
+    if (!Array.isArray(parsed.aliases)) warnings.push(`aliases should be an array; would normalize via ${reason} => ${JSON.stringify(arr)}`);
   }
 
   // Unknown fields
@@ -312,15 +446,26 @@ const validateOne = (filePath) => {
       const m = l.match(/\[([^\]]+)\]\(([^)]+)\)/);
       const url = m?.[2];
       if (!url) continue;
+
+      // Skip external, anchors, mailto, tel
+      if (/^(https?:)?\/\//.test(url) || url.startsWith("#") || url.startsWith("mailto:") || url.startsWith("tel:")) {
+        continue;
+      }
+
       if (url.startsWith("/")) {
-        const linked = path.join(projectRoot, url);
-        const exists =
-          fs.existsSync(linked) ||
-          fs.existsSync(linked + ".md") ||
-          fs.existsSync(linked + ".mdx") ||
-          fs.existsSync(path.join(projectRoot, "pages", url + ".tsx")) ||
-          fs.existsSync(path.join(projectRoot, "pages", url + ".ts")) ||
-          fs.existsSync(path.join(projectRoot, "public", url));
+        // Try common Next.js locations
+        const candidates = [
+          path.join(projectRoot, url),
+          path.join(projectRoot, "public", url),
+          path.join(projectRoot, "pages", url + ".tsx"),
+          path.join(projectRoot, "pages", url + ".ts"),
+          path.join(projectRoot, "app", url, "page.tsx"),
+          path.join(projectRoot, "app", url, "page.ts"),
+          path.join(projectRoot, "content", url + ".mdx"),
+          path.join(projectRoot, "content", url + ".md"),
+        ];
+
+        const exists = candidates.some((c) => fs.existsSync(c));
         if (!exists) warnings.push(`Possible broken internal link: ${url}`);
       }
     }
@@ -343,33 +488,29 @@ const files = getAllFiles(contentDir);
 
 const results = files.map(validateOne);
 
-const errors = results.filter((r) => r.errors?.length);
-const warnings = results.filter((r) => r.warnings?.length);
+const fatal = results.filter((r) => r.errors?.length);
+const noisy = results.filter((r) => r.warnings?.length);
 
 console.log("========================================");
 console.log("📌 Frontmatter Validation Report");
 console.log("========================================");
-console.log(`Scanned: ${results.length} files`);
-console.log(`Errors:  ${errors.length}`);
-console.log(`Warnings:${warnings.length}`);
+console.log(`Scanned:  ${results.length} files`);
+console.log(`Fatal:    ${fatal.length}`);
+console.log(`Warnings: ${noisy.length}`);
 console.log("");
 
-if (errors.length) {
-  console.log("❌ Errors (fatal):");
-  for (const r of errors) {
-    for (const e of r.errors) {
-      console.log(` - ${r.path}: ${e}`);
-    }
+if (fatal.length) {
+  console.log("❌ Fatal (build should stop):");
+  for (const r of fatal) {
+    for (const e of r.errors) console.log(` - ${r.path}: ${e}`);
   }
   console.log("");
 }
 
-if (warnings.length) {
-  console.log("⚠️ Warnings:");
-  for (const r of warnings) {
-    for (const w of r.warnings) {
-      console.log(` - ${r.path}: ${w}`);
-    }
+if (noisy.length) {
+  console.log("⚠️ Warnings (fix soon):");
+  for (const r of noisy) {
+    for (const w of r.warnings) console.log(` - ${r.path}: ${w}`);
   }
   console.log("");
 }
@@ -377,11 +518,11 @@ if (warnings.length) {
 // Write report file (optional but useful)
 try {
   const reportPath = path.join(projectRoot, "frontmatter-validation-report.json");
-  fs.writeFileSync(reportPath, JSON.stringify({ results, errors, warnings }, null, 2), "utf8");
+  fs.writeFileSync(reportPath, JSON.stringify({ results, fatal, noisy }, null, 2), "utf8");
   console.log(`📋 Report saved: ${reportPath}`);
 } catch {
   // ignore
 }
 
 // Exit code: fail only if fatal errors exist
-process.exit(errors.length ? 1 : 0);
+process.exit(fatal.length ? 1 : 0);

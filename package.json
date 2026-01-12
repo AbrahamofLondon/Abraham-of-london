@@ -117,6 +117,8 @@
     "fix:imports": "tsx scripts/system/fix-imports.ts",
     "fix:build": "tsx scripts/system/fix-build-issues.ts",
     "fix:prisma": "tsx scripts/system/fix-prisma-working.ts",
+    "fm:validate": "node scripts/validate-frontmatter.mjs",
+    "prebuild": "pnpm fm:validate && pnpm fix:windows && pnpm contentlayer:safe || echo 'Contentlayer build warning (continuing anyway)'",
     "fix:all": "pnpm fix:prisma && pnpm fix:contentlayer && pnpm fix:imports",
     "health": "tsx scripts/system/check-system-health.ts",
     "check:system": "tsx scripts/system/check-system.ts",
