@@ -1,9 +1,12 @@
-// lib/prisma.ts
+// lib/prisma.ts - UPDATED WITH AUDIT LOGGING
 import { PrismaClient } from "@prisma/client";
+import { initializeAuditLogger, ProductionAuditLogger } from "@/lib/audit/audit-logger";
 
 declare global {
   // eslint-disable-next-line no-var
   var __prisma: PrismaClient | undefined;
+  // eslint-disable-next-line no-var
+  var __auditLogger: ProductionAuditLogger | undefined;
 }
 
 /**
@@ -38,7 +41,6 @@ function isBuildTime(): boolean {
 
 /**
  * Create a PrismaClient instance (Node runtime only).
- * NOTE: Prisma must NOT be forced into engine type "client" unless you provide adapter/accelerateUrl.
  */
 function createRealPrismaClient(): PrismaClient {
   // Hard-stop on unsupported runtimes
@@ -78,8 +80,7 @@ function createRealPrismaClient(): PrismaClient {
 }
 
 /**
- * Return a safe stub for build/browser/edge so imports don’t explode.
- * Any attempt to use it will throw clearly.
+ * Return a safe stub for build/browser/edge so imports don't explode.
  */
 function createStubPrisma(reason: string): PrismaClient {
   return new Proxy({} as PrismaClient, {
@@ -95,9 +96,7 @@ function createStubPrisma(reason: string): PrismaClient {
 }
 
 /**
- * Lazy singleton getter.
- * - During build: returns stub by default (prevents "collect page data" crashes).
- * - At runtime (Node): returns real PrismaClient.
+ * Lazy singleton getter for PrismaClient.
  */
 export function getPrisma(): PrismaClient {
   // Never in browser/edge
@@ -119,6 +118,34 @@ export function getPrisma(): PrismaClient {
   return global.__prisma ?? (global.__prisma = createRealPrismaClient());
 }
 
+/**
+ * Lazy singleton getter for AuditLogger.
+ */
+export function getAuditLogger(): ProductionAuditLogger {
+  // Don't initialize in browser/edge/build-time
+  if (isBrowser() || isEdgeRuntime() || isBuildTime()) {
+    throw new Error("AuditLogger is server-side only");
+  }
+
+  if (!global.__auditLogger) {
+    const prisma = getPrisma();
+    
+    // Check if we got a stub (shouldn't happen here but safe)
+    if ((prisma as any)._isStub) {
+      throw new Error("Cannot initialize AuditLogger with stub Prisma client");
+    }
+
+    global.__auditLogger = initializeAuditLogger({
+      prisma,
+      service: "abraham-of-london",
+      environment: process.env.NODE_ENV || "development",
+      version: process.env.APP_VERSION || "1.0.0",
+    });
+  }
+
+  return global.__auditLogger!;
+}
+
 // Convenience named export (but still lazy via getter pattern)
 export const prisma = new Proxy({} as PrismaClient, {
   get(_t, prop) {
@@ -128,16 +155,103 @@ export const prisma = new Proxy({} as PrismaClient, {
   },
 });
 
-export async function safePrismaQuery<T>(fn: (p: PrismaClient) => Promise<T>): Promise<T | null> {
+// Convenience named export for auditLogger
+export const auditLogger = new Proxy({} as ProductionAuditLogger, {
+  get(_t, prop) {
+    const logger = getAuditLogger();
+    // @ts-expect-error - dynamic proxy passthrough
+    return logger[prop];
+  },
+});
+
+// Safe query wrapper with audit logging
+export async function safePrismaQuery<T>(
+  fn: (p: PrismaClient) => Promise<T>,
+  auditContext?: {
+    action: string;
+    actorId?: string;
+    actorEmail?: string;
+    resourceType?: string;
+    resourceId?: string;
+  }
+): Promise<T | null> {
+  const startTime = Date.now();
+  
   try {
-    // If stubbed, this will throw with a clear reason.
     const p = getPrisma();
     await p.$connect();
     const result = await fn(p);
+    
+    // Log successful query if audit context provided
+    if (auditContext) {
+      try {
+        const logger = getAuditLogger();
+        await logger.log({
+          action: `DB_${auditContext.action}`,
+          actorId: auditContext.actorId,
+          actorEmail: auditContext.actorEmail,
+          resourceType: auditContext.resourceType,
+          resourceId: auditContext.resourceId,
+          severity: "info",
+          category: "database",
+          durationMs: Date.now() - startTime,
+          status: "success",
+          metadata: {
+            operation: auditContext.action,
+            executionTime: `${Date.now() - startTime}ms`,
+          },
+        });
+      } catch (auditError) {
+        console.warn("[Audit] Failed to log query:", auditError);
+      }
+    }
+    
     return result;
   } catch (e) {
     console.error("[Prisma] safePrismaQuery failed:", e);
+    
+    // Log failed query if audit context provided
+    if (auditContext) {
+      try {
+        const logger = getAuditLogger();
+        await logger.log({
+          action: `DB_${auditContext.action}`,
+          actorId: auditContext.actorId,
+          actorEmail: auditContext.actorEmail,
+          resourceType: auditContext.resourceType,
+          resourceId: auditContext.resourceId,
+          severity: "error",
+          category: "database",
+          durationMs: Date.now() - startTime,
+          status: "failure",
+          errorMessage: e instanceof Error ? e.message : "Database query failed",
+          metadata: {
+            operation: auditContext.action,
+            error: e instanceof Error ? e.message : String(e),
+          },
+        });
+      } catch (auditError) {
+        console.warn("[Audit] Failed to log query error:", auditError);
+      }
+    }
+    
     return null;
+  }
+}
+
+// Export Prisma types
+export { AdminUser, AdminSession, MfaChallenge } from '@prisma/client';
+
+// Clean shutdown
+export async function cleanup(): Promise<void> {
+  if (global.__auditLogger) {
+    await global.__auditLogger.destroy();
+    global.__auditLogger = undefined;
+  }
+  
+  if (global.__prisma) {
+    await global.__prisma.$disconnect();
+    global.__prisma = undefined;
   }
 }
 

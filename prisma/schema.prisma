@@ -310,3 +310,105 @@ model MaintenanceLog {
   @@index([startedAt])
   @@map("maintenance_logs")
 }
+
+// ==================== ADMIN AUTHENTICATION MODELS ====================
+
+model AdminUser {
+  id                  String   @id @default(cuid())
+  username            String   @unique
+  passwordHash        String   @map("password_hash")
+  email               String   @unique
+  role                String   @default("admin") // 'admin', 'superadmin', 'editor', 'viewer'
+  permissions         String   @default("[]") // JSON array of permission strings
+  mfaEnabled          Boolean  @default(false) @map("mfa_enabled")
+  totpSecret          String?  @map("totp_secret")
+  backupCodes         String   @default("[]") @map("backup_codes") // JSON array
+  status              String   @default("active") // 'active', 'locked', 'suspended', 'inactive'
+  failedLoginAttempts Int      @default(0) @map("failed_login_attempts")
+  lastLoginAt         DateTime? @map("last_login_at")
+  lastFailedLoginAt   DateTime? @map("last_failed_login_at")
+  passwordChangedAt   DateTime? @map("password_changed_at")
+  emailVerifiedAt     DateTime? @map("email_verified_at")
+  timezone            String?   @default("UTC")
+  language            String?   @default("en")
+  avatarUrl           String?   @map("avatar_url")
+  metadata            String?   // JSON object for additional data
+  
+  sessions            AdminSession[]
+  securityLogs        SecurityLog[]
+  createdJobs         FailedJob[] @relation("AdminCreatedJobs")
+  
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  
+  @@index([username])
+  @@index([email])
+  @@index([status])
+  @@index([role])
+  @@index([createdAt])
+  @@map("admin_users")
+}
+
+model AdminSession {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  user            AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken    String   @unique @map("session_token")
+  csrfToken       String   @map("csrf_token")
+  refreshToken    String?  @unique @map("refresh_token")
+  deviceId        String?  @map("device_id")
+  userAgent       String?
+  ipAddress       String?  @map("ip_address")
+  countryCode     String?  @map("country_code")
+  expiresAt       DateTime @map("expires_at")
+  lastActiveAt    DateTime @default(now()) @map("last_active_at")
+  status          String   @default("active") // 'active', 'revoked', 'expired'
+  loginMethod     String?  @map("login_method") // 'password', 'mfa', 'sso'
+  metadata        String?  // JSON object for additional session data
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  @@index([userId])
+  @@index([sessionToken])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@index([status])
+  @@index([deviceId])
+  @@map("admin_sessions")
+}
+
+model MfaChallenge {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  user            AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId     String   @unique @map("challenge_id")
+  method          String   // 'totp', 'sms', 'email', 'backup'
+  type            String   @default("login") // 'login', 'transaction', 'recovery'
+  code            String?  // For SMS/email codes
+  secret          String?  // For TOTP setup
+  expiresAt       DateTime @map("expires_at")
+  verifiedAt      DateTime? @map("verified_at")
+  status          String   @default("pending") // 'pending', 'verified', 'expired', 'failed'
+  ipAddress       String?  @map("ip_address")
+  userAgent       String?
+  attempts        Int      @default(0)
+  maxAttempts     Int      @default(3) @map("max_attempts")
+  metadata        String?  // JSON object
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  @@index([userId])
+  @@index([challengeId])
+  @@index([expiresAt])
+  @@index([status])
+  @@index([method])
+  @@map("mfa_challenges")
+}
+
+// ==================== UPDATE EXISTING SECURITY LOGS ====================
+
+// Add relation to AdminUser in your existing SystemAuditLog model
+// (You already have actorId/actorType fields, just need to document the relation)
+// SystemAuditLog already exists with proper fields
