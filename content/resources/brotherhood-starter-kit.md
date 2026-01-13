@@ -13,6 +13,7 @@ draft: false
 coverImage: /assets/images/resources/brotherhood-starter-kit.jpg
 accessLevel: public
 resourceType: guide
+docKind: Resource
 href: /resources/brotherhood-starter-kit
 downloadUrl: /assets/resources/pdfs/brotherhood-starter-kit.pdf
 ogTitle: ""

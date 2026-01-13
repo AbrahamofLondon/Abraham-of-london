@@ -1,4 +1,4 @@
-// lib/audit/audit-logger.ts - PRODUCTION READY
+// lib/audit/audit-logger.ts - COMPLETE PRODUCTION READY
 import { PrismaClient, type SystemAuditLog } from '@prisma/client';
 
 export type AuditSeverity = 'info' | 'warning' | 'error' | 'critical';
@@ -566,6 +566,129 @@ export function initializeAuditLogger(config: {
   return auditLoggerInstance;
 }
 
+// ==================== SIMPLE AUDIT LOGGER FOR IMMEDIATE USE ====================
+// This provides a simple interface that handles initialization automatically
+
+export const auditLogger = {
+  // Initialize the logger if not already initialized
+  async ensureInitialized(): Promise<ProductionAuditLogger> {
+    if (!auditLoggerInstance) {
+      const { prisma } = await import('@/lib/prisma');
+      return initializeAuditLogger({
+        prisma,
+        service: 'admin-system',
+        environment: process.env.NODE_ENV || 'development',
+        version: process.env.APP_VERSION || '1.0.0'
+      });
+    }
+    return auditLoggerInstance;
+  },
+
+  async log(options: Omit<AuditEvent, 'timestamp'>): Promise<SystemAuditLog | null> {
+    try {
+      const logger = await this.ensureInitialized();
+      return await logger.log(options);
+    } catch (error) {
+      console.error('[AuditLogger] Failed to log event:', error);
+      return null;
+    }
+  },
+
+  async logAuthEvent(
+    userId: string,
+    action: string,
+    details: {
+      success: boolean;
+      method?: string;
+      provider?: string;
+      mfaUsed?: boolean;
+      ipAddress?: string;
+      userAgent?: string;
+      error?: string;
+    }
+  ): Promise<void> {
+    try {
+      const logger = await this.ensureInitialized();
+      await logger.logAuthEvent(userId, action, details);
+    } catch (error) {
+      console.error('[AuditLogger] Failed to log auth event:', error);
+    }
+  },
+
+  async logSecurityEvent(
+    actorId: string,
+    action: string,
+    details: {
+      severity: AuditSeverity;
+      threatType?: string;
+      sourceIp?: string;
+      userAgent?: string;
+      blocked?: boolean;
+      reason?: string;
+    }
+  ): Promise<void> {
+    try {
+      const logger = await this.ensureInitialized();
+      await logger.logSecurityEvent(actorId, action, details);
+    } catch (error) {
+      console.error('[AuditLogger] Failed to log security event:', error);
+    }
+  },
+
+  async logAdminEvent(
+    adminId: string,
+    adminEmail: string,
+    action: string,
+    details: {
+      resourceType?: string;
+      resourceId?: string;
+      changes?: Record<string, any>;
+      ipAddress?: string;
+      userAgent?: string;
+    }
+  ): Promise<void> {
+    try {
+      const logger = await this.ensureInitialized();
+      await logger.logAdminEvent(adminId, adminEmail, action, details);
+    } catch (error) {
+      console.error('[AuditLogger] Failed to log admin event:', error);
+    }
+  },
+
+  // Query methods
+  async query(filters: {
+    actorId?: string;
+    actorEmail?: string;
+    action?: string;
+    resourceType?: string;
+    resourceId?: string;
+    severity?: AuditSeverity;
+    category?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  }): Promise<SystemAuditLog[]> {
+    try {
+      const logger = await this.ensureInitialized();
+      return await logger.query(filters);
+    } catch (error) {
+      console.error('[AuditLogger] Failed to query logs:', error);
+      return [];
+    }
+  },
+
+  async getRecentEvents(limit: number = 50): Promise<SystemAuditLog[]> {
+    try {
+      const logger = await this.ensureInitialized();
+      return await logger.getRecentEvents(limit);
+    } catch (error) {
+      console.error('[AuditLogger] Failed to get recent events:', error);
+      return [];
+    }
+  }
+};
+
 // ==================== CLIENT-SIDE AUDIT LOGGER ====================
 // For browser-only logging (doesn't require Prisma)
 
@@ -581,7 +704,6 @@ export class ClientAuditLogger {
   async log(event: Omit<AuditEvent, 'timestamp'>): Promise<void> {
     const fullEvent: AuditEvent = {
       ...event,
-      timestamp: new Date().toISOString(),
       service: this.service,
       environment: this.environment,
     };
@@ -663,4 +785,5 @@ export default {
   ClientAuditLogger,
   getAuditLogger,
   initializeAuditLogger,
+  auditLogger
 };

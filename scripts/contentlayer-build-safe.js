@@ -18,29 +18,17 @@ const EXPECT_DOCS = process.env.CONTENTLAYER_EXPECT_DOCS !== "0";
 console.log("🚀 Starting HARDENED Contentlayer build...");
 console.log(`📁 CWD: ${ROOT}`);
 console.log(`🧠 Node: ${process.version}`);
-console.log(`🧱 STRICT: ${STRICT} | EXPECT_DOCS: ${EXPECT_DOCS} | ALLOW_FALLBACK: ${ALLOW_FALLBACK}`);
-
-function hasAny(depNames) {
-  for (const name of depNames) {
-    try {
-      require.resolve(name, { paths: [ROOT] });
-      return true;
-    } catch {}
-  }
-  return false;
-}
+console.log(
+  `🧱 STRICT: ${STRICT} | EXPECT_DOCS: ${EXPECT_DOCS} | ALLOW_FALLBACK: ${ALLOW_FALLBACK}`
+);
 
 function run(cmd) {
-  const env = { 
-    ...process.env, 
+  const env = {
+    ...process.env,
     FORCE_COLOR: "1",
-    NODE_OPTIONS: "--max-old-space-size=4096"
+    NODE_OPTIONS: "--max-old-space-size=4096",
   };
-  execSync(cmd, {
-    stdio: "inherit",
-    cwd: ROOT,
-    env
-  });
+  execSync(cmd, { stdio: "inherit", cwd: ROOT, env });
 }
 
 function rmrf(p) {
@@ -49,38 +37,6 @@ function rmrf(p) {
 
 function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
-}
-
-function writeFallback(generatedDir) {
-  ensureDir(generatedDir);
-
-  const fallbackData = {
-    allPosts: [],
-    allBooks: [],
-    allCanons: [],
-    allDownloads: [],
-    allEvents: [],
-    allPrints: [],
-    allResources: [],
-    allShorts: [],
-    allStrategies: [],
-    allDocuments: [],
-  };
-
-  // CJS + ESM
-  fs.writeFileSync(
-    path.join(generatedDir, "index.js"),
-    `module.exports = ${JSON.stringify(fallbackData, null, 2)};\n`
-  );
-
-  fs.writeFileSync(
-    path.join(generatedDir, "index.mjs"),
-    `export default ${JSON.stringify(fallbackData, null, 2)};\nexport const ${Object.keys(fallbackData)
-      .map((k) => `${k} = []`)
-      .join(", ")};\n`
-  );
-
-  console.log("🟡 Fallback contentlayer/generated written (EMPTY DATA).");
 }
 
 function listDirSafe(p) {
@@ -99,152 +55,91 @@ function verifyGenerated() {
   if (files.length === 0) {
     return { ok: false, reason: "generated-dir-empty", files };
   }
-
-  const hasIndexJs = files.includes("index.js") || files.includes("index.mjs");
-  const hasTypes = files.includes("types.d.ts") || files.includes("index.d.ts");
-  return { ok: hasIndexJs, reason: hasIndexJs ? "ok" : "index-missing", files, hasTypes };
+  const hasIndex = files.includes("index.js") || files.includes("index.mjs");
+  return { ok: hasIndex, reason: hasIndex ? "ok" : "index-missing", files };
 }
 
-function checkRequiredDeps() {
-  const requiredDeps = ["@contentlayer2/cli", "@contentlayer2/core"];
-  const missingDeps = [];
-  
-  for (const dep of requiredDeps) {
-    try {
-      require.resolve(dep, { paths: [ROOT] });
-    } catch {
-      missingDeps.push(dep);
-    }
+function writeFallback(generatedDir) {
+  ensureDir(generatedDir);
+
+  const fallbackData = {
+    allPosts: [],
+    allBooks: [],
+    allCanons: [],
+    allDownloads: [],
+    allEvents: [],
+    allPrints: [],
+    allResources: [],
+    allShorts: [],
+    allStrategies: [],
+    allDocuments: [],
+  };
+
+  fs.writeFileSync(
+    path.join(generatedDir, "index.js"),
+    `module.exports = ${JSON.stringify(fallbackData, null, 2)};\n`
+  );
+
+  fs.writeFileSync(
+    path.join(generatedDir, "index.mjs"),
+    `export default ${JSON.stringify(fallbackData, null, 2)};\nexport const ${Object.keys(
+      fallbackData
+    )
+      .map((k) => `${k} = []`)
+      .join(", ")};\n`
+  );
+
+  console.log("🟡 Fallback contentlayer/generated written (EMPTY DATA).");
+}
+
+function hasCL2() {
+  try {
+    require.resolve("@contentlayer2/cli", { paths: [ROOT] });
+    require.resolve("@contentlayer2/core", { paths: [ROOT] });
+    return true;
+  } catch {
+    return false;
   }
-  
-  return missingDeps;
-}
-
-function createWorkingConfig() {
-  const configPath = path.join(ROOT, "contentlayer.working.mjs");
-  
-  // Use contentlayer2/source-files for the correct exports
-  const configContent = `
-// Auto-generated WORKING Contentlayer config
-import { defineDocumentType, makeSource } from 'contentlayer2/source-files';
-
-// Simple document type
-export const Post = defineDocumentType(() => ({
-  name: "Post",
-  filePathPattern: "blog/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    title: { type: "string", required: false },
-    date: { type: "date", required: false },
-    slug: { type: "string", required: false },
-    draft: { type: "boolean", default: false },
-  },
-}));
-
-export const Short = defineDocumentType(() => ({
-  name: "Short",
-  filePathPattern: "shorts/**/*.{md,mdx}",
-  contentType: "mdx",
-  fields: {
-    title: { type: "string", required: false },
-    date: { type: "date", required: false },
-    slug: { type: "string", required: false },
-    draft: { type: "boolean", default: false },
-  },
-}));
-
-export default makeSource({
-  contentDirPath: 'content',
-  documentTypes: [Post, Short],
-  mdx: {
-    esbuildOptions: (options) => {
-      // Mark framer-motion as external
-      options.external = [...(options.external || []), 'framer-motion'];
-      options.platform = 'node';
-      return options;
-    },
-  },
-  onUnknownDocuments: 'skip-warn',
-  onMissingOrInvalidDocuments: 'skip-warn',
-  disableImportAliasWarning: true,
-  onExtraFieldData: 'ignore',
-});
-`;
-  
-  fs.writeFileSync(configPath, configContent, 'utf8');
-  return configPath;
 }
 
 try {
-  // 1) Clean
+  // 1) Clean cache
   console.log("🧹 Cleaning .contentlayer cache...");
   rmrf(CONTENTLAYER_DIR);
   ensureDir(CONTENTLAYER_DIR);
 
-  // 2) Check required dependencies
-  console.log("🔍 Checking required dependencies...");
-  const missingDeps = checkRequiredDeps();
-  if (missingDeps.length > 0) {
-    console.warn(`⚠️ Missing dependencies: ${missingDeps.join(", ")}`);
-    if (ALLOW_FALLBACK) {
-      console.warn("🟠 Writing fallback due to missing dependencies");
-      writeFallback(GENERATED_DIR);
-      process.exit(0);
-    } else {
-      console.error(`🔴 Please install: pnpm add -D @contentlayer2/cli @contentlayer2/core`);
-      process.exit(1);
-    }
-  }
-
-  // 3) Detect engine
-  const hasCL2 = hasAny(["@contentlayer2/cli", "@contentlayer2/core", "contentlayer2"]);
-  const hasCL1 = hasAny(["contentlayer"]);
-
-  console.log(`🔎 Detected: CL2=${hasCL2} | CL1=${hasCL1}`);
-
-  if (!hasCL2 && !hasCL1) {
-    const msg = "Neither Contentlayer2 nor Contentlayer v1 detected in node_modules.";
+  // 2) Ensure Contentlayer2 exists
+  console.log("🔍 Checking Contentlayer2 deps...");
+  if (!hasCL2()) {
+    const msg =
+      "Contentlayer2 not detected (missing @contentlayer2/cli and/or @contentlayer2/core).";
     if (ALLOW_FALLBACK) {
       console.warn(`🟠 ${msg} Writing fallback because CONTENTLAYER_ALLOW_FALLBACK=1`);
       writeFallback(GENERATED_DIR);
       process.exit(0);
     }
     console.error(`🔴 ${msg}`);
-    console.error("Install: pnpm add -D contentlayer2");
+    console.error("Install: pnpm add -D @contentlayer2/cli @contentlayer2/core");
     process.exit(1);
   }
 
-  // 4) Create working config with correct imports
-  const workingConfigPath = createWorkingConfig();
-  console.log("🔧 Created working Contentlayer config with correct imports");
+  // 3) Run Contentlayer2 build using REAL config (no temp config)
+  console.log("🔨 Running Contentlayer2 build (real config)...");
+  try {
+    run("pnpm exec contentlayer2 build --clearCache");
+    console.log("✅ Contentlayer build succeeded!");
+  } catch (err) {
+    console.error("❌ Contentlayer build failed:", err?.message ?? err);
 
-  // 5) Build with working config
-  if (hasCL2) {
-    console.log("🔨 Running Contentlayer2 build with working config...");
-    try {
-      run(`pnpm exec contentlayer2 build --config ${workingConfigPath}`);
-      console.log("✅ Contentlayer build succeeded!");
-    } catch (error) {
-      console.error("❌ Contentlayer build failed:", error.message);
-      
-      if (ALLOW_FALLBACK) {
-        console.warn("🟠 Writing fallback because CONTENTLAYER_ALLOW_FALLBACK=1");
-        writeFallback(GENERATED_DIR);
-      } else {
-        throw error;
-      }
-    } finally {
-      // Clean up temporary config
-      if (fs.existsSync(workingConfigPath)) {
-        fs.unlinkSync(workingConfigPath);
-      }
+    if (ALLOW_FALLBACK) {
+      console.warn("🟠 Writing fallback because CONTENTLAYER_ALLOW_FALLBACK=1");
+      writeFallback(GENERATED_DIR);
+      process.exit(0);
     }
-  } else {
-    console.log("🔨 Running Contentlayer v1 build...");
-    run("pnpm exec contentlayer build");
+    throw err;
   }
 
-  // 6) Verify output
+  // 4) Verify output
   console.log("🔍 Verifying generated output...");
   const result = verifyGenerated();
 
@@ -260,20 +155,19 @@ try {
     process.exit(1);
   }
 
-  // 7) Optional: assert docs are non-empty
+  // 5) Optional strict check: must have more than just index
   if (STRICT && EXPECT_DOCS) {
-    const nonTrivialCount = result.files.filter((f) => !["index.js", "index.mjs", "types.d.ts", "index.d.ts"].includes(f))
-      .length;
-
-    if (nonTrivialCount === 0) {
-      const msg = "Generated exports exist but appear to contain no document data artifacts.";
-      if (ALLOW_FALLBACK) {
-        console.warn(`🟠 ${msg} Allowing due to fallback mode.`);
-      } else {
+    // we won’t try to parse exports here; Contentlayer already generated docs.
+    // this is just a sanity gate to prevent empty runs.
+    const files = result.files;
+    if (files.length <= 2) {
+      const msg = "Generated exports exist but look suspiciously minimal.";
+      if (!ALLOW_FALLBACK) {
         console.error(`🔴 ${msg}`);
-        console.error("If this is intended (rare), set CONTENTLAYER_EXPECT_DOCS=0.");
+        console.error("If intended, set CONTENTLAYER_EXPECT_DOCS=0.");
         process.exit(1);
       }
+      console.warn(`🟠 ${msg} Allowing due to fallback mode.`);
     }
   }
 

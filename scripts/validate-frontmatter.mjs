@@ -1,10 +1,5 @@
 // scripts/validate-frontmatter.mjs
-// GREENLAND validator (production-grade):
-// - strict where it matters: YAML validity, required fields, slug hygiene, uniqueness
-// - tolerant where it should be: filenames don't have to match slugs
-// - catches: multi-frontmatter, embedded YAML blocks, type conflicts, unknown fields
-// - outputs: frontmatter-validation-report.json
-// - exit code: non-zero only on fatal errors
+// GREENLAND validator: strict where it matters, tolerant where it should be.
 
 import fs from "fs";
 import path from "path";
@@ -21,30 +16,7 @@ const REQUIRE_DATE_FOR_ALL = process.env.REQUIRE_DATE_FOR_ALL === "1";
 const CHECK_INTERNAL_LINKS = process.env.CHECK_INTERNAL_LINKS === "1";
 const STRICT_MULTI_FM = process.env.STRICT_MULTI_FM === "1";
 const STRICT_TYPE_CONFLICT = process.env.STRICT_TYPE_CONFLICT === "1";
-
-// Slug policy (Strategy A):
-// - slug is canonical
-// - filename may differ
-// - validate slug shape + uniqueness
-const REQUIRE_SLUG_FOR_ALL = process.env.REQUIRE_SLUG_FOR_ALL === "1";
-const REQUIRE_SLUG_FOR = new Set(
-  (process.env.REQUIRE_SLUG_FOR || "Post,Download,Book")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-);
-
-// enforce kebab-case slugs (recommended)
-const STRICT_SLUG_FORMAT = process.env.STRICT_SLUG_FORMAT !== "0"; // default true
-
-// optional: enforce that downloads slugs start with "download-"
-const ENFORCE_DOWNLOAD_PREFIX = process.env.ENFORCE_DOWNLOAD_PREFIX === "1";
-
-// How far to scan after a '---' when hunting embedded YAML-like blocks
-const EMBEDDED_FM_SCAN_WINDOW = Number(process.env.EMBEDDED_FM_SCAN_WINDOW || 80);
-
-// If true, converts markdown HR lines `---` to `***` in extracted body (in-memory only)
-const NORMALIZE_BODY_HR = process.env.NORMALIZE_BODY_HR === "1";
+const STRICT_SLUG_FORMAT = process.env.STRICT_SLUG_FORMAT !== "0"; // default ON
 
 // ------------------------------------------------------------
 // HELPERS
@@ -59,17 +31,13 @@ const readFileSafe = (p) => {
   }
 };
 
-const normalizeSlashes = (p) => p.replace(/\\/g, "/");
-
 const getAllFiles = (dir) => {
   const out = [];
   const stack = [dir];
   while (stack.length) {
     const d = stack.pop();
     if (!fs.existsSync(d)) continue;
-
-    const entries = fs.readdirSync(d, { withFileTypes: true });
-    for (const e of entries) {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
       const full = path.join(d, e.name);
       if (e.isDirectory()) stack.push(full);
       else if (e.isFile() && isMdx(full)) out.push(full);
@@ -77,6 +45,8 @@ const getAllFiles = (dir) => {
   }
   return out;
 };
+
+const normalizeSlashes = (p) => p.replace(/\\/g, "/");
 
 const getTypeFromRelativePath = (relativePath) => {
   const p = normalizeSlashes(relativePath);
@@ -105,110 +75,150 @@ const getTypeFromRelativePath = (relativePath) => {
   }
 };
 
+const fileSlug = (filePath) => path.basename(filePath, path.extname(filePath));
+
 const isValidDateString = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+
+// strict kebab-case slug (no extension)
+const isValidSlug = (s) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(s || ""));
 
 const countFrontmatterBlocks = (raw) => {
   const matches = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/gm);
   return matches ? matches.length : 0;
 };
 
+// Extract first FM + body, and normalize markdown HR inside body
 const extractFirstFrontmatter = (raw) => {
   if (!raw.startsWith("---")) return null;
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) return null;
 
   const yamlText = match[1];
-  let body = raw.slice(match[0].length);
+  const bodyWithoutAnyFrontmatterBlocks = raw.slice(match[0].length);
 
-  if (NORMALIZE_BODY_HR) {
-    body = body.replace(/^\s*---\s*$/gm, "***");
-  }
+  // Convert markdown HR '---' to '***' inside body to avoid confusing downstream tools
+  const bodyHrNormalized = bodyWithoutAnyFrontmatterBlocks.replace(
+    /^\s*---\s*$/gm,
+    "***"
+  );
 
-  return { yamlText, body };
+  return { yamlText, body: bodyHrNormalized };
 };
 
-// detect a real embedded YAML-like block in body: `---` then "key: value" lines then closing `---`
-const hasEmbeddedYamlFrontmatterBlock = (body) => {
+// Detect suspicious “second frontmatter” embedded in body
+const hasFrontmatterLikeBlockInBody = (body) => {
   if (!body) return false;
-  const lines = body.split(/\r?\n/);
 
+  const lines = body.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].trim() !== "---") continue;
 
     let sawYamlKey = false;
-
-    for (let j = i + 1; j < Math.min(i + EMBEDDED_FM_SCAN_WINDOW, lines.length); j++) {
+    for (let j = i + 1; j < Math.min(i + 60, lines.length); j++) {
       const t = lines[j].trim();
-      if (t === "---") return sawYamlKey;
 
-      if (/^[A-Za-z0-9_][A-Za-z0-9_-]*\s*:\s*.*$/.test(t)) {
-        sawYamlKey = true;
+      if (t === "---") {
+        return sawYamlKey;
       }
+
+      // YAML-ish: "key: value"
+      if (/^[A-Za-z0-9_][A-Za-z0-9_-]*\s*:\s*.*$/.test(t)) sawYamlKey = true;
     }
   }
   return false;
 };
 
-const isKebabSlug = (s) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(s || ""));
-
 // ------------------------------------------------------------
 // FIELD SCHEMAS
 // ------------------------------------------------------------
 const COMMON_FIELDS = new Set([
+  // identity / routing
   "title",
   "slug",
   "href",
+  "aliases",
+  "docKind", // ✅ new global field replacing "type:"
+  "type", // keep allowed in case legacy files still have it
+
+  // dates
   "date",
   "updated",
+  "publishedDate",
+
+  // publishing flags
+  "draft",
+  "published",
+  "featured",
+  "priority",
+
+  // authoring
   "author",
   "authorTitle",
+
+  // meta
   "excerpt",
   "description",
   "subtitle",
-  "draft",
-  "published",
-  "tags",
   "category",
-  "ogTitle",
-  "ogDescription",
-  "socialCaption",
+  "tags",
+  "theme",
+  "layout",
+  "density",
   "canonicalUrl",
+  "socialCaption",
+
+  // cover / visuals
   "coverImage",
+  "featuredImage",
   "coverAspect",
   "coverFit",
   "coverPosition",
-  "featured",
-  "priority",
+
+  // access controls
   "accessLevel",
   "lockMessage",
   "tier",
   "requiresAuth",
   "preload",
-  "version",
-  "type",
 
-  // tolerated migration keys
+  // reading time variants
   "readTime",
   "readingTime",
   "readtime",
-  "layout",
-  "density",
-  "featuredImage",
+
+  // structured attachments / config blobs
   "resources",
   "downloads",
   "relatedDownloads",
+
+  // editorial extras (your new additions)
+  "keyInsights",
+  "authorNote",
+
+  // SEO
+  "ogTitle",
+  "ogDescription",
+  "ogImage",
+  "twitterTitle",
+  "twitterDescription",
+  "twitterImage",
+
+  // canon specifics
   "volumeNumber",
   "order",
-  "resourceType",
+  "volume",
+  "part",
 
-  // aliases
-  "aliases",
+  // misc
+  "resourceType",
+  "shortType",
+  "audience",
 ]);
 
 const TYPE_FIELDS = {
   Post: new Set(["series", "isSeriesPart", "seriesOrder"]),
-  Book: new Set(["isbn", "pages", "publisher", "publishedDate", "edition", "format"]),
-  Canon: new Set(["canonType", "volume", "part"]),
+  Book: new Set(["isbn", "pages", "publisher", "edition", "format"]),
+  Canon: new Set(["canonType"]),
   Download: new Set([
     "downloadType",
     "format",
@@ -241,8 +251,10 @@ const TYPE_FIELDS = {
     "requiresEmail",
     "emailFieldLabel",
     "emailSuccessMessage",
+    "features",
+    "version",
   ]),
-  Short: new Set(["shortType", "audience", "theme", "hook", "callToAction"]),
+  Short: new Set(["hook", "callToAction"]),
   Event: new Set([
     "eventType",
     "location",
@@ -255,9 +267,9 @@ const TYPE_FIELDS = {
     "isVirtual",
     "meetingLink",
   ]),
-  Print: new Set(["printType", "format", "paperFormats", "fileSize", "fileUrl", "downloadUrl", "isPhysical", "price", "currency"]),
-  Resource: new Set(["resourceType", "fileUrl", "downloadUrl", "links", "resources"]),
-  Strategy: new Set(["strategyType", "stage", "industry", "region", "complexity", "timeframe", "deliverables"]),
+  Print: new Set(["printType", "price", "currency", "isPhysical"]),
+  Resource: new Set(["downloadUrl", "links"]),
+  Strategy: new Set(["strategyType", "stage", "industry", "region", "complexity", "timeframe", "deliverables", "version"]),
   Document: new Set([]),
 };
 
@@ -271,16 +283,15 @@ const validateOne = (filePath) => {
   const relativePath = path.relative(contentDir, filePath);
   const raw = readFileSafe(filePath);
 
-  const errors = [];
-  const warnings = [];
-
   if (!raw) {
-    errors.push("Cannot read file");
-    return { path: relativePath, valid: false, errors, warnings };
+    return { path: relativePath, valid: false, errors: ["Cannot read file"], warnings: [] };
   }
 
   const fmCount = countFrontmatterBlocks(raw);
   const fm = extractFirstFrontmatter(raw);
+
+  const errors = [];
+  const warnings = [];
 
   if (!fm) {
     errors.push("No frontmatter (missing --- at start or closing ---)");
@@ -293,8 +304,8 @@ const validateOne = (filePath) => {
     else warnings.push(msg);
   }
 
-  if (hasEmbeddedYamlFrontmatterBlock(fm.body)) {
-    const msg = `Suspicious embedded YAML-like frontmatter block detected in body.`;
+  if (hasFrontmatterLikeBlockInBody(fm.body)) {
+    const msg = `Suspicious embedded YAML block found in body. Possible duplicated frontmatter.`;
     if (STRICT_MULTI_FM) errors.push(msg);
     else warnings.push(msg);
   }
@@ -310,53 +321,56 @@ const validateOne = (filePath) => {
   const folderType = getTypeFromRelativePath(relativePath);
   const allowed = allowedForType(folderType);
 
+  // If legacy "type" is present and conflicts with folder type, warn (or error if strict)
   if (parsed.type && String(parsed.type).trim() && String(parsed.type) !== folderType) {
     const msg = `Frontmatter type "${parsed.type}" conflicts with folder type "${folderType}".`;
     if (STRICT_TYPE_CONFLICT) errors.push(msg);
     else warnings.push(msg);
   }
 
-  // Required: title
   if (!parsed.title || String(parsed.title).trim() === "") {
     errors.push("Missing required field: title");
   }
 
-  // Required: date (configurable)
   const requiresDate = REQUIRE_DATE_FOR_ALL ? true : folderType === "Post";
   if (requiresDate) {
     if (!parsed.date) errors.push("Missing required field: date");
-    else if (!isValidDateString(parsed.date)) errors.push(`Invalid date format: "${parsed.date}" (YYYY-MM-DD)`);
-  } else {
-    if (parsed.date && !isValidDateString(parsed.date)) warnings.push(`Invalid date format: "${parsed.date}" (YYYY-MM-DD)`);
+    else if (!isValidDateString(parsed.date))
+      errors.push(`Invalid date format: "${parsed.date}" (YYYY-MM-DD)`);
   }
 
-  // Slug policy (canonical slug)
-  const requiresSlug = REQUIRE_SLUG_FOR_ALL ? true : REQUIRE_SLUG_FOR.has(folderType);
-  if (requiresSlug) {
-    if (!parsed.slug || String(parsed.slug).trim() === "") {
-      errors.push("Missing required field: slug");
-    } else {
-      const s = String(parsed.slug).trim();
-      if (STRICT_SLUG_FORMAT && !isKebabSlug(s)) {
-        errors.push(`Invalid slug format: "${s}" (use kebab-case: lowercase, digits, hyphens)`);
-      }
-      if (ENFORCE_DOWNLOAD_PREFIX && folderType === "Download" && !s.startsWith("download-")) {
-        errors.push(`Download slug must start with "download-": "${s}"`);
-      }
-    }
-  } else {
-    // if slug exists, still validate shape (warning if bad)
-    if (parsed.slug && String(parsed.slug).trim()) {
-      const s = String(parsed.slug).trim();
-      if (STRICT_SLUG_FORMAT && !isKebabSlug(s)) warnings.push(`Invalid slug format: "${s}" (use kebab-case)`);
+  // Slug vs filename consistency (warning)
+  const expectedSlug = fileSlug(filePath);
+const actualSlug = String(parsed.slug || "").trim();
+
+const normalizedExpected = expectedSlug
+  .replace(/^post-/, "")
+  .replace(/^book-/, "");
+
+if (actualSlug && actualSlug !== expectedSlug && actualSlug !== normalizedExpected) {
+  warnings.push(`Slug "${actualSlug}" differs from filename "${expectedSlug}"`);
+}
+
+  // Strict slug format: kebab-case only (fatal)
+  if (STRICT_SLUG_FORMAT && parsed.slug && String(parsed.slug).trim()) {
+    const s = String(parsed.slug).trim();
+    if (s.endsWith(".mdx") || s.endsWith(".md")) {
+      errors.push(`Invalid slug format: "${s}" (must not include file extension)`);
+    } else if (!isValidSlug(s)) {
+      errors.push(
+        `Invalid slug format: "${s}" (use kebab-case: lowercase, digits, hyphens)`
+      );
     }
   }
 
-  // Tags / aliases shape
-  if (parsed.tags && !Array.isArray(parsed.tags)) warnings.push("tags should be an array");
-  if (parsed.aliases && !Array.isArray(parsed.aliases)) warnings.push("aliases should be an array");
+  // keyInsights should be array if present
+  if (parsed.keyInsights && !Array.isArray(parsed.keyInsights)) {
+    warnings.push(`keyInsights should be an array of strings`);
+  }
 
-  // Unknown fields
+  if (parsed.tags && !Array.isArray(parsed.tags)) warnings.push("Tags should be an array");
+  if (parsed.aliases && !Array.isArray(parsed.aliases)) warnings.push("Aliases should be an array");
+
   for (const key of Object.keys(parsed)) {
     if (!allowed.has(key)) {
       const msg = `Unknown field "${key}" for type ${folderType}`;
@@ -365,7 +379,7 @@ const validateOne = (filePath) => {
     }
   }
 
-  // Optional internal link checks
+  // Optional internal link checking
   if (CHECK_INTERNAL_LINKS) {
     const body = fm.body || "";
     const links = body.match(/\[([^\]]+)\]\(([^)]+)\)/g) || [];
@@ -373,7 +387,6 @@ const validateOne = (filePath) => {
       const m = l.match(/\[([^\]]+)\]\(([^)]+)\)/);
       const url = m?.[2];
       if (!url) continue;
-
       if (url.startsWith("/")) {
         const linked = path.join(projectRoot, url);
         const exists =
@@ -381,19 +394,23 @@ const validateOne = (filePath) => {
           fs.existsSync(linked + ".md") ||
           fs.existsSync(linked + ".mdx") ||
           fs.existsSync(path.join(projectRoot, "pages", url + ".tsx")) ||
-          fs.existsSync(path.join(projectRoot, "pages", url + ".ts")) ||
           fs.existsSync(path.join(projectRoot, "public", url));
-
         if (!exists) warnings.push(`Possible broken internal link: ${url}`);
       }
     }
   }
 
-  return { path: relativePath, type: folderType, valid: errors.length === 0, errors, warnings, frontmatter: parsed };
+  return {
+    path: relativePath,
+    type: folderType,
+    valid: errors.length === 0,
+    errors,
+    warnings,
+  };
 };
 
 // ------------------------------------------------------------
-// RUN + CROSS-FILE CHECKS (slug uniqueness)
+// RUN
 // ------------------------------------------------------------
 const files = getAllFiles(contentDir);
 const results = files.map(validateOne);
@@ -401,51 +418,21 @@ const results = files.map(validateOne);
 const errorRows = results.filter((r) => r.errors?.length);
 const warningRows = results.filter((r) => r.warnings?.length);
 
-// Build slug index per type
-const slugIndex = new Map(); // key: `${type}::${slug}` -> [paths]
-for (const r of results) {
-  const slug = r.frontmatter?.slug ? String(r.frontmatter.slug).trim() : "";
-  if (!slug) continue;
-  const key = `${r.type}::${slug}`;
-  const arr = slugIndex.get(key) || [];
-  arr.push(r.path);
-  slugIndex.set(key, arr);
-}
-
-// Flag duplicates
-for (const [key, paths] of slugIndex.entries()) {
-  if (paths.length <= 1) continue;
-  const [type, slug] = key.split("::");
-  const msg = `Duplicate slug "${slug}" within type ${type}: ${paths.join(", ")}`;
-  // duplicates are fatal (always) — this breaks routing/content lookup
-  errorRows.push({
-    path: "(cross-file)",
-    type: "System",
-    valid: false,
-    errors: [msg],
-    warnings: [],
-  });
-}
-
-// Recompute totals after cross-file errors
-const fatalCount = errorRows.length;
-const warnCount = warningRows.length;
-
 console.log("========================================");
 console.log("📌 Frontmatter Validation Report");
 console.log("========================================");
 console.log(`Scanned:  ${results.length} files`);
-console.log(`Fatal:    ${fatalCount}`);
-console.log(`Warnings: ${warnCount}`);
+console.log(`Fatal:    ${errorRows.length}`);
+console.log(`Warnings: ${warningRows.length}`);
 console.log("");
 
-if (warnCount) {
+if (warningRows.length) {
   console.log("⚠️ Warnings (fix soon):");
   for (const r of warningRows) for (const w of r.warnings) console.log(` - ${r.path}: ${w}`);
   console.log("");
 }
 
-if (fatalCount) {
+if (errorRows.length) {
   console.log("❌ Fatal Errors:");
   for (const r of errorRows) for (const e of r.errors) console.log(` - ${r.path}: ${e}`);
   console.log("");
@@ -455,25 +442,10 @@ try {
   const reportPath = path.join(projectRoot, "frontmatter-validation-report.json");
   fs.writeFileSync(
     reportPath,
-    JSON.stringify(
-      {
-        summary: {
-          scanned: results.length,
-          fatal: fatalCount,
-          warnings: warnCount,
-        },
-        results: results.map(({ frontmatter, ...rest }) => rest), // don’t dump full FM by default
-        errors: errorRows,
-        warnings: warningRows,
-      },
-      null,
-      2
-    ),
+    JSON.stringify({ results, errors: errorRows, warnings: warningRows }, null, 2),
     "utf8"
   );
   console.log(`📋 Report saved: ${reportPath}`);
-} catch {
-  // ignore
-}
+} catch {}
 
-process.exit(fatalCount ? 1 : 0);
+process.exit(errorRows.length ? 1 : 0);

@@ -1,7 +1,7 @@
-// app/api/admin/login/route.ts - UPDATED WITH AUDIT LOGGING
+// app/api/admin/login/route.ts - CORRECTED IMPORTS
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, timingSafeEqual } from "crypto";
-import { auditLogger } from "@/lib/prisma"; // Import the audit logger
+import { auditLogger } from "@/lib/audit/audit-logger"; // Updated import
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -176,17 +176,20 @@ async function verifyPassword(inputPassword: string, storedHash: string): Promis
 
 async function logFailedAttempt(username: string, reason: string, userId?: string) {
   try {
-    // Use audit logger instead of direct Prisma
-    await auditLogger.logSecurityEvent(
-      'system',
-      'LOGIN_FAILED',
-      {
-        severity: 'warning',
-        threatType: 'failed_auth',
-        sourceIp: 'unknown',
-        reason: `Failed login attempt for ${username}: ${reason}`,
-      }
-    );
+    // Use audit logger
+    await auditLogger.log({
+      action: 'LOGIN_FAILED',
+      actorId: userId || 'unknown',
+      actorType: 'user',
+      actorEmail: username,
+      category: 'auth',
+      severity: 'warning',
+      details: {
+        reason,
+        threatType: 'failed_auth'
+      },
+      status: 'failure'
+    });
   } catch (error) {
     console.error('[AuthLog] Failed to log attempt:', error);
   }
@@ -362,17 +365,19 @@ export async function POST(request: NextRequest) {
       body = await request.json();
     } catch {
       // Log invalid JSON
-      await auditLogger.logSecurityEvent(
-        clientIp,
-        'INVALID_REQUEST',
-        {
-          severity: 'warning',
+      await auditLogger.log({
+        action: 'INVALID_REQUEST',
+        category: 'auth',
+        severity: 'warning',
+        details: {
           threatType: 'malformed_request',
           sourceIp: clientIp,
-          blocked: false,
-          reason: 'Invalid JSON in login request',
-        }
-      );
+          reason: 'Invalid JSON in login request'
+        },
+        ipAddress: clientIp,
+        userAgent,
+        status: 'failure'
+      });
       
       return jsonError("Invalid JSON", 400);
     }
@@ -383,17 +388,19 @@ export async function POST(request: NextRequest) {
 
     if (!username || !password) {
       // Log missing credentials
-      await auditLogger.logSecurityEvent(
-        clientIp,
-        'MISSING_CREDENTIALS',
-        {
-          severity: 'warning',
+      await auditLogger.log({
+        action: 'MISSING_CREDENTIALS',
+        category: 'auth',
+        severity: 'warning',
+        details: {
           threatType: 'malformed_request',
           sourceIp: clientIp,
-          blocked: false,
-          reason: 'Missing username or password in login request',
-        }
-      );
+          reason: 'Missing username or password in login request'
+        },
+        ipAddress: clientIp,
+        userAgent,
+        status: 'failure'
+      });
       
       return jsonError("Username and password required", 400);
     }
@@ -401,17 +408,19 @@ export async function POST(request: NextRequest) {
     // Additional validation
     if (username.length > 100 || password.length > 500) {
       // Log invalid input length
-      await auditLogger.logSecurityEvent(
-        clientIp,
-        'INVALID_INPUT_LENGTH',
-        {
-          severity: 'warning',
+      await auditLogger.log({
+        action: 'INVALID_INPUT_LENGTH',
+        category: 'auth',
+        severity: 'warning',
+        details: {
           threatType: 'malformed_request',
           sourceIp: clientIp,
-          blocked: false,
-          reason: 'Input length exceeds limits',
-        }
-      );
+          reason: 'Input length exceeds limits'
+        },
+        ipAddress: clientIp,
+        userAgent,
+        status: 'failure'
+      });
       
       return jsonError("Invalid input length", 400);
     }
@@ -451,13 +460,9 @@ export async function POST(request: NextRequest) {
       // Generate MFA challenge
       const mfaChallenge = randomBytes(16).toString('hex');
       
-      // Store challenge in Redis/database
-      try {
-        const { setMFAChallenge } = await import('@/lib/auth/mfa');
-        await setMFAChallenge(authResult.user!.id, mfaChallenge);
-      } catch (error) {
-        console.error('[MFA] Failed to store challenge:', error);
-      }
+      // Store challenge
+      const { setMFAChallenge } = await import('@/lib/auth/mfa');
+      await setMFAChallenge(authResult.user!.id, mfaChallenge);
       
       // Log MFA challenge created
       await auditLogger.logAuthEvent(

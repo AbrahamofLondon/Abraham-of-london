@@ -9,6 +9,7 @@ draft: false
 coverImage: /assets/images/canon/canon-resources.jpg
 accessLevel: public
 resourceType: guide
+docKind: Resource
 downloadUrl: /assets/resources/pdfs/fatherhood-impact-framework.pdf
 href: /resources/fatherhood-impact-framework
 ogTitle: ""

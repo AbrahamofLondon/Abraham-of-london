@@ -15,6 +15,7 @@ draft: false
 coverImage: /assets/images/canon/canon-resources.jpg
 accessLevel: public
 resourceType: guide
+docKind: Resource
 href: /resources/strategic-frameworks
 ogTitle: ""
 ogDescription: ""
@@ -43,7 +44,7 @@ This collection brings together time-tested strategic frameworks used by leaders
 
 ### 3. The Legacy Canvas---
 title: "Strategic Frameworks"
-type: "Resource"
+docKind: "Resource"
 date: "2024-01-10"
 description: "A curated operating library of strategic frameworks derived from ancient principles and built for modern board-level decision-making."
 excerpt: "Not theory. Deployable frameworks — engineered from the Canon’s philosophical spine to solve modern problems with ancient precision."
@@ -55,7 +56,7 @@ href: "/resources/strategic-frameworks"
 draft: false
 
 
-<!-- stripped: duplicate frontmatter block -->
+{/* stripped: duplicate frontmatter block */}
 
 
 ## Why this exists
@@ -77,7 +78,7 @@ These frameworks are designed to be used in boardrooms, founding teams, househol
 
 
 
-<!-- stripped: duplicate frontmatter block -->
+{/* stripped: duplicate frontmatter block */}
 
 
 ## The Core Library
@@ -137,7 +138,7 @@ Purpose is not emotion — it’s *placement + responsibility + order*.
 
 
 
-<!-- stripped: duplicate frontmatter block -->
+{/* stripped: duplicate frontmatter block */}
 
 
 ### 3) The Legacy Canvas
@@ -188,7 +189,7 @@ For each dimension:
 
 
 
-<!-- stripped: duplicate frontmatter block -->
+{/* stripped: duplicate frontmatter block */}
 
 
 ## What’s coming next in this library
@@ -203,7 +204,7 @@ This makes the page feel “alive” and signals your seriousness.
 
 
 
-<!-- stripped: duplicate frontmatter block -->
+{/* stripped: duplicate frontmatter block */}
 
 
 ## Downloadable artifacts (recommended structure)

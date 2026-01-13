@@ -9,6 +9,7 @@ draft: false
 coverImage: /assets/images/resources/leadership-standards-blueprint.jpg
 accessLevel: public
 resourceType: guide
+docKind: Resource
 href: /resources/leadership-standards-blueprint
 downloadUrl: /assets/resources/pdfs/leadership-standards-blueprint.pdf
 ogTitle: ""

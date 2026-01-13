@@ -124,6 +124,7 @@ const coreFields = {
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
 
+  // Contentlayer2 uses Date objects if you use type: "date"
   date: { type: "date", required: false },
   updated: { type: "date", required: false },
 
@@ -162,10 +163,6 @@ const coreFields = {
   priority: { type: "number", required: false },
   preload: { type: "boolean", required: false },
 
-  // fields you showed as "extra"
-  audience: { type: "string", required: false },      // shorts
-  resourceType: { type: "string", required: false },  // resources
-
   // allow object or list variants without schema fights
   resources: { type: "json", required: false },
 
@@ -175,6 +172,14 @@ const coreFields = {
 
   published: { type: "boolean", required: false, default: true },
   shortType: { type: "string", required: false },
+  audience: { type: "string", required: false },      // shorts
+  resourceType: { type: "string", required: false },  // resources
+
+  // ✅ New editorial fields you want to support
+  keyInsights: { type: "list", of: { type: "string" }, required: false },
+  authorNote: { type: "string", required: false },
+
+ docKind: { type: "string", required: false },
 
 
   ...seoFields,
@@ -322,9 +327,7 @@ export const Download = defineDocumentType(() => ({
     relatedDownloads: { type: "list", of: { type: "string" }, required: false },
     related: { type: "list", of: { type: "string" }, required: false },
 
-    // ✅ THIS kills your one remaining mismatch:
-    // legacy-canvas.mdx has `features: "Interactive fillable fields"`
-    // Other files may use list/object -> we accept all safely.
+    // Accept any shape safely
     features: { type: "json", required: false },
   },
   computedFields: {
@@ -350,8 +353,6 @@ export const Event = defineDocumentType(() => ({
     ...coreFields,
     location: { type: "string", required: false },
     registrationUrl: { type: "string", required: false },
-
-    // your content shows a non-ISO combined string; keep it as string
     startDate: { type: "string", required: false },
   },
 }));
@@ -392,15 +393,15 @@ export default makeSource({
 
   // IMPORTANT: ignore templates & backups & generated json
   ignore: [
-  "**/_*/**",
-  "**/*BACKUP*/**",
-  "**/.*/**",
-  "downloads/_generated.downloads.json",
-  "_templates/**",
-  "**/_templates/**",
-  "content/_templates/**",
-  "**/content/_templates/**",
-],
+    "**/_*/**",
+    "**/*BACKUP*/**",
+    "**/.*/**",
+    "downloads/_generated.downloads.json",
+    "_templates/**",
+    "**/_templates/**",
+    "content/_templates/**",
+    "**/content/_templates/**",
+  ],
 
   disableImportAliasWarning: true,
 });

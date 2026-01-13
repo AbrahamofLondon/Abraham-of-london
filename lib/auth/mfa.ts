@@ -1,7 +1,16 @@
-// lib/auth/mfa.ts - PRODUCTION READY MULTI-FACTOR AUTHENTICATION
+// lib/auth/mfa.ts - COMPLETE PRODUCTION READY MULTI-FACTOR AUTHENTICATION
 import { randomInt, randomBytes } from 'crypto';
 import { encode as encodeBase32 } from 'hi-base32';
-import { authenticator } from 'otplib';
+// Use the correct import for otplib
+import * as otplib from 'otplib';
+
+// Create authenticator instance with proper config
+const authenticator = new otplib.Authenticator({
+  window: 1,
+  step: 30,
+  digits: 6,
+  algorithm: 'sha1'
+});
 
 // Types
 export type MfaMethod = 'totp' | 'sms' | 'email' | 'backup-code' | 'push';
@@ -183,11 +192,7 @@ export function generateTotpUri(
 
 export function verifyTotpCode(secret: string, code: string): boolean {
   try {
-    return authenticator.verify({
-      secret,
-      token: code,
-      window: MFA_CONFIG.totp.window
-    });
+    return authenticator.check(code, secret);
   } catch (error) {
     console.error('[MFA] TOTP verification error:', error);
     return false;
@@ -621,6 +626,46 @@ export async function verifyMfaSetup(
   }
 }
 
+// ==================== SET MFA CHALLENGE (USED BY ADMIN LOGIN) ====================
+export async function setMFAChallenge(userId: string, challenge: string): Promise<void> {
+  try {
+    const { getRedisClient } = await import('@/lib/redis');
+    const redis = await getRedisClient();
+    
+    await redis.setex(
+      `mfa:challenge:${userId}`,
+      300, // 5 minutes
+      JSON.stringify({
+        challenge,
+        userId,
+        createdAt: new Date().toISOString()
+      })
+    );
+    
+    await logMfaEvent({
+      userId,
+      action: 'MFA_CHALLENGE_SET',
+      challengeId: challenge,
+      metadata: { action: 'login' }
+    });
+  } catch (error) {
+    console.error('[MFA] Failed to store challenge:', error);
+    // Fallback to in-memory store
+    const store = MfaChallengeStore.getInstance();
+    await store.set(`challenge:${userId}`, {
+      id: `challenge:${userId}`,
+      userId,
+      method: 'totp',
+      type: 'login',
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 300000),
+      status: 'pending',
+      attempts: 0,
+      maxAttempts: 3
+    } as MfaChallenge, 300000);
+  }
+}
+
 // ==================== SECURITY UTILITIES ====================
 function generateNumericCode(length: number): string {
   let code = '';
@@ -821,6 +866,7 @@ export default {
   verifyMfaChallenge,
   getPendingChallenges,
   cancelChallenge,
+  setMFAChallenge,
   
   // TOTP
   generateTotpSecret,
