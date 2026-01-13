@@ -109,8 +109,8 @@ importers:
         specifier: 9.0.3
         version: 9.0.3
       lucide-react:
-        specifier: 0.454.0
-        version: 0.454.0(react@18.3.1)
+        specifier: 0.562.0
+        version: 0.562.0(react@18.3.1)
       markdown-pdf:
         specifier: 10.0.0
         version: 10.0.0
@@ -7849,10 +7849,10 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  lucide-react@0.454.0:
-    resolution: {integrity: sha512-hw7zMDwykCLnEzgncEEjHeA6+45aeEzRYuKHuyRSOPkhko+J3ySGjGIzu+mmMfDFG1vazHepMaYFYHbTFAZAAQ==}
+  lucide-react@0.562.0:
+    resolution: {integrity: sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw==}
     peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
@@ -20741,7 +20741,7 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  lucide-react@0.454.0(react@18.3.1):
+  lucide-react@0.562.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
