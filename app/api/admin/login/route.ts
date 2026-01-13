@@ -206,12 +206,33 @@ async function logSuccessfulLogin(userId: string, username: string) {
 }
 
 // ==================== SESSION MANAGEMENT ====================
+
+// Keep this local to avoid hard dependency/type import issues in build.
+// Adjust fields if your sessions module expects more/less.
+type CreateSessionOptionsLike = {
+  userId: string;
+  username?: string;
+  role?: string;
+  permissions?: string[];
+  mfaEnabled?: boolean;
+};
+
 async function createAdminSession(user: AdminUser) {
   try {
     // Preferred: central session layer
     try {
-      const { createSession } = await import("@/lib/auth/sessions");
-      return await createSession(user);
+      const mod = await import("@/lib/auth/sessions");
+      const createSession: (opts: CreateSessionOptionsLike) => Promise<any> =
+        (mod as any).createSession;
+
+      // IMPORTANT: sessions expects userId, not id
+      return await createSession({
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        permissions: user.permissions,
+        mfaEnabled: user.mfaEnabled,
+      });
     } catch {
       // Fallback: DB session
       const sessionId = randomBytes(32).toString("hex");
