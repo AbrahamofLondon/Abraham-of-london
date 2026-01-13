@@ -866,9 +866,7 @@
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Unknown field \"version\" for type Download"
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\weekly-operating-rhythm.mdx",
@@ -966,9 +964,7 @@
       "type": "Book",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Slug \"fathering-without-fear\" differs from filename \"book-fathering-without-fear\""
-      ]
+      "warnings": []
     },
     {
       "path": "books\\the-architecture-of-human-purpose.mdx",
@@ -1059,9 +1055,7 @@
       "type": "Post",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Slug \"when-the-system-breaks-you\" differs from filename \"post-when-the-system-breaks-you\""
-      ]
+      "warnings": []
     },
     {
       "path": "blog\\principles-for-my-son.mdx",
@@ -1128,33 +1122,5 @@
     }
   ],
   "errors": [],
-  "warnings": [
-    {
-      "path": "downloads\\ultimate-purpose-of-man-editorial.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Unknown field \"version\" for type Download"
-      ]
-    },
-    {
-      "path": "books\\book-fathering-without-fear.mdx",
-      "type": "Book",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Slug \"fathering-without-fear\" differs from filename \"book-fathering-without-fear\""
-      ]
-    },
-    {
-      "path": "blog\\post-when-the-system-breaks-you.mdx",
-      "type": "Post",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Slug \"when-the-system-breaks-you\" differs from filename \"post-when-the-system-breaks-you\""
-      ]
-    }
-  ]
+  "warnings": []
 }

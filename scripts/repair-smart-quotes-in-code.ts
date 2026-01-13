@@ -1,4 +1,6 @@
+// scripts/repair-smart-quotes-in-code.ts
 import fs from "node:fs";
+import path from "node:path";
 
 const targets = [
   "pages/auth/signin.tsx",
@@ -14,32 +16,48 @@ const targets = [
 
 // Only touch likely JSX text nodes: between > ... <
 // (This avoids import strings, object keys, etc.)
-function fixInJsxText(input) {
-  return input.replace(/>([^<]+)</g, (m, text) => {
+function fixInJsxText(input: string): string {
+  return input.replace(/>([^<]+)</g, (match: string, text: string) => {
     const fixed = text
       // straight double quotes in text → smart quotes
-      .replace(/"([^"]*)"/g, ""$1"")
+      .replace(/"([^"]*)"/g, '“$1”')  // Fixed: Use proper quote characters
       // apostrophes in common contractions/possessives → curly apostrophe
       .replace(/(\w)'(\w)/g, "$1'$2");
     return `>${fixed}<`;
   });
 }
 
-let changed = 0;
+function main(): void {
+  let changed = 0;
 
-for (const p of targets) {
-  if (!fs.existsSync(p)) continue;
+  for (const filePath of targets) {
+    if (!fs.existsSync(filePath)) {
+      console.log(`File not found: ${filePath}`);
+      continue;
+    }
 
-  const original = fs.readFileSync(p, "utf8");
-  const next = fixInJsxText(original);
+    const original = fs.readFileSync(filePath, "utf8");
+    const next = fixInJsxText(original);
 
-  if (next !== original) {
-    fs.writeFileSync(p, next, "utf8");
-    console.log(`patched: ${p}`);
-    changed++;
-  } else {
-    console.log(`no change: ${p}`);
+    if (next !== original) {
+      // Create backup before writing
+      const backupPath = `${filePath}.backup`;
+      fs.writeFileSync(backupPath, original, "utf8");
+      
+      fs.writeFileSync(filePath, next, "utf8");
+      console.log(`patched: ${filePath} (backup created at ${backupPath})`);
+      changed++;
+    } else {
+      console.log(`no change: ${filePath}`);
+    }
   }
+
+  console.log(`\nDone. Files changed: ${changed}`);
 }
 
-console.log(`\nDone. Files changed: ${changed}`);
+// Run if executed directly
+if (require.main === module) {
+  main();
+}
+
+export { fixInJsxText };

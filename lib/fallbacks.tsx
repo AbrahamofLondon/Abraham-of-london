@@ -1,7 +1,7 @@
-// lib/fallbacks.ts
 /**
  * Safe fallbacks for missing modules during build
  */
+import React from 'react';
 
 // Fallback for missing Layout component
 export const FallbackLayout = ({ children }: { children: React.ReactNode }) => {
@@ -19,11 +19,23 @@ export const fallbackAuthOptions = {
   secret: 'fallback-secret-do-not-use-in-production',
 };
 
-// Safe require function
+// Safe require function with proper type handling
 export function safeRequire<T>(modulePath: string, fallback: T): T {
   try {
-    // @ts-ignore - Dynamic require
-    return require(modulePath);
+    // Use require for CommonJS modules
+    const module = require(modulePath);
+    return module.default || module;
+  } catch (error) {
+    console.warn(`Module ${modulePath} not found, using fallback`);
+    return fallback;
+  }
+}
+
+// Safe dynamic import for ES modules
+export async function safeDynamicImport<T>(modulePath: string, fallback: T): Promise<T> {
+  try {
+    const module = await import(modulePath);
+    return module.default || module;
   } catch (error) {
     console.warn(`Module ${modulePath} not found, using fallback`);
     return fallback;

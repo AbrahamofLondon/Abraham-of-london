@@ -40,14 +40,14 @@ const contentlayer = spawn(
 
 // Handle process exit
 contentlayer.on('close', (code) => {
-  if (isWindows) {
-    // On Windows, ignore the exit code error if documents were generated
-    console.log('\n✓ Contentlayer completed successfully');
-    process.exit(0);
-  } else {
-    // On other platforms, use the actual exit code
-    process.exit(code || 0);
-  }
+  contentlayer.on('close', (code) => {
+  const generatedDir = join(process.cwd(), ".contentlayer", "generated");
+  const ok =
+    fs.existsSync(generatedDir) &&
+    (fs.existsSync(join(generatedDir, "index.mjs")) || fs.existsSync(join(generatedDir, "index.js")));
+
+  if (isWindows && ok) process.exit(0);
+  process.exit(code || (ok ? 0 : 1));
 });
 
 // Handle errors

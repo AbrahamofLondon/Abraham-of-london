@@ -112,35 +112,39 @@ class CommandRunner {
     this.npxCmd = this.isWindows ? "npx.cmd" : "npx";
   }
 
-  async runWithRetry(
-    name: string,
-    script: string,
-    args: string[] = [],
-    options: { timeout?: number; cwd?: string } = {}
-  ) {
-    const { timeout = CONFIG.timeout, cwd = process.cwd() } = options;
-    let lastError: any;
+  async checkDependencies(): Promise<void> {
+    Logger.info("Checking dependencies for premium PDF generation...");
 
-    for (let attempt = 1; attempt <= CONFIG.retries; attempt++) {
+    const requiredPackages = ["tsx"];
+    const missing: string[] = [];
+
+    for (const pkg of requiredPackages) {
       try {
-        if (attempt > 1) {
-          Logger.warn(`Retry ${attempt}/${CONFIG.retries} for: ${name}`);
-          await this.delay(CONFIG.retryDelay * attempt);
-        }
-        return await this.runCommand(name, script, args, { timeout, cwd });
-      } catch (error: any) {
-        lastError = error;
-        Logger.warn(`Attempt ${attempt} failed for ${name}: ${error?.message || String(error)}`);
-
-        // Hard failure conditions
-        const msg = (error?.message || "").toLowerCase();
-        if (msg.includes("enoent") || msg.includes("not found")) {
-          throw error;
-        }
+        // Use dynamic import instead of require for ESM compatibility
+        await import(pkg);
+        Logger.debug(`✓ ${pkg} is available`);
+      } catch {
+        missing.push(pkg);
+        Logger.warn(`✗ ${pkg} is missing`);
       }
     }
 
-    throw new Error(`Failed after ${CONFIG.retries} attempts: ${lastError?.message || String(lastError)}`);
+    if (missing.length > 0) {
+      Logger.warn(`Missing packages: ${missing.join(", ")}`);
+      Logger.info("Attempting to install missing packages...");
+
+      try {
+        execSync(`npm install ${missing.join(" ")} --no-save`, {
+          stdio: "inherit",
+          cwd: process.cwd(),
+        });
+        Logger.success("Missing packages installed successfully");
+      } catch (error: any) {
+        throw new Error(`Failed to install missing packages: ${error?.message || String(error)}`);
+      }
+    }
+
+    Logger.success("All dependencies are satisfied");
   }
 
   async runCommand(

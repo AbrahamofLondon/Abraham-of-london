@@ -1,7 +1,7 @@
-// app/api/admin/login/route.ts - CORRECTED IMPORTS
+// app/api/admin/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, timingSafeEqual } from "crypto";
-import { auditLogger } from "@/lib/audit/audit-logger"; // Updated import
+import { auditLogger } from "@/lib/audit/audit-logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,11 +42,28 @@ async function loadRateLimiters() {
   return { rateLimitRedis, rateLimitModule: unifiedModule };
 }
 
+// ==================== CONSTANT-TIME COMPARE (TS-SAFE) ====================
+// Avoid Buffer typing issues under lib.esnext.disposable by using Uint8Array.
+function toBytes(input: string | Uint8Array): Uint8Array {
+  if (input instanceof Uint8Array) return input;
+  return new TextEncoder().encode(input);
+}
+
+function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+
+  // timingSafeEqual expects ArrayBufferView; Uint8Array satisfies that under all sane TS libs.
+  const aView = new Uint8Array(a);
+  const bView = new Uint8Array(b);
+
+  return timingSafeEqual(aView, bView);
+}
+
 // ==================== AUTHENTICATION SERVICE ====================
 type AdminUser = {
   id: string;
   username: string;
-  role: 'admin' | 'superadmin' | 'editor';
+  role: "admin" | "superadmin" | "editor";
   permissions: string[];
   mfaEnabled: boolean;
 };
@@ -60,15 +77,14 @@ type AuthResult = {
 
 async function authenticateAdmin(username: string, password: string): Promise<AuthResult> {
   try {
-    // Use your existing DAL or database
-    // First try to use the existing admin system
+    // Preferred: central auth utility if present
     try {
-      const { verifyAdminCredentials } = await import('@/lib/server/auth/admin-utils');
+      const { verifyAdminCredentials } = await import("@/lib/server/auth/admin-utils");
       return await verifyAdminCredentials(username, password);
     } catch {
-      // Fallback to database check
-      const { prisma } = await import('@/lib/prisma');
-      
+      // Fallback: direct DB check
+      const { prisma } = await import("@/lib/prisma");
+
       const user = await prisma.adminUser.findUnique({
         where: { username: username.toLowerCase() },
         select: {
@@ -80,169 +96,145 @@ async function authenticateAdmin(username: string, password: string): Promise<Au
           mfaEnabled: true,
           status: true,
           lastLoginAt: true,
-          failedLoginAttempts: true
-        }
+          failedLoginAttempts: true,
+        },
       });
-      
+
       if (!user) {
-        // Log failed attempt
-        await logFailedAttempt(username, 'user_not_found');
+        await logFailedAttempt(username, "user_not_found");
+        return { success: false, error: "Invalid credentials" };
+      }
+
+      if (user.status === "locked" || user.failedLoginAttempts >= 5) {
         return {
           success: false,
-          error: 'Invalid credentials'
+          error: "Account is temporarily locked. Please contact support.",
         };
       }
-      
-      // Check if account is locked
-      if (user.status === 'locked' || user.failedLoginAttempts >= 5) {
-        return {
-          success: false,
-          error: 'Account is temporarily locked. Please contact support.'
-        };
-      }
-      
-      // Verify password - use timing-safe comparison
+
       const isPasswordValid = await verifyPassword(password, user.passwordHash);
-      
+
       if (!isPasswordValid) {
-        // Increment failed attempts
         await prisma.adminUser.update({
           where: { id: user.id },
           data: {
             failedLoginAttempts: { increment: 1 },
-            lastFailedLoginAt: new Date()
-          }
+            lastFailedLoginAt: new Date(),
+          },
         });
-        
-        await logFailedAttempt(username, 'invalid_password', user.id);
-        return {
-          success: false,
-          error: 'Invalid credentials'
-        };
+
+        await logFailedAttempt(username, "invalid_password", user.id);
+        return { success: false, error: "Invalid credentials" };
       }
-      
-      // Reset failed attempts on successful login
+
       await prisma.adminUser.update({
         where: { id: user.id },
         data: {
           failedLoginAttempts: 0,
-          lastLoginAt: new Date()
-        }
+          lastLoginAt: new Date(),
+        },
       });
-      
-      // Log successful login
+
       await logSuccessfulLogin(user.id, username);
-      
+
       return {
         success: true,
         user: {
           id: user.id,
           username: user.username,
           role: user.role as any,
-          permissions: JSON.parse(user.permissions || '[]'),
-          mfaEnabled: user.mfaEnabled
+          permissions: JSON.parse(user.permissions || "[]"),
+          mfaEnabled: user.mfaEnabled,
         },
-        requiresMFA: user.mfaEnabled
+        requiresMFA: user.mfaEnabled,
       };
     }
   } catch (error) {
-    console.error('[AdminAuth] Error:', error);
-    return {
-      success: false,
-      error: 'Authentication failed'
-    };
+    console.error("[AdminAuth] Error:", error);
+    return { success: false, error: "Authentication failed" };
   }
 }
 
 async function verifyPassword(inputPassword: string, storedHash: string): Promise<boolean> {
-  // Use bcrypt if available
+  // Preferred: bcrypt
   try {
-    const { compare } = await import('bcryptjs');
+    const { compare } = await import("bcryptjs");
     return await compare(inputPassword, storedHash);
   } catch {
-    // Fallback to timing-safe comparison for dev
-    const encoder = new TextEncoder();
-    const a = encoder.encode(inputPassword);
-    const b = encoder.encode(process.env.ADMIN_DEV_PASSWORD || '');
-    
-    if (a.length !== b.length) return false;
-    
-    return timingSafeEqual(
-      Buffer.from(a.buffer, a.byteOffset, a.byteLength),
-      Buffer.from(b.buffer, b.byteOffset, b.byteLength)
-    );
+    // Dev-only fallback
+    console.warn("[Auth] Using timing-safe fallback for password verification");
+
+    if (process.env.NODE_ENV === "development") {
+      const input = toBytes(inputPassword);
+      const expected = toBytes(process.env.ADMIN_DEV_PASSWORD || "");
+
+      return timingSafeEqualBytes(input, expected);
+    }
+
+    throw new Error("Password verification failed: bcrypt not available");
   }
 }
 
 async function logFailedAttempt(username: string, reason: string, userId?: string) {
   try {
-    // Use audit logger
     await auditLogger.log({
-      action: 'LOGIN_FAILED',
-      actorId: userId || 'unknown',
-      actorType: 'user',
+      action: "LOGIN_FAILED",
+      actorId: userId || "unknown",
+      actorType: "user",
       actorEmail: username,
-      category: 'auth',
-      severity: 'warning',
-      details: {
-        reason,
-        threatType: 'failed_auth'
-      },
-      status: 'failure'
+      category: "auth",
+      severity: "warning",
+      details: { reason, threatType: "failed_auth" },
+      status: "failure",
     });
   } catch (error) {
-    console.error('[AuthLog] Failed to log attempt:', error);
+    console.error("[AuthLog] Failed to log attempt:", error);
   }
 }
 
 async function logSuccessfulLogin(userId: string, username: string) {
   try {
-    await auditLogger.logAuthEvent(
-      userId,
-      'LOGIN_SUCCESS',
-      {
-        success: true,
-        method: 'password',
-        ipAddress: 'unknown',
-        userAgent: 'admin-login',
-      }
-    );
+    await auditLogger.logAuthEvent(userId, "LOGIN_SUCCESS", {
+      success: true,
+      method: "password",
+      ipAddress: "unknown",
+      userAgent: "admin-login",
+    });
   } catch (error) {
-    console.error('[AuthLog] Failed to log success:', error);
+    console.error("[AuthLog] Failed to log success:", error);
   }
 }
 
 // ==================== SESSION MANAGEMENT ====================
 async function createAdminSession(user: AdminUser) {
   try {
-    // Use Redis for session storage if available
+    // Preferred: central session layer
     try {
-      const { createSession } = await import('@/lib/auth/sessions');
+      const { createSession } = await import("@/lib/auth/sessions");
       return await createSession(user);
     } catch {
-      // Fallback to simple session
-      const sessionId = randomBytes(32).toString('hex');
-      const csrfToken = randomBytes(16).toString('hex');
-      
-      // Store in database as fallback
-      const { prisma } = await import('@/lib/prisma');
+      // Fallback: DB session
+      const sessionId = randomBytes(32).toString("hex");
+      const csrfToken = randomBytes(16).toString("hex");
+
+      const { prisma } = await import("@/lib/prisma");
       await prisma.adminSession.create({
         data: {
           id: sessionId,
           userId: user.id,
           token: sessionId,
           csrfToken,
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          userAgent: 'admin-login',
-          ipAddress: 'unknown'
-        }
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          userAgent: "admin-login",
+          ipAddress: "unknown",
+        },
       });
-      
+
       return { token: sessionId, csrfToken, userId: user.id };
     }
   } catch (error) {
-    console.error('[Session] Failed to create session:', error);
-    throw new Error('Session creation failed');
+    console.error("[Session] Failed to create session:", error);
+    throw new Error("Session creation failed");
   }
 }
 
@@ -269,20 +261,24 @@ function normalizeRememberMe(v: unknown): boolean {
   return v === true;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // ==================== MAIN HANDLERS ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const clientIp = getClientIp(request);
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-  
+  const userAgent = request.headers.get("user-agent") || "unknown";
+
   try {
     const { rateLimitRedis, rateLimitModule } = await loadRateLimiters();
 
     // ==================== RATE LIMITING ====================
     let rateLimitResult: any = null;
-    let rateLimitKey = `auth:${clientIp}`;
+    const rateLimitKey = `auth:${clientIp}`;
 
-    // 1) Redis limiter (preferred)
+    // 1) Redis limiter
     if (rateLimitRedis?.check) {
       try {
         rateLimitResult = await rateLimitRedis.check(rateLimitKey, {
@@ -294,29 +290,25 @@ export async function POST(request: NextRequest) {
 
         if (rateLimitResult && rateLimitResult.allowed === false) {
           console.warn(`[AdminLogin] Rate limited: ${clientIp}`);
-          
-          // Log rate limiting event
-          await auditLogger.logSecurityEvent(
-            clientIp,
-            'RATE_LIMIT_EXCEEDED',
+
+          await auditLogger.logSecurityEvent(clientIp, "RATE_LIMIT_EXCEEDED", {
+            severity: "warning",
+            threatType: "brute_force",
+            sourceIp: clientIp,
+            blocked: true,
+            reason: "Too many login attempts",
+          });
+
+          return NextResponse.json(
+            { error: "Too many login attempts. Please try again later." },
             {
-              severity: 'warning',
-              threatType: 'brute_force',
-              sourceIp: clientIp,
-              blocked: true,
-              reason: 'Too many login attempts',
+              status: 429,
+              headers: {
+                "Retry-After": "300",
+                "X-RateLimit-Reason": "too_many_attempts",
+              },
             }
           );
-          
-          return NextResponse.json({ 
-            error: "Too many login attempts. Please try again later." 
-          }, { 
-            status: 429,
-            headers: {
-              'Retry-After': '300',
-              'X-RateLimit-Reason': 'too_many_attempts'
-            }
-          });
         }
       } catch (e) {
         console.warn("[AdminLogin] Redis rate limit error:", e);
@@ -326,29 +318,27 @@ export async function POST(request: NextRequest) {
     // 2) Unified limiter fallback
     if (!rateLimitResult && rateLimitModule?.withEdgeRateLimit) {
       try {
-        const cfg = rateLimitModule.RATE_LIMIT_CONFIGS?.AUTH ?? { 
-          limit: 10, 
-          windowMs: 300_000 
+        const cfg = rateLimitModule.RATE_LIMIT_CONFIGS?.AUTH ?? {
+          limit: 10,
+          windowMs: 300_000,
         };
 
-        const { allowed, result } = await rateLimitModule.withEdgeRateLimit(request, cfg);
+        const { allowed, result } = await rateLimitModule.withEdgeRateLimit(
+          request,
+          cfg
+        );
 
         if (!allowed) {
-          // Log rate limiting event
-          await auditLogger.logSecurityEvent(
-            clientIp,
-            'RATE_LIMIT_EXCEEDED',
-            {
-              severity: 'warning',
-              threatType: 'brute_force',
-              sourceIp: clientIp,
-              blocked: true,
-              reason: 'Too many login requests',
-            }
-          );
-          
+          await auditLogger.logSecurityEvent(clientIp, "RATE_LIMIT_EXCEEDED", {
+            severity: "warning",
+            threatType: "brute_force",
+            sourceIp: clientIp,
+            blocked: true,
+            reason: "Too many login requests",
+          });
+
           if (rateLimitModule.createRateLimitedResponse) {
-            return rateLimitModule.createRateLimitedResponse(result);
+            return rateLimitModule.createRateLimitedResponse(result) as any;
           }
           return NextResponse.json({ error: "Too many requests" }, { status: 429 });
         }
@@ -364,21 +354,20 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch {
-      // Log invalid JSON
       await auditLogger.log({
-        action: 'INVALID_REQUEST',
-        category: 'auth',
-        severity: 'warning',
+        action: "INVALID_REQUEST",
+        category: "auth",
+        severity: "warning",
         details: {
-          threatType: 'malformed_request',
+          threatType: "malformed_request",
           sourceIp: clientIp,
-          reason: 'Invalid JSON in login request'
+          reason: "Invalid JSON in login request",
         },
         ipAddress: clientIp,
         userAgent,
-        status: 'failure'
+        status: "failure",
       });
-      
+
       return jsonError("Invalid JSON", 400);
     }
 
@@ -387,68 +376,58 @@ export async function POST(request: NextRequest) {
     const rememberMe = normalizeRememberMe(body?.rememberMe);
 
     if (!username || !password) {
-      // Log missing credentials
       await auditLogger.log({
-        action: 'MISSING_CREDENTIALS',
-        category: 'auth',
-        severity: 'warning',
+        action: "MISSING_CREDENTIALS",
+        category: "auth",
+        severity: "warning",
         details: {
-          threatType: 'malformed_request',
+          threatType: "malformed_request",
           sourceIp: clientIp,
-          reason: 'Missing username or password in login request'
+          reason: "Missing username or password in login request",
         },
         ipAddress: clientIp,
         userAgent,
-        status: 'failure'
+        status: "failure",
       });
-      
+
       return jsonError("Username and password required", 400);
     }
 
-    // Additional validation
     if (username.length > 100 || password.length > 500) {
-      // Log invalid input length
       await auditLogger.log({
-        action: 'INVALID_INPUT_LENGTH',
-        category: 'auth',
-        severity: 'warning',
+        action: "INVALID_INPUT_LENGTH",
+        category: "auth",
+        severity: "warning",
         details: {
-          threatType: 'malformed_request',
+          threatType: "malformed_request",
           sourceIp: clientIp,
-          reason: 'Input length exceeds limits'
+          reason: "Input length exceeds limits",
         },
         ipAddress: clientIp,
         userAgent,
-        status: 'failure'
+        status: "failure",
       });
-      
+
       return jsonError("Invalid input length", 400);
     }
 
     // ==================== CREDENTIAL CHECK ====================
     const authResult = await authenticateAdmin(username, password);
-    
+
     if (!authResult.success) {
-      // Add delay to prevent timing attacks
+      // consistent minimum time
       const elapsed = Date.now() - startTime;
-      const minDelay = 500; // Minimum 500ms response time
-      if (elapsed < minDelay) {
-        await new Promise(resolve => setTimeout(resolve, minDelay - elapsed));
-      }
-      
-      // Log failed authentication attempt
-      await auditLogger.logAuthEvent(
-        username, // Use username since we don't have userId for failed attempts
-        'LOGIN_FAILED',
-        {
-          success: false,
-          method: 'password',
-          ipAddress: clientIp,
-          userAgent,
-          error: authResult.error || 'Invalid credentials',
-        }
-      );
-      
+      const minDelay = 500;
+      if (elapsed < minDelay) await sleep(minDelay - elapsed);
+
+      await auditLogger.logAuthEvent(username, "LOGIN_FAILED", {
+        success: false,
+        method: "password",
+        ipAddress: clientIp,
+        userAgent,
+        error: authResult.error || "Invalid credentials",
+      });
+
       return NextResponse.json(
         { error: authResult.error || "Invalid credentials" },
         { status: 401 }
@@ -457,31 +436,24 @@ export async function POST(request: NextRequest) {
 
     // ==================== MFA CHECK ====================
     if (authResult.requiresMFA) {
-      // Generate MFA challenge
-      const mfaChallenge = randomBytes(16).toString('hex');
-      
-      // Store challenge
-      const { setMFAChallenge } = await import('@/lib/auth/mfa');
+      const mfaChallenge = randomBytes(16).toString("hex");
+
+      const { setMFAChallenge } = await import("@/lib/auth/mfa");
       await setMFAChallenge(authResult.user!.id, mfaChallenge);
-      
-      // Log MFA challenge created
-      await auditLogger.logAuthEvent(
-        authResult.user!.id,
-        'MFA_CHALLENGE_CREATED',
-        {
-          success: true,
-          method: 'password',
-          mfaUsed: true,
-          ipAddress: clientIp,
-          userAgent,
-        }
-      );
-      
+
+      await auditLogger.logAuthEvent(authResult.user!.id, "MFA_CHALLENGE_CREATED", {
+        success: true,
+        method: "password",
+        mfaUsed: true,
+        ipAddress: clientIp,
+        userAgent,
+      });
+
       return NextResponse.json({
         success: true,
         requiresMFA: true,
         userId: authResult.user!.id,
-        challenge: mfaChallenge
+        challenge: mfaChallenge,
       });
     }
 
@@ -499,45 +471,41 @@ export async function POST(request: NextRequest) {
           permissions: authResult.user!.permissions,
           mfaEnabled: authResult.user!.mfaEnabled,
         },
-        session: {
-          expiresIn: 30 * 24 * 60 * 60 // 30 days in seconds
-        }
+        session: { expiresIn: 30 * 24 * 60 * 60 },
       },
       { status: 200 }
     );
 
-    // Set session cookie
-    response.cookies.set('admin_session', session.token, {
+    response.cookies.set("admin_session", session.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 1 day
-      path: '/',
-      priority: 'high'
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
+      path: "/",
+      priority: "high",
     });
 
-    // Set CSRF token (not HttpOnly, used by frontend)
-    response.cookies.set('admin_csrf', session.csrfToken, {
+    response.cookies.set("admin_csrf", session.csrfToken, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
-      path: '/'
+      path: "/",
     });
 
     // Security headers
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('X-XSS-Protection', '1; mode=block');
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("X-Frame-Options", "DENY");
+    response.headers.set("X-XSS-Protection", "1; mode=block");
+    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+
     // Custom headers
-    response.headers.set('X-Login-Success', 'true');
-    response.headers.set('X-User-Role', authResult.user!.role);
-    response.headers.set('X-User-Id', authResult.user!.id);
-    response.headers.set('X-Response-Time', `${Date.now() - startTime}ms`);
+    response.headers.set("X-Login-Success", "true");
+    response.headers.set("X-User-Role", authResult.user!.role);
+    response.headers.set("X-User-Id", authResult.user!.id);
+    response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
 
     // Rate-limit headers
     if (rateLimitResult && rateLimitModule?.createRateLimitHeaders) {
@@ -551,55 +519,46 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Performance timing
     const totalTime = Date.now() - startTime;
     console.log(`[AdminLogin] Successful login for ${username} in ${totalTime}ms`);
 
-    // Log successful login with audit logger
-    await auditLogger.logAuthEvent(
-      authResult.user!.id,
-      'LOGIN_SUCCESS',
-      {
-        success: true,
-        method: 'password',
-        ipAddress: clientIp,
-        userAgent,
-        mfaUsed: false,
-      }
-    );
+    await auditLogger.logAuthEvent(authResult.user!.id, "LOGIN_SUCCESS", {
+      success: true,
+      method: "password",
+      ipAddress: clientIp,
+      userAgent,
+      mfaUsed: false,
+    });
 
     return response;
-    
   } catch (error) {
     console.error("[AdminLogin] Error:", error);
-    
-    // Log internal error
+
     await auditLogger.log({
-      action: 'LOGIN_INTERNAL_ERROR',
-      severity: 'error',
-      category: 'auth',
+      action: "LOGIN_INTERNAL_ERROR",
+      severity: "error",
+      category: "auth",
       details: {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       },
       ipAddress: clientIp,
       userAgent,
-      status: 'failure',
+      status: "failure",
       metadata: {
-        endpoint: '/api/admin/login',
-        method: 'POST',
+        endpoint: "/api/admin/login",
+        method: "POST",
       },
     });
-    
-    // Don't leak internal errors
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { 
+      {
         status: 500,
         headers: {
-          'Cache-Control': 'no-store',
-          'X-Error-Type': 'internal_error'
-        }
+          "Cache-Control": "no-store",
+          "X-Error-Type": "internal_error",
+        },
       }
     );
   }
@@ -609,31 +568,30 @@ export async function GET() {
   return NextResponse.json(
     {
       recaptchaEnabled: !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-      mfaEnabled: process.env.ADMIN_MFA_ENABLED === 'true',
+      mfaEnabled: process.env.ADMIN_MFA_ENABLED === "true",
       allowRememberMe: true,
       maxPasswordLength: 500,
       minPasswordLength: 8,
-      supportedAuthMethods: ['password', 'mfa'],
-      version: '1.0.0'
+      supportedAuthMethods: ["password", "mfa"],
+      version: "1.0.0",
     },
-    { 
-      status: 200, 
-      headers: { 
-        'Cache-Control': 'public, max-age=3600',
-        'X-Endpoint-Version': 'admin-login-v1'
-      } 
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, max-age=3600",
+        "X-Endpoint-Version": "admin-login-v1",
+      },
     }
   );
 }
 
-// Health check endpoint
 export async function HEAD() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Cache-Control': 'no-store',
-      'X-Status': 'healthy',
-      'X-Endpoint': 'admin-login'
-    }
+      "Cache-Control": "no-store",
+      "X-Status": "healthy",
+      "X-Endpoint": "admin-login",
+    },
   });
 }

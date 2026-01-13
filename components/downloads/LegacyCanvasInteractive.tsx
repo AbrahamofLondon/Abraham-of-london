@@ -1,15 +1,32 @@
 // components/downloads/LegacyCanvasInteractive.tsx - PREMIUM VERSION
-import React, { useState, useEffect } from 'react';
-import { 
-  Save, Download, Printer, Undo, HelpCircle, Lock, Unlock, 
-  Shield, Award, Globe, Users, Target, Zap, CheckCircle,
-  FileText, BarChart, Building, Eye, EyeOff
+'use client';
+
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Save,
+  Download,
+  Printer,
+  Undo,
+  HelpCircle,
+  Lock,
+  Unlock,
+  Shield,
+  Award,
+  Globe,
+  Users,
+  Target,
+  Zap,
+  CheckCircle,
+  FileText,
+  BarChart,
+  Building,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 interface CanvasField {
   id: string;
   label: string;
-  value: string;
   placeholder: string;
   required: boolean;
   type: 'text' | 'textarea' | 'signature' | 'checkbox' | 'date';
@@ -26,267 +43,269 @@ interface CanvasSection {
   fields: CanvasField[];
 }
 
+type CanvasData = Record<string, string>;
+
+const STORAGE_KEY = 'legacyCanvasData';
+
 const LegacyCanvasInteractive: React.FC = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [canvasData, setCanvasData] = useState<Record<string, string>>({});
+  const [canvasData, setCanvasData] = useState<CanvasData>({});
   const [exporting, setExporting] = useState(false);
   const [generationTime, setGenerationTime] = useState<string>('');
 
   // Load saved data
   useEffect(() => {
-    const savedData = localStorage.getItem('legacyCanvasData');
-    if (savedData) {
-      try {
-        setCanvasData(JSON.parse(savedData));
-      } catch (e) {
-        console.error('Failed to load saved data:', e);
+    try {
+      const savedData = window.localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        const parsed = JSON.parse(savedData) as CanvasData;
+        if (parsed && typeof parsed === 'object') {
+          setCanvasData(parsed);
+        }
       }
+    } catch (e) {
+      console.error('Failed to load saved data:', e);
     }
   }, []);
 
-  const sections: CanvasSection[] = [
-    {
-      id: 'sovereign-thesis',
-      title: 'SOVEREIGN THESIS',
-      description: 'Articulate your foundational worldview and purpose',
-      color: 'bg-purple-600',
-      icon: <Globe className="w-5 h-5" />,
-      fields: [
-        {
-          id: 'purpose',
-          label: 'Core Purpose',
-          value: canvasData.purpose || '',
-          placeholder: 'The fundamental reason for your existence...',
-          required: true,
-          type: 'textarea',
-          helpText: 'What legacy do you want to leave? What is your ultimate purpose?',
-          maxLength: 1000
-        },
-        {
-          id: 'values',
-          label: 'Guiding Values',
-          value: canvasData.values || '',
-          placeholder: 'Principles that guide every decision...',
-          required: true,
-          type: 'textarea',
-          helpText: 'What values are non-negotiable in your life and work?',
-          maxLength: 1000
-        },
-        {
-          id: 'vision',
-          label: 'Long-term Vision',
-          value: canvasData.vision || '',
-          placeholder: 'The world you aim to create...',
-          required: true,
-          type: 'textarea',
-          helpText: 'Describe your 100-year vision for your legacy',
-          maxLength: 1000
-        }
-      ]
-    },
-    {
-      id: 'capital-matrix',
-      title: 'CAPITAL MATRIX',
-      description: 'Map and allocate your forms of capital',
-      color: 'bg-emerald-600',
-      icon: <BarChart className="w-5 h-5" />,
-      fields: [
-        {
-          id: 'financial',
-          label: 'Financial Capital',
-          value: canvasData.financial || '',
-          placeholder: 'Financial resources, investments, wealth preservation...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'social',
-          label: 'Social Capital',
-          value: canvasData.social || '',
-          placeholder: 'Networks, relationships, influence, reputation...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'cultural',
-          label: 'Cultural Capital',
-          value: canvasData.cultural || '',
-          placeholder: 'Knowledge, education, taste, family traditions...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'spiritual',
-          label: 'Spiritual Capital',
-          value: canvasData.spiritual || '',
-          placeholder: 'Faith, purpose, transcendence, moral authority...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        }
-      ]
-    },
-    {
-      id: 'institutions',
-      title: 'INSTITUTIONS',
-      description: 'Design the structures that embody your legacy',
-      color: 'bg-blue-600',
-      icon: <Building className="w-5 h-5" />,
-      fields: [
-        {
-          id: 'family',
-          label: 'Family Structures',
-          value: canvasData.family || '',
-          placeholder: 'Family governance, traditions, values, education...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'business',
-          label: 'Business Entities',
-          value: canvasData.business || '',
-          placeholder: 'Companies, partnerships, holding structures, succession...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'philanthropy',
-          label: 'Philanthropic Vehicles',
-          value: canvasData.philanthropy || '',
-          placeholder: 'Foundations, trusts, charitable initiatives, impact...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'intellectual',
-          label: 'Intellectual Property',
-          value: canvasData.intellectual || '',
-          placeholder: 'Patents, trademarks, copyrights, trade secrets...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        }
-      ]
-    },
-    {
-      id: 'guardrails',
-      title: 'GUARDRAILS',
-      description: 'Establish boundaries and protection mechanisms',
-      color: 'bg-red-600',
-      icon: <Shield className="w-5 h-5" />,
-      fields: [
-        {
-          id: 'ethical',
-          label: 'Ethical Boundaries',
-          value: canvasData.ethical || '',
-          placeholder: 'Moral principles, red lines, ethical will...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'risk',
-          label: 'Risk Management',
-          value: canvasData.risk || '',
-          placeholder: 'Risk assessment, mitigation strategies, insurance...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'succession',
-          label: 'Succession Planning',
-          value: canvasData.succession || '',
-          placeholder: 'Leadership transition, continuity plans, training...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        },
-        {
-          id: 'accountability',
-          label: 'Accountability Systems',
-          value: canvasData.accountability || '',
-          placeholder: 'Oversight, checks and balances, audits, advisors...',
-          required: true,
-          type: 'textarea',
-          maxLength: 500
-        }
-      ]
+  const sections: CanvasSection[] = useMemo(
+    () => [
+      {
+        id: 'sovereign-thesis',
+        title: 'SOVEREIGN THESIS',
+        description: 'Articulate your foundational worldview and purpose',
+        color: 'bg-purple-600',
+        icon: <Globe className="w-5 h-5" />,
+        fields: [
+          {
+            id: 'purpose',
+            label: 'Core Purpose',
+            placeholder: 'The fundamental reason for your existence...',
+            required: true,
+            type: 'textarea',
+            helpText:
+              'What legacy do you want to leave? What is your ultimate purpose?',
+            maxLength: 1000,
+          },
+          {
+            id: 'values',
+            label: 'Guiding Values',
+            placeholder: 'Principles that guide every decision...',
+            required: true,
+            type: 'textarea',
+            helpText: 'What values are non-negotiable in your life and work?',
+            maxLength: 1000,
+          },
+          {
+            id: 'vision',
+            label: 'Long-term Vision',
+            placeholder: 'The world you aim to create...',
+            required: true,
+            type: 'textarea',
+            helpText: 'Describe your 100-year vision for your legacy',
+            maxLength: 1000,
+          },
+        ],
+      },
+      {
+        id: 'capital-matrix',
+        title: 'CAPITAL MATRIX',
+        description: 'Map and allocate your forms of capital',
+        color: 'bg-emerald-600',
+        icon: <BarChart className="w-5 h-5" />,
+        fields: [
+          {
+            id: 'financial',
+            label: 'Financial Capital',
+            placeholder: 'Financial resources, investments, wealth preservation...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'social',
+            label: 'Social Capital',
+            placeholder: 'Networks, relationships, influence, reputation...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'cultural',
+            label: 'Cultural Capital',
+            placeholder: 'Knowledge, education, taste, family traditions...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'spiritual',
+            label: 'Spiritual Capital',
+            placeholder: 'Faith, purpose, transcendence, moral authority...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+        ],
+      },
+      {
+        id: 'institutions',
+        title: 'INSTITUTIONS',
+        description: 'Design the structures that embody your legacy',
+        color: 'bg-blue-600',
+        icon: <Building className="w-5 h-5" />,
+        fields: [
+          {
+            id: 'family',
+            label: 'Family Structures',
+            placeholder: 'Family governance, traditions, values, education...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'business',
+            label: 'Business Entities',
+            placeholder: 'Companies, partnerships, holding structures, succession...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'philanthropy',
+            label: 'Philanthropic Vehicles',
+            placeholder: 'Foundations, trusts, charitable initiatives, impact...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'intellectual',
+            label: 'Intellectual Property',
+            placeholder: 'Patents, trademarks, copyrights, trade secrets...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+        ],
+      },
+      {
+        id: 'guardrails',
+        title: 'GUARDRAILS',
+        description: 'Establish boundaries and protection mechanisms',
+        color: 'bg-red-600',
+        icon: <Shield className="w-5 h-5" />,
+        fields: [
+          {
+            id: 'ethical',
+            label: 'Ethical Boundaries',
+            placeholder: 'Moral principles, red lines, ethical will...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'risk',
+            label: 'Risk Management',
+            placeholder: 'Risk assessment, mitigation strategies, insurance...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'succession',
+            label: 'Succession Planning',
+            placeholder: 'Leadership transition, continuity plans, training...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+          {
+            id: 'accountability',
+            label: 'Accountability Systems',
+            placeholder: 'Oversight, checks and balances, audits, advisors...',
+            required: true,
+            type: 'textarea',
+            maxLength: 500,
+          },
+        ],
+      },
+    ],
+    []
+  );
+
+  const persist = (data: CanvasData) => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error('LocalStorage write failed:', e);
     }
-  ];
+  };
 
   const handleFieldChange = (fieldId: string, value: string) => {
-    if (!isLocked) {
-      const newData = {
-        ...canvasData,
-        [fieldId]: value
-      };
-      setCanvasData(newData);
-      setSaved(false);
-      
-      // Auto-save
-      localStorage.setItem('legacyCanvasData', JSON.stringify(newData));
-    }
+    if (isLocked) return;
+
+    setCanvasData((prev) => {
+      const next = { ...prev, [fieldId]: value };
+      persist(next); // Auto-save
+      return next;
+    });
+
+    setSaved(false);
   };
 
   const handleSave = async () => {
     try {
-      localStorage.setItem('legacyCanvasData', JSON.stringify(canvasData));
+      persist(canvasData);
       setSaved(true);
-      
-      // Show success message
-      setTimeout(() => setSaved(false), 3000);
+      window.setTimeout(() => setSaved(false), 3000);
     } catch (error) {
       console.error('Save failed:', error);
     }
   };
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to reset all fields? This cannot be undone.')) {
-      setCanvasData({});
-      localStorage.removeItem('legacyCanvasData');
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+    const ok = window.confirm(
+      'Are you sure you want to reset all fields? This cannot be undone.'
+    );
+    if (!ok) return;
+
+    setCanvasData({});
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignore
     }
+
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 2000);
   };
 
   const handleExportPDF = async (format: 'A4' | 'Letter' = 'A4') => {
     setExporting(true);
-    
+
     try {
       const startTime = Date.now();
-      
-      // Generate dynamic filename
+
       const timestamp = new Date().toISOString().slice(0, 10);
       const filename = `Legacy-Architecture-Canvas-${format}-${timestamp}.pdf`;
-      
-      // In production, this would call your backend PDF generation service
-      // For now, we'll use the existing PDFs and simulate generation
-      
+
       const pdfUrl = `/assets/downloads/download-legacy-architecture-canvas-${format.toLowerCase()}-premium.pdf`;
-      
-      // Create download link
+
       const link = document.createElement('a');
       link.href = pdfUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       const endTime = Date.now();
       const duration = ((endTime - startTime) / 1000).toFixed(1);
       setGenerationTime(duration);
-      
+
       console.log(`PDF exported in ${duration}s: ${filename}`);
-      
     } catch (error) {
       console.error('PDF export failed:', error);
       alert('Failed to export PDF. Please try again.');
@@ -295,79 +314,138 @@ const LegacyCanvasInteractive: React.FC = () => {
     }
   };
 
+  const escapeHtml = (input: string) =>
+    input
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+
   const handlePrint = () => {
-    // Create print-friendly version
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Legacy Architecture Canvas - Print Version</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 40px; }
-            .section { margin-bottom: 40px; border: 2px solid #000; padding: 20px; }
-            .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-            .field { margin-bottom: 15px; }
-            .field-label { font-weight: bold; margin-bottom: 5px; }
-            .field-value { border-bottom: 1px solid #ccc; min-height: 20px; }
-            .header { text-align: center; margin-bottom: 40px; }
-            .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Legacy Architecture Canvas</h1>
-            <p>Generated: ${new Date().toLocaleDateString()}</p>
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+    if (!printWindow) return;
+
+    const generated = new Date();
+    const year = generated.getFullYear();
+
+    const bodyHtml = sections
+      .map((section) => {
+        const fieldsHtml = section.fields
+          .map((field) => {
+            const raw = canvasData[field.id] || '';
+            const value = raw.trim() ? escapeHtml(raw) : '';
+            const fallback = escapeHtml(field.placeholder);
+            return `
+              <div class="field">
+                <div class="field-label">${escapeHtml(field.label)}</div>
+                <div class="field-value">${
+                  value
+                    ? value.replace(/\n/g, '<br/>')
+                    : `<span class="placeholder">${fallback}</span>`
+                }</div>
+              </div>
+            `;
+          })
+          .join('');
+
+        return `
+          <div class="section">
+            <div class="section-title">${escapeHtml(section.title)}</div>
+            <p class="section-desc">${escapeHtml(section.description)}</p>
+            ${fieldsHtml}
           </div>
-          
-          ${sections.map(section => `
-            <div class="section">
-              <div class="section-title">${section.title}</div>
-              <p>${section.description}</p>
-              ${section.fields.map(field => `
-                <div class="field">
-                  <div class="field-label">${field.label}</div>
-                  <div class="field-value">${canvasData[field.id] || field.placeholder}</div>
-                </div>
-              `).join('')}
-            </div>
-          `).join('')}
-          
-          <div class="footer">
-            <p>© ${new Date().getFullYear()} Abraham of London. All rights reserved.</p>
-            <p>www.abrahamoflondon.com</p>
-          </div>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
+        `;
+      })
+      .join('');
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8"/>
+        <title>Legacy Architecture Canvas - Print Version</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 40px; color: #111; }
+          .header { text-align: center; margin-bottom: 40px; }
+          .section { margin-bottom: 30px; border: 2px solid #000; padding: 18px; page-break-inside: avoid; }
+          .section-title { font-size: 18px; font-weight: bold; margin-bottom: 6px; }
+          .section-desc { margin: 0 0 14px 0; color: #333; }
+          .field { margin-bottom: 12px; }
+          .field-label { font-weight: bold; margin-bottom: 4px; }
+          .field-value { border-bottom: 1px solid #ccc; padding-bottom: 6px; min-height: 18px; white-space: normal; }
+          .placeholder { color: #888; font-style: italic; }
+          .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Legacy Architecture Canvas</h1>
+          <p>Generated: ${generated.toLocaleDateString()}</p>
+        </div>
+        ${bodyHtml}
+        <div class="footer">
+          <p>© ${year} Abraham of London. All rights reserved.</p>
+          <p>www.abrahamoflondon.com</p>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
 
   const handleLockToggle = () => {
-    setIsLocked(!isLocked);
-    if (!isLocked) {
-      // Auto-save when locking
-      handleSave();
-    }
+    setIsLocked((prev) => {
+      const next = !prev;
+      if (next) {
+        // Auto-save when locking
+        void handleSave();
+      }
+      return next;
+    });
   };
 
-  const fieldCount = Object.keys(canvasData).filter(key => canvasData[key]?.trim()).length;
-  const totalFields = sections.reduce((acc, section) => acc + section.fields.length, 0);
-  const completionPercentage = Math.round((fieldCount / totalFields) * 100);
+  const fieldCount = useMemo(() => {
+    return Object.keys(canvasData).filter((key) => canvasData[key]?.trim())
+      .length;
+  }, [canvasData]);
 
-  // Calculate word count
-  const totalWords = Object.values(canvasData)
-    .join(' ')
-    .split(/\s+/)
-    .filter(word => word.length > 0).length;
+  const totalFields = useMemo(() => {
+    return sections.reduce((acc, section) => acc + section.fields.length, 0);
+  }, [sections]);
+
+  const completionPercentage = useMemo(() => {
+    if (totalFields === 0) return 0;
+    return Math.round((fieldCount / totalFields) * 100);
+  }, [fieldCount, totalFields]);
+
+  const totalWords = useMemo(() => {
+    return Object.values(canvasData)
+      .join(' ')
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+  }, [canvasData]);
+
+  const helpTitleForSection = (section: CanvasSection) => {
+    const lines = section.fields
+      .map((f) => f.helpText)
+      .filter((x): x is string => Boolean(x))
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+    if (lines.length === 0) return 'No help text available for this section yet.';
+    return lines.join('\n');
+  };
+
+  const isPurposeOrVision = (fieldId: string) =>
+    fieldId.includes('purpose') || fieldId.includes('vision');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
-      {/* Premium Header */}
       <div className="max-w-7xl mx-auto">
+        {/* Premium Header */}
         <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 rounded-2xl shadow-2xl p-6 md:p-8 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="text-white">
@@ -377,14 +455,14 @@ const LegacyCanvasInteractive: React.FC = () => {
                   PREMIUM EDITION
                 </span>
               </div>
-              
+
               <h1 className="text-3xl md:text-4xl font-bold mb-3">
                 Legacy Architecture Canvas
               </h1>
               <p className="text-lg text-purple-100 mb-6">
                 Institutional-Grade Framework for Sovereign Legacy Design
               </p>
-              
+
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-emerald-300" />
@@ -409,31 +487,35 @@ const LegacyCanvasInteractive: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={isLocked}
-                className={`px-6 py-3 rounded-lg flex items-center gap-2 font-semibold transition-all ${saved
+                className={`px-6 py-3 rounded-lg flex items-center gap-2 font-semibold transition-all ${
+                  saved
                     ? 'bg-emerald-500 text-white'
                     : 'bg-white text-purple-900 hover:bg-purple-50'
-                  } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Save className="w-4 h-4" />
                 {saved ? 'Saved!' : 'Save Progress'}
               </button>
 
-              <div className="relative group">
-                <button
-                  onClick={() => setShowPreview(!showPreview)}
-                  className="px-6 py-3 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition-all flex items-center gap-2"
-                >
-                  {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  {showPreview ? 'Hide Preview' : 'Show Preview'}
-                </button>
-              </div>
+              <button
+                onClick={() => setShowPreview((p) => !p)}
+                className="px-6 py-3 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition-all flex items-center gap-2"
+              >
+                {showPreview ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+                {showPreview ? 'Hide Preview' : 'Show Preview'}
+              </button>
 
               <button
                 onClick={handleLockToggle}
-                className={`px-6 py-3 rounded-lg flex items-center gap-2 font-semibold transition-all ${isLocked
+                className={`px-6 py-3 rounded-lg flex items-center gap-2 font-semibold transition-all ${
+                  isLocked
                     ? 'bg-amber-500 text-white hover:bg-amber-600'
                     : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
+                }`}
               >
                 {isLocked ? (
                   <>
@@ -465,7 +547,7 @@ const LegacyCanvasInteractive: React.FC = () => {
                 <div
                   className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500"
                   style={{ width: `${completionPercentage}%` }}
-                ></div>
+                />
               </div>
               <div className="mt-2 text-xs text-purple-200">
                 {fieldCount} of {totalFields} fields completed
@@ -490,7 +572,7 @@ const LegacyCanvasInteractive: React.FC = () => {
                   Export Options
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() => handleExportPDF('A4')}
                   disabled={exporting}
@@ -519,23 +601,42 @@ const LegacyCanvasInteractive: React.FC = () => {
         {/* Canvas Grid */}
         {showPreview ? (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Canvas Preview</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">
+              Canvas Preview
+            </h2>
             <div className="space-y-8">
               {sections.map((section) => (
-                <div key={section.id} className="border-l-4 border-slate-300 pl-6">
-                  <h3 className="text-xl font-bold text-slate-800 mb-2">{section.title}</h3>
+                <div
+                  key={section.id}
+                  className="border-l-4 border-slate-300 pl-6"
+                >
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">
+                    {section.title}
+                  </h3>
                   <p className="text-slate-600 mb-4">{section.description}</p>
                   <div className="space-y-4">
-                    {section.fields.map((field) => (
-                      <div key={field.id} className="border-b border-slate-100 pb-4 last:border-0">
-                        <div className="text-sm font-medium text-slate-700 mb-1">{field.label}</div>
-                        <div className="text-slate-900 whitespace-pre-wrap min-h-[20px]">
-                          {canvasData[field.id] || (
-                            <span className="text-slate-400 italic">Not completed</span>
-                          )}
+                    {section.fields.map((field) => {
+                      const value = canvasData[field.id] ?? '';
+                      return (
+                        <div
+                          key={field.id}
+                          className="border-b border-slate-100 pb-4 last:border-0"
+                        >
+                          <div className="text-sm font-medium text-slate-700 mb-1">
+                            {field.label}
+                          </div>
+                          <div className="text-slate-900 whitespace-pre-wrap min-h-[20px]">
+                            {value.trim() ? (
+                              value
+                            ) : (
+                              <span className="text-slate-400 italic">
+                                Not completed
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -566,11 +667,18 @@ const LegacyCanvasInteractive: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium text-white/80 bg-white/20 px-2 py-1 rounded">
-                        {section.fields.filter(f => canvasData[f.id]?.trim()).length}/{section.fields.length}
+                        {
+                          section.fields.filter((f) =>
+                            (canvasData[f.id] ?? '').trim()
+                          ).length
+                        }
+                        /{section.fields.length}
                       </span>
-                      <button 
+                      <button
+                        type="button"
                         className="text-white hover:text-white/80"
-                        title={section.fields.map(f => f.helpText).filter(Boolean).join('\n')}
+                        title={helpTitleForSection(section)}
+                        aria-label={`Help: ${section.title}`}
                       >
                         <HelpCircle className="w-5 h-5" />
                       </button>
@@ -580,54 +688,69 @@ const LegacyCanvasInteractive: React.FC = () => {
 
                 {/* Section Fields */}
                 <div className="p-6 space-y-6">
-                  {section.fields.map((field) => (
-                    <div key={field.id} className="space-y-3">
-                      <label className="block">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
-                            {field.label}
-                            {field.required && <span className="text-red-500">*</span>}
-                          </span>
-                          {field.maxLength && (
-                            <span className="text-xs text-slate-500">
-                              {canvasData[field.id]?.length || 0}/{field.maxLength}
+                  {section.fields.map((field) => {
+                    const value = canvasData[field.id] ?? '';
+                    const len = value.length;
+
+                    return (
+                      <div key={field.id} className="space-y-3">
+                        <label className="block">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                              {field.label}
+                              {field.required ? (
+                                <span className="text-red-500">*</span>
+                              ) : null}
                             </span>
-                          )}
-                        </div>
-                        {field.type === 'textarea' ? (
-                          <textarea
-                            value={field.value}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                            placeholder={field.placeholder}
-                            rows={field.id.includes('purpose') || field.id.includes('vision') ? 4 : 3}
-                            disabled={isLocked}
-                            maxLength={field.maxLength}
-                            className={`w-full px-4 py-3 rounded-lg border transition-all resize-none ${isLocked
-                                ? 'bg-slate-50 border-slate-300 text-slate-500 cursor-not-allowed'
-                                : 'bg-white border-slate-300 hover:border-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200'
-                              }`}
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            value={field.value}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                            placeholder={field.placeholder}
-                            disabled={isLocked}
-                            className={`w-full px-4 py-3 rounded-lg border transition-all ${isLocked
-                                ? 'bg-slate-50 border-slate-300 text-slate-500 cursor-not-allowed'
-                                : 'bg-white border-slate-300 hover:border-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200'
-                              }`}
-                          />
-                        )}
-                        {field.helpText && !isLocked && (
-                          <div className="text-xs text-slate-500 mt-1 italic">
-                            💡 {field.helpText}
+                            {typeof field.maxLength === 'number' ? (
+                              <span className="text-xs text-slate-500">
+                                {len}/{field.maxLength}
+                              </span>
+                            ) : null}
                           </div>
-                        )}
-                      </label>
-                    </div>
-                  ))}
+
+                          {field.type === 'textarea' ? (
+                            <textarea
+                              value={value}
+                              onChange={(e) =>
+                                handleFieldChange(field.id, e.target.value)
+                              }
+                              placeholder={field.placeholder}
+                              rows={isPurposeOrVision(field.id) ? 4 : 3}
+                              disabled={isLocked}
+                              maxLength={field.maxLength}
+                              className={`w-full px-4 py-3 rounded-lg border transition-all resize-none ${
+                                isLocked
+                                  ? 'bg-slate-50 border-slate-300 text-slate-500 cursor-not-allowed'
+                                  : 'bg-white border-slate-300 hover:border-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200'
+                              }`}
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={value}
+                              onChange={(e) =>
+                                handleFieldChange(field.id, e.target.value)
+                              }
+                              placeholder={field.placeholder}
+                              disabled={isLocked}
+                              className={`w-full px-4 py-3 rounded-lg border transition-all ${
+                                isLocked
+                                  ? 'bg-slate-50 border-slate-300 text-slate-500 cursor-not-allowed'
+                                  : 'bg-white border-slate-300 hover:border-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200'
+                              }`}
+                            />
+                          )}
+
+                          {field.helpText && !isLocked ? (
+                            <div className="text-xs text-slate-500 mt-1 italic">
+                              💡 {field.helpText}
+                            </div>
+                          ) : null}
+                        </label>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -646,18 +769,18 @@ const LegacyCanvasInteractive: React.FC = () => {
                 Reset Canvas
               </button>
               <div className="text-sm text-slate-500">
-                Data is automatically saved to your browser's local storage
+                Data is automatically saved to your browser&apos;s local storage
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {isLocked && (
+              {isLocked ? (
                 <div className="px-4 py-2 bg-amber-50 text-amber-800 rounded-lg text-sm border border-amber-200 flex items-center gap-2">
                   <Lock className="w-4 h-4" />
                   Canvas is locked. Unlock to edit.
                 </div>
-              )}
-              
+              ) : null}
+
               <button
                 onClick={() => handleExportPDF('A4')}
                 disabled={exporting}
@@ -666,7 +789,7 @@ const LegacyCanvasInteractive: React.FC = () => {
                 <Download className="w-4 h-4" />
                 {exporting ? 'Generating PDF...' : 'Download Premium PDF'}
               </button>
-              
+
               <button
                 onClick={handlePrint}
                 className="px-6 py-3 rounded-lg bg-white text-slate-800 font-semibold border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-all flex items-center gap-2"
@@ -684,7 +807,7 @@ const LegacyCanvasInteractive: React.FC = () => {
             <Award className="w-8 h-8 text-yellow-400" />
             <h3 className="text-2xl font-bold">Premium Features & Instructions</h3>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div className="flex items-start gap-4">
@@ -694,12 +817,12 @@ const LegacyCanvasInteractive: React.FC = () => {
                 <div>
                   <h4 className="text-lg font-bold mb-2">Complete with Precision</h4>
                   <p className="text-slate-200">
-                    Fill each section thoughtfully. Consider multi-generational impact 
+                    Fill each section thoughtfully. Consider multi-generational impact
                     (25, 50, 100-year horizons) and be specific about your intentions.
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="bg-white/20 p-3 rounded-lg flex-shrink-0">
                   <Save className="w-6 h-6" />
@@ -707,14 +830,14 @@ const LegacyCanvasInteractive: React.FC = () => {
                 <div>
                   <h4 className="text-lg font-bold mb-2">Auto-save & Security</h4>
                   <p className="text-slate-200">
-                    Your work is automatically saved to your browser. No data leaves 
-                    your device unless you choose to export. Use the lock feature to 
+                    Your work is automatically saved to your browser. No data leaves
+                    your device unless you choose to export. Use the lock feature to
                     prevent accidental edits.
                   </p>
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <div className="bg-white/20 p-3 rounded-lg flex-shrink-0">
@@ -723,12 +846,12 @@ const LegacyCanvasInteractive: React.FC = () => {
                 <div>
                   <h4 className="text-lg font-bold mb-2">Professional Export</h4>
                   <p className="text-slate-200">
-                    Download premium PDFs in A4 or Letter format. Generated PDFs include 
+                    Download premium PDFs in A4 or Letter format. Generated PDFs include
                     interactive form fields that can be filled using any PDF viewer.
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="bg-white/20 p-3 rounded-lg flex-shrink-0">
                   <Users className="w-6 h-6" />
@@ -743,11 +866,11 @@ const LegacyCanvasInteractive: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-8 pt-6 border-t border-white/20">
             <div className="text-center">
               <p className="text-slate-300">
-                For enterprise features, bulk generation, or custom templates, 
+                For enterprise features, bulk generation, or custom templates,
                 contact <span className="text-yellow-300">legacy@abrahamoflondon.com</span>
               </p>
               <p className="text-sm text-slate-400 mt-2">
@@ -756,9 +879,9 @@ const LegacyCanvasInteractive: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Generation Status */}
-        {generationTime && (
+        {generationTime ? (
           <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -775,7 +898,7 @@ const LegacyCanvasInteractive: React.FC = () => {
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

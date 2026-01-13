@@ -1,18 +1,12 @@
-// lib/auth/mfa.ts - COMPLETE PRODUCTION READY MULTI-FACTOR AUTHENTICATION
+// lib/auth/mfa.ts - FIXED OTPLIB IMPORTS
 import { randomInt, randomBytes } from 'crypto';
 import { encode as encodeBase32 } from 'hi-base32';
-// Use the correct import for otplib
-import * as otplib from 'otplib';
 
-// Create authenticator instance with proper config
-const authenticator = new otplib.Authenticator({
-  window: 1,
-  step: 30,
-  digits: 6,
-  algorithm: 'sha1'
-});
+// IMPORTANT: otplib v10+ uses different exports
+// Use @otplib/preset-default for the latest version
+import { authenticator } from '@otplib/preset-default';
 
-// Types
+// Types (keep your existing types)
 export type MfaMethod = 'totp' | 'sms' | 'email' | 'backup-code' | 'push';
 export type MfaStatus = 'pending' | 'verified' | 'expired' | 'failed';
 export type MfaChallengeType = 'login' | 'transaction' | 'recovery';
@@ -192,7 +186,7 @@ export function generateTotpUri(
 
 export function verifyTotpCode(secret: string, code: string): boolean {
   try {
-    return authenticator.check(code, secret);
+    return authenticator.verify({ token: code, secret });
   } catch (error) {
     console.error('[MFA] TOTP verification error:', error);
     return false;
@@ -784,8 +778,9 @@ export async function isDeviceRemembered(
 
 function generateDeviceId(userAgent: string, ipAddress?: string): string {
   // Create a deterministic device ID from user agent and IP
+  const crypto = require('crypto');
   const data = `${userAgent}:${ipAddress || ''}`;
-  const hash = require('crypto').createHash('sha256').update(data).digest('hex');
+  const hash = crypto.createHash('sha256').update(data).digest('hex');
   return hash.substring(0, 16);
 }
 

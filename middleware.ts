@@ -1,4 +1,4 @@
-// middleware.ts - PRODUCTION READY V7.1
+// middleware.ts - FIXED VERSION WITHOUT TOP-LEVEL AWAIT
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -10,33 +10,39 @@ let withEdgeRateLimit: any = null;
 let createRateLimitedResponse: any = null;
 let createRateLimitHeaders: any = null;
 
-// Dynamically load security modules with proper error handling
-try {
-  const redisModule = await import('@/lib/rate-limit-redis');
-  rateLimitRedis = redisModule.rateLimitRedis || redisModule.default;
-} catch (error) {
-  console.warn('[Middleware] rate-limit-redis not available:', error.message);
-}
+// Function to load security modules lazily
+async function loadSecurityModules() {
+  if (!rateLimitRedis) {
+    try {
+      const redisModule = await import('@/lib/rate-limit-redis');
+      rateLimitRedis = redisModule.rateLimitRedis || redisModule.default;
+    } catch (error: any) {
+      console.warn('[Middleware] rate-limit-redis not available:', error.message);
+    }
+  }
 
-try {
-  const unifiedModule = await import('@/lib/server/rate-limit-unified');
-  rateLimitModule = unifiedModule;
-  RATE_LIMIT_CONFIGS = unifiedModule.RATE_LIMIT_CONFIGS || {};
-  withEdgeRateLimit = unifiedModule.withEdgeRateLimit;
-  createRateLimitedResponse = unifiedModule.createRateLimitedResponse;
-  createRateLimitHeaders = unifiedModule.createRateLimitHeaders;
-} catch (error) {
-  console.warn('[Middleware] rate-limit-unified not available, using fallbacks:', error.message);
-  
-  // Default configurations
-  RATE_LIMIT_CONFIGS = {
-    API_GENERAL: { limit: 100, windowMs: 60000, keyPrefix: "api" },
-    API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },
-    AUTH: { limit: 10, windowMs: 300000, keyPrefix: "auth" },
-    CONTENT: { limit: 60, windowMs: 60000, keyPrefix: "content" },
-    FONT: { limit: 50, windowMs: 60000, keyPrefix: "font" },
-    ADMIN: { limit: 30, windowMs: 60000, keyPrefix: "admin" }
-  };
+  if (!rateLimitModule) {
+    try {
+      const unifiedModule = await import('@/lib/server/rate-limit-unified');
+      rateLimitModule = unifiedModule;
+      RATE_LIMIT_CONFIGS = unifiedModule.RATE_LIMIT_CONFIGS || {};
+      withEdgeRateLimit = unifiedModule.withEdgeRateLimit;
+      createRateLimitedResponse = unifiedModule.createRateLimitedResponse;
+      createRateLimitHeaders = unifiedModule.createRateLimitHeaders;
+    } catch (error: any) {
+      console.warn('[Middleware] rate-limit-unified not available, using fallbacks:', error.message);
+      
+      // Default configurations
+      RATE_LIMIT_CONFIGS = {
+        API_GENERAL: { limit: 100, windowMs: 60000, keyPrefix: "api" },
+        API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },
+        AUTH: { limit: 10, windowMs: 300000, keyPrefix: "auth" },
+        CONTENT: { limit: 60, windowMs: 60000, keyPrefix: "content" },
+        FONT: { limit: 50, windowMs: 60000, keyPrefix: "font" },
+        ADMIN: { limit: 30, windowMs: 60000, keyPrefix: "admin" }
+      };
+    }
+  }
 }
 
 // ==================== AUTHENTICATION GATEWAY ====================
@@ -165,14 +171,14 @@ const FONT_SECURITY_CONFIG = {
 // ==================== CONFIGURATION ====================
 const PRODUCTION = process.env.NODE_ENV === 'production';
 
-// Route security configuration
+// Route security configuration - using fallback configs until loaded
 const ROUTE_SECURITY_CONFIG = {
   // Admin routes - strict authentication required
   "/admin": { 
     mode: "strict", 
     type: "admin", 
     cache: "private, no-store, max-age=0",
-    rateLimit: RATE_LIMIT_CONFIGS?.ADMIN || { limit: 30, windowMs: 60000 },
+    rateLimit: { limit: 30, windowMs: 60000 },
     requires: "admin"
   },
   
@@ -181,7 +187,7 @@ const ROUTE_SECURITY_CONFIG = {
     mode: "strict", 
     type: "board", 
     cache: "private, max-age=3600",
-    rateLimit: RATE_LIMIT_CONFIGS?.API_STRICT || { limit: 30, windowMs: 60000 },
+    rateLimit: { limit: 30, windowMs: 60000 },
     requires: "admin"
   },
   
@@ -190,7 +196,7 @@ const ROUTE_SECURITY_CONFIG = {
     mode: "strict", 
     type: "inner-circle", 
     cache: "private, max-age=3600",
-    rateLimit: RATE_LIMIT_CONFIGS?.AUTH || { limit: 10, windowMs: 300000 },
+    rateLimit: { limit: 10, windowMs: 300000 },
     requires: "inner-circle"
   },
   
@@ -199,7 +205,7 @@ const ROUTE_SECURITY_CONFIG = {
     mode: "hybrid", 
     type: "pdf", 
     cache: "private, max-age=7200",
-    rateLimit: RATE_LIMIT_CONFIGS?.CONTENT || { limit: 60, windowMs: 60000 },
+    rateLimit: { limit: 60, windowMs: 60000 },
     requires: "authenticated"
   },
   
@@ -207,7 +213,7 @@ const ROUTE_SECURITY_CONFIG = {
     mode: "strict", 
     type: "download", 
     cache: "private, no-store",
-    rateLimit: RATE_LIMIT_CONFIGS?.CONTENT || { limit: 20, windowMs: 60000 },
+    rateLimit: { limit: 20, windowMs: 60000 },
     requires: "authenticated"
   },
   
@@ -216,14 +222,14 @@ const ROUTE_SECURITY_CONFIG = {
     mode: "public", 
     type: "strategy", 
     cache: "public, max-age=7200, stale-while-revalidate=86400",
-    rateLimit: RATE_LIMIT_CONFIGS?.CONTENT || { limit: 60, windowMs: 60000 }
+    rateLimit: { limit: 60, windowMs: 60000 }
   },
   
   "/canons": { 
     mode: "public", 
     type: "canon", 
     cache: "public, max-age=7200, stale-while-revalidate=86400",
-    rateLimit: RATE_LIMIT_CONFIGS?.CONTENT || { limit: 60, windowMs: 60000 }
+    rateLimit: { limit: 60, windowMs: 60000 }
   },
   
   // API routes
@@ -231,7 +237,7 @@ const ROUTE_SECURITY_CONFIG = {
     mode: "strict", 
     type: "admin-api", 
     cache: "private, no-store",
-    rateLimit: RATE_LIMIT_CONFIGS?.ADMIN || { limit: 30, windowMs: 60000 },
+    rateLimit: { limit: 30, windowMs: 60000 },
     requires: "admin"
   },
   
@@ -239,7 +245,7 @@ const ROUTE_SECURITY_CONFIG = {
     mode: "strict", 
     type: "inner-circle-api", 
     cache: "private, no-store",
-    rateLimit: RATE_LIMIT_CONFIGS?.AUTH || { limit: 10, windowMs: 300000 },
+    rateLimit: { limit: 10, windowMs: 300000 },
     requires: "inner-circle"
   }
 };
@@ -349,6 +355,11 @@ function validateFontRequest(pathname: string): boolean {
 
 // ==================== RATE LIMITING ====================
 async function applyRouteRateLimit(req: NextRequest, pathname: string, authContext: AuthContext) {
+  // Load modules if not already loaded
+  if (!RATE_LIMIT_CONFIGS) {
+    await loadSecurityModules();
+  }
+  
   const ip = getClientIp(req);
   const userAgent = req.headers.get('user-agent') || '';
   

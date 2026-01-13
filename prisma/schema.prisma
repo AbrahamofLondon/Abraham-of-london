@@ -61,7 +61,7 @@ model ShortInteraction {
   ipAddress   String?
   ipHash      String?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
 
   member      InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull, onUpdate: Cascade)
@@ -88,23 +88,23 @@ model StrategyRoomIntake {
 }
 
 model InnerCircleMember {
-  id               String            @id @default(cuid())
-  emailHash        String            @unique
-  emailHashPrefix  String
-  name             String?
-  status           String            @default("active")
-  tier             String            @default("standard")
-  createdAt        DateTime          @default(now())
-  lastSeenAt       DateTime          @default(now())
-  lastIp           String?
-  loginCount       Int               @default(0)
-  email            String?
-  flags            String?
+  id                String             @id @default(cuid())
+  emailHash         String             @unique
+  emailHashPrefix   String
+  name              String?
+  status            String             @default("active")
+  tier              String             @default("standard")
+  createdAt         DateTime           @default(now())
+  lastSeenAt        DateTime           @default(now())
+  lastIp            String?
+  loginCount        Int                @default(0)
+  email             String?
+  flags             String?
 
-  downloadEvents   DownloadAuditEvent[]
+  downloadEvents    DownloadAuditEvent[]
   shortInteractions ShortInteraction[]
-  keys             InnerCircleKey[]
-  sessions         Session[]
+  keys              InnerCircleKey[]
+  sessions          Session[]
 
   @@index([status], name: "inner_circle_members_status_idx")
   @@index([tier], name: "inner_circle_members_tier_idx")
@@ -167,7 +167,7 @@ model ContentMetadata {
   tags              String?
   metadata          String?
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@index([contentType], name: "content_metadata_content_type_idx")
   @@index([createdAt], name: "content_metadata_created_at_idx")
@@ -196,7 +196,7 @@ model SystemAuditLog {
   subCategory  String?
   tags         String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([actorType], name: "system_audit_logs_actor_type_idx")
   @@index([actorId], name: "system_audit_logs_actor_id_idx")
@@ -224,7 +224,7 @@ model Session {
   lastActivity DateTime
   data         String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   member       InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
@@ -241,7 +241,7 @@ model CacheEntry {
   expiresAt DateTime
   tags      String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([key], name: "cache_entries_key_idx")
   @@index([expiresAt], name: "cache_entries_expires_at_idx")
@@ -257,7 +257,7 @@ model SystemConfig {
   isPublic    Boolean  @default(false)
   updatedBy   String?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([key], name: "system_configs_key_idx")
   @@index([category], name: "system_configs_category_idx")
@@ -297,22 +297,22 @@ model MaintenanceLog {
 }
 
 model AdminUser {
-  id                  String       @id @default(cuid())
-  username            String       @unique
+  id                  String        @id @default(cuid())
+  username            String        @unique
   passwordHash        String
-  role                String       @default("admin") // admin, superadmin, editor
-  permissions         String       @default("[]") // JSON array of permissions
-  mfaEnabled          Boolean      @default(false)
+  role                String        @default("admin")
+  permissions         String        @default("[]")
+  mfaEnabled          Boolean       @default(false)
   mfaSecret           String?
-  mfaBackupCodes      String?      @default("[]") // JSON array
-  status              String       @default("active") // active, locked, suspended
+  mfaBackupCodes      String?       @default("[]")
+  status              String        @default("active")
   lastLoginAt         DateTime?
   lastFailedLoginAt   DateTime?
-  failedLoginAttempts Int          @default(0)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  failedLoginAttempts Int           @default(0)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
   sessions            AdminSession[]
-  auditLogs           SystemAuditLog[]
 
   @@index([role], name: "admin_users_role_idx")
   @@index([status], name: "admin_users_status_idx")
@@ -346,7 +346,7 @@ model SecurityLog {
   details   String?
   ipAddress String?
   userAgent String?
-  severity  String?  @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+  severity  String?  @default("LOW")
   createdAt DateTime @default(now())
 
   @@index([userId], name: "security_logs_user_id_idx")
@@ -358,10 +358,10 @@ model SecurityLog {
 model MfaSetup {
   id              String   @id @default(cuid())
   userId          String   @unique
-  methods         String   @default("[]") // JSON array of MfaMethod
+  methods         String   @default("[]")
   totpSecret      String?
   totpVerified    Boolean  @default(false)
-  backupCodes     String   @default("[]") // JSON array
+  backupCodes     String   @default("[]")
   phoneNumber     String?
   phoneVerified   Boolean  @default(false)
   emailVerified   Boolean  @default(false)

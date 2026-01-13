@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/useToast";
 import { useSession } from "next-auth/react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { AuditLogger } from "@/lib/audit/audit-logger";
+import { auditLogger } from '@/lib/audit/audit-logger';
 
 // Types
 interface AdminRow {
@@ -60,12 +60,6 @@ interface SecurityConfig {
   maxApiRetries: number;
   rateLimitWindow: number;
 }
-
-// Audit logging
-const auditLogger = new AuditLogger({
-  service: "inner-circle-admin",
-  environment: process.env.NODE_ENV,
-});
 
 // Security configuration
 const SECURITY_CONFIG: SecurityConfig = {
