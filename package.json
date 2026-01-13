@@ -105,7 +105,7 @@
     "@otplib/preset-default": "^12.0.1",
     "@prisma/client": "^6.19.1",
     "@react-email/components": "1.0.4",
-    "@react-pdf/renderer": "4.3.1",
+    "@react-pdf/renderer": "4.3.2",
     "@tailwindcss/typography": "0.5.19",
     "@types/jsonwebtoken": "9.0.10",
     "@vercel/kv": "3.0.0",
