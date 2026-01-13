@@ -270,12 +270,7 @@ const baseConfig = {
     // If it doesn't exist, install it.
 
     // Ignore Contentlayer dynamic generated imports where they appear in compat layers
-    config.plugins.push(
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^contentlayer\/generated$/,
-      })
-    );
-
+    
     // Ignore binary docs in the public downloads folders (prevents accidental bundling)
     config.plugins.push(
       new webpack.IgnorePlugin({
