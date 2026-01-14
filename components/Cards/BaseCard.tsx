@@ -103,7 +103,7 @@ function formatDate(dateString: string): string {
 // DOC -> CARD PROPS (no `any`)
 // =============================================================================
 
-function getCardPropsFromDocument(doc: unknown): BaseCardProps {
+function getCardPropsFromDocument(doc: unknown): Omit<BaseCardProps, 'href' | 'className'> {
   if (!isRecord(doc)) {
     return { slug: "", title: "Untitled" };
   }
@@ -161,7 +161,11 @@ const BaseCard: React.FC<BaseCardProps> = ({
   href,
 }) => {
   const isLocked = accessLevel === "inner-circle" || accessLevel === "premium";
+  
+  // Always ensure href is a valid string with fallback
   const linkHref = href || `/${slug}`;
+  const safeHref = linkHref.trim() === "" ? "/" : linkHref;
+  
   const displayText = excerpt || description || subtitle || "";
   
   // FIX: Ensure tags is treated as an array even if passed as null
@@ -179,7 +183,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
 
   return (
     <Link
-      href={linkHref}
+      href={safeHref}
       className={`group block rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm transition-all duration-300 hover:border-softGold/30 hover:shadow-[0_8px_30px_rgba(226,197,120,0.15)] ${className}`}
       aria-label={title}
     >
@@ -312,8 +316,11 @@ export default BaseCard;
 
 export function DocumentCard({ document, className = "", href }: DocumentCardProps) {
   const cardProps = getCardPropsFromDocument(document);
-  return <BaseCard {...cardProps} className={className} href={href} />;
+  
+  // Ensure href is always a string - use provided href or fallback to slug-based URL
+  const resolvedHref = href || `/${cardProps.slug}`;
+  
+  return <BaseCard {...cardProps} className={className} href={resolvedHref} />;
 }
 
 export type { BaseCardProps, DocumentCardProps };
-
