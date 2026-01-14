@@ -264,11 +264,17 @@ const NavLink: React.FC<NavLinkProps> = ({
     rounded-r-md pl-3
   ` : "";
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
     <li className={isMobile ? "w-full" : ""}>
       <Link
         href={getRoutePath(item.route)}
-        onClick={onClick}
+        onClick={handleClick}
         className={`${baseClasses} ${highlightClasses} ${isMobile ? "block" : ""}`}
         aria-current={isActive ? "page" : undefined}
         prefetch={true}
@@ -321,10 +327,16 @@ const ContactButton: React.FC<ContactButtonProps> = ({
   const label = type === "email" ? "Email" : "Call";
   const Icon = type === "email" ? Mail : Phone;
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
     <a
       href={href}
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         flex items-center gap-2 transition-all duration-200
         ${isMobile ? "text-base py-2 px-3 rounded-lg" : "text-sm px-3 py-1.5 rounded-md"}
