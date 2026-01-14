@@ -112,25 +112,25 @@ function safeArray<T>(v: any): T[] {
 let DATA: GeneratedShape = FALLBACK;
 let LOADED = false;
 
-// Helper to clear mod cache in development
+// Helper to clear module cache in development
 const clearCache = (modulePath: string) => {
   if (process.env.NODE_ENV !== 'production') {
     try {
       const resolvedPath = require.resolve(modulePath);
       delete require.cache[resolvedPath];
     } catch (e) {
-      // ignore if mod not resolved yet
+      // ignore if module not resolved yet
     }
   }
 };
 
-// Helper to safely load a mod with fallbacks
+// Helper to safely load a module with fallbacks
 const loadModule = (modulePath: string): any => {
   try {
     clearCache(modulePath);
     return require(modulePath);
   } catch (e) {
-    console.warn(`[Contentlayer] Failed to load mod: ${modulePath}`, e?.message || e);
+    console.warn(`[Contentlayer] Failed to load module: ${modulePath}`, e?.message || e);
     return null;
   }
 };
@@ -193,9 +193,9 @@ try {
       for (const collection of collections) {
         const collectionPath = path.join(process.cwd(), '.contentlayer', 'generated', collection.name, '_index.mjs');
         if (fileExists(collectionPath)) {
-          const mod = loadModule(collectionPath);
-          if (mod) {
-            DATA[collection.key as keyof GeneratedShape] = safeArray<DocBase>(mod);
+          const module = loadModule(collectionPath);
+          if (module) {
+            DATA[collection.key as keyof GeneratedShape] = safeArray<DocBase>(module);
             console.log(`[Contentlayer] Loaded ${collection.name}: ${DATA[collection.key as keyof GeneratedShape].length} items`);
           }
         } else {
@@ -256,7 +256,7 @@ try {
         `[Contentlayer] Loaded (v1 fallback): posts=${DATA.allPosts.length} books=${DATA.allBooks.length} canon=${DATA.allCanons.length} downloads=${DATA.allDownloads.length}`
       );
     } else {
-      throw new Error('No v1 mod found');
+      throw new Error('No v1 module found');
     }
   } catch (e2: any) {
     LOADED = false;

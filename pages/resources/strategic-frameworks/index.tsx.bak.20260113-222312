@@ -730,7 +730,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
     
     // Try to import the function dynamically
     try {
-      const mod = await import('@/lib/resources/strategic-frameworks');
+      const module = await import('@/lib/resources/strategic-frameworks');
       if (module.getAllFrameworks) {
         frameworks = module.getAllFrameworks();
       } else {

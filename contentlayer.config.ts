@@ -1,9 +1,5 @@
 // contentlayer.config.ts
-import {
-  defineDocumentType,
-  defineNestedType,
-  makeSource,
-} from "contentlayer2/source-files";
+import { defineDocumentType, defineNestedType, makeSource } from "contentlayer2/source-files";
 
 // ------------------------------------------------------------
 // Helpers
@@ -22,9 +18,6 @@ function estimateReadTime(text: string): string {
 
 // ------------------------------------------------------------
 // Nested types (Contentlayer2-safe)
-// RULE:
-// - list:   of: NestedType
-// - nested: { type: "nested", of: NestedType }
 // ------------------------------------------------------------
 const DownloadLink = defineNestedType(() => ({
   name: "DownloadLink",
@@ -60,10 +53,7 @@ const CTAConfig = defineNestedType(() => ({
   fields: {
     badge: { type: "string", required: false },
     tier: { type: "string", required: false },
-
     details: { type: "list", of: CTADetail, required: false },
-
-    // some files store as strings, some as objects
     featuresText: { type: "list", of: { type: "string" }, required: false },
     features: { type: "list", of: CTAFeature, required: false },
   },
@@ -106,7 +96,7 @@ const CTAButton = defineNestedType(() => ({
 }));
 
 // ------------------------------------------------------------
-// Shared field fragments
+// Shared fields
 // ------------------------------------------------------------
 const seoFields = {
   ogTitle: { type: "string", required: false },
@@ -124,7 +114,6 @@ const coreFields = {
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
 
-  // Contentlayer2 uses Date objects if you use type: "date"
   date: { type: "date", required: false },
   updated: { type: "date", required: false },
 
@@ -155,7 +144,6 @@ const coreFields = {
   coverFit: { type: "string", required: false },
   coverPosition: { type: "string", required: false },
 
-  // access controls used across content
   accessLevel: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
   tier: { type: "string", required: false },
@@ -163,24 +151,20 @@ const coreFields = {
   priority: { type: "number", required: false },
   preload: { type: "boolean", required: false },
 
-  // allow object or list variants without schema fights
   resources: { type: "json", required: false },
-
   contentOnly: { type: "boolean", required: false },
 
   readTime: { type: "string", required: false },
 
   published: { type: "boolean", required: false, default: true },
   shortType: { type: "string", required: false },
-  audience: { type: "string", required: false },      // shorts
-  resourceType: { type: "string", required: false },  // resources
+  audience: { type: "string", required: false },
+  resourceType: { type: "string", required: false },
 
-  // ✅ New editorial fields you want to support
   keyInsights: { type: "list", of: { type: "string" }, required: false },
   authorNote: { type: "string", required: false },
 
- docKind: { type: "string", required: false },
-
+  docKind: { type: "string", required: false },
 
   ...seoFields,
 } as const;
@@ -200,13 +184,11 @@ export const Post = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug ?? doc._raw.flattenedPath.replace(/^blog\//, ""),
+      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^blog\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) =>
-        doc.href ?? `/blog/${doc._raw.flattenedPath.replace(/^blog\//, "")}`,
+      resolve: (doc) => doc.href ?? `/blog/${doc._raw.flattenedPath.replace(/^blog\//, "")}`,
     },
     readingTime: {
       type: "string",
@@ -223,14 +205,11 @@ export const Short = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug ?? doc._raw.flattenedPath.replace(/^shorts\//, ""),
+      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^shorts\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) =>
-        doc.href ??
-        `/shorts/${doc._raw.flattenedPath.replace(/^shorts\//, "")}`,
+      resolve: (doc) => doc.href ?? `/shorts/${doc._raw.flattenedPath.replace(/^shorts\//, "")}`,
     },
     readingTime: {
       type: "string",
@@ -251,13 +230,11 @@ export const Book = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug ?? doc._raw.flattenedPath.replace(/^books\//, ""),
+      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^books\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) =>
-        doc.href ?? `/books/${doc._raw.flattenedPath.replace(/^books\//, "")}`,
+      resolve: (doc) => doc.href ?? `/books/${doc._raw.flattenedPath.replace(/^books\//, "")}`,
     },
   },
 }));
@@ -274,13 +251,11 @@ export const Canon = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug ?? doc._raw.flattenedPath.replace(/^canon\//, ""),
+      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^canon\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) =>
-        doc.href ?? `/canon/${doc._raw.flattenedPath.replace(/^canon\//, "")}`,
+      resolve: (doc) => doc.href ?? `/canon/${doc._raw.flattenedPath.replace(/^canon\//, "")}`,
     },
   },
 }));
@@ -327,20 +302,16 @@ export const Download = defineDocumentType(() => ({
     relatedDownloads: { type: "list", of: { type: "string" }, required: false },
     related: { type: "list", of: { type: "string" }, required: false },
 
-    // Accept any shape safely
     features: { type: "json", required: false },
   },
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) =>
-        doc.slug ?? doc._raw.flattenedPath.replace(/^downloads\//, ""),
+      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^downloads\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) =>
-        doc.href ??
-        `/downloads/${doc._raw.flattenedPath.replace(/^downloads\//, "")}`,
+      resolve: (doc) => doc.href ?? `/downloads/${doc._raw.flattenedPath.replace(/^downloads\//, "")}`,
     },
   },
 }));
@@ -391,11 +362,16 @@ export default makeSource({
   contentDirPath: "content",
   documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy],
 
-  // IMPORTANT: ignore templates & backups & generated json
+  // Only affects the content directory, but keep it tight and predictable
   ignore: [
     "**/_*/**",
     "**/*BACKUP*/**",
     "**/.*/**",
+    "**/*.bak",
+    "**/*.tmp",
+    "**/*.swp",
+    "**/*.DS_Store",
+
     "downloads/_generated.downloads.json",
     "_templates/**",
     "**/_templates/**",

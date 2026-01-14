@@ -6,15 +6,15 @@ import type { NextRequest } from 'next/server';
 let rateLimitModule: any = null;
 let RATE_LIMIT_CONFIGS: any = null;
 
-// Initialize on mod load (but don't crash)
+// Initialize on module load (but don't crash)
 function initRateLimit() {
   if (rateLimitModule !== null) return;
   
   try {
     if (typeof window === 'undefined') {
       // Server-side: try to load
-      const mod = require('@/lib/server/rateLimit');
-      rateLimitModule = mod;
+      const module = require('@/lib/server/rateLimit');
+      rateLimitModule = module;
       RATE_LIMIT_CONFIGS = module.RATE_LIMIT_CONFIGS;
     }
   } catch (error) {
@@ -357,4 +357,3 @@ export async function validateAccessToken(token: string): Promise<{
 
 // Export RATE_LIMIT_CONFIGS for external use
 export { RATE_LIMIT_CONFIGS };
-

@@ -100,7 +100,7 @@ export default function CanonResourceCard({
 
           {/* INNER CIRCLE BADGE (if gated) */}
           <InnerCircleBadge
-            accessLevel={accessLevel ?? undefined}
+            accessLevel={accessLevel}
             className="shrink-0"
             size="sm"
           />

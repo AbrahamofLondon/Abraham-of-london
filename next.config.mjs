@@ -5,9 +5,11 @@ const require = createRequire(import.meta.url);
 /** @type {import("next").NextConfig} */
 const baseConfig = {
   reactStrictMode: true,
+  trailingSlash: false,
+  compress: true,
+  poweredByHeader: false,
 
   // Prefer runtime env vars over baking timestamps into next.config
-  // (BUILD_TIMESTAMP forces cache bust every build)
   env: {
     CONTENTLAYER_DISABLE_WARNINGS: "true",
     NEXT_PUBLIC_SITE_URL:
@@ -23,7 +25,6 @@ const baseConfig = {
       "date-fns",
       "clsx",
       "tailwind-merge",
-      // framer-motion is fine here, but it's not a magic fix if it's missing
       "framer-motion",
     ],
   },
@@ -37,10 +38,6 @@ const baseConfig = {
     dangerouslyAllowSVG: true,
   },
 
-  trailingSlash: false,
-  compress: true,
-  poweredByHeader: false,
-
   transpilePackages: [
     "lucide-react",
     "date-fns",
@@ -52,25 +49,85 @@ const baseConfig = {
   async redirects() {
     const redirects = [
       // Workshop redirects
-      { source: "/workshop/purpose-pyramid", destination: "/workshops/purpose-pyramid", permanent: true },
-      { source: "/workshop/decision-matrix", destination: "/workshops/decision-matrix", permanent: true },
-      { source: "/workshop/legacy-canvas", destination: "/workshops/legacy-canvas", permanent: true },
-      { source: "/workshops/purpose-pyramid-workshop", destination: "/workshops/purpose-pyramid", permanent: true },
-      { source: "/workshops/decision-matrix-workshop", destination: "/workshops/decision-matrix", permanent: true },
-      { source: "/workshops/legacy-canvas-workshop", destination: "/workshops/legacy-canvas", permanent: true },
+      {
+        source: "/workshop/purpose-pyramid",
+        destination: "/workshops/purpose-pyramid",
+        permanent: true,
+      },
+      {
+        source: "/workshop/decision-matrix",
+        destination: "/workshops/decision-matrix",
+        permanent: true,
+      },
+      {
+        source: "/workshop/legacy-canvas",
+        destination: "/workshops/legacy-canvas",
+        permanent: true,
+      },
+      {
+        source: "/workshops/purpose-pyramid-workshop",
+        destination: "/workshops/purpose-pyramid",
+        permanent: true,
+      },
+      {
+        source: "/workshops/decision-matrix-workshop",
+        destination: "/workshops/decision-matrix",
+        permanent: true,
+      },
+      {
+        source: "/workshops/legacy-canvas-workshop",
+        destination: "/workshops/legacy-canvas",
+        permanent: true,
+      },
 
       // Resource redirects
-      { source: "/resources/leadership-standards", destination: "/resources/leadership-standards-blueprint", permanent: true },
-      { source: "/resources/purpose-pyramid-guide", destination: "/resources/purpose-pyramid", permanent: true },
-      { source: "/resources/legacy-framework", destination: "/resources/legacy-canvas", permanent: true },
+      {
+        source: "/resources/leadership-standards",
+        destination: "/resources/leadership-standards-blueprint",
+        permanent: true,
+      },
+      {
+        source: "/resources/purpose-pyramid-guide",
+        destination: "/resources/purpose-pyramid",
+        permanent: true,
+      },
+      {
+        source: "/resources/legacy-framework",
+        destination: "/resources/legacy-canvas",
+        permanent: true,
+      },
 
       // PDF download redirects
-      { source: "/downloads/purpose-pyramid-worksheet-fillable.pdf", destination: "/downloads/purpose-pyramid.pdf", permanent: true },
-      { source: "/downloads/decision-matrix-worksheet-fillable.pdf", destination: "/downloads/decision-matrix.pdf", permanent: true },
-      { source: "/downloads/legacy-canvas-worksheet-fillable.pdf", destination: "/downloads/legacy-canvas.pdf", permanent: true },
-      { source: "/public/downloads/purpose-pyramid.pdf", destination: "/downloads/purpose-pyramid.pdf", permanent: true },
-      { source: "/public/downloads/decision-matrix.pdf", destination: "/downloads/decision-matrix.pdf", permanent: true },
-      { source: "/public/downloads/legacy-canvas.pdf", destination: "/downloads/legacy-canvas.pdf", permanent: true },
+      {
+        source: "/downloads/purpose-pyramid-worksheet-fillable.pdf",
+        destination: "/downloads/purpose-pyramid.pdf",
+        permanent: true,
+      },
+      {
+        source: "/downloads/decision-matrix-worksheet-fillable.pdf",
+        destination: "/downloads/decision-matrix.pdf",
+        permanent: true,
+      },
+      {
+        source: "/downloads/legacy-canvas-worksheet-fillable.pdf",
+        destination: "/downloads/legacy-canvas.pdf",
+        permanent: true,
+      },
+      {
+        source: "/public/downloads/purpose-pyramid.pdf",
+        destination: "/downloads/purpose-pyramid.pdf",
+        permanent: true,
+      },
+      {
+        source: "/public/downloads/decision-matrix.pdf",
+        destination: "/downloads/decision-matrix.pdf",
+        permanent: true,
+      },
+      {
+        source: "/public/downloads/legacy-canvas.pdf",
+        destination: "/downloads/legacy-canvas.pdf",
+        permanent: true,
+      },
 
       // Canonical
       { source: "/index.html", destination: "/", permanent: true },
@@ -79,109 +136,96 @@ const baseConfig = {
       { source: "/about-us", destination: "/about", permanent: true },
       { source: "/contact-us", destination: "/contact", permanent: true },
       { source: "/get-in-touch", destination: "/contact", permanent: true },
-      { source: "/services/coaching", destination: "/services/executive-coaching", permanent: true },
-      { source: "/services/consulting", destination: "/services/leadership-development", permanent: true },
+      {
+        source: "/services/coaching",
+        destination: "/services/executive-coaching",
+        permanent: true,
+      },
+      {
+        source: "/services/consulting",
+        destination: "/services/leadership-development",
+        permanent: true,
+      },
 
       // Content aliases
       { source: "/blog/:slug", destination: "/insights/:slug", permanent: true },
-      { source: "/articles/:slug", destination: "/insights/:slug", permanent: true },
+      {
+        source: "/articles/:slug",
+        destination: "/insights/:slug",
+        permanent: true,
+      },
       { source: "/news/:slug", destination: "/insights/:slug", permanent: true },
 
-      // Download alias (note: destination is a page route, not a pdf file)
-      { source: "/downloads/leadership-standards-blueprint.pdf", destination: "/downloads/leadership-standards-blueprint", permanent: true },
+      // Download alias (destination is a page route, not a pdf file)
+      {
+        source: "/downloads/leadership-standards-blueprint.pdf",
+        destination: "/downloads/leadership-standards-blueprint",
+        permanent: true,
+      },
     ];
 
-    return redirects.filter(r => typeof r.destination === "string" && r.destination.trim() !== "");
+    return redirects.filter(
+      (r) => typeof r.destination === "string" && r.destination.trim() !== ""
+    );
   },
 
   async headers() {
-    // Netlify production-safe CSP policy
-    const cspDirectives = [
-      // Default sources
+    const isProd = process.env.NODE_ENV === "production";
+
+    // NOTE: CSP must be a set of full directives. Your previous version mixed sources
+    // as separate array items, which produces invalid CSP.
+    const csp = [
       "default-src 'self'",
-      
-      // Script sources
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      // Add common analytics and external scripts
-      "https://www.google.com",
-      "https://www.gstatic.com",
-      "https://www.google-analytics.com",
-      "https://www.googletagmanager.com",
-      "https://cdn.jsdelivr.net",
-      "https://unpkg.com",
-      // Netlify specific
-      "https://app.netlify.com",
-      "https://*.netlify.app",
-      "https://*.netlify.com",
-      
-      // Connect sources (for API calls, WebSockets, etc.)
-      "connect-src 'self'",
-      "https://www.google.com",
-      "https://www.google-analytics.com",
-      // Netlify forms and functions
-      "https://*.netlify.app",
-      "https://*.netlify.com",
-      "https://api.netlify.com",
-      // Netlify Identity if you use it
-      "https://*.auth0.com",
-      "wss://*.netlify.app",
-      
-      // Image sources
-      "img-src 'self' data: blob: https:",
-      "https:",
-      "data:",
-      // Netlify large media
-      "https://images.ctfassets.net",
-      "https://*.cloudinary.com",
-      
-      // Style sources
-      "style-src 'self' 'unsafe-inline'",
-      // Allow Google Fonts if you use them
-      "https://fonts.googleapis.com",
-      // Allow Font Awesome if you use it
-      "https://cdnjs.cloudflare.com",
-      "https://use.fontawesome.com",
-      // Allow Netlify CMS if you use it
-      "https://unpkg.com",
-      
-      // Font sources
-      "font-src 'self'",
-      "https://fonts.gstatic.com",
-      "https://cdnjs.cloudflare.com",
-      "https://use.fontawesome.com",
-      "data:",
-      
-      // Frame sources
-      "frame-src 'self'",
-      "https://www.google.com",
-      "https://app.netlify.com",
-      // Netlify CMS iframe
-      "https://identity.netlify.com",
-      
-      // Media sources (for audio/video if needed)
-      "media-src 'self'",
-      "https:",
-      "data:",
-      
-      // Object sources (for Flash, Java, etc.)
+      [
+        "script-src 'self'",
+        // If you can remove these two later, do it.
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "https://www.google.com",
+        "https://www.gstatic.com",
+        "https://www.google-analytics.com",
+        "https://www.googletagmanager.com",
+        "https://cdn.jsdelivr.net",
+        "https://unpkg.com",
+        "https://app.netlify.com",
+        "https://*.netlify.app",
+        "https://*.netlify.com",
+      ].join(" "),
+      [
+        "connect-src 'self'",
+        "https://www.google.com",
+        "https://www.google-analytics.com",
+        "https://*.netlify.app",
+        "https://*.netlify.com",
+        "https://api.netlify.com",
+        "https://*.auth0.com",
+        "wss://*.netlify.app",
+      ].join(" "),
+      ["img-src 'self'", "data:", "blob:", "https:"].join(" "),
+      ["style-src 'self'", "'unsafe-inline'", "https://fonts.googleapis.com"].join(
+        " "
+      ),
+      ["font-src 'self'", "data:", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"].join(
+        " "
+      ),
+      [
+        "frame-src 'self'",
+        "https://www.google.com",
+        "https://app.netlify.com",
+        "https://identity.netlify.com",
+      ].join(" "),
+      ["media-src 'self'", "data:", "https:"].join(" "),
       "object-src 'none'",
-      
-      // Base URI
       "base-uri 'self'",
-      
-      // Form action
-      "form-action 'self'",
-      "https://*.netlify.app",
-      "https://*.netlify.com",
-      
-      // Frame ancestors
+      ["form-action 'self'", "https://*.netlify.app", "https://*.netlify.com"].join(
+        " "
+      ),
       "frame-ancestors 'none'",
-      
-      // Upgrading insecure requests (only in production)
-      ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
-    ];
+      ...(isProd ? ["upgrade-insecure-requests"] : []),
+    ].join("; ");
 
     return [
+      // Static font cache
       {
         source: "/fonts/:path*",
         headers: [
@@ -189,10 +233,16 @@ const baseConfig = {
           { key: "Access-Control-Allow-Origin", value: "*" },
         ],
       },
+
+      // Next static
       {
         source: "/_next/static/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
       },
+
+      // Direct PDF hits (if any remain)
       {
         source: "/downloads/:path*.pdf",
         headers: [
@@ -201,32 +251,34 @@ const baseConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
+
+      // Public downloadable assets cache
       {
         source: "/assets/downloads/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
       },
+
+      // Global security headers
       {
         source: "/(.*)",
         headers: [
-          {
-            key: "Content-Security-Policy",
-            value: cspDirectives.join("; "),
-          },
+          { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-XSS-Protection", value: "1; mode=block" },
-          // Add HSTS for production
-          ...(process.env.NODE_ENV === "production" ? [
-            { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }
-          ] : []),
-          // Netlify specific headers
-          { key: "X-Netlify-ID", value: process.env.NETLIFY_SITE_ID || "" },
-          { key: "X-Netlify-Edge", value: process.env.NETLIFY_EDGE_HANDLER || "" },
-          // Permissions Policy
-          {
-            key: "Permissions-Policy",
-            value: [
+          { key: "Cache-Control", value: "no-store" },
+          ...(isProd
+            ? [
+                {
+                  key: "Strict-Transport-Security",
+                  value: "max-age=31536000; includeSubDomains",
+                },
+              ]
+            : []),
+          { key: "Permissions-Policy", value: [
               "accelerometer=()",
               "ambient-light-sensor=()",
               "autoplay=()",
@@ -260,26 +312,28 @@ const baseConfig = {
               "clipboard-write=(self)",
             ].join(", ")
           },
+
+          // Netlify headers: only set if present (empty values are noise)
+          ...(process.env.NETLIFY_SITE_ID
+            ? [{ key: "X-Netlify-ID", value: process.env.NETLIFY_SITE_ID }]
+            : []),
+          ...(process.env.NETLIFY_EDGE_HANDLER
+            ? [{ key: "X-Netlify-Edge", value: process.env.NETLIFY_EDGE_HANDLER }]
+            : []),
         ],
       },
     ];
   },
 
   webpack: (config, { isServer, dev, webpack }) => {
-    // DO NOT externalize framer-motion. If it exists, bundle it.
-    // If it doesn't exist, install it.
-
-    // Ignore Contentlayer dynamic generated imports where they appear in compat layers
-    
-    // Ignore binary docs in the public downloads folders (prevents accidental bundling)
+    // Ignore binary assets if they ever get referenced by mistake
     config.plugins.push(
       new webpack.IgnorePlugin({
         resourceRegExp: /\.(pdf|pptx|docx|xlsx|od[tsp])$/i,
-        contextRegExp: /[\\/]public[\\/](downloads|assets[\\/]downloads)[\\/]/,
       })
     );
 
-    // Optional fallbacks if you truly have browser-side imports that drag node built-ins.
+    // Browser fallbacks (only if something tries to drag Node built-ins client-side)
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -297,7 +351,7 @@ const baseConfig = {
       };
     }
 
-    // Windows dev watch sanity
+    // Windows dev watch sanity (prevents EPERM / churn)
     if (process.platform === "win32" && dev) {
       config.watchOptions = {
         ...config.watchOptions,
@@ -306,8 +360,16 @@ const baseConfig = {
         ignored: [
           "**/node_modules/**",
           "**/.next/**",
+
+          // Public binary assets
           "**/public/assets/downloads/**",
           "**/public/downloads/**",
+          "**/public/assets/vault/**",
+
+          // Private vault (should never be watched by Next)
+          "**/private/**",
+
+          // Common binaries anywhere
           "**/*.pdf",
           "**/*.pptx",
           "**/*.docx",

@@ -1,30 +1,31 @@
 // app/api/admin/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes, timingSafeEqual } from "crypto";
+import { randomBytes } from "crypto";
 import { auditLogger } from "@/lib/audit/audit-logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/**
+ * NOTE:
+ * - This route must compile with strict TS + exactOptionalPropertyTypes.
+ * - Prisma AdminSession model (in your project) does NOT support `metadata` in create().
+ *   So fallback DB session creation MUST NOT include `metadata`.
+ */
+
 // ==================== TYPES ====================
+
+type AdminRole = "admin" | "superadmin" | "editor";
+
 interface RateLimitResult {
   allowed: boolean;
   remaining: number;
-  retryAfterMs?: number;
   resetTime: number;
   limit: number;
   windowMs: number;
+  retryAfterMs?: number;
   blocked?: boolean;
   blockUntil?: number;
-}
-
-interface RateLimitRedisModule {
-  rateLimitRedis?: {
-    check: (key: string, opts: RateLimitOptions) => Promise<RateLimitResult>;
-  };
-  default?: {
-    check: (key: string, opts: RateLimitOptions) => Promise<RateLimitResult>;
-  };
 }
 
 interface RateLimitOptions {
@@ -34,28 +35,17 @@ interface RateLimitOptions {
   blockDuration?: number;
 }
 
-interface UnifiedRateLimitModule {
-  withEdgeRateLimit?: (
-    req: NextRequest,
-    cfg: RateLimitOptions
-  ) => Promise<{ allowed: boolean; result?: RateLimitResult }>;
-  RATE_LIMIT_CONFIGS?: {
-    AUTH?: RateLimitOptions;
-  };
-  createRateLimitedResponse?: (result: RateLimitResult) => Response;
-  createRateLimitHeaders?: (result: RateLimitResult) => Record<string, string>;
-}
+type RateLimitCheckResult =
+  | { limited: true; result: RateLimitResult }
+  | { limited: false; result?: RateLimitResult };
 
 interface AdminUser {
   id: string;
   username: string;
-  role: "admin" | "superadmin" | "editor";
+  role: AdminRole;
   permissions: string[];
   mfaEnabled: boolean;
   status?: string;
-  passwordHash?: string;
-  failedLoginAttempts?: number;
-  lastLoginAt?: Date;
 }
 
 interface AuthResult {
@@ -65,18 +55,6 @@ interface AuthResult {
   requiresMFA?: boolean;
 }
 
-interface CreateSessionOptions {
-  userId: string;
-  username?: string;
-  role?: string;
-  permissions?: string[];
-  mfaEnabled?: boolean;
-  userAgent?: string;
-  ipAddress?: string;
-  metadata?: Record<string, any>;
-  expiresIn?: number;
-}
-
 interface SessionResult {
   token: string;
   csrfToken?: string;
@@ -84,36 +62,16 @@ interface SessionResult {
   expiresAt?: Date;
 }
 
-// ==================== UTILITY FUNCTIONS ====================
-async function safeImport<T = any>(specifier: string): Promise<T | null> {
-  try {
-    return (await import(specifier)) as unknown as T;
-  } catch (error) {
-    console.warn(`[SafeImport] Failed to import ${specifier}:`, error);
-    return null;
-  }
-}
+// ==================== HELPERS ====================
 
-function toBytes(input: string | Uint8Array): Uint8Array {
-  if (input instanceof Uint8Array) return input;
-  return new TextEncoder().encode(input);
-}
-
-function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  const aView = new Uint8Array(a);
-  const bView = new Uint8Array(b);
-  return timingSafeEqual(aView, bView);
+function jsonError(message: string, status: number): NextResponse {
+  return NextResponse.json({ error: message }, { status });
 }
 
 function getClientIp(req: NextRequest): string {
   const xff = req.headers.get("x-forwarded-for");
   if (xff) return xff.split(",")[0]?.trim() || "unknown";
   return req.headers.get("x-real-ip")?.trim() || "unknown";
-}
-
-function jsonError(message: string, status: number): NextResponse {
-  return NextResponse.json({ error: message }, { status });
 }
 
 function normalizeUsername(v: unknown): string {
@@ -129,104 +87,31 @@ function normalizeRememberMe(v: unknown): boolean {
 }
 
 async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// ==================== RATE LIMITING ====================
-async function loadRateLimiters(): Promise<{
-  rateLimitRedis: any;
-  rateLimitModule: UnifiedRateLimitModule | null;
-}> {
-  const redisModule = await safeImport<RateLimitRedisModule>("@/lib/rate-limit-redis");
-  const unifiedModule = await safeImport<UnifiedRateLimitModule>(
-    "@/lib/server/rate-limit-unified"
-  );
-
-  const rateLimitRedis = redisModule?.rateLimitRedis || redisModule?.default || null;
-  return { rateLimitRedis, rateLimitModule: unifiedModule };
-}
-
-async function applyRateLimiting(
-  req: NextRequest,
-  clientIp: string,
-  rateLimitRedis: any,
-  rateLimitModule: UnifiedRateLimitModule | null
-): Promise<{ limited: boolean; result?: RateLimitResult }> {
-  const rateLimitKey = `auth:${clientIp}`;
-  let rateLimitResult: RateLimitResult | undefined;
-
-  // 1. Try Redis rate limiting
-  if (rateLimitRedis?.check) {
-    try {
-      rateLimitResult = await rateLimitRedis.check(rateLimitKey, {
-        windowMs: 60_000,
-        limit: 5,
-        keyPrefix: "auth_login",
-        blockDuration: 300_000,
-      });
-
-      if (rateLimitResult && !rateLimitResult.allowed) {
-        console.warn(`[AdminLogin] Rate limited via Redis: ${clientIp}`);
-        return { limited: true, result: rateLimitResult };
-      }
-    } catch (error) {
-      console.warn("[AdminLogin] Redis rate limit error:", error);
-    }
-  }
-
-  // 2. Try unified rate limiting
-  if (!rateLimitResult && rateLimitModule?.withEdgeRateLimit) {
-    try {
-      const cfg = rateLimitModule.RATE_LIMIT_CONFIGS?.AUTH ?? {
-        limit: 10,
-        windowMs: 300_000,
-      };
-
-      const { allowed, result } = await rateLimitModule.withEdgeRateLimit(req, cfg);
-      if (!allowed) {
-        console.warn(`[AdminLogin] Rate limited via unified: ${clientIp}`);
-        return { limited: true, result };
-      }
-      rateLimitResult = result;
-    } catch (error) {
-      console.warn("[AdminLogin] Unified rate limit error:", error);
-    }
-  }
-
-  return { limited: false, result: rateLimitResult };
-}
-
-// ==================== PASSWORD VERIFICATION ====================
-async function verifyPassword(inputPassword: string, storedHash: string): Promise<boolean> {
-  // Primary: bcrypt
-  try {
-    const { compare } = await import("bcryptjs");
-    return await compare(inputPassword, storedHash);
-  } catch (error) {
-    console.warn("[Auth] bcrypt not available, using fallback:", error);
-    
-    // Development fallback (timing-safe comparison)
-    if (process.env.NODE_ENV === "development") {
-      const input = toBytes(inputPassword);
-      const expected = toBytes(process.env.ADMIN_DEV_PASSWORD || "");
-      
-      if (input.length !== expected.length) return false;
-      return timingSafeEqualBytes(input, expected);
-    }
-    
-    // Production: must fail if bcrypt is unavailable
-    throw new Error("Password verification failed: bcrypt not available");
-  }
+function buildRateLimitFallback(cfg: { limit: number; windowMs: number }): RateLimitResult {
+  const now = Date.now();
+  return {
+    allowed: false,
+    remaining: 0,
+    resetTime: now + cfg.windowMs,
+    limit: cfg.limit,
+    windowMs: cfg.windowMs,
+    retryAfterMs: cfg.windowMs,
+  };
 }
 
 // ==================== AUDIT LOGGING ====================
-async function logFailedAttempt(
-  username: string,
-  reason: string,
-  userId?: string,
-  clientIp?: string,
-  userAgent?: string
-): Promise<void> {
+
+async function logFailedAttempt(params: {
+  username: string;
+  reason: string;
+  userId?: string;
+  ipAddress: string;
+  userAgent: string;
+}): Promise<void> {
+  const { username, reason, userId, ipAddress, userAgent } = params;
   try {
     await auditLogger.log({
       action: "LOGIN_FAILED",
@@ -238,25 +123,26 @@ async function logFailedAttempt(
       details: {
         reason,
         threatType: "failed_auth",
-        sourceIp: clientIp || "unknown",
-        userAgent: userAgent || "unknown",
+        sourceIp: ipAddress,
+        userAgent,
       },
-      ipAddress: clientIp || "unknown",
-      userAgent: userAgent || "unknown",
+      ipAddress,
+      userAgent,
       status: "failure",
     });
-  } catch (error) {
-    console.error("[AuthLog] Failed to log failed attempt:", error);
+  } catch (err) {
+    console.error("[AuthLog] Failed to log failed attempt:", err);
   }
 }
 
-async function logSuccessfulLogin(
-  userId: string,
-  username: string,
-  clientIp?: string,
-  userAgent?: string,
-  mfaUsed: boolean = false
-): Promise<void> {
+async function logSuccessfulLogin(params: {
+  userId: string;
+  username: string;
+  ipAddress: string;
+  userAgent: string;
+  mfaUsed: boolean;
+}): Promise<void> {
+  const { userId, username, ipAddress, userAgent, mfaUsed } = params;
   try {
     await auditLogger.log({
       action: "LOGIN_SUCCESS",
@@ -268,24 +154,25 @@ async function logSuccessfulLogin(
       details: {
         method: "password",
         mfaUsed,
-        sourceIp: clientIp || "unknown",
-        userAgent: userAgent || "unknown",
+        sourceIp: ipAddress,
+        userAgent,
       },
-      ipAddress: clientIp || "unknown",
-      userAgent: userAgent || "unknown",
+      ipAddress,
+      userAgent,
       status: "success",
     });
-  } catch (error) {
-    console.error("[AuthLog] Failed to log successful login:", error);
+  } catch (err) {
+    console.error("[AuthLog] Failed to log successful login:", err);
   }
 }
 
-async function logMfaChallengeCreated(
-  userId: string,
-  username: string,
-  clientIp?: string,
-  userAgent?: string
-): Promise<void> {
+async function logMfaChallengeCreated(params: {
+  userId: string;
+  username: string;
+  ipAddress: string;
+  userAgent: string;
+}): Promise<void> {
+  const { userId, username, ipAddress, userAgent } = params;
   try {
     await auditLogger.log({
       action: "MFA_CHALLENGE_CREATED",
@@ -297,37 +184,136 @@ async function logMfaChallengeCreated(
       details: {
         method: "password",
         mfaRequired: true,
-        sourceIp: clientIp || "unknown",
-        userAgent: userAgent || "unknown",
+        sourceIp: ipAddress,
+        userAgent,
       },
-      ipAddress: clientIp || "unknown",
-      userAgent: userAgent || "unknown",
+      ipAddress,
+      userAgent,
       status: "success",
     });
-  } catch (error) {
-    console.error("[AuthLog] Failed to log MFA challenge:", error);
+  } catch (err) {
+    console.error("[AuthLog] Failed to log MFA challenge:", err);
   }
 }
 
-// ==================== AUTHENTICATION SERVICE ====================
-async function authenticateAdmin(
-  username: string,
-  password: string,
-  clientIp?: string,
-  userAgent?: string
-): Promise<AuthResult> {
+// ==================== RATE LIMIT ====================
+
+async function applyRateLimiting(req: NextRequest, clientIp: string): Promise<RateLimitCheckResult> {
+  const key = `auth:${clientIp}`;
+
+  // Prefer Redis limiter if present
   try {
-    // Try central auth utility first
-    try {
-      const { verifyAdminCredentials } = await import("@/lib/server/auth/admin-utils");
-      return await verifyAdminCredentials(username, password);
-    } catch (error) {
-      console.warn("[AdminAuth] Central auth utility not available, using direct DB check");
+    const redisMod: any = await import("@/lib/rate-limit-redis");
+    const limiter = redisMod?.rateLimitRedis || redisMod?.default;
+    if (limiter?.check) {
+      const result: RateLimitResult = await limiter.check(key, {
+        windowMs: 60_000,
+        limit: 5,
+        keyPrefix: "auth_login",
+        blockDuration: 300_000,
+      } satisfies RateLimitOptions);
+
+      if (!result.allowed) return { limited: true, result };
+      return { limited: false, result };
+    }
+  } catch (err) {
+    // non-fatal
+    console.warn("[AdminLogin] Redis limiter unavailable:", err);
+  }
+
+  // Fallback to unified limiter if present
+  try {
+    const unified: any = await import("@/lib/server/rate-limit-unified");
+    const withEdgeRateLimit: undefined | ((r: NextRequest, cfg: RateLimitOptions) => Promise<{ allowed: boolean; result?: RateLimitResult }>) =
+      unified?.withEdgeRateLimit;
+
+    const cfg: RateLimitOptions =
+      unified?.RATE_LIMIT_CONFIGS?.AUTH ?? { limit: 10, windowMs: 300_000 };
+
+    if (withEdgeRateLimit) {
+      const out = await withEdgeRateLimit(req, cfg);
+      if (!out.allowed) return { limited: true, result: out.result ?? buildRateLimitFallback(cfg) };
+
+      // IMPORTANT for exactOptionalPropertyTypes:
+      // If result is undefined, omit the property (do NOT set result: undefined)
+      return out.result ? { limited: false, result: out.result } : { limited: false };
+    }
+  } catch (err) {
+    console.warn("[AdminLogin] Unified limiter unavailable:", err);
+  }
+
+  return { limited: false };
+}
+
+async function createRateLimitedResponseIfAvailable(result: RateLimitResult): Promise<NextResponse | null> {
+  try {
+    const unified: any = await import("@/lib/server/rate-limit-unified");
+    if (typeof unified?.createRateLimitedResponse === "function") {
+      return unified.createRateLimitedResponse(result) as NextResponse;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function createRateLimitHeadersIfAvailable(result: RateLimitResult): Promise<Record<string, string> | null> {
+  try {
+    const unified: any = await import("@/lib/server/rate-limit-unified");
+    if (typeof unified?.createRateLimitHeaders === "function") {
+      return unified.createRateLimitHeaders(result) as Record<string, string>;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+// ==================== PASSWORD VERIFICATION ====================
+
+async function verifyPassword(inputPassword: string, storedHash: string): Promise<boolean> {
+  // Primary: bcryptjs
+  try {
+    const bcrypt = await import("bcryptjs");
+    return await bcrypt.compare(inputPassword, storedHash);
+  } catch (err) {
+    console.warn("[Auth] bcrypt not available:", err);
+
+    // Dev-only fallback: compare against ADMIN_DEV_PASSWORD (timing-safe not required here; this is a dev escape hatch)
+    if (process.env.NODE_ENV === "development") {
+      const expected = process.env.ADMIN_DEV_PASSWORD || "";
+      return inputPassword === expected && expected.length > 0;
     }
 
-    // Fallback: direct database authentication
+    // Production should fail hard if bcrypt is missing
+    throw new Error("Password verification unavailable");
+  }
+}
+
+// ==================== AUTH ====================
+
+async function authenticateAdmin(params: {
+  username: string;
+  password: string;
+  ipAddress: string;
+  userAgent: string;
+}): Promise<AuthResult> {
+  const { username, password, ipAddress, userAgent } = params;
+
+  // Prefer central auth util (if present)
+  try {
+    const central = await import("@/lib/server/auth/admin-utils");
+    if (typeof (central as any)?.verifyAdminCredentials === "function") {
+      return await (central as any).verifyAdminCredentials(username, password);
+    }
+  } catch (err) {
+    console.warn("[AdminAuth] Central auth unavailable, falling back to DB:", err);
+  }
+
+  // DB fallback
+  try {
     const { prisma } = await import("@/lib/prisma");
-    
+
     const user = await prisma.adminUser.findUnique({
       where: { username: username.toLowerCase() },
       select: {
@@ -344,23 +330,21 @@ async function authenticateAdmin(
     });
 
     if (!user) {
-      await logFailedAttempt(username, "user_not_found", undefined, clientIp, userAgent);
+      await logFailedAttempt({ username, reason: "user_not_found", ipAddress, userAgent });
       return { success: false, error: "Invalid credentials" };
     }
 
-    // Check account status
-    if (user.status === "locked" || (user.failedLoginAttempts && user.failedLoginAttempts >= 5)) {
-      return {
-        success: false,
-        error: "Account is temporarily locked. Please contact support.",
-      };
+    if (user.status === "locked" || (user.failedLoginAttempts ?? 0) >= 5) {
+      return { success: false, error: "Account is temporarily locked. Please contact support." };
     }
 
-    // Verify password
-    const isPasswordValid = await verifyPassword(password, user.passwordHash!);
+    if (!user.passwordHash) {
+      await logFailedAttempt({ username, reason: "missing_password_hash", userId: user.id, ipAddress, userAgent });
+      return { success: false, error: "Invalid credentials" };
+    }
 
-    if (!isPasswordValid) {
-      // Increment failed attempts
+    const ok = await verifyPassword(password, user.passwordHash);
+    if (!ok) {
       await prisma.adminUser.update({
         where: { id: user.id },
         data: {
@@ -369,177 +353,156 @@ async function authenticateAdmin(
         },
       });
 
-      await logFailedAttempt(username, "invalid_password", user.id, clientIp, userAgent);
+      await logFailedAttempt({ username, reason: "invalid_password", userId: user.id, ipAddress, userAgent });
       return { success: false, error: "Invalid credentials" };
     }
 
-    // Reset failed attempts and update last login
+    // reset attempts
     await prisma.adminUser.update({
       where: { id: user.id },
-      data: {
-        failedLoginAttempts: 0,
-        lastLoginAt: new Date(),
-      },
+      data: { failedLoginAttempts: 0, lastLoginAt: new Date() },
     });
 
-    // Parse permissions if stored as JSON string
-    const permissions = typeof user.permissions === "string" 
-      ? JSON.parse(user.permissions || "[]")
-      : (user.permissions || []);
+    const permissions: string[] =
+      typeof user.permissions === "string"
+        ? (JSON.parse(user.permissions || "[]") as string[])
+        : (user.permissions ?? []);
 
     const adminUser: AdminUser = {
       id: user.id,
       username: user.username,
-      role: user.role as "admin" | "superadmin" | "editor",
+      role: user.role as AdminRole,
       permissions,
-      mfaEnabled: user.mfaEnabled,
+      mfaEnabled: !!user.mfaEnabled,
+      status: user.status ?? undefined,
     };
 
-    return {
-      success: true,
-      user: adminUser,
-      requiresMFA: user.mfaEnabled,
-    };
-
-  } catch (error) {
-    console.error("[AdminAuth] Authentication error:", error);
+    return { success: true, user: adminUser, requiresMFA: adminUser.mfaEnabled };
+  } catch (err) {
+    console.error("[AdminAuth] DB auth failed:", err);
     return { success: false, error: "Authentication failed" };
   }
 }
 
-// ==================== SESSION MANAGEMENT ====================
-async function createAdminSession(
-  user: AdminUser,
-  userAgent?: string,
-  ipAddress?: string
-): Promise<SessionResult> {
+// ==================== MFA ====================
+
+async function setMFAChallenge(userId: string, challenge: string): Promise<void> {
+  // Prefer a dedicated MFA module if present
   try {
-    // Try to use centralized session management
-    try {
-      const { createSession } = await import("@/lib/auth/sessions");
-      
-      // Build session options with metadata
-      const sessionOptions: CreateSessionOptions = {
+    const mfaMod: any = await import("@/lib/auth/mfa");
+    if (typeof mfaMod?.setMFAChallenge === "function") {
+      await mfaMod.setMFAChallenge(userId, challenge);
+      return;
+    }
+  } catch (err) {
+    console.warn("[MFA] module unavailable, using CacheEntry fallback:", err);
+  }
+
+  // CacheEntry fallback (schema-backed)
+  const { prisma } = await import("@/lib/prisma");
+
+  const ttlMs = 10 * 60 * 1000; // 10 minutes
+  const expiresAt = new Date(Date.now() + ttlMs);
+
+  // Store a single active challenge per user (overwrite on new login attempt)
+  const key = `mfa_challenge:${userId}`;
+
+  await prisma.cacheEntry.upsert({
+    where: { key },
+    update: {
+      value: JSON.stringify({
+        challenge,
+        expiresAt: expiresAt.toISOString(),
+      }),
+      expiresAt,
+      tags: "mfa,challenge",
+    },
+    create: {
+      key,
+      value: JSON.stringify({
+        challenge,
+        expiresAt: expiresAt.toISOString(),
+      }),
+      expiresAt,
+      tags: "mfa,challenge",
+    },
+  });
+}
+
+// ==================== SESSION ====================
+
+async function createAdminSession(params: {
+  user: AdminUser;
+  userAgent: string;
+  ipAddress: string;
+  rememberMe: boolean;
+}): Promise<SessionResult> {
+  const { user, userAgent, ipAddress } = params;
+
+  // Prefer central sessions module (if present)
+  try {
+    const sessions: any = await import("@/lib/auth/sessions");
+    if (typeof sessions?.createSession === "function") {
+      // Important: do NOT guess fields that may not exist (like metadata).
+      // Only pass the core fields most session libs accept.
+      const session = await sessions.createSession({
         userId: user.id,
         username: user.username,
         role: user.role,
         permissions: user.permissions,
         mfaEnabled: user.mfaEnabled,
-        userAgent: userAgent || "admin-login",
-        ipAddress: ipAddress || "unknown",
-        metadata: {
-          source: "admin-login-api",
-          loginMethod: "password",
-          timestamp: new Date().toISOString(),
-        },
-        expiresIn: 30 * 24 * 60 * 60, // 30 days in seconds
-      };
-
-      const session = await createSession(sessionOptions);
-      
-      // Ensure the session has required fields
-      if (!session || !session.token || !session.userId) {
-        throw new Error("Invalid session response from createSession");
-      }
-
-      return {
-        token: session.token,
-        csrfToken: session.csrfToken,
-        userId: session.userId,
-        expiresAt: session.expiresAt,
-      };
-    } catch (sessionError) {
-      console.warn("[Session] Centralized session creation failed, using fallback:", sessionError);
-      
-      // Fallback: create database session directly
-      const sessionId = randomBytes(32).toString("hex");
-      const csrfToken = randomBytes(16).toString("hex");
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-
-      const { prisma } = await import("@/lib/prisma");
-      
-      await prisma.adminSession.create({
-        data: {
-          id: sessionId,
-          userId: user.id,
-          token: sessionId,
-          csrfToken,
-          expiresAt,
-          userAgent: userAgent || "admin-login",
-          ipAddress: ipAddress || "unknown",
-          metadata: {
-            username: user.username,
-            role: user.role,
-            mfaEnabled: user.mfaEnabled,
-            source: "fallback-session",
-          },
-        },
+        userAgent,
+        ipAddress,
+        // If their API supports expiresIn, fine; if not, this stays inside the module typing.
+        expiresIn: 30 * 24 * 60 * 60,
       });
 
-      return {
-        token: sessionId,
-        csrfToken,
-        userId: user.id,
-        expiresAt,
-      };
+      if (session?.token && session?.userId) {
+        return {
+          token: session.token,
+          csrfToken: session.csrfToken,
+          userId: session.userId,
+          expiresAt: session.expiresAt,
+        };
+      }
     }
-  } catch (error) {
-    console.error("[Session] Failed to create session:", error);
-    throw new Error("Session creation failed");
+  } catch (err) {
+    console.warn("[Session] Central sessions unavailable, using DB fallback:", err);
   }
-}
 
-async function setMFAChallenge(userId: string, challenge: string): Promise<void> {
-  try {
-    // Try to use MFA module if available
-    try {
-      const { setMFAChallenge: setChallenge } = await import("@/lib/auth/mfa");
-      await setChallenge(userId, challenge);
-      return;
-    } catch (error) {
-      console.warn("[MFA] MFA module not available, using database fallback");
-    }
+  // DB fallback (NO metadata field)
+  const sessionId = randomBytes(32).toString("hex");
+  const csrfToken = randomBytes(16).toString("hex");
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    // Fallback: store in database with expiry
-    const { prisma } = await import("@/lib/prisma");
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const { prisma } = await import("@/lib/prisma");
+  await prisma.adminSession.create({
+    data: {
+      id: sessionId,
+      userId: user.id,
+      token: sessionId,
+      csrfToken,
+      expiresAt,
+      userAgent,
+      ipAddress,
+    },
+  });
 
-    await prisma.mfaChallenge.upsert({
-      where: { userId },
-      update: { challenge, expiresAt, used: false },
-      create: {
-        userId,
-        challenge,
-        expiresAt,
-        used: false,
-      },
-    });
-  } catch (error) {
-    console.error("[MFA] Failed to set challenge:", error);
-    throw new Error("Failed to create MFA challenge");
-  }
+  return { token: sessionId, csrfToken, userId: user.id, expiresAt };
 }
 
 // ==================== MAIN HANDLER ====================
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
   const clientIp = getClientIp(request);
   const userAgent = request.headers.get("user-agent") || "unknown";
 
   try {
-    // Load rate limiters
-    const { rateLimitRedis, rateLimitModule } = await loadRateLimiters();
+    // Rate limit first
+    const rate = await applyRateLimiting(request, clientIp);
 
-    // Apply rate limiting
-    const rateLimitCheck = await applyRateLimiting(
-      request,
-      clientIp,
-      rateLimitRedis,
-      rateLimitModule
-    );
-
-    if (rateLimitCheck.limited) {
-      // Log rate limiting event
+    if (rate.limited) {
       await auditLogger.log({
         action: "RATE_LIMIT_EXCEEDED",
         category: "auth",
@@ -555,29 +518,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         status: "failure",
       });
 
-      // Return rate limited response
-      if (rateLimitModule?.createRateLimitedResponse && rateLimitCheck.result) {
-        return rateLimitModule.createRateLimitedResponse(rateLimitCheck.result) as NextResponse;
-      }
+      const specialized = await createRateLimitedResponseIfAvailable(rate.result);
+      if (specialized) return specialized;
 
       return NextResponse.json(
         { error: "Too many login attempts. Please try again later." },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": "300",
-            "X-RateLimit-Reason": "too_many_attempts",
-          },
-        }
+        { status: 429, headers: { "Retry-After": "300", "X-RateLimit-Reason": "too_many_attempts" } }
       );
     }
 
-    // Parse and validate request body
-    let body: any;
+    // Parse body
+    let body: any = null;
     try {
       body = await request.json();
-    } catch (error) {
-      await logFailedAttempt("unknown", "invalid_json", undefined, clientIp, userAgent);
+    } catch {
+      await logFailedAttempt({ username: "unknown", reason: "invalid_json", ipAddress: clientIp, userAgent });
       return jsonError("Invalid JSON", 400);
     }
 
@@ -586,69 +541,75 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const rememberMe = normalizeRememberMe(body?.rememberMe);
 
     if (!username || !password) {
-      await logFailedAttempt(username || "unknown", "missing_credentials", undefined, clientIp, userAgent);
+      await logFailedAttempt({ username: username || "unknown", reason: "missing_credentials", ipAddress: clientIp, userAgent });
       return jsonError("Username and password required", 400);
     }
 
     if (username.length > 100 || password.length > 500) {
-      await logFailedAttempt(username, "invalid_input_length", undefined, clientIp, userAgent);
+      await logFailedAttempt({ username, reason: "invalid_input_length", ipAddress: clientIp, userAgent });
       return jsonError("Invalid input length", 400);
     }
 
-    // Authenticate user
-    const authResult = await authenticateAdmin(username, password, clientIp, userAgent);
+    const auth = await authenticateAdmin({ username, password, ipAddress: clientIp, userAgent });
 
-    if (!authResult.success) {
-      // Add consistent timing delay
+    if (!auth.success || !auth.user) {
+      // consistent delay
       const elapsed = Date.now() - startTime;
-      const minDelay = 500;
-      if (elapsed < minDelay) await sleep(minDelay - elapsed);
+      if (elapsed < 500) await sleep(500 - elapsed);
 
-      return NextResponse.json(
-        { error: authResult.error || "Invalid credentials" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: auth.error || "Invalid credentials" }, { status: 401 });
     }
 
-    // Handle MFA if required
-    if (authResult.requiresMFA) {
-      const mfaChallenge = randomBytes(16).toString("hex");
-      await setMFAChallenge(authResult.user!.id, mfaChallenge);
-      
-      await logMfaChallengeCreated(authResult.user!.id, username, clientIp, userAgent);
+    // MFA path
+    if (auth.requiresMFA) {
+      const challenge = randomBytes(16).toString("hex");
+      await setMFAChallenge(auth.user.id, challenge);
+      await logMfaChallengeCreated({ userId: auth.user.id, username, ipAddress: clientIp, userAgent });
 
       return NextResponse.json({
         success: true,
         requiresMFA: true,
-        userId: authResult.user!.id,
-        challenge: mfaChallenge,
-        username: authResult.user!.username,
+        userId: auth.user.id,
+        challenge,
+        username: auth.user.username,
       });
     }
 
-    // Create session
-    const session = await createAdminSession(authResult.user!, userAgent, clientIp);
+    // Session
+    const session = await createAdminSession({
+      user: auth.user,
+      userAgent,
+      ipAddress: clientIp,
+      rememberMe,
+    });
 
-    // Log successful login
-    await logSuccessfulLogin(authResult.user!.id, username, clientIp, userAgent, false);
+    await logSuccessfulLogin({
+      userId: auth.user.id,
+      username,
+      ipAddress: clientIp,
+      userAgent,
+      mfaUsed: false,
+    });
 
-    // Build response
-    const response = NextResponse.json({
-      success: true,
-      user: {
-        id: authResult.user!.id,
-        username: authResult.user!.username,
-        role: authResult.user!.role,
-        permissions: authResult.user!.permissions,
-        mfaEnabled: authResult.user!.mfaEnabled,
+    const response = NextResponse.json(
+      {
+        success: true,
+        user: {
+          id: auth.user.id,
+          username: auth.user.username,
+          role: auth.user.role,
+          permissions: auth.user.permissions,
+          mfaEnabled: auth.user.mfaEnabled,
+        },
+        session: {
+          expiresIn: 30 * 24 * 60 * 60,
+          expiresAt: session.expiresAt?.toISOString(),
+        },
       },
-      session: {
-        expiresIn: 30 * 24 * 60 * 60, // 30 days in seconds
-        expiresAt: session.expiresAt?.toISOString(),
-      },
-    }, { status: 200 });
+      { status: 200 }
+    );
 
-    // Set cookies
+    // Cookies
     response.cookies.set("admin_session", session.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -676,81 +637,73 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     response.headers.set("X-XSS-Protection", "1; mode=block");
     response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
-    // Custom headers
+    // Diagnostics (safe)
     response.headers.set("X-Login-Success", "true");
-    response.headers.set("X-User-Role", authResult.user!.role);
-    response.headers.set("X-User-Id", authResult.user!.id);
+    response.headers.set("X-User-Role", auth.user.role);
+    response.headers.set("X-User-Id", auth.user.id);
     response.headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
 
-    // Rate limit headers if available
-    if (rateLimitCheck.result && rateLimitModule?.createRateLimitHeaders) {
-      try {
-        const headers = rateLimitModule.createRateLimitHeaders(rateLimitCheck.result);
-        Object.entries(headers).forEach(([key, value]) => {
-          response.headers.set(key, String(value));
-        });
-      } catch (error) {
-        console.warn("[AdminLogin] Failed to set rate limit headers:", error);
+    // Optional rate limit headers if we got a result earlier
+    if (rate.result) {
+      const headers = await createRateLimitHeadersIfAvailable(rate.result);
+      if (headers) {
+        for (const [k, v] of Object.entries(headers)) response.headers.set(k, String(v));
       }
     }
 
     console.log(`[AdminLogin] Successful login for ${username} in ${Date.now() - startTime}ms`);
     return response;
+  } catch (err) {
+    console.error("[AdminLogin] Internal server error:", err);
 
-  } catch (error) {
-    console.error("[AdminLogin] Internal server error:", error);
-    
-    // Log internal error
-    await auditLogger.log({
-      action: "LOGIN_INTERNAL_ERROR",
-      category: "auth",
-      severity: "error",
-      details: {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        sourceIp: clientIp,
-      },
-      ipAddress: clientIp,
-      userAgent,
-      status: "failure",
-      metadata: {
-        endpoint: "/api/admin/login",
-        method: "POST",
-        timestamp: new Date().toISOString(),
-      },
-    });
+    // Audit internal error (avoid metadata field here too; audit logger supports it, but your implementation may not)
+    try {
+      await auditLogger.log({
+        action: "LOGIN_INTERNAL_ERROR",
+        category: "auth",
+        severity: "error",
+        details: {
+          error: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+          sourceIp: clientIp,
+        },
+        ipAddress: clientIp,
+        userAgent,
+        status: "failure",
+      });
+    } catch (auditErr) {
+      console.error("[AdminLogin] Failed to audit internal error:", auditErr);
+    }
 
     return NextResponse.json(
       { error: "Internal server error" },
-      {
-        status: 500,
-        headers: {
-          "Cache-Control": "no-store",
-          "X-Error-Type": "internal_error",
-        },
-      }
+      { status: 500, headers: { "Cache-Control": "no-store", "X-Error-Type": "internal_error" } }
     );
   }
 }
 
 // ==================== SUPPORTING ENDPOINTS ====================
+
 export async function GET(): Promise<NextResponse> {
-  return NextResponse.json({
-    recaptchaEnabled: !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-    mfaEnabled: process.env.ADMIN_MFA_ENABLED === "true",
-    allowRememberMe: true,
-    maxPasswordLength: 500,
-    minPasswordLength: 8,
-    supportedAuthMethods: ["password", "mfa"],
-    version: "1.0.0",
-    timestamp: new Date().toISOString(),
-  }, {
-    status: 200,
-    headers: {
-      "Cache-Control": "public, max-age=3600",
-      "X-Endpoint-Version": "admin-login-v1",
+  return NextResponse.json(
+    {
+      recaptchaEnabled: !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+      mfaEnabled: process.env.ADMIN_MFA_ENABLED === "true",
+      allowRememberMe: true,
+      maxPasswordLength: 500,
+      minPasswordLength: 8,
+      supportedAuthMethods: ["password", "mfa"],
+      version: "1.0.0",
+      timestamp: new Date().toISOString(),
     },
-  });
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, max-age=3600",
+        "X-Endpoint-Version": "admin-login-v1",
+      },
+    }
+  );
 }
 
 export async function HEAD(): Promise<NextResponse> {
@@ -765,12 +718,11 @@ export async function HEAD(): Promise<NextResponse> {
   });
 }
 
-// ==================== HEALTH CHECK ====================
 export async function OPTIONS(): Promise<NextResponse> {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Allow": "GET, POST, HEAD, OPTIONS",
+      Allow: "GET, POST, HEAD, OPTIONS",
       "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Max-Age": "86400",

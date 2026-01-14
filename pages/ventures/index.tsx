@@ -3,39 +3,25 @@ import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   Building2,
   PackageCheck,
   Lightbulb,
-  Target,
-  TrendingUp,
-  Users,
-  Globe,
   ExternalLink,
   ChevronRight,
   Award,
-  BarChart,
   Zap,
   Shield,
   Briefcase,
   Rocket,
   Heart,
-  Star,
   CheckCircle,
-  Clock,
-  MapPin,
   Users2,
   Target as TargetIcon,
   TrendingUp as TrendingUpIcon,
-  Layers,
-  Cpu,
   Building,
-  Factory,
-  Store,
-  BookOpen,
-  Sparkles
+  BookOpen
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -397,10 +383,12 @@ const VenturesPage: NextPage = () => {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">
-                Complete Portfolio
+                {otherVentures.length > 0 ? "Emerging Ventures" : "Complete Portfolio"}
               </h2>
               <p className="text-gray-400">
-                All ventures under the Abraham of London umbrella, organized by stage and focus.
+                {otherVentures.length > 0 
+                  ? "Additional ventures in development and incubation stages."
+                  : "All ventures under the Abraham of London umbrella, organized by stage and focus."}
               </p>
             </div>
 
@@ -411,7 +399,7 @@ const VenturesPage: NextPage = () => {
               whileInView="visible"
               viewport={{ once: true }}
             >
-              {ventures.map((venture) => {
+              {(otherVentures.length > 0 ? otherVentures : ventures).map((venture) => {
                 const statusStyle = statusColors[venture.status];
                 
                 return (

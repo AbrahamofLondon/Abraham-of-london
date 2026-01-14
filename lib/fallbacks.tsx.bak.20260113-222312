@@ -23,8 +23,8 @@ export const fallbackAuthOptions = {
 export function safeRequire<T>(modulePath: string, fallback: T): T {
   try {
     // Use require for CommonJS modules
-    const mod = require(modulePath);
-    return module.default || mod;
+    const module = require(modulePath);
+    return module.default || module;
   } catch (error) {
     console.warn(`Module ${modulePath} not found, using fallback`);
     return fallback;
@@ -34,8 +34,8 @@ export function safeRequire<T>(modulePath: string, fallback: T): T {
 // Safe dynamic import for ES modules
 export async function safeDynamicImport<T>(modulePath: string, fallback: T): Promise<T> {
   try {
-    const mod = await import(modulePath);
-    return module.default || mod;
+    const module = await import(modulePath);
+    return module.default || module;
   } catch (error) {
     console.warn(`Module ${modulePath} not found, using fallback`);
     return fallback;

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/inner-circle/keys.ts - CLIENT-SAFE VERSION
-import crypto from "crypto";
 
 export type KeyTier = "member" | "patron" | "founder";
 
@@ -94,8 +93,19 @@ export function generateAccessKey(): string {
     return `IC-${hex.toUpperCase()}`;
   }
   
-  // Server-side
-  return `IC-${crypto.randomBytes(20).toString("hex").toUpperCase()}`;
+  // Server-side: dynamic import to avoid bundling Node crypto on client
+  try {
+    const crypto = require('crypto');
+    return `IC-${crypto.randomBytes(20).toString("hex").toUpperCase()}`;
+  } catch (error) {
+    // Fallback if crypto not available
+    const array = new Uint8Array(20);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = Math.floor(Math.random() * 256);
+    }
+    const hex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return `IC-${hex.toUpperCase()}`;
+  }
 }
 
 export async function storeKey(record: StoredKey): Promise<void> {
@@ -428,38 +438,49 @@ export function getMemoryStoreSize(): number {
   return mem.size;
 }
 
-// Export the missing function
-export function getEmailHash(email: string): string {
-  const normalizedEmail = email.trim().toLowerCase();
-  
-  if (typeof window !== 'undefined') {
-    // Client-side: use Web Crypto API
-    const encoder = new TextEncoder();
-    const data = encoder.encode(normalizedEmail);
-    return crypto.subtle.digest('SHA-256', data)
-      .then(hash => {
-        const hex = Array.from(new Uint8Array(hash))
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('');
-        return hex.substring(0, 32);
-      })
-      .catch(() => {
-        // Fallback for older browsers
-        let hash = 0;
-        for (let i = 0; i < normalizedEmail.length; i++) {
-          hash = ((hash << 5) - hash) + normalizedEmail.charCodeAt(i);
-          hash |= 0;
-        }
-        return Math.abs(hash).toString(16).padStart(32, '0').substring(0, 32);
-      }) as any;
+// Fixed: Proper async email hash function with correct crypto usage
+export async function getEmailHash(email: string): Promise<string> {
+  const normalized = email.trim().toLowerCase();
+
+  // Client-side: Web Crypto
+  if (typeof window !== "undefined" && globalThis.crypto?.subtle) {
+    try {
+      const data = new TextEncoder().encode(normalized);
+      const hash = await globalThis.crypto.subtle.digest("SHA-256", data);
+      const hex = Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+      return hex.substring(0, 32);
+    } catch (error) {
+      console.warn("[getEmailHash] Web Crypto failed, using fallback:", error);
+      // Fallback for older browsers or errors
+      let hash = 0;
+      for (let i = 0; i < normalized.length; i++) {
+        hash = ((hash << 5) - hash) + normalized.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash).toString(16).padStart(32, '0').substring(0, 32);
+    }
   }
-  
-  // Server-side: use Node.js crypto
-  return crypto
-    .createHash('sha256')
-    .update(normalizedEmail)
-    .digest('hex')
-    .substring(0, 32);
+
+  // Server-side: Node crypto (dynamic import avoids bundling)
+  try {
+    // Use dynamic import to avoid bundling Node crypto on client
+    const nodeCrypto = await import("crypto");
+    return nodeCrypto.createHash("sha256")
+      .update(normalized)
+      .digest("hex")
+      .substring(0, 32);
+  } catch (error) {
+    console.error("[getEmailHash] Node crypto import failed:", error);
+    // Final fallback
+    let hash = 0;
+    for (let i = 0; i < normalized.length; i++) {
+      hash = ((hash << 5) - hash) + normalized.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).padStart(32, '0').substring(0, 32);
+  }
 }
 
 // ==================== MISSING EXPORTS (NEW IMPLEMENTATIONS) ====================
@@ -482,7 +503,7 @@ const keyUsageStore = new Map<string, {
 export async function createOrUpdateMemberAndIssueKey(
   args: CreateOrUpdateMemberArgs
 ): Promise<IssuedKey> {
-  // Generate member ID from email hash
+  // Generate member ID from email hash - NOW AWAITED
   const memberId = await getEmailHash(args.email);
   
   // Create or update member

@@ -9,8 +9,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 let rateLimitModule: any = null;
 
 try {
-  const mod = require('@/lib/server/rate-limit-unified');
-  rateLimitModule = mod;
+  const module = require('@/lib/server/rate-limit-unified');
+  rateLimitModule = module;
 } catch (error) {
   console.warn('[withInnerCircleAccess] rate-limit-unified not available');
 }
@@ -38,7 +38,7 @@ export function withInnerCircleAccess(
         return;
       }
       
-      // Apply rate limiting if mod is available
+      // Apply rate limiting if module is available
       if (rateLimitModule?.withApiRateLimit) {
         const rateLimitConfig = options.rateLimitConfig || rateLimitModule.RATE_LIMIT_CONFIGS?.INNER_CIRCLE;
         if (rateLimitConfig) {
@@ -60,4 +60,3 @@ export function withInnerCircleAccess(
 }
 
 export default withInnerCircleAccess;
-

@@ -42,59 +42,112 @@ export const INNER_CIRCLE_CONFIG = {
 export const withInnerCircleRateLimit = withInnerCircleAccess;
 
 /**
- * Back-compat: older handlers expected `{ data, headers }`.
- * We return privacy-safe stats only (no PII).
+ * Back-compat wrapper:
+ * Older handlers expect: `{ verification, rateLimit, headers }`
  *
- * NOTE:
- * - `req` is optional because App Router uses NextRequest (not NextApiRequest).
- * - We only use `createRateLimitHeaders()` if it exists + can be called safely.
+ * - `verification` is the real VerifyInnerCircleKeyResult from keys layer
+ * - `rateLimit` + `headers` are best-effort (only when req exists + access layer supports it)
  */
-export async function getPrivacySafeKeyExportWithRateLimit(
-  params: { page?: number; limit?: number } = {},
-  adminId = "admin",
+export async function verifyInnerCircleKeyWithRateLimit(
+  key: string,
   req?: any
-): Promise<{ data: any; headers: Record<string, string> }> {
-  const stats = await getPrivacySafeStats();
-
-  const data = {
-    exportedAt: new Date().toISOString(),
-    adminId,
-    params: {
-      page: Number(params.page || 1),
-      limit: Number(params.limit || 50),
-    },
-    stats,
-    metadata: {
-      format: "JSON",
-      version: "1.0",
-      generatedBy: "Inner Circle Admin API",
-    },
+): Promise<{
+  verification: VerifyInnerCircleKeyResult;
+  rateLimit?: {
+    allowed: boolean;
+    remaining?: number;
+    resetAt?: number;
+    retryAfterMs?: number;
   };
+  headers?: Record<string, string>;
+}> {
+  // 1) Apply rate limit if we can
+  let headers: Record<string, string> | undefined;
+  let rateLimit: {
+    allowed: boolean;
+    remaining?: number;
+    resetAt?: number;
+    retryAfterMs?: number;
+  } | undefined;
 
-  // Try to create rate-limit headers using your real helper, if possible.
-  // Many implementations accept a result object; we safely fallback otherwise.
-  let headers: Record<string, string> = {};
   try {
-    // If you have a limiter result in req context, wire it in here.
-    // Otherwise, emit nothing (better than lying).
-    const maybe = createRateLimitHeaders?.(undefined as any);
-    if (maybe && typeof maybe === "object") {
-      headers = Object.fromEntries(
-        Object.entries(maybe).map(([k, v]) => [k, String(v)])
-      );
+    if (req && typeof withInnerCircleAccess === "function") {
+      // Prefer explicit VERIFY config if you have one, else fall back to AUTH, else hard default
+      const cfg =
+        (RATE_LIMIT_CONFIGS as any)?.VERIFY ??
+        (RATE_LIMIT_CONFIGS as any)?.AUTH ?? {
+          limit: 30,
+          windowMs: 60_000,
+          keyPrefix: "inner_circle_verify",
+          blockDuration: 5 * 60_000,
+        };
+
+      // We allow both "boolean" and "object" patterns because your access layer may differ.
+      const access = await withInnerCircleAccess(req, cfg as any);
+
+      // Common patterns:
+      // A) { allowed, result }
+      // B) { ok, rateLimit }
+      // C) boolean
+      const allowed =
+        typeof access === "boolean"
+          ? access
+          : typeof access?.allowed === "boolean"
+            ? access.allowed
+            : typeof access?.ok === "boolean"
+              ? access.ok
+              : true;
+
+      const result = (access as any)?.result ?? (access as any)?.rateLimit ?? undefined;
+
+      if (result) {
+        rateLimit = {
+          allowed,
+          remaining: result.remaining,
+          resetAt: result.resetAt ?? result.resetTime,
+          retryAfterMs: result.retryAfterMs,
+        };
+
+        // Only add headers if helper exists and result is real
+        if (typeof createRateLimitHeaders === "function") {
+          const h = createRateLimitHeaders(result as any);
+          if (h && typeof h === "object") {
+            headers = Object.fromEntries(
+              Object.entries(h).map(([k, v]) => [k, String(v)])
+            );
+          }
+        }
+      }
+
+      // If rate-limited, short-circuit without touching keys DB
+      if (!allowed) {
+        // We cannot safely fabricate a fully-correct VerifyInnerCircleKeyResult shape
+        // across versions, so we return a minimal "invalid" object with a cast.
+        return {
+          verification: { valid: false, reason: "rate_limited" } as any as VerifyInnerCircleKeyResult,
+          rateLimit,
+          headers,
+        };
+      }
     }
   } catch {
-    headers = {};
+    // If rate limiting fails, do NOT block verification.
+    // Silent fail is safer than locking out real users due to infra hiccups.
   }
 
-  return { data, headers };
+  // 2) Perform verification
+  const verification = await verifyInnerCircleKey(key);
+
+  return { verification, rateLimit, headers };
 }
 
 // Straight aliases (some older code may import these names)
 export const getPrivacySafeStatsWithRateLimit = getPrivacySafeStats;
 export const createOrUpdateMemberAndIssueKeyWithRateLimit =
   createOrUpdateMemberAndIssueKey;
-export const verifyInnerCircleKeyWithRateLimit = verifyInnerCircleKey;
+
+// REMOVE THIS LINE - IT'S A DUPLICATE AND CAUSES THE ERROR:
+// export const verifyInnerCircleKeyWithRateLimit = verifyInnerCircleKey;
 
 export const healthCheckEnhanced = async () => ({
   status: "ok",
@@ -128,7 +181,6 @@ const innerCircle = {
 
   // compat
   withInnerCircleRateLimit,
-  getPrivacySafeKeyExportWithRateLimit,
   getPrivacySafeStatsWithRateLimit,
   createOrUpdateMemberAndIssueKeyWithRateLimit,
   verifyInnerCircleKeyWithRateLimit,

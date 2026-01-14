@@ -29,9 +29,20 @@ const CanonNavigation: React.FC<CanonNavigationProps> = ({
   currentModuleId,
   currentLessonId,
 }) => {
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(
-    new Set(currentModuleId ? [currentModuleId] : [modules[0]?.id])
-  );
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(() => {
+    const initialSet = new Set<string>();
+    
+    // Add current module if provided
+    if (currentModuleId) {
+      initialSet.add(currentModuleId);
+    } 
+    // Otherwise add first module if available
+    else if (modules[0]?.id) {
+      initialSet.add(modules[0].id);
+    }
+    
+    return initialSet;
+  });
 
   const toggleModule = (moduleId: string) => {
     const newExpanded = new Set(expandedModules);
