@@ -1,18 +1,15 @@
-// components/content/ContentLayout.tsx - FIXED
+// components/ContentPageTemplate.tsx - FIXED
 import * as React from "react";
 import Head from "next/head";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-// Import the utility function directly instead of the whole config
-import { getPageTitle, siteConfig } from '@/lib/imports';
+import { siteConfig } from "@/lib/imports";
 
-interface ContentLayoutProps {
+interface ContentPageTemplateProps {
   frontmatter: {
     slug: string;
     title: string;
-    excerpt?: string;
     description?: string;
+    excerpt?: string;
     date?: string;
     author?: string;
     category?: string;
@@ -25,34 +22,26 @@ interface ContentLayoutProps {
     featured?: boolean;
     [key: string]: any;
   };
-  mdxSource: MDXRemoteSerializeResult;
+  children: React.ReactNode;
   contentType?: string;
-  children?: React.ReactNode;
 }
 
-export default function ContentLayout({
+export default function ContentPageTemplate({
   frontmatter,
-  mdxSource,
-  contentType = "content",
   children,
-}: ContentLayoutProps): JSX.Element {
-  // Safe access with fallbacks
+  contentType = "content",
+}: ContentPageTemplateProps): JSX.Element {
   const title = frontmatter.title || `${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`;
-  
-  // Use the utility function directly
-  const pageTitle = getPageTitle(title);
-  
-  // Use excerpt first, then description, then title
   const description = frontmatter.excerpt || frontmatter.description || title;
   
   // URL can be from frontmatter or constructed
   const url = frontmatter.url || `/${contentType}/${frontmatter.slug}`;
-  const fullUrl = `${siteConfig.siteUrl}${url}`;
+  const fullUrl = `${siteConfig.url}${url}`; // FIXED: Changed siteUrl to url
   
   return (
     <Layout title={title} className={`bg-charcoal content-${contentType}`}>
       <Head>
-        <title>{pageTitle}</title>
+        <title>{title}</title>
         <meta name="description" content={description} />
         {frontmatter.tags && frontmatter.tags.length > 0 && (
           <meta name="keywords" content={frontmatter.tags.join(", ")} />
@@ -159,7 +148,6 @@ export default function ContentLayout({
 
           {/* Content */}
           <div className="mt-8">
-            <MDXRemote {...mdxSource} components={mdxComponents} />
             {children}
           </div>
         </article>
@@ -167,4 +155,3 @@ export default function ContentLayout({
     </Layout>
   );
 }
-
