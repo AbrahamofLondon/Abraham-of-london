@@ -362,7 +362,15 @@ export default makeSource({
   contentDirPath: "content",
   documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy],
 
-  // Only affects the content directory, but keep it tight and predictable
+  // Add contentDirExclude to exclude non-content directories
+  contentDirExclude: [
+    "public",      // Exclude entire public folder
+    "node_modules",
+    ".next",
+    ".git",
+  ],
+
+  // Keep ignore for content directory only
   ignore: [
     "**/_*/**",
     "**/*BACKUP*/**",
@@ -371,7 +379,6 @@ export default makeSource({
     "**/*.tmp",
     "**/*.swp",
     "**/*.DS_Store",
-
     "downloads/_generated.downloads.json",
     "_templates/**",
     "**/_templates/**",

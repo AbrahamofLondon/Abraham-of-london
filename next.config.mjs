@@ -9,6 +9,9 @@ const baseConfig = {
   compress: true,
   poweredByHeader: false,
 
+  // Increase timeout for static generation with large files
+  staticPageGenerationTimeout: 300,
+
   // Prefer runtime env vars over baking timestamps into next.config
   env: {
     CONTENTLAYER_DISABLE_WARNINGS: "true",
@@ -100,17 +103,17 @@ const baseConfig = {
       // PDF download redirects
       {
         source: "/downloads/purpose-pyramid-worksheet-fillable.pdf",
-        destination: "/downloads/purpose-pyramid.pdf",
+        destination: "/downloads/purpose-pyramid",
         permanent: true,
       },
       {
         source: "/downloads/decision-matrix-worksheet-fillable.pdf",
-        destination: "/downloads/decision-matrix.pdf",
+        destination: "/downloads/decision-matrix",
         permanent: true,
       },
       {
         source: "/downloads/legacy-canvas-worksheet-fillable.pdf",
-        destination: "/downloads/legacy-canvas.pdf",
+        destination: "/downloads/legacy-canvas",
         permanent: true,
       },
       {
@@ -326,12 +329,24 @@ const baseConfig = {
   },
 
   webpack: (config, { isServer, dev, webpack }) => {
-    // Ignore binary assets if they ever get referenced by mistake
+    // Ignore ALL binary assets in /public from being treated as modules during bundling
     config.plugins.push(
       new webpack.IgnorePlugin({
-        resourceRegExp: /\.(pdf|pptx|docx|xlsx|od[tsp])$/i,
+        resourceRegExp: /\.(pdf|pptx|docx|xlsx|odt|ods|odp|ttf|otf|woff|woff2|eot)$/i,
+        contextRegExp: /[\\/]public[\\/]/,
       })
     );
+
+    // Handle other PDF imports (outside public/) as static assets
+    config.module.rules.push({
+      test: /\.(pdf)$/,
+      issuer: /\.(js|jsx|ts|tsx)$/,
+      exclude: /[\\/]public[\\/]/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name].[hash][ext]',
+      },
+    });
 
     // Browser fallbacks (only if something tries to drag Node built-ins client-side)
     if (!isServer) {
@@ -351,7 +366,7 @@ const baseConfig = {
       };
     }
 
-    // Windows dev watch sanity (prevents EPERM / churn)
+    // Windows dev watch sanity - IGNORE ENTIRE PUBLIC FOLDER
     if (process.platform === "win32" && dev) {
       config.watchOptions = {
         ...config.watchOptions,
@@ -360,20 +375,16 @@ const baseConfig = {
         ignored: [
           "**/node_modules/**",
           "**/.next/**",
-
-          // Public binary assets
-          "**/public/assets/downloads/**",
-          "**/public/downloads/**",
-          "**/public/assets/vault/**",
-
-          // Private vault (should never be watched by Next)
-          "**/private/**",
-
-          // Common binaries anywhere
+          "**/.contentlayer/**",
+          "**/public/**",           // IGNORE ENTIRE PUBLIC FOLDER
           "**/*.pdf",
           "**/*.pptx",
           "**/*.docx",
           "**/*.xlsx",
+          "**/*.ttf",
+          "**/*.otf",
+          "**/*.woff",
+          "**/*.woff2",
           "**/Thumbs.db",
           "**/desktop.ini",
         ],

@@ -1,4 +1,4 @@
-// components/dashboard/LiveDataDashboard.tsx - CONNECTED TO PDF DASHBOARD
+// components/dashboard/LiveDataDashboard.tsx - FIXED VERSION
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { usePDFDashboardContext } from '@/contexts/PDFDashboardContext';
 import { PDFItem } from '@/types/pdf-dashboard';
@@ -95,7 +95,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
     setPdfStatsData(stats);
   }, [pdfs]);
 
-  // Simulate live updates based on PDF generation status
+  // Simulate live updates based on PDF generation status - FIXED TYPE ERROR
   useEffect(() => {
     if (isPaused || !isGenerating) return;
 
@@ -105,11 +105,22 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
         const updated = { ...prev };
         pdfs.forEach(pdf => {
           if (pdf.isGenerating && updated[pdf.id]) {
+            const currentStat = updated[pdf.id];
             updated[pdf.id] = {
-              ...updated[pdf.id],
-              change: Math.min(updated[pdf.id].change + 10, 90), // Progress
-              changePercent: Math.min(updated[pdf.id].changePercent + 10, 90),
+              symbol: currentStat.symbol,
+              price: currentStat.price,
+              change: Math.min(currentStat.change + 10, 90), // Progress
+              changePercent: Math.min(currentStat.changePercent + 10, 90),
               lastUpdated: new Date().toISOString(),
+              volume: currentStat.volume,
+              marketCap: currentStat.marketCap,
+              high24h: currentStat.high24h,
+              low24h: currentStat.low24h,
+              isFavorite: currentStat.isFavorite,
+              status: currentStat.status,
+              category: currentStat.category,
+              type: currentStat.type,
+              exists: currentStat.exists,
             };
           }
         });
@@ -131,7 +142,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
     }
   }, [isGenerating, pdfs.length]);
 
-  // Favorite management
+  // Favorite management - FIXED TYPE ERROR
   const toggleFavorite = useCallback((pdfId: string) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
@@ -143,14 +154,31 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
       
       localStorage.setItem('pdf-favorites', JSON.stringify(Array.from(newFavorites)));
       
-      // Update stats
-      setPdfStatsData(prev => ({
-        ...prev,
-        [pdfId]: {
-          ...prev[pdfId],
-          isFavorite: newFavorites.has(pdfId),
-        },
-      }));
+      // Update stats with all required properties
+      setPdfStatsData(prev => {
+        const currentStat = prev[pdfId];
+        if (!currentStat) return prev;
+        
+        return {
+          ...prev,
+          [pdfId]: {
+            symbol: currentStat.symbol,
+            price: currentStat.price,
+            change: currentStat.change,
+            changePercent: currentStat.changePercent,
+            lastUpdated: currentStat.lastUpdated,
+            volume: currentStat.volume,
+            marketCap: currentStat.marketCap,
+            high24h: currentStat.high24h,
+            low24h: currentStat.low24h,
+            status: currentStat.status,
+            category: currentStat.category,
+            type: currentStat.type,
+            exists: currentStat.exists,
+            isFavorite: newFavorites.has(pdfId),
+          },
+        };
+      });
       
       return newFavorites;
     });
@@ -163,6 +191,31 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
       if (savedFavorites) {
         const favoritesArray = JSON.parse(savedFavorites) as string[];
         setFavorites(new Set(favoritesArray));
+        
+        // Update stats with favorite status
+        setPdfStatsData(prev => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach(pdfId => {
+            const currentStat = updated[pdfId];
+            updated[pdfId] = {
+              symbol: currentStat.symbol,
+              price: currentStat.price,
+              change: currentStat.change,
+              changePercent: currentStat.changePercent,
+              lastUpdated: currentStat.lastUpdated,
+              volume: currentStat.volume,
+              marketCap: currentStat.marketCap,
+              high24h: currentStat.high24h,
+              low24h: currentStat.low24h,
+              status: currentStat.status,
+              category: currentStat.category,
+              type: currentStat.type,
+              exists: currentStat.exists,
+              isFavorite: favoritesArray.includes(pdfId),
+            };
+          });
+          return updated;
+        });
       }
     } catch (error) {
       console.error('Error loading favorites:', error);
