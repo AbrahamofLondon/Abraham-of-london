@@ -208,7 +208,7 @@
     "eslint-plugin-prettier": "5.5.4",
     "eslint-plugin-unused-imports": "4.3.0",
     "fast-glob": "3.3.3",
-    "glob": "^11.1.0",
+    "glob": "^13.0.0",
     "globby": "16.1.0",
     "gray-matter": "4.0.3",
     "husky": "9.1.7",
