@@ -13,9 +13,9 @@ export interface StockPrice {
 }
 
 export interface StockDataUpdate {
-  type: 'price_update' | 'batch_update' | 'connection_status';
-  data: StockPrice | StockPrice[] | { status: string };
-  timestamp: number;
+  type: 'price_update' | 'batch_update' | 'error' | 'connection_status';
+  data: StockPrice | StockPrice[] | string;
+  timestamp?: string;
 }
 
 export interface LiveDataDashboardProps {
@@ -24,5 +24,16 @@ export interface LiveDataDashboardProps {
   showConnectionStatus?: boolean;
   maxStocksDisplay?: number;
   onStockSelect?: (symbol: string) => void;
+  theme?: 'light' | 'dark';
+}
+
+export interface StockPriceCardProps {
+  stock: StockPrice;
+  isFavorite: boolean;
+  onToggleFavorite: (symbol: string) => void;
+  onClick?: () => void;
+  formatCurrency: (value: number) => string;
+  formatPercent: (value: number) => string;
+  formatLargeNumber: (value?: number) => string;
   theme?: 'light' | 'dark';
 }

@@ -1,4 +1,4 @@
-// pages/_app.tsx - PROFESSIONAL PRODUCTION VERSION
+// pages/_app.tsx - FIXED IMPORTS
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
@@ -17,9 +17,9 @@ import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext";
 
-// Dashboard providers
-import { PDFDashboardProvider } from "@/contexts/PDFDashboardContext";
-import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
+// FIX: Update import paths to match actual folders
+import { PDFDashboardProvider } from '@/contexts/PDFDashboardContext';  // ✅ plural "contexts"
+import { AnalyticsProvider } from '@/contexts/AnalyticsContext';        // ✅ plural "contexts"
 
 // Types
 declare global {

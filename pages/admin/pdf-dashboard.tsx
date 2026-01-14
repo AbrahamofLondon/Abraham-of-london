@@ -1,9 +1,11 @@
-// pages/admin/pdfdashboard.tsx
+// pages/admin/pdf-dashboard.tsx - UPDATED WITH NEW SETUP
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { withAdminAuth } from '@/lib/auth/withAdminAuth';
 import { usePDFDashboard } from '@/hooks/usePDFDashboard';
 import { useToast } from '@/hooks/useToast';
+
+// Existing dashboard components (keep all)
 import DashboardHeader from '@/components/DashboardHeader';
 import PDFListPanel from '@/components/PDFListPanel';
 import PDFViewerPanel from '@/components/PDFViewerPanel';
@@ -14,6 +16,10 @@ import DashboardStats from '@/components/DashboardStats';
 import PDFQuickActions from "@/components/PDFQuickActions";
 import PDFActionsBar from "@/components/PDFActionsBar";
 import ErrorBoundary from '@/components/ErrorBoundary';
+
+// NEW: Add the live data dashboard components
+import { PDFDataDashboard } from '@/components/dashboard/PDFDataDashboard';
+import { LiveDataDashboard } from '@/components/dashboard/LiveDataDashboard';
 
 // Types
 interface PDFDashboardProps {
@@ -29,7 +35,7 @@ interface PDFDashboardProps {
 const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
   const router = useRouter();
   const { toast } = useToast();
-  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'detail'>('grid');
+  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'detail' | 'live'>('grid');
   const [selectedPDFs, setSelectedPDFs] = useState<Set<string>>(new Set());
 
   // Get URL params
@@ -37,8 +43,9 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
   const category = router.query.category as string || 'all';
   const sortBy = router.query.sort as string || 'updatedAt';
   const sortOrder = router.query.order as 'asc' | 'desc' || 'desc';
+  const showLiveView = router.query.live === 'true';
 
-  // Dashboard hook
+  // Dashboard hook - keep existing
   const {
     pdfs,
     filteredPDFs,
@@ -132,6 +139,21 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     }
   };
 
+  // Toggle live view
+  const toggleLiveView = () => {
+    const newViewMode = viewMode === 'live' ? 'grid' : 'live';
+    setViewMode(newViewMode);
+    
+    // Update URL
+    router.push({
+      pathname: router.pathname,
+      query: { 
+        ...router.query,
+        live: newViewMode === 'live' ? 'true' : undefined 
+      },
+    }, undefined, { shallow: true });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0a0b0d] flex items-center justify-center">
@@ -144,7 +166,7 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     <ErrorBoundary fallback={<DashboardError onRetry={refreshPDFList} />}>
       <div className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
         <div className="max-w-8xl mx-auto p-4 md:p-8">
-          {/* Dashboard Header */}
+          {/* Dashboard Header - Enhanced with live view toggle */}
           <DashboardHeader
             title="PDF Intelligence System"
             subtitle="Institutional Publishing • Dynamic Registry"
@@ -153,6 +175,19 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
             onRefresh={refreshPDFList}
             onGenerateAll={generateAllPDFs}
             isGenerating={isGenerating}
+            // Add live view toggle button
+            additionalActions={
+              <button
+                onClick={toggleLiveView}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  viewMode === 'live' 
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                }`}
+              >
+                {viewMode === 'live' ? '📊 Switch to Classic View' : '⚡ Switch to Live View'}
+              </button>
+            }
           />
 
           {/* Status Messages */}
@@ -163,90 +198,135 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
             />
           )}
 
-          {/* Quick Actions Bar */}
-          <PDFQuickActions
-            selectedCount={selectedPDFs.size}
-            onRefresh={refreshPDFList}
-            onGenerateAll={generateAllPDFs}
-            onBatchDelete={handleBatchDelete}
-            onClearSelection={clearSelection}
-            isGenerating={isGenerating}
-          />
+          {/* NEW: Live Dashboard View */}
+          {viewMode === 'live' ? (
+            <div className="space-y-6">
+              {/* Live Data Dashboard */}
+              <LiveDataDashboard
+                theme="dark"
+                onPDFSelect={handleSelectPDF}
+                showConnectionStatus={true}
+                maxPDFsDisplay={12}
+              />
+              
+              {/* Quick toggle back to classic view */}
+              <div className="text-center">
+                <button
+                  onClick={toggleLiveView}
+                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+                >
+                  ← Back to Classic Dashboard
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* ORIGINAL: Classic Dashboard View */
+            <>
+              {/* Quick Actions Bar */}
+              <PDFQuickActions
+                selectedCount={selectedPDFs.size}
+                onRefresh={refreshPDFList}
+                onGenerateAll={generateAllPDFs}
+                onBatchDelete={handleBatchDelete}
+                onClearSelection={clearSelection}
+                isGenerating={isGenerating}
+                // Add live view button here too
+                additionalButtons={
+                  <button
+                    onClick={toggleLiveView}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    ⚡ Live View
+                  </button>
+                }
+              />
 
-          {/* Filters Section */}
-          <div className="mb-6">
-            <PDFFilters
-              searchQuery={filters.search}
-              selectedCategory={filters.category}
-              sortBy={filters.sortBy}
-              sortOrder={filters.sortOrder}
-              categories={categories}
-              onSearchChange={searchPDFs}
-              onCategoryChange={(value) => updateFilter({ category: value })}
-              onSortChange={sortPDFs}
-              onClearFilters={clearFilters}
-            />
-          </div>
+              {/* Filters Section */}
+              <div className="mb-6">
+                <PDFFilters
+                  searchQuery={filters.search}
+                  selectedCategory={filters.category}
+                  sortBy={filters.sortBy}
+                  sortOrder={filters.sortOrder}
+                  categories={categories}
+                  onSearchChange={searchPDFs}
+                  onCategoryChange={(value) => updateFilter({ category: value })}
+                  onSortChange={sortPDFs}
+                  onClearFilters={clearFilters}
+                />
+              </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-            {/* Sidebar - PDF List */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="rounded-2xl border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm p-4 md:p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">
-                    Document Registry ({filteredPDFs.length})
-                  </h2>
-                  <span className="text-xs text-gray-500 font-mono">
-                    {stats.availablePDFs}/{stats.totalPDFs} files
-                  </span>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+                {/* Sidebar - PDF List */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="rounded-2xl border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm p-4 md:p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">
+                        Document Registry ({filteredPDFs.length})
+                      </h2>
+                      <span className="text-xs text-gray-500 font-mono">
+                        {stats.availablePDFs}/{stats.totalPDFs} files
+                      </span>
+                    </div>
+
+                    <PDFListPanel
+                      pdfs={filteredPDFs}
+                      selectedPDFId={selectedPDF?.id || null}
+                      selectedPDFs={selectedPDFs}
+                      isGenerating={isGenerating}
+                      viewMode={viewMode}
+                      onSelectPDF={handleSelectPDF}
+                      onGeneratePDF={generatePDF}
+                      onToggleSelection={togglePDFSelection}
+                      onDeletePDF={deletePDF}
+                      onDuplicatePDF={duplicatePDF}
+                    />
+
+                    <DashboardStats stats={stats} selectedCount={selectedPDFs.size} />
+                  </div>
                 </div>
 
-                <PDFListPanel
-                  pdfs={filteredPDFs}
-                  selectedPDFId={selectedPDF?.id || null}
-                  selectedPDFs={selectedPDFs}
-                  isGenerating={isGenerating}
-                  viewMode={viewMode}
-                  onSelectPDF={handleSelectPDF}
-                  onGeneratePDF={generatePDF}
-                  onToggleSelection={togglePDFSelection}
-                  onDeletePDF={deletePDF}
-                  onDuplicatePDF={duplicatePDF}
-                />
+                {/* Main Viewer Area */}
+                <div className="lg:col-span-8">
+                  <div className="rounded-2xl border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm p-4 md:p-8 min-h-[600px]">
+                    {/* Actions Bar */}
+                    {selectedPDF && (
+                      <PDFActionsBar
+                        pdf={selectedPDF}
+                        isGenerating={isGenerating}
+                        onGeneratePDF={() => generatePDF(selectedPDF.id)}
+                        onDeletePDF={() => deletePDF(selectedPDF.id)}
+                        onDuplicatePDF={() => duplicatePDF(selectedPDF.id)}
+                        onRenamePDF={() => {
+                          const newName = prompt('Enter new name:', selectedPDF.title);
+                          if (newName) renamePDF(selectedPDF.id, newName);
+                        }}
+                        canEdit={user?.permissions.includes('pdf:edit')}
+                        canDelete={user?.permissions.includes('pdf:delete')}
+                      />
+                    )}
 
-                <DashboardStats stats={stats} selectedCount={selectedPDFs.size} />
+                    {/* PDF Viewer */}
+                    <PDFViewerPanel
+                      pdf={selectedPDF}
+                      isGenerating={isGenerating}
+                      onGeneratePDF={generatePDF}
+                      refreshKey={stats.totalPDFs}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            </>
+          )}
 
-            {/* Main Viewer Area */}
-            <div className="lg:col-span-8">
-              <div className="rounded-2xl border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm p-4 md:p-8 min-h-[600px]">
-                {/* Actions Bar */}
-                {selectedPDF && (
-                  <PDFActionsBar
-                    pdf={selectedPDF}
-                    isGenerating={isGenerating}
-                    onGeneratePDF={() => generatePDF(selectedPDF.id)}
-                    onDeletePDF={() => deletePDF(selectedPDF.id)}
-                    onDuplicatePDF={() => duplicatePDF(selectedPDF.id)}
-                    onRenamePDF={() => {
-                      const newName = prompt('Enter new name:', selectedPDF.title);
-                      if (newName) renamePDF(selectedPDF.id, newName);
-                    }}
-                    canEdit={user?.permissions.includes('pdf:edit')}
-                    canDelete={user?.permissions.includes('pdf:delete')}
-                  />
-                )}
-
-                {/* PDF Viewer */}
-                <PDFViewerPanel
-                  pdf={selectedPDF}
-                  isGenerating={isGenerating}
-                  onGeneratePDF={generatePDF}
-                  refreshKey={stats.totalPDFs}
-                />
-              </div>
-            </div>
+          {/* NEW: Analytics Dashboard Section (always visible) */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4 text-gray-300">PDF Analytics</h3>
+            <PDFDataDashboard
+              view="analytics"
+              theme="dark"
+              onPDFSelect={handleSelectPDF}
+            />
           </div>
         </div>
       </div>
