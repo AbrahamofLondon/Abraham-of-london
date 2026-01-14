@@ -1,49 +1,44 @@
-// components/content/CardDisplay.tsx
+// components/content/CardDisplay.tsx - COMPLETE FIX
 import * as React from "react";
 import Link from "next/link";
 
-// Import from your contentlayer helper - using ContentDoc instead of DocumentTypes
+// Import everything from your fixed lib/contentlayer
 import {
-  type ContentDoc, // Use ContentDoc from your helper
-  getContentlayerData,
+  type ContentDoc,
+  type DocumentTypes, // For backward compatibility
   getDocHref,
-  getDocKind,
   resolveDocCoverImage,
-  isPublished,
-} from "@/lib/contentlayer";
-
-// Import any additional helpers you might need
-import {
+  // Type guards
+  isPost,
+  isBook,
+  isCanon,
+  isDownload,
+  isEvent,
+  isPrint,
+  isResource,
+  isStrategy,
+  // Card helpers
   getCardPropsForDocument,
   formatCardDate,
   getCardImage,
-} from "@/lib/contentlayer-compat"; // Or wherever these are defined
+} from "@/lib/contentlayer";
 
+// Use DocumentTypes for backward compatibility with existing code
 type Props = {
-  items: ContentDoc[]; // Changed from DocumentTypes[] to ContentDoc[]
+  items: DocumentTypes[];
   title?: string;
   emptyMessage?: string;
   className?: string;
 };
 
-// Type guard functions based on doc.type
-const isPost = (doc: ContentDoc): boolean => doc.type === "Post";
-const isBook = (doc: ContentDoc): boolean => doc.type === "Book";
-const isCanon = (doc: ContentDoc): boolean => doc.type === "Canon";
-const isDownload = (doc: ContentDoc): boolean => doc.type === "Download";
-const isEvent = (doc: ContentDoc): boolean => doc.type === "Event";
-const isPrint = (doc: ContentDoc): boolean => doc.type === "Print";
-const isResource = (doc: ContentDoc): boolean => doc.type === "Resource";
-const isStrategy = (doc: ContentDoc): boolean => doc.type === "Strategy";
-
-function getHref(doc: ContentDoc): string {
-  // Use the getDocHref function from your helper if available
+function getHref(doc: DocumentTypes): string {
+  // First try to use getDocHref if available
   if (getDocHref) {
     const href = getDocHref(doc);
     if (href) return href;
   }
   
-  // Fallback implementation
+  // Fallback: build URL based on document type
   const slug = doc.slug || "";
   if (!slug) return "/";
 
@@ -56,7 +51,6 @@ function getHref(doc: ContentDoc): string {
   if (isResource(doc)) return `/resources/${slug}`;
   if (isStrategy(doc)) return `/strategy/${slug}`;
 
-  // fallback route
   return `/content/${slug}`;
 }
 
@@ -69,11 +63,11 @@ export default function CardDisplay({
   if (!Array.isArray(items) || items.length === 0) {
     return (
       <section className={className}>
-        {title ? (
+        {title && (
           <h2 className="mb-4 font-serif text-xl font-semibold text-cream">
             {title}
           </h2>
-        ) : null}
+        )}
         <div className="rounded-2xl border border-white/10 bg-black/30 p-6 text-sm text-gray-300">
           {emptyMessage}
         </div>
@@ -83,40 +77,29 @@ export default function CardDisplay({
 
   return (
     <section className={className}>
-      {title ? (
+      {title && (
         <h2 className="mb-4 font-serif text-xl font-semibold text-cream">
           {title}
         </h2>
-      ) : null}
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((doc) => {
-          // Use getCardPropsForDocument if available, otherwise create basic props
-          const card = getCardPropsForDocument 
-            ? getCardPropsForDocument(doc) 
-            : {
-                title: doc.title || "Untitled",
-                subtitle: doc.subtitle,
-                excerpt: doc.excerpt,
-                description: doc.description,
-                coverImage: doc.coverImage,
-                date: doc.date,
-                tags: doc.tags || [],
-                slug: doc.slug || "",
-              };
-          
+          const card = getCardPropsForDocument(doc);
           const href = getHref(doc);
           
-          // Use resolveDocCoverImage from helper if available
+          // Get image - try resolveDocCoverImage first, then fallback
           const image = resolveDocCoverImage 
-            ? resolveDocCoverImage(doc)
+            ? resolveDocCoverImage(doc) 
             : getCardImage(card.coverImage, "/assets/images/og-image.jpg");
-            
-          const date = formatCardDate ? formatCardDate(card.date) : "";
+          
+          const date = formatCardDate(card.date);
+
+          const docKey = doc._id || `${doc.type}-${card.slug}`;
 
           return (
             <Link
-              key={doc._id || `${doc.type}-${card.slug}`}
+              key={docKey}
               href={href}
               className="group overflow-hidden rounded-2xl border border-white/10 bg-black/30 transition hover:border-white/20 hover:bg-black/40"
             >
@@ -136,28 +119,28 @@ export default function CardDisplay({
                   <span className="rounded-full border border-gold/30 bg-gold/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold/90">
                     {doc.type || "Content"}
                   </span>
-                  {date ? (
+                  {date && (
                     <span className="text-xs text-gray-400">{date}</span>
-                  ) : null}
+                  )}
                 </div>
 
                 <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
                   {card.title || "Untitled"}
                 </h3>
 
-                {card.subtitle ? (
+                {card.subtitle && (
                   <p className="line-clamp-2 text-sm text-gold/80">
                     {card.subtitle}
                   </p>
-                ) : null}
+                )}
 
-                {card.excerpt || card.description ? (
+                {(card.excerpt || card.description) && (
                   <p className="line-clamp-3 text-sm text-gray-300">
                     {card.excerpt || card.description}
                   </p>
-                ) : null}
+                )}
 
-                {Array.isArray(card.tags) && card.tags.length ? (
+                {Array.isArray(card.tags) && card.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {card.tags.slice(0, 3).map((t: string) => (
                       <span
@@ -168,7 +151,7 @@ export default function CardDisplay({
                       </span>
                     ))}
                   </div>
-                ) : null}
+                )}
               </div>
             </Link>
           );

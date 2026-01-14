@@ -1,18 +1,15 @@
-// lib/contentlayer/index.ts
+/* lib/contentlayer/index.ts - COMPLETE FIX */
 // Re-export everything from contentlayer-helper
 export * from "../contentlayer-helper";
 
 // Export from data.ts
 export { getContentlayerData } from "./data";
 
-// Re-export from contentlayer-compat for missing functions
-export {
-  getCardPropsForDocument,
-  formatCardDate,
-  getCardImage,
-} from "@/lib/contentlayer-compat";
+// Import and re-export the missing functions/types
+import type { ContentDoc } from "../contentlayer-helper";
+export type { ContentDoc };
 
-// Define type guard functions locally if not in compat
+// Define and export the missing functions that CardDisplay needs
 export const isPost = (doc: any): boolean => doc.type === "Post";
 export const isBook = (doc: any): boolean => doc.type === "Book";
 export const isCanon = (doc: any): boolean => doc.type === "Canon";
@@ -22,9 +19,37 @@ export const isPrint = (doc: any): boolean => doc.type === "Print";
 export const isResource = (doc: any): boolean => doc.type === "Resource";
 export const isStrategy = (doc: any): boolean => doc.type === "Strategy";
 
-// For backward compatibility, define DocumentTypes as ContentDoc
-import type { ContentDoc } from "../contentlayer-helper";
+// For backward compatibility
 export type DocumentTypes = ContentDoc;
+
+// Card display helpers (simple implementations)
+export const getCardPropsForDocument = (doc: ContentDoc) => ({
+  title: doc.title || "Untitled",
+  subtitle: doc.subtitle,
+  excerpt: doc.excerpt,
+  description: doc.description,
+  coverImage: doc.coverImage,
+  date: doc.date,
+  tags: doc.tags || [],
+  slug: doc.slug || "",
+});
+
+export const formatCardDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return "";
+  try {
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
+};
+
+export const getCardImage = (coverImage: string | null | undefined, fallback: string): string => {
+  return coverImage || fallback;
+};
 
 // Default export
 import ContentHelper from "../contentlayer-helper";
@@ -33,7 +58,7 @@ import { getContentlayerData } from "./data";
 const DefaultExport = {
   ...ContentHelper,
   getContentlayerData,
-  // Add the missing functions
+  // Add all the functions we defined above
   isPost,
   isBook,
   isCanon,
@@ -42,31 +67,9 @@ const DefaultExport = {
   isPrint,
   isResource,
   isStrategy,
-  getCardPropsForDocument: async (doc: ContentDoc) => ({
-    title: doc.title || "Untitled",
-    subtitle: doc.subtitle,
-    excerpt: doc.excerpt,
-    description: doc.description,
-    coverImage: doc.coverImage,
-    date: doc.date,
-    tags: doc.tags || [],
-    slug: doc.slug || "",
-  }),
-  formatCardDate: (dateString: string | null | undefined): string => {
-    if (!dateString) return "";
-    try {
-      return new Date(dateString).toLocaleDateString("en-GB", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch {
-      return "";
-    }
-  },
-  getCardImage: (coverImage: string | null | undefined, fallback: string): string => {
-    return coverImage || fallback;
-  },
+  getCardPropsForDocument,
+  formatCardDate,
+  getCardImage,
 };
 
 export default DefaultExport;

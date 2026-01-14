@@ -1,4 +1,4 @@
-// components/content/ContentLayout.tsx
+// components/content/ContentLayout.tsx - FIXED
 import * as React from "react";
 import Head from "next/head";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -69,7 +69,9 @@ export default function ContentLayout({
   const description = frontmatter.excerpt || frontmatter.description || title;
 
   const url = frontmatter.url || `/${contentType}/${frontmatter.slug}`;
-  const fullUrl = `${siteConfig.siteUrl}${url}`;
+  
+  // FIX: Use siteConfig.url instead of siteConfig.siteUrl
+  const fullUrl = `${siteConfig.url}${url}`;
 
   const ogImage = coerceOgImage(frontmatter.coverImage);
   const readTime = normalizeReadTime(frontmatter.readTime);
@@ -221,4 +223,3 @@ export default function ContentLayout({
     </Layout>
   );
 }
-
