@@ -5,9 +5,9 @@ export * from "../contentlayer-helper";
 // Export from data.ts
 export { getContentlayerData } from "./data";
 
-// Import and re-export the missing functions/types
-import type { ContentDoc } from "../contentlayer-helper";
-export type { ContentDoc };
+// Import and re-export types from contentlayer-helper
+import type { ContentDoc, DocKind } from "../contentlayer-helper";
+export type { ContentDoc, DocKind };
 
 // Define and export the missing functions that CardDisplay needs
 export const isPost = (doc: any): boolean => doc.type === "Post";
@@ -22,7 +22,7 @@ export const isStrategy = (doc: any): boolean => doc.type === "Strategy";
 // For backward compatibility
 export type DocumentTypes = ContentDoc;
 
-// Card display helpers (simple implementations)
+// Card display helpers
 export const getCardPropsForDocument = (doc: ContentDoc) => ({
   title: doc.title || "Untitled",
   subtitle: doc.subtitle,
@@ -70,6 +70,9 @@ const DefaultExport = {
   getCardPropsForDocument,
   formatCardDate,
   getCardImage,
+  ContentDoc: {} as ContentDoc, // For type-only, this won't be used at runtime
+  DocumentTypes: {} as DocumentTypes, // For type-only
 };
 
+export { default as CardDisplay } from "@/components/content/CardDisplay"; 
 export default DefaultExport;

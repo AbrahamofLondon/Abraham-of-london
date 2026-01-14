@@ -69,21 +69,22 @@ export default function ContentLayout({
   const description = frontmatter.excerpt || frontmatter.description || title;
 
   const url = frontmatter.url || `/${contentType}/${frontmatter.slug}`;
-  
-  // FIX: Use siteConfig.url instead of siteConfig.siteUrl
   const fullUrl = `${siteConfig.url}${url}`;
 
   const ogImage = coerceOgImage(frontmatter.coverImage);
   const readTime = normalizeReadTime(frontmatter.readTime);
+  
+  // FIX: Ensure keywords is always an array (not undefined)
+  const keywords = frontmatter.tags || [];
 
   return (
     <Layout
       title={pageTitle}
       className={`bg-charcoal content-${contentType}`}
       description={description}
-      keywords={frontmatter.tags}
+      keywords={keywords} // Now always an array
       canonicalUrl={fullUrl}
-      ogImage={ogImage}
+      ogImage={ogImage || ""} // Ensure ogImage is string, not undefined
       ogType="article"
     >
       <Head>

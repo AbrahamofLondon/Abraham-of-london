@@ -1,4 +1,4 @@
-// components/ContentlayerDocPage.tsx - ENHANCED
+// components/ContentlayerDocPage.tsx - FIXED
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -67,6 +67,9 @@ export default function ContentlayerDocPage({
   const description = doc.excerpt?.trim() || doc.description?.trim() || "Strategic assets for institutional architects.";
   const canonicalUrl = `${SITE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
   
+  // FIX: Ensure ogImage is always a string (not undefined)
+  const ogImage = doc.coverImage || "";
+  
   // Format Date for en-GB standards
   const displayDate = React.useMemo(() => {
     if (!doc.date) return null;
@@ -112,12 +115,17 @@ export default function ContentlayerDocPage({
   };
 
   return (
-    <Layout title={title} description={description} ogImage={doc.coverImage ?? undefined}>
+    // FIXED: Removed ogImage prop or ensured it's always a string
+    <Layout title={title} description={description} ogImage={doc.coverImage || ""}>
       <Head>
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
+        {/* Add og:image tag directly in Head if we have an image */}
+        {ogImage && (
+          <meta property="og:image" content={ogImage} />
+        )}
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-cream">

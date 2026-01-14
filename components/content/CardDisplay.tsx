@@ -1,44 +1,70 @@
-// components/content/CardDisplay.tsx - COMPLETE FIX
+// components/content/CardDisplay.tsx - COMPLETE SELF-CONTAINED FIX
 import * as React from "react";
 import Link from "next/link";
 
-// Import everything from your fixed lib/contentlayer
-import {
-  type ContentDoc,
-  type DocumentTypes, // For backward compatibility
-  getDocHref,
-  resolveDocCoverImage,
-  // Type guards
-  isPost,
-  isBook,
-  isCanon,
-  isDownload,
-  isEvent,
-  isPrint,
-  isResource,
-  isStrategy,
-  // Card helpers
-  getCardPropsForDocument,
-  formatCardDate,
-  getCardImage,
-} from "@/lib/contentlayer";
+// Define everything locally - NO imports from problematic modules
+type ContentDoc = {
+  _id: string;
+  slug: string;
+  title: string;
+  type: string;
+  subtitle?: string;
+  excerpt?: string;
+  description?: string;
+  coverImage?: string;
+  date?: string;
+  tags?: string[];
+  [key: string]: any;
+};
 
-// Use DocumentTypes for backward compatibility with existing code
 type Props = {
-  items: DocumentTypes[];
+  items: ContentDoc[];
   title?: string;
   emptyMessage?: string;
   className?: string;
 };
 
-function getHref(doc: DocumentTypes): string {
-  // First try to use getDocHref if available
-  if (getDocHref) {
-    const href = getDocHref(doc);
-    if (href) return href;
+// Local type guard functions
+const isPost = (doc: ContentDoc): boolean => doc.type === "Post";
+const isBook = (doc: ContentDoc): boolean => doc.type === "Book";
+const isCanon = (doc: ContentDoc): boolean => doc.type === "Canon";
+const isDownload = (doc: ContentDoc): boolean => doc.type === "Download";
+const isEvent = (doc: ContentDoc): boolean => doc.type === "Event";
+const isPrint = (doc: ContentDoc): boolean => doc.type === "Print";
+const isResource = (doc: ContentDoc): boolean => doc.type === "Resource";
+const isStrategy = (doc: ContentDoc): boolean => doc.type === "Strategy";
+
+// Local helper functions
+const getCardPropsForDocument = (doc: ContentDoc) => ({
+  title: doc.title || "Untitled",
+  subtitle: doc.subtitle,
+  excerpt: doc.excerpt,
+  description: doc.description,
+  coverImage: doc.coverImage,
+  date: doc.date,
+  tags: doc.tags || [],
+  slug: doc.slug || "",
+});
+
+const formatCardDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return "";
+  try {
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "";
   }
-  
-  // Fallback: build URL based on document type
+};
+
+const getCardImage = (coverImage: string | null | undefined, fallback: string): string => {
+  return coverImage || fallback;
+};
+
+// Simple href builder
+function getHref(doc: ContentDoc): string {
   const slug = doc.slug || "";
   if (!slug) return "/";
 
@@ -87,12 +113,7 @@ export default function CardDisplay({
         {items.map((doc) => {
           const card = getCardPropsForDocument(doc);
           const href = getHref(doc);
-          
-          // Get image - try resolveDocCoverImage first, then fallback
-          const image = resolveDocCoverImage 
-            ? resolveDocCoverImage(doc) 
-            : getCardImage(card.coverImage, "/assets/images/og-image.jpg");
-          
+          const image = getCardImage(card.coverImage, "/assets/images/og-image.jpg");
           const date = formatCardDate(card.date);
 
           const docKey = doc._id || `${doc.type}-${card.slug}`;

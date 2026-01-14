@@ -1,4 +1,5 @@
-import { StockPrice } from './LiveDataDashboard';
+// components/dashboard/StockPriceCard.tsx - UPDATED
+import { StockPrice } from './types';
 
 interface StockPriceCardProps {
   stock: StockPrice;
@@ -45,6 +46,7 @@ export const StockPriceCard: React.FC<StockPriceCardProps> = ({
           className={`p-1 rounded-full ${
             theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
           }`}
+          aria-label={isFavorite ? `Remove ${stock.symbol} from favorites` : `Add ${stock.symbol} to favorites`}
         >
           {isFavorite ? '★' : '☆'}
         </button>
