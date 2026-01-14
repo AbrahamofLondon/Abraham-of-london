@@ -23,12 +23,11 @@ export const robotoMono = Roboto_Mono({
   preload: true,
 });
 
-// ✅ Keep local fonts OUT of /public
-// ✅ Prefer woff2/woff only (best for Next + web performance + Windows tooling)
+// ✅ Use the file you actually have
 export const editorialFont = localFont({
   src: [
     {
-      path: "../assets/fonts/EditorialNew-Regular.woff2",
+      path: "../public/assets/fonts/EditorialNew-Regular.woff2",
       weight: "400",
       style: "normal",
     },
@@ -38,22 +37,27 @@ export const editorialFont = localFont({
   preload: true,
 });
 
-// If you truly need AoL Serif, convert it to WOFF2 and add it here.
-// Example (once you have AoLSerif-Italic.woff2):
+// ✅ You only have TTF for AoLSerif-Italic, so use TTF
 export const aolSerif = localFont({
   src: [
     {
-      path: "../assets/fonts/AoLSerif-Italic.woff2",
+      path: "../public/assets/fonts/AoLSerif-Italic.ttf",
       weight: "400",
       style: "italic",
     },
   ],
   variable: "--font-aol-serif",
   display: "swap",
-  preload: true,
+  preload: false,
 });
 
-export const fontVariables = `${inter.variable} ${robotoMono.variable} ${editorialFont.variable} ${aolSerif.variable}`;
+export const fontVariables = [
+  inter.variable,
+  robotoMono.variable,
+  editorialFont.variable,
+  aolSerif.variable,
+].join(" ");
+
 export const fontBodyClass = inter.className;
 
 export const fontConfig = {

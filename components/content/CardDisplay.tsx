@@ -2,30 +2,49 @@
 import * as React from "react";
 import Link from "next/link";
 
+// Import from your contentlayer helper - using ContentDoc instead of DocumentTypes
 import {
-  type DocumentTypes,
-  isBook,
-  isCanon,
-  isDownload,
-  isEvent,
-  isPost,
-  isPrint,
-  isResource,
-  isStrategy,
+  type ContentDoc, // Use ContentDoc from your helper
+  getContentlayerData,
+  getDocHref,
+  getDocKind,
+  resolveDocCoverImage,
+  isPublished,
+} from "@/lib/contentlayer";
+
+// Import any additional helpers you might need
+import {
   getCardPropsForDocument,
   formatCardDate,
   getCardImage,
-} from "@/lib/contentlayer";
+} from "@/lib/contentlayer-compat"; // Or wherever these are defined
 
 type Props = {
-  items: DocumentTypes[];
+  items: ContentDoc[]; // Changed from DocumentTypes[] to ContentDoc[]
   title?: string;
   emptyMessage?: string;
   className?: string;
 };
 
-function getHref(doc: DocumentTypes): string {
-  const slug = (doc as any)?.slug || "";
+// Type guard functions based on doc.type
+const isPost = (doc: ContentDoc): boolean => doc.type === "Post";
+const isBook = (doc: ContentDoc): boolean => doc.type === "Book";
+const isCanon = (doc: ContentDoc): boolean => doc.type === "Canon";
+const isDownload = (doc: ContentDoc): boolean => doc.type === "Download";
+const isEvent = (doc: ContentDoc): boolean => doc.type === "Event";
+const isPrint = (doc: ContentDoc): boolean => doc.type === "Print";
+const isResource = (doc: ContentDoc): boolean => doc.type === "Resource";
+const isStrategy = (doc: ContentDoc): boolean => doc.type === "Strategy";
+
+function getHref(doc: ContentDoc): string {
+  // Use the getDocHref function from your helper if available
+  if (getDocHref) {
+    const href = getDocHref(doc);
+    if (href) return href;
+  }
+  
+  // Fallback implementation
+  const slug = doc.slug || "";
   if (!slug) return "/";
 
   if (isPost(doc)) return `/blog/${slug}`;
@@ -37,7 +56,7 @@ function getHref(doc: DocumentTypes): string {
   if (isResource(doc)) return `/resources/${slug}`;
   if (isStrategy(doc)) return `/strategy/${slug}`;
 
-  // fallback route if you have a unified content page
+  // fallback route
   return `/content/${slug}`;
 }
 
@@ -72,15 +91,32 @@ export default function CardDisplay({
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((doc) => {
-          const card = getCardPropsForDocument(doc);
+          // Use getCardPropsForDocument if available, otherwise create basic props
+          const card = getCardPropsForDocument 
+            ? getCardPropsForDocument(doc) 
+            : {
+                title: doc.title || "Untitled",
+                subtitle: doc.subtitle,
+                excerpt: doc.excerpt,
+                description: doc.description,
+                coverImage: doc.coverImage,
+                date: doc.date,
+                tags: doc.tags || [],
+                slug: doc.slug || "",
+              };
+          
           const href = getHref(doc);
-
-          const image = getCardImage(card.coverImage, "/assets/images/og-image.jpg");
-          const date = formatCardDate(card.date);
+          
+          // Use resolveDocCoverImage from helper if available
+          const image = resolveDocCoverImage 
+            ? resolveDocCoverImage(doc)
+            : getCardImage(card.coverImage, "/assets/images/og-image.jpg");
+            
+          const date = formatCardDate ? formatCardDate(card.date) : "";
 
           return (
             <Link
-              key={(doc as any)._id ?? `${(doc as any).type}-${card.slug}`}
+              key={doc._id || `${doc.type}-${card.slug}`}
               href={href}
               className="group overflow-hidden rounded-2xl border border-white/10 bg-black/30 transition hover:border-white/20 hover:bg-black/40"
             >
@@ -98,7 +134,7 @@ export default function CardDisplay({
               <div className="space-y-2 p-4">
                 <div className="flex items-center gap-2">
                   <span className="rounded-full border border-gold/30 bg-gold/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold/90">
-                    {(doc as any).type ?? "Content"}
+                    {doc.type || "Content"}
                   </span>
                   {date ? (
                     <span className="text-xs text-gray-400">{date}</span>
@@ -141,4 +177,3 @@ export default function CardDisplay({
     </section>
   );
 }
-
