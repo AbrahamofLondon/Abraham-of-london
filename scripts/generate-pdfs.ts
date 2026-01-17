@@ -103,17 +103,17 @@ class Logger {
     gear: "⚙️",
   };
 
-  static shouldLog(level: LogLevel) {
+  static shouldLog(level: LogLevel): boolean {
     const levels: LogLevel[] = ["silent", "error", "warn", "info", "debug"];
     return levels.indexOf(level) <= levels.indexOf(CONFIG.logLevel);
   }
 
-  static timestamp() {
+  static timestamp(): string {
     const now = new Date();
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
   }
 
-  static format(level: Exclude<LogLevel, "silent">, message: string, icon?: string, color?: string) {
+  static format(level: Exclude<LogLevel, "silent">, message: string, icon?: string, color?: string): void {
     if (!Logger.shouldLog(level)) return;
     
     const timestamp = `\x1b[90m${Logger.timestamp()}\x1b[0m`;
@@ -135,49 +135,49 @@ class Logger {
     else console.log(line);
   }
 
-  static header(title: string) {
+  static header(title: string): void {
     console.log(`\n${Logger.colors.brightMagenta}╔${'═'.repeat(title.length + 2)}╗\x1b[0m`);
     console.log(`${Logger.colors.brightMagenta}║ ${Logger.colors.brightWhite}${title}${Logger.colors.brightMagenta} ║\x1b[0m`);
     console.log(`${Logger.colors.brightMagenta}╚${'═'.repeat(title.length + 2)}╝\x1b[0m\n`);
   }
 
-  static separator(length = 60) {
+  static separator(length = 60): void {
     console.log(`${Logger.colors.gray}${'─'.repeat(length)}\x1b[0m`);
   }
 
-  static success(message: string) { 
+  static success(message: string): void { 
     Logger.format("info", message, Logger.symbols.success, Logger.colors.brightGreen); 
   }
   
-  static info(message: string) { 
+  static info(message: string): void { 
     Logger.format("info", message, Logger.symbols.info, Logger.colors.brightCyan); 
   }
   
-  static warn(message: string) { 
+  static warn(message: string): void { 
     Logger.format("warn", message, Logger.symbols.warning, Logger.colors.brightYellow); 
   }
   
-  static error(message: string) { 
+  static error(message: string): void { 
     Logger.format("error", message, Logger.symbols.error, Logger.colors.brightRed); 
   }
   
-  static debug(message: string) { 
+  static debug(message: string): void { 
     Logger.format("debug", message, Logger.symbols.debug, Logger.colors.gray); 
   }
   
-  static start(message: string) { 
+  static start(message: string): void { 
     Logger.format("info", message, Logger.symbols.rocket, Logger.colors.brightMagenta); 
   }
   
-  static file(message: string) { 
+  static file(message: string): void { 
     Logger.format("info", message, Logger.symbols.file, Logger.colors.brightBlue); 
   }
   
-  static folder(message: string) { 
+  static folder(message: string): void { 
     Logger.format("info", message, Logger.symbols.folder, Logger.colors.brightBlue); 
   }
   
-  static time(message: string) { 
+  static time(message: string): void { 
     Logger.format("info", message, Logger.symbols.clock, Logger.colors.brightYellow); 
   }
 }
@@ -186,7 +186,7 @@ class Logger {
 // ENHANCED FILE MANAGER WITH SAFETY FEATURES
 // ----------------------------------------------------------------------------
 class FileManager {
-  static async exists(p: string) {
+  static async exists(p: string): Promise<boolean> {
     try {
       await fsp.access(p);
       return true;
@@ -195,23 +195,18 @@ class FileManager {
     }
   }
 
-  static async ensureDir(p: string) {
+  static async ensureDir(p: string): Promise<void> {
     if (!(await FileManager.exists(p))) {
       await fsp.mkdir(p, { recursive: true });
       Logger.folder(`Created directory: ${p}`);
     }
   }
 
-  static async safeCleanup() {
+  static async safeCleanup(): Promise<{ cleanedCount: number; backupDir: string; backupCount: number }> {
     Logger.start("Performing safe cleanup...");
     const now = Date.now();
     let cleanedCount = 0;
     let backupCount = 0;
-
-    // CRITICAL: DO NOT DELETE ZIP FILES
-      if (file.endsWith('.zip')) {
-        Logger.debug(`Skipping ZIP file: ${file}`);
-        continue;
 
     // Create backup directory
     const backupDir = path.join(os.tmpdir(), `pdf-backup-${Date.now()}`);
@@ -223,6 +218,13 @@ class FileManager {
       
       for (const file of files) {
         const filePath = path.join(CONFIG.outputDir, file);
+        
+        // CRITICAL: DO NOT DELETE ZIP FILES
+        if (file.endsWith('.zip')) {
+          Logger.debug(`Skipping ZIP file: ${file}`);
+          continue;
+        }
+        
         const stat = await fsp.stat(filePath).catch(() => null);
         if (!stat) continue;
 
@@ -276,7 +278,7 @@ class FileManager {
     return { cleanedCount, backupDir, backupCount };
   }
 
-  static async validateFiles() {
+  static async validateFiles(): Promise<{ validFiles: string[]; issues: string[]; total: number }> {
     Logger.start("Validating generated files...");
     const issues: string[] = [];
     const validFiles: string[] = [];
@@ -324,7 +326,7 @@ class FileManager {
     return { validFiles, issues, total: pdfFiles.length };
   }
 
-  static checksum16(filePath: string) {
+  static checksum16(filePath: string): string | null {
     try {
       const buf = fs.readFileSync(filePath);
       return crypto.createHash("sha256").update(buf).digest("hex").slice(0, 16);
@@ -343,7 +345,7 @@ class PremiumFallbackGenerator {
     quality: Quality, 
     tier: Tier, 
     outputPath: string
-  ) {
+  ): Promise<boolean> {
     try {
       Logger.warn(`Generating premium fallback for ${format}-${quality}-${tier}`);
       
@@ -481,7 +483,7 @@ class CommandRunner {
   private isWindows = os.platform() === "win32";
   private npxCmd = this.isWindows ? "npx.cmd" : "npx";
 
-  async delay(ms: number) {
+  async delay(ms: number): Promise<void> {
     return new Promise((r) => setTimeout(r, ms));
   }
 
@@ -490,7 +492,7 @@ class CommandRunner {
     script: string,
     args: string[] = [],
     options: { timeout?: number; cwd?: string; tier?: Tier; quality?: Quality; format?: Format } = {}
-  ) {
+  ): Promise<{ code: number; duration: number; fallback?: boolean }> {
     let lastError: any;
 
     for (let attempt = 1; attempt <= CONFIG.retries; attempt++) {
@@ -515,13 +517,13 @@ class CommandRunner {
           Logger.info("Attempting premium fallback generation...");
           const fallbackPath = path.join(
             CONFIG.outputDir,
-            `legacy-architecture-canvas-${options.format.toLowerCase()}-${options.quality}-${TIER_SLUG[options.tier]}.pdf`
+            `legacy-architecture-canvas-${options.format.toLowerCase()}-${options.quality}-${TIER_SLUG[options.tier!]}.pdf`
           );
           
           const fallbackSuccess = await PremiumFallbackGenerator.generateLegacyCanvasFallback(
-            options.format,
-            options.quality,
-            options.tier,
+            options.format!,
+            options.quality!,
+            options.tier!,
             fallbackPath
           );
           
@@ -542,7 +544,7 @@ class CommandRunner {
     script: string,
     args: string[] = [],
     options: { timeout?: number; cwd?: string } = {}
-  ) {
+  ): Promise<{ code: number; duration: number }> {
     const { timeout = CONFIG.timeout, cwd = process.cwd() } = options;
     const start = Date.now();
 
@@ -561,7 +563,7 @@ class CommandRunner {
     Logger.start(`Starting: ${name}`);
     Logger.debug(`Command: ${command} ${commandArgs.join(" ")}`);
 
-    return new Promise<{ code: number; duration: number; fallback?: boolean }>((resolve, reject) => {
+    return new Promise<{ code: number; duration: number }>((resolve, reject) => {
       const child = spawn(command, commandArgs, {
         stdio: "inherit",
         shell: true,
@@ -606,7 +608,7 @@ class CommandRunner {
     });
   }
 
-  async checkDependencies() {
+  async checkDependencies(): Promise<void> {
     const missing: string[] = [];
 
     // Check for pdf-lib instead of puppeteer (since we're using your pdf-lib version)
@@ -635,17 +637,26 @@ class CommandRunner {
 // ----------------------------------------------------------------------------
 // TOP-TIER PDF GENERATION ORCHESTRATOR
 // ----------------------------------------------------------------------------
+interface StepResult {
+  name: string;
+  ok: boolean;
+  duration: number;
+  error?: string;
+  fallback?: boolean;
+  at: string;
+}
+
 class PDFGenerationOrchestrator {
   private runner = new CommandRunner();
-  private steps: Array<any> = [];
+  private steps: StepResult[] = [];
   private start = Date.now();
   private generatedFiles: string[] = [];
 
-  private pushStep(row: any) {
+  private pushStep(row: Omit<StepResult, 'at'>): void {
     this.steps.push({ ...row, at: new Date().toISOString() });
   }
 
-  async initialize() {
+  async initialize(): Promise<{ cleanedCount: number; backupDir: string; backupCount: number }> {
     Logger.header("PDF GENERATION SYSTEM");
     Logger.info(`Platform: ${os.platform()} ${os.arch()}`);
     Logger.info(`Node: ${process.version}`);
@@ -664,19 +675,19 @@ class PDFGenerationOrchestrator {
     return cleanup;
   }
 
-  private canvasScriptPath() {
+  private canvasScriptPath(): string {
     return path.join(CONFIG.scriptDir, "generate-legacy-canvas.ts");
   }
 
-  private expectedCanvasFilename(format: Format) {
+  private expectedCanvasFilename(format: Format): string {
     const tierSlug = TIER_SLUG[CONFIG.tier];
     return `legacy-architecture-canvas-${format.toLowerCase()}-${CONFIG.quality}-${tierSlug}.pdf`;
   }
 
-  async runStep(name: string, script: string, args: string[], timeout?: number) {
+  async runStep(name: string, script: string, args: string[], timeout?: number): Promise<{ code: number; duration: number; fallback?: boolean }> {
     const stepStart = Date.now();
     try {
-      const r = await this.runner.runWithRetry(name, script, args, { 
+      const result = await this.runner.runWithRetry(name, script, args, { 
         timeout,
         tier: CONFIG.tier,
         quality: CONFIG.quality,
@@ -686,23 +697,23 @@ class PDFGenerationOrchestrator {
       this.pushStep({ 
         name, 
         ok: true, 
-        duration: r.duration,
-        fallback: r.fallback || false
+        duration: result.duration,
+        fallback: result.fallback || false
       });
-      return r;
-    } catch (e: any) {
+      return result;
+    } catch (error: any) {
       this.pushStep({
         name,
         ok: false,
         duration: Date.now() - stepStart,
-        error: e?.message || String(e),
+        error: error?.message || String(error),
         fallback: false
       });
-      throw e;
+      throw error;
     }
   }
 
-  async generateLegacyCanvas(formats: Format[]) {
+  async generateLegacyCanvas(formats: Format[]): Promise<void> {
     const script = this.canvasScriptPath();
     if (!(await FileManager.exists(script))) {
       throw new Error(`Missing script: ${script}`);
@@ -710,20 +721,20 @@ class PDFGenerationOrchestrator {
 
     Logger.header("GENERATING LEGACY CANVAS");
     
-    for (const f of formats) {
+    for (const format of formats) {
       await this.runStep(
-        `Legacy Canvas (${f})`,
+        `Legacy Canvas (${format})`,
         script,
-        [f, CONFIG.quality, CONFIG.tier],
+        [format, CONFIG.quality, CONFIG.tier],
         5 * 60 * 1000
       );
 
-      const filename = this.expectedCanvasFilename(f);
+      const filename = this.expectedCanvasFilename(format);
       this.generatedFiles.push(filename);
     }
   }
 
-  async runAdditionalGenerators() {
+  async runAdditionalGenerators(): Promise<void> {
     Logger.header("ADDITIONAL PDF GENERATORS");
     
     const standaloneScript = path.join(CONFIG.scriptDir, "generate-standalone-pdf.tsx");
@@ -748,11 +759,35 @@ class PDFGenerationOrchestrator {
     }
   }
 
-  async verifyCanvas(formats: Format[]) {
-    const results: any[] = [];
+  async verifyCanvas(formats: Format[]): Promise<Array<{
+    format: Format;
+    filename: string;
+    location: 'downloads' | 'lib';
+    exists: boolean;
+    valid: boolean;
+    size: number;
+    sizeKB: number;
+    checksum: string | null;
+    mtime: string;
+    tier: Tier;
+    quality: Quality;
+  }>> {
+    const results: Array<{
+      format: Format;
+      filename: string;
+      location: 'downloads' | 'lib';
+      exists: boolean;
+      valid: boolean;
+      size: number;
+      sizeKB: number;
+      checksum: string | null;
+      mtime: string;
+      tier: Tier;
+      quality: Quality;
+    }> = [];
 
-    for (const f of formats) {
-      const filename = this.expectedCanvasFilename(f);
+    for (const format of formats) {
+      const filename = this.expectedCanvasFilename(format);
       const downloadsPath = path.join(CONFIG.outputDir, filename);
       const libPath = path.join(CONFIG.libDir, filename);
 
@@ -763,7 +798,7 @@ class PDFGenerationOrchestrator {
 
       for (const loc of locations) {
         if (await FileManager.exists(loc.filePath)) {
-          const st = await fsp.stat(loc.filePath);
+          const stat = await fsp.stat(loc.filePath);
           
           // Enhanced validation
           let minSize: number;
@@ -778,18 +813,18 @@ class PDFGenerationOrchestrator {
               minSize = 20000;
           }
           
-          const valid = st.size >= minSize && st.size <= 5 * 1024 * 1024; // 5MB max
+          const valid = stat.size >= minSize && stat.size <= 5 * 1024 * 1024; // 5MB max
 
           results.push({
-            format: f,
+            format,
             filename,
             location: loc.location,
             exists: true,
             valid,
-            size: st.size,
-            sizeKB: +(st.size / 1024).toFixed(1),
+            size: stat.size,
+            sizeKB: +(stat.size / 1024).toFixed(1),
             checksum: FileManager.checksum16(loc.filePath),
-            mtime: st.mtime.toISOString(),
+            mtime: stat.mtime.toISOString(),
             tier: CONFIG.tier,
             quality: CONFIG.quality,
           });
@@ -800,7 +835,7 @@ class PDFGenerationOrchestrator {
     return results;
   }
 
-  async consolidateFiles() {
+  async consolidateFiles(): Promise<void> {
     Logger.start("Consolidating generated files...");
 
     const libFiles = (await fsp.readdir(CONFIG.libDir).catch(() => []))
@@ -828,7 +863,25 @@ class PDFGenerationOrchestrator {
     }
   }
 
-  async generateReport(formats: Format[]) {
+  async generateReport(formats: Format[]): Promise<{
+    payload: any;
+    pdfs: Array<{
+      format: Format;
+      filename: string;
+      location: 'downloads' | 'lib';
+      exists: boolean;
+      valid: boolean;
+      size: number;
+      sizeKB: number;
+      checksum: string | null;
+      mtime: string;
+      tier: Tier;
+      quality: Quality;
+    }>;
+    validPdfs: number;
+    validation: { validFiles: string[]; issues: string[]; total: number };
+    fallbacks: number;
+  }> {
     const total = Date.now() - this.start;
     const ok = this.steps.filter((s) => s.ok).length;
     const fail = this.steps.filter((s) => !s.ok).length;
@@ -891,7 +944,27 @@ class PDFGenerationOrchestrator {
     return { payload, pdfs, validPdfs, validation, fallbacks };
   }
 
-  async run(formats: Format[]) {
+  async run(formats: Format[]): Promise<{
+    success: boolean;
+    payload: any;
+    pdfs: Array<{
+      format: Format;
+      filename: string;
+      location: 'downloads' | 'lib';
+      exists: boolean;
+      valid: boolean;
+      size: number;
+      sizeKB: number;
+      checksum: string | null;
+      mtime: string;
+      tier: Tier;
+      quality: Quality;
+    }>;
+    validPdfs: number;
+    validation: { validFiles: string[]; issues: string[]; total: number };
+    fallbacks: number;
+    cleanup: { cleanedCount: number; backupDir: string; backupCount: number };
+  }> {
     const cleanup = await this.initialize();
     await this.generateLegacyCanvas(formats);
     await this.runAdditionalGenerators();
@@ -948,7 +1021,7 @@ function parseQuality(v?: string): Quality {
 // ----------------------------------------------------------------------------
 // CLI ENTRY
 // ----------------------------------------------------------------------------
-async function cliMain() {
+async function cliMain(): Promise<void> {
   const args = process.argv.slice(2);
 
   let formatsArg = "all";
@@ -1042,10 +1115,10 @@ ${Logger.colors.brightCyan}Environment Variables:${Logger.colors.reset}
   }
 
   const formats = parseFormats(formatsArg);
-  const orch = new PDFGenerationOrchestrator();
+  const orchestrator = new PDFGenerationOrchestrator();
 
   try {
-    const result = await orch.run(formats);
+    const result = await orchestrator.run(formats);
 
     if (result.success) {
       Logger.success(`${Logger.colors.brightGreen}🎉 PDF generation completed successfully!${Logger.colors.reset}`);
@@ -1054,8 +1127,8 @@ ${Logger.colors.brightCyan}Environment Variables:${Logger.colors.reset}
     }
 
     process.exit(result.success ? 0 : 1);
-  } catch (e: any) {
-    Logger.error(`Fatal error: ${e?.message || String(e)}`);
+  } catch (error: any) {
+    Logger.error(`Fatal error: ${error?.message || String(error)}`);
     process.exit(1);
   }
 }

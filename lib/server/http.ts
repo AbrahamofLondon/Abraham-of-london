@@ -97,7 +97,7 @@ export function jsonOk<T>(
   data: T, 
   meta?: ApiOk<T>["meta"],
   statusCode: number = 200
-): NextApiResponse<ApiOk<T>> {
+): void {
   setSecurityHeaders(res);
   
   const payload: ApiOk<T> = {
@@ -110,7 +110,8 @@ export function jsonOk<T>(
   // SAFE: Validate status code
   const safeStatusCode = Math.max(200, Math.min(500, statusCode));
   
-  return res.status(safeStatusCode).json(payload);
+  res.status(safeStatusCode).json(payload);
+
 }
 
 // Enhanced error response with better categorization
@@ -121,7 +122,7 @@ export function jsonErr(
   message: string, 
   details?: unknown,
   requestId?: string
-): NextApiResponse<ApiErr> {
+): void {
   setSecurityHeaders(res);
   
   // SAFE: Categorize HTTP status codes
@@ -144,7 +145,8 @@ export function jsonErr(
     res.setHeader("Retry-After", "60");
   }
 
-  return res.status(safeStatus).json(payload);
+  res.status(safeStatus).json(payload);
+
 }
 
 // Helper for common error messages
@@ -191,7 +193,7 @@ export function methodNotAllowed(
   res: NextApiResponse, 
   allowed: string[],
   requestId?: string
-): NextApiResponse<ApiErr> {
+): void {
   const safeAllowed = allowed.filter(method => 
     typeof method === 'string' && ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'].includes(method.toUpperCase())
   );
@@ -199,7 +201,7 @@ export function methodNotAllowed(
   res.setHeader("Allow", safeAllowed.join(", "));
   
   // Add CORS headers for OPTIONS preflight
-  if (req?.method === 'OPTIONS') {
+  if (request?.method === 'OPTIONS') {
     res.setHeader("Access-Control-Allow-Methods", safeAllowed.join(", "));
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Request-ID");
     res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
@@ -369,3 +371,10 @@ export function withApiHandler<T = any>(
     }
   };
 }
+
+
+
+
+
+
+

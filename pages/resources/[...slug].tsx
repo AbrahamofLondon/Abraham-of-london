@@ -23,10 +23,10 @@ import {
   ChevronLeft 
 } from 'lucide-react';
 
-// Dynamic imports
-const ReadingProgress = dynamic(() => import("@/components/enhanced/ReadingProgress"), { ssr: false });
-const TableOfContents = dynamic(() => import("@/components/enhanced/TableOfContents"), { ssr: false });
-const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
+// Dynamic imports - FIXED SYNTAX
+const ReadingProgress = dynamic(() => import("@/components/enhanced/ReadingProgress").then(mod => ({ default: mod.default || mod })), { ssr: false });
+const TableOfContents = dynamic(() => import("@/components/enhanced/TableOfContents").then(mod => ({ default: mod.default || mod })), { ssr: false });
+const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop").then(mod => ({ default: mod.default || mod })), { ssr: false });
 
 interface Resource {
   title: string;

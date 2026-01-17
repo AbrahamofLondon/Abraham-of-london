@@ -1,52 +1,34 @@
 {
-  "name": "abraham-of-london",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=9.0.0"
-  },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
     "dev": "next dev",
     "dev:full": "pnpm env:check && concurrently --kill-others-on-fail=false --names \"CONTENT,DEV\" \"pnpm contentlayer:watch\" \"next dev\"",
     "dev:windows": "cross-env IS_WINDOWS=true next dev",
     "dev:profile": "cross-env NEXT_PROFILING=true next dev",
-    "prebuild": "pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm contentlayer:safe || echo 'Contentlayer build warning (continuing anyway)'",
-    "build": "cross-env TURBOPACK_DISABLED=true NEXT_RUNTIME=nodejs next build",
-    "build:fast": "cross-env TURBOPACK_DISABLED=false next build",
-    "build:netlify": "pnpm install --frozen-lockfile && pnpm content:full && pnpm build",
-    "build:analyze": "cross-env ANALYZE=true NODE_OPTIONS=--max-old-space-size=4096 next build",
-    "start": "next start",
-    "preview": "next start --port 3001",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "type-check": "tsc --noEmit",
+
     "clean": "rimraf .next .contentlayer .turbo .cache node_modules/.cache",
     "clean:hard": "rimraf node_modules .next .contentlayer .turbo .cache node_modules/.cache",
+
     "env:setup": "tsx scripts/environment/setup-env.ts",
     "env:check": "tsx scripts/environment/check-env.ts || echo 'Environment check completed (some warnings may appear)'",
     "env:validate": "tsx scripts/environment/validate-env.ts",
     "env:production:sync": "cross-env NODE_ENV=production tsx scripts/environment/generate-production-env.ts",
     "env:staging:sync": "cross-env NODE_ENV=staging tsx scripts/environment/generate-staging-env.ts",
     "env:development:sync": "cross-env NODE_ENV=development tsx scripts/environment/generate-development-env.ts",
+
     "prisma:generate": "pnpm exec prisma generate --schema=./prisma/schema.prisma",
     "prisma:push": "pnpm exec prisma db push --accept-data-loss --schema=./prisma/schema.prisma",
     "prisma:studio": "pnpm exec prisma studio --url=\"file:./prisma/dev.db\" --schema=./prisma/schema.prisma",
-    "db:setup": "tsx scripts/database/setup-database.ts",
-    "db:seed": "tsx scripts/database/seed-database.ts",
-    "db:verify": "tsx scripts/database/verify-database.ts",
-    "db:backup": "tsx scripts/database/backup-database.ts",
-    "db:health": "tsx scripts/database/check-database-health.ts",
+
     "contentlayer": "pnpm exec contentlayer2",
     "contentlayer:watch": "pnpm exec contentlayer2 dev",
     "contentlayer:build": "pnpm exec contentlayer2 build",
     "contentlayer:safe": "pnpm exec contentlayer2 build --clearCache",
+
     "fm:validate": "node scripts/validate-frontmatter.mjs",
-    "fix:yaml": "node scripts/fix-yaml-specific.js",
+    "fix:windows": "node scripts/windows-fix.js",
+    "fix:yaml": "node scripts/fix-yaml-specific.cjs",
+
     "content:clean": "rimraf .contentlayer .next/content",
     "content:validate": "node scripts/validate-frontmatter.mjs",
     "content:schema": "tsx scripts/content/validate-schema.ts",
@@ -54,6 +36,7 @@
     "content:backup": "tsx scripts/content/backup-content.ts",
     "content:optimize": "tsx scripts/content/optimize-content.ts",
     "content:full": "pnpm content:clean && pnpm fix:yaml && pnpm contentlayer:safe && pnpm content:validate",
+
     "pdfs:generate": "tsx scripts/pdf/unified-pdf-generator.ts",
     "pdfs:cycle": "tsx scripts/pdf/unified-pdf-generator.ts --tier all",
     "pdfs:sync": "tsx scripts/pdf/sync-pdfs.ts",
@@ -63,30 +46,41 @@
     "pdfs:optimize": "tsx scripts/pdf/optimize-pdfs.ts",
     "pdfs:build": "pnpm pdfs:cycle && pnpm pdfs:sync",
     "pdfs:audit": "pnpm pdfs:list && pnpm pdfs:validate",
+
     "assets:fonts:optimize": "node scripts/optimize-fonts.js",
-    "assets:fonts:generate": "node scripts/generate-fonts.js",
+    "assets:fonts:generate": "node scripts/generate-fonts.cjs",
     "assets:images:optimize": "node scripts/optimize-images.js",
     "assets:images:resize": "node scripts/resize-images.js",
     "assets:audit": "node scripts/audit-assets.js",
     "assets:optimize": "pnpm assets:fonts:optimize && pnpm assets:images:optimize",
+
     "security:audit": "npm audit --audit-level=high",
     "security:scan": "tsx scripts/security/security-scan.ts",
     "security:full": "pnpm security:scan && pnpm security:audit",
+
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+
     "test": "jest",
     "test:unit": "jest --testPathPattern=\"\\.(test|spec)\\.(ts|tsx)$\" --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test --project=chromium",
+
     "health": "tsx scripts/system/check-system-health.ts",
     "check:system": "tsx scripts/system/check-system.ts",
     "check:dependencies": "tsx scripts/system/check-dependencies.ts",
     "check:security": "audit-ci --config .auditci.json",
     "check:all": "pnpm check:system && pnpm check:dependencies && pnpm check:security",
-    "fix:windows": "node scripts/windows-fix.js",
+
     "fix:imports": "tsx scripts/system/fix-imports.ts",
     "fix:build": "tsx scripts/system/fix-build-issues.ts",
     "fix:prisma": "tsx scripts/system/fix-prisma-working.ts",
     "fix:all": "pnpm fix:prisma && pnpm fix:imports && pnpm fix:build",
+
     "sitemap:generate": "node scripts/generate-sitemap.js",
     "sitemap:validate": "node scripts/validate-sitemap.js",
     "seo:audit": "node scripts/seo-audit.js",
@@ -94,8 +88,17 @@
     "audit:local": "node scripts/check-links.js --local",
     "audit:staging": "node scripts/check-links.js --url=https://staging.abrahamoflondon.org",
     "audit:production": "node scripts/check-links.js --url=https://www.abrahamoflondon.org",
-    "postinstall": "pnpm prisma:generate",
-    "postbuild": "pnpm sitemap:generate"
+
+    "prebuild": "pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm content:full",
+    "build": "cross-env TURBOPACK_DISABLED=true NEXT_RUNTIME=nodejs next build",
+    "build:fast": "cross-env TURBOPACK_DISABLED=false next build",
+    "build:netlify": "pnpm install --frozen-lockfile && pnpm prebuild && pnpm build",
+    "postbuild": "pnpm sitemap:generate",
+
+    "start": "next start",
+    "preview": "next start --port 3001",
+
+    "postinstall": "pnpm prisma:generate"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "1.4.0",
@@ -126,11 +129,11 @@
     "hi-base32": "^0.5.1",
     "ioredis": "5.9.0",
     "jsonwebtoken": "9.0.3",
+    "lru-cache": "^11.2.4",
     "lucide-react": "0.454.0",
     "markdown-pdf": "10.0.0",
     "next": "14.2.35",
     "next-auth": "4.24.13",
-    "next-contentlayer2": "0.5.8",
     "next-mdx-remote": "5.0.0",
     "otplib": "^13.1.0",
     "pdf-lib": "1.17.1",
@@ -152,9 +155,12 @@
     "rehype-external-links": "3.0.0",
     "rehype-highlight": "7.0.2",
     "rehype-slug": "5.1.0",
+    "rehype-stringify": "^10.0.1",
     "remark": "14.0.3",
     "remark-gfm": "3.0.1",
     "remark-html": "15.0.2",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
     "resend": "6.5.2",
     "sass": "^1.97.2",
     "sharp": "0.33.5",
@@ -180,10 +186,13 @@
     "@svgr/webpack": "8.1.0",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",
+    "@types/archiver": "^7.0.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "30.0.0",
     "@types/jsdom": "27.0.0",
     "@types/mdx": "2.0.13",
     "@types/node": "20.11.30",
+    "@types/node-fetch": "^2.6.13",
     "@types/pg": "8.16.0",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
@@ -218,6 +227,7 @@
     "jsdom": "27.4.0",
     "lighthouse": "12.8.2",
     "lint-staged": "15.2.10",
+    "next-contentlayer2": "0.5.8",
     "nodemon": "3.1.9",
     "npm-check-updates": "17.1.4",
     "os-browserify": "0.3.0",
@@ -233,7 +243,7 @@
     "stream-browserify": "3.0.0",
     "ts-node": "10.9.2",
     "typedoc": "0.26.11",
-    "typescript": "5.6.3",
+    "typescript": "5.5.4",
     "url": "0.11.4",
     "util": "0.12.5",
     "webpack": "5.104.1"
@@ -259,15 +269,7 @@
     }
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
   }
 }

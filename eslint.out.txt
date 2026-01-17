@@ -1,0 +1,706 @@
+
+C:\Abraham-of-london\build-simple.js
+  4:7  warning  'path' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\Comments.tsx
+  183:5  warning  React Hook React.useCallback has an unnecessary dependency: 'retryCount'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Abraham-of-london\components\ContentPortal.tsx
+  352:41  warning  'index' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\FontLoader.js
+  5:10  warning  'fontsLoaded' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\Header.tsx
+  267:24  warning  'e' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  330:24  warning  'e' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\LuxuryNavbar.tsx
+  30:7  warning  'PRIORITY_ITEMS' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\PDFDashboard\PDFActionsBar.tsx
+  28:3  warning  'onUpdateMetadata' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\PDFDashboard\PDFAnnotations.tsx
+   2:27  warning  'useRef' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+   8:3   warning  'X' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+  12:3   warning  'Circle' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  38:3   warning  'pdfId' is defined but never used. Allowed unused args must match /^_/u                  @typescript-eslint/no-unused-vars
+  45:10  warning  'isDrawing' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  45:21  warning  'setIsDrawing' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\PDFDashboard\PDFExportPanel.tsx
+  4:10  warning  'Download' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:45  warning  'Share2' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\PDFDashboard\PDFQuickActions.tsx
+  3:50  warning  'List' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\PDFDashboard\PDFViewer.tsx
+  2:38  warning  'useRef' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\SocialLinks.tsx
+  22:3  warning  'iconSize' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  29:9  warning  'sizeClasses' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\ThemeContext.tsx
+   9:10  warning  'getAllDownloadsMeta' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  10:10  warning  'getAllBooksMeta' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\blog\BlogFooter.tsx
+  11:3  warning  'author' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\blog\RelatedPosts.tsx
+  20:54  warning  'currentPostSlug' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\blog\ResourceGrid.tsx
+  4:57  warning  'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\books\BookCard.tsx
+  10:3   warning  'getFallbackImage' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  90:10  warning  'fallbackIndex' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\books\BookReviews.tsx
+   28:3   warning  'bookId' is defined but never used. Allowed unused args must match /^_/u                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  164:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Abraham-of-london\components\books\PurchaseOptions.tsx
+  20:60  warning  'bookId' is defined but never used. Allowed unused args must match /^_/u                      @typescript-eslint/no-unused-vars
+  21:26  warning  'setSelectedOption' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\dashboard\ConnectionStatus.tsx
+  10:3  warning  'connectionId' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\downloads\DownloadCard.tsx
+  5:20  warning  'FileText' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\downloads\DownloadHero.tsx
+  2:8   warning  'Image' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:30  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\downloads\SurrenderAssetsLanding.tsx
+  4:3  warning  'getAllPDFItems' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  7:3  warning  'PDFConfig' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\enhanced\AnimatedStatsBar.tsx
+   4:10  warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   4:54  warning  'Globe' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  58:11  warning  'totalFrames' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\enhanced\VenturesSection.tsx
+  6:14  warning  'Briefcase' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  6:25  warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  6:37  warning  'Target' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  7:3   warning  'Zap' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  8:15  warning  'ExternalLink' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\events\EventRegistration.tsx
+  23:3  warning  'eventId' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\events\mdx-components.tsx
+  442:3  warning  'social' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\homepage\HeroSection.tsx
+  6:10  warning  'BaseCard' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  6:20  warning  'CARD_ANIMATIONS' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\homepage\MilestonesTimeline.tsx
+    5:42  warning  'Award' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+    5:66  warning  'Landmark' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+    5:94  warning  'Zap' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  150:10  warning  'cx' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\mdx-components.tsx
+  109:10  warning  'ctaPresets' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  111:15  warning  'ctas' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\mdx\MinimalMdxComponents.tsx
+  135:5  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Abraham-of-london\components\shorts\ShortActions.tsx
+  18:3   warning  'shortId' is defined but never used. Allowed unused args must match /^_/u               @typescript-eslint/no-unused-vars
+  30:20  warning  'setDuration' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\shorts\ShortComments.tsx
+  24:66  warning  'shortId' is defined but never used. Allowed unused args must match /^_/u                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  71:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Abraham-of-london\components\shorts\ShortShare.tsx
+  20:50  warning  'shortId' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\components\ui\ErrorBoundary.tsx
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\fix-contentlayer-windows.js
+  4:9  warning  'execSync' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\hooks\useCtaPreset.ts
+  5:8  warning  'CTAPreset' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\hooks\usePerformanceMonitor.ts
+  31:11  warning  'entry' is assigned a value but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  55:13  warning  'unmountEntry' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  92:13  warning  'renderEntry' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\auth\admin.ts
+  3:10  warning  'randomBytes' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\auth\gateway.ts
+  4:10  warning  'getPublicAccess' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\auth\sessions.ts
+  656:9  warning  'store' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\auth\unified-auth.ts
+  44:13  warning  'accessCheck' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\client\imports.ts
+  21:29  warning  'ip' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\content-fallback.ts
+  367:9  warning  'q' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\content-loader.ts
+  112:13  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\lib\contentlayer-compat.server.ts
+    3:15  warning  'NextApiRequest' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+    4:15  warning  'NextRequest' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  304:16  warning  'getDataForExport' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\contentlayer-compat.ts
+  484:18  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\lib\empty-module.js
+  3:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Abraham-of-london\lib\framer-transitions.ts
+  310:12  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\lib\inner-circle\access.ts
+  282:46  warning  'context' is defined but never used. Allowed unused args must match /^_/u        @typescript-eslint/no-unused-vars
+  314:56  warning  'tier' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\inner-circle\index.ts
+  203:9  warning  'memorySize' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\inner-circle\rate-limit.ts
+  2:31  warning  'NextApiResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\inner-circle\templates\InnerCircleEmail.tsx
+  74:9  warning  'isAccessRequest' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\mdx-utils.ts
+  222:7  warning  'MAX_SAMPLES' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\metrics.ts
+  3:10  warning  'logger' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\monitoring\performance.ts
+  132:41  warning  'metrics' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\pdf-generator.ts
+  1:26  warning  'getAllPDFs' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\rate-limit-redis.ts
+  3:8  warning  'enhancedRedis' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\recaptchaServer.ts
+  371:11  warning  'duration' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  467:50  warning  'res' is defined but never used. Allowed unused args must match /^_/u                @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\redis-enhanced.ts
+  15:15  warning  'options' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  21:65  warning  'ttlSeconds' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  32:5   warning  'ttlSeconds' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  40:22  warning  'pattern' is defined but never used. Allowed unused args must match /^_/u              @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\redis-fallback.ts
+   3:15  warning  'key' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
+   7:15  warning  'key' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
+   7:28  warning  'value' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  11:15  warning  'key' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\redis\index.ts
+  14:43  warning  'options' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\security\download-token.ts
+  39:14  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\lib\security\index.ts
+  513:30  warning  'event' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\security\middleware-utils.ts
+  22:11  warning  'logEntry' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\audit.ts
+  542:7  warning  'status' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\auth\admin-utils.ts
+  2:10  warning  'randomBytes' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  2:23  warning  'timingSafeEqual' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  3:10  warning  'auditLogger' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\books-data.ts
+  93:11  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\lib\server\canon-data.ts
+  249:11  warning  'content' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  249:20  warning  'body' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\downloads-data.ts
+  138:15  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\lib\server\events-data.ts
+  187:12  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\lib\server\http.ts
+    3:15  warning  'IncomingHttpHeaders' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  128:9   warning  'statusCategory' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\inner-circle-access.ts
+   10:3   warning  'VerifyInnerCircleKeyResult' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  733:40  warning  'index' is defined but never used. Allowed unused args must match /^_/u                       @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\inner-circle-cache.ts
+  444:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Abraham-of-london\lib\server\inner-circle-export.ts
+  5:10  warning  'sha256Hex' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\inner-circle-simple.ts
+  80:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Abraham-of-london\lib\server\mdx-collections.ts
+   13:7   warning  'exists' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   17:7   warning  'VALID_SLUG_REGEX' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  381:13  warning  'content' is defined but never used. Allowed unused args must match /^_/u                    @typescript-eslint/no-unused-vars
+  381:22  warning  'fileStats' is defined but never used. Allowed unused args must match /^_/u                  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\original-methods.ts
+  32:49  warning  'sanitizeString' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\pages-data.ts
+  178:11  warning  'content' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  178:20  warning  'body' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\posts-data.ts
+  183:11  warning  'content' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  183:20  warning  'body' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\lib\server\prints-data.ts
+  229:11  warning  'content' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  229:20  warning  'body' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\middleware\admin-auth.ts
+  12:3  warning  'RATE_LIMIT_CONFIGS' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\netlify\functions\health-check.ts
+  286:3  warning  'context' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\netlify\submissions\submission-created.js
+  20:22  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\pages\admin\inner-circle\index.tsx
+   97:10  warning  'apiRetries' is assigned a value but never used. Allowed unused vars must match /^_/u                                                          @typescript-eslint/no-unused-vars
+   99:10  warning  'showBulkActions' is assigned a value but never used. Allowed unused vars must match /^_/u                                                     @typescript-eslint/no-unused-vars
+   99:27  warning  'setShowBulkActions' is assigned a value but never used. Allowed unused vars must match /^_/u                                                  @typescript-eslint/no-unused-vars
+  245:6   warning  React Hook React.useCallback has missing dependencies: 'secureFetch' and 'updateActivity'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Abraham-of-london\pages\admin\pdf-dashboard.tsx
+  46:9  warning  'showLiveView' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  50:5  warning  'pdfs' is assigned a value but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  73:5  warning  'batchExport' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\api\analytics\downloads\summary.ts
+  350:10  warning  'toInt' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  355:10  warning  'toFloat' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  368:10  warning  'toSizeString' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  565:3   warning  'filters' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  567:9   warning  'where' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  592:63  warning  'filters' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\api\frameworks\[slug]\protected.ts
+  13:11  warning  'slug' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\api\generate-pdfs\batch.ts
+  12:20  warning  'tiers' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\api\inner-circle\register.ts
+  6:10  warning  'generateAccessKey' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  6:29  warning  'getEmailHash' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\api\inner-circle\resend.ts
+  7:40  warning  'limitEmail' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\api\shorts\[slug]\interactions.ts
+  2:25  warning  'RATE_LIMIT_CONFIGS' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\blog\index.tsx
+   12:3  warning  'getDocHref' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  100:9  warning  'router' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\board\c.tsx
+   12:3  warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   14:3  warning  'Download' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   15:3  warning  'Eye' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+   16:3  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   26:3  warning  'BarChart' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   27:3  warning  'Bar' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+  135:7  warning  'totalDownloads' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  139:7  warning  'recentAuditLogs' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\board\dashboard.tsx
+  7:61  warning  'Download' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  7:76  warning  'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\board\intelligence.tsx
+  4:10  warning  'getStrategicHealthReport' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\books\index.tsx
+  16:3  warning  'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  28:3  warning  'isDraftContent' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\brands\index.tsx
+   19:3  warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   22:3  warning  'Sparkles' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   24:3  warning  'MapPin' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  139:9  warning  'itemVariants' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  508:3  warning  'isBuilding' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\canon-campaign\index.tsx
+   6:8  warning  'Image' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  15:3  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  20:3  warning  'BarChart3' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  24:3  warning  'Star' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  27:3  warning  'Bookmark' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  28:3  warning  'Download' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\consulting\strategy-room.tsx
+   6:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  15:3   warning  'Workflow' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  22:3   warning  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  24:3   warning  'GraduationCap' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  25:3   warning  'Building2' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\cookies.tsx
+  4:8  warning  'Link' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\diagnostic.tsx
+  5:7  warning  Do not use `<head>` element. Use `<Head />` from `next/head` instead. See: https://nextjs.org/docs/messages/no-head-element  @next/next/no-head-element
+
+C:\Abraham-of-london\pages\downloads\[slug].tsx
+  23:3  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  47:7  warning  'DownloadCard' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\downloads\index.tsx
+  11:3  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  12:3  warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  13:3  warning  'Tag' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\events\[slug].tsx
+  18:3  warning  'getContentlayerData' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  37:3  warning  'ExternalLink' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\fatherhood\index.tsx
+   4:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  12:3   warning  'ScrollText' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  15:3   warning  'TreePine' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  16:3   warning  'FileSpreadsheet' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  17:3   warning  'ClipboardCheck' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  18:3   warning  'Building2' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  20:3   warning  'Library' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  21:3   warning  'Heart' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  24:3   warning  'FileText' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\founders\index.tsx
+  10:3  warning  'Workflow' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  22:3  warning  'Cpu' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  26:3  warning  'TreePine' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  28:3  warning  'Sparkles' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\inner-circle\admin.tsx
+   5:52  warning  'Download' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+   5:62  warning  'Trash2' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  11:10  warning  'loading' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\leadership\index.tsx
+  13:3  warning  'Layers' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  23:3  warning  'Cpu' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  25:3  warning  'FileStack' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  27:3  warning  'Award' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  28:3  warning  'Sparkles' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  29:3  warning  'TreePine' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\prints\[slug].tsx
+   22:3   warning  'Eye' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   26:3   warning  'ExternalLink' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   29:3   warning  'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  224:75  warning  'requiredRole' is defined but never used. Allowed unused args must match /^_/u                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  421:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Abraham-of-london\pages\prints\index.tsx
+  19:3  warning  'Bookmark' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  23:3  warning  'Heart' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\resources\strategic-frameworks\[slug].tsx
+    5:10  warning  'useEffect' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+   11:3   warning  'BookOpen' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   18:3   warning  'AlertTriangle' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  125:3   warning  'requiredRole' is defined but never used. Allowed unused args must match /^_/u   @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\resources\strategic-frameworks\index.tsx
+    6:8   warning  'Image' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+   11:3   warning  'Shield' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+   14:3   warning  'Layers' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+   20:3   warning  'Building2' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   22:3   warning  'Star' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+   23:3   warning  'Zap' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+   24:3   warning  'BarChart3' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   25:3   warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+   26:3   warning  'Cpu' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+   28:3   warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+   29:10  warning  'TagIcon' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   31:3   warning  'ExternalLink' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   33:3   warning  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  193:10  warning  'cx' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  733:13  warning  'mod' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\shorts\[slug].tsx
+  38:7  warning  'ShortActions' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  39:7  warning  'ShortMetadata' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\shorts\index.tsx
+   25:3   warning  'Target' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+   26:3   warning  'Flame' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   27:3   warning  'BarChart3' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+   31:3   warning  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  159:10  warning  'subtitleVisible' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  348:9   warning  'totalSaves' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  562:43  warning  'index' is defined but never used. Allowed unused args must match /^_/u                     @typescript-eslint/no-unused-vars
+  658:27  warning  'shareCount' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  659:27  warning  'saveCount' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\speaking\index.tsx
+  10:3  warning  'ShieldCheck' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  11:3  warning  'Building2' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  12:3  warning  'Landmark' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  14:3  warning  'FileText' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  16:3  warning  'Lock' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  19:3  warning  'Compass' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  22:3  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  23:3  warning  'Award' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  24:3  warning  'Sparkles' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\strategy\[slug].tsx
+   15:3  warning  'Users' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  143:9  warning  'tools' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\strategy\index.tsx
+  12:3  warning  'Workflow' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  17:3  warning  'Landmark' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  20:3  warning  'Compass' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  28:3  warning  'Sparkles' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  29:3  warning  'TreePine' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\terms.tsx
+   4:8   warning  'Link' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   8:10  warning  'brand' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  12:9   warning  'lastUpdated' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\pages\vault\index.tsx
+   9:18  warning  'Award' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+   9:36  warning  'ShieldCheck' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  11:23  warning  'Hammer' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  11:39  warning  'Cpu' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  11:54  warning  'Compass' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  12:20  warning  'ClipboardCheck' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  12:51  warning  'Sparkles' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  15:46  warning  'getDocHref' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\prisma\seed.ts
+  5:24  warning  'Prisma' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\build-clean.js
+  3:8  warning  'fs' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\check-deploment.ts
+   9:10  warning  'readFileSync' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  15:7   warning  'rootDir' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\check-missing-covers.ts
+  6:7  warning  'COVER_OVERRIDES' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\check-os-compatibility.ts
+  1:8  warning  'os' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\contentlayer-build.js
+  68:3  error  Parsing error: '}' expected
+
+C:\Abraham-of-london\scripts\contentlayer-windows-fix.js
+  2:10  warning  'execSync' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\create-migration.ts
+   9:22  warning  'mkdirSync' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+   9:33  warning  'writeFileSync' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  86:21  warning  'stderr' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\environment\generate-development-env.ts
+  4:10  warning  'execSync' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\environment\setup-env.ts
+  4:10  warning  'execSync' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\fix-contentlayer-windows.ts
+  7:7  warning  'execAsync' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\fix-prisma-complete.ts
+  168:10  warning  'generatePrismaClient' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\fix-shorts-yaml.js
+  10:7  warning  'shortsDir' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\fix-unescaped-entities-safe.ts
+  21:31  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\scripts\fix-unescaped-entities.ts
+  3:8  warning  'path' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\fix-yaml-specific.js
+  159:85  warning  'm' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\generate-all-pdfs.js
+  179:37  error  Parsing error: ',' expected
+
+C:\Abraham-of-london\scripts\generate-fonts.js
+  2:7  warning  'fs' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  3:7  warning  'path' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\generate-pdfs.ts
+  279:2  error  Parsing error: Declaration or statement expected
+
+C:\Abraham-of-london\scripts\generate-secrets.js
+  3:7  warning  'fs' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  4:7  warning  'path' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\generate-secrets.ts
+  3:7  warning  'fs' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  4:7  warning  'path' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\generate-standalone-pdf.tsx
+   14:3   warning  'Link' is defined but never used. Allowed unused vars must match /^_/u                                       @typescript-eslint/no-unused-vars
+   15:3   warning  'Note' is defined but never used. Allowed unused vars must match /^_/u                                       @typescript-eslint/no-unused-vars
+  576:13  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Abraham-of-london\scripts\health-check.ts
+  247:13  warning  'stdout' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\make-pdfs.ts
+   75:10  warning  'toAbsolutePublicPath' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  165:16  warning  'generateUltimatePurposePDF' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  165:43  warning  'outputPath' is defined but never used. Allowed unused args must match /^_/u                  @typescript-eslint/no-unused-vars
+  255:43  warning  'mdxPath' is defined but never used. Allowed unused args must match /^_/u                     @typescript-eslint/no-unused-vars
+  316:9   warning  'title' is assigned a value but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  385:44  warning  'mdxPath' is defined but never used. Allowed unused args must match /^_/u                     @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\optimize-fonts.js
+  4:9  warning  'execSync' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  8:7  warning  'fontsDir' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf-generator.ts
+  2:26  warning  'getAllPDFs' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf-registry.ts
+  672:38  warning  'pdfId' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\convert-all-files.ts
+  2:43  warning  'FileDocument' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\file-pdf-converter\converters\base-converter.ts
+  59:57  warning  'format' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\file-pdf-converter\converters\excel-converter.ts
+  208:5  warning  'quality' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\generate-all-documents.ts
+  9:11  warning  'DocumentConfig' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\generate-legacy-canvas.ts
+  106:11  warning  'legacyTier' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\intelligent-generator.ts
+  76:10  warning  'statSafe' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\intelligent-pdf-generator-bridge.ts
+  19:9  warning  'legacyTier' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\mdx-pdf-converter\converter.ts
+    9:10  warning  'visit' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+   11:22  warning  'DOCUMENT_REGISTRY' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  211:5   warning  'height' is defined but never used. Allowed unused args must match /^_/u             @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\pdf\unified-pdf-generator.ts
+  151:11  warning  'legacyTier' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\prepare-build.js
+  2:10  warning  'execSync' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\prepare-build.ts
+  2:10  warning  'execSync' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\prisma-simple-fix.js
+  4:10  warning  'fileURLToPath' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\quick-fix-content.js
+  2:7  warning  'fs' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  3:7  warning  'path' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\repair-smart-quotes-in-code.ts
+  3:8  warning  'path' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\scan-content-assets.ts
+  16:7  warning  'ALLOW_FALLBACK_FOR' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\server\pdf-generator.ts
+  2:8  warning  'fs' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  3:8  warning  'path' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\standardize-extensions.ts
+  4:10  warning  'execSync' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\test-admin.js
+  2:7  warning  'crypto' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\test-admin.ts
+  2:7  warning  'crypto' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\update-contentlayer-imports.js
+  5:9  warning  'execSync' is assigned a value but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  8:7  warning  'DYNAMIC_PAGE_PATTERNS' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\validate-build-output.ts
+  149:13  warning  'stdout' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  248:16  warning  'isSqlite3Available' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\validate-env.ts
+  35:7  warning  'OPTIONAL_VARS' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\validate-schema.ts
+  3:8  warning  'fs' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\scripts\visual-assets-generator.ts
+    2:24  warning  'loadImage' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+    2:35  warning  'registerFont' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  331:24  warning  'index' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\services\pdfService.ts
+  11:3  warning  'Pagination' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Abraham-of-london\test-exports.js
+  20:16  error  Parsing error: Invalid character
+
+C:\Abraham-of-london\tools\pdf-dashboard.tsx
+  216:5  warning  'pdfs' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+Ô£û 355 problems (13 errors, 342 warnings)
+

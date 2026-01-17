@@ -173,8 +173,11 @@ export async function searchUnifiedContent(
   });
 }
 
-export default {
+// Create a named object and export it as default
+const unifiedContentApi = {
   getAllUnifiedContent,
   getUnifiedContentByType,
   searchUnifiedContent,
 };
+
+export default unifiedContentApi;

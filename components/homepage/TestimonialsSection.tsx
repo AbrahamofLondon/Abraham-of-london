@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, MotionProps } from "framer-motion";
 import clsx from "clsx";
 
 export type Testimonial = {
@@ -98,6 +98,24 @@ const DEFAULT_ITEMS: Testimonial[] = [
     verified: true,
   },
 ];
+
+// Helper function to build motion props without undefined values
+const buildMotionProps = (reduceMotion: boolean, index?: number): Partial<MotionProps> => {
+  if (reduceMotion) {
+    return {};
+  }
+  
+  const baseProps = {
+    initial: { opacity: 0, y: 12 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: index !== undefined 
+      ? { duration: 0.45, delay: index * 0.06 }
+      : { duration: 0.5 }
+  };
+  
+  return baseProps;
+};
 
 export default function TestimonialsSection({
   items,
@@ -217,6 +235,9 @@ export default function TestimonialsSection({
     </svg>
   );
 
+  // Get motion props for heading
+  const headingMotionProps = buildMotionProps(!!reduceMotion);
+
   return (
     <section
       id={id}
@@ -229,10 +250,7 @@ export default function TestimonialsSection({
           <motion.h2
             id={headingId}
             className="text-3xl md:text-4xl font-serif font-bold text-center mb-3"
-            initial={reduceMotion ? undefined : { opacity: 0, y: 12 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={reduceMotion ? undefined : { duration: 0.5 }}
+            {...headingMotionProps}
           >
             {title}
           </motion.h2>
@@ -245,113 +263,111 @@ export default function TestimonialsSection({
             <p className={clsx("text-center", subText)}>No testimonials yet.</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-3">
-              {data.map((t, i) => (
-                <motion.figure
-                  key={`${t.name}-${t.role ?? "role"}-${i}`}
-                  className={clsx(
-                    "rounded-2xl shadow-md p-6 relative overflow-hidden",
-                    card
-                  )}
-                  initial={reduceMotion ? undefined : { opacity: 0, y: 16 }}
-                  whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={
-                    reduceMotion
-                      ? undefined
-                      : { duration: 0.45, delay: i * 0.06 }
-                  }
-                >
-                  {/* Header: avatar / logo / rating / verified */}
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {t.avatar && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={t.avatar}
-                          alt=""
-                          width={40}
-                          height={40}
-                          className="h-10 w-10 rounded-full object-cover"
-                          loading="lazy"
-                        />
-                      )}
-                      <div>
-                        <div className="text-sm font-semibold">
-                          {t.name}{" "}
-                          {t.verified && (
-                            <span className="ml-1 inline-flex items-center gap-1 text-xs text-softGold">
-                              <Check /> Verified
-                            </span>
-                          )}
-                        </div>
-                        <div className={clsx("text-xs", subText)}>
-                          {[t.role, t.company].filter(Boolean).join(" · ")}
-                        </div>
-                      </div>
-                    </div>
-                    {typeof t.rating === "number" && (
-                      <div
-                        className="flex items-center gap-0.5"
-                        aria-label={`${t.rating} out of 5`}
-                      >
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <Star key={n} filled={n <= t.rating!} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                   {/* Quote */}
-                  <blockquote className="text-base leading-relaxed">
-                    <span aria-hidden className="sr-only">
-                      &quot;
-                    </span>
-                    <span className="block line-clamp-6">{t.quote}</span>
-                    <span aria-hidden className="sr-only">
-                      &quot;
-                    </span>
-                  </blockquote>
-
-                  {/* Footer: metric chip + source */}
-                  <figcaption
+              {data.map((t, i) => {
+                // Get motion props for each testimonial card
+                const cardMotionProps = buildMotionProps(!!reduceMotion, i);
+                
+                return (
+                  <motion.figure
+                    key={`${t.name}-${t.role ?? "role"}-${i}`}
                     className={clsx(
-                      "mt-4 text-xs flex items-center gap-3",
-                      subText
+                      "rounded-2xl shadow-md p-6 relative overflow-hidden",
+                      card
                     )}
+                    {...cardMotionProps}
                   >
-                    {t.metric && (
-                      <span className="rounded-full bg-softGold/15 text-deepCharcoal px-2 py-0.5">
-                        {t.metric}
-                      </span>
-                    )}
-                    {t.href && (
-                      <a
-                        href={t.href}
-                        className="underline underline-offset-4 hover:no-underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Source
-                      </a>
-                    )}
-                    {t.date && (
-                      <time dateTime={t.date}>
-                        {new Date(t.date).toLocaleDateString()}
-                      </time>
-                    )}
-                  </figcaption>
+                    {/* Header: avatar / logo / rating / verified */}
+                    <div className="mb-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {t.avatar && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={t.avatar}
+                            alt=""
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-full object-cover"
+                            loading="lazy"
+                          />
+                        )}
+                        <div>
+                          <div className="text-sm font-semibold">
+                            {t.name}{" "}
+                            {t.verified && (
+                              <span className="ml-1 inline-flex items-center gap-1 text-xs text-softGold">
+                                <Check /> Verified
+                              </span>
+                            )}
+                          </div>
+                          <div className={clsx("text-xs", subText)}>
+                            {[t.role, t.company].filter(Boolean).join(" · ")}
+                          </div>
+                        </div>
+                      </div>
+                      {typeof t.rating === "number" && (
+                        <div
+                          className="flex items-center gap-0.5"
+                          aria-label={`${t.rating} out of 5`}
+                        >
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <Star key={n} filled={n <= t.rating!} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-                  {t.logo && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={t.logo}
-                      alt=""
-                      className="pointer-events-none absolute -right-4 -bottom-2 h-14 w-auto opacity-10"
-                      loading="lazy"
-                    />
-                  )}
-                </motion.figure>
-              ))}
+                    {/* Quote */}
+                    <blockquote className="text-base leading-relaxed">
+                      <span aria-hidden className="sr-only">
+                        &quot;
+                      </span>
+                      <span className="block line-clamp-6">{t.quote}</span>
+                      <span aria-hidden className="sr-only">
+                        &quot;
+                      </span>
+                    </blockquote>
+
+                    {/* Footer: metric chip + source */}
+                    <figcaption
+                      className={clsx(
+                        "mt-4 text-xs flex items-center gap-3",
+                        subText
+                      )}
+                    >
+                      {t.metric && (
+                        <span className="rounded-full bg-softGold/15 text-deepCharcoal px-2 py-0.5">
+                          {t.metric}
+                        </span>
+                      )}
+                      {t.href && (
+                        <a
+                          href={t.href}
+                          className="underline underline-offset-4 hover:no-underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Source
+                        </a>
+                      )}
+                      {t.date && (
+                        <time dateTime={t.date}>
+                          {new Date(t.date).toLocaleDateString()}
+                        </time>
+                      )}
+                    </figcaption>
+
+                    {t.logo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={t.logo}
+                        alt=""
+                        className="pointer-events-none absolute -right-4 -bottom-2 h-14 w-auto opacity-10"
+                        loading="lazy"
+                      />
+                    )}
+                  </motion.figure>
+                );
+              })}
             </div>
           )}
         </div>
@@ -365,4 +381,3 @@ export default function TestimonialsSection({
     </section>
   );
 }
-

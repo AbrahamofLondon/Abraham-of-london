@@ -1,4 +1,6 @@
+// scripts/fix-unescaped-entities-safe.ts
 import fs from "node:fs";
+import path from "node:path";
 
 const targets = [
   "pages/auth/signin.tsx",
@@ -12,34 +14,73 @@ const targets = [
   "components/homepage/AboutSection.tsx",
 ];
 
-// Only touch likely JSX text nodes: between > ... <
-// (This avoids import strings, object keys, etc.)
-function fixInJsxText(input) {
-  return input.replace(/>([^<]+)</g, (m, text) => {
+/**
+ * Only touch likely JSX text nodes: between > ... <
+ * This avoids import strings, object keys, etc.
+ */
+function fixInJsxText(input: string): string {
+  return input.replace(/>([^<]+)</g, (match: string, text: string) => {
     const fixed = text
       // straight double quotes in text → smart quotes
-      .replace(/"([^"]*)"/g, ""$1"")
+      .replace(/"([^"]*)"/g, '"$1"')
       // apostrophes in common contractions/possessives → curly apostrophe
       .replace(/(\w)'(\w)/g, "$1'$2");
     return `>${fixed}<`;
   });
 }
 
-let changed = 0;
+async function main(): Promise<void> {
+  let changed = 0;
+  const skipped: string[] = [];
 
-for (const p of targets) {
-  if (!fs.existsSync(p)) continue;
+  for (const target of targets) {
+    const filePath = path.resolve(process.cwd(), target);
+    
+    if (!fs.existsSync(filePath)) {
+      console.log(`Skipping (not found): ${target}`);
+      skipped.push(target);
+      continue;
+    }
 
-  const original = fs.readFileSync(p, "utf8");
-  const next = fixInJsxText(original);
+    try {
+      const original = fs.readFileSync(filePath, "utf8");
+      const next = fixInJsxText(original);
 
-  if (next !== original) {
-    fs.writeFileSync(p, next, "utf8");
-    console.log(`patched: ${p}`);
-    changed++;
-  } else {
-    console.log(`no change: ${p}`);
+      if (next !== original) {
+        // Create backup before modifying
+        const backupPath = `${filePath}.bak-${Date.now()}`;
+        fs.writeFileSync(backupPath, original, "utf8");
+        
+        // Write the fixed content
+        fs.writeFileSync(filePath, next, "utf8");
+        
+        console.log(`✅ Patched: ${target} (backup: ${path.basename(backupPath)})`);
+        changed++;
+      } else {
+        console.log(`⏭️  No change needed: ${target}`);
+      }
+    } catch (error) {
+      console.error(`❌ Error processing ${target}:`, error instanceof Error ? error.message : String(error));
+    }
   }
+
+  console.log(`\n📊 Summary:`);
+  console.log(`   Changed: ${changed} file${changed !== 1 ? 's' : ''}`);
+  console.log(`   Skipped: ${skipped.length} file${skipped.length !== 1 ? 's' : ''}`);
+  
+  if (skipped.length > 0) {
+    console.log(`   Missing files: ${skipped.join(', ')}`);
+  }
+  
+  console.log(`\n✅ Done.`);
 }
 
-console.log(`\nDone. Files changed: ${changed}`);
+// Run only if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error('❌ Fatal error:', error);
+    process.exit(1);
+  });
+}
+
+export { fixInJsxText, targets };

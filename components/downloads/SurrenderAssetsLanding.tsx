@@ -1,18 +1,27 @@
-// components/downloads/SurrenderAssetsLanding.tsx
+// components/downloads/SurrenderAssetsLanding.tsx - PROPERLY FIXED
 import React from 'react';
-import { getAllPDFItems, getPDFItemsByType } from '@/scripts/pdf-registry';
+import { 
+  getAllPDFItems, 
+  getPDFsByType, 
+  configToItem, 
+  PDFConfig, 
+  PDFItem 
+} from '@/scripts/pdf-registry';
 import { Shield, Download, FileText, Users, Zap, Award } from 'lucide-react';
 
 interface AssetCardProps {
-  asset: any;
+  asset: PDFItem;
   index: number;
 }
 
 const SurrenderAssetsLanding: React.FC = () => {
-  const surrenderAssets = getPDFItemsByType('worksheet').concat(
-    getPDFItemsByType('assessment'),
-    getPDFItemsByType('tool')
-  );
+  // Convert PDFConfig[] to PDFItem[] for component usage
+  const surrenderAssets = [
+    ...getPDFsByType('worksheet'),
+    ...getPDFsByType('assessment'),
+    ...getPDFsByType('tool'),
+    ...getPDFsByType('framework')
+  ].map(configToItem);
 
   const categories = [
     {
@@ -72,7 +81,7 @@ const SurrenderAssetsLanding: React.FC = () => {
         </div>
         
         <a
-          href={asset.outputPath}
+          href={asset.fileUrl}
           download
           className="flex items-center gap-2 text-sm text-amber-500 hover:text-amber-400 font-medium"
         >
@@ -109,7 +118,7 @@ const SurrenderAssetsLanding: React.FC = () => {
               Browse All Downloads
             </a>
             <a
-              href="/downloads/surrender-starter-kit.zip"
+              href="/assets/downloads/surrender-starter-kit.zip"
               className="px-6 py-3 border border-amber-500 text-amber-500 hover:bg-amber-500/10 font-bold rounded-lg transition"
             >
               Get Starter Kit
@@ -117,7 +126,7 @@ const SurrenderAssetsLanding: React.FC = () => {
           </div>
         </div>
         
-        {/* Stats */}
+        {/* Stats - Use the actual surrenderAssets array */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
             <div className="text-2xl font-bold text-white mb-1">{surrenderAssets.length}</div>
@@ -181,7 +190,7 @@ const SurrenderAssetsLanding: React.FC = () => {
             All worksheets, assessments, and tools in one comprehensive bundle. Save 60% versus purchasing separately.
           </p>
           <a
-            href="/downloads/surrender-starter-kit.zip"
+            href="/assets/downloads/surrender-starter-kit.zip"
             className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-lg transition-all hover:scale-105"
           >
             <Download className="w-5 h-5" />

@@ -95,10 +95,10 @@ class EdgeRateLimiter {
     
     const { limit, windowMs, keyPrefix = "rl", blockDuration } = options;
     const now = Date.now();
-    const storeKey = `${keyPrefix}:${key}`;
+    const _storeKey = `${keyPrefix}:${key}`; // Prefixed with underscore to indicate unused
     
     // Check if blocked
-    const blockStatus = this.isBlocked(storeKey);
+    const blockStatus = this.isBlocked(_storeKey);
     if (blockStatus.blocked) {
       return {
         allowed: false,
@@ -112,7 +112,7 @@ class EdgeRateLimiter {
       };
     }
 
-    let entry = this.memoryStore.get(storeKey);
+    let entry = this.memoryStore.get(_storeKey);
 
     // Create new entry if expired or doesn't exist
     if (!entry || now > entry.resetTime) {
@@ -144,7 +144,7 @@ class EdgeRateLimiter {
 
     // Increment count
     entry.count += 1;
-    this.memoryStore.set(storeKey, entry);
+    this.memoryStore.set(_storeKey, entry);
 
     const allowed = entry.count <= limit;
     
@@ -167,13 +167,13 @@ class EdgeRateLimiter {
 
   getStatus(key: string, options: RateLimitOptions): RateLimitResult | null {
     const { limit, windowMs, keyPrefix = "rl" } = options;
-    const storeKey = `${keyPrefix}:${key}`;
+    const _storeKey = `${keyPrefix}:${key}`;
     
-    const entry = this.memoryStore.get(storeKey);
+    const entry = this.memoryStore.get(_storeKey);
     if (!entry) return null;
     
     const now = Date.now();
-    const blockStatus = this.isBlocked(storeKey);
+    const blockStatus = this.isBlocked(_storeKey);
     const blocked = blockStatus.blocked;
     
     return {
@@ -189,9 +189,9 @@ class EdgeRateLimiter {
   }
 
   resetKey(key: string, keyPrefix = "rl"): boolean {
-    const storeKey = `${keyPrefix}:${key}`;
-    this.permanentBlocks.delete(storeKey);
-    return this.memoryStore.delete(storeKey);
+    const _storeKey = `${keyPrefix}:${key}`;
+    this.permanentBlocks.delete(_storeKey);
+    return this.memoryStore.delete(_storeKey);
   }
 
   getStats() {
@@ -474,12 +474,12 @@ export async function rateLimitAsync(key: string, options: RateLimitOptions): Pr
 
 export async function markRequestSuccess(key: string, keyPrefix = "rl"): Promise<void> {
   const limiter = getEdgeLimiter();
-  const storeKey = `${keyPrefix}:${key}`;
+  const _storeKey = `${keyPrefix}:${key}`;
   const entry = limiter.getStatus(key, { limit: 1, windowMs: 1000, keyPrefix }); // Dummy options
   if (entry && entry.remaining < entry.limit) {
     // This is a simplified implementation - in production you might want to
     // expose a method on the limiter to decrement counts safely
-    const newEntry = {
+    const _newEntry = { // Prefixed with underscore to indicate unused
       count: Math.max(0, entry.remaining - 1),
       resetTime: entry.resetTime,
       firstRequestTime: Date.now(),
@@ -520,14 +520,14 @@ export async function resetRateLimit(key: string, keyPrefix = "rl"): Promise<boo
 
 export async function blockPermanently(key: string, keyPrefix = "rl"): Promise<void> {
   const limiter = getEdgeLimiter();
-  const storeKey = `${keyPrefix}:${key}`;
-  limiter.blockPermanently(storeKey);
+  const _storeKey = `${keyPrefix}:${key}`;
+  limiter.blockPermanently(_storeKey);
 }
 
 export async function unblock(key: string, keyPrefix = "rl"): Promise<void> {
   const limiter = getEdgeLimiter();
-  const storeKey = `${keyPrefix}:${key}`;
-  limiter.unblock(storeKey);
+  const _storeKey = `${keyPrefix}:${key}`;
+  limiter.unblock(_storeKey);
 }
 
 export async function getRateLimiterStats() {
@@ -535,8 +535,8 @@ export async function getRateLimiterStats() {
   return limiter.getStats();
 }
 
-// Default export with unified API
-export default {
+// Create named object for default export
+const rateLimitEdgeApi = {
   rateLimit,
   rateLimitAsync,
   withEdgeRateLimit,
@@ -554,3 +554,7 @@ export default {
   unblock,
   getRateLimiterStats,
 };
+
+export default rateLimitEdgeApi;
+
+

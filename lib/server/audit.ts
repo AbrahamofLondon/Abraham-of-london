@@ -704,7 +704,8 @@ export async function cleanupOldAuditLogs(retentionDays: number = 90) {
 }
 
 // SAFE: Default export for backward compatibility
-export default {
+const auditApi = {
+
   logAuditEvent,
   logAuthEvent,
   logDataAccessEvent,
@@ -716,4 +717,7 @@ export default {
   AUDIT_CATEGORIES,
   AUDIT_ACTIONS,
   AuditContext,
+
 };
+export default auditApi;
+

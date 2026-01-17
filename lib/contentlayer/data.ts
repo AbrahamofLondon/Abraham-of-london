@@ -170,10 +170,14 @@ export async function getStaticPathsData() {
 }
 
 // Default export for backward compatibility
-export default {
+const dataApi = {
+
   getContentlayerData,
   getAllDocuments,
   getDocumentsByType,
   getDocumentBySlug,
   getStaticPathsData
+
 };
+export default dataApi;
+

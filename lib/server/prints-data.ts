@@ -283,7 +283,7 @@ export function getAllPrintsMeta(): Print[] {
   }
 }
 
-export function getPrintBySlug(slug: string): PrintWithContent | null {
+export async function getPrintBySlug(slug: string): Promise<PrintWithContent | null> {
   try {
     if (!slug || typeof slug !== 'string') {
       console.error("getPrintBySlug called with invalid slug:", slug);
@@ -296,14 +296,15 @@ export function getPrintBySlug(slug: string): PrintWithContent | null {
       return null;
     }
     
-    return fromMdxDocument(doc);
+    const resolvedDoc = await doc;
+return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
   } catch (error) {
     console.error(`Error fetching print by slug (${slug}):`, error);
     return null;
   }
 }
 
-export function getAllPrints(): PrintWithContent[] {
+export async function getAllPrints(): Promise<PrintWithContent[]> {
   try {
     const metas = getAllPrintsMeta();
     if (metas.length === 0) return [];
@@ -700,5 +701,10 @@ const printsData = {
 };
 
 export default printsData;
+
+
+
+
+
 
 

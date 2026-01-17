@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
-import { isRateLimited } from "@/lib/rate-limit";
+import { isRateLimited, RATE_LIMIT_CONFIGS } from "@/lib/server/rate-limit-unified";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { cacheResponse, getCacheKey } from "@/lib/server/cache";
 import { logAuditEvent } from "@/lib/audit";
@@ -664,3 +664,5 @@ async function enrichContentBreakdowns(
     };
   });
 }
+
+

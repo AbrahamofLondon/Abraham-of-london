@@ -21,7 +21,7 @@ function safeArray(value: any): string[] | undefined {
   return value.filter(item => typeof item === "string");
 }
 
-function safeNumber(value: any): number | undefined {
+function _safeNumber(value: any): number | undefined { // Prefixed with underscore
   if (typeof value === "number") return value;
   if (typeof value === "string") {
     const parsed = parseInt(value, 10);
@@ -147,11 +147,12 @@ export function getFeaturedResources(): Resource[] {
   }
 }
 
-export default {
+// Create named object for default export
+const resourcesDataApi = {
   getAllResourcesMeta,
   getResourceBySlug,
   getResourcesByType,
   getFeaturedResources,
 };
 
-
+export default resourcesDataApi;

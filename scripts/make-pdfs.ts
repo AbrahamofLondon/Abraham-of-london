@@ -1,40 +1,81 @@
-// scripts/make-pdfs.mjs
-// Enhanced PDF + asset generation for Abraham of London
-// - Handles Download MDX frontmatter keys: file, pdfPath, downloadFile
-// - Ensures PDFs exist under: public/assets/downloads
-// - Generates specific PDFs via React-PDF renderers where available
-// - Falls back to minimal placeholder PDFs so builds never break
-// - Fixes misplaced PDFs (public/downloads -> public/assets/downloads)
+// scripts/make-pdfs.ts
+// Premium PDF generation for Abraham of London
+// - Strict validation with no placeholders
+// - Only generates PDFs if all requirements are met
+// - Throws errors for missing assets
+// - Professional-grade content only
 
 import fs from "fs/promises";
 import path from "path";
-import { promisify } from "util";
-import { exec } from "child_process";
+import { fileURLToPath } from "url";
 
-const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const CONTENT_DIR = "content";
-
-// canonical public dirs
 const PUBLIC_DIR = "public";
 const DOWNLOADS_DIR = path.join(PUBLIC_DIR, "assets", "downloads");
-const RESOURCES_PDF_DIR = path.join(PUBLIC_DIR, "assets", "resources", "pdfs");
-const IMAGES_CANON_DIR = path.join(PUBLIC_DIR, "assets", "images", "canon");
-const IMAGES_DOWNLOADS_DIR = path.join(PUBLIC_DIR, "assets", "images", "downloads");
-const IMAGES_RESOURCES_DIR = path.join(PUBLIC_DIR, "assets", "images", "resources");
-
-// Wrong legacy dir some content might reference
 const WRONG_DOWNLOADS_DIR = path.join(PUBLIC_DIR, "downloads");
 
 // ----------------------------
-// Utilities
+// Premium Interfaces
 // ----------------------------
 
-function logStep(msg) {
-  console.log(msg);
+interface ContentFile {
+  path: string;
+  name: string;
+  content: string;
 }
 
-async function pathExists(p) {
+interface PdfReference {
+  raw: string;
+  canonicalPath: string;
+  publicHref: string;
+  filename: string;
+}
+
+interface PdfGenerationResult {
+  status: 'exists' | 'generated' | 'copied' | 'error';
+  pdfPath: string;
+  publicHref: string;
+  source?: string;
+  error?: string;
+}
+
+interface CoverImageResult {
+  status: 'exists' | 'missing' | 'error';
+  path: string;
+  error?: string;
+}
+
+interface ContentValidation {
+  isValid: boolean;
+  hasPdfRef: boolean;
+  hasCoverImage: boolean;
+  errors: string[];
+}
+
+// ----------------------------
+// Premium Utilities
+// ----------------------------
+
+function logStep(msg: string): void {
+  console.log(`🎯 ${msg}`);
+}
+
+function logSuccess(msg: string): void {
+  console.log(`✅ ${msg}`);
+}
+
+function logWarning(msg: string): void {
+  console.log(`⚠️  ${msg}`);
+}
+
+function logError(msg: string): void {
+  console.error(`❌ ${msg}`);
+}
+
+async function pathExists(p: string): Promise<boolean> {
   try {
     await fs.access(p);
     return true;
@@ -43,535 +84,519 @@ async function pathExists(p) {
   }
 }
 
-async function ensureDirectories() {
-  const dirs = [
-    DOWNLOADS_DIR,
-    RESOURCES_PDF_DIR,
-    IMAGES_CANON_DIR,
-    IMAGES_DOWNLOADS_DIR,
-    IMAGES_RESOURCES_DIR,
-    WRONG_DOWNLOADS_DIR, // ensure exists only if you want to detect, not required
-  ];
-
-  for (const dir of dirs) {
-    // Don't force create WRONG_DOWNLOADS_DIR; it may not exist and that's fine.
-    if (dir === WRONG_DOWNLOADS_DIR) continue;
+async function ensureDirectory(dir: string): Promise<void> {
+  try {
     await fs.mkdir(dir, { recursive: true });
-    console.log(`✅ Ensured directory: ${dir}`);
+    logSuccess(`Ensured directory: ${dir}`);
+  } catch (error) {
+    throw new Error(`Failed to create directory ${dir}: ${error}`);
   }
 }
 
-function normalizePublicHref(href) {
-  // Converts:
-  // - "/assets/downloads/x.pdf" -> "assets/downloads/x.pdf"
-  // - "assets/downloads/x.pdf" -> "assets/downloads/x.pdf"
-  // - "/downloads/x.pdf" -> "downloads/x.pdf"
-  // - "downloads/x.pdf" -> "downloads/x.pdf"
-  // - "x.pdf" -> "x.pdf"
-  if (!href || typeof href !== "string") return null;
-  return href.trim().replace(/^\/+/, "");
+function normalizePath(href: string): string {
+  return href.trim().replace(/^\/+/, "").replace(/\\/g, "/");
 }
 
-function toAbsolutePublicPath(publicHref) {
-  const rel = normalizePublicHref(publicHref);
-  if (!rel) return null;
-  return path.join(PUBLIC_DIR, rel);
-}
-
-function ensurePdfGoesToAssetsDownloads(pdfHrefMaybeWrong) {
-  // Takes any of:
-  // - downloads/foo.pdf
-  // - assets/downloads/foo.pdf
-  // - public/assets/downloads/foo.pdf (rare)
-  // - /downloads/foo.pdf
-  // - /assets/downloads/foo.pdf
-  // Returns:
-  // - { publicHref: "assets/downloads/foo.pdf", absPath: ".../public/assets/downloads/foo.pdf" }
-  const rel = normalizePublicHref(pdfHrefMaybeWrong);
-  if (!rel) return null;
-
-  const base = path.basename(rel);
-  const canonicalPublicHref = path.join("assets", "downloads", base).replace(/\\/g, "/");
-  const absPath = path.join(DOWNLOADS_DIR, base);
-  return { publicHref: canonicalPublicHref, absPath, filename: base };
-}
-
-function extractFrontmatterBlock(raw) {
-  // Returns the frontmatter text (between --- ... ---) or null
+function extractFrontmatterBlock(raw: string): string | null {
   const match = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n/m);
   return match ? match[1] : null;
 }
 
-function extractFirstMatch(raw, regex) {
+function extractFirstMatch(raw: string, regex: RegExp): string | null {
   const m = raw.match(regex);
   return m ? m[1] : null;
 }
 
-function extractPdfReferenceFromMdx(raw) {
-  // Supports your patterns:
-  // file: "ultimate-purpose-of-man-editorial.pdf"
-  // pdfPath: "/downloads/ultimate-purpose-of-man-editorial.pdf"
-  // downloadFile: "/assets/downloads/....pdf"
-  //
-  // Preference order: pdfPath > downloadFile > file
-  const fm = extractFrontmatterBlock(raw);
+// ----------------------------
+// Strict Content Validation
+// ----------------------------
+
+function validateContentFile(content: string): ContentValidation {
+  const validation: ContentValidation = {
+    isValid: true,
+    hasPdfRef: false,
+    hasCoverImage: false,
+    errors: []
+  };
+
+  const fm = extractFrontmatterBlock(content);
+  if (!fm) {
+    validation.isValid = false;
+    validation.errors.push("Missing or invalid frontmatter");
+    return validation;
+  }
+
+  // Check for PDF references
+  const pdfRefRegex = /^(?:pdfPath|downloadFile|file)\s*:\s*["'](.+?\.pdf)["']\s*$/m;
+  if (pdfRefRegex.test(fm)) {
+    validation.hasPdfRef = true;
+  }
+
+  // Check for cover image
+  const coverRegex = /^coverImage\s*:\s*["'](.+?\.(?:jpg|jpeg|png|webp|avif))["']\s*$/m;
+  if (coverRegex.test(fm)) {
+    validation.hasCoverImage = true;
+  }
+
+  // Premium content must have both
+  if (!validation.hasPdfRef) {
+    validation.isValid = false;
+    validation.errors.push("Missing PDF reference (pdfPath, downloadFile, or file)");
+  }
+
+  if (!validation.hasCoverImage) {
+    validation.isValid = false;
+    validation.errors.push("Missing coverImage");
+  }
+
+  return validation;
+}
+
+function extractPdfReference(content: string): PdfReference | null {
+  const fm = extractFrontmatterBlock(content);
   if (!fm) return null;
 
-  const pdfPath = extractFirstMatch(fm, /^(?:pdfPath)\s*:\s*["'](.+?\.pdf)["']\s*$/m);
-  if (pdfPath) return pdfPath;
+  // Check all possible PDF reference keys
+  const pdfPath = extractFirstMatch(fm, /^pdfPath\s*:\s*["'](.+?\.pdf)["']\s*$/m);
+  if (pdfPath) {
+    return normalizePdfReference(pdfPath);
+  }
 
-  const downloadFile = extractFirstMatch(fm, /^(?:downloadFile)\s*:\s*["'](.+?\.pdf)["']\s*$/m);
-  if (downloadFile) return downloadFile;
+  const downloadFile = extractFirstMatch(fm, /^downloadFile\s*:\s*["'](.+?\.pdf)["']\s*$/m);
+  if (downloadFile) {
+    return normalizePdfReference(downloadFile);
+  }
 
-  const file = extractFirstMatch(fm, /^(?:file)\s*:\s*["'](.+?\.pdf)["']\s*$/m);
+  const file = extractFirstMatch(fm, /^file\s*:\s*["'](.+?\.pdf)["']\s*$/m);
   if (file) {
-    // "file:" is usually just a filename; assume canonical downloads dir
-    return `/assets/downloads/${file.replace(/^\/+/, "")}`;
+    return normalizePdfReference(`/assets/downloads/${file}`);
   }
 
   return null;
 }
 
-function extractCoverImageFromMdx(raw) {
-  const fm = extractFrontmatterBlock(raw);
+function normalizePdfReference(ref: string): PdfReference {
+  const normalized = normalizePath(ref);
+  const filename = path.basename(normalized);
+  
+  // Ensure PDF is in the correct directory
+  const publicHref = `assets/downloads/${filename}`;
+  const canonicalPath = path.join(DOWNLOADS_DIR, filename);
+
+  return {
+    raw: ref,
+    canonicalPath,
+    publicHref,
+    filename
+  };
+}
+
+function extractCoverImage(content: string): string | null {
+  const fm = extractFrontmatterBlock(content);
   if (!fm) return null;
 
-  // allow webp too; your site uses webp heavily
   const cover = extractFirstMatch(
     fm,
-    /^coverImage\s*:\s*["'](.+?\.(?:jpg|jpeg|png|webp))["']\s*$/m
+    /^coverImage\s*:\s*["'](.+?\.(?:jpg|jpeg|png|webp|avif))["']\s*$/m
   );
-  return cover || null;
+
+  return cover ? normalizePath(cover) : null;
 }
 
-async function walkDirCollect(dir, predicate) {
-  const out = [];
-  async function walk(d) {
-    const entries = await fs.readdir(d, { withFileTypes: true });
+// ----------------------------
+// Content Scanning
+// ----------------------------
+
+async function scanContentFiles(): Promise<ContentFile[]> {
+  const files: ContentFile[] = [];
+  
+  async function scanDirectory(dir: string): Promise<void> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    
     for (const entry of entries) {
-      const full = path.join(d, entry.name);
+      const fullPath = path.join(dir, entry.name);
+      
       if (entry.isDirectory()) {
-        await walk(full);
-      } else if (predicate(entry.name)) {
-        const content = await fs.readFile(full, "utf8");
-        out.push({ path: full, name: entry.name, content });
+        await scanDirectory(fullPath);
+      } else if (entry.name.endsWith('.mdx') || entry.name.endsWith('.md')) {
+        try {
+          const content = await fs.readFile(fullPath, 'utf-8');
+          files.push({
+            path: fullPath,
+            name: entry.name,
+            content
+          });
+        } catch (error) {
+          logError(`Failed to read ${fullPath}: ${error}`);
+        }
       }
     }
   }
-  await walk(dir);
-  return out;
+
+  await scanDirectory(CONTENT_DIR);
+  return files;
 }
 
-async function generateUltimatePurposePDF(outputPath) {
-  // outputPath is provided by the caller; use it.
-  await execAsync(`npx tsx scripts/generate-ultimate-purpose-of-man-pdf.ts`);
+// ----------------------------
+// PDF Generation
+// ----------------------------
+
+async function generatePremiumPdf(
+  pdfRef: PdfReference,
+  mdxPath: string,
+  coverImagePath?: string
+): Promise<void> {
+  const { canonicalPath, filename } = pdfRef;
+  
+  logStep(`Generating premium PDF: ${filename}`);
+  
+  // Check if cover image exists
+  if (coverImagePath) {
+    const coverAbsPath = path.join(PUBLIC_DIR, coverImagePath);
+    if (!(await pathExists(coverAbsPath))) {
+      throw new Error(`Cover image not found: ${coverImagePath}`);
+    }
+  }
+
+  // Check for existing React PDF generator
+  const generatorPath = path.join(__dirname, '..', 'lib', 'pdf', `${path.basename(mdxPath, '.mdx')}-pdf.tsx`);
+  
+  if (await pathExists(generatorPath)) {
+    await generateReactPdf(generatorPath, canonicalPath, coverImagePath);
+  } else {
+    // Fallback to external generator script
+    await generateWithExternalScript(filename, canonicalPath);
+  }
 }
 
-async function fixWronglyPlacedPDFs() {
-  // Move public/downloads/*.pdf -> public/assets/downloads/*.pdf
-  if (!(await pathExists(WRONG_DOWNLOADS_DIR))) return;
+async function generateReactPdf(
+  generatorPath: string,
+  outputPath: string,
+  coverImagePath?: string
+): Promise<void> {
+  // This would dynamically import and render the React PDF component
+  // For now, we'll create a placeholder implementation
+  logStep(`Using React PDF generator: ${path.basename(generatorPath)}`);
+  
+  // In a real implementation, you would:
+  // 1. Dynamically import the component
+  // 2. Render it with React PDF
+  // 3. Save to outputPath
+  
+  throw new Error(`React PDF generator not implemented: ${generatorPath}`);
+}
 
-  let moved = 0;
+async function generateWithExternalScript(
+  pdfName: string,
+  outputPath: string
+): Promise<void> {
+  const scriptName = pdfName.replace('.pdf', '').replace(/-/g, '_');
+  const scriptPath = path.join(__dirname, `generate-${scriptName}-pdf.ts`);
+  
+  if (await pathExists(scriptPath)) {
+    logStep(`Using external generator: ${scriptPath}`);
+    
+    // Execute the TypeScript script
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+    
+    try {
+      await execAsync(`npx tsx ${scriptPath} --output "${outputPath}"`);
+      logSuccess(`Generated PDF: ${pdfName}`);
+    } catch (error) {
+      throw new Error(`Failed to execute generator ${scriptPath}: ${error}`);
+    }
+  } else {
+    throw new Error(`No generator found for PDF: ${pdfName}`);
+  }
+}
+
+// ----------------------------
+// Asset Management
+// ----------------------------
+
+async function fixMisplacedPdfs(): Promise<void> {
+  if (!(await pathExists(WRONG_DOWNLOADS_DIR))) {
+    return;
+  }
+
   try {
     const files = await fs.readdir(WRONG_DOWNLOADS_DIR);
-    for (const f of files) {
-      if (!f.toLowerCase().endsWith(".pdf")) continue;
-      const from = path.join(WRONG_DOWNLOADS_DIR, f);
-      const to = path.join(DOWNLOADS_DIR, f);
+    let movedCount = 0;
 
-      if (await pathExists(to)) {
-        await fs.unlink(from);
-        console.log(`  🗑️  Deleted duplicate misplaced PDF: public/downloads/${f}`);
+    for (const file of files) {
+      if (!file.toLowerCase().endsWith('.pdf')) continue;
+
+      const sourcePath = path.join(WRONG_DOWNLOADS_DIR, file);
+      const targetPath = path.join(DOWNLOADS_DIR, file);
+
+      if (await pathExists(targetPath)) {
+        await fs.unlink(sourcePath);
+        logWarning(`Removed duplicate: ${file}`);
       } else {
-        await fs.mkdir(DOWNLOADS_DIR, { recursive: true });
-        await fs.rename(from, to);
-        console.log(`  📦 Moved misplaced PDF: ${f} -> public/assets/downloads/`);
-        moved++;
+        await fs.rename(sourcePath, targetPath);
+        logSuccess(`Moved: ${file} → assets/downloads/`);
+        movedCount++;
       }
     }
-  } catch {
-    // ignore
-  }
 
-  // Attempt remove wrong dir if empty
+    // Clean up empty directory
+    const remainingFiles = await fs.readdir(WRONG_DOWNLOADS_DIR);
+    if (remainingFiles.length === 0) {
+      await fs.rm(WRONG_DOWNLOADS_DIR, { recursive: true });
+      logSuccess('Removed empty downloads directory');
+    }
+
+    if (movedCount > 0) {
+      logSuccess(`Fixed ${movedCount} misplaced PDFs`);
+    }
+  } catch (error) {
+    logError(`Failed to fix misplaced PDFs: ${error}`);
+  }
+}
+
+async function validateCoverImage(coverPath: string): Promise<CoverImageResult> {
+  const absolutePath = path.join(PUBLIC_DIR, coverPath);
+  
   try {
-    const left = await fs.readdir(WRONG_DOWNLOADS_DIR);
-    if (left.length === 0) {
-      await fs.rmdir(WRONG_DOWNLOADS_DIR);
-      console.log(`  🗑️  Removed empty directory: public/downloads`);
-    }
-  } catch {
-    // ignore
-  }
-
-  if (moved) console.log(`✅ Fixed ${moved} misplaced PDFs\n`);
-}
-
-// ----------------------------
-// PDF Generation (React-PDF)
-// ----------------------------
-
-async function renderReactPdfToFile({ componentImport, props, outPath }) {
-  // Render via @react-pdf/renderer in Node.
-  // We use dynamic import to avoid ESM/CJS friction.
-  const { renderToFile } = await import("@react-pdf/renderer");
-
-  // componentImport can be a path to a module that default-exports Document component
-  const mod = await import(componentImport);
-  const Comp = mod?.default;
-
-  if (!Comp) {
-    throw new Error(`React-PDF module has no default export: ${componentImport}`);
-  }
-
-  await fs.mkdir(path.dirname(outPath), { recursive: true });
-
-  // Render
-  await renderToFile(React.createElement(Comp, props), outPath);
-}
-
-// Generate The Ultimate Purpose PDF (board-grade)
-async function generateUltimatePurposePdf(absOutputPath) {
-  // Cover image is referenced in MDX as "/assets/images/purpose-cover.jpg"
-  // React-PDF in Node prefers absolute filesystem paths
-  const coverAbs = path.join(process.cwd(), "public", "assets", "images", "purpose-cover.jpg");
-
-  if (!(await pathExists(coverAbs))) {
-    // If the cover doesn’t exist, don’t hard-fail. We can still render with a fallback.
-    // But Image src cannot be empty; use a tiny generated placeholder if needed.
-    throw new Error(
-      `Missing cover image for Ultimate Purpose PDF: ${coverAbs} (expected /public/assets/images/purpose-cover.jpg)`
-    );
-  }
-
-  await renderReactPdfToFile({
-    componentImport: "../lib/pdf/ultimate-purpose-of-man-pdf.tsx",
-    props: { coverImagePath: coverAbs },
-    outPath: absOutputPath,
-  });
-}
-
-// Dispatch by slug or filename
-async function generateSpecificPdfByMdx({ mdxPath, pdfAbsPath, pdfPublicHref }) {
-  // Use slug/filename heuristics
-  const base = path.basename(pdfAbsPath).toLowerCase();
-
-  // Your flagship
-  if (base === "ultimate-purpose-of-man-editorial.pdf") {
-    await generateUltimatePurposePdf(pdfAbsPath);
-    return { status: "generated", kind: "react-pdf", target: pdfPublicHref };
-  }
-
-  // If you later add more React-PDF generators, add them here.
-
-  // No specific generator: return null so caller can fallback placeholder
-  return null;
-}
-
-// ----------------------------
-// Placeholder PDF fallback
-// ----------------------------
-
-async function createSimpleTextPdf(text, absOutPath) {
-  const { PDFDocument, StandardFonts } = await import("pdf-lib");
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([612, 792]); // Letter
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-  const margin = 50;
-  const fontSize = 12;
-  const lineHeight = fontSize * 1.5;
-
-  const { height } = page.getSize();
-
-  // naive wrap
-  const words = String(text).replace(/\r/g, "").split(/\s+/);
-  const lines = [];
-  let line = "";
-  const maxChars = 90;
-
-  for (const w of words) {
-    const test = (line ? line + " " : "") + w;
-    if (test.length <= maxChars) line = test;
-    else {
-      if (line) lines.push(line);
-      line = w;
-    }
-  }
-  if (line) lines.push(line);
-
-  let y = height - margin;
-  for (const l of lines) {
-    if (y < margin) break;
-    page.drawText(l, { x: margin, y, size: fontSize, font });
-    y -= lineHeight;
-  }
-
-  await fs.mkdir(path.dirname(absOutPath), { recursive: true });
-  const bytes = await pdfDoc.save();
-  await fs.writeFile(absOutPath, bytes);
-}
-
-async function createMinimalPdfPlaceholder({ absOutPath, mdxPath, pdfPublicHref }) {
-  const title = path.basename(mdxPath);
-  const body = [
-    `Abraham of London — Placeholder PDF`,
-    ``,
-    `This PDF was generated as a build-safe placeholder.`,
-    `It will be replaced by the final board-grade artifact.`,
-    ``,
-    `Source MDX: ${mdxPath}`,
-    `Target PDF: /${pdfPublicHref}`,
-  ].join("\n");
-  await createSimpleTextPdf(body, absOutPath);
-}
-
-// ----------------------------
-// Existing file copy logic
-// ----------------------------
-
-async function tryFindAndCopyExistingPdf({ absTargetPath, targetFilename }) {
-  const searchDirs = [
-    path.join(PUBLIC_DIR, "assets", "downloads"),
-    path.join(PUBLIC_DIR, "downloads"), // legacy wrong dir
-  ];
-
-  const normalizedTarget = targetFilename.toLowerCase().replace(/[-_\s]/g, "");
-
-  for (const dir of searchDirs) {
-    if (!(await pathExists(dir))) continue;
-
-    let files = [];
-    try {
-      files = await fs.readdir(dir);
-    } catch {
-      continue;
+    const exists = await pathExists(absolutePath);
+    
+    if (!exists) {
+      return {
+        status: 'missing',
+        path: coverPath,
+        error: `Cover image not found: ${coverPath}`
+      };
     }
 
-    // exact normalized match
-    for (const f of files) {
-      if (!f.toLowerCase().endsWith(".pdf")) continue;
-      const norm = f.toLowerCase().replace(/[-_\s]/g, "").replace(/\.pdf$/, "");
-      if (norm === normalizedTarget.replace(/\.pdf$/, "")) {
-        await fs.copyFile(path.join(dir, f), absTargetPath);
-        return { copied: true, from: path.join(dir, f) };
-      }
+    // Verify it's a valid image file
+    const stats = await fs.stat(absolutePath);
+    if (stats.size === 0) {
+      return {
+        status: 'error',
+        path: coverPath,
+        error: `Cover image is empty: ${coverPath}`
+      };
     }
 
-    // partial keyword match
-    const keywords = normalizedTarget
-      .replace(/\.pdf$/, "")
-      .split(/[-_\s]+/)
-      .filter((w) => w && w.length > 3);
-
-    for (const f of files) {
-      if (!f.toLowerCase().endsWith(".pdf")) continue;
-      const lower = f.toLowerCase();
-      const matchCount = keywords.filter((kw) => lower.includes(kw)).length;
-      if (keywords.length && matchCount >= Math.ceil(keywords.length * 0.7)) {
-        await fs.copyFile(path.join(dir, f), absTargetPath);
-        return { copied: true, from: path.join(dir, f) };
-      }
-    }
-  }
-
-  return { copied: false };
-}
-
-// ----------------------------
-// Cover image placeholder (optional)
-// ----------------------------
-
-async function ensureCoverImage(imageHref, mdxPath) {
-  const rel = normalizePublicHref(imageHref);
-  if (!rel) return { status: "skip" };
-
-  const abs = path.join(PUBLIC_DIR, rel);
-  if (await pathExists(abs)) return { status: "exists", path: imageHref };
-
-  // Create a tiny placeholder file so validation doesn’t explode.
-  // Better: you can wire sharp here; but we keep it safe.
-  await fs.mkdir(path.dirname(abs), { recursive: true });
-
-  // If it's an image, writing an empty file is not ideal but prevents "missing asset" check
-  // only if your validator just checks existence. If you enforce size>0, replace this with sharp.
-  await fs.writeFile(abs, "");
-  return { status: "placeholder", path: imageHref };
-}
-
-// ----------------------------
-// Main worker
-// ----------------------------
-
-async function getContentFilesWithPdfRefs() {
-  const files = await walkDirCollect(CONTENT_DIR, (name) => name.endsWith(".mdx") || name.endsWith(".md"));
-
-  // Keep only those with pdf ref keys
-  return files.filter(({ content }) => {
-    const fm = extractFrontmatterBlock(content);
-    if (!fm) return false;
-    return (
-      fm.includes("pdfPath:") ||
-      fm.includes("downloadFile:") ||
-      fm.includes("file:")
-    );
-  });
-}
-
-async function ensurePdfForMdxFile({ mdxPath, mdxContent }) {
-  const pdfRef = extractPdfReferenceFromMdx(mdxContent);
-  if (!pdfRef) return null;
-
-  // Canonicalize destination under /assets/downloads
-  const canonical = ensurePdfGoesToAssetsDownloads(pdfRef);
-  if (!canonical) return null;
-
-  const { absPath, publicHref, filename } = canonical;
-
-  // Already exists?
-  if (await pathExists(absPath)) {
-    return { status: "exists", pdf: `/${publicHref}`, mdx: mdxPath };
-  }
-
-  // Try copy from existing similar
-  const copyAttempt = await tryFindAndCopyExistingPdf({
-    absTargetPath: absPath,
-    targetFilename: filename,
-  });
-  if (copyAttempt.copied) {
     return {
-      status: "copied",
-      from: copyAttempt.from,
-      pdf: `/${publicHref}`,
-      mdx: mdxPath,
+      status: 'exists',
+      path: coverPath
+    };
+  } catch (error) {
+    return {
+      status: 'error',
+      path: coverPath,
+      error: `Failed to validate cover image: ${error}`
+    };
+  }
+}
+
+// ----------------------------
+// Main Processing
+// ----------------------------
+
+async function processContentFile(contentFile: ContentFile): Promise<{
+  pdfResult?: PdfGenerationResult;
+  coverResult?: CoverImageResult;
+}> {
+  const { path: mdxPath, content } = contentFile;
+  const baseName = path.basename(mdxPath);
+
+  logStep(`Processing: ${baseName}`);
+
+  // Validate content
+  const validation = validateContentFile(content);
+  if (!validation.isValid) {
+    logError(`Invalid content in ${baseName}: ${validation.errors.join(', ')}`);
+    return {};
+  }
+
+  // Extract PDF reference
+  const pdfRef = extractPdfReference(content);
+  if (!pdfRef) {
+    logError(`Failed to extract PDF reference from ${baseName}`);
+    return {};
+  }
+
+  // Extract cover image
+  const coverImage = extractCoverImage(content);
+  if (!coverImage) {
+    logError(`Failed to extract cover image from ${baseName}`);
+    return {};
+  }
+
+  // Validate cover image
+  const coverResult = await validateCoverImage(coverImage);
+  if (coverResult.status !== 'exists') {
+    logError(`Cover image issue in ${baseName}: ${coverResult.error}`);
+    return {};
+  }
+
+  // Check if PDF already exists
+  if (await pathExists(pdfRef.canonicalPath)) {
+    logSuccess(`PDF already exists: ${pdfRef.filename}`);
+    return {
+      pdfResult: {
+        status: 'exists',
+        pdfPath: pdfRef.canonicalPath,
+        publicHref: pdfRef.publicHref
+      },
+      coverResult
     };
   }
 
-  // Try specific generator
+  // Generate PDF
   try {
-    const spec = await generateSpecificPdfByMdx({
-      mdxPath,
-      pdfAbsPath: absPath,
-      pdfPublicHref: publicHref,
-    });
-    if (spec) {
-      return { status: spec.status, kind: spec.kind, pdf: `/${publicHref}`, mdx: mdxPath };
-    }
-  } catch (e) {
-    // Continue to placeholder fallback
-    return { status: "error", step: "specific-generator", error: String(e?.message || e), pdf: `/${publicHref}`, mdx: mdxPath };
+    await generatePremiumPdf(pdfRef, mdxPath, coverImage);
+    
+    return {
+      pdfResult: {
+        status: 'generated',
+        pdfPath: pdfRef.canonicalPath,
+        publicHref: pdfRef.publicHref
+      },
+      coverResult
+    };
+  } catch (error) {
+    logError(`Failed to generate PDF for ${baseName}: ${error}`);
+    
+    return {
+      pdfResult: {
+        status: 'error',
+        pdfPath: pdfRef.canonicalPath,
+        publicHref: pdfRef.publicHref,
+        error: String(error)
+      },
+      coverResult
+    };
   }
-
-  // Placeholder fallback
-  await createMinimalPdfPlaceholder({
-    absOutPath: absPath,
-    mdxPath,
-    pdfPublicHref: publicHref,
-  });
-
-  return { status: "placeholder", pdf: `/${publicHref}`, mdx: mdxPath };
 }
 
-async function main() {
-  console.log("🚀 Starting PDF + asset generation...\n");
+// ----------------------------
+// Main Function
+// ----------------------------
+
+async function main(): Promise<void> {
+  console.log('✨ Premium PDF Generation System');
+  console.log('===============================\n');
 
   const results = {
-    pdfs: { exists: 0, copied: 0, generated: 0, placeholder: 0, error: 0, items: [] },
-    images: { exists: 0, placeholder: 0, skip: 0, error: 0 },
+    processed: 0,
+    succeeded: 0,
+    failed: 0,
+    skipped: 0,
+    pdfs: {
+      generated: 0,
+      existing: 0,
+      errors: 0
+    },
+    covers: {
+      valid: 0,
+      missing: 0,
+      errors: 0
+    }
   };
 
   try {
-    // Step 0: fix misplaced PDFs
-    logStep("📦 Checking for misplaced PDFs...");
-    await fs.mkdir(DOWNLOADS_DIR, { recursive: true });
-    await fixWronglyPlacedPDFs();
+    // Step 1: Setup directories
+    logStep('Setting up directories...');
+    await ensureDirectory(DOWNLOADS_DIR);
 
-    // Step 1: ensure directories
-    logStep("📁 Ensuring directories...");
-    await ensureDirectories();
-    console.log("");
+    // Step 2: Fix misplaced PDFs
+    logStep('Checking for misplaced assets...');
+    await fixMisplacedPdfs();
 
-    // Step 2: scan content
-    logStep("📄 Scanning content for PDF references...");
-    const contentFiles = await getContentFilesWithPdfRefs();
-    console.log(`Found ${contentFiles.length} content file(s) with PDF references\n`);
+    // Step 3: Scan content
+    logStep('Scanning content files...');
+    const contentFiles = await scanContentFiles();
+    console.log(`Found ${contentFiles.length} content files\n`);
 
-    // Step 3: process each
-    for (const f of contentFiles) {
-      console.log(`Processing: ${f.path}`);
+    // Step 4: Process each file
+    for (const contentFile of contentFiles) {
+      results.processed++;
 
-      // Ensure PDF exists
-      const pdfRes = await ensurePdfForMdxFile({ mdxPath: f.path, mdxContent: f.content });
-      if (pdfRes) {
-        results.pdfs.items.push(pdfRes);
-        results.pdfs[pdfRes.status] = (results.pdfs[pdfRes.status] || 0) + 1;
+      try {
+        const { pdfResult, coverResult } = await processContentFile(contentFile);
 
-        if (pdfRes.status === "generated") results.pdfs.generated++;
-        if (pdfRes.status === "exists") results.pdfs.exists++;
-        if (pdfRes.status === "copied") results.pdfs.copied++;
-        if (pdfRes.status === "placeholder") results.pdfs.placeholder++;
-        if (pdfRes.status === "error") results.pdfs.error++;
+        // Update cover results
+        if (coverResult) {
+          if (coverResult.status === 'exists') results.covers.valid++;
+          else if (coverResult.status === 'missing') results.covers.missing++;
+          else if (coverResult.status === 'error') results.covers.errors++;
+        }
 
-        if (pdfRes.status === "error") {
-          console.warn(`  ⚠️  PDF generator error: ${pdfRes.error}`);
-          // Attempt placeholder to keep build safe
-          const pdfRef = extractPdfReferenceFromMdx(f.content);
-          const canonical = ensurePdfGoesToAssetsDownloads(pdfRef);
-          if (canonical && !(await pathExists(canonical.absPath))) {
-            await createMinimalPdfPlaceholder({
-              absOutPath: canonical.absPath,
-              mdxPath: f.path,
-              pdfPublicHref: canonical.publicHref,
-            });
-            console.log(`  ✅ Fallback placeholder created: /${canonical.publicHref}`);
-            results.pdfs.placeholder++;
+        // Update PDF results
+        if (pdfResult) {
+          if (pdfResult.status === 'generated') {
+            results.pdfs.generated++;
+            results.succeeded++;
+          } else if (pdfResult.status === 'exists') {
+            results.pdfs.existing++;
+            results.succeeded++;
+          } else if (pdfResult.status === 'error') {
+            results.pdfs.errors++;
+            results.failed++;
           }
         } else {
-          console.log(`  ✅ PDF: ${pdfRes.status.toUpperCase()} -> ${pdfRes.pdf}`);
+          results.skipped++;
         }
-      } else {
-        console.log(`  ⏭️  No PDF reference found`);
+      } catch (error) {
+        results.failed++;
+        logError(`Unexpected error processing ${contentFile.name}: ${error}`);
       }
 
-      // Ensure cover image exists (optional)
-      const cover = extractCoverImageFromMdx(f.content);
-      if (cover) {
-        try {
-          const imgRes = await ensureCoverImage(cover, f.path);
-          results.images[imgRes.status] = (results.images[imgRes.status] || 0) + 1;
-          console.log(`  🖼️  Cover: ${imgRes.status.toUpperCase()} -> ${cover}`);
-        } catch (e) {
-          results.images.error++;
-          console.warn(`  ⚠️  Cover image ensure failed: ${String(e?.message || e)}`);
-        }
-      }
-
-      console.log("");
+      console.log(''); // Empty line between files
     }
 
-    // Summary
-    console.log("📊 Generation Summary");
-    console.log("PDFs:");
-    console.log(`  ✅ Exists:        ${results.pdfs.exists}`);
-    console.log(`  📋 Copied:        ${results.pdfs.copied}`);
-    console.log(`  🔨 Generated:     ${results.pdfs.generated}`);
-    console.log(`  ⚠️  Placeholders: ${results.pdfs.placeholder}`);
-    console.log(`  ❌ Errors:        ${results.pdfs.error}`);
+    // Step 5: Summary
+    console.log('📊 Premium Generation Summary');
+    console.log('============================');
+    console.log(`📄 Processed:   ${results.processed} files`);
+    console.log(`✅ Succeeded:   ${results.succeeded}`);
+    console.log(`❌ Failed:      ${results.failed}`);
+    console.log(`⏭️  Skipped:     ${results.skipped}`);
+    console.log('');
+    console.log('PDF Generation:');
+    console.log(`  🔨 Generated: ${results.pdfs.generated}`);
+    console.log(`  📁 Existing:  ${results.pdfs.existing}`);
+    console.log(`  ❌ Errors:    ${results.pdfs.errors}`);
+    console.log('');
+    console.log('Cover Images:');
+    console.log(`  ✅ Valid:     ${results.covers.valid}`);
+    console.log(`  ❌ Missing:   ${results.covers.missing}`);
+    console.log(`  ⚠️  Errors:    ${results.covers.errors}`);
 
-    console.log("\nImages:");
-    console.log(`  ✅ Exists:        ${results.images.exists || 0}`);
-    console.log(`  ⚠️  Placeholders: ${results.images.placeholder || 0}`);
-    console.log(`  ⏭️  Skipped:       ${results.images.skip || 0}`);
-    console.log(`  ❌ Errors:        ${results.images.error || 0}`);
+    // Exit with error if any failures
+    if (results.failed > 0) {
+      console.log('\n❌ Build failed due to PDF generation errors');
+      process.exit(1);
+    }
 
-    console.log("\n✅ PDF generation complete.\n");
+    console.log('\n✨ Premium PDF generation completed successfully!');
 
-    // We do NOT hard-fail builds if placeholders were created.
-    // Only fail if a fatal exception occurs (caught below).
-  } catch (fatal) {
-    console.error("❌ Fatal error in make-pdfs.mjs:", fatal);
+  } catch (error) {
+    logError(`Fatal error in premium PDF generation: ${error}`);
     process.exit(1);
   }
 }
 
-main();
+// Execute if run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(error => {
+    console.error('Unhandled error:', error);
+    process.exit(1);
+  });
+}
+
+// Export for programmatic use
+export {
+  scanContentFiles,
+  validateContentFile,
+  extractPdfReference,
+  extractCoverImage,
+  generatePremiumPdf,
+  fixMisplacedPdfs,
+  validateCoverImage
+};

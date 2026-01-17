@@ -1,5 +1,9 @@
 // contentlayer.config.ts
-import { defineDocumentType, defineNestedType, makeSource } from "contentlayer2/source-files";
+import {
+  defineDocumentType,
+  defineNestedType,
+  makeSource,
+} from "contentlayer2/source-files";
 
 // ------------------------------------------------------------
 // Helpers
@@ -17,7 +21,7 @@ function estimateReadTime(text: string): string {
 }
 
 // ------------------------------------------------------------
-// Nested types (Contentlayer2-safe)
+// Nested types
 // ------------------------------------------------------------
 const DownloadLink = defineNestedType(() => ({
   name: "DownloadLink",
@@ -130,6 +134,8 @@ const coreFields = {
   theme: { type: "string", required: false },
   category: { type: "string", required: false },
 
+  resourceType: { type: "string", required: false },
+
   socialCaption: { type: "string", required: false },
 
   layout: { type: "string", required: false },
@@ -140,6 +146,8 @@ const coreFields = {
 
   coverImage: { type: "string", required: false },
   featuredImage: { type: "string", required: false },
+
+  // presentation metadata (used in your MDX)
   coverAspect: { type: "string", required: false },
   coverFit: { type: "string", required: false },
   coverPosition: { type: "string", required: false },
@@ -148,18 +156,16 @@ const coreFields = {
   lockMessage: { type: "string", required: false },
   tier: { type: "string", required: false },
   requiresAuth: { type: "boolean", required: false },
-  priority: { type: "number", required: false },
-  preload: { type: "boolean", required: false },
 
-  resources: { type: "json", required: false },
-  contentOnly: { type: "boolean", required: false },
-
+  // allow frontmatter overrides (some of your posts include it)
   readTime: { type: "string", required: false },
 
+  // permissive resources blob (your posts sometimes store complex objects here)
+  resources: { type: "json", required: false },
+
+  contentOnly: { type: "boolean", required: false },
+
   published: { type: "boolean", required: false, default: true },
-  shortType: { type: "string", required: false },
-  audience: { type: "string", required: false },
-  resourceType: { type: "string", required: false },
 
   keyInsights: { type: "list", of: { type: "string" }, required: false },
   authorNote: { type: "string", required: false },
@@ -174,7 +180,7 @@ const coreFields = {
 // ------------------------------------------------------------
 export const Post = defineDocumentType(() => ({
   name: "Post",
-  filePathPattern: `blog/**/*.mdx`,
+  filePathPattern: "blog/**/*.mdx",
   contentType: "mdx",
   fields: {
     ...coreFields,
@@ -184,43 +190,50 @@ export const Post = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^blog\//, ""),
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^blog\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) => doc.href ?? `/blog/${doc._raw.flattenedPath.replace(/^blog\//, "")}`,
+      resolve: (doc) =>
+        doc.href ??
+        `/blog/${doc._raw.flattenedPath.replace(/^blog\//, "")}`,
     },
-    readingTime: {
+    // if frontmatter readTime exists, keep it; else compute
+    readTime: {
       type: "string",
-      resolve: (doc) => estimateReadTime(doc.body.raw),
+      resolve: (doc) => doc.readTime ?? estimateReadTime(doc.body.raw),
     },
   },
 }));
 
 export const Short = defineDocumentType(() => ({
   name: "Short",
-  filePathPattern: `shorts/**/*.mdx`,
+  filePathPattern: "shorts/**/*.mdx",
   contentType: "mdx",
   fields: { ...coreFields },
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^shorts\//, ""),
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^shorts\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) => doc.href ?? `/shorts/${doc._raw.flattenedPath.replace(/^shorts\//, "")}`,
+      resolve: (doc) =>
+        doc.href ??
+        `/shorts/${doc._raw.flattenedPath.replace(/^shorts\//, "")}`,
     },
-    readingTime: {
+    readTime: {
       type: "string",
-      resolve: (doc) => estimateReadTime(doc.body.raw),
+      resolve: (doc) => doc.readTime ?? estimateReadTime(doc.body.raw),
     },
   },
 }));
 
 export const Book = defineDocumentType(() => ({
   name: "Book",
-  filePathPattern: `books/**/*.mdx`,
+  filePathPattern: "books/**/*.mdx",
   contentType: "mdx",
   fields: {
     ...coreFields,
@@ -230,18 +243,21 @@ export const Book = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^books\//, ""),
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^books\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) => doc.href ?? `/books/${doc._raw.flattenedPath.replace(/^books\//, "")}`,
+      resolve: (doc) =>
+        doc.href ??
+        `/books/${doc._raw.flattenedPath.replace(/^books\//, "")}`,
     },
   },
 }));
 
 export const Canon = defineDocumentType(() => ({
   name: "Canon",
-  filePathPattern: `canon/**/*.mdx`,
+  filePathPattern: "canon/**/*.mdx",
   contentType: "mdx",
   fields: {
     ...coreFields,
@@ -251,18 +267,21 @@ export const Canon = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^canon\//, ""),
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^canon\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) => doc.href ?? `/canon/${doc._raw.flattenedPath.replace(/^canon\//, "")}`,
+      resolve: (doc) =>
+        doc.href ??
+        `/canon/${doc._raw.flattenedPath.replace(/^canon\//, "")}`,
     },
   },
 }));
 
 export const Download = defineDocumentType(() => ({
   name: "Download",
-  filePathPattern: `downloads/**/*.mdx`,
+  filePathPattern: "downloads/**/*.mdx",
   contentType: "mdx",
   fields: {
     ...coreFields,
@@ -271,13 +290,15 @@ export const Download = defineDocumentType(() => ({
     downloadUrl: { type: "string", required: false },
     fileSize: { type: "string", required: false },
 
-    format: { type: "string", required: false },
-    downloadType: { type: "string", required: false },
-    paperFormats: { type: "list", of: { type: "string" }, required: false },
+    // ✅ fields shown missing in your log:
+    fileFormat: { type: "string", required: false },
     isInteractive: { type: "boolean", required: false },
     isFillable: { type: "boolean", required: false },
 
-    fileFormat: { type: "string", required: false },
+    format: { type: "string", required: false },
+    downloadType: { type: "string", required: false },
+    paperFormats: { type: "list", of: { type: "string" }, required: false },
+
     version: { type: "string", required: false },
     language: { type: "string", required: false },
     aliases: { type: "list", of: { type: "string" }, required: false },
@@ -307,18 +328,21 @@ export const Download = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug ?? doc._raw.flattenedPath.replace(/^downloads\//, ""),
+      resolve: (doc) =>
+        doc.slug ?? doc._raw.flattenedPath.replace(/^downloads\//, ""),
     },
     href: {
       type: "string",
-      resolve: (doc) => doc.href ?? `/downloads/${doc._raw.flattenedPath.replace(/^downloads\//, "")}`,
+      resolve: (doc) =>
+        doc.href ??
+        `/downloads/${doc._raw.flattenedPath.replace(/^downloads\//, "")}`,
     },
   },
 }));
 
 export const Event = defineDocumentType(() => ({
   name: "Event",
-  filePathPattern: `events/**/*.mdx`,
+  filePathPattern: "events/**/*.mdx",
   contentType: "mdx",
   fields: {
     ...coreFields,
@@ -330,24 +354,21 @@ export const Event = defineDocumentType(() => ({
 
 export const Print = defineDocumentType(() => ({
   name: "Print",
-  filePathPattern: `prints/**/*.mdx`,
+  filePathPattern: "prints/**/*.mdx",
   contentType: "mdx",
   fields: { ...coreFields },
 }));
 
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
-  filePathPattern: `resources/**/*.{md,mdx}`,
+  filePathPattern: "resources/**/*.{md,mdx}",
   contentType: "mdx",
-  fields: {
-    ...coreFields,
-    downloadUrl: { type: "string", required: false },
-  },
+  fields: { ...coreFields, downloadUrl: { type: "string", required: false } },
 }));
 
 export const Strategy = defineDocumentType(() => ({
   name: "Strategy",
-  filePathPattern: `strategy/**/*.mdx`,
+  filePathPattern: "strategy/**/*.mdx",
   contentType: "mdx",
   fields: {
     ...coreFields,
@@ -360,17 +381,19 @@ export const Strategy = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: "content",
-  documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy],
-
-  // Add contentDirExclude to exclude non-content directories
-  contentDirExclude: [
-    "public",      // Exclude entire public folder
-    "node_modules",
-    ".next",
-    ".git",
+  documentTypes: [
+    Post,
+    Short,
+    Book,
+    Canon,
+    Download,
+    Event,
+    Print,
+    Resource,
+    Strategy,
   ],
 
-  // Keep ignore for content directory only
+  // Only ignore inside content/*
   ignore: [
     "**/_*/**",
     "**/*BACKUP*/**",
@@ -382,8 +405,6 @@ export default makeSource({
     "downloads/_generated.downloads.json",
     "_templates/**",
     "**/_templates/**",
-    "content/_templates/**",
-    "**/content/_templates/**",
   ],
 
   disableImportAliasWarning: true,

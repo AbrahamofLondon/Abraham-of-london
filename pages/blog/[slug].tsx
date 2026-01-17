@@ -234,7 +234,7 @@ const BlogPostPage: NextPage<Props> = ({ post, source }) => {
               {/* Read time indicator */}
               {post.readTime && (
                 <div className="mb-8">
-                  <ReadTime minutes={post.readTime} />
+                  {post.readTime && <ReadTime minutes={post.readTime} />}
                 </div>
               )}
 

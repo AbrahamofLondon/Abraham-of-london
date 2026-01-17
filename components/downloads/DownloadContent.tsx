@@ -4,8 +4,7 @@ import { MDXRemote } from 'next-mdx-remote'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 
-// CRITICAL: Dynamically import all components that might have SCSS/CSS
-// Use ssr: false to prevent server-side CSS processing
+// Dynamically import all components that might have SCSS/CSS
 const LegacyCanvasInteractive = dynamic(
   () => import('@/components/downloads/LegacyCanvasInteractive'),
   { 
@@ -46,11 +45,10 @@ const FeatureGrid = dynamic(
   }
 )
 
-// CRITICAL: DownloadCTA has SCSS imports, must be client-only
 const DownloadCTA = dynamic(
   () => import('@/components/content/DownloadCTA'),
   { 
-    ssr: false, // MUST be false to prevent SCSS import on server
+    ssr: false,
     loading: () => (
       <div className="rounded-xl border border-gray-700 p-6 bg-gradient-to-br from-gray-900 to-gray-800 animate-pulse">
         <div className="h-4 bg-gray-800 rounded w-1/4 mb-4"></div>
@@ -63,11 +61,11 @@ const DownloadCTA = dynamic(
 )
 
 interface DownloadContentProps {
-  content: any // MDX content
+  content: any
   frontmatter?: any
 }
 
-// Basic components that don't need SCSS/CSS imports
+// SINGLE definition for each component - no duplicates
 const components = {
   LegacyCanvasInteractive,
   ProTip,
@@ -119,11 +117,7 @@ const components = {
       {...props} 
     />
   ),
-  // You can add more custom components as needed
-  DownloadCTA: (props: any) => <DownloadCTA {...props} />,
-  ProTip: (props: any) => <ProTip {...props} />,
-  FeatureGrid: (props: any) => <FeatureGrid {...props} />,
-  LegacyCanvasInteractive: (props: any) => <LegacyCanvasInteractive {...props} />,
+  // No duplicate custom components here - they're already defined above
 }
 
 const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter }) => {
@@ -140,12 +134,10 @@ const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter 
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Main Content Area */}
       <div className="prose prose-invert prose-lg max-w-none">
         <MDXRemote {...content} components={components} />
       </div>
       
-      {/* Related Downloads Section */}
       {frontmatter?.relatedDownloads && frontmatter.relatedDownloads.length > 0 && (
         <div className="mt-12 pt-8 border-t border-gray-800">
           <h3 className="text-2xl font-bold mb-6 text-white">Related Downloads</h3>
@@ -168,7 +160,6 @@ const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter 
         </div>
       )}
       
-      {/* Share Section */}
       <div className="mt-12 pt-8 border-t border-gray-800">
         <h3 className="text-2xl font-bold mb-4 text-white">Share this download</h3>
         <div className="flex flex-wrap gap-3">
@@ -211,7 +202,6 @@ const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter 
             onClick={() => {
               if (typeof window !== 'undefined' && navigator.clipboard) {
                 navigator.clipboard.writeText(window.location.href)
-                // You could add a toast notification here
                 alert('Link copied to clipboard!')
               }
             }}
@@ -224,7 +214,6 @@ const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter 
         </div>
       </div>
       
-      {/* Author/Credits Section (Optional) */}
       {frontmatter?.author && (
         <div className="mt-8 pt-6 border-t border-gray-800">
           <div className="flex items-start gap-4">
@@ -263,21 +252,19 @@ const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter 
         </div>
       )}
       
-      {/* Copyright Notice */}
       <div className="mt-8 pt-6 border-t border-gray-800 text-center">
         <p className="text-sm text-gray-500">
           © {new Date().getFullYear()} Abraham of London. All rights reserved.
           {frontmatter?.license && ` Licensed under ${frontmatter.license}.`}
         </p>
         <p className="text-xs text-gray-600 mt-2">
-          This resource is provided for personal, non-commercial use.
+          This resource is provided for personal, non-commercial use only.
         </p>
       </div>
     </div>
   )
 }
 
-// Add prop types for better TypeScript support
 DownloadContent.defaultProps = {
   frontmatter: {},
 }

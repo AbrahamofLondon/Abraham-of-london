@@ -1,4 +1,4 @@
-// lib/image-utils.ts
+// lib/image-utils.ts - COMPLETELY FIXED VERSION
 import { safeString } from "./utils";
 
 /* -------------------------------------------------------------------------- */
@@ -53,7 +53,6 @@ type SupportedFormat = (typeof SUPPORTED_FORMATS)[number];
 
 const PREFERRED_FORMAT: SupportedFormat = "webp";
 
-// ✅ FIXED: Use mutable array types instead of readonly arrays
 interface ImageConfig {
   widths: number[];
   quality: number;
@@ -266,8 +265,7 @@ function getFallbackImage(config: FallbackConfig = { type: "book" }): string {
 
   // Category-specific
   if (category && category in fallbacks) {
-    const categoryFallback =
-      fallbacks[category as keyof (typeof fallbacks)];
+    const categoryFallback = fallbacks[category as keyof typeof fallbacks];
     if (typeof categoryFallback === "string") {
       return categoryFallback;
     }
@@ -573,9 +571,14 @@ function getSafeImageProps(
         )
       : undefined;
 
+  // Fallback for safeString if it doesn't exist
+  const safeAlt = typeof safeString === 'function' 
+    ? safeString(alt, "Image")
+    : alt || "Image";
+
   return {
     src,
-    alt: safeString(alt, "Image"),
+    alt: safeAlt,
     width: width || undefined,
     height: height || undefined,
     priority,
@@ -612,7 +615,8 @@ export {
   getSafeImageProps,
 };
 
-export default {
+// Create a named object for default export
+const imageUtilsApi = {
   CDN_BASE_URL,
   SUPPORTED_FORMATS,
   PREFERRED_FORMAT,
@@ -631,3 +635,4 @@ export default {
   getSafeImageProps,
 };
 
+export default imageUtilsApi;

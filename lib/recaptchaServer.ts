@@ -493,11 +493,15 @@ export function withRecaptcha(
   };
 }
 
-export default {
+const recaptchaServerApi = {
+
   verifyRecaptchaDetailed,
   verifyRecaptcha,
   validateRecaptchaConfig,
   clearVerificationCache,
   getCacheStats,
   withRecaptcha,
+
 };
+export default recaptchaServerApi;
+

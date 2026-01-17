@@ -65,23 +65,29 @@ const LinkItemComponent: React.FC<{
 }> = ({ item, theme, featured = false, compact = false }) => {
   const badgeConfig = getBadgeConfig(item.badge);
 
+  // Build props object for Link to handle exactOptionalPropertyTypes
+  const linkProps: React.ComponentProps<typeof Link> & Record<string, any> = {
+    href: item.href,
+    className: `group block relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
+      featured
+        ? `bg-gradient-to-br ${theme.primary} border-transparent text-white shadow-xl ${theme.glow}`
+        : `bg-white border-gray-100 hover:border-gray-200 text-gray-900 shadow-sm hover:shadow-lg`
+    } ${compact ? "p-4" : "p-6"}`,
+  };
+
+  // Only add external link attributes if needed
+  if (item.external) {
+    linkProps.target = "_blank";
+    linkProps.rel = "noopener noreferrer";
+  }
+
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
-      <Link
-        href={item.href}
-        className={`group block relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
-          featured
-            ? `bg-gradient-to-br ${theme.primary} border-transparent text-white shadow-xl ${theme.glow}`
-            : `bg-white border-gray-100 hover:border-gray-200 text-gray-900 shadow-sm hover:shadow-lg`
-        } ${compact ? "p-4" : "p-6"}`}
-        {...(item.external
-          ? { target: "_blank", rel: "noopener noreferrer" }
-          : {})}
-      >
+      <Link {...linkProps}>
         {/* Background gradient for featured items */}
         {featured && (
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
@@ -212,17 +218,21 @@ const CtaPresetComponent: React.FC<CtaPresetProps> = ({
   className,
 }) => {
   const preset = presetKey ? getCtaPreset(presetKey) : null;
-  const theme = getThemeColors(preset?.theme ?? "default");
+  
+  // Provide default theme if preset or preset.theme is undefined
+  const themeName = preset?.theme ?? "default";
+  const theme = getThemeColors(themeName);
 
   const actualTitle = title || preset?.title || "Call to Action";
   const actualDescription = description || preset?.description;
   const layout = preset?.layout || "grid";
 
   if (!preset) {
+    // Build className string without undefined
+    const containerClasses = `my-8 rounded-2xl border border-gray-200 bg-gray-50 p-6 ${className ?? ""}`.trim();
+    
     return (
-      <div
-        className={`my-8 rounded-2xl border border-gray-200 bg-gray-50 p-6 ${className ?? ""}`}
-      >
+      <div className={containerClasses}>
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-900">{actualTitle}</h2>
           {actualDescription && (
@@ -249,10 +259,11 @@ const CtaPresetComponent: React.FC<CtaPresetProps> = ({
     related.length > 0;
 
   if (!hasContent) {
+    // Build className string without undefined
+    const containerClasses = `my-8 rounded-2xl border border-gray-200 bg-gray-50 p-6 ${className ?? ""}`.trim();
+    
     return (
-      <div
-        className={`my-8 rounded-2xl border border-gray-200 bg-gray-50 p-6 ${className ?? ""}`}
-      >
+      <div className={containerClasses}>
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-900">{actualTitle}</h2>
         </div>
@@ -286,13 +297,16 @@ const CtaPresetComponent: React.FC<CtaPresetProps> = ({
   addItems(downloads);
   addItems(related);
 
+  // Build motion.div props without undefined className
+  const motionProps: React.ComponentProps<typeof motion.div> = {
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.7 },
+    className: `my-8 rounded-3xl border border-gray-200/50 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm ${className ?? ""}`.trim(),
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7 }}
-      className={`my-8 rounded-3xl border border-gray-200/50 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm ${className ?? ""}`}
-    >
+    <motion.div {...motionProps}>
       <div className={compact ? "p-6" : "p-8"}>
         {/* Header */}
         <motion.header
@@ -334,7 +348,7 @@ const CtaPresetComponent: React.FC<CtaPresetProps> = ({
               <LinkItemComponent
                 item={featuredItem}
                 theme={theme}
-                featured
+                featured={true}
                 compact={compact}
               />
             </motion.section>

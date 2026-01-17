@@ -231,7 +231,7 @@ export function getAllPagesMeta(): Page[] {
   }
 }
 
-export function getPageBySlug(slug: string): PageWithContent | null {
+export async function getPageBySlug(slug: string): Promise<PageWithContent | null> {
   try {
     if (!slug || typeof slug !== 'string') {
       console.error("getPageBySlug called with invalid slug:", slug);
@@ -244,14 +244,15 @@ export function getPageBySlug(slug: string): PageWithContent | null {
       return null;
     }
     
-    return fromMdxDocument(doc);
+    const resolvedDoc = await doc;
+return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
   } catch (error) {
     console.error(`Error fetching page by slug (${slug}):`, error);
     return null;
   }
 }
 
-export function getAllPages(): PageWithContent[] {
+export async function getAllPages(): Promise<PageWithContent[]> {
   try {
     const metas = getAllPagesMeta();
     if (metas.length === 0) return [];
@@ -499,13 +500,13 @@ export function getHomePage(): PageWithContent | null {
     );
     
     if (homePage) {
-      return getPageBySlug(homePage.slug);
+      return await getPageBySlug(homePage.slug);
     }
     
     const publishedPages = getPublishedPages();
     // FIX: Ensure array has elements before accessing index 0
     if (publishedPages.length > 0 && publishedPages[0]) {
-      return getPageBySlug(publishedPages[0].slug);
+      return await getPageBySlug(publishedPages[0].slug);
     }
     
     return null;
@@ -595,4 +596,10 @@ const pagesData = {
 };
 
 export default pagesData;
+
+
+
+
+
+
 

@@ -90,12 +90,28 @@ export function getRecentBooks(count?: number): Book[] {
   return typeof count === "number" && count > 0 ? sorted.slice(0, count) : sorted;
 }
 
-export default {
+const booksDataApi = {
+
   getAllBooksMeta,
   getBookBySlug,
   getAllBooks,
   getBookSlugs,
   getFeaturedBooks,
   getRecentBooks,
+
 };
 
+
+
+
+
+const booksDataApi = {
+  getAllBooks,
+  getAllBooksMeta,
+  getBookBySlug,
+  getBookSlugs,
+  getFeaturedBooks,
+  getRecentBooks
+};
+
+export default booksDataApi;

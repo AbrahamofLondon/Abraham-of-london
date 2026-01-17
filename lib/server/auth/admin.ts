@@ -583,7 +583,8 @@ export function withValidation<T>(
   };
 }
 
-export default {
+const adminApi = {
+
   validateAdminAccess,
   validateDateRange,
   validateEmail,
@@ -595,4 +596,7 @@ export default {
   withValidation,
   isInvalidAdmin,
   isValidAdmin,
+
 };
+export default adminApi;
+

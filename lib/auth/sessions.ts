@@ -660,7 +660,8 @@ export async function cleanupExpiredSessions(): Promise<number> {
 }
 
 // Export default for backward compatibility
-export default {
+const sessionsApi = {
+
   createSession,
   verifySession,
   refreshSession,
@@ -670,4 +671,6 @@ export default {
   createSessionCookie,
   createCsrfCookie,
   cleanupExpiredSessions
+
 };
+export default sessionsApi;

@@ -1,8 +1,22 @@
 {
   "extends": "next/core-web-vitals",
   "rules": {
-    "@typescript-eslint/no-unused-vars": "warn",
-    "react/no-unescaped-entities": "off"
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "ignoreRestSiblings": true,
+        "destructuredArrayIgnorePattern": "^_"
+      }
+    ],
+    "react/no-unescaped-entities": "off",
+    "import/no-anonymous-default-export": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "@next/next/no-head-element": "error",
+    "@next/next/no-img-element": "error",
+    "react/display-name": "error"
   },
   "ignorePatterns": [
     "node_modules/",

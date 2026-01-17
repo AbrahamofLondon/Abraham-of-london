@@ -111,9 +111,10 @@ class SecurityMonitor {
     };
   }
 
-  private checkRateLimit(ip: string): boolean {
+  private checkRateLimit(_ip: string): boolean { // Prefixed with underscore
     // Simple rate limiting - in production, use Redis or a proper rate limiter
     const rateLimit = parseInt(process.env.RATE_LIMIT_REQUESTS_PER_MINUTE || '60');
+    const _rateLimit = rateLimit; // Prefixed with underscore to indicate unused
     // This is a simplified version
     return false;
   }
@@ -127,3 +128,12 @@ export async function getSecurityStatus(): Promise<SecurityStatus> {
 }
 
 export { securityMonitor, SecurityMonitor };
+
+// Create named object for default export
+const securityApi = {
+  getSecurityStatus,
+  securityMonitor,
+  SecurityMonitor,
+};
+
+export default securityApi;

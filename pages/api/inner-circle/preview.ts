@@ -106,7 +106,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // ✅ Record the unlock event (audit trail)
     try {
       const clientIp = getClientIp(req);
-      const userAgent = typeof req.headers["user-agent"] === "string" 
+      const _userAgent = typeof req.headers["user-agent"] === "string" 
         ? req.headers["user-agent"] 
         : undefined;
 
@@ -134,4 +134,5 @@ export const config = {
     },
   },
 };
+
 

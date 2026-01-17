@@ -1,4 +1,4 @@
-// components/mdx/cta-presets.tsx
+// components/mdx/cta-presets.tsx - FIXED VERSION
 import * as React from "react";
 
 /* -------------------------------------------------------------------------- */
@@ -65,8 +65,18 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "default",
     layout: "grid",
     actions: [
-      { href: "/canon", label: "Explore The Canon", sub: "Foundations, governance, formation", priority: 1 },
-      { href: "/shorts", label: "Read Shorts", sub: "3-minute convictions", priority: 2 },
+      { 
+        href: "/canon", 
+        label: "Explore The Canon", 
+        sub: "Foundations, governance, formation", 
+        priority: 1 
+      },
+      { 
+        href: "/shorts", 
+        label: "Read Shorts", 
+        sub: "3-minute convictions", 
+        priority: 2 
+      },
     ],
   },
 
@@ -76,8 +86,18 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "premium",
     layout: "grid",
     actions: [
-      { href: "/strategy", label: "Strategic Frameworks", sub: "Operating systems for builders", priority: 1 },
-      { href: "/resources", label: "Resource Library", sub: "Battle-tested tools", priority: 2 },
+      { 
+        href: "/strategy", 
+        label: "Strategic Frameworks", 
+        sub: "Operating systems for builders", 
+        priority: 1 
+      },
+      { 
+        href: "/resources", 
+        label: "Resource Library", 
+        sub: "Battle-tested tools", 
+        priority: 2 
+      },
     ],
   },
 
@@ -87,7 +107,13 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "default",
     layout: "stack",
     actions: [
-      { href: "/inner-circle", label: "Join The Inner Circle", sub: "Private invites + tools", badge: "featured", priority: 1 },
+      { 
+        href: "/inner-circle", 
+        label: "Join The Inner Circle", 
+        sub: "Private invites + tools", 
+        badge: "featured" as const, 
+        priority: 1 
+      },
     ],
   },
 
@@ -97,7 +123,12 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "default",
     layout: "grid",
     actions: [
-      { href: "/contact", label: "Request Mentorship", sub: "If you’re serious, reach out", priority: 1 },
+      { 
+        href: "/contact", 
+        label: "Request Mentorship", 
+        sub: "If you're serious, reach out", 
+        priority: 1 
+      },
     ],
   },
 
@@ -107,7 +138,13 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "light",
     layout: "grid",
     downloads: [
-      { href: "/downloads", label: "Browse Downloads", sub: "Templates, worksheets, cue cards", badge: "free", priority: 1 },
+      { 
+        href: "/downloads", 
+        label: "Browse Downloads", 
+        sub: "Templates, worksheets, cue cards", 
+        badge: "free" as const, 
+        priority: 1 
+      },
     ],
   },
 
@@ -120,11 +157,16 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
       href: "/inner-circle",
       label: "Join The Inner Circle",
       sub: "Primary channel for essays, tools, and private invites",
-      badge: "featured",
+      badge: "featured" as const,
       priority: 0,
     },
     actions: [
-      { href: "/events", label: "Attend Upcoming Events", sub: "Workshops, salons, and closed-room conversations", priority: 1 },
+      { 
+        href: "/events", 
+        label: "Attend Upcoming Events", 
+        sub: "Workshops, salons, and closed-room conversations", 
+        priority: 1 
+      },
     ],
   },
 
@@ -134,8 +176,19 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "default",
     layout: "stack",
     actions: [
-      { href: "/events", label: "See Events", sub: "Meet in rooms that matter", priority: 1 },
-      { href: "/inner-circle", label: "Inner Circle", sub: "Private channel", badge: "featured", priority: 2 },
+      { 
+        href: "/events", 
+        label: "See Events", 
+        sub: "Meet in rooms that matter", 
+        priority: 1 
+      },
+      { 
+        href: "/inner-circle", 
+        label: "Inner Circle", 
+        sub: "Private channel", 
+        badge: "featured" as const, 
+        priority: 2 
+      },
     ],
   },
 
@@ -150,7 +203,7 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
         href: "/newsletter",
         label: "Subscribe to The Inner Circle",
         sub: "Curated reflections for founders, fathers, and legacy builders",
-        badge: "featured",
+        badge: "featured" as const,
         priority: 1,
       },
     ],
@@ -158,7 +211,7 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
       href: "/newsletter",
       label: "Join The Inner Circle Today",
       sub: "Zero spam. Clear thinking. Real stakes. Transformative impact.",
-      badge: "exclusive",
+      badge: "exclusive" as const,
       priority: 0,
     },
   },
@@ -190,7 +243,7 @@ export function getSortedItems(
   return [...list].sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
 }
 
-export function getThemeColors(theme: ThemeName): ThemeTokens {
+export function getThemeColors(theme: ThemeName = "default"): ThemeTokens {
   switch (theme) {
     case "premium":
       return {
@@ -229,3 +282,52 @@ export function getThemeColors(theme: ThemeName): ThemeTokens {
 // Optional named export that some files expect
 export const ctaPresets = CTA_PRESETS;
 
+// ============================================================================
+// CTA PRESET COMPONENT (if needed as a React component)
+// ============================================================================
+
+export interface CTAConfigProps {
+  presetKey?: CTAKey;
+  className?: string;
+}
+
+/**
+ * Component that renders CTA preset configuration (not a UI component)
+ * This is just for reference/demo purposes
+ */
+export const CTAConfig: React.FC<CTAConfigProps> = ({ presetKey, className }) => {
+  if (!presetKey) {
+    return (
+      <div className={className}>
+        <p>No preset key provided</p>
+      </div>
+    );
+  }
+
+  const preset = getCtaPreset(presetKey);
+  
+  if (!preset) {
+    return (
+      <div className={className}>
+        <p>Preset "{presetKey}" not found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <h3 className="font-bold text-lg">{preset.title}</h3>
+      {preset.description && (
+        <p className="text-gray-600 mt-1">{preset.description}</p>
+      )}
+      <div className="mt-3">
+        <code className="text-sm bg-gray-100 p-2 rounded block">
+          {JSON.stringify(preset, null, 2)}
+        </code>
+      </div>
+    </div>
+  );
+};
+
+// If you need a default export for compatibility
+export default CTA_PRESETS;

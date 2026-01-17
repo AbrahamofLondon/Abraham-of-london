@@ -109,9 +109,22 @@ export function createContentLoader() {
   };
 }
 
-export default {
+const contentLoaderApi = {
+
   loadPostsFromSource,
   initializeAllContent,
   createContentLoader
+
 };
 
+
+
+
+
+const contentLoaderApi = {
+  createContentLoader,
+  initializeAllContent,
+  loadPostsFromSource
+};
+
+export default contentLoaderApi;

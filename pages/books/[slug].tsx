@@ -156,8 +156,8 @@ const BookPage: NextPage<Props> = ({ book, source }) => {
         {/* Institutional Hero Section */}
         <BookHero
           title={book.title}
-          author={book.author}
-          coverImage={book.coverImage}
+          author={book.author || ""}
+          coverImage={book.coverImage || ""}
           excerpt={book.excerpt}
         />
 

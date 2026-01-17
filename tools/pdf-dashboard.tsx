@@ -10,13 +10,47 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import PDFFilters from '@/components/PDFFilters';
 import DashboardStats from '@/components/DashboardStats';
 
+// Type definitions - CRITICAL: Define these BEFORE any useState calls
+type GenerationStatus =
+  | { type: "idle" }
+  | { type: "working"; message?: string }
+  | { type: "success"; message?: string }
+  | { type: "error"; message: string };
+
+type PDFItem = {
+  id: string;
+  title?: string;
+  description?: string;
+  slug?: string;
+  category: string;
+  exists: boolean;
+  fileSize?: number;
+  [key: string]: any;
+};
+
+interface Filters {
+  searchQuery: string;
+  selectedCategory: string;
+}
+
+interface Stats {
+  totalPDFs: number;
+  availablePDFs: number;
+  missingPDFs: number;
+  categories: string[];
+  totalFileSize: number;
+  averageFileSize: number;
+  byAccessLevel: Record<string, number>;
+  byCategory: Record<string, number>;
+}
+
 // Custom hook that uses API calls instead of direct imports
 const usePDFDashboard = () => {
-  const [pdfs, setPdfs] = useState([]);
-  const [selectedPDFId, setSelectedPDFId] = useState(null);
+  const [pdfs, setPdfs] = useState<PDFItem[]>([]);
+  const [selectedPDFId, setSelectedPDFId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStatus, setGenerationStatus] = useState(null);
-  const [filters, setFilters] = useState({
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus>({ type: "idle" });
+  const [filters, setFilters] = useState<Filters>({
     searchQuery: '',
     selectedCategory: 'all',
   });
@@ -37,9 +71,10 @@ const usePDFDashboard = () => {
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to load PDFs:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setGenerationStatus({
-        message: `❌ Failed to load PDFs: ${error.message}`,
-        type: 'error',
+        type: "error",
+        message: `❌ Failed to load PDFs: ${errorMessage}`,
       });
       setIsLoading(false);
     }
@@ -69,9 +104,9 @@ const usePDFDashboard = () => {
     });
   }, [pdfs, filters]);
 
-  const stats = useMemo(() => {
+  const stats = useMemo((): Stats => {
     const availablePDFs = pdfs.filter(p => p.exists).length;
-    const categoryCounts = pdfs.reduce((acc, pdf) => {
+    const categoryCounts = pdfs.reduce<Record<string, number>>((acc, pdf) => {
       acc[pdf.category] = (acc[pdf.category] || 0) + 1;
       return acc;
     }, {});
@@ -90,16 +125,16 @@ const usePDFDashboard = () => {
     };
   }, [pdfs, categories]);
 
-  const selectedPDF = useMemo(() => {
+  const selectedPDF = useMemo<PDFItem | null>(() => {
     if (!selectedPDFId) return null;
     return pdfs.find(pdf => pdf.id === selectedPDFId) || null;
   }, [selectedPDFId, pdfs]);
 
-  const generatePDF = async (id) => {
+  const generatePDF = async (id: string) => {
     setIsGenerating(true);
     setGenerationStatus({
+      type: "working",
       message: `Generating ${id}...`,
-      type: 'info',
     });
     
     try {
@@ -113,21 +148,22 @@ const usePDFDashboard = () => {
       
       if (response.ok && data.success) {
         setGenerationStatus({
+          type: "success",
           message: `✅ ${data.filename} generated successfully`,
-          type: 'success',
         });
         // Refresh the list
         await loadPDFs();
       } else {
         setGenerationStatus({
+          type: "error",
           message: `❌ Failed to generate: ${data.error || 'Unknown error'}`,
-          type: 'error',
         });
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setGenerationStatus({
-        message: `❌ Network error: ${error.message}`,
-        type: 'error',
+        type: "error",
+        message: `❌ Network error: ${errorMessage}`,
       });
     } finally {
       setIsGenerating(false);
@@ -137,8 +173,8 @@ const usePDFDashboard = () => {
   const generateAllPDFs = async () => {
     setIsGenerating(true);
     setGenerationStatus({
+      type: "working",
       message: 'Generating all known PDFs...',
-      type: 'info',
     });
     
     try {
@@ -150,20 +186,21 @@ const usePDFDashboard = () => {
       
       if (response.ok && data.success) {
         setGenerationStatus({
+          type: "success",
           message: `✅ Generated ${data.count} PDFs successfully`,
-          type: 'success',
         });
         await loadPDFs();
       } else {
         setGenerationStatus({
+          type: "error",
           message: `❌ Bulk generation failed: ${data.error || 'Unknown error'}`,
-          type: 'error',
         });
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setGenerationStatus({
-        message: `❌ Network error: ${error.message}`,
-        type: 'error',
+        type: "error",
+        message: `❌ Network error: ${errorMessage}`,
       });
     } finally {
       setIsGenerating(false);
@@ -174,21 +211,21 @@ const usePDFDashboard = () => {
     try {
       await loadPDFs();
       setGenerationStatus({
+        type: "success",
         message: '📂 PDF list refreshed',
-        type: 'info',
       });
-      setTimeout(() => setGenerationStatus(null), 3000);
+      setTimeout(() => setGenerationStatus({ type: "idle" }), 3000);
     } catch (error) {
       console.error('Failed to refresh:', error);
     }
   };
 
-  const updateFilters = (updates) => {
+  const updateFilters = (updates: Partial<Filters>) => {
     setFilters(prev => ({ ...prev, ...updates }));
   };
 
   const clearStatus = () => {
-    setGenerationStatus(null);
+    setGenerationStatus({ type: "idle" });
   };
 
   return {
@@ -230,19 +267,19 @@ const PDFDashboard: React.FC = () => {
     clearStatus,
   } = usePDFDashboard();
 
-  const handleSearchChange = useCallback((value) => {
+  const handleSearchChange = useCallback((value: string) => {
     updateFilters({ searchQuery: value });
   }, [updateFilters]);
 
-  const handleCategoryChange = useCallback((value) => {
+  const handleCategoryChange = useCallback((value: string) => {
     updateFilters({ selectedCategory: value });
   }, [updateFilters]);
 
-  const handlePDFSelect = useCallback((id) => {
+  const handlePDFSelect = useCallback((id: string) => {
     setSelectedPDFId(id);
   }, [setSelectedPDFId]);
 
-  const handleGenerateSinglePDF = useCallback(async (id) => {
+  const handleGenerateSinglePDF = useCallback(async (id: string) => {
     await generatePDF(id);
   }, [generatePDF]);
 
@@ -267,11 +304,14 @@ const PDFDashboard: React.FC = () => {
             isGenerating={isGenerating}
           />
 
-          {generationStatus && (
+          {generationStatus.type !== "idle" && (
             <StatusMessage
-              status={generationStatus}
+              status={{
+                message: generationStatus.message || '',
+                type: generationStatus.type === "working" ? "info" : generationStatus.type,
+              }}
               onDismiss={clearStatus}
-              autoDismiss={generationStatus.type !== 'error' ? 3000 : undefined}
+              autoDismiss={generationStatus.type !== "error" ? 3000 : undefined}
             />
           )}
 
@@ -299,7 +339,7 @@ const PDFDashboard: React.FC = () => {
                 
                 <PDFListPanel
                   pdfs={filteredPDFs}
-                  selectedPDFId={selectedPDF?.id || null}
+                  selectedPDFId={selectedPDF?.id ?? null}
                   isGenerating={isGenerating}
                   onSelectPDF={handlePDFSelect}
                   onGeneratePDF={handleGenerateSinglePDF}

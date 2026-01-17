@@ -21,7 +21,7 @@ function safeArray(value: any): string[] | undefined {
   return value.filter(item => typeof item === "string");
 }
 
-function safeNumber(value: any): number | undefined {
+function _safeNumber(value: any): number | undefined { // Prefixed with underscore
   if (typeof value === "number") return value;
   if (typeof value === "string") {
     const parsed = parseInt(value, 10);
@@ -150,11 +150,12 @@ export function getFeaturedStrategies(): Strategy[] {
   }
 }
 
-export default {
+// Create named object for default export
+const strategiesDataApi = {
   getAllStrategiesMeta,
   getStrategyBySlug,
   getStrategiesByType,
   getFeaturedStrategies,
 };
 
-
+export default strategiesDataApi;

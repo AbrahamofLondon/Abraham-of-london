@@ -855,7 +855,8 @@ export async function cleanupExpiredChallenges(): Promise<number> {
 }
 
 // Export default for backward compatibility
-export default {
+const mfaApi = {
+
   // Challenge Management
   createMfaChallenge,
   verifyMfaChallenge,
@@ -878,4 +879,6 @@ export default {
   
   // Cleanup
   cleanupExpiredChallenges
+
 };
+export default mfaApi;

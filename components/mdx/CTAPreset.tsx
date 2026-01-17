@@ -1,4 +1,4 @@
-// components/mdx/CTAPreset.tsx
+// components/mdx/CTAPreset.tsx - FIXED VERSION
 import * as React from "react";
 import type { CTAKey } from "./cta-presets";
 import { CTA } from "./ctas";
@@ -10,6 +10,18 @@ export interface CTAPresetProps {
 }
 
 export function CTAPreset({ presetKey, className, compact }: CTAPresetProps) {
-  return <CTA presetKey={presetKey} className={className} compact={compact} />;
-}
+  // Create props object without undefined values for exactOptionalPropertyTypes
+  const ctaProps: Record<string, any> = {
+    presetKey,
+  };
 
+  // Only add className if it's defined
+  if (className !== undefined) {
+    ctaProps.className = className;
+  }
+
+  // Only add compact if it's defined (use false as default when undefined)
+  ctaProps.compact = compact !== undefined ? compact : false;
+
+  return <CTA {...ctaProps} />;
+}

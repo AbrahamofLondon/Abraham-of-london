@@ -1,62 +1,94 @@
-// tsconfig.json
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "es2022"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "ESNext",
-
-    // Next 14 + TS 5.6: use Bundler resolution for correct ESM + node typings behavior
     "moduleResolution": "Bundler",
-
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
-
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-
     "forceConsistentCasingInFileNames": true,
-    "exactOptionalPropertyTypes": true,
-
+    "exactOptionalPropertyTypes": false,
     "declaration": false,
     "declarationMap": false,
-
     "sourceMap": true,
     "inlineSources": false,
-
     "paths": {
-      "@/*": ["./*"],
-      "@/styles/*": ["./styles/*"],
-      "@/components/*": ["./components/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/fonts/*": ["./fonts/*"],
-      "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
-      "@/lib/contentlayer-compat": ["./lib/contentlayer-compat.ts"],
-      "@/lib/redis-enhanced": ["./lib/redis-enhanced.ts"],
-      "@/lib/server/rate-limit-unified": ["./lib/server/rate-limit-unified.ts"],
-      "@/lib/db": ["./lib/db.ts"],
-      "@/lib/contentlayer/status": ["./lib/contentlayer/status.ts"],
-      "@/lib/server/inner-circle-access": ["./lib/server/inner-circle-access.ts"],
-      "@/lib/rate-limit": ["./lib/rate-limit.ts"],
-      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"],
-      "@/lib/premium/download-token": ["./lib/premium/download-token.ts"],
-      "@/lib/server/with-inner-circle-access": ["./lib/server/with-inner-circle-access.ts"],
-      "@/lib/inner-circle/access": ["./lib/inner-circle/access.ts"],
-      "@/lib/next-fonts": ["./lib/next-fonts.ts"]
+      "@/*": [
+        "./*"
+      ],
+      "@/styles/*": [
+        "./styles/*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
+      "@/fonts/*": [
+        "./fonts/*"
+      ],
+      "contentlayer/generated": [
+        "./lib/contentlayer-compat.ts"
+      ],
+      "@/lib/contentlayer-compat": [
+        "./lib/contentlayer-compat.ts"
+      ],
+      "@/lib/redis-enhanced": [
+        "./lib/redis-enhanced.ts"
+      ],
+      "@/lib/server/rate-limit-unified": [
+        "./lib/server/rate-limit-unified.ts"
+      ],
+      "@/lib/db": [
+        "./lib/db.ts"
+      ],
+      "@/lib/contentlayer/status": [
+        "./lib/contentlayer/status.ts"
+      ],
+      "@/lib/server/inner-circle-access": [
+        "./lib/server/inner-circle-access.ts"
+      ],
+      "@/lib/rate-limit": [
+        "./lib/rate-limit.ts"
+      ],
+      "@/lib/server/inner-circle-store": [
+        "./lib/server/inner-circle-store.ts"
+      ],
+      "@/lib/premium/download-token": [
+        "./lib/premium/download-token.ts"
+      ],
+      "@/lib/server/with-inner-circle-access": [
+        "./lib/server/with-inner-circle-access.ts"
+      ],
+      "@/lib/inner-circle/access": [
+        "./lib/inner-circle/access.ts"
+      ],
+      "@/lib/next-fonts": [
+        "./lib/next-fonts.ts"
+      ]
     },
-
-    "plugins": [{ "name": "next" }],
-
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "allowSyntheticDefaultImports": true,
     "removeComments": true,
     "preserveConstEnums": true,
@@ -64,25 +96,10 @@
   },
   "include": [
     "next-env.d.ts",
+    "global.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "contentlayer.config.js",
-    ".contentlayer/generated",
-    ".env*.local",
-    "middleware.ts",
-    "netlify/edge-functions/**/*.ts",
-    "__tests__/**/*.ts",
-    "__tests__/**/*.tsx",
-    "lib/contentlayer/status.ts",
-    "lib/db.ts",
-    "lib/server/inner-circle-access.ts",
-    "lib/server/rate-limit-unified.ts",
-    "lib/premium/download-token.ts",
-    "lib/server/with-inner-circle-access.ts",
-    "lib/next-fonts.ts",
-    "lib/fonts.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

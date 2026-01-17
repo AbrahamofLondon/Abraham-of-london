@@ -1,207 +1,451 @@
-// components/logos.tsx
+"use client";
+
 import * as React from "react";
 
-type SvgProps = React.SVGProps<SVGSVGElement> & {
+/**
+ * Abraham of London — World-class logo system
+ * - exactOptionalPropertyTypes-safe
+ * - no undefined passed to optional props
+ * - unique <defs> ids per instance
+ */
+
+// ---------------------------------------------
+// Types
+// ---------------------------------------------
+type LogoProps = Omit<React.SVGProps<SVGSVGElement>, "children"> & {
   title?: string;
+  "aria-label"?: string;
+  "aria-hidden"?: boolean;
 };
 
-interface SvgBaseProps extends SvgProps {
-  children: React.ReactNode;
-  "aria-label"?: string;
-  "aria-hidden"?: boolean | "true" | "false";
+type LogoBaseProps = LogoProps & { children: React.ReactNode };
+
+// ---------------------------------------------
+// Helpers
+// ---------------------------------------------
+function cx(...parts: Array<string | undefined | false>) {
+  return parts.filter(Boolean).join(" ");
 }
 
-function SvgBase({
+function useStableIds(prefix: string) {
+  const id = React.useId().replace(/:/g, "");
+  return (name: string) => `${prefix}-${name}-${id}`;
+}
+
+/**
+ * LogoBase:
+ * - If aria-hidden === true => decorative
+ * - Else exposes role="img" and aria-label derived from aria-label || title || default
+ * - exactOptionalPropertyTypes-safe: never assigns undefined to optional props
+ */
+function LogoBase({
   title,
-  children,
   "aria-label": ariaLabel,
   "aria-hidden": ariaHidden,
-  focusable = "false",
-  fill = "currentColor",
+  className,
+  children,
   ...props
-}: SvgBaseProps) {
-  // Determine the best accessibility approach
-  const hasTitle = Boolean(title);
-  const shouldBeHidden = ariaHidden === true || ariaHidden === "true";
+}: LogoBaseProps) {
+  const svgProps: React.SVGProps<SVGSVGElement> = {
+    xmlns: "http://www.w3.org/2000/svg",
+    className: cx(
+      "select-none",
+      "transition-[opacity,transform,filter] duration-300",
+      "motion-reduce:transition-none",
+      className
+    ),
+    focusable: false,
+    ...props,
+  };
 
-  // Create proper accessibility props without type conflicts
-  const accessibilityProps = shouldBeHidden
-    ? { "aria-hidden": true as const } // Use boolean true
-    : {
-        "aria-label": ariaLabel || title,
-        role: "img" as const,
-      };
+  if (ariaHidden === true) {
+    svgProps["aria-hidden"] = true;
+  } else {
+    svgProps.role = "img";
+    svgProps["aria-label"] = ariaLabel ?? title ?? "Abraham of London";
+  }
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill={fill}
-      focusable={focusable}
-      {...accessibilityProps}
-      {...props}
-    >
-      {/* Provide title for both accessibility and tooltips */}
-      {hasTitle && !shouldBeHidden && <title>{title}</title>}
+    <svg {...svgProps}>
+      {title && ariaHidden !== true ? <title>{title}</title> : null}
       {children}
     </svg>
   );
 }
 
-/**
- * Monogram - a premium, quiet-luxury "A" crest mark.
- * Uses currentColor so it inherits text color (e.g., deepCharcoal).
- */
-export function LogoMonogram(props: SvgProps) {
-  return (
-    <SvgBase
-      title={props.title ?? "Abraham of London - Monogram"}
-      viewBox="0 0 64 64"
-      {...props}
-    >
-      {/* Outer shield with subtle gradient effect */}
-      <path
-        d="M32 3c9.2 0 20 4.1 20 4.1s0 8.9-1.6 14.7C47.8 30.4 41 36.6 32 43.5c-9-6.9-15.8-13.1-18.4-21.7C12 16 12 7.1 12 7.1S22.8 3 32 3z"
-        className="fill-current"
-      />
-      {/* Stylized A - main letterform */}
-      <path
-        d="M32 15l12 24h-6l-2.3-4.8h-7.4L26 39h-6L32 15zm0 8.8l-2.3 4.8h4.6L32 23.8z"
-        className="fill-current"
-      />
-      {/* Crown hint (subtle) */}
-      <path
-        d="M22 12h20a1.5 1.5 0 0 1 0 3H22a1.5 1.5 0 0 1 0-3z"
-        className="fill-current"
-      />
-    </SvgBase>
-  );
-}
+// ---------------------------------------------
+// Brand primitives
+// ---------------------------------------------
+const BRAND = {
+  goldA: "#E6D5A5",
+  goldB: "#D4AF37",
+  goldC: "#B8860B",
+  platinumA: "#F5F5F5",
+  platinumB: "#C0C0C0",
+  ink: "#0B0B0D",
+} as const;
 
-/**
- * Wordmark - refined serif/smallcaps feel but rendered as vector paths,
- * so it stays sharp and brand-consistent.
- */
-export function LogoWordmark(props: SvgProps) {
+const ESTABLISHED_YEAR = "MMXVIII";
+
+// ---------------------------------------------
+// 1) MONOGRAM
+// ---------------------------------------------
+export function LogoMonogram(props: LogoProps) {
+  const { title, className, ...rest } = props;
+  const gid = useStableIds("aol-monogram");
+
+  const gold = gid("gold");
+  const platinum = gid("platinum");
+  const shadow = gid("shadow");
+  const sheen = gid("sheen");
+
   return (
-    <SvgBase
-      title={props.title ?? "Abraham of London - Wordmark"}
-      viewBox="0 0 320 64"
-      {...props}
+    <LogoBase
+      title={title ?? "Abraham of London"}
+      viewBox="0 0 120 120"
+      className={cx(
+        "will-change-transform",
+        "hover:scale-[1.02]",
+        "active:scale-[0.99]",
+        "motion-reduce:hover:scale-100 motion-reduce:active:scale-100",
+        className
+      )}
+      {...rest}
     >
-      {/* "ABRAHAM OF LONDON" as vector paths (clean, mono-solid look) */}
-      <g className="fill-current">
-        {/* ABRAHAM */}
-        <path d="M18 46l8-28h6l8 28h-5.6l-1.6-6H25.2l-1.7 6H18zm8.5-11h8l-4-14-4 14zM45 46V18h5v10.4h.2c1.3-1.8 3.6-3.2 6.7-3.2 5 0 8.1 3.7 8.1 9.1V46h-5v-10c0-3.5-1.8-5.8-5-5.8-3.1 0-5 2.5-5 5.8V46h-5zM73 46V18h5v3.6h.2c1.2-2.4 3.7-4 7-4 5.6 0 9.2 4.5 9.2 10.4 0 6.2-3.7 10.7-9.3 10.7-3 0-5.4-1.3-6.7-3.6H78V46h-5zm16.1-17.9c0-3.4-2.2-5.9-5.2-5.9s-5.2 2.5-5.2 5.9 2.2 6 5.2 6c3 0 5.2-2.6 5.2-6zM102 46l8-28h6l8 28h-5.6l-1.6-6h-9.6l-1.7 6H102zm8.5-11h8l-4-14-4 14z" />
-        {/* OF */}
-        <path d="M146 45.9c-6.7 0-11.4-4.9-11.4-11.9s4.7-12 11.4-12 11.4 5 11.4 12-4.7 12-11.4 12zm0-4.7c3.9 0 6.5-3 6.5-7.3s-2.6-7.4-6.5-7.4-6.5 3.1-6.5 7.4 2.6 7.3 6.5 7.3zM162 46V18h15v4.3h-10v5.8h8.6V32H167v10h-5z" />
-        {/* LONDON */}
-        <path d="M184 46V18h5v23.7h11.4V46H184zM203 32c0-7.1 4.5-12 11.1-12s11.1 4.9 11.1 12-4.5 12-11.1 12S203 39.1 203 32zm17.2 0c0-4.2-2.4-7.3-6.1-7.3s-6.1 3.1-6.1 7.3 2.4 7.3 6.1 7.3 6.1-3.1 6.1-7.3zM228 46V18h5v3.7h.2c1.1-2.4 3.6-3.7 6.6-3.7 5.5 0 9.1 4.5 9.1 10.4 0 6.1-3.6 10.7-9.2 10.7-3 0-5.4-1.3-6.5-3.6H233V46h-5zm15.7-14c0-3.4-2.2-5.9-5.2-5.9s-5.2 2.5-5.2 5.9 2.2 6 5.2 6c3 0 5.2-2.6 5.2-6zM254 32c0-7.1 4.5-12 11.1-12s11.1 4.9 11.1 12-4.5 12-11.1 12S254 39.1 254 32zm17.2 0c0-4.2-2.4-7.3-6.1-7.3s-6.1 3.1-6.1 7.3 2.4 7.3 6.1 7.3 6.1-3.1 6.1-7.3z" />
+      <defs>
+        <linearGradient id={gold} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={BRAND.goldA} />
+          <stop offset="45%" stopColor={BRAND.goldB} />
+          <stop offset="100%" stopColor={BRAND.goldC} />
+        </linearGradient>
+
+        <linearGradient id={platinum} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={BRAND.platinumA} />
+          <stop offset="100%" stopColor={BRAND.platinumB} />
+        </linearGradient>
+
+        <radialGradient id={sheen} cx="25%" cy="20%" r="70%">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.35" />
+          <stop offset="55%" stopColor="#FFFFFF" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+
+        <filter id={shadow} x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000" floodOpacity="0.16" />
+        </filter>
+      </defs>
+
+      <circle cx="60" cy="60" r="56" fill="none" stroke={`url(#${gold})`} strokeWidth="1" strokeOpacity="0.35" />
+      <circle cx="60" cy="60" r="26" fill="none" stroke={`url(#${gold})`} strokeWidth="0.6" strokeOpacity="0.55" />
+
+      <g filter={`url(#${shadow})`}>
+        <path
+          d="M60 28 L88 82 H77.5 L71.5 70 H48.5 L42.5 82 H32 L60 28 Z
+             M60 49 L54.2 61 H65.8 L60 49 Z"
+          fill={`url(#${platinum})`}
+          stroke={`url(#${gold})`}
+          strokeWidth="1.05"
+          strokeLinejoin="round"
+        />
       </g>
-    </SvgBase>
+
+      <circle cx="60" cy="60" r="54" fill={`url(#${sheen})`} />
+
+      <g opacity="0.65">
+        <text
+          x="60"
+          y="111"
+          textAnchor="middle"
+          fontSize="8"
+          fill={`url(#${gold})`}
+          letterSpacing="1.5"
+          style={{ fontFamily: "'Cormorant Garamond','Times New Roman',serif" }}
+        >
+          • LONDON •
+        </text>
+      </g>
+    </LogoBase>
   );
 }
 
-/** Full lockup: monogram + wordmark (nice for header) */
+// ---------------------------------------------
+// 2) WORDMARK
+// ---------------------------------------------
+export function LogoWordmark(props: LogoProps) {
+  const { title, className, ...rest } = props;
+  const gid = useStableIds("aol-wordmark");
+
+  const gold = gid("gold");
+  const glow = gid("glow");
+
+  return (
+    <LogoBase
+      title={title ?? "Abraham of London"}
+      viewBox="0 0 520 90"
+      className={cx("opacity-95 hover:opacity-100", className)}
+      {...rest}
+    >
+      <defs>
+        <linearGradient id={gold} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={BRAND.goldB} />
+          <stop offset="50%" stopColor={BRAND.goldA} />
+          <stop offset="100%" stopColor={BRAND.goldC} />
+        </linearGradient>
+
+        <filter id={glow} x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="0.8" result="blur" />
+          <feColorMatrix
+            in="blur"
+            type="matrix"
+            values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              0 0 0 0.25 0"
+            result="soft"
+          />
+          <feMerge>
+            <feMergeNode in="soft" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <g filter={`url(#${glow})`}>
+        <text
+          x="260"
+          y="54"
+          textAnchor="middle"
+          fontSize="40"
+          fontWeight="500"
+          letterSpacing="0.12em"
+          fill={`url(#${gold})`}
+          style={{
+            fontFamily: "'Cormorant Garamond','Times New Roman',serif",
+            fontVariant: "small-caps",
+          }}
+        >
+          ABRAHAM OF LONDON
+        </text>
+
+        <line
+          x1="120"
+          y1="64"
+          x2="400"
+          y2="64"
+          stroke={`url(#${gold})`}
+          strokeWidth="0.65"
+          strokeOpacity="0.45"
+          strokeLinecap="round"
+        />
+
+        <text
+          x="260"
+          y="82"
+          textAnchor="middle"
+          fontSize="9"
+          letterSpacing="2.6"
+          fill={`url(#${gold})`}
+          opacity="0.45"
+          style={{ fontFamily: "system-ui, -apple-system, Segoe UI, Arial" }}
+        >
+          ESTABLISHED {ESTABLISHED_YEAR}
+        </text>
+      </g>
+    </LogoBase>
+  );
+}
+
+// ---------------------------------------------
+// 3) FULL LOCKUP
+// ---------------------------------------------
 export function LogoFull({
-  gap = 10,
-  monogramProps = {},
-  wordmarkProps = {},
+  variant = "horizontal",
+  monogramSize = 52,
+  wordmarkWidth = 260,
+  spacing = 18,
   className = "",
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & {
-  gap?: number;
-  monogramProps?: SvgProps;
-  wordmarkProps?: SvgProps;
+  variant?: "horizontal" | "vertical";
+  monogramSize?: number;
+  wordmarkWidth?: number;
+  spacing?: number;
 }) {
-  const {
-    "aria-label": ariaLabel = "Abraham of London",
-    "aria-hidden": ariaHidden,
-    ...divProps
-  } = props;
+  const { "aria-label": ariaLabel = "Abraham of London", "aria-hidden": ariaHidden, ...divProps } = props;
+
+  const isVertical = variant === "vertical";
+  const wordmarkHeight = Math.max(48, Math.round(monogramSize * 0.72));
 
   return (
     <div
-      aria-label={ariaHidden ? undefined : ariaLabel}
-      aria-hidden={ariaHidden}
-      className={`inline-flex items-center ${className}`}
-      style={{ color: "currentColor" }}
+      {...(ariaHidden === true ? { "aria-hidden": true } : { role: "img", "aria-label": ariaLabel })}
+      className={cx(
+        "inline-flex items-center justify-center",
+        isVertical ? "flex-col" : "flex-row",
+        className
+      )}
+      style={{ gap: `${spacing}px` }}
       {...divProps}
     >
-      <LogoMonogram
-        width={28}
-        height={28}
-        aria-hidden={true} // Fix: Use boolean instead of string
-        {...monogramProps}
-      />
-      <span style={{ width: gap }} aria-hidden="true" />
-      <LogoWordmark
-        width={190}
-        height={38}
-        aria-hidden={true} // Fix: Use boolean instead of string
-        {...wordmarkProps}
-      />
+      <LogoMonogram width={monogramSize} height={monogramSize} aria-hidden={true} />
+      <LogoWordmark width={wordmarkWidth} height={wordmarkHeight} aria-hidden={true} />
     </div>
   );
 }
 
-/**
- * Compact version for mobile or tight spaces
- */
-export function LogoCompact(props: SvgProps) {
-  return (
-    <SvgBase
-      title={props.title ?? "Abraham of London - Compact"}
-      viewBox="0 0 120 64"
-      {...props}
-    >
-      <g className="fill-current">
-        {/* Monogram adapted for compact version */}
-        <path d="M12 3c6.9 0 15 3.1 15 3.1s0 6.7-1.2 11c-2.3 6-7.4 10.5-13.8 15.4-6.4-4.9-11.5-9.4-13.8-15.4C-3 12.8-3 6.2-3 6.2S5.1 3 12 3z" />
-        <path d="M12 11.2l9 18h-4.5l-1.7-3.6H17l-1.7 3.6H12l9-18zm0 6.6l-1.7 3.6h3.4L12 17.8z" />
-        <path d="M5 9h14a1.1 1.1 0 0 1 0 2.2H5a1.1 1.1 0 0 1 0-2.2z" />
+// ---------------------------------------------
+// 4) SEAL
+// ---------------------------------------------
+export function LogoSeal(props: LogoProps) {
+  const { title, className, ...rest } = props;
+  const gid = useStableIds("aol-seal");
 
-        {/* Compact wordmark */}
-        <path d="M32 46V18h3.8v23.7h8.6V46H32zM45.3 32c0-5.3 3.4-9 8.3-9s8.3 3.7 8.3 9-3.4 9-8.3 9-8.3-3.7-8.3-9zm12.9 0c0-3.2-1.8-5.5-4.6-5.5s-4.6 2.3-4.6 5.5 1.8 5.5 4.6 5.5 4.6-2.3 4.6-5.5zM68 46V18h3.8v3.7h.2c.8-1.8 2.7-2.8 5-2.8 4.1 0 6.8 3.4 6.8 7.8 0 4.6-2.7 8-6.9 8-2.3 0-4-1-4.9-2.7H72V46h-4zm11.8-10.5c0-2.6-1.7-4.4-3.9-4.4s-3.9 1.9-3.9 4.4 1.7 4.5 3.9 4.5 3.9-1.9 3.9-4.5z" />
+  const gold = gid("gold");
+  const textPathId = gid("textPath");
+  const emboss = gid("emboss");
+
+  return (
+    <LogoBase
+      title={title ?? "Abraham of London Seal"}
+      viewBox="0 0 160 160"
+      className={cx("opacity-95", className)}
+      {...rest}
+    >
+      <defs>
+        <linearGradient id={gold} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={BRAND.goldA} />
+          <stop offset="50%" stopColor={BRAND.goldB} />
+          <stop offset="100%" stopColor={BRAND.goldC} />
+        </linearGradient>
+
+        <filter id={emboss} x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1" stdDeviation="1.2" floodColor="#000" floodOpacity="0.14" />
+        </filter>
+
+        <path
+          id={textPathId}
+          d="M80,80 m-60,0 a60,60 0 1,1 120,0 a60,60 0 1,1 -120,0"
+          fill="none"
+        />
+      </defs>
+
+      <circle cx="80" cy="80" r="76" fill="none" stroke={`url(#${gold})`} strokeWidth="1.1" />
+      <circle cx="80" cy="80" r="68" fill="none" stroke={`url(#${gold})`} strokeWidth="0.7" strokeOpacity="0.55" />
+
+      <g filter={`url(#${emboss})`}>
+        <path
+          d="M80 38 L103 84 H92.5 L87.3 73 H72.7 L67.5 84 H57 L80 38 Z
+             M80 55 L74.7 66.2 H85.3 L80 55 Z"
+          fill="none"
+          stroke={`url(#${gold})`}
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
       </g>
-    </SvgBase>
+
+      <text
+        fill={`url(#${gold})`}
+        fontSize="9"
+        letterSpacing="1.4"
+        opacity="0.78"
+        style={{ fontFamily: "'Cormorant Garamond','Times New Roman',serif" }}
+      >
+        <textPath href={`#${textPathId}`} startOffset="50%" textAnchor="middle">
+          • ABRAHAM OF LONDON • EST • {ESTABLISHED_YEAR} •
+        </textPath>
+      </text>
+
+      <circle cx="80" cy="80" r="2.2" fill={`url(#${gold})`} />
+    </LogoBase>
   );
 }
 
-/**
- * Icon-only version for favicon, social media, etc.
- */
-export function LogoIcon(props: SvgProps) {
+// ---------------------------------------------
+// 5) MARK
+// ---------------------------------------------
+export function LogoMark(props: LogoProps) {
+  const { title, className, ...rest } = props;
+  const gid = useStableIds("aol-mark");
+
+  const gold = gid("gold");
+
   return (
-    <SvgBase
-      title={props.title ?? "Abraham of London - Icon"}
-      viewBox="0 0 64 64"
-      {...props}
+    <LogoBase
+      title={title ?? "Abraham of London"}
+      viewBox="0 0 80 80"
+      className={cx(
+        "will-change-transform",
+        "hover:scale-[1.03]",
+        "active:scale-[0.99]",
+        "motion-reduce:hover:scale-100 motion-reduce:active:scale-100",
+        className
+      )}
+      {...rest}
     >
-      <path
-        d="M32 2c10.1 0 22 4.5 22 4.5s0 9.8-1.8 16.2C49.6 33.4 42 40.3 32 47.8c-10-7.5-17.6-14.4-20.2-25.1C10 16.3 10 6.5 10 6.5S21.9 2 32 2z"
-        className="fill-current"
+      <defs>
+        <linearGradient id={gold} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={BRAND.goldB} />
+          <stop offset="100%" stopColor={BRAND.goldC} />
+        </linearGradient>
+      </defs>
+
+      <rect
+        x="10"
+        y="10"
+        width="60"
+        height="60"
+        rx="8"
+        fill="none"
+        stroke={`url(#${gold})`}
+        strokeWidth="0.8"
+        strokeOpacity="0.35"
       />
+
       <path
-        d="M32 14l13.2 26.4h-6.6l-2.5-5.3h-8.2L25.4 40.4h-6.6L32 14zm0 9.7l-2.5 5.3h5l-2.5-5.3z"
-        className="fill-current"
+        d="M40 22 L57 58 H50.8 L47.2 50.2 H32.8 L29.2 58 H23 L40 22 Z
+           M40 36.2 L35.8 45.3 H44.2 L40 36.2 Z"
+        fill="none"
+        stroke={`url(#${gold})`}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+        strokeLinecap="round"
       />
+
       <path
-        d="M20 10h22a1.7 1.7 0 0 1 0 3.4H20a1.7 1.7 0 0 1 0-3.4z"
-        className="fill-current"
+        d="M52.5 58 H43.5 V39.5"
+        fill="none"
+        stroke={`url(#${gold})`}
+        strokeWidth="1.1"
+        strokeOpacity="0.55"
+        strokeLinecap="round"
       />
-    </SvgBase>
+
+      <text
+        x="68"
+        y="72"
+        fontSize="6"
+        fill={`url(#${gold})`}
+        opacity="0.3"
+        style={{ fontFamily: "'Cormorant Garamond','Times New Roman',serif" }}
+        textAnchor="end"
+      >
+        {ESTABLISHED_YEAR}
+      </text>
+    </LogoBase>
   );
 }
 
-// Create named export object
+// ---------------------------------------------
+// Export bundle
+// ---------------------------------------------
 const Logos = {
   LogoMonogram,
   LogoWordmark,
   LogoFull,
-  LogoCompact,
-  LogoIcon,
-};
+  LogoSeal,
+  LogoMark,
+} as const;
 
-// Export all logos for easy importing
 export default Logos;
-

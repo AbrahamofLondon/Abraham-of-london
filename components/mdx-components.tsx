@@ -1,6 +1,23 @@
-/* components/mdx-components.tsx - FINAL WORKING VERSION (EXPORT-SHAPE SAFE) */
+/* components/mdx-components.tsx - ULTIMATE FIXED VERSION */
 import * as React from "react";
-import * as Lucide from "lucide-react";
+import type { ComponentType, ReactNode } from "react";
+
+// ===== LUCIDE ICONS =====
+import { 
+  Lock, Book, Calendar, ChevronRight, ExternalLink,
+  FileText, Globe, Heart, Home, Mail, MessageSquare,
+  Search, Share2, Star, Tag, User, Award, Clock,
+  BookOpen, Coffee, Crown, Diamond, Eye, Filter,
+  Flag, Gem, Gift, Lightbulb, Link, List,
+  MapPin, Menu, Moon, Package, PenTool, Phone,
+  PieChart, Plus, RefreshCw, Settings, Shield,
+  ShoppingBag, SkipForward, Sun, ThumbsUp, TrendingUp,
+  Trophy, Users, Zap, ArrowRight, CheckCircle,
+  XCircle, AlertCircle, Info
+} from "lucide-react";
+
+// ===== IMPORT MINIMAL MDX COMPONENTS =====
+import * as MinimalMdxComponentsModule from "./mdx/MinimalMdxComponents";
 
 // ===== CORE MDX COMPONENTS =====
 import Divider from "./Divider";
@@ -9,10 +26,7 @@ import Grid from "./mdx/Grid";
 import PullLine from "./mdx/PullLine";
 import Callout from "./mdx/Callout";
 import Quote from "./mdx/Quote";
-
-// ✅ Note is NOT a named export according to your error → import default
 import Note from "./mdx/Note";
-
 import Caption from "./mdx/Caption";
 import CanonReference from "./CanonReference";
 import GlossaryTerm from "./GlossaryTerm";
@@ -93,40 +107,90 @@ import BrandFrame from "./mdx/BrandFrame";
 
 import { createDynamicComponent } from "./mdx/component-resolver";
 import { ctaPresets } from "./mdx/cta-presets";
-import { CTAPreset } from "./mdx/CTAPreset";
+import { CTAPreset as CTAPresetComponent } from "./mdx/CTAPreset";
 import { CTA, ctas } from "./mdx/ctas";
 import CtaPresetComponent from "./mdx/CtaPresetComponent";
 
-// ✅ no default export per your error → import named
 import { FallbackComponent } from "./mdx/FallbackComponent";
-
 import HeroEyebrow from "./mdx/HeroEyebrow";
 import JsonLd from "./mdx/JsonLd";
-
-// ✅ no default export per your error → import named
 import { MDXContentWrapper } from "./mdx/MDXContentWrapper";
 
-import MinimalMdxComponents from "./mdx/MinimalMdxComponents";
 import MissingComponent from "./mdx/MissingComponent";
 import ResourcesCTA from "./mdx/ResourcesCTA";
 import ShareRow from "./mdx/ShareRow";
-
-// ✅ shortcodes is NOT exported as a named symbol per your error → import default
 import shortcodes from "./mdx/shortcodes";
-
 import Verse from "./mdx/Verse";
 
 // ===== ADMIN =====
 import ShortsAnalytics from "./admin/ShortsAnalytics";
 
-// ===== HELPER FUNCTION =====
+// ===== TYPES =====
+interface MDXComponentProps {
+  children?: ReactNode;
+  [key: string]: any;
+}
+
+// ===== HELPER FUNCTIONS =====
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-// ===== BASIC ELEMENTS =====
-function Anchor(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
-  const { className, ...rest } = props;
+// ===== CREATE LUCIDE ICON MAP =====
+const LucideIcons: Record<string, ComponentType<any>> = {
+  Lock, Book, Calendar, ChevronRight, ExternalLink,
+  FileText, Globe, Heart, Home, Mail, MessageSquare,
+  Search, Share2, Star, Tag, User, Award, Clock,
+  BookOpen, Coffee, Crown, Diamond, Eye, Filter,
+  Flag, Gem, Gift, Lightbulb, Link, List,
+  MapPin, Menu, Moon, Package, PenTool, Phone,
+  PieChart, Plus, RefreshCw, Settings, Shield,
+  ShoppingBag, SkipForward, Sun, ThumbsUp, TrendingUp,
+  Trophy, Users, Zap, ArrowRight, CheckCircle,
+  XCircle, AlertCircle, Info
+};
+
+// ===== MINIMAL MDX COMPONENTS HANDLING =====
+// Safely extract components from MinimalMdxComponentsModule
+const MinimalMdxExport: unknown = MinimalMdxComponentsModule;
+
+// Helper to safely extract component map
+function extractComponentMap(module: any): Record<string, ComponentType<any>> {
+  if (!module || typeof module !== 'object') return {};
+  
+  // If module is a single component (function or React component)
+  if (typeof module === 'function' || (module.$$typeof && typeof module.render === 'function')) {
+    return { MinimalMdxComponents: module as ComponentType<any> };
+  }
+  
+  // If module has a default export that's a component map
+  if (module.default && typeof module.default === 'object') {
+    const result: Record<string, ComponentType<any>> = {};
+    for (const [key, value] of Object.entries(module.default)) {
+      if (typeof value === 'function' || 
+          (value && typeof value === 'object' && '$$typeof' in value)) {
+        result[key] = value as ComponentType<any>;
+      }
+    }
+    return result;
+  }
+  
+  // If module itself is a component map
+  const result: Record<string, ComponentType<any>> = {};
+  for (const [key, value] of Object.entries(module)) {
+    if (typeof value === 'function' || 
+        (value && typeof value === 'object' && '$$typeof' in value)) {
+      result[key] = value as ComponentType<any>;
+    }
+  }
+  return result;
+}
+
+const MinimalMdxBridge: Record<string, ComponentType<any>> = extractComponentMap(MinimalMdxExport);
+
+// ===== ELEVATED COMPONENTS =====
+const Anchor: ComponentType<any> = (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+  const { className, children, ...rest } = props;
   const href = typeof rest.href === "string" ? rest.href : "";
   const isExternal = href.startsWith("http");
 
@@ -134,53 +198,240 @@ function Anchor(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
     <a
       {...rest}
       className={cx(
-        "text-gold underline decoration-gold/40 underline-offset-4 hover:decoration-gold",
+        "relative inline-flex items-center gap-1",
+        "text-gold font-medium tracking-wide",
+        "border-b border-gold/20 pb-0.5",
+        "transition-all duration-300",
+        "hover:text-platinum hover:border-platinum",
+        "after:content-[''] after:absolute after:-bottom-0.5 after:left-0",
+        "after:w-0 after:h-px after:bg-platinum",
+        "after:transition-all after:duration-300",
+        "hover:after:w-full",
+        isExternal && "pr-5 after:right-0 after:left-auto",
         className
       )}
       rel={rest.rel ?? (isExternal ? "noopener noreferrer" : undefined)}
       target={rest.target ?? (isExternal ? "_blank" : undefined)}
-    />
+    >
+      {children}
+      {isExternal && (
+        <span className="absolute -right-4 opacity-60">
+          <ExternalLink size={12} />
+        </span>
+      )}
+    </a>
   );
-}
+};
 
-function InlineCode(props: React.HTMLAttributes<HTMLElement>) {
-  const { className, ...rest } = props;
+const InlineCode: ComponentType<any> = (props: React.HTMLAttributes<HTMLElement>) => {
+  const { className, children, ...rest } = props;
   return (
     <code
       {...rest}
       className={cx(
-        "rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[0.95em] text-cream",
+        "relative inline-block",
+        "px-2 py-1 mx-0.5",
+        "font-mono text-sm leading-tight",
+        "text-gold bg-black/40",
+        "border border-gold/10 rounded",
+        "shadow-sm shadow-black/20",
+        "before:content-[''] before:absolute before:inset-0",
+        "before:rounded before:bg-gradient-to-br",
+        "before:from-transparent before:via-white/5 before:to-transparent",
+        "before:pointer-events-none",
+        "transition-all duration-200",
+        "hover:text-platinum hover:border-platinum/30",
         className
       )}
-    />
+    >
+      {children}
+    </code>
   );
-}
+};
 
-// ============================================================================
-// Dynamic component bridge for MDX
-// Usage in MDX: <Dynamic name="SomeComponent" />
-// ============================================================================
-export const Dynamic: React.FC<{ name: string; [key: string]: any }> = ({
-  name,
-  ...props
-}) => {
+const H1: ComponentType<any> = (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+  const { className, children, ...rest } = props;
+  return (
+    <h1
+      {...rest}
+      className={cx(
+        "text-4xl md:text-5xl lg:text-6xl font-serif font-light",
+        "text-platinum tracking-tight leading-tight",
+        "mb-8 mt-12",
+        "border-l-4 border-gold pl-6",
+        "bg-gradient-to-r from-gold/5 via-transparent to-transparent",
+        className
+      )}
+    >
+      {children}
+    </h1>
+  );
+};
+
+const H2: ComponentType<any> = (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+  const { className, children, ...rest } = props;
+  return (
+    <h2
+      {...rest}
+      className={cx(
+        "text-2xl md:text-3xl lg:text-4xl font-serif font-normal",
+        "text-platinum tracking-normal leading-snug",
+        "mb-6 mt-10",
+        "relative",
+        "before:content-[''] before:absolute before:-left-4",
+        "before:top-1/2 before:-translate-y-1/2",
+        "before:w-2 before:h-2 before:bg-gold before:rounded-full",
+        className
+      )}
+    >
+      {children}
+    </h2>
+  );
+};
+
+const H3: ComponentType<any> = (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+  const { className, children, ...rest } = props;
+  return (
+    <h3
+      {...rest}
+      className={cx(
+        "text-xl md:text-2xl lg:text-3xl font-serif font-medium",
+        "text-cream tracking-wide leading-relaxed",
+        "mb-4 mt-8",
+        "border-b border-gold/20 pb-2",
+        className
+      )}
+    >
+      {children}
+    </h3>
+  );
+};
+
+const Paragraph: ComponentType<any> = (props: React.HTMLAttributes<HTMLParagraphElement>) => {
+  const { className, children, ...rest } = props;
+  return (
+    <p
+      {...rest}
+      className={cx(
+        "text-base md:text-lg font-sans font-light",
+        "text-cream/90 tracking-normal leading-relaxed",
+        "mb-6",
+        "max-w-3xl",
+        className
+      )}
+    >
+      {children}
+    </p>
+  );
+};
+
+const Blockquote: ComponentType<any> = (props: React.HTMLAttributes<HTMLQuoteElement>) => {
+  const { className, children, ...rest } = props;
+  return (
+    <blockquote
+      {...rest}
+      className={cx(
+        "relative my-8 pl-8 border-l-4 border-gold",
+        "italic text-lg text-cream/80",
+        "bg-gradient-to-r from-gold/10 via-transparent to-transparent",
+        "py-4 pr-4 rounded-r-lg",
+        "before:content-['\"'] before:absolute before:-left-2",
+        "before:top-0 before:text-4xl before:text-gold/30",
+        "after:content-['\"'] after:absolute after:-right-2",
+        "after:bottom-0 after:text-4xl after:text-gold/30",
+        className
+      )}
+    >
+      {children}
+    </blockquote>
+  );
+};
+
+const UnorderedList: ComponentType<any> = (props: React.HTMLAttributes<HTMLUListElement>) => {
+  const { className, children, ...rest } = props;
+  return (
+    <ul
+      {...rest}
+      className={cx(
+        "my-6 space-y-3",
+        "list-none pl-4",
+        className
+      )}
+    >
+      {React.Children.map(children, (child, index) => (
+        <li key={index} className="flex items-start gap-3">
+          <span className="mt-2.5 shrink-0 w-1.5 h-1.5 rounded-full bg-gold/60" />
+          <span className="text-cream/90">{child}</span>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const OrderedList: ComponentType<any> = (props: React.HTMLAttributes<HTMLOListElement>) => {
+  const { className, children, ...rest } = props;
+  return (
+    <ol
+      {...rest}
+      className={cx(
+        "my-6 space-y-3",
+        "list-none pl-4 counter-reset",
+        className
+      )}
+    >
+      {React.Children.map(children, (child, index) => (
+        <li key={index} className="flex items-start gap-3">
+          <span className="mt-1 shrink-0 w-6 h-6 flex items-center justify-center text-xs font-medium rounded-full bg-gold/10 text-gold">
+            {index + 1}
+          </span>
+          <span className="text-cream/90">{child}</span>
+        </li>
+      ))}
+    </ol>
+  );
+};
+
+// ===== DYNAMIC COMPONENT =====
+export const Dynamic: ComponentType<any> = ({ name, ...props }: { name: string; [key: string]: any }) => {
   const Comp = React.useMemo(() => createDynamicComponent(name), [name]);
   return <Comp {...props} />;
 };
 Dynamic.displayName = "Dynamic";
 
-// ============================================================================
-// MDX COMPONENT MAP
-// ============================================================================
-export const mdxComponents: Record<string, React.ComponentType<any>> = {
-  // Standard MDX element overrides
+// ===== LUCIDE ICON COMPONENT =====
+const LucideIcon: ComponentType<any> = ({ name, ...props }: { name: string; [key: string]: any }) => {
+  const IconComponent = LucideIcons[name];
+  
+  if (!IconComponent) {
+    console.warn(`Lucide icon "${name}" not found. Using fallback.`);
+    return <span className="inline-block w-4 h-4 bg-gold/20 rounded" />;
+  }
+  
+  return <IconComponent {...props} />;
+};
+LucideIcon.displayName = "LucideIcon";
+
+// ===== MDX COMPONENT MAP =====
+export const mdxComponents: Record<string, ComponentType<any>> = {
+  // ===== OVERRIDE BASIC ELEMENTS WITH ELEVATED VERSIONS =====
   a: Anchor,
   code: InlineCode,
+  h1: H1,
+  h2: H2,
+  h3: H3,
+  p: Paragraph,
+  blockquote: Blockquote,
+  ul: UnorderedList,
+  ol: OrderedList,
 
-  // namespaces
-  Lucide,
+  // ===== LUCIDE ICONS =====
+  ...LucideIcons,
+  LucideIcon,
 
-  // Core MDX
+  // ===== MINIMAL MDX COMPONENTS (AS OBJECT MAP) =====
+  ...MinimalMdxBridge,
+
+  // ===== CORE MDX COMPONENTS =====
   Divider,
   Rule,
   Grid,
@@ -194,7 +445,7 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   EmbossedBrandMark,
   EmbossedSign,
 
-  // Cards
+  // ===== CARDS =====
   BaseCard,
   BlogPostCard,
   BookCard,
@@ -202,23 +453,23 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   CanonResourceCard,
   ArticleHero,
 
-  // UI
+  // ===== UI =====
   Box,
   Button,
   InteractiveElement,
   SectionHeading,
   SilentSurface,
 
-  // Media / Icons
+  // ===== MEDIA / ICONS =====
   CoverFrame,
   BrandLogo,
   LockClosedIcon,
 
-  // SEO
+  // ===== SEO =====
   BookJsonLd,
   EventJsonLd,
 
-  // Blog
+  // ===== BLOG =====
   BlogContent,
   BlogFooter,
   BlogHeader,
@@ -227,7 +478,7 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   RelatedPosts,
   ResourceGrid,
 
-  // Shorts
+  // ===== SHORTS =====
   RelatedShorts,
   ShortActions,
   ShortComments,
@@ -237,7 +488,7 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   ShortNavigation,
   ShortShare,
 
-  // Resources
+  // ===== RESOURCES =====
   RelatedResources,
   ResourceActions,
   ResourceCard,
@@ -246,7 +497,7 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   ResourceHero,
   ResourceMetadata,
 
-  // Homepage
+  // ===== HOMEPAGE =====
   AboutSection,
   ContentShowcase,
   EventsSection,
@@ -258,10 +509,10 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   TestimonialsSection,
   VenturesSection,
 
-  // Diagrams
+  // ===== DIAGRAMS =====
   LegacyDiagram,
 
-  // MDX-specific
+  // ===== MDX-SPECIFIC =====
   Badge,
   BadgeRow,
   BrandFrame,
@@ -271,23 +522,26 @@ export const mdxComponents: Record<string, React.ComponentType<any>> = {
   HeroEyebrow,
   JsonLd,
   MDXContentWrapper,
-  MinimalMdxComponents,
   ResourcesCTA,
   ShareRow,
   Verse,
 
-  // Shortcode registry (default export)
-  shortcodes,
+  // ===== SHORTCODE REGISTRY =====
+  shortcodes: shortcodes as unknown as ComponentType<any>,
 
-  // CTA system
+  // ===== CTA SYSTEM =====
   CTA,
-  CTAPreset,
+  CTAPreset: CTAPresetComponent,
   CtaPresetComponent,
-  ctaPresets,
-  ctas,
+  // ctaPresets and ctas are configuration objects, not components
 
-  // Admin
+  // ===== ADMIN =====
   ShortsAnalytics,
 };
 
+// ============================================================================
+// EXPORT
+// ============================================================================
 export default mdxComponents;
+
+export type { MDXComponentProps };

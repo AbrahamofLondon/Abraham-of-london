@@ -198,7 +198,7 @@ export function useWebSocketStatus(): boolean {
 }
 
 // Additional utility hook for receiving messages
-export function useWebSocketMessages<T = any>(
+export function useWebSocketMessages(
   eventType?: string
 ): WebSocketMessage[] {
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
@@ -218,4 +218,7 @@ export function useWebSocketMessages<T = any>(
   return messages;
 }
 
-export default WebSocketService;
+// Create named export for the class
+const WebSocketServiceClass = WebSocketService;
+
+export default WebSocketServiceClass; 

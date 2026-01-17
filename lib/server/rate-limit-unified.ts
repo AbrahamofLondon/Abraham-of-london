@@ -1,14 +1,13 @@
-// lib/server/rate-limit-unified.ts - Canonical rate limiting module
-import type { NextApiRequest } from 'next';
-import type { NextRequest } from 'next/server';
+// lib/server/rate-limit-unified.ts
+import type { NextApiRequest } from "next";
+import type { NextRequest } from "next/server";
 
-// ==================== RATE LIMIT TYPES ====================
+// ==================== TYPES ====================
+
 export type RateLimitOptions = {
   limit: number;
   windowMs: number;
   keyPrefix?: string;
-  skipFailedRequests?: boolean;
-  skipSuccessfulRequests?: boolean;
 };
 
 export type RateLimitResult = {
@@ -20,184 +19,190 @@ export type RateLimitResult = {
   windowMs: number;
 };
 
-// ==================== DEFAULT CONFIGURATIONS ====================
-export const RATE_LIMIT_CONFIGS = {
-  API_STRICT: { limit: 30, windowMs: 60000, keyPrefix: "api-strict" },
-  API_GENERAL: { limit: 100, windowMs: 3600000, keyPrefix: "api" },
-  INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600000, keyPrefix: "ic-unlock" },
-  AUTH: { limit: 10, windowMs: 900000, keyPrefix: "auth" },
-  CONTACT: { limit: 5, windowMs: 3600000, keyPrefix: "contact" },
-  DOWNLOAD: { limit: 20, windowMs: 3600000, keyPrefix: "download" },
-  LIKE: { limit: 50, windowMs: 300000, keyPrefix: "like" },
-  SAVE: { limit: 30, windowMs: 300000, keyPrefix: "save" },
-  SUBSCRIBE: { limit: 3, windowMs: 3600000, keyPrefix: "subscribe" },
-  TEASER: { limit: 10, windowMs: 3600000, keyPrefix: "teaser" },
-  NEWSLETTER: { limit: 5, windowMs: 3600000, keyPrefix: "newsletter" },
-  EXPORT: { limit: 3, windowMs: 3600000, keyPrefix: "export" },
-  ADMIN: { limit: 100, windowMs: 60000, keyPrefix: "admin" }
+// ==================== CONFIGS ====================
+
+export const RATE_LIMIT_CONFIGS: Record<string, RateLimitOptions> = {
+  API_STRICT: { limit: 30, windowMs: 60_000, keyPrefix: "api-strict" },
+  API_GENERAL: { limit: 100, windowMs: 3_600_000, keyPrefix: "api" },
+  INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600_000, keyPrefix: "ic-unlock" },
+  AUTH: { limit: 10, windowMs: 900_000, keyPrefix: "auth" },
+  CONTACT: { limit: 5, windowMs: 3_600_000, keyPrefix: "contact" },
+  DOWNLOAD: { limit: 20, windowMs: 3_600_000, keyPrefix: "download" },
+  LIKE: { limit: 50, windowMs: 300_000, keyPrefix: "like" },
+  SAVE: { limit: 30, windowMs: 300_000, keyPrefix: "save" },
+  SUBSCRIBE: { limit: 3, windowMs: 3_600_000, keyPrefix: "subscribe" },
+  TEASER: { limit: 10, windowMs: 3_600_000, keyPrefix: "teaser" },
+  NEWSLETTER: { limit: 5, windowMs: 3_600_000, keyPrefix: "newsletter" },
+  EXPORT: { limit: 3, windowMs: 3_600_000, keyPrefix: "export" },
+  ADMIN: { limit: 100, windowMs: 60_000, keyPrefix: "admin" },
 };
 
-// ==================== CORE RATE LIMITING LOGIC ====================
-const memoryStore = new Map<string, { count: number; resetTime: number }>();
+// ==================== STORAGE ====================
 
-function getRateLimitKey(identifier: string, options: RateLimitOptions): string {
-  const prefix = options.keyPrefix || "rl";
-  return `${prefix}:${identifier}`;
+type StoreRecord = { count: number; resetTime: number };
+const memoryStore = new Map<string, StoreRecord>();
+
+function makeStoreKey(identifier: string, options: RateLimitOptions): string {
+  return `${options.keyPrefix ?? "rl"}:${identifier}`;
 }
 
-async function getRateLimitData(key: string): Promise<{ count: number; resetTime: number } | null> {
+async function tryGetRedis(): Promise<any | null> {
   try {
-    // Try Redis first if available
-    const { getRedis } = await import('@/lib/redis');
-    const redis = getRedis();
-    if (redis && redis.get) {
-      const data = await redis.get(key);
-      if (data) {
-        return JSON.parse(data);
-      }
-    }
+    const mod = await import("@/lib/redis");
+    const redis = typeof mod.getRedis === "function" ? mod.getRedis() : null;
+    return redis ?? null;
   } catch {
-    // Fallback to memory store
+    return null;
   }
-  
-  // Memory store
-  return memoryStore.get(key) || null;
 }
 
-async function setRateLimitData(key: string, data: { count: number; resetTime: number }, windowMs: number): Promise<void> {
-  try {
-    // Try Redis first
-    const { getRedis } = await import('@/lib/redis');
-    const redis = getRedis();
-    if (redis && redis.set) {
+async function getRecord(key: string): Promise<StoreRecord | null> {
+  const redis = await tryGetRedis();
+  if (redis?.get) {
+    try {
+      const raw = await redis.get(key);
+      if (raw) return JSON.parse(raw) as StoreRecord;
+    } catch {
+      // ignore
+    }
+  }
+  return memoryStore.get(key) ?? null;
+}
+
+async function setRecord(key: string, data: StoreRecord, windowMs: number): Promise<void> {
+  const redis = await tryGetRedis();
+  if (redis?.set) {
+    try {
       await redis.set(key, JSON.stringify(data), { EX: Math.ceil(windowMs / 1000) });
+    } catch {
+      // ignore
     }
-  } catch {
-    // Fallback to memory store
   }
-  
-  // Always update memory store
+
   memoryStore.set(key, data);
-  
-  // Auto-cleanup for memory store
-  setTimeout(() => {
-    memoryStore.delete(key);
-  }, windowMs);
+  setTimeout(() => memoryStore.delete(key), windowMs);
 }
 
-// ==================== MAIN RATE LIMIT FUNCTION ====================
-export async function rateLimit(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL): Promise<RateLimitResult> {
+// ==================== CORE ====================
+
+export async function rateLimit(
+  identifier: string,
+  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
+): Promise<RateLimitResult> {
   const now = Date.now();
-  const key = getRateLimitKey(identifier, options);
-  
-  const existing = await getRateLimitData(key);
-  
+  const key = makeStoreKey(identifier, options);
+  const existing = await getRecord(key);
+
   if (existing && now < existing.resetTime) {
-    // Within window, increment count
-    existing.count += 1;
-    await setRateLimitData(key, existing, options.windowMs);
-    
-    const remaining = Math.max(0, options.limit - existing.count);
-    const allowed = remaining >= 0;
-    
+    const nextCount = existing.count + 1;
+    const updated: StoreRecord = { count: nextCount, resetTime: existing.resetTime };
+    await setRecord(key, updated, options.windowMs);
+
+    const remaining = Math.max(0, options.limit - nextCount);
+    const allowed = nextCount <= options.limit;
+    const retryAfterMs = allowed ? 0 : Math.max(0, existing.resetTime - now);
+
     return {
       allowed,
       remaining,
       limit: options.limit,
-      retryAfterMs: allowed ? 0 : existing.resetTime - now,
+      retryAfterMs,
       resetTime: existing.resetTime,
-      windowMs: options.windowMs
-    };
-  } else {
-    // New window
-    const newData = {
-      count: 1,
-      resetTime: now + options.windowMs
-    };
-    
-    await setRateLimitData(key, newData, options.windowMs);
-    
-    return {
-      allowed: true,
-      remaining: options.limit - 1,
-      limit: options.limit,
-      retryAfterMs: 0,
-      resetTime: newData.resetTime,
-      windowMs: options.windowMs
+      windowMs: options.windowMs,
     };
   }
-}
 
-// ==================== HELPER FUNCTIONS ====================
-export function getClientIp(req: NextApiRequest | NextRequest): string {
-  if ('headers' in req && req.headers && typeof (req.headers as any).get === 'function') {
-    const edgeHeaders = req.headers as any;
-    const forwarded = edgeHeaders.get('x-forwarded-for');
-    return forwarded?.split(',')[0]?.trim() || 
-           edgeHeaders.get('x-real-ip') || 
-           edgeHeaders.get('cf-connecting-ip') || 
-           'unknown';
-  }
-  
-  const apiReq = req as NextApiRequest;
-  const forwarded = apiReq.headers['x-forwarded-for'];
-  
-  if (forwarded) {
-    const ips = Array.isArray(forwarded) ? forwarded : forwarded.split(',');
-    return ips[0]?.trim() || 'unknown';
-  }
-  
-  return apiReq.socket?.remoteAddress || 'unknown';
-}
+  const newData: StoreRecord = { count: 1, resetTime: now + options.windowMs };
+  await setRecord(key, newData, options.windowMs);
 
-export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
   return {
-    'X-RateLimit-Limit': result.limit.toString(),
-    'X-RateLimit-Remaining': result.remaining.toString(),
-    'X-RateLimit-Reset': Math.ceil(result.resetTime / 1000).toString(),
-    ...(result.retryAfterMs > 0 && {
-      'Retry-After': Math.ceil(result.retryAfterMs / 1000).toString()
-    })
+    allowed: true,
+    remaining: Math.max(0, options.limit - 1),
+    limit: options.limit,
+    retryAfterMs: 0,
+    resetTime: newData.resetTime,
+    windowMs: options.windowMs,
   };
 }
 
-// ==================== API MIDDLEWARE WRAPPERS ====================
+// ==================== IP UTIL ====================
+
+function firstNonEmpty(v: unknown): string | null {
+  if (typeof v === "string") {
+    const s = v.trim();
+    return s ? s : null;
+  }
+  return null;
+}
+
+export function getClientIp(req: NextApiRequest | NextRequest): string {
+  // NextRequest / Edge style headers.get()
+  const maybeHeaders = (req as any)?.headers;
+  if (maybeHeaders && typeof maybeHeaders.get === "function") {
+    const h = maybeHeaders as { get: (k: string) => string | null };
+
+    const forwarded = firstNonEmpty(h.get("x-forwarded-for"));
+    if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
+
+    return (
+      firstNonEmpty(h.get("x-real-ip")) ||
+      firstNonEmpty(h.get("cf-connecting-ip")) ||
+      firstNonEmpty(h.get("x-vercel-ip")) ||
+      "unknown"
+    );
+  }
+
+  // NextApiRequest headers object
+  const apiReq = req as NextApiRequest;
+  const fwd = apiReq.headers["x-forwarded-for"];
+  if (typeof fwd === "string" && fwd.trim()) return fwd.split(",")[0]?.trim() || "unknown";
+  if (Array.isArray(fwd) && fwd.length > 0) return (fwd[0] ?? "").trim() || "unknown";
+
+  const real = apiReq.headers["x-real-ip"];
+  if (typeof real === "string" && real.trim()) return real.trim();
+  if (Array.isArray(real) && real.length > 0) return (real[0] ?? "").trim() || "unknown";
+
+  return apiReq.socket?.remoteAddress?.trim() || "unknown";
+}
+
+// ==================== HEADERS ====================
+
+export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
+  const headers: Record<string, string> = {
+    "X-RateLimit-Limit": String(result.limit),
+    "X-RateLimit-Remaining": String(result.remaining),
+    "X-RateLimit-Reset": String(Math.ceil(result.resetTime / 1000)),
+  };
+  if (result.retryAfterMs > 0) {
+    headers["Retry-After"] = String(Math.ceil(result.retryAfterMs / 1000));
+  }
+  return headers;
+}
+
+// ==================== WRAPPERS ====================
+
 export function withApiRateLimit(
   handler: (req: NextApiRequest, res: any) => Promise<void> | void,
   options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
 ) {
   return async (req: NextApiRequest, res: any) => {
-    try {
-      const ip = getClientIp(req);
-      const key = `${ip}:${req.url || '/'}`;
-      
-      const result = await rateLimit(key, options);
-      
-      if (!result.allowed) {
-        const headers = createRateLimitHeaders(result);
-        Object.entries(headers).forEach(([key, value]) => {
-          res.setHeader(key, value);
-        });
-        
-        return res.status(429).json({
-          error: 'Too Many Requests',
-          message: 'Rate limit exceeded',
-          retryAfter: Math.ceil(result.retryAfterMs / 1000)
-        });
-      }
-      
-      // Add rate limit headers to successful responses
-      const headers = createRateLimitHeaders(result);
-      Object.entries(headers).forEach(([key, value]) => {
-        res.setHeader(key, value);
+    const ip = getClientIp(req);
+    const key = `${ip}:${req.url || "/"}`;
+    const result = await rateLimit(key, options);
+
+    const headers = createRateLimitHeaders(result);
+    for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
+
+    if (!result.allowed) {
+      return res.status(429).json({
+        ok: false,
+        error: "RATE_LIMITED",
+        message: "Too many requests. Please slow down.",
+        retryAfter: Math.ceil(result.retryAfterMs / 1000),
       });
-      
-      return handler(req, res);
-    } catch (error) {
-      console.error('[RateLimit] Error:', error);
-      // If rate limiting fails, allow the request
-      return handler(req, res);
     }
+
+    return handler(req, res);
   };
 }
 
@@ -206,119 +211,82 @@ export function withEdgeRateLimit(
   options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
 ) {
   return async (req: NextRequest) => {
-    try {
-      const ip = getClientIp(req);
-      const key = `${ip}:${req.nextUrl.pathname}`;
-      
-      const result = await rateLimit(key, options);
-      
-      if (!result.allowed) {
-        const headers = createRateLimitHeaders(result);
-        
-        return new Response(JSON.stringify({
-          error: 'Too Many Requests',
-          message: 'Rate limit exceeded',
-          retryAfter: Math.ceil(result.retryAfterMs / 1000)
-        }), {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            ...headers
-          }
-        });
-      }
-      
-      return handler(req);
-    } catch (error) {
-      console.error('[EdgeRateLimit] Error:', error);
-      // If rate limiting fails, allow the request
-      return handler(req);
+    const ip = getClientIp(req);
+    const key = `${ip}:${req.nextUrl.pathname}`;
+    const result = await rateLimit(key, options);
+
+    if (!result.allowed) {
+      const headers = createRateLimitHeaders(result);
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "RATE_LIMITED",
+          message: "Too many requests. Please slow down.",
+          retryAfter: Math.ceil(result.retryAfterMs / 1000),
+        }),
+        { status: 429, headers: { "Content-Type": "application/json", ...headers } }
+      );
     }
+
+    return handler(req);
   };
 }
 
-// ==================== UTILITY FUNCTIONS ====================
-export async function isRateLimited(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL): Promise<boolean> {
-  const result = await rateLimit(identifier, options);
-  return !result.allowed;
-}
+// Single alias (no duplicates)
+export const withRateLimit = withApiRateLimit;
 
-export async function checkRateLimit(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL): Promise<RateLimitResult> {
-  return rateLimit(identifier, options);
-}
+// ==================== ADMIN / DEBUG ====================
 
-export async function rateLimitForRequestIp(req: NextApiRequest | NextRequest, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL): Promise<{ ip: string } & RateLimitResult> {
-  const ip = getClientIp(req);
-  const result = await rateLimit(ip, options);
-  return { ip, ...result };
-}
-
-// ==================== ADMIN FUNCTIONS ====================
 export async function getRateLimiterStats(): Promise<{
   memoryStoreSize: number;
   usingRedis: boolean;
-  configs: typeof RATE_LIMIT_CONFIGS;
 }> {
   let usingRedis = false;
-  
-  try {
-    const { getRedis } = await import('@/lib/redis');
-    const redis = getRedis();
-    if (redis && redis.ping) {
+  const redis = await tryGetRedis();
+  if (redis?.ping) {
+    try {
       await redis.ping();
       usingRedis = true;
+    } catch {
+      usingRedis = false;
     }
-  } catch {
-    // Redis not available
   }
-  
-  return {
-    memoryStoreSize: memoryStore.size,
-    usingRedis,
-    configs: RATE_LIMIT_CONFIGS
-  };
+  return { memoryStoreSize: memoryStore.size, usingRedis };
 }
 
-export async function resetRateLimit(keyPattern: string): Promise<void> {
-  try {
-    const { getRedis } = await import('@/lib/redis');
-    const redis = getRedis();
-    
-    if (redis && redis.keys && redis.del) {
-      const keys = await redis.keys(`${keyPattern}*`);
-      if (keys.length > 0) {
-        await redis.del(...keys);
-      }
+export async function resetRateLimit(keyPrefix: string): Promise<void> {
+  const redis = await tryGetRedis();
+  if (redis?.keys && redis?.del) {
+    try {
+      const keys: string[] = await redis.keys(`${keyPrefix}*`);
+      if (keys.length) await redis.del(...keys);
+    } catch {
+      // ignore
     }
-  } catch {
-    // Fallback to memory store
   }
-  
-  // Clear memory store
-  for (const key of memoryStore.keys()) {
-    if (key.startsWith(keyPattern)) {
-      memoryStore.delete(key);
-    }
+  for (const k of memoryStore.keys()) {
+    if (k.startsWith(keyPrefix)) memoryStore.delete(k);
   }
 }
 
 export async function unblock(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL): Promise<void> {
-  const key = getRateLimitKey(identifier, options);
-  
-  try {
-    const { getRedis } = await import('@/lib/redis');
-    const redis = getRedis();
-    if (redis && redis.del) {
+  const key = makeStoreKey(identifier, options);
+  const redis = await tryGetRedis();
+  if (redis?.del) {
+    try {
       await redis.del(key);
+    } catch {
+      // ignore
     }
-  } catch {
-    // Fallback to memory store
   }
-  
   memoryStore.delete(key);
 }
 
-// ==================== DEFAULT EXPORT ====================
+export async function isRateLimited(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL) {
+  const r = await rateLimit(identifier, options);
+  return !r.allowed;
+}
+
 export default {
   rateLimit,
   getClientIp,
@@ -326,10 +294,9 @@ export default {
   RATE_LIMIT_CONFIGS,
   withApiRateLimit,
   withEdgeRateLimit,
+  withRateLimit,
   isRateLimited,
-  checkRateLimit,
-  rateLimitForRequestIp,
   getRateLimiterStats,
   resetRateLimit,
-  unblock
+  unblock,
 };

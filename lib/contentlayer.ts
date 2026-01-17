@@ -665,7 +665,8 @@ export const allPrints = DATA.allPrints ?? [];
 export const allResources = DATA.allResources ?? [];
 export const allStrategies = DATA.allStrategies ?? [];
 
-export default {
+const contentlayerApi = {
+
   getContentlayerData,
   getPublishedDocuments,
   getDocBySlug,
@@ -729,4 +730,7 @@ export default {
   allPrints,
   allResources,
   allStrategies,
+
 };
+export default contentlayerApi;
+

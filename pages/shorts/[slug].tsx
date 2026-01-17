@@ -31,13 +31,13 @@ const BackToTop = dynamic(
   { ssr: false }
 );
 
-// Import your existing components
-const ShortHero = dynamic(() => import("@/components/shorts/ShortHero"), { ssr: false });
-const ShortContent = dynamic(() => import("@/components/shorts/ShortContent"), { ssr: false });
-const ShortNavigation = dynamic(() => import("@/components/shorts/ShortNavigation"), { ssr: false });
-const ShortActions = dynamic(() => import("@/components/shorts/ShortActions"), { ssr: false });
-const ShortMetadata = dynamic(() => import("@/components/shorts/ShortMetadata"), { ssr: false });
-const ShortComments = dynamic(() => import("@/components/shorts/ShortComments"), { ssr: false });
+// Import your existing components - FIXED SYNTAX
+const ShortHero = dynamic(() => import("@/components/shorts/ShortHero").then(mod => ({ default: mod.default || mod })), { ssr: false });
+const ShortContent = dynamic(() => import("@/components/shorts/ShortContent").then(mod => ({ default: mod.default || mod })), { ssr: false });
+const ShortNavigation = dynamic(() => import("@/components/shorts/ShortNavigation").then(mod => ({ default: mod.default || mod })), { ssr: false });
+const ShortActions = dynamic(() => import("@/components/shorts/ShortActions").then(mod => ({ default: mod.default || mod })), { ssr: false });
+const ShortMetadata = dynamic(() => import("@/components/shorts/ShortMetadata").then(mod => ({ default: mod.default || mod })), { ssr: false });
+const ShortComments = dynamic(() => import("@/components/shorts/ShortComments").then(mod => ({ default: mod.default || mod })), { ssr: false });
 
 interface Short {
   title: string;

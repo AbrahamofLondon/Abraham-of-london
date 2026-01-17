@@ -103,3 +103,13 @@ export function getDownloadBySlug(slug: string): Download | null {
     content,
   };
 }
+
+// Create a named object for default export
+const downloadsDataApi = {
+  getAllDownloadsMeta,
+  getDownloadSlugs,
+  getDownloadBySlug,
+};
+
+// Export default for compatibility
+export default downloadsDataApi;

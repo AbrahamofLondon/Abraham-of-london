@@ -143,7 +143,8 @@ export function checkImports() {
 }
 
 // Default export
-export default {
+const importsApi = {
+
   siteConfig,
   getPageTitle,
   absUrl,
@@ -155,4 +156,6 @@ export default {
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
   checkImports
+
 };
+export default importsApi;

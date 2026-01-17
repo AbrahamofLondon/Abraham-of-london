@@ -307,7 +307,8 @@ export type TransitionConfig = TransitionLike;
 // DEFAULT EXPORT
 // =============================================================================
 
-export default {
+const framerTransitionsApi = {
+
   // Core
   springTransition,
   fastSpringTransition,
@@ -357,6 +358,51 @@ export default {
   createSpringTransition,
   createDurationTransition,
   createStaggeredTransition,
+
 };
 
 
+
+
+
+
+const framerTransitionsApi = {
+  bouncySpringTransition,
+  breatheTransition,
+  createDurationTransition,
+  createSpringTransition,
+  createStaggeredTransition,
+  defaultTransition,
+  drawerTransition,
+  easeInOutTransition,
+  easeInTransition,
+  easeOutTransition,
+  EasingCurves,
+  extraLongTransition,
+  fadeInTransition,
+  fastSpringTransition,
+  gentleSpringTransition,
+  instantTransition,
+  linearTransition,
+  loaderTransition,
+  longTransition,
+  microTransition,
+  modalTransition,
+  pageTransition,
+  pulseTransition,
+  rotateTransition,
+  scaleTransition,
+  sharpTransition,
+  shortTransition,
+  slideDownTransition,
+  slideUpTransition,
+  smoothTransition,
+  springTransition,
+  staggeredFastSpringTransition,
+  staggeredSpringTransition,
+  staggeredTransition,
+  stiffSpringTransition,
+  TransitionPresets
+};
+
+export default framerTransitionsApi;

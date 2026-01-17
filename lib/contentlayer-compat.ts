@@ -481,7 +481,69 @@ export const allPrints = DATA.allPrints ?? [];
 export const allResources = DATA.allResources ?? [];
 export const allStrategies = DATA.allStrategies ?? [];
 
-export default {
+/** Additional utility functions for common patterns */
+export function getDocumentsByType(type: string): DocBase[] {
+  switch (type) {
+    case 'post':
+      return DATA.allPosts ?? [];
+    case 'book':
+      return DATA.allBooks ?? [];
+    case 'canon':
+      return DATA.allCanons ?? [];
+    case 'download':
+      return DATA.allDownloads ?? [];
+    case 'event':
+      return DATA.allEvents ?? [];
+    case 'short':
+      return DATA.allShorts ?? [];
+    case 'print':
+      return DATA.allPrints ?? [];
+    case 'resource':
+      return DATA.allResources ?? [];
+    case 'strategy':
+      return DATA.allStrategies ?? [];
+    default:
+      return DATA.allDocuments?.filter(doc => doc.type === type) ?? [];
+  }
+}
+
+export function getPublishedDocumentsByType(type: string): DocBase[] {
+  return getDocumentsByType(type).filter(isPublished);
+}
+
+export function getAllSlugs(type?: string): string[] {
+  let documents = DATA.allDocuments;
+  if (type) {
+    documents = getDocumentsByType(type);
+  }
+  return documents
+    .filter(isPublished)
+    .map(doc => doc.slug || '')
+    .filter(Boolean);
+}
+
+export function getFeaturedDocuments(count: number = 3): DocBase[] {
+  return (DATA.allDocuments ?? [])
+    .filter(doc => doc.featured && isPublished(doc))
+    .sort((a, b) => safeDateMs(b?.date) - safeDateMs(a?.date))
+    .slice(0, count);
+}
+
+export function getRecentDocuments(count: number = 5, type?: string): DocBase[] {
+  let documents = DATA.allDocuments;
+  if (type) {
+    documents = getDocumentsByType(type);
+  }
+  
+  return documents
+    .filter(isPublished)
+    .sort((a, b) => safeDateMs(b?.date) - safeDateMs(a?.date))
+    .slice(0, count);
+}
+
+// Create the default export object - ONLY ONE DEFINITION
+const contentlayerCompatApi = {
+  // Core functions
   getContentlayerData,
   getPublishedDocuments,
   getDocBySlug,
@@ -497,6 +559,8 @@ export default {
   toUiDoc,
   isContentlayerLoaded,
   assertContentlayerHasDocs,
+  
+  // Type-specific getters
   getAllBooks,
   getServerAllBooks,
   getServerBookBySlug,
@@ -521,11 +585,27 @@ export default {
   getAllPosts,
   getServerAllPosts,
   getServerPostBySlug,
+  
+  // Async versions
   getServerAllBooksAsync,
   getServerAllCanonsAsync,
   getServerAllDownloadsAsync,
   getServerAllShortsAsync,
+  
+  // Utility functions
   recordContentView,
+  getDocumentsByType,
+  getPublishedDocumentsByType,
+  getAllSlugs,
+  getFeaturedDocuments,
+  getRecentDocuments,
+  
+  // Async wrappers
+  getContentlayerDataAsync,
+  getPublishedDocumentsAsync,
+  getDocBySlugAsync,
+  
+  // Data constants
   allDocuments,
   allPosts,
   allBooks,
@@ -537,3 +617,5 @@ export default {
   allResources,
   allStrategies,
 };
+
+export default contentlayerCompatApi;

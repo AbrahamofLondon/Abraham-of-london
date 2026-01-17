@@ -237,7 +237,7 @@ export function getAllPostsMeta(): Post[] {
   }
 }
 
-export function getPostBySlug(slug: string): PostWithContent | null {
+export async function getPostBySlug(slug: string): Promise<PostWithContent | null> {
   try {
     if (!slug || typeof slug !== 'string') {
       console.error("getPostBySlug called with invalid slug:", slug);
@@ -250,14 +250,15 @@ export function getPostBySlug(slug: string): PostWithContent | null {
       return null;
     }
     
-    return fromMdxDocument(doc);
+    const resolvedDoc = await doc;
+return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
   } catch (error) {
     console.error(`Error fetching post by slug (${slug}):`, error);
     return null;
   }
 }
 
-export function getAllPosts(): PostWithContent[] {
+export async function getAllPosts(): Promise<PostWithContent[]> {
   try {
     const metas = getAllPostsMeta();
     if (metas.length === 0) return [];
@@ -592,5 +593,10 @@ const postsData = {
 };
 
 export default postsData;
+
+
+
+
+
 
 

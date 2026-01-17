@@ -232,10 +232,13 @@ export const mockEvents: EventMeta[] = [
   },
 ];
 
-export default {
+// Create a named object for default export
+const eventsDataApi = {
   getEventSlugs,
   getEventBySlug,
   getAllEvents,
   getUpcomingEvents,
   mockEvents,
 };
+
+export default eventsDataApi;

@@ -84,7 +84,7 @@ These frameworks are designed to be used in boardrooms, founding teams, househol
 ## The Core Library
 
 ### 1) The Purpose Pyramid
-**Use:** Defining organizational or personal purpose (and preventing drift)  
+**Use:** Defining organizational or personal purpose (and preventing drift)
 **Best for:** Boards, founders, leaders re-architecting a mandate
 
 **The Problem It Solves**
@@ -133,7 +133,7 @@ A four-level progression:
 - Purpose without sacrifice (no cost = no conviction)
 
 **Canon root**
-**The Garden Mandate:** identity precedes assignment; assignment precedes stewardship.  
+**The Garden Mandate:** identity precedes assignment; assignment precedes stewardship.
 Purpose is not emotion — it’s *placement + responsibility + order*.
 
 
@@ -142,10 +142,10 @@ Purpose is not emotion — it’s *placement + responsibility + order*.
 
 
 ### 3) The Legacy Canvas
-**Use:** Long-term legacy planning that doesn’t collapse into money-talk  
+**Use:** Long-term legacy planning that doesn’t collapse into money-talk
 **Best for:** founders, executives, family wealth planning, succession
 
-Legacy is not “what people say at your funeral.”  
+Legacy is not “what people say at your funeral.”
 Legacy is what your life *builds into others and systems* while you’re still alive.
 
 **Dimensions**

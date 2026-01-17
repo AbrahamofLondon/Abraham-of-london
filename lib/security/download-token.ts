@@ -36,4 +36,16 @@ export function verifyDownloadToken(token: string) {
   }
 }
 
-export default { createDownloadToken, verifyDownloadToken };
+const downloadTokenApi = {
+ createDownloadToken, verifyDownloadToken 
+};
+
+
+
+
+const downloadTokenApi = {
+  createDownloadToken,
+  verifyDownloadToken
+};
+
+export default downloadTokenApi;

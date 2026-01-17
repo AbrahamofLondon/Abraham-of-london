@@ -50,7 +50,7 @@ interface HealthReport {
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const requestId = createHash('md5').update(`${Date.now()}-${Math.random()}`).digest('hex');
-  const startTime = Date.now();
+  const _startTime = Date.now();
 
   try {
     // 1. ADMIN AUTH (basic check)

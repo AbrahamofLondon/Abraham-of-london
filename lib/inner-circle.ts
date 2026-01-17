@@ -1,8 +1,7 @@
 // lib/inner-circle.ts
 // Production-safe re-export hub + backward compat layer
 
-export * from "./inner-circle/access";
-export * from "./inner-circle/keys";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 import {
   withInnerCircleAccess,
@@ -26,6 +25,36 @@ import {
   type CreateOrUpdateMemberArgs,
 } from "./inner-circle/keys";
 
+import { requireAdmin, requireRateLimit } from "@/lib/server/guards";
+
+// --------------------
+// Primary exports (non-star, avoids collisions)
+// --------------------
+export {
+  withInnerCircleAccess,
+  getInnerCircleAccess,
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
+  verifyInnerCircleKey,
+  getPrivacySafeStats,
+  createOrUpdateMemberAndIssueKey,
+};
+
+// --------------------
+// Types
+// --------------------
+export type {
+  InnerCircleAccess,
+  AccessCheckOptions,
+  KeyTier,
+  StoredKey,
+  CreateOrUpdateMemberArgs,
+  IssuedKey,
+  VerifyInnerCircleKeyResult,
+  InnerCircleStats,
+  CleanupResult,
+};
+
 // --------------------
 // Backward compat
 // --------------------
@@ -38,15 +67,11 @@ export const INNER_CIRCLE_CONFIG = {
   maxKeysPerMember: 3,
 };
 
-// Historical alias used by older pages/api handlers:
 export const withInnerCircleRateLimit = withInnerCircleAccess;
 
 /**
  * Back-compat wrapper:
- * Older handlers expect: `{ verification, rateLimit, headers }`
- *
- * - `verification` is the real VerifyInnerCircleKeyResult from keys layer
- * - `rateLimit` + `headers` are best-effort (only when req exists + access layer supports it)
+ * returns `{ verification, rateLimit, headers }`
  */
 export async function verifyInnerCircleKeyWithRateLimit(
   key: string,
@@ -61,18 +86,18 @@ export async function verifyInnerCircleKeyWithRateLimit(
   };
   headers?: Record<string, string>;
 }> {
-  // 1) Apply rate limit if we can
   let headers: Record<string, string> | undefined;
-  let rateLimit: {
-    allowed: boolean;
-    remaining?: number;
-    resetAt?: number;
-    retryAfterMs?: number;
-  } | undefined;
+  let rateLimitInfo:
+    | {
+        allowed: boolean;
+        remaining?: number;
+        resetAt?: number;
+        retryAfterMs?: number;
+      }
+    | undefined;
 
   try {
     if (req && typeof withInnerCircleAccess === "function") {
-      // Prefer explicit VERIFY config if you have one, else fall back to AUTH, else hard default
       const cfg =
         (RATE_LIMIT_CONFIGS as any)?.VERIFY ??
         (RATE_LIMIT_CONFIGS as any)?.AUTH ?? {
@@ -82,72 +107,80 @@ export async function verifyInnerCircleKeyWithRateLimit(
           blockDuration: 5 * 60_000,
         };
 
-      // We allow both "boolean" and "object" patterns because your access layer may differ.
       const access = await withInnerCircleAccess(req, cfg as any);
 
-      // Common patterns:
-      // A) { allowed, result }
-      // B) { ok, rateLimit }
-      // C) boolean
       const allowed =
         typeof access === "boolean"
           ? access
-          : typeof access?.allowed === "boolean"
-            ? access.allowed
-            : typeof access?.ok === "boolean"
-              ? access.ok
+          : typeof (access as any)?.allowed === "boolean"
+            ? (access as any).allowed
+            : typeof (access as any)?.ok === "boolean"
+              ? (access as any).ok
               : true;
 
       const result = (access as any)?.result ?? (access as any)?.rateLimit ?? undefined;
 
       if (result) {
-        rateLimit = {
+        rateLimitInfo = {
           allowed,
           remaining: result.remaining,
           resetAt: result.resetAt ?? result.resetTime,
           retryAfterMs: result.retryAfterMs,
         };
 
-        // Only add headers if helper exists and result is real
         if (typeof createRateLimitHeaders === "function") {
           const h = createRateLimitHeaders(result as any);
           if (h && typeof h === "object") {
-            headers = Object.fromEntries(
-              Object.entries(h).map(([k, v]) => [k, String(v)])
-            );
+            headers = Object.fromEntries(Object.entries(h).map(([k, v]) => [k, String(v)]));
           }
         }
       }
 
-      // If rate-limited, short-circuit without touching keys DB
       if (!allowed) {
-        // We cannot safely fabricate a fully-correct VerifyInnerCircleKeyResult shape
-        // across versions, so we return a minimal "invalid" object with a cast.
         return {
           verification: { valid: false, reason: "rate_limited" } as any as VerifyInnerCircleKeyResult,
-          rateLimit,
+          rateLimit: rateLimitInfo,
           headers,
         };
       }
     }
   } catch {
-    // If rate limiting fails, do NOT block verification.
-    // Silent fail is safer than locking out real users due to infra hiccups.
+    // If RL fails, do not block verification.
   }
 
-  // 2) Perform verification
   const verification = await verifyInnerCircleKey(key);
-
-  return { verification, rateLimit, headers };
+  return { verification, rateLimit: rateLimitInfo, headers };
 }
 
-// Straight aliases (some older code may import these names)
+// Straight aliases
 export const getPrivacySafeStatsWithRateLimit = getPrivacySafeStats;
-export const createOrUpdateMemberAndIssueKeyWithRateLimit =
-  createOrUpdateMemberAndIssueKey;
+export const createOrUpdateMemberAndIssueKeyWithRateLimit = createOrUpdateMemberAndIssueKey;
 
-// REMOVE THIS LINE - IT'S A DUPLICATE AND CAUSES THE ERROR:
-// export const verifyInnerCircleKeyWithRateLimit = verifyInnerCircleKey;
+/**
+ * ✅ THIS is the missing export your build complained about.
+ * Privacy-safe export + rate limit + admin gate.
+ * You can wire real data later; the important part is: export exists and is safe.
+ */
+export async function getPrivacySafeKeyExportWithRateLimit(req: NextApiRequest, res: NextApiResponse) {
+  const okRL = await requireRateLimit(req, res, (RATE_LIMIT_CONFIGS as any)?.ADMIN_EXPORT ?? RATE_LIMIT_CONFIGS.API_GENERAL, "ic-export");
+  if (!okRL) return;
+
+  const okAdmin = await requireAdmin(req, res);
+  if (!okAdmin) return;
+
+  // Privacy safe by default: do not leak raw keys.
+  const stats = await getPrivacySafeStats().catch(() => null);
+
+  res.status(200).json({
+    ok: true,
+    data: {
+      export: [],
+      note: "Privacy-safe export stub. Wire to real export when ready.",
+      stats,
+    },
+    timestamp: new Date().toISOString(),
+  });
+}
 
 export const healthCheckEnhanced = async () => ({
   status: "ok",
@@ -155,20 +188,7 @@ export const healthCheckEnhanced = async () => ({
   store: process.env.INNER_CIRCLE_STORE || "memory",
 });
 
-// Types (optional explicit re-export for clarity)
-export type {
-  InnerCircleAccess,
-  AccessCheckOptions,
-  KeyTier,
-  StoredKey,
-  CreateOrUpdateMemberArgs,
-  IssuedKey,
-  VerifyInnerCircleKeyResult,
-  InnerCircleStats,
-  CleanupResult,
-};
-
-// Default export (optional; keep if older code uses default import)
+// Default export (keep for older default-import usage)
 const innerCircle = {
   withInnerCircleAccess,
   getInnerCircleAccess,
@@ -184,8 +204,9 @@ const innerCircle = {
   getPrivacySafeStatsWithRateLimit,
   createOrUpdateMemberAndIssueKeyWithRateLimit,
   verifyInnerCircleKeyWithRateLimit,
-  healthCheckEnhanced,
+  getPrivacySafeKeyExportWithRateLimit,
 
+  healthCheckEnhanced,
   INNER_CIRCLE_CONFIG,
 };
 

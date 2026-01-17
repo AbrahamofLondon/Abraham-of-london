@@ -696,7 +696,8 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
 }
 
 /// Export everything for backward compatibility
-export default {
+const keysApi = {
+
   generateAccessKey,
   storeKey,
   getKey,
@@ -715,4 +716,6 @@ export default {
   getPrivacySafeStats,
   recordInnerCircleUnlock,
   cleanupExpiredData
+
 };
+export default keysApi;

@@ -103,7 +103,7 @@ function sortByDateDesc<T extends { date?: string | null; fileStats?: { mtime: D
     if (keyB !== keyA) return keyB - keyA;
     
     // Fallback to alphabetical by slug
-    return (a.slug || '').localeCompare(b.slug || '');
+    return (((a as any).slug || '') as string).localeCompare((((b as any).slug || '') as string));
   });
 }
 
@@ -354,8 +354,8 @@ export async function getAdjacentDocuments(
   }
   
   return {
-    prev: currentIndex > 0 ? docs[currentIndex - 1] : null,
-    next: currentIndex < docs.length - 1 ? docs[currentIndex + 1] : null
+    prev: (currentIndex > 0 ? (docs[currentIndex - 1] ?? null) : null),
+    next: (currentIndex < docs.length - 1 ? (docs[currentIndex + 1] ?? null) : null)
   };
 }
 
@@ -444,3 +444,6 @@ function readRawDocsSync(collection: string): RawDoc[] {
   
   return docs;
 }
+
+
+

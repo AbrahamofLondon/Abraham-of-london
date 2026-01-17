@@ -1,7 +1,7 @@
 // pages/api/generate-pdfs/batch.ts 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PDFGenerationPipeline } from '../../../scripts/generate-pdfs';
-import { PDF_REGISTRY } from '../../../scripts/pdf-registry';
+import { PDFGenerationPipeline as _PDFGenerationPipeline } from '../../../scripts/generate-pdfs';
+import { PDF_REGISTRY as _PDF_REGISTRY } from '../../../scripts/pdf-registry';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -63,3 +63,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+

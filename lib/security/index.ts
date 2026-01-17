@@ -863,7 +863,8 @@ export function validateOrigin(req: NextApiRequest, config: SecurityConfig): boo
 // -----------------------------------------------------------------------------
 // Export unified interface
 // -----------------------------------------------------------------------------
-export default {
+const indexApi = {
+
   config: securityConfig,
   monitor: securityMonitor,
   rateLimiter,
@@ -873,7 +874,10 @@ export default {
     createSecurityHeaders,
     validateOrigin,
   },
+
 };
+export default indexApi;
 
 // Type exports for convenience
 export type { SecurityEvent, RequestLog, LimitConfig, LimitResult };
+

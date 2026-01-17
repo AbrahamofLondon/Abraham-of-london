@@ -1,0 +1,15 @@
+# Netlify redirects
+# =================
+
+# Health check endpoint
+/health  /api/health  200
+
+# Legacy URL corrections (example - add your actual known broken URLs here)
+/ultimate-purpose-of-man-   /blog/ultimate-purpose-of-man   301!
+/old-slug-example   /blog/new-slug   301!
+
+# Preserve old static file paths
+/downloads/*   /downloads/:splat   200
+
+# 404 fallback (serves your static 404.html)
+/*   /404.html   404

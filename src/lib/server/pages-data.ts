@@ -208,10 +208,13 @@ export const mockPages: PageMeta[] = [
   },
 ];
 
-// Export default for compatibility
-export default {
+// Create a named object for default export
+const pagesDataApi = {
   getPageSlugs,
   getPageBySlug,
   getAllPages,
   mockPages,
 };
+
+// Export default for compatibility
+export default pagesDataApi;

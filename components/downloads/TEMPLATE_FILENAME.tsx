@@ -1,4 +1,4 @@
-// content/downloads/TEMPLATE_FILENAME.tsx
+// content/downloads/TEMPLATE_FILENAME.tsx - FIXED VERSION
 import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 
@@ -11,8 +11,8 @@ export type DownloadMetadata = {
   slug: string;
   type: "Download";
 
-  date?: string; // YYYY-MM-DD
-  updated?: string; // YYYY-MM-DD
+  date?: string;
+  updated?: string;
   author?: string;
 
   subtitle?: string;
@@ -83,19 +83,16 @@ export const metadata: DownloadMetadata = {
 };
 
 type Props = {
-  // future-proof slot for templating
   showHeader?: boolean;
 };
 
 const DownloadTemplate: React.FC<Props> = ({ showHeader = true }) => {
-  return (
-    <BrandFrame
-      title={metadata.title}
-      subtitle={metadata.subtitle}
-      pageSize="A4"
-      author={metadata.author}
-      date={metadata.date}
-    >
+  // Create props object with only defined values
+  const brandFrameProps = {
+    title: metadata.title,
+    subtitle: metadata.subtitle || "", // Provide default for required prop
+    pageSize: "A4" as const,
+    children: (
       <div className="space-y-4">
         {showHeader ? (
           <header className="space-y-1">
@@ -108,7 +105,6 @@ const DownloadTemplate: React.FC<Props> = ({ showHeader = true }) => {
 
         <hr className="opacity-20" />
 
-        {/* Start of Download Content */}
         <section className="space-y-3">
           <p className="text-sm">
             This is where the unique content for this download goes.
@@ -120,10 +116,20 @@ const DownloadTemplate: React.FC<Props> = ({ showHeader = true }) => {
             <li>Use spacing like a grown-up — whitespace is governance.</li>
           </ul>
         </section>
-        {/* End of Download Content */}
       </div>
-    </BrandFrame>
-  );
+    )
+  };
+
+  // Conditionally add optional props
+  if (metadata.author !== undefined) {
+    (brandFrameProps as any).author = metadata.author;
+  }
+  
+  if (metadata.date !== undefined) {
+    (brandFrameProps as any).date = metadata.date;
+  }
+
+  return <BrandFrame {...brandFrameProps} />;
 };
 
 export default DownloadTemplate;

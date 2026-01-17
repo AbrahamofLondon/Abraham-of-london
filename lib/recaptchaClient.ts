@@ -403,7 +403,8 @@ export async function getRecaptchaTokenForActions(
   return results;
 }
 
-export default {
+const recaptchaClientApi = {
+
   getRecaptchaToken,
   getRecaptchaTokenSafe,
   loadRecaptchaScript,
@@ -414,4 +415,7 @@ export default {
   getRecaptchaTokenForActions,
   getSiteKey,
   isValidAction,
+
 };
+export default recaptchaClientApi;
+
