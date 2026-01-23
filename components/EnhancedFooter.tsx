@@ -19,11 +19,12 @@ import {
   MessageCircle,
 } from "lucide-react";
 
-// Import the actual site config or use fallbacks
-import { siteConfig } from "@/lib/imports";
+// Import the actual site config
+import { siteConfig } from "@/config/site";
 
 type SocialPlatform =
   | "twitter"
+  | "x"
   | "linkedin"
   | "instagram"
   | "youtube"
@@ -39,6 +40,7 @@ const iconMap: Record<
   React.ComponentType<React.SVGProps<SVGSVGElement>>
 > = {
   twitter: Twitter,
+  x: Twitter,
   linkedin: Linkedin,
   instagram: Instagram,
   youtube: Youtube,
@@ -52,17 +54,14 @@ const iconMap: Record<
 
 // FALLBACK SITE CONFIG in case imports fail
 const fallbackSiteConfig = {
-  title: "Abraham of London",
-  description: "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.",
   brand: {
+    name: "Abraham of London",
     tagline: "Faith · Strategy · Fatherhood"
   },
-  contact: {
+  author: {
     email: "info@abrahamoflondon.org",
-    phone: "+44 20 8622 5909",
-    address: "Based in London, working globally"
   },
-  socialLinks: [
+  socials: [
     { kind: "twitter" as const, label: "Twitter", href: "https://twitter.com/abrahamoflondon" },
     { kind: "linkedin" as const, label: "LinkedIn", href: "https://linkedin.com/company/abrahamoflondon" },
     { kind: "instagram" as const, label: "Instagram", href: "https://instagram.com/abrahamoflondon" },
@@ -201,14 +200,15 @@ function FooterLink({
 export default function EnhancedFooter(): JSX.Element {
   const year = new Date().getFullYear();
 
-  const email = config.contact?.email || "info@abrahamoflondon.org";
-  const phone = config.contact?.phone || "+44 20 8622 5909";
-  const location = config.contact?.address || "Based in London, working globally";
+  // Use the correct structure from your actual siteConfig
+  const email = config.author?.email || "info@abrahamoflondon.org";
+  const phone = "+44 20 8622 5909"; // Hardcoded since not in your config
+  const location = "Based in London, working globally"; // Hardcoded
 
-  const description = config.description || 
+  const description = config.seo?.description || 
     "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.";
 
-  const socials = Array.isArray(config.socialLinks) ? config.socialLinks : [];
+  const socials = Array.isArray(config.socials) ? config.socials : [];
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -228,10 +228,10 @@ export default function EnhancedFooter(): JSX.Element {
               <Link href="/" className="group inline-block mb-6" aria-label="Go to homepage">
                 <div className="flex flex-col gap-1.5">
                   <h2 className="font-serif text-2xl lg:text-3xl font-bold text-white tracking-tight">
-                    Abraham<span className="text-amber-400"> of London</span>
+                    {config.brand?.name ? config.brand.name.replace('Abraham', 'Abraham<span className="text-amber-400">').replace(' of London', '</span> of London') : 'Abraham<span className="text-amber-400"> of London</span>'}
                   </h2>
                   <p className="text-xs font-medium tracking-[0.2em] text-amber-400/80 uppercase">
-                    {config.brand?.tagline ?? "Faith · Strategy · Fatherhood"}
+                    {config.brand?.tagline || "Faith · Strategy · Fatherhood"}
                   </p>
                 </div>
               </Link>
@@ -334,7 +334,7 @@ export default function EnhancedFooter(): JSX.Element {
             <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="text-center lg:text-left">
                 <p className="text-sm text-gray-400/90 font-light">
-                  © {year} {config.title || "Abraham of London"}. All rights reserved.
+                  © {year} {config.brand?.name || "Abraham of London"}. All rights reserved.
                 </p>
                 <p className="mt-2 text-xs text-gray-500/80 font-light">
                   Built for those who still believe in duty, consequence, and legacy.

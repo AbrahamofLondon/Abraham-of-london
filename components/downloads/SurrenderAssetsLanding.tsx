@@ -1,13 +1,12 @@
-// components/downloads/SurrenderAssetsLanding.tsx - PROPERLY FIXED
+// components/downloads/SurrenderAssetsLanding.tsx - ROBUST IMPORT
 import React from 'react';
-import { 
-  getAllPDFItems, 
-  getPDFsByType, 
-  configToItem, 
-  PDFConfig, 
-  PDFItem 
-} from '@/scripts/pdf-registry';
+import * as PDFRegistry from '@/scripts/pdf-registry';
 import { Shield, Download, FileText, Users, Zap, Award } from 'lucide-react';
+
+// Use the imported functions
+const { getAllPDFItems, getPDFsByType, configToItem } = PDFRegistry;
+type PDFItem = PDFRegistry.PDFItem;
+type PDFConfig = PDFRegistry.PDFConfig;
 
 interface AssetCardProps {
   asset: PDFItem;

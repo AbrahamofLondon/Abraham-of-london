@@ -1,7 +1,7 @@
 // components/content/ContentLayout.tsx - FIXED
 import * as React from "react";
 import Head from "next/head";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
@@ -14,11 +14,11 @@ type Frontmatter = {
   title: string;
   excerpt?: string;
   description?: string;
-  date?: string; // ISO-ish or parseable
+  date?: string;
   author?: string;
   category?: string;
   tags?: string[];
-  readTime?: string; // e.g. "6" or "6 min read" or "6 min"
+  readTime?: string;
   coverImage?: CoverImage;
   url?: string;
   subtitle?: string;
@@ -28,16 +28,16 @@ type Frontmatter = {
 
 export type ContentLayoutProps = {
   frontmatter: Frontmatter;
-  mdxSource: MDXRemoteSerializeResult;
+  mdxSource: string;
   contentType?: string;
   children?: React.ReactNode;
 };
 
-function coerceOgImage(coverImage: CoverImage): string | undefined {
-  if (!coverImage) return undefined;
+function coerceOgImage(coverImage: CoverImage): string {
+  if (!coverImage) return "";
   if (typeof coverImage === "string") return coverImage;
   if (typeof coverImage === "object" && typeof coverImage.src === "string") return coverImage.src;
-  return undefined;
+  return "";
 }
 
 function normalizeReadTime(input?: string): string | null {
@@ -45,10 +45,8 @@ function normalizeReadTime(input?: string): string | null {
   const s = String(input).trim();
   if (!s) return null;
 
-  // If user already wrote "min read" etc., keep it.
   if (/min/i.test(s)) return s;
 
-  // If it's numeric, format as "X min read"
   const n = Number(s);
   if (Number.isFinite(n) && n > 0) return `${Math.round(n)} min read`;
 
@@ -73,8 +71,6 @@ export default function ContentLayout({
 
   const ogImage = coerceOgImage(frontmatter.coverImage);
   const readTime = normalizeReadTime(frontmatter.readTime);
-  
-  // FIX: Ensure keywords is always an array (not undefined)
   const keywords = frontmatter.tags || [];
 
   return (
@@ -82,22 +78,22 @@ export default function ContentLayout({
       title={pageTitle}
       className={`bg-charcoal content-${contentType}`}
       description={description}
-      keywords={keywords} // Now always an array
+      keywords={keywords}
       canonicalUrl={fullUrl}
-      ogImage={ogImage || ""} // Ensure ogImage is string, not undefined
+      ogImage={ogImage}
       ogType="article"
     >
       <Head>
-        {frontmatter.date ? (
+        {frontmatter.date && (
           <meta
             property="article:published_time"
             content={new Date(frontmatter.date).toISOString()}
           />
-        ) : null}
+        )}
 
-        {frontmatter.author ? (
+        {frontmatter.author && (
           <meta property="article:author" content={frontmatter.author} />
-        ) : null}
+        )}
 
         {frontmatter.tags?.map((tag) => (
           <meta key={tag} property="article:tag" content={tag} />
@@ -112,31 +108,31 @@ export default function ContentLayout({
                 {contentType}
               </span>
 
-              {frontmatter.volumeNumber ? (
+              {frontmatter.volumeNumber && (
                 <span className="ml-2 inline-block rounded-full bg-charcoal-light px-3 py-1 text-xs font-medium text-cream/70">
                   Volume {frontmatter.volumeNumber}
                 </span>
-              ) : null}
+              )}
 
-              {frontmatter.featured ? (
+              {frontmatter.featured && (
                 <span className="ml-2 inline-block rounded-full bg-softGold px-3 py-1 text-xs font-semibold text-charcoal">
                   Featured
                 </span>
-              ) : null}
+              )}
             </div>
 
             <h1 className="mb-4 font-serif text-4xl font-semibold leading-tight text-cream md:text-5xl">
               {title}
             </h1>
 
-            {frontmatter.subtitle ? (
+            {frontmatter.subtitle && (
               <p className="mb-6 text-xl italic text-cream/80">
                 {frontmatter.subtitle}
               </p>
-            ) : null}
+            )}
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-cream/70">
-              {frontmatter.date ? (
+              {frontmatter.date && (
                 <time dateTime={frontmatter.date} className="flex items-center">
                   <svg
                     className="mr-2 h-4 w-4"
@@ -158,9 +154,9 @@ export default function ContentLayout({
                     day: "numeric",
                   })}
                 </time>
-              ) : null}
+              )}
 
-              {frontmatter.author ? (
+              {frontmatter.author && (
                 <span className="flex items-center">
                   <svg
                     className="mr-2 h-4 w-4"
@@ -178,9 +174,9 @@ export default function ContentLayout({
                   </svg>
                   {frontmatter.author}
                 </span>
-              ) : null}
+              )}
 
-              {readTime ? (
+              {readTime && (
                 <span className="flex items-center">
                   <svg
                     className="mr-2 h-4 w-4"
@@ -198,10 +194,10 @@ export default function ContentLayout({
                   </svg>
                   {readTime}
                 </span>
-              ) : null}
+              )}
             </div>
 
-            {frontmatter.tags?.length ? (
+            {frontmatter.tags && frontmatter.tags.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {frontmatter.tags.map((tag) => (
                   <span
@@ -212,11 +208,11 @@ export default function ContentLayout({
                   </span>
                 ))}
               </div>
-            ) : null}
+            )}
           </header>
 
           <div className="mt-8">
-            <MDXRemote {...mdxSource} components={mdxComponents} />
+            <MDXRemote source={mdxSource} components={mdxComponents} />
             {children}
           </div>
         </article>

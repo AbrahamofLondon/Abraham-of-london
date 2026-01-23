@@ -1,5 +1,4 @@
-// lib/content-fallback.ts
-// Direct imports from contentlayer/generated as fallback - NO DEPENDENCIES
+// lib/content-fallback.ts - FIXED WITH CORRECT TYPES
 import { 
   allPosts, 
   allBooks, 
@@ -12,18 +11,110 @@ import {
   allShorts 
 } from "@/lib/contentlayer";
 
-// FIX: Import correct type names (Post, Book) and alias them to preserve existing code
-import type {
-  Post as PostType,
-  Book as BookType,
-  Download as DownloadType,
-  Event as EventType,
-  Print as PrintType,
-  Resource as ResourceType,
-  Strategy as StrategyType,
-  Canon as CanonType,
-  Short as ShortType,
-} from "@/lib/contentlayer";
+// Define types based on actual Contentlayer data structure
+// Using more flexible types that match what's actually imported
+
+export interface DocBase {
+  _id?: string;
+  _raw?: {
+    sourceFilePath?: string;
+    sourceFileName?: string;
+    sourceFileDir?: string;
+    contentType?: string;
+    flattenedPath?: string;
+  };
+  type: string;
+  title: string;
+  description?: string;
+  date?: string;
+  tags?: string[];
+  draft?: boolean;
+  featured?: boolean;
+  slug?: string;
+  [key: string]: any; // Allow extra properties
+}
+
+// Extended types with optional properties
+export interface PostType extends DocBase {
+  type: 'Post';
+  excerpt?: string;
+  body?: any;
+  coverImage?: string;
+  author?: string;
+  category?: string;
+  readTime?: string;
+}
+
+export interface BookType extends DocBase {
+  type: 'Book';
+  excerpt?: string;
+  body?: any;
+  coverImage?: string;
+  author?: string;
+  publisher?: string;
+  isbn?: string;
+  pages?: number;
+}
+
+export interface DownloadType extends DocBase {
+  type: 'Download';
+  excerpt?: string;
+  body?: any;
+  fileUrl?: string;
+  fileSize?: string;
+  fileType?: string;
+}
+
+export interface EventType extends DocBase {
+  type: 'Event';
+  excerpt?: string;
+  body?: any;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  registrationUrl?: string;
+}
+
+export interface PrintType extends DocBase {
+  type: 'Print';
+  excerpt?: string;
+  body?: any;
+  coverImage?: string;
+  price?: string;
+  dimensions?: string;
+}
+
+export interface ResourceType extends DocBase {
+  type: 'Resource';
+  excerpt?: string;
+  body?: any;
+  category?: string;
+  downloadUrl?: string;
+}
+
+export interface StrategyType extends DocBase {
+  type: 'Strategy';
+  excerpt?: string;
+  body?: any;
+  category?: string;
+  confidential?: boolean;
+}
+
+export interface CanonType extends DocBase {
+  type: 'Canon';
+  excerpt?: string;
+  body?: any;
+  principle?: string;
+  chapter?: string;
+}
+
+export interface ShortType extends DocBase {
+  type: 'Short';
+  excerpt?: string;
+  body?: any;
+  format?: 'text' | 'audio' | 'video';
+  duration?: string;
+}
 
 // Union type for all documents
 export type AnyDoc = 
@@ -47,6 +138,13 @@ export type DocKind =
   | 'Strategy' 
   | 'Canon' 
   | 'Short';
+
+// ============================================
+// TYPE ASSERTION HELPERS
+// ============================================
+function assertDocType<T extends AnyDoc>(doc: DocBase, type: DocKind): T {
+  return { ...doc, type } as T;
+}
 
 // ============================================
 // SLUG HELPER
@@ -102,7 +200,9 @@ export const isPublished = (doc: AnyDoc): boolean => !isDraft(doc);
 
 // Posts
 export const getAllPostsDirect = (): PostType[] => {
-  return allPosts.filter(post => !post.draft) as PostType[];
+  return allPosts
+    .filter((post: any) => !post.draft)
+    .map((post: any) => assertDocType<PostType>(post, 'Post'));
 };
 
 export const getPostBySlugDirect = (slug: string): PostType | undefined => {
@@ -111,7 +211,9 @@ export const getPostBySlugDirect = (slug: string): PostType | undefined => {
 
 // Books
 export const getAllBooksDirect = (): BookType[] => {
-  return allBooks.filter(book => !book.draft) as BookType[];
+  return allBooks
+    .filter((book: any) => !book.draft)
+    .map((book: any) => assertDocType<BookType>(book, 'Book'));
 };
 
 export const getBookBySlugDirect = (slug: string): BookType | undefined => {
@@ -120,7 +222,9 @@ export const getBookBySlugDirect = (slug: string): BookType | undefined => {
 
 // Downloads
 export const getAllDownloadsDirect = (): DownloadType[] => {
-  return allDownloads.filter(download => !download.draft) as DownloadType[];
+  return allDownloads
+    .filter((download: any) => !download.draft)
+    .map((download: any) => assertDocType<DownloadType>(download, 'Download'));
 };
 
 export const getDownloadBySlugDirect = (slug: string): DownloadType | undefined => {
@@ -129,7 +233,9 @@ export const getDownloadBySlugDirect = (slug: string): DownloadType | undefined 
 
 // Events
 export const getAllEventsDirect = (): EventType[] => {
-  return allEvents.filter(event => !event.draft) as EventType[];
+  return allEvents
+    .filter((event: any) => !event.draft)
+    .map((event: any) => assertDocType<EventType>(event, 'Event'));
 };
 
 export const getEventBySlugDirect = (slug: string): EventType | undefined => {
@@ -138,7 +244,9 @@ export const getEventBySlugDirect = (slug: string): EventType | undefined => {
 
 // Prints
 export const getAllPrintsDirect = (): PrintType[] => {
-  return allPrints.filter(print => !print.draft) as PrintType[];
+  return allPrints
+    .filter((print: any) => !print.draft)
+    .map((print: any) => assertDocType<PrintType>(print, 'Print'));
 };
 
 export const getPrintBySlugDirect = (slug: string): PrintType | undefined => {
@@ -147,7 +255,9 @@ export const getPrintBySlugDirect = (slug: string): PrintType | undefined => {
 
 // Resources
 export const getAllResourcesDirect = (): ResourceType[] => {
-  return allResources.filter(resource => !resource.draft) as ResourceType[];
+  return allResources
+    .filter((resource: any) => !resource.draft)
+    .map((resource: any) => assertDocType<ResourceType>(resource, 'Resource'));
 };
 
 export const getResourceBySlugDirect = (slug: string): ResourceType | undefined => {
@@ -156,7 +266,9 @@ export const getResourceBySlugDirect = (slug: string): ResourceType | undefined 
 
 // Strategies
 export const getAllStrategiesDirect = (): StrategyType[] => {
-  return allStrategies.filter(strategy => !strategy.draft) as StrategyType[];
+  return allStrategies
+    .filter((strategy: any) => !strategy.draft)
+    .map((strategy: any) => assertDocType<StrategyType>(strategy, 'Strategy'));
 };
 
 export const getStrategyBySlugDirect = (slug: string): StrategyType | undefined => {
@@ -165,7 +277,9 @@ export const getStrategyBySlugDirect = (slug: string): StrategyType | undefined 
 
 // Canon
 export const getAllCanonsDirect = (): CanonType[] => {
-  return allCanons.filter(canon => !canon.draft) as CanonType[];
+  return allCanons
+    .filter((canon: any) => !canon.draft)
+    .map((canon: any) => assertDocType<CanonType>(canon, 'Canon'));
 };
 
 export const getCanonBySlugDirect = (slug: string): CanonType | undefined => {
@@ -174,7 +288,9 @@ export const getCanonBySlugDirect = (slug: string): CanonType | undefined => {
 
 // Shorts
 export const getAllShortsDirect = (): ShortType[] => {
-  return allShorts.filter(short => !short.draft) as ShortType[];
+  return allShorts
+    .filter((short: any) => !short.draft)
+    .map((short: any) => assertDocType<ShortType>(short, 'Short'));
 };
 
 export const getShortBySlugDirect = (slug: string): ShortType | undefined => {
@@ -455,21 +571,6 @@ export const resourcesDirect = getAllResourcesDirect();
 export const downloadsDirect = getAllDownloadsDirect();
 export const shortsDirect = getAllShortsDirect();
 
-// ============================================
-// EXPORT ALL TYPES
-// ============================================
-export type {
-  PostType,
-  BookType,
-  DownloadType,
-  EventType,
-  PrintType,
-  ResourceType,
-  StrategyType,
-  CanonType,
-  ShortType,
-};
-
 // Type aliases for backward compatibility
 export type Post = PostType;
 export type PostWithContent = PostType & { content?: string };
@@ -486,4 +587,3 @@ export type Strategy = StrategyType;
 export type Short = ShortType;
 export type BasicDoc = AnyDoc;
 export type ContentItem = AnyDoc;
-

@@ -1,8 +1,7 @@
-// components/SomeComponent.tsx
 "use client";
 
 import * as React from "react";
-import Button from "@/components/ui/Button"; // Note: lowercase 'b' if file is Button.tsx
+import Button from "@/components/ui/Button";
 
 interface SomeComponentProps {
   title?: string;
@@ -56,7 +55,8 @@ export default function SomeComponent({
         <Button
           href="#"
           variant="ghost"
-          onClick={(e) => {
+          // STRATEGIC FIX: Explicitly type the MouseEvent
+          onClick={(e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
             e.preventDefault();
             console.log("Link clicked");
           }}
@@ -75,4 +75,3 @@ export default function SomeComponent({
     </div>
   );
 }
-

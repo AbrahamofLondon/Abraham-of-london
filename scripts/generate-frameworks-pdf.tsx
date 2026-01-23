@@ -32,7 +32,51 @@ import {
   Line,
 } from "@react-pdf/renderer";
 
-import { FRAMEWORKS, type Framework } from "../lib/resources/strategic-frameworks";
+// FIX: Import the FRAMEWORKS data correctly - adjust path as needed
+const FRAMEWORKS_DATA_PATH = path.join(process.cwd(), 'lib', 'resources', 'strategic-frameworks.ts');
+let FRAMEWORKS: any[] = [];
+
+// Try to load frameworks data dynamically
+try {
+  if (fsSync.existsSync(FRAMEWORKS_DATA_PATH)) {
+    const { FRAMEWORKS: loadedFrameworks } = await import(FRAMEWORKS_DATA_PATH);
+    FRAMEWORKS = loadedFrameworks || [];
+  } else {
+    console.warn(`⚠️ Framework data not found at ${FRAMEWORKS_DATA_PATH}`);
+    // Fallback: create sample framework data for testing
+    FRAMEWORKS = [
+      {
+        slug: "legacy-architecture-canvas",
+        title: "Legacy Architecture Canvas",
+        tier: ["architect"],
+        tag: "framework",
+        oneLiner: "A strategic framework for designing and building enduring legacies",
+        operatingLogic: [
+          {
+            title: "Sovereign Thesis",
+            body: "Define your core legacy statement and guiding principles"
+          },
+          {
+            title: "Capital Matrix",
+            body: "Map and allocate your seven capitals for maximum impact"
+          }
+        ]
+      }
+    ];
+  }
+} catch (error) {
+  console.error(`❌ Failed to load frameworks data: ${error}`);
+  FRAMEWORKS = [];
+}
+
+type Framework = {
+  slug: string;
+  title: string;
+  tier: string | string[];
+  tag?: string;
+  oneLiner?: string;
+  operatingLogic?: Array<{title: string, body: string}>;
+};
 
 // ----------------------------------------------------------------------------
 // Paths
@@ -924,7 +968,7 @@ const PremiumFrameworkTeaser: React.FC<PremiumFrameworkTeaserProps> = ({
   const teaserBody =
     "This is a strategic capability instrument. It clarifies the institutional outcome, the operating logic required to produce it, and the leadership behaviours that sustain it. Use it to align decision-makers, govern trade-offs, and turn intent into repeatable execution.";
 
-  // “Public teaser” still avoids IP leakage: no deep steps, no full operating logic, no templates.
+  // "Public teaser" still avoids IP leakage: no deep steps, no full operating logic, no templates.
   const boundaries =
     "This teaser is an abstract. Detailed mechanisms, templates, and operating cadence remain gated within private-tier materials.";
 

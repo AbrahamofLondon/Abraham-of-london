@@ -1,87 +1,143 @@
-// components/PDFDashboard/Header.tsx
-import React from 'react';
-import { FilterState, DashboardStats } from '@/types/pdf-dashboard';
+import React from "react";
+import type { DashboardStats, FilterState } from "@/types/pdf-dashboard";
 
-interface HeaderProps {
+export type ViewMode = "list" | "grid" | "detail";
+
+export interface HeaderProps {
   stats: DashboardStats;
   filterState: FilterState;
   categories: string[];
+  viewMode: ViewMode;
+  selectedPDFs: Set<string>;
   isGenerating: boolean;
+
   onRefresh: () => void;
-  onGenerateAll: () => void;
+  onGenerateAll: () => Promise<any>;
   onFilterChange: (updates: Partial<FilterState>) => void;
+  onSearch: (q: string) => void;
+  onSort: (sortBy: string) => void;
+  onClearFilters: () => void;
+  onViewModeChange: (mode: ViewMode) => void;
+
+  onBatchDelete: () => Promise<void>;
+  onBatchExport: (format: string) => Promise<void>;
+  enableSharing: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   stats,
   filterState,
   categories,
+  viewMode,
+  selectedPDFs,
   isGenerating,
   onRefresh,
   onGenerateAll,
+  onSearch,
   onFilterChange,
+  onSort,
+  onClearFilters,
+  onViewModeChange,
+  onBatchDelete,
+  onBatchExport,
 }) => {
   return (
-    <header className="mb-8 md:mb-12 border-b border-white/10 pb-6 md:pb-8">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div className="rounded-2xl border border-gray-800 bg-gray-900/40 backdrop-blur-sm p-4 md:p-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <p className="text-amber-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">
-            Institutional Publishing • Dynamic Registry
-          </p>
-          <h1 className="text-2xl md:text-4xl font-serif font-bold italic">
-            PDF <span className="text-white/40">Intelligence Dashboard</span>
-          </h1>
-          <p className="text-xs text-gray-500 mt-2 italic">
-            {stats.totalPDFs} PDFs available • {stats.availablePDFs} on filesystem
-          </p>
+          <h1 className="text-xl font-semibold text-white">PDF Dashboard</h1>
+          <div className="mt-1 text-sm text-gray-400">
+            Total: {stats.totalPDFs} • Generated: {stats.generated} • Missing: {stats.missingPDFs} • Errors: {stats.errors}
+          </div>
         </div>
-        
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={onRefresh}
-            className="btn-secondary"
-            aria-label="Refresh PDF list"
-          >
-            🔄 Refresh
-          </button>
-          <button
-            onClick={onGenerateAll}
-            disabled={isGenerating}
-            className="btn-primary"
-            aria-label="Generate all PDFs"
-          >
-            {isGenerating ? '⚡ Generating...' : '🚀 Generate All'}
-          </button>
-        </div>
-      </div>
-      
-      {/* Search and Filter */}
-      <div className="mt-6 flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
+
+        <div className="flex flex-wrap items-center gap-2">
           <input
-            type="text"
-            placeholder="🔍 Search PDFs by title, description, or ID..."
+            className="px-3 py-2 rounded-lg bg-black/20 border border-gray-800 text-sm text-gray-100 placeholder:text-gray-500"
+            placeholder="Search PDFs…"
             value={filterState.searchQuery}
-            onChange={(e) => onFilterChange({ searchQuery: e.target.value })}
-            className="input-search"
-            aria-label="Search PDFs"
+            onChange={(e) => onSearch(e.target.value)}
           />
-        </div>
-        <div className="flex gap-2">
+
           <select
+            className="px-3 py-2 rounded-lg bg-black/20 border border-gray-800 text-sm text-gray-100"
             value={filterState.selectedCategory}
             onChange={(e) => onFilterChange({ selectedCategory: e.target.value })}
-            className="select-category"
-            aria-label="Filter by category"
           >
-            {categories.map(category => (
-              <option key={category} value={category}>
-                {category === 'all' ? '📁 All Categories' : `🏷️ ${category}`}
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
               </option>
             ))}
           </select>
+
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm"
+          >
+            Refresh
+          </button>
+
+          <button
+            type="button"
+            onClick={onClearFilters}
+            className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm"
+          >
+            Clear
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onViewModeChange(viewMode === "list" ? "grid" : "list")}
+            className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm"
+          >
+            View: {viewMode}
+          </button>
+
+          <button
+            type="button"
+            disabled={isGenerating}
+            onClick={() => void onGenerateAll()}
+            className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition text-sm"
+          >
+            Generate All
+          </button>
+
+          {selectedPDFs.size > 0 ? (
+            <>
+              <button
+                type="button"
+                onClick={() => void onBatchDelete()}
+                className="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition text-sm"
+              >
+                Batch Delete ({selectedPDFs.size})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void onBatchExport("pdf")}
+                className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm"
+              >
+                Batch Export
+              </button>
+            </>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => onSort("title")}
+            className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm"
+          >
+            Sort: {filterState.sortBy}
+          </button>
         </div>
       </div>
-    </header>
+    </div>
   );
 };
+
+Header.displayName = "Header";
+
+const HeaderComponent = Header;
+export default HeaderComponent;

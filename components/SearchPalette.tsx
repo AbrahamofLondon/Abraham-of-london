@@ -1,4 +1,4 @@
-// components/SearchPalette.tsx
+// components/SearchPalette.tsx - FINAL COMPLETE FIXED VERSION
 "use client";
 
 import * as React from "react";
@@ -25,7 +25,7 @@ export default function SearchPalette({
 }: SearchPaletteProps): JSX.Element | null {
   const [query, setQuery] = React.useState("");
   const [items, setItems] = React.useState<SearchItem[] | null>(null);
-  const [fuse, setFuse] = React.useState<Fuse<SearchItem> | null>(null);
+  const [fuse, setFuse] = React.useState<any>(null);
   const [active, setActive] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -147,7 +147,7 @@ export default function SearchPalette({
       ? fuse
           .search(query)
           .slice(0, 12)
-          .map((r) => r.item)
+          .map((r: any) => r.item) // FIX: Add type annotation here
       : (items || []).slice(0, 12);
 
   return (
@@ -182,7 +182,7 @@ export default function SearchPalette({
               {query ? "No results found" : "Start typing to search..."}
             </li>
           ) : (
-            results.map((result, index) => (
+            results.map((result: SearchItem, index: number) => (
               <li key={result.id}>
                 <Link
                   href={result.url}
@@ -224,4 +224,3 @@ export default function SearchPalette({
     </div>
   );
 }
-

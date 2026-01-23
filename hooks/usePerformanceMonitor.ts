@@ -16,25 +16,20 @@ interface PerformanceEntry {
   duration?: number;
 }
 
+const now = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
+
 export function usePerformanceMonitor(componentName: string) {
   const mountTimeRef = useRef<number>(0);
   const renderCountRef = useRef<number>(0);
   const lastRenderTimeRef = useRef<number>(0);
   const renderStartTimeRef = useRef<number>(0);
 
-  // Measure component mount time
   useEffect(() => {
-    const mountTime = performance.now();
+    const mountTime = now();
     mountTimeRef.current = mountTime;
 
-    // Log mount performance
-    const entry: PerformanceEntry = {
-      componentName,
-      timestamp: mountTime,
-      type: "mount",
-    };
+    const entry: PerformanceEntry = { componentName, timestamp: mountTime, type: "mount" };
 
-    // Send to analytics if available
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag("event", "performance_component_mount", {
         component_name: componentName,
@@ -42,14 +37,12 @@ export function usePerformanceMonitor(componentName: string) {
       });
     }
 
-    // Console log in development
     if (process.env.NODE_ENV === "development") {
-      console.log(`🚀 ${componentName} mounted in ${mountTime.toFixed(2)}ms`);
+      console.log(`🚀 ${componentName} mounted at ${mountTime.toFixed(2)}ms`);
     }
 
-    // Cleanup on unmount
     return () => {
-      const unmountTime = performance.now();
+      const unmountTime = now();
       const totalLifeTime = unmountTime - mountTimeRef.current;
 
       const unmountEntry: PerformanceEntry = {
@@ -59,6 +52,9 @@ export function usePerformanceMonitor(componentName: string) {
         duration: totalLifeTime,
       };
 
+      void entry;
+      void unmountEntry;
+
       if (process.env.NODE_ENV === "development") {
         console.log(
           `📊 ${componentName} lifetime: ${totalLifeTime.toFixed(2)}ms, Renders: ${renderCountRef.current}`
@@ -67,34 +63,30 @@ export function usePerformanceMonitor(componentName: string) {
     };
   }, [componentName]);
 
-  // Measure render performance
   useEffect(() => {
-    const now = performance.now();
+    const t = now();
 
-    // Calculate render duration if this is not the first render
     if (renderStartTimeRef.current > 0) {
-      const renderDuration = now - renderStartTimeRef.current;
+      const renderDuration = t - renderStartTimeRef.current;
       lastRenderTimeRef.current = renderDuration;
 
       if (process.env.NODE_ENV === "development" && renderDuration > 16) {
-        // Warn about slow renders (> 16ms = 60fps)
-        console.warn(
-          `🐢 ${componentName} slow render: ${renderDuration.toFixed(2)}ms`
-        );
+        console.warn(`🐢 ${componentName} slow render: ${renderDuration.toFixed(2)}ms`);
       }
     }
 
     renderCountRef.current += 1;
-    renderStartTimeRef.current = now;
+    renderStartTimeRef.current = t;
 
-    // Log render performance periodically
     if (renderCountRef.current % 10 === 0) {
       const renderEntry: PerformanceEntry = {
         componentName,
-        timestamp: now,
+        timestamp: t,
         type: "render",
         duration: lastRenderTimeRef.current,
       };
+
+      void renderEntry;
 
       if (typeof window !== "undefined" && (window as any).gtag) {
         (window as any).gtag("event", "performance_component_render", {
@@ -107,25 +99,24 @@ export function usePerformanceMonitor(componentName: string) {
   });
 
   const getMetrics = useCallback((): PerformanceMetrics => {
-    const totalTime = performance.now() - mountTimeRef.current;
-    const averageRenderTime =
-      renderCountRef.current > 0 ? totalTime / renderCountRef.current : 0;
+    const totalTime = now() - mountTimeRef.current;
+    const avg = renderCountRef.current > 0 ? totalTime / renderCountRef.current : 0;
 
     return {
       componentName,
       mountTime: mountTimeRef.current,
       renderCount: renderCountRef.current,
-      averageRenderTime,
+      averageRenderTime: avg,
       lastRenderTime: lastRenderTimeRef.current,
     };
   }, [componentName]);
 
   const markRenderStart = useCallback(() => {
-    renderStartTimeRef.current = performance.now();
+    renderStartTimeRef.current = now();
   }, []);
 
   const markRenderEnd = useCallback(() => {
-    const endTime = performance.now();
+    const endTime = now();
     const renderTime = endTime - renderStartTimeRef.current;
     lastRenderTimeRef.current = renderTime;
     return renderTime;
@@ -140,24 +131,19 @@ export function usePerformanceMonitor(componentName: string) {
   };
 }
 
-// Enhanced performance monitoring for page-level metrics
 export function usePagePerformanceMonitor(pageName: string) {
   const pageLoadTimeRef = useRef<number>(0);
   const firstContentfulPaintRef = useRef<number>(0);
   const largestContentfulPaintRef = useRef<number>(0);
 
   useEffect(() => {
-    // Mark page load start
-    pageLoadTimeRef.current = performance.now();
+    pageLoadTimeRef.current = now();
 
-    // Track First Contentful Paint
     if (typeof window !== "undefined" && "PerformanceObserver" in window) {
       const fcpObserver = new PerformanceObserver((entryList) => {
-        const entries = entryList.getEntries();
-        for (const entry of entries) {
+        for (const entry of entryList.getEntries()) {
           if (entry.name === "first-contentful-paint") {
             firstContentfulPaintRef.current = entry.startTime;
-
             if (process.env.NODE_ENV === "development") {
               console.log(`🎨 FCP: ${entry.startTime.toFixed(2)}ms`);
             }
@@ -168,17 +154,12 @@ export function usePagePerformanceMonitor(pageName: string) {
       const lcpObserver = new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
         const lastEntry = entries[entries.length - 1];
-        if (lastEntry) {
-          largestContentfulPaintRef.current = lastEntry.startTime;
-        }
+        if (lastEntry) largestContentfulPaintRef.current = lastEntry.startTime;
       });
 
       try {
         fcpObserver.observe({ type: "paint", buffered: true });
-        lcpObserver.observe({
-          type: "largest-contentful-paint",
-          buffered: true,
-        });
+        lcpObserver.observe({ type: "largest-contentful-paint", buffered: true });
       } catch (error) {
         console.warn("Performance Observer not supported:", error);
       }
@@ -193,7 +174,7 @@ export function usePagePerformanceMonitor(pageName: string) {
   }, [pageName]);
 
   const getPageMetrics = useCallback(() => {
-    const pageLoadTime = performance.now() - pageLoadTimeRef.current;
+    const pageLoadTime = now() - pageLoadTimeRef.current;
 
     return {
       pageName,
@@ -207,10 +188,9 @@ export function usePagePerformanceMonitor(pageName: string) {
   return {
     getPageMetrics,
     markPageLoad: () => {
-      pageLoadTimeRef.current = performance.now();
+      pageLoadTimeRef.current = now();
     },
   };
 }
 
 export default usePerformanceMonitor;
-

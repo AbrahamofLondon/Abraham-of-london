@@ -1,7 +1,4 @@
-// components/dashboard/index.ts - FIXED
-// Export types (no dependencies)
-export * from './types';
-
-// Export components
-export { StockPriceCard } from './StockPriceCard';
-export { LiveDataDashboard } from './LiveDataDashboard';
+// components/dashboard/index.ts
+export { StockPriceCard } from "./StockPriceCard";
+export { default as LiveDataDashboard } from "./LiveDataDashboard";
+export { default as PDFDataDashboard } from "./PDFDataDashboard";

@@ -1,4 +1,3 @@
-// pages/events/[slug].tsx - COMPLETE FIXED VERSION
 import React, { useState, useEffect } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -13,7 +12,6 @@ import rehypeSlug from "rehype-slug";
 import {
   getServerAllEvents,
   getServerEventBySlug,
-  normalizeSlug,
   resolveDocCoverImage,
   getContentlayerData
 } from "@/lib/contentlayer-compat";
@@ -400,7 +398,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const eventArray = Array.isArray(events) ? events : [];
     
     const paths = eventArray
-      .map((e: any) => normalizeSlug(e?.slug || e?.slugComputed || e?._raw?.flattenedPath || ""))
+      .map((e: any) => {
+        // Try multiple possible slug properties
+        const slug = e?.slug || e?.slugComputed || e?._raw?.flattenedPath || "";
+        // Ensure slug is a string and normalize it
+        if (typeof slug === 'string' && slug.trim()) {
+          // Remove any trailing .md or .mdx extensions
+          const normalized = slug.replace(/\.(md|mdx)$/, '');
+          return normalized;
+        }
+        return "";
+      })
       .filter((slug: string) => slug && slug !== "index" && !slug.includes("replace") && slug.trim() !== '')
       .map((slug: string) => ({ 
         params: { slug } 
@@ -422,11 +430,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const rawParam = (params as any)?.slug;
 
-  const slug =
+  const slug = 
     typeof rawParam === "string"
-      ? normalizeSlug(rawParam)
+      ? rawParam
       : Array.isArray(rawParam) && typeof rawParam[0] === "string"
-        ? normalizeSlug(rawParam[0])
+        ? rawParam[0]
         : "";
 
   if (!slug) return { notFound: true };

@@ -1,0 +1,588 @@
+
+> prebuild
+> pnpm pdf:registry:full && pnpm pdf:generate:assets && pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm content:full && pnpm assets:optimize
+
+
+> @ pdf:registry:full C:\Abraham-of-london
+> pnpm pdf:registry:build && pnpm pdf:registry && pnpm pdf:variants
+
+
+> @ pdf:registry:build C:\Abraham-of-london
+> tsx scripts/pdf/build-pdf-registry-generated.ts
+
+Generated: scripts\pdf\pdf-registry.generated.ts
+Entries: 58 (base=58, variants=0)
+
+> @ pdf:registry C:\Abraham-of-london
+> tsx scripts/pdf/build-pdf-registry.ts
+
+
+­ƒôª Step 1/3 ÔÇö Build generated PDF registry
+ÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇö
+Generated: scripts\pdf\pdf-registry.generated.ts
+Entries: 58 (base=58, variants=0)
+
+­ƒº▒ Step 2/3 ÔÇö Generate missing format variants
+ÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇö
+Using cover image: assets/images/purpose-cover.jpg
+Ô£à Premium fonts registered successfully
+============================================================
+­ƒôÜ PDF Generation System - Abraham of London
+============================================================
+­ƒöä Starting PDF generation pipeline...
+­ƒôè Context: quality=premium, tier=free
+­ƒöì Scanning content directories...
+Ô£à Found 28 content files
+Ô£à Found 5 library PDF files
+  Ô£ô mdx: abraham-vault-pack
+  Ô£ô mdx: board-decision-log-template
+  Ô£ô xlsx: board-decision-log-template
+  Ô£ô mdx: board-investor-onepager
+  Ô£ô mdx: brotherhood-covenant
+  Ô£ô mdx: canon-volume-iv-diagnostic-toolkit
+  Ô£ô mdx: canon-volume-v-governance-diagnostic-toolkit
+  Ô£ô mdx: communication-script-bpf
+  Ô£ô mdx: decision-log-template
+  Ô£ô mdx: decision-matrix-scorecard
+  Ô£ô mdx: download-legacy-architecture-canvas
+  Ô£ô mdx: entrepreneur-operating-pack
+  Ô£ô mdx: entrepreneur-survival-checklist
+  Ô£ô mdx: family-altar-liturgy
+  Ô£ô mdx: leaders-cue-card-two-up
+  Ô£ô mdx: leadership-playbook
+  Ô£ô mdx: legacy-canvas
+  Ô£ô mdx: life-alignment-assessment
+  Ô£ô mdx: mentorship-starter-kit
+  Ô£ô mdx: operating-cadence-pack
+  Ô£ô pptx: operating-cadence-pack
+  Ô£ô mdx: principles-for-my-son-cue-card
+  Ô£ô mdx: principles-for-my-son
+  Ô£ô mdx: purpose-pyramid-worksheet
+  Ô£ô mdx: scripture-track-john14
+  Ô£ô mdx: standards-brief
+  Ô£ô mdx: ultimate-purpose-of-man-editorial
+  Ô£ô mdx: weekly-operating-rhythm
+  ÔÜá Skipping duplicate: decision-log-template
+  Ô£ô pdf: decision-matrix-scorecard-fillable
+  Ô£ô pdf: legacy-canvas-fillable
+  Ô£ô pdf: purpose-pyramid-worksheet-fillable
+  ÔÜá Skipping duplicate: ultimate-purpose-of-man-editorial
+­ƒôê Found 0 PDFs to generate (out of 31 total)
+­ƒôï Generated registry: scripts\pdf\pdf-registry.generated.ts (31 entries)
+­ƒôä Generated manifest: public\assets\downloads\pdf-manifest.json
+­ƒºÀ Core alias step: ensuring canonical core PDFs exist...
+ÔÜá core alias step reported failure ÔÇö audit may remain red for core files.
+
+============================================================
+­ƒôè GENERATION SUMMARY
+============================================================
+Ô£à Successful: 0
+ÔÅ¡´©Å  Skipped: 31
+ÔØî Failed: 0
+­ƒÄ» Total processed: 31
+
+­ƒÄë PDF generation completed successfully!
+
+­ƒöü Step 3/3 ÔÇö Rebuild registry metadata (post-variants)
+ÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇöÔÇö
+Generated: scripts\pdf\pdf-registry.generated.ts
+Entries: 58 (base=58, variants=0)
+
+Ô£à PDF registry is GREEN.
+Generated file: scripts\pdf\pdf-registry.generated.ts
+
+> @ pdf:variants C:\Abraham-of-london
+> tsx scripts/pdf/generate-from-generated-registry.ts
+
+Using cover image: assets/images/purpose-cover.jpg
+Ô£à Premium fonts registered successfully
+============================================================
+­ƒôÜ PDF Generation System - Abraham of London
+============================================================
+­ƒöä Starting PDF generation pipeline...
+­ƒôè Context: quality=premium, tier=free
+­ƒöì Scanning content directories...
+Ô£à Found 28 content files
+Ô£à Found 5 library PDF files
+  Ô£ô mdx: abraham-vault-pack
+  Ô£ô mdx: board-decision-log-template
+  Ô£ô xlsx: board-decision-log-template
+  Ô£ô mdx: board-investor-onepager
+  Ô£ô mdx: brotherhood-covenant
+  Ô£ô mdx: canon-volume-iv-diagnostic-toolkit
+  Ô£ô mdx: canon-volume-v-governance-diagnostic-toolkit
+  Ô£ô mdx: communication-script-bpf
+  Ô£ô mdx: decision-log-template
+  Ô£ô mdx: decision-matrix-scorecard
+  Ô£ô mdx: download-legacy-architecture-canvas
+  Ô£ô mdx: entrepreneur-operating-pack
+  Ô£ô mdx: entrepreneur-survival-checklist
+  Ô£ô mdx: family-altar-liturgy
+  Ô£ô mdx: leaders-cue-card-two-up
+  Ô£ô mdx: leadership-playbook
+  Ô£ô mdx: legacy-canvas
+  Ô£ô mdx: life-alignment-assessment
+  Ô£ô mdx: mentorship-starter-kit
+  Ô£ô mdx: operating-cadence-pack
+  Ô£ô pptx: operating-cadence-pack
+  Ô£ô mdx: principles-for-my-son-cue-card
+  Ô£ô mdx: principles-for-my-son
+  Ô£ô mdx: purpose-pyramid-worksheet
+  Ô£ô mdx: scripture-track-john14
+  Ô£ô mdx: standards-brief
+  Ô£ô mdx: ultimate-purpose-of-man-editorial
+  Ô£ô mdx: weekly-operating-rhythm
+  ÔÜá Skipping duplicate: decision-log-template
+  Ô£ô pdf: decision-matrix-scorecard-fillable
+  Ô£ô pdf: legacy-canvas-fillable
+  Ô£ô pdf: purpose-pyramid-worksheet-fillable
+  ÔÜá Skipping duplicate: ultimate-purpose-of-man-editorial
+­ƒôê Found 0 PDFs to generate (out of 31 total)
+­ƒôï Generated registry: scripts\pdf\pdf-registry.generated.ts (31 entries)
+­ƒôä Generated manifest: public\assets\downloads\pdf-manifest.json
+­ƒºÀ Core alias step: ensuring canonical core PDFs exist...
+ÔÜá core alias step reported failure ÔÇö audit may remain red for core files.
+
+============================================================
+­ƒôè GENERATION SUMMARY
+============================================================
+Ô£à Successful: 0
+ÔÅ¡´©Å  Skipped: 31
+ÔØî Failed: 0
+­ƒÄ» Total processed: 31
+
+­ƒÄë PDF generation completed successfully!
+
+> @ pdf:generate:assets C:\Abraham-of-london
+> tsx scripts/pdf/generate-pdf-assets.ts
+
+­ƒÜÇ PDF Assets Generator - Registry Edition
+Ô£à PDF registry module loaded
+Mode: Standalone execution
+­ƒôè PDF Assets Build Process
+============================================================
+­ƒôä Total PDFs in registry: 58
+
+­ƒôï Sample PDFs from registry:
+  1. Legacy Architecture Canvas (A4 ÔÇó Premium Architect) (legacy-architecture-canvas-a4-premium-architect)
+  2. Legacy Architecture Canvas (Letter ÔÇó Premium Architect) (legacy-architecture-canvas-letter-premium-architect)
+  3. Legacy Architecture Canvas (A3 ÔÇó Premium Architect) (legacy-architecture-canvas-a3-premium-architect)
+  ... and 55 more
+
+­ƒöì PDFs potentially needing generation: 5
+
+­ƒôØ PDFs to check:
+  ÔÇó Legacy Architecture Canvas (A4 ÔÇó Premium Architect) ÔåÆ /assets/downloads/legacy-architecture-canvas-a4-premium-architect.pdf
+  ÔÇó Legacy Architecture Canvas (Letter ÔÇó Premium Architect) ÔåÆ /assets/downloads/legacy-architecture-canvas-letter-premium-architect.pdf
+  ÔÇó Legacy Architecture Canvas (A3 ÔÇó Premium Architect) ÔåÆ /assets/downloads/legacy-architecture-canvas-a3-premium-architect.pdf
+  ÔÇó Legacy Architecture Canvas (A4 ÔÇó Premium Architect ÔÇó Interactive) ÔåÆ /assets/downloads/legacy-architecture-canvas-a4-premium-architect-interactive.pdf
+  ÔÇó Legacy Architecture Canvas (Letter ÔÇó Premium Architect ÔÇó Interactive) ÔåÆ /assets/downloads/legacy-architecture-canvas-letter-premium-architect-interactive.pdf
+
+­ƒÆí Note: Actual file existence check not implemented
+
+============================================================
+­ƒôê GENERATION SUMMARY
+============================================================
+Ô£à Would generate: 5
+ÔÅ¡´©Å  Already exist: 53
+­ƒÄ» Total in registry: 58
+
+==================================================
+­ƒÄë PDF GENERATION SIMULATION COMPLETE
+­ƒÆí Note: This is a simulation only
+­ƒÆí To actually generate PDFs, implement the generation logic
+==================================================
+
+> @ fm:validate C:\Abraham-of-london
+> node scripts/validate-frontmatter.mjs
+
+========================================
+­ƒôî Frontmatter Validation Report
+========================================
+Scanned:  162 files
+Fatal:    0
+Warnings: 2
+
+ÔÜá´©Å Warnings (fix soon):
+ - downloads\life-alignment-assessment.mdx: Multiple frontmatter blocks detected (found 11). Only the first is used.
+ - downloads\life-alignment-assessment.mdx: Unknown field "download" for type Download
+ - blog\surrender-not-submission.mdx: Multiple frontmatter blocks detected (found 5). Only the first is used.
+
+­ƒôï Report saved: C:\Abraham-of-london\frontmatter-validation-report.json
+
+> @ fix:windows C:\Abraham-of-london
+> node scripts/windows-fix.js
+
+[fix:windows] Running safe Windows hygiene...
+[fix:windows] Done (non-fatal).
+
+> @ fix:yaml C:\Abraham-of-london
+> node scripts/fix-yaml-specific.cjs
+
+[fix:yaml] Scanning directory: C:\Abraham-of-london\content
+[fix:yaml] Scanned 162 files. Updated 0.
+
+> @ content:full C:\Abraham-of-london
+> pnpm content:clean && pnpm fix:yaml && pnpm contentlayer:safe && pnpm content:validate
+
+
+> @ content:clean C:\Abraham-of-london
+> rimraf .contentlayer .next/content
+
+
+> @ fix:yaml C:\Abraham-of-london
+> node scripts/fix-yaml-specific.cjs
+
+[fix:yaml] Scanning directory: C:\Abraham-of-london\content
+[fix:yaml] Scanned 162 files. Updated 0.
+
+> @ contentlayer:safe C:\Abraham-of-london
+> pnpm exec contentlayer2 build --clearCache
+
+Warning: Contentlayer might not work as expected on Windows
+Cache cleared successfully
+Warning: Found 1 problems in 162 documents.
+
+ ÔööÔöÇÔöÇ   1 documents contain field data which isn't defined in the document type definition.
+     
+     ÔÇó "downloads/life-alignment-assessment.mdx" of type "Download" has the following extra fields:
+       ÔÇó download: {"file":"/assets/downloads/life-alignment-assessment.pdf","label":"Download PDF","isFillable":false,"isInteractive":false} 
+     
+
+successCallback C:/Abraham-of-london/.contentlayer
+Ô£à Contentlayer build complete. Documents: 162
+Generated 162 documents in .contentlayer
+
+> @ content:validate C:\Abraham-of-london
+> node scripts/validate-frontmatter.mjs
+
+========================================
+­ƒôî Frontmatter Validation Report
+========================================
+Scanned:  162 files
+Fatal:    0
+Warnings: 2
+
+ÔÜá´©Å Warnings (fix soon):
+ - downloads\life-alignment-assessment.mdx: Multiple frontmatter blocks detected (found 11). Only the first is used.
+ - downloads\life-alignment-assessment.mdx: Unknown field "download" for type Download
+ - blog\surrender-not-submission.mdx: Multiple frontmatter blocks detected (found 5). Only the first is used.
+
+­ƒôï Report saved: C:\Abraham-of-london\frontmatter-validation-report.json
+
+> @ assets:optimize C:\Abraham-of-london
+> node scripts/optimize-assets.js
+
+­ƒÜÇ Starting asset optimization
+============================================================
+
+> build
+> cross-env TURBOPACK_DISABLED=true NEXT_RUNTIME=nodejs next build
+
+ ÔÜá Invalid next.config.mjs options detected: 
+ ÔÜá     Unrecognized key(s) in object: 'resourceRegExp'
+ ÔÜá See more info here: https://nextjs.org/docs/messages/invalid-next-config
+  Ôû▓ Next.js 14.2.35
+  - Environments: .env.local, .env.production, .env
+  - Experiments (use with caution):
+    ┬À scrollRestoration
+
+   Creating an optimized production build ...
+ ÔÜá You are using an experimental edge runtime, the API might change.
+Warning: Contentlayer might not work as expected on Windows
+Warning: Found 1 problems in 162 documents.
+
+ ÔööÔöÇÔöÇ   1 documents contain field data which isn't defined in the document type definition.
+     
+     ÔÇó "downloads/life-alignment-assessment.mdx" of type "Download" has the following extra fields:
+       ÔÇó download: {"file":"/assets/downloads/life-alignment-assessment.pdf","label":"Download PDF","isFillable":false,"isInteractive":false} 
+     
+
+successCallback C:/Abraham-of-london/.contentlayer
+Ô£à Contentlayer build complete. Documents: 162
+Generated 162 documents in .contentlayer
+ ÔÜá Compiled with warnings
+
+./pages/admin/pdf-dashboard.tsx
+Attempted import error: 'LiveDataDashboard' is not exported from '@/components/dashboard/LiveDataDashboard' (imported as 'LiveDataDashboard').
+
+./pages/admin/pdf-dashboard.tsx
+Attempted import error: 'PDFDataDashboard' is not exported from '@/components/dashboard/PDFDataDashboard' (imported as 'PDFDataDashboard').
+
+./lib/contentlayer-compat.server.ts
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./lib/contentlayer-compat.server.ts
+./lib/contentlayer-compat.ts
+./pages/[slug].tsx
+
+./lib/contentlayer-compat.server.ts
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./lib/contentlayer-compat.server.ts
+./lib/contentlayer-compat.ts
+./pages/[slug].tsx
+
+./pages/admin/pdf-dashboard.tsx
+Attempted import error: 'LiveDataDashboard' is not exported from '@/components/dashboard/LiveDataDashboard' (imported as 'LiveDataDashboard').
+
+Import trace for requested module:
+./pages/admin/pdf-dashboard.tsx
+
+./pages/admin/pdf-dashboard.tsx
+Attempted import error: 'PDFDataDashboard' is not exported from '@/components/dashboard/PDFDataDashboard' (imported as 'PDFDataDashboard').
+
+Import trace for requested module:
+./pages/admin/pdf-dashboard.tsx
+
+./lib/contentlayer-compat.server.ts
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./lib/contentlayer-compat.server.ts
+./lib/contentlayer-compat.ts
+./pages/api/blog/[slug].tsx
+
+./lib/contentlayer-compat.server.ts
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./lib/contentlayer-compat.server.ts
+./lib/contentlayer-compat.ts
+./pages/api/blog/[slug].tsx
+
+./lib/contentlayer.ts
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./lib/contentlayer.ts
+./pages/api/admin/system-health.ts
+
+./lib/rate-limit-unified.ts
+export 'checkRateLimit' (reexported as 'checkRateLimit') was not found in './server/rate-limit-unified' (possible exports: RATE_LIMIT_CONFIGS, createRateLimitHeaders, default, getClientIp, getRateLimiterStats, isRateLimited, rateLimit, resetRateLimit, unblock, withApiRateLimit, withEdgeRateLimit, withRateLimit)
+
+Import trace for requested module:
+./lib/rate-limit-unified.ts
+./pages/api/rate-limit/stats.ts
+
+./lib/rate-limit-unified.ts
+export 'rateLimitForRequestIp' (reexported as 'rateLimitForRequestIp') was not found in './server/rate-limit-unified' (possible exports: RATE_LIMIT_CONFIGS, createRateLimitHeaders, default, getClientIp, getRateLimiterStats, isRateLimited, rateLimit, resetRateLimit, unblock, withApiRateLimit, withEdgeRateLimit, withRateLimit)
+
+Import trace for requested module:
+./lib/rate-limit-unified.ts
+./pages/api/rate-limit/stats.ts
+
+./lib/server/rateLimit.ts
+export 'isRateLimitedRequest' (reexported as 'isRateLimited') was not found in './rate-limit-unified' (possible exports: RATE_LIMIT_CONFIGS, createRateLimitHeaders, default, getClientIp, getRateLimiterStats, isRateLimited, rateLimit, resetRateLimit, unblock, withApiRateLimit, withEdgeRateLimit, withRateLimit)
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./lib/server/rateLimit.ts
+export 'getRateLimiterStatsSync' (reexported as 'getRateLimiterStatsSync') was not found in './rate-limit-unified' (possible exports: RATE_LIMIT_CONFIGS, createRateLimitHeaders, default, getClientIp, getRateLimiterStats, isRateLimited, rateLimit, resetRateLimit, unblock, withApiRateLimit, withEdgeRateLimit, withRateLimit)
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./lib/server/rateLimit.ts
+export 'resetRateLimitSync' (reexported as 'resetRateLimitSync') was not found in './rate-limit-unified' (possible exports: RATE_LIMIT_CONFIGS, createRateLimitHeaders, default, getClientIp, getRateLimiterStats, isRateLimited, rateLimit, resetRateLimit, unblock, withApiRateLimit, withEdgeRateLimit, withRateLimit)
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./lib/server/rateLimit.ts
+export 'unblockSync' (reexported as 'unblockSync') was not found in './rate-limit-unified' (possible exports: RATE_LIMIT_CONFIGS, createRateLimitHeaders, default, getClientIp, getRateLimiterStats, isRateLimited, rateLimit, resetRateLimit, unblock, withApiRateLimit, withEdgeRateLimit, withRateLimit)
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./lib/server/rateLimit.ts
+Attempted import error: 'isRateLimitedRequest' is not exported from './rate-limit-unified' (imported as 'isRateLimited').
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./lib/server/rateLimit.ts
+Attempted import error: 'getRateLimiterStatsSync' is not exported from './rate-limit-unified' (imported as 'getRateLimiterStatsSync').
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./lib/server/rateLimit.ts
+Attempted import error: 'resetRateLimitSync' is not exported from './rate-limit-unified' (imported as 'resetRateLimitSync').
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./lib/server/rateLimit.ts
+Attempted import error: 'unblockSync' is not exported from './rate-limit-unified' (imported as 'unblockSync').
+
+Import trace for requested module:
+./lib/server/rateLimit.ts
+./pages/api/contact.ts
+
+./pages/api/admin/export-audit.ts
+Attempted import error: 'validateDateRange' is not exported from '@/lib/server/validation' (imported as 'validateDateRange').
+
+Import trace for requested module:
+./pages/api/admin/export-audit.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+A Node.js API is used (process.nextTick at line: 189) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+A Node.js API is used (process.nextTick at line: 193) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+A Node.js API is used (process.nextTick at line: 196) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+A Node.js API is used (process.nextTick at line: 650) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/autoPipelining.js
+A Node.js API is used (process.nextTick at line: 60) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/autoPipelining.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/utils/Commander.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/autoPipelining.js
+A Node.js API is used (process.nextTick at line: 65) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/autoPipelining.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/utils/Commander.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/autoPipelining.js
+A Node.js API is used (setImmediate at line: 142) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/autoPipelining.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/utils/Commander.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/DelayQueue.js
+A Node.js API is used (process.nextTick at line: 22) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/DelayQueue.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/index.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/index.js
+A Node.js API is used (setImmediate at line: 250) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/index.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/index.js
+A Node.js API is used (process.nextTick at line: 627) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/index.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/index.js
+A Node.js API is used (process.nextTick at line: 782) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/cluster/index.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/connectors/StandaloneConnector.js
+A Node.js API is used (process.nextTick at line: 44) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/connectors/StandaloneConnector.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/connectors/index.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/Redis.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/redis-errors@1.2.0/node_modules/redis-errors/index.js
+A Node.js API is used (process.version at line: 3) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/redis-errors@1.2.0/node_modules/redis-errors/index.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+./node_modules/.pnpm/redis-errors@1.2.0/node_modules/redis-errors/index.js
+A Node.js API is used (process.version at line: 3) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.pnpm/redis-errors@1.2.0/node_modules/redis-errors/index.js
+./node_modules/.pnpm/ioredis@5.9.0/node_modules/ioredis/built/index.js
+./lib/redis.ts
+./lib/rate-limit-redis.ts
+
+   Linting and checking validity of types ...

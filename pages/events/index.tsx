@@ -1,9 +1,14 @@
+/* pages/events/index.tsx — EVENTS VAULT (INTEGRITY MODE) */
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData, normalizeSlug } from "@/lib/contentlayer-compat";
+import { 
+  getContentlayerData, 
+  normalizeSlug,
+  sanitizeData 
+} from "@/lib/contentlayer-compat";
 
 type EventItem = {
   _id: string;
@@ -12,6 +17,7 @@ type EventItem = {
   excerpt: string | null;
   eventDate: string | null;
   location: string | null;
+  href: string; // Integrity: strictly defined path
 };
 
 type Props = {
@@ -44,35 +50,56 @@ function formatDateGB(value: string): string {
   });
 }
 
+/**
+ * STRATEGIC FIX: INTEGRITY MODE
+ * 1. Awaits getContentlayerData for absolute synchronization.
+ * 2. Enforces /events/ prefix integrity for all generated links.
+ */
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const data = await getContentlayerData();
-  const eventsRaw = data.allEvents || [];
-  
-  const now = new Date();
+  try {
+    // COMMAND: Await contentlayer data for absolute build-time integrity
+    const data = await getContentlayerData();
+    const eventsRaw = data.allEvents || [];
+    
+    const now = new Date();
 
-  const events: EventItem[] = eventsRaw.map((e: any) => {
-    const slug = normalizeSlug(e.slugComputed || e.slug || "");
-    const dateCandidate = (e.eventDate ?? e.date ?? null) as string | null;
+    const events: EventItem[] = eventsRaw.map((e: any) => {
+      // Resolve slug and ensure /events/ prefix
+      const rawSlug = normalizeSlug(e.slugComputed || e.slug || "");
+      const slug = rawSlug.replace(/^events\//, "");
+      const href = `/events/${slug}`;
+      
+      const dateCandidate = (e.eventDate ?? e.date ?? null) as string | null;
 
-    return {
-      _id: String(e._id ?? `${slug}-${dateCandidate ?? "no-date"}`),
-      slug,
-      title: String(e.title ?? "Untitled Event"),
-      excerpt: (e.excerpt ?? e.description ?? null) as string | null,
-      eventDate: dateCandidate,
-      location: (e.location ?? null) as string | null,
+      return {
+        _id: String(e._id ?? `${slug}-${dateCandidate ?? "no-date"}`),
+        slug,
+        href,
+        title: String(e.title ?? "Untitled Event"),
+        excerpt: (e.excerpt ?? e.description ?? null) as string | null,
+        eventDate: dateCandidate,
+        location: (e.location ?? null) as string | null,
+      };
+    })
+    // INTEGRITY: Only show events with valid titles and paths
+    .filter(e => Boolean(e.title) && e.href.startsWith("/events/"));
+
+    const upcoming = events
+      .filter((e) => e.eventDate && isValidDateString(e.eventDate) && new Date(e.eventDate) >= now)
+      .sort((a, b) => Date.parse(a.eventDate as string) - Date.parse(b.eventDate as string));
+
+    const past = events
+      .filter((e) => !e.eventDate || !isValidDateString(e.eventDate) || new Date(e.eventDate) < now)
+      .sort((a, b) => Date.parse(b.eventDate ?? "") - Date.parse(a.eventDate ?? ""));
+
+    return { 
+      props: sanitizeData({ upcoming, past }), 
+      revalidate: 1800 
     };
-  });
-
-  const upcoming = events
-    .filter((e) => e.eventDate && isValidDateString(e.eventDate) && new Date(e.eventDate) >= now)
-    .sort((a, b) => Date.parse(a.eventDate as string) - Date.parse(b.eventDate as string));
-
-  const past = events
-    .filter((e) => !e.eventDate || !isValidDateString(e.eventDate) || new Date(e.eventDate) < now)
-    .sort((a, b) => Date.parse(b.eventDate ?? "") - Date.parse(a.eventDate ?? ""));
-
-  return { props: { upcoming, past }, revalidate: 1800 };
+  } catch (error) {
+    console.error("Events index getStaticProps failed:", error);
+    return { props: { upcoming: [], past: [] }, revalidate: 1800 };
+  }
 };
 
 const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
@@ -107,7 +134,7 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
                   key={event._id}
                   className="rounded-2xl border border-white/5 bg-black/40 p-4 transition hover:border-gold/60 hover:bg-black/70"
                 >
-                  <Link href={`/events/${event.slug}`} className="block space-y-1 no-underline">
+                  <Link href={event.href} className="block space-y-1 no-underline">
                     <p className="text-xs uppercase tracking-[0.25em] text-gold/70">
                       {event.location || "Private Room"}
                     </p>
@@ -147,7 +174,7 @@ const EventsIndexPage: NextPage<Props> = ({ upcoming, past }) => {
                     {event.eventDate ? formatDateGB(event.eventDate) : "Past"}
                   </span>
 
-                  <Link href={`/events/${event.slug}`} className="flex-1 text-cream hover:text-gold">
+                  <Link href={event.href} className="flex-1 text-cream hover:text-gold">
                     {event.title}
                   </Link>
                 </li>

@@ -1,9 +1,8 @@
 import React from 'react';
-import { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { MDXRemote } from 'next-mdx-remote';
+import { MDXRemote } from 'next-mdx-remote/rsc';
 
 interface CanonContentProps {
-  content: MDXRemoteSerializeResult;
+  content: string;
   components?: Record<string, React.ComponentType>;
 }
 
@@ -26,7 +25,7 @@ const CanonContent: React.FC<CanonContentProps> = ({ content, components = {} })
           </ul>
         </div>
         
-        <MDXRemote {...content} components={defaultComponents} />
+        <MDXRemote source={content} components={defaultComponents} />
         
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">

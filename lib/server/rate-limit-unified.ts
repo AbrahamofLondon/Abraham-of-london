@@ -282,12 +282,51 @@ export async function unblock(identifier: string, options: RateLimitOptions = RA
   memoryStore.delete(key);
 }
 
-export async function isRateLimited(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL) {
+export async function isRateLimited(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL): Promise<boolean> {
   const r = await rateLimit(identifier, options);
   return !r.allowed;
 }
 
-export default {
+// --- BACKWARD COMPATIBILITY EXPORTS ---
+
+export async function checkRateLimit(
+  identifier: string, 
+  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
+): Promise<RateLimitResult> {
+  return rateLimit(identifier, options);
+}
+
+// Alias for rateLimitForRequestIp
+export const rateLimitForRequestIp = rateLimit;
+
+// Alias functions for backward compatibility
+export async function isRateLimitedRequest(
+  identifier: string, 
+  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
+): Promise<boolean> {
+  const result = await rateLimit(identifier, options);
+  return !result.allowed;
+}
+
+export async function getRateLimiterStatsSync(): Promise<{
+  memoryStoreSize: number;
+  usingRedis: boolean;
+}> {
+  return getRateLimiterStats();
+}
+
+export async function resetRateLimitSync(keyPrefix: string): Promise<void> {
+  return resetRateLimit(keyPrefix);
+}
+
+export async function unblockSync(identifier: string, options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL): Promise<void> {
+  return unblock(identifier, options);
+}
+
+// ==================== DEFAULT EXPORT ====================
+
+// This is what's imported when someone does `import rateLimit from './rate-limit-unified'`
+const rateLimitModule = {
   rateLimit,
   getClientIp,
   createRateLimitHeaders,
@@ -299,4 +338,13 @@ export default {
   getRateLimiterStats,
   resetRateLimit,
   unblock,
+  // Include backward compatibility exports in default export
+  checkRateLimit,
+  rateLimitForRequestIp,
+  isRateLimitedRequest,
+  getRateLimiterStatsSync,
+  resetRateLimitSync,
+  unblockSync,
 };
+
+export default rateLimitModule;

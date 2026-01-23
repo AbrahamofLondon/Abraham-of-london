@@ -1,60 +1,17 @@
-// @/lib/imports.ts - MAIN EXPORT FILE
+// @/lib/imports.ts - MAIN EXPORT FILE (UPDATED)
 /**
  * Main imports file - exports everything needed by the app
  * This should be safe for both client and server
  */
 
-// Site configuration
-export const siteConfig = {
-  title: "Abraham of London",
-  description: "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
-  brand: {
-    tagline: "Faith · Strategy · Fatherhood",
-    mission: "To restore faith-rooted leadership and strategy in a world that has outsourced responsibility."
-  },
-  contact: {
-    email: "info@abrahamoflondon.org",
-    phone: "+44 20 8622 5909",
-    address: "Based in London, working globally"
-  },
-  socialLinks: [
-    { kind: "twitter", label: "Twitter", href: "https://twitter.com/abrahamoflondon" },
-    { kind: "linkedin", label: "LinkedIn", href: "https://linkedin.com/company/abrahamoflondon" },
-    { kind: "instagram", label: "Instagram", href: "https://instagram.com/abrahamoflondon" },
-    { kind: "youtube", label: "YouTube", href: "https://youtube.com/@abrahamoflondon" },
-    { kind: "website", label: "Website", href: "https://www.abrahamoflondon.org" }
-  ],
-  navigation: {
-    main: [
-      { name: "Home", href: "/" },
-      { name: "Essays", href: "/blog" },
-      { name: "The Canon", href: "/canon" },
-      { name: "Books", href: "/books" },
-      { name: "Downloads", href: "/downloads" },
-      { name: "Contact", href: "/contact" }
-    ],
-    footer: [
-      { name: "Privacy", href: "/privacy" },
-      { name: "Terms", href: "/terms" },
-      { name: "Accessibility", href: "/accessibility" },
-      { name: "Security", href: "/security" }
-    ]
-  }
-};
+// Re-export from your actual config file
+export { siteConfig, canonicalUrl, authorImage } from "@/config/site";
 
 // Utility functions
-export function getPageTitle(pageTitle?: string): string {
-  return pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
-}
+export { getPageTitle } from "@/lib/utils/getPageTitle";
+export { absUrl, isInternalUrl, normalizePath } from "@/lib/utils/url-helpers";
 
-export function absUrl(path: string): string {
-  const base = siteConfig.url.replace(/\/$/, '');
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${base}${cleanPath}`;
-}
-
-// Simple validation utilities (client-safe)
+// Input validation
 export * from "@/lib/input-validator";
 
 // Contentlayer helpers - client-safe versions
@@ -70,6 +27,20 @@ export const contentlayerHelper = {
     ) || null;
   },
   getPublishedDocuments: () => getPublishedDocuments(),
+  getDocumentsByTag: (tag: string) => {
+    const data = getContentlayerData();
+    return data.allDocuments?.filter(doc => 
+      doc.tags?.includes(tag) || 
+      doc._raw?.tags?.includes(tag)
+    ) || [];
+  },
+  getDocumentsByCategory: (category: string) => {
+    const data = getContentlayerData();
+    return data.allDocuments?.filter(doc => 
+      doc.category === category || 
+      doc._raw?.category === category
+    ) || [];
+  }
 };
 
 // IP utilities (client-safe fallbacks)
@@ -119,17 +90,47 @@ export function anonymizeIp(ip: string): string {
 }
 
 // Rate limiting (client-safe stubs)
-export const rateLimit = async () => ({ 
-  allowed: true, 
-  remaining: 100, 
-  retryAfterMs: 0,
-  resetTime: Date.now() + 3600000,
-  limit: 100,
-  windowMs: 3600000
-});
+export async function rateLimit(options?: any) { 
+  return { 
+    allowed: true, 
+    remaining: 100, 
+    retryAfterMs: 0,
+    resetTime: Date.now() + 3600000,
+    limit: 100,
+    windowMs: 3600000
+  };
+}
 
-export const createRateLimitHeaders = () => ({});
-export const RATE_LIMIT_CONFIGS = {};
+export function createRateLimitHeaders(result?: any) {
+  return {};
+}
+
+export const RATE_LIMIT_CONFIGS = {
+  API_GENERAL: { limit: 100, windowMs: 60000 },
+  AUTH: { limit: 10, windowMs: 60000 },
+  UPLOAD: { limit: 5, windowMs: 60000 }
+};
+
+// Additional utilities
+export function getMetaDescription(customDescription?: string): string {
+  return customDescription || siteConfig.seo.description;
+}
+
+export function getOgImageUrl(path?: string): string {
+  const baseUrl = siteConfig.url;
+  const ogImage = siteConfig.seo.openGraphImage || '/assets/images/social/og-image.jpg';
+  
+  if (path) {
+    return `${baseUrl}${path}`;
+  }
+  
+  return `${baseUrl}${ogImage}`;
+}
+
+export function getSocialUrl(platform: string): string | null {
+  const social = siteConfig.socials.find(s => s.kind === platform);
+  return social?.href || null;
+}
 
 // Health check
 export function checkImports() {
@@ -144,7 +145,6 @@ export function checkImports() {
 
 // Default export
 const importsApi = {
-
   siteConfig,
   getPageTitle,
   absUrl,
@@ -155,7 +155,12 @@ const importsApi = {
   rateLimit,
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
-  checkImports
-
+  checkImports,
+  getMetaDescription,
+  getOgImageUrl,
+  getSocialUrl,
+  canonicalUrl,
+  authorImage
 };
+
 export default importsApi;

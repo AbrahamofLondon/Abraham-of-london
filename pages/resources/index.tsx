@@ -1,3 +1,4 @@
+/* pages/resources/index.tsx — RESOURCE VAULT (INTEGRITY MODE) */
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -5,26 +6,92 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData, normalizeSlug, getDocHref } from "@/lib/contentlayer-compat";
+import { getContentlayerData, normalizeSlug } from "@/lib/contentlayer-compat";
 
 type ResourceMeta = {
-  slug: string;
+  slug: string;          // slug without "resources/"
   title: string;
-  description?: string | null;
-  subtitle?: string | null;
-  date?: string | null;
-  readTime?: string | null;
-  image?: string | null;
-  tags?: string[] | null;
-  author?: string | null;
-  href: string;
+  description: string | null;
+  subtitle: string | null;
+  date: string | null;   // ISO string
+  readTime: string | null;
+  image: string | null;
+  tags: string[];
+  author: string | null;
+  href: string;          // ALWAYS page route: /resources/{slug}
 };
 
 type Props = { resources: ResourceMeta[] };
 
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+
 function resolveDocCoverImage(doc: any): string | null {
-  return doc.coverImage || doc.image || null;
+  return doc.coverImage || doc.featuredImage || doc.image || doc.thumbnail || null;
 }
+
+function resolveResourceSlug(doc: any): string {
+  const raw = doc?.slugComputed || doc?.slug || doc?._raw?.flattenedPath || "";
+  const n = normalizeSlug(raw);
+  return n.replace(/^resources\//, "");
+}
+
+function resolveResourceHref(slug: string): string {
+  return `/resources/${slug}`;
+}
+
+function safeDateISO(d: any): string | null {
+  const t = new Date(d ?? "").getTime();
+  if (!Number.isFinite(t) || t <= 0) return null;
+  return new Date(t).toISOString();
+}
+
+/**
+ * STRATEGIC FIX: INTEGRITY MODE
+ * 1. Awaits getContentlayerData for absolute synchronization.
+ * 2. Filters strictly for titled resources with established paths.
+ */
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  try {
+    // COMMAND: Await contentlayer data for absolute build-time integrity
+    const data = await getContentlayerData();
+    const docs = Array.isArray(data.allResources) ? data.allResources : [];
+
+    const resources: ResourceMeta[] = docs
+      .map((r: any) => {
+        const slug = resolveResourceSlug(r);
+        return {
+          slug,
+          title: r.title ?? "Untitled Resource",
+          description: r.description ?? r.excerpt ?? null,
+          subtitle: r.subtitle ?? null,
+          date: safeDateISO(r.date),
+          readTime: r.readTime ?? r.normalizedReadTime ?? null,
+          image: resolveDocCoverImage(r),
+          tags: Array.isArray(r.tags) ? r.tags.filter((x: any) => typeof x === "string") : [],
+          author: r.author ?? null,
+          href: resolveResourceHref(slug),
+        };
+      })
+      // INTEGRITY MODE: Ensure slug existence and valid titling
+      .filter((x) => Boolean(x.slug) && Boolean(x.title) && x.title !== "Untitled Resource")
+      .sort((a, b) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return db - da;
+      });
+
+    return { 
+      props: { resources }, 
+      revalidate: 1800 
+    };
+  } catch (error) {
+    console.error("Resource index getStaticProps failed:", error);
+    return { 
+      props: { resources: [] }, 
+      revalidate: 1800 
+    };
+  }
+};
 
 const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
   const pageTitle = "The Resource Vault | Abraham of London";
@@ -35,10 +102,16 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
     <Layout title="Resource Vault" description={pageDescription}>
       <Head>
         <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE}/resources`} />
+        <link rel="canonical" href={`${SITE}/resources`} />
       </Head>
 
       <main className="min-h-screen bg-black text-cream">
-        <section className="mx-auto max-w-5xl px-6 py-16 lg:py-24">
+        <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
           <header className="mb-16 border-b border-gold/10 pb-12 text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
@@ -50,15 +123,15 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
               The Resource Vault
             </h1>
 
-            <p className="mt-6 mx-auto max-w-2xl text-base leading-relaxed text-gray-400 sm:text-lg">
-              Curated frameworks and structural primers. These are not general insights,
-              but architectural tools for those building legacies.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-400 sm:text-lg">
+              Curated frameworks and structural primers. Not general insights —
+              architectural tools for those building legacies.
             </p>
 
             <div className="mt-8 flex items-center justify-center gap-3">
               <div className="h-px w-8 bg-gold/30" />
               <p className="text-[11px] font-mono uppercase tracking-widest text-gold/60">
-                {resources.length} Compiled Volumes
+                {resources.length} Resources
               </p>
               <div className="h-px w-8 bg-gold/30" />
             </div>
@@ -92,7 +165,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
                       <div className="mb-4">
                         <div className="mb-3 flex items-center gap-3">
                           <span className="rounded bg-gold/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-gold/80">
-                            Framework
+                            Resource
                           </span>
                           {res.readTime && (
                             <span className="text-[10px] font-mono uppercase tracking-tighter text-gray-500">
@@ -142,6 +215,19 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
                           </svg>
                         </div>
                       </div>
+
+                      {res.tags.length > 0 && (
+                        <div className="mt-6 flex flex-wrap gap-2">
+                          {res.tags.slice(0, 6).map((t) => (
+                            <span
+                              key={t}
+                              className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-widest text-gray-400"
+                            >
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </article>
@@ -150,7 +236,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
           ) : (
             <div className="py-32 text-center">
               <h3 className="font-serif text-2xl italic text-cream opacity-50">
-                Resources are being initialized...
+                Resources are being initialized…
               </h3>
             </div>
           )}
@@ -158,28 +244,6 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
       </main>
     </Layout>
   );
-};
-
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const data = await getContentlayerData();
-  const docs = data.allResources || [];
-
-  const resources: ResourceMeta[] = docs
-    .map((r: any) => ({
-      slug: normalizeSlug(r.slugComputed || r.slug || ""),
-      title: r.title ?? "Untitled Resource",
-      description: r.description ?? r.excerpt ?? null,
-      subtitle: r.subtitle ?? null,
-      date: r.date ? String(r.date) : null,
-      readTime: r.normalizedReadTime ?? r.readTime ?? r.readtime ?? null,
-      image: resolveDocCoverImage(r),
-      tags: Array.isArray(r.tags) ? r.tags : null,
-      author: r.author ?? null,
-      href: getDocHref(r),
-    }))
-    .sort((a, b) => (b.date ? new Date(b.date).getTime() : 0) - (a.date ? new Date(a.date).getTime() : 0));
-
-  return { props: { resources }, revalidate: 1800 };
 };
 
 export default ResourcesIndexPage;

@@ -1033,4 +1033,21 @@ const validationApi = {
   }
 };
 
+
+/**
+ * Validate date range
+ */
+export const validateDateRange = (start: Date | string, end: Date | string): boolean => {
+  if (!start || !end) return false;
+  
+  const startDate = start instanceof Date ? start : new Date(start);
+  const endDate = end instanceof Date ? end : new Date(end);
+  
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return false;
+  }
+  
+  return startDate <= endDate;
+};
+
 export default validationApi;

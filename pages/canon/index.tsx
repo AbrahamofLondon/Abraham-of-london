@@ -1,4 +1,4 @@
-// pages/canon/index.tsx — ENHANCED TO SHOWCASE CANON MATERIALS
+// pages/canon/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -28,7 +28,6 @@ import {
   getPublishedDocuments,
   getAccessLevel,
   normalizeSlug,
-  getDocHref,
   isDraftContent,
   sanitizeData,
 } from "@/lib/contentlayer-compat";
@@ -39,18 +38,18 @@ type CanonItem = {
   title: string;
   subtitle: string | null;
   excerpt: string | null;
-  slug: string;
-  href: string;
+  slug: string;           // normalized path (no leading slash)
+  href: string;           // ALWAYS page route
   accessLevel: AccessLevel;
   coverImage: string | null;
-  date: string | null;
+  dateISO: string | null;
   readTime: string | null;
-  tags?: string[];
-  category?: string | null;
-  volume?: string | null;
-  featured?: boolean;
-  isTeachingEdition?: boolean;
-  volumeNumber?: number | null;
+  tags: string[];
+  category: string | null;
+  volume: string | null;
+  featured: boolean;
+  isTeachingEdition: boolean;
+  volumeNumber: number | null;
 };
 
 type CanonSeries = {
@@ -64,12 +63,7 @@ type CanonSeries = {
 
 type CanonIndexProps = {
   items: CanonItem[];
-  counts: {
-    total: number;
-    public: number;
-    inner: number;
-    private: number;
-  };
+  counts: { total: number; public: number; inner: number; private: number };
   featuredItems: CanonItem[];
   series: CanonSeries[];
   teachingEditions: CanonItem[];
@@ -79,34 +73,19 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.o
 
 function toAccessLevel(v: unknown): AccessLevel {
   const n = String(v || "").trim().toLowerCase();
-  if (n === "inner-circle" || n === "innercircle" || n === "members") return "inner-circle";
-  if (n === "private" || n === "draft" || n === "restricted") return "private";
+  if (["inner-circle", "innercircle", "members"].includes(n)) return "inner-circle";
+  if (["private", "draft", "restricted"].includes(n)) return "private";
   return "public";
 }
 
-function getAccessLevelBadge(level: AccessLevel) {
+function accessBadge(level: AccessLevel) {
   switch (level) {
     case "public":
-      return {
-        label: "Public",
-        icon: Unlock,
-        className: "border-amber-500/30 bg-amber-500/10 text-amber-200",
-        iconColor: "text-amber-300",
-      };
+      return { label: "Public", icon: Unlock, className: "border-amber-500/30 bg-amber-500/10 text-amber-200", iconColor: "text-amber-300" };
     case "inner-circle":
-      return {
-        label: "Inner Circle",
-        icon: Users,
-        className: "border-amber-500/20 bg-amber-900/20 text-amber-200/90",
-        iconColor: "text-amber-400",
-      };
+      return { label: "Inner Circle", icon: Users, className: "border-amber-500/20 bg-amber-900/20 text-amber-200/90", iconColor: "text-amber-400" };
     case "private":
-      return {
-        label: "Private",
-        icon: Lock,
-        className: "border-gray-500/20 bg-gray-900/20 text-gray-400",
-        iconColor: "text-gray-400",
-      };
+      return { label: "Private", icon: Lock, className: "border-gray-500/20 bg-gray-900/20 text-gray-400", iconColor: "text-gray-400" };
   }
 }
 
@@ -117,39 +96,46 @@ function extractVolumeNumber(title: string): number | null {
     const values: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
     let total = 0;
     let previous = 0;
-    
     for (let i = roman.length - 1; i >= 0; i--) {
       const current = values[roman[i]];
-      if (current < previous) {
-        total -= current;
-      } else {
-        total += current;
-      }
+      total += current < previous ? -current : current;
       previous = current;
     }
     return total;
   }
-  
   const numberMatch = title.match(/Volume[-\s](\d+)/i);
   if (numberMatch) return parseInt(numberMatch[1], 10);
-  
   return null;
 }
 
-function fmtDate(d: any): string | null {
+function safeDateISO(d: any): string | null {
   const t = new Date(d ?? "").getTime();
+  if (!Number.isFinite(t) || t <= 0) return null;
+  return new Date(t).toISOString();
+}
+
+function fmtDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
   if (!Number.isFinite(t) || t <= 0) return null;
   return new Date(t).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" });
 }
 
+function resolveCanonSlug(doc: any): string {
+  const raw = doc?.slugComputed || doc?.slug || doc?._raw?.flattenedPath || "";
+  return normalizeSlug(raw);
+}
+
+function resolveCanonHref(slug: string): string {
+  const s = slug.replace(/^canon\//, "");
+  return `/canon/${s}`;
+}
+
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
   try {
-    const data = getContentlayerData();
+    const data = await getContentlayerData();
 
-    // Primary canon collection
     const canonPrimary = Array.isArray(data.allCanons) ? data.allCanons : [];
-
-    // Secondary: tolerate legacy canon living elsewhere
     const allPublished = getPublishedDocuments();
 
     const canonSecondary = allPublished.filter((doc: any) => {
@@ -157,22 +143,13 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       const tags = Array.isArray(doc?.tags) ? doc.tags.map((t: string) => String(t).toLowerCase()) : [];
       const cat = String(doc?.category || "").toLowerCase();
       const urlish = String(doc?.url || "").toLowerCase();
-
-      return (
-        fp.startsWith("canon/") ||
-        tags.includes("canon") ||
-        tags.includes("volume") ||
-        cat.includes("canon") ||
-        urlish.includes("/canon/")
-      );
+      return fp.startsWith("canon/") || tags.includes("canon") || tags.includes("volume") || cat.includes("canon") || urlish.includes("/canon/");
     });
 
-    // Merge (avoid duplicates by flattenedPath/slug/title)
     const seen = new Set<string>();
     const merged = [...canonPrimary, ...canonSecondary].filter((d: any) => {
       const k = normalizeSlug(d?.slug || d?._raw?.flattenedPath || d?.title || "");
-      if (!k) return false;
-      if (seen.has(k)) return false;
+      if (!k || seen.has(k)) return false;
       seen.add(k);
       return true;
     });
@@ -180,8 +157,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     const items: CanonItem[] = merged
       .filter((c: any) => c && !isDraftContent(c))
       .map((c: any) => {
-        const slug = normalizeSlug(c?.slug || c?._raw?.flattenedPath || "");
-        const href = getDocHref(c) || (slug ? `/canon/${slug}` : "/canon");
+        const slug = resolveCanonSlug(c);
         const title = c?.title || "Untitled Canon";
         const isTeachingEdition = title.toLowerCase().includes("teaching edition");
         const volumeNumber = extractVolumeNumber(title);
@@ -192,11 +168,11 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           excerpt: c?.excerpt || c?.description || null,
           coverImage: c?.coverImage || null,
           slug,
-          href,
+          href: resolveCanonHref(slug),
           accessLevel: toAccessLevel(getAccessLevel(c)),
-          date: fmtDate(c?.date),
+          dateISO: safeDateISO(c?.date),
           readTime: c?.readTime || null,
-          tags: Array.isArray(c?.tags) ? c.tags : [],
+          tags: Array.isArray(c?.tags) ? c.tags.filter((x: any) => typeof x === "string") : [],
           category: c?.category || null,
           volume: c?.volume || null,
           featured: Boolean(c?.featured),
@@ -204,81 +180,35 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           volumeNumber,
         };
       })
+      .filter((x) => x.slug)
       .sort((a, b) => {
-        // Sort teaching editions after regular volumes
         if (a.isTeachingEdition && !b.isTeachingEdition) return 1;
         if (!a.isTeachingEdition && b.isTeachingEdition) return -1;
-        
-        // Sort by volume number if available
-        if (a.volumeNumber !== null && b.volumeNumber !== null) {
-          return a.volumeNumber - b.volumeNumber;
-        }
-        
-        // Then by featured status
+
+        if (a.volumeNumber !== null && b.volumeNumber !== null) return a.volumeNumber - b.volumeNumber;
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
 
-        // Then by date
-        const da = a.date ? new Date(a.date).getTime() : 0;
-        const db = b.date ? new Date(b.date).getTime() : 0;
+        const da = a.dateISO ? new Date(a.dateISO).getTime() : 0;
+        const db = b.dateISO ? new Date(b.dateISO).getTime() : 0;
         return db - da || a.title.localeCompare(b.title);
       });
 
-    // Group by volume series
     const volumeSeries: Record<string, CanonItem[]> = {};
-    items.forEach(item => {
+    for (const item of items) {
       if (item.volumeNumber !== null && !item.isTeachingEdition) {
-        const seriesKey = `Volume ${item.volumeNumber}`;
-        if (!volumeSeries[seriesKey]) {
-          volumeSeries[seriesKey] = [];
-        }
-        volumeSeries[seriesKey].push(item);
+        const key = `Volume ${item.volumeNumber}`;
+        (volumeSeries[key] ||= []).push(item);
       }
-    });
+    }
 
-    // Create series definitions
     const series: CanonSeries[] = [
-      {
-        volume: "Volume I",
-        title: "Foundations of Purpose",
-        description: "Architectural principles for human purpose and intentional existence",
-        icon: Target,
-        items: volumeSeries["Volume 1"] || [],
-        color: "from-amber-500/20 to-amber-600/10"
-      },
-      {
-        volume: "Volume II",
-        title: "Governance & Formation",
-        description: "Systems, structures, and processes for sustainable institutions",
-        icon: Building2,
-        items: volumeSeries["Volume 2"] || [],
-        color: "from-blue-500/20 to-blue-600/10"
-      },
-      {
-        volume: "Volume III",
-        title: "Civilisation & Legacy",
-        description: "Building enduring civilisations and generational legacy",
-        icon: Castle,
-        items: volumeSeries["Volume 3"] || [],
-        color: "from-purple-500/20 to-purple-600/10"
-      },
-      {
-        volume: "Volume IV",
-        title: "Stewardship & Continuity",
-        description: "Sustaining systems and maintaining continuity across generations",
-        icon: Compass,
-        items: volumeSeries["Volume 4"] || [],
-        color: "from-emerald-500/20 to-emerald-600/10"
-      },
-      {
-        volume: "Volume X",
-        title: "Future Civilisation",
-        description: "Visionary frameworks for the arc of future human organisation",
-        icon: Layers,
-        items: volumeSeries["Volume 10"] || [],
-        color: "from-rose-500/20 to-rose-600/10"
-      }
-    ].filter(series => series.items.length > 0);
+      { volume: "Volume I", title: "Foundations of Purpose", description: "Architectural principles for human purpose and intentional existence", icon: Target, items: volumeSeries["Volume 1"] || [], color: "from-amber-500/20 to-amber-600/10" },
+      { volume: "Volume II", title: "Governance & Formation", description: "Systems, structures, and processes for sustainable institutions", icon: Building2, items: volumeSeries["Volume 2"] || [], color: "from-blue-500/20 to-blue-600/10" },
+      { volume: "Volume III", title: "Civilisation & Legacy", description: "Building enduring civilisations and generational legacy", icon: Castle, items: volumeSeries["Volume 3"] || [], color: "from-purple-500/20 to-purple-600/10" },
+      { volume: "Volume IV", title: "Stewardship & Continuity", description: "Sustaining systems and maintaining continuity across generations", icon: Compass, items: volumeSeries["Volume 4"] || [], color: "from-emerald-500/20 to-emerald-600/10" },
+      { volume: "Volume X", title: "Future Civilisation", description: "Visionary frameworks for the arc of future human organisation", icon: Layers, items: volumeSeries["Volume 10"] || [], color: "from-rose-500/20 to-rose-600/10" },
+    ].filter((s) => s.items.length > 0);
 
     const counts = items.reduce(
       (acc, it) => {
@@ -292,10 +222,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     );
 
     const featuredItems = items.filter((x) => x.featured && x.accessLevel !== "private").slice(0, 6);
-    const teachingEditions = items.filter(x => x.isTeachingEdition && x.accessLevel === "public").slice(0, 4);
-
-    // eslint-disable-next-line no-console
-    console.log(`📚 Canon index: items=${items.length} series=${series.length} teachingEditions=${teachingEditions.length}`);
+    const teachingEditions = items.filter((x) => x.isTeachingEdition && x.accessLevel === "public").slice(0, 4);
 
     return {
       props: sanitizeData({ items, counts, featuredItems, series, teachingEditions }),
@@ -319,8 +246,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
 
 const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItems, series, teachingEditions }) => {
   const title = "The Canon";
-  const description =
-    "Foundational work on purpose, governance, civilisation, and legacy — organised for builders, not browsers.";
+  const description = "Foundational work on purpose, governance, civilisation, and legacy — organised for builders, not browsers.";
   const canonicalUrl = `${SITE}/canon`;
 
   const publicItems = items.filter((i) => i.accessLevel === "public" && !i.isTeachingEdition);
@@ -329,16 +255,20 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
   return (
     <Layout title={title} description={description} fullWidth>
       <Head>
+        <title>{title} | Abraham of London</title>
+        <meta name="description" content={description} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${title} | Abraham of London`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
       </Head>
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-b from-black via-slate-950 to-black">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(212,175,55,0.08),transparent_55%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
-          {/* Decorative elements */}
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl" />
         </div>
@@ -357,31 +287,16 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
             </h1>
 
             <p className="mt-6 text-lg md:text-xl leading-relaxed text-gray-400 max-w-3xl">
-              The architectural blueprint for intentional existence, governance, and civilisation-building. 
+              The architectural blueprint for intentional existence, governance, and civilisation-building.
               These volumes represent the foundational methodology applied across all Abraham of London work.
             </p>
 
             <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-4 max-w-3xl">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-white mb-1">{counts.total}</div>
-                <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Volumes</div>
-              </div>
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-amber-200 mb-1">{series.length}</div>
-                <div className="text-xs font-medium text-amber-300/80 uppercase tracking-wider">Core Series</div>
-              </div>
-              <div className="rounded-xl border border-amber-500/20 bg-amber-900/20 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-amber-200/90 mb-1">{teachingEditions.length}</div>
-                <div className="text-xs font-medium text-amber-300/60 uppercase tracking-wider">Teaching Editions</div>
-              </div>
-              <div className="rounded-xl border border-blue-500/20 bg-blue-900/20 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-blue-200/90 mb-1">4+</div>
-                <div className="text-xs font-medium text-blue-300/60 uppercase tracking-wider">Years in Development</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-white mb-1">{new Date().getFullYear()}</div>
-                <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Active Volumes</div>
-              </div>
+              <Stat label="Total Volumes" value={counts.total} tone="neutral" />
+              <Stat label="Core Series" value={series.length} tone="amber" />
+              <Stat label="Teaching Editions" value={teachingEditions.length} tone="amberSoft" />
+              <Stat label="Years in Development" value={"4+"} tone="blue" />
+              <Stat label="Active Volumes" value={new Date().getFullYear()} tone="neutral" />
             </div>
 
             <div className="mt-12 flex flex-wrap gap-4">
@@ -406,7 +321,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         </div>
       </section>
 
-      {/* Canon Series Overview */}
+      {/* Series */}
       {series.length > 0 && (
         <section id="series" className="py-20 border-b border-white/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -419,7 +334,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                 Architectural Blueprints for Civilisation
               </h2>
               <p className="text-gray-400 max-w-3xl mx-auto text-lg">
-                Each volume builds upon the last, creating a comprehensive framework for intentional existence, 
+                Each volume builds upon the last, creating a comprehensive framework for intentional existence,
                 governance, and legacy-building.
               </p>
             </div>
@@ -428,40 +343,40 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
               {series.map((s) => {
                 const SeriesIcon = s.icon;
                 const primaryItem = s.items[0];
-                
                 return (
-                  <div 
-                    key={s.volume} 
+                  <div
+                    key={s.volume}
                     className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br ${s.color} p-8 transition-all hover:border-white/20 hover:scale-[1.02]`}
                   >
                     <div className="absolute top-4 right-4">
                       <SeriesIcon className="w-8 h-8 text-white/10 group-hover:text-white/20 transition-colors" />
                     </div>
-                    
+
                     <div className="mb-6">
                       <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 backdrop-blur-sm">
                         <span className="text-xs font-bold uppercase tracking-wider text-white">{s.volume}</span>
-                        <span className="text-xs text-gray-400">{s.items.length} volume{s.items.length !== 1 ? 's' : ''}</span>
+                        <span className="text-xs text-gray-400">{s.items.length} volume{s.items.length !== 1 ? "s" : ""}</span>
                       </div>
                     </div>
-                    
+
                     <h3 className="font-serif text-2xl font-bold text-white mb-3">{s.title}</h3>
                     <p className="text-gray-400 mb-6">{s.description}</p>
-                    
+
                     {primaryItem && (
-                      <Link
-                        href={primaryItem.href}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-white/80 hover:text-white group/link"
-                      >
+                      <Link href={primaryItem.href} className="inline-flex items-center gap-2 text-sm font-medium text-white/80 hover:text-white group/link">
                         <span>Explore {s.volume}</span>
                         <ChevronRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
                       </Link>
                     )}
-                    
+
                     <div className="mt-6 pt-6 border-t border-white/5">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <BookOpen className="w-3 h-3" />
-                        <span>Includes: {s.items.map(item => item.title.split('–')[0].trim()).join(', ')}</span>
+                      <div className="text-xs text-gray-500">
+                        Includes:{" "}
+                        {s.items
+                          .slice(0, 3)
+                          .map((it) => it.title.split("—")[0].split("–")[0].trim())
+                          .join(", ")}
+                        {s.items.length > 3 ? ` +${s.items.length - 3} more` : ""}
                       </div>
                     </div>
                   </div>
@@ -472,25 +387,23 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         </section>
       )}
 
-      {/* Featured Volumes */}
+      {/* Featured */}
       {featuredItems.length > 0 && (
         <section className="py-20 border-b border-white/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-amber-400" />
-                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400">Essential Foundations</p>
-                </div>
-                <h2 className="font-serif text-3xl md:text-4xl font-bold text-white">Entry Points to the Work</h2>
-                <p className="mt-2 text-gray-400">Start here to understand the core methodology</p>
+            <div className="mb-12">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400">Essential Foundations</p>
               </div>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-white">Entry Points to the Work</h2>
+              <p className="mt-2 text-gray-400">Start here to understand the core methodology</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {featuredItems.map((item) => {
-                const badge = getAccessLevelBadge(item.accessLevel);
-                const BadgeIcon = badge.icon;
+                const b = accessBadge(item.accessLevel);
+                const BadgeIcon = b.icon;
 
                 return (
                   <Link
@@ -508,9 +421,9 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                     )}
 
                     <div className="mb-6">
-                      <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${badge.className}`}>
-                        <BadgeIcon className={`w-3 h-3 ${badge.iconColor}`} />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">{badge.label}</span>
+                      <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${b.className}`}>
+                        <BadgeIcon className={`w-3 h-3 ${b.iconColor}`} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">{b.label}</span>
                       </div>
                     </div>
 
@@ -518,9 +431,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                       {item.title}
                     </h3>
 
-                    {item.subtitle && (
-                      <p className="mt-2 text-sm font-medium text-gray-400">{item.subtitle}</p>
-                    )}
+                    {item.subtitle && <p className="mt-2 text-sm font-medium text-gray-400">{item.subtitle}</p>}
 
                     {item.excerpt && (
                       <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-gray-400 group-hover:text-gray-300">
@@ -530,10 +441,10 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
 
                     <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-6 text-xs">
                       <div className="flex items-center gap-4 text-gray-500">
-                        {item.date && (
+                        {fmtDate(item.dateISO) && (
                           <span className="flex items-center gap-1.5">
                             <Calendar className="w-4 h-4" />
-                            {item.date}
+                            {fmtDate(item.dateISO)}
                           </span>
                         )}
                         {item.readTime && (
@@ -562,9 +473,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                 <BookOpen className="w-5 h-5 text-amber-400" />
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400">Teaching Editions</p>
               </div>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">
-                Applied Methodology
-              </h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">Applied Methodology</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
                 Practical implementations and teaching versions of core concepts for direct application
               </p>
@@ -587,9 +496,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                     {item.title}
                   </h3>
 
-                  {item.subtitle && (
-                    <p className="mt-2 text-sm font-medium text-gray-400">{item.subtitle}</p>
-                  )}
+                  {item.subtitle && <p className="mt-2 text-sm font-medium text-gray-400">{item.subtitle}</p>}
 
                   {item.excerpt && (
                     <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-gray-400 group-hover:text-gray-300">
@@ -599,10 +506,10 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
 
                   <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-6 text-xs">
                     <div className="flex items-center gap-4 text-gray-500">
-                      {item.date && (
+                      {fmtDate(item.dateISO) && (
                         <span className="flex items-center gap-1.5">
                           <Calendar className="w-4 h-4" />
-                          {item.date}
+                          {fmtDate(item.dateISO)}
                         </span>
                       )}
                       {item.readTime && (
@@ -627,12 +534,8 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
           <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-500">The Complete Collection</p>
-              <h2 className="mt-3 font-serif text-3xl md:text-4xl font-bold text-white">
-                All Public Volumes
-              </h2>
-              <p className="mt-2 text-gray-400">
-                {publicItems.length} foundational volumes available to all builders and thinkers
-              </p>
+              <h2 className="mt-3 font-serif text-3xl md:text-4xl font-bold text-white">All Public Volumes</h2>
+              <p className="mt-2 text-gray-400">{publicItems.length} foundational volumes available to all builders and thinkers</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -654,8 +557,8 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
           {publicItems.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2">
               {publicItems.map((item) => {
-                const badge = getAccessLevelBadge(item.accessLevel);
-                const BadgeIcon = badge.icon;
+                const b = accessBadge(item.accessLevel);
+                const BadgeIcon = b.icon;
 
                 return (
                   <Link
@@ -668,13 +571,11 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                         <h3 className="font-serif text-2xl font-bold text-white transition-colors group-hover:text-amber-400">
                           {item.title}
                         </h3>
-                        {item.subtitle && (
-                          <p className="mt-2 text-sm font-medium text-gray-400">{item.subtitle}</p>
-                        )}
+                        {item.subtitle && <p className="mt-2 text-sm font-medium text-gray-400">{item.subtitle}</p>}
                       </div>
-                      <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 ${badge.className}`}>
-                        <BadgeIcon className={`w-3 h-3 ${badge.iconColor}`} />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">{badge.label}</span>
+                      <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 ${b.className}`}>
+                        <BadgeIcon className={`w-3 h-3 ${b.iconColor}`} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">{b.label}</span>
                       </div>
                     </div>
 
@@ -684,28 +585,23 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                       </p>
                     )}
 
-                    {item.tags && item.tags.length > 0 && (
+                    {item.tags.length > 0 && (
                       <div className="mt-6 flex flex-wrap gap-2">
                         {item.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-400"
-                          >
+                          <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-400">
                             #{tag}
                           </span>
                         ))}
-                        {item.tags.length > 3 && (
-                          <span className="text-xs text-gray-500">+{item.tags.length - 3} more</span>
-                        )}
+                        {item.tags.length > 3 && <span className="text-xs text-gray-500">+{item.tags.length - 3} more</span>}
                       </div>
                     )}
 
                     <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-6 text-xs font-medium text-gray-500">
                       <div className="flex items-center gap-4">
-                        {item.date && (
+                        {fmtDate(item.dateISO) && (
                           <span className="flex items-center gap-1.5">
                             <Calendar className="w-4 h-4" />
-                            {item.date}
+                            {fmtDate(item.dateISO)}
                           </span>
                         )}
                         {item.readTime && (
@@ -746,24 +642,18 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                 <Users className="w-5 h-5 text-amber-400" />
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400">Extended Framework</p>
               </div>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">
-                The Complete Methodology
-              </h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">The Complete Methodology</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                {innerCircleItems.length} additional volumes, including advanced applications, case studies, 
-                and implementation frameworks available exclusively to Inner Circle members
+                {innerCircleItems.length} additional volumes available exclusively to Inner Circle members.
               </p>
             </div>
 
             <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-black/50 p-8 md:p-12">
               <div className="grid md:grid-cols-2 gap-8 items-center">
                 <div>
-                  <h3 className="font-serif text-2xl md:text-3xl font-bold text-white mb-4">
-                    Access the Complete Framework
-                  </h3>
+                  <h3 className="font-serif text-2xl md:text-3xl font-bold text-white mb-4">Access the Complete Framework</h3>
                   <p className="text-gray-300 mb-6">
-                    The Inner Circle provides full access to the complete Abraham of London methodology, 
-                    including implementation guides, case studies, and ongoing development of the canon.
+                    Full access to advanced volumes, implementations, and ongoing canon development.
                   </p>
                   <ul className="space-y-3 mb-8">
                     {[
@@ -771,7 +661,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                       "Advanced implementation frameworks",
                       "Case studies and real-world applications",
                       "Ongoing volume development and updates",
-                      "Direct methodology consultation access"
+                      "Direct methodology consultation access",
                     ].map((x, i) => (
                       <li key={i} className="flex items-center gap-3 text-gray-300">
                         <div className="w-2 h-2 rounded-full bg-amber-500" />
@@ -791,20 +681,13 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
 
                 <div className="grid grid-cols-2 gap-4">
                   {innerCircleItems.slice(0, 4).map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-xl border border-amber-500/20 bg-amber-950/20 p-4 hover:border-amber-500/40 transition-colors"
-                    >
+                    <div key={idx} className="rounded-xl border border-amber-500/20 bg-amber-950/20 p-4 hover:border-amber-500/40 transition-colors">
                       <div className="flex items-center gap-2 mb-2">
                         <Lock className="w-3 h-3 text-amber-400" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">
-                          Inner Circle
-                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Inner Circle</span>
                       </div>
                       <h4 className="text-sm font-semibold text-white line-clamp-2">{item.title}</h4>
-                      {item.volume && (
-                        <p className="text-xs text-amber-400/70 mt-1">{item.volume}</p>
-                      )}
+                      {item.volume && <p className="text-xs text-amber-400/70 mt-1">{item.volume}</p>}
                     </div>
                   ))}
                 </div>
@@ -816,5 +699,25 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
     </Layout>
   );
 };
+
+function Stat({ label, value, tone }: { label: string; value: string | number; tone: "neutral" | "amber" | "amberSoft" | "blue" }) {
+  const cls =
+    tone === "amber"
+      ? "border-amber-500/30 bg-amber-500/10"
+      : tone === "amberSoft"
+      ? "border-amber-500/20 bg-amber-900/20"
+      : tone === "blue"
+      ? "border-blue-500/20 bg-blue-900/20"
+      : "border-white/10 bg-white/5";
+
+  const valCls = tone === "amber" ? "text-amber-200" : tone === "blue" ? "text-blue-200/90" : "text-white";
+
+  return (
+    <div className={`rounded-xl border p-4 backdrop-blur-sm ${cls}`}>
+      <div className={`text-2xl font-bold mb-1 ${valCls}`}>{value}</div>
+      <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+    </div>
+  );
+}
 
 export default CanonIndexPage;

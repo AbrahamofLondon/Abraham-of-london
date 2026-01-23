@@ -1,14 +1,15 @@
-// components/PolicyFooter.tsx
+// components/PolicyFooter.tsx - FIXED
 import * as React from "react";
 import Link from "next/link";
-import { siteConfig } from "@/lib/imports";
+import { siteConfig } from "@/config/site";
 
 interface PolicyFooterProps {
   isDark?: boolean;
 }
 
 export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.Element {
-  const email = siteConfig.contact?.email || (siteConfig as any).email || "info@abrahamoflondon.org";
+  // Use the correct path: siteConfig.author.email or fallback to contact.email
+  const email = siteConfig.author?.email || "info@abrahamoflondon.org";
 
   const border = isDark ? "border-white/10" : "border-gray-200/70";
   const bg = isDark
@@ -80,4 +81,3 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
     </section>
   );
 }
-

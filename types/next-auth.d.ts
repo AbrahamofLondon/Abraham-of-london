@@ -32,7 +32,7 @@ declare module "next-auth" {
   /**
    * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider`.
    */
-  interface Session extends AoLAccessClaims {
+  interface Session extends DefaultSession, AoLAccessClaims {
     user: {
       /** The user's unique identifier. */
       id: string;
@@ -42,6 +42,8 @@ declare module "next-auth" {
       name?: string | null;
       /** The user's profile image URL. */
       image?: string | null;
+      /** User role */
+      role?: string;
     } & DefaultSession["user"];
   }
 
@@ -54,6 +56,7 @@ declare module "next-auth" {
     email: string;
     name?: string | null;
     image?: string | null;
+    role?: string;
   }
 }
 
@@ -66,5 +69,6 @@ declare module "next-auth/jwt" {
     email: string;
     name?: string;
     image?: string;
+    role?: string;
   }
 }

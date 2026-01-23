@@ -1,4 +1,4 @@
-// pages/admin/pdf-dashboard.tsx - UPDATED WITH NEW SETUP
+// pages/admin/pdf-dashboard.tsx - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { withAdminAuth } from '@/lib/auth/withAdminAuth';
@@ -17,9 +17,9 @@ import PDFQuickActions from "@/components/PDFQuickActions";
 import PDFActionsBar from "@/components/PDFActionsBar";
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-// NEW: Add the live data dashboard components
-import { PDFDataDashboard } from '@/components/dashboard/PDFDataDashboard';
-import { LiveDataDashboard } from '@/components/dashboard/LiveDataDashboard';
+// FIX: Use default imports since components export as default
+import PDFDataDashboard from '@/components/dashboard/PDFDataDashboard';
+import LiveDataDashboard from '@/components/dashboard/LiveDataDashboard';
 
 // Types
 interface PDFDashboardProps {
@@ -205,8 +205,7 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
               <LiveDataDashboard
                 theme="dark"
                 onPDFSelect={handleSelectPDF}
-                showConnectionStatus={true}
-                maxPDFsDisplay={12}
+                // Removed props that don't exist: showConnectionStatus and maxPDFsDisplay
               />
               
               {/* Quick toggle back to classic view */}

@@ -15,21 +15,28 @@ import {
   AlertCircle,
   Clock,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Grid3x3,
+  List,
+  LayoutGrid
 } from 'lucide-react';
 
 interface PDFViewerProps {
   pdf: PDFItem | null;
   isGenerating: boolean;
-  onGeneratePDF: (id: string) => void;
+  onGeneratePDF: (id: string) => Promise<any> | void;
   refreshKey?: number;
+  viewMode?: 'list' | 'grid' | 'detail';
+  enableAnnotations?: boolean;
 }
 
 export const PDFViewer: React.FC<PDFViewerProps> = ({
   pdf,
   isGenerating,
   onGeneratePDF,
-  refreshKey
+  refreshKey,
+  viewMode = 'detail',
+  enableAnnotations = false
 }) => {
   // ALL HOOKS AT TOP LEVEL
   const [zoom, setZoom] = useState(100);
@@ -176,26 +183,57 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
 
   const status = getPDFStatus();
 
+  // Get view mode icon
+  const getViewModeIcon = () => {
+    switch (viewMode) {
+      case 'list': return <List className="h-4 w-4" />;
+      case 'grid': return <Grid3x3 className="h-4 w-4" />;
+      case 'detail': return <LayoutGrid className="h-4 w-4" />;
+      default: return <LayoutGrid className="h-4 w-4" />;
+    }
+  };
+
+  // Determine container classes based on view mode
+  const getContainerClasses = () => {
+    const baseClasses = `bg-gradient-to-br from-gray-900/50 to-black/50 border border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ${
+      isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''
+    }`;
+    
+    switch (viewMode) {
+      case 'list':
+        return `${baseClasses} max-h-[400px]`;
+      case 'grid':
+        return `${baseClasses} max-h-[500px]`;
+      case 'detail':
+      default:
+        return `${baseClasses}`;
+    }
+  };
+
   // Early returns - AFTER all hooks
   if (!mounted) return null;
   
   if (!pdf) {
     return (
-      <div className="lg:col-span-8 bg-gradient-to-br from-gray-900/50 to-black/50 border border-gray-800 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[600px]">
-        <FileText className="h-24 w-24 text-gray-600 mb-6" />
-        <h3 className="text-xl font-semibold text-gray-400 mb-2">No PDF Selected</h3>
-        <p className="text-gray-500 text-center max-w-md">
-          Select a PDF from the sidebar to view and manage it here.
-        </p>
+      <div className={getContainerClasses()}>
+        <div className="p-8 flex flex-col items-center justify-center min-h-[400px]">
+          <FileText className="h-24 w-24 text-gray-600 mb-6" />
+          <h3 className="text-xl font-semibold text-gray-400 mb-2">No PDF Selected</h3>
+          <p className="text-gray-500 text-center max-w-md">
+            Select a PDF from the sidebar to view and manage it here.
+          </p>
+          <div className="mt-4 text-sm text-gray-400 flex items-center gap-2">
+            {getViewModeIcon()}
+            <span>View Mode: {viewMode}</span>
+          </div>
+        </div>
       </div>
     );
   }
 
   // Main render
   return (
-    <div className={`lg:col-span-8 bg-gradient-to-br from-gray-900/50 to-black/50 border border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ${
-      isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''
-    }`}>
+    <div className={getContainerClasses()}>
       {/* Header */}
       <div className="border-b border-gray-800 p-6 bg-gradient-to-r from-gray-900 to-black">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -206,13 +244,21 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${status.color}`}>
                 {status.text}
               </span>
+              <div className="flex items-center gap-1 text-xs text-gray-400 ml-2">
+                {getViewModeIcon()}
+                <span>{viewMode}</span>
+              </div>
             </div>
             <p className="text-gray-400 text-sm truncate">{pdf.description}</p>
-            <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+            <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-gray-500">
               <span>Type: {pdf.type}</span>
               {pdf.fileSize && <span>Size: {pdf.fileSize}</span>}
-              {pdf.lastGenerated && (
-                <span>Last Generated: {new Date(pdf.lastGenerated).toLocaleDateString()}</span>
+              {/* FIX: Use generatedAt instead of lastGenerated */}
+              {pdf.generatedAt && (
+                <span>Last Generated: {new Date(pdf.generatedAt).toLocaleDateString()}</span>
+              )}
+              {enableAnnotations && (
+                <span className="text-blue-400">Annotations Enabled</span>
               )}
             </div>
           </div>
@@ -284,16 +330,18 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowAnnotations(!showAnnotations)}
-              className={`p-2 rounded-lg flex items-center gap-2 transition-colors ${
-                showAnnotations ? 'bg-blue-900/30 text-blue-400' : 'bg-gray-800 hover:bg-gray-700'
-              }`}
-              title={showAnnotations ? 'Hide Annotations' : 'Show Annotations'}
-            >
-              {showAnnotations ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-              <span className="text-sm hidden md:inline">Annotations</span>
-            </button>
+            {enableAnnotations && (
+              <button
+                onClick={() => setShowAnnotations(!showAnnotations)}
+                className={`p-2 rounded-lg flex items-center gap-2 transition-colors ${
+                  showAnnotations ? 'bg-blue-900/30 text-blue-400' : 'bg-gray-800 hover:bg-gray-700'
+                }`}
+                title={showAnnotations ? 'Hide Annotations' : 'Show Annotations'}
+              >
+                {showAnnotations ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                <span className="text-sm hidden md:inline">Annotations</span>
+              </button>
+            )}
             
             <button
               onClick={handleCopyLink}
@@ -331,7 +379,11 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
       </div>
 
       {/* PDF Viewer Area */}
-      <div className="p-6 bg-gradient-to-b from-gray-950 to-black h-[calc(100%-200px)] overflow-auto">
+      <div className={`p-6 bg-gradient-to-b from-gray-950 to-black overflow-auto ${
+        viewMode === 'list' ? 'h-[200px]' : 
+        viewMode === 'grid' ? 'h-[300px]' : 
+        'h-[calc(100%-200px)]'
+      }`}>
         {error && (
           <div className="mb-4 p-4 bg-red-900/20 border border-red-800 rounded-lg">
             <div className="flex items-center gap-2 text-red-400">
@@ -429,7 +481,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
             </div>
 
             {/* PDF Info Overlay */}
-            {showAnnotations && (
+            {showAnnotations && enableAnnotations && (
               <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm text-white p-4 rounded-lg max-w-xs">
                 <h4 className="font-semibold mb-2">PDF Details</h4>
                 <ul className="text-sm space-y-1">
@@ -446,6 +498,10 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
                   <li className="flex justify-between">
                     <span className="text-gray-300">Zoom:</span>
                     <span>{zoom}%</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span className="text-gray-300">View Mode:</span>
+                    <span>{viewMode}</span>
                   </li>
                   <li className="flex justify-between">
                     <span className="text-gray-300">Status:</span>
@@ -480,9 +536,14 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <div className="flex items-center gap-4 text-gray-400">
             <span>PDF ID: {pdf.id}</span>
-            {pdf.lastGenerated && (
-              <span>Last updated: {new Date(pdf.lastGenerated).toLocaleString()}</span>
+            {/* FIX: Use generatedAt instead of lastGenerated */}
+            {pdf.generatedAt && (
+              <span>Last updated: {new Date(pdf.generatedAt).toLocaleString()}</span>
             )}
+            <div className="flex items-center gap-1">
+              {getViewModeIcon()}
+              <span>Mode: {viewMode}</span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <button

@@ -1,3 +1,4 @@
+// lib/content-loader.ts - FIXED
 import { Post } from '@/types/post';
 
 /* -------------------------------------------------------------------------- */
@@ -109,22 +110,11 @@ export function createContentLoader() {
   };
 }
 
+// FIX: Only declare contentLoaderApi once
 const contentLoaderApi = {
-
   loadPostsFromSource,
   initializeAllContent,
   createContentLoader
-
-};
-
-
-
-
-
-const contentLoaderApi = {
-  createContentLoader,
-  initializeAllContent,
-  loadPostsFromSource
 };
 
 export default contentLoaderApi;

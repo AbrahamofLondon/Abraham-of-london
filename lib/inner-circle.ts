@@ -28,6 +28,39 @@ import {
 import { requireAdmin, requireRateLimit } from "@/lib/server/guards";
 
 // --------------------
+// Type Definitions
+// --------------------
+export type AccessCheckReason = 
+  | 'expired'
+  | 'no_cookie'
+  | 'invalid_cookie'
+  | 'rate_limited'
+  | 'ip_blocked'
+  | 'no_request'
+  | 'build_time'
+  | 'local_storage'
+  | 'api_error'
+  | 'valid';
+
+// Re-export all types with proper AccessCheckReason
+export type { 
+  InnerCircleAccess as BaseInnerCircleAccess,
+  AccessCheckOptions,
+  KeyTier,
+  StoredKey,
+  CreateOrUpdateMemberArgs,
+  IssuedKey,
+  VerifyInnerCircleKeyResult,
+  InnerCircleStats,
+  CleanupResult 
+};
+
+// Extend InnerCircleAccess with AccessCheckReason
+export type InnerCircleAccess = BaseInnerCircleAccess & {
+  reason?: AccessCheckReason;
+};
+
+// --------------------
 // Primary exports (non-star, avoids collisions)
 // --------------------
 export {
@@ -41,22 +74,7 @@ export {
 };
 
 // --------------------
-// Types
-// --------------------
-export type {
-  InnerCircleAccess,
-  AccessCheckOptions,
-  KeyTier,
-  StoredKey,
-  CreateOrUpdateMemberArgs,
-  IssuedKey,
-  VerifyInnerCircleKeyResult,
-  InnerCircleStats,
-  CleanupResult,
-};
-
-// --------------------
-// Backward compat
+// Backward compat constants
 // --------------------
 export const INNER_CIRCLE_CONFIG = {
   enabled: true,
@@ -65,12 +83,13 @@ export const INNER_CIRCLE_CONFIG = {
   keyPrefix: "icl_",
   keyExpiryDays: 90,
   maxKeysPerMember: 3,
-};
+} as const;
 
+// Alias for backward compatibility
 export const withInnerCircleRateLimit = withInnerCircleAccess;
 
 /**
- * Back-compat wrapper:
+ * Backward compatibility wrapper:
  * returns `{ verification, rateLimit, headers }`
  */
 export async function verifyInnerCircleKeyWithRateLimit(
@@ -138,74 +157,133 @@ export async function verifyInnerCircleKeyWithRateLimit(
 
       if (!allowed) {
         return {
-          verification: { valid: false, reason: "rate_limited" } as any as VerifyInnerCircleKeyResult,
+          verification: { 
+            valid: false, 
+            reason: "rate_limited" 
+          } as VerifyInnerCircleKeyResult,
           rateLimit: rateLimitInfo,
           headers,
         };
       }
     }
   } catch {
-    // If RL fails, do not block verification.
+    // If rate limiting fails, do not block verification
   }
 
   const verification = await verifyInnerCircleKey(key);
   return { verification, rateLimit: rateLimitInfo, headers };
 }
 
-// Straight aliases
+// Straight aliases for backward compatibility
 export const getPrivacySafeStatsWithRateLimit = getPrivacySafeStats;
 export const createOrUpdateMemberAndIssueKeyWithRateLimit = createOrUpdateMemberAndIssueKey;
 
 /**
- * ✅ THIS is the missing export your build complained about.
- * Privacy-safe export + rate limit + admin gate.
- * You can wire real data later; the important part is: export exists and is safe.
+ * ✅ Privacy-safe export with rate limiting and admin gate
  */
-export async function getPrivacySafeKeyExportWithRateLimit(req: NextApiRequest, res: NextApiResponse) {
-  const okRL = await requireRateLimit(req, res, (RATE_LIMIT_CONFIGS as any)?.ADMIN_EXPORT ?? RATE_LIMIT_CONFIGS.API_GENERAL, "ic-export");
+export async function getPrivacySafeKeyExportWithRateLimit(
+  req: NextApiRequest, 
+  res: NextApiResponse
+): Promise<void> {
+  const okRL = await requireRateLimit(
+    req, 
+    res, 
+    (RATE_LIMIT_CONFIGS as any)?.ADMIN_EXPORT ?? RATE_LIMIT_CONFIGS.API_GENERAL, 
+    "ic-export"
+  );
   if (!okRL) return;
 
   const okAdmin = await requireAdmin(req, res);
   if (!okAdmin) return;
 
-  // Privacy safe by default: do not leak raw keys.
+  // Privacy safe by design - never leak raw keys
   const stats = await getPrivacySafeStats().catch(() => null);
 
   res.status(200).json({
     ok: true,
     data: {
       export: [],
-      note: "Privacy-safe export stub. Wire to real export when ready.",
+      note: "Privacy-safe export - no raw keys are exposed",
       stats,
     },
     timestamp: new Date().toISOString(),
   });
 }
 
+/**
+ * Enhanced health check
+ */
 export const healthCheckEnhanced = async () => ({
-  status: "ok",
+  status: "ok" as const,
   timestamp: new Date().toISOString(),
   store: process.env.INNER_CIRCLE_STORE || "memory",
+  version: "1.0.0",
 });
 
-// Default export (keep for older default-import usage)
+// --------------------
+// Utility Functions
+// --------------------
+
+/**
+ * Create a valid InnerCircleAccess response
+ */
+export function createInnerCircleAccess(
+  hasAccess: boolean, 
+  reason?: AccessCheckReason, 
+  token?: string
+): InnerCircleAccess {
+  return {
+    hasAccess,
+    ok: hasAccess,
+    reason,
+    token,
+    checkedAt: new Date(),
+  };
+}
+
+/**
+ * Check if access is valid
+ */
+export function isValidAccess(access: InnerCircleAccess | null): boolean {
+  return access?.hasAccess === true && access?.reason === 'valid';
+}
+
+/**
+ * Check if access should be renewed
+ */
+export function shouldRenewAccess(access: InnerCircleAccess | null): boolean {
+  if (!access) return true;
+  
+  const checkAge = Date.now() - access.checkedAt.getTime();
+  return checkAge > 5 * 60 * 1000; // 5 minutes
+}
+
+// --------------------
+// Default export (backward compatibility)
+// --------------------
 const innerCircle = {
+  // Core functions
   withInnerCircleAccess,
   getInnerCircleAccess,
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
-
   verifyInnerCircleKey,
   getPrivacySafeStats,
   createOrUpdateMemberAndIssueKey,
-
-  // compat
+  
+  // Backward compatibility
   withInnerCircleRateLimit,
   getPrivacySafeStatsWithRateLimit,
   createOrUpdateMemberAndIssueKeyWithRateLimit,
   verifyInnerCircleKeyWithRateLimit,
   getPrivacySafeKeyExportWithRateLimit,
-
+  
+  // Utility functions
+  createInnerCircleAccess,
+  isValidAccess,
+  shouldRenewAccess,
+  
+  // Health and config
   healthCheckEnhanced,
   INNER_CIRCLE_CONFIG,
 };

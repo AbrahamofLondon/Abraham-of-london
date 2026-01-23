@@ -1,86 +1,89 @@
 // components/PDFDashboard/PDFQuickActions.tsx
-import React from 'react';
-import { RefreshCw, Download, Tag, Filter, Grid, List, Settings } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from "react";
 
-interface PDFQuickActionsProps {
+type Props = {
   isGenerating: boolean;
   selectedCount: number;
-  onGenerateAll: () => void;
-  onRefresh: () => void;
-  onBatchTag: () => void;
-  onSettingsClick?: () => void;
-}
 
-export const PDFQuickActions: React.FC<PDFQuickActionsProps> = ({
+  onGenerateAll: () => Promise<void> | void;
+  onRefresh: () => void;
+
+  // ✅ matches your real batchTag signature
+  onBatchTag: (tag: string, pdfIds?: string[]) => Promise<void> | void;
+
+  // Optional: pass selected IDs directly from parent
+  selectedIds?: string[];
+};
+
+export const PDFQuickActions: React.FC<Props> = ({
   isGenerating,
   selectedCount,
   onGenerateAll,
   onRefresh,
   onBatchTag,
-  onSettingsClick,
+  selectedIds,
 }) => {
+  const [tag, setTag] = useState("");
+
+  const canTag = useMemo(
+    () => selectedCount > 0 && tag.trim().length > 0,
+    [selectedCount, tag]
+  );
+
+  const handleTag = useCallback(async () => {
+    if (!canTag) return;
+
+    const cleanTag = tag.trim();
+    const ids = selectedIds && selectedIds.length > 0 ? selectedIds : undefined;
+
+    await onBatchTag(cleanTag, ids);
+    setTag("");
+  }, [canTag, onBatchTag, tag, selectedIds]);
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between bg-gray-800/40 border border-gray-700/50 rounded-2xl p-4">
+      <div className="flex flex-wrap gap-2 items-center">
         <button
+          type="button"
           onClick={onRefresh}
-          disabled={isGenerating}
-          className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+          className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium transition-colors"
         >
-          <RefreshCw className="h-4 w-4" />
           Refresh
         </button>
-        
+
         <button
-          onClick={onGenerateAll}
+          type="button"
+          onClick={() => void onGenerateAll()}
           disabled={isGenerating}
-          className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors"
         >
-          <Download className="h-4 w-4" />
-          Generate All Missing
+          {isGenerating ? "Generating…" : "Generate All"}
         </button>
 
-        {selectedCount > 0 && (
-          <div className="flex items-center gap-2 ml-2">
-            <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
-              {selectedCount} selected
-            </span>
-            <button
-              onClick={onBatchTag}
-              className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg flex items-center gap-1"
-            >
-              <Tag className="h-3 w-3" />
-              Tag Selected
-            </button>
-          </div>
-        )}
+        <div className="text-sm text-gray-300 ml-1">
+          Selected: <span className="font-semibold">{selectedCount}</span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex gap-2 items-center">
+        <input
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          placeholder="Tag selected PDFs…"
+          className="px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+        />
+
         <button
-          className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
-          title="Toggle Grid/List View"
+          type="button"
+          onClick={() => void handleTag()}
+          disabled={!canTag}
+          className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors"
         >
-          <Grid className="h-4 w-4" />
+          Apply Tag
         </button>
-        
-        <button
-          className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
-          title="Filter Options"
-        >
-          <Filter className="h-4 w-4" />
-        </button>
-        
-        {onSettingsClick && (
-          <button
-            onClick={onSettingsClick}
-            className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
-            title="Settings"
-          >
-            <Settings className="h-4 w-4" />
-          </button>
-        )}
       </div>
     </div>
   );
 };
+
+export default React.memo(PDFQuickActions);

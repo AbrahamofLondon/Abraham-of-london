@@ -3,8 +3,7 @@
 // Server component by default; accepts serialized MDX and component map.
 
 import React from "react";
-import { MDXRemote } from "next-mdx-remote";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
 export type MDXComponent = React.ComponentType<Record<string, unknown>>;
 export type MDXComponents = Record<string, MDXComponent>;
@@ -17,8 +16,8 @@ const defaultComponents: MDXComponents = {
 };
 
 export interface MDXRendererProps {
-  /** The serialized MDX object (result of next-mdx-remote/serialize). */
-  source: MDXRemoteSerializeResult;
+  /** The MDX source string (use next-mdx-remote/serialize for older API). */
+  source: string;
   /** Optional component override map (merged over defaults). */
   components?: MDXComponents;
   /** Optional className for a wrapping element. */
@@ -30,7 +29,7 @@ export interface MDXRendererProps {
 /**
  * MDXRenderer
  * Usage:
- *   <MDXRenderer source={mdx} components={mdxComponents} prose />
+ *   <MDXRenderer source={mdxSource} components={mdxComponents} prose />
  */
 export default function MDXRenderer({
   source,
@@ -48,7 +47,7 @@ export default function MDXRenderer({
 
   const merged: MDXComponents = { ...defaultComponents, ...(components || {}) };
 
-  const content = <MDXRemote {...source} components={merged} />;
+  const content = <MDXRemote source={source} components={merged} />;
 
   if (prose) {
     return (
@@ -64,4 +63,3 @@ export default function MDXRenderer({
 
   return <div className={className}>{content}</div>;
 }
-

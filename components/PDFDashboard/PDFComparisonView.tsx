@@ -21,6 +21,22 @@ interface PDFComparisonViewProps {
   pdfTitles?: Record<string, string>;
 }
 
+interface PDFComparisonItem {
+  id: string;
+  title: string;
+  size: string;
+  pages: number;
+  status: 'generated' | 'pending' | 'error';
+  lastModified: string;
+  category: string;
+  score: number;
+  metadata: {
+    author: string;
+    version: string;
+    tags: string[];
+  };
+}
+
 const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
   pdfIds,
   onClose,
@@ -33,31 +49,53 @@ const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
   const [comparisonMode, setComparisonMode] = useState<'overview' | 'detailed' | 'side-by-side'>('overview');
 
   // Mock comparison data - in real app, fetch PDF metadata
-  const comparisonData = useMemo(() => {
-    return pdfIds.map((pdfId, index) => ({
-      id: pdfId,
-      title: pdfTitles[pdfId] || `PDF ${index + 1}`,
-      size: `${(Math.random() * 5 + 1).toFixed(1)} MB`,
-      pages: Math.floor(Math.random() * 50) + 10,
-      status: ['generated', 'pending', 'error'][index % 3] as 'generated' | 'pending' | 'error',
-      lastModified: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      category: ['reports', 'manuals', 'financial', 'marketing'][index % 4],
-      score: Math.floor(Math.random() * 100),
-      metadata: {
-        author: `Author ${index + 1}`,
-        version: `v${(index % 3) + 1}.0`,
-        tags: ['important', 'review', 'archive'].slice(0, (index % 3) + 1),
-      }
-    }));
+  const comparisonData = useMemo<PDFComparisonItem[]>(() => {
+    const categories = ['reports', 'manuals', 'financial', 'marketing'];
+    const statuses = ['generated', 'pending', 'error'] as const;
+    
+    return pdfIds.map((pdfId, index) => {
+      const categoryIndex = index % categories.length;
+      const statusIndex = index % statuses.length;
+      
+      // Type assertion to guarantee the status type
+      const status = statuses[statusIndex] as 'generated' | 'pending' | 'error';
+      
+      return {
+        id: pdfId,
+        title: pdfTitles[pdfId] || `PDF ${index + 1}`,
+        size: `${(Math.random() * 5 + 1).toFixed(1)} MB`,
+        pages: Math.floor(Math.random() * 50) + 10,
+        status: status, // Use the typed status
+        lastModified: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        category: categories[categoryIndex] || 'uncategorized',
+        score: Math.floor(Math.random() * 100),
+        metadata: {
+          author: `Author ${index + 1}`,
+          version: `v${(index % 3) + 1}.0`,
+          tags: ['important', 'review', 'archive'].slice(0, (index % 3) + 1),
+        }
+      };
+    });
   }, [pdfIds, pdfTitles]);
 
-  const metrics = [
-    { id: 'size', label: 'File Size', format: (value: string) => value },
-    { id: 'pages', label: 'Page Count', format: (value: number) => `${value} pages` },
-    { id: 'status', label: 'Status', format: (value: string) => value },
-    { id: 'category', label: 'Category', format: (value: string) => value },
-    { id: 'score', label: 'Quality Score', format: (value: number) => `${value}/100` },
-    { id: 'lastModified', label: 'Last Modified', format: (value: string) => new Date(value).toLocaleDateString() },
+  type Metric = {
+    id: keyof PDFComparisonItem | 'status';
+    label: string;
+    format: (value: string | number) => string;
+  };
+
+  const metrics: Metric[] = [
+    { id: 'size', label: 'File Size', format: (value: string | number) => value.toString() },
+    { id: 'pages', label: 'Page Count', format: (value: string | number) => `${value} pages` },
+    { id: 'status', label: 'Status', format: (value: string | number) => value.toString() },
+    { id: 'category', label: 'Category', format: (value: string | number) => value.toString() },
+    { id: 'score', label: 'Quality Score', format: (value: string | number) => `${value}/100` },
+    { id: 'lastModified', label: 'Last Modified', format: (value: string | number) => {
+      if (typeof value === 'string') {
+        return new Date(value).toLocaleDateString();
+      }
+      return new Date(value.toString()).toLocaleDateString();
+    }},
   ];
 
   const getLayoutClasses = () => {
@@ -72,6 +110,26 @@ const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
         return 'space-y-4';
       default:
         return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+    }
+  };
+
+  // Helper function to get metric value safely
+  const getMetricValue = (pdf: PDFComparisonItem, metricId: string): string | number => {
+    switch (metricId) {
+      case 'size':
+        return pdf.size;
+      case 'pages':
+        return pdf.pages;
+      case 'status':
+        return pdf.status;
+      case 'category':
+        return pdf.category;
+      case 'score':
+        return pdf.score;
+      case 'lastModified':
+        return pdf.lastModified;
+      default:
+        return '';
     }
   };
 
@@ -248,7 +306,7 @@ const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
                       <div key={metric.id} className="text-sm">
                         <div className="text-gray-400">{metric.label}</div>
                         <div className="font-medium text-gray-300">
-                          {metric.format(pdf[metric.id as keyof typeof pdf] as any)}
+                          {metric.format(getMetricValue(pdf, metric.id))}
                         </div>
                       </div>
                     ))}
@@ -257,7 +315,7 @@ const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
                 {pdf.metadata && (
                   <div className="mt-4 pt-4 border-t border-gray-700/30">
                     <div className="flex flex-wrap gap-1">
-                      {pdf.metadata.tags?.map(tag => (
+                      {pdf.metadata.tags.map(tag => (
                         <span key={tag} className="px-2 py-1 bg-gray-800 text-gray-400 text-xs rounded">
                           {tag}
                         </span>
@@ -299,7 +357,7 @@ const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
                       .filter(m => selectedMetrics.includes(m.id))
                       .map(metric => (
                         <td key={metric.id} className="py-3 px-4 text-gray-300">
-                          {metric.format(pdf[metric.id as keyof typeof pdf] as any)}
+                          {metric.format(getMetricValue(pdf, metric.id))}
                         </td>
                       ))}
                   </tr>
@@ -321,7 +379,7 @@ const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
                       <div key={metric.id} className="flex justify-between items-center">
                         <span className="text-gray-400">{metric.label}:</span>
                         <span className="font-medium text-gray-300">
-                          {metric.format(pdf[metric.id as keyof typeof pdf] as any)}
+                          {metric.format(getMetricValue(pdf, metric.id))}
                         </span>
                       </div>
                     ))}

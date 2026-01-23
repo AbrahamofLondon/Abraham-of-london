@@ -12,7 +12,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // 1. Retrieve Content Safely - getAllPosts() returns a Promise
     const posts = await getAllPosts();
-    const post = posts.find((p) => p.slug === slug);
+    const post = posts.find((p: any) => {
+      // Try multiple slug properties
+      const postSlug = p?.slug || p?._raw?.flattenedPath || "";
+      // Remove file extensions if present
+      const normalizedPostSlug = postSlug.replace(/\.(md|mdx)$/, '');
+      return normalizedPostSlug === slug;
+    });
 
     if (!post) {
       return res.status(404).json({ error: "POST_NOT_FOUND" });
@@ -20,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 2. Non-blocking Analytics
     // Record the view without delaying the response
-    recordContentView(post).catch(e => console.error("[LOG_SILENT_FAIL]", e));
+    recordContentView(slug).catch((e: any) => console.error("[LOG_SILENT_FAIL]", e));
 
     // 3. Principled Header Selection
     // Cache for 60s shared, allow stale up to 30s
@@ -28,21 +34,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 4. Transform Response
     // Safe property access using optional chaining where data might be missing
-    return res.status(200).json({
-      title: post.title,
-      date: post.date,
+    const responseData = {
+      title: post.title || "Untitled",
+      date: post.date || post.createdAt || new Date().toISOString().split('T')[0],
       // Access safely; computed fields might differ based on config
-      readingTime: (post as any).readingTime?.text || (post as any).readTime || "Unknown",
+      readingTime: (post as any).readingTime?.text || 
+                   (post as any).readTime || 
+                   (post as any).timeToRead || 
+                   "Unknown",
       category: (post as any).category || "General",
-      tags: post.tags || [],
-      description: post.description || (post as any).summary || "",
+      tags: (post as any).tags || [],
+      description: post.description || 
+                   (post as any).summary || 
+                   (post as any).excerpt || 
+                   "",
+      slug: slug,
       success: true
-    });
+    };
+
+    return res.status(200).json(responseData);
   } catch (error) {
     console.error('[Blog API] Error:', error);
     return res.status(500).json({ 
       error: "SERVER_ERROR",
-      message: "Failed to fetch blog post"
+      message: "Failed to fetch blog post",
+      slug: slug
     });
   }
 }

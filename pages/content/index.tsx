@@ -1,4 +1,4 @@
-// pages/content/index.tsx — FULL INDEX (SYNC CONTENTLAYER)
+// pages/content/index.tsx — FULL INDEX (VAULT-ONLY, LINK-INTEGRITY MODE)
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
@@ -45,18 +45,19 @@ type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
-    const data = getContentlayerData();
+    // Ensure contentlayer is loaded
+    const data = await getContentlayerData();
     assertContentlayerHasDocs(data);
 
-    const docs = getPublishedDocuments(); // combined published docs
+    const docs = getPublishedDocuments();
 
+    // VAULT-ONLY: only include docs whose href begins with /content/
     const items: Item[] = (docs ?? [])
       .map((d: any) => {
         const kind = String(getDocKind(d) ?? "document");
         const href = String(getDocHref(d) ?? "");
         const title = String(d?.title ?? "Untitled");
         const slugish = String(d?.slug || d?._raw?.flattenedPath || href || title);
-
         const key = String(d?._id ?? `${kind}:${slugish}`);
 
         return {
@@ -72,7 +73,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
           category: d?.category ?? null,
         };
       })
-      .filter((x) => Boolean(x.href) && Boolean(x.title))
+      .filter((x) => Boolean(x.href) && x.href.startsWith("/content/") && Boolean(x.title))
       .sort((a, b) => {
         const bd = b.date ? new Date(b.date).getTime() : 0;
         const ad = a.date ? new Date(a.date).getTime() : 0;
@@ -84,12 +85,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       revalidate: 1800,
     };
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating static props for content index:", error);
-    return {
-      props: { items: [] },
-      revalidate: 1800,
-    };
+    console.error("Error generating static props for /content index:", error);
+    return { props: { items: [] }, revalidate: 1800 };
   }
 };
 
@@ -161,8 +158,8 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
       short: "Shorts",
       print: "Prints",
       resource: "Resources",
-      document: "Documents",
       strategy: "Strategy",
+      document: "Documents",
     };
     return labels[kind] || `${kind.charAt(0).toUpperCase()}${kind.slice(1)}s`;
   };
@@ -179,6 +176,7 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
       print: <Layers className="w-4 h-4" />,
       resource: <Layers className="w-4 h-4" />,
       strategy: <Terminal className="w-4 h-4" />,
+      document: <BookOpen className="w-4 h-4" />,
     };
     return icons[kind] || <BookOpen className="w-4 h-4" />;
   };
@@ -192,7 +190,7 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
   return (
     <Layout
       title="The Kingdom Vault"
-      description="Centralized strategic repository containing essays, books, events, and exclusive resources from Abraham of London."
+      description="Centralised strategic repository: vetted documents, manuscripts, and assets from Abraham of London."
       fullWidth
     >
       <main className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-gray-300">
@@ -211,7 +209,8 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
             </h1>
 
             <p className="text-lg text-gray-400 mb-12 max-w-3xl">
-              Centralized strategic repository containing essays, books, events, and exclusive resources.
+              This index only lists assets that live under <span className="font-mono text-gray-200">/content/</span>.
+              If it’s here, it resolves. No broken routes.
             </p>
 
             <div className="space-y-4 max-w-3xl">
@@ -303,7 +302,7 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
               {(searchTerm || selectedKind || selectedCategory) && (
                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
                   <span>
-                    Showing {filteredItems.length} of {items.length} items
+                    Showing {filteredItems.length} of {items.length} assets
                   </span>
                 </div>
               )}
@@ -313,10 +312,19 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
 
         <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           {groups.length === 0 ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-3xl border border-dashed border-white/10 py-24 text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="rounded-3xl border border-dashed border-white/10 py-24 text-center"
+            >
               <Box className="mx-auto mb-4 text-gray-700" size={48} />
-              <p className="font-serif text-xl italic text-gray-500 mb-6">No assets matching the current filters.</p>
-              <button onClick={clearFilters} className="px-6 py-3 bg-white/5 border border-white/10 text-gray-400 rounded-xl hover:bg-white/10 hover:text-white transition-colors">
+              <p className="font-serif text-xl italic text-gray-500 mb-6">
+                No assets matching current filters.
+              </p>
+              <button
+                onClick={clearFilters}
+                className="px-6 py-3 bg-white/5 border border-white/10 text-gray-400 rounded-xl hover:bg-white/10 hover:text-white transition-colors"
+              >
                 Clear all filters
               </button>
             </motion.div>
@@ -327,10 +335,14 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-white/5">{getKindIcon(kind)}</div>
-                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-white">{getKindLabel(kind)}</h2>
+                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-white">
+                        {getKindLabel(kind)}
+                      </h2>
                     </div>
                     <div className="h-px flex-1 bg-gradient-to-r from-amber-500/20 to-transparent" />
-                    <span className="font-mono text-xs text-gray-500 uppercase tracking-widest">{kindItems.length} Volumes</span>
+                    <span className="font-mono text-xs text-gray-500 uppercase tracking-widest">
+                      {kindItems.length} Assets
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -345,39 +357,50 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
                             {item.title}
                           </h3>
 
-                          {item.excerpt && <p className="mb-6 text-sm leading-relaxed text-gray-400 line-clamp-2">{item.excerpt}</p>}
+                          {item.excerpt ? (
+                            <p className="mb-6 text-sm leading-relaxed text-gray-400 line-clamp-2">
+                              {item.excerpt}
+                            </p>
+                          ) : null}
 
                           <div className="mt-auto space-y-3 pt-4 border-t border-white/5">
                             <div className="flex items-center justify-between text-xs text-gray-500">
                               <div className="flex items-center gap-2">
-                                {item.date && (
+                                {item.date ? (
                                   <div className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
                                     <span>
-                                      {new Date(item.date).toLocaleDateString("en-US", {
+                                      {new Date(item.date).toLocaleDateString("en-GB", {
+                                        day: "2-digit",
                                         month: "short",
-                                        day: "numeric",
                                         year: "numeric",
                                       })}
                                     </span>
                                   </div>
-                                )}
-                                {item.readTime && (
+                                ) : null}
+                                {item.readTime ? (
                                   <div className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
                                     <span>{item.readTime}</span>
                                   </div>
-                                )}
+                                ) : null}
                               </div>
 
-                              {item.category && <span className="px-2 py-0.5 bg-white/5 rounded text-[10px]">{item.category}</span>}
+                              {item.category ? (
+                                <span className="px-2 py-0.5 bg-white/5 rounded text-[10px]">
+                                  {item.category}
+                                </span>
+                              ) : null}
                             </div>
 
                             <div className="flex items-center justify-between">
                               <span className="font-mono text-[10px] uppercase tracking-widest text-gray-600 group-hover:text-amber-500/50 transition-colors truncate max-w-[70%]">
                                 {item.href.replace(/^\//, "").replace(/\//g, " · ")}
                               </span>
-                              <ArrowRight size={14} className="text-amber-500 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 flex-shrink-0" />
+                              <ArrowRight
+                                size={14}
+                                className="text-amber-500 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 flex-shrink-0"
+                              />
                             </div>
                           </div>
                         </Link>

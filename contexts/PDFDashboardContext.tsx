@@ -1,6 +1,10 @@
-// contexts/PDFDashboardContext.tsx
+/* contexts/PDFDashboardContext.tsx - RECONCILED EXPORT ALIGNMENT */
 import React, { createContext, useContext, ReactNode } from 'react';
-import { usePDFDashboard } from '@/hooks/usePDFDashboard';
+
+// STRATEGIC FIX: Switched from named import to default import 
+// to match the implementation in hooks/usePDFDashboard.ts
+import usePDFDashboard from '@/hooks/usePDFDashboard';
+
 import { UsePDFDashboardReturn } from '@/types/pdf-dashboard';
 
 const PDFDashboardContext = createContext<UsePDFDashboardReturn | undefined>(undefined);

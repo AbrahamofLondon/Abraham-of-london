@@ -1,103 +1,120 @@
-// components/dashboard/StockPriceCard.tsx - UPDATED
-import { StockPrice } from './types';
+// components/dashboard/StockPriceCard.tsx
+import React from "react";
+import type { StockPrice } from "./types";
 
 interface StockPriceCardProps {
   stock: StockPrice;
-  isFavorite: boolean;
-  onToggleFavorite: (symbol: string) => void;
-  onClick: () => void;
-  formatCurrency: (value: number) => string;
-  formatPercent: (value: number) => string;
-  formatLargeNumber: (value?: number) => string;
-  theme: 'light' | 'dark';
+  theme?: "light" | "dark";
+  onClick?: (symbol: string) => void;
+}
+
+function formatCurrency(value: number): string {
+  if (!Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatNumber(value: number): string {
+  if (!Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function safeTime(value: unknown): string {
+  if (typeof value !== "string" || !value.trim()) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString();
 }
 
 export const StockPriceCard: React.FC<StockPriceCardProps> = ({
   stock,
-  isFavorite,
-  onToggleFavorite,
+  theme = "light",
   onClick,
-  formatCurrency,
-  formatPercent,
-  formatLargeNumber,
-  theme,
 }) => {
+  const isDark = theme === "dark";
+
+  // ✅ These may not exist depending on your StockPrice model.
+  // We defensively read them as unknown and narrow safely.
+  const changePercent =
+    typeof (stock as any).changePercent === "number" ? (stock as any).changePercent : 0;
+
+  const change =
+    typeof (stock as any).change === "number" ? (stock as any).change : 0;
+
+  const lastUpdated = safeTime((stock as any).lastUpdated);
+
+  // name is NOT in StockPrice, so treat as unknown
+  const name =
+    typeof (stock as any).name === "string" && (stock as any).name.trim()
+      ? (stock as any).name
+      : "—";
+
+  const cardCls = isDark
+    ? "bg-gray-900 border-gray-800 text-white"
+    : "bg-white border-gray-200 text-gray-900";
+
+  const mutedCls = isDark ? "text-gray-400" : "text-gray-600";
+
+  const priceColor =
+    changePercent >= 0 ? "text-green-600" : "text-red-600";
+
   return (
     <div
-      onClick={onClick}
-      className={`p-4 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${
-        theme === 'dark'
-          ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-          : 'bg-white border-gray-200 hover:border-gray-300'
-      }`}
+      className={`p-4 rounded-xl border shadow-sm hover:shadow-md transition-all cursor-pointer ${cardCls}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => onClick?.(stock.symbol)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.(stock.symbol);
+        }
+      }}
     >
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h3 className="font-bold text-lg">{stock.symbol}</h3>
-          <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            ${stock.price.toFixed(2)}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold truncate">{stock.symbol}</div>
+          <div className={`text-xs ${mutedCls} truncate`}>{name}</div>
+        </div>
+
+        <div className="text-right shrink-0">
+          <div className={`text-xl font-bold ${priceColor}`}>
+            {formatCurrency(stock.price)}
+          </div>
+          <div className={`text-xs ${mutedCls}`}>
+            {changePercent >= 0 ? "+" : ""}
+            {formatNumber(changePercent)}%
           </div>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(stock.symbol);
-          }}
-          className={`p-1 rounded-full ${
-            theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-          }`}
-          aria-label={isFavorite ? `Remove ${stock.symbol} from favorites` : `Add ${stock.symbol} to favorites`}
-        >
-          {isFavorite ? '★' : '☆'}
-        </button>
       </div>
 
-      <div className={`text-2xl font-bold mb-1 ${
-        stock.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
-      }`}>
-        {formatCurrency(stock.price)}
-      </div>
+      <div className={`mt-4 grid grid-cols-3 gap-3 text-xs ${mutedCls}`}>
+        <div>
+          <div className="opacity-70">Change</div>
+          <div className="font-semibold">
+            {change >= 0 ? "+" : ""}
+            {formatNumber(change)}
+          </div>
+        </div>
 
-      <div className={`text-sm font-medium mb-3 ${
-        stock.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
-      }`}>
-        {stock.change >= 0 ? '+' : ''}{formatCurrency(stock.change)} 
-        <span className="ml-2">({formatPercent(stock.changePercent)})</span>
-      </div>
+        <div>
+          <div className="opacity-70">Volume</div>
+          <div className="font-semibold">
+            {"volume" in (stock as any) && typeof (stock as any).volume === "number"
+              ? formatNumber((stock as any).volume)
+              : "—"}
+          </div>
+        </div>
 
-      <div className={`grid grid-cols-2 gap-2 text-xs ${
-        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-      }`}>
-        {stock.volume && (
-          <div>
-            <div>Volume</div>
-            <div className="font-medium">{formatLargeNumber(stock.volume)}</div>
-          </div>
-        )}
-        {stock.marketCap && (
-          <div>
-            <div>Market Cap</div>
-            <div className="font-medium">{formatLargeNumber(stock.marketCap)}</div>
-          </div>
-        )}
-        {stock.high24h && (
-          <div>
-            <div>24h High</div>
-            <div className="font-medium">{formatCurrency(stock.high24h)}</div>
-          </div>
-        )}
-        {stock.low24h && (
-          <div>
-            <div>24h Low</div>
-            <div className="font-medium">{formatCurrency(stock.low24h)}</div>
-          </div>
-        )}
-      </div>
-
-      <div className={`mt-3 text-xs ${
-        theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
-      }`}>
-        Updated: {new Date(stock.lastUpdated).toLocaleTimeString()}
+        <div className="text-right">
+          <div className="opacity-70">Updated</div>
+          <div className="font-semibold">{lastUpdated}</div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 // lib/canon.ts — CANONICAL (ASYNC, NO allCanons IMPORTS)
 
-import { getContentlayerData, isDraftContent, normalizeSlug, getAccessLevel as compatAccess } from "@/lib/contentlayer-compat";
+import { getContentlayerData, isDraftContent } from "@/lib/contentlayer-compat";
 
 export type Canon = any;
 
@@ -8,7 +8,18 @@ export type Canon = any;
 /* Utilities                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const norm = (v: unknown) => normalizeSlug(String(v || "")).toLowerCase();
+// Local normalizeSlug function since it's not exported from contentlayer-compat
+function normalizeSlug(slug: string): string {
+  if (!slug) return "";
+  // Remove file extensions and trailing slashes
+  return slug
+    .replace(/\.(md|mdx)$/, '')
+    .replace(/\/+$/, '')
+    .toLowerCase()
+    .trim();
+}
+
+const norm = (v: unknown) => normalizeSlug(String(v || ""));
 
 export function isPublicCanon(canon: Canon): boolean {
   if (!canon) return false;
@@ -22,16 +33,28 @@ export function isPublicCanon(canon: Canon): boolean {
 /** Required by pages/canon/[slug].tsx */
 export function getAccessLevel(canon: Canon | undefined): string {
   if (!canon) return "public";
-  return String(canon.accessLevel || canon.tier || compatAccess(canon) || "public");
+  
+  // Try multiple possible access level properties
+  const access = 
+    canon.accessLevel || 
+    canon.tier || 
+    canon.access || 
+    "public";
+  
+  return String(access).toLowerCase();
 }
 
 export function resolveCanonSlug(canon: Canon): string {
   if (!canon) return "";
-  if (canon.slug) return norm(canon.slug).replace(/\/+$/, "");
-
-  const fp = String(canon._raw?.flattenedPath || "");
-  const parts = fp.split("/").filter(Boolean);
-  return norm(parts[parts.length - 1] || "");
+  
+  // Try multiple slug properties
+  const slug = 
+    canon.slug || 
+    canon.slugComputed || 
+    canon._raw?.flattenedPath || 
+    "";
+  
+  return normalizeSlug(slug);
 }
 
 async function loadCanons(): Promise<Canon[]> {
@@ -52,13 +75,26 @@ export async function getPublicCanons(): Promise<Canon[]> {
   const canons = await loadCanons();
   return canons
     .filter(isPublicCanon)
-    .sort((a: any, b: any) => (Number(a?.order) || 0) - (Number(b?.order) || 0));
+    .sort((a: any, b: any) => {
+      // Sort by volume number if available, otherwise by date
+      const aVolume = Number(a?.volumeNumber) || Number(a?.order) || 0;
+      const bVolume = Number(b?.volumeNumber) || Number(b?.order) || 0;
+      if (aVolume !== bVolume) return aVolume - bVolume;
+      
+      // Fallback to date
+      const aDate = a?.date || a?.createdAt || '';
+      const bDate = b?.date || b?.createdAt || '';
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    });
 }
 
 export async function getCanonBySlug(slug: string): Promise<Canon | undefined> {
-  const target = norm(slug);
+  const target = normalizeSlug(slug);
   const canons = await loadCanons();
-  return canons.find((c) => resolveCanonSlug(c) === target);
+  return canons.find((c) => {
+    const canonSlug = resolveCanonSlug(c);
+    return canonSlug === target;
+  });
 }
 
 /** Alias for legacy pages */
@@ -75,6 +111,7 @@ export type CanonIndexItem = {
   coverImage: string | null;
   excerpt: string | null;
   accessLevel: string;
+  date?: string;
 };
 
 export async function getCanonIndexItems(): Promise<CanonIndexItem[]> {
@@ -82,9 +119,17 @@ export async function getCanonIndexItems(): Promise<CanonIndexItem[]> {
   return canons.map((c) => ({
     slug: resolveCanonSlug(c),
     title: c?.title || "Untitled Canon",
-    volumeNumber: typeof c?.volumeNumber === "number" ? c.volumeNumber : null,
-    coverImage: c?.coverImage || null,
-    excerpt: c?.description || c?.excerpt || null,
+    volumeNumber: typeof c?.volumeNumber === "number" ? c.volumeNumber : 
+                 typeof c?.order === "number" ? c.order : null,
+    coverImage: c?.coverImage || 
+                c?.image || 
+                c?.cover || 
+                null,
+    excerpt: c?.description || 
+             c?.excerpt || 
+             c?.summary || 
+             null,
     accessLevel: getAccessLevel(c),
+    date: c?.date || c?.createdAt,
   }));
 }

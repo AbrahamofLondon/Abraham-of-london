@@ -1,4 +1,4 @@
-/* pages/inner-circle/index.tsx - HARDENED ACCESS CONTROL */
+/* pages/inner-circle/index.tsx — HARDENED ACCESS CONTROL (INTEGRITY MODE) */
 import * as React from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -20,9 +20,9 @@ import {
 import Layout from "@/components/Layout";
 import useAnalytics from "@/hooks/useAnalytics";
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
-import { sanitizeData } from "@/lib/server/md-utils";
 
-const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
+// Institutional Standard: matches lib/server/auth/cookies.ts
+const INNER_CIRCLE_COOKIE_NAME = "aol_access";
 
 /**
  * CLIENT-SIDE ACCESS VERIFICATION
@@ -32,7 +32,7 @@ function hasInnerCircleCookie(): boolean {
   return document.cookie
     .split(";")
     .map((c) => c.trim())
-    .some((c) => c.startsWith(`${INNER_CIRCLE_COOKIE_NAME}=true`));
+    .some((c) => c.startsWith(`${INNER_CIRCLE_COOKIE_NAME}=`));
 }
 
 const InnerCirclePage: NextPage = () => {
@@ -49,25 +49,25 @@ const InnerCirclePage: NextPage = () => {
   const [alreadyUnlocked, setAlreadyUnlocked] = React.useState(false);
 
   // REDIRECTION LOGIC
-  const returnTo = typeof router.query.returnTo === "string" ? router.query.returnTo : "/canon";
+  const returnTo = typeof router.query.returnTo === "string" ? router.query.returnTo : "/inner-circle/dashboard";
 
   React.useEffect(() => {
     const unlocked = hasInnerCircleCookie();
     setAlreadyUnlocked(unlocked);
     
-    if (unlocked) {
-      // Auto-redirect if already unlocked and trying to access
+    if (unlocked && router.isReady) {
       const redirectTimer = setTimeout(() => {
-        if (returnTo && returnTo !== window.location.pathname) {
+        // Only redirect if we aren't already where we want to be
+        if (returnTo && !window.location.pathname.includes(returnTo)) {
           router.push(returnTo);
         }
-      }, 1000);
+      }, 1500);
       return () => clearTimeout(redirectTimer);
     }
-  }, [router, returnTo]);
+  }, [router.isReady, returnTo]);
 
   /**
-   * MEMBERSHIP REQUEST HANDLER
+   * MEMBERSHIP REQUEST HANDLER (POSTGRES-SYNCED)
    */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,18 +82,14 @@ const InnerCirclePage: NextPage = () => {
     }
 
     try {
-      // PAYLOAD SANITIZATION: Prevents injection of undefined values into API
-      const payload = sanitizeData({ 
-        email: email.trim(), 
-        name: name.trim(), 
-        returnTo, 
-        recaptchaToken: token 
-      });
-      
       const res = await fetch("/api/inner-circle/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ 
+          email: email.trim(), 
+          name: name.trim(), 
+          recaptchaToken: token 
+        }),
       });
       const data = await res.json();
 
@@ -102,11 +98,9 @@ const InnerCirclePage: NextPage = () => {
       setRegisterStatus("success");
       setFeedback({ 
         type: "register", 
-        msg: "Access key dispatched. Check your inbox within 5 minutes." 
+        msg: "Request received. Check your inbox for your access key." 
       });
       trackEvent("inner_circle_register_success", { domain: email.split("@")[1] });
-      
-      // Clear form on success
       setEmail("");
       setName("");
     } catch (err: any) {
@@ -119,7 +113,7 @@ const InnerCirclePage: NextPage = () => {
   };
 
   /**
-   * VAULT DEPLOYMENT HANDLER
+   * VAULT DEPLOYMENT HANDLER (POSTGRES-SYNCED)
    */
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,15 +121,10 @@ const InnerCirclePage: NextPage = () => {
     setFeedback(null);
 
     try {
-      const payload = sanitizeData({ 
-        key: accessKey.trim(), 
-        returnTo 
-      });
-      
       const res = await fetch("/api/inner-circle/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ key: accessKey.trim() }),
       });
       const data = await res.json();
 
@@ -144,9 +133,10 @@ const InnerCirclePage: NextPage = () => {
       setUnlockStatus("success");
       setAlreadyUnlocked(true);
       
-      // Delay for visual confirmation of the "CheckCircle" state
+      trackEvent("inner_circle_vault_unlocked");
+      
       setTimeout(() => {
-        router.push(data.redirectTo || returnTo || "/inner-circle/dashboard");
+        router.push(returnTo);
       }, 1200);
     } catch (err: any) {
       setUnlockStatus("error");
@@ -157,301 +147,112 @@ const InnerCirclePage: NextPage = () => {
     }
   };
 
-  const handleViewContent = () => {
-    router.push('/inner-circle/dashboard');
-  };
-
-  const handleLearnMore = () => {
-    router.push('/about/inner-circle');
-  };
-
   return (
     <Layout 
-      title="Inner Circle | Abraham of London" 
-      description="Private access to exclusive strategic volumes, early manuscripts, and architectural notes."
-      noIndex={false}
+      title="Inner Circle" 
+      description="Private access to exclusive strategic volumes and architectural notes."
     >
       <main className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-gray-300 pt-24 pb-20">
-        {/* Hero Section */}
         <section className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }} 
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 mb-6"
-            >
-              <ShieldCheck size={16} className="text-amber-500" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-amber-500">
-                Members Only
-              </span>
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
-            >
-              The Inner Circle
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mx-auto max-w-3xl text-lg text-gray-400 mb-10"
-            >
-              Access exclusive strategic volumes, early manuscripts, and architectural notes. 
-              Entry is reserved for those who carry the weight of real responsibility.
-            </motion.p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 mb-6 text-amber-500">
+              <ShieldCheck size={16} />
+              <span className="text-xs font-bold uppercase tracking-[0.2em]">Institutional Access</span>
+            </div>
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">The Inner Circle</h1>
+            <p className="mx-auto max-w-3xl text-lg text-gray-400">Entry is reserved for those who carry the weight of real responsibility.</p>
           </div>
 
-          {/* Stats Grid */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
-          >
-            {[
-              { label: "Volumes", value: "50+", icon: BookOpen },
-              { label: "Members", value: "250+", icon: Users },
-              { label: "Frameworks", value: "30+", icon: ShieldCheck },
-              { label: "Access", value: "24/7", icon: Lock }
-            ].map((stat, idx) => (
-              <div key={idx} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center">
-                <stat.icon className="w-8 h-8 text-amber-500 mx-auto mb-3" />
-                <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
-
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            
-            {/* REQUEST ENTRY CARD */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900/50 to-black/50 p-8 backdrop-blur-xl shadow-2xl"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-12 w-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                  <Mail className="h-6 w-6 text-black" />
+            {/* REQUEST ENTRY */}
+            <div className="rounded-3xl border border-white/10 bg-zinc-900/50 p-8 backdrop-blur-xl">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-12 w-12 bg-amber-500 rounded-xl flex items-center justify-center text-black">
+                  <Mail className="h-6 w-6" />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-serif font-bold text-white">Request Access</h2>
-                  <p className="text-sm text-gray-400">Apply for Inner Circle membership</p>
-                </div>
+                <h2 className="text-2xl font-serif font-bold text-white">Request Access</h2>
               </div>
               
               <form onSubmit={handleRegister} className="space-y-6">
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-                    <User className="h-4 w-4" />
-                    Your Name
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Name</label>
                   <input 
-                    type="text" 
-                    required 
-                    value={name} 
+                    type="text" required value={name} 
                     onChange={e => setName(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all"
-                    placeholder="Legal or common name"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:border-amber-500/50 outline-none transition-all"
+                    placeholder="Full Name"
                   />
                 </div>
-                
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-                    <Mail className="h-4 w-4" />
-                    Email Address
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Email</label>
                   <input 
-                    type="email" 
-                    required 
-                    value={email} 
+                    type="email" required value={email} 
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:border-amber-500/50 outline-none transition-all"
                     placeholder="advisory@firm.com"
                   />
                 </div>
-                
                 <button 
-                  type="submit"
+                  type="submit" 
                   disabled={registerStatus === "submitting" || registerStatus === "success"}
-                  className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-black py-4 rounded-xl font-bold hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 shadow-lg shadow-amber-900/30"
+                  className="w-full bg-amber-500 text-black py-4 rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {registerStatus === "submitting" ? (
-                    <>
-                      <RefreshCw className="h-5 w-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : registerStatus === "success" ? (
-                    <>
-                      <CheckCircle className="h-5 w-5" />
-                      Request Sent
-                    </>
-                  ) : (
-                    <>
-                      <ShieldCheck className="h-5 w-5" />
-                      Request Access Key
-                    </>
-                  )}
+                  {registerStatus === "submitting" ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
+                  Request Access Key
                 </button>
-                
                 {feedback?.type === "register" && (
-                  <div className={`p-4 rounded-xl text-sm font-medium ${
-                    registerStatus === "error" 
-                      ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
-                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                  }`}>
+                  <div className={`p-4 rounded-xl text-sm ${registerStatus === "error" ? 'text-red-400 bg-red-500/10' : 'text-emerald-400 bg-emerald-500/10'}`}>
                     {feedback.msg}
                   </div>
                 )}
               </form>
-              
-              <div className="mt-8 pt-8 border-t border-white/10">
-                <div className="text-sm text-gray-400">
-                  <p className="mb-3">What happens next:</p>
-                  <ul className="space-y-2">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Access key will be emailed within 24 hours</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>One-time verification required</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Full access to all Inner Circle resources</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </motion.div>
+            </div>
 
-            {/* UNLOCK VAULT CARD */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-              className="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-8 backdrop-blur-xl shadow-2xl"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-12 w-12 bg-gradient-to-br from-amber-900 to-amber-800 rounded-xl flex items-center justify-center">
-                  <Key className="h-6 w-6 text-amber-400" />
+            {/* UNLOCK VAULT */}
+            <div className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-8 backdrop-blur-xl">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-12 w-12 bg-amber-900/50 border border-amber-500/30 rounded-xl flex items-center justify-center text-amber-500">
+                  <Key className="h-6 w-6" />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-serif font-bold text-white">Unlock Vault</h2>
-                  <p className="text-sm text-amber-400">Already have an access key?</p>
-                </div>
+                <h2 className="text-2xl font-serif font-bold text-white">Unlock Vault</h2>
               </div>
-              
+
               {alreadyUnlocked ? (
-                <div className="text-center py-8">
-                  <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 mb-6">
-                    <CheckCircle className="h-10 w-10 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">Already Unlocked</h3>
-                  <p className="text-gray-400 mb-8">
-                    You already have access to the Inner Circle vault.
-                  </p>
-                  <button
-                    onClick={handleViewContent}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-4 rounded-xl font-bold hover:from-emerald-400 hover:to-emerald-500 transition-all flex items-center justify-center gap-3"
-                  >
-                    View Content
-                    <ArrowRight className="h-5 w-5" />
+                <div className="text-center py-10">
+                  <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-6" />
+                  <h3 className="text-xl font-bold text-white mb-6">Vault Unlocked</h3>
+                  <button onClick={() => router.push(returnTo)} className="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2">
+                    Enter Dashboard <ArrowRight />
                   </button>
                 </div>
               ) : (
-                <>
-                  <form onSubmit={handleUnlock} className="space-y-6">
-                    <div className="space-y-3">
-                      <label className="flex items-center gap-2 text-sm font-medium text-amber-300">
-                        <Key className="h-4 w-4" />
-                        Security Key
-                      </label>
-                      <input 
-                        type="password" 
-                        required 
-                        value={accessKey} 
-                        onChange={e => setAccessKey(e.target.value)}
-                        className="w-full bg-black/40 border border-amber-500/30 rounded-xl px-4 py-3.5 font-mono text-amber-400 placeholder:text-amber-900/40 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
-                        placeholder="ic_••••••••••••"
-                      />
-                    </div>
-                    
-                    <button 
-                      type="submit"
-                      disabled={unlockStatus === "submitting" || unlockStatus === "success"}
-                      className="w-full border-2 border-amber-500 text-amber-500 py-4 rounded-xl font-bold hover:bg-amber-500 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
-                    >
-                      {unlockStatus === "submitting" ? (
-                        <>
-                          <RefreshCw className="h-5 w-5 animate-spin" />
-                          Verifying...
-                        </>
-                      ) : unlockStatus === "success" ? (
-                        <>
-                          <CheckCircle className="h-5 w-5" />
-                          Access Granted
-                        </>
-                      ) : (
-                        <>
-                          <Unlock className="h-5 w-5" />
-                          Unlock Vault
-                        </>
-                      )}
-                    </button>
-                    
-                    {feedback?.type === "unlock" && (
-                      <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-sm font-medium border border-red-500/20">
-                        {feedback.msg}
-                      </div>
-                    )}
-                  </form>
-                  
-                  <div className="mt-8 pt-8 border-t border-amber-500/10">
-                    <p className="text-xs text-amber-500/60 uppercase tracking-widest mb-2">
-                      Access Information
-                    </p>
-                    <p className="text-sm text-amber-400/80">
-                      Access persists on this device. Clear browser data to revoke.
-                    </p>
+                <form onSubmit={handleUnlock} className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-amber-500/60 ml-1">Security Key</label>
+                    <input 
+                      type="password" required value={accessKey} 
+                      onChange={e => setAccessKey(e.target.value)}
+                      className="w-full bg-black/40 border border-amber-500/30 rounded-xl px-4 py-3.5 font-mono text-amber-400 focus:border-amber-500 outline-none transition-all"
+                      placeholder="ic_••••••••••••"
+                    />
                   </div>
-                </>
+                  <button 
+                    type="submit" 
+                    disabled={unlockStatus === "submitting"}
+                    className="w-full border-2 border-amber-500 text-amber-500 py-4 rounded-xl font-bold hover:bg-amber-500 hover:text-black transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {unlockStatus === "submitting" ? <RefreshCw className="animate-spin" /> : <Unlock />}
+                    Unlock Vault
+                  </button>
+                  {feedback?.type === "unlock" && (
+                    <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-sm border border-red-500/20">
+                      {feedback.msg}
+                    </div>
+                  )}
+                </form>
               )}
-            </motion.div>
-          </div>
-
-          {/* Bottom CTA */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mt-16 text-center"
-          >
-            <div className="inline-flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleLearnMore}
-                className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-3"
-              >
-                <ShieldCheck className="h-5 w-5" />
-                Learn More About Inner Circle
-              </button>
-              <button
-                onClick={() => router.push('/contact')}
-                className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-3"
-              >
-                <Mail className="h-5 w-5" />
-                Contact Support
-              </button>
             </div>
-          </motion.div>
+          </div>
         </section>
       </main>
     </Layout>

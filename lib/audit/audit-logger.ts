@@ -1,5 +1,5 @@
 // lib/audit/audit-logger.ts
-import { PrismaClient, Prisma, type SystemAuditLog } from "@prisma/client";
+import { PrismaClient, Prisma, type SystemAuditLog } from ".prisma/client";
 
 export type AuditSeverity = "info" | "warning" | "error" | "critical";
 export type AuditCategory =
@@ -135,17 +135,16 @@ export class AuditLogger {
     const timestamp = new Date().toISOString();
     const emoji = this.getSeverityEmoji(event.severity);
 
-    // No fancy colours needed on server logs — keep it deterministic.
     console.groupCollapsed(`${emoji} [AUDIT:${event.severity.toUpperCase()}] ${event.action}`);
     console.log("Timestamp:", timestamp);
     console.log("Actor:", event.actorEmail || event.actorId || "Anonymous");
     console.log("Category:", event.category || "general");
 
-    if (event.resourceType) {
-      console.log("Resource:", `${event.resourceType}${event.resourceId ? `#${event.resourceId}` : ""}`);
-    }
-    if (event.details && Object.keys(event.details).length > 0) {
-      console.log("Details:", event.details);
+    if (event.resourceType || event.resourceName) {
+      console.log("Resource:", 
+        `${event.resourceType || 'unknown'}${event.resourceId ? `#${event.resourceId}` : ''}`,
+        event.resourceName ? `(${event.resourceName})` : ''
+      );
     }
     if (event.ipAddress || event.userAgent) {
       console.log("Context:", {
@@ -176,6 +175,9 @@ export class AuditLogger {
   }
 
   private toCreateManyInput(event: AuditEvent): Prisma.SystemAuditLogCreateManyInput {
+    // Convert AuditSeverity to string for database
+    const severityString = event.severity as string;
+    
     return {
       actorType: event.actorType || "system",
       actorId: event.actorId,
@@ -184,18 +186,19 @@ export class AuditLogger {
       action: event.action,
       resourceType: event.resourceType || "system",
       resourceId: event.resourceId,
+      resourceName: event.resourceName,
       userAgent: event.userAgent,
       requestId: event.requestId,
       sessionId: event.sessionId,
       status: event.status || "success",
-      severity: event.severity || "info",
+      severity: severityString, // Already a string from AuditSeverity type
       errorMessage: event.errorMessage,
       durationMs: event.durationMs,
       metadata: event.metadata ? JSON.stringify(event.metadata) : undefined,
       category: event.category,
       subCategory: event.subCategory,
       tags: event.tags ? JSON.stringify(event.tags) : undefined,
-      // createdAt/updatedAt omitted: Prisma will default them.
+      // Note: createdAt/updatedAt omitted - Prisma will default them
     };
   }
 
@@ -213,7 +216,6 @@ export class AuditLogger {
     try {
       await this.prisma.systemAuditLog.createMany({
         data: batch,
-        // For audit logs, duplicates should not happen; we do NOT rely on skipDuplicates.
       });
 
       if (this.environment === "development") {
@@ -221,8 +223,6 @@ export class AuditLogger {
       }
     } catch (error) {
       console.error("[AuditLogger] Batch insert failed:", error);
-      // Fail-soft: if batch insert fails, we drop the batch to protect uptime.
-      // If you want a dead-letter queue, implement it explicitly.
     }
   }
 
@@ -312,7 +312,8 @@ export class AuditLogger {
       category: "auth",
       severity: details.success ? "info" : "warning",
       status: details.success ? "success" : "failure",
-      details: {
+      metadata: { 
+        authEvent: true,
         method: details.method,
         provider: details.provider,
         mfaUsed: details.mfaUsed,
@@ -320,7 +321,6 @@ export class AuditLogger {
       ipAddress: details.ipAddress,
       userAgent: details.userAgent,
       errorMessage: details.error,
-      metadata: { authEvent: true },
     });
   }
 
@@ -345,10 +345,12 @@ export class AuditLogger {
       resourceId: details.resourceId,
       category: "admin",
       severity: "info",
-      details: details.changes,
+      metadata: { 
+        adminEvent: true,
+        changes: details.changes 
+      },
       ipAddress: details.ipAddress,
       userAgent: details.userAgent,
-      metadata: { adminEvent: true },
     });
   }
 
@@ -370,14 +372,14 @@ export class AuditLogger {
       action: `SECURITY_${action.toUpperCase()}`,
       category: "security",
       severity: details.severity,
-      details: {
+      metadata: { 
+        securityEvent: true,
         threatType: details.threatType,
         blocked: details.blocked,
         reason: details.reason,
       },
       ipAddress: details.sourceIp,
       userAgent: details.userAgent,
-      metadata: { securityEvent: true },
     });
   }
 

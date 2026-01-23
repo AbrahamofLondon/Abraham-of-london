@@ -109,15 +109,21 @@ const PDFAnnotations: React.FC<PDFAnnotationsProps> = ({
 
   const undo = () => {
     if (historyIndex > 0) {
-      setHistoryIndex(historyIndex - 1);
-      setAnnotations(history[historyIndex - 1]);
+      const prevAnnotations = history[historyIndex - 1];
+      if (prevAnnotations) {
+        setHistoryIndex(historyIndex - 1);
+        setAnnotations(prevAnnotations);
+      }
     }
   };
 
   const redo = () => {
     if (historyIndex < history.length - 1) {
-      setHistoryIndex(historyIndex + 1);
-      setAnnotations(history[historyIndex + 1]);
+      const nextAnnotations = history[historyIndex + 1];
+      if (nextAnnotations) {
+        setHistoryIndex(historyIndex + 1);
+        setAnnotations(nextAnnotations);
+      }
     }
   };
 

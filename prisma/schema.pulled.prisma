@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model inner_circle_keys {
+  id                   String               @id @default(dbgenerated("(gen_random_uuid())::text"))
+  member_id            String
+  key_hash             String               @unique
+  key_suffix           String
+  status               String?              @default("active")
+  expires_at           DateTime             @db.Timestamptz(6)
+  total_unlocks        Int?                 @default(0)
+  last_used_at         DateTime?            @db.Timestamptz(6)
+  last_ip              String?              @db.Inet
+  created_by_ip        String?              @db.Inet
+  revoked_at           DateTime?            @db.Timestamptz(6)
+  revoked_by           String?
+  revoked_reason       String?
+  flags                Json?                @default("[]")
+  metadata             Json?                @default("{}")
+  created_at           DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime             @default(now()) @db.Timestamptz(6)
+  inner_circle_members inner_circle_members @relation(fields: [member_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  key_audit_logs       key_audit_logs[]
+  key_unlock_logs      key_unlock_logs[]
+
+  @@index([expires_at], map: "idx_keys_expires_at")
+  @@index([key_hash], map: "idx_keys_key_hash")
+  @@index([last_used_at(sort: Desc)], map: "idx_keys_last_used")
+  @@index([member_id], map: "idx_keys_member_id")
+  @@index([status], map: "idx_keys_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model inner_circle_members {
+  id                String              @id @default(dbgenerated("(gen_random_uuid())::text"))
+  email_hash        String              @unique
+  email_hash_prefix String
+  name              String?
+  tier              String?             @default("basic")
+  status            String?             @default("active")
+  last_ip           String?             @db.Inet
+  last_seen_at      DateTime            @default(now()) @db.Timestamptz(6)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  metadata          Json?               @default("{}")
+  inner_circle_keys inner_circle_keys[]
+  member_flags      member_flags[]
+
+  @@index([email_hash], map: "idx_members_email_hash")
+  @@index([last_seen_at(sort: Desc)], map: "idx_members_last_seen")
+  @@index([status], map: "idx_members_status")
+  @@index([tier], map: "idx_members_tier")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model key_audit_logs {
+  id                String            @id @default(dbgenerated("(gen_random_uuid())::text"))
+  key_id            String
+  action            String
+  actor_type        String
+  actor_id          String?
+  old_value         Json?
+  new_value         Json?
+  ip_address        String?           @db.Inet
+  user_agent        String?
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  inner_circle_keys inner_circle_keys @relation(fields: [key_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([action], map: "idx_audit_logs_action")
+  @@index([actor_type, actor_id], map: "idx_audit_logs_actor")
+  @@index([key_id, created_at(sort: Desc)], map: "idx_audit_logs_key_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model key_unlock_logs {
+  id                String            @id @default(dbgenerated("(gen_random_uuid())::text"))
+  key_id            String
+  unlocked_at       DateTime          @default(now()) @db.Timestamptz(6)
+  ip_address        String?           @db.Inet
+  user_agent        String?
+  country_code      String?           @db.Char(2)
+  success           Boolean           @default(true)
+  metadata          Json?             @default("{}")
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  inner_circle_keys inner_circle_keys @relation(fields: [key_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([ip_address], map: "idx_unlock_logs_ip")
+  @@index([key_id, unlocked_at(sort: Desc)], map: "idx_unlock_logs_key_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model member_flags {
+  member_id            String
+  flag                 String
+  created_at           DateTime             @default(now()) @db.Timestamptz(6)
+  expires_at           DateTime?            @db.Timestamptz(6)
+  metadata             Json?                @default("{}")
+  inner_circle_members inner_circle_members @relation(fields: [member_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([member_id, flag])
+  @@index([expires_at], map: "idx_member_flags_expires")
+  @@index([flag], map: "idx_member_flags_flag")
+}

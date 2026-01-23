@@ -1,86 +1,67 @@
-import { getServerAllPosts, getServerPostBySlug , getContentlayerData} from "@/lib/contentlayer-compat";
-import { serialize } from "next-mdx-remote/serialize";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import type { GetStaticPaths, GetStaticProps } from "next";
+// pages/api/downloads/[slug].ts
+// ✅ Postgres session gating + ✅ server-side MDX compile (returns MDXRemote payload)
+// Mirrors canon API behavior so the client never serializes/compiles.
+
+import type { NextApiRequest, NextApiResponse } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
-type Props = {
-  post: {
-    title: string;
-    excerpt: string | null;
-    author: string | null;
-    coverImage: string | null;
-    date: string | null;
-    slug: string;
-    url: string;
-  };
+import { getSessionTier } from "@/lib/server/auth/tokenStore.postgres";
+import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
+import { getServerDownloadBySlug, normalizeSlug } from "@/lib/contentlayer-compat";
+import { prepareMDX } from "@/lib/server/md-utils";
+
+type Tier = "public" | "inner-circle" | "private";
+
+type Ok = {
+  ok: true;
+  tier: Tier;
+  requiredTier: Tier;
   source: MDXRemoteSerializeResult;
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  
-  await getContentlayerData();
-  const posts = await getServerAllPosts();
-  
-  return {
-    paths: posts.map((post) => ({
-      params: { slug: post.slug },
-    })),
-    fallback: false,
-  };
-};
+type Fail = { ok: false; reason: string };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = params?.slug as string;
-  
-  if (!slug) {
-    return {
-      notFound: true,
-    };
-  }
+const order: Tier[] = ["public", "inner-circle", "private"];
+
+function asTier(v: unknown): Tier {
+  if (v === "private") return "private";
+  if (v === "inner-circle") return "inner-circle";
+  return "public";
+}
+
+function canAccess(sessionTier: Tier, requiredTier: Tier) {
+  return order.indexOf(sessionTier) >= order.indexOf(requiredTier);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Fail>) {
+  if (req.method !== "GET") return res.status(405).json({ ok: false, reason: "Method not allowed" });
+
+  const slug = normalizeSlug(String(req.query.slug || ""));
+  if (!slug) return res.status(400).json({ ok: false, reason: "Missing slug" });
 
   try {
-    const post = await getServerPostBySlug(slug);
-    
-    if (!post) {
-      return {
-        notFound: true,
-      };
+    const doc: any = await getServerDownloadBySlug(slug);
+    if (!doc || doc.draft) return res.status(404).json({ ok: false, reason: "Not found" });
+
+    const requiredTier = asTier(doc.accessLevel || "inner-circle");
+
+    let sessionTier: Tier = "public";
+    if (requiredTier !== "public") {
+      const token = getAccessTokenFromReq(req);
+      const t = token ? await getSessionTier(token) : null;
+      if (!t) return res.status(403).json({ ok: false, reason: "Access denied" });
+
+      sessionTier = asTier(t);
+      if (!canAccess(sessionTier, requiredTier)) {
+        return res.status(403).json({ ok: false, reason: "Access denied" });
+      }
     }
 
-    // Serialize MDX content if it exists
-    let source: MDXRemoteSerializeResult | null = null;
-    if (post.body) {
-      source = await serialize(post.body, {
-        mdxOptions: {
-          remarkPlugins: [remarkGfm],
-          rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
-        },
-      });
-    }
+    const rawMdx = String(doc?.body?.raw ?? doc?.body ?? "");
+    const source = await prepareMDX(rawMdx);
 
-    return {
-      props: {
-        post: {
-          title: post.title,
-          excerpt: post.excerpt || null,
-          author: post.author || null,
-          coverImage: post.coverImage || null,
-          date: post.date || null,
-          slug: post.slug,
-          url: post.url || `/blog/${post.slug}`,
-        },
-        source,
-      },
-    };
+    return res.status(200).json({ ok: true, tier: sessionTier, requiredTier, source });
   } catch (error) {
-    console.error("[BLOG_PAGE_ERROR]", error);
-    return {
-      notFound: true,
-    };
+    return res.status(500).json({ ok: false, reason: "Server error" });
   }
-};
-
-
+}

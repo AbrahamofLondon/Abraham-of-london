@@ -1,0 +1,205 @@
+{
+  "generatedAt": "2026-01-20T13:10:43.490Z",
+  "totalFiles": 28,
+  "success": 28,
+  "failed": 0,
+  "outputDir": "C:\\Abraham-of-london\\public\\assets\\downloads\\content-downloads",
+  "results": [
+    {
+      "file": "abraham-vault-pack.mdx",
+      "output": "abraham-vault-pack.pdf",
+      "success": true,
+      "size": 2438,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "board-decision-log-template.mdx",
+      "output": "board-decision-log-template.pdf",
+      "success": true,
+      "size": 1906,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "board-decision-log-template.xlsx",
+      "output": "board-decision-log-template.pdf",
+      "success": true,
+      "size": 1378,
+      "method": "placeholder"
+    },
+    {
+      "file": "board-investor-onepager.mdx",
+      "output": "board-investor-onepager.pdf",
+      "success": true,
+      "size": 1708,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "brotherhood-covenant.mdx",
+      "output": "brotherhood-covenant.pdf",
+      "success": true,
+      "size": 2409,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "canon-volume-iv-diagnostic-toolkit.mdx",
+      "output": "canon-volume-iv-diagnostic-toolkit.pdf",
+      "success": true,
+      "size": 2772,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "output": "canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "success": true,
+      "size": 2772,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "communication-script-bpf.mdx",
+      "output": "communication-script-bpf.pdf",
+      "success": true,
+      "size": 2461,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "decision-log-template.mdx",
+      "output": "decision-log-template.pdf",
+      "success": true,
+      "size": 1724,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "decision-matrix-scorecard.mdx",
+      "output": "decision-matrix-scorecard.pdf",
+      "success": true,
+      "size": 2070,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "download-legacy-architecture-canvas.mdx",
+      "output": "download-legacy-architecture-canvas.pdf",
+      "success": true,
+      "size": 785,
+      "method": "placeholder"
+    },
+    {
+      "file": "entrepreneur-operating-pack.mdx",
+      "output": "entrepreneur-operating-pack.pdf",
+      "success": true,
+      "size": 2891,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "entrepreneur-survival-checklist.mdx",
+      "output": "entrepreneur-survival-checklist.pdf",
+      "success": true,
+      "size": 2525,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "family-altar-liturgy.mdx",
+      "output": "family-altar-liturgy.pdf",
+      "success": true,
+      "size": 2457,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "leaders-cue-card-two-up.mdx",
+      "output": "leaders-cue-card-two-up.pdf",
+      "success": true,
+      "size": 2642,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "leadership-playbook.mdx",
+      "output": "leadership-playbook.pdf",
+      "success": true,
+      "size": 2696,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "legacy-canvas.mdx",
+      "output": "legacy-canvas.pdf",
+      "success": true,
+      "size": 3187,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "life-alignment-assessment.mdx",
+      "output": "life-alignment-assessment.pdf",
+      "success": true,
+      "size": 2491,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "mentorship-starter-kit.mdx",
+      "output": "mentorship-starter-kit.pdf",
+      "success": true,
+      "size": 2434,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "operating-cadence-pack.mdx",
+      "output": "operating-cadence-pack.pdf",
+      "success": true,
+      "size": 1856,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "operating-cadence-pack.pptx",
+      "output": "operating-cadence-pack.pdf",
+      "success": true,
+      "size": 1366,
+      "method": "placeholder"
+    },
+    {
+      "file": "principles-for-my-son-cue-card.mdx",
+      "output": "principles-for-my-son-cue-card.pdf",
+      "success": true,
+      "size": 2767,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "principles-for-my-son.mdx",
+      "output": "principles-for-my-son.pdf",
+      "success": true,
+      "size": 2398,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "purpose-pyramid-worksheet.mdx",
+      "output": "purpose-pyramid-worksheet.pdf",
+      "success": true,
+      "size": 765,
+      "method": "placeholder"
+    },
+    {
+      "file": "scripture-track-john14.mdx",
+      "output": "scripture-track-john14.pdf",
+      "success": true,
+      "size": 2532,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "standards-brief.mdx",
+      "output": "standards-brief.pdf",
+      "success": true,
+      "size": 2407,
+      "method": "pdf-lib"
+    },
+    {
+      "file": "ultimate-purpose-of-man-editorial.mdx",
+      "output": "ultimate-purpose-of-man-editorial.pdf",
+      "success": true,
+      "size": 781,
+      "method": "placeholder"
+    },
+    {
+      "file": "weekly-operating-rhythm.mdx",
+      "output": "weekly-operating-rhythm.pdf",
+      "success": true,
+      "size": 2556,
+      "method": "pdf-lib"
+    }
+  ]
+}

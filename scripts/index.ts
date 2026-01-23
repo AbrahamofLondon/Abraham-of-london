@@ -5,11 +5,12 @@
  * - No child_process usage
  */
 
-export {
+import {
   PDF_REGISTRY,
   getPDFRegistry,
   getPDFById,
   getAllPDFs,
+  getAllPDFItems,
   getPDFsByTier,
   getPDFsByType,
   getInteractivePDFs,
@@ -22,7 +23,26 @@ export {
   type PDFTier,
   type PDFType,
   type PDFFormat,
+  type PDFItem,
 } from "./pdf-registry";
+
+export {
+  PDF_REGISTRY,
+  getPDFRegistry,
+  getPDFById,
+  getAllPDFs,
+  getAllPDFItems,
+  getPDFsByTier,
+  getPDFsByType,
+  getInteractivePDFs,
+  getFillablePDFs,
+  scanForDynamicAssets,
+  getPDFsRequiringGeneration,
+  needsRegeneration,
+  generateMissingPDFs,
+};
+
+export type { PDFConfig, PDFTier, PDFType, PDFFormat, PDFItem };
 
 /**
  * Resolve file metadata from filename
@@ -39,6 +59,10 @@ export function resolveFileMetadata(filename: string): {
     | "tool"
     | "canvas"
     | "worksheet"
+    | "assessment"
+    | "journal"
+    | "tracker"
+    | "bundle"
     | "other";
 } {
   const ext = filename.toLowerCase().split(".").pop() || "";
@@ -61,10 +85,18 @@ export function resolveFileMetadata(filename: string): {
     | "tool"
     | "canvas"
     | "worksheet"
+    | "assessment"
+    | "journal"
+    | "tracker"
+    | "bundle"
     | "other" = "other";
 
   if (name.includes("canvas") || name.includes("template")) type = "canvas";
   else if (name.includes("worksheet") || name.includes("checklist")) type = "worksheet";
+  else if (name.includes("assessment") || name.includes("diagnostic")) type = "assessment";
+  else if (name.includes("journal")) type = "journal";
+  else if (name.includes("tracker")) type = "tracker";
+  else if (name.includes("bundle") || ext === "zip") type = "bundle";
   else if (name.includes("framework") || name.includes("model")) type = "framework";
   else if (name.includes("guide") || name.includes("manual")) type = "strategic";
   else if (name.includes("editorial") || name.includes("article")) type = "editorial";
@@ -72,14 +104,6 @@ export function resolveFileMetadata(filename: string): {
   else if (name.includes("tool") || name.includes("utility")) type = "tool";
 
   return { format, isInteractive, isFillable, type };
-}
-
-export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"] as const;
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 export function hasAccessToPDF(
@@ -101,10 +125,7 @@ export function getPDFDownloadUrl(
   userId?: string,
   userTier?: string,
 ): { url: string; requiresAuth: boolean; accessGranted: boolean } {
-  // Note: getPDFById is re-exported above
-  const { getPDFById } = require("./pdf-registry") as typeof import("./pdf-registry");
   const pdf = getPDFById(pdfId);
-
   if (!pdf) throw new Error(`PDF with ID "${pdfId}" not found`);
 
   const requiresAuth = pdf.requiresAuth;
@@ -131,7 +152,6 @@ export function generatePDFManifest(): {
     requiresAuth: boolean;
   }>;
 } {
-  const { getAllPDFs } = require("./pdf-registry") as typeof import("./pdf-registry");
   const allPDFs = getAllPDFs();
   const now = new Date().toISOString();
 
@@ -145,23 +165,11 @@ export function generatePDFManifest(): {
       type: pdf.type,
       tier: pdf.tier,
       path: pdf.outputPath,
-      size: pdf.fileSize ? formatFileSize(pdf.fileSize) : undefined,
+      // fileSize in your registry is already human-readable string
+      size: pdf.fileSize || undefined,
       interactive: pdf.isInteractive,
       fillable: pdf.isFillable,
       requiresAuth: pdf.requiresAuth,
     })),
   };
 }
-
-// Convenience re-export types
-export type PDFType =
-  | "editorial"
-  | "framework"
-  | "academic"
-  | "strategic"
-  | "tool"
-  | "canvas"
-  | "worksheet"
-  | "other";
-export type PDFTier = "free" | "member" | "architect" | "inner-circle";
-export type PDFFormat = "PDF" | "EXCEL" | "POWERPOINT" | "ZIP" | "BINARY";

@@ -1,0 +1,13 @@
+# .contentlayerignore
+**/*BACKUP*/
+**/.*/
+**/*.bak
+**/*.tmp
+**/*.swp
+**/*.DS_Store
+downloads/_generated.downloads.json
+_templates/**
+**/_templates/**
+/public/assets/downloads/public-assets/resources/pdfs/*.pdf
+/public/**/*.pdf
+/public/assets/downloads/**

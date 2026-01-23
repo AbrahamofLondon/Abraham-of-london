@@ -1,9 +1,13 @@
+// lib/contentlayer-compat.ts - ROBUST TYPE-SAFE VERSION
+
 /**
  * lib/contentlayer-compat.ts — SINGLE SOURCE OF TRUTH (Pages Router, SYNC-FIRST)
- *
- * This is the client-safe version that delegates to server-only logic
+ * Reconciled for Abraham of London Institutional Stability.
  */
 
+// --- CORE TYPES ---
+
+// Base document interface with all optional fields
 export interface DocBase {
   _id?: string;
   _raw?: {
@@ -45,577 +49,532 @@ export interface DocBase {
   [k: string]: any;
 }
 
+// Strict interface for functions that require certain fields
+export interface StrictContentDoc extends DocBase {
+  // Required fields for strict operations
+  _id: string;
+  _raw: {
+    sourceFilePath: string;
+    sourceFileName: string;
+    sourceFileDir: string;
+    contentType: string;
+    flattenedPath: string;
+  };
+  slug: string;
+  title: string;
+  
+  // Enhanced fields with proper defaults
+  kind: string;
+  href: string;
+  coverImage: string | null;
+  downloadUrl: string | null;
+  accessLevel: string;
+}
+
+// Public ContentDoc type - exported as union for flexibility
+export type ContentDoc = DocBase | StrictContentDoc;
+
+// Type guard to check if a document is StrictContentDoc
+export function isStrictContentDoc(doc: ContentDoc): doc is StrictContentDoc {
+  return (
+    typeof (doc as StrictContentDoc)._id === 'string' &&
+    typeof (doc as StrictContentDoc)._raw?.flattenedPath === 'string' &&
+    typeof (doc as StrictContentDoc).slug === 'string' &&
+    typeof (doc as StrictContentDoc).title === 'string'
+  );
+}
+
+// Convert any ContentDoc to StrictContentDoc with defaults
+export function toStrictContentDoc(doc: ContentDoc): StrictContentDoc {
+  if (isStrictContentDoc(doc)) {
+    return doc;
+  }
+  
+  const slug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || '');
+  const kind = getDocKind(doc);
+  const href = getDocHref(doc);
+  
+  return {
+    ...doc,
+    _id: doc._id || `doc_${slug}_${Date.now()}`,
+    _raw: doc._raw || {
+      sourceFilePath: '',
+      sourceFileName: '',
+      sourceFileDir: '',
+      contentType: 'document',
+      flattenedPath: slug,
+    },
+    slug,
+    title: doc.title || 'Untitled',
+    kind,
+    href,
+    coverImage: doc.coverImage || null,
+    downloadUrl: doc.downloadUrl || null,
+    accessLevel: doc.accessLevel || 'public',
+  };
+}
+
+export type DocKind = 
+  | 'post' | 'book' | 'canon' | 'download' | 'short' 
+  | 'event' | 'print' | 'resource' | 'strategy' | 'document';
+
 type GeneratedShape = {
-  allDocuments: DocBase[];
-  allPosts: DocBase[];
-  allBooks: DocBase[];
-  allCanons: DocBase[];
-  allDownloads: DocBase[];
-  allShorts: DocBase[];
-  allEvents: DocBase[];
-  allPrints: DocBase[];
-  allResources: DocBase[];
-  allStrategies: DocBase[];
+  allDocuments: ContentDoc[];
+  allPosts: ContentDoc[];
+  allBooks: ContentDoc[];
+  allCanons: ContentDoc[];
+  allDownloads: ContentDoc[];
+  allShorts: ContentDoc[];
+  allEvents: ContentDoc[];
+  allPrints: ContentDoc[];
+  allResources: ContentDoc[];
+  allStrategies: ContentDoc[];
 };
 
 const FALLBACK: GeneratedShape = {
-  allDocuments: [],
-  allPosts: [],
-  allBooks: [],
-  allCanons: [],
-  allDownloads: [],
-  allShorts: [],
-  allEvents: [],
-  allPrints: [],
-  allResources: [],
-  allStrategies: [],
+  allDocuments: [], allPosts: [], allBooks: [], allCanons: [],
+  allDownloads: [], allShorts: [], allEvents: [], allPrints: [],
+  allResources: [], allStrategies: [],
 };
 
-// Client-side fallback data
+// --- STATE ---
 let DATA: GeneratedShape = FALLBACK;
 let LOADED = false;
 
-// Server-side data loading - will only execute on server
-async function loadServerData(): Promise<GeneratedShape> {
-  // Only import server module on server
-  if (typeof window === 'undefined') {
-    try {
-      const { getContentlayerData, getAllDocumentsSync } = await import('./contentlayer-compat.server');
-      const serverData = await getContentlayerData();
-      
-      return {
-        allDocuments: getAllDocumentsSync(serverData),
-        allPosts: serverData.allPosts || [],
-        allBooks: serverData.allBooks || [],
-        allCanons: serverData.allCanons || [],
-        allDownloads: serverData.allDownloads || [],
-        allShorts: serverData.allShorts || [],
-        allEvents: serverData.allEvents || [],
-        allPrints: serverData.allPrints || [],
-        allResources: serverData.allResources || [],
-        allStrategies: serverData.allStrategies || [],
+// --- SERVER-SIDE HYDRATION ENGINE ---
+async function syncInstitutionalData() {
+  if (typeof window !== 'undefined') return;
+  
+  try {
+    const { getContentlayerData, getAllDocumentsSync } = await import('./contentlayer-compat.server');
+    const rawData = await getContentlayerData();
+    
+    DATA = {
+      allDocuments: getAllDocumentsSync(rawData),
+      allPosts: rawData.allPosts || [],
+      allBooks: rawData.allBooks || [],
+      allCanons: rawData.allCanons || [],
+      allDownloads: rawData.allDownloads || [],
+      allShorts: rawData.allShorts || [],
+      allEvents: rawData.allEvents || [],
+      allPrints: rawData.allPrints || [],
+      allResources: rawData.allResources || [],
+      allStrategies: rawData.allStrategies || [],
+    };
+    LOADED = true;
+  } catch (error) {
+    console.error('[Institutional Engine] Critical Hydration Failure:', error);
+    if (process.env.NODE_ENV === 'development') {
+      DATA = {
+        ...FALLBACK,
+        allDocuments: [
+          {
+            _id: 'dev_fallback_1',
+            title: 'Development Mode',
+            slug: 'development-fallback',
+            description: 'Contentlayer data is loading...',
+            _raw: {
+              sourceFilePath: '',
+              sourceFileName: 'dev-fallback.mdx',
+              sourceFileDir: 'dev',
+              contentType: 'document',
+              flattenedPath: 'dev/fallback',
+            },
+            body: { raw: 'Content is being loaded.' }
+          }
+        ]
       };
-    } catch (error) {
-      console.warn('[Contentlayer] Failed to load server data:', error);
-      return FALLBACK;
+      LOADED = true;
     }
   }
-  return FALLBACK;
 }
 
-// Initialize data (async, only works on server)
 if (typeof window === 'undefined') {
-  loadServerData().then(serverData => {
-    DATA = serverData;
-    LOADED = true;
-    console.log(`[Contentlayer] Loaded server data: ${DATA.allDocuments.length} documents`);
-  }).catch(() => {
-    // Keep fallback data
-    LOADED = false;
-  });
+  syncInstitutionalData().catch(() => {});
 }
 
-/** SYNC getter — Pages Router safe (client-side returns fallback) */
+// --- CORE EXPORTS ---
 export function getContentlayerData(): GeneratedShape {
   return DATA;
 }
 
-/** Status helpers */
 export function isContentlayerLoaded(): boolean {
   return LOADED;
 }
 
 export function assertContentlayerHasDocs(data?: GeneratedShape): boolean {
   const d = data ?? DATA;
-  const total = d.allDocuments?.length ?? 0;
-  return total > 0;
+  return (d.allDocuments?.length ?? 0) > 0;
 }
 
-/** Slug utils */
+// --- SLUG & PATH LOGIC ---
 export function normalizeSlug(input: any): string {
-  return (input ?? "")
-    .toString()
-    .trim()
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "");
+  return (input ?? "").toString().trim().replace(/^\/+/, "").replace(/\/+$/, "");
 }
 
-function slugOf(doc: DocBase | any): string {
+function slugOf(doc: ContentDoc | any): string {
   return normalizeSlug(
-    doc?.slug ||
-      doc?._raw?.flattenedPath ||
-      doc?._raw?.sourceFileName?.replace(/\.mdx?$/, "") ||
-      ""
+    doc?.slug || doc?._raw?.flattenedPath || doc?._raw?.sourceFileName?.replace(/\.mdx?$/, "") || ""
   );
 }
 
-/** Kind logic: folder-derived, stable */
-export type DocKind =
-  | "post"
-  | "book"
-  | "canon"
-  | "download"
-  | "event"
-  | "short"
-  | "print"
-  | "resource"
-  | "strategy"
-  | "document"
-  | string;
-
-export function getDocKind(doc: DocBase | any): DocKind {
+export function getDocKind(doc: ContentDoc | any): string {
   const fp = String(doc?._raw?.flattenedPath ?? "");
   if (fp.startsWith("blog/")) return "post";
   if (fp.startsWith("books/")) return "book";
   if (fp.startsWith("canon/")) return "canon";
   if (fp.startsWith("downloads/")) return "download";
-  if (fp.startsWith("events/")) return "event";
-  if (fp.startsWith("shorts/")) return "short";
-  if (fp.startsWith("prints/")) return "print";
-  if (fp.startsWith("resources/")) return "resource";
   if (fp.startsWith("strategy/")) return "strategy";
-
-  return (doc?.type || doc?._type || "document") as DocKind;
+  if (fp.startsWith("resources/")) return "resource";
+  return (doc?.type || doc?._type || "document").toLowerCase();
 }
 
-export function getDocHref(doc: DocBase | any): string {
+export function getDocHref(doc: ContentDoc | any): string {
   const s = slugOf(doc);
   const k = getDocKind(doc);
   if (!s) return "/";
-
-  switch (k) {
-    case "post":
-      return `/blog/${s}`;
-    case "book":
-      return `/books/${s}`;
-    case "canon":
-      return `/canon/${s}`;
-    case "download":
-      return `/downloads/${s}`;
-    case "event":
-      return `/events/${s}`;
-    case "short":
-      return `/shorts/${s}`;
-    case "print":
-      return `/prints/${s}`;
-    case "strategy":
-      return `/strategy/${s}`;
-    case "resource":
-      return `/resources/${s}`;
-    default:
-      return `/content/${s}`;
-  }
+  const map: Record<string, string> = {
+    post: `/blog/${s}`,
+    book: `/books/${s}`,
+    canon: `/canon/${s}`,
+    download: `/downloads/${s}`,
+    short: `/shorts/${s}`,
+    print: `/prints/${s}`,
+    strategy: `/strategy/${s}`,
+    resource: `/resources/${s}`,
+  };
+  return map[k] || `/content/${s}`;
 }
 
-export function getAccessLevel(doc: DocBase | any): string {
+// --- COVER IMAGE RESOLUTION ---
+export function resolveDocCoverImage(doc: ContentDoc | any): string | null {
+  if (!doc) return null;
+  
+  if (doc.coverImage && typeof doc.coverImage === 'string') return doc.coverImage;
+  if (doc.featuredImage && typeof doc.featuredImage === 'string') return doc.featuredImage;
+  
+  const slug = slugOf(doc);
+  if (slug) {
+    return `/images/covers/${slug}.jpg`;
+  }
+  
+  return null;
+}
+
+// --- ACCESS & STATUS ---
+export function isPublished(doc: ContentDoc | any): boolean {
+  if (!doc) return false;
+  return doc.published !== false && doc.draft !== true;
+}
+
+export const isDraftContent = (doc: ContentDoc | any): boolean => {
+  if (!doc) return false;
+  return doc.draft === true || doc.published === false;
+};
+
+export const isDraft = isDraftContent;
+
+export function getAccessLevel(doc: ContentDoc | any): string {
   return String(doc?.accessLevel || doc?.tier || "public").trim().toLowerCase();
 }
 
-/**
- * Draft logic:
- * - `draft: true` => draft
- * - `published: false` => draft/unpublished
- * Everything else => published
- */
-export function isDraftContent(doc: DocBase | any): boolean {
-  if (!doc) return true;
-  if (doc?.draft === true) return true;
-  if (doc?.published === false) return true;
-  return false;
+// --- DOWNLOAD URL RESOLUTION ---
+export function resolveDocDownloadUrl(doc: ContentDoc | any): string | null {
+  if (!doc) return null;
+  
+  if (doc.downloadUrl && typeof doc.downloadUrl === 'string') {
+    return doc.downloadUrl.startsWith('/') ? doc.downloadUrl : `/${doc.downloadUrl}`;
+  }
+  
+  if (doc.fileUrl && typeof doc.fileUrl === 'string') {
+    return doc.fileUrl.startsWith('/') ? doc.fileUrl : `/${doc.fileUrl}`;
+  }
+  
+  const sourcePath = doc?._raw?.sourceFilePath;
+  if (sourcePath && typeof sourcePath === 'string') {
+    const normalizedPath = sourcePath.replace(/\\/g, '/');
+    
+    if (normalizedPath.includes('/public/')) {
+      const publicIndex = normalizedPath.indexOf('/public/') + 8;
+      return `/${normalizedPath.substring(publicIndex)}`;
+    }
+    
+    const slug = slugOf(doc);
+    const kind = getDocKind(doc);
+    
+    if (kind === 'download') {
+      return `/downloads/${slug}${getFileExtension(sourcePath)}`;
+    }
+    
+    return `/${kind}/${slug}`;
+  }
+  
+  const slug = slugOf(doc);
+  if (slug) {
+    const kind = getDocKind(doc);
+    
+    if (kind === 'download' || doc.fileFormat) {
+      const extension = doc.fileFormat ? `.${doc.fileFormat.toLowerCase()}` : '.pdf';
+      return `/downloads/${slug}${extension}`;
+    }
+    
+    return `/${kind}/${slug}`;
+  }
+  
+  return null;
 }
 
-export function isPublished(doc: DocBase | any): boolean {
-  return !isDraftContent(doc);
+function getFileExtension(filePath: string): string {
+  const match = filePath.match(/\.([a-zA-Z0-9]+)$/);
+  return match ? `.${match[1].toLowerCase()}` : '';
 }
 
-/** Media resolvers */
-export function resolveDocCoverImage(doc: DocBase | any): string | null {
-  return (doc?.coverImage || doc?.featuredImage || doc?.image || null) as string | null;
+// --- DATA CONSTANTS ---
+export const allDocuments = DATA.allDocuments;
+export const allPosts = DATA.allPosts;
+export const allBooks = DATA.allBooks;
+export const allCanons = DATA.allCanons;
+export const allDownloads = DATA.allDownloads;
+export const allShorts = DATA.allShorts;
+export const allEvents = DATA.allEvents;
+export const allPrints = DATA.allPrints;
+export const allResources = DATA.allResources;
+export const allStrategies = DATA.allStrategies;
+
+// --- GETTER FUNCTIONS ---
+export const getAllPosts = () => DATA.allPosts;
+export const getAllBooks = () => DATA.allBooks;
+export const getAllCanons = () => DATA.allCanons;
+export const getAllDownloads = () => DATA.allDownloads;
+export const getAllShorts = () => DATA.allShorts;
+export const getAllEvents = () => DATA.allEvents;
+export const getAllPrints = () => DATA.allPrints;
+export const getAllResources = () => DATA.allResources;
+export const getAllStrategies = () => DATA.allStrategies;
+export const getAllDocuments = () => DATA.allDocuments;
+
+export function getPublishedDocuments(docs: ContentDoc[] = DATA.allDocuments): ContentDoc[] {
+  return docs.filter((doc) => !isDraftContent(doc));
 }
 
-export function resolveDocDownloadUrl(doc: DocBase | any): string | null {
-  return (doc?.downloadUrl || doc?.fileUrl || doc?.downloadFile || null) as string | null;
+// --- SERVER-SIDE GETTERS ---
+export function getServerAllPosts() { return DATA.allPosts; }
+export function getServerPostBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allPosts.find(p => normalizeSlug(p.slug || p._raw?.flattenedPath) === s) || null;
 }
 
-/** UI normalizer */
-export function toUiDoc<T extends DocBase>(doc: T): T & {
-  slug: string;
-  href: string;
-  kind: DocKind;
-  coverImage: string | null;
-  downloadUrl: string | null;
-  accessLevel: string;
-} {
+export function getServerAllBooks() { return DATA.allBooks; }
+export function getServerBookBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allBooks.find(b => normalizeSlug(b.slug) === s) || null;
+}
+
+export function getServerAllCanons() { return DATA.allCanons; }
+export function getServerCanonBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allCanons.find(c => normalizeSlug(c.slug) === s) || null;
+}
+
+export function getServerAllDownloads() { return DATA.allDownloads; }
+export function getServerDownloadBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allDownloads.find(d => normalizeSlug(d.slug) === s) || null;
+}
+
+export function getServerAllEvents() { return DATA.allEvents; }
+export function getServerEventBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allEvents.find(e => normalizeSlug(e.slug) === s) || null;
+}
+
+export function getServerAllShorts() { return DATA.allShorts; }
+export function getServerShortBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allShorts.find(s_ => normalizeSlug(s_.slug) === s) || null;
+}
+
+export function getServerAllResources() { return DATA.allResources; }
+export function getServerResourceBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allResources.find(r => normalizeSlug(r.slug) === s) || null;
+}
+
+export function getServerAllStrategies() { return DATA.allStrategies; }
+export function getServerStrategyBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allStrategies.find(st => normalizeSlug(st.slug) === s) || null;
+}
+
+export function getServerAllPrints() { return DATA.allPrints; }
+export function getServerPrintBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return DATA.allPrints.find(p => normalizeSlug(p.slug) === s) || null;
+}
+
+export const getDownloadBySlug = getServerDownloadBySlug;
+
+export function getDocumentBySlug(kind: DocKind, slug: string): ContentDoc | null {
+  const normalizedSlug = normalizeSlug(slug);
+  
+  switch (kind) {
+    case 'post':
+      return getServerPostBySlug(normalizedSlug);
+    case 'book':
+      return getServerBookBySlug(normalizedSlug);
+    case 'canon':
+      return getServerCanonBySlug(normalizedSlug);
+    case 'download':
+      return getServerDownloadBySlug(normalizedSlug);
+    case 'event':
+      return getServerEventBySlug(normalizedSlug);
+    case 'short':
+      return getServerShortBySlug(normalizedSlug);
+    case 'resource':
+      return getServerResourceBySlug(normalizedSlug);
+    case 'strategy':
+      return getServerStrategyBySlug(normalizedSlug);
+    case 'print':
+      return getServerPrintBySlug(normalizedSlug);
+    default:
+      return DATA.allDocuments.find(doc => normalizeSlug(doc.slug) === normalizedSlug) || null;
+  }
+}
+
+// --- UTILITIES ---
+export function sanitizeData<T>(input: T): T {
+  if (input === null || input === undefined) return null as any;
+  return JSON.parse(JSON.stringify(input, (_, v) => (v === undefined ? null : v)));
+}
+
+export function toUiDoc(doc: ContentDoc): StrictContentDoc {
+  return toStrictContentDoc(doc);
+}
+
+// Card props generator - accepts both types, returns consistent output
+export function getCardProps(doc: ContentDoc) {
+  const strictDoc = toStrictContentDoc(doc);
+  
   return {
-    ...(doc as any),
-    slug: slugOf(doc),
-    href: getDocHref(doc),
-    kind: getDocKind(doc),
-    coverImage: resolveDocCoverImage(doc),
-    downloadUrl: resolveDocDownloadUrl(doc),
-    accessLevel: getAccessLevel(doc),
+    title: strictDoc.title,
+    description: strictDoc.description || strictDoc.excerpt || '',
+    href: getDocHref(strictDoc),
+    coverImage: resolveDocCoverImage(strictDoc),
+    date: strictDoc.date,
+    updated: strictDoc.updated,
+    author: strictDoc.author,
+    tags: strictDoc.tags || [],
+    category: strictDoc.category,
+    kind: getDocKind(strictDoc),
+    featured: strictDoc.featured || false,
+    readTime: strictDoc.readTime,
+    downloadUrl: strictDoc.downloadUrl || strictDoc.fileUrl || null,
+    fileSize: strictDoc.fileSize,
+    fileFormat: strictDoc.fileFormat,
   };
 }
 
-/** Combined docs */
-export function getAllCombinedDocs(): DocBase[] {
-  return DATA.allDocuments;
+// --- VIEW TRACKING ---
+export async function recordContentView(slug: string, userId?: string): Promise<void> {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[View Tracking] ${slug} viewed by ${userId || 'anonymous'}`);
+  }
 }
 
-/** Published filter + stable sort */
-function safeDateMs(v: any): number {
-  const t = new Date(v ?? "").getTime();
-  return Number.isFinite(t) ? t : 0;
+// --- DOWNLOAD ACCESS VALIDATION ---
+export async function validateDownloadAccess(params: {
+  userTier: string;
+  requiredTier: string;
+  slug: string;
+  userId?: string;
+}): Promise<{ allowed: boolean; reason?: string }> {
+  const tierOrder = {
+    'free': 0,
+    'inner-circle': 1,
+    'inner-circle-plus': 2,
+    'inner-circle-elite': 3
+  };
+  
+  const userLevel = tierOrder[params.userTier as keyof typeof tierOrder] || 0;
+  const requiredLevel = tierOrder[params.requiredTier as keyof typeof tierOrder] || 0;
+  
+  if (userLevel >= requiredLevel) {
+    return { allowed: true };
+  }
+  
+  return {
+    allowed: false,
+    reason: `Requires ${params.requiredTier} tier, you have ${params.userTier}`
+  };
 }
 
-export function getPublishedDocuments(docs?: DocBase[]): DocBase[] {
-  const source = docs ?? getAllCombinedDocs();
-  return (source ?? [])
-    .filter((x) => x && isPublished(x))
-    .slice()
-    .sort((a, b) => safeDateMs(b?.date) - safeDateMs(a?.date));
-}
-
-/** Slug lookup (across combined docs by default) */
-export function getDocBySlug(slug: string, collection?: DocBase[]): DocBase | null {
-  const s = normalizeSlug(slug);
-  const src = collection ?? getAllCombinedDocs();
-
-  const found = (src ?? []).find((doc) => {
-    const a = normalizeSlug(doc?.slug || "");
-    const b = normalizeSlug(doc?._raw?.flattenedPath || "");
-    return a === s || b === s;
-  });
-
-  return found ?? null;
-}
-
-/** Sanitize for Next.js serialization */
-export function sanitizeData<T>(input: T): T {
-  if (input === null || input === undefined) return input as any;
-  return JSON.parse(
-    JSON.stringify(input, (_k, v) => (v === undefined ? null : v))
-  );
-}
-
-/** Optional async wrappers (for callers that insist on await) */
+// --- ASYNC VERSIONS ---
 export async function getContentlayerDataAsync(): Promise<GeneratedShape> {
-  if (typeof window === 'undefined') {
-    // On server, load fresh data
-    return await loadServerData();
-  }
-  // On client, return cached data
-  return Promise.resolve(DATA);
+  return DATA;
 }
 
-export async function getPublishedDocumentsAsync(docs?: DocBase[]): Promise<DocBase[]> {
-  return Promise.resolve(getPublishedDocuments(docs));
+export async function getPublishedDocumentsAsync(): Promise<ContentDoc[]> {
+  return getPublishedDocuments();
 }
 
-export async function getDocBySlugAsync(slug: string, collection?: DocBase[]): Promise<DocBase | null> {
-  return Promise.resolve(getDocBySlug(slug, collection));
+export async function getDocBySlugAsync(slug: string): Promise<ContentDoc | null> {
+  return DATA.allDocuments.find(doc => normalizeSlug(doc.slug) === normalizeSlug(slug)) || null;
 }
 
-/** ==================== MISSING EXPORTS FOR PAGE IMPORTS ==================== */
+export async function getServerAllBooksAsync() { return DATA.allBooks; }
+export async function getServerAllCanonsAsync() { return DATA.allCanons; }
+export async function getServerAllDownloadsAsync() { return DATA.allDownloads; }
+export async function getServerAllShortsAsync() { return DATA.allShorts; }
 
-// For ./pages/books/[slug].tsx and similar
-export function getAllBooks() {
-  return DATA.allBooks ?? [];
+// Client-side fallback data for development
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && DATA.allDocuments.length === 0) {
+  DATA = {
+    ...FALLBACK,
+    allDocuments: [
+      {
+        _id: 'dev_client_fallback',
+        title: 'Development Mode - Content Loading',
+        slug: 'development-fallback',
+        description: 'Contentlayer data is being loaded on the server side.',
+        _raw: {
+          sourceFilePath: '',
+          sourceFileName: 'dev-fallback.mdx',
+          sourceFileDir: 'dev',
+          contentType: 'document',
+          flattenedPath: 'dev/fallback',
+        },
+        body: { raw: 'This is placeholder content for development mode.' }
+      }
+    ]
+  };
 }
 
-export function getServerAllBooks() {
-  return getAllBooks();
-}
-
-export function getServerBookBySlug(slug: string) {
-  const normalizedSlug = normalizeSlug(slug);
-  return (DATA.allBooks ?? []).find(book => normalizeSlug(book.slug) === normalizedSlug) || null;
-}
-
-// For ./pages/canon/[slug].tsx
-export function getAllCanons() {
-  return DATA.allCanons ?? [];
-}
-
-export function getServerAllCanons() {
-  return getAllCanons();
-}
-
-export function getServerCanonBySlug(slug: string) {
-  const normalizedSlug = normalizeSlug(slug);
-  return (DATA.allCanons ?? []).find(canon => normalizeSlug(canon.slug) === normalizedSlug) || null;
-}
-
-// For ./pages/downloads/[slug].tsx
-export function getAllDownloads() {
-  return DATA.allDownloads ?? [];
-}
-
-export function getServerAllDownloads() {
-  return getAllDownloads();
-}
-
-export function getServerDownloadBySlug(slug: string) {
-  const normalizedSlug = normalizeSlug(slug);
-  return (DATA.allDownloads ?? []).find(download => normalizeSlug(download.slug) === normalizedSlug) || null;
-}
-
-export function getDownloadBySlug(slug: string) {
-  return getServerDownloadBySlug(slug);
-}
-
-// For ./pages/events/[slug].tsx
-export function getAllEvents() {
-  return DATA.allEvents ?? [];
-}
-
-export function getServerAllEvents() {
-  return getAllEvents();
-}
-
-export function getServerEventBySlug(slug: string) {
-  const normalizedSlug = normalizeSlug(slug);
-  return (DATA.allEvents ?? []).find(event => normalizeSlug(event.slug) === normalizedSlug) || null;
-}
-
-// For ./pages/index.tsx and ./pages/shorts/[slug].tsx
-export function getAllShorts() {
-  return DATA.allShorts ?? [];
-}
-
-export function getServerAllShorts() {
-  return getAllShorts();
-}
-
-export function getServerShortBySlug(slug: string) {
-  const normalizedSlug = normalizeSlug(slug);
-  return (DATA.allShorts ?? []).find(short => normalizeSlug(short.slug) === normalizedSlug) || null;
-}
-
-// For ./pages/resources/[...slug].tsx
-export function getAllResources() {
-  return DATA.allResources ?? [];
-}
-
-export function getServerAllResources() {
-  return getAllResources();
-}
-
-export function getServerResourceBySlug(slug: string) {
-  const normalizedSlug = normalizeSlug(slug);
-  return (DATA.allResources ?? []).find(resource => normalizeSlug(resource.slug) === normalizedSlug) || null;
-}
-
-// For ./pages/content/[slug].tsx and ./pages/debug/content.tsx
-export function getAllContentlayerDocs() {
-  return getAllCombinedDocs();
-}
-
-// For ./pages/debug/content.tsx
-export function isDraft(doc: DocBase | any): boolean {
-  return isDraftContent(doc);
-}
-
-// For ./pages/api/blog/[slug].tsx and ./pages/api/canon/[slug].tsx
-export function getAllPosts() {
-  return DATA.allPosts ?? [];
-}
-
-export function getServerAllPosts() {
-  return getAllPosts();
-}
-
-export function getServerPostBySlug(slug: string) {
-  const normalizedSlug = normalizeSlug(slug);
-  return (DATA.allPosts ?? []).find(post => normalizeSlug(post.slug) === normalizedSlug) || null;
-}
-
-// For ./pages/api/content/initialize.ts
-export async function getServerAllBooksAsync() {
-  if (typeof window === 'undefined') {
-    const data = await loadServerData();
-    return data.allBooks;
-  }
-  return Promise.resolve(DATA.allBooks);
-}
-
-export async function getServerAllCanonsAsync() {
-  if (typeof window === 'undefined') {
-    const data = await loadServerData();
-    return data.allCanons;
-  }
-  return Promise.resolve(DATA.allCanons);
-}
-
-export async function getServerAllDownloadsAsync() {
-  if (typeof window === 'undefined') {
-    const data = await loadServerData();
-    return data.allDownloads;
-  }
-  return Promise.resolve(DATA.allDownloads);
-}
-
-export async function getServerAllShortsAsync() {
-  if (typeof window === 'undefined') {
-    const data = await loadServerData();
-    return data.allShorts;
-  }
-  return Promise.resolve(DATA.allShorts);
-}
-
-// For ./pages/api/blog/[slug].tsx and ./pages/api/canon/[slug].tsx
-export function recordContentView(slug: string, type: string) {
-  // Implementation depends on your analytics setup
-  console.log(`Recorded view: ${type} - ${slug}`);
-}
-
-/** Direct exports some code may import */
-export const allDocuments = DATA.allDocuments ?? [];
-export const allPosts = DATA.allPosts ?? [];
-export const allBooks = DATA.allBooks ?? [];
-export const allCanons = DATA.allCanons ?? [];
-export const allDownloads = DATA.allDownloads ?? [];
-export const allShorts = DATA.allShorts ?? [];
-export const allEvents = DATA.allEvents ?? [];
-export const allPrints = DATA.allPrints ?? [];
-export const allResources = DATA.allResources ?? [];
-export const allStrategies = DATA.allStrategies ?? [];
-
-/** Additional utility functions for common patterns */
-export function getDocumentsByType(type: string): DocBase[] {
-  switch (type) {
-    case 'post':
-      return DATA.allPosts ?? [];
-    case 'book':
-      return DATA.allBooks ?? [];
-    case 'canon':
-      return DATA.allCanons ?? [];
-    case 'download':
-      return DATA.allDownloads ?? [];
-    case 'event':
-      return DATA.allEvents ?? [];
-    case 'short':
-      return DATA.allShorts ?? [];
-    case 'print':
-      return DATA.allPrints ?? [];
-    case 'resource':
-      return DATA.allResources ?? [];
-    case 'strategy':
-      return DATA.allStrategies ?? [];
-    default:
-      return DATA.allDocuments?.filter(doc => doc.type === type) ?? [];
-  }
-}
-
-export function getPublishedDocumentsByType(type: string): DocBase[] {
-  return getDocumentsByType(type).filter(isPublished);
-}
-
-export function getAllSlugs(type?: string): string[] {
-  let documents = DATA.allDocuments;
-  if (type) {
-    documents = getDocumentsByType(type);
-  }
-  return documents
-    .filter(isPublished)
-    .map(doc => doc.slug || '')
-    .filter(Boolean);
-}
-
-export function getFeaturedDocuments(count: number = 3): DocBase[] {
-  return (DATA.allDocuments ?? [])
-    .filter(doc => doc.featured && isPublished(doc))
-    .sort((a, b) => safeDateMs(b?.date) - safeDateMs(a?.date))
-    .slice(0, count);
-}
-
-export function getRecentDocuments(count: number = 5, type?: string): DocBase[] {
-  let documents = DATA.allDocuments;
-  if (type) {
-    documents = getDocumentsByType(type);
-  }
-  
-  return documents
-    .filter(isPublished)
-    .sort((a, b) => safeDateMs(b?.date) - safeDateMs(a?.date))
-    .slice(0, count);
-}
-
-// Create the default export object - ONLY ONE DEFINITION
+// Default API export
 const contentlayerCompatApi = {
-  // Core functions
-  getContentlayerData,
-  getPublishedDocuments,
-  getDocBySlug,
-  getDocKind,
-  getDocHref,
-  normalizeSlug,
-  isDraftContent,
-  isPublished,
-  resolveDocCoverImage,
-  resolveDocDownloadUrl,
-  getAccessLevel,
-  sanitizeData,
-  toUiDoc,
-  isContentlayerLoaded,
-  assertContentlayerHasDocs,
+  // Data constants
+  allPosts, allBooks, allCanons, allDownloads, allShorts, allEvents, allPrints, allResources, allStrategies, allDocuments,
   
-  // Type-specific getters
-  getAllBooks,
-  getServerAllBooks,
-  getServerBookBySlug,
-  getAllCanons,
-  getServerAllCanons,
-  getServerCanonBySlug,
-  getAllDownloads,
-  getServerAllDownloads,
-  getServerDownloadBySlug,
-  getDownloadBySlug,
-  getAllEvents,
-  getServerAllEvents,
-  getServerEventBySlug,
-  getAllShorts,
-  getServerAllShorts,
-  getServerShortBySlug,
-  getAllResources,
-  getServerAllResources,
-  getServerResourceBySlug,
-  getAllContentlayerDocs,
-  isDraft,
-  getAllPosts,
-  getServerAllPosts,
-  getServerPostBySlug,
-  
-  // Async versions
-  getServerAllBooksAsync,
-  getServerAllCanonsAsync,
-  getServerAllDownloadsAsync,
-  getServerAllShortsAsync,
+  // Getter functions
+  getAllPosts, getAllBooks, getAllCanons, getAllDownloads, getAllShorts, getAllEvents, getAllPrints, getAllResources, getAllStrategies, getAllDocuments,
+  getDocumentBySlug, getServerPostBySlug, getServerBookBySlug, getServerCanonBySlug, 
+  getServerDownloadBySlug, getServerShortBySlug, getServerResourceBySlug, getServerStrategyBySlug, getServerPrintBySlug,
+  getServerEventBySlug, getDownloadBySlug,
   
   // Utility functions
-  recordContentView,
-  getDocumentsByType,
-  getPublishedDocumentsByType,
-  getAllSlugs,
-  getFeaturedDocuments,
-  getRecentDocuments,
+  resolveDocDownloadUrl, resolveDocCoverImage, getPublishedDocuments, getCardProps,
+  isPublished, isDraftContent, isDraft,
+  sanitizeData, normalizeSlug, getDocKind, getDocHref, toUiDoc, toStrictContentDoc, isStrictContentDoc, isContentlayerLoaded,
+  getAccessLevel,
   
-  // Async wrappers
-  getContentlayerDataAsync,
-  getPublishedDocumentsAsync,
-  getDocBySlugAsync,
+  // View tracking and validation
+  recordContentView, validateDownloadAccess,
   
-  // Data constants
-  allDocuments,
-  allPosts,
-  allBooks,
-  allCanons,
-  allDownloads,
-  allShorts,
-  allEvents,
-  allPrints,
-  allResources,
-  allStrategies,
+  // Core
+  getContentlayerData, assertContentlayerHasDocs,
+  
+  // Async functions
+  getContentlayerDataAsync, getPublishedDocumentsAsync, getDocBySlugAsync,
+  getServerAllBooksAsync, getServerAllCanonsAsync, getServerAllDownloadsAsync, getServerAllShortsAsync
 };
 
 export default contentlayerCompatApi;

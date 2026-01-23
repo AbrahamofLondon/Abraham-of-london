@@ -1,0 +1,50 @@
+{
+  "generated": "2026-01-20T17:54:42.557Z",
+  "sourceDirectory": "C:\\Abraham-of-london\\public\\fonts",
+  "optimizedDirectory": "C:\\Abraham-of-london\\public\\fonts\\optimized",
+  "fonts": {
+    "inter": {
+      "variants": [
+        {
+          "name": "Inter-Regular.ttf",
+          "size": 342732,
+          "type": "normal",
+          "weight": 400
+        },
+        {
+          "name": "Inter_18pt-Regular.ttf",
+          "size": 342680,
+          "type": "normal",
+          "weight": 400
+        },
+        {
+          "name": "Inter_28pt-Regular.ttf",
+          "size": 342484,
+          "type": "normal",
+          "weight": 400
+        }
+      ],
+      "totalSize": 1027896
+    },
+    "woff2": [
+      {
+        "name": "geist-black.woff2",
+        "size": 65861
+      },
+      {
+        "name": "GeistMono-Regular.woff2",
+        "size": 46692
+      },
+      {
+        "name": "PPEditorialNew-Regular-BF644b214ff145f.woff2",
+        "size": 25500
+      }
+    ]
+  },
+  "summary": {
+    "totalFiles": 57,
+    "ttfFiles": 54,
+    "woff2Files": 3,
+    "copiedToOptimized": 0
+  }
+}

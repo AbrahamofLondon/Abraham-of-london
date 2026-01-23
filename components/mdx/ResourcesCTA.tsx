@@ -9,9 +9,7 @@ import {
 } from "@/components/mdx/cta-presets";
 
 type ResourcesCTAProps = {
-  /** Preset key - can be CTAKey or string in MDX: <ResourcesCTA preset="fatherhood" /> */
   preset?: CTAKey | string;
-  /** Optional overrides from MDX */
   titleOverride?: string;
   descriptionOverride?: string;
   className?: string;
@@ -86,7 +84,6 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
   const rawKey = (preset ?? "").toString().trim().toLowerCase();
   const config: CTAPreset | null = getCtaPreset(rawKey);
 
-  // Fail-safe: if preset is unknown or missing, render nothing so MDX doesn't explode.
   if (!config) return null;
 
   const title = titleOverride || config.title;
@@ -102,14 +99,15 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
 
   if (!hasAny) return null;
 
+  const theme = config.theme as string;
   const tone =
-    config.theme === "fatherhood"
+    theme === "fatherhood"
       ? "border-softGold/40 bg-warmWhite/80"
-      : config.theme === "brotherhood"
-        ? "border-forest/30 bg-forest/3"
-        : config.theme === "leadership"
-          ? "border-deepCharcoal/25 bg-slate-900/2"
-          : "border-lightGrey bg-white/80";
+      : theme === "brotherhood"
+      ? "border-forest/30 bg-forest/3"
+      : theme === "leadership"
+      ? "border-deepCharcoal/25 bg-slate-900/2"
+      : "border-lightGrey bg-white/80";
 
   return (
     <section
@@ -153,4 +151,3 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
     </section>
   );
 }
-

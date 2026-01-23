@@ -1,3 +1,4 @@
+// lib/server/rate-limit-unified-redis.ts
 import { NextResponse } from 'next/server';
 import { rateLimitRedis, type RedisCheckResult } from '@/lib/rate-limit-redis';
 
@@ -91,10 +92,12 @@ export function createRateLimitedResponse(result: RateLimitResult): NextResponse
 }
 
 // Export a default object for convenience
-export default {
+const rateLimitRedisModule = {
   check,
   createRateLimitHeaders,
   createRateLimitedResponse,
   RateLimitOptions,
   RateLimitResult,
 };
+
+export default rateLimitRedisModule;

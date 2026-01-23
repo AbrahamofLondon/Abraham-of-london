@@ -1,4 +1,4 @@
-// lib/server/prisma.ts
+// lib/server/prisma.ts - UPDATED
 /// Safe Prisma wrapper.
 /// NOTE: This avoids hard dependency on PrismaClient types so TS can compile
 /// even when tooling is broken. Still exports a named `prisma` for legacy imports.
@@ -11,7 +11,7 @@ export function getPrisma() {
   try {
     // dynamic require avoids TS static type dependency
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require("@prisma/client");
+    const mod = require(".prisma/client"); // CHANGED: Added dot
     const Client = mod?.PrismaClient;
     prismaInstance = Client ? new Client() : null;
   } catch {

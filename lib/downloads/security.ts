@@ -124,3 +124,7 @@ export function verifyDownloadToken(
   }
 }
 
+// Add the missing export that pages/api/dl/[token].ts is trying to import
+export function validateDownloadAccess(tier: InnerCircleTier, requiredTier: InnerCircleTier): boolean {
+  return tierAtLeast(tier, requiredTier);
+}

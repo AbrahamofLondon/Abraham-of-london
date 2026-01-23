@@ -24,7 +24,7 @@ export type AccessTierAlias =
 export type ContentTier = Tier | AccessTierAlias | "all";
 
 export type AccessDecision =
-  | { ok: true }
+  | { ok: true; redirectUrl?: string } // Allow optional redirectUrl here
   | {
       ok: false;
       reason:
@@ -37,7 +37,7 @@ export type AccessDecision =
         | "RATE_LIMITED";
       requiredTier?: Tier;
       currentTier?: Tier;
-      redirectUrl?: string;
+      redirectUrl?: string; // Already exists here
       maintenanceUntil?: string;
       retryAfter?: number; // seconds
       suggestedAction?: "upgrade" | "login" | "contact_support";
@@ -274,12 +274,13 @@ export function requiresInnerCircle(doc: AccessControlledDocument): boolean {
   // Explicit doc rule wins.
   if (doc.requiresInnerCircle === true) return true;
 
-  // Any tier above public implies inner-circle gate (unless doc tier is "all" or public).
+  // Any tier above public implies inner-circle gate
   const tiers = normalizeDocTiers(doc);
   if (tiers.includes("private")) return true;
-  return tiers.some(
-    (t) => t !== "public" && t !== "all" // (all handled in normalize)
-  );
+  
+  // Check if there are any non-public tiers
+  // normalizeDocTiers already converts "all" to ["public"]
+  return tiers.some(tier => tier !== "public");
 }
 
 export function hasInnerCircleAccess(ctx: AccessContext): boolean {
@@ -380,27 +381,40 @@ function checkDocumentSpecificRules(
     }
   }
 
-  // Check access hours
-  if (rules.accessHours && rules.accessHours.length > 0) {
-    const userTimezone = rules.accessHours[0].timezone || "UTC";
-    const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
-    const currentHour = userNow.getHours();
+  // Check access hours - ROBUST VERSION
+if (rules.accessHours && rules.accessHours.length > 0) {
+  const firstAccessHour = rules.accessHours[0];
+  if (!firstAccessHour) return null;
+  
+  const userTimezone = firstAccessHour.timezone || "UTC";
+  const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
+  
+  const isWithinAccessHours = rules.accessHours.some((rule) => {
+    if (!rule) return false;
     
-    const isWithinAccessHours = rules.accessHours.some(({ start, end }) => {
-      const startHour = parseInt(start.split(':')[0]);
-      const endHour = parseInt(end.split(':')[0]);
-      return currentHour >= startHour && currentHour < endHour;
-    });
+    // Ensure we have valid start and end times
+    const startTime = String(rule.start || "00:00");
+    const endTime = String(rule.end || "00:00");
     
-    if (!isWithinAccessHours) {
-      return {
-        ok: false,
-        reason: "INSUFFICIENT_TIER",
-        currentTier: deriveUserTier(ctx),
-        suggestedAction: "contact_support",
-      };
-    }
+    const startHour = parseInt(startTime.split(':')[0] || "0");
+    const endHour = parseInt(endTime.split(':')[0] || "0");
+    
+    const ruleTimezone = rule.timezone || userTimezone;
+    const ruleNow = new Date(now.toLocaleString("en-US", { timeZone: ruleTimezone }));
+    const ruleHour = ruleNow.getHours();
+    
+    return ruleHour >= startHour && ruleHour < endHour;
+  });
+  
+  if (!isWithinAccessHours) {
+    return {
+      ok: false,
+      reason: "INSUFFICIENT_TIER",
+      currentTier: deriveUserTier(ctx),
+      suggestedAction: "contact_support",
+    };
   }
+}
 
   return null;
 }
@@ -464,14 +478,21 @@ export function canAccessByTier(required: Tier, ctx: AccessContext): boolean {
   return isSameOrHigherTier(current, required);
 }
 
+/**
+ * STRATEGIC FIX: Accept generic AccessDecision.
+ * Handles both ok: true and ok: false branches of the union.
+ */
 export function getAccessRedirectUrl(
-  decision: Extract<AccessDecision, { ok: false }>,
+  decision: AccessDecision,
   ctx: AccessContext
 ): string {
   // You can route these to your existing pages. Keep predictable URLs.
   const returnTo = ctx.returnTo ? encodeURIComponent(ctx.returnTo) : "";
   const withReturnTo = (base: string) =>
     returnTo ? `${base}?returnTo=${returnTo}` : base;
+
+  // If technically 'ok', return home or provided custom redirect
+  if (decision.ok) return decision.redirectUrl || withReturnTo("/");
 
   switch (decision.reason) {
     case "AUTH_REQUIRED":
@@ -692,16 +713,20 @@ function normalizeDocTiers(doc: AccessControlledDocument): Tier[] {
 }
 
 function highestTierFromList(tiers: Tier[]): Tier {
-  // private excluded earlier; this should be safe.
-  // if nothing left, default public.
-  if (tiers.length === 0) return "public";
+  // If no tiers are provided, default to public (most permissive)
+  if (!tiers || tiers.length === 0) return "public";
 
-  // pick highest numeric order among non-private
-  return tiers.reduce((acc, t) => {
+  // Use "public" as the initial value (seed) for the reduction.
+  // This ensures 'acc' is never undefined.
+  return tiers.reduce((acc: Tier, t: Tier) => {
+    // 1. Private is a separate class; ignore it in numeric comparison
     if (t === "private") return acc;
     if (acc === "private") return t;
+
+    // 2. Compare numeric order defined in TIER_ORDER
+    // If current tier 't' is higher than accumulator 'acc', it becomes the new winner.
     return TIER_ORDER[t] > TIER_ORDER[acc] ? t : acc;
-  }, tiers[0]);
+  }, "public" as Tier); 
 }
 
 /**

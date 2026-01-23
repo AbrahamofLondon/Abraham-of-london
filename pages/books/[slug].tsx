@@ -1,4 +1,4 @@
-/* pages/books/[slug].tsx - FIXED */
+/* pages/books/[slug].tsx — MANUSCRIPT READER (INTEGRITY MODE) */
 import React, { useState, useEffect } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -8,10 +8,18 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
 
 // Server content layer
-import { getServerAllBooks, getServerBookBySlug, getContentlayerData } from "@/lib/contentlayer-compat";
+import { 
+  getServerAllBooks, 
+  getServerBookBySlug, 
+  getContentlayerData 
+} from "@/lib/contentlayer-compat";
 
 // MDX utilities (use simple components for build safety)
-import { prepareMDX, simpleMdxComponents, sanitizeData } from "@/lib/server/md-utils";
+import { 
+  prepareMDX, 
+  simpleMdxComponents, 
+  sanitizeData 
+} from "@/lib/server/md-utils";
 
 // UI Components
 import BookHero from "@/components/books/BookHero";
@@ -20,7 +28,17 @@ import BookContent from "@/components/books/BookContent";
 import PurchaseOptions from "@/components/books/PurchaseOptions";
 import BookReviews from "@/components/books/BookReviews";
 import RelatedBooks from "@/components/books/RelatedBooks";
-import { Share2, Download, Layers, ChevronLeft, Bookmark, BookmarkCheck, ExternalLink } from "lucide-react";
+import { 
+  Share2, 
+  Download, 
+  Layers, 
+  ChevronLeft, 
+  Bookmark, 
+  BookmarkCheck, 
+  ExternalLink,
+  Clock,
+  Calendar
+} from "lucide-react";
 
 type Book = {
   title: string;
@@ -34,8 +52,6 @@ type Book = {
   pages: number | null;
   publishedDate: string | null;
   description: string | null;
-  price?: number;
-  currency?: string;
   availableFormats?: string[];
   categories?: string[];
 };
@@ -48,168 +64,72 @@ type Props = {
 const BookPage: NextPage<Props> = ({ book, source }) => {
   const router = useRouter();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Check bookmarks
       try {
-        const bookmarks = JSON.parse(localStorage.getItem('bookmarkedBooks') || '[]');
+        const bookmarks = JSON.parse(localStorage.getItem('ic_bookmarks') || '[]');
         setIsBookmarked(bookmarks.includes(book.slug));
-      } catch (error) {
-        console.error('Error parsing bookmarks:', error);
-        localStorage.setItem('bookmarkedBooks', '[]');
+      } catch (e) {
+        localStorage.setItem('ic_bookmarks', '[]');
       }
     }
   }, [book.slug]);
 
-  const handleBookmark = () => {
-    if (typeof window !== 'undefined') {
-      try {
-        const bookmarks = JSON.parse(localStorage.getItem('bookmarkedBooks') || '[]');
-        
-        if (isBookmarked) {
-          const updated = bookmarks.filter((slug: string) => slug !== book.slug);
-          localStorage.setItem('bookmarkedBooks', JSON.stringify(updated));
-          setIsBookmarked(false);
-        } else {
-          bookmarks.push(book.slug);
-          localStorage.setItem('bookmarkedBooks', JSON.stringify(bookmarks));
-          setIsBookmarked(true);
-        }
-      } catch (error) {
-        console.error('Error updating bookmarks:', error);
-      }
-    }
-  };
-
-  const handleShare = async () => {
-    setIsSharing(true);
+  const toggleBookmark = () => {
     try {
-      const shareData = {
-        title: book.title,
-        text: book.excerpt || '',
-        url: window.location.href,
-      };
-
-      if (navigator.share && navigator.canShare?.(shareData)) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      if (!navigator.share) {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-      }
-    } finally {
-      setIsSharing(false);
-    }
+      const bookmarks = JSON.parse(localStorage.getItem('ic_bookmarks') || '[]');
+      const updated = isBookmarked 
+        ? bookmarks.filter((s: string) => s !== book.slug)
+        : [...bookmarks, book.slug];
+      localStorage.setItem('ic_bookmarks', JSON.stringify(updated));
+      setIsBookmarked(!isBookmarked);
+    } catch (e) { /* silent fail */ }
   };
-
-  const metaDescription =
-    book.excerpt || book.description || "A definitive volume from Abraham of London";
 
   const formattedDate = book.publishedDate 
-    ? new Date(book.publishedDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-    : '';
+    ? new Date(book.publishedDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })
+    : 'In Preparation';
 
   return (
-    <Layout>
+    <Layout title={`${book.title} | The Canon`}>
       <Head>
-        <title>{book.title} | Books | Abraham of London</title>
-        <meta name="description" content={metaDescription} />
-        <meta property="og:title" content={book.title} />
-        <meta property="og:description" content={metaDescription} />
-        <meta
-          property="og:image"
-          content={book.coverImage || "/assets/images/book-default.jpg"}
-        />
+        <title>{book.title} | Abraham of London</title>
+        <meta name="description" content={book.excerpt || ""} />
         <meta property="og:type" content="book" />
-        <meta property="og:url" content={`https://abrahamoflondon.com${book.url}`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        {book.isbn ? <meta property="book:isbn" content={book.isbn} /> : null}
-        {book.author ? <meta property="book:author" content={book.author} /> : null}
-        <link rel="canonical" href={`https://abrahamoflondon.com${book.url}`} />
+        <meta property="og:image" content={book.coverImage || ""} />
+        <link rel="canonical" href={`https://abrahamoflondon.com/books/${book.slug}`} />
       </Head>
 
-      {/* Navigation */}
-      <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors group"
-          >
-            <ChevronLeft className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-            Back to Library
-          </button>
+      <div className="min-h-screen bg-black text-cream selection:bg-gold selection:text-black">
+        {/* TOP NAVIGATION: VAULT ESCAPE */}
+        <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <button onClick={() => router.push('/books')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-all group">
+              <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to Library
+            </button>
+            <div className="flex gap-4">
+              <button onClick={toggleBookmark} className={`p-2 rounded-lg border transition-all ${isBookmarked ? 'bg-gold/10 border-gold/30 text-gold' : 'bg-white/5 border-white/10 text-gray-500 hover:text-white'}`}>
+                {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="min-h-screen bg-black selection:bg-amber-500 selection:text-black">
-        {/* Institutional Hero Section */}
+        {/* INSTITUTIONAL HERO */}
         <BookHero
           title={book.title}
-          author={book.author || ""}
+          author={book.author || "Abraham of London"}
           coverImage={book.coverImage || ""}
           excerpt={book.excerpt}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-            {/* Main Manuscript Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+          <div className="grid lg:grid-cols-12 gap-12">
+            
+            {/* MANUSCRIPT CORE */}
             <main className="lg:col-span-8">
-              <div className="bg-zinc-900/30 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-8 lg:p-12 shadow-2xl">
-                {/* Action buttons */}
-                <div className="flex flex-wrap gap-4 mb-8">
-                  <button
-                    onClick={handleBookmark}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      isBookmarked 
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
-                        : 'bg-white/5 text-gray-400 border border-white/10 hover:border-amber-500/30 hover:text-amber-400'
-                    }`}
-                  >
-                    {isBookmarked ? (
-                      <>
-                        <BookmarkCheck className="w-4 h-4" />
-                        <span className="text-sm font-medium">Saved</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark className="w-4 h-4" />
-                        <span className="text-sm font-medium">Save for Later</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 border border-white/10 hover:border-amber-500/30 hover:text-amber-400 transition-colors disabled:opacity-50"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span className="text-sm font-medium">Share</span>
-                  </button>
-                  {book.isbn && (
-                    <a
-                      href={`https://www.amazon.com/s?k=${book.isbn}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 border border-white/10 hover:border-blue-500/30 hover:text-blue-400 transition-colors"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      <span className="text-sm font-medium">Find on Amazon</span>
-                    </a>
-                  )}
-                </div>
-
-                {/* Physical Specifications */}
+              <div className="bg-zinc-900/40 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
                 <BookDetails
                   isbn={book.isbn}
                   publisher={book.publisher}
@@ -217,147 +137,65 @@ const BookPage: NextPage<Props> = ({ book, source }) => {
                   publishedDate={formattedDate}
                 />
 
-                <div className="mt-8 prose prose-invert prose-lg max-w-none">
+                <article className="mt-12 prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-p:leading-relaxed prose-p:text-gray-300">
                   <BookContent>
-                    {/* IMPORTANT: Use simpleMdxComponents for guaranteed availability */}
                     <MDXRemote {...source} components={simpleMdxComponents} />
                   </BookContent>
-                </div>
+                </article>
 
-                {/* Categories */}
-                {book.categories && book.categories.length > 0 && (
-                  <div className="mt-12 pt-8 border-t border-white/10">
-                    <div className="flex flex-wrap gap-2">
-                      {book.categories.map((category) => (
-                        <span
-                          key={category}
-                          className="px-3 py-1.5 bg-white/5 text-gray-300 text-sm rounded-full border border-white/10"
-                        >
-                          {category}
-                        </span>
-                      ))}
-                    </div>
+                {/* TAGS & CATEGORIES */}
+                {book.categories && (
+                  <div className="mt-16 pt-8 border-t border-white/5 flex flex-wrap gap-2">
+                    {book.categories.map(c => (
+                      <span key={c} className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-500">{c}</span>
+                    ))}
                   </div>
                 )}
 
-                <div className="mt-12 pt-8 border-t border-white/10">
-                  <PurchaseOptions book={book} />
+                <div className="mt-12 pt-8 border-t border-white/5">
+                   <PurchaseOptions book={book} />
                 </div>
-
-                <div className="mt-12">
-                  <BookReviews bookTitle={book.title} />
-                </div>
+              </div>
+              
+              <div className="mt-12">
+                <BookReviews bookTitle={book.title} />
               </div>
             </main>
 
-            {/* Strategic Sidebar */}
-            <aside className="lg:col-span-4">
+            {/* STRATEGIC SIDEBAR */}
+            <aside className="lg:col-span-4 space-y-8">
               <div className="sticky top-24 space-y-6">
-                {/* Related Volumes */}
-                <div className="bg-zinc-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
-                  <h3 className="text-lg font-serif font-semibold text-white mb-6 flex items-center gap-2">
-                    <Layers className="h-5 w-5 text-amber-500" />
-                    Related Intelligence
+                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-sm">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-gold mb-6 flex items-center gap-2">
+                    <Layers size={16} /> Related Intelligence
                   </h3>
                   <RelatedBooks currentBookSlug={book.slug} />
                 </div>
 
-                {/* Digital Formats & Downloads */}
-                <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-2xl p-6 shadow-xl">
-                  <h3 className="text-lg font-semibold text-amber-200 mb-6 flex items-center gap-2">
-                    <Download className="h-5 w-5" />
-                    Transmission Formats
+                <div className="p-6 rounded-3xl bg-gradient-to-br from-gold/10 to-transparent border border-gold/20">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-6 flex items-center gap-2">
+                    <Download size={16} className="text-gold" /> Formats
                   </h3>
-                  <div className="space-y-3">
-                    {[
-                      { label: "Standard PDF", icon: "📄", action: () => {} },
-                      { label: "EPUB / E-Reader", icon: "📱", action: () => {} },
-                      { label: "Institutional Audio", icon: "🎧", action: () => {} },
-                    ].map((format) => (
-                      <button
-                        key={format.label}
-                        onClick={format.action}
-                        className="w-full bg-white/5 text-gray-200 border border-white/10 rounded-xl px-4 py-4 text-sm font-medium hover:bg-white/10 hover:border-amber-500/30 transition-all flex items-center justify-between group"
-                        type="button"
-                      >
-                        <span className="flex items-center gap-2">
-                          <span>{format.icon}</span>
-                          <span>{format.label}</span>
-                        </span>
-                        <svg className="w-4 h-4 text-gray-500 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
+                  <div className="space-y-2">
+                    {['Standard PDF', 'Institutional EPUB', 'Archival Audio'].map(f => (
+                      <button key={f} className="w-full text-left px-4 py-3 rounded-xl bg-white/5 border border-white/5 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-gold hover:bg-white/10 transition-all flex justify-between items-center group">
+                        {f} <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-all" />
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Author Info */}
-                {book.author && (
-                  <div className="bg-zinc-900/50 border border-white/10 rounded-2xl p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">About the Author</h3>
-                    <div className="space-y-3">
-                      <p className="text-sm text-gray-300">
-                        {book.author} is a strategic thinker and author focused on institutional design and long-term value creation.
-                      </p>
-                      <button
-                        onClick={() => router.push(`/authors/${book.author?.toLowerCase().replace(/\s+/g, '-')}`)}
-                        className="w-full text-sm text-amber-400 hover:text-amber-300 transition-colors text-left"
-                      >
-                        View all works by {book.author} →
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Book Stats */}
-                <div className="bg-zinc-900/50 border border-white/10 rounded-2xl p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">Book Details</h3>
-                  <div className="space-y-4">
-                    {book.pages && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-400">Pages</span>
-                        <span className="text-sm text-white font-medium">{book.pages.toLocaleString()}</span>
-                      </div>
-                    )}
-                    {book.publishedDate && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-400">Published</span>
-                        <span className="text-sm text-white font-medium">{formattedDate}</span>
-                      </div>
-                    )}
-                    {book.isbn && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-400">ISBN</span>
-                        <span className="text-sm text-white font-mono">{book.isbn}</span>
-                      </div>
-                    )}
-                    {book.publisher && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-400">Publisher</span>
-                        <span className="text-sm text-white font-medium">{book.publisher}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Newsletter CTA */}
-                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-2xl p-6">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-white mb-3">New Releases</h3>
-                    <p className="text-sm text-gray-300 mb-6">
-                      Get notified when new volumes are published.
-                    </p>
-                    <button
-                      onClick={() => router.push('/newsletter')}
-                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:from-blue-400 hover:to-blue-500 transition-all shadow-lg shadow-blue-900/30"
-                    >
-                      Subscribe to Updates
-                    </button>
-                  </div>
+                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+                   <h3 className="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">Metadata</h3>
+                   <div className="space-y-3 font-mono text-[10px] uppercase text-gray-600">
+                      <div className="flex justify-between"><span>Pages</span><span className="text-gray-400">{book.pages || '---'}</span></div>
+                      <div className="flex justify-between"><span>ISBN</span><span className="text-gray-400">{book.isbn || 'N/A'}</span></div>
+                      <div className="flex justify-between"><span>Release</span><span className="text-gray-400">{book.publishedDate ? 'GA' : 'Draft'}</span></div>
+                   </div>
                 </div>
               </div>
             </aside>
+
           </div>
         </div>
       </div>
@@ -365,38 +203,21 @@ const BookPage: NextPage<Props> = ({ book, source }) => {
   );
 };
 
-export default BookPage;
-
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     await getContentlayerData();
     const books = await getServerAllBooks();
     
-    const filteredBooks = books
-      .filter((x: any) => x && !(x as any).draft)
-      .filter((x: any) => {
-        const slug = (x as any).slug || (x as any)._raw?.flattenedPath || "";
-        return slug && !String(slug).includes("replace") && slug.trim() !== '';
-      });
-
-    const paths = filteredBooks
+    const paths = books
       .filter((b: any) => b && !b.draft)
-      .map((b: any) => {
-        const slug = b.slug || b._raw?.flattenedPath?.replace(/^books\//, '');
-        return slug ? { params: { slug } } : null;
-      })
-      .filter(Boolean) as { params: { slug: string } }[];
+      .map((b: any) => ({
+        params: { slug: b.slug || b._raw?.flattenedPath?.replace(/^books\//, '') }
+      }))
+      .filter((p: any) => p.params.slug);
 
-    return { 
-      paths, 
-      fallback: 'blocking' 
-    };
+    return { paths, fallback: 'blocking' };
   } catch (error) {
-    console.error('Error generating static paths:', error);
-    return {
-      paths: [],
-      fallback: 'blocking'
-    };
+    return { paths: [], fallback: 'blocking' };
   }
 };
 
@@ -405,39 +226,35 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const slug = params?.slug as string;
     if (!slug) return { notFound: true };
 
-    const bookData: any = await getServerBookBySlug(slug);
-    if (!bookData || bookData.draft) return { notFound: true };
+    const data: any = await getServerBookBySlug(slug);
+    if (!data || data.draft) return { notFound: true };
 
-    const rawMdx = bookData?.body?.raw ?? bookData?.body ?? "";
+    const rawMdx = data?.body?.raw ?? data?.body ?? "";
     const source = await prepareMDX(typeof rawMdx === "string" ? rawMdx : "");
 
     const book: Book = {
-      title: bookData.title || "Untitled Volume",
-      excerpt: bookData.excerpt || bookData.description || null,
-      coverImage: bookData.coverImage || null,
-      slug: bookData.slug || slug,
-      url: `/books/${bookData.slug || slug}`,
-      isbn: bookData.isbn ?? null,
-      author: bookData.author ?? null,
-      publisher: bookData.publisher ?? null,
-      pages: bookData.pages ?? null,
-      publishedDate: bookData.date ?? null,
-      description: bookData.description ?? null,
-      price: bookData.price,
-      currency: bookData.currency,
-      availableFormats: bookData.availableFormats,
-      categories: bookData.categories,
+      title: data.title || "Untitled Volume",
+      excerpt: data.excerpt || data.description || null,
+      coverImage: data.coverImage || null,
+      slug: data.slug || slug,
+      url: `/books/${data.slug || slug}`,
+      isbn: data.isbn ?? null,
+      author: data.author ?? null,
+      publisher: data.publisher ?? null,
+      pages: data.pages ?? null,
+      publishedDate: data.date ?? null,
+      description: data.description ?? null,
+      availableFormats: data.availableFormats || [],
+      categories: data.categories || [],
     };
 
-    // Sanitize ONLY the book model, NOT the MDX source.
     return {
       props: { book: sanitizeData(book), source },
       revalidate: 1800,
     };
   } catch (error) {
-    console.error('Error generating static props:', error);
-    return {
-      notFound: true
-    };
+    return { notFound: true };
   }
 };
+
+export default BookPage;

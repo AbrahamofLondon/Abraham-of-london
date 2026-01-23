@@ -1,6 +1,9 @@
-// pages/inner-circle/resend.tsx
+/* pages/inner-circle/resend.tsx — ACCESS RECOVERY (INTEGRITY MODE) */
 import * as React from "react";
 import type { NextPage } from "next";
+import { useRouter } from "next/router";
+import { Mail, RefreshCw, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import Layout from "@/components/Layout";
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
 
@@ -11,18 +14,22 @@ type ApiResponse = {
 };
 
 const InnerCircleResendPage: NextPage = () => {
+  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [status, setStatus] = React.useState<"idle" | "success" | "error">("idle");
   const [feedback, setFeedback] = React.useState<string | null>(null);
 
+  // Redirection target after recovery
+  const returnTo = typeof router.query.returnTo === "string" ? router.query.returnTo : "/inner-circle/dashboard";
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email)) {
       setStatus("error");
-      setFeedback("Please enter a valid email address.");
+      setFeedback("Please enter a valid institutional email address.");
       return;
     }
 
@@ -31,24 +38,24 @@ const InnerCircleResendPage: NextPage = () => {
     setFeedback(null);
 
     try {
+      // 1. Security Check: Recaptcha verification
       const recaptchaToken = await getRecaptchaTokenSafe("inner_circle_resend");
 
       if (!recaptchaToken) {
         setStatus("error");
-        setFeedback(
-          "Security check failed. Please ensure JavaScript is enabled and try again."
-        );
+        setFeedback("Security verification failed. Please ensure JavaScript is enabled.");
         setLoading(false);
         return;
       }
 
+      // 2. Postgres Synchronization: Request fresh key from database
       const res = await fetch("/api/inner-circle/resend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
-          name: name || undefined,
-          returnTo: "/canon",
+          email: email.trim(),
+          name: name.trim() || undefined,
+          returnTo,
           recaptchaToken,
         }),
       });
@@ -57,61 +64,47 @@ const InnerCircleResendPage: NextPage = () => {
 
       if (!data.ok) {
         setStatus("error");
-        setFeedback(
-          data.error ||
-            "We couldn't resend your access email. Please try again shortly."
-        );
+        setFeedback(data.error || "We couldn't locate an active session for this email.");
         return;
       }
 
+      // 3. Success State
       setStatus("success");
-      setFeedback(
-        data.message ||
-          "A fresh Inner Circle access email has been sent. Please check your inbox."
-      );
+      setFeedback(data.message || "A fresh Inner Circle access email has been dispatched. Please check your inbox.");
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Resend failed:", error);
+      console.error("[RESEND_FAILURE]", error);
       setStatus("error");
-      setFeedback(
-        "Something went wrong while resending your access email. Please try again."
-      );
+      setFeedback("A system error occurred. Please attempt recovery again shortly.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Layout title="Resend Inner Circle Access">
-      <main className="mx-auto max-w-xl px-4 py-12 sm:py-16 lg:py-20">
-        <section className="space-y-8">
-          <header className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-softGold/70">
-              Inner Circle · Access
-            </p>
-            <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-              Resend Your Inner Circle Access
+    <Layout title="Resend Access">
+      <main className="min-h-[80vh] flex items-center justify-center px-4 py-20 bg-black">
+        <section className="w-full max-w-xl">
+          <header className="mb-10 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-gold text-[10px] font-bold uppercase tracking-widest mb-6">
+              <Mail size={12} />
+              Access Recovery
+            </div>
+            <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white mb-4">
+              Resend Access Email
             </h1>
-            <p className="text-sm text-softGold/80">
-              If you&apos;ve already registered but can&apos;t find your access email,
-              request a fresh one here.
+            <p className="text-gray-400 text-sm md:text-base leading-relaxed">
+              If you have already registered but cannot locate your access key, 
+              provide your registered email to receive a fresh entry link.
             </p>
           </header>
 
           <form
             onSubmit={handleSubmit}
-            className="
-              space-y-6 rounded-2xl border border-softGold/40 
-              bg-black/70 p-6 shadow-lg backdrop-blur 
-              shadow-black/40
-            "
+            className="space-y-6 rounded-3xl border border-white/10 bg-zinc-900/50 p-8 backdrop-blur-xl shadow-2xl"
           >
             <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="text-xs font-semibold uppercase tracking-[0.21em] text-softGold/80"
-              >
-                Email address
+              <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">
+                Registered Email
               </label>
               <input
                 id="email"
@@ -120,25 +113,14 @@ const InnerCircleResendPage: NextPage = () => {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="
-                  w-full rounded-xl border border-softGold/40 bg-black/60 
-                  px-3 py-2 text-sm text-cream outline-none ring-0
-                  transition focus:border-softGold focus:ring-1 focus:ring-softGold/60
-                "
-                placeholder="you@example.com"
+                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-gold/50 transition-all font-medium"
+                placeholder="you@institutional-firm.com"
               />
-              <p className="text-[11px] text-softGold/70">
-                Use the same email you registered with. If the message doesn&apos;t appear,
-                check Promotions or Spam.
-              </p>
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="name"
-                className="text-xs font-semibold uppercase tracking-[0.21em] text-softGold/80"
-              >
-                Name <span className="text-softGold/60">(optional)</span>
+              <label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">
+                Name <span className="text-gray-700">(optional)</span>
               </label>
               <input
                 id="name"
@@ -146,49 +128,53 @@ const InnerCircleResendPage: NextPage = () => {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="
-                  w-full rounded-xl border border-softGold/30 bg-black/60 
-                  px-3 py-2 text-sm text-cream outline-none ring-0
-                  transition focus:border-softGold/70 focus:ring-1 focus:ring-softGold/60
-                "
-                placeholder="How should we address you?"
+                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-gold/50 transition-all"
+                placeholder="Institutional ID or Name"
               />
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="
-                inline-flex w-full items-center justify-center 
-                rounded-full bg-softGold px-6 py-3 text-sm font-semibold 
-                text-black shadow-md transition 
-                hover:bg-softGold/90 
-                disabled:cursor-not-allowed disabled:opacity-60
-              "
+              disabled={loading || status === "success"}
+              className="w-full bg-gold text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-gold/80 disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-lg shadow-gold/10"
             >
-              {loading ? "Resending..." : "Resend access email"}
+              {loading ? (
+                <RefreshCw size={18} className="animate-spin" />
+              ) : status === "success" ? (
+                <CheckCircle size={18} />
+              ) : (
+                "Dispatch Recovery Email"
+              )}
             </button>
 
             {feedback && (
               <div
-                className={[
-                  "mt-2 rounded-xl border px-3 py-2 text-sm",
+                className={`flex items-start gap-3 p-4 rounded-xl text-sm font-medium border ${
                   status === "success"
-                    ? "border-emerald-500/60 bg-emerald-900/40 text-emerald-100"
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                     : status === "error"
-                    ? "border-red-500/60 bg-red-900/40 text-red-100"
-                    : "border-softGold/40 bg-black/60 text-softGold/90",
-                ].join(" ")}
+                    ? "border-red-500/30 bg-red-500/10 text-red-400"
+                    : "border-white/10 bg-white/5 text-gray-400"
+                }`}
               >
-                {feedback}
+                {status === "error" ? <AlertCircle size={18} className="shrink-0" /> : <CheckCircle size={18} className="shrink-0" />}
+                <p>{feedback}</p>
               </div>
             )}
           </form>
 
-          <p className="text-xs text-softGold/60">
-            If you still don&apos;t receive the email after multiple attempts, reply to any
-            Abraham of London newsletter or contact us through the main site — we&apos;ll assist you manually.
-          </p>
+          <footer className="mt-10 flex flex-col items-center gap-4">
+            <Link 
+              href="/inner-circle" 
+              className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-white transition-colors group"
+            >
+              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+              Return to Access Gate
+            </Link>
+            <p className="text-[11px] text-gray-600 text-center max-w-sm">
+              Note: If you do not receive the email within 10 minutes, please check your spam folder or contact support for manual institutional verification.
+            </p>
+          </footer>
         </section>
       </main>
     </Layout>
@@ -196,4 +182,3 @@ const InnerCircleResendPage: NextPage = () => {
 };
 
 export default InnerCircleResendPage;
-

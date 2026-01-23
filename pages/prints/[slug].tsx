@@ -8,8 +8,8 @@ import Layout from "@/components/Layout";
 import { withInnerCircleAuth } from "@/lib/auth/withInnerCircleAuth";
 import { 
   getContentlayerData, 
-  isDraftContent, 
-  normalizeSlug,
+  isDraftContent,
+  resolveDocCoverImage
 } from "@/lib/contentlayer-compat";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
@@ -84,10 +84,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const paths = (allPrints ?? [])
       .filter((p: any) => p && !isDraftContent(p))
       .map((p: any) => {
-        const slug = normalizeSlug(p?.slug ?? p?._raw?.flattenedPath ?? "");
-        return slug ? { params: { slug } } : null;
+        // Try multiple possible slug properties
+        const slug = p?.slug || p?._raw?.flattenedPath || "";
+        // Ensure slug is a string and normalize it
+        if (typeof slug === 'string' && slug.trim()) {
+          // Remove any trailing .md or .mdx extensions
+          const normalized = slug.replace(/\.(md|mdx)$/, '');
+          return normalized;
+        }
+        return "";
       })
-      .filter(Boolean) as { params: { slug: string } }[];
+      .filter((slug: string) => slug && slug.trim() !== '')
+      .map((slug: string) => ({ 
+        params: { slug } 
+      }));
 
     return { 
       paths, 
@@ -102,26 +112,25 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 };
 
-function resolvePrintCoverImage(doc: any): string | null {
-  return (
-    doc?.coverImage ??
-    doc?.coverimage ??
-    doc?.image ??
-    doc?.thumbnail ??
-    null
-  );
-}
-
 export const getStaticProps: GetStaticProps<Omit<Props, 'user' | 'requiredRole'>> = async ({ params }) => {
   try {
-    const slug = normalizeSlug(String(params?.slug ?? ""));
+    const rawSlug = params?.slug;
+    const slug = 
+      typeof rawSlug === "string"
+        ? rawSlug
+        : Array.isArray(rawSlug) && typeof rawSlug[0] === "string"
+          ? rawSlug[0]
+          : "";
+
     if (!slug) return { notFound: true };
 
     const { allPrints } = await getContentlayerData();
 
     const doc = (allPrints ?? []).find((p: any) => {
-      const s = normalizeSlug(p?.slug ?? p?._raw?.flattenedPath ?? "");
-      return s === slug;
+      // Try multiple slug properties for matching
+      const pSlug = p?.slug || p?._raw?.flattenedPath || "";
+      const normalizedPSlug = typeof pSlug === 'string' ? pSlug.replace(/\.(md|mdx)$/, '') : "";
+      return normalizedPSlug === slug;
     }) ?? null;
 
     if (!doc || isDraftContent(doc)) return { notFound: true };
@@ -133,7 +142,7 @@ export const getStaticProps: GetStaticProps<Omit<Props, 'user' | 'requiredRole'>
       excerpt: (doc as any).excerpt ?? null,
       description: (doc as any).description ?? (doc as any).excerpt ?? null,
       dimensions: (doc as any).dimensions ?? null,
-      coverImage: resolvePrintCoverImage(doc),
+      coverImage: resolveDocCoverImage(doc) || null,
       pdfUrl: (doc as any).pdfUrl ?? (doc as any).downloadUrl ?? null,
       highResUrl: (doc as any).highResUrl ?? null,
       slug,

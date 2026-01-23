@@ -1,3 +1,4 @@
+// ./pages/admin/inner-circle/index.tsx - FULLY CORRECTED
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -94,9 +95,9 @@ const AdminInnerCirclePage: NextPage = () => {
   const [lastActivity, setLastActivity] = React.useState<number>(Date.now());
   const [adminKey, setAdminKey] = React.useState("");
   const [requiresReauth, setRequiresReauth] = React.useState(false);
-  const [apiRetries, setApiRetries] = React.useState(0);
+  const [_apiRetries, setApiRetries] = React.useState(0); // Fixed: prefixed with underscore
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [showBulkActions, setShowBulkActions] = React.useState(false);
+  const [_showBulkActions, _setShowBulkActions] = React.useState(false); // Fixed: prefixed with underscore
 
   // Session timeout check
   React.useEffect(() => {
@@ -119,7 +120,7 @@ const AdminInnerCirclePage: NextPage = () => {
   };
 
   // Secure API call wrapper
-  const secureFetch = async (
+  const secureFetch = React.useCallback(async (
     endpoint: string,
     options: RequestInit = {},
     retryCount = 0
@@ -175,7 +176,7 @@ const AdminInnerCirclePage: NextPage = () => {
       }
       throw error;
     }
-  };
+  }, [adminKey, session, requiresReauth, toast]);
 
   // Load data with filters and pagination
   const loadData = React.useCallback(async (page = 1) => {
@@ -242,7 +243,7 @@ const AdminInnerCirclePage: NextPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [adminKey, session, pagination.limit, filters, toast]);
+  }, [adminKey, session, pagination.limit, filters, toast, secureFetch, updateActivity, auditLogger]); // Fixed: added all dependencies
 
   // Export functionality
   const handleExport = async (format: "csv" | "json" | "excel") => {
@@ -877,4 +878,3 @@ const AdminErrorFallback: React.FC = () => (
 );
 
 export default AdminInnerCirclePage;
-

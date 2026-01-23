@@ -21,14 +21,16 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  // STRATEGIC FIX: Added 'override' modifier to satisfy strict TS rules
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
   }
 
-  render() {
+  // STRATEGIC FIX: Added 'override' modifier to satisfy strict TS rules
+  override render() {
     if (this.state.hasError) {
       return this.props.fallback;
     }

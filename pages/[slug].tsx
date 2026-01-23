@@ -2,8 +2,11 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { ArrowRight, Calendar, Clock, Tag } from "lucide-react";
+import { ArrowRight, Calendar, Clock, Tag, User } from "lucide-react";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 import {
@@ -18,8 +21,10 @@ import {
 } from "@/lib/contentlayer-compat";
 
 import { prepareMDX, mdxComponents } from "@/lib/server/md-utils";
-import { MDXRemote } from "next-mdx-remote";
 
+/* -----------------------------------------------------------------------------
+  TYPES
+----------------------------------------------------------------------------- */
 type Doc = {
   key: string;
   kind: string;
@@ -36,10 +41,15 @@ type Doc = {
 
 interface Props {
   doc: Doc;
-  source: any;
+  source: MDXRemoteSerializeResult | null;
 }
 
+/* -----------------------------------------------------------------------------
+  ROUTE PROTECTION
+  This page must NEVER hijack real sections like /canon/* or /blog/*
+----------------------------------------------------------------------------- */
 const RESERVED = new Set([
+  // site sections
   "blog",
   "blogs",
   "canon",
@@ -56,19 +66,48 @@ const RESERVED = new Set([
   "consulting",
   "contact",
   "inner-circle",
+  // framework / infra
   "api",
   "_next",
   "assets",
+  "public",
+  "admin",
+  "dashboard",
+  "auth",
+  // common static files
+  "favicon.ico",
+  "robots.txt",
+  "sitemap.xml",
+  "manifest.json",
 ]);
 
-const isReservedSlug = (slug: string) => {
-  const s = slug.toLowerCase();
+function isReservedSlug(slug: string) {
+  const s = slug.toLowerCase().trim();
+  if (!s) return true;
   if (RESERVED.has(s)) return true;
   if (s.startsWith("_")) return true;
-  if (s.includes(".")) return true;
+  if (s.includes(".")) return true; // blocks /whatever.png, /sitemap.xml, etc
+  if (s.includes("/")) return true; // blocks nested slugs entirely
   return false;
-};
+}
 
+function toISODate(date: string | null | undefined) {
+  if (!date) return null;
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+function safeText(v: unknown, fallback = "") {
+  const s = typeof v === "string" ? v : "";
+  return s.trim() || fallback;
+}
+
+const SITE_URL = "https://www.abrahamoflondon.org";
+
+/* -----------------------------------------------------------------------------
+  PAGE
+----------------------------------------------------------------------------- */
 const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
   const router = useRouter();
 
@@ -91,6 +130,15 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
           <p className="mt-3 text-gray-300">
             This route does not exist as a top-level document.
           </p>
+          <div className="mt-10">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3 rounded-xl border border-amber-400/25 bg-white/5 px-5 py-3 text-sm font-semibold text-amber-100 hover:border-amber-400/45"
+            >
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              Return home
+            </Link>
+          </div>
         </div>
       </Layout>
     );
@@ -104,25 +152,70 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
       })
     : null;
 
-  const canonical = `https://www.abrahamoflondon.org${doc.href.startsWith("/") ? doc.href : `/${doc.href}`}`;
+  const canonical =
+    `${SITE_URL}${doc.href.startsWith("/") ? doc.href : `/${doc.href}`}`;
+
+  const ogImage = doc.image || "/assets/images/social/og-image.jpg";
+  const description =
+    doc.excerpt ||
+    "Abraham of London — institutional advisory and strategic architecture.";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: doc.title,
+    description,
+    mainEntityOfPage: canonical,
+    url: canonical,
+    image: [`${SITE_URL}${ogImage.startsWith("/") ? ogImage : `/${ogImage}`}`],
+    datePublished: toISODate(doc.date),
+    dateModified: toISODate(doc.date),
+    author: doc.author
+      ? { "@type": "Person", name: doc.author }
+      : { "@type": "Person", name: "Abraham of London" },
+    publisher: {
+      "@type": "Organization",
+      name: "Abraham of London",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/assets/images/abraham-logo.jpg`,
+      },
+    },
+    keywords: (doc.tags || []).join(", "),
+  };
 
   return (
-    <Layout title={doc.title} description={doc.excerpt ?? undefined}>
+    <Layout title={doc.title} description={description}>
       <Head>
-        <meta property="og:type" content="article" />
         <link rel="canonical" href={canonical} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={doc.title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:image" content={`${SITE_URL}${ogImage}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={doc.title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={`${SITE_URL}${ogImage}`} />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </Head>
 
       <section className="bg-black">
         <div className="mx-auto max-w-3xl px-6 py-12">
+          {/* Kind pill */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
-            {doc.kind}
+            {safeText(doc.kind, "document")}
           </div>
 
           <h1 className="font-serif text-4xl font-semibold leading-tight text-amber-100 sm:text-5xl">
             {doc.title}
           </h1>
 
+          {/* Meta row */}
           <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-gray-300">
             {formattedDate ? (
               <span className="inline-flex items-center gap-2">
@@ -137,21 +230,31 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
                 {doc.readTime}
               </span>
             ) : null}
+
+            {doc.author ? (
+              <span className="inline-flex items-center gap-2">
+                <User className="h-4 w-4 text-amber-300" />
+                {doc.author}
+              </span>
+            ) : null}
           </div>
 
+          {/* Excerpt */}
           {doc.excerpt ? (
             <p className="mt-6 text-lg leading-relaxed text-gray-200">
               {doc.excerpt}
             </p>
           ) : null}
 
+          {/* Cover */}
           {doc.image ? (
             <div className="mt-10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={doc.image} alt={doc.title} className="w-full h-auto" />
+              <img src={doc.image} alt={doc.title} className="h-auto w-full" />
             </div>
           ) : null}
 
+          {/* Content */}
           <article className="prose prose-invert mt-10 max-w-none">
             {source ? (
               <MDXRemote {...source} components={mdxComponents ?? {}} />
@@ -160,6 +263,7 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
             )}
           </article>
 
+          {/* Tags */}
           {doc.tags && doc.tags.length > 0 ? (
             <div className="mt-10 border-t border-white/10 pt-8">
               <div className="mb-3 inline-flex items-center gap-2 text-sm text-gray-300">
@@ -179,34 +283,52 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
             </div>
           ) : null}
 
-          <button
-            onClick={() => router.push("/")}
-            className="mt-12 inline-flex items-center gap-3 rounded-xl border border-amber-400/25 bg-white/5 px-5 py-3 text-sm font-semibold text-amber-100 hover:border-amber-400/45"
-          >
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            Return home
-          </button>
+          {/* Actions */}
+          <div className="mt-12 flex flex-wrap gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3 rounded-xl border border-amber-400/25 bg-white/5 px-5 py-3 text-sm font-semibold text-amber-100 hover:border-amber-400/45"
+            >
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              Return home
+            </Link>
+
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-gray-200 hover:border-white/20"
+              type="button"
+            >
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              Back
+            </button>
+          </div>
         </div>
       </section>
     </Layout>
   );
 };
 
+/* -----------------------------------------------------------------------------
+  BUILD: PATHS
+  STRICT: only generates /{slug} for documents whose href is exactly "/slug"
+----------------------------------------------------------------------------- */
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     await getContentlayerData();
-    const docs = getPublishedDocuments();
 
+    const docs = getPublishedDocuments();
     const paths =
       (docs ?? [])
         .map((d: any) => {
-          const slug = normalizeSlug(d);
-          if (!slug) return null;
-          if (isReservedSlug(slug)) return null;
-
-          // STRICT: only top-level href ("/slug"), not nested
           const href = getDocHref(d);
-          if (!href || href !== `/${slug}`) return null;
+          if (!href) return null;
+
+          // Only allow exact top-level href: "/slug"
+          const slug = normalizeSlug(href);
+          if (!slug) return null;
+
+          if (isReservedSlug(slug)) return null;
+          if (href !== `/${slug}`) return null;
 
           return { params: { slug } };
         })
@@ -219,6 +341,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 };
 
+/* -----------------------------------------------------------------------------
+  BUILD: PROPS
+  STRICT: only serves top-level "/slug", never nested content
+----------------------------------------------------------------------------- */
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
     const rawSlug = params?.slug;
@@ -231,14 +357,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     if (!rawDoc) return { notFound: true };
     if (isDraftContent(rawDoc)) return { notFound: true };
 
-    // STRICT: only allow "/slug" — never allow this page to serve nested content
     const href = getDocHref(rawDoc);
     if (!href || href !== `/${slug}`) return { notFound: true };
 
     const doc: Doc = {
       key: rawDoc._id || `doc:${slug}`,
       kind: String(getDocKind(rawDoc) ?? "document"),
-      title: String(rawDoc?.title ?? "Untitled"),
+      title: safeText(rawDoc?.title, "Untitled"),
       href: String(href),
       excerpt: (rawDoc?.excerpt ?? rawDoc?.description ?? null) as string | null,
       date: rawDoc?.date ? String(rawDoc.date) : null,
@@ -249,11 +374,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       category: rawDoc.category || null,
     };
 
-    let source = null;
     const rawMdx = rawDoc.body?.raw || rawDoc.body || "";
-    if (rawMdx && typeof rawMdx === "string") {
-      source = await prepareMDX(rawMdx);
-    }
+    const source =
+      typeof rawMdx === "string" && rawMdx.trim()
+        ? await prepareMDX(rawMdx)
+        : null;
 
     return { props: { doc, source }, revalidate: 3600 };
   } catch (e) {

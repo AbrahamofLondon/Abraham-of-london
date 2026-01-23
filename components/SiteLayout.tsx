@@ -1,8 +1,9 @@
-// components/SiteLayout.tsx - FIXED
+// components/SiteLayout.tsx - ENHANCED VERSION
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { getPageTitle, absUrl } from '@/lib/imports';
+import { getPageTitle, absUrl, siteConfig } from '@/lib/imports';
+import { getOgImageUrl, generateOrganizationSchema } from '@/lib/utils/site-utils';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -31,7 +32,7 @@ interface SiteLayoutProps {
   ogImage?: string;
   ogType?: "website" | "article" | "profile" | "book" | string;
   twitterCard?: "summary" | "summary_large_image" | "app" | "player";
-  structuredData?: object;
+  structuredData?: object[];
   noIndex?: boolean;
   noFollow?: boolean;
   themeColor?: string;
@@ -41,13 +42,14 @@ interface SiteLayoutProps {
   className?: string;
   skipToContentId?: string;
   errorBoundary?: React.ComponentType<{ children: React.ReactNode }>;
+  showOrganizationSchema?: boolean;
 }
 
 const DEFAULT_CONFIG = {
   viewport: "width=device-width, initial-scale=1.0, viewport-fit=cover",
   charset: "UTF-8",
   lang: "en",
-  themeColor: "#ffffff",
+  themeColor: siteConfig.brand.primaryColor || "#d4af37",
   ogType: "website",
   twitterCard: "summary_large_image" as const,
 } as const;
@@ -131,7 +133,7 @@ export default function SiteLayout({
   ogImage,
   ogType = DEFAULT_CONFIG.ogType,
   twitterCard = DEFAULT_CONFIG.twitterCard,
-  structuredData,
+  structuredData = [],
   noIndex = false,
   noFollow = false,
   themeColor = DEFAULT_CONFIG.themeColor,
@@ -141,6 +143,7 @@ export default function SiteLayout({
   className = "",
   skipToContentId = "main-content",
   errorBoundary: ErrorBoundary = LayoutErrorBoundary,
+  showOrganizationSchema = true,
 }: SiteLayoutProps) {
   const router = useRouter();
   const currentPath = router.asPath || "/";
@@ -160,15 +163,19 @@ export default function SiteLayout({
     return directives.join(", ");
   }, [noIndex, noFollow]);
 
-  const defaultDescription =
-    metaDescription ||
-    "Abraham of London - strategy, fatherhood, and legacy for a world that has lost its bearings.";
-
-  const defaultOgImageAbs = absUrl(
-    ogImage || "/assets/images/social/og-image.jpg"
+  const defaultDescription = React.useMemo(
+    () => metaDescription || siteConfig.seo.description,
+    [metaDescription]
   );
-  const defaultTwitterImageAbs = absUrl(
-    ogImage || "/assets/images/social/twitter-image.jpg"
+
+  const defaultOgImageAbs = React.useMemo(
+    () => getOgImageUrl(ogImage),
+    [ogImage]
+  );
+
+  const defaultTwitterImageAbs = React.useMemo(
+    () => getOgImageUrl(ogImage),
+    [ogImage]
   );
 
   const defaultMetaTags: MetaTag[] = React.useMemo(
@@ -180,13 +187,19 @@ export default function SiteLayout({
       { property: "og:type", content: ogType },
       { property: "og:url", content: fullCanonicalUrl },
       { property: "og:image", content: defaultOgImageAbs },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { property: "og:description", content: defaultDescription },
-      { property: "og:site_name", content: "Abraham of London" },
+      { property: "og:site_name", content: siteConfig.brand.name },
       { property: "og:locale", content: "en_GB" },
       { name: "twitter:card", content: twitterCard },
       { name: "twitter:title", content: fullTitle },
       { name: "twitter:description", content: defaultDescription },
       { name: "twitter:image", content: defaultTwitterImageAbs },
+      ...(siteConfig.seo.twitterHandle ? [
+        { name: "twitter:site", content: siteConfig.seo.twitterHandle },
+        { name: "twitter:creator", content: siteConfig.seo.twitterHandle },
+      ] : []),
     ],
     [
       defaultDescription,
@@ -208,6 +221,9 @@ export default function SiteLayout({
       { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.json" },
+      ...(siteConfig.brand.favicon ? [
+        { rel: "shortcut icon", href: siteConfig.brand.favicon },
+      ] : []),
     ],
     [fullCanonicalUrl]
   );
@@ -236,13 +252,22 @@ export default function SiteLayout({
     [defaultLinkTags, linkTags]
   );
 
-  const structuredDataScript = structuredData ? (
+  // Add organization schema by default
+  const allStructuredData = React.useMemo(() => {
+    const data = [...structuredData];
+    if (showOrganizationSchema) {
+      data.push(generateOrganizationSchema());
+    }
+    return data;
+  }, [structuredData, showOrganizationSchema]);
+
+  const structuredDataScripts = allStructuredData.map((data, index) => (
     <script
-      key="structured-data"
+      key={`structured-data-${index}`}
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
-  ) : null;
+  ));
 
   return (
     <>
@@ -270,6 +295,7 @@ export default function SiteLayout({
           />
         ))}
 
+        {/* Font preloading */}
         <link
           rel="preload"
           href="/fonts/Inter-Variable.woff2"
@@ -286,9 +312,14 @@ export default function SiteLayout({
           crossOrigin="anonymous"
           key="font-preload-playfair"
         />
+
+        {/* Keywords meta tag */}
+        {siteConfig.seo.keywords && siteConfig.seo.keywords.length > 0 && (
+          <meta name="keywords" content={siteConfig.seo.keywords.join(', ')} />
+        )}
       </Head>
 
-      {structuredDataScript}
+      {structuredDataScripts}
 
       <SkipToContent targetId={skipToContentId} />
 
@@ -296,6 +327,10 @@ export default function SiteLayout({
         <div
           className={`flex min-h-screen flex-col bg-warmWhite text-soft-charcoal antialiased ${className}`}
           data-lang={lang}
+          style={{
+            '--color-primary': siteConfig.brand.primaryColor,
+            '--color-accent': siteConfig.brand.accentColor,
+          } as React.CSSProperties}
         >
           <Header initialTheme="light" />
           <main
@@ -317,13 +352,17 @@ export function usePageMetadata(
   description?: string,
   additionalMeta: Partial<SiteLayoutProps> = {}
 ) {
+  const router = useRouter();
+  const currentPath = router.asPath || "/";
+
   return React.useMemo(
     () => ({
       pageTitle: title,
       metaDescription: description,
+      canonicalUrl: absUrl(currentPath),
       ...additionalMeta,
     }),
-    [title, description, additionalMeta]
+    [title, description, currentPath, additionalMeta]
   );
 }
 
@@ -341,7 +380,7 @@ export function withSiteLayout<P extends object>(
 }
 
 export function generateStructuredData(
-  type: "Article" | "WebPage" | "Organization",
+  type: "Article" | "WebPage" | "Organization" | "Person" | "Book",
   data: object
 ) {
   return {
@@ -349,4 +388,68 @@ export function generateStructuredData(
     "@type": type,
     ...data,
   };
+}
+
+// Helper to generate article schema
+export function generateArticleSchema({
+  headline,
+  description,
+  author = siteConfig.author.name,
+  publisher = siteConfig.brand.name,
+  datePublished,
+  dateModified,
+  image,
+  url,
+}: {
+  headline: string;
+  description: string;
+  author?: string;
+  publisher?: string;
+  datePublished: string;
+  dateModified?: string;
+  image?: string;
+  url?: string;
+}) {
+  return generateStructuredData("Article", {
+    headline,
+    description,
+    author: {
+      "@type": "Person",
+      name: author,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: publisher,
+      logo: {
+        "@type": "ImageObject",
+        url: absUrl(siteConfig.brand.logo || '/assets/images/abraham-logo.jpg'),
+      },
+    },
+    datePublished,
+    dateModified: dateModified || datePublished,
+    image: image ? absUrl(image) : getOgImageUrl(),
+    url: url ? absUrl(url) : absUrl(),
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url ? absUrl(url) : absUrl(),
+    },
+  });
+}
+
+// Helper to generate person schema
+export function generatePersonSchema() {
+  return generateStructuredData("Person", {
+    name: siteConfig.author.name,
+    description: siteConfig.author.bio || siteConfig.seo.description,
+    image: absUrl(siteConfig.author.image || '/assets/images/profile-portrait.webp'),
+    email: siteConfig.author.email,
+    jobTitle: siteConfig.author.title,
+    worksFor: {
+      "@type": "Organization",
+      name: siteConfig.brand.name,
+    },
+    sameAs: siteConfig.socials
+      .filter(s => ['x', 'linkedin', 'instagram', 'youtube', 'facebook'].includes(s.kind))
+      .map(s => s.href),
+  });
 }

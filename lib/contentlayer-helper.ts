@@ -134,3 +134,61 @@ export const getPublishedDocumentsLegacy = getPublishedAll;
 /** Hard guarantees (keep stubs if referenced) */
 export const assertPublicAssetsForDownloadsAndResources = () => true;
 export const recordContentView = () => true;
+
+// Create a default export object
+const contentlayerHelper = {
+  // Re-export all the functions
+  getAllDocuments,
+  getPublishedAll,
+  getDocumentBySlug,
+  getAllPosts,
+  getAllBooks,
+  getAllCanons,
+  getAllDownloads,
+  getAllShorts,
+  getAllEvents,
+  getAllPrints,
+  getAllResources,
+  getAllStrategies,
+  getPublishedPosts,
+  getPublishedBooks,
+  getPublishedCanons,
+  getPublishedDownloads,
+  getPublishedShorts,
+  getPublishedEvents,
+  getPublishedPrints,
+  getPublishedResources,
+  getPublishedStrategies,
+  getPostBySlug,
+  getBookBySlug,
+  getCanonBySlug,
+  getDownloadBySlug,
+  getShortBySlug,
+  getEventBySlug,
+  getPrintBySlug,
+  getResourceBySlug,
+  getStrategyBySlug,
+  getAllContentlayerDocs,
+  getPublishedDocumentsLegacy,
+  assertPublicAssetsForDownloadsAndResources,
+  recordContentView,
+  // Re-export from compat
+  getContentlayerData,
+  getAllCombinedDocs,
+  getPublishedDocuments,
+  getDocBySlug,
+  getDocKind,
+  getDocHref,
+  normalizeSlug,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl,
+  getAccessLevel,
+  isDraftContent,
+  isPublished,
+  sanitizeData,
+  toUiDoc,
+  isContentlayerLoaded,
+  assertContentlayerHasDocs,
+};
+
+export default contentlayerHelper;

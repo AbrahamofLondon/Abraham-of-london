@@ -3,6 +3,7 @@ import React, { ComponentType, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import LoadingSpinner from "@/components/LoadingSpinner";
 import type { User, UserRole } from '@/types/auth';
+import { ROLE_HIERARCHY } from '@/types/auth'; // ✅ Added import
 
 interface WithInnerCircleAuthProps {
   user?: User;
@@ -21,6 +22,7 @@ export function withInnerCircleAuth<P extends object>(
     const router = useRouter();
     const [user, setUser] = useState<User>();
     const [isLoading, setIsLoading] = useState(true);
+    const [accessChecked, setAccessChecked] = useState(false);
     
     const requiredRole = options?.requiredRole || 'inner-circle';
     const redirectTo = options?.redirectTo || `/access/request?resource=${encodeURIComponent(router.asPath)}`;
@@ -28,40 +30,93 @@ export function withInnerCircleAuth<P extends object>(
     useEffect(() => {
       const checkAuth = async () => {
         try {
-          const response = await fetch('/api/auth/session');
-          const data = await response.json();
+          // First check if we have a session
+          const sessionResponse = await fetch('/api/auth/session');
+          const sessionData = await sessionResponse.json();
           
-          if (data?.user) {
-            // Check if user has required role
-            const userRole = data.user.role as UserRole;
+          if (sessionData?.user) {
+            // User is authenticated via NextAuth
+            const userRole = sessionData.user.role as UserRole;
             const userHierarchy = ROLE_HIERARCHY[userRole] || 0;
             const requiredHierarchy = ROLE_HIERARCHY[requiredRole] || 0;
             
             if (userHierarchy >= requiredHierarchy) {
+              // User has sufficient role
               setUser({
-                id: data.user.id,
-                email: data.user.email,
-                name: data.user.name,
+                id: sessionData.user.id,
+                email: sessionData.user.email,
+                name: sessionData.user.name,
                 role: userRole,
                 permissions: getPermissionsForRole(userRole),
-                membershipDate: data.user.membershipDate,
-                lastAccess: data.user.lastAccess
+                membershipDate: sessionData.user.membershipDate,
+                lastAccess: sessionData.user.lastAccess
               });
+              setAccessChecked(true);
+              return;
             } else {
-              // Insufficient permissions
-              if (options?.fallbackComponent) {
-                // Use provided fallback
-              } else {
-                router.push(redirectTo);
+              // Check for inner-circle access as fallback
+              try {
+                const innerCircleResponse = await fetch('/api/inner-circle/access');
+                if (innerCircleResponse.ok) {
+                  const accessData = await innerCircleResponse.json();
+                  if (accessData.hasAccess) {
+                    // Grant inner-circle access even if role is lower
+                    setUser({
+                      id: `inner-circle-${sessionData.user.id || 'access'}`,
+                      email: sessionData.user.email || 'inner-circle@abrahamoflondon.org',
+                      name: 'Inner Circle Member',
+                      role: 'inner-circle' as UserRole,
+                      permissions: getPermissionsForRole('inner-circle'),
+                      membershipDate: new Date().toISOString(),
+                      lastAccess: new Date().toISOString()
+                    });
+                    setAccessChecked(true);
+                    return;
+                  }
+                }
+              } catch (innerCircleError) {
+                // Inner circle check failed, continue with normal flow
               }
             }
-          } else {
-            // Not authenticated
-            router.push(`/login?redirect=${encodeURIComponent(router.asPath)}&tier=${requiredRole}`);
           }
+          
+          // If we get here, user doesn't have required access
+          if (options?.fallbackComponent) {
+            // Use provided fallback
+            setAccessChecked(true);
+          } else {
+            router.push(redirectTo);
+          }
+          
         } catch (error) {
           console.error('Auth check failed:', error);
-          router.push('/login');
+          
+          // Try inner-circle standalone access
+          try {
+            const innerCircleResponse = await fetch('/api/inner-circle/access');
+            if (innerCircleResponse.ok) {
+              const accessData = await innerCircleResponse.json();
+              if (accessData.hasAccess) {
+                // Grant inner-circle access
+                setUser({
+                  id: `inner-circle-guest`,
+                  email: 'inner-circle@abrahamoflondon.org',
+                  name: 'Inner Circle Member',
+                  role: 'inner-circle' as UserRole,
+                  permissions: getPermissionsForRole('inner-circle'),
+                  membershipDate: new Date().toISOString(),
+                  lastAccess: new Date().toISOString()
+                });
+                setAccessChecked(true);
+                return;
+              }
+            }
+          } catch (innerCircleError) {
+            // Continue with error flow
+          }
+          
+          // Redirect to login if all checks failed
+          router.push(`/login?redirect=${encodeURIComponent(router.asPath)}&tier=${requiredRole}`);
         } finally {
           setIsLoading(false);
         }
@@ -73,12 +128,12 @@ export function withInnerCircleAuth<P extends object>(
     if (isLoading) {
       return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
-          <LoadingSpinner message="Verifying inner circle access..." />
+          <LoadingSpinner message="Verifying access..." />
         </div>
       );
     }
 
-    if (!user && options?.fallbackComponent) {
+    if (!accessChecked && options?.fallbackComponent) {
       const Fallback = options.fallbackComponent;
       return <Fallback />;
     }
@@ -90,9 +145,9 @@ export function withInnerCircleAuth<P extends object>(
   return ComponentWithAuth;
 }
 
-// Update permissions function
+// Update permissions function with better typing
 function getPermissionsForRole(role: UserRole): string[] {
-  const basePermissions = {
+  const basePermissions: Record<UserRole, string[]> = {
     'guest': ['content:view:public'],
     'viewer': ['content:view:public', 'pdf:view'],
     'editor': ['content:view:public', 'pdf:view', 'pdf:create', 'pdf:edit'],
@@ -125,3 +180,91 @@ function getPermissionsForRole(role: UserRole): string[] {
 
   return basePermissions[role] || basePermissions.guest;
 }
+
+// Utility function for checking permissions
+export function checkPermission(user: User | undefined, permission: string): boolean {
+  if (!user) return false;
+  return user.permissions.includes(permission) || user.permissions.includes('*');
+}
+
+// Hook version for functional components
+export function useInnerCircleAuth(requiredRole?: UserRole) {
+  const router = useRouter();
+  const [user, setUser] = useState<User>();
+  const [loading, setLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        // Check both auth systems
+        const [sessionResponse, innerCircleResponse] = await Promise.allSettled([
+          fetch('/api/auth/session'),
+          fetch('/api/inner-circle/access')
+        ]);
+
+        let foundUser: User | undefined;
+        let userHasAccess = false;
+
+        // Check NextAuth session
+        if (sessionResponse.status === 'fulfilled' && sessionResponse.value.ok) {
+          const sessionData = await sessionResponse.value.json();
+          if (sessionData?.user) {
+            const userRole = sessionData.user.role as UserRole;
+            const userHierarchy = ROLE_HIERARCHY[userRole] || 0;
+            const requiredHierarchy = ROLE_HIERARCHY[requiredRole || 'inner-circle'] || 0;
+            
+            if (userHierarchy >= requiredHierarchy) {
+              foundUser = {
+                id: sessionData.user.id,
+                email: sessionData.user.email,
+                name: sessionData.user.name,
+                role: userRole,
+                permissions: getPermissionsForRole(userRole),
+                membershipDate: sessionData.user.membershipDate,
+                lastAccess: sessionData.user.lastAccess
+              };
+              userHasAccess = true;
+            }
+          }
+        }
+
+        // Check inner-circle access as fallback
+        if (!userHasAccess && innerCircleResponse.status === 'fulfilled' && innerCircleResponse.value.ok) {
+          const innerCircleData = await innerCircleResponse.value.json();
+          if (innerCircleData.hasAccess) {
+            foundUser = {
+              id: `inner-circle-${foundUser?.id || 'access'}`,
+              email: foundUser?.email || 'inner-circle@abrahamoflondon.org',
+              name: foundUser?.name || 'Inner Circle Member',
+              role: 'inner-circle' as UserRole,
+              permissions: getPermissionsForRole('inner-circle'),
+              membershipDate: new Date().toISOString(),
+              lastAccess: new Date().toISOString()
+            };
+            userHasAccess = true;
+          }
+        }
+
+        setUser(foundUser);
+        setHasAccess(userHasAccess);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAccess();
+  }, [requiredRole]);
+
+  return {
+    user,
+    loading,
+    hasAccess,
+    checkPermission: (permission: string) => checkPermission(user, permission)
+  };
+}
+
+// Export everything
+export default withInnerCircleAuth;

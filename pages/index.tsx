@@ -1,4 +1,5 @@
 // pages/index.tsx — INSTITUTIONAL HOME (FIXED LINKS + STRATEGIC FRAMEWORK STRIP)
+// NOTE: Tailwind-safe classes only (no decimals like h-4.5 / py-4.5)
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
@@ -35,7 +36,6 @@ import {
   Workflow,
 } from "lucide-react";
 
-// Content (server-safe wrapper)
 import { getAllShorts, getDocHref } from "@/lib/contentlayer-compat";
 
 /* -----------------------------------------------------------------------------
@@ -61,12 +61,11 @@ type HomePageProps = {
 
 /* -----------------------------------------------------------------------------
    ROUTES (MUST MATCH REAL PAGES)
-   IMPORTANT: If you do NOT have these pages implemented, they will 404.
 ----------------------------------------------------------------------------- */
 const ROUTES = {
   consulting: "/consulting",
   canon: "/canon",
-  canonVolume1: "/canon/volume-i-foundations-of-purpose", // if this 404s, your canon slug/page is wrong (we will fix canon pages next)
+  canonVolume1: "/canon/volume-i-foundations-of-purpose",
   shorts: "/shorts",
   books: "/books",
   ventures: "/ventures",
@@ -105,7 +104,7 @@ const Pill: React.FC<{ children: React.ReactNode; icon?: React.ReactNode }> = ({
   children,
   icon,
 }) => (
-  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
+  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
     {icon}
     {children}
   </span>
@@ -122,7 +121,9 @@ const Card: React.FC<{
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">
           {title}
         </p>
-        <p className="mt-3.5 text-sm leading-relaxed text-gray-200 font-light">{body}</p>
+        <p className="mt-3.5 text-sm font-light leading-relaxed text-gray-200">
+          {body}
+        </p>
       </div>
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
         {icon}
@@ -146,10 +147,10 @@ const HeroSection: React.FC = () => {
 
       <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pb-24">
         <div className="mb-10 flex flex-wrap gap-3">
-          <Pill icon={<Landmark className="h-3.5 w-3.5" />}>Institutional OS</Pill>
-          <Pill icon={<Target className="h-3.5 w-3.5" />}>Strategy</Pill>
-          <Pill icon={<Scale className="h-3.5 w-3.5" />}>Governance</Pill>
-          <Pill icon={<Workflow className="h-3.5 w-3.5" />}>Execution</Pill>
+          <Pill icon={<Landmark className="h-4 w-4" />}>Institutional OS</Pill>
+          <Pill icon={<Target className="h-4 w-4" />}>Strategy</Pill>
+          <Pill icon={<Scale className="h-4 w-4" />}>Governance</Pill>
+          <Pill icon={<Workflow className="h-4 w-4" />}>Execution</Pill>
         </div>
 
         <div className="grid gap-14 lg:grid-cols-12 lg:items-start">
@@ -165,7 +166,7 @@ const HeroSection: React.FC = () => {
               </span>
             </h1>
 
-            <p className="mb-12 max-w-3xl text-lg leading-relaxed text-gray-200 font-light sm:text-xl lg:text-2xl">
+            <p className="mb-12 max-w-3xl text-lg font-light leading-relaxed text-gray-200 sm:text-xl lg:text-2xl">
               Consulting-grade diagnostics and governance — built for founders,
               leadership teams, and institutions that must survive pressure,
               scrutiny, and scale.
@@ -174,7 +175,7 @@ const HeroSection: React.FC = () => {
             <div className="flex flex-wrap gap-4">
               <Link
                 href={ROUTES.consulting}
-                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-8 py-4.5 text-base font-bold text-black shadow-lg shadow-amber-900/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-amber-900/40"
+                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-8 py-4 text-base font-bold text-black shadow-lg shadow-amber-900/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-amber-900/40"
               >
                 <Briefcase className="h-5 w-5" />
                 Engage Advisory
@@ -183,7 +184,7 @@ const HeroSection: React.FC = () => {
 
               <Link
                 href={ROUTES.canon}
-                className="inline-flex items-center gap-3 rounded-xl border border-amber-400/25 bg-white/5 px-8 py-4.5 text-base font-bold text-amber-100 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-amber-400/45 hover:bg-white/8"
+                className="inline-flex items-center gap-3 rounded-xl border border-amber-400/25 bg-white/5 px-8 py-4 text-base font-bold text-amber-100 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-amber-400/45 hover:bg-white/10"
               >
                 <BookOpen className="h-5 w-5" />
                 Read the Canon
@@ -191,17 +192,17 @@ const HeroSection: React.FC = () => {
               </Link>
             </div>
 
-            <div className="mt-12 flex flex-wrap items-center gap-7 text-sm text-gray-300 font-light">
+            <div className="mt-12 flex flex-wrap items-center gap-7 text-sm font-light text-gray-300">
               <span className="inline-flex items-center gap-2.5">
-                <Shield className="h-4.5 w-4.5 text-amber-300" />
+                <Shield className="h-4 w-4 text-amber-300" />
                 Conviction-led ethics
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <Scale className="h-4.5 w-4.5 text-amber-300" />
+                <Scale className="h-4 w-4 text-amber-300" />
                 Audit-ready governance
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <Workflow className="h-4.5 w-4.5 text-amber-300" />
+                <Workflow className="h-4 w-4 text-amber-300" />
                 Deployment cadence
               </span>
             </div>
@@ -250,7 +251,7 @@ const HeroSection: React.FC = () => {
               <p className="text-base font-medium text-amber-100 sm:text-lg">
                 Blueprint → pressure-test → deploy. Convert strategy into routine.
               </p>
-              <p className="mt-2.5 text-sm text-gray-300 font-light">
+              <p className="mt-2.5 text-sm font-light text-gray-300">
                 Institutional architecture since 2024.
               </p>
             </div>
@@ -300,7 +301,7 @@ const TrustSignals: React.FC = () => {
           <h2 className="mt-6 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
             Built to survive pressure
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-gray-300 font-light">
+          <p className="mx-auto mt-5 max-w-2xl text-lg font-light text-gray-300">
             Repeatable method that holds under cross-examination.
           </p>
         </div>
@@ -315,7 +316,7 @@ const TrustSignals: React.FC = () => {
                 {s.icon}
               </div>
               <h3 className="text-xl font-semibold text-amber-100">{s.title}</h3>
-              <p className="mt-3.5 text-sm leading-relaxed text-gray-300 font-light">
+              <p className="mt-3.5 text-sm font-light leading-relaxed text-gray-300">
                 {s.description}
               </p>
             </div>
@@ -327,7 +328,7 @@ const TrustSignals: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   SERVICE LINES (NOW CLICKABLE)
+   SERVICE LINES (CLICKABLE)
 ----------------------------------------------------------------------------- */
 const ServiceLines: React.FC = () => {
   const lines = [
@@ -374,14 +375,14 @@ const ServiceLines: React.FC = () => {
             <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               A proper consulting spine
             </h2>
-            <p className="mt-5 text-xl text-gray-300 font-light">
+            <p className="mt-5 text-xl font-light text-gray-300">
               We don't "help." We build the decision system that makes help unnecessary.
             </p>
           </div>
 
           <Link
             href={ROUTES.consulting}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
           >
             <span>See engagements</span>
             <ArrowRight className="h-4 w-4" />
@@ -403,10 +404,10 @@ const ServiceLines: React.FC = () => {
                 {l.title}
               </h3>
 
-              <ul className="mt-7 space-y-3.5 text-sm text-gray-300 font-light">
+              <ul className="mt-7 space-y-3.5 text-sm font-light text-gray-300">
                 {l.bullets.map((b) => (
                   <li key={b} className="flex gap-3.5">
-                    <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 flex-shrink-0 text-amber-300" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
                     <span>{b}</span>
                   </li>
                 ))}
@@ -462,14 +463,14 @@ const DeliveryModel: React.FC = () => {
             <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               Method beats motivation.
             </h2>
-            <p className="mt-5 text-xl text-gray-300 font-light">
+            <p className="mt-5 text-xl font-light text-gray-300">
               Your organisation needs cadence that doesn't collapse when the room gets hot.
             </p>
           </div>
 
           <Link
             href={ROUTES.consulting}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
           >
             <span>Engagement formats</span>
             <ArrowRight className="h-4 w-4" />
@@ -485,11 +486,13 @@ const DeliveryModel: React.FC = () => {
               <div className="absolute -right-3 -top-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-sm font-bold text-amber-100">
                 {idx + 1}
               </div>
-              <div className="mb-8 inline-flex h-18 w-18 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
+              <div className="mb-8 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {s.icon}
               </div>
               <h3 className="text-2xl font-semibold text-amber-100">{s.title}</h3>
-              <p className="mt-4 text-sm leading-relaxed text-gray-300 font-light">{s.body}</p>
+              <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">
+                {s.body}
+              </p>
             </div>
           ))}
         </div>
@@ -499,15 +502,35 @@ const DeliveryModel: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   STRATEGIC FRAMEWORK STRIP (THE VALUE REPLACEMENT)
+   STRATEGIC FRAMEWORK STRIP
 ----------------------------------------------------------------------------- */
 const StrategicFrameworkStrip: React.FC = () => {
   const items = [
-    { icon: <Target className="h-6 w-6" />, title: "Mandate", body: "Define mission boundary. No mandate = no strategy." },
-    { icon: <Map className="h-6 w-6" />, title: "Terrain", body: "Market structure, rivals, constraints. Reality first." },
-    { icon: <Scale className="h-6 w-6" />, title: "Choices", body: "Trade-offs written. If it's not written, it isn't real." },
-    { icon: <Workflow className="h-6 w-6" />, title: "Operating System", body: "Decision rights + cadence. Strategy becomes routine." },
-    { icon: <Gauge className="h-6 w-6" />, title: "Governance", body: "Accountability that keeps the machine honest." },
+    {
+      icon: <Target className="h-6 w-6" />,
+      title: "Mandate",
+      body: "Define mission boundary. No mandate = no strategy.",
+    },
+    {
+      icon: <Map className="h-6 w-6" />,
+      title: "Terrain",
+      body: "Market structure, rivals, constraints. Reality first.",
+    },
+    {
+      icon: <Scale className="h-6 w-6" />,
+      title: "Choices",
+      body: "Trade-offs written. If it's not written, it isn't real.",
+    },
+    {
+      icon: <Workflow className="h-6 w-6" />,
+      title: "Operating System",
+      body: "Decision rights + cadence. Strategy becomes routine.",
+    },
+    {
+      icon: <Gauge className="h-6 w-6" />,
+      title: "Governance",
+      body: "Accountability that keeps the machine honest.",
+    },
   ] as const;
 
   return (
@@ -521,7 +544,7 @@ const StrategicFrameworkStrip: React.FC = () => {
             <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               Capacity is proven by method.
             </h2>
-            <p className="mt-5 text-xl text-gray-300 font-light">
+            <p className="mt-5 text-xl font-light text-gray-300">
               Five layers that prevent strategy from collapsing at first contact with reality.
             </p>
           </div>
@@ -529,13 +552,13 @@ const StrategicFrameworkStrip: React.FC = () => {
           <div className="flex flex-wrap gap-3.5">
             <Link
               href={ROUTES.strategy}
-              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-amber-400/30 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
+              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-amber-400/30 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
             >
               Strategy <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={ROUTES.resources}
-              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/8"
+              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
             >
               Resources <ArrowRight className="h-4 w-4" />
             </Link>
@@ -552,7 +575,9 @@ const StrategicFrameworkStrip: React.FC = () => {
                 {it.icon}
               </div>
               <h3 className="text-xl font-semibold text-amber-100">{it.title}</h3>
-              <p className="mt-3.5 text-sm leading-relaxed text-gray-300 font-light">{it.body}</p>
+              <p className="mt-3.5 text-sm font-light leading-relaxed text-gray-300">
+                {it.body}
+              </p>
             </div>
           ))}
         </div>
@@ -575,14 +600,14 @@ const CanonShowcase: React.FC = () => (
           <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
             The blueprint that underwrites the firm
           </h2>
-          <p className="mt-5 text-xl text-gray-300 font-light">
+          <p className="mt-5 text-xl font-light text-gray-300">
             First principles and operating logic — written to last longer than a trend cycle.
           </p>
         </div>
 
         <Link
           href={ROUTES.canon}
-          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
+          className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
         >
           <span>Browse Canon</span>
           <ArrowRight className="h-4 w-4" />
@@ -618,14 +643,14 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
             <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
               Executive notes for builders.
             </h2>
-            <p className="mt-5 text-xl text-gray-300 font-light">
+            <p className="mt-5 text-xl font-light text-gray-300">
               Concise insights that cut through noise and translate into action.
             </p>
           </div>
 
           <Link
             href={ROUTES.shorts}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4.5 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/8"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
           >
             <span>View all shorts</span>
             <ArrowRight className="h-4 w-4" />
@@ -634,20 +659,22 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
 
         <div className="grid gap-8 md:grid-cols-3">
           {shorts.map((short) => {
-            const href = getDocHref(short);
+            const href = getDocHref(short) || "/shorts";
+            const key = short.slug ?? short._raw?.flattenedPath ?? short.title ?? href;
+
             return (
               <Link
-                key={short.slug ?? short._raw?.flattenedPath ?? short.title ?? href}
+                key={key}
                 href={href}
-                className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/30 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-amber-500/5"
+                className="group rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/30 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-amber-500/5"
               >
                 <div className="mb-7 flex items-center justify-between">
                   <span className="inline-flex items-center gap-2.5 rounded-full bg-amber-500/10 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
-                    <Sparkles className="h-3.5 w-3.5" />
+                    <Sparkles className="h-4 w-4" />
                     Field note
                   </span>
                   <span className="flex items-center gap-2 text-xs font-medium text-gray-400">
-                    <Clock className="h-3.5 w-3.5" />
+                    <Clock className="h-4 w-4" />
                     {short.readTime ?? "3 min"}
                   </span>
                 </div>
@@ -655,14 +682,14 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
                 <h3 className="mb-4 line-clamp-2 font-serif text-2xl font-semibold text-amber-100">
                   {short.title}
                 </h3>
-                <p className="line-clamp-3 text-sm leading-relaxed text-gray-300 font-light">
+                <p className="line-clamp-3 text-sm font-light leading-relaxed text-gray-300">
                   {short.excerpt || short.description}
                 </p>
 
                 <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-7">
                   <span className="text-sm font-medium text-gray-400">Read analysis</span>
                   <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/5 transition-all duration-300 group-hover:border-amber-400/40 group-hover:bg-amber-500/10">
-                    <ArrowRight className="h-5 w-5 text-amber-200 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="h-5 w-5 text-amber-200 transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>
@@ -690,7 +717,7 @@ const StrategicSessions: React.FC = () => (
           deployable systems
         </span>
       </h2>
-      <p className="mx-auto mt-7 max-w-2xl text-xl text-gray-300 font-light">
+      <p className="mx-auto mt-7 max-w-2xl text-xl font-light text-gray-300">
         Diagnose, decide, deploy — with governance and cadence that stick.
       </p>
 
@@ -706,7 +733,7 @@ const StrategicSessions: React.FC = () => (
 
         <Link
           href={`${ROUTES.consulting}#offer`}
-          className="inline-flex items-center justify-center gap-3.5 rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/25 hover:bg-white/8"
+          className="inline-flex items-center justify-center gap-3.5 rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/25 hover:bg-white/10"
         >
           <span>View offer</span>
           <ChevronRight className="h-5 w-5" />
@@ -755,10 +782,9 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
         <SectionDivider />
         <DeliveryModel />
-        
-        {/* REPLACEMENT: Strategic value strip (instead of "0+" tiles) */}
+
         <SectionDivider withOrnament={false} />
-        <StrategicFrameworkStrip /> {/* ✅ This component is now rendered */}
+        <StrategicFrameworkStrip />
 
         <SectionDivider />
         <CanonShowcase />
@@ -794,9 +820,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
     return { props: { featuredShorts }, revalidate: 3600 };
   } catch (error) {
-    // ✅ Gracefully handle the error: log it and return empty props.
     console.error("Error fetching shorts for homepage:", error);
-    // Return empty featuredShorts to allow the page to render.
     return { props: { featuredShorts: [] }, revalidate: 3600 };
   }
 };

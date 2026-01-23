@@ -1,51 +1,90 @@
 // components/PDFDashboard/StatusMessage.tsx
-import React, { useEffect } from 'react';
+import React from "react";
 
-interface StatusMessageProps {
+export type StatusType = "success" | "error" | "info" | "warning";
+
+export interface StatusMessageProps {
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: StatusType;
+  details?: string;
+  progress?: number;
+  actionLabel?: string;
+  onAction?: () => void;
   onDismiss?: () => void;
-  autoDismiss?: number;
+  autoDismiss?: boolean;
+  dismissAfter?: number;
+}
+
+function tone(type: StatusType) {
+  switch (type) {
+    case "success":
+      return "border-green-700/40 bg-green-900/20 text-green-100";
+    case "error":
+      return "border-red-700/40 bg-red-900/20 text-red-100";
+    case "warning":
+      return "border-yellow-700/40 bg-yellow-900/20 text-yellow-100";
+    case "info":
+    default:
+      return "border-blue-700/40 bg-blue-900/20 text-blue-100";
+  }
 }
 
 export const StatusMessage: React.FC<StatusMessageProps> = ({
   message,
   type,
+  details,
+  progress,
+  actionLabel,
+  onAction,
   onDismiss,
-  autoDismiss = 3000,
+  autoDismiss = false,
+  dismissAfter = 5000,
 }) => {
-  useEffect(() => {
-    if (autoDismiss && onDismiss && type !== 'error') {
-      const timer = setTimeout(onDismiss, autoDismiss);
-      return () => clearTimeout(timer);
-    }
-  }, [autoDismiss, onDismiss, type]);
-
-  const getStyles = () => {
-    switch (type) {
-      case 'success':
-        return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
-      case 'error':
-        return 'bg-rose-500/10 border-rose-500/20 text-rose-400';
-      case 'info':
-        return 'bg-amber-500/10 border-amber-500/20 text-amber-400';
-    }
-  };
+  React.useEffect(() => {
+    if (!autoDismiss || !onDismiss) return;
+    const t = setTimeout(onDismiss, dismissAfter);
+    return () => clearTimeout(t);
+  }, [autoDismiss, dismissAfter, onDismiss]);
 
   return (
-    <div className={`mb-6 rounded-xl p-4 text-sm font-medium border ${getStyles()}`}>
-      <div className="flex items-center justify-between">
-        <span>{message}</span>
-        {onDismiss && (
-          <button
-            onClick={onDismiss}
-            className="ml-4 text-xs opacity-70 hover:opacity-100"
-            aria-label="Dismiss message"
-          >
-            ✕
-          </button>
-        )}
+    <div className={`mt-4 rounded-xl border p-4 ${tone(type)}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="font-medium">{message}</div>
+          {details ? <div className="mt-1 text-xs opacity-80 whitespace-pre-wrap">{details}</div> : null}
+          {typeof progress === "number" ? (
+            <div className="mt-3">
+              <div className="h-2 w-full rounded bg-black/20 overflow-hidden">
+                <div className="h-2 rounded bg-white/40" style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
+              </div>
+              <div className="mt-1 text-xs opacity-70">{progress}%</div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {actionLabel && onAction ? (
+            <button
+              type="button"
+              onClick={onAction}
+              className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition"
+            >
+              {actionLabel}
+            </button>
+          ) : null}
+          {onDismiss ? (
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition"
+            >
+              Dismiss
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );
 };
+
+StatusMessage.displayName = "StatusMessage";

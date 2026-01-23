@@ -1,56 +1,58 @@
-// Centralised content exports - Contentlayer-based Adapter
-// Adapts the Enterprise Helper v5.0.0 to the application's legacy API surface
-
+// lib/content.ts - FIXED VERSION
 import ContentHelper, {
   // Types
-  type ContentDoc,
+  type ContentDoc as CompatContentDoc,
+  type StrictContentDoc,
   type DocKind,
   
   // Core Functions
-  getAllDocuments, // This returns published docs in v5.0.0
+  getAllDocuments as compatGetAllDocuments,
   getDocumentBySlug,
   getCardProps,
   getDocKind,
+  getAccessLevel,
+  toStrictContentDoc,
   
-  // Specific Getters (These return published docs in v5.0.0)
-  getAllPosts,
-  getAllBooks,
-  getAllDownloads,
-  getAllEvents,
-  getAllPrints,
-  getAllResources,
-  getAllStrategies,
-  getAllCanons,
-  getAllShorts,
+  // Specific Getters
+  getAllPosts as compatGetAllPosts,
+  getAllBooks as compatGetAllBooks,
+  getAllDownloads as compatGetAllDownloads,
+  getAllEvents as compatGetAllEvents,
+  getAllPrints as compatGetAllPrints,
+  getAllResources as compatGetAllResources,
+  getAllStrategies as compatGetAllStrategies,
+  getAllCanons as compatGetAllCanons,
+  getAllShorts as compatGetAllShorts,
 } from "@/lib/contentlayer";
 
 // ============================================
 // TYPE DEFINITIONS
 // ============================================
 
-// Re-export types from the source of truth to prevent mismatches
-export type { ContentDoc, DocKind };
+// These 'export type' statements are the correct way to share types 🏷️
+export type ContentDoc = StrictContentDoc;
+export type { DocKind };
 export type AccessLevel = 'public' | 'private' | 'restricted';
-
-// Backward compatibility types
 export type AnyDoc = ContentDoc;
 export type ContentlayerCardProps = ReturnType<typeof getCardProps>;
 
 // ============================================
-// LOCAL UTILITIES (Re-implemented for safety)
+// LOCAL UTILITIES
 // ============================================
 
 export const isDraft = (doc: ContentDoc): boolean => {
-  return doc.draft === true || doc.draft === "true";
+  const draftValue = doc.draft;
+  return draftValue === true;
 };
 
 export const isPublic = (doc: ContentDoc): boolean => {
-  return !doc.accessLevel || doc.accessLevel === 'public';
+  const level = getAccessLevel(doc);
+  return level === 'public';
 };
 
 export const isContentlayerLoaded = (): boolean => {
   try {
-    const docs = getAllDocuments();
+    const docs = compatGetAllDocuments();
     return Array.isArray(docs) && docs.length > 0;
   } catch {
     return false;
@@ -69,68 +71,74 @@ export const isCanon = (doc: ContentDoc): boolean => getDocKind(doc) === "canon"
 export const isShort = (doc: ContentDoc): boolean => getDocKind(doc) === "short";
 
 // ============================================
-// DOCUMENT GETTERS (Mapped to v5.0.0 Helper)
+// DOCUMENT GETTERS
 // ============================================
 
-// General
+const convertToStrict = (doc: CompatContentDoc): ContentDoc => {
+  return toStrictContentDoc(doc);
+};
+
+const convertAllToStrict = (docs: CompatContentDoc[]): ContentDoc[] => {
+  return docs.map(convertToStrict);
+};
+
 export const getPublishedDocuments = (): ContentDoc[] => {
-  if (!isContentlayerLoaded()) return [];
-  return getAllDocuments(); // v5.0.0 getAllDocuments already filters published
+  const docs = compatGetAllDocuments();
+  return convertAllToStrict(docs);
 };
 
 export const getAllContentlayerDocs = getPublishedDocuments;
 
-// Type-Specific (Mapping "getPublishedX" to "getAllX" from helper)
-export const getPublishedPosts = (limit?: number) => {
-  const docs = getAllPosts();
-  return limit ? docs.slice(0, limit) : docs;
+export const getPublishedPosts = (limit?: number): ContentDoc[] => {
+  const docs = compatGetAllPosts();
+  const processed = convertAllToStrict(docs);
+  return limit ? processed.slice(0, limit) : processed;
 };
 
-export const getPublishedShorts = (limit?: number) => {
-  const docs = getAllShorts();
-  return limit ? docs.slice(0, limit) : docs;
+export const getPublishedShorts = (limit?: number): ContentDoc[] => {
+  const docs = compatGetAllShorts();
+  const processed = convertAllToStrict(docs);
+  return limit ? processed.slice(0, limit) : processed;
 };
 
-export const getRecentBooks = (limit?: number) => {
-  const docs = getAllBooks();
-  return limit ? docs.slice(0, limit) : docs;
+export const getRecentBooks = (limit?: number): ContentDoc[] => {
+  const docs = compatGetAllBooks();
+  const processed = convertAllToStrict(docs);
+  return limit ? processed.slice(0, limit) : processed;
 };
 
-// Passthroughs for getters that match name
-export { 
-  getAllBooks, 
-  getAllDownloads, 
-  getAllEvents, 
-  getAllPrints, 
-  getAllResources, 
-  getAllStrategies, 
-  getAllCanons 
-};
+export const getAllBooks = (): ContentDoc[] => convertAllToStrict(compatGetAllBooks());
+export const getAllDownloads = (): ContentDoc[] => convertAllToStrict(compatGetAllDownloads());
+export const getAllEvents = (): ContentDoc[] => convertAllToStrict(compatGetAllEvents());
+export const getAllPrints = (): ContentDoc[] => convertAllToStrict(compatGetAllPrints());
+export const getAllResources = (): ContentDoc[] => convertAllToStrict(compatGetAllResources());
+export const getAllStrategies = (): ContentDoc[] => convertAllToStrict(compatGetAllStrategies());
+export const getAllCanons = (): ContentDoc[] => convertAllToStrict(compatGetAllCanons());
+export const getAllShorts = (): ContentDoc[] => convertAllToStrict(compatGetAllShorts());
 
 // ============================================
-// FEATURED CONTENT (Logic moved here)
+// FEATURED CONTENT
 // ============================================
 
 export const getFeaturedDocuments = (kind?: DocKind, limit?: number): ContentDoc[] => {
   if (!isContentlayerLoaded()) return [];
   
-  let docs: ContentDoc[] = [];
+  let docs: CompatContentDoc[] = [];
   
   if (kind) {
-    // Dynamically fetch based on kind using the Helper's aliases
-    // or fallback to filtering all docs (slower but safer)
     const specificGetter = (ContentHelper as any)[`getAll${kind.charAt(0).toUpperCase() + kind.slice(1)}s`];
     if (typeof specificGetter === 'function') {
       docs = specificGetter();
     } else {
-      docs = getAllDocuments().filter(d => getDocKind(d) === kind);
+      docs = compatGetAllDocuments().filter(d => getDocKind(d) === kind);
     }
   } else {
-    docs = getAllDocuments();
+    docs = compatGetAllDocuments();
   }
 
   const featured = docs.filter(doc => doc.featured === true);
-  return limit ? featured.slice(0, limit) : featured;
+  const processed = convertAllToStrict(featured);
+  return limit ? processed.slice(0, limit) : processed;
 };
 
 export const getFeaturedDocumentsByType = (kind: DocKind, limit?: number): ContentDoc[] => {
@@ -141,40 +149,73 @@ export const getFeaturedDocumentsByType = (kind: DocKind, limit?: number): Conte
 // SLUG RESOLUTION
 // ============================================
 
-export { getDocumentBySlug }; // v5.0.0 helper exports a robust version of this
+export { getDocumentBySlug };
 
-// Convenience wrappers for specific types
-export const getPostBySlug = (slug: string) => ContentHelper.getDocumentBySlug('post', slug);
-export const getBookBySlug = (slug: string) => ContentHelper.getDocumentBySlug('book', slug);
-export const getDownloadBySlug = (slug: string) => ContentHelper.getDocumentBySlug('download', slug);
-export const getEventBySlug = (slug: string) => ContentHelper.getDocumentBySlug('event', slug);
-export const getPrintBySlug = (slug: string) => ContentHelper.getDocumentBySlug('print', slug);
-export const getResourceBySlug = (slug: string) => ContentHelper.getDocumentBySlug('resource', slug);
-export const getStrategyBySlug = (slug: string) => ContentHelper.getDocumentBySlug('strategy', slug);
-export const getCanonBySlug = (slug: string) => ContentHelper.getDocumentBySlug('canon', slug);
-export const getShortBySlug = (slug: string) => ContentHelper.getDocumentBySlug('short', slug);
+export const getPostBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('post', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getBookBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('book', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getDownloadBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('download', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getEventBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('event', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getPrintBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('print', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getResourceBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('resource', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getStrategyBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('strategy', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getCanonBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('canon', slug);
+  return doc ? convertToStrict(doc) : null;
+};
+
+export const getShortBySlug = (slug: string): ContentDoc | null => {
+  const doc = ContentHelper.getDocumentBySlug('short', slug);
+  return doc ? convertToStrict(doc) : null;
+};
 
 // ============================================
 // UI & DISPLAY
 // ============================================
 
-export const getCardPropsForDocument = (doc: ContentDoc): ContentlayerCardProps => {
-  return getCardProps(doc);
-};
+export const getCardPropsForDocument = getCardProps;
 
 // ============================================
 // UTILITIES
 // ============================================
 
 export const getRecentDocuments = (limit: number = 10, kind?: DocKind): ContentDoc[] => {
-  let documents = getPublishedDocuments();
+  let documents = compatGetAllDocuments();
   
   if (kind) {
     documents = documents.filter(doc => getDocKind(doc) === kind);
   }
   
-  // v5.0.0 helper returns collections already sorted by date, but strictly ensuring here
-  return documents
+  const processed = convertAllToStrict(documents);
+  
+  return processed
     .sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
@@ -202,7 +243,7 @@ export const getDocumentsForSitemap = () => {
   return getPublishedDocuments().map(doc => {
     const card = getCardProps(doc);
     return {
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://abrahamoflondon.com'}${card.href}`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://abrahamoflondon.org'}${card.href}`,
       lastModified: doc.date,
       changeFrequency: 'weekly' as const,
       priority: doc.featured ? 0.8 : 0.5,
@@ -210,3 +251,60 @@ export const getDocumentsForSitemap = () => {
   });
 };
 
+// ============================================
+// DEFAULT EXPORT (Values only! 🛠️)
+// ============================================
+
+export default {
+  // Utilities
+  isDraft,
+  isPublic,
+  isContentlayerLoaded,
+  
+  // Type Guards
+  isPost,
+  isBook,
+  isDownload,
+  isEvent,
+  isCanon,
+  isShort,
+  
+  // Document Getters
+  getPublishedDocuments,
+  getAllContentlayerDocs,
+  getPublishedPosts,
+  getPublishedShorts,
+  getRecentBooks,
+  getAllBooks,
+  getAllDownloads,
+  getAllEvents,
+  getAllPrints,
+  getAllResources,
+  getAllStrategies,
+  getAllCanons,
+  getAllShorts,
+  
+  // Featured Content
+  getFeaturedDocuments,
+  getFeaturedDocumentsByType,
+  
+  // Slug Resolution
+  getDocumentBySlug,
+  getPostBySlug,
+  getBookBySlug,
+  getDownloadBySlug,
+  getEventBySlug,
+  getPrintBySlug,
+  getResourceBySlug,
+  getStrategyBySlug,
+  getCanonBySlug,
+  getShortBySlug,
+  
+  // UI & Display
+  getCardPropsForDocument,
+  
+  // Utilities
+  getRecentDocuments,
+  getUniqueTags,
+  getDocumentsForSitemap,
+};

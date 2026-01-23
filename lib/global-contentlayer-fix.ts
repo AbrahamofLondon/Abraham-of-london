@@ -1,6 +1,11 @@
-// lib/global-contentlayer-fix.ts
+/* lib/global-contentlayer-fix.ts - GLOBAL HYDRATION GUARD */
 
-// Declare global function
+// Extend the global type definition
+declare global {
+  var getContentlayerData: () => Promise<any>;
+}
+
+// Declare global function for Node.js environment
 if (typeof global !== 'undefined' && !global.getContentlayerData) {
   global.getContentlayerData = async () => {
     try {
@@ -17,7 +22,7 @@ if (typeof global !== 'undefined' && !global.getContentlayerData) {
   };
 }
 
-// Also add to window for browser context
+// Ensure window context for browser-side safety
 if (typeof window !== 'undefined') {
   (window as any).getContentlayerData = async () => ({
     available: false,
@@ -26,3 +31,5 @@ if (typeof window !== 'undefined') {
     types: []
   });
 }
+
+export {};

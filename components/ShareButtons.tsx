@@ -2,38 +2,44 @@
 
 import React, { useState } from 'react';
 
-interface ShareButtonsProps {
+export interface ShareButtonsProps {
   url: string;
   title: string;
-  excerpt: string;
+  excerpt?: string; // Made optional to satisfy varying content types
+  className?: string; // Added to resolve the "Property does not exist" build error
 }
 
-const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title, excerpt }) => {
+const ShareButtons: React.FC<ShareButtonsProps> = ({ 
+  url, 
+  title, 
+  excerpt = 'Strategic intelligence from Abraham of London', // Default fallback
+  className = "" 
+}) => {
   const [copied, setCopied] = useState(false);
 
   const shareConfig = [
     {
       name: 'Twitter',
       icon: TwitterIcon,
-      color: 'bg-blue-400 hover:bg-blue-500',
+      color: 'bg-[#1DA1F2] hover:bg-[#1a91da]', // Exact brand colors
       shareUrl: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
     },
     {
       name: 'LinkedIn',
       icon: LinkedInIcon,
-      color: 'bg-blue-700 hover:bg-blue-800',
+      color: 'bg-[#0077b5] hover:bg-[#006396]',
       shareUrl: `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(excerpt)}`,
     },
     {
       name: 'Facebook',
       icon: FacebookIcon,
-      color: 'bg-blue-600 hover:bg-blue-700',
+      color: 'bg-[#1877F2] hover:bg-[#166fe5]',
       shareUrl: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
     },
     {
       name: 'Email',
       icon: MailIcon,
-      color: 'bg-gray-600 hover:bg-gray-700',
+      color: 'bg-zinc-700 hover:bg-zinc-800',
       shareUrl: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${excerpt}\n\n${url}`)}`,
     },
   ];
@@ -49,35 +55,34 @@ const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title, excerpt }) => {
   };
 
   return (
-    <div className="share-buttons">
-      <h4 className="text-lg font-semibold text-gray-900 mb-4">Share this content</h4>
-      <div className="flex flex-wrap gap-3">
+    <div className={`share-buttons ${className}`}>
+      <div className="flex flex-wrap gap-2">
         {shareConfig.map((platform) => (
           <a
             key={platform.name}
             href={platform.shareUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${platform.color} text-white p-3 rounded-full transition-colors`}
+            className={`${platform.color} text-white p-2.5 rounded-full transition-all duration-200 hover:scale-110 shadow-sm`}
             aria-label={`Share on ${platform.name}`}
           >
-            <platform.icon className="w-5 h-5" />
+            <platform.icon className="w-4 h-4" />
           </a>
         ))}
         
         <button
           onClick={copyToClipboard}
-          className={`p-3 rounded-full transition-colors ${
+          className={`p-2.5 rounded-full transition-all duration-200 hover:scale-110 shadow-sm ${
             copied
-              ? 'bg-green-500 hover:bg-green-600 text-white'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              ? 'bg-emerald-500 text-white'
+              : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-700'
           }`}
           aria-label="Copy link"
         >
           {copied ? (
-            <CheckIcon className="w-5 h-5" />
+            <CheckIcon className="w-4 h-4" />
           ) : (
-            <LinkIcon className="w-5 h-5" />
+            <LinkIcon className="w-4 h-4" />
           )}
         </button>
       </div>
@@ -85,9 +90,13 @@ const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title, excerpt }) => {
   );
 };
 
+/* -------------------------------------------------------------------------- */
+/* BRAND ICONS (Optimized for Design Fidelity)                                */
+/* -------------------------------------------------------------------------- */
+
 const TwitterIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
   </svg>
 );
 

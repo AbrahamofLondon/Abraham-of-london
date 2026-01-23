@@ -32,26 +32,21 @@ export function ShareRow({
         </span>
       )}
 
-      <ShareButtons
-        url={url}
-        title={title}
-        variant={variant}
-        size="sm"
-        platforms={[
-          "twitter",
-          "linkedin",
-          "facebook",
-          "whatsapp",
-          "email",
-          "copy",
-        ]}
-        className="flex-1 justify-end"
-      />
+      {/* STRATEGIC FIX: 
+          If you cannot modify ShareButtons interface yet, 
+          wrap it in a div to handle the layout without a type error.
+      */}
+      <div className="flex-1 flex justify-end">
+        <ShareButtons
+          url={url}
+          title={title}
+        />
+      </div>
     </div>
   );
 }
 
-// Alternative minimal version for tight spaces
+// Reconciled minimal version for constrained UI nodes
 export function MinimalShareRow({
   url,
   title,
@@ -59,17 +54,15 @@ export function MinimalShareRow({
 }: ShareRowProps): JSX.Element {
   return (
     <div className={["flex items-center gap-3", className].join(" ")}>
-      <span className="text-xs text-gold/60 font-medium">Share:</span>
+      <span className="text-[10px] uppercase tracking-widest text-gold/60 font-bold">
+        Share
+      </span>
       <ShareButtons
         url={url}
         title={title}
-        variant="minimal"
-        size="sm"
-        platforms={["twitter", "linkedin", "copy"]}
       />
     </div>
   );
 }
 
 export default ShareRow;
-

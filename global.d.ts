@@ -27,7 +27,7 @@ declare module "next/dynamic" {
   export default dynamic;
 }
 
-// Fix for next-mdx-remote
+// Fix for next-mdx-remote - CORRECTED
 declare module "next-mdx-remote" {
   import type { ComponentType } from "react";
   
@@ -37,8 +37,8 @@ declare module "next-mdx-remote" {
     frontmatter?: Record<string, unknown>;
   }
   
-  export interface MDXRemoteProps {
-    source: MDXRemoteSerializeResult;
+  // FIXED: MDXRemoteProps should spread MDXRemoteSerializeResult
+  export interface MDXRemoteProps extends MDXRemoteSerializeResult {
     components?: RelaxedPartial<Record<string, ComponentType<any>>>;
     lazy?: boolean;
   }

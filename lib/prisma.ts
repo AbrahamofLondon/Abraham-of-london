@@ -1,5 +1,5 @@
-// lib/prisma.ts - CLEAN WORKING VERSION
-import { PrismaClient } from "@prisma/client";
+// lib/prisma.ts - UPDATED IMPORT
+import { PrismaClient } from ".prisma/client"; // CHANGED: Added dot
 
 declare global {
   // eslint-disable-next-line no-var

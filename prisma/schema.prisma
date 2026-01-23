@@ -1,10 +1,11 @@
-// prisma/schema.prisma
+// prisma/schema.prisma - CORRECTED FULL SCHEMA
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -151,6 +152,25 @@ model ApiRateLimit {
   @@index([windowEnd], name: "api_rate_limits_window_end_idx")
 }
 
+model ApiLog {
+  id           String   @id @default(cuid())
+  endpoint     String
+  method       String
+  statusCode   Int
+  userAgent    String?
+  ipAddress    String?
+  responseTime Int      @default(0)
+  metadata     String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([endpoint])
+  @@index([method])
+  @@index([createdAt])
+  @@index([statusCode])
+  @@index([ipAddress])
+}
+
 model ContentMetadata {
   id                String   @id @default(cuid())
   slug              String   @unique
@@ -175,26 +195,25 @@ model ContentMetadata {
 
 model SystemAuditLog {
   id           String   @id @default(cuid())
-  actorType    String
+  actorType    String   @default("system")
   actorId      String?
   actorEmail   String?
   ipAddress    String?
   action       String
-  resourceType String
+  resourceType String   @default("system")
   resourceId   String?
-  oldValue     String?
-  newValue     String?
+  resourceName String?
   userAgent    String?
   requestId    String?
   sessionId    String?
   status       String   @default("success")
-  severity     String?  @default("low")
+  severity     String   @default("info")
   errorMessage String?
   durationMs   Int?
-  metadata     String?
+  metadata     String?  @db.Text
   category     String?
   subCategory  String?
-  tags         String?
+  tags         String?  @db.Text
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

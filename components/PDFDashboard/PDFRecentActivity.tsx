@@ -12,8 +12,9 @@ export const PDFRecentActivity: React.FC<PDFRecentActivityProps> = ({
   pdfs,
   onSelectPDF,
 }) => {
+  // FIX: Use generatedAt instead of lastGenerated
   const recentPDFs = [...pdfs]
-    .sort((a, b) => new Date(b.lastGenerated || 0).getTime() - new Date(a.lastGenerated || 0).getTime())
+    .sort((a, b) => new Date(b.generatedAt || 0).getTime() - new Date(a.generatedAt || 0).getTime())
     .slice(0, 5);
 
   const formatTimeAgo = (dateString?: string) => {
@@ -61,8 +62,9 @@ export const PDFRecentActivity: React.FC<PDFRecentActivityProps> = ({
                   {pdf.title}
                 </span>
               </div>
+              {/* FIX: Use generatedAt instead of lastGenerated */}
               <span className="text-xs text-gray-500 shrink-0 ml-2">
-                {formatTimeAgo(pdf.lastGenerated)}
+                {formatTimeAgo(pdf.generatedAt)}
               </span>
             </div>
             {pdf.description && (

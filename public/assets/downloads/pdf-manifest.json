@@ -1,0 +1,317 @@
+{
+  "generatedAt": "2026-01-23T12:06:24.032Z",
+  "total": 29,
+  "available": 29,
+  "byTier": {
+    "free": 27,
+    "architect": 1,
+    "public": 1
+  },
+  "byCategory": {
+    "Vault": 2,
+    "organizational": 2,
+    "Brotherhood": 2,
+    "downloads": 7,
+    "leadership": 2,
+    "legacy": 4,
+    "Business": 2,
+    "Entrepreneurship": 1,
+    "Family": 1,
+    "Leadership": 3,
+    "Frameworks": 1,
+    "Fatherhood": 1,
+    "Faith": 1
+  },
+  "files": [
+    {
+      "id": "abraham-vault-pack",
+      "title": "Abraham Vault — Strategic Artifacts Pack",
+      "path": "/assets/downloads/content-downloads/abraham-vault-pack.pdf",
+      "size": "2.0 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Vault",
+      "type": "Download"
+    },
+    {
+      "id": "board-decision-log-template",
+      "title": "Board Decision Log Template",
+      "path": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
+      "size": "1.6 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "organizational",
+      "type": "Download"
+    },
+    {
+      "id": "board-investor-onepager",
+      "title": "Board & Investor One-Pager Template",
+      "path": "/assets/downloads/content-downloads/board-investor-onepager.pdf",
+      "size": "1.5 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "organizational",
+      "type": "Download"
+    },
+    {
+      "id": "brotherhood-covenant",
+      "title": "Brotherhood Covenant",
+      "path": "/assets/downloads/content-downloads/brotherhood-covenant.pdf",
+      "size": "2.9 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Brotherhood",
+      "type": "Download"
+    },
+    {
+      "id": "canon-volume-iv-diagnostic-toolkit",
+      "title": "Canon Volume IV - Culture-Decadence Diagnostic Toolkit",
+      "path": "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "size": "1.1 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "downloads",
+      "type": "Download"
+    },
+    {
+      "id": "canon-volume-v-governance-diagnostic-toolkit",
+      "title": "Canon Volume V - Governance Diagnostic Toolkit",
+      "path": "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "size": "1.1 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "leadership",
+      "type": "Download"
+    },
+    {
+      "id": "communication-script-bpf",
+      "title": "Brotherhood Communication Script",
+      "path": "/assets/downloads/content-downloads/communication-script-bpf.pdf",
+      "size": "3.0 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Brotherhood",
+      "type": "Download"
+    },
+    {
+      "id": "decision-log-template",
+      "title": "Decision Log Template",
+      "path": "/assets/downloads/lib-pdf/decision-log-template.pdf",
+      "size": "336.2 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "downloads",
+      "type": "tool"
+    },
+    {
+      "id": "decision-matrix-scorecard",
+      "title": "Decision Matrix Scorecard",
+      "path": "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
+      "size": "1.7 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "downloads",
+      "type": "Download"
+    },
+    {
+      "id": "download-legacy-architecture-canvas",
+      "title": "The Legacy Architecture Canvas",
+      "path": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+      "size": "3.1 KB",
+      "exists": true,
+      "tier": "architect",
+      "category": "legacy",
+      "type": "Download"
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "title": "Entrepreneur Operating Pack",
+      "path": "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
+      "size": "3.1 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Business",
+      "type": "Download"
+    },
+    {
+      "id": "entrepreneur-survival-checklist",
+      "title": "Entrepreneurial Survival Checklist",
+      "path": "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
+      "size": "3.1 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Entrepreneurship",
+      "type": "Download"
+    },
+    {
+      "id": "family-altar-liturgy",
+      "title": "Family Altar Liturgy",
+      "path": "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
+      "size": "3.0 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Family",
+      "type": "Download"
+    },
+    {
+      "id": "leaders-cue-card-two-up",
+      "title": "Leader's Cue Card (Two Up)",
+      "path": "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
+      "size": "2.3 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Leadership",
+      "type": "Download"
+    },
+    {
+      "id": "leadership-playbook",
+      "title": "The Leadership Playbook",
+      "path": "/assets/downloads/content-downloads/leadership-playbook.pdf",
+      "size": "3.0 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Leadership",
+      "type": "Download"
+    },
+    {
+      "id": "legacy-canvas",
+      "title": "The Legacy Architecture Canvas",
+      "path": "/assets/downloads/content-downloads/legacy-canvas.pdf",
+      "size": "3.1 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "legacy",
+      "type": "Download"
+    },
+    {
+      "id": "life-alignment-assessment",
+      "title": "THE PRINCIPLES OF SURRENDER FRAMEWORK",
+      "path": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
+      "size": "92.0 KB",
+      "exists": true,
+      "tier": "public",
+      "category": "Frameworks",
+      "type": "Download"
+    },
+    {
+      "id": "mentorship-starter-kit",
+      "title": "Mentorship Starter Kit",
+      "path": "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
+      "size": "2.2 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "leadership",
+      "type": "Download"
+    },
+    {
+      "id": "operating-cadence-pack",
+      "title": "Operating Cadence Pack",
+      "path": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
+      "size": "1.6 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "downloads",
+      "type": "Download"
+    },
+    {
+      "id": "principles-for-my-son-cue-card",
+      "title": "Principles for My Son - Cue Card",
+      "path": "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
+      "size": "2.3 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Fatherhood",
+      "type": "Download"
+    },
+    {
+      "id": "principles-for-my-son",
+      "title": "Principles for My Son",
+      "path": "/assets/downloads/content-downloads/principles-for-my-son.pdf",
+      "size": "3.0 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "legacy",
+      "type": "Download"
+    },
+    {
+      "id": "purpose-pyramid-worksheet",
+      "title": "Purpose Pyramid Worksheet",
+      "path": "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
+      "size": "1.1 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Vault",
+      "type": "Download"
+    },
+    {
+      "id": "scripture-track-john14",
+      "title": "Scripture Track - John 14",
+      "path": "/assets/downloads/content-downloads/scripture-track-john14.pdf",
+      "size": "3.0 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Faith",
+      "type": "Download"
+    },
+    {
+      "id": "standards-brief",
+      "title": "Standards Brief",
+      "path": "/assets/downloads/content-downloads/standards-brief.pdf",
+      "size": "2.8 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Leadership",
+      "type": "Download"
+    },
+    {
+      "id": "ultimate-purpose-of-man-editorial",
+      "title": "Ultimate Purpose Of Man Editorial",
+      "path": "/assets/downloads/lib-pdf/ultimate-purpose-of-man-editorial.pdf",
+      "size": "2.3 MB",
+      "exists": true,
+      "tier": "free",
+      "category": "downloads",
+      "type": "editorial"
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "title": "Weekly Operating Rhythm & Daily Blocks",
+      "path": "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
+      "size": "2.8 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "Business",
+      "type": "Download"
+    },
+    {
+      "id": "decision-matrix-scorecard-fillable",
+      "title": "Decision Matrix Scorecard Fillable",
+      "path": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
+      "size": "35.8 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "downloads",
+      "type": "tool"
+    },
+    {
+      "id": "legacy-canvas-fillable",
+      "title": "Legacy Canvas Fillable",
+      "path": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
+      "size": "10.5 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "legacy",
+      "type": "canvas"
+    },
+    {
+      "id": "purpose-pyramid-worksheet-fillable",
+      "title": "Purpose Pyramid Worksheet Fillable",
+      "path": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
+      "size": "19.8 KB",
+      "exists": true,
+      "tier": "free",
+      "category": "downloads",
+      "type": "worksheet"
+    }
+  ]
+}

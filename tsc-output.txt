@@ -1,0 +1,8 @@
+scripts/generate-premium-pdfs.tsx(499,20): error TS1127: Invalid character.
+scripts/generate-premium-pdfs.tsx(499,21): error TS1127: Invalid character.
+scripts/generate-premium-pdfs.tsx(499,35): error TS1005: ',' expected.
+scripts/generate-premium-pdfs.tsx(499,41): error TS1005: ',' expected.
+scripts/generate-premium-pdfs.tsx(499,50): error TS1005: ',' expected.
+scripts/generate-premium-pdfs.tsx(499,56): error TS1005: ',' expected.
+scripts/generate-premium-pdfs.tsx(499,75): error TS1002: Unterminated string literal.
+scripts/generate-premium-pdfs.tsx(500,5): error TS1005: ',' expected.

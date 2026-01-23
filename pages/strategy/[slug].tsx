@@ -1,4 +1,3 @@
-// pages/strategy/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -27,8 +26,6 @@ import SafeMDXRemote from "@/components/SafeMDXRemote";
 import {
   getContentlayerData,
   isDraftContent,
-  normalizeSlug,
-  getAccessLevel,
 } from "@/lib/contentlayer-compat";
 
 import { serialize } from "next-mdx-remote/serialize";
@@ -47,24 +44,43 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const paths = (allStrategies ?? [])
     .filter((d: any) => d && !isDraftContent(d))
     .map((d: any) => {
-      const slug = normalizeSlug(d?.slug ?? d?._raw?.flattenedPath ?? "");
-      return slug ? { params: { slug } } : null;
+      // Try multiple possible slug properties
+      const slug = d?.slug || d?._raw?.flattenedPath || "";
+      // Ensure slug is a string and normalize it
+      if (typeof slug === 'string' && slug.trim()) {
+        // Remove any trailing .md or .mdx extensions
+        const normalized = slug.replace(/\.(md|mdx)$/, '');
+        return normalized;
+      }
+      return "";
     })
-    .filter(Boolean) as { params: { slug: string } }[];
+    .filter((slug: string) => slug && slug.trim() !== '')
+    .map((slug: string) => ({ 
+      params: { slug } 
+    }));
 
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = normalizeSlug(String(params?.slug ?? ""));
+  const rawSlug = params?.slug;
+  const slug = 
+    typeof rawSlug === "string"
+      ? rawSlug
+      : Array.isArray(rawSlug) && typeof rawSlug[0] === "string"
+        ? rawSlug[0]
+        : "";
+
   if (!slug) return { notFound: true };
 
   const { allStrategies } = await getContentlayerData();
 
   const strategy =
     (allStrategies ?? []).find((d: any) => {
-      const s = normalizeSlug(d?.slug ?? d?._raw?.flattenedPath ?? "");
-      return s === slug;
+      // Try multiple slug properties for matching
+      const dSlug = d?.slug || d?._raw?.flattenedPath || "";
+      const normalizedDSlug = typeof dSlug === 'string' ? dSlug.replace(/\.(md|mdx)$/, '') : "";
+      return normalizedDSlug === slug;
     }) ?? null;
 
   if (!strategy || isDraftContent(strategy)) return { notFound: true };
@@ -143,12 +159,12 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
   const tools = strategy?.tools || [];
   const applications = strategy?.applications || [];
   const expectedOutcomes = strategy?.expectedOutcomes || [];
+  const accessLevel = strategy?.accessLevel || "public";
 
-  const canonical = `https://www.abrahamoflondon.org/strategy/${encodeURIComponent(
-    strategy?.slug || normalizeSlug(strategy?._raw?.flattenedPath || "")
-  )}`;
-
-  const access = getAccessLevel(strategy);
+  // Extract slug from strategy
+  const strategySlug = strategy?.slug || strategy?._raw?.flattenedPath || "";
+  const canonicalSlug = typeof strategySlug === 'string' ? strategySlug.replace(/\.(md|mdx)$/, '') : "";
+  const canonical = `https://www.abrahamoflondon.org/strategy/${encodeURIComponent(canonicalSlug)}`;
 
   // Related tools based on framework type
   const relatedTools = {
@@ -223,7 +239,7 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
       <Head>
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={canonical} />
-        {access === "inner-circle" && (
+        {accessLevel === "inner-circle" && (
           <meta name="robots" content="noindex, nofollow" />
         )}
       </Head>
@@ -244,13 +260,13 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
                 {category}
               </span>
               
-              {access && (
+              {accessLevel && (
                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.3em] ${
-                  access === 'inner-circle' 
+                  accessLevel === 'inner-circle' 
                     ? 'bg-gold/10 text-gold border border-gold/30'
                     : 'bg-green-500/10 text-green-400 border border-green-500/30'
                 }`}>
-                  {access === 'inner-circle' ? 'Inner Circle' : 'Public'}
+                  {accessLevel === 'inner-circle' ? 'Inner Circle' : 'Public'}
                 </span>
               )}
               
@@ -306,7 +322,7 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
 
             {/* Quick Actions */}
             <div className="mt-8 flex flex-wrap gap-4">
-              {access === 'public' ? (
+              {accessLevel === 'public' ? (
                 <Link
                   href="#download"
                   className="inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-gold/80"
@@ -472,15 +488,15 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
                       <Download className="h-10 w-10 text-gold" />
                     </div>
                     <h3 className="mb-4 font-serif text-2xl font-bold text-white">
-                      {access === 'public' ? 'Download Complete Framework' : 'Unlock Full Framework'}
+                      {accessLevel === 'public' ? 'Download Complete Framework' : 'Unlock Full Framework'}
                     </h3>
                     <p className="mb-8 max-w-2xl text-zinc-400">
-                      {access === 'public' 
+                      {accessLevel === 'public' 
                         ? 'Get the complete framework including templates, worksheets, and implementation guides.'
                         : 'This framework is exclusive to Inner Circle members. Join to access the complete toolkit.'
                       }
                     </p>
-                    {access === 'public' ? (
+                    {accessLevel === 'public' ? (
                       <div className="flex flex-col gap-4 sm:flex-row">
                         <Link
                           href="/download/strategy-framework"

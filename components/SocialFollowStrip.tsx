@@ -1,4 +1,4 @@
-// components/SocialFollowStrip.tsx
+// components/SocialFollowStrip.tsx - UPDATED
 "use client";
 
 import * as React from "react";
@@ -12,26 +12,27 @@ import {
   Mail,
   Phone,
   MessageCircle,
+  Globe,
 } from "lucide-react";
+import { siteConfig, getSocialLinks } from "@/config/site";
 
-type Item = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  'x': Twitter,
+  'twitter': Twitter,
+  'linkedin': Linkedin,
+  'instagram': Instagram,
+  'facebook': Facebook,
+  'youtube': Youtube,
+  'email': Mail,
+  'phone': Phone,
+  'tiktok': MessageCircle,
+  'website': Globe,
+  'whatsapp': MessageCircle,
 };
 
-const ITEMS: Item[] = [
-  { href: "https://x.com/AbrahamAda48634", label: "X", icon: Twitter },
-  { href: "https://www.tiktok.com/@abrahamoflondon", label: "TikTok", icon: MessageCircle },
-  { href: "https://www.instagram.com/abraham_of_london_/", label: "Instagram", icon: Instagram },
-  { href: "https://www.facebook.com/share/1Gvu4ZunTq/", label: "Facebook", icon: Facebook },
-  { href: "https://www.linkedin.com/in/abraham-adaramola-06630321", label: "LinkedIn", icon: Linkedin },
-  { href: "https://www.youtube.com/@abrahamoflondon", label: "YouTube", icon: Youtube },
-  { href: "mailto:info@abrahamoflondon.org", label: "Email", icon: Mail },
-  { href: "tel:+442086225909", label: "Call", icon: Phone },
-];
-
 export default function SocialFollowStrip() {
+  const socialLinks = getSocialLinks(10); // Get top priority social links
+  
   return (
     <section className="mx-auto my-20 max-w-6xl px-4">
       <div className="relative overflow-hidden rounded-3xl border border-gold/20 bg-black/90 p-10 text-center">
@@ -43,13 +44,13 @@ export default function SocialFollowStrip() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-3">
-            {ITEMS.map((it, i) => {
-              const Icon = it.icon;
-              const external = it.href.startsWith("http");
+            {socialLinks.map((social, i) => {
+              const Icon = iconMap[social.kind] || Globe;
+              const external = social.href.startsWith("http");
               return (
                 <motion.a
-                  key={it.label}
-                  href={it.href}
+                  key={social.label}
+                  href={social.href}
                   target={external ? "_blank" : "_self"}
                   rel={external ? "noopener noreferrer" : undefined}
                   initial={{ opacity: 0, y: 18 }}
@@ -60,7 +61,7 @@ export default function SocialFollowStrip() {
                   className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-2 text-xs font-semibold text-gold hover:bg-gold hover:text-black transition-colors"
                 >
                   <Icon className="h-4 w-4" />
-                  {it.label}
+                  {social.label}
                 </motion.a>
               );
             })}
@@ -70,4 +71,3 @@ export default function SocialFollowStrip() {
     </section>
   );
 }
-

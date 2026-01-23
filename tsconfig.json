@@ -1,106 +1,88 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2022"
-    ],
+    "lib": ["dom", "dom.iterable", "es2022"],
     "allowJs": true,
-    "skipLibCheck": true,
+
     "strict": true,
     "noEmit": true,
-    "esModuleInterop": true,
+
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
     "incremental": true,
+    "forceConsistentCasingInFileNames": true,
+
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
+
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "forceConsistentCasingInFileNames": true,
+
     "exactOptionalPropertyTypes": false,
-    "declaration": false,
-    "declarationMap": false,
+
     "sourceMap": true,
     "inlineSources": false,
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@/styles/*": [
-        "./styles/*"
-      ],
-      "@/components/*": [
-        "./components/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
-      ],
-      "@/fonts/*": [
-        "./fonts/*"
-      ],
-      "contentlayer/generated": [
-        "./lib/contentlayer-compat.ts"
-      ],
-      "@/lib/contentlayer-compat": [
-        "./lib/contentlayer-compat.ts"
-      ],
-      "@/lib/redis-enhanced": [
-        "./lib/redis-enhanced.ts"
-      ],
-      "@/lib/server/rate-limit-unified": [
-        "./lib/server/rate-limit-unified.ts"
-      ],
-      "@/lib/db": [
-        "./lib/db.ts"
-      ],
-      "@/lib/contentlayer/status": [
-        "./lib/contentlayer/status.ts"
-      ],
-      "@/lib/server/inner-circle-access": [
-        "./lib/server/inner-circle-access.ts"
-      ],
-      "@/lib/rate-limit": [
-        "./lib/rate-limit.ts"
-      ],
-      "@/lib/server/inner-circle-store": [
-        "./lib/server/inner-circle-store.ts"
-      ],
-      "@/lib/premium/download-token": [
-        "./lib/premium/download-token.ts"
-      ],
-      "@/lib/server/with-inner-circle-access": [
-        "./lib/server/with-inner-circle-access.ts"
-      ],
-      "@/lib/inner-circle/access": [
-        "./lib/inner-circle/access.ts"
-      ],
-      "@/lib/next-fonts": [
-        "./lib/next-fonts.ts"
-      ]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "allowSyntheticDefaultImports": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "skipDefaultLibCheck": true
+
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "types": ["node", "react", "react-dom"],
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/styles/*": ["./styles/*"],
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/fonts/*": ["./fonts/*"],
+      "@/hooks/*": ["./hooks/*"],
+
+      "@/lib/redis": ["./lib/redis.ts"],
+      "@/lib/redis/*": ["./lib/redis/*"],
+      "@/lib/redis-enhanced": ["./lib/redis-enhanced.ts"],
+
+      "@/lib/db": ["./lib/db.ts"],
+      "@/lib/contentlayer-compat": ["./lib/contentlayer-compat.ts"],
+      "@/lib/contentlayer/status": ["./lib/contentlayer/status.ts"],
+      "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
+
+      "@/lib/server/rate-limit-unified": ["./lib/server/rate-limit-unified.ts"],
+      "@/lib/server/inner-circle-access": ["./lib/server/inner-circle-access.ts"],
+      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"],
+      "@/lib/server/with-inner-circle-access": ["./lib/server/with-inner-circle-access.ts"],
+
+      "@/lib/rate-limit": ["./lib/rate-limit.ts"],
+      "@/lib/inner-circle/access": ["./lib/inner-circle/access.ts"],
+      "@/lib/premium/download-token": ["./lib/premium/download-token.ts"],
+      "@/lib/next-fonts": ["./lib/next-fonts.ts"],
+
+      "@prisma/client": ["./.prisma/client"]
+    },
+
+    "plugins": [{ "name": "next" }]
   },
+
   "include": [
     "next-env.d.ts",
     "global.d.ts",
+    "types/**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".contentlayer/generated"
   ],
+
   "exclude": [
     "node_modules",
     ".next",
@@ -108,6 +90,7 @@
     "build",
     "coverage",
     ".turbo",
+    "scripts",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
@@ -118,10 +101,9 @@
     "**/temp/**",
     "**/tmp/**"
   ],
+
   "ts-node": {
     "transpileOnly": true,
-    "compilerOptions": {
-      "module": "commonjs"
-    }
+    "compilerOptions": { "module": "commonjs" }
   }
 }

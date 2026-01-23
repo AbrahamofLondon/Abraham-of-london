@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Share2, Clock, Calendar, Tag, BookOpen, Eye, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
@@ -38,7 +38,7 @@ type ContentlayerDoc = {
 
 type Props = {
   doc: ContentlayerDoc;
-  source: MDXRemoteSerializeResult;
+  source: string;
   canonicalPath: string;
   backHref?: string;
   label?: string;
@@ -330,7 +330,7 @@ export default function ContentlayerDocPage({
                       </div>
                     }
                   >
-                    <MDXRemote {...source} components={components} />
+                    <MDXRemote source={source} components={components} />
                   </React.Suspense>
                 </div>
               </div>

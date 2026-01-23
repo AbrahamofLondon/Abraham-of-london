@@ -1,4 +1,7 @@
-// lib/contentlayer-compat.server.ts
+/**
+ * lib/contentlayer-compat.server.ts
+ * RECONCILED INSTITUTIONAL SERVER-SIDE DATA ENGINE
+ */
 import fs from 'fs';
 import path from 'path';
 import type { DocBase } from './contentlayer-compat';
@@ -56,44 +59,93 @@ export function isServerSide(): boolean {
 }
 
 export function isEdgeRuntime(): boolean {
+  // @ts-ignore
   return typeof EdgeRuntime !== 'undefined' || process.env.NEXT_RUNTIME === 'edge';
 }
-
-/* -------------------------------------------------------------------------- */
-/* DATA LOADING                                                               */
-/* -------------------------------------------------------------------------- */
 
 // Cache for server-side data
 let SERVER_CACHE: ServerGeneratedShape | null = null;
 let SERVER_CACHE_TIMESTAMP = 0;
 const SERVER_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+/* -------------------------------------------------------------------------- */
+/* NORMALIZATION                                                              */
+/* -------------------------------------------------------------------------- */
+
+function normalizeDocument(doc: any): ServerDocBase {
+  const type = doc.type || doc._type || 'document';
+  const slug = doc.slug || doc._raw?.flattenedPath?.split('/').pop() || 'untitled';
+  
+  return {
+    ...doc, // Preserves all fields including body.code
+    _id: doc._id || `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    _raw: {
+      sourceFilePath: doc._raw?.sourceFilePath || `content/${type}/${slug}.mdx`,
+      sourceFileName: doc._raw?.sourceFileName || `${slug}.mdx`,
+      sourceFileDir: doc._raw?.sourceFileDir || `content/${type}`,
+      contentType: doc._raw?.contentType || 'mdx',
+      flattenedPath: doc._raw?.flattenedPath || `${type}/${slug}`,
+    },
+    type: type,
+    title: doc.title || 'Untitled Transmission',
+    slug: slug,
+    tags: Array.isArray(doc.tags) ? doc.tags : [],
+    draft: !!doc.draft,
+    featured: !!doc.featured,
+  };
+}
+
+export function getAllDocumentsSync(data: any): ServerDocBase[] {
+  const allDocs: ServerDocBase[] = [];
+  
+  const collections = [
+    'allBooks', 'allCanons', 'allDownloads', 'allEvents', 
+    'allPosts', 'allPrints', 'allResources', 'allShorts', 'allStrategies'
+  ];
+
+  collections.forEach(key => {
+    if (data[key] && Array.isArray(data[key])) {
+      allDocs.push(...data[key].map(normalizeDocument));
+    }
+  });
+  
+  if (data.allDocuments && Array.isArray(data.allDocuments)) {
+    allDocs.push(...data.allDocuments.map(normalizeDocument));
+  }
+  
+  // Deduplicate by flattened path to ensure unique route mapping
+  const seen = new Set();
+  return allDocs.filter(doc => {
+    const key = doc._raw.flattenedPath;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* DATA LOADING (ASYNC & SYNC)                                                */
+/* -------------------------------------------------------------------------- */
+
 async function loadContentlayerData(): Promise<ServerGeneratedShape> {
   const now = Date.now();
-  
-  // Return cached data if valid
   if (SERVER_CACHE && now - SERVER_CACHE_TIMESTAMP < SERVER_CACHE_TTL) {
     return SERVER_CACHE;
   }
   
   try {
-    // Try Contentlayer v2 first
     const v2Path = path.join(process.cwd(), '.contentlayer', 'generated');
-    
     let rawData: any;
     
     if (fs.existsSync(path.join(v2Path, 'index.mjs'))) {
       const mod = await import(path.join(v2Path, 'index.mjs'));
       rawData = mod.default || mod;
     } else {
-      // Fallback to Contentlayer's main export
       const mod = await import('contentlayer/generated');
       rawData = mod.default || mod;
     }
     
-    // Transform to our ServerGeneratedShape format
     const allDocuments = getAllDocumentsSync(rawData);
-    
     const transformedData: ServerGeneratedShape = {
       allDocuments,
       allPosts: (rawData.allPosts || []).map(normalizeDocument),
@@ -109,103 +161,41 @@ async function loadContentlayerData(): Promise<ServerGeneratedShape> {
     
     SERVER_CACHE = transformedData;
     SERVER_CACHE_TIMESTAMP = now;
-    
-    console.log(`[Contentlayer] Loaded ${allDocuments.length} documents into server cache`);
     return transformedData;
-    
   } catch (error) {
-    console.warn('[Contentlayer] Failed to load generated data:', error);
-    
-    // Return empty structure on error
-    const emptyData: ServerGeneratedShape = {
-      allDocuments: [],
-      allPosts: [],
-      allBooks: [],
-      allCanons: [],
-      allDownloads: [],
-      allEvents: [],
-      allShorts: [],
-      allPrints: [],
-      allResources: [],
-      allStrategies: [],
-    };
-    
-    SERVER_CACHE = emptyData;
-    SERVER_CACHE_TIMESTAMP = now;
-    
-    return emptyData;
+    console.warn('[Contentlayer] Async load failed, falling back to sync:', error);
+    return getContentlayerDataSync();
   }
 }
 
-function normalizeDocument(doc: any): ServerDocBase {
-  return {
-    _id: doc._id || `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    _raw: {
-      sourceFilePath: doc._raw?.sourceFilePath || `content/${doc.type || 'unknown'}/${doc.slug || 'unknown'}.mdx`,
-      sourceFileName: doc._raw?.sourceFileName || `${doc.slug || 'unknown'}.mdx`,
-      sourceFileDir: doc._raw?.sourceFileDir || `content/${doc.type || 'unknown'}`,
-      contentType: doc._raw?.contentType || doc.type || 'document',
-      flattenedPath: doc._raw?.flattenedPath || `${doc.type || 'document'}/${doc.slug || 'unknown'}`,
-    },
-    type: doc.type || 'document',
-    title: doc.title || 'Untitled',
-    slug: doc.slug || 'untitled',
-    description: doc.description,
-    excerpt: doc.excerpt,
-    date: doc.date,
-    coverImage: doc.coverImage,
-    author: doc.author,
-    tags: doc.tags || [],
-    category: doc.category,
-    draft: doc.draft || false,
-    featured: doc.featured || false,
-    body: doc.body,
-    // Copy any additional fields
-    ...doc,
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/* PUBLIC API                                                                 */
-/* -------------------------------------------------------------------------- */
-
-export async function getContentlayerData(): Promise<ServerGeneratedShape> {
-  if (!isServerSide()) {
-    throw new Error('getContentlayerData can only be called on the server');
-  }
-  
-  return loadContentlayerData();
-}
-
+/**
+ * INSTITUTIONAL SYNC GETTER
+ * Force-loads data for Pages Router compatibility.
+ */
 export function getContentlayerDataSync(): ServerGeneratedShape {
   if (!isServerSide()) {
     throw new Error('getContentlayerDataSync can only be called on the server');
   }
-  
-  // Return cached data if available
-  if (SERVER_CACHE) {
-    return SERVER_CACHE;
-  }
+
+  if (SERVER_CACHE) return SERVER_CACHE;
   
   try {
     const v2Path = path.join(process.cwd(), '.contentlayer', 'generated');
-    
+    const indexPath = path.join(v2Path, 'index.mjs');
     let rawData: any;
-    
-    if (fs.existsSync(path.join(v2Path, 'index.mjs'))) {
-      // Clear require cache for hot reload
-      const modulePath = path.join(v2Path, 'index.mjs');
-      delete require.cache[modulePath];
-      const mod = require(modulePath);
-      rawData = mod.default || mod;
+
+    if (fs.existsSync(indexPath)) {
+      // In development, we clear the require cache to capture content changes
+      if (process.env.NODE_ENV !== 'production') {
+        delete require.cache[require.resolve(indexPath)];
+      }
+      rawData = require(indexPath);
+      rawData = rawData.default || rawData;
     } else {
-      // Fallback
-      const mod = require('contentlayer/generated');
-      rawData = mod.default || mod;
+      rawData = require('contentlayer/generated');
     }
     
     const allDocuments = getAllDocumentsSync(rawData);
-    
     const data: ServerGeneratedShape = {
       allDocuments,
       allPosts: (rawData.allPosts || []).map(normalizeDocument),
@@ -221,95 +211,41 @@ export function getContentlayerDataSync(): ServerGeneratedShape {
     
     SERVER_CACHE = data;
     SERVER_CACHE_TIMESTAMP = Date.now();
-    
     return data;
   } catch (error) {
-    console.warn('[Contentlayer] Failed to load generated data sync:', error);
-    
-    const emptyData: ServerGeneratedShape = {
-      allDocuments: [],
-      allPosts: [],
-      allBooks: [],
-      allCanons: [],
-      allDownloads: [],
-      allEvents: [],
-      allShorts: [],
-      allPrints: [],
-      allResources: [],
-      allStrategies: [],
+    console.error('[Contentlayer] Critical Load Failure:', error);
+    return {
+      allDocuments: [], allPosts: [], allBooks: [], allCanons: [],
+      allDownloads: [], allEvents: [], allShorts: [], allPrints: [],
+      allResources: [], allStrategies: []
     };
-    
-    SERVER_CACHE = emptyData;
-    return emptyData;
   }
 }
 
-export function getAllDocumentsSync(data: any): ServerDocBase[] {
-  const allDocs: ServerDocBase[] = [];
-  
-  if (data.allBooks) allDocs.push(...data.allBooks.map(normalizeDocument));
-  if (data.allCanons) allDocs.push(...data.allCanons.map(normalizeDocument));
-  if (data.allDownloads) allDocs.push(...data.allDownloads.map(normalizeDocument));
-  if (data.allEvents) allDocs.push(...data.allEvents.map(normalizeDocument));
-  if (data.allPosts) allDocs.push(...data.allPosts.map(normalizeDocument));
-  if (data.allPrints) allDocs.push(...data.allPrints.map(normalizeDocument));
-  if (data.allResources) allDocs.push(...data.allResources.map(normalizeDocument));
-  if (data.allShorts) allDocs.push(...data.allShorts.map(normalizeDocument));
-  if (data.allStrategies) allDocs.push(...data.allStrategies.map(normalizeDocument));
-  
-  // Also check for direct allDocuments array
-  if (data.allDocuments && Array.isArray(data.allDocuments)) {
-    allDocs.push(...data.allDocuments.map(normalizeDocument));
-  }
-  
-  // Remove duplicates by _id
-  const seen = new Set();
-  return allDocs.filter(doc => {
-    if (seen.has(doc._id)) return false;
-    seen.add(doc._id);
-    return true;
-  });
-}
+/* -------------------------------------------------------------------------- */
+/* PUBLIC API                                                                 */
+/* -------------------------------------------------------------------------- */
 
-/* -------------------------------------------------------------------------- */
-/* ADDITIONAL UTILITY FUNCTIONS                                               */
-/* -------------------------------------------------------------------------- */
+export async function getContentlayerData(): Promise<ServerGeneratedShape> {
+  if (!isServerSide()) {
+    throw new Error('getContentlayerData can only be called on the server');
+  }
+  return loadContentlayerData();
+}
 
 export async function getPublishedDocuments(type?: string): Promise<ServerDocBase[]> {
   const data = await getContentlayerData();
-  
-  let documents = data.allDocuments.filter((doc: ServerDocBase) => !doc.draft);
-  
-  if (type) {
-    documents = documents.filter((doc: ServerDocBase) => doc.type === type);
-  }
-  
+  let documents = data.allDocuments.filter((doc) => !doc.draft);
+  if (type) documents = documents.filter((doc) => doc.type === type);
   return documents;
 }
 
-export async function getDocumentBySlug(
-  slug: string,
-  type?: string
-): Promise<ServerDocBase | null> {
+export async function getDocumentBySlug(slug: string, type?: string): Promise<ServerDocBase | null> {
   const data = await getContentlayerData();
-  
-  const document = data.allDocuments.find((doc: ServerDocBase) => {
+  return data.allDocuments.find((doc) => {
     const slugMatch = doc.slug === slug;
     return type ? slugMatch && doc.type === type : slugMatch;
-  });
-  
-  return document || null;
-}
-
-export async function getAllSlugs(type?: string): Promise<string[]> {
-  const data = await getContentlayerData();
-  
-  let documents = data.allDocuments;
-  if (type) {
-    documents = documents.filter((doc: ServerDocBase) => doc.type === type);
-  }
-  
-  return documents.map((doc: ServerDocBase) => doc.slug);
+  }) || null;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -319,87 +255,25 @@ export async function getAllSlugs(type?: string): Promise<string[]> {
 export function clearServerCache(): void {
   SERVER_CACHE = null;
   SERVER_CACHE_TIMESTAMP = 0;
-  console.log('[Contentlayer] Server cache cleared');
 }
 
-export function getCacheInfo(): {
-  hasCache: boolean;
-  timestamp: number;
-  age: number;
-  documentCount: number;
-} {
-  const now = Date.now();
-  return {
-    hasCache: !!SERVER_CACHE,
-    timestamp: SERVER_CACHE_TIMESTAMP,
-    age: SERVER_CACHE_TIMESTAMP ? now - SERVER_CACHE_TIMESTAMP : 0,
-    documentCount: SERVER_CACHE?.allDocuments.length || 0,
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/* TYPE-SPECIFIC GETTERS                                                      */
-/* -------------------------------------------------------------------------- */
-
-export async function getAllPosts() {
-  const data = await getContentlayerData();
-  return data.allPosts || [];
-}
-
-export async function getAllBooks() {
-  const data = await getContentlayerData();
-  return data.allBooks || [];
-}
-
-export async function getAllCanons() {
-  const data = await getContentlayerData();
-  return data.allCanons || [];
-}
-
-export async function getAllDownloads() {
-  const data = await getContentlayerData();
-  return data.allDownloads || [];
-}
-
-export async function getAllEvents() {
-  const data = await getContentlayerData();
-  return data.allEvents || [];
-}
-
-export async function getAllShorts() {
-  const data = await getContentlayerData();
-  return data.allShorts || [];
-}
-
-export async function getAllPrints() {
-  const data = await getContentlayerData();
-  return data.allPrints || [];
-}
-
-export async function getAllResources() {
-  const data = await getContentlayerData();
-  return data.allResources || [];
-}
-
-export async function getAllStrategies() {
-  const data = await getContentlayerData();
-  return data.allStrategies || [];
-}
-
-/* -------------------------------------------------------------------------- */
-/* DEFAULT EXPORT                                                             */
-/* -------------------------------------------------------------------------- */
+export async function getAllPosts() { const d = await getContentlayerData(); return d.allPosts; }
+export async function getAllBooks() { const d = await getContentlayerData(); return d.allBooks; }
+export async function getAllCanons() { const d = await getContentlayerData(); return d.allCanons; }
+export async function getAllDownloads() { const d = await getContentlayerData(); return d.allDownloads; }
+export async function getAllEvents() { const d = await getContentlayerData(); return d.allEvents; }
+export async function getAllShorts() { const d = await getContentlayerData(); return d.allShorts; }
+export async function getAllPrints() { const d = await getContentlayerData(); return d.allPrints; }
+export async function getAllResources() { const d = await getContentlayerData(); return d.allResources; }
+export async function getAllStrategies() { const d = await getContentlayerData(); return d.allStrategies; }
 
 const contentlayerCompatServerApi = {
-  // Core data access
   getContentlayerData,
   getContentlayerDataSync,
   getAllDocumentsSync,
   getPublishedDocuments,
   getDocumentBySlug,
-  getAllSlugs,
-  
-  // Type-specific getters
+  clearServerCache,
   getAllPosts,
   getAllBooks,
   getAllCanons,
@@ -409,18 +283,8 @@ const contentlayerCompatServerApi = {
   getAllPrints,
   getAllResources,
   getAllStrategies,
-  
-  // Utilities
   isServerSide,
-  isEdgeRuntime,
-  
-  // Cache management
-  clearServerCache,
-  getCacheInfo,
-  
-  // Type exports
-  ServerDocBase,
-  ServerGeneratedShape,
+  isEdgeRuntime
 };
 
 export default contentlayerCompatServerApi;

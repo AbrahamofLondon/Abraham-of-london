@@ -1,10 +1,11 @@
 /* Abraham of London - Strategic Framework Detail V8.0
- * Fixed Styling & Legibility
+ * Reconciled for Database-Backed Access and Gated Integrity
  */
 import * as React from "react";
 import { useEffect, useState } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import {
   ArrowRight,
@@ -24,12 +25,16 @@ import {
 
 import Layout from "@/components/Layout";
 import { withUnifiedAuth } from "@/lib/auth/withUnifiedAuth";
+
+// STRATEGIC FIX: Import the database-backed server getters
 import {
-  getFrameworkBySlug,
+  getServerFrameworkBySlug,
   getAllFrameworkSlugs,
   type Framework,
   type FrameworkTier,
 } from "@/lib/resources/strategic-frameworks";
+
+import { sanitizeData } from "@/lib/server/md-utils";
 import type { User } from '@/types/auth';
 import type { InnerCircleAccess } from '@/lib/inner-circle';
 
@@ -51,7 +56,7 @@ const tierIcon: Record<FrameworkTier, React.ReactNode> = {
   Household: <Users className="h-5 w-5" aria-hidden="true" />,
 };
 
-// Clean color system with better contrast
+// Clean color system
 const accentColor: Record<Framework["accent"], string> = {
   gold: "text-amber-400",
   emerald: "text-emerald-400",
@@ -68,7 +73,7 @@ const accentBg: Record<Framework["accent"], string> = {
   indigo: "bg-indigo-500/10 border-indigo-500/20",
 };
 
-// Access Denied Component with proper styling
+// Access Denied Component
 const AccessDeniedComponent = ({ framework, requiredRole }: { framework: Framework; requiredRole?: string }) => {
   const router = useRouter();
   
@@ -116,7 +121,7 @@ const AccessDeniedComponent = ({ framework, requiredRole }: { framework: Framewo
   );
 };
 
-// Main Component with fixed styling
+// Main Component
 const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({ 
   framework, 
   isPreview = false,
@@ -127,18 +132,15 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
   const router = useRouter();
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Check access
   const hasInnerCircleAccess = innerCircleAccess?.hasAccess || false;
   const isAdmin = user?.role === 'admin' || user?.role === 'editor';
   const canViewFull = hasInnerCircleAccess || isAdmin || isPreview;
   
-  // User display info
   const userName = user?.name || 'Guest';
   const userRole = user?.role || (hasInnerCircleAccess ? 'inner-circle' : 'guest');
 
   const handleDownload = async () => {
     if (!framework.artifactHref) return;
-    
     if (!canViewFull) {
       router.push(`/inner-circle/locked?action=download&resource=${framework.slug}`);
       return;
@@ -146,14 +148,12 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
 
     setIsDownloading(true);
     try {
-      // For inner-circle members, use their token
       const headers: HeadersInit = {};
       if (innerCircleAccess?.token) {
         headers.Authorization = `Bearer ${innerCircleAccess.token}`;
       }
       
       const response = await fetch(framework.artifactHref, { headers });
-      
       if (!response.ok) throw new Error('Download failed');
       
       const blob = await response.blob();
@@ -167,7 +167,6 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Download failed:', error);
-      alert('Download failed. Please ensure you have proper access.');
     } finally {
       setIsDownloading(false);
     }
@@ -180,12 +179,7 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
     } else {
       router.push({
         pathname: "/inner-circle/locked",
-        query: {
-          returnTo: router.asPath,
-          reason: 'protected-framework',
-          framework: framework.slug,
-          tier: framework.tier.join(',')
-        }
+        query: { returnTo: router.asPath, framework: framework.slug }
       });
     }
   };
@@ -195,7 +189,6 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
       title={`${framework.title} | Strategic Framework`} 
       description={framework.oneLiner}
     >
-      {/* Access Status Bar - Fixed contrast */}
       <div className={`border-b ${canViewFull ? 'border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent' : 'border-slate-800 bg-gradient-to-r from-slate-800/30 to-transparent'}`}>
         <div className="mx-auto max-w-7xl px-4 py-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm">
@@ -215,29 +208,15 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
                 </>
               )}
             </div>
-            {!canViewFull && (
-              <Link 
-                href="/inner-circle/join" 
-                className="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-medium"
-              >
-                Upgrade Access <ArrowRight className="h-3 w-3" />
-              </Link>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-black">
-        {/* Hero Header */}
         <section className="relative overflow-hidden border-b border-slate-800/50">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.08),transparent_50%)]" />
           <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
             <div className="mb-8">
-              <Link 
-                href="/resources/strategic-frameworks" 
-                className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors group"
-              >
+              <Link href="/resources/strategic-frameworks" className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 Back to frameworks
               </Link>
@@ -249,15 +228,7 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
                   <span className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${accentBg[framework.accent]} ${accentColor[framework.accent]}`}>
                     {framework.tag}
                   </span>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {framework.tier.map((t) => (
-                      <span key={t} className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-slate-200 border border-white/10">
-                        {tierIcon[t]} {t}
-                      </span>
-                    ))}
-                  </div>
                 </div>
-
                 <h1 className="mb-4 font-serif text-4xl font-bold text-white sm:text-5xl leading-tight">
                   {framework.title}
                 </h1>
@@ -278,35 +249,17 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
                       <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" /> 
                       Tier: {framework.tier.join(", ")}
                     </li>
-                    <li className="flex items-center gap-3 text-slate-300">
-                      <TrendingUp className="h-4 w-4 text-blue-400 flex-shrink-0" /> 
-                      {framework.executiveSummary.length} Core Principles
-                    </li>
-                    <li className="flex items-center gap-3 text-slate-300">
-                      <Calendar className="h-4 w-4 text-amber-400 flex-shrink-0" /> 
-                      {framework.applicationPlaybook.length} Step Playbook
-                    </li>
                   </ul>
                 </div>
 
                 {framework.artifactHref && canViewFull && (
                   <div className="rounded-xl border border-amber-500/30 bg-gradient-to-b from-amber-500/5 to-amber-600/5 p-6">
-                    <h3 className="mb-4 text-lg font-semibold text-white">Download artifact</h3>
                     <button 
                       onClick={handleDownload}
                       disabled={isDownloading}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-white transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-white transition-all hover:scale-[1.02] disabled:opacity-50"
                     >
-                      {isDownloading ? (
-                        <>
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                          Downloading...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-4 w-4" /> Download template
-                        </>
-                      )}
+                      {isDownloading ? 'Downloading...' : 'Download template'}
                     </button>
                   </div>
                 )}
@@ -315,7 +268,6 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
           </div>
         </section>
 
-        {/* Gated Dossier Section */}
         <section id="full-dossier" className="border-t border-slate-800/50 py-16 bg-gradient-to-b from-black/20 to-slate-950/30">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -325,51 +277,22 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
                   {canViewFull ? 'Unlocked' : 'Locked - Inner Circle Access Required'}
                 </p>
               </div>
-              
-              {!canViewFull ? (
-                <button 
-                  onClick={() => scrollToLocked("full-dossier")} 
-                  className="flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-sm font-bold text-white transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.98]"
-                >
-                  <Lock className="h-4 w-4" /> Unlock Inner Circle
-                </button>
-              ) : (
-                <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-sm text-emerald-400 font-medium">Access Granted</span>
-                </div>
-              )}
             </div>
 
             {canViewFull ? (
-              <div className="space-y-16">
-                <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-b from-slate-900/50 to-slate-950/50 p-8 backdrop-blur-sm">
-                  <h3 className="mb-6 text-2xl font-semibold text-white">Complete Framework Content</h3>
-                  <p className="text-slate-300">
-                    Full operating logic, application playbook, and metrics are available to Inner Circle members.
-                  </p>
-                  {/* Your full framework content here */}
-                </div>
+              <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-b from-slate-900/50 to-slate-950/50 p-8 backdrop-blur-sm">
+                <h3 className="mb-6 text-2xl font-semibold text-white">Complete Framework Content</h3>
+                <p className="text-slate-300">
+                  Full operating logic and application playbook for {framework.title}.
+                </p>
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-700/50 p-12 text-center bg-gradient-to-b from-slate-900/30 to-slate-950/30 backdrop-blur-sm">
                 <Lock className="mx-auto mb-4 h-16 w-16 text-amber-500/50" />
                 <h3 className="text-xl font-semibold text-white mb-4">Inner Circle Exclusive</h3>
-                <p className="text-slate-300 max-w-md mx-auto mb-6 leading-relaxed">
-                  This strategic framework contains proprietary insights reserved for Inner Circle members.
-                </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link 
-                    href={`/inner-circle/join?framework=${framework.slug}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 text-sm font-bold text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/25 transition-all active:scale-[0.98]"
-                  >
+                  <Link href={`/inner-circle/join?framework=${framework.slug}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 text-sm font-bold text-white transition-all">
                     <Key className="h-4 w-4" /> Join Inner Circle
-                  </Link>
-                  <Link 
-                    href="/inner-circle/details" 
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-700 px-8 py-3 text-sm font-medium text-slate-300 hover:bg-slate-800/30 hover:text-white transition-all"
-                  >
-                    <Users className="h-4 w-4" /> Learn About Membership
                   </Link>
                 </div>
               </div>
@@ -381,40 +304,23 @@ const FrameworkDetailPageComponent: NextPage<FrameworkPageProps> = ({
   );
 };
 
-// Determine if this framework requires inner-circle access
+// Access Logic
 const requiresInnerCircle = (framework: Framework): boolean => {
-  const protectedTags = ['canon', 'strategic', 'ultimate-purpose', 'governance'];
-  const protectedTiers = framework.tier.filter(t => 
-    t === 'Board' || t === 'Founder'
-  );
-  
-  return (
-    protectedTags.some(tag => framework.tag.toLowerCase().includes(tag)) ||
-    protectedTiers.length > 0 ||
-    framework.slug.includes('canon') ||
-    framework.slug.includes('strategic-framework')
-  );
+  return framework.tier.some(t => t === 'Board' || t === 'Founder') || framework.slug.includes('canon');
 };
 
-// Export the wrapped component
 const FrameworkDetailPage: NextPage<PageProps> = (props) => {
   const { framework } = props;
-  
-  // Check if this framework requires inner-circle access
   const needsInnerCircle = requiresInnerCircle(framework);
   
   if (needsInnerCircle) {
-    // Wrap with unified auth for inner-circle content
     const ProtectedComponent = withUnifiedAuth(FrameworkDetailPageComponent, {
       requiredRole: 'inner-circle',
       fallbackComponent: () => <AccessDeniedComponent framework={framework} requiredRole="inner-circle" />,
-      publicFallback: false // Don't show public version
+      publicFallback: false
     });
-    
     return <ProtectedComponent {...props} />;
   }
-  
-  // Public framework - no auth required
   return <FrameworkDetailPageComponent {...props} />;
 };
 
@@ -422,32 +328,19 @@ export default FrameworkDetailPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = await getAllFrameworkSlugs();
-  
-  // Only expose public frameworks in sitemap
-  const publicFrameworks = slugs.filter(slug => {
-    // Filter out protected frameworks
-    return !slug.includes('canon') && 
-           !slug.includes('strategic-framework') &&
-           !slug.includes('ultimate-purpose');
-  });
-  
   return { 
-    paths: publicFrameworks.map((slug) => ({ params: { slug } })), 
+    paths: slugs.map((slug) => ({ params: { slug } })), 
     fallback: 'blocking' 
   };
 };
 
-export const getStaticProps: GetStaticProps<PageProps> = async ({ params, preview = false }) => {
+export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slug = String(params?.slug ?? "").trim();
-  const framework = await getFrameworkBySlug(slug);
-  
+  const framework = await getServerFrameworkBySlug(slug);
   if (!framework) return { notFound: true };
   
   return { 
-    props: { 
-      framework,
-      isPreview: preview
-    }, 
+    props: { framework: sanitizeData(framework) }, 
     revalidate: 3600 
   };
 };

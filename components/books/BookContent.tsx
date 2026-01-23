@@ -1,3 +1,4 @@
+// components/books/BookContent.tsx
 import React from 'react';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { MDXRemote } from 'next-mdx-remote';
@@ -16,6 +17,7 @@ const BookContent: React.FC<BookContentProps> = ({ content, components = {} }) =
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
       <article className="prose prose-lg prose-blue max-w-none">
+        {/* Spread the content object - it has compiledSource, scope, frontmatter */}
         <MDXRemote {...content} components={defaultComponents} />
         
         <div className="mt-12 pt-8 border-t border-gray-200">

@@ -1,5 +1,5 @@
-// lib/audit/init.ts
-import { PrismaClient } from '@prisma/client';
+// lib/audit/init.ts - CORRECTED
+import { PrismaClient } from '.prisma/client';
 import { initializeAuditLogger } from './audit-logger';
 
 let prisma: PrismaClient;

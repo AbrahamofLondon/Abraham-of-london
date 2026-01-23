@@ -813,6 +813,15 @@
       "warnings": []
     },
     {
+      "path": "downloads\\life-alignment-assessment.mdx",
+      "type": "Download",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Unknown field \"download\" for type Download"
+      ]
+    },
+    {
       "path": "downloads\\mentorship-starter-kit.mdx",
       "type": "Download",
       "valid": true,
@@ -1065,6 +1074,13 @@
       "warnings": []
     },
     {
+      "path": "blog\\purpose-is-the-anchor.mdx",
+      "type": "Post",
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
       "path": "blog\\reclaiming-the-narrative.mdx",
       "type": "Post",
       "valid": true,
@@ -1122,5 +1138,15 @@
     }
   ],
   "errors": [],
-  "warnings": []
+  "warnings": [
+    {
+      "path": "downloads\\life-alignment-assessment.mdx",
+      "type": "Download",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Unknown field \"download\" for type Download"
+      ]
+    }
+  ]
 }

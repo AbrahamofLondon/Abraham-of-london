@@ -9,8 +9,8 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { PDFDocument, StandardFonts, rgb, PDFFont } from "pdf-lib";
 import crypto from "crypto";
+import { PDFDocument, StandardFonts, rgb, PDFFont } from "pdf-lib";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,19 +34,15 @@ const TIER_MAP: Record<Tier, { display: string; filename: string; level: number 
   restricted: { display: "Private", filename: "restricted", level: 5 },
 };
 
-// Quiet luxury palette: warm ink + paper + restrained accents
+// Quiet luxury palette
 const PALETTE = {
   paper: rgb(0.996, 0.995, 0.992),
   ink: rgb(0.08, 0.08, 0.10),
   muted: rgb(0.40, 0.40, 0.44),
-  faint: rgb(0.78, 0.78, 0.80),
   hairline: rgb(0.86, 0.86, 0.88),
 
-  // “Foil-like” accents (simulated)
   gold: rgb(0.74, 0.63, 0.38),
-  slate: rgb(0.18, 0.20, 0.24),
 
-  // Section accents (kept tasteful)
   sectionA: rgb(0.20, 0.22, 0.28),
   sectionB: rgb(0.12, 0.33, 0.30),
   sectionC: rgb(0.14, 0.26, 0.45),
@@ -120,10 +116,10 @@ function drawPaper(page: any, w: number, h: number, quality: Quality) {
     });
   }
 
-  // Micro texture: tiny points (monotone, very light)
-  for (let x = 26; x < w; x += 120) {
-    for (let y = 26; y < h; y += 120) {
-      page.drawText("·", { x, y, size: 7, color: rgb(0.93, 0.93, 0.928) });
+  // Micro texture: tiny points (very light)
+  for (let x = 28; x < w; x += 130) {
+    for (let y = 28; y < h; y += 130) {
+      page.drawText("·", { x, y, size: 7, color: rgb(0.935, 0.935, 0.933) });
     }
   }
 }
@@ -131,7 +127,7 @@ function drawPaper(page: any, w: number, h: number, quality: Quality) {
 function drawBorderSystem(page: any, w: number, h: number) {
   const m = 36;
 
-  // Outer border
+  // Outer border (border-only; no fill)
   page.drawRectangle({
     x: m,
     y: m,
@@ -139,8 +135,6 @@ function drawBorderSystem(page: any, w: number, h: number) {
     height: h - m * 2,
     borderColor: PALETTE.hairline,
     borderWidth: 1,
-    color: rgb(0, 0, 0), // ignored because border-only rectangle requires color; keep transparent-like
-    opacity: 0, // pdf-lib ignores opacity on rectangle fill in some viewers; harmless
   });
 
   // Inner keyline
@@ -151,23 +145,13 @@ function drawBorderSystem(page: any, w: number, h: number) {
     height: h - (m + 10) * 2,
     borderColor: rgb(0.90, 0.90, 0.902),
     borderWidth: 1,
-    color: rgb(0, 0, 0),
-    opacity: 0,
   });
 }
 
-function drawHeader(
-  page: any,
-  w: number,
-  h: number,
-  font: PDFFont,
-  fontBold: PDFFont,
-  format: Format
-) {
+function drawHeader(page: any, w: number, h: number, font: PDFFont, fontBold: PDFFont, format: Format) {
   const left = 52;
   const top = h - 78;
 
-  // Small-cap style by letter spacing simulation (manual)
   page.drawText("LEGACY ARCHITECTURE CANVAS", {
     x: left,
     y: top,
@@ -184,7 +168,6 @@ function drawHeader(
     color: PALETTE.muted,
   });
 
-  // Hairline rule
   page.drawLine({
     start: { x: left, y: top - 34 },
     end: { x: w - left, y: top - 34 },
@@ -197,13 +180,12 @@ function drawHeader(
     x: w - left - 30,
     y: top + 2,
     size: 9,
-    font: font,
+    font,
     color: PALETTE.muted,
   });
 }
 
 function drawDiscreetMark(page: any, w: number, h: number, font: PDFFont, tier: Tier) {
-  // No loud badges. Just a small mark, and only for higher tiers.
   if (!(tier === "premium" || tier === "enterprise" || tier === "restricted")) return;
 
   const txt = tier === "restricted" ? "Private" : "Signed";
@@ -215,7 +197,6 @@ function drawDiscreetMark(page: any, w: number, h: number, font: PDFFont, tier: 
     color: rgb(0.55, 0.55, 0.56),
   });
 
-  // Tiny “foil” line
   page.drawLine({
     start: { x: w - 52 - 60, y: h - 128 },
     end: { x: w - 52, y: h - 128 },
@@ -262,9 +243,9 @@ function getSections(): Section[] {
       description: "Foundation, purpose, direction",
       color: PALETTE.sectionA,
       fields: [
-        { key: "purpose", label: "Core purpose", multiline: true, placeholder: "" },
-        { key: "values", label: "Guiding values", multiline: true, placeholder: "" },
-        { key: "vision", label: "Long-term vision", multiline: true, placeholder: "" },
+        { key: "purpose", label: "Core purpose", multiline: true },
+        { key: "values", label: "Guiding values", multiline: true },
+        { key: "vision", label: "Long-term vision", multiline: true },
       ],
     },
     {
@@ -272,10 +253,10 @@ function getSections(): Section[] {
       description: "Resources, leverage, stewardship",
       color: PALETTE.sectionB,
       fields: [
-        { key: "financial", label: "Financial", multiline: true, placeholder: "" },
-        { key: "social", label: "Social", multiline: true, placeholder: "" },
-        { key: "cultural", label: "Cultural", multiline: true, placeholder: "" },
-        { key: "spiritual", label: "Spiritual", multiline: true, placeholder: "" },
+        { key: "financial", label: "Financial", multiline: true },
+        { key: "social", label: "Social", multiline: true },
+        { key: "cultural", label: "Cultural", multiline: true },
+        { key: "spiritual", label: "Spiritual", multiline: true },
       ],
     },
     {
@@ -283,10 +264,10 @@ function getSections(): Section[] {
       description: "Structures that carry legacy",
       color: PALETTE.sectionC,
       fields: [
-        { key: "family", label: "Family", multiline: true, placeholder: "" },
-        { key: "business", label: "Business", multiline: true, placeholder: "" },
-        { key: "philanthropy", label: "Philanthropy", multiline: true, placeholder: "" },
-        { key: "intellectual", label: "Intellectual property", multiline: true, placeholder: "" },
+        { key: "family", label: "Family", multiline: true },
+        { key: "business", label: "Business", multiline: true },
+        { key: "philanthropy", label: "Philanthropy", multiline: true },
+        { key: "intellectual", label: "Intellectual property", multiline: true },
       ],
     },
     {
@@ -294,44 +275,35 @@ function getSections(): Section[] {
       description: "Boundaries, accountability, risk",
       color: PALETTE.sectionD,
       fields: [
-        { key: "ethical", label: "Ethical boundaries", multiline: true, placeholder: "" },
-        { key: "risk", label: "Risk management", multiline: true, placeholder: "" },
-        { key: "succession", label: "Succession planning", multiline: true, placeholder: "" },
-        { key: "accountability", label: "Accountability systems", multiline: true, placeholder: "" },
+        { key: "ethical", label: "Ethical boundaries", multiline: true },
+        { key: "risk", label: "Risk management", multiline: true },
+        { key: "succession", label: "Succession planning", multiline: true },
+        { key: "accountability", label: "Accountability systems", multiline: true },
       ],
     },
   ];
 }
 
-function layout(format: Format): { cols: number; marginX: number; gapX: number; gapY: number; topY: number; blockH: number } {
+function layout(format: Format) {
   const { h } = DIM[format];
+
   if (format === "A3") {
-    return { cols: 2, marginX: 58, gapX: 22, gapY: 22, topY: h - 160, blockH: 270 };
+    return { cols: 2, marginX: 58, gapX: 22, gapY: 22, topY: h - 170, blockH: 310 };
   }
   if (format === "Letter") {
-    return { cols: 2, marginX: 52, gapX: 18, gapY: 18, topY: h - 150, blockH: 220 };
+    return { cols: 2, marginX: 52, gapX: 18, gapY: 18, topY: h - 160, blockH: 245 };
   }
-  return { cols: 2, marginX: 52, gapX: 16, gapY: 18, topY: h - 150, blockH: 218 };
+  return { cols: 2, marginX: 52, gapX: 16, gapY: 18, topY: h - 160, blockH: 245 };
 }
 
-function drawSectionCard(
-  page: any,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  section: Section,
-  font: PDFFont,
-  fontBold: PDFFont
-) {
-  // “Card” shadow (fake emboss)
+function drawSectionCard(page: any, x: number, y: number, w: number, h: number, section: Section, font: PDFFont, fontBold: PDFFont) {
+  // Soft shadow
   page.drawRectangle({
     x: x + 1.5,
     y: y - 1.5,
     width: w,
     height: h,
     color: rgb(0.965, 0.965, 0.966),
-    borderWidth: 0,
   });
 
   // Card body
@@ -362,7 +334,7 @@ function drawSectionCard(
     color: PALETTE.ink,
   });
 
-  // Description (quiet)
+  // Description
   page.drawText(section.description, {
     x: x + 12,
     y: y + h - 42,
@@ -370,6 +342,13 @@ function drawSectionCard(
     font,
     color: PALETTE.muted,
   });
+}
+
+function slugify(s: string) {
+  return (s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 async function addFields(
@@ -389,30 +368,38 @@ async function addFields(
   const fieldLeft = x + 12;
   const fieldW = w - 24;
 
-  // Field area bounds
+  // Field area bounds inside the card
   const top = y + h - 62;
   const bottom = y + 16;
 
   const rows = section.fields.length;
-  const rowH = Math.max(26, Math.floor((top - bottom) / rows));
+
+  // Allocate meaningful space for actual writing:
+  // each field gets label + a sizeable multiline box.
+  const available = top - bottom;
+  const gap = 10; // breathing space between blocks
+  const per = Math.max(42, Math.floor((available - gap * (rows - 1)) / rows));
+  const labelH = 10;
+  const boxH = Math.max(28, per - labelH);
+
+  const sectionKey = slugify(section.title);
 
   for (let i = 0; i < rows; i++) {
     const f = section.fields[i];
-    const yy = top - i * rowH;
+
+    const blockTop = top - i * (per + gap);
 
     // Label
     page.drawText(f.label, {
       x: fieldLeft,
-      y: yy,
+      y: blockTop,
       size: 8.8,
       font: fontBold,
       color: PALETTE.ink,
     });
 
-    // Field box (print clean: no heavy fills)
-    const boxY = yy - 18;
-    const boxH = 16;
-
+    // Box
+    const boxY = blockTop - (labelH + boxH);
     page.drawRectangle({
       x: fieldLeft,
       y: boxY,
@@ -424,38 +411,39 @@ async function addFields(
     });
 
     // Form field
-    const name = `${section.title.toLowerCase().replace(/\s+/g, "_")}.${f.key}`;
+    const name = `${sectionKey}.${slugify(f.key)}`;
     const tf = form.createTextField(name);
-    tf.enableMultiline();
 
-    // No placeholder text in the actual field (keeps it print-clean)
+    if (f.multiline) tf.enableMultiline();
     tf.setText("");
 
     tf.addToPage(page, {
-      x: fieldLeft + 3,
-      y: boxY + 3,
-      width: fieldW - 6,
-      height: boxH - 6,
+      x: fieldLeft + 4,
+      y: boxY + 4,
+      width: fieldW - 8,
+      height: boxH - 8,
     });
 
-    // Optional: discreet helper line for public/basic only (printed as faint microtext)
-    if ((tier === "public" || tier === "basic") && f.placeholder) {
-      page.drawText(f.placeholder, {
-        x: fieldLeft + 6,
-        y: boxY + 5,
+    // Discreet helper text (public/basic only)
+    if (tier === "public" || tier === "basic") {
+      page.drawText("Write here", {
+        x: fieldLeft + 8,
+        y: boxY + 6,
         size: 7.2,
         font,
         color: rgb(0.78, 0.78, 0.785),
       });
     }
+
+    // Set a viewer-friendly appearance
+    // (some viewers ignore font size unless you set it explicitly)
+    const anyTf = tf as any;
+    if (typeof anyTf.setFontSize === "function") anyTf.setFontSize(10);
   }
 
-  // Ensure /DA exists, then set sizes safely
+  // Critical for cross-viewer fillable reliability:
+  // regenerates appearance streams with embedded font
   form.updateFieldAppearances(font);
-  for (const field of form.getFields()) {
-    const anyField = field as any;
-    if (typeof anyField.setFontSize === "function") anyField.setFontSize(10);
-  }
 }
 
 function drawFooter(page: any, w: number, h: number, font: PDFFont, id: string) {
@@ -469,12 +457,13 @@ function drawFooter(page: any, w: number, h: number, font: PDFFont, id: string) 
     color: PALETTE.hairline,
   });
 
-  page.drawText(`Abraham of London`, { x: left, y, size: 8, font, color: PALETTE.muted });
-  page.drawText(id, { x: w - left - 120, y, size: 8, font, color: PALETTE.muted });
+  page.drawText("Abraham of London", { x: left, y, size: 8, font, color: PALETTE.muted });
+  page.drawText(id, { x: w - left - 140, y, size: 8, font, color: PALETTE.muted });
 }
 
 function fileName(format: Format, quality: Quality, tier: Tier) {
-  // Keep stable, predictable, “catalogue-grade”
+  // matches your catalogue naming:
+  // legacy-architecture-canvas-a4-premium-architect.pdf
   const tierSlug = TIER_MAP[tier].filename;
   return `legacy-architecture-canvas-${format.toLowerCase()}-${quality}-${tierSlug}.pdf`;
 }
@@ -510,6 +499,7 @@ async function generateOne(format: Format, quality: Quality, tier: Tier, outDir:
   drawHeader(page, w, h, font, fontBold, format);
   drawDiscreetMark(page, w, h, font, tier);
 
+  // Layout + sections
   const sections = getSections();
   const L = layout(format);
   const colW = (w - L.marginX * 2 - L.gapX) / L.cols;
@@ -530,10 +520,10 @@ async function generateOne(format: Format, quality: Quality, tier: Tier, outDir:
   ensureDir(outDir);
   const fp = path.join(outDir, fileName(format, quality, tier));
   const bytes = await doc.save();
+
   fs.writeFileSync(fp, bytes);
 
   const kb = Math.round(fs.statSync(fp).size / 1024);
-  // Clean output: one line, no emojis, no shouting
   console.log(`${path.basename(fp)}  ${kb}KB  ${id}`);
 }
 
@@ -547,7 +537,6 @@ async function main() {
   const outDir = path.join(process.cwd(), "public/assets/downloads");
   const formats: Format[] = formatArg === "all" ? ["A4", "Letter", "A3"] : [safeFormat(formatArg)];
 
-  // Clean, professional header
   console.log(`legacy-canvas  formats=${formats.join(",")}  quality=${quality}  tier=${tier}`);
 
   for (const f of formats) {
@@ -555,12 +544,18 @@ async function main() {
   }
 }
 
-const isMainModule = import.meta.url === `file://${process.argv[1].replace(/\\/g, "/")}`;
-if (isMainModule) {
+// ESM-safe direct run guard for tsx (Windows-safe)
+const invokedAsScript = (() => {
+  const argv1 = process.argv[1] ? path.resolve(process.argv[1]) : "";
+  const here = path.resolve(__filename);
+  return argv1 === here;
+})();
+
+if (invokedAsScript) {
   main().catch((e) => {
     console.error(e?.message || e);
     process.exit(1);
   });
 }
 
-export { type Format, type Quality, type Tier };
+export default main;
