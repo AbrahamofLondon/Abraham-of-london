@@ -6,7 +6,6 @@ import { getAllDashboardPDFs, getDashboardStats } from "@/utils/pdf-stats-conver
 import { LoadingState } from "@/components/ui/LoadingState";
 import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe";
 
-
 type MetricType = "generations" | "views" | "downloads" | "errors" | "size" | "categories";
 
 interface AnalyticsDashboardProps {
@@ -261,12 +260,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   }
 
   return (
-    <div className={`p-6 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"} ${className}`}>
+    <div className={`p-6 ${theme === "dark" ? "bg-gradient-to-br from-gray-900 to-gray-950 text-white" : "bg-gradient-to-br from-white to-gray-50 text-gray-900"} ${className} rounded-2xl shadow-2xl`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold">PDF Analytics Dashboard</h2>
-          <p className={`mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+            PDF Analytics Dashboard
+          </h2>
+          <p className={`mt-2 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
             Insights, usage patterns, generation performance and operational trends.
           </p>
         </div>
@@ -276,9 +277,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <select
               value={selectedMetric}
               onChange={(e) => setSelectedMetric(e.target.value as MetricType)}
-              className={`px-3 py-2 rounded-lg border ${
-                theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-gray-900"
-              } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`px-4 py-2.5 rounded-xl border ${
+                theme === "dark" 
+                  ? "bg-gray-800/50 border-gray-700/50 text-white backdrop-blur-sm" 
+                  : "bg-white/80 border-gray-300 text-gray-900 backdrop-blur-sm"
+              } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300`}
             >
               {metrics.map((metric) => (
                 <option key={metric} value={metric}>
@@ -291,15 +294,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           {exportEnabled && (
             <button
               onClick={handleExport}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                theme === "dark" ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-500 hover:bg-blue-600"
-              } text-white transition-colors`}
+              className={`px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white transition-all duration-300 shadow-lg hover:shadow-blue-500/30`}
             >
               Export Data
             </button>
           )}
 
-          <div className="text-sm px-3 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+          <div className="text-sm px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-200 font-medium">
             {pdfs.length} PDFs
           </div>
         </div>
@@ -329,11 +330,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Category Distribution */}
         <div
-          className={`rounded-xl border p-6 ${
-            theme === "dark" ? "border-gray-800 bg-gray-950" : "border-gray-200 bg-gray-50"
-          }`}
+          className={`rounded-2xl border p-6 backdrop-blur-sm ${
+            theme === "dark" 
+              ? "border-gray-700/50 bg-gradient-to-br from-gray-800/40 to-gray-900/40" 
+              : "border-gray-200/80 bg-gradient-to-br from-white/80 to-gray-50/80"
+          } shadow-lg`}
         >
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-300 dark:text-gray-300">
             <span>📊</span> Category Distribution
           </h3>
           <div className="space-y-3">
@@ -342,12 +345,15 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 .sort(([, a], [, b]) => b - a)
                 .map(([category, count]) => (
                   <div key={category} className="flex items-center justify-between">
-                    <span className="font-medium">{category}</span>
+                    <span className="font-medium text-gray-300 dark:text-gray-300">{category}</span>
                     <div className="flex items-center gap-3">
-                      <div className="w-32 h-2 bg-gray-700 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 dark:bg-blue-400 rounded-full" style={{ width: `${(count / pdfs.length) * 100}%` }} />
+                      <div className="w-32 h-2 bg-gray-700/30 dark:bg-gray-800/30 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 dark:from-blue-400 dark:to-cyan-400 rounded-full" 
+                          style={{ width: `${(count / pdfs.length) * 100}%` }} 
+                        />
                       </div>
-                      <span className="text-sm font-medium w-8 text-right">{count}</span>
+                      <span className="text-sm font-medium w-8 text-right text-gray-300 dark:text-gray-300">{count}</span>
                     </div>
                   </div>
                 ))}
@@ -356,11 +362,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
         {/* Tier Distribution */}
         <div
-          className={`rounded-xl border p-6 ${
-            theme === "dark" ? "border-gray-800 bg-gray-950" : "border-gray-200 bg-gray-50"
-          }`}
+          className={`rounded-2xl border p-6 backdrop-blur-sm ${
+            theme === "dark" 
+              ? "border-gray-700/50 bg-gradient-to-br from-gray-800/40 to-gray-900/40" 
+              : "border-gray-200/80 bg-gradient-to-br from-white/80 to-gray-50/80"
+          } shadow-lg`}
         >
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-300 dark:text-gray-300">
             <span>🎯</span> Tier Distribution
           </h3>
           <div className="space-y-3">
@@ -370,23 +378,26 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 .map(([tier, count]) => (
                   <div key={tier} className="flex items-center justify-between">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                         tier === "free"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300"
                           : tier === "member"
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          ? "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-700 dark:text-blue-300"
                           : tier === "architect"
-                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                          ? "bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-purple-700 dark:text-purple-300"
+                          : "bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-700 dark:text-yellow-300"
                       }`}
                     >
                       {tier}
                     </span>
                     <div className="flex items-center gap-3">
-                      <div className="w-24 h-2 bg-gray-700 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500 dark:bg-green-400 rounded-full" style={{ width: `${(count / pdfs.length) * 100}%` }} />
+                      <div className="w-24 h-2 bg-gray-700/30 dark:bg-gray-800/30 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-400 dark:to-emerald-400 rounded-full" 
+                          style={{ width: `${(count / pdfs.length) * 100}%` }} 
+                        />
                       </div>
-                      <span className="text-sm font-medium w-8 text-right">{count}</span>
+                      <span className="text-sm font-medium w-8 text-right text-gray-300 dark:text-gray-300">{count}</span>
                     </div>
                   </div>
                 ))}
@@ -398,35 +409,41 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
         <div
-          className={`rounded-xl border p-6 lg:col-span-2 ${
-            theme === "dark" ? "border-gray-800 bg-gray-950" : "border-gray-200 bg-gray-50"
-          }`}
+          className={`rounded-2xl border p-6 lg:col-span-2 backdrop-blur-sm ${
+            theme === "dark" 
+              ? "border-gray-700/50 bg-gradient-to-br from-gray-800/40 to-gray-900/40" 
+              : "border-gray-200/80 bg-gradient-to-br from-white/80 to-gray-50/80"
+          } shadow-lg`}
         >
-          <h3 className="text-lg font-semibold mb-4">📈 Recent Activity</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-300 dark:text-gray-300">📈 Recent Activity</h3>
           <div className="space-y-3">
-            {pdfs
-              safeSlice(...)
-              .sort((a, b) => {
+            {safeSlice(
+              [...pdfs].sort((a, b) => {
                 const dateA = new Date(a.lastModified || a.updatedAt || 0).getTime();
                 const dateB = new Date(b.lastModified || b.updatedAt || 0).getTime();
                 return dateB - dateA;
-              })
-              safeSlice(..., 0, 5)
-              .map((pdf) => (
+              }),
+              0,
+              5
+            ).map((pdf) => (
                 <div
                   key={pdf.id}
-                  className="flex items-center justify-between py-3 border-b border-gray-700 dark:border-gray-700 last:border-0"
+                  className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-800/20 to-gray-900/10 dark:from-gray-800/10 dark:to-gray-900/5 hover:from-gray-800/30 hover:to-gray-900/20 transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`p-2 rounded-lg ${
-                        pdf.exists ? "bg-green-100 dark:bg-green-900" : pdf.error ? "bg-red-100 dark:bg-red-900" : "bg-yellow-100 dark:bg-yellow-900"
+                      className={`p-2 rounded-xl ${
+                        pdf.exists 
+                          ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20" 
+                          : pdf.error 
+                            ? "bg-gradient-to-r from-red-500/20 to-rose-500/20" 
+                            : "bg-gradient-to-r from-yellow-500/20 to-amber-500/20"
                       }`}
                     >
                       {pdf.exists ? "✅" : pdf.error ? "❌" : "⏳"}
                     </div>
                     <div>
-                      <p className="font-medium">{pdf.title}</p>
+                      <p className="font-medium text-gray-300 dark:text-gray-300 group-hover:text-white transition-colors duration-300">{pdf.title}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {pdf.category} • {pdf.tier || "No tier"} • {pdf.fileSize || "Unknown size"}
                       </p>
@@ -448,11 +465,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
         {/* Quick Stats */}
         <div
-          className={`rounded-xl border p-6 ${
-            theme === "dark" ? "border-gray-800 bg-gray-950" : "border-gray-200 bg-gray-50"
-          }`}
+          className={`rounded-2xl border p-6 backdrop-blur-sm ${
+            theme === "dark" 
+              ? "border-gray-700/50 bg-gradient-to-br from-gray-800/40 to-gray-900/40" 
+              : "border-gray-200/80 bg-gradient-to-br from-white/80 to-gray-50/80"
+          } shadow-lg`}
         >
-          <h3 className="text-lg font-semibold mb-4">📋 Quick Stats</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-300 dark:text-gray-300">📋 Quick Stats</h3>
           <div className="space-y-4">
             <StatItem
               label="Largest PDF"
@@ -495,21 +514,23 @@ const MetricCard: React.FC<{
   icon: string;
 }> = ({ title, value, change, theme, icon }) => (
   <div
-    className={`rounded-xl border p-6 transition-all hover:scale-[1.02] ${
-      theme === "dark" ? "border-gray-800 bg-gray-950 hover:border-gray-700" : "border-gray-200 bg-gray-50 hover:border-gray-300"
-    }`}
+    className={`rounded-2xl border p-6 transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm ${
+      theme === "dark" 
+        ? "border-gray-700/50 bg-gradient-to-br from-gray-800/40 to-gray-900/40 hover:border-gray-600/50" 
+        : "border-gray-200/80 bg-gradient-to-br from-white/80 to-gray-50/80 hover:border-gray-300"
+    } shadow-lg hover:shadow-xl`}
   >
     <div className="flex items-start justify-between mb-4">
       <div className="text-3xl">{icon}</div>
       {change ? (
         <span
-          className={`text-sm px-2 py-1 rounded-full ${
+          className={`text-sm px-3 py-1.5 rounded-full ${
             change.startsWith("+")
-              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+              ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300"
               : change.startsWith("-")
-              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-              : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-          }`}
+              ? "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-700 dark:text-red-300"
+              : "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-700 dark:text-blue-300"
+          } font-medium`}
         >
           {change}
         </span>
@@ -526,7 +547,7 @@ const StatItem: React.FC<{
   subvalue: string;
   theme: "light" | "dark";
 }> = ({ label, value, subvalue, theme }) => (
-  <div>
+  <div className="p-3 rounded-xl bg-gradient-to-r from-gray-800/10 to-gray-900/5 dark:from-gray-800/5 dark:to-gray-900/2 hover:from-gray-800/20 hover:to-gray-900/10 transition-all duration-300">
     <p className={`text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"} mb-1`}>{label}</p>
     <p className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-1`}>{value}</p>
     <p className="text-xs text-gray-500">{subvalue}</p>

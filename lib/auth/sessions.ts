@@ -355,7 +355,7 @@ export async function getActiveSessions(
 }
 // ==================== SECURITY UTILITIES ====================
 function generateSecureToken(length: number): string {
-  return randomBytes(Math.ceil(length / 2)).toString('hex').slice, 0, length);
+  return randomBytes(Math.ceil(length / 2)).toString("hex").slice(0, length);
 }
 // ==================== COOKIE MANAGEMENT ====================
 export function createSessionCookie(

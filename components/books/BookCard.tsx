@@ -338,7 +338,7 @@ export default function BookCard({
                 <div className="flex flex-wrap gap-1">
                   {bookWithId.tags
                     .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
-                    safeArraySlice(..., 0, 3)
+                    safeArraySlice(tags, 0, 3)
                     .map((tag, index) => (
                       <span
                         key={`${tag}-${index}`}

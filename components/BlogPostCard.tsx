@@ -1,5 +1,4 @@
 // components/BlogPostCard.tsx
-import { safeArraySlice } from "@/lib/utils/safe";
 "use client";
 
 import * as React from "react";
@@ -15,13 +14,16 @@ import {
   type FallbackConfig,
 } from "@/lib/image-utils";
 
+// Import the safe utilities
+import { safeSlice } from "@/lib/utils/safe";
+
 // ✅ Use the shared PostLike type (single source of truth)
 import type { PostLike } from "@/components/Cards/types";
 
 interface BlogPostCardProps {
   post: PostLike;
   priority?: boolean;
-  size?: "default" | "featured" | "compact";
+  size?: "default" | "featured" | "compact" | "luxury";
   showCategory?: boolean;
   showAuthor?: boolean;
   showTags?: boolean;
@@ -78,13 +80,29 @@ const shimmerStyles = `
     0% { transform: translateX(-120%); }
     100% { transform: translateX(120%); }
   }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
 `;
 
 const ImageShimmer = () => (
   <div className="absolute inset-0 overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+    <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50/80 to-gray-100 animate-pulse" />
     <div
-      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
       style={{ animation: "shimmer 2s infinite" }}
     />
   </div>
@@ -121,6 +139,7 @@ function getPostFallbackConfig(post: PostLike): FallbackConfig {
     const firstTag = safeString(tags[0])?.toLowerCase() || "";
     if (firstTag.includes("philosophy") || firstTag.includes("deep")) theme = "dark";
     if (firstTag.includes("business") || firstTag.includes("strategy")) theme = "light";
+    if (firstTag.includes("luxury") || firstTag.includes("premium")) theme = "luxury";
   }
 
   return { type: "post", theme, category };
@@ -234,31 +253,53 @@ export default function BlogPostCard({
   const sizeClasses = useMemo(
     () => ({
       compact: {
-        container: "rounded-2xl",
-        title: "text-lg md:text-xl",
+        container: "rounded-xl",
+        title: "text-lg md:text-xl font-serif font-light",
         content: "p-4",
         image: "aspect-[16/9]",
-        excerpt: "line-clamp-2 text-sm",
+        excerpt: "line-clamp-2 text-sm font-light leading-relaxed",
+        meta: "text-xs",
       },
       default: {
-        container: "rounded-3xl",
-        title: "text-xl md:text-2xl",
-        content: "p-6",
-        image: "aspect-[16/9]",
-        excerpt: "line-clamp-3",
+        container: "rounded-2xl",
+        title: "text-xl md:text-2xl font-serif font-light tracking-tight",
+        content: "p-5 md:p-6",
+        image: "aspect-[16/10]",
+        excerpt: "line-clamp-3 font-light leading-relaxed",
+        meta: "text-sm",
       },
       featured: {
-        container: "rounded-[2rem]",
-        title: "text-2xl md:text-3xl lg:text-4xl",
+        container: "rounded-[1.5rem] md:rounded-[2rem]",
+        title: "text-2xl md:text-3xl lg:text-4xl font-serif font-light tracking-tight",
+        content: "p-6 md:p-8",
+        image: "aspect-[16/9] md:aspect-[21/9]",
+        excerpt: "line-clamp-4 text-base md:text-lg font-light leading-relaxed",
+        meta: "text-sm md:text-base",
+      },
+      luxury: {
+        container: "rounded-3xl",
+        title: "text-2xl md:text-3xl lg:text-4xl font-serif font-light tracking-tight",
         content: "p-8",
-        image: "aspect-[16/10]",
-        excerpt: "line-clamp-4 text-base",
+        image: "aspect-[4/3]",
+        excerpt: "line-clamp-3 text-base md:text-lg font-light leading-relaxed",
+        meta: "text-sm",
       },
     }),
     [],
   );
 
   const currentSize = sizeClasses[size];
+
+  // Filter and slice tags safely
+  const displayTags = useMemo(() => {
+    if (!showTags || !Array.isArray(post.tags)) return [];
+    
+    return safeSlice(
+      post.tags.filter((t): t is string => isString(t) && t.trim().length > 0),
+      0,
+      3
+    );
+  }, [post.tags, showTags]);
 
   // ────────────────────────────────────────────────────────────────────────────
   // HANDLERS
@@ -298,16 +339,25 @@ export default function BlogPostCard({
 
       <article
         className={[
-          "group relative overflow-hidden border border-white/20 bg-white/95 backdrop-blur-sm shadow-xl shadow-black/10 transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20",
+          "group relative overflow-hidden bg-gradient-to-br from-white via-white to-ivory",
+          "shadow-2xl shadow-black/[0.02] transition-all duration-700",
+          "hover:shadow-3xl hover:shadow-black/[0.04] hover:-translate-y-1",
+          "border border-slate-100/80 backdrop-blur-sm",
+          size === "luxury" && "hover:scale-[1.01]",
           currentSize.container,
           className,
-        ].join(" ")}
+        ].filter(Boolean).join(" ")}
         aria-labelledby={`post-title-${slug}`}
+        style={{ animation: "fadeInUp 0.6s ease-out" }}
       >
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-white via-gray-50/80 to-softGold/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          aria-hidden="true"
-        />
+        {/* Premium background effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-softGold/5" />
+        
+        {/* Luxury accent border */}
+        <div className="absolute inset-0 rounded-inherit border border-slate-100/50 pointer-events-none" />
+        
+        {/* Hover shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-softGold/[0.02] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
         <Link
           href={href}
@@ -316,12 +366,16 @@ export default function BlogPostCard({
           onClick={handleClick}
           aria-label={`Read article: ${safeTitle}`}
         >
-          {/* IMAGE */}
-          <div className={`relative w-full overflow-hidden ${currentSize.image}`}>
+          {/* IMAGE CONTAINER */}
+          <div className={`relative w-full overflow-hidden ${currentSize.image} rounded-t-inherit`}>
+            {/* Elegant overlay gradient */}
             <div
-              className="absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/20 to-transparent opacity-60"
+              className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-black/15 to-transparent"
               aria-hidden="true"
             />
+            
+            {/* Luxury accent line */}
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent z-20" />
 
             {!imageLoaded && !imageError ? <ImageShimmer /> : null}
 
@@ -329,75 +383,90 @@ export default function BlogPostCard({
               src={imageProps.src}
               alt={imageProps.alt}
               fill
-              className={`object-cover transition-all duration-700 ${
-                imageLoaded ? "opacity-100 group-hover:scale-[1.03]" : "opacity-0"
+              className={`object-cover transition-all duration-1000 ${
+                imageLoaded 
+                  ? "opacity-100 group-hover:scale-[1.03] group-hover:brightness-110" 
+                  : "opacity-0"
               }`}
-              sizes="(min-width: 1024px) 600px, (min-width: 768px) 400px, 100vw"
+              sizes="(min-width: 1536px) 640px, (min-width: 1280px) 560px, (min-width: 1024px) 480px, (min-width: 768px) 400px, 100vw"
               priority={imageProps.priority}
               loading={imageProps.loading}
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
 
-            {/* TOP BADGES */}
-            <div className="absolute left-4 top-4 z-20 flex flex-wrap gap-2">
+            {/* TOP BADGES - Luxury styling */}
+            <div className="absolute left-6 top-6 z-30 flex flex-wrap gap-3">
               {showCategory && safeCategory ? (
-                <div className="rounded-full border border-white/20 bg-black/55 px-3 py-1.5 backdrop-blur-sm">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-white">
-                    {safeCategory}
+                <div className="rounded-full border border-white/30 bg-black/40 backdrop-blur-xl px-4 py-2 transition-all duration-500 group-hover:bg-black/60">
+                  <span className="text-xs font-medium tracking-wider text-white">
+                    {safeCategory.toUpperCase()}
                   </span>
                 </div>
               ) : null}
 
               {Boolean((post as any).featured) ? (
-                <div className="rounded-full border border-white/20 bg-gradient-to-r from-softGold to-amber-500 px-3 py-1.5 backdrop-blur-sm">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-white">
-                    Featured
+                <div className="rounded-full border border-softGold/40 bg-gradient-to-r from-softGold/20 to-amber-500/20 backdrop-blur-xl px-4 py-2 transition-all duration-500 group-hover:from-softGold/30 group-hover:to-amber-500/30">
+                  <span className="text-xs font-medium tracking-wider text-softGold">
+                    FEATURED
                   </span>
                 </div>
               ) : null}
             </div>
 
-            {/* HOVER CTA */}
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/45 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-              <div className="rounded-full border border-white/20 bg-black/55 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
-                Read Insight{readText ? <span className="ml-2 text-white/70">• {readText}</span> : null}
+            {/* Luxury hover CTA */}
+            <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-all duration-700 group-hover:opacity-100">
+              <div className="rounded-full border border-white/30 bg-black/60 backdrop-blur-xl px-6 py-3 transition-transform duration-500 group-hover:scale-105">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium tracking-wide text-white">
+                    Read Article
+                  </span>
+                  <span className="text-xs text-white/70">•</span>
+                  {readText ? (
+                    <span className="text-xs font-light text-white/70">{readText}</span>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
 
           {/* CONTENT */}
           <div className={`relative ${currentSize.content}`}>
+            {/* Title with elegant styling */}
             <h3
               id={`post-title-${slug}`}
               className={[
-                "mb-3 line-clamp-2 font-serif font-light leading-tight text-deepCharcoal transition-colors duration-300 group-hover:text-forest",
+                "mb-4 font-serif font-light leading-tight text-deepCharcoal transition-colors duration-500",
+                "group-hover:text-softGold/90",
                 currentSize.title,
               ].join(" ")}
             >
               {safeTitle}
             </h3>
 
+            {/* Excerpt with refined typography */}
             {safeExcerpt ? (
-              <p className={`mb-4 font-light leading-relaxed text-gray-600 ${currentSize.excerpt}`}>
+              <p className={`mb-6 font-light leading-relaxed text-slate-600 ${currentSize.excerpt}`}>
                 {safeExcerpt}
               </p>
             ) : null}
 
+            {/* AUTHOR & METADATA - Luxury styling */}
             {showAuthor ? (
-              <div className="flex items-center justify-between border-t border-gray-100/60 pt-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
+              <div className="flex items-center justify-between border-t border-slate-100/60 pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="relative" style={{ animation: "float 3s ease-in-out infinite" }}>
+                    {/* Author image glow */}
                     <div
-                      className="absolute inset-0 rounded-full bg-softGold/15 transition-transform duration-300 group-hover:scale-110"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-softGold/20 to-transparent blur-md transition-all duration-500 group-hover:blur-xl group-hover:from-softGold/40"
                       aria-hidden="true"
                     />
                     <Image
-                      src={authorPic} // ✅ now always defined, always in scope
+                      src={authorPic}
                       alt={`Author: ${authorName}`}
-                      width={40}
-                      height={40}
-                      className="relative z-10 h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm"
+                      width={44}
+                      height={44}
+                      className="relative z-10 h-11 w-11 rounded-full border-2 border-white/80 object-cover shadow-lg"
                       onError={handleAuthorImageError}
                     />
                   </div>
@@ -405,41 +474,42 @@ export default function BlogPostCard({
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-deepCharcoal">{authorName}</span>
                     {metaDisplay ? (
-                      <span className="text-xs font-light text-gray-500">{metaDisplay}</span>
+                      <span className={`text-xs font-light text-slate-500 ${currentSize.meta}`}>
+                        {metaDisplay}
+                      </span>
                     ) : null}
                   </div>
                 </div>
 
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-softGold/10 text-softGold transition-colors group-hover:bg-softGold/20">
+                {/* Luxury arrow button */}
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-softGold/10 to-softGold/5 text-softGold transition-all duration-500 group-hover:from-softGold/20 group-hover:to-softGold/10 group-hover:scale-110">
                   <svg
-                    className="h-4 w-4"
+                    className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </span>
               </div>
             ) : null}
 
-            {showTags && Array.isArray(post.tags) && post.tags.length > 0 ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {post.tags
-                  .filter((t): t is string => isString(t) && t.trim().length > 0)
-                  safeArraySlice(..., 0, 3)
-                  .map((tag, idx) => (
-                    <span
-                      key={`${tag}-${idx}`}
-                      className="rounded-full border border-gray-200/60 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-colors hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+            {/* TAGS - Refined styling */}
+            {displayTags.length > 0 ? (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {displayTags.map((tag, idx) => (
+                  <span
+                    key={`${tag}-${idx}`}
+                    className="rounded-full border border-slate-200/60 bg-white/50 px-3.5 py-1.5 text-xs font-light text-slate-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/30 hover:bg-softGold/10 hover:text-softGold"
+                  >
+                    {tag}
+                  </span>
+                ))}
 
-                {post.tags.length > 3 ? (
-                  <span className="rounded-full border border-gray-200/60 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-500">
+                {post.tags && post.tags.length > 3 ? (
+                  <span className="rounded-full border border-slate-200/60 bg-white/50 px-3.5 py-1.5 text-xs font-light text-slate-500">
                     +{post.tags.length - 3}
                   </span>
                 ) : null}
@@ -447,9 +517,15 @@ export default function BlogPostCard({
             ) : null}
           </div>
 
-          {/* bottom accent */}
+          {/* Luxury bottom accent line */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-softGold/0 via-softGold to-forest/0 transition-transform duration-500 group-hover:scale-x-100"
+            className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-softGold/30 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+            aria-hidden="true"
+          />
+          
+          {/* Premium shine effect on hover */}
+          <div
+            className="absolute inset-0 rounded-inherit bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100"
             aria-hidden="true"
           />
         </Link>
@@ -459,4 +535,3 @@ export default function BlogPostCard({
 }
 
 export type { BlogPostCardProps };
-

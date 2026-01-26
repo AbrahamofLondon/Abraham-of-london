@@ -119,7 +119,7 @@ const rateLimitedHandler = withInnerCircleRateLimit({
     const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
     // Get admin token for ID generation
     const adminToken = authHeader?.startsWith("Bearer ") ? safeSlice(authHeader, 7) : adminKeyFromHeader;
-    const adminId = `admin_${Buffer.from(adminToken || '').toString('hex').slice, 0, 16)}`;
+    const adminId = `admin_${Buffer.from(adminToken || "").toString("hex").slice(0, 16)}`;
     // Build filter options
     const filterOptions = {
       page,

@@ -34,6 +34,7 @@ import {
   normalizeSlug,
   getDocHref,
 } from "@/lib/content/shared";
+
 type PrintItem = {
   slug: string;
   title: string;
@@ -51,16 +52,19 @@ type PrintItem = {
   downloadUrl?: string | null;
   price?: string | null;
 };
+
 type Props = {
   prints: PrintItem[];
   featuredCount: number;
   categories: string[];
   popularTags: string[];
 };
+
 // Helper function to get cover image
 function resolveDocCoverImage(doc: any): string | null {
   return doc.coverImage || doc.image || doc.thumbnail || null;
 }
+
 // Helper function to format date
 function formatPrintDate(dateString: string | null): string | null {
   if (!dateString) return null;
@@ -75,20 +79,24 @@ function formatPrintDate(dateString: string | null): string | null {
     return null;
   }
 }
+
 // Helper function to get print dimensions
 function getPrintDimensions(doc: any): string | null {
   if (doc.dimensions) return doc.dimensions;
   if (doc.width && doc.height) return `${doc.width} × ${doc.height}`;
   return null;
 }
+
 // Helper function to get download URL
 function getDownloadUrl(doc: any): string | null {
   return doc.downloadUrl || doc.fileUrl || doc.url || null;
 }
+
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
     const contentlayerData = getContentlayerData(); // ✅ Removed await - it's synchronous now
     const allDocs = getPublishedDocuments();
+
     // Filter for prints (adjust based on your content structure)
     const printDocs = allDocs.filter((doc: any) => {
       const kind = String(doc._raw?.sourceFileDir || doc.kind || "").toLowerCase();
@@ -105,6 +113,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         (doc.url && doc.url.includes('/prints/'))
       );
     });
+
     const prints: PrintItem[] = printDocs
       .filter((p: any) => p && !isDraftContent(p))
       .map((p: any) => ({
@@ -132,9 +141,11 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         const db = b.date ? new Date(b.date).getTime() : 0;
         return db - da || a.title.localeCompare(b.title);
       });
+
     // Calculate stats
     const featuredCount = prints.filter(p => p.featured).length;
     const categories = [...new Set(prints.map(p => p.category).filter(Boolean))] as string[];
+
     // Get popular tags
     const tagCounts: Record<string, number> = {};
     prints.forEach(print => {
@@ -142,11 +153,15 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         tagCounts[tag] = (tagCounts[tag] || 0) + 1;
       });
     });
-    const popularTags = Object.entries(tagCounts)
-      .sort((a, b) => b[1] - a[1])
-      safeArraySlice(..., 0, 12)
-      .map(([tag]) => tag);
+
+    const popularTags = safeArraySlice(
+      Object.entries(tagCounts).sort((a, b) => b[1] - a[1]),
+      0,
+      12
+    ).map(([tag]) => tag);
+
     console.log(`🎨 Prints index: Loaded ${prints.length} prints, ${featuredCount} featured`);
+
     return { 
       props: { 
         prints,
@@ -169,12 +184,14 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     };
   }
 };
+
 const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, popularTags }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
   const [showDownloadOnly, setShowDownloadOnly] = React.useState(false);
+
   const filteredPrints = React.useMemo(() => {
     const q = searchQuery.toLowerCase();
     return prints.filter((print) => {
@@ -190,19 +207,28 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
       return matchesSearch && matchesCategory && matchesTag && matchesDownload;
     });
   }, [prints, searchQuery, selectedCategory, selectedTag, showDownloadOnly]);
+
   const featuredPrints = React.useMemo(() => 
-    safeArraySlice(prints.filter(...), 0, 3),
+    safeArraySlice(
+      prints.filter(p => p.featured),
+      0,
+      3
+    ),
     [prints]
   );
+
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("all");
     setSelectedTag(null);
     setShowDownloadOnly(false);
   };
+
   const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedTag || showDownloadOnly;
+
   const pageTitle = "Visual Artefacts";
   const pageDescription = "Typography, posters, and statements. Designed like heirlooms to anchor the physical space with strategic truth.";
+
   return (
     <Layout title={pageTitle} description={pageDescription}>
       <Head>
@@ -216,6 +242,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="canonical" href="https://abrahamoflondon.com/prints" />
       </Head>
+
       <main className="min-h-screen bg-black">
         {/* Hero Section */}
         <section className="relative overflow-hidden border-b border-gold/10 bg-gradient-to-b from-black via-zinc-950/50 to-black">
@@ -234,6 +261,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
               <p className="mt-6 text-lg leading-relaxed text-gray-400">
                 {pageDescription}
               </p>
+              
               {/* Stats */}
               <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-xl">
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
@@ -255,6 +283,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
                   <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Downloadable</div>
                 </div>
               </div>
+
               <div className="mt-12 flex flex-wrap gap-4">
                 <Link
                   href="#prints-grid"
@@ -274,6 +303,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
             </div>
           </div>
         </section>
+
         {/* Filters Section */}
         <section className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-xl py-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -320,6 +350,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
                 </div>
               </div>
             </div>
+
             {/* Active Filters & Popular Tags */}
             <div className="mt-4 space-y-3">
               {hasActiveFilters && (
@@ -358,6 +389,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
                   </button>
                 </div>
               )}
+
               {/* Popular Tags */}
               {popularTags.length > 0 && !selectedTag && (
                 <div className="flex items-center gap-2">
@@ -382,6 +414,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
             </div>
           </div>
         </section>
+
         {/* Featured Prints */}
         {featuredPrints.length > 0 && (
           <section className="py-12 border-b border-white/10">
@@ -455,6 +488,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
             </div>
           </section>
         )}
+
         {/* Main Prints Grid */}
         <section id="prints-grid" className="py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -477,6 +511,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
                     </label>
                   </div>
                 </div>
+
                 <div className={viewMode === "grid" 
                   ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
                   : "space-y-6"
@@ -549,7 +584,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
                           )}
                           {print.tags.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">
-                              {print.safeSlice(tags, 0, 3).map((tag) => (
+                              {safeSlice(print.tags, 0, 3).map((tag) => (
                                 <button
                                   key={tag}
                                   onClick={(e) => {
@@ -614,6 +649,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
             )}
           </div>
         </section>
+
         {/* CTA Section */}
         <section className="py-20 border-t border-white/10">
           <div className="mx-auto max-w-4xl px-4 text-center">
@@ -650,4 +686,5 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
     </Layout>
   );
 };
-export default PrintsIndexPage;
+
+export default PrintsIndexPage;

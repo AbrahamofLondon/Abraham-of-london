@@ -14,7 +14,6 @@ coverImage: /assets/images/resources/brotherhood-starter-kit.jpg
 accessLevel: public
 resourceType: guide
 docKind: Resource
-href: /resources/brotherhood-starter-kit
 downloadUrl: /assets/resources/pdfs/brotherhood-starter-kit.pdf
 ogTitle: ""
 ogDescription: ""
@@ -52,3 +51,4 @@ Essential tools and frameworks for building authentic brotherhood and meaningful
 - **Service over Status** - Focus on how you can serve, not what you can get
 
 > "Brotherhood isn't about having the same story-it's about fighting for each other's stories."
+

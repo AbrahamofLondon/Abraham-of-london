@@ -11,7 +11,6 @@ accessLevel: public
 resourceType: guide
 docKind: Resource
 downloadUrl: /assets/resources/pdfs/fatherhood-impact-framework.pdf
-href: /resources/fatherhood-impact-framework
 ogTitle: ""
 ogDescription: ""
 socialCaption: ""
@@ -61,3 +60,4 @@ This resource defines the five domains every father must architect intentionally
 > "A father's presence becomes a child's first definition of safety."
 
 This framework is an anchor for every father's journey.
+

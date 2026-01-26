@@ -817,14 +817,18 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   try {
     const allShorts = getAllShorts(); // ✅ Removed await - it's synchronous now
 
-    const featuredShorts = (allShorts as any[])
-      .filter((s) => (s?.published ?? true) && !(s?.draft ?? false))
-      .sort((a, b) => {
-        const da = a?.date ? new Date(a.date).getTime() : 0;
-        const db = b?.date ? new Date(b.date).getTime() : 0;
-        return db - da;
-      })
-      safeArraySlice(..., 0, 3);
+    // ✅ FIXED: Apply safeArraySlice directly to the filtered and sorted array
+    const featuredShorts = safeArraySlice(
+      (allShorts as any[])
+        .filter((s) => (s?.published ?? true) && !(s?.draft ?? false))
+        .sort((a, b) => {
+          const da = a?.date ? new Date(a.date).getTime() : 0;
+          const db = b?.date ? new Date(b.date).getTime() : 0;
+          return db - da;
+        }),
+      0,
+      3
+    );
 
     return { props: { featuredShorts }, revalidate: 3600 };
   } catch (error) {

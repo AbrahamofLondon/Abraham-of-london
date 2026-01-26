@@ -16,11 +16,6 @@ const baseConfig = {
     ignoreBuildErrors: true,
   },
 
-  // ✅ SHIP-FIRST: stop ESLint from failing the build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   env: {
     CONTENTLAYER_DISABLE_WARNINGS: "true",
     NEXT_PUBLIC_SITE_URL:
@@ -171,7 +166,6 @@ const baseConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-XSS-Protection", value: "1; mode=block" },
-          // NOTE: "no-store" everywhere is heavy-handed, but we keep it for now since it was your stance.
           { key: "Cache-Control", value: "no-store" },
           ...(isProd ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }] : []),
           {

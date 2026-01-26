@@ -166,7 +166,8 @@ export default function MilestonesTimeline({
 
   // Defensive copy + ascending sort by year
   const data = React.useMemo(() => {
-    const arr = (items && items.length ? items : DEFAULT_ITEMS)safeArraySlice(...);
+    const base = items && items.length ? items : DEFAULT_ITEMS;
+    const arr = safeArraySlice(base, 0);
     arr.sort((a, b) => a.year - b.year);
     return arr;
   }, [items]);

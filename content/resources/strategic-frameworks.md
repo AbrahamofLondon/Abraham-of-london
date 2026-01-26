@@ -16,7 +16,6 @@ coverImage: /assets/images/canon/canon-resources.jpg
 accessLevel: public
 resourceType: guide
 docKind: Resource
-href: /resources/strategic-frameworks
 ogTitle: ""
 ogDescription: ""
 socialCaption: ""

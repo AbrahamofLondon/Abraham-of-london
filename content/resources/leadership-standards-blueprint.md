@@ -10,7 +10,6 @@ coverImage: /assets/images/resources/leadership-standards-blueprint.jpg
 accessLevel: public
 resourceType: guide
 docKind: Resource
-href: /resources/leadership-standards-blueprint
 downloadUrl: /assets/resources/pdfs/leadership-standards-blueprint.pdf
 ogTitle: ""
 ogDescription: ""
@@ -45,5 +44,6 @@ This resource distills the highest-order patterns shared by leaders who build le
 > "Legacies don't emerge from gifts - they emerge from standards."
 
 Use this blueprint to audit your leadership or evaluate those you follow.
+
 
 

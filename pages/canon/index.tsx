@@ -25,9 +25,6 @@ import {
 import Layout from "@/components/Layout";
 import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
 
-
-// REMOVED: import from "@/lib/content" - This was causing the Webpack chunk error
-
 type AccessLevel = "public" | "inner-circle" | "private";
 
 type CanonItem = {
@@ -67,7 +64,6 @@ type CanonIndexProps = {
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 
-// SAFE HELPER FUNCTIONS (No imports from problematic modules)
 function safeNormalizeSlug(input: string): string {
   try {
     return (input || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
@@ -80,16 +76,13 @@ function safeGetAccessLevel(doc: any): string {
   try {
     if (!doc) return "public";
     
-    // Check access field
     if (doc.access === "inner-circle" || doc.access === "members") return "inner-circle";
     if (doc.access === "private" || doc.access === "restricted") return "private";
     
-    // Check tags
     const tags = Array.isArray(doc.tags) ? doc.tags.map((t: any) => String(t).toLowerCase()) : [];
     if (tags.includes("inner-circle") || tags.includes("members")) return "inner-circle";
     if (tags.includes("private") || tags.includes("restricted")) return "private";
     
-    // Check category
     const category = String(doc.category || "").toLowerCase();
     if (category.includes("inner-circle")) return "inner-circle";
     
@@ -203,14 +196,11 @@ function resolveCanonHref(slug: string): string {
 }
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
-  // SAFE: All operations wrapped in try-catch with defaults
   try {
-    // Step 1: Try to get data from contentlayer with dynamic import
     let data: any = { allCanons: [], allDocuments: [] };
     let allPublished: any[] = [];
     
     try {
-      // DYNAMIC IMPORT to avoid Webpack chunk errors
       const contentModule = await import("@/lib/content");
       
       if (contentModule.getContentlayerData) {
@@ -222,14 +212,12 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       }
     } catch (error) {
       console.warn("⚠️ Contentlayer import failed, using empty data");
-      // Fallback: Try direct import from contentlayer/generated
       try {
-        // @ts-ignore - contentlayer/generated is generated at build time
+        // @ts-ignore
         const generated = await import("contentlayer/generated");
         const docs = generated?.allDocuments || [];
         allPublished = Array.isArray(docs) ? docs : [];
         
-        // Filter for canon items
         data.allCanons = allPublished.filter((doc: any) => {
           try {
             const dir = String(doc._raw?.sourceFileDir || "").toLowerCase();
@@ -243,7 +231,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       }
     }
 
-    // Step 2: Process canon data safely
     const canonPrimary = Array.isArray(data.allCanons) ? data.allCanons : [];
     
     const canonSecondary = (Array.isArray(allPublished) ? allPublished : []).filter((doc: any) => {
@@ -270,7 +257,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       }
     });
 
-    // Step 3: Transform to CanonItems safely
     const items: CanonItem[] = merged
       .filter((c: any) => {
         try {
@@ -304,7 +290,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
             volumeNumber,
           };
         } catch (error) {
-          // Return minimal valid item if transformation fails
           return {
             title: "Untitled Canon",
             subtitle: null,
@@ -324,7 +309,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           };
         }
       })
-      .filter((x) => x.slug) // Remove items with empty slugs
+      .filter((x) => x.slug)
       .sort((a, b) => {
         try {
           if (a.isTeachingEdition && !b.isTeachingEdition) return 1;
@@ -342,7 +327,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
         }
       });
 
-    // Step 4: Group by volume series safely
     const volumeSeries: Record<string, CanonItem[]> = {};
     for (const item of items) {
       try {
@@ -355,7 +339,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       }
     }
 
-    // Step 5: Create series with fallbacks
     const series: CanonSeries[] = [
       { 
         volume: "Volume I", 
@@ -399,7 +382,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       },
     ].filter((s) => s.items.length > 0);
 
-    // Step 6: Calculate counts safely
     const counts = items.reduce(
       (acc, it) => {
         try {
@@ -415,28 +397,30 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       { total: 0, public: 0, inner: 0, private: 0 }
     );
 
-    // Step 7: Filter featured items and teaching editions
-    const featuredItems = items
-      .filter((x) => {
+    const featuredItems = safeArraySlice(
+      items.filter((x) => {
         try {
           return x.featured && x.accessLevel !== "private";
         } catch (error) {
           return false;
         }
-      })
-      safeArraySlice(..., 0, 6);
+      }),
+      0,
+      6
+    );
 
-    const teachingEditions = items
-      .filter((x) => {
+    const teachingEditions = safeArraySlice(
+      items.filter((x) => {
         try {
           return x.isTeachingEdition && x.accessLevel === "public";
         } catch (error) {
           return false;
         }
-      })
-      safeArraySlice(..., 0, 4);
+      }),
+      0,
+      4
+    );
 
-    // Step 8: Return sanitized props
     return {
       props: safeSanitizeData({ 
         items, 
@@ -449,7 +433,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     };
 
   } catch (error) {
-    // CRITICAL: Always return valid props
     console.error("❌ CRITICAL: Canon index page failed completely:", error);
     
     return {
@@ -465,17 +448,13 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
   }
 };
 
-// ==================== COMPONENT ====================
-
 const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItems, series, teachingEditions }) => {
-  // SAFE: Check if we have any content to show
   const hasAnyContent = items.length > 0 || series.length > 0 || featuredItems.length > 0 || teachingEditions.length > 0;
   
   const title = "The Canon";
   const description = "Foundational work on purpose, governance, civilisation, and legacy — organised for builders, not browsers.";
   const canonicalUrl = `${SITE}/canon`;
 
-  // SAFE: Filter with try-catch
   const publicItems = items.filter((i) => {
     try {
       return i.accessLevel === "public" && !i.isTeachingEdition;
@@ -492,7 +471,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
     }
   });
 
-  // Render fallback if absolutely no content
   if (!hasAnyContent) {
     return (
       <Layout title={title} description={description} fullWidth>
@@ -533,7 +511,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Hero - ALWAYS SHOWS EVEN WITH EMPTY DATA */}
       <section className="relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-b from-black via-slate-950 to-black">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(212,175,55,0.08),transparent_55%)]" />
@@ -595,7 +572,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         </div>
       </section>
 
-      {/* Series - CONDITIONAL */}
       {series.length > 0 && (
         <section id="series" className="py-20 border-b border-white/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -646,8 +622,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
                     <div className="mt-6 pt-6 border-t border-white/5">
                       <div className="text-xs text-gray-500">
                         Includes:{" "}
-                        {s.items
-                          safeArraySlice(..., 0, 3)
+                        {safeArraySlice(s.items, 0, 3)
                           .map((it) => it.title.split("—")[0].split("–")[0].trim())
                           .join(", ")}
                         {s.items.length > 3 ? ` +${s.items.length - 3} more` : ""}
@@ -661,7 +636,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         </section>
       )}
 
-      {/* Featured - CONDITIONAL */}
       {featuredItems.length > 0 && (
         <section className="py-20 border-b border-white/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -738,7 +712,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         </section>
       )}
 
-      {/* Teaching Editions - CONDITIONAL */}
       {teachingEditions.length > 0 && (
         <section className="py-20 border-b border-white/10 bg-gradient-to-b from-black to-amber-950/5">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -802,7 +775,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         </section>
       )}
 
-      {/* Public Library - CONDITIONAL */}
       {publicItems.length > 0 ? (
         <section className="py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -861,7 +833,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
 
                     {item.tags.length > 0 && (
                       <div className="mt-6 flex flex-wrap gap-2">
-                        {item.safeSlice(tags, 0, 3).map((tag) => (
+                        {safeSlice(item.tags, 0, 3).map((tag) => (
                           <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-400">
                             #{tag}
                           </span>
@@ -900,7 +872,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
           </div>
         </section>
       ) : (
-        // Show empty state only if we have no public items but have other content
         hasAnyContent && (
           <section className="py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -914,7 +885,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         )
       )}
 
-      {/* Inner Circle CTA - CONDITIONAL */}
       {innerCircleItems.length > 0 && (
         <section className="py-20 border-t border-white/10 bg-gradient-to-b from-black to-amber-950/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

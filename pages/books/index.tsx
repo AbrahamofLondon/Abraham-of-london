@@ -208,7 +208,11 @@ export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
         const db = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
         return db - da;
       });
-    const popularTags = Array.from(new Set(books.flatMap(b => b.tags)))safeArraySlice(..., 0, 12);
+    const popularTags = safeArraySlice(
+    Array.from(new Set(books.flatMap((b) => b.tags))),
+    0,
+    12
+  );
     const seriesList = Array.from(new Set(books.map(b => b.series).filter(Boolean) as string[]));
     return { 
       props: {

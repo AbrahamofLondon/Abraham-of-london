@@ -2,7 +2,6 @@
 import * as React from "react";
 import { safeSlice } from "@/lib/utils/safe";
 
-
 /**
  * IMPORTANT:
  * The dashboard hook may return a different PDFItem type shape.

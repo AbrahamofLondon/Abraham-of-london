@@ -21,9 +21,11 @@ interface RelatedDownloadsProps {
 }
 
 const RelatedDownloads: React.FC<RelatedDownloadsProps> = ({ downloads, currentDownloadId }) => {
-  const filteredDownloads = downloads
-    .filter(download => download.id !== currentDownloadId)
-    safeArraySlice(..., 0, 4);
+  const filteredDownloads = safeArraySlice(
+  downloads.filter((d) => d.id !== currentDownloadId),
+  0,
+  4
+);
 
   const typeColors = {
     pdf: 'bg-red-100 text-red-800',

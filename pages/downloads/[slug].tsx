@@ -1,9 +1,10 @@
-/* pages/downloads/[slug].tsx — INSTITUTIONAL DOWNLOAD DETAIL (COMPILED API MODE) */
+/* pages/downloads/[slug].tsx — INSTITUTIONAL DOWNLOAD DETAIL (CLEAN VERSION) */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -13,62 +14,11 @@ import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import AccessGate from "@/components/AccessGate";
 
-// Server-side imports
+// ✅ Server-side imports
 import { getAllContentlayerDocs } from "@/lib/content/real";
 import { sanitizeData } from "@/lib/content/shared";
 
-import dynamic from 'next/dynamic';
-
-const MDXRemote = dynamic(
-  () => import('next-mdx-remote').then((mod) => mod.MDXRemote),
-  { ssr: false }
-);
-
-// In your component
-export default function Page({ source, data }) {
-  const [isClient, setIsClient] = useState(false);
-  
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
-  return (
-    <Layout>
-      {/* ... */}
-      {source && isClient ? (
-        <MDXRemote {...source} components={mdxComponents} />
-      ) : (
-        <div dangerouslySetInnerHTML={{ __html: source?.compiledSource || '' }} />
-      )}
-      {/* ... */}
-    </Layout>
-  );
-}
-
-// In getStaticProps
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  try {
-    // ... your data fetching logic ...
-    
-    let source: any = { compiledSource: '' };
-    if (rawMdxContent) {
-      try {
-        source = await prepareMDX(rawMdxContent);
-      } catch (error) {
-        console.error('MDX error:', error);
-      }
-    }
-    
-    return {
-      props: {
-        data: yourData,
-        source: JSON.parse(JSON.stringify(source)), // 🔥 This is critical
-      },
-    };
-  } catch (error) {
-    return { notFound: true };
-  }
-};
+// ==================== TYPES ====================
 
 type Tier = "public" | "inner-circle" | "private";
 
@@ -99,7 +49,8 @@ type ApiFail = {
   reason: string;
 };
 
-// Server-side helper functions
+// ==================== SERVER-SIDE HELPERS ====================
+
 function getServerAllDownloads(): any[] {
   const allDocs = getAllContentlayerDocs();
   return allDocs.filter(
@@ -149,61 +100,81 @@ function asTier(v: unknown): Tier {
   return "public";
 }
 
+// ==================== STATIC PATHS ====================
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const downloads = getServerAllDownloads();
+  try {
+    const downloads = getServerAllDownloads();
 
-  const paths = (downloads || [])
-    .filter((d: any) => d && !isDraftContent(d))
-    .map((asset: any) => ({
-      params: { slug: stripDownloadsPrefix(String(asset.slug || asset._raw?.flattenedPath || "")) },
-    }))
-    .filter((p) => p.params.slug);
+    const paths = (downloads || [])
+      .filter((d: any) => d && !isDraftContent(d))
+      .map((asset: any) => ({
+        params: { 
+          slug: stripDownloadsPrefix(String(asset.slug || asset._raw?.flattenedPath || "")) 
+        },
+      }))
+      .filter((p) => p.params.slug);
 
-  return { paths, fallback: "blocking" };
+    return { paths, fallback: "blocking" };
+  } catch (error) {
+    console.error("[Downloads] Error in getStaticPaths:", error);
+    return { paths: [], fallback: "blocking" };
+  }
 };
+
+// ==================== STATIC PROPS ====================
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const raw = typeof params?.slug === "string" ? params.slug : "";
-  const slug = stripDownloadsPrefix(raw);
+  try {
+    const raw = typeof params?.slug === "string" ? params.slug : "";
+    const slug = stripDownloadsPrefix(raw);
 
-  if (!slug) return { notFound: true };
+    if (!slug) return { notFound: true };
 
-  const doc: any = getServerDownloadBySlug(slug);
-  if (!doc || isDraftContent(doc)) return { notFound: true };
+    const doc: any = getServerDownloadBySlug(slug);
+    if (!doc || isDraftContent(doc)) return { notFound: true };
 
-  const accessLevel = asTier(doc.accessLevel || "inner-circle");
-  const locked = accessLevel !== "public";
+    const accessLevel = asTier(doc.accessLevel || "inner-circle");
+    const locked = accessLevel !== "public";
 
-  // Only pre-serialize for public downloads (so no gated MDX lands in HTML)
-  let initialSource: MDXRemoteSerializeResult | null = null;
-  if (!locked) {
-    const rawMdx = String(doc?.body?.raw ?? doc?.body ?? doc?.content ?? "");
-    initialSource = await serialize(rawMdx, {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
-      },
-    });
-  }
+    // ✅ Only pre-serialize for public downloads (no gated MDX in HTML)
+    let initialSource: MDXRemoteSerializeResult | null = null;
+    if (!locked) {
+      const rawMdx = String(doc?.body?.raw ?? doc?.body ?? doc?.content ?? "");
+      if (rawMdx.trim()) {
+        initialSource = await serialize(rawMdx, {
+          mdxOptions: {
+            remarkPlugins: [remarkGfm],
+            rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
+          },
+        });
+      }
+    }
 
-  return {
-    props: {
-      download: sanitizeData({
-        title: doc.title || "Untitled Download",
-        excerpt: doc.excerpt ?? null,
-        description: doc.description ?? null,
-        slug: normalizeSlug(doc.slug || slug),
-        accessLevel,
-        fileUrl: doc.fileUrl || doc.downloadUrl || null,
-        date: doc.date ? String(doc.date) : null,
-        coverImage: doc.coverImage || null,
+    return {
+      props: sanitizeData({
+        download: {
+          title: doc.title || "Untitled Download",
+          excerpt: doc.excerpt ?? null,
+          description: doc.description ?? null,
+          slug: normalizeSlug(doc.slug || slug),
+          accessLevel,
+          fileUrl: doc.fileUrl || doc.downloadUrl || null,
+          date: doc.date ? String(doc.date) : null,
+          coverImage: doc.coverImage || null,
+        },
+        locked,
+        initialSource,
       }),
-      locked,
-      initialSource,
-    },
-    revalidate: 1800,
-  };
+      revalidate: 1800,
+    };
+  } catch (error) {
+    console.error("[Downloads] Error in getStaticProps:", error);
+    return { notFound: true };
+  }
 };
+
+// ==================== PAGE COMPONENT ====================
 
 const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource }) => {
   const router = useRouter();
@@ -248,8 +219,22 @@ const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource }) 
     }
   }
 
+  if (router.isFallback) {
+    return (
+      <Layout title="Loading...">
+        <div className="mx-auto max-w-4xl px-4 py-16 text-center">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="mt-4 text-gray-400">Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout title={download.title} description={download.description || download.excerpt || undefined}>
+    <Layout 
+      title={download.title} 
+      description={download.description || download.excerpt || undefined}
+    >
       <Head>
         <meta property="og:title" content={download.title} />
         <meta property="og:description" content={download.description || download.excerpt || ""} />
@@ -258,6 +243,7 @@ const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource }) 
       </Head>
 
       <div className="mx-auto max-w-4xl px-4 py-16">
+        {/* Back Button */}
         <button
           onClick={() => router.back()}
           className="text-sm text-gray-400 hover:text-white transition-colors"
@@ -266,16 +252,28 @@ const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource }) 
           ← Back to Vault
         </button>
 
+        {/* Header */}
         <header className="mt-6 border-b border-white/10 pb-8">
-          <h1 className="text-4xl font-bold text-white tracking-tight">{download.title}</h1>
+          <h1 className="text-4xl font-bold text-white tracking-tight">
+            {download.title}
+          </h1>
           {(download.description || download.excerpt) && (
             <p className="mt-4 text-lg text-gray-300 leading-relaxed">
               {download.description || download.excerpt}
             </p>
           )}
+          {download.date && (
+            <p className="mt-3 text-sm text-gray-500">
+              {new Date(download.date).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </p>
+          )}
         </header>
 
-        {/* Gate only if locked AND no source yet */}
+        {/* Access Gate - only if locked AND no source yet */}
         {locked && !source && (
           <div className="mt-12">
             <AccessGate
@@ -288,6 +286,7 @@ const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource }) 
           </div>
         )}
 
+        {/* Loading State */}
         {loading && (
           <div className="mt-12 flex items-center gap-3 text-gray-400">
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -295,26 +294,29 @@ const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource }) 
           </div>
         )}
 
+        {/* Error Message */}
         {errMsg && (
           <div className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
             {errMsg}
           </div>
         )}
 
+        {/* MDX Content */}
         {source && (
           <article className="prose prose-invert mt-12 max-w-none animate-in fade-in slide-in-from-bottom-4 duration-700">
             <MDXRemote {...source} components={mdxComponents} />
           </article>
         )}
 
-        {/* Optional: show file link if public + you want it visible */}
+        {/* Download Button - only for public files */}
         {download.fileUrl && download.accessLevel === "public" && (
-          <div className="mt-12">
+          <div className="mt-12 flex gap-4">
             <a
               href={download.fileUrl}
-              className="inline-flex items-center justify-center rounded-lg bg-white/10 px-4 py-3 text-sm font-semibold text-white hover:bg-white/15 transition-colors"
+              download
+              className="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 px-6 py-3 text-sm font-semibold text-white transition-colors"
             >
-              Download file
+              Download File
             </a>
           </div>
         )}

@@ -189,7 +189,7 @@ const DownloadLink = defineNestedType(() => ({
   fields: {
     title: { type: "string", required: true },
     url: { type: "string", required: true },
-    label: { type: "string", required: false }, // ✅ warning fix
+    label: { type: "string", required: false },
     format: { type: "string", required: false },
     size: { type: "string", required: false },
     description: { type: "string", required: false },
@@ -297,6 +297,13 @@ const coreFields = {
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
 
+  // Content classification / display helpers (used across repo)
+  docKind: { type: "string", required: false },
+  density: { type: "string", required: false },
+  order: { type: "number", required: false },
+  volumeNumber: { type: "string", required: false },
+  resourceType: { type: "string", required: false },
+
   // dates / publish flags
   date: { type: "date", required: false },
   updated: { type: "date", required: false },
@@ -330,6 +337,13 @@ const coreFields = {
   keyInsights: { type: "list", of: { type: "string" }, required: false },
   readTime: { type: "string", required: false },
   contentOnly: { type: "boolean", required: false },
+
+  // Social / distribution metadata
+  socialCaption: { type: "string", required: false },
+
+  // Flexible "resources" field: can be array OR object across old content
+  // JSON is the only safe way to support both shapes without refactoring content.
+  resources: { type: "json", required: false },
 
   // access control
   accessLevel: { type: "string", required: false },
@@ -410,6 +424,18 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
       },
     },
 
+    // ✅ INVARIANT: coverAspectSafe with whitelist normalization
+    coverAspectSafe: {
+      type: "string",
+      resolve: (doc) => {
+        const aspect = safeString(doc?.coverAspect).toLowerCase().trim();
+        const allowed = ["book", "16/9", "4/3", "1/1", "3/2", "2/3", "21/9"];
+        if (allowed.includes(aspect)) return aspect;
+        // Default based on content type
+        return "16/9";
+      },
+    },
+
     // ✅ Useful: wordCount
     wordCount: {
       type: "number",
@@ -470,7 +496,6 @@ export const Book = defineDocumentType(() => ({
   fields: {
     ...coreFields,
     aliases: { type: "list", of: { type: "string" }, required: false },
-    order: { type: "number", required: false },
     isbn: { type: "string", required: false },
     pages: { type: "number", required: false },
     publisher: { type: "string", required: false },
@@ -485,8 +510,6 @@ export const Canon = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...coreFields,
-    volumeNumber: { type: "string", required: false },
-    order: { type: "number", required: false },
     edition: { type: "string", required: false },
     isStandard: { type: "boolean", required: false },
 

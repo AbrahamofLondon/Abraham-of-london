@@ -23,9 +23,11 @@ const RelatedResources: React.FC<RelatedResourcesProps> = ({
   resources, 
   currentResourceId 
 }) => {
-  const filteredResources = resources
-    .filter(resource => resource.id !== currentResourceId)
-    safeArraySlice(..., 0, 3);
+  const filteredResources = safeArraySlice(
+  resources.filter((r) => r.id !== currentResourceId),
+  0,
+  3
+);
 
   if (filteredResources.length === 0) {
     return null;

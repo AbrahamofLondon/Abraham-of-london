@@ -9,7 +9,7 @@ import ContentHelper, {
   type DocKind 
 } from "./contentlayer-helper";
 import { absUrl } from "@/lib/siteConfig";
-import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+import { safeSlice } from "@/lib/utils/safe";
 
 
 /* -------------------------------------------------------------------------- */
@@ -108,20 +108,19 @@ export function searchDocuments(query: string, limit: number = 20): SearchDoc[] 
   // Return recent content if no query provided
   if (!searchTerm) return safeSlice(searchIndex, 0, limit);
 
-  return searchIndex
-    .filter((doc) => {
-      const searchableText = [
-        doc.title, 
-        doc.excerpt ?? "", 
-        doc.category ?? "",
-        (doc.tags ?? []).join(" ")
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+  const results = searchIndex.filter((doc) => {
+    const searchableText = [
+      doc.title, 
+      doc.excerpt ?? "", 
+      doc.category ?? "",
+      (doc.tags ?? []).join(" ")
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-      return searchableText.includes(searchTerm);
-    })
-    safeArraySlice(..., 0, limit);
+    return searchableText.includes(searchTerm);
+  });
+
+  return safeSlice(results, 0, limit);
 }
-

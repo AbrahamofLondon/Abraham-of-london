@@ -132,7 +132,8 @@ export default function TestimonialsSection({
   const headingId = React.useId();
 
   const data = React.useMemo(() => {
-    const arr = (items?.length ? items : DEFAULT_ITEMS)safeArraySlice(...);
+    const base = items?.length ? items : DEFAULT_ITEMS;
+    const arr = safeArraySlice(base, 0);
     return typeof limit === "number" ? safeSlice(arr, 0, Math.max(0, limit)) : arr;
   }, [items, limit]);
 

@@ -184,20 +184,24 @@ export async function getFeaturedContent(
   
   for (const col of collections) {
     const items = await getAllFromCollection(col);
-    const featured = items
-      .filter(item => item.featured === true)
-      safeArraySlice(..., 0, limit);
+    const featured = safeArraySlice(
+      items.filter(item => item.featured === true),
+      0,
+      limit
+    );
     
     allFeatured.push(...featured);
   }
   
-  return allFeatured
-    .sort((a, b) => {
+  return safeArraySlice(
+    allFeatured.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
-    })
-    safeArraySlice(..., 0, limit);
+    }),
+    0,
+    limit
+  );
 }
 
 // Search content across all collections

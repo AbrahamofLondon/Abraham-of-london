@@ -20,9 +20,11 @@ interface RelatedShortsProps {
 }
 
 const RelatedShorts: React.FC<RelatedShortsProps> = ({ shorts, currentShortId }) => {
-  const filteredShorts = shorts
-    .filter(short => short.id !== currentShortId)
-    safeArraySlice(..., 0, 4);
+  const filteredShorts = safeArraySlice(
+  shorts.filter((s) => s.id !== currentShortId),
+  0,
+  4
+);
 
   if (filteredShorts.length === 0) {
     return null;

@@ -7,9 +7,25 @@
  * USE THIS instead of importing @/lib/redis directly in Edge routes!
  */
 
-// Runtime detection
-const isEdgeRuntime = typeof EdgeRuntime !== 'undefined' || typeof caches !== 'undefined';
-const isNodeRuntime = typeof process !== 'undefined' && process.versions?.node;
+// ==================== RUNTIME DETECTION (EDGE-SAFE) ====================
+
+// Edge runtime detection - safe for top-level
+const isEdgeRuntime = 
+  typeof EdgeRuntime !== 'undefined' || 
+  typeof caches !== 'undefined' ||
+  (typeof globalThis !== 'undefined' && 'caches' in globalThis);
+
+// Node runtime detection - wrapped in function to avoid top-level process.versions
+function isNodeRuntime(): boolean {
+  try {
+    // Check for Node.js without touching process.versions at module top-level
+    return typeof process !== 'undefined' && 
+           typeof process.release === 'object' && 
+           process.release.name === 'node';
+  } catch {
+    return false;
+  }
+}
 
 // ==================== TYPES ====================
 
@@ -40,12 +56,46 @@ export type RedisStats = {
   error?: string;
 };
 
+// ==================== ENVIRONMENT DETECTION ====================
+
+function getEnvVar(name: string): string | undefined {
+  try {
+    // Use try-catch for safe environment variable access
+    return typeof process !== 'undefined' && process.env ? process.env[name] : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getEnvVars(): { 
+  kvUrl?: string; 
+  kvToken?: string; 
+  upstashUrl?: string; 
+  upstashToken?: string;
+  redisUrl?: string;
+} {
+  try {
+    return {
+      kvUrl: getEnvVar('KV_REST_API_URL'),
+      kvToken: getEnvVar('KV_REST_API_TOKEN'),
+      upstashUrl: getEnvVar('UPSTASH_REDIS_REST_URL'),
+      upstashToken: getEnvVar('UPSTASH_REDIS_REST_TOKEN'),
+      redisUrl: getEnvVar('REDIS_URL'),
+    };
+  } catch {
+    return {};
+  }
+}
+
 // ==================== UPSTASH/VERCEL KV (EDGE-COMPATIBLE) ====================
 
 async function getEdgeCompatibleRedis(): Promise<any | null> {
+  const envVars = getEnvVars();
+  
   // Try Vercel KV first
-  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+  if (envVars.kvUrl && envVars.kvToken) {
     try {
+      // Dynamic import to avoid bundling issues
       const { kv } = await import('@vercel/kv');
       return { client: kv, type: 'vercel-kv' };
     } catch (error) {
@@ -54,12 +104,12 @@ async function getEdgeCompatibleRedis(): Promise<any | null> {
   }
 
   // Try Upstash Redis
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (envVars.upstashUrl && envVars.upstashToken) {
     try {
       const { Redis } = await import('@upstash/redis');
       const client = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+        url: envVars.upstashUrl,
+        token: envVars.upstashToken,
       });
       return { client, type: 'upstash' };
     } catch (error) {
@@ -74,8 +124,15 @@ async function getEdgeCompatibleRedis(): Promise<any | null> {
 
 async function getNodeRedis(): Promise<any | null> {
   if (isEdgeRuntime) return null; // Never try ioredis in Edge
+  
+  // Only proceed if we're in Node runtime
+  if (!isNodeRuntime()) return null;
+
+  const envVars = getEnvVars();
+  if (!envVars.redisUrl) return null;
 
   try {
+    // Use dynamic import for ioredis to avoid bundling in Edge
     const redisModule = await import('@/lib/redis');
     const redis = typeof redisModule.getRedis === 'function' 
       ? redisModule.getRedis() 
@@ -109,12 +166,10 @@ async function getRedisClient(): Promise<{ client: any; type: string } | null> {
   }
 
   // Try Node.js Redis (only in Node runtime)
-  if (isNodeRuntime && !isEdgeRuntime) {
-    const nodeRedis = await getNodeRedis();
-    if (nodeRedis) {
-      cachedRedis = nodeRedis;
-      return nodeRedis;
-    }
+  const nodeRedis = await getNodeRedis();
+  if (nodeRedis) {
+    cachedRedis = nodeRedis;
+    return nodeRedis;
   }
 
   // Mark as unavailable
@@ -131,12 +186,13 @@ export async function getRedis(): Promise<SafeRedisClient | null> {
 
 export async function getRedisStats(): Promise<RedisStats> {
   const redis = await getRedisClient();
+  const runtime = isEdgeRuntime ? 'edge' : isNodeRuntime() ? 'node' : 'unknown';
 
   if (!redis) {
     return {
       available: false,
       type: 'none',
-      runtime: isEdgeRuntime ? 'edge' : isNodeRuntime ? 'node' : 'unknown',
+      runtime,
       connectionStatus: 'disconnected',
     };
   }
@@ -153,7 +209,7 @@ export async function getRedisStats(): Promise<RedisStats> {
   return {
     available: connectionStatus === 'connected',
     type: redis.type as any,
-    runtime: isEdgeRuntime ? 'edge' : isNodeRuntime ? 'node' : 'unknown',
+    runtime,
     connectionStatus,
   };
 }
@@ -242,17 +298,21 @@ export async function safePing(): Promise<boolean> {
 // ==================== UTILITY FUNCTIONS ====================
 
 export function isRedisAvailable(): boolean {
+  const envVars = getEnvVars();
+  
   return Boolean(
-    process.env.UPSTASH_REDIS_REST_URL ||
-    process.env.KV_REST_API_URL ||
-    (!isEdgeRuntime && process.env.REDIS_URL)
+    envVars.upstashUrl ||
+    envVars.kvUrl ||
+    (!isEdgeRuntime && envVars.redisUrl)
   );
 }
 
 export function getRedisType(): 'upstash' | 'vercel-kv' | 'ioredis' | 'none' {
-  if (process.env.KV_REST_API_URL) return 'vercel-kv';
-  if (process.env.UPSTASH_REDIS_REST_URL) return 'upstash';
-  if (!isEdgeRuntime && process.env.REDIS_URL) return 'ioredis';
+  const envVars = getEnvVars();
+  
+  if (envVars.kvUrl) return 'vercel-kv';
+  if (envVars.upstashUrl) return 'upstash';
+  if (!isEdgeRuntime && envVars.redisUrl) return 'ioredis';
   return 'none';
 }
 

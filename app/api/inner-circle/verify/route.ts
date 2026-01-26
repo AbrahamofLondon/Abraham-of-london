@@ -5,15 +5,25 @@ import { verifyInnerCircleKeyWithRateLimit } from "@/lib/inner-circle";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type AnyObj = Record<string, any>;
+type AnyObj = Record<string, unknown>;
 
-function pickVerificationPayload(out: AnyObj): AnyObj {
-  // Supports BOTH shapes:
-  // A) { verification: {...}, rateLimit?, headers? }
-  // B) { valid, member, expiresAt, rateLimit?, headers? }  (verification at top level)
-  return (out && typeof out === "object" && "verification" in out && out.verification)
-    ? out.verification
-    : out;
+type RateLimitShape = {
+  allowed?: boolean;
+  remaining?: number;
+  resetAt?: string | number | null;
+  resetTime?: string | number | null;
+};
+
+type VerificationShape = {
+  valid?: boolean;
+  member?: unknown;
+  expiresAt?: unknown;
+};
+
+function pickVerificationPayload(out: AnyObj): VerificationShape {
+  const maybe = out?.verification;
+  if (maybe && typeof maybe === "object") return maybe as VerificationShape;
+  return out as VerificationShape;
 }
 
 function recordHeaders(h: unknown): Record<string, string> | null {
@@ -24,12 +34,20 @@ function recordHeaders(h: unknown): Record<string, string> | null {
     else if (typeof v === "number") rec[k] = String(v);
     else if (typeof v === "boolean") rec[k] = v ? "true" : "false";
   }
-  return rec;
+  return Object.keys(rec).length ? rec : null;
+}
+
+function normalizeResetAt(rateLimit?: RateLimitShape): string | null {
+  const v = rateLimit?.resetAt ?? rateLimit?.resetTime ?? null;
+  if (v == null) return null;
+  if (typeof v === "number") return new Date(v).toISOString();
+  if (typeof v === "string") return v;
+  return null;
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const body = await req.json().catch(() => ({}));
+    const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
     const key = typeof body?.key === "string" ? body.key.trim() : "";
 
     if (!key) {
@@ -39,31 +57,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const out = (await verifyInnerCircleKeyWithRateLimit(key, req as any)) as AnyObj;
 
     const verification = pickVerificationPayload(out);
-    const headers = recordHeaders(out?.headers);
-    const rateLimit = out?.rateLimit;
+    const headers = recordHeaders((out as any)?.headers);
+    const rateLimit = ((out as any)?.rateLimit ?? null) as RateLimitShape | null;
 
     const res = NextResponse.json(
       {
         valid: !!verification?.valid,
-        member: verification?.member ?? null,
-        expiresAt: verification?.expiresAt ?? null,
+        member: (verification as any)?.member ?? null,
+        expiresAt: (verification as any)?.expiresAt ?? null,
         rateLimit: rateLimit
           ? {
               allowed: !!rateLimit.allowed,
               remaining: rateLimit.remaining ?? null,
-              resetAt: rateLimit.resetAt ?? rateLimit.resetTime ?? null,
+              resetAt: normalizeResetAt(rateLimit),
             }
           : undefined,
       },
       { status: 200 }
     );
 
-    // Pass-through rate limit headers if provided
-    if (headers) {
-      for (const [k, v] of Object.entries(headers)) res.headers.set(k, v);
-    }
+    // Pass-through provided headers (safe only)
+    if (headers) for (const [k, v] of Object.entries(headers)) res.headers.set(k, v);
 
-    // Useful explicit headers
     res.headers.set("X-Inner-Circle-Valid", String(!!verification?.valid));
     res.headers.set("Cache-Control", "no-store");
 

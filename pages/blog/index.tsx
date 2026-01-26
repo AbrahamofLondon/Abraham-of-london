@@ -21,7 +21,6 @@ import { getPublishedPosts } from "@/lib/content/server";
 import { sanitizeData, normalizeSlug, resolveDocCoverImage } from "@/lib/content/shared";
 import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
 
-
 // ============= TYPE DEFINITIONS =============
 type BlogPost = {
   slug: string;
@@ -286,7 +285,8 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
           )}
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {post.safeSlice(tags, 0, 3).map(tag => (
+              {/* ✅ FIXED: Use imported safeSlice function */}
+              {safeSlice(post.tags, 0, 3).map(tag => (
                 <span
                   key={tag}
                   className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium"
@@ -345,7 +345,8 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
             <div className="flex items-center justify-between flex-wrap gap-2">
               {post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {post.safeSlice(tags, 0, 4).map(tag => (
+                  {/* ✅ FIXED: Use imported safeSlice function */}
+                  {safeSlice(post.tags, 0, 4).map(tag => (
                     <span
                       key={tag}
                       className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium"
@@ -456,10 +457,12 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
         return bTime - aTime;
       });
 
-    // Extract featured posts
-    const featuredItems = items
-      .filter(post => post.featured)
-      safeArraySlice(..., 0, 3);
+    // ✅ FIXED: Extract featured posts with proper safeArraySlice usage
+    const featuredItems = safeArraySlice(
+      items.filter(post => post.featured),
+      0,
+      3
+    );
 
     // Calculate popular tags with counts
     const tagCounts: Record<string, number> = {};
@@ -471,10 +474,13 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
       });
     });
 
-    const popularTags = Object.entries(tagCounts)
-      .sort(([, a], [, b]) => b - a)
-      safeSlice(..., 0, 10)
-      .map(([tag]) => tag);
+    // ✅ FIXED: Use safeSlice for popular tags
+    const popularTags = safeSlice(
+      Object.entries(tagCounts)
+        .sort(([, a], [, b]) => b - a),
+      0,
+      10
+    ).map(([tag]) => tag);
 
     // ✅ Use imported sanitizeData
     const props: BlogIndexProps = sanitizeData({

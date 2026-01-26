@@ -21,9 +21,11 @@ interface RelatedBooksProps {
 }
 
 const RelatedBooks: React.FC<RelatedBooksProps> = ({ books, currentBookId }) => {
-  const filteredBooks = books
-    .filter(book => book.id !== currentBookId)
-    safeArraySlice(..., 0, 3);
+  const filteredBooks = safeArraySlice(
+  books.filter((book) => book.id !== currentBookId),
+  0,
+  3
+);
 
   return (
     <div className="bg-gray-50 rounded-2xl p-8">

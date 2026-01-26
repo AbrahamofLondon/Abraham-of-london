@@ -126,7 +126,7 @@ export default function SearchPalette({
     query.trim() && fuse
       ? fuse
           .search(query)
-          safeArraySlice(..., 0, 12)
+          const top = safeArraySlice(results, 0, 12);
           .map((r: any) => r.item) // FIX: Add type annotation here
       : safeArraySlice(items || [], 0, 12);
   return (

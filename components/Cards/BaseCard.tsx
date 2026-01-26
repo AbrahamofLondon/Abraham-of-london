@@ -1,9 +1,8 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type {
 import { safeSlice } from "@/lib/utils/safe";
-
+import type {
   BaseCardProps,
   DocumentCardProps,
   CoverAspect,
@@ -186,47 +185,53 @@ const BaseCard: React.FC<BaseCardProps> = ({
   return (
     <Link
       href={safeHref}
-      className={`group block rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm transition-all duration-300 hover:border-softGold/30 hover:shadow-[0_8px_30px_rgba(226,197,120,0.15)] ${className}`}
+      className={`group block rounded-2xl border border-white/10 bg-gradient-to-br from-black/50 to-gray-900/60 backdrop-blur-xl transition-all duration-500 hover:border-softGold/40 hover:shadow-[0_20px_60px_rgba(226,197,120,0.15)] hover:shadow-softGold/20 ${className}`}
       aria-label={title}
     >
       <article className="relative flex h-full flex-col overflow-hidden">
+        {/* Premium glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-softGold/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        
         {/* Cover Image */}
         <div className={`relative w-full overflow-hidden ${aClass}`}>
+          {/* Image overlay gradient */}
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+          
           <Image
             src={cardImage}
             alt={title}
             fill
-            className={`${oFit} ${oPos} transition-transform duration-500 group-hover:scale-105`}
+            className={`${oFit} ${oPos} transition-all duration-700 group-hover:scale-105 group-hover:brightness-110`}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
           {/* Optional: add subtle overlay only when contain is used (prevents "dead letterbox") */}
           {coverFit === "contain" && (
             <div
-              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"
               aria-hidden="true"
             />
           )}
 
           {/* Badges Container - Top Left */}
-          <div className="absolute left-3 top-3 flex flex-col gap-2">
+          <div className="absolute left-4 top-4 z-20 flex flex-col gap-2">
             {featured && (
-              <div className="rounded-full bg-softGold/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-black backdrop-blur-sm">
+              <div className="rounded-full border border-softGold/40 bg-gradient-to-r from-softGold/30 to-amber-500/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-softGold backdrop-blur-xl transition-all duration-500 group-hover:from-softGold/40 group-hover:to-amber-500/40">
                 Featured
               </div>
             )}
             {isNew && (
-              <div className="rounded-full bg-green-600/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+              <div className="rounded-full border border-emerald-500/40 bg-gradient-to-r from-emerald-600/30 to-emerald-500/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 backdrop-blur-xl transition-all duration-500 group-hover:from-emerald-600/40 group-hover:to-emerald-500/40">
                 New
               </div>
             )}
           </div>
 
           {/* Badges Container - Top Right */}
-          <div className="absolute right-3 top-3 flex flex-col gap-2">
+          <div className="absolute right-4 top-4 z-20 flex flex-col gap-2">
             {isLocked && (
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-700/40 bg-amber-900/30 px-2 py-1 text-[0.65rem] font-semibold text-amber-400/90 backdrop-blur-sm">
-                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-900/30 to-amber-800/30 px-3 py-1.5 text-[0.7rem] font-semibold text-amber-300/95 backdrop-blur-xl transition-all duration-500 group-hover:border-amber-400/60 group-hover:from-amber-900/40 group-hover:to-amber-800/40">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -238,7 +243,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
               </div>
             )}
             {category && (
-              <div className="rounded-full border border-blue-500/30 bg-blue-900/30 px-3 py-1 text-xs font-semibold text-blue-300 backdrop-blur-sm">
+              <div className="rounded-full border border-blue-500/40 bg-gradient-to-r from-blue-900/30 to-blue-800/30 px-3.5 py-1.5 text-xs font-semibold text-blue-300 backdrop-blur-xl transition-all duration-500 group-hover:border-blue-400/60">
                 {category}
               </div>
             )}
@@ -246,19 +251,14 @@ const BaseCard: React.FC<BaseCardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex flex-1 flex-col gap-3 p-5">
+        <div className="relative flex flex-1 flex-col gap-4 p-6">
           {/* Tags & Category Row */}
           {(displayTags.length > 0 || category) && (
             <div className="flex flex-wrap items-center gap-2">
-              {category && (
-                <span className="rounded-full border border-blue-500/30 bg-blue-900/30 px-3 py-1 text-xs font-semibold text-blue-300">
-                  {category}
-                </span>
-              )}
               {displayTags.map((tag, idx) => (
                 <span
                   key={`${tag}-${idx}`}
-                  className="rounded-full border border-softGold/20 bg-softGold/10 px-3 py-1 text-xs font-medium text-softGold/90"
+                  className="rounded-full border border-softGold/30 bg-gradient-to-r from-softGold/15 to-transparent px-3 py-1.5 text-xs font-medium text-softGold/95 backdrop-blur-sm transition-all duration-300 hover:border-softGold/50 hover:from-softGold/25"
                 >
                   {tag}
                 </span>
@@ -267,8 +267,8 @@ const BaseCard: React.FC<BaseCardProps> = ({
           )}
 
           {/* Title & Subtitle */}
-          <div className="space-y-1">
-            <h3 className="font-serif text-xl font-semibold text-cream transition-colors group-hover:text-softGold">
+          <div className="space-y-2">
+            <h3 className="font-serif text-xl font-semibold text-cream transition-colors duration-300 group-hover:text-softGold">
               {title}
             </h3>
             {subtitle ? (
@@ -284,31 +284,53 @@ const BaseCard: React.FC<BaseCardProps> = ({
           ) : null}
 
           {/* Footer */}
-          <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-            <div className="flex items-center gap-3">
+          <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-white/10">
+            <div className="flex items-center gap-4">
               {formattedDate ? (
-                <time className="text-xs text-gray-400">{formattedDate}</time>
+                <time className="text-xs font-medium text-gray-400">{formattedDate}</time>
               ) : null}
 
               {readingTime ? (
-                <span className="text-xs text-gray-500 before:mr-2 before:content-['•']">
+                <span className="text-xs font-medium text-gray-500 before:mr-2 before:content-['•']">
                   {typeof readingTime === "number" ? `${readingTime} min read` : `${readingTime} read`}
                 </span>
               ) : null}
             </div>
 
-            {isLocked && lockMessage ? (
-              <span className="text-xs italic text-amber-400/80">{lockMessage}</span>
-            ) : null}
+            {/* Premium arrow indicator */}
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-softGold/10 to-softGold/5 text-softGold transition-all duration-500 group-hover:from-softGold/20 group-hover:to-softGold/10 group-hover:scale-110">
+              <svg
+                className="h-3.5 w-3.5 transition-transform duration-500 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </div>
           </div>
+
+          {/* Lock message if present */}
+          {isLocked && lockMessage ? (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-amber-500/30 bg-gradient-to-r from-amber-900/40 to-amber-800/40 px-4 py-1.5 text-xs font-medium text-amber-300/95 backdrop-blur-xl">
+              {lockMessage}
+            </div>
+          ) : null}
         </div>
 
         {/* New badge for "text-only" cards fallback */}
         {!coverImage && isNew && (
-          <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-green-600/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+          <div className="pointer-events-none absolute bottom-4 right-4 rounded-full border border-emerald-500/40 bg-gradient-to-r from-emerald-600/40 to-emerald-500/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-100 backdrop-blur-xl">
             New
           </div>
         )}
+
+        {/* Bottom accent line */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-softGold/30 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+          aria-hidden="true"
+        />
       </article>
     </Link>
   );
