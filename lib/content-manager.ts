@@ -1,4 +1,5 @@
 // lib/content-manager.ts - FIXED WITH OPTIONAL TITLE
+import { safeArraySlice } from "@/lib/utils/safe";
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
@@ -185,7 +186,7 @@ export async function getFeaturedContent(
     const items = await getAllFromCollection(col);
     const featured = items
       .filter(item => item.featured === true)
-      .slice(0, limit);
+      safeArraySlice(..., 0, limit);
     
     allFeatured.push(...featured);
   }
@@ -196,7 +197,7 @@ export async function getFeaturedContent(
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     })
-    .slice(0, limit);
+    safeArraySlice(..., 0, limit);
 }
 
 // Search content across all collections

@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, FileText } from "lucide-react";
 import BlogPostCard from "@/components/BlogPostCard"; // ✅ FIX (default import)
 import BookCard from "@/components/books/BookCard";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // -----------------------------------------------------------------------------
 // Types - ENSURE required properties exist
@@ -85,7 +87,7 @@ export default function ContentShowcase({
     (item) => item && typeof item === "object" && item.slug && item.title,
   );
 
-  const displayedItems = validItems.slice(0, maxItems);
+  const displayedItems = safeSlice(validItems, 0, maxItems);
 
   return (
     <section className={`py-16 ${className}`}>

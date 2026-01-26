@@ -1,6 +1,8 @@
 // lib/monitoring/performance.ts
 import { logger } from '@/lib/logging';
 import { metrics, Metric } from '@/lib/metrics';
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export interface PerformanceMetric {
   operation: string;
@@ -125,7 +127,7 @@ export class PerformanceMonitor {
     } catch (error) {
       logger.error('Failed to flush performance metrics:', error);
       // Re-buffer failed metrics (with deduplication logic in production)
-      this.buffer.unshift(...toFlush.slice(-50)); // Keep last 50 on error
+      this.buffer.unshift(...safeSlice(toFlush, -50)); // Keep last 50 on error
     }
   }
 

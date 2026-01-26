@@ -1,3 +1,5 @@
+import { safeSlice } from "@/lib/utils/safe";
+
 // lib/server/subscription.ts
 // Robust subscription service (Buttondown + local fallback)
 
@@ -296,7 +298,7 @@ export async function bulkSubscribe(
   const failed: Array<{ email: string; error: string }> = [];
 
   for (let i = 0; i < emails.length; i += batchSize) {
-    const batch = emails.slice(i, i + batchSize);
+    const batch = safeSlice(emails, i, i + batchSize);
     const results: SubscriptionResult[] = await Promise.all(
       batch.map((addr) => subscribe(addr, { tags: options.tags }))
     );

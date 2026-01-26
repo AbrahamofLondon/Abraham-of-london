@@ -1,0 +1,867 @@
+// pages/shorts/index.tsx
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+import * as React from "react";
+import type { NextPage, GetStaticProps } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  Sparkles,
+  Clock,
+  Zap,
+  Heart,
+  Share2,
+  Bookmark,
+  TrendingUp,
+  Filter,
+  Search,
+  Grid,
+  List,
+  MessageCircle,
+  ChevronRight,
+  Award,
+  ArrowUpRight,
+  BookOpen,
+  Users,
+  Target,
+  Flame,
+  BarChart3,
+  Calendar,
+  Tag as TagIcon,
+  X,
+  CheckCircle
+} from "lucide-react";
+import Layout from "@/components/Layout";
+import {
+  normalizeSlug,
+  isDraftContent,
+  getDocKind,
+  getDocHref,
+  getPublishedDocuments,
+} from "@/lib/contentlayer-helper";
+type ShortDoc = {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  description?: string | null;
+  date?: string | null;
+  formattedDate?: string | null;
+  readTime?: string | null;
+  tags?: string[];
+  theme?: string | null;
+  category?: string | null;
+  featured?: boolean;
+  url?: string;
+};
+type ShortsIndexProps = {
+  shorts: ShortDoc[];
+  totalCount: number;
+  themes: string[];
+  popularTags: string[];
+};
+const STREAK_LAST_SEEN_KEY = "aol_shorts_last_seen";
+const STREAK_COUNT_KEY = "aol_shorts_streak";
+const LIKE_KEY = "aol_shorts_likes_v1";
+const SHARE_KEY = "aol_shorts_shares_v1";
+const SAVE_KEY = "aol_shorts_saves_v1";
+function formatISO(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function parseIntSafe(v: string | null): number | null {
+  if (!v) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.trunc(n) : null;
+}
+function safeJson<T>(raw: string | null, fallback: T): T {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+function formatDate(dateString: string | null): string | null {
+  if (!dateString) return null;
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  } catch {
+    return null;
+  }
+}
+const themeGradients: Record<string, string> = {
+  faith: "from-blue-500/10 via-indigo-500/6 to-transparent border-blue-500/25",
+  resilience: "from-amber-500/12 via-orange-500/6 to-transparent border-amber-500/25",
+  purpose: "from-emerald-500/12 via-teal-500/6 to-transparent border-emerald-500/25",
+  leadership: "from-purple-500/12 via-pink-500/6 to-transparent border-purple-500/25",
+  fatherhood: "from-rose-500/12 via-red-500/6 to-transparent border-rose-500/25",
+  strategy: "from-cyan-500/12 via-sky-500/6 to-transparent border-cyan-500/25",
+  default: "from-slate-500/10 via-slate-500/6 to-transparent border-slate-500/25",
+};
+const themeIcons: Record<string, string> = {
+  faith: "🙏",
+  resilience: "💪",
+  purpose: "🎯",
+  leadership: "👑",
+  fatherhood: "👨‍👦",
+  strategy: "♟️",
+  default: "📝",
+};
+const themeColors: Record<string, string> = {
+  faith: "text-blue-400",
+  resilience: "text-amber-400",
+  purpose: "text-emerald-400",
+  leadership: "text-purple-400",
+  fatherhood: "text-rose-400",
+  strategy: "text-cyan-400",
+  default: "text-slate-400",
+};
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.08 } },
+};
+const cardVariants = {
+  hidden: { opacity: 0, y: 18, scale: 0.97 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 110, damping: 16 } },
+  hover: { y: -5, scale: 1.02, transition: { type: "spring", stiffness: 260, damping: 20 } },
+  tap: { scale: 0.985 },
+};
+const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, themes, popularTags }) => {
+  const reduceMotion = useReducedMotion();
+  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedTheme, setSelectedTheme] = React.useState<string>("all");
+  const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
+  const [streakDays, setStreakDays] = React.useState<number>(0);
+  const [subtitleVisible, setSubtitleVisible] = React.useState(false);
+  const subtitle = "For wherever you are today.";
+  const [likes, setLikes] = React.useState<Record<string, number>>({});
+  const [shares, setShares] = React.useState<Record<string, number>>({});
+  const [saves, setSaves] = React.useState<Record<string, number>>({});
+  const [savedSet, setSavedSet] = React.useState<Set<string>>(new Set());
+  const filteredShorts = React.useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return shorts.filter((short) => {
+      const matchesSearch =
+        !searchQuery ||
+        short.title.toLowerCase().includes(q) ||
+        (short.excerpt ?? "").toLowerCase().includes(q) ||
+        (short.description ?? "").toLowerCase().includes(q) ||
+        short.tags?.some((t) => t.toLowerCase().includes(q));
+      const matchesTheme = selectedTheme === "all" || short.theme === selectedTheme;
+      const matchesTag = !selectedTag || short.tags?.includes(selectedTag);
+      return matchesSearch && matchesTheme && matchesTag;
+    });
+  }, [shorts, searchQuery, selectedTheme, selectedTag]);
+  const featuredShorts = React.useMemo(() => 
+    shorts.filter(s => s.featured).slice(0, 3),
+    [shorts]
+  );
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (reduceMotion) {
+      setSubtitleVisible(true);
+      return;
+    }
+    const t = window.setTimeout(() => setSubtitleVisible(true), 1200);
+    return () => window.clearTimeout(t);
+  }, [reduceMotion]);
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const todayKey = formatISO(new Date());
+    const lastKey = window.localStorage.getItem(STREAK_LAST_SEEN_KEY);
+    const streak = parseIntSafe(window.localStorage.getItem(STREAK_COUNT_KEY));
+    let next = streak ?? 0;
+    if (!lastKey) next = 1;
+    else if (lastKey === todayKey) next = Math.max(1, next);
+    else {
+      const lastDate = new Date(`${lastKey}T00:00:00`);
+      const todayDate = new Date(`${todayKey}T00:00:00`);
+      const diffDays = Math.round((todayDate.getTime() - lastDate.getTime()) / 86400000);
+      next = diffDays === 1 ? next + 1 : 1;
+    }
+    window.localStorage.setItem(STREAK_LAST_SEEN_KEY, todayKey);
+    window.localStorage.setItem(STREAK_COUNT_KEY, String(next));
+    setStreakDays(Math.max(1, Math.min(3650, next)));
+  }, []);
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const likeStore = safeJson<Record<string, number>>(localStorage.getItem(LIKE_KEY), {});
+    const shareStore = safeJson<Record<string, number>>(localStorage.getItem(SHARE_KEY), {});
+    const saveStore = safeJson<Record<string, number>>(localStorage.getItem(SAVE_KEY), {});
+    setLikes(likeStore);
+    setShares(shareStore);
+    setSaves(saveStore);
+    setSavedSet(new Set(Object.keys(saveStore).filter((k) => (saveStore[k] ?? 0) > 0)));
+  }, []);
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(LIKE_KEY, JSON.stringify(likes));
+  }, [likes]);
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(SHARE_KEY, JSON.stringify(shares));
+  }, [shares]);
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saves));
+  }, [saves]);
+  const onLike = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLikes((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
+  };
+  const onSave = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSavedSet((prev) => {
+      const next = new Set(prev);
+      const currentlySaved = next.has(id);
+      setSaves((s) => ({
+        ...s,
+        [id]: Math.max(0, (s[id] ?? 0) + (currentlySaved ? -1 : 1)),
+      }));
+      if (currentlySaved) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const onShareCard = async (id: string, slug: string, title: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://www.abrahamoflondon.com";
+    const url = `${origin}/shorts/${slug}`;
+    const text = `"${title}" - Abraham of London`;
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: `${title} · Abraham of London`, text, url });
+        setShares((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
+        return;
+      } catch {
+        // ignore
+      }
+    }
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        setShares((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
+        return;
+      }
+    } catch {
+      // ignore
+    }
+    if (typeof window !== "undefined") {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, "_blank", "noopener,noreferrer");
+      setShares((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
+    }
+  };
+  const sharePage = async (platform?: "twitter" | "whatsapp") => {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    const text = "Shorts - Abraham of London";
+    if (platform === "twitter") {
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+      return;
+    }
+    if (platform === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if ((navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: "Shorts · Abraham of London", text, url });
+        return;
+      } catch {
+        // ignore
+      }
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+    }
+  };
+  const subtitleMotion = reduceMotion
+    ? { initial: { opacity: 1, y: 0 }, animate: { opacity: 1, y: 0 } }
+    : { initial: { opacity: 0, y: 8, filter: "blur(2px)" }, animate: { opacity: 1, y: 0, filter: "blur(0px)" } };
+  const totalShares = Object.values(shares).reduce((sum, v) => sum + v, 0);
+  const totalLikes = Object.values(likes).reduce((sum, v) => sum + v, 0);
+  const totalSaves = Object.values(saves).reduce((sum, v) => sum + v, 0);
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedTheme("all");
+    setSelectedTag(null);
+  };
+  const hasActiveFilters = searchQuery || selectedTheme !== "all" || selectedTag;
+  return (
+    <Layout 
+      title="Shorts · Abraham of London" 
+      description="Short reflections for busy minds - faith-rooted clarity without the noise."
+      className="bg-black min-h-screen"
+    >
+      <Head>
+        <title>Shorts · Abraham of London</title>
+        <meta name="description" content="Short reflections for busy minds - faith-rooted clarity without the noise." />
+        <meta property="og:title" content="Shorts · Abraham of London" />
+        <meta property="og:description" content="Short reflections for busy minds - faith-rooted clarity without the noise." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://abrahamoflondon.com/shorts" />
+        <meta property="og:image" content="https://abrahamoflondon.com/api/og/shorts" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://abrahamoflondon.com/shorts" />
+      </Head>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-white/10 bg-gradient-to-b from-black via-slate-950 to-black">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_55%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black" />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2">
+              <Zap className="h-4 w-4 text-blue-400" />
+              <span className="text-sm font-medium text-blue-300">Field Notes · Short Form</span>
+            </div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6"
+            >
+              Shorts
+            </motion.h1>
+            <motion.p 
+              {...subtitleMotion}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-xl md:text-2xl text-slate-300 mb-10 max-w-3xl mx-auto"
+            >
+              {subtitle}
+            </motion.p>
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-xl mx-auto mb-12">
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-white mb-1">{totalCount}</div>
+                <div className="text-xs font-medium text-slate-300 uppercase tracking-wider">Total Shorts</div>
+              </div>
+              <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-blue-200 mb-1">{streakDays}</div>
+                <div className="text-xs font-medium text-blue-300 uppercase tracking-wider">Day Streak</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-white mb-1">{totalLikes}</div>
+                <div className="text-xs font-medium text-slate-300 uppercase tracking-wider">Total Likes</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-white mb-1">{totalShares}</div>
+                <div className="text-xs font-medium text-slate-300 uppercase tracking-wider">Total Shares</div>
+              </div>
+            </div>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="#shorts-grid"
+                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 text-sm font-bold text-white transition-all hover:scale-105 hover:from-blue-400 hover:to-blue-500"
+              >
+                <BookOpen className="h-5 w-5" />
+                Browse All Shorts
+                <ArrowUpRight className="h-5 w-5" />
+              </Link>
+              <button
+                onClick={() => sharePage()}
+                className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-white/5 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-white/10"
+              >
+                <Share2 className="h-5 w-5" />
+                Share Collection
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* Filters Section */}
+      <section className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-xl py-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="flex-1 w-full">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search shorts by title, content, or tags..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded-lg ${viewMode === "grid" ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <Grid className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded-lg ${viewMode === "list" ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <List className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="relative">
+                <select
+                  value={selectedTheme}
+                  onChange={(e) => setSelectedTheme(e.target.value)}
+                  className="appearance-none bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Themes</option>
+                  {themes.map(theme => (
+                    <option key={theme} value={theme}>{theme}</option>
+                  ))}
+                </select>
+                <Filter className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+          {/* Active Filters */}
+          {hasActiveFilters && (
+            <div className="mt-4 flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-slate-400">
+                  Showing {filteredShorts.length} of {totalCount} shorts
+                </span>
+                {searchQuery && (
+                  <span className="px-3 py-1 bg-blue-500/10 text-blue-300 rounded-full text-sm">
+                    Search: "{searchQuery}"
+                  </span>
+                )}
+                {selectedTheme !== "all" && (
+                  <span className="px-3 py-1 bg-white/5 text-white rounded-full text-sm">
+                    Theme: {selectedTheme}
+                  </span>
+                )}
+                {selectedTag && (
+                  <span className="px-3 py-1 bg-white/5 text-white rounded-full text-sm flex items-center gap-1">
+                    <TagIcon className="h-3 w-3" />
+                    Tag: {selectedTag}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-slate-400 hover:text-white"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+      {/* Featured Shorts */}
+      {featuredShorts.length > 0 && (
+        <section className="py-12 border-b border-white/10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-6 w-6 text-amber-400" />
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Featured Shorts</h2>
+                  <p className="text-slate-400">Handpicked insights of exceptional value</p>
+                </div>
+              </div>
+              <Link
+                href="/content"
+                className="text-sm text-slate-400 hover:text-white flex items-center gap-1"
+              >
+                View all <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {featuredShorts.map((short, index) => {
+                const themeGradient = themeGradients[short.theme || 'default'];
+                const themeColor = themeColors[short.theme || 'default'];
+                const themeIcon = themeIcons[short.theme || 'default'];
+                return (
+                  <Link
+                    key={short._id}
+                    href={short.url || `/shorts/${short.slug}`}
+                    className="group block"
+                  >
+                    <motion.div
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      whileHover="hover"
+                      whileTap="tap"
+                      className={`rounded-2xl border ${themeGradient} bg-gradient-to-br from-white/5 to-white/0 p-6 backdrop-blur-sm`}
+                    >
+                      <div className="mb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{themeIcon}</span>
+                          <span className={`text-sm font-medium ${themeColor}`}>
+                            {short.theme || 'Insight'}
+                          </span>
+                        </div>
+                        <Award className="h-5 w-5 text-amber-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
+                        {short.title}
+                      </h3>
+                      {short.excerpt && (
+                        <p className="text-slate-300 mb-4 line-clamp-3">
+                          {short.excerpt}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between border-t border-white/10 pt-4">
+                        <div className="flex items-center gap-4 text-sm text-slate-400">
+                          {short.readTime && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {short.readTime}
+                            </span>
+                          )}
+                          {short.date && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {short.formattedDate}
+                            </span>
+                          )}
+                        </div>
+                        <ArrowUpRight className="h-5 w-5 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                      </div>
+                    </motion.div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+      {/* Main Shorts Grid */}
+      <section id="shorts-grid" className="py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {filteredShorts.length > 0 ? (
+            <>
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">All Shorts</h2>
+                  <p className="text-slate-400">{filteredShorts.length} shorts matching your criteria</p>
+                </div>
+                <div className="text-sm text-slate-400">
+                  Sorted by {selectedTheme === "all" ? "latest" : "relevance"}
+                </div>
+              </div>
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className={viewMode === "grid" 
+                  ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  : "space-y-6"
+                }
+              >
+                <AnimatePresence mode="wait">
+                  {filteredShorts.map((short) => {
+                    const themeGradient = themeGradients[short.theme || 'default'];
+                    const themeColor = themeColors[short.theme || 'default'];
+                    const themeIcon = themeIcons[short.theme || 'default'];
+                    const isSaved = savedSet.has(short._id);
+                    const likeCount = likes[short._id] || 0;
+                    const shareCount = shares[short._id] || 0;
+                    const saveCount = saves[short._id] || 0;
+                    return (
+                      <motion.div
+                        key={short._id}
+                        layout
+                        variants={cardVariants}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                      >
+                        <Link
+                          href={short.url || `/shorts/${short.slug}`}
+                          className={`group block ${viewMode === "list" ? 'flex gap-6' : ''}`}
+                        >
+                          <motion.div
+                            whileHover="hover"
+                            whileTap="tap"
+                            className={`rounded-2xl border ${themeGradient} bg-gradient-to-br from-white/5 to-white/0 p-6 backdrop-blur-sm ${viewMode === "list" ? 'flex-1' : ''}`}
+                          >
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl">{themeIcon}</span>
+                                <div>
+                                  <span className={`text-sm font-medium ${themeColor}`}>
+                                    {short.theme || 'Insight'}
+                                  </span>
+                                  {short.category && (
+                                    <span className="ml-2 text-xs text-slate-400">
+                                      • {short.category}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={(e) => onLike(short._id, e)}
+                                  className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-rose-400"
+                                >
+                                  <Heart className={`h-4 w-4 ${likes[short._id] ? 'fill-rose-500 text-rose-500' : ''}`} />
+                                  {likeCount > 0 && (
+                                    <span className="ml-1 text-xs">{likeCount}</span>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={(e) => onSave(short._id, e)}
+                                  className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-amber-400"
+                                >
+                                  <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-amber-500 text-amber-500' : ''}`} />
+                                </button>
+                              </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
+                              {short.title}
+                            </h3>
+                            {(short.excerpt || short.description) && (
+                              <p className="text-slate-300 mb-4 line-clamp-3">
+                                {short.excerpt || short.description}
+                              </p>
+                            )}
+                            {/* Tags */}
+                            {short.tags && short.tags.length > 0 && (
+                              <div className="mb-4 flex flex-wrap gap-2">
+                                {short.safeSlice(tags, 0, 3).map((tag) => (
+                                  <button
+                                    key={tag}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      setSelectedTag(tag === selectedTag ? null : tag);
+                                    }}
+                                    className={`px-2 py-1 rounded-full text-xs ${selectedTag === tag ? 'bg-blue-500/20 text-blue-300' : 'bg-white/5 text-slate-400'}`}
+                                  >
+                                    #{tag}
+                                  </button>
+                                ))}
+                                {short.tags.length > 3 && (
+                                  <span className="text-xs text-slate-500">
+                                    +{short.tags.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+                              <div className="flex items-center gap-4 text-sm text-slate-400">
+                                {short.readTime && (
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-4 w-4" />
+                                    {short.readTime}
+                                  </span>
+                                )}
+                                {short.date && (
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    {short.formattedDate}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={(e) => onShareCard(short._id, short.slug, short.title, e)}
+                                  className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-blue-400"
+                                  title="Share"
+                                >
+                                  <Share2 className="h-4 w-4" />
+                                </button>
+                                <ArrowUpRight className="h-5 w-5 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                              </div>
+                            </div>
+                          </motion.div>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </motion.div>
+            </>
+          ) : (
+            <div className="text-center py-20">
+              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
+                <Search className="h-8 w-8 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">No shorts found</h3>
+              <p className="text-slate-400 mb-8">
+                {searchQuery 
+                  ? `No shorts match "${searchQuery}". Try a different search term.`
+                  : "No shorts available with the current filters."
+                }
+              </p>
+              <button
+                onClick={clearFilters}
+                className="rounded-xl bg-white/10 px-6 py-3 text-white hover:bg-white/15 transition-colors"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+      {/* Popular Tags */}
+      {popularTags.length > 0 && !selectedTag && (
+        <section className="py-12 border-t border-white/10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-6 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-emerald-400" />
+              <h3 className="text-lg font-bold text-white">Popular Topics</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {popularTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                  className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                    selectedTag === tag
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                  }`}
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      {/* CTA Section */}
+      <section className="py-20 border-t border-white/10">
+        <div className="mx-auto max-w-4xl px-4 text-center">
+          <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-transparent p-8 md:p-12">
+            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-500/10">
+              <MessageCircle className="h-7 w-7 text-blue-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">Join the Conversation</h3>
+            <p className="mb-8 text-slate-300 max-w-2xl mx-auto">
+              Share your thoughts, connect with other readers, and explore deeper discussions 
+              in the Inner Circle community.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/inner-circle"
+                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 text-sm font-bold text-white hover:from-blue-400 hover:to-blue-500 transition-all"
+              >
+                <Users className="h-5 w-5" />
+                Explore Inner Circle
+                <ArrowUpRight className="h-5 w-5" />
+              </Link>
+              <button
+                onClick={() => sharePage("twitter")}
+                className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-white/5 px-8 py-4 text-sm font-bold text-white hover:bg-white/10 transition-all"
+              >
+                <Share2 className="h-5 w-5" />
+                Share on Twitter
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+};
+export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
+  try {
+    await getContentlayerData();
+    const allDocs = getPublishedDocuments();
+    // Filter for shorts (adjust based on your content structure)
+    const shortsDocs = allDocs.filter((doc: any) => {
+      const kind = String(doc._raw?.sourceFileDir || doc.kind || "").toLowerCase();
+      const tags = Array.isArray(doc.tags) ? doc.tags.map((t: string) => t.toLowerCase()) : [];
+      return (
+        kind.includes('short') || 
+        kind.includes('field-note') || 
+        kind.includes('fieldnote') ||
+        tags.includes('short') ||
+        tags.includes('field-note') ||
+        tags.includes('quick') ||
+        (doc.category && doc.category.toLowerCase().includes('short')) ||
+        (doc.url && doc.url.includes('/shorts/'))
+      );
+    });
+    const shorts: ShortDoc[] = shortsDocs
+      .filter((s: any) => s && !isDraftContent(s))
+      .map((s: any) => {
+        const slug = normalizeSlug(s.slug || s._raw?.flattenedPath || "");
+        return {
+          _id: String(s._id || slug || s.title || Math.random()),
+          slug,
+          title: String(s.title || "Short"),
+          excerpt: (s.excerpt || null) as string | null,
+          description: (s.description || null) as string | null,
+          date: (s.date || null) as string | null,
+          formattedDate: formatDate(s.date || null),
+          readTime: (s.readTime || s.readingTime || null) as string | null,
+          tags: Array.isArray(s.tags) ? s.tags : [],
+          theme: (s.theme || s.category || null) as string | null,
+          category: (s.category || null) as string | null,
+          featured: Boolean(s.featured),
+          url: getDocHref(s) || `/shorts/${slug}`,
+        };
+      })
+      .filter((s) => !!s.slug)
+      .sort((a, b) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return db - da || a.title.localeCompare(b.title);
+      });
+    // Extract themes
+    const themes = [...new Set(shorts.map(s => s.theme).filter(Boolean))] as string[];
+    // Calculate popular tags
+    const tagCounts: Record<string, number> = {};
+    shorts.forEach(short => {
+      short.tags?.forEach(tag => {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      });
+    });
+    const popularTags = Object.entries(tagCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([tag]) => tag);
+    console.log(`📝 Shorts index: Loaded ${shorts.length} shorts, ${popularTags.length} popular tags`);
+    return { 
+      props: { 
+        shorts, 
+        totalCount: shorts.length,
+        themes,
+        popularTags
+      }, 
+      revalidate: 3600 
+    };
+  } catch (error) {
+    console.error("Error generating shorts index:", error);
+    return {
+      props: { 
+        shorts: [], 
+        totalCount: 0,
+        themes: [],
+        popularTags: []
+      },
+      revalidate: 3600,
+    };
+  }
+};
+export default ShortsIndexPage;

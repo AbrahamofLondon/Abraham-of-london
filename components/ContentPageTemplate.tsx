@@ -3,6 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/imports";
+import { capitalize } from "@/lib/utils/string"; // ✅ Add import
 
 interface ContentPageTemplateProps {
   frontmatter: {
@@ -31,13 +32,43 @@ export default function ContentPageTemplate({
   children,
   contentType = "content",
 }: ContentPageTemplateProps): JSX.Element {
-  const title = frontmatter.title || `${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`;
+  // ✅ FIXED: Use safe capitalize function
+  const title = frontmatter.title || capitalize(contentType);
   const description = frontmatter.excerpt || frontmatter.description || title;
   
   // URL can be from frontmatter or constructed
   const url = frontmatter.url || `/${contentType}/${frontmatter.slug}`;
-  const fullUrl = `${siteConfig.url}${url}`; // FIXED: Changed siteUrl to url
+  const fullUrl = `${siteConfig.url}${url}`;
   
+  // ✅ FIXED: Safe cover image URL extraction
+  const getCoverImageUrl = () => {
+    if (!frontmatter.coverImage) return '';
+    if (typeof frontmatter.coverImage === 'string') return frontmatter.coverImage;
+    if (frontmatter.coverImage && typeof frontmatter.coverImage === 'object') {
+      return (frontmatter.coverImage as any).src || '';
+    }
+    return '';
+  };
+  
+  const coverImageUrl = getCoverImageUrl();
+  const safeDate = frontmatter.date ? new Date(frontmatter.date) : null;
+  
+  // ✅ FIXED: Safe date formatting
+  const formatDate = (date: Date | null) => {
+    if (!date || isNaN(date.getTime())) return '';
+    return date.toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+  
+  // ✅ FIXED: Safe category formatting
+  const formatCategory = (category?: string) => {
+    if (!category) return capitalize(contentType);
+    return category.split('-').map(word => capitalize(word)).join(' ');
+  };
+
   return (
     <Layout title={title} className={`bg-charcoal content-${contentType}`}>
       <Head>
@@ -52,12 +83,8 @@ export default function ContentPageTemplate({
         <meta property="og:description" content={description} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={fullUrl} />
-        {frontmatter.coverImage && (
-          <meta property="og:image" content={
-            typeof frontmatter.coverImage === 'string' 
-              ? frontmatter.coverImage 
-              : (frontmatter.coverImage as any)?.src || ''
-          } />
+        {coverImageUrl && (
+          <meta property="og:image" content={coverImageUrl} />
         )}
         
         {/* Twitter */}
@@ -75,7 +102,7 @@ export default function ContentPageTemplate({
           <header className="mb-10 border-b border-softGold/20 pb-8">
             <div className="mb-4">
               <span className="inline-block rounded-full bg-softGold/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-softGold">
-                {contentType}
+                {formatCategory(frontmatter.category)}
               </span>
               {frontmatter.volumeNumber && (
                 <span className="ml-2 inline-block rounded-full bg-charcoal-light px-3 py-1 text-xs font-medium text-cream/70">
@@ -100,16 +127,12 @@ export default function ContentPageTemplate({
             )}
             
             <div className="flex flex-wrap items-center gap-4 text-sm text-cream/70">
-              {frontmatter.date && (
-                <time dateTime={frontmatter.date} className="flex items-center">
+              {safeDate && (
+                <time dateTime={safeDate.toISOString()} className="flex items-center">
                   <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  {new Date(frontmatter.date).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {formatDate(safeDate)}
                 </time>
               )}
               
@@ -139,7 +162,8 @@ export default function ContentPageTemplate({
                     key={tag}
                     className="rounded-full bg-softGold/10 px-3 py-1 text-xs font-medium text-softGold transition-colors hover:bg-softGold/20"
                   >
-                    {tag}
+                    {/* ✅ FIXED: Use safe capitalize for tags */}
+                    {capitalize(tag)}
                   </span>
                 ))}
               </div>

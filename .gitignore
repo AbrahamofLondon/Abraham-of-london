@@ -37,6 +37,7 @@ build/
 
 # Contentlayer generated output
 .contentlayer/
+.contentlayer-cache/
 
 # =====================================================
 # ENVIRONMENT FILES (SENSITIVE - DO NOT COMMIT)

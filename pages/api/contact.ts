@@ -1,4 +1,5 @@
 // pages/api/contact.ts
+import { safeTrimSlice, safeSlice } from "@/lib/utils/safe";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { withSecurity } from "@/lib/apiGuard";
 import {
@@ -84,11 +85,11 @@ async function contactHandler(
       typeof rawBody === "string" ? safeParse(rawBody) : (rawBody || {});
 
     // Input sanitisation and limits
-    const name = String(body.name || "").trim().slice(0, 100);
+    const name = String(body.name || "")safeTrimSlice(..., 0, 100);
     const email = String(body.email || "").trim().toLowerCase();
     const subject = String(body.subject || "Website contact")
       .trim()
-      .slice(0, 120);
+      safeSlice(..., 0, 120);
     const message = String(body.message || "").trim();
     const honeypot = String(body.botField || "").trim();
 

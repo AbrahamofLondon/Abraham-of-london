@@ -3,13 +3,15 @@
 // Synchronized with ContentHelper v5.2.0
 
 import { 
+import { safeSlice } from "@/lib/utils/safe";
+
   getAllPosts, getAllBooks, getAllDownloads, getAllCanons, getAllShorts,
   getAllEvents, getAllResources, getAllStrategies, getAllArticles,
   getAllGuides, getAllTutorials, getAllCaseStudies, getAllWhitepapers,
   getAllReports, getAllNewsletters, getAllSermons, getAllDevotionals,
   getAllPrayers, getAllTestimonies, getAllPodcasts, getAllVideos,
   getAllCourses, getAllLessons, getAllPrints
-} from "@/lib/contentlayer";
+} from "@/lib/content";
 
 /* -------------------------------------------------------------------------- */
 /* 1. TYPES & INTERFACES                                                      */
@@ -332,7 +334,7 @@ export async function queryUnifiedContent(options: ContentQuery = {}): Promise<U
 
   const skip = options.skip || 0;
   const limit = options.limit || content.length;
-  return content.slice(skip, skip + limit);
+  return safeSlice(content, skip, skip + limit);
 }
 
 export async function searchUnifiedContent(query: string): Promise<UnifiedContent[]> {

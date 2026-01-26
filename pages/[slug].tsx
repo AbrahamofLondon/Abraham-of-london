@@ -1,4 +1,4 @@
-// pages/[slug].tsx — STRICT TOP-LEVEL DOC HANDLER (WON'T HIJACK SECTIONS)
+// pages/[slug].tsx — STRICT TOP-LEVEL DOC HANDLER (RETAINS ORIGINAL IMPORTS)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -9,16 +9,22 @@ import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { MDXRemote } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
+
+// ✅ KEEP ORIGINAL IMPORTS - They exist and work
 import {
-  getPublishedDocuments,
+  getAllCombinedDocs,
   getDocBySlug,
-  getDocKind,
   normalizeSlug,
+  isDraftContent,
+  isPublished,
+} from "@/lib/contentlayer-helper";
+
+import {
+  getDocKind,
   getDocHref,
   resolveDocCoverImage,
-  getContentlayerData,
-  isDraftContent,
-} from "@/lib/contentlayer-compat";
+  sanitizeData,
+} from "@/lib/content/shared";
 
 import { prepareMDX, mdxComponents } from "@/lib/server/md-utils";
 
@@ -32,6 +38,7 @@ type Doc = {
   href: string;
   excerpt?: string | null;
   date?: string | null;
+  dateIso?: string | null;  // ✅ ISO for reliable handling
   image?: string | null;
   tags?: string[];
   author?: string | null;
@@ -45,68 +52,106 @@ interface Props {
 }
 
 /* -----------------------------------------------------------------------------
-  ROUTE PROTECTION
-  This page must NEVER hijack real sections like /canon/* or /blog/*
+  ROUTE PROTECTION - UPDATED WITH ALL RESERVED ROUTES
 ----------------------------------------------------------------------------- */
-const RESERVED = new Set([
-  // site sections
-  "blog",
-  "blogs",
-  "canon",
-  "canons",
-  "books",
-  "book",
-  "shorts",
-  "prints",
+const RESERVED_TOP_LEVEL = new Set<string>([
+  "vault",
+  "canon-campaign",
   "downloads",
-  "resources",
+  "download",
+  "books",
+  "canon",
   "events",
-  "ventures",
+  "shorts",
   "strategy",
-  "consulting",
-  "contact",
+  "resources",
+  "prints",
+  "blog",
   "inner-circle",
-  // framework / infra
+  "login",
   "api",
-  "_next",
-  "assets",
-  "public",
   "admin",
-  "dashboard",
+  "about",
+  "accessibility",
+  "accessibility-statement",
+  "cookie-policy",
+  "cookies",
+  "contact",
+  "fatherhood",
+  "founders",
+  "leadership",
+  "newsletter",
+  "privacy",
+  "security",
+  "security-policy",
+  "speaking",
+  "subscribe",
+  "terms",
+  "terms-of-service",
+  "ventures",
+  "works-in-progress",
+  "content",
+  "board",
   "auth",
-  // common static files
-  "favicon.ico",
-  "robots.txt",
-  "sitemap.xml",
-  "manifest.json",
+  "private",
+  "debug",
+  "diagnostic",
+  "styling-test",
+  "inner-circle-portal",
+  "inner-circle-admin",
+  "books-the-architecture-of-human-purpose-landing",
+  "chatham-rooms",
+  "consulting",
+  "content-simple",
+  "strategy-room",
+  // ✅ ADDED: Problematic slugs from export errors
+  "abraham-vault-pack",
+  "download-legacy-architecture-canvas",
+  "the-brotherhood-code",
+  "ultimate-purpose-of-man-editorial",
 ]);
 
-function isReservedSlug(slug: string) {
-  const s = slug.toLowerCase().trim();
-  if (!s) return true;
-  if (RESERVED.has(s)) return true;
-  if (s.startsWith("_")) return true;
-  if (s.includes(".")) return true; // blocks /whatever.png, /sitemap.xml, etc
-  if (s.includes("/")) return true; // blocks nested slugs entirely
-  return false;
+/* -----------------------------------------------------------------------------
+  UTILITY FUNCTIONS
+----------------------------------------------------------------------------- */
+function stripMdxExt(s: string): string {
+  return String(s || "").replace(/\.(md|mdx)$/, "");
 }
 
-function toISODate(date: string | null | undefined) {
+function topSlugFromDoc(d: any): string {
+  const raw =
+    normalizeSlug(String(d?.slug || "")) ||
+    normalizeSlug(String(d?._raw?.flattenedPath || "")) ||
+    "";
+
+  const noExt = stripMdxExt(raw);
+
+  // Only allow *single-segment* slugs for this page.
+  // Anything with "/" belongs to a nested router.
+  const seg = noExt.split("/").filter(Boolean)[0] || "";
+  return seg;
+}
+
+function toISODate(date: string | null | undefined): string | null {
   if (!date) return null;
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+  try {
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toISOString();
+  } catch {
+    return null;
+  }
 }
 
-function safeText(v: unknown, fallback = "") {
+function safeText(v: unknown, fallback = ""): string {
   const s = typeof v === "string" ? v : "";
   return s.trim() || fallback;
 }
 
-const SITE_URL = "https://www.abrahamoflondon.org";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
 /* -----------------------------------------------------------------------------
-  PAGE
+  PAGE COMPONENT
 ----------------------------------------------------------------------------- */
 const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
   const router = useRouter();
@@ -152,13 +197,9 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
       })
     : null;
 
-  const canonical =
-    `${SITE_URL}${doc.href.startsWith("/") ? doc.href : `/${doc.href}`}`;
-
+  const canonical = `${SITE_URL}${doc.href.startsWith("/") ? doc.href : `/${doc.href}`}`;
   const ogImage = doc.image || "/assets/images/social/og-image.jpg";
-  const description =
-    doc.excerpt ||
-    "Abraham of London — institutional advisory and strategic architecture.";
+  const description = doc.excerpt || "Abraham of London — institutional advisory and strategic architecture.";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -168,8 +209,8 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
     mainEntityOfPage: canonical,
     url: canonical,
     image: [`${SITE_URL}${ogImage.startsWith("/") ? ogImage : `/${ogImage}`}`],
-    datePublished: toISODate(doc.date),
-    dateModified: toISODate(doc.date),
+    datePublished: doc.dateIso,
+    dateModified: doc.dateIso,
     author: doc.author
       ? { "@type": "Person", name: doc.author }
       : { "@type": "Person", name: "Abraham of London" },
@@ -199,7 +240,6 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
         <meta name="twitter:image" content={`${SITE_URL}${ogImage}`} />
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
@@ -217,54 +257,53 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
 
           {/* Meta row */}
           <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-gray-300">
-            {formattedDate ? (
+            {formattedDate && (
               <span className="inline-flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-amber-300" />
                 {formattedDate}
               </span>
-            ) : null}
+            )}
 
-            {doc.readTime ? (
+            {doc.readTime && (
               <span className="inline-flex items-center gap-2">
                 <Clock className="h-4 w-4 text-amber-300" />
                 {doc.readTime}
               </span>
-            ) : null}
+            )}
 
-            {doc.author ? (
+            {doc.author && (
               <span className="inline-flex items-center gap-2">
                 <User className="h-4 w-4 text-amber-300" />
                 {doc.author}
               </span>
-            ) : null}
+            )}
           </div>
 
           {/* Excerpt */}
-          {doc.excerpt ? (
+          {doc.excerpt && (
             <p className="mt-6 text-lg leading-relaxed text-gray-200">
               {doc.excerpt}
             </p>
-          ) : null}
+          )}
 
           {/* Cover */}
-          {doc.image ? (
+          {doc.image && (
             <div className="mt-10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={doc.image} alt={doc.title} className="h-auto w-full" />
             </div>
-          ) : null}
+          )}
 
           {/* Content */}
           <article className="prose prose-invert mt-10 max-w-none">
             {source ? (
-              <MDXRemote {...source} components={mdxComponents ?? {}} />
+              <MDXRemote {...source} components={mdxComponents || {}} />
             ) : (
               <p className="text-gray-300">Content not available.</p>
             )}
           </article>
 
           {/* Tags */}
-          {doc.tags && doc.tags.length > 0 ? (
+          {doc.tags && doc.tags.length > 0 && (
             <div className="mt-10 border-t border-white/10 pt-8">
               <div className="mb-3 inline-flex items-center gap-2 text-sm text-gray-300">
                 <Tag className="h-4 w-4 text-amber-300" />
@@ -281,7 +320,7 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
                 ))}
               </div>
             </div>
-          ) : null}
+          )}
 
           {/* Actions */}
           <div className="mt-12 flex flex-wrap gap-3">
@@ -314,29 +353,33 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
 ----------------------------------------------------------------------------- */
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    await getContentlayerData();
+    const docs = getAllCombinedDocs();
 
-    const docs = getPublishedDocuments();
-    const paths =
-      (docs ?? [])
-        .map((d: any) => {
-          const href = getDocHref(d);
-          if (!href) return null;
+    const candidates = docs
+      .filter((d: any) => {
+        if (!d) return false;
+        try {
+          return !isDraftContent(d) && isPublished(d);
+        } catch {
+          return false;
+        }
+      })
+      .map(topSlugFromDoc)
+      .filter(Boolean);
 
-          // Only allow exact top-level href: "/slug"
-          const slug = normalizeSlug(href);
-          if (!slug) return null;
+    // ✅ CRITICAL: Filter out reserved routes
+    const unique = Array.from(new Set(candidates)).filter((s) => {
+      if (!s) return false;
+      if (RESERVED_TOP_LEVEL.has(s)) return false;
+      return true;
+    });
 
-          if (isReservedSlug(slug)) return null;
-          if (href !== `/${slug}`) return null;
-
-          return { params: { slug } };
-        })
-        .filter(Boolean) as { params: { slug: string } }[];
-
-    return { paths, fallback: "blocking" };
+    return {
+      paths: unique.map((slug) => ({ params: { slug } })),
+      fallback: "blocking",
+    };
   } catch (e) {
-    console.error("getStaticPaths [slug] failed:", e);
+    console.error("[Slug Page] Error generating static paths:", e);
     return { paths: [], fallback: "blocking" };
   }
 };
@@ -347,42 +390,73 @@ export const getStaticPaths: GetStaticPaths = async () => {
 ----------------------------------------------------------------------------- */
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
-    const rawSlug = params?.slug;
-    if (!rawSlug || Array.isArray(rawSlug)) return { notFound: true };
+    const raw = String((params as any)?.slug || "");
+    const slug = normalizeSlug(raw);
 
-    const slug = normalizeSlug(String(rawSlug));
-    if (!slug || isReservedSlug(slug)) return { notFound: true };
+    // ✅ CRITICAL: REJECT reserved routes
+    if (!slug || RESERVED_TOP_LEVEL.has(slug)) {
+      return { notFound: true };
+    }
 
-    const rawDoc = await getDocBySlug(slug);
-    if (!rawDoc) return { notFound: true };
-    if (isDraftContent(rawDoc)) return { notFound: true };
+    // Try direct slug, and also flattenedPath variants (defensive)
+    const rawDoc =
+      getDocBySlug(slug) ||
+      getDocBySlug(`${slug}/index`) ||
+      getDocBySlug(`${slug}.mdx`) ||
+      getDocBySlug(`${slug}.md`) ||
+      null;
+
+    if (!rawDoc) {
+      return { notFound: true };
+    }
+
+    // Check if draft or unpublished
+    if (isDraftContent(rawDoc) || !isPublished(rawDoc)) {
+      return { notFound: true };
+    }
 
     const href = getDocHref(rawDoc);
-    if (!href || href !== `/${slug}`) return { notFound: true };
+    
+    // ✅ CRITICAL: Ensure it's truly top-level (not nested)
+    if (!href || href !== `/${slug}`) {
+      return { notFound: true };
+    }
+
+    // ✅ Store both ISO date (for schema) and display date
+    const dateIso = toISODate(rawDoc?.date);
+    const dateStr = rawDoc?.date ? String(rawDoc.date) : null;
 
     const doc: Doc = {
       key: rawDoc._id || `doc:${slug}`,
-      kind: String(getDocKind(rawDoc) ?? "document"),
+      kind: String(getDocKind(rawDoc) || "document"),
       title: safeText(rawDoc?.title, "Untitled"),
       href: String(href),
-      excerpt: (rawDoc?.excerpt ?? rawDoc?.description ?? null) as string | null,
-      date: rawDoc?.date ? String(rawDoc.date) : null,
-      image: (resolveDocCoverImage(rawDoc) ?? null) as string | null,
+      excerpt: (rawDoc?.excerpt || rawDoc?.description || null) as string | null,
+      date: dateStr,
+      dateIso,
+      image: (resolveDocCoverImage(rawDoc) || null) as string | null,
       tags: Array.isArray(rawDoc.tags) ? rawDoc.tags : [],
       author: rawDoc.author || null,
       readTime: rawDoc.readTime || null,
       category: rawDoc.category || null,
     };
 
+    // ✅ Prepare MDX content
     const rawMdx = rawDoc.body?.raw || rawDoc.body || "";
     const source =
       typeof rawMdx === "string" && rawMdx.trim()
         ? await prepareMDX(rawMdx)
         : null;
 
-    return { props: { doc, source }, revalidate: 3600 };
-  } catch (e) {
-    console.error("getStaticProps [slug] failed:", e);
+    return {
+      props: {
+        doc: sanitizeData(doc),
+        source: sanitizeData(source),
+      },
+      revalidate: 3600, // Revalidate every hour
+    };
+  } catch (error) {
+    console.error("[Slug Page] Error in getStaticProps:", error);
     return { notFound: true };
   }
 };

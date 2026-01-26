@@ -8,17 +8,15 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 
-// Content + MDX utilities
+// ✅ FIXED: Use contentlayer-helper for ALL server-side functions
 import {
-  getContentlayerData,
-  isDraftContent,
   normalizeSlug,
-} from "@/lib/contentlayer-compat";
-import {
-  prepareMDX,
-  simpleMdxComponents,
-  sanitizeData,
-} from "@/lib/server/md-utils";
+  getPublishedPosts,
+  getPostBySlug,
+  getPostBySlugWithContent,
+} from "@/lib/contentlayer-helper";
+
+import { prepareMDX, simpleMdxComponents } from "@/lib/server/md-utils";
 
 // UI components
 import BlogHeader from "@/components/blog/BlogHeader";
@@ -30,15 +28,9 @@ import AuthorBio from "@/components/AuthorBio";
 import RelatedPosts from "@/components/blog/RelatedPosts";
 import ResourceGrid from "@/components/blog/ResourceGrid";
 
-import {
-  ChevronLeft,
-  Bookmark,
-  BookmarkCheck,
-  Clock,
-  Calendar,
-  User,
-  Tag
-} from "lucide-react";
+import { ChevronLeft, Clock, Calendar, User, Tag } from "lucide-react";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // Client-only hydration-safe components
 const ReadingProgress = dynamic(() => import("@/components/enhanced/ReadingProgress"), { ssr: false });
@@ -51,172 +43,312 @@ const extendedComponents = {
   ResourceGrid,
 };
 
-interface Props {
-  post: {
-    title: string;
-    slug: string;
-    date: string | null;
-    author: string | null;
-    excerpt: string | null;
-    description: string | null;
-    coverImage: string | null;
-    tags: string[];
-    readTime: string | null;
-  };
+type TocItem = { id: string; text: string; level: number };
+type ReadingTime = { minutes: number; words: number };
+
+type PostLike = {
+  _id?: string;
+  title?: string | null;
+  excerpt?: string | null;
+  author?: string | null;
+  date?: string | null;
+  slug: string;
+  coverImage?: string | null;
+  tags?: string[] | null;
+  body?: { raw?: string };
+  bodyRaw?: string;
+  [key: string]: any;
+};
+
+type PageProps = {
+  post: PostLike;
   source: MDXRemoteSerializeResult;
+  toc: TocItem[] | null;
+  readingTime: ReadingTime | null;
+  related: any[];
+};
+
+function getRawBody(post: PostLike): string {
+  return post?.body?.raw || (typeof post?.bodyRaw === "string" ? post.bodyRaw : "") || "";
 }
 
-const BlogPostPage: NextPage<Props> = ({ post, source }) => {
-  const router = useRouter();
-  const [isBookmarked, setIsBookmarked] = React.useState(false);
-  const [isScrolled, setIsScrolled] = React.useState(false);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const bookmarks = JSON.parse(localStorage.getItem('ic_bookmarks_blog') || '[]');
-        setIsBookmarked(bookmarks.includes(post.slug));
-      } catch (e) { /* ignore */ }
-
-      const handleScroll = () => setIsScrolled(window.scrollY > 100);
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      return () => window.removeEventListener('scroll', handleScroll);
+/**
+ * Normalize the return shape of prepareMDX.
+ * Some codebases return MDXRemoteSerializeResult.
+ * Others return { source, toc, readingTime }.
+ */
+function normalizePrepareMdxResult(
+  mdxResult: unknown
+): { source: MDXRemoteSerializeResult | null; toc: TocItem[] | null; readingTime: ReadingTime | null } {
+  // If it already looks like an MDXRemoteSerializeResult (compiledSource is typical)
+  const r = mdxResult as any;
+  if (r && typeof r === "object") {
+    if (typeof r.compiledSource === "string") {
+      return { source: r as MDXRemoteSerializeResult, toc: null, readingTime: null };
     }
-  }, [post.slug]);
+    if (r.source && typeof r.source === "object") {
+      return {
+        source: r.source as MDXRemoteSerializeResult,
+        toc: Array.isArray(r.toc) ? (r.toc as TocItem[]) : null,
+        readingTime: r.readingTime && typeof r.readingTime === "object" ? (r.readingTime as ReadingTime) : null,
+      };
+    }
+  }
+  return { source: null, toc: null, readingTime: null };
+}
 
-  const toggleBookmark = () => {
-    try {
-      const bookmarks = JSON.parse(localStorage.getItem('ic_bookmarks_blog') || '[]');
-      const updated = isBookmarked 
-        ? bookmarks.filter((s: string) => s !== post.slug)
-        : [...bookmarks, post.slug];
-      localStorage.setItem('ic_bookmarks_blog', JSON.stringify(updated));
-      setIsBookmarked(!isBookmarked);
-    } catch (e) { /* ignore */ }
-  };
+const BlogSlugPage: NextPage<PageProps> = ({ post, source, toc, readingTime, related }) => {
+  const router = useRouter();
 
-  const formattedDate = post.date
-    ? new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })
-    : "Draft";
+  // fallback="blocking" should reduce this, but keep it safe
+  if (router.isFallback) {
+    return (
+      <Layout>
+        <div className="mx-auto max-w-5xl px-4 py-16">
+          <div className="h-8 w-2/3 rounded bg-gray-200 animate-pulse mb-6" />
+          <div className="h-4 w-full rounded bg-gray-200 animate-pulse mb-2" />
+          <div className="h-4 w-5/6 rounded bg-gray-200 animate-pulse mb-2" />
+          <div className="h-4 w-3/4 rounded bg-gray-200 animate-pulse" />
+        </div>
+      </Layout>
+    );
+  }
+
+  const title = post?.title ?? "Essay";
+  const description = post?.excerpt ?? "";
+  const canonical = post?.slug
+    ? `https://www.abrahamoflondon.org/blog/${normalizeSlug(post.slug)}`
+    : undefined;
 
   return (
-    <Layout title={`${post.title} | Essays`}>
+    <Layout>
       <Head>
-        <title>{post.title} | Abraham of London</title>
-        <meta name="description" content={post.excerpt || ""} />
+        <title>{title}</title>
+        {description ? <meta name="description" content={description} /> : null}
+        {canonical ? <link rel="canonical" href={canonical} /> : null}
+
         <meta property="og:type" content="article" />
-        <meta property="og:image" content={post.coverImage || ""} />
-        <link rel="canonical" href={`https://abrahamoflondon.com/blog/${post.slug}`} />
+        <meta property="og:title" content={title} />
+        {description ? <meta property="og:description" content={description} /> : null}
+        {canonical ? <meta property="og:url" content={canonical} /> : null}
       </Head>
 
-      <ReadingProgress />
-
-      <div className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-black/90 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'}`}>
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <button onClick={() => router.push('/blog')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-all group">
-            <ChevronLeft size={14} /> Back to Archive
+      <div className="relative">
+        {/* Top utilities */}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back
           </button>
         </div>
-      </div>
 
-      <div className="min-h-screen bg-black selection:bg-gold selection:text-black">
-        <BlogHeader
-          title={post.title}
-          author={post.author}
-          date={formattedDate}
-          coverImage={post.coverImage}
-          tags={post.tags}
-        />
+        {/* Reading Progress */}
+        <ReadingProgress />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
-          <div className="grid lg:grid-cols-12 gap-12">
-            
-            {/* ESSAY CORE */}
-            <main className="lg:col-span-8">
-              <div className="flex items-center gap-6 mb-8 text-[10px] font-mono uppercase text-gray-500">
-                <span className="flex items-center gap-2"><User size={12} /> {post.author}</span>
-                <span className="flex items-center gap-2"><Calendar size={12} /> {formattedDate}</span>
-                <span className="flex items-center gap-2"><Clock size={12} /> {post.readTime}</span>
-                <button onClick={toggleBookmark} className={`ml-auto flex items-center gap-2 transition-colors ${isBookmarked ? 'text-gold' : 'hover:text-gold'}`}>
-                  {isBookmarked ? <BookmarkCheck size={14} /> : <Bookmark size={14} />} {isBookmarked ? 'Saved' : 'Save'}
-                </button>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* Main */}
+            <article className="lg:col-span-8">
+              <BlogHeader post={post} />
+
+              {/* Meta Row */}
+              <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+                {post?.date ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {post.date}
+                  </span>
+                ) : null}
+
+                {post?.author ? (
+                  <span className="inline-flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    {post.author}
+                  </span>
+                ) : null}
+
+                {readingTime?.minutes ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {readingTime.minutes} min read
+                  </span>
+                ) : (
+                  <ReadTime content={getRawBody(post)} />
+                )}
+
+                {Array.isArray(post?.tags) && post.tags.length ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    {post.safeSlice(tags, 0, 3).join(", ")}
+                  </span>
+                ) : null}
               </div>
 
-              <article className="prose prose-invert prose-gold max-w-none prose-p:leading-relaxed prose-p:text-gray-300">
-                <div className="bg-zinc-900/40 border border-white/5 rounded-3xl p-8 md:p-12 shadow-2xl">
-                  <BlogContent>
-                    <MDXRemote {...source} components={extendedComponents} />
-                  </BlogContent>
-                  
-                  <div className="mt-16 pt-8 border-t border-white/5">
-                    <ShareButtons url={`https://abrahamoflondon.com/blog/${post.slug}`} title={post.title} />
-                  </div>
+              <div className="mt-8">
+                <BlogContent>
+                  <MDXRemote {...source} components={extendedComponents} />
+                </BlogContent>
+              </div>
+
+              <div className="mt-10">
+                <ShareButtons title={title} />
+              </div>
+
+              <div className="mt-10">
+                <AuthorBio post={post} />
+              </div>
+
+              {Array.isArray(related) && related.length ? (
+                <div className="mt-12">
+                  <RelatedPosts posts={related} />
                 </div>
-              </article>
+              ) : null}
 
               <div className="mt-12">
-                <AuthorBio author={post.author || "Abraham of London"} />
-                <RelatedPosts currentPostSlug={post.slug} />
+                <BlogFooter post={post} />
               </div>
-            </main>
+            </article>
 
-            {/* STRATEGIC SIDEBAR */}
-            <aside className="lg:col-span-4 space-y-8">
-              <div className="sticky top-24 space-y-6">
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-sm">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gold mb-6">Navigation</h3>
-                  <TableOfContents />
-                </div>
+            {/* Sidebar */}
+            <aside className="lg:col-span-4">
+              <div className="sticky top-20 space-y-6">
+                <BlogSidebar post={post} />
 
-                <div className="p-8 rounded-3xl bg-gradient-to-br from-gold/10 to-transparent border border-gold/20">
-                  <h3 className="font-serif text-xl font-bold text-white mb-4">Join the Build</h3>
-                  <p className="text-xs text-gray-400 mb-6 leading-relaxed">Field notes and strategic clarity delivered to founders and builders weekly.</p>
-                  <button onClick={() => router.push('/newsletter')} className="w-full py-3 rounded-xl bg-gold text-black text-xs font-black uppercase tracking-widest hover:bg-gold/80 transition-all">Subscribe</button>
-                </div>
+                {toc && toc.length ? <TableOfContents toc={toc} /> : <TableOfContents />}
+
+                <BackToTop />
               </div>
             </aside>
-
           </div>
         </div>
       </div>
-      <BackToTop />
     </Layout>
   );
 };
 
+export default BlogSlugPage;
+
+// ---------------------------------------------
+// SSG (Pages Router)
+// ---------------------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { allPosts } = await getContentlayerData();
-  const paths = (allPosts || [])
-    .filter((p: any) => !p.draft)
-    .map((p: any) => ({
-      params: { slug: normalizeSlug(p.slug || p._raw?.flattenedPath).replace(/^blog\//, '') }
-    }))
-    .filter((p: any) => p.params.slug);
+  try {
+    const posts = getPublishedPosts();
 
-  return { paths, fallback: 'blocking' };
+    const paths = posts
+      .map((p: any) => {
+        const slug = p?.slug || "";
+        return typeof slug === "string" ? normalizeSlug(slug) : "";
+      })
+      .filter((s: string) => Boolean(s))
+      .map((slug: string) => ({ params: { slug } }));
+
+    return {
+      paths,
+      fallback: "blocking",
+    };
+  } catch (error) {
+    console.error("[getStaticPaths] Error generating blog paths:", error);
+    return {
+      paths: [],
+      fallback: "blocking",
+    };
+  }
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const { allPosts } = await getContentlayerData();
-  const doc = allPosts.find((p: any) => normalizeSlug(p.slug || p._raw?.flattenedPath).endsWith(slug));
+export const getStaticProps: GetStaticProps<PageProps> = async (ctx) => {
+  try {
+    const slugParam = ctx.params?.slug;
 
-  if (!doc || isDraftContent(doc)) return { notFound: true };
+    const slug =
+      typeof slugParam === "string"
+        ? slugParam
+        : Array.isArray(slugParam)
+          ? slugParam.join("/")
+          : "";
 
-  const source = await prepareMDX(doc.body.raw);
-  const post = sanitizeData({
-    title: doc.title || "Untitled",
-    slug: normalizeSlug(doc.slug || slug),
-    date: doc.date || null,
-    author: doc.author || "Abraham of London",
-    excerpt: doc.excerpt || doc.description || null,
-    description: doc.description || null,
-    coverImage: doc.coverImage || null,
-    tags: Array.isArray(doc.tags) ? doc.tags : [],
-    readTime: doc.readTime || "5 min read",
-  });
+    const normalized = normalizeSlug(slug);
+    if (!normalized) {
+      console.warn(`[getStaticProps] Invalid slug: ${slug}`);
+      return { notFound: true };
+    }
 
-  return { props: { post, source }, revalidate: 1800 };
+    // First try getPostBySlug from the main content library
+    let post = getPostBySlug(normalized);
+    
+    // If not found, try getPostBySlugWithContent from server module
+    if (!post) {
+      try {
+        post = getPostBySlugWithContent(normalized);
+      } catch (error) {
+        console.warn(`[getStaticProps] getPostBySlugWithContent failed for ${normalized}:`, error);
+      }
+    }
+
+    if (!post) {
+      console.warn(`[getStaticProps] Post not found: ${normalized}`);
+      return { notFound: true };
+    }
+
+    if (isDraftContent(post)) {
+      console.warn(`[getStaticProps] Draft content accessed: ${normalized}`);
+      return { notFound: true };
+    }
+
+    const raw = getRawBody(post);
+
+    // Compile MDX
+    let mdxResult;
+    try {
+      mdxResult = await prepareMDX(raw);
+    } catch (error) {
+      console.error(`[getStaticProps] MDX compilation failed for ${normalized}:`, error);
+      return { notFound: true };
+    }
+
+    const { source, toc, readingTime } = normalizePrepareMdxResult(mdxResult);
+
+    if (!source) {
+      console.error(`[getStaticProps] No MDX source generated for ${normalized}`);
+      return { notFound: true };
+    }
+
+    const safePost = sanitizeData(post);
+
+    // Related posts - filter out current post and get up to 6 related
+    let related: any[] = [];
+    try {
+      const allPosts = getPublishedPosts();
+      related = allPosts
+        .filter((p: any) => {
+          const pSlug = p?.slug || "";
+          const currentSlug = post?.slug || "";
+          return normalizeSlug(String(pSlug)) !== normalizeSlug(String(currentSlug));
+        })
+        safeSlice(..., 0, 6)
+        .map((p: any) => sanitizeData(p));
+    } catch (error) {
+      console.warn(`[getStaticProps] Error fetching related posts:`, error);
+    }
+
+    return {
+      props: {
+        post: safePost,
+        source,
+        toc,
+        readingTime,
+        related,
+      },
+      revalidate: 60, // Incremental static regeneration every minute
+    };
+  } catch (error) {
+    console.error(`[getStaticProps] Fatal error for slug ${ctx.params?.slug}:`, error);
+    return {
+      notFound: true,
+    };
+  }
 };
-
-export default BlogPostPage;

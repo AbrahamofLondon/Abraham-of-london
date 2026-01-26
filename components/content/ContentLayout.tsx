@@ -6,6 +6,8 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { getPageTitle, siteConfig } from "@/lib/imports";
+import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe";
+
 
 type CoverImage = string | { src?: string } | null | undefined;
 
@@ -61,7 +63,7 @@ export default function ContentLayout({
 }: ContentLayoutProps): JSX.Element {
   const title =
     frontmatter.title ||
-    `${contentType.charAt(0).toUpperCase()}${contentType.slice(1)}`;
+    `${safeCapitalize(contentType)}`;
 
   const pageTitle = getPageTitle(title);
   const description = frontmatter.excerpt || frontmatter.description || title;

@@ -2,6 +2,8 @@
 // Prints data facade
 
 import { getAllPrintsMeta } from "@/lib/server/prints-data";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // SAFE string helper
 function safeString(value: any): string {
@@ -177,7 +179,7 @@ export function getPublicPrints(): PrintMeta[] {
 export function getFeaturedPrints(limit?: number): PrintMeta[] {
   const prints = getPublicPrints();
   const featured = prints.filter(p => p.featured === true);
-  return limit ? featured.slice(0, limit) : featured;
+  return limit ? safeSlice(featured, 0, limit) : featured;
 }
 
 /**

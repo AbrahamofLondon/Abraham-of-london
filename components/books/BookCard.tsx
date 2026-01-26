@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useState, useMemo } from "react";
 import { safeString } from "@/lib/utils";
 import { 
+import { safeFirstChar, safeSlice, safeCapitalize, safeArraySlice } from "@/lib/utils/safe";
+
   getSafeImageProps, 
   getFallbackImage,
   type FallbackConfig 
@@ -283,7 +285,7 @@ export default function BookCard({
                         : "bg-blue-100 text-blue-800 border border-blue-200"
                     }`}
                   >
-                    {bookWithId.status.charAt(0).toUpperCase() + bookWithId.status.slice(1)}
+                    {safeCapitalize(bookWithId.status)}
                   </span>
                 )}
 
@@ -336,7 +338,7 @@ export default function BookCard({
                 <div className="flex flex-wrap gap-1">
                   {bookWithId.tags
                     .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
-                    .slice(0, 3)
+                    safeArraySlice(..., 0, 3)
                     .map((tag, index) => (
                       <span
                         key={`${tag}-${index}`}

@@ -1,3 +1,5 @@
+import { safeSlice } from "@/lib/utils/safe";
+
 // lib/server/security.ts - Simplified security module
 export interface SecurityThreat {
   id: string;
@@ -57,7 +59,7 @@ class SecurityMonitor {
 
     return {
       level: overallLevel,
-      threats: recentThreats.slice(0, 20),
+      threats: safeSlice(recentThreats, 0, 20),
       lastScan: new Date(),
       metrics: { ...this.metrics },
       recommendations
@@ -80,7 +82,7 @@ class SecurityMonitor {
       recommendations.push('No immediate security concerns detected');
     }
 
-    return recommendations.slice(0, 3);
+    return safeSlice(recommendations, 0, 3);
   }
 
   async analyzeRequest(request: {

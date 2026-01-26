@@ -1,5 +1,7 @@
 // lib/server/access.ts
 import crypto from "crypto";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export type Tier = "public" | "inner-circle" | "private";
 
@@ -45,8 +47,8 @@ export function parseCookies(header: string | undefined): Record<string, string>
   for (const p of parts) {
     const idx = p.indexOf("=");
     if (idx === -1) continue;
-    const k = p.slice(0, idx).trim();
-    const v = p.slice(idx + 1).trim();
+    const k = safeSlice(p, 0, idx).trim();
+    const v = safeSlice(p, idx + 1).trim();
     out[k] = decodeURIComponent(v);
   }
   return out;

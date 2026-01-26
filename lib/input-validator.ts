@@ -1,4 +1,5 @@
 // lib/input-validator.ts
+import { safeSlice } from "@/lib/utils/safe";
 
 /**
  * Sanitize user input to prevent XSS and injection attacks
@@ -9,7 +10,7 @@ export function sanitizeInput(input: string): string {
   return input
     .trim()
     .replace(/[<>]/g, '') // Remove angle brackets
-    .slice(0, 1000); // Limit length
+    safeSlice(..., 0, 1000); // Limit length
 }
 
 /**

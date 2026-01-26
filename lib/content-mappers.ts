@@ -1,7 +1,7 @@
 // lib/content-mappers.ts - UPDATED IMPORTS
 import type { 
   DocBase 
-} from "@/lib/contentlayer";
+} from "@/lib/content";
 
 // Define specific types based on DocBase
 export interface Post extends DocBase {

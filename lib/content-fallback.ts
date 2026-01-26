@@ -1,5 +1,7 @@
 // lib/content-fallback.ts - FIXED WITH CORRECT TYPES
 import { 
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+
   allPosts, 
   allBooks, 
   allDownloads, 
@@ -9,7 +11,7 @@ import {
   allStrategies, 
   allCanons, 
   allShorts 
-} from "@/lib/contentlayer";
+} from "@/lib/content";
 
 // Define types based on actual Contentlayer data structure
 // Using more flexible types that match what's actually imported
@@ -433,7 +435,7 @@ export function searchDocumentsDirect<T extends AnyDoc>(docs: T[], query: string
 export function paginateDocumentsDirect<T extends AnyDoc>(docs: T[], page: number = 1, limit: number = 10): T[] {
   const start = (page - 1) * limit;
   const end = start + limit;
-  return docs.slice(start, end);
+  return safeSlice(docs, start, end);
 }
 
 // ============================================
@@ -522,11 +524,11 @@ export const getPaginatedPostsDirect = (page: number = 1, limit: number = 10): P
   const posts = getSortedPostsDirect();
   const start = (page - 1) * limit;
   const end = start + limit;
-  return posts.slice(start, end);
+  return safeSlice(posts, start, end);
 };
 
 export const getRecentPostsDirect = (limit: number = 5): PostType[] => {
-  return getSortedPostsDirect().slice(0, limit);
+  return safeArraySlice(getSortedPostsDirect(), 0, limit);
 };
 
 export const searchPostsDirect = (query: string): PostType[] => {

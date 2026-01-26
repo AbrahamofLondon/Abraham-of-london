@@ -1,6 +1,6 @@
 // pages/api/admin/rate-limit/stats.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getRateLimiterStats, resetRateLimit, unblock } from '@/lib/rate-limit-unified';
+import { getRateLimiterStats, resetRateLimit, unblock } from "@/lib/server/rate-limit-unified";
 
 export default async function handler(
   req: NextApiRequest,

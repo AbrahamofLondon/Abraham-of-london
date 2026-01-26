@@ -1,49 +1,38 @@
 // components/ShortCard.tsx
+import { safeArraySlice } from "@/lib/utils/safe";
 import * as React from "react";
 import Link from "next/link";
-
 type ShortLike = {
   title: string;
   slug?: string | null;
   url?: string | null;
-
   excerpt?: string | null;
   readTime?: string | null;
-
   theme?: string | null;
   audience?: string | null;
-
   tags?: string[] | null;
 };
-
 type Props = {
   short: ShortLike;
   className?: string;
 };
-
 const audienceLabelMap: Record<string, string> = {
   secular: "Outer Court",
   busy: "Quick Reset",
   church: "Inner Crowd",
 };
-
 function safeText(v: unknown): string {
   return typeof v === "string" ? v : "";
 }
-
 function safeArray(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
 }
-
 export const ShortCard: React.FC<Props> = ({ short, className }) => {
   const audienceKey = safeText(short.audience).toLowerCase();
   const audience = audienceLabelMap[audienceKey] || "Short • High Protein";
-
   const slug = safeText(short.slug).replace(/^\/+|\/+$/g, "");
   const href = safeText(short.url) || `/shorts/${slug}`;
-
-  const tags = safeArray(short.tags).slice(0, 2);
-
+  const tags = safeArraySlice(safeArray(short.tags), 0, 2);
   return (
     <Link href={href} className="group block h-full">
       <article
@@ -59,25 +48,21 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
               {audience}
             </span>
-
             {short.readTime ? (
               <span className="text-[0.7rem] text-gray-500 dark:text-gray-400">
                 {short.readTime}
               </span>
             ) : null}
           </div>
-
           <h3 className="font-serif text-base font-semibold text-gray-900 dark:text-white">
             {short.title || "Untitled"}
           </h3>
         </header>
-
         {short.excerpt ? (
           <p className="mb-3 line-clamp-3 text-sm text-gray-600 dark:text-gray-300">
             {short.excerpt}
           </p>
         ) : null}
-
         <div className="mt-auto flex items-center justify-between pt-2 text-[0.75rem]">
           <div className="flex flex-wrap gap-1 text-gray-500 dark:text-gray-400">
             {short.theme ? (
@@ -85,7 +70,6 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
                 {short.theme}
               </span>
             ) : null}
-
             {tags.map((tag) => (
               <span
                 key={tag}
@@ -95,7 +79,6 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
               </span>
             ))}
           </div>
-
           <span className="text-[0.75rem] font-semibold text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400">
             Read ↠
           </span>
@@ -104,6 +87,4 @@ export const ShortCard: React.FC<Props> = ({ short, className }) => {
     </Link>
   );
 };
-
-export default ShortCard;
-
+export default ShortCard;

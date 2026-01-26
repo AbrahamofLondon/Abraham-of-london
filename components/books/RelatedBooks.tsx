@@ -1,3 +1,4 @@
+import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,7 +23,7 @@ interface RelatedBooksProps {
 const RelatedBooks: React.FC<RelatedBooksProps> = ({ books, currentBookId }) => {
   const filteredBooks = books
     .filter(book => book.id !== currentBookId)
-    .slice(0, 3);
+    safeArraySlice(..., 0, 3);
 
   return (
     <div className="bg-gray-50 rounded-2xl p-8">

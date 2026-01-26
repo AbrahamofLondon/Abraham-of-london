@@ -17,3 +17,13 @@ module.exports = {
     "react/no-unescaped-entities": "off",
   },
 };
+
+// Disallow server modules from UI code
+"no-restricted-imports": ["error", {
+  "patterns": [
+    {
+      "group": ["@/lib/server/*", "@/lib/rate-limit-unified"],
+      "message": "Server-only module. Import only inside pages/api/* or lib/server/*."
+    }
+  ]
+}]

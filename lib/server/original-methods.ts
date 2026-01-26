@@ -1,7 +1,7 @@
 /* lib/server/original-methods.ts */
 // This file contains the original methods extracted from the enhanced implementation
 // to maintain backward compatibility
-
+import { safeSlice } from "@/lib/utils/safe";
 import type { PoolClient } from 'pg';
 import type {
   InnerCircleMember,
@@ -14,7 +14,6 @@ import type {
   PaginationParams,
   PaginatedResult
 } from './inner-circle';
-
 // Re-export types
 export type {
   InnerCircleMember,
@@ -27,21 +26,17 @@ export type {
   PaginationParams,
   PaginatedResult
 };
-
 // Import utility functions from a separate file to avoid circular dependencies
 import { DatabaseClient, toIso, toInt, toFloat, sanitizeString } from './inner-circle-utils';
-
 // Export the extracted methods for use in the enhanced implementation
 export async function deleteMemberByEmail(email: string): Promise<boolean> {
   const cleaned = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned)) {
     throw new Error("Invalid email address");
   }
-
   // Import crypto here to avoid top-level issues
   const crypto = await import('crypto');
   const emailHash = crypto.createHash("sha256").update(cleaned, "utf8").digest("hex");
-
   return DatabaseClient.transactional(
     "deleteMemberByEmail",
     async (client: PoolClient) => {
@@ -50,27 +45,22 @@ export async function deleteMemberByEmail(email: string): Promise<boolean> {
          WHERE member_id IN (SELECT id FROM inner_circle_members WHERE email_hash = $1)`,
         [emailHash]
       );
-
       const res = await client.query(
         `DELETE FROM inner_circle_members WHERE email_hash = $1 RETURNING id`,
         [emailHash]
       );
-
       return (res.rowCount ?? 0) > 0;
     },
     false
   );
 }
-
 export async function getMemberByEmail(email: string): Promise<InnerCircleMember | null> {
   const cleaned = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned)) {
     throw new Error("Invalid email address");
   }
-
   const crypto = await import('crypto');
   const emailHash = crypto.createHash("sha256").update(cleaned, "utf8").digest("hex");
-
   const rows = await DatabaseClient.query<
     Array<{
       id: string;
@@ -94,9 +84,7 @@ export async function getMemberByEmail(email: string): Promise<InnerCircleMember
     [emailHash],
     []
   );
-
   if (rows.length === 0) return null;
-
   const r = rows[0]!;
   return {
     id: r.id,
@@ -107,10 +95,8 @@ export async function getMemberByEmail(email: string): Promise<InnerCircleMember
     totalKeysIssued: toInt(r.totalKeysIssued, 0),
   };
 }
-
 export async function getMemberKeys(memberId: string): Promise<MemberKeyRow[]> {
   if (!memberId || memberId === "no-db-fallback") return [];
-
   const rows = await DatabaseClient.query<MemberKeyRow[]>(
     "getMemberKeys",
     `SELECT
@@ -131,7 +117,6 @@ export async function getMemberKeys(memberId: string): Promise<MemberKeyRow[]> {
     [memberId],
     []
   );
-
   return rows.map((r) => ({
     ...r,
     createdAt: toIso(r.createdAt),
@@ -140,10 +125,8 @@ export async function getMemberKeys(memberId: string): Promise<MemberKeyRow[]> {
     totalUnlocks: toInt(r.totalUnlocks, 0),
   }));
 }
-
 export async function getActiveKeysForMember(memberId: string): Promise<ActiveKeyRow[]> {
   if (!memberId || memberId === "no-db-fallback") return [];
-
   const rows = await DatabaseClient.query<ActiveKeyRow[]>(
     "getActiveKeysForMember",
     `SELECT
@@ -162,7 +145,6 @@ export async function getActiveKeysForMember(memberId: string): Promise<ActiveKe
     [memberId],
     []
   );
-
   return rows.map((r) => ({
     ...r,
     createdAt: toIso(r.createdAt),
@@ -171,7 +153,6 @@ export async function getActiveKeysForMember(memberId: string): Promise<ActiveKe
     totalUnlocks: toInt(r.totalUnlocks, 0),
   }));
 }
-
 export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
   const rows = await DatabaseClient.query<
     Array<{
@@ -197,7 +178,6 @@ export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
     [],
     []
   );
-
   const r = rows[0] ?? {
     totalMembers: "0",
     totalKeys: "0",
@@ -207,7 +187,6 @@ export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
     avgUnlocks: "0",
     lastActivity: null,
   };
-
   return {
     totalMembers: toInt(r.totalMembers, 0),
     totalKeys: toInt(r.totalKeys, 0),
@@ -218,7 +197,6 @@ export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
     lastCleanup: r.lastActivity ? toIso(r.lastActivity) : null,
   };
 }
-
 export async function getPrivacySafeKeyRows(
   params: PaginationParams = {}
 ): Promise<PaginatedResult<PrivacySafeKeyRow>> {
@@ -226,9 +204,7 @@ export async function getPrivacySafeKeyRows(
   const limit = Math.min(200, Math.max(1, params.limit ?? 50));
   const sortBy = params.sortBy ?? "createdAt";
   const sortOrder = (params.sortOrder ?? "desc") === "asc" ? "ASC" : "DESC";
-
   const offset = (page - 1) * limit;
-  
   // Validate sort field
   const allowedSortFields: Record<string, string> = {
     id: "k.id",
@@ -242,9 +218,7 @@ export async function getPrivacySafeKeyRows(
     memberEmailPrefix: "m.email_hash_prefix",
     memberName: "m.name",
   };
-  
   const sortSql = allowedSortFields[sortBy] ?? "k.created_at";
-
   const rows = await DatabaseClient.query<PrivacySafeKeyRow[]>(
     "getPrivacySafeKeyRows",
     `SELECT
@@ -265,17 +239,14 @@ export async function getPrivacySafeKeyRows(
     [limit, offset],
     []
   );
-
   const countRows = await DatabaseClient.query<Array<{ total: string }>>(
     "getPrivacySafeKeyRowsCount",
     `SELECT COUNT(*)::text as total FROM inner_circle_keys`,
     [],
     [{ total: "0" }]
   );
-
   const total = toInt(countRows[0]?.total, 0);
   const totalPages = Math.max(1, Math.ceil(total / limit));
-
   return {
     data: rows.map((r) => ({
       ...r,
@@ -294,7 +265,6 @@ export async function getPrivacySafeKeyRows(
     },
   };
 }
-
 export async function getAdminExport(): Promise<AdminExportRow[]> {
   const rows = await DatabaseClient.query<AdminExportRow[]>(
     "getAdminExport",
@@ -317,7 +287,6 @@ export async function getAdminExport(): Promise<AdminExportRow[]> {
     [],
     []
   );
-
   return rows.map((r) => ({
     ...r,
     createdAt: toIso(r.createdAt),
@@ -327,7 +296,6 @@ export async function getAdminExport(): Promise<AdminExportRow[]> {
     memberCreatedAt: toIso(r.memberCreatedAt),
   }));
 }
-
 export async function cleanupExpiredData(): Promise<CleanupResult> {
   const fallback: CleanupResult = {
     deletedMembers: 0,
@@ -335,7 +303,6 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
     totalOrphanedKeys: 0,
     cleanedAt: new Date().toISOString(),
   };
-
   return DatabaseClient.transactional(
     "cleanupExpiredData",
     async (client: PoolClient) => {
@@ -346,7 +313,6 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
          WHERE expires_at < NOW()
            AND status = 'active'`
       );
-
       // 2) Delete expired/revoked keys older than TTL (30 days)
       const keysRes = await client.query(
         `DELETE FROM inner_circle_keys
@@ -354,9 +320,7 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
            AND (last_used_at IS NULL OR last_used_at < NOW() - INTERVAL '30 days')
          RETURNING id`
       );
-
       const deletedKeys = keysRes.rowCount ?? 0;
-
       // 3) Delete members with no active keys and no recent usage (90 days)
       const membersRes = await client.query(
         `DELETE FROM inner_circle_members m
@@ -370,9 +334,7 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
          )
          RETURNING id`
       );
-
       const deletedMembers = membersRes.rowCount ?? 0;
-
       // 4) Count orphaned keys
       const orphaned = await client.query<{ count: string }>(
         `SELECT COUNT(*)::text as count
@@ -381,9 +343,7 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
            SELECT 1 FROM inner_circle_members m WHERE m.id = k.member_id
          )`
       );
-
       const totalOrphanedKeys = toInt(orphaned.rows[0]?.count, 0);
-
       return {
         deletedMembers,
         deletedKeys,
@@ -394,11 +354,9 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
     fallback
   );
 }
-
 export function getClientIp(req: unknown): string | undefined {
   const r = req as { headers?: Record<string, string | string[] | undefined>; socket?: { remoteAddress?: string } };
   if (!r?.headers) return r?.socket?.remoteAddress;
-
   const headers = r.headers;
   const candidates = [
     "cf-connecting-ip",
@@ -409,35 +367,27 @@ export function getClientIp(req: unknown): string | undefined {
     "forwarded-for",
     "forwarded",
   ] as const;
-
   for (const h of candidates) {
     const v = headers[h] ?? headers[h.toLowerCase()];
     if (!v) continue;
-
     const raw = Array.isArray(v) ? v[0] : v;
     if (!raw) continue;
-
     const ip = raw.split(",")[0]?.trim();
     if (ip && ip !== "unknown") return ip;
   }
-
   return r.socket?.remoteAddress;
 }
-
 export function getPrivacySafeKeyExport(key: string): string {
   const KEY_PREFIX = "icl_";
   if (!key || key.length < 8) return "***";
   if (!key.startsWith(KEY_PREFIX)) return "***";
-  return `${KEY_PREFIX}***${key.slice(-6)}`;
+  return `${KEY_PREFIX}***${safeSlice(key, -6)}`;
 }
-
 export async function healthCheck(): Promise<{ ok: boolean; details: string }> {
   // Import pool dynamically to avoid circular dependencies
   const { getPool } = await import('./inner-circle-utils');
   const pool = getPool();
-  
   if (!pool) return { ok: false, details: "Database pool not initialized" };
-
   try {
     const client = await pool.connect();
     try {
@@ -451,4 +401,3 @@ export async function healthCheck(): Promise<{ ok: boolean; details: string }> {
     return { ok: false, details: `Database health check failed: ${msg}` };
   }
 }
-

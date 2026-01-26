@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Download, ChevronRight } from "lucide-react";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export type DocKind =
   | "post"
@@ -131,7 +133,7 @@ export function AnimatedContentGrid({ filteredDocs, filter, TYPE_CONFIG }: Props
                       {/* Tags */}
                       {doc.tags && doc.tags.length > 0 ? (
                         <div className="mb-5 flex flex-wrap gap-2">
-                          {doc.tags.slice(0, 3).map((tag) => (
+                          {doc.safeSlice(tags, 0, 3).map((tag) => (
                             <span
                               key={tag}
                               className="rounded-lg border border-neutral-200/50 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-600"

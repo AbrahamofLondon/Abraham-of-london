@@ -1,12 +1,12 @@
 // ============================================================================
 // 2) pages/api/pdfs/list.ts  (SERVER) — SAFE, AUDITABLE, REGISTRY-BASED LISTING
-//    - Uses scripts/pdf-registry.ts (browser-safe registry) as the single source
+// 
 //    - Optionally enriches with DB counters if prisma is present
 //    - Security: admin-only by default (flip REQUIRE_ADMIN to false if needed)
 // ============================================================================
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAllPDFItems } from "@/scripts/pdf-registry";
+import { getAllPDFItems } from "@/lib/pdf/registry";
 import prisma from "@/lib/prisma";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";

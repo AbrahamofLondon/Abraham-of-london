@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 // lib/email/dispatcher.ts
+import { safeSlice } from "@/lib/utils/safe";
 
 export type EmailSendInput = {
   to: string;
@@ -113,7 +114,7 @@ async function sendViaNetlify(input: EmailSendInput): Promise<void> {
     const body = await res.text().catch(() => "");
     console.warn("⚠️ [Email:netlify] send failed. Falling back to console.", {
       status: res.status,
-      body: body?.slice(0, 300),
+      body: safeSlice(body, 0, 300),
     });
     return sendViaConsole(input);
   }

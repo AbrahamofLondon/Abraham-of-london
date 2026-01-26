@@ -1,3 +1,4 @@
+import { safeArraySlice } from "@/lib/utils/safe";
 "use client";
 
 import * as React from "react";
@@ -165,7 +166,7 @@ export default function MilestonesTimeline({
 
   // Defensive copy + ascending sort by year
   const data = React.useMemo(() => {
-    const arr = (items && items.length ? items : DEFAULT_ITEMS).slice();
+    const arr = (items && items.length ? items : DEFAULT_ITEMS)safeArraySlice(...);
     arr.sort((a, b) => a.year - b.year);
     return arr;
   }, [items]);

@@ -1,5 +1,7 @@
 // Edge-optimized rate limiting for Next.js Edge Runtime and serverless functions
 import type { NextRequest } from "next/server";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // Standard interfaces maintained for compatibility
 export interface RateLimitOptions {
@@ -304,7 +306,7 @@ export function anonymizeIp(ip: string): string {
   if (cleanIp.includes(':')) {
     const parts = cleanIp.split(':');
     if (parts.length <= 3) return cleanIp;
-    return `${parts.slice(0, 2).join(':')}::`; // Keep only first 2 segments
+    return `${safeSlice(parts, 0, 2).join(':')}::`; // Keep only first 2 segments
   }
   
   const parts = cleanIp.split('.');

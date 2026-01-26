@@ -6,6 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { BookOpen, Award, Calendar, Mail, Users, FileText, Clock } from "lucide-react";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // --- Types ---
 
@@ -96,7 +98,7 @@ export default function AboutSection({
   const parallaxY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
 
   const sortedAchievements = React.useMemo(() => {
-    return achievements.slice().sort((a, b) => b.year - a.year);
+    return safeSlice(achievements, ).sort((a, b) => b.year - a.year);
   }, [achievements]);
 
   // Stats data

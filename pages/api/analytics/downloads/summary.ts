@@ -1,15 +1,14 @@
 // ./pages/api/analytics/downloads/summary.ts - FULLY CORRECTED
+import { safeSlice, safeDateSlice } from "@/lib/utils/safe";
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { isRateLimited } from "@/lib/server/rate-limit-unified";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { cacheResponse, getCacheKey } from "@/lib/server/cache";
 import { logAuditEvent } from "@/lib/audit";
-
 // ---------------------------
 // Types (JSON-safe)
 // ---------------------------
-
 type DownloadSummary = {
   slug: string;
   contentType: string;
@@ -23,7 +22,6 @@ type DownloadSummary = {
   byTier?: Record<string, number>;
   byCountry?: Record<string, number>;
 };
-
 type AnalyticsResponse = {
   ok: boolean;
   data?: {
@@ -66,30 +64,24 @@ type AnalyticsResponse = {
   };
   warnings?: string[];
 };
-
 // ---------------------------
 // Configuration
 // ---------------------------
-
 const DEFAULT_DAYS = 30;
 const MAX_DAYS = 365;
 const PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 1000;
 const CACHE_TTL = 60; // seconds
-
 // ---------------------------
 // Main handler
 // ---------------------------
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<AnalyticsResponse>
 ) {
   const startTime = Date.now();
-
   try {
     const adminAuth = await validateAdminAccess(req);
-    
     if (adminAuth.valid === false) {
       await logAuditEvent({
         actorType: "api",
@@ -98,7 +90,6 @@ export default async function handler(
         status: "failed",
         details: { reason: adminAuth.reason },
       });
-
       return res.status(401).json({
         ok: false,
         error: { code: "UNAUTHORIZED", message: "Admin access required" },
@@ -113,7 +104,6 @@ export default async function handler(
         },
       });
     }
-
     const rateLimitKey = `analytics:${adminAuth.userId || req.socket.remoteAddress || "unknown"}`;
     const rl = await isRateLimited(rateLimitKey, "analytics_api", 100);
     if (rl.limited) {
@@ -139,9 +129,7 @@ export default async function handler(
         },
       });
     }
-
     const { since, until, days, filters, page, limit } = validateQuery(req.query);
-
     if (days > MAX_DAYS) {
       return res.status(400).json({
         ok: false,
@@ -160,7 +148,6 @@ export default async function handler(
         },
       });
     }
-
     const cacheKey = getCacheKey("analytics:downloads:summary", {
       since: since.toISOString(),
       until: until.toISOString(),
@@ -168,7 +155,6 @@ export default async function handler(
       page,
       limit,
     });
-
     const cached = await cacheResponse.get<AnalyticsResponse>(cacheKey);
     if (cached) {
       cached.meta.cacheHit = true;
@@ -183,7 +169,6 @@ export default async function handler(
       res.setHeader("X-Rate-Limit-Remaining", rl.remaining.toString());
       return res.json(cached);
     }
-
     const [
       summaryStats,
       topContent,
@@ -203,11 +188,8 @@ export default async function handler(
       getDailyTrends(since, until, filters),
       getTotalContentCount(since, until, filters),
     ]);
-
     const enrichedTopContent = await enrichContentBreakdowns(since, until, filters, topContent);
-
     const responseTime = Date.now() - startTime;
-
     const response: AnalyticsResponse = {
       ok: true,
       data: {
@@ -237,9 +219,7 @@ export default async function handler(
         },
       },
     };
-
     await cacheResponse.set(cacheKey, response, CACHE_TTL);
-
     await logAuditEvent({
       actorType: "admin",
       actorId: adminAuth.userId,
@@ -252,11 +232,9 @@ export default async function handler(
         cacheStatus: "miss",
       },
     });
-
     res.setHeader("X-Response-Time", `${responseTime}ms`);
     res.setHeader("X-Cache-Status", "miss");
     res.setHeader("X-Rate-Limit-Remaining", rl.remaining.toString());
-
     return res.json(response);
   } catch (error) {
     console.error("Analytics API Error:", error);
@@ -270,7 +248,6 @@ export default async function handler(
         stack: error instanceof Error ? error.stack : undefined,
       },
     });
-
     return res.status(500).json({
       ok: false,
       error: {
@@ -290,17 +267,14 @@ export default async function handler(
     });
   }
 }
-
 // ---------------------------
 // Helper Functions
 // ---------------------------
-
 function asStringArray(v: unknown): string[] | null {
   if (Array.isArray(v)) return v.filter((x) => typeof x === "string").map((s) => s.trim()).filter(Boolean);
   if (typeof v === "string") return [v.trim()].filter(Boolean);
   return null;
 }
-
 function asNumber(v: unknown): number | null {
   if (typeof v === "number" && Number.isFinite(v)) return v;
   if (typeof v === "string" && v.trim()) {
@@ -309,68 +283,54 @@ function asNumber(v: unknown): number | null {
   }
   return null;
 }
-
 function asDate(v: unknown): Date | null {
   if (typeof v !== "string" || !v.trim()) return null;
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d;
 }
-
 function validateQuery(query: NextApiRequest["query"]) {
   const days = Math.min(MAX_DAYS, Math.max(1, asNumber(query.days) ?? DEFAULT_DAYS));
   const until = asDate(query.until) ?? new Date();
   const since = asDate(query.since) ?? new Date(until.getTime() - days * 86400000);
-
   if (since > until) throw new Error("Start date must be before end date");
-
   const filters: Record<string, string[]> = {};
   const contentType = asStringArray(query.contentType);
   const eventType = asStringArray(query.eventType);
   const tier = asStringArray(query.tier);
   const countryCode = asStringArray(query.countryCode);
   const success = asStringArray(query.success);
-
   if (contentType) filters.contentType = contentType;
   if (eventType) filters.eventType = eventType;
   if (tier) filters.tier = tier;
   if (countryCode) filters.countryCode = countryCode;
-
   if (success) {
     const norm = success
       .map((s) => s.toLowerCase())
       .filter((s) => s === "true" || s === "false");
     if (norm.length) filters.success = norm;
   }
-
   const page = Math.max(1, asNumber(query.page) ?? 1);
   const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, asNumber(query.limit) ?? PAGE_SIZE));
-
   return { since, until, days, filters, page, limit };
 }
-
 const _toInt = (_v: unknown, _fallback = 0): number => { // Fixed: unused variables prefixed
   return 0;
 };
-
 const _toFloat = (_v: unknown): number | null => { // Fixed: unused variable prefixed
   return null;
 };
-
 function toIsoDate(v: unknown): string {
-  if (typeof v === "string" && v.length >= 10) return v.slice(0, 10);
+  if (typeof v === "string" && v.length >= 10) return safeSlice(v, 0, 10);
   const d = v instanceof Date ? v : new Date(String(v));
-  if (Number.isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
-  return d.toISOString().slice(0, 10);
+  if (Number.isNaN(d.getTime())) return safeDateSlice(new Date(), 0, 10);
+  return safeDateSlice(d, 0, 10);
 }
-
 const _toSizeString = (_v: unknown): string => { // Fixed: unused variable prefixed
   return "0";
 };
-
 // ---------------------------
 // Data access - Updated to use Prisma directly without raw SQL helpers
 // ---------------------------
-
 async function getSummaryStats(since: Date, until: Date, filters: Record<string, string[]>) {
   const where: any = {
     created_at: {
@@ -378,7 +338,6 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
       lte: until,
     }
   };
-
   // Apply filters
   if (filters.success?.length) {
     where.success = { in: filters.success.map(s => s === "true") };
@@ -395,7 +354,6 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
   if (filters.countryCode?.length) {
     where.country_code = { in: filters.countryCode };
   }
-
   // Get counts
   const [
     totalDownloads,
@@ -411,7 +369,6 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
       _sum: { file_size: true }
     }),
   ]);
-
   // Get unique content and users
   const [uniqueContentResults, uniqueUsersResults] = await Promise.all([
     prisma.download_audit_events.groupBy({
@@ -425,11 +382,9 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
       _count: true,
     }),
   ]);
-
   const uniqueContent = uniqueContentResults.length;
   const uniqueUsers = uniqueUsersResults.length;
   const avgSuccessRate = totalDownloads > 0 ? (successfulDownloads / totalDownloads) * 100 : 0;
-
   // Get daily trends
   const byPeriod = await prisma.$queryRaw`
     SELECT
@@ -440,7 +395,6 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at) ASC
   ` as Array<{ date: Date; count: bigint }>;
-
   return {
     totalDownloads,
     uniqueContent,
@@ -453,7 +407,6 @@ async function getSummaryStats(since: Date, until: Date, filters: Record<string,
     })),
   };
 }
-
 async function getTopContent(
   since: Date,
   until: Date,
@@ -467,7 +420,6 @@ async function getTopContent(
       lte: until,
     }
   };
-
   // Apply filters
   if (filters.success?.length) {
     where.success = { in: filters.success.map(s => s === "true") };
@@ -478,9 +430,7 @@ async function getTopContent(
   if (filters.eventType?.length) {
     where.event_type = { in: filters.eventType };
   }
-
   const offset = (page - 1) * limit;
-
   // Use Prisma's raw query for complex grouping
   const rows = await prisma.$queryRaw`
     SELECT
@@ -512,7 +462,6 @@ async function getTopContent(
     avg_latency: number | null;
     success_rate: number;
   }>;
-
   return rows.map((r) => ({
     slug: r.slug,
     contentType: r.content_type,
@@ -525,7 +474,6 @@ async function getTopContent(
     successRate: r.success_rate,
   }));
 }
-
 async function getGroupedCounts(
   since: Date,
   until: Date,
@@ -539,13 +487,11 @@ async function getGroupedCounts(
     },
     [column]: { not: null }
   };
-
   const results = await prisma.download_audit_events.groupBy({
     by: [column as any],
     where,
     _count: true,
   });
-
   const out: Record<string, number> = {};
   for (const r of results) {
     const key = r[column] as string;
@@ -553,7 +499,6 @@ async function getGroupedCounts(
   }
   return out;
 }
-
 async function getDailyTrends(
   since: Date,
   until: Date,
@@ -569,14 +514,12 @@ async function getDailyTrends(
     GROUP BY DATE(created_at)
     ORDER BY DATE(created_at) ASC
   ` as Array<{ date: Date; downloads: bigint; users: bigint }>;
-
   return rows.map((r) => ({
     date: toIsoDate(r.date),
     downloads: Number(r.downloads),
     users: Number(r.users),
   }));
 }
-
 async function getTotalContentCount(since: Date, until: Date, filters: Record<string, string[]>) {
   const where: any = {
     created_at: {
@@ -584,15 +527,12 @@ async function getTotalContentCount(since: Date, until: Date, filters: Record<st
       lte: until,
     }
   };
-
   const uniqueContent = await prisma.download_audit_events.groupBy({
     by: ['slug'],
     where,
   });
-
   return uniqueContent.length;
 }
-
 async function enrichContentBreakdowns(
   since: Date,
   until: Date,
@@ -600,7 +540,6 @@ async function enrichContentBreakdowns(
   top: DownloadSummary[]
 ): Promise<DownloadSummary[]> {
   if (!top.length) return top;
-
   const where: any = {
     created_at: {
       gte: since,
@@ -612,21 +551,18 @@ async function enrichContentBreakdowns(
       event_type: t.eventType,
     }))
   };
-
   // Get tier breakdowns
   const tierResults = await prisma.download_audit_events.groupBy({
     by: ['slug', 'content_type', 'event_type', 'tier'],
     where: { ...where, tier: { not: null } },
     _count: true,
   });
-
   // Get country breakdowns
   const countryResults = await prisma.download_audit_events.groupBy({
     by: ['slug', 'content_type', 'event_type', 'country_code'],
     where: { ...where, country_code: { not: null } },
     _count: true,
   });
-
   const tierMap = new Map<string, Record<string, number>>();
   for (const r of tierResults) {
     const key = `${r.slug}||${r.content_type}||${r.event_type}`;
@@ -634,7 +570,6 @@ async function enrichContentBreakdowns(
     obj[r.tier as string] = r._count;
     tierMap.set(key, obj);
   }
-
   const countryMap = new Map<string, Record<string, number>>();
   for (const r of countryResults) {
     const key = `${r.slug}||${r.content_type}||${r.event_type}`;
@@ -642,7 +577,6 @@ async function enrichContentBreakdowns(
     obj[r.country_code as string] = r._count;
     countryMap.set(key, obj);
   }
-
   return top.map((t) => {
     const key = `${t.slug}||${t.contentType}||${t.eventType}`;
     return {

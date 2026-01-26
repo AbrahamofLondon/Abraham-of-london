@@ -2,6 +2,8 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import clsx from "clsx";
+import { safeSlice, safeDateSlice } from "@/lib/utils/safe";
+
 
 // --- Types ---
 
@@ -61,7 +63,7 @@ function parseDate(d: string | Date): Date | null {
 /**
  * Safely converts a Date object to YYYY-MM-DD string.
  */
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+const isoDate = (d: Date) => safeDateSlice(d, 0, 10);
 
 // --- Component ---
 
@@ -101,7 +103,7 @@ export default function EventsSection({
     filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
 
     // Apply max limit
-    return typeof max === "number" ? filtered.slice(0, max) : filtered;
+    return typeof max === "number" ? safeSlice(filtered, 0, max) : filtered;
   }, [events, hidePast, max, today]);
 
   const hasEvents = list.length > 0;

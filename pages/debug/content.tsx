@@ -5,15 +5,29 @@ import type { GetStaticProps, NextPage } from "next";
 import Layout from "@/components/Layout";
 import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
 
-import {
-  getAllContentlayerDocs,
+// FIXED: Import from ONE source only
+import { 
+  getContentlayerData, 
+  getAllContentlayerDocs, 
   getPublishedDocuments,
   getDocKind,
   normalizeSlug,
-  getDocHref,
-  isDraft,
-  getContentlayerData
-} from "@/lib/contentlayer-compat";
+  getDocHref
+} from '@/lib/contentlayer-helper';
+import { isDraftContent as isDraft } from '@/lib/content/shared';
+import { safeSlice } from "@/lib/utils/safe";
+
+
+// REMOVED: Duplicate imports from "@/lib/content"
+// import {
+//   getAllContentlayerDocs,
+//   getPublishedDocuments,
+//   getDocKind,
+//   normalizeSlug,
+//   getDocHref,
+//   isDraft,
+//   getContentlayerData
+// } from "@/lib/content";
 
 type DocKind =
   | "post"
@@ -202,7 +216,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     const draftsOfKind = allOfKind.filter((d: any) => isDraft(d));
     const publishedOfKind = allOfKind.filter((d: any) => !isDraft(d));
 
-    const sample = publishedOfKind.slice(0, 3).map((d: any) => ({
+    const sample = safeSlice(publishedOfKind, 0, 3).map((d: any) => ({
       title: String(d?.title ?? "Untitled"),
       slug: String(normalizeSlug(d) ?? ""),
       href: String(getDocHref(d) ?? ""),

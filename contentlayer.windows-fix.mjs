@@ -1,6 +1,6 @@
 
 // Auto-generated Contentlayer config for Windows with framer-motion fix
-import { defineDocumentType, makeSource } from 'next-contentlayer2';
+import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 

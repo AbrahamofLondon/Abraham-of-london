@@ -1,4 +1,5 @@
 // components/PDFDashboard/PDFComparisonView.tsx
+import { safeArraySlice } from "@/lib/utils/safe";
 import React, { useState, useMemo } from 'react';
 import { 
   X, 
@@ -72,7 +73,7 @@ const PDFComparisonView: React.FC<PDFComparisonViewProps> = ({
         metadata: {
           author: `Author ${index + 1}`,
           version: `v${(index % 3) + 1}.0`,
-          tags: ['important', 'review', 'archive'].slice(0, (index % 3) + 1),
+          tags: safeArraySlice(['important', 'review', 'archive'], 0, (index % 3) + 1),
         }
       };
     });

@@ -1,6 +1,6 @@
 // scripts/pdf/pdf-registry.generated.ts
 // AUTO-GENERATED FROM CONTENT SCAN - DO NOT EDIT MANUALLY
-// Generated: 2026-01-23T12:06:24.031Z
+// Generated: 2026-01-24T16:04:29.875Z
 
 export const GENERATED_PDF_CONFIGS = [
   {
@@ -19,7 +19,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "2.0 KB",
-    "lastModified": "2026-01-23T12:06:23.461Z",
+    "lastModified": "2026-01-24T16:04:29.412Z",
     "exists": true,
     "tags": [
       "Strategy",
@@ -32,7 +32,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "961765dfb9ad57d4aba7a492d806eb99"
+    "md5": "1ec1923e112c740960752d151863bec9"
   },
   {
     "id": "board-decision-log-template",
@@ -50,7 +50,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "1.6 KB",
-    "lastModified": "2026-01-23T12:06:23.491Z",
+    "lastModified": "2026-01-24T16:04:29.432Z",
     "exists": true,
     "tags": [
       "board",
@@ -62,7 +62,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "03200aae4b8818b7d6f73f402331d5ce"
+    "md5": "f25e077b170b08a1c29a62df66d4fba4"
   },
   {
     "id": "board-investor-onepager",
@@ -80,7 +80,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "1.5 KB",
-    "lastModified": "2026-01-23T12:06:23.512Z",
+    "lastModified": "2026-01-24T16:04:29.450Z",
     "exists": true,
     "tags": [
       "download",
@@ -93,7 +93,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "ad1c84701a1f717e7976140c34bd6c9b"
+    "md5": "0c126ee418457d215c05364aa7ad622e"
   },
   {
     "id": "brotherhood-covenant",
@@ -111,7 +111,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "2.9 KB",
-    "lastModified": "2026-01-23T12:06:23.536Z",
+    "lastModified": "2026-01-24T16:04:29.470Z",
     "exists": true,
     "tags": [
       "covenant",
@@ -122,7 +122,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "7ba633099e3ab250e3a1fa2078d484a6"
+    "md5": "b12d38719845783e112d95340a87a6c0"
   },
   {
     "id": "canon-volume-iv-diagnostic-toolkit",
@@ -140,7 +140,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "1.1 KB",
-    "lastModified": "2026-01-23T12:06:23.566Z",
+    "lastModified": "2026-01-24T16:04:29.491Z",
     "exists": true,
     "tags": [
       "canon",
@@ -154,7 +154,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "b97c2124a63681b38bc14fcf2017b7e3"
+    "md5": "654611c8df52d2b65bbf41628dbbb88b"
   },
   {
     "id": "canon-volume-v-governance-diagnostic-toolkit",
@@ -172,7 +172,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "1.1 KB",
-    "lastModified": "2026-01-23T12:06:23.593Z",
+    "lastModified": "2026-01-24T16:04:29.510Z",
     "exists": true,
     "tags": [
       "canon",
@@ -186,7 +186,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "9229718cc79b5f7ae12711d80b4493ee"
+    "md5": "bae2664d4d429f2e72facde627a0ff85"
   },
   {
     "id": "communication-script-bpf",
@@ -204,7 +204,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.0 KB",
-    "lastModified": "2026-01-23T12:06:23.616Z",
+    "lastModified": "2026-01-24T16:04:29.528Z",
     "exists": true,
     "tags": [
       "brotherhood",
@@ -215,7 +215,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "84fba74fb32360d1f83fe4ac0eb80ebb"
+    "md5": "5a1a95e1ed646f4559bf16c9bca3ebfa"
   },
   {
     "id": "decision-log-template",
@@ -258,7 +258,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "1.7 KB",
-    "lastModified": "2026-01-23T12:06:23.642Z",
+    "lastModified": "2026-01-24T16:04:29.545Z",
     "exists": true,
     "tags": [
       "decision-making",
@@ -270,7 +270,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "10e1ed44383da24169c77feecb354bca"
+    "md5": "ccfd4c98804ff992a5e461bd431584a1"
   },
   {
     "id": "download-legacy-architecture-canvas",
@@ -288,7 +288,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.1 KB",
-    "lastModified": "2026-01-23T12:06:23.666Z",
+    "lastModified": "2026-01-24T16:04:29.564Z",
     "exists": true,
     "tags": [
       "legacy-architecture",
@@ -301,7 +301,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 5,
     "preload": false,
-    "md5": "8fa3d974ddaaffb4036959a05db2a046"
+    "md5": "64f8cfa0c3faa7b1c62bacd013b7b50a"
   },
   {
     "id": "entrepreneur-operating-pack",
@@ -319,14 +319,14 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.1 KB",
-    "lastModified": "2026-01-23T12:06:23.693Z",
+    "lastModified": "2026-01-24T16:04:29.586Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "c8a4221906a638b303cb048b4b14118a"
+    "md5": "dc181d72a2df9ff3fb4ba70854791232"
   },
   {
     "id": "entrepreneur-survival-checklist",
@@ -344,7 +344,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.1 KB",
-    "lastModified": "2026-01-23T12:06:23.717Z",
+    "lastModified": "2026-01-24T16:04:29.606Z",
     "exists": true,
     "tags": [
       "entrepreneurship",
@@ -356,7 +356,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "561eb98911d2a0a1582f861987432dc5"
+    "md5": "14a936ef3f61e550e5a776bade432122"
   },
   {
     "id": "family-altar-liturgy",
@@ -374,7 +374,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.0 KB",
-    "lastModified": "2026-01-23T12:06:23.736Z",
+    "lastModified": "2026-01-24T16:04:29.624Z",
     "exists": true,
     "tags": [
       "family",
@@ -386,7 +386,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "df05bfcb2cc16da7503bc74c8b250265"
+    "md5": "8aee3330b7cfc500c465e6e51d904bae"
   },
   {
     "id": "leaders-cue-card-two-up",
@@ -404,14 +404,14 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "2.3 KB",
-    "lastModified": "2026-01-23T12:06:23.757Z",
+    "lastModified": "2026-01-24T16:04:29.641Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "4386b074ed77a3414f41928c433491e2"
+    "md5": "28706e40a8ccd40357223afab94f4a9e"
   },
   {
     "id": "leadership-playbook",
@@ -429,14 +429,14 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.0 KB",
-    "lastModified": "2026-01-23T12:06:23.779Z",
+    "lastModified": "2026-01-24T16:04:29.658Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "ed4b413dcb736a99d724e2680efed2d2"
+    "md5": "9dd1f4c62c6e80db7cff61f60d4befb8"
   },
   {
     "id": "legacy-canvas",
@@ -454,7 +454,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.1 KB",
-    "lastModified": "2026-01-23T12:06:23.799Z",
+    "lastModified": "2026-01-24T16:04:29.675Z",
     "exists": true,
     "tags": [
       "legacy-architecture",
@@ -467,7 +467,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "6cd8fbf40798288a8989adf282e343f8"
+    "md5": "6eb275b97863fa95418147e4afb65814"
   },
   {
     "id": "life-alignment-assessment",
@@ -517,7 +517,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "2.2 KB",
-    "lastModified": "2026-01-23T12:06:23.818Z",
+    "lastModified": "2026-01-24T16:04:29.692Z",
     "exists": true,
     "tags": [
       "leadership",
@@ -527,7 +527,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "c5b4ff7c49894180b877502163df95bc"
+    "md5": "4c5c454f5bf8970f6ee16940ca9145ed"
   },
   {
     "id": "operating-cadence-pack",
@@ -545,7 +545,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "1.6 KB",
-    "lastModified": "2026-01-23T12:06:23.835Z",
+    "lastModified": "2026-01-24T16:04:29.707Z",
     "exists": true,
     "tags": [
       "operations",
@@ -557,7 +557,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "1935b3a15a35bde5eeb895d24fce4668"
+    "md5": "70d5aacdbaec9f8b6d0fb1bbbb041dce"
   },
   {
     "id": "principles-for-my-son-cue-card",
@@ -575,14 +575,14 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "2.3 KB",
-    "lastModified": "2026-01-23T12:06:23.854Z",
+    "lastModified": "2026-01-24T16:04:29.724Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "ba6c6188962f3c4443911c5ed7d9c091"
+    "md5": "d76de0047847400f10d04772b29c6603"
   },
   {
     "id": "principles-for-my-son",
@@ -600,7 +600,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.0 KB",
-    "lastModified": "2026-01-23T12:06:23.877Z",
+    "lastModified": "2026-01-24T16:04:29.742Z",
     "exists": true,
     "tags": [
       "fatherhood",
@@ -610,7 +610,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "caab252ac167a7d1a22a0b5e034c4948"
+    "md5": "f8fb5bda9cb894c5f4884ec9525869e1"
   },
   {
     "id": "purpose-pyramid-worksheet",
@@ -628,7 +628,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "1.1 KB",
-    "lastModified": "2026-01-23T12:06:23.895Z",
+    "lastModified": "2026-01-24T16:04:29.757Z",
     "exists": true,
     "tags": [
       "purpose",
@@ -640,7 +640,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "7e4262f35ac5142d7e7d2234600d5b41"
+    "md5": "5fc76a54dd63c473b2b073125bb0bc67"
   },
   {
     "id": "scripture-track-john14",
@@ -658,14 +658,14 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "3.0 KB",
-    "lastModified": "2026-01-23T12:06:23.915Z",
+    "lastModified": "2026-01-24T16:04:29.774Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "a54d913a9b3416170306ff4c8de00dd0"
+    "md5": "067541cc1d3334fab7b827c71dd093e3"
   },
   {
     "id": "standards-brief",
@@ -683,14 +683,14 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "2.8 KB",
-    "lastModified": "2026-01-23T12:06:23.935Z",
+    "lastModified": "2026-01-24T16:04:29.790Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "12ae08101a5ed55e0434f6703947c2b7"
+    "md5": "5fbaca22be745366d412246ddfc3876c"
   },
   {
     "id": "ultimate-purpose-of-man-editorial",
@@ -733,14 +733,14 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "2.8 KB",
-    "lastModified": "2026-01-23T12:06:23.955Z",
+    "lastModified": "2026-01-24T16:04:29.806Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
     "version": "1.0.0",
     "priority": 10,
     "preload": false,
-    "md5": "f5310f411d66efc41bb6e60e4743b103"
+    "md5": "8a880fc86e391a3a22f80133b7789c5f"
   },
   {
     "id": "decision-matrix-scorecard-fillable",
@@ -758,7 +758,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "35.8 KB",
-    "lastModified": "2026-01-23T12:06:23.981Z",
+    "lastModified": "2026-01-24T16:04:29.830Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
@@ -783,7 +783,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "10.5 KB",
-    "lastModified": "2026-01-23T12:06:24.005Z",
+    "lastModified": "2026-01-24T16:04:29.851Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
@@ -808,7 +808,7 @@ export const GENERATED_PDF_CONFIGS = [
       "A4"
     ],
     "fileSize": "19.8 KB",
-    "lastModified": "2026-01-23T12:06:24.030Z",
+    "lastModified": "2026-01-24T16:04:29.874Z",
     "exists": true,
     "tags": [],
     "requiresAuth": false,
@@ -818,5 +818,5 @@ export const GENERATED_PDF_CONFIGS = [
     "md5": "b37f145c3c79e6c6b8ba39385620cfb3"
   }
 ] as const;
-export const GENERATED_AT = "2026-01-23T12:06:24.031Z";
+export const GENERATED_AT = "2026-01-24T16:04:29.875Z";
 export const GENERATED_COUNT = 29;

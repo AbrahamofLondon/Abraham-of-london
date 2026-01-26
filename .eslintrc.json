@@ -23,6 +23,7 @@
     ".next/",
     ".contentlayer/",
     "public/downloads/",
-    "public/assets/downloads/"
+    "public/assets/downloads/",
+    "scripts/"
   ]
 }

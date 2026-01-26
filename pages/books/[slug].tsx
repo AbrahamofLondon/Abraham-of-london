@@ -2,24 +2,17 @@
 import React, { useState, useEffect } from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 
-// Server content layer
-import { 
-  getServerAllBooks, 
-  getServerBookBySlug, 
-  getContentlayerData 
-} from "@/lib/contentlayer-compat";
+// Server-side imports
+import { getAllContentlayerDocs } from "@/lib/content/real";
+import { sanitizeData } from "@/lib/content/shared";
 
-// MDX utilities (use simple components for build safety)
-import { 
-  prepareMDX, 
-  simpleMdxComponents, 
-  sanitizeData 
-} from "@/lib/server/md-utils";
+// MDX utilities
+import { prepareMDX, simpleMdxComponents } from "@/lib/server/md-utils";
 
 // UI Components
 import BookHero from "@/components/books/BookHero";
@@ -40,6 +33,20 @@ import {
   Calendar
 } from "lucide-react";
 
+// 🔥 CRITICAL FIX: Dynamically import MDXRemote to avoid SSR issues
+const MDXRemote = dynamic(
+  () => import('next-mdx-remote').then((mod) => mod.MDXRemote),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="animate-pulse space-y-4">
+        <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+      </div>
+    )
+  }
+);
+
 type Book = {
   title: string;
   excerpt: string | null;
@@ -58,15 +65,74 @@ type Book = {
 
 type Props = {
   book: Book;
-  source: MDXRemoteSerializeResult;
+  source: any; // Changed from MDXRemoteSerializeResult to any for safety
+};
+
+// Server-side helper functions
+function getServerAllBooks(): any[] {
+  const allDocs = getAllContentlayerDocs();
+  return allDocs.filter(
+    (doc: any) => doc.type === "Book" || doc._raw?.sourceFileDir === "books"
+  );
+}
+
+function getServerBookBySlug(slug: string): any | null {
+  const normalized = slug.replace(/^\/+|\/+$/g, "");
+  const books = getServerAllBooks();
+  
+  for (const doc of books) {
+    const docSlug = doc.slug || "";
+    const docHref = doc.href || "";
+    const flattenedPath = doc._raw?.flattenedPath || "";
+    
+    const compareSlug = (s: string) => s.replace(/^\/+|\/+$/g, "");
+    
+    if (
+      compareSlug(docSlug) === normalized ||
+      compareSlug(docHref.replace(/^\//, "")) === normalized ||
+      compareSlug(flattenedPath) === normalized
+    ) {
+      return doc;
+    }
+  }
+  
+  return null;
+}
+
+// 🔥 SAFE MDX COMPONENTS: Ensure no undefined components
+const getSafeMdxComponents = () => {
+  const safeComponents: any = {};
+  
+  if (typeof simpleMdxComponents === 'object') {
+    Object.keys(simpleMdxComponents).forEach(key => {
+      const Comp = (simpleMdxComponents as any)[key];
+      if (Comp && typeof Comp === 'function') {
+        safeComponents[key] = Comp;
+      } else {
+        // Fallback component for safety
+        safeComponents[key] = ({ children, ...props }: any) => {
+          return React.createElement('div', props, children);
+        };
+      }
+    });
+  }
+  
+  return safeComponents;
 };
 
 const BookPage: NextPage<Props> = ({ book, source }) => {
   const router = useRouter();
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [mdxComponents, setMdxComponents] = useState<any>({});
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    setIsClient(true);
+    setMdxComponents(getSafeMdxComponents());
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
       try {
         const bookmarks = JSON.parse(localStorage.getItem('ic_bookmarks') || '[]');
         setIsBookmarked(bookmarks.includes(book.slug));
@@ -74,7 +140,7 @@ const BookPage: NextPage<Props> = ({ book, source }) => {
         localStorage.setItem('ic_bookmarks', '[]');
       }
     }
-  }, [book.slug]);
+  }, [book.slug, isClient]);
 
   const toggleBookmark = () => {
     try {
@@ -139,7 +205,22 @@ const BookPage: NextPage<Props> = ({ book, source }) => {
 
                 <article className="mt-12 prose prose-invert prose-gold max-w-none prose-headings:font-serif prose-p:leading-relaxed prose-p:text-gray-300">
                   <BookContent>
-                    <MDXRemote {...source} components={simpleMdxComponents} />
+                    {source && isClient ? (
+                      <MDXRemote 
+                        {...source} 
+                        components={mdxComponents}
+                      />
+                    ) : (
+                      // Server-side/fallback rendering
+                      <div className="prose prose-invert max-w-none">
+                        <div 
+                          dangerouslySetInnerHTML={{ 
+                            __html: source?.compiledSource || 
+                            '<p>Content loading...</p>' 
+                          }} 
+                        />
+                      </div>
+                    )}
                   </BookContent>
                 </article>
 
@@ -205,8 +286,7 @@ const BookPage: NextPage<Props> = ({ book, source }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    await getContentlayerData();
-    const books = await getServerAllBooks();
+    const books = getServerAllBooks();
     
     const paths = books
       .filter((b: any) => b && !b.draft)
@@ -226,11 +306,22 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const slug = params?.slug as string;
     if (!slug) return { notFound: true };
 
-    const data: any = await getServerBookBySlug(slug);
+    const data: any = getServerBookBySlug(slug);
     if (!data || data.draft) return { notFound: true };
 
-    const rawMdx = data?.body?.raw ?? data?.body ?? "";
-    const source = await prepareMDX(typeof rawMdx === "string" ? rawMdx : "");
+    const rawMdx = String(data?.body?.raw ?? data?.body ?? "");
+    let source: any = {};
+    
+    if (rawMdx.trim()) {
+      try {
+        source = await prepareMDX(rawMdx);
+      } catch (mdxError) {
+        console.error(`MDX compilation error for ${slug}:`, mdxError);
+        source = { compiledSource: '' };
+      }
+    } else {
+      source = { compiledSource: '' };
+    }
 
     const book: Book = {
       title: data.title || "Untitled Volume",
@@ -249,10 +340,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     };
 
     return {
-      props: { book: sanitizeData(book), source },
+      props: { 
+        book: sanitizeData(book), 
+        source: JSON.parse(JSON.stringify(source)) // Ensure serializable
+      },
       revalidate: 1800,
     };
   } catch (error) {
+    console.error(`Error in getStaticProps for /books/${params?.slug}:`, error);
     return { notFound: true };
   }
 };

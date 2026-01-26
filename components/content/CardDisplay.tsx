@@ -1,6 +1,8 @@
 // components/content/CardDisplay.tsx - COMPLETE SELF-CONTAINED FIX
 import * as React from "react";
 import Link from "next/link";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // Define everything locally - NO imports from problematic modules
 type ContentDoc = {
@@ -163,7 +165,7 @@ export default function CardDisplay({
 
                 {Array.isArray(card.tags) && card.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {card.tags.slice(0, 3).map((t: string) => (
+                    {card.safeSlice(tags, 0, 3).map((t: string) => (
                       <span
                         key={t}
                         className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-gray-300"

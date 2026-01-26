@@ -1,3 +1,5 @@
+import { safeSlice } from "@/lib/utils/safe";
+
 // lib/contentlayer/status.ts
 /* eslint-disable no-console */
 /**
@@ -237,7 +239,7 @@ class ContentLayerStatusManager {
       
       try {
         // First try direct import
-        const contentlayer = await import('contentlayer/generated');
+        const contentlayer = await import('@/lib/contentlayer-generated');
         contentlayerData = contentlayer;
       } catch {
         // Try alternative path
@@ -255,7 +257,7 @@ class ContentLayerStatusManager {
             const documentFiles = files.filter((f: string) => f.endsWith('.json'));
             const documents: any[] = [];
             
-            for (const file of documentFiles.slice(0, 10)) {
+            for (const file of safeSlice(documentFiles, 0, 10)) {
               try {
                 const content = fs.readFileSync(path.join(contentlayerPath, file), 'utf-8');
                 documents.push(JSON.parse(content));
@@ -277,7 +279,7 @@ class ContentLayerStatusManager {
         return {
           available: true,
           documentCount: allDocuments.length,
-          documents: allDocuments.slice(0, 10),
+          documents: safeSlice(allDocuments, 0, 10),
           types: [...new Set(allDocuments.map((doc: any) => doc._raw?.sourceFileDir || doc.type || 'unknown'))]
         };
       }
@@ -310,7 +312,7 @@ class ContentLayerStatusManager {
     
     if (!health.healthy) {
       if (health.status === 'not-initialized') {
-        recommendations.push('Install ContentLayer: npm install contentlayer next-contentlayer');
+        recommendations.push("Install Contentlayer2: pnpm add contentlayer2 next-contentlayer2");
         recommendations.push('Create contentlayer.config.ts with your content configuration');
       } else if (health.status === 'error') {
         recommendations.push('Check contentlayer.config.ts for configuration errors');

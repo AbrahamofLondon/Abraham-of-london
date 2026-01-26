@@ -7,6 +7,8 @@ import {
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
 import type { Page, ContentEntry, ContentMeta } from "@/types/index";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export type PageWithContent = Page & {
   content: string;
@@ -419,7 +421,7 @@ export function getRecentPages(limit?: number): Page[] {
       return (a.title || '').localeCompare(b.title || '');
     });
     
-    return limit && limit > 0 ? sorted.slice(0, limit) : sorted;
+    return limit && limit > 0 ? safeSlice(sorted, 0, limit) : sorted;
   } catch (error) {
     console.error("Error fetching recent pages:", error);
     return [];

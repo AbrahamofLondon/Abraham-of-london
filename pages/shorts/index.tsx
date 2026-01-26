@@ -1,4 +1,5 @@
 // pages/shorts/index.tsx
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Head from "next/head";
@@ -30,16 +31,14 @@ import {
   X,
   CheckCircle
 } from "lucide-react";
-
 import Layout from "@/components/Layout";
-import { 
-  getContentlayerData, 
-  isDraftContent, 
+import {
   normalizeSlug,
+  isDraftContent,
+  getDocKind,
+  getDocHref,
   getPublishedDocuments,
-  getDocHref 
-} from "@/lib/contentlayer-compat";
-
+} from "@/lib/contentlayer-helper";
 type ShortDoc = {
   _id: string;
   slug: string;
@@ -55,33 +54,28 @@ type ShortDoc = {
   featured?: boolean;
   url?: string;
 };
-
 type ShortsIndexProps = {
   shorts: ShortDoc[];
   totalCount: number;
   themes: string[];
   popularTags: string[];
 };
-
 const STREAK_LAST_SEEN_KEY = "aol_shorts_last_seen";
 const STREAK_COUNT_KEY = "aol_shorts_streak";
 const LIKE_KEY = "aol_shorts_likes_v1";
 const SHARE_KEY = "aol_shorts_shares_v1";
 const SAVE_KEY = "aol_shorts_saves_v1";
-
 function formatISO(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
-
 function parseIntSafe(v: string | null): number | null {
   if (!v) return null;
   const n = Number(v);
   return Number.isFinite(n) ? Math.trunc(n) : null;
 }
-
 function safeJson<T>(raw: string | null, fallback: T): T {
   if (!raw) return fallback;
   try {
@@ -90,7 +84,6 @@ function safeJson<T>(raw: string | null, fallback: T): T {
     return fallback;
   }
 }
-
 function formatDate(dateString: string | null): string | null {
   if (!dateString) return null;
   try {
@@ -104,7 +97,6 @@ function formatDate(dateString: string | null): string | null {
     return null;
   }
 }
-
 const themeGradients: Record<string, string> = {
   faith: "from-blue-500/10 via-indigo-500/6 to-transparent border-blue-500/25",
   resilience: "from-amber-500/12 via-orange-500/6 to-transparent border-amber-500/25",
@@ -114,7 +106,6 @@ const themeGradients: Record<string, string> = {
   strategy: "from-cyan-500/12 via-sky-500/6 to-transparent border-cyan-500/25",
   default: "from-slate-500/10 via-slate-500/6 to-transparent border-slate-500/25",
 };
-
 const themeIcons: Record<string, string> = {
   faith: "🙏",
   resilience: "💪",
@@ -124,7 +115,6 @@ const themeIcons: Record<string, string> = {
   strategy: "♟️",
   default: "📝",
 };
-
 const themeColors: Record<string, string> = {
   faith: "text-blue-400",
   resilience: "text-amber-400",
@@ -134,36 +124,29 @@ const themeColors: Record<string, string> = {
   strategy: "text-cyan-400",
   default: "text-slate-400",
 };
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.08 } },
 };
-
 const cardVariants = {
   hidden: { opacity: 0, y: 18, scale: 0.97 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 110, damping: 16 } },
   hover: { y: -5, scale: 1.02, transition: { type: "spring", stiffness: 260, damping: 20 } },
   tap: { scale: 0.985 },
 };
-
 const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, themes, popularTags }) => {
   const reduceMotion = useReducedMotion();
-
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTheme, setSelectedTheme] = React.useState<string>("all");
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
-
   const [streakDays, setStreakDays] = React.useState<number>(0);
   const [subtitleVisible, setSubtitleVisible] = React.useState(false);
   const subtitle = "For wherever you are today.";
-
   const [likes, setLikes] = React.useState<Record<string, number>>({});
   const [shares, setShares] = React.useState<Record<string, number>>({});
   const [saves, setSaves] = React.useState<Record<string, number>>({});
   const [savedSet, setSavedSet] = React.useState<Set<string>>(new Set());
-
   const filteredShorts = React.useMemo(() => {
     const q = searchQuery.toLowerCase();
     return shorts.filter((short) => {
@@ -173,19 +156,15 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
         (short.excerpt ?? "").toLowerCase().includes(q) ||
         (short.description ?? "").toLowerCase().includes(q) ||
         short.tags?.some((t) => t.toLowerCase().includes(q));
-
       const matchesTheme = selectedTheme === "all" || short.theme === selectedTheme;
       const matchesTag = !selectedTag || short.tags?.includes(selectedTag);
-
       return matchesSearch && matchesTheme && matchesTag;
     });
   }, [shorts, searchQuery, selectedTheme, selectedTag]);
-
   const featuredShorts = React.useMemo(() => 
-    shorts.filter(s => s.featured).slice(0, 3),
+    safeArraySlice(shorts.filter(...), 0, 3),
     [shorts]
   );
-
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     if (reduceMotion) {
@@ -195,16 +174,12 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
     const t = window.setTimeout(() => setSubtitleVisible(true), 1200);
     return () => window.clearTimeout(t);
   }, [reduceMotion]);
-
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-
     const todayKey = formatISO(new Date());
     const lastKey = window.localStorage.getItem(STREAK_LAST_SEEN_KEY);
     const streak = parseIntSafe(window.localStorage.getItem(STREAK_COUNT_KEY));
-
     let next = streak ?? 0;
-
     if (!lastKey) next = 1;
     else if (lastKey === todayKey) next = Math.max(1, next);
     else {
@@ -213,12 +188,10 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
       const diffDays = Math.round((todayDate.getTime() - lastDate.getTime()) / 86400000);
       next = diffDays === 1 ? next + 1 : 1;
     }
-
     window.localStorage.setItem(STREAK_LAST_SEEN_KEY, todayKey);
     window.localStorage.setItem(STREAK_COUNT_KEY, String(next));
     setStreakDays(Math.max(1, Math.min(3650, next)));
   }, []);
-
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     const likeStore = safeJson<Record<string, number>>(localStorage.getItem(LIKE_KEY), {});
@@ -229,55 +202,44 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
     setSaves(saveStore);
     setSavedSet(new Set(Object.keys(saveStore).filter((k) => (saveStore[k] ?? 0) > 0)));
   }, []);
-
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem(LIKE_KEY, JSON.stringify(likes));
   }, [likes]);
-
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem(SHARE_KEY, JSON.stringify(shares));
   }, [shares]);
-
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem(SAVE_KEY, JSON.stringify(saves));
   }, [saves]);
-
   const onLike = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setLikes((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
   };
-
   const onSave = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     setSavedSet((prev) => {
       const next = new Set(prev);
       const currentlySaved = next.has(id);
-
       setSaves((s) => ({
         ...s,
         [id]: Math.max(0, (s[id] ?? 0) + (currentlySaved ? -1 : 1)),
       }));
-
       if (currentlySaved) next.delete(id);
       else next.add(id);
       return next;
     });
   };
-
   const onShareCard = async (id: string, slug: string, title: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     const origin = typeof window !== "undefined" ? window.location.origin : "https://www.abrahamoflondon.com";
     const url = `${origin}/shorts/${slug}`;
     const text = `"${title}" - Abraham of London`;
-
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
         await (navigator as any).share({ title: `${title} · Abraham of London`, text, url });
@@ -287,7 +249,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
         // ignore
       }
     }
-
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(`${text}\n${url}`);
@@ -297,20 +258,16 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
     } catch {
       // ignore
     }
-
     if (typeof window !== "undefined") {
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
       window.open(twitterUrl, "_blank", "noopener,noreferrer");
       setShares((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
     }
   };
-
   const sharePage = async (platform?: "twitter" | "whatsapp") => {
     if (typeof window === "undefined") return;
-
     const url = window.location.href;
     const text = "Shorts - Abraham of London";
-
     if (platform === "twitter") {
       window.open(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
@@ -319,12 +276,10 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
       );
       return;
     }
-
     if (platform === "whatsapp") {
       window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, "_blank", "noopener,noreferrer");
       return;
     }
-
     if ((navigator as any).share) {
       try {
         await (navigator as any).share({ title: "Shorts · Abraham of London", text, url });
@@ -333,28 +288,22 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
         // ignore
       }
     }
-
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(`${text}\n${url}`);
     }
   };
-
   const subtitleMotion = reduceMotion
     ? { initial: { opacity: 1, y: 0 }, animate: { opacity: 1, y: 0 } }
     : { initial: { opacity: 0, y: 8, filter: "blur(2px)" }, animate: { opacity: 1, y: 0, filter: "blur(0px)" } };
-
   const totalShares = Object.values(shares).reduce((sum, v) => sum + v, 0);
   const totalLikes = Object.values(likes).reduce((sum, v) => sum + v, 0);
   const totalSaves = Object.values(saves).reduce((sum, v) => sum + v, 0);
-
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedTheme("all");
     setSelectedTag(null);
   };
-
   const hasActiveFilters = searchQuery || selectedTheme !== "all" || selectedTag;
-
   return (
     <Layout 
       title="Shorts · Abraham of London" 
@@ -372,21 +321,18 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="canonical" href="https://abrahamoflondon.com/shorts" />
       </Head>
-
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-white/10 bg-gradient-to-b from-black via-slate-950 to-black">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_55%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black" />
         </div>
-
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2">
               <Zap className="h-4 w-4 text-blue-400" />
               <span className="text-sm font-medium text-blue-300">Field Notes · Short Form</span>
             </div>
-
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -395,7 +341,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
             >
               Shorts
             </motion.h1>
-
             <motion.p 
               {...subtitleMotion}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -403,7 +348,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
             >
               {subtitle}
             </motion.p>
-
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-xl mx-auto mb-12">
               <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
@@ -423,7 +367,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                 <div className="text-xs font-medium text-slate-300 uppercase tracking-wider">Total Shares</div>
               </div>
             </div>
-
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -445,7 +388,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
           </div>
         </div>
       </section>
-
       {/* Filters Section */}
       <section className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-xl py-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -470,7 +412,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                 )}
               </div>
             </div>
-
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <button
@@ -486,7 +427,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                   <List className="h-5 w-5" />
                 </button>
               </div>
-
               <div className="relative">
                 <select
                   value={selectedTheme}
@@ -502,7 +442,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
               </div>
             </div>
           </div>
-
           {/* Active Filters */}
           {hasActiveFilters && (
             <div className="mt-4 flex items-center justify-between">
@@ -537,7 +476,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
           )}
         </div>
       </section>
-
       {/* Featured Shorts */}
       {featuredShorts.length > 0 && (
         <section className="py-12 border-b border-white/10">
@@ -557,13 +495,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                 View all <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
-
             <div className="grid md:grid-cols-3 gap-6">
               {featuredShorts.map((short, index) => {
                 const themeGradient = themeGradients[short.theme || 'default'];
                 const themeColor = themeColors[short.theme || 'default'];
                 const themeIcon = themeIcons[short.theme || 'default'];
-                
                 return (
                   <Link
                     key={short._id}
@@ -587,17 +523,14 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                         </div>
                         <Award className="h-5 w-5 text-amber-400" />
                       </div>
-
                       <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
                         {short.title}
                       </h3>
-                      
                       {short.excerpt && (
                         <p className="text-slate-300 mb-4 line-clamp-3">
                           {short.excerpt}
                         </p>
                       )}
-
                       <div className="flex items-center justify-between border-t border-white/10 pt-4">
                         <div className="flex items-center gap-4 text-sm text-slate-400">
                           {short.readTime && (
@@ -623,7 +556,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
           </div>
         </section>
       )}
-
       {/* Main Shorts Grid */}
       <section id="shorts-grid" className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -638,7 +570,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                   Sorted by {selectedTheme === "all" ? "latest" : "relevance"}
                 </div>
               </div>
-
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -657,7 +588,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                     const likeCount = likes[short._id] || 0;
                     const shareCount = shares[short._id] || 0;
                     const saveCount = saves[short._id] || 0;
-
                     return (
                       <motion.div
                         key={short._id}
@@ -688,7 +618,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                                   )}
                                 </div>
                               </div>
-                              
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={(e) => onLike(short._id, e)}
@@ -699,7 +628,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                                     <span className="ml-1 text-xs">{likeCount}</span>
                                   )}
                                 </button>
-                                
                                 <button
                                   onClick={(e) => onSave(short._id, e)}
                                   className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-amber-400"
@@ -708,21 +636,18 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                                 </button>
                               </div>
                             </div>
-
                             <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
                               {short.title}
                             </h3>
-                            
                             {(short.excerpt || short.description) && (
                               <p className="text-slate-300 mb-4 line-clamp-3">
                                 {short.excerpt || short.description}
                               </p>
                             )}
-
                             {/* Tags */}
                             {short.tags && short.tags.length > 0 && (
                               <div className="mb-4 flex flex-wrap gap-2">
-                                {short.tags.slice(0, 3).map((tag) => (
+                                {short.safeSlice(tags, 0, 3).map((tag) => (
                                   <button
                                     key={tag}
                                     onClick={(e) => {
@@ -741,7 +666,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                                 )}
                               </div>
                             )}
-
                             <div className="flex items-center justify-between border-t border-white/10 pt-4">
                               <div className="flex items-center gap-4 text-sm text-slate-400">
                                 {short.readTime && (
@@ -757,7 +681,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
                                   </span>
                                 )}
                               </div>
-                              
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={(e) => onShareCard(short._id, short.slug, short.title, e)}
@@ -799,7 +722,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
           )}
         </div>
       </section>
-
       {/* Popular Tags */}
       {popularTags.length > 0 && !selectedTag && (
         <section className="py-12 border-t border-white/10">
@@ -826,7 +748,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
           </div>
         </section>
       )}
-
       {/* CTA Section */}
       <section className="py-20 border-t border-white/10">
         <div className="mx-auto max-w-4xl px-4 text-center">
@@ -862,17 +783,14 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount, theme
     </Layout>
   );
 };
-
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
   try {
     await getContentlayerData();
     const allDocs = getPublishedDocuments();
-    
     // Filter for shorts (adjust based on your content structure)
     const shortsDocs = allDocs.filter((doc: any) => {
       const kind = String(doc._raw?.sourceFileDir || doc.kind || "").toLowerCase();
       const tags = Array.isArray(doc.tags) ? doc.tags.map((t: string) => t.toLowerCase()) : [];
-      
       return (
         kind.includes('short') || 
         kind.includes('field-note') || 
@@ -884,7 +802,6 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
         (doc.url && doc.url.includes('/shorts/'))
       );
     });
-
     const shorts: ShortDoc[] = shortsDocs
       .filter((s: any) => s && !isDraftContent(s))
       .map((s: any) => {
@@ -911,10 +828,8 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
         const db = b.date ? new Date(b.date).getTime() : 0;
         return db - da || a.title.localeCompare(b.title);
       });
-
     // Extract themes
     const themes = [...new Set(shorts.map(s => s.theme).filter(Boolean))] as string[];
-    
     // Calculate popular tags
     const tagCounts: Record<string, number> = {};
     shorts.forEach(short => {
@@ -922,14 +837,11 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
         tagCounts[tag] = (tagCounts[tag] || 0) + 1;
       });
     });
-
     const popularTags = Object.entries(tagCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
+      safeSlice(..., 0, 10)
       .map(([tag]) => tag);
-
     console.log(`📝 Shorts index: Loaded ${shorts.length} shorts, ${popularTags.length} popular tags`);
-
     return { 
       props: { 
         shorts, 
@@ -941,7 +853,6 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     };
   } catch (error) {
     console.error("Error generating shorts index:", error);
-    
     return {
       props: { 
         shorts: [], 
@@ -953,5 +864,4 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     };
   }
 };
-
 export default ShortsIndexPage;

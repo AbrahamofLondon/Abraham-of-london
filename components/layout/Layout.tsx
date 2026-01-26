@@ -141,7 +141,7 @@ const Layout: React.FC<LayoutProps> = ({
         <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImage} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://abrahamoflondon.com${router.asPath}`} />
+        <meta property="og:url" content={`https://abrahamoflondon.org${router.asPath}`} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -156,7 +156,7 @@ const Layout: React.FC<LayoutProps> = ({
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         
         {/* Canonical URL */}
-        <link rel="canonical" href={`https://abrahamoflondon.com${router.asPath}`} />
+        <link rel="canonical" href={`https://abrahamoflondon.org${router.asPath}`} />
         
         {/* Structured Data */}
         <script
@@ -166,14 +166,14 @@ const Layout: React.FC<LayoutProps> = ({
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "Abraham of London - Inner Circle",
-              "url": "https://abrahamoflondon.com",
+              "url": "https://abrahamoflondon.org",
               "description": description,
               "publisher": {
                 "@type": "Organization",
                 "name": "Abraham of London",
                 "logo": {
                   "@type": "ImageObject",
-                  "url": "https://abrahamoflondon.com/logo.png"
+                  "url": "https://abrahamoflondon.org/logo.png"
                 }
               }
             })

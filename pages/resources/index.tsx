@@ -6,7 +6,16 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData, normalizeSlug } from "@/lib/contentlayer-compat";
+// ✅ FIXED: Import server-side functions from correct location
+import { 
+  getContentlayerData 
+} from "@/lib/content/server";
+
+import { 
+import { safeSlice } from "@/lib/utils/safe";
+
+  normalizeSlug 
+} from "@/lib/content/shared";
 
 type ResourceMeta = {
   slug: string;          // slug without "resources/"
@@ -47,13 +56,13 @@ function safeDateISO(d: any): string | null {
 
 /**
  * STRATEGIC FIX: INTEGRITY MODE
- * 1. Awaits getContentlayerData for absolute synchronization.
+ * 1. Uses getContentlayerData for absolute synchronization.
  * 2. Filters strictly for titled resources with established paths.
  */
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
-    // COMMAND: Await contentlayer data for absolute build-time integrity
-    const data = await getContentlayerData();
+    // COMMAND: Get contentlayer data for absolute build-time integrity
+    const data = getContentlayerData(); // ✅ Removed await - it's synchronous now
     const docs = Array.isArray(data.allResources) ? data.allResources : [];
 
     const resources: ResourceMeta[] = docs
@@ -218,7 +227,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
 
                       {res.tags.length > 0 && (
                         <div className="mt-6 flex flex-wrap gap-2">
-                          {res.tags.slice(0, 6).map((t) => (
+                          {res.safeSlice(tags, 0, 6).map((t) => (
                             <span
                               key={t}
                               className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-widest text-gray-400"

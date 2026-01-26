@@ -36,7 +36,7 @@ function hasContentlayerInstalled(): boolean {
       ...packageJson.devDependencies,
     };
     
-    return !!(deps['contentlayer'] || deps['next-contentlayer']);
+    return !!(deps["contentlayer2"] || deps["next-contentlayer2"]);
   } catch {
     return false;
   }

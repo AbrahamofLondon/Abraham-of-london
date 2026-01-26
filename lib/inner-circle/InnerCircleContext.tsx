@@ -1,6 +1,8 @@
 // lib/inner-circle/InnerCircleContext.tsx - CLIENT-SAFE VERSION
+"use client";
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/router'; // Keep this for Pages Router
 
 // NO Redis imports - client-side only
 

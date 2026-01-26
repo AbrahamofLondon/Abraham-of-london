@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/email";
 import { getClientIp } from "@/lib/server/ip";
 import { limitIp, setRateLimitHeaders, limitEmail } from "@/lib/security/rateLimit";
-import { generateAccessKey, getEmailHash } from "@/lib/inner-circle/keys";
+import { createOrUpdateMemberAndIssueKeyWithRateLimit } from "@/lib/server/inner-circle/keys"
 
 type ResponseData = { ok: boolean; message?: string; error?: string };
 const GENERIC_SUCCESS = "If your email is registered, your access email will be dispatched shortly.";

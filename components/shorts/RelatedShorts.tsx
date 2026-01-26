@@ -1,3 +1,4 @@
+import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -21,7 +22,7 @@ interface RelatedShortsProps {
 const RelatedShorts: React.FC<RelatedShortsProps> = ({ shorts, currentShortId }) => {
   const filteredShorts = shorts
     .filter(short => short.id !== currentShortId)
-    .slice(0, 4);
+    safeArraySlice(..., 0, 4);
 
   if (filteredShorts.length === 0) {
     return null;

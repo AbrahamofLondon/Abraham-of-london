@@ -1,4 +1,5 @@
 // lib/audit/audit-logger.ts
+import { safeSlice } from "@/lib/utils/safe";
 import { PrismaClient, Prisma, type SystemAuditLog } from ".prisma/client";
 
 export type AuditSeverity = "info" | "warning" | "error" | "critical";
@@ -149,7 +150,7 @@ export class AuditLogger {
     if (event.ipAddress || event.userAgent) {
       console.log("Context:", {
         ip: event.ipAddress,
-        userAgent: event.userAgent?.slice(0, 120),
+        userAgent: event.safeSlice(userAgent, 0, 120),
       });
     }
     if (typeof event.durationMs === "number") {

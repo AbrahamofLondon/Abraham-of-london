@@ -2,6 +2,8 @@
 // Events data facade
 
 import { getAllEventsMeta, getEventBySlug as getEventBySlugServer } from "@/lib/server/events-data";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // Type definitions
 export type Event = any;
@@ -67,7 +69,7 @@ export function getUpcomingEvents(limit?: number): EventMeta[] {
     const dateB = new Date(b.eventDate || '').getTime();
     return dateA - dateB;
   });
-  return limit ? upcoming.slice(0, limit) : upcoming;
+  return limit ? safeSlice(upcoming, 0, limit) : upcoming;
 }
 
 

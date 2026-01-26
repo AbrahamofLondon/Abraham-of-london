@@ -1,10 +1,10 @@
-// ./pages/api/dl/[token].ts - FULLY CORRECTED
+// pages/api/dl/[token].ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { 
-  getDownloadBySlug, 
+  getDownloadBySlug,
   resolveDocDownloadUrl,
-  // getAllDownloads // Removed: unused import
-} from "@/lib/contentlayer-compat";
+} from "@/lib/contentlayer-helper"; 
+import { sanitizeData } from "@/lib/content/shared";
 import {
   verifyDownloadToken,
   getUserTierFromCookies,
@@ -12,9 +12,10 @@ import {
   type InnerCircleTier
 } from "@/lib/downloads/security";
 import { logDownloadEvent } from "@/lib/downloads/audit";
+import { safeSlice } from "@/lib/utils/safe";
 
-// Fix: Create a local validateDownloadAccess function since the import doesn't exist
-// or update the security module to include this signature
+
+// Local validateDownloadAccess function
 function validateDownloadAccess(params: {
   userTier: InnerCircleTier;
   requiredTier: string;
@@ -60,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const ref = req.headers.referer || "direct";
 
   try {
-    // 3) Verify token - FIXED: Proper type handling
+    // 3) Verify token
     const verificationResult = verifyDownloadToken(token, secret);
     
     // Handle token verification result
@@ -78,11 +79,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ error: "Invalid or expired token" });
     }
 
-    // Type-safe payload - FIXED: Use the valid payload
+    // Type-safe payload
     const { slug, requiredTier, exp, nonce } = verificationResult;
 
-    // 4) Resolve document
-    const doc = getDownloadBySlug(slug);
+    // 4) Resolve document - USING getDocBySlug INSTEAD OF getDownloadBySlug
+    const doc = getDocBySlug(slug);
     if (!doc) {
       await logDownloadEvent({
         eventType: "DOWNLOAD_NOT_FOUND",
@@ -116,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 6) Tier check at redemption-time
     const userTier = getUserTierFromCookies(req.headers.cookie);
     
-    // Additional validation using security module - FIXED: Use local function
+    // Additional validation using local function
     const accessCheck = validateDownloadAccess({
       userTier,
       requiredTier,
@@ -184,7 +185,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     return res.status(500).json({ 
       error: "Internal server error",
-      reference: token.slice(0, 8) // Partial token for debugging
+      reference: safeSlice(token, 0, 8) // Partial token for debugging
     });
   }
 }

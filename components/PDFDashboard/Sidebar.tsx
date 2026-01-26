@@ -1,6 +1,8 @@
 import React, { useCallback, useMemo } from "react";
 import type { PDFItem, DashboardStats, ViewMode } from "@/types/pdf-dashboard";
 import { FileText, RefreshCw, CheckCircle, Clock, AlertCircle, Trash2, Copy, Pencil } from "lucide-react";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 type SidebarProps = {
   pdfs: PDFItem[];
@@ -287,7 +289,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {selectedIds.length > 0 && (
           <div className="mt-4 text-xs text-gray-500">
-            Selected IDs: {selectedIds.slice(0, 3).join(", ")}
+            Selected IDs: {safeSlice(selectedIds, 0, 3).join(", ")}
             {selectedIds.length > 3 ? ` … (+${selectedIds.length - 3})` : ""}
           </div>
         )}

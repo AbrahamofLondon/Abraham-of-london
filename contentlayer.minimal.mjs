@@ -1,6 +1,6 @@
 
 // Minimal Contentlayer config
-import { makeSource } from 'next-contentlayer2';
+import { makeSource } from "contentlayer2/source-files";
 
 export default makeSource({
   contentDirPath: 'content',

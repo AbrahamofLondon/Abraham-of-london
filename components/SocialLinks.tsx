@@ -5,6 +5,8 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { getSocialIcon } from "@/lib/utils/site-utils";
 import {
+import { safeSlice } from "@/lib/utils/safe";
+
   Twitter,
   Linkedin,
   Instagram,
@@ -55,7 +57,7 @@ export default function SocialLinks({
   const socials = siteConfig.socials || [];
   
   // Apply maxItems if specified
-  const displaySocials = maxItems ? socials.slice(0, maxItems) : socials;
+  const displaySocials = maxItems ? safeSlice(socials, 0, maxItems) : socials;
 
   if (!displaySocials.length) return null;
 

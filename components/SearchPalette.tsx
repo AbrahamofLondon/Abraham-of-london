@@ -1,10 +1,9 @@
 // components/SearchPalette.tsx - FINAL COMPLETE FIXED VERSION
+import { safeArraySlice } from "@/lib/utils/safe";
 "use client";
-
 import * as React from "react";
 import Fuse from "fuse.js";
 import Link from "next/link";
-
 interface SearchItem {
   id: string;
   type: "post" | "book" | "event";
@@ -13,12 +12,10 @@ interface SearchItem {
   date: string | null;
   snippet: string;
 }
-
 interface SearchPaletteProps {
   open: boolean;
   onClose: () => void;
 }
-
 export default function SearchPalette({
   open,
   onClose,
@@ -28,18 +25,15 @@ export default function SearchPalette({
   const [fuse, setFuse] = React.useState<any>(null);
   const [active, setActive] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
-
   // Focus input when opening
   React.useEffect(() => {
     if (open && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open]);
-
   // lazy-load the index on first open
   React.useEffect(() => {
     if (!open || items) return;
-
     const loadSearchIndex = async (): Promise<void> => {
       try {
         const res = await fetch("/api/search-index");
@@ -57,36 +51,28 @@ export default function SearchPalette({
         console.error("Failed to load search index:", error);
       }
     };
-
     loadSearchIndex();
   }, [open, items]);
-
   // esc to close
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "Escape") onClose();
     };
-
     if (open) {
       document.addEventListener("keydown", handleKeyDown);
     }
-
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
-
   // lock background scroll while open
   React.useEffect(() => {
     if (!open) return;
-
     const scrollY = window.scrollY;
     const { style } = document.documentElement;
-
     style.position = "fixed";
     style.top = `-${scrollY}px`;
     style.left = "0";
     style.right = "0";
     style.width = "100%";
-
     return () => {
       style.position = "";
       style.top = "";
@@ -96,7 +82,6 @@ export default function SearchPalette({
       window.scrollTo(0, scrollY);
     };
   }, [open]);
-
   const handleArrowNavigation = (direction: 1 | -1): void => {
     setActive((current) => {
       const count = results.length;
@@ -104,7 +89,6 @@ export default function SearchPalette({
       return (current + direction + count) % count;
     });
   };
-
   const handleInputKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>
   ): void => {
@@ -126,11 +110,9 @@ export default function SearchPalette({
         break;
     }
   };
-
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     if (e.target === e.currentTarget) onClose();
   };
-
   const handleBackdropKeyDown = (
     e: React.KeyboardEvent<HTMLDivElement>
   ): void => {
@@ -139,17 +121,14 @@ export default function SearchPalette({
       onClose();
     }
   };
-
   if (!open) return null;
-
   const results =
     query.trim() && fuse
       ? fuse
           .search(query)
-          .slice(0, 12)
+          safeArraySlice(..., 0, 12)
           .map((r: any) => r.item) // FIX: Add type annotation here
-      : (items || []).slice(0, 12);
-
+      : safeArraySlice(items || [], 0, 12);
   return (
     <div
       role="dialog"
@@ -175,7 +154,6 @@ export default function SearchPalette({
             aria-label="Search"
           />
         </div>
-
         <ul className="max-h-96 overflow-auto p-1">
           {results.length === 0 ? (
             <li className="px-3 py-6 text-center text-sm text-neutral-500">
@@ -215,7 +193,6 @@ export default function SearchPalette({
             ))
           )}
         </ul>
-
         <div className="flex items-center justify-between border-t border-neutral-200 px-3 py-2 text-xs text-neutral-500 dark:border-neutral-800">
           <span>Tip: Use ↑ ↓ and Enter</span>
           <span>Esc to close</span>

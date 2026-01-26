@@ -1,4 +1,5 @@
 // components/BookHero.tsx
+import { safeSlice } from "@/lib/utils/safe";
 "use client";
 
 import * as React from "react";
@@ -186,7 +187,7 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
             <div className="mb-6 flex flex-wrap gap-2">
               {tags
                 .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
-                .slice(0, 5)
+                safeSlice(..., 0, 5)
                 .map((tag, index) => (
                   <span
                     key={`${tag}-${index}`}

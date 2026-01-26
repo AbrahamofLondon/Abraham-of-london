@@ -1,10 +1,13 @@
 // lib/server/rate-limit.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
-import type { NextRequest } from 'next/server';
-import { LRUCache } from 'lru-cache';
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
+// SINGLE SOURCE OF TRUTH — Pages Router + App Router compatible
+// REQUIRED EXPORTS by call-sites:
+// - createRateLimitHeaders
+// - rateLimit (default + named)
+// - rateLimitPublic / rateLimitAuthenticated / rateLimitCritical
+
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest } from "next/server";
+import { LRUCache } from "lru-cache";
 
 export interface RateLimitConfig {
   maxRequests: number;
@@ -13,151 +16,132 @@ export interface RateLimitConfig {
   keyGenerator?: (req: NextApiRequest | NextRequest) => string;
 }
 
-/* -------------------------------------------------------------------------- */
-/* LRU CACHE SETUP                                                            */
-/* -------------------------------------------------------------------------- */
-
 interface RateLimitRecord {
   count: number;
   resetTime: number;
 }
 
-// Create LRU cache with reasonable defaults
 const rateLimitCache = new LRUCache<string, RateLimitRecord>({
-  max: 10000, // Maximum number of items in cache
-  ttl: 60 * 60 * 1000, // 1 hour TTL
+  max: 10000,
+  ttl: 60 * 60 * 1000,
 });
 
-/* -------------------------------------------------------------------------- */
-/* KEY GENERATORS                                                             */
-/* -------------------------------------------------------------------------- */
-
 function defaultKeyGenerator(req: NextApiRequest | NextRequest): string {
-  // For Pages Router
-  if ('socket' in req) {
+  if ("socket" in req) {
     const pagesReq = req as NextApiRequest;
-    return `rl:${pagesReq.socket.remoteAddress || 'unknown'}:${pagesReq.url}`;
+    return `rl:${pagesReq.socket.remoteAddress || "unknown"}:${pagesReq.url || "unknown"}`;
   }
-  
-  // For App Router
+
   const appReq = req as NextRequest;
-  const ip = appReq.ip || appReq.headers.get('x-forwarded-for') || 'unknown';
-  const path = new URL(appReq.url).pathname;
-  return `rl:${ip}:${path}`;
+  const ip = appReq.ip || appReq.headers.get("x-forwarded-for") || "unknown";
+  const pathname = new URL(appReq.url).pathname;
+  return `rl:${ip}:${pathname}`;
 }
 
 function userKeyGenerator(req: NextApiRequest | NextRequest): string {
-  // For Pages Router
-  if ('socket' in req) {
+  if ("socket" in req) {
     const pagesReq = req as NextApiRequest;
-    const userId = pagesReq.headers['x-user-id'] || pagesReq.cookies?.userId || 'anonymous';
-    return `rl:user:${userId}:${pagesReq.url}`;
+    const userId =
+      (pagesReq.headers["x-user-id"] as string | undefined) ||
+      (pagesReq.cookies as any)?.userId ||
+      "anonymous";
+    return `rl:user:${userId}:${pagesReq.url || "unknown"}`;
   }
-  
-  // For App Router
+
   const appReq = req as NextRequest;
-  const userId = appReq.headers.get('x-user-id') || 
-                 appReq.cookies.get('userId')?.value || 
-                 'anonymous';
-  const path = new URL(appReq.url).pathname;
-  return `rl:user:${userId}:${path}`;
+  const userId =
+    appReq.headers.get("x-user-id") ||
+    appReq.cookies.get("userId")?.value ||
+    "anonymous";
+  const pathname = new URL(appReq.url).pathname;
+  return `rl:user:${userId}:${pathname}`;
 }
 
-/* -------------------------------------------------------------------------- */
-/* RATE LIMIT FUNCTION                                                        */
-/* -------------------------------------------------------------------------- */
+/**
+ * REQUIRED BY MANY API ROUTES:
+ * createRateLimitHeaders(...)
+ */
+export function createRateLimitHeaders(params: {
+  limit: number;
+  remaining: number;
+  reset: number; // epoch seconds
+}): Record<string, string> {
+  return {
+    "X-RateLimit-Limit": String(params.limit),
+    "X-RateLimit-Remaining": String(Math.max(0, params.remaining)),
+    "X-RateLimit-Reset": String(params.reset),
+  };
+}
 
 export function rateLimit<T = any>(
   handler: (req: NextApiRequest | NextRequest, res?: NextApiResponse) => Promise<T> | T,
   config: RateLimitConfig
 ): (req: NextApiRequest | NextRequest, res?: NextApiResponse) => Promise<T> {
-  const {
-    maxRequests,
-    windowMs,
-    keyGenerator = defaultKeyGenerator,
-  } = config;
-  
+  const { maxRequests, windowMs, keyGenerator = defaultKeyGenerator } = config;
+
   return async function rateLimitedHandler(
     req: NextApiRequest | NextRequest,
     res?: NextApiResponse
   ): Promise<T> {
     const key = keyGenerator(req);
     const now = Date.now();
-    
-    // Get or create rate limit record
+
     let record = rateLimitCache.get(key);
-    
     if (!record || now > record.resetTime) {
-      // Create new record
-      record = {
-        count: 0,
-        resetTime: now + windowMs,
-      };
+      record = { count: 0, resetTime: now + windowMs };
     }
-    
-    // Increment count
+
     record.count += 1;
     rateLimitCache.set(key, record);
-    
-    // Check if rate limit exceeded
+
+    const remaining = Math.max(0, maxRequests - record.count);
+    const resetEpochSeconds = Math.ceil(record.resetTime / 1000);
+
+    // Set headers (Pages Router only)
+    if (res && "setHeader" in res) {
+      const headers = createRateLimitHeaders({
+        limit: maxRequests,
+        remaining,
+        reset: resetEpochSeconds,
+      });
+      for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
+    }
+
     if (record.count > maxRequests) {
-      const error: any = new Error(config.message || 'Too many requests');
-      error.statusCode = 429;
-      error.retryAfter = Math.ceil((record.resetTime - now) / 1000);
-      throw error;
+      const err: any = new Error(config.message || "Too many requests");
+      err.statusCode = 429;
+      err.retryAfter = Math.max(1, Math.ceil((record.resetTime - now) / 1000));
+      err.headers = createRateLimitHeaders({
+        limit: maxRequests,
+        remaining: 0,
+        reset: resetEpochSeconds,
+      });
+      throw err;
     }
-    
-    // Set rate limit headers
-    if (res && 'setHeader' in res) {
-      res.setHeader('X-RateLimit-Limit', maxRequests.toString());
-      res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - record.count).toString());
-      res.setHeader('X-RateLimit-Reset', Math.ceil(record.resetTime / 1000).toString());
-    }
-    
-    // Execute the handler
+
     return handler(req, res);
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/* PRE-CONFIGURED RATE LIMITERS                                               */
-/* -------------------------------------------------------------------------- */
+export const rateLimitPublic = (handler: any) =>
+  rateLimit(handler, { maxRequests: 10, windowMs: 60_000 });
 
-export const rateLimitPublic = (handler: any) => 
-  rateLimit(handler, { maxRequests: 10, windowMs: 60000 });
-
-export const rateLimitAuthenticated = (handler: any) => 
-  rateLimit(handler, { 
-    maxRequests: 30, 
-    windowMs: 60000,
+export const rateLimitAuthenticated = (handler: any) =>
+  rateLimit(handler, {
+    maxRequests: 30,
+    windowMs: 60_000,
     keyGenerator: userKeyGenerator,
   });
 
-export const rateLimitCritical = (handler: any) => 
-  rateLimit(handler, { maxRequests: 5, windowMs: 60000 });
-
-/* -------------------------------------------------------------------------- */
-/* CACHE MANAGEMENT                                                           */
-/* -------------------------------------------------------------------------- */
+export const rateLimitCritical = (handler: any) =>
+  rateLimit(handler, { maxRequests: 5, windowMs: 60_000 });
 
 export function clearRateLimitCache(): void {
   rateLimitCache.clear();
-  console.log('Rate limit cache cleared');
 }
 
-export function getRateLimitCacheStats(): {
-  size: number;
-  itemCount: number;
-} {
-  return {
-    size: rateLimitCache.size,
-    itemCount: rateLimitCache.size,
-  };
+export function getRateLimitCacheStats(): { size: number; itemCount: number } {
+  return { size: rateLimitCache.size, itemCount: rateLimitCache.size };
 }
-
-/* -------------------------------------------------------------------------- */
-/* DEFAULT EXPORT                                                             */
-/* -------------------------------------------------------------------------- */
 
 export default rateLimit;
-

@@ -9,6 +9,8 @@ import { Users, Zap, Clock, ExternalLink, Activity, Shield, Download, Key, Alert
 // FIX: Import Security Primitives
 import { validateAdminAccess } from "@/lib/server/validation";
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
+import { safeFirstChar } from "@/lib/utils/safe";
+
 
 // Define proper TypeScript interfaces based on your Prisma schema
 interface InnerCircleMember {
@@ -516,7 +518,7 @@ const BoardDashboard: NextPage<DashboardProps> = ({ members, intakes, stats, las
                         <div className="flex-1">
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-xs font-bold">
-                              {member.name?.charAt(0) || member.emailHashPrefix.charAt(0)}
+                              {safeFirstChar(member?.name) || member.safeFirstChar(emailHashPrefix)}
                             </div>
                             <div>
                               <p className="font-bold text-sm text-white">

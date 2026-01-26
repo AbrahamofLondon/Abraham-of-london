@@ -1,6 +1,8 @@
 // components/PDFDashboard/PDFAnnotations.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { 
+import { safeSlice } from "@/lib/utils/safe";
+
   Plus, 
   Trash2, 
   Edit2, 
@@ -102,7 +104,7 @@ const PDFAnnotations: React.FC<PDFAnnotationsProps> = ({
   };
 
   const saveToHistory = (newAnnotations: Annotation[]) => {
-    const newHistory = [...history.slice(0, historyIndex + 1), newAnnotations];
+    const newHistory = [...safeSlice(history, 0, historyIndex + 1), newAnnotations];
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   };

@@ -1,6 +1,8 @@
 // components/Cards/utils.ts
 
 import React from 'react';
+import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe";
+
 
 // =============================================================================
 // TYPES
@@ -254,7 +256,7 @@ export function getAuthorInitials(name: string): string {
     // Single word - take first two characters
     const firstPart = parts[0];
     if (!firstPart || firstPart.length === 0) return '??';
-    return firstPart.slice(0, 2).toUpperCase();
+    return safeSlice(firstPart, 0, 2).toUpperCase();
   }
   
   // Multiple words - take first letter of first two words
@@ -263,8 +265,8 @@ export function getAuthorInitials(name: string): string {
   
   if (!first || !second || first.length === 0 || second.length === 0) return '??';
   
-  const firstChar = first.charAt(0);
-  const secondChar = second.charAt(0);
+  const firstChar = safeFirstChar(first);
+  const secondChar = safeFirstChar(second);
   
   return (firstChar + secondChar).toUpperCase();
 }
@@ -299,7 +301,7 @@ export function formatAuthorName(
       return parts
         .map(part => {
           if (!part || part.length === 0) return '';
-          return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+          return safeCapitalize(part);
         })
         .filter(p => p.length > 0)
         .join(" ");
@@ -605,12 +607,12 @@ export function getAccessLevelBadge(accessLevel?: string | null): {
 // =============================================================================
 
 export function truncateTags(tags: string[] = [], maxCount = 3): string[] {
-  return tags.slice(0, maxCount);
+  return safeSlice(tags, 0, maxCount);
 }
 
 export function formatTagText(tag: string): string {
   if (!tag || tag.length === 0) return '';
-  return tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+  return safeCapitalize(tag);
 }
 
 // =============================================================================
@@ -702,7 +704,7 @@ export function capitalizeWords(str: string): string {
     .split(' ')
     .map(word => {
       if (!word || word.length === 0) return '';
-      return word.charAt(0).toUpperCase() + word.slice(1);
+      return safeCapitalize(word);
     })
     .filter(w => w.length > 0)
     .join(' ');

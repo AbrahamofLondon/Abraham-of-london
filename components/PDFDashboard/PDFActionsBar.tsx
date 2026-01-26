@@ -1,9 +1,10 @@
 // components/PDFDashboard/PDFActionsBar.tsx
 import * as React from "react";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 /**
  * IMPORTANT:
- * Do NOT import PDFItem from "@/scripts/pdf-registry" here.
  * The dashboard hook may return a different PDFItem type shape.
  * This component only needs a minimal, UI-safe view model.
  */
@@ -42,7 +43,7 @@ export type PDFActionsBarProps = {
 function clampTitle(s: string, max = 90) {
   const v = (s || "").trim();
   if (v.length <= max) return v;
-  return v.slice(0, max - 1) + "…";
+  return safeSlice(v, 0, max - 1) + "…";
 }
 
 const PDFActionsBar: React.FC<PDFActionsBarProps> = ({

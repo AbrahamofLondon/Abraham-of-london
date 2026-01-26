@@ -1,6 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { safeSlice } from "@/lib/utils/safe";
+
 
 interface ResourceCardProps {
   title: string;
@@ -81,7 +83,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({
           
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
-              {tags.slice(0, 3).map((tag, index) => (
+              {safeSlice(tags, 0, 3).map((tag, index) => (
                 <span
                   key={index}
                   className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"

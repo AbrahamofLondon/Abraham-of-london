@@ -1,8 +1,7 @@
-// pages/content/index.tsx — FULL INDEX (VAULT-ONLY, LINK-INTEGRITY MODE)
+// pages/content/index.tsx — FIXED: VAULT-ONLY, LINK-INTEGRITY MODE
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -18,15 +17,19 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+// ✅ FIXED: Import server-side functions from correct location
 import {
-  assertContentlayerHasDocs,
-  getContentlayerData,
   getPublishedDocuments,
+} from "@/lib/content/server";
+
+import {
+import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
+
   getDocKind,
   getDocHref,
   resolveDocCoverImage,
   sanitizeData,
-} from "@/lib/contentlayer-compat";
+} from "@/lib/content/shared";
 
 type Item = {
   key: string;
@@ -35,6 +38,7 @@ type Item = {
   href: string;
   excerpt?: string | null;
   date?: string | null;
+  dateIso?: string | null;  // ✅ ISO date for reliable sorting
   image?: string | null;
   readTime?: string | null;
   tags?: string[];
@@ -45,39 +49,57 @@ type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
-    // Ensure contentlayer is loaded
-    const data = await getContentlayerData();
-    assertContentlayerHasDocs(data);
-
+    // ✅ Get published documents from server-side functions
     const docs = getPublishedDocuments();
 
-    // VAULT-ONLY: only include docs whose href begins with /content/
-    const items: Item[] = (docs ?? [])
-      .map((d: any) => {
-        const kind = String(getDocKind(d) ?? "document");
-        const href = String(getDocHref(d) ?? "");
-        const title = String(d?.title ?? "Untitled");
-        const slugish = String(d?.slug || d?._raw?.flattenedPath || href || title);
-        const key = String(d?._id ?? `${kind}:${slugish}`);
+    if (!docs || docs.length === 0) {
+      console.warn("[Content Index] No documents found");
+      return { props: { items: [] }, revalidate: 1800 };
+    }
 
-        return {
-          key,
-          kind,
-          title,
-          href,
-          excerpt: (d?.excerpt ?? d?.description ?? null) as string | null,
-          date: d?.date ? String(d.date) : null,
-          image: (resolveDocCoverImage(d) ?? null) as string | null,
-          readTime: d?.readTime ?? null,
-          tags: Array.isArray(d?.tags) ? d.tags : [],
-          category: d?.category ?? null,
-        };
+    // VAULT-ONLY: only include docs whose href begins with /content/
+    const items: Item[] = docs
+      .map((d: any) => {
+        try {
+          const kind = String(getDocKind(d) || "document");
+          const href = String(getDocHref(d) || "");
+          const title = String(d?.title || "Untitled");
+          const slugish = String(d?.slug || d?._raw?.flattenedPath || href || title);
+          const key = String(d?._id || `${kind}:${slugish}`);
+
+          // ✅ Store both ISO date (for sorting) and display date
+          const dateIso = d?.date ? new Date(d.date).toISOString() : null;
+          const dateStr = d?.date ? String(d.date) : null;
+
+          return {
+            key,
+            kind,
+            title,
+            href,
+            excerpt: (d?.excerpt || d?.description || null) as string | null,
+            date: dateStr,
+            dateIso,
+            image: (resolveDocCoverImage(d) || null) as string | null,
+            readTime: d?.readTime || null,
+            tags: Array.isArray(d?.tags) ? d.tags : [],
+            category: d?.category || null,
+          };
+        } catch (error) {
+          console.warn("[Content Index] Failed to transform document:", error);
+          return null;
+        }
       })
-      .filter((x) => Boolean(x.href) && x.href.startsWith("/content/") && Boolean(x.title))
+      .filter((x): x is Item => 
+        x !== null && 
+        Boolean(x.href) && 
+        x.href.startsWith("/content/") && 
+        Boolean(x.title)
+      )
       .sort((a, b) => {
-        const bd = b.date ? new Date(b.date).getTime() : 0;
-        const ad = a.date ? new Date(a.date).getTime() : 0;
-        return bd - ad;
+        // ✅ Sort by ISO date for reliability across platforms
+        const aTime = a.dateIso ? Date.parse(a.dateIso) : 0;
+        const bTime = b.dateIso ? Date.parse(b.dateIso) : 0;
+        return bTime - aTime; // Newest first
       });
 
     return {
@@ -85,13 +107,12 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       revalidate: 1800,
     };
   } catch (error) {
-    console.error("Error generating static props for /content index:", error);
+    console.error("[Content Index] Error in getStaticProps:", error);
     return { props: { items: [] }, revalidate: 1800 };
   }
 };
 
 const ContentIndexPage: NextPage<Props> = ({ items }) => {
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedKind, setSelectedKind] = React.useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
@@ -161,7 +182,7 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
       strategy: "Strategy",
       document: "Documents",
     };
-    return labels[kind] || `${kind.charAt(0).toUpperCase()}${kind.slice(1)}s`;
+    return labels[kind] || `${safeFirstChar(kind).toUpperCase()}${safeSlice(kind, 1)}s`;
   };
 
   const getKindIcon = (kind: string) => {
@@ -182,7 +203,7 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
   };
 
   const latestYear = React.useMemo(() => {
-    const ms = Math.max(...items.map((i) => (i.date ? new Date(i.date).getTime() : 0)));
+    const ms = Math.max(...items.map((i) => (i.dateIso ? Date.parse(i.dateIso) : 0)));
     const yr = ms > 0 ? new Date(ms).getFullYear() : new Date().getFullYear();
     return yr;
   }, [items]);
@@ -210,7 +231,7 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
 
             <p className="text-lg text-gray-400 mb-12 max-w-3xl">
               This index only lists assets that live under <span className="font-mono text-gray-200">/content/</span>.
-              If it’s here, it resolves. No broken routes.
+              If it's here, it resolves. No broken routes.
             </p>
 
             <div className="space-y-4 max-w-3xl">
@@ -357,16 +378,16 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
                             {item.title}
                           </h3>
 
-                          {item.excerpt ? (
+                          {item.excerpt && (
                             <p className="mb-6 text-sm leading-relaxed text-gray-400 line-clamp-2">
                               {item.excerpt}
                             </p>
-                          ) : null}
+                          )}
 
                           <div className="mt-auto space-y-3 pt-4 border-t border-white/5">
                             <div className="flex items-center justify-between text-xs text-gray-500">
                               <div className="flex items-center gap-2">
-                                {item.date ? (
+                                {item.date && (
                                   <div className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
                                     <span>
@@ -377,20 +398,20 @@ const ContentIndexPage: NextPage<Props> = ({ items }) => {
                                       })}
                                     </span>
                                   </div>
-                                ) : null}
-                                {item.readTime ? (
+                                )}
+                                {item.readTime && (
                                   <div className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
                                     <span>{item.readTime}</span>
                                   </div>
-                                ) : null}
+                                )}
                               </div>
 
-                              {item.category ? (
+                              {item.category && (
                                 <span className="px-2 py-0.5 bg-white/5 rounded text-[10px]">
                                   {item.category}
                                 </span>
-                              ) : null}
+                              )}
                             </div>
 
                             <div className="flex items-center justify-between">

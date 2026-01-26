@@ -3,8 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/email";
 import { getClientIp, RATE_LIMIT_CONFIGS } from "@/lib/server/rate-limit-unified";
-import { generateAccessKey, getEmailHash } from "@/lib/inner-circle/keys";
-import { createOrUpdateMemberAndIssueKeyWithRateLimit } from "@/lib/inner-circle";
+import { generateAccessKey, getEmailHash } from "@/lib/server/inner-circle/keys";
+import { createOrUpdateMemberAndIssueKeyWithRateLimit } from "@/lib/server/inner-circle/keys"
 
 type ResponseData =
   | { 
@@ -143,5 +143,6 @@ export default async function handler(
     });
   }
 }
+
 
 

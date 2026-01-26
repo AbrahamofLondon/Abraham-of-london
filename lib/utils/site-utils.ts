@@ -1,7 +1,7 @@
 // lib/utils/site-utils.ts
+import { safeSlice } from "@/lib/utils/safe";
 import { siteConfig } from "@/config/site";
 import type { SocialPlatform } from "@/config/site";
-
 /**
  * Get absolute URL for a given path
  */
@@ -10,7 +10,6 @@ export function absUrl(path: string = '/'): string {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${base}${cleanPath}`;
 }
-
 /**
  * Check if URL is internal
  */
@@ -23,14 +22,12 @@ export function isInternalUrl(url: string): boolean {
     return false;
   }
 }
-
 /**
  * Normalize path (remove duplicate slashes, trailing slashes)
  */
 export function normalizePath(path: string): string {
   return path.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
 }
-
 /**
  * Get social icon component name
  */
@@ -51,26 +48,22 @@ export function getSocialIcon(platform: SocialPlatform): string {
   };
   return iconMap[platform] || 'Globe';
 }
-
 /**
  * Format phone number for display
  */
 export function formatPhone(phone: string): string {
   // Remove all non-numeric characters
   const cleaned = phone.replace(/\D/g, '');
-  
   // UK number format
   if (cleaned.startsWith('44')) {
-    const withoutCode = cleaned.slice(2);
+    const withoutCode = safeSlice(cleaned, 2);
     if (withoutCode.length === 10) {
-      return `+44 ${withoutCode.slice(0, 4)} ${withoutCode.slice(4)}`;
+      return `+44 ${safeSlice(withoutCode, 0, 4)} ${safeSlice(withoutCode, 4)}`;
     }
   }
-  
   // Default: return as-is
   return phone;
 }
-
 /**
  * Create mailto link with subject
  */
@@ -81,17 +74,13 @@ export function createMailtoLink(
 ): string {
   let mailto = `mailto:${email}`;
   const params = new URLSearchParams();
-  
   if (subject) params.append('subject', subject);
   if (body) params.append('body', body);
-  
   if (params.toString()) {
     mailto += `?${params.toString()}`;
   }
-  
   return mailto;
 }
-
 /**
  * Create tel link
  */
@@ -100,21 +89,17 @@ export function createTelLink(phone?: string): string {
   const cleaned = tel.replace(/\D/g, '');
   return `tel:+${cleaned}`;
 }
-
 /**
  * Get OG image URL
  */
 export function getOgImageUrl(imagePath?: string): string {
   const base = siteConfig.url.replace(/\/$/, '');
   const image = imagePath || siteConfig.seo.openGraphImage || '/assets/images/social/og-image.jpg';
-  
   if (image.startsWith('http')) {
     return image;
   }
-  
   return `${base}${image.startsWith('/') ? image : `/${image}`}`;
 }
-
 /**
  * Generate structured data for organization
  */
@@ -139,7 +124,6 @@ export function generateOrganizationSchema() {
       .map(s => s.href)
   };
 }
-
 /**
  * Generate breadcrumb structured data
  */
@@ -155,14 +139,12 @@ export function generateBreadcrumbSchema(items: Array<{ name: string; url: strin
     }))
   };
 }
-
 /**
  * Check if feature is enabled
  */
 export function isFeatureEnabled(feature: keyof NonNullable<typeof siteConfig.features>): boolean {
   return siteConfig.features?.[feature] || false;
 }
-
 /**
  * Get current year for copyright
  */

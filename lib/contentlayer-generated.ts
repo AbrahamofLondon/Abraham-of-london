@@ -1,3 +1,5 @@
 // lib/contentlayer-generated.ts
-export * from "contentlayer/generated";
-export { default } from "contentlayer/generated";
+// Single canonical re-export of Contentlayer2 output.
+// Do NOT import .contentlayer output directly all over the codebase.
+
+export * from "../.contentlayer/generated/index.mjs";

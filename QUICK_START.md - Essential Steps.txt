@@ -1,0 +1,77 @@
+# 🚀 Quick Start - Essential Steps Only
+
+## Step 1: Replace 5 Files ✅
+
+Copy these files from the artifacts to your project:
+
+1. `pages/blog/index.tsx`
+2. `pages/content/index.tsx`
+3. `pages/[slug].tsx`
+4. `lib/server/rate-limit-unified.ts`
+5. `pages/api/admin/system-health.ts`
+
+## Step 2: Create 3 New Files ✅
+
+Create these new files in your project:
+
+6. `lib/redis-safe.ts`
+7. `REDIS_SETUP.md`
+8. `EDGE_MIGRATION_SUMMARY.md`
+
+## Step 3: Install Package ✅
+
+```bash
+pnpm add @upstash/redis
+```
+
+## Step 4: Build & Test ✅
+
+```bash
+# Clean build
+rm -rf .next
+pnpm build
+
+# Should see:
+# ✓ Compiled successfully
+# ✓ Generating static pages (162/162)
+```
+
+## Step 5: (Optional) Add Redis ✅
+
+Only if you want persistent rate limiting:
+
+```bash
+# .env.local
+UPSTASH_REDIS_REST_URL=https://your-endpoint.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token-here
+```
+
+Get free credentials at: https://upstash.com
+
+---
+
+## ✅ Success Criteria
+
+You're done when:
+
+- ✅ Build completes without errors
+- ✅ No "wV" or "TypeError" errors
+- ✅ `/blog` page works
+- ✅ `/content` page works
+- ✅ No Edge Runtime warnings
+
+---
+
+## 📚 Need More Info?
+
+- **Redis Setup:** See `REDIS_SETUP.md`
+- **Complete Guide:** See `EDGE_MIGRATION_SUMMARY.md`
+- **Troubleshooting:** See `EDGE_MIGRATION_SUMMARY.md` → Troubleshooting section
+
+---
+
+## 🎯 That's It!
+
+No Redis setup? No problem! The app uses memory store automatically.
+
+**Deploy now:** Your app works on Windows, Linux, macOS, Vercel, Netlify, and everywhere else! 🎉

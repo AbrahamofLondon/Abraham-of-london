@@ -1,145 +1,261 @@
-import React from 'react';
-import Image from 'next/image';
+import React from "react";
+import Image from "next/image";
+import { 
+  safeString, 
+  safeCapitalize, 
+  safeNumber, 
+  safeImageSrc,
+  safeArray,
+  safeUrl,
+  classNames 
+} from "@/lib/utils/safe";
+import { BookOpen, Clock, Award, Download, Sparkles, Calendar, ArrowRight } from "lucide-react";
 
 interface CanonHeroProps {
-  title: string;
-  subtitle?: string;
-  description: string;
-  coverImage: string;
-  category: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  estimatedHours: number;
+  title?: string | null;
+  subtitle?: string | null;
+  description?: string | null;
+  coverImage?: string | null;
+  category?: string | null;
+  difficulty?: "beginner" | "intermediate" | "advanced" | string | null;
+  estimatedHours?: number | null;
+  version?: string | null;
+  tags?: (string | null | undefined)[];
+  author?: string | null;
+  publishedDate?: string | Date | null;
 }
 
-const CanonHero: React.FC<CanonHeroProps> = ({
-  title,
-  subtitle,
-  description,
-  coverImage,
-  category,
-  difficulty,
-  estimatedHours,
-}) => {
-  const difficultyColors = {
-    beginner: 'bg-green-100 text-green-800',
-    intermediate: 'bg-yellow-100 text-yellow-800',
-    advanced: 'bg-red-100 text-red-800',
-  };
+const difficultyConfig = {
+  beginner: {
+    label: "Beginner",
+    classes: "bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 text-emerald-400 border-emerald-500/30",
+    icon: "🌱"
+  },
+  intermediate: {
+    label: "Intermediate",
+    classes: "bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-400 border-amber-500/30",
+    icon: "⚡"
+  },
+  advanced: {
+    label: "Advanced",
+    classes: "bg-gradient-to-r from-rose-500/20 to-rose-600/10 text-rose-400 border-rose-500/30",
+    icon: "🔥"
+  }
+};
+
+const CanonHero: React.FC<CanonHeroProps> = (props) => {
+  // Extract and sanitize all values
+  const title = safeString(props.title, "Manuscript");
+  const subtitle = safeString(props.subtitle);
+  const description = safeString(props.description, "A foundational text for builders and thinkers.");
+  const category = safeString(props.category, "Canon");
+  const difficulty = safeString(props.difficulty, "beginner").toLowerCase() as keyof typeof difficultyConfig;
+  const estimatedHours = safeNumber(props.estimatedHours, 0);
+  const version = safeString(props.version, "1.0.0");
+  const author = safeString(props.author, "Abraham of London");
+  const publishedDate = props.publishedDate;
+  const tags = safeArray<string>(props.tags);
+  
+  // Get difficulty configuration
+  const diffConfig = difficultyConfig[difficulty] || difficultyConfig.beginner;
+  
+  // Format hours
+  const hoursText = estimatedHours > 0 
+    ? `${Math.round(estimatedHours)} ${estimatedHours === 1 ? 'hour' : 'hours'}`
+    : "Self-paced";
+  
+  // Format date
+  const formattedDate = publishedDate 
+    ? new Date(publishedDate).toLocaleDateString('en-GB', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    : "Coming soon";
+  
+  // Safe image source
+  const imageSrc = safeImageSrc(props.coverImage);
 
   return (
-    <div className="relative bg-gradient-to-br from-gray-900 to-purple-900 text-white overflow-hidden">
-      <div className="absolute inset-0">
-        {coverImage && (
-          <Image
-            src={coverImage}
-            alt={title}
-            fill
-            className="object-cover opacity-10"
-            priority
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-purple-900/90" />
-      </div>
+    <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-950 to-black">
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/5 via-transparent to-purple-900/5 animate-gradient-shift" />
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="flex items-center space-x-4 mb-6">
-              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold">
+      {/* Subtle grid overlay */}
+      <div className="absolute inset-0 bg-[size:50px_50px] bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)]" />
+      
+      <div className="relative mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
+          {/* Left Column: Content */}
+          <div className="space-y-8">
+            {/* Meta badges */}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-semibold backdrop-blur-sm border border-white/10">
+                <Sparkles className="h-3 w-3 text-gold" />
                 {category}
               </span>
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${difficultyColors[difficulty]}`}>
-                {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+              
+              <span className={classNames(
+                "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border",
+                diffConfig.classes
+              )}>
+                <span>{diffConfig.icon}</span>
+                {diffConfig.label}
+              </span>
+              
+              {estimatedHours > 0 && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-400 border border-blue-500/20">
+                  <Clock className="h-3 w-3" />
+                  {hoursText}
+                </span>
+              )}
+              
+              <span className="font-mono text-xs text-gray-400">
+                v{version}
               </span>
             </div>
-            
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-              {title}
-            </h1>
-            
-            {subtitle && (
-              <h2 className="text-2xl md:text-3xl font-light text-purple-200 mb-6">
-                {subtitle}
-              </h2>
-            )}
-            
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-3xl">
+
+            {/* Title & Subtitle */}
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
+                <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                  {title}
+                </span>
+              </h1>
+              
+              {subtitle && (
+                <h2 className="text-xl font-light text-purple-200 md:text-2xl">
+                  {subtitle}
+                </h2>
+              )}
+            </div>
+
+            {/* Description */}
+            <p className="text-lg leading-relaxed text-gray-300 max-w-3xl">
               {description}
             </p>
-            
-            <div className="flex flex-wrap gap-6 mb-8">
-              <div className="flex items-center space-x-2">
-                <ClockIcon className="w-5 h-5 text-purple-300" />
-                <span className="text-lg">{estimatedHours} hours</span>
+
+            {/* Metadata */}
+            <div className="flex flex-wrap items-center gap-6 text-sm">
+              <div className="flex items-center gap-2 text-gray-400">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">
+                    {safeFirstChar(author, 'A')}
+                  </span>
+                </div>
+                <span>{author}</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <BookIcon className="w-5 h-5 text-purple-300" />
-                <span className="text-lg">Comprehensive Guide</span>
+              
+              <div className="flex items-center gap-2 text-gray-400">
+                <Calendar className="h-4 w-4" />
+                <span>{formattedDate}</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <CertificateIcon className="w-5 h-5 text-purple-300" />
-                <span className="text-lg">Certificate Available</span>
+              
+              <div className="flex items-center gap-2 text-gray-400">
+                <Award className="h-4 w-4" />
+                <span>Certificate Available</span>
               </div>
             </div>
-            
-            <div className="flex flex-wrap gap-4">
-              <button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2">
-                <PlayIcon className="w-5 h-5" />
-                <span>Start Learning</span>
+
+            {/* Tags */}
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-4">
+                {safeSlice(tags, 0, 6).map((tag, index) => (
+                  <span
+                    key={index}
+                    className="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors cursor-pointer border border-white/10 hover:border-white/20"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 pt-6">
+              <button className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-6 py-3 font-semibold text-black transition-all hover:shadow-lg hover:shadow-gold/20">
+                <BookOpen className="h-5 w-5" />
+                <span>Start Reading</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
-              <button className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-lg font-semibold transition-colors backdrop-blur-sm">
-                Download Syllabus
+              
+              <button className="flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20">
+                <Download className="h-5 w-5" />
+                <span>Download PDF</span>
               </button>
             </div>
           </div>
-          
+
+          {/* Right Column: Cover Image */}
           <div className="relative">
-            <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
-              {coverImage ? (
+            {/* Floating image container */}
+            <div className="relative h-[480px] overflow-hidden rounded-3xl shadow-2xl border border-white/10 group">
+              {imageSrc ? (
                 <Image
-                  src={coverImage}
+                  src={imageSrc}
                   alt={title}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.style.display = 'none';
+                    target.parentElement?.classList.add('bg-gradient-to-br', 'from-purple-900', 'to-blue-900');
+                  }}
                 />
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600" />
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-blue-900" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              
+              {/* Decorative corner accents */}
+              <div className="absolute top-0 left-0 h-12 w-12 border-t-2 border-l-2 border-gold/50 rounded-tl-xl" />
+              <div className="absolute bottom-0 right-0 h-12 w-12 border-b-2 border-r-2 border-gold/50 rounded-br-xl" />
             </div>
             
-            <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl" />
-            <div className="absolute -top-6 -left-6 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl" />
+            {/* Decorative floating elements */}
+            <div className="absolute -top-6 -left-6 h-48 w-48 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-3xl animate-pulse-slow" />
+            <div className="absolute -bottom-6 -right-6 h-48 w-48 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 blur-3xl animate-pulse-slower" />
           </div>
         </div>
       </div>
+      
+      {/* Subtle scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="h-8 w-px bg-gradient-to-b from-gold via-transparent to-transparent" />
+      </div>
+      
+      {/* Custom animations */}
+      <style jsx>{`
+        @keyframes gradient-shift {
+          0%, 100% { opacity: 0.1; }
+          50% { opacity: 0.3; }
+        }
+        .animate-gradient-shift {
+          animation: gradient-shift 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.05; }
+          50% { opacity: 0.15; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 6s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-slower {
+          0%, 100% { opacity: 0.03; }
+          50% { opacity: 0.1; }
+        }
+        .animate-pulse-slower {
+          animation: pulse-slower 10s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };
-
-const ClockIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const BookIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-  </svg>
-);
-
-const CertificateIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-  </svg>
-);
-
-const PlayIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
 
 export default CanonHero;

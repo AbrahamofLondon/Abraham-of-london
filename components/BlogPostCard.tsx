@@ -1,4 +1,5 @@
 // components/BlogPostCard.tsx
+import { safeArraySlice } from "@/lib/utils/safe";
 "use client";
 
 import * as React from "react";
@@ -427,7 +428,7 @@ export default function BlogPostCard({
               <div className="mt-4 flex flex-wrap gap-2">
                 {post.tags
                   .filter((t): t is string => isString(t) && t.trim().length > 0)
-                  .slice(0, 3)
+                  safeArraySlice(..., 0, 3)
                   .map((tag, idx) => (
                     <span
                       key={`${tag}-${idx}`}

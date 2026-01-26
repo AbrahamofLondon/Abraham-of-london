@@ -26,6 +26,8 @@ import {
 
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/imports";
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+
 
 // ============================================================================
 // TYPES
@@ -259,8 +261,8 @@ const AboutPage: NextPage = () => {
     "Legacy over ego",
     "Stewardship over status",
   ];
-  const leftValues = brandValues.slice(0, Math.ceil(brandValues.length / 2));
-  const rightValues = brandValues.slice(Math.ceil(brandValues.length / 2));
+  const leftValues = safeSlice(brandValues, 0, Math.ceil(brandValues.length / 2));
+  const rightValues = safeArraySlice(brandValues, Math.ceil(brandValues.length / 2));
 
   if (!mounted) {
     return (

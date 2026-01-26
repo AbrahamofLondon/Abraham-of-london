@@ -1,3 +1,4 @@
+import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import ResourceCard from './ResourceCard';
 import Link from 'next/link';
@@ -24,7 +25,7 @@ const RelatedResources: React.FC<RelatedResourcesProps> = ({
 }) => {
   const filteredResources = resources
     .filter(resource => resource.id !== currentResourceId)
-    .slice(0, 3);
+    safeArraySlice(..., 0, 3);
 
   if (filteredResources.length === 0) {
     return null;

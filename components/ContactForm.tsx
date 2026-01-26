@@ -1,9 +1,8 @@
 // components/ContactForm.tsx
+import { safeTrimSlice } from "@/lib/utils/safe";
 "use client";
-
 import * as React from "react";
 import { getRecaptchaToken } from "@/lib/recaptchaClient";
-
 interface ContactFormData {
   name: string;
   email: string;
@@ -13,15 +12,12 @@ interface ContactFormData {
   teaserOptIn: boolean;
   newsletterOptIn: boolean;
 }
-
 interface ApiResponse {
   ok: boolean;
   message?: string;
   error?: string;
 }
-
 type SubmitStatus = "success" | "error" | "info" | null;
-
 export default function ContactForm(): JSX.Element {
   const [form, setForm] = React.useState<ContactFormData>({
     name: "",
@@ -32,19 +28,16 @@ export default function ContactForm(): JSX.Element {
     teaserOptIn: false,
     newsletterOptIn: false,
   });
-
   const [status, setStatus] = React.useState<SubmitStatus>(null);
   const [statusMessage, setStatusMessage] = React.useState<string>("");
   const [submitting, setSubmitting] = React.useState(false);
   const [submitAttempts, setSubmitAttempts] = React.useState(0);
   const [lastSubmitTime, setLastSubmitTime] = React.useState<number>(0);
-
   // Client-side throttle: max 3 submissions per minute
   const isRateLimited = React.useMemo(() => {
     const now = Date.now();
     return submitAttempts >= 3 && now - lastSubmitTime < 60_000;
   }, [submitAttempts, lastSubmitTime]);
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -54,7 +47,6 @@ export default function ContactForm(): JSX.Element {
       [name]: value,
     }));
   };
-
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setForm((prev) => ({
@@ -62,7 +54,6 @@ export default function ContactForm(): JSX.Element {
       [name]: checked,
     }));
   };
-
   function validateForm(): string | null {
     // Honeypot: if filled, it's almost certainly a bot
     if (form.botField.trim() !== "") {
@@ -71,50 +62,39 @@ export default function ContactForm(): JSX.Element {
       // because handleSubmit short-circuits on botField separately.
       return "Thank you for your message!";
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!emailRegex.test(form.email)) {
       return "Please enter a valid email address";
     }
-
     if (!form.name.trim() || form.name.trim().length < 2) {
       return "Name must be at least 2 characters long";
     }
-
     if (!form.message.trim() || form.message.trim().length < 10) {
       return "Message must be at least 10 characters long";
     }
-
     if (form.name.length > 100) return "Name is too long";
     if (form.email.length > 255) return "Email is too long";
     if (form.subject.length > 200) return "Subject is too long";
     if (form.message.length > 5000) return "Message is too long";
-
     if (isRateLimited) {
       return "Too many submission attempts. Please try again in a minute.";
     }
-
     return null;
   }
-
   function sanitizeFormData(data: ContactFormData): ContactFormData {
     return {
       ...data,
-      name: data.name.trim().slice(0, 100),
-      email: data.email.trim().slice(0, 255),
-      subject: data.subject.trim().slice(0, 200),
-      message: data.message.trim().slice(0, 5000),
+      name: data.safeTrimSlice(name, 0, 100),
+      email: data.safeTrimSlice(email, 0, 255),
+      subject: data.safeTrimSlice(subject, 0, 200),
+      message: data.safeTrimSlice(message, 0, 5000),
       // Always clear honeypot before sending
       botField: "",
     };
   }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     if (submitting) return;
-
     if (isRateLimited) {
       setStatus("error");
       setStatusMessage(
@@ -122,14 +102,11 @@ export default function ContactForm(): JSX.Element {
       );
       return;
     }
-
     setStatus(null);
     setStatusMessage("");
     setSubmitting(true);
-
     try {
       const validationError = validateForm();
-
       // If honeypot is filled, pretend success and bail early
       if (form.botField.trim() !== "") {
         setStatus("success");
@@ -148,14 +125,12 @@ export default function ContactForm(): JSX.Element {
         setSubmitting(false);
         return;
       }
-
       if (validationError) {
         setStatus("error");
         setStatusMessage(validationError);
         setSubmitting(false);
         return;
       }
-
       // reCAPTCHA v3 token
       const recaptchaToken = await getRecaptchaToken("contact_form");
       if (!recaptchaToken) {
@@ -166,12 +141,9 @@ export default function ContactForm(): JSX.Element {
         setSubmitting(false);
         return;
       }
-
       const sanitizedData = sanitizeFormData(form);
-
       const controller = new AbortController();
       const timeoutId = window.setTimeout(() => controller.abort(), 15_000);
-
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: {
@@ -188,16 +160,13 @@ export default function ContactForm(): JSX.Element {
         }),
         signal: controller.signal,
       });
-
       window.clearTimeout(timeoutId);
-
       if (!res.ok) {
         const errorText = await res.text();
         console.error(
           `Contact API responded with status ${res.status}:`,
           errorText
         );
-
         if (res.status === 429) {
           setStatus("error");
           setStatusMessage("Too many requests. Please try again later.");
@@ -210,13 +179,10 @@ export default function ContactForm(): JSX.Element {
             "Submission failed. Please check your connection and try again."
           );
         }
-
         setSubmitting(false);
         return;
       }
-
       const data: ApiResponse = await res.json();
-
       if (!data?.ok) {
         setStatus("error");
         setStatusMessage(
@@ -225,7 +191,6 @@ export default function ContactForm(): JSX.Element {
       } else {
         setStatus("success");
         setStatusMessage(data.message || "Message sent successfully!");
-
         setForm({
           name: "",
           email: "",
@@ -235,7 +200,6 @@ export default function ContactForm(): JSX.Element {
           teaserOptIn: false,
           newsletterOptIn: false,
         });
-
         setSubmitAttempts((prev) => prev + 1);
         setLastSubmitTime(Date.now());
       }
@@ -262,9 +226,7 @@ export default function ContactForm(): JSX.Element {
       setSubmitting(false);
     }
   }
-
   const isSuccess = status === "success";
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {/* Honeypot - matches server 'botField' */}
@@ -292,7 +254,6 @@ export default function ContactForm(): JSX.Element {
           tabIndex={-1}
         />
       </div>
-
       {/* Name */}
       <div>
         <input
@@ -307,7 +268,6 @@ export default function ContactForm(): JSX.Element {
           disabled={submitting || isRateLimited}
         />
       </div>
-
       {/* Email */}
       <div>
         <input
@@ -322,7 +282,6 @@ export default function ContactForm(): JSX.Element {
           disabled={submitting || isRateLimited}
         />
       </div>
-
       {/* Subject */}
       <div>
         <input
@@ -335,7 +294,6 @@ export default function ContactForm(): JSX.Element {
           disabled={submitting || isRateLimited}
         />
       </div>
-
       {/* Message */}
       <div>
         <textarea
@@ -354,7 +312,6 @@ export default function ContactForm(): JSX.Element {
           {form.message.length}/5000
         </div>
       </div>
-
       {/* Opt-ins */}
       <div className="space-y-3">
         <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300 transition-colors hover:text-gray-200">
@@ -368,7 +325,6 @@ export default function ContactForm(): JSX.Element {
           />
           Send me the Fathering Without Fear teaser
         </label>
-
         <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300 transition-colors hover:text-gray-200">
           <input
             type="checkbox"
@@ -381,7 +337,6 @@ export default function ContactForm(): JSX.Element {
           Add me to the mailing list
         </label>
       </div>
-
       {/* Submit */}
       <button
         type="submit"
@@ -394,7 +349,6 @@ export default function ContactForm(): JSX.Element {
             ? "Try Again Later"
             : "Send Message"}
       </button>
-
       {/* Status */}
       {status && statusMessage && (
         <div
@@ -409,12 +363,10 @@ export default function ContactForm(): JSX.Element {
           {statusMessage}
         </div>
       )}
-
       {/* Security notice */}
       <div className="border-t border-gray-800 pt-2 text-center text-xs text-gray-500">
         Protected by reCAPTCHA and layered security controls.
       </div>
     </form>
   );
-}
-
+}

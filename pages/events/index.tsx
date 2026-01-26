@@ -5,10 +5,13 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import { 
-  getContentlayerData, 
+  getContentlayerData
+} from "@/lib/content/server";
+
+import { 
   normalizeSlug,
   sanitizeData 
-} from "@/lib/contentlayer-compat";
+} from "@/lib/content/shared";
 
 type EventItem = {
   _id: string;
@@ -52,13 +55,13 @@ function formatDateGB(value: string): string {
 
 /**
  * STRATEGIC FIX: INTEGRITY MODE
- * 1. Awaits getContentlayerData for absolute synchronization.
+ * 1. Uses getContentlayerData for absolute synchronization.
  * 2. Enforces /events/ prefix integrity for all generated links.
  */
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
-    // COMMAND: Await contentlayer data for absolute build-time integrity
-    const data = await getContentlayerData();
+    // COMMAND: Get contentlayer data for absolute build-time integrity
+    const data = getContentlayerData();
     const eventsRaw = data.allEvents || [];
     
     const now = new Date();

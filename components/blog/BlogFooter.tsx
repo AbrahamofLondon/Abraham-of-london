@@ -10,7 +10,7 @@ interface BlogFooterProps {
 const BlogFooter: React.FC<BlogFooterProps> = ({
   author = 'Abraham of London',
   authorBio = 'Thought leader and content creator sharing insights on business, technology, and innovation.',
-  authorWebsite = 'https://abrahamoflondon.com',
+  authorWebsite = 'https://abrahamoflondon.org',
 }) => {
   return (
     <footer className="bg-gray-50 border-t border-gray-200 py-12">

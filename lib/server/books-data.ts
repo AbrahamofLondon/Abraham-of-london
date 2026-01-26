@@ -1,6 +1,8 @@
 // lib/server/books-data.ts - PRODUCTION-GRADE, NO ASSUMPTIONS
-import type { ContentDoc } from "@/lib/contentlayer";
-import { getPublishedBooks, normalizeSlug } from "@/lib/contentlayer";
+import type { ContentDoc } from "@/lib/content";
+import { getPublishedBooks, normalizeSlug } from "@/lib/content";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export type Book = ContentDoc & {
   normalizedReadTime: string;
@@ -78,7 +80,7 @@ export function getBookSlugs(): string[] {
 
 export function getFeaturedBooks(count?: number): Book[] {
   const featured = getAllBooksMeta().filter((b: any) => b?.featured === true);
-  return typeof count === "number" && count > 0 ? featured.slice(0, count) : featured;
+  return typeof count === "number" && count > 0 ? safeSlice(featured, 0, count) : featured;
 }
 
 export function getRecentBooks(count?: number): Book[] {
@@ -87,7 +89,7 @@ export function getRecentBooks(count?: number): Book[] {
     const tb = new Date(b?.date ?? 0).getTime();
     return (Number.isFinite(tb) ? tb : 0) - (Number.isFinite(ta) ? ta : 0);
   });
-  return typeof count === "number" && count > 0 ? sorted.slice(0, count) : sorted;
+  return typeof count === "number" && count > 0 ? safeSlice(sorted, 0, count) : sorted;
 }
 
 const booksDataApi = {
@@ -115,3 +117,4 @@ const booksDataApi = {
 };
 
 export default booksDataApi;
+

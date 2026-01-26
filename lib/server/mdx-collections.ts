@@ -2,11 +2,13 @@
 // Generic, file-system based MDX loader for content/* collections.
 // No Contentlayer dependency. Safe for Netlify / Next static builds.
 
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 import { promisify } from "node:util";
 import matter from "gray-matter";
 import { safeListFiles } from "@/lib/fs-utils";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 const readFile = promisify(fs.readFile);
 const stat = promisify(fs.stat);
@@ -214,7 +216,7 @@ async function readRawDocs(collection: string): Promise<RawDoc[]> {
   // Process files in batches for better performance
   const batchSize = 10;
   for (let i = 0; i < files.length; i += batchSize) {
-    const batch = files.slice(i, i + batchSize);
+    const batch = safeSlice(files, i, i + batchSize);
     const batchPromises = batch.map(async (filePath) => {
       try {
         const [raw, stats] = await Promise.all([
@@ -444,6 +446,8 @@ function readRawDocsSync(collection: string): RawDoc[] {
   
   return docs;
 }
+
+
 
 
 

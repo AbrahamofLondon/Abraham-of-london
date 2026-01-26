@@ -4,26 +4,44 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+
 import Layout from "@/components/Layout";
+
+// ✅ FIXED: Use contentlayer-helper for ALL server-side functions
 import {
-  getServerAllShorts,
-  getServerShortBySlug,
+  getAllContentlayerDocs,
+  getDocBySlug,
+  isDraftContent,
   normalizeSlug,
-} from "@/lib/contentlayer-compat";
-import { prepareMDX, mdxComponents, sanitizeData } from "@/lib/server/md-utils";
+  sanitizeData,
+} from "@/lib/contentlayer-helper";  // Single source for server functions
+
+// MDX utilities
+import { prepareMDX, simpleMdxComponents } from "@/lib/server/md-utils";
+
 import {
-  Bookmark,
   Heart,
-  MessageCircle,
   Eye,
   Clock,
   Zap,
-  ArrowRight,
   Sparkles,
-  X,
-  Share2
+  Share2,
 } from "lucide-react";
+
+// 🔥 CRITICAL FIX: Dynamically import MDXRemote to avoid SSR issues
+const MDXRemote = dynamic(
+  () => import('next-mdx-remote').then((mod) => mod.MDXRemote),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="animate-pulse space-y-4">
+        <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+        <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+      </div>
+    )
+  }
+);
 
 // Client-only engagement components
 const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
@@ -31,7 +49,25 @@ const ShortHero = dynamic(() => import("@/components/shorts/ShortHero"), { ssr: 
 const ShortComments = dynamic(() => import("@/components/shorts/ShortComments"), { ssr: false });
 const ShortNavigation = dynamic(() => import("@/components/shorts/ShortNavigation"), { ssr: false });
 
-interface Short {
+type ShortDoc = {
+  title?: string | null;
+  excerpt?: string | null;
+  date?: string | null;
+  coverImage?: string | null;
+  tags?: string[] | null;
+  author?: string | null;
+  slug?: string | null;
+  readTime?: string | null;
+  draft?: boolean;
+  kind?: string;
+  href?: string;
+  body?: { raw?: string };
+  bodyRaw?: string;
+  _raw?: { flattenedPath?: string };
+  [k: string]: any;
+};
+
+type Short = {
   title: string;
   excerpt: string | null;
   date: string | null;
@@ -42,63 +78,162 @@ interface Short {
   slugPath: string;
   readTime: string | null;
   theme: string | null;
-  views: number | null;
-  likes: number | null;
+  views: number;
+  likes: number;
+};
+
+type Props = {
+  short: Short;
+  source: any; // Changed from MDXRemoteSerializeResult to any for safety
+};
+
+function getShortSlug(doc: ShortDoc): string {
+  // prefer slug; fallback to flattenedPath; strip "shorts/" prefix if present
+  const fromSlug = normalizeSlug(String(doc.slug || ""));
+  const fromFlat = normalizeSlug(String(doc._raw?.flattenedPath || ""));
+  const chosen = fromSlug || fromFlat;
+  return chosen.replace(/^shorts\//, "");
 }
 
-interface Props {
-  short: Short;
-  source: MDXRemoteSerializeResult;
+function getRawBody(doc: ShortDoc): string {
+  return doc?.body?.raw || (typeof doc?.bodyRaw === "string" ? doc.bodyRaw : "") || "";
 }
+
+function normalizePrepareMdxResult(
+  mdxResult: unknown
+): { source: any | null } {
+  const r = mdxResult as any;
+
+  // direct MDXRemoteSerializeResult
+  if (r && typeof r === "object" && typeof r.compiledSource === "string") {
+    return { source: r };
+  }
+
+  // wrapped shape: { source }
+  if (r && typeof r === "object" && r.source && typeof r.source === "object") {
+    return { source: r.source };
+  }
+
+  return { source: null };
+}
+
+// 🔥 SAFE MDX COMPONENTS: Ensure no undefined components
+const getSafeMdxComponents = () => {
+  const safeComponents: any = {};
+  
+  if (typeof simpleMdxComponents === 'object') {
+    Object.keys(simpleMdxComponents).forEach(key => {
+      const Comp = (simpleMdxComponents as any)[key];
+      if (Comp && typeof Comp === 'function') {
+        safeComponents[key] = Comp;
+      } else {
+        // Fallback component for safety
+        safeComponents[key] = ({ children, ...props }: any) => {
+          console.warn(`MDX Component "${key}" is not properly defined`);
+          return React.createElement('div', props, children);
+        };
+      }
+    });
+  }
+  
+  return safeComponents;
+};
 
 const ShortPage: NextPage<Props> = ({ short, source }) => {
   const router = useRouter();
-  const [likes, setLikes] = React.useState(short.likes || 0);
-  const [isLiked, setIsLiked] = React.useState(false);
-  const [isBookmarked, setIsBookmarked] = React.useState(false);
-  const [streak, setStreak] = React.useState(0);
-  const [readProgress, setReadProgress] = React.useState(0);
+  const [likes, setLikes] = React.useState<number>(short.likes || 0);
+  const [isLiked, setIsLiked] = React.useState<boolean>(false);
+  const [isBookmarked, setIsBookmarked] = React.useState<boolean>(false);
+  const [streak, setStreak] = React.useState<number>(0);
+  const [readProgress, setReadProgress] = React.useState<number>(0);
+  const [isClient, setIsClient] = React.useState(false);
+  const [mdxComponents, setMdxComponents] = React.useState<any>({});
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Habit Formation: Streak Logic
-      const today = new Date().toDateString();
-      const lastRead = localStorage.getItem('aol_last_short');
-      const currentStreak = parseInt(localStorage.getItem('aol_streak') || '0', 10);
-      
-      if (lastRead !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toDateString();
-        const newStreak = lastRead === yesterday ? currentStreak + 1 : 1;
-        setStreak(newStreak);
-        localStorage.setItem('aol_streak', newStreak.toString());
-        localStorage.setItem('aol_last_short', today);
-      } else {
-        setStreak(currentStreak);
-      }
+    setIsClient(true);
+    setMdxComponents(getSafeMdxComponents());
+  }, []);
 
-      // Interaction State: Bookmarks & Likes
-      const bookmarks = JSON.parse(localStorage.getItem('aol_bookmarks_shorts') || '[]');
-      setIsBookmarked(bookmarks.includes(short.slugPath));
-      
-      const liked = JSON.parse(localStorage.getItem('aol_liked_shorts') || '[]');
-      setIsLiked(liked.includes(short.slugPath));
+  React.useEffect(() => {
+    if (!isClient) return;
 
-      const handleScroll = () => {
-        const progress = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-        setReadProgress(progress);
-      };
+    // Habit Formation: Streak Logic
+    const today = new Date().toDateString();
+    const lastRead = localStorage.getItem("aol_last_short");
+    const currentStreak = parseInt(localStorage.getItem("aol_streak") || "0", 10);
 
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      return () => window.removeEventListener('scroll', handleScroll);
+    if (lastRead !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      const newStreak = lastRead === yesterday ? currentStreak + 1 : 1;
+      setStreak(newStreak);
+      localStorage.setItem("aol_streak", String(newStreak));
+      localStorage.setItem("aol_last_short", today);
+    } else {
+      setStreak(currentStreak);
     }
-  }, [short.slugPath]);
+
+    // Interaction State: Bookmarks & Likes
+    try {
+      const bookmarks = JSON.parse(localStorage.getItem("aol_bookmarks_shorts") || "[]");
+      setIsBookmarked(Array.isArray(bookmarks) && bookmarks.includes(short.slugPath));
+
+      const liked = JSON.parse(localStorage.getItem("aol_liked_shorts") || "[]");
+      setIsLiked(Array.isArray(liked) && liked.includes(short.slugPath));
+    } catch {
+      setIsBookmarked(false);
+      setIsLiked(false);
+    }
+
+    const handleScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? (window.scrollY / max) * 100 : 0;
+      setReadProgress(Math.max(0, Math.min(100, progress)));
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [short.slugPath, isClient]);
 
   const toggleLike = () => {
-    if (!isLiked) {
-      setLikes(v => v + 1);
-      setIsLiked(true);
-      const liked = JSON.parse(localStorage.getItem('aol_liked_shorts') || '[]');
-      localStorage.setItem('aol_liked_shorts', JSON.stringify([...liked, short.slugPath]));
+    if (!isClient || isLiked) return;
+
+    setLikes((v) => v + 1);
+    setIsLiked(true);
+
+    try {
+      const liked = JSON.parse(localStorage.getItem("aol_liked_shorts") || "[]");
+      const next = Array.isArray(liked) ? Array.from(new Set([...liked, short.slugPath])) : [short.slugPath];
+      localStorage.setItem("aol_liked_shorts", JSON.stringify(next));
+    } catch {
+      localStorage.setItem("aol_liked_shorts", JSON.stringify([short.slugPath]));
+    }
+  };
+
+  const handleShare = async () => {
+    if (!isClient) return;
+
+    const shareUrl = `https://www.abrahamoflondon.org${short.url}`;
+    const payload = { title: short.title, text: short.excerpt || "", url: shareUrl };
+
+    try {
+      // Prefer Web Share API if available
+      if (navigator.share) {
+        await navigator.share(payload);
+        return;
+      }
+    } catch {
+      // fall through to clipboard
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      // you can swap this for your toaster if you have one
+      // eslint-disable-next-line no-console
+      console.log("Copied to clipboard:", shareUrl);
+    } catch {
+      // eslint-disable-next-line no-console
+      console.log("Share failed:", shareUrl);
     }
   };
 
@@ -107,7 +242,11 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
       <Head>
         <title>{short.title} | Abraham of London</title>
         <meta name="description" content={short.excerpt || ""} />
-        <link rel="canonical" href={`https://abrahamoflondon.com${short.url}`} />
+        <link rel="canonical" href={`https://www.abrahamoflondon.org${short.url}`} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={short.title} />
+        <meta property="og:description" content={short.excerpt || ""} />
+        <meta property="og:url" content={`https://www.abrahamoflondon.org${short.url}`} />
       </Head>
 
       {/* PROGRESS ENGINE */}
@@ -117,20 +256,40 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
 
       <main className="min-h-screen bg-black text-gray-300 selection:bg-gold selection:text-black pt-20 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
           {/* INTERACTION BAR */}
           <div className="mb-10 flex items-center justify-between border-b border-white/5 pb-8">
             <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-gray-500">
-              <span className="flex items-center gap-2"><Eye size={14} className="text-gold/50" /> {short.views?.toLocaleString()}</span>
-              <span className="flex items-center gap-2"><Clock size={14} className="text-gold/50" /> {short.readTime}</span>
-              {streak > 1 && <span className="flex items-center gap-2 text-gold"><Zap size={14} /> {streak} Day Streak</span>}
+              <span className="flex items-center gap-2">
+                <Eye size={14} className="text-gold/50" /> {Number(short.views || 0).toLocaleString()}
+              </span>
+              <span className="flex items-center gap-2">
+                <Clock size={14} className="text-gold/50" /> {short.readTime || "2 min read"}
+              </span>
+              {streak > 1 ? (
+                <span className="flex items-center gap-2 text-gold">
+                  <Zap size={14} /> {streak} Day Streak
+                </span>
+              ) : null}
             </div>
-            
+
             <div className="flex items-center gap-4">
-              <button onClick={toggleLike} className={`p-2 rounded-lg border transition-all ${isLiked ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' : 'bg-white/5 border-white/10 text-gray-500 hover:text-white'}`}>
-                <Heart size={18} className={isLiked ? 'fill-current' : ''} />
+              <button
+                onClick={toggleLike}
+                className={`p-2 rounded-lg border transition-all ${
+                  isLiked
+                    ? "bg-rose-500/10 border-rose-500/30 text-rose-500"
+                    : "bg-white/5 border-white/10 text-gray-500 hover:text-white"
+                }`}
+                aria-label="Like"
+              >
+                <Heart size={18} className={isLiked ? "fill-current" : ""} />
               </button>
-              <button onClick={() => {}} className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-500 hover:text-white transition-all">
+
+              <button
+                onClick={handleShare}
+                className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-500 hover:text-white transition-all"
+                aria-label="Share"
+              >
                 <Share2 size={18} />
               </button>
             </div>
@@ -139,15 +298,40 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
           <div className="grid lg:grid-cols-12 gap-12">
             <div className="lg:col-span-8">
               <div className="bg-zinc-900/40 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
-                <ShortHero title={short.title} theme={short.theme} author={short.author} coverImage={short.coverImage} />
-                
+                <ShortHero
+                  title={short.title}
+                  theme={short.theme}
+                  author={short.author}
+                  coverImage={short.coverImage}
+                />
+
                 <article className="mt-8 prose prose-invert prose-gold max-w-none prose-p:leading-relaxed prose-p:text-gray-300">
-                  <MDXRemote {...source} components={mdxComponents} />
+                  {source && isClient ? (
+                    <MDXRemote 
+                      {...source} 
+                      components={mdxComponents}
+                    />
+                  ) : (
+                    // Server-side/fallback rendering
+                    <div className="prose prose-invert max-w-none">
+                      <div 
+                        dangerouslySetInnerHTML={{ 
+                          __html: source?.compiledSource || 
+                          '<p>Content loading...</p>' 
+                        }} 
+                      />
+                    </div>
+                  )}
                 </article>
 
                 <div className="mt-12 pt-8 border-t border-white/5 flex flex-wrap gap-2">
-                  {short.tags.map(tag => (
-                    <span key={tag} className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-500">#{tag}</span>
+                  {short.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-500"
+                    >
+                      #{tag}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -160,61 +344,115 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
             <aside className="lg:col-span-4 space-y-6">
               <div className="sticky top-24 space-y-6">
                 <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gold mb-6">Continue the Build</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gold mb-6">
+                    Continue the Build
+                  </h3>
                   <ShortNavigation currentSlug={short.slugPath} />
                 </div>
-                
+
                 <div className="p-8 rounded-3xl bg-gradient-to-br from-gold/10 to-transparent border border-gold/20 text-center">
-                   <Sparkles className="mx-auto text-gold mb-4" />
-                   <h3 className="font-serif text-xl font-bold text-white mb-2">Daily Field Notes</h3>
-                   <p className="text-xs text-gray-500 mb-6">2-minute insights delivered to your dashboard daily.</p>
-                   <button onClick={() => router.push('/inner-circle')} className="w-full py-3 rounded-xl bg-gold text-black text-xs font-black uppercase tracking-widest hover:bg-gold/80 transition-all">Subscribe</button>
+                  <Sparkles className="mx-auto text-gold mb-4" />
+                  <h3 className="font-serif text-xl font-bold text-white mb-2">Daily Field Notes</h3>
+                  <p className="text-xs text-gray-500 mb-6">
+                    2-minute insights delivered to your dashboard daily.
+                  </p>
+                  <button
+                    onClick={() => router.push("/inner-circle")}
+                    className="w-full py-3 rounded-xl bg-gold text-black text-xs font-black uppercase tracking-widest hover:bg-gold/80 transition-all"
+                  >
+                    Subscribe
+                  </button>
                 </div>
               </div>
             </aside>
           </div>
         </div>
       </main>
+
       <BackToTop />
     </Layout>
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const shorts = await getServerAllShorts();
-  const paths = (shorts || [])
-    .filter((s: any) => !s.draft)
-    .map((s: any) => ({
-      params: { slug: normalizeSlug(s.slug || s._raw?.flattenedPath).replace(/^shorts\//, '') }
-    }))
-    .filter((p: any) => p.params.slug);
+export default ShortPage;
 
-  return { paths, fallback: 'blocking' };
+// ---------------------------------------------
+// SSG (Pages Router)
+// ---------------------------------------------
+export const getStaticPaths: GetStaticPaths = async () => {
+  // We use compat docs and filter by kind/dir — no server-only functions.
+  const docs = getAllContentlayerDocs();
+
+  const shorts = docs.filter((d: any) => d.kind === "Short" || d._raw?.sourceFileDir?.toLowerCase?.().includes("short"));
+
+  const paths = shorts
+    .filter((s: any) => !isDraftContent(s))
+    .map((s: any) => getShortSlug(s))
+    .filter((slug: string) => Boolean(slug))
+    .map((slug: string) => ({ params: { slug } }));
+
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const data = await getServerShortBySlug(slug);
+  try {
+    const slug = typeof params?.slug === "string" ? params.slug : Array.isArray(params?.slug) ? params?.slug.join("/") : "";
+    const normalized = normalizeSlug(slug);
+    if (!normalized) return { notFound: true };
 
-  if (!data || (data as any).draft) return { notFound: true };
+    // Prefer Short lookup by slugPath: `shorts/<slug>` or `<slug>` depending on how contentlayer stores it.
+    // Try both to be resilient.
+    const direct = getDocBySlug(`shorts/${normalized}`) || getDocBySlug(normalized);
+    const data = (direct as ShortDoc | null) ?? null;
 
-  const source = await prepareMDX(data.body.raw);
-  const short: Short = {
-    title: data.title || "Field Note",
-    excerpt: data.excerpt || null,
-    date: data.date || null,
-    coverImage: data.coverImage || null,
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    author: data.author || "Abraham of London",
-    url: `/shorts/${normalizeSlug(data.slug || slug)}`,
-    slugPath: normalizeSlug(data.slug || slug),
-    readTime: data.readTime || "2 min read",
-    theme: (data as any).theme || null,
-    views: (data as any).views || 0,
-    likes: (data as any).likes || 0,
-  };
+    if (!data || isDraftContent(data)) return { notFound: true };
 
-  return { props: { short: sanitizeData(short), source }, revalidate: 3600 };
+    const raw = getRawBody(data);
+    
+    // 🔥 SAFETY: Ensure we have valid MDX source
+    let source: any = {};
+    if (typeof raw === "string" && raw.trim()) {
+      try {
+        const mdxResult = await prepareMDX(raw);
+        const { source: mdxSource } = normalizePrepareMdxResult(mdxResult);
+        source = mdxSource || { compiledSource: '' };
+      } catch (mdxError) {
+        console.error(`MDX compilation error for ${normalized}:`, mdxError);
+        source = { compiledSource: '' };
+      }
+    } else {
+      source = { compiledSource: '' };
+    }
+
+    if (!source) return { notFound: true };
+
+    const slugPath = getShortSlug(data);
+    const url = `/shorts/${slugPath}`;
+
+    const short: Short = {
+      title: data.title || "Field Note",
+      excerpt: data.excerpt || null,
+      date: data.date || null,
+      coverImage: data.coverImage || null,
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      author: data.author || "Abraham of London",
+      url,
+      slugPath,
+      readTime: data.readTime || "2 min read",
+      theme: (data as any).theme || null,
+      views: Number((data as any).views || 0),
+      likes: Number((data as any).likes || 0),
+    };
+
+    return {
+      props: {
+        short: sanitizeData(short),
+        source: JSON.parse(JSON.stringify(source)), // Ensure serializable
+      },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error(`Error in getStaticProps for /shorts/${params?.slug}:`, error);
+    return { notFound: true };
+  }
 };
-
-export default ShortPage;

@@ -183,7 +183,7 @@ class ErrorBoundary extends Component<Props, State> {
                   <p className="text-sm text-gray-600 text-center">
                     Need immediate assistance?{' '}
                     <a
-                      href="mailto:support@abrahamoflondon.com"
+                      href="mailto:support@abrahamoflondon.org"
                       className="text-blue-600 hover:text-blue-800 font-medium"
                     >
                       Email our support team

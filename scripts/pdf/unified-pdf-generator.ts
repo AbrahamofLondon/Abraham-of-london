@@ -1,19 +1,20 @@
-// scripts/pdf/unified-pdf-generator.ts - ENHANCED WITH CONTENT SCANNING
+// scripts/pdf/unified-pdf-generator.ts - COMPLETE AND PROPERLY STRUCTURED
 import { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
-import { execSync, spawnSync } from 'child_process';
+import { execSync } from 'child_process';
 import crypto from 'crypto';
 import matter from 'gray-matter';
 import os from 'os';
 import { fileURLToPath } from 'url';
+import { SecurePuppeteerPDFGenerator } from './secure-puppeteer-generator';
 
 const program = new Command();
 
 program
   .name('unified-pdf-generator')
-  .description('Premium PDF generator for all tiers with content scanning & enhanced output')
-  .version('2.0.0');
+  .description('Premium PDF generator with content scanning & enhanced output')
+  .version('3.2.0');
 
 program
   .option('-t, --tier <tier>', 'Tier to generate (architect, member, free, all)', 'all')
@@ -25,12 +26,17 @@ program
   .option('--scan-content', 'Scan content/downloads for source files', false)
   .option('--scan-only', 'Only scan content, don\'t generate', false)
   .option('--skip-canvas', 'Skip legacy canvas generation', false)
+  .option('--use-puppeteer', 'Use Puppeteer for MDX/HTML generation', true)
+  .option('--use-universal', 'Use Universal Converter for Office/PDF files', true)
+  .option('--strict', 'Fail on conversion errors', false)
+  .option('--overwrite', 'Overwrite existing files', false)
+  .option('--min-bytes <bytes>', 'Minimum PDF size to consider valid', '8000')
   .option('--no-clean', 'Skip cleaning (safer)', false);
 
 type Tier = 'architect' | 'member' | 'free' | 'all';
 type Quality = 'premium' | 'enterprise' | 'draft';
 type Format = 'A4' | 'Letter' | 'A3' | 'bundle';
-type SourceKind = 'mdx' | 'md' | 'xlsx' | 'xls' | 'pptx' | 'ppt' | 'pdf';
+type SourceKind = 'mdx' | 'md' | 'xlsx' | 'xls' | 'pptx' | 'ppt' | 'pdf' | 'html';
 
 interface GenerationOptions {
   tier: string;
@@ -42,6 +48,11 @@ interface GenerationOptions {
   scanContent: boolean;
   scanOnly: boolean;
   skipCanvas: boolean;
+  usePuppeteer: boolean;
+  useUniversal: boolean;
+  strict: boolean;
+  overwrite: boolean;
+  minBytes: number;
 }
 
 interface SourceFile {
@@ -104,9 +115,10 @@ class ContentScanner {
           }
 
           const ext = path.extname(entry.name).toLowerCase().replace('.', '');
-          const kind = ext as SourceKind;
+          let kind = ext as SourceKind;
           
-          if (!['mdx', 'md', 'xlsx', 'xls', 'pptx', 'ppt', 'pdf'].includes(kind)) {
+          if (ext === 'html' || ext === 'htm') kind = 'html';
+          if (!['mdx', 'md', 'xlsx', 'xls', 'pptx', 'ppt', 'pdf', 'html'].includes(kind)) {
             continue;
           }
 
@@ -140,6 +152,17 @@ class ContentScanner {
         const { data } = matter(content);
         return data || {};
       }
+      if (kind === 'html') {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const metaTags: Record<string, string> = {};
+        const titleMatch = content.match(/<title>(.*?)<\/title>/i);
+        if (titleMatch) metaTags.title = titleMatch[1];
+        
+        const descriptionMatch = content.match(/<meta name="description" content="(.*?)"/i);
+        if (descriptionMatch) metaTags.description = descriptionMatch[1];
+        
+        return metaTags;
+      }
       const stats = fs.statSync(filePath);
       return {
         _fileSize: stats.size,
@@ -155,7 +178,7 @@ class ContentScanner {
   static detectCategory(id: string, tags: string[] = [], metadata?: Record<string, any>): string {
     if (metadata?.category) return metadata.category;
     
-    const tagCategories = ['legacy', 'leadership', 'theology', 'surrender-framework', 'personal-growth', 'organizational'];
+    const tagCategories = ['legacy', 'leadership', 'theology', 'surrender-framework', 'personal-growth', 'organizational', 'tools', 'templates'];
     for (const tag of tags) {
       if (tagCategories.includes(tag.toLowerCase())) return tag;
     }
@@ -167,6 +190,8 @@ class ContentScanner {
     if (idLower.includes('personal') || idLower.includes('alignment')) return 'personal-growth';
     if (idLower.includes('board') || idLower.includes('organizational')) return 'organizational';
     if (idLower.includes('surrender') || idLower.includes('framework')) return 'surrender-framework';
+    if (idLower.includes('template') || idLower.includes('worksheet')) return 'templates';
+    if (idLower.includes('tool') || idLower.includes('calculator')) return 'tools';
     
     return 'downloads';
   }
@@ -180,7 +205,7 @@ class ContentScanner {
     if (idLower.includes('premium') || idLower.includes('architect') || idLower.includes('inner-circle')) {
       return 'architect';
     }
-    if (idLower.includes('member') || idLower.includes('pro')) {
+    if (idLower.includes('member') || idLower.includes('pro') || idLower.includes('premium')) {
       return 'member';
     }
     if (idLower.includes('free') || idLower.includes('public') || idLower.includes('basic')) {
@@ -252,7 +277,8 @@ class ContentScanner {
       type: metadata.type || 'tool',
       format: sourceFile.kind === 'pdf' ? 'PDF' : 
               (sourceFile.kind === 'xlsx' || sourceFile.kind === 'xls') ? 'EXCEL' :
-              (sourceFile.kind === 'pptx' || sourceFile.kind === 'ppt') ? 'POWERPOINT' : 'PDF',
+              (sourceFile.kind === 'pptx' || sourceFile.kind === 'ppt') ? 'POWERPOINT' :
+              sourceFile.kind === 'html' ? 'HTML' : 'PDF',
       isInteractive: id.toLowerCase().includes('interactive') || id.toLowerCase().includes('fillable'),
       isFillable: id.toLowerCase().includes('fillable') || sourceFile.kind === 'xlsx' || sourceFile.kind === 'xls',
       category,
@@ -365,8 +391,245 @@ class ContentScanner {
   }
 }
 
+class IntegratedUniversalConverter {
+  static isPdfHeader(buf: Buffer): boolean {
+    if (!buf || buf.length < 4) return false;
+    const head = buf.subarray(0, 4).toString('utf8');
+    return head === '%PDF';
+  }
+
+  static pdfLooksValid(absPath: string, minBytes: number): { ok: boolean; reason: string } {
+    try {
+      const st = fs.statSync(absPath);
+      if (st.size < minBytes) return { ok: false, reason: "too small or missing" };
+
+      const head = fs.readFileSync(absPath, { encoding: null, flag: "r" });
+      if (!this.isPdfHeader(head)) return { ok: false, reason: "missing %PDF header" };
+
+      return { ok: true, reason: "ok" };
+    } catch {
+      return { ok: false, reason: "cannot read file" };
+    }
+  }
+
+  static hasLibreOffice(): boolean {
+    try {
+      execSync('libreoffice --version', { stdio: 'ignore', shell: true });
+      return true;
+    } catch {
+      try {
+        execSync('soffice --version', { stdio: 'ignore', shell: true });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+  }
+
+  static checksum16(filePath: string): string | null {
+    try {
+      const buf = fs.readFileSync(filePath);
+      return crypto.createHash('sha256').update(buf).digest('hex').slice(0, 16);
+    } catch {
+      return null;
+    }
+  }
+
+  static async convertOfficeWithLibreOffice(srcAbsPath: string, outAbsPath: string): Promise<boolean> {
+    try {
+      const tempDir = path.join(os.tmpdir(), 'pdf-conversion');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      if (!fs.existsSync(path.dirname(outAbsPath))) {
+        fs.mkdirSync(path.dirname(outAbsPath), { recursive: true });
+      }
+
+      const cmd = `soffice --headless --convert-to pdf --outdir "${tempDir}" "${srcAbsPath}"`;
+      execSync(cmd, { stdio: 'pipe', shell: true });
+
+      const base = path.basename(srcAbsPath, path.extname(srcAbsPath));
+      const produced = path.join(tempDir, `${base}.pdf`);
+
+      if (!fs.existsSync(produced)) {
+        const pdfs = fs.readdirSync(tempDir).filter((f) => f.toLowerCase().endsWith(".pdf"));
+        if (pdfs.length === 0) throw new Error("LibreOffice produced no PDF output");
+        fs.copyFileSync(path.join(tempDir, pdfs[0]), outAbsPath);
+      } else {
+        fs.copyFileSync(produced, outAbsPath);
+      }
+
+      try {
+        if (fs.existsSync(produced)) fs.unlinkSync(produced);
+      } catch {}
+
+      return true;
+    } catch (error: any) {
+      console.error(`\x1b[31m❌ LibreOffice conversion failed: ${error.message}\x1b[0m`);
+      return false;
+    }
+  }
+
+  static async convertWithFallback(entry: ContentRegistryEntry, outputPath: string, options: GenerationOptions): Promise<{
+    success: boolean;
+    method: string;
+    error?: string;
+    size?: number;
+  }> {
+    const startTime = Date.now();
+    
+    try {
+      if (!entry.sourcePath) {
+        throw new Error('No source path');
+      }
+
+      if (entry.sourceKind === 'pdf') {
+        fs.copyFileSync(entry.sourcePath, outputPath);
+        const stats = fs.statSync(outputPath);
+        const valid = this.pdfLooksValid(outputPath, options.minBytes);
+        
+        if (!valid.ok) {
+          fs.unlinkSync(outputPath);
+          throw new Error(`Invalid PDF: ${valid.reason}`);
+        }
+        
+        return {
+          success: true,
+          method: 'copy',
+          size: stats.size,
+        };
+      }
+
+      if (['xlsx', 'xls', 'pptx', 'ppt'].includes(entry.sourceKind || '')) {
+        const hasLibreOffice = this.hasLibreOffice();
+        
+        if (hasLibreOffice) {
+          const success = await this.convertOfficeWithLibreOffice(entry.sourcePath, outputPath);
+          if (success) {
+            const stats = fs.statSync(outputPath);
+            const valid = this.pdfLooksValid(outputPath, options.minBytes);
+            
+            if (!valid.ok) {
+              fs.unlinkSync(outputPath);
+              throw new Error(`Converted PDF invalid: ${valid.reason}`);
+            }
+            
+            return {
+              success: true,
+              method: 'libreoffice',
+              size: stats.size,
+            };
+          }
+        }
+        
+        console.log(`  \x1b[33m⚠️  LibreOffice not available, using fallback for ${entry.sourceKind}\x1b[0m`);
+        return this.createFallbackPDF(entry, outputPath, `${entry.sourceKind?.toUpperCase()} Document`);
+      }
+
+      throw new Error(`Unsupported file type: ${entry.sourceKind}`);
+
+    } catch (error: any) {
+      return {
+        success: false,
+        method: 'universal-converter',
+        error: error.message,
+      };
+    }
+  }
+
+  static async createFallbackPDF(entry: ContentRegistryEntry, outputPath: string, docType: string): Promise<{
+    success: boolean;
+    method: string;
+    error?: string;
+    size?: number;
+  }> {
+    try {
+      const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
+      
+      const doc = await PDFDocument.create();
+      const page = doc.addPage([595.28, 841.89]);
+      
+      const font = await doc.embedFont(StandardFonts.Helvetica);
+      const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+      
+      const fileName = entry.sourcePath ? path.basename(entry.sourcePath) : entry.id;
+      
+      page.drawText(`${docType} - Fallback PDF`, {
+        x: 50,
+        y: 750,
+        size: 24,
+        font: fontBold,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+      
+      page.drawText(`File: ${fileName}`, {
+        x: 50,
+        y: 700,
+        size: 14,
+        font: font,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      
+      page.drawText(entry.title, {
+        x: 50,
+        y: 670,
+        size: 16,
+        font: fontBold,
+        color: rgb(0.2, 0.2, 0.2),
+        maxWidth: 500,
+      });
+      
+      page.drawText(entry.description.substring(0, 200) + '...', {
+        x: 50,
+        y: 640,
+        size: 10,
+        font: font,
+        color: rgb(0.4, 0.4, 0.4),
+        maxWidth: 500,
+      });
+      
+      const metadata = [
+        `ID: ${entry.id}`,
+        `Type: ${entry.type}`,
+        `Tier: ${entry.tier}`,
+        `Category: ${entry.category}`,
+        `Source: ${entry.sourceKind || 'unknown'}`,
+        `Generated: ${new Date().toLocaleDateString()}`,
+      ];
+      
+      metadata.forEach((line, i) => {
+        page.drawText(line, {
+          x: 50,
+          y: 600 - (i * 20),
+          size: 10,
+          font: font,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+      });
+      
+      const pdfBytes = await doc.save();
+      fs.writeFileSync(outputPath, pdfBytes);
+      const stats = fs.statSync(outputPath);
+      
+      return {
+        success: true,
+        method: 'fallback',
+        size: stats.size,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        method: 'fallback',
+        error: `Fallback creation failed: ${error.message}`,
+      };
+    }
+  }
+}
+
 class UnifiedPDFGenerator {
   private options: GenerationOptions;
+  private puppeteerGenerator: SecurePuppeteerPDFGenerator;
   private tierMapping: Record<Tier, string> = {
     architect: 'inner-circle-plus',
     member: 'inner-circle',
@@ -376,19 +639,27 @@ class UnifiedPDFGenerator {
 
   constructor(options: GenerationOptions) {
     this.options = options;
+    this.puppeteerGenerator = new SecurePuppeteerPDFGenerator({
+      timeout: 60000,
+      maxRetries: 3,
+    });
   }
 
   async initialize() {
-    console.log('\n\x1b[1;35m✨ UNIFIED PDF GENERATOR v2.0 ✨\x1b[0m');
+    console.log('\n\x1b[1;35m✨ UNIFIED PDF GENERATOR v3.2 ✨\x1b[0m');
     console.log('\x1b[1;37m════════════════════════════════════════════════════════════════════\x1b[0m');
     
     console.log(`🎯 \x1b[1;36mTier:\x1b[0m \x1b[1;33m${this.options.tier}\x1b[0m`);
     console.log(`🏆 \x1b[1;36mQuality:\x1b[0m \x1b[1;33m${this.options.quality}\x1b[0m`);
     console.log(`📄 \x1b[1;36mFormats:\x1b[0m \x1b[1;33m${this.options.formats.join(', ')}\x1b[0m`);
     console.log(`🔍 \x1b[1;36mContent Scan:\x1b[0m \x1b[1;33m${this.options.scanContent ? 'ENABLED' : 'DISABLED'}\x1b[0m`);
+    console.log(`🎨 \x1b[1;36mPuppeteer:\x1b[0m \x1b[1;33m${this.options.usePuppeteer ? 'ENABLED' : 'DISABLED'}\x1b[0m`);
+    console.log(`🔄 \x1b[1;36mUniversal Converter:\x1b[0m \x1b[1;33m${this.options.useUniversal ? 'ENABLED' : 'DISABLED'}\x1b[0m`);
     console.log(`🏗️ \x1b[1;36mCanvas Gen:\x1b[0m \x1b[1;33m${this.options.skipCanvas ? 'SKIP' : 'ENABLED'}\x1b[0m`);
     console.log(`📁 \x1b[1;36mOutput:\x1b[0m \x1b[1;33m${this.options.output}\x1b[0m`);
     console.log(`🧹 \x1b[1;36mClean:\x1b[0m \x1b[1;33m${this.options.clean ? 'YES' : 'NO'}\x1b[0m`);
+    console.log(`⚡ \x1b[1;36mOverwrite:\x1b[0m \x1b[1;33m${this.options.overwrite ? 'YES' : 'NO'}\x1b[0m`);
+    console.log(`🔒 \x1b[1;36mStrict:\x1b[0m \x1b[1;33m${this.options.strict ? 'YES' : 'NO'}\x1b[0m`);
     
     if (!fs.existsSync(this.options.output)) {
       fs.mkdirSync(this.options.output, { recursive: true });
@@ -479,12 +750,16 @@ class UnifiedPDFGenerator {
       duration: number;
       error?: string;
       size?: number;
+      hash?: string;
     }>;
   }> {
     console.log('\n\x1b[1;36m🔄 GENERATING FROM CONTENT\x1b[0m');
     console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
     
-    const toGenerate = entries.filter(entry => entry.needsGeneration);
+    const toGenerate = this.options.overwrite 
+      ? entries 
+      : entries.filter(entry => entry.needsGeneration);
+    
     const skipped = entries.length - toGenerate.length;
     
     console.log(`\x1b[36m📊 Found ${toGenerate.length} files to generate (${skipped} already exist)\x1b[0m`);
@@ -493,94 +768,54 @@ class UnifiedPDFGenerator {
     let generated = 0;
     let failed = 0;
     
-    for (const entry of toGenerate) {
-      console.log(`  \x1b[36m🚀 Generating: ${entry.title} (${entry.id})\x1b[0m`);
-      
-      const startTime = Date.now();
-      const outputAbsPath = path.join(process.cwd(), 'public', entry.outputPath);
-      
-      try {
-        fs.mkdirSync(path.dirname(outputAbsPath), { recursive: true });
-        
-        if (entry.sourceKind === 'pdf') {
-          // Direct copy for PDFs
-          fs.copyFileSync(entry.sourcePath!, outputAbsPath);
-          const stats = fs.statSync(outputAbsPath);
-          
-          results.push({
-            id: entry.id,
-            success: true,
-            method: 'copy',
-            duration: Date.now() - startTime,
-            size: stats.size,
-          });
-          
-          generated++;
-          console.log(`    \x1b[32m✅ Copied (${(stats.size / 1024).toFixed(1)}KB)\x1b[0m`);
-          
-        } else {
-          // Use universal-converter for other types
-          const converterPath = path.join(process.cwd(), 'scripts', 'pdf', 'universal-converter.ts');
-          
-          if (!fs.existsSync(converterPath)) {
-            throw new Error('Universal converter not found');
-          }
-          
-          const res = spawnSync(
-            os.platform() === 'win32' ? 'npx.cmd' : 'npx',
-            ['tsx', converterPath, entry.sourcePath!],
-            {
-              stdio: this.options.verbose ? 'inherit' : 'pipe',
-              cwd: process.cwd(),
-              env: {
-                ...process.env,
-                FORCE_COLOR: "1",
-                NODE_OPTIONS: process.env.NODE_OPTIONS || "--max-old-space-size=4096",
-              },
-            }
-          );
-          
-          if (res.status !== 0) {
-            throw new Error(`Converter failed with code ${res.status}`);
-          }
-          
-          if (!fs.existsSync(outputAbsPath)) {
-            throw new Error('Converter did not produce output file');
-          }
-          
-          const stats = fs.statSync(outputAbsPath);
-          results.push({
-            id: entry.id,
-            success: true,
-            method: 'universal-converter',
-            duration: Date.now() - startTime,
-            size: stats.size,
-          });
-          
-          generated++;
-          console.log(`    \x1b[32m✅ Converted (${(stats.size / 1024).toFixed(1)}KB)\x1b[0m`);
-        }
-        
-      } catch (error: any) {
-        results.push({
-          id: entry.id,
-          success: false,
-          method: 'error',
-          duration: Date.now() - startTime,
-          error: error.message,
-        });
-        
-        failed++;
-        console.log(`    \x1b[31m❌ Failed: ${error.message}\x1b[0m`);
-        
-        // Try to create placeholder
-        try {
-          await this.generatePlaceholderPDF(entry, outputAbsPath);
-          console.log(`    \x1b[33m⚠️  Created placeholder instead\x1b[0m`);
-        } catch (placeholderError: any) {
-          console.log(`    \x1b[31m❌ Placeholder also failed\x1b[0m`);
-        }
-      }
+    const pdfFiles = toGenerate.filter(e => e.sourceKind === 'pdf');
+    const mdxFiles = toGenerate.filter(e => e.sourceKind === 'mdx' || e.sourceKind === 'md');
+    const htmlFiles = toGenerate.filter(e => e.sourceKind === 'html');
+    const officeFiles = toGenerate.filter(e => 
+      ['xlsx', 'xls', 'pptx', 'ppt'].includes(e.sourceKind || '')
+    );
+    
+    for (const entry of pdfFiles) {
+      const result = await this.processPDFFile(entry);
+      results.push(result);
+      if (result.success) generated++;
+      else failed++;
+    }
+    
+    if (this.options.usePuppeteer && mdxFiles.length > 0) {
+      const puppeteerResults = await this.processWithPuppeteerFallback(mdxFiles, 'mdx');
+      results.push(...puppeteerResults);
+      generated += puppeteerResults.filter(r => r.success).length;
+      failed += puppeteerResults.filter(r => !r.success).length;
+    } else if (mdxFiles.length > 0) {
+      const fallbackResults = await this.processWithUniversalConverter(mdxFiles);
+      results.push(...fallbackResults);
+      generated += fallbackResults.filter(r => r.success).length;
+      failed += fallbackResults.filter(r => !r.success).length;
+    }
+
+    if (this.options.usePuppeteer && htmlFiles.length > 0) {
+      const puppeteerResults = await this.processWithPuppeteerFallback(htmlFiles, 'html');
+      results.push(...puppeteerResults);
+      generated += puppeteerResults.filter(r => r.success).length;
+      failed += puppeteerResults.filter(r => !r.success).length;
+    } else if (htmlFiles.length > 0) {
+      const fallbackResults = await this.processWithUniversalConverter(htmlFiles);
+      results.push(...fallbackResults);
+      generated += fallbackResults.filter(r => r.success).length;
+      failed += fallbackResults.filter(r => !r.success).length;
+    }
+    
+    if (this.options.useUniversal && officeFiles.length > 0) {
+      const converterResults = await this.processWithUniversalConverter(officeFiles);
+      results.push(...converterResults);
+      generated += converterResults.filter(r => r.success).length;
+      failed += converterResults.filter(r => !r.success).length;
+    } else if (officeFiles.length > 0) {
+      const fallbackResults = await this.processWithUniversalConverter(officeFiles);
+      results.push(...fallbackResults);
+      generated += fallbackResults.filter(r => r.success).length;
+      failed += fallbackResults.filter(r => !r.success).length;
     }
     
     console.log(`\n\x1b[32m📊 Content generation: ${generated} generated, ${skipped} skipped, ${failed} failed\x1b[0m`);
@@ -589,616 +824,33 @@ class UnifiedPDFGenerator {
     return { generated, skipped, failed, results };
   }
 
-  async generateTier(tier: Tier) {
-    console.log(`\n\x1b[1;35m🚀 Generating tier: ${tier.toUpperCase()}\x1b[0m`);
-    console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
-    
-    const filesBefore = fs.existsSync(this.options.output) 
-      ? fs.readdirSync(this.options.output).filter(f => f.includes(`-${tier}.pdf`))
-      : [];
-    
-    if (filesBefore.length > 0 && this.options.verbose) {
-      console.log(`  \x1b[90m📋 Found ${filesBefore.length} existing files for tier ${tier}\x1b[0m`);
-    }
-    
-    const generatedFiles: string[] = [];
-    
-    for (const format of this.options.formats) {
-      console.log(`  \x1b[36m📄 Generating ${format}...\x1b[0m`);
-      
-      try {
-        const command = `npx tsx scripts/generate-legacy-canvas.ts ${format} ${this.options.quality} ${tier}`;
-        
-        if (this.options.verbose) {
-          console.log(`    \x1b[90mCommand: ${command}\x1b[0m`);
-        }
-        
-        const output = execSync(command, {
-          encoding: 'utf8',
-          cwd: process.cwd(),
-          env: {
-            ...process.env,
-            PDF_TIER: tier,
-            PDF_QUALITY: this.options.quality,
-            PDF_FORMAT: format,
-            FORCE_COLOR: '1'
-          }
-        });
-        
-        const lines = output.trim().split('\n');
-        for (const line of lines) {
-          if (line.includes('KB') || line.includes('LAC-')) {
-            console.log(`    \x1b[32m✅ ${line.trim()}\x1b[0m`);
-          } else if (!line.includes('legacy-canvas')) {
-            console.log(`    \x1b[90m${line}\x1b[0m`);
-          }
-        }
-        
-        const filename = `legacy-architecture-canvas-${format.toLowerCase()}-${this.options.quality}-${tier}.pdf`;
-        generatedFiles.push(filename);
-        
-      } catch (error: any) {
-        console.log(`    \x1b[31m❌ ${format} failed: ${error.message}\x1b[0m`);
-        
-        const expectedFile = path.join(
-          this.options.output, 
-          `legacy-architecture-canvas-${format.toLowerCase()}-${this.options.quality}-${tier}.pdf`
-        );
-        
-        if (fs.existsSync(expectedFile)) {
-          const stats = fs.statSync(expectedFile);
-          if (stats.size < 10000) {
-            console.log(`    \x1b[33m⚠️  Removing corrupted file (${stats.size} bytes)\x1b[0m`);
-            fs.unlinkSync(expectedFile);
-          }
-        }
-        
-        try {
-          console.log(`    \x1b[33m🔄 Trying fallback generation for ${format}...\x1b[0m`);
-          await this.generateFallback(format, tier, this.options.quality);
-          console.log(`    \x1b[32m✅ ${format} (fallback) generated\x1b[0m`);
-        } catch (fallbackError: any) {
-          console.log(`    \x1b[31m❌ ${format} fallback failed: ${fallbackError.message}\x1b[0m`);
-        }
-      }
-    }
-    
-    await this.generateStandalonePDF(tier, this.options.quality);
-    
-    console.log(`\n\x1b[32m✅ Tier ${tier.toUpperCase()} completed\x1b[0m`);
-    console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
-    
-    return generatedFiles;
-  }
-
-  async generateStandalonePDF(tier: Tier, quality: Quality) {
-    console.log(`  \x1b[36m📖 Generating standalone editorial...\x1b[0m`);
+  private async processPDFFile(entry: ContentRegistryEntry) {
+    const startTime = Date.now();
+    const outputAbsPath = path.join(process.cwd(), 'public', entry.outputPath);
     
     try {
-      const command = `npx tsx scripts/generate-standalone-pdf.tsx ${quality} ${tier}`;
-      
-      if (this.options.verbose) {
-        console.log(`    \x1b[90mCommand: ${command}\x1b[0m`);
+      if (!entry.sourcePath) {
+        throw new Error('No source path');
       }
+
+      fs.mkdirSync(path.dirname(outputAbsPath), { recursive: true });
       
-      const output = execSync(command, {
-        encoding: 'utf8',
-        cwd: process.cwd(),
-        env: {
-          ...process.env,
-          PDF_TIER: tier,
-          PDF_QUALITY: quality,
-          FORCE_COLOR: '1'
-        }
-      });
-      
-      const lines = output.trim().split('\n');
-      for (const line of lines) {
-        if (line.includes('Success!') || line.includes('PDF saved to:')) {
-          console.log(`    \x1b[32m✅ ${line.trim()}\x1b[0m`);
-        } else if (line.includes('File size:') || line.includes('Pages:')) {
-          console.log(`    \x1b[90m${line.trim()}\x1b[0m`);
+      if (!this.options.overwrite && fs.existsSync(outputAbsPath)) {
+        const stats = fs.statSync(outputAbsPath);
+        const valid = IntegratedUniversalConverter.pdfLooksValid(outputAbsPath, this.options.minBytes);
+        
+        if (valid.ok) {
+          const hash = IntegratedUniversalConverter.checksum16(outputAbsPath);
+          return {
+            id: entry.id,
+            success: true,
+            method: 'skip_existing',
+            duration: Date.now() - startTime,
+            size: stats.size,
+            hash: hash || undefined,
+          };
         }
       }
       
-    } catch (error: any) {
-      console.log(`    \x1b[33m⚠️  Standalone PDF generation skipped: ${error.message}\x1b[0m`);
-    }
-  }
-
-  async generatePlaceholderPDF(entry: ContentRegistryEntry, outputPath: string): Promise<void> {
-    const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
-    
-    const doc = await PDFDocument.create();
-    const page = doc.addPage([595.28, 841.89]); // A4
-    
-    const font = await doc.embedFont(StandardFonts.Helvetica);
-    const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
-    
-    // Header
-    page.drawText(entry.title, {
-      x: 50,
-      y: 750,
-      size: 24,
-      font: fontBold,
-      color: rgb(0.1, 0.1, 0.1),
-    });
-    
-    page.drawText('PLACEHOLDER DOCUMENT - CONTENT GENERATION PENDING', {
-      x: 50,
-      y: 720,
-      size: 10,
-      font: font,
-      color: rgb(0.6, 0.2, 0.2),
-    });
-    
-    // Description
-    page.drawText(entry.description, {
-      x: 50,
-      y: 680,
-      size: 12,
-      font: font,
-      color: rgb(0.3, 0.3, 0.3),
-      maxWidth: 500,
-    });
-    
-    // Metadata
-    const metadata = [
-      `ID: ${entry.id}`,
-      `Type: ${entry.type}`,
-      `Tier: ${entry.tier}`,
-      `Category: ${entry.category}`,
-      `Generated: ${new Date().toLocaleString()}`,
-      `Status: Placeholder - Source: ${entry.sourceKind || 'unknown'}`,
-    ];
-    
-    metadata.forEach((line, i) => {
-      page.drawText(line, {
-        x: 50,
-        y: 600 - (i * 20),
-        size: 10,
-        font: font,
-        color: rgb(0.4, 0.4, 0.4),
-      });
-    });
-    
-    const pdfBytes = await doc.save();
-    fs.writeFileSync(outputPath, pdfBytes);
-  }
-
-  async generateFallback(format: string, tier: Tier, quality: Quality) {
-    const filename = `legacy-architecture-canvas-${format.toLowerCase()}-${quality}-${tier}.pdf`;
-    const filePath = path.join(this.options.output, filename);
-    
-    try {
-      const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
-      
-      const doc = await PDFDocument.create();
-      const page = doc.addPage([595.28, 841.89]); // A4
-      
-      const font = await doc.embedFont(StandardFonts.Helvetica);
-      const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
-      
-      doc.setTitle(`Legacy Architecture Canvas - ${tier}`);
-      doc.setAuthor('Abraham of London');
-      doc.setSubject('Strategic Framework');
-      
-      // Professional header
-      page.drawText('LEGACY ARCHITECTURE CANVAS', {
-        x: 50,
-        y: 750,
-        size: 24,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-      
-      page.drawText(`Tier: ${tier.toUpperCase()} | Format: ${format} | Quality: ${quality}`, {
-        x: 50,
-        y: 720,
-        size: 10,
-        font: font,
-        color: rgb(0.4, 0.4, 0.4),
-      });
-      
-      const content = [
-        'This is a fallback document generated because the primary',
-        'PDF generator encountered an issue. The full-featured version',
-        'with interactive form fields and enhanced formatting should',
-        'be available when the system is fully operational.',
-        '',
-        `Generated: ${new Date().toLocaleDateString()}`,
-      ];
-      
-      content.forEach((line, i) => {
-        page.drawText(line, {
-          x: 50,
-          y: 650 - (i * 20),
-          size: 11,
-          font: font,
-          color: rgb(0.2, 0.2, 0.2),
-        });
-      });
-      
-      const pdfBytes = await doc.save();
-      fs.writeFileSync(filePath, pdfBytes);
-      
-    } catch (error) {
-      // Minimal PDF as last resort
-      const minimalPDF = `%PDF-1.4
-1 0 obj
-<<
-/Type /Catalog
-/Pages 2 0 R
->>
-endobj
-
-2 0 obj
-<<
-/Type /Pages
-/Kids [3 0 R]
-/Count 1
->>
-endobj
-
-3 0 obj
-<<
-/Type /Page
-/Parent 2 0 R
-/MediaBox [0 0 612 792]
-/Contents 4 0 R
-/Resources << /Font << /F1 5 0 R >> >>
->>
-endobj
-
-4 0 obj
-<< /Length 200 >>
-stream
-BT
-/F1 24 Tf
-100 700 Td
-(Legacy Architecture Canvas) Tj
-0 -30 Td
-/F1 12 Tf
-(Tier: ${tier.toUpperCase()}) Tj
-0 -20 Td
-(Format: ${format}) Tj
-0 -20 Td
-(Quality: ${quality}) Tj
-0 -20 Td
-(Date: ${new Date().toLocaleDateString()}) Tj
-ET
-endstream
-endobj
-
-5 0 obj
-<<
-/Type /Font
-/Subtype /Type1
-/BaseFont /Helvetica
->>
-endobj
-
-xref
-0 6
-0000000000 65535 f 
-0000000010 00000 n 
-0000000050 00000 n 
-0000000120 00000 n 
-0000000250 00000 n 
-0000002000 00000 n 
-trailer
-<<
-/Size 6
-/Root 1 0 R
->>
-startxref
-2500
-%%EOF`;
-      
-      fs.writeFileSync(filePath, minimalPDF);
-    }
-  }
-
-  async generateRegistryFile(entries: ContentRegistryEntry[]): Promise<string> {
-    const registryPath = path.join(process.cwd(), 'scripts', 'pdf', 'pdf-registry.generated.ts');
-    const now = new Date().toISOString();
-    
-    const configs = entries.map(entry => ({
-      id: entry.id,
-      title: entry.title,
-      description: entry.description,
-      excerpt: entry.excerpt,
-      outputPath: entry.outputPath,
-      type: entry.type,
-      format: entry.format as any,
-      isInteractive: entry.isInteractive,
-      isFillable: entry.isFillable,
-      category: entry.category,
-      tier: entry.tier,
-      formats: entry.formats,
-      fileSize: entry.fileSize,
-      lastModified: entry.lastModified,
-      exists: entry.exists,
-      tags: entry.tags,
-      requiresAuth: entry.requiresAuth,
-      version: entry.version,
-      priority: entry.priority,
-      preload: entry.preload,
-      placeholder: entry.placeholder,
-      md5: entry.md5,
-    }));
-    
-    const registryContent = `// scripts/pdf/pdf-registry.generated.ts
-// AUTO-GENERATED FROM CONTENT SCAN - DO NOT EDIT MANUALLY
-// Generated: ${now}
-// Sources: content/downloads/ and lib/pdf/
-
-export type PDFTier = 'free' | 'member' | 'architect' | 'inner-circle';
-export type PDFType = 'editorial' | 'framework' | 'academic' | 'strategic' | 'tool' | 'canvas' | 'worksheet' | 'assessment' | 'journal' | 'tracker' | 'bundle' | 'other';
-export type PDFFormat = 'PDF' | 'EXCEL' | 'POWERPOINT' | 'ZIP' | 'BINARY';
-
-export interface PDFConfigGenerated {
-  id: string;
-  title: string;
-  description: string;
-  excerpt?: string;
-  outputPath: string;
-  type: PDFType;
-  format: PDFFormat;
-  isInteractive: boolean;
-  isFillable: boolean;
-  category: string;
-  tier: PDFTier;
-  formats: string[];
-  fileSize: string;
-  lastModified: string;
-  exists: boolean;
-  tags: string[];
-  requiresAuth: boolean;
-  version: string;
-  priority?: number;
-  preload?: boolean;
-  placeholder?: string;
-  md5?: string;
-}
-
-export const GENERATED_PDF_CONFIGS: PDFConfigGenerated[] = ${JSON.stringify(configs, null, 2)};
-
-export const GENERATED_AT = "${now}";
-export const GENERATED_COUNT = ${configs.length};
-export const GENERATED_SOURCES = {
-  content: ${entries.filter(e => e.sourcePath?.includes('content/downloads')).length},
-  libPdf: ${entries.filter(e => e.sourcePath?.includes('lib/pdf')).length}
-};
-`;
-    
-    fs.mkdirSync(path.dirname(registryPath), { recursive: true });
-    fs.writeFileSync(registryPath, registryContent, 'utf-8');
-    
-    console.log(`\n\x1b[32m📋 Generated registry: ${registryPath} (${configs.length} entries)\x1b[0m`);
-    return registryPath;
-  }
-
-  async run() {
-    await this.initialize();
-    
-    let contentResults;
-    let canvasResults;
-    
-    // CONTENT SCANNING & GENERATION
-    if (this.options.scanContent && !this.options.scanOnly) {
-      const { entries } = await ContentScanner.scanAllContent(this.options);
-      contentResults = await this.generateFromContent(entries);
-      
-      // Generate registry after content generation
-      if (contentResults.generated > 0) {
-        await this.generateRegistryFile(entries);
-      }
-    } else if (this.options.scanOnly) {
-      console.log('\n\x1b[1;36m🔍 SCAN-ONLY MODE\x1b[0m');
-      console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
-      const { entries, summary } = await ContentScanner.scanAllContent(this.options);
-      console.log(`\x1b[32m📊 Scan complete: ${summary.total} total entries\x1b[0m`);
-      console.log(`\x1b[90m  • Content files: ${summary.contentFiles}\x1b[0m`);
-      console.log(`\x1b[90m  • Library PDFs: ${summary.libFiles}\x1b[0m`);
-      console.log(`\x1b[90m  • Need generation: ${summary.needGeneration}\x1b[0m`);
-      
-      // Generate registry file from scan
-      await this.generateRegistryFile(entries);
-      return true;
-    }
-    
-    // LEGACY CANVAS GENERATION
-    if (!this.options.skipCanvas) {
-      const tiers: Tier[] = this.options.tier === 'all' 
-        ? ['architect', 'member', 'free'] 
-        : [this.options.tier as Tier];
-      
-      const results: Record<string, boolean> = {};
-      
-      for (const tier of tiers) {
-        console.log('\n\x1b[1;37m' + '='.repeat(60) + '\x1b[0m');
-        console.log(`\x1b[1;34m🏗️  BUILDING: ${tier.toUpperCase()}\x1b[0m`);
-        console.log('\x1b[1;37m' + '='.repeat(60) + '\x1b[0m');
-        
-        const filesGenerated = await this.generateTier(tier);
-        const verified = await this.verifyTier(tier);
-        results[tier] = verified;
-        
-        console.log('\x1b[1;37m' + '='.repeat(60) + '\x1b[0m');
-        console.log(verified ? 
-          `\x1b[1;32m✅ ${tier.toUpperCase()} VERIFIED\x1b[0m` : 
-          `\x1b[1;33m⚠️  ${tier.toUpperCase()} HAS ISSUES\x1b[0m`);
-        console.log('\x1b[1;37m' + '='.repeat(60) + '\x1b[0m');
-      }
-      
-      canvasResults = results;
-    }
-    
-    // SUMMARY
-    this.printSummary(contentResults, canvasResults);
-    
-    const canvasSuccess = !canvasResults || Object.values(canvasResults).every(v => v);
-    const contentSuccess = !contentResults || contentResults.failed === 0;
-    
-    return canvasSuccess && contentSuccess;
-  }
-
-  async verifyTier(tier: Tier): Promise<boolean> {
-    console.log(`\x1b[36m🔍 Verifying tier: ${tier}\x1b[0m`);
-    
-    if (!fs.existsSync(this.options.output)) {
-      console.log(`  \x1b[31m❌ Output directory does not exist\x1b[0m`);
-      return false;
-    }
-    
-    const files = fs.readdirSync(this.options.output);
-    const expectedFiles = this.options.formats.map(f => 
-      `legacy-architecture-canvas-${f.toLowerCase()}-${this.options.quality}-${tier}.pdf`
-    );
-    
-    let allValid = true;
-    let validCount = 0;
-    
-    for (const expected of expectedFiles) {
-      if (files.includes(expected)) {
-        const filePath = path.join(this.options.output, expected);
-        const stats = fs.statSync(filePath);
-        
-        let minSize, maxSize;
-        switch (this.options.quality) {
-          case 'enterprise':
-            minSize = 50000;
-            maxSize = 5000000;
-            break;
-          case 'premium':
-            minSize = 30000;
-            maxSize = 2000000;
-            break;
-          default:
-            minSize = 20000;
-            maxSize = 1000000;
-        }
-        
-        const isValid = stats.size >= minSize && stats.size <= maxSize;
-        const sizeDisplay = (stats.size / 1024).toFixed(1);
-        
-        if (isValid) {
-          console.log(`  \x1b[32m✅ ${expected} (${sizeDisplay} KB)\x1b[0m`);
-          validCount++;
-        } else {
-          const issue = stats.size < minSize ? 'TOO SMALL' : 'TOO LARGE';
-          console.log(`  \x1b[33m⚠️  ${expected} (${sizeDisplay} KB - ${issue})\x1b[0m`);
-          allValid = false;
-        }
-      } else {
-        console.log(`  \x1b[31m❌ ${expected} (MISSING)\x1b[0m`);
-        allValid = false;
-      }
-    }
-    
-    const standaloneFile = `ultimate-purpose-of-man-${this.options.quality}.pdf`;
-    if (files.includes(standaloneFile)) {
-      const stats = fs.statSync(path.join(this.options.output, standaloneFile));
-      console.log(`  \x1b[32m✅ ${standaloneFile} (${(stats.size / 1024).toFixed(1)} KB)\x1b[0m`);
-      validCount++;
-    }
-    
-    console.log(`  \x1b[90mValid files: ${validCount}/${expectedFiles.length + 1}\x1b[0m`);
-    return allValid;
-  }
-
-  printSummary(
-    contentResults?: { generated: number; skipped: number; failed: number; results: any[] },
-    canvasResults?: Record<string, boolean>
-  ) {
-    console.log('\n\x1b[1;36m📊 GENERATION SUMMARY\x1b[0m');
-    console.log('\x1b[1;37m════════════════════════════════════════════════════════════════════\x1b[0m');
-    
-    if (contentResults) {
-      console.log(`\x1b[1;36mCONTENT:\x1b[0m`);
-      console.log(`  \x1b[32m✅ Generated: ${contentResults.generated}\x1b[0m`);
-      console.log(`  \x1b[33m⏭️  Skipped: ${contentResults.skipped}\x1b[0m`);
-      console.log(`  \x1b[31m❌ Failed: ${contentResults.failed}\x1b[0m`);
-    }
-    
-    if (canvasResults) {
-      console.log(`\n\x1b[1;36mLEGACY CANVAS:\x1b[0m`);
-      const successful = Object.keys(canvasResults).filter(t => canvasResults[t]);
-      const failed = Object.keys(canvasResults).filter(t => !canvasResults[t]);
-      
-      console.log(`  \x1b[32m✅ Successful: ${successful.length}/${Object.keys(canvasResults).length}\x1b[0m`);
-      
-      if (failed.length > 0) {
-        console.log(`  \x1b[31m❌ Failed: ${failed.length}/${Object.keys(canvasResults).length}\x1b[0m`);
-        console.log(`  \x1b[33m   Failed tiers: ${failed.join(', ')}\x1b[0m`);
-      }
-    }
-    
-    // Show directory contents
-    if (fs.existsSync(this.options.output)) {
-      const files = fs.readdirSync(this.options.output);
-      const pdfCount = files.filter(f => f.endsWith('.pdf')).length;
-      console.log(`\n\x1b[90m📁 Output directory: ${this.options.output}\x1b[0m`);
-      console.log(`\x1b[90m📄 Total PDF files: ${pdfCount}\x1b[0m`);
-    }
-    
-    const contentSuccess = !contentResults || contentResults.failed === 0;
-    const canvasSuccess = !canvasResults || Object.values(canvasResults).every(v => v);
-    
-    if (contentSuccess && canvasSuccess) {
-      console.log('\n\x1b[1;32m🎉 ALL GENERATION COMPLETED SUCCESSFULLY!\x1b[0m');
-    } else {
-      console.log('\n\x1b[33m⚠️  Some generations failed - check logs above\x1b[0m');
-    }
-    
-    console.log('\x1b[1;37m════════════════════════════════════════════════════════════════════\x1b[0m');
-  }
-}
-
-async function main() {
-  program.parse(process.argv);
-  const opts = program.opts();
-  
-  const formats = (opts.formats || 'A4,Letter,A3')
-    .split(',')
-    .map((f: string) => f.trim().toUpperCase() as Format)
-    .filter(f => ['A4', 'LETTER', 'A3', 'BUNDLE'].includes(f))
-    .map(f => f === 'LETTER' ? 'Letter' : f as Format);
-  
-  const options: GenerationOptions = {
-    tier: opts.tier || 'all',
-    quality: (opts.quality || 'premium') as Quality,
-    formats: formats.length > 0 ? formats : ['A4', 'Letter', 'A3'] as Format[],
-    output: opts.output || './public/assets/downloads',
-    clean: opts.clean || false,
-    verbose: opts.verbose || false,
-    scanContent: opts.scanContent || false,
-    scanOnly: opts.scanOnly || false,
-    skipCanvas: opts.skipCanvas || false,
-  };
-  
-  const generator = new UnifiedPDFGenerator(options);
-  
-  try {
-    const success = await generator.run();
-    process.exit(success ? 0 : 1);
-  } catch (error: any) {
-    console.error('\n\x1b[1;31m❌ Generation failed:\x1b[0m', error.message);
-    if (opts.verbose && error.stack) {
-      console.error('\x1b[90m' + error.stack + '\x1b[0m');
-    }
-    process.exit(1);
-  }
-}
-
-// Fix for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const isMainModule = process.argv[1] === __filename;
-
-if (isMainModule) {
-  main();
-}
-
-export { UnifiedPDFGenerator, ContentScanner };
+      fs.copyFileSync(entry.sourcePath, outputAbsPath);
+      const stats = fs

@@ -1,62 +1,64 @@
 // lib/server/token-store.ts
-import { createClient } from "redis";
+import type { RedisClientType } from "redis";
+
+let _redis: RedisClientType | null = null;
+let _redisConnecting: Promise<RedisClientType | null> | null = null;
+
+function getRedisUrl(): string | null {
+  return process.env.REDIS_URL || process.env.INNER_CIRCLE_REDIS_URL || null;
+}
+
+async function getRedis(): Promise<RedisClientType | null> {
+  if (_redis) return _redis;
+  if (_redisConnecting) return _redisConnecting;
+
+  _redisConnecting = (async () => {
+    const url = getRedisUrl();
+    if (!url) return null;
+
+    try {
+      const { createClient } = await import("redis");
+      const client = createClient({ url });
+
+      client.on("error", (err) => {
+        // keep log minimal in production
+        console.warn("[redis] client error", err?.message || err);
+      });
+
+      await client.connect();
+      _redis = client;
+      return _redis;
+    } catch (e: any) {
+      console.warn("[redis] connect failed; redis disabled", e?.message || e);
+      _redis = null;
+      return null;
+    } finally {
+      _redisConnecting = null;
+    }
+  })();
+
+  return _redisConnecting;
+}
+
+const PREFIX = "aol:";
 
 export type Tier = "public" | "inner-circle" | "private";
 
-export type Session = {
-  tier: Tier;
-  sub?: string;          // email or user id
-  suspended?: boolean;
-  issuedAt: number;
-  expiresAt?: number;    // optional hard expiry
-};
+export async function tokenStoreSet(key: string, value: any, ttlSeconds: number) {
+  const redis = await getRedis();
+  if (!redis) return;
+  await redis.set(`${PREFIX}${key}`, JSON.stringify(value), { EX: ttlSeconds });
+}
 
-const REDIS_URL = process.env.REDIS_URL;
-if (!REDIS_URL) throw new Error("REDIS_URL not set");
+export async function tokenStoreGet<T = any>(key: string): Promise<T | null> {
+  const redis = await getRedis();
+  if (!redis) return null;
+  const raw = await redis.get(`${PREFIX}${key}`);
+  return raw ? (JSON.parse(raw) as T) : null;
+}
 
-const redis = createClient({ url: REDIS_URL });
-redis.connect().catch(console.error);
-
-const PREFIX = "aol:session:";
-const TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
-
-export const tokenStore = {
-  async createSession(
-    sessionId: string,
-    data: Session,
-    ttlSeconds: number = TTL_SECONDS
-  ) {
-    const key = PREFIX + sessionId;
-    await redis.set(key, JSON.stringify(data), { EX: ttlSeconds });
-  },
-
-  async getSession(sessionId: string): Promise<Session | null> {
-    const key = PREFIX + sessionId;
-    const raw = await redis.get(key);
-    if (!raw) return null;
-
-    try {
-      const session = JSON.parse(raw) as Session;
-      if (session.expiresAt && Date.now() > session.expiresAt) {
-        await redis.del(key);
-        return null;
-      }
-      return session;
-    } catch {
-      await redis.del(key);
-      return null;
-    }
-  },
-
-  async revokeSession(sessionId: string) {
-    await redis.del(PREFIX + sessionId);
-  },
-
-  async suspendSession(sessionId: string) {
-    const key = PREFIX + sessionId;
-    const s = await this.getSession(sessionId);
-    if (!s) return;
-    s.suspended = true;
-    await redis.set(key, JSON.stringify(s));
-  },
-};
+export async function tokenStoreDel(key: string) {
+  const redis = await getRedis();
+  if (!redis) return;
+  await redis.del(`${PREFIX}${key}`);
+}

@@ -1,7 +1,7 @@
+import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
 interface RelatedEvent {
   id: string;
   title: string;
@@ -12,24 +12,19 @@ interface RelatedEvent {
   image: string;
   slug: string;
 }
-
 interface RelatedEventsProps {
   events: RelatedEvent[];
   currentEventId: string;
 }
-
 const RelatedEvents: React.FC<RelatedEventsProps> = ({ events, currentEventId }) => {
-  const filteredEvents = events.filter(event => event.id !== currentEventId).slice(0, 3);
-
+  const filteredEvents = safeArraySlice(events.filter(...), 0, 3);
   if (filteredEvents.length === 0) {
     return null;
   }
-
   return (
     <div className="bg-gray-50 rounded-2xl p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">You Might Also Like</h2>
       <p className="text-gray-600 mb-8">Explore more events from Abraham of London</p>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredEvents.map((event) => (
           <Link key={event.id} href={`/events/${event.slug}`}>
@@ -53,7 +48,6 @@ const RelatedEvents: React.FC<RelatedEventsProps> = ({ events, currentEventId })
                   </span>
                 </div>
               </div>
-              
               <div className="p-6">
                 <div className="flex items-center text-sm text-gray-500 mb-3">
                   <CalendarIcon className="w-4 h-4 mr-1" />
@@ -62,15 +56,12 @@ const RelatedEvents: React.FC<RelatedEventsProps> = ({ events, currentEventId })
                   <LocationIcon className="w-4 h-4 mr-1" />
                   <span>{event.location}</span>
                 </div>
-                
                 <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
                   {event.title}
                 </h3>
-                
                 <p className="text-gray-600 mb-4 line-clamp-3">
                   {event.excerpt}
                 </p>
-                
                 <div className="flex items-center text-blue-600 font-semibold">
                   <span>Learn More</span>
                   <ArrowIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -83,24 +74,20 @@ const RelatedEvents: React.FC<RelatedEventsProps> = ({ events, currentEventId })
     </div>
   );
 };
-
 const CalendarIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
   </svg>
 );
-
 const LocationIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
-
 const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
   </svg>
 );
-
-export default RelatedEvents;
+export default RelatedEvents;

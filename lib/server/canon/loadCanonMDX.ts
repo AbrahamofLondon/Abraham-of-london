@@ -1,5 +1,5 @@
 /* lib/server/canon/loadCanonMDX.ts */
-import { getDocBySlug } from "@/lib/contentlayer-compat";
+import { getDocBySlug } from "@/lib/content";
 
 export async function loadCanonMDX(slug: string) {
   const doc = await getDocBySlug(`content/${slug}`);

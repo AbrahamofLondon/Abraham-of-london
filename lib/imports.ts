@@ -16,6 +16,8 @@ export * from "@/lib/input-validator";
 
 // Contentlayer helpers - client-safe versions
 import { getContentlayerData, getPublishedDocuments } from "./contentlayer-compat";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export const contentlayerHelper = {
   getAllDocuments: () => getContentlayerData().allDocuments || [],
@@ -81,7 +83,7 @@ export function anonymizeIp(ip: string): string {
   if (cleanIp.includes(':')) {
     const parts = cleanIp.split(':');
     if (parts.length <= 3) return cleanIp;
-    return `${parts.slice(0, Math.min(2, parts.length)).join(':')}::`;
+    return `${safeSlice(parts, 0, Math.min(2, parts.length)).join(':')}::`;
   }
   
   const parts = cleanIp.split('.');

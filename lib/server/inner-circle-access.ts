@@ -11,6 +11,8 @@ import type {
   IssuedKey
 } from './inner-circle-store';
 import { getRedis } from '@/lib/redis';
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export interface AccessLevel {
   level: 'basic' | 'premium' | 'vip' | 'admin';
@@ -158,7 +160,7 @@ class InnerCircleAccessManager {
     
     // Keep memory log at manageable size
     if (this.memoryAuditLog.length > this.maxMemoryAuditLogSize) {
-      this.memoryAuditLog = this.memoryAuditLog.slice(0, this.maxMemoryAuditLogSize);
+      this.memoryAuditLog = this.safeSlice(memoryAuditLog, 0, this.maxMemoryAuditLogSize);
     }
 
     // Also store in Redis for persistence if available
@@ -721,7 +723,7 @@ class InnerCircleAccessManager {
           // Process in chunks to avoid too many Redis calls
           const chunkSize = 100;
           for (let i = 0; i < auditKeys.length; i += chunkSize * 2) {
-            const keysChunk = auditKeys.slice(i, i + chunkSize * 2);
+            const keysChunk = safeSlice(auditKeys, i, i + chunkSize * 2);
             const keys = [];
             
             for (let j = 0; j < keysChunk.length; j += 2) {
@@ -776,7 +778,7 @@ class InnerCircleAccessManager {
     }
 
     if (filters?.limit) {
-      filtered = filtered.slice(0, filters.limit);
+      filtered = safeSlice(filtered, 0, filters.limit);
     }
 
     return filtered;
@@ -860,7 +862,7 @@ class InnerCircleAccessManager {
       granted: last24Hours.filter(log => log.granted).length,
       denied: last24Hours.filter(log => !log.granted).length,
       byLevel,
-      recentActivity: last24Hours.slice(0, 10),
+      recentActivity: safeSlice(last24Hours, 0, 10),
       peakHour,
       cacheHits,
       cacheMisses

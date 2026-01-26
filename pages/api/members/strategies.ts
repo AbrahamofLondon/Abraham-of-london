@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createStrictApiHandler } from '@/lib/server/inner-circle-access';
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // Example strategy data
 const STRATEGIES_DATA = [
@@ -86,7 +88,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           // Pagination
           const startIndex = (pageNum - 1) * limitNum;
           const endIndex = pageNum * limitNum;
-          const paginatedStrategies = filteredStrategies.slice(startIndex, endIndex);
+          const paginatedStrategies = safeSlice(filteredStrategies, startIndex, endIndex);
           
           return res.status(200).json({
             success: true,

@@ -1,7 +1,7 @@
 /* pages/api/admin/export-audit.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
-import { requireAdmin, requireRateLimit } from "@/lib/server/guards";
+import { requireAdmin, requireRateLimit } from "@/lib/server/inner-circle-guards";
 import { validateDateRange } from "@/lib/server/validation";
 import { jsonErr } from "@/lib/server/http";
 

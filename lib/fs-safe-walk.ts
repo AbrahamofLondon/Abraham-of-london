@@ -1,6 +1,6 @@
 // lib/fs-safe-walk.ts
-import fs from "node:fs/promises";
-import path from "node:path";
+import fs from "fs/promises";
+import path from "path";
 
 export type WalkOptions = {
   ignoreExt?: Set<string>;
@@ -52,3 +52,4 @@ export async function safeWalkDirsOnly(
   await walk(rootDir);
   return results;
 }
+

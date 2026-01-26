@@ -4,6 +4,8 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextRequest } from "next/server";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // -----------------------------------------------------------------------------
 // 1. Configuration (lib/security/config.ts)
@@ -460,7 +462,7 @@ export class SecurityMonitor {
   }
   
   getRequestLogs(limit = 100): RequestLog[] {
-    return this.requestLogs.slice(0, limit);
+    return this.safeSlice(requestLogs, 0, limit);
   }
   
   clearOldLogs(maxAgeHours = 24): void {
@@ -798,7 +800,7 @@ export function anonymizeIp(ip: string): string {
     const parts = ip.split(':');
     if (parts.length >= 4) {
       // Keep first 4 segments, zero out the rest
-      return `${parts.slice(0, 4).join(':')}::`;
+      return `${safeSlice(parts, 0, 4).join(':')}::`;
     }
   }
   

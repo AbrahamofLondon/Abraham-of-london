@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe";
+
 
 interface Session {
   id: string;
@@ -102,7 +104,7 @@ const EventSchedule: React.FC<EventScheduleProps> = ({ schedule }) => {
                       ? 'bg-gray-100 text-gray-800'
                       : 'bg-blue-100 text-blue-800'
                   }`}>
-                    {session.type.charAt(0).toUpperCase() + session.type.slice(1)}
+                    {safeCapitalize(session.type)}
                   </span>
                 </div>
                 

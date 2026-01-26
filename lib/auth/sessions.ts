@@ -1,10 +1,9 @@
 /* lib/auth/sessions.ts — SESSION ARCHITECTURE (INTEGRITY MODE) */
+import { safeSlice } from "@/lib/utils/safe";
 import { randomBytes, timingSafeEqual } from 'crypto';
-
 // Types
 export type SessionType = 'admin' | 'inner-circle' | 'public' | 'api';
 export type SessionStatus = 'active' | 'expired' | 'revoked' | 'compromised';
-
 export interface SessionData {
   id: string;
   userId: string;
@@ -23,7 +22,6 @@ export interface SessionData {
   csrfToken: string;
   refreshToken?: string;
 }
-
 export interface CreateSessionOptions {
   userId: string;
   userEmail?: string;
@@ -36,7 +34,6 @@ export interface CreateSessionOptions {
   deviceId?: string;
   metadata?: Record<string, any>;
 }
-
 export interface VerifySessionOptions {
   requireCsrf?: boolean;
   csrfToken?: string;
@@ -45,7 +42,6 @@ export interface VerifySessionOptions {
   validateUserAgent?: boolean;
   currentUserAgent?: string;
 }
-
 // Constants
 const SESSION_CONFIG = {
   admin: {
@@ -73,47 +69,37 @@ const SESSION_CONFIG = {
     requiresCsrf: false
   }
 } as const;
-
 // ==================== SESSION STORAGE ====================
-
 class InMemStore {
   private static instance: InMemStore;
   private sessions = new Map<string, SessionData>();
-  
   private constructor() {}
-
   static getInstance(): InMemStore {
     if (!InMemStore.instance) {
       InMemStore.instance = new InMemStore();
     }
     return InMemStore.instance;
   }
-
   async set(id: string, data: SessionData, ttl?: number): Promise<void> {
     this.sessions.set(id, data);
-    
     if (ttl) {
       setTimeout(() => {
         this.sessions.delete(id);
       }, ttl);
     }
   }
-
   async get(id: string): Promise<SessionData | null> {
     return this.sessions.get(id) || null;
   }
-
   async delete(id: string): Promise<void> {
     this.sessions.delete(id);
   }
-
   async findByUserId(userId: string, type?: SessionType): Promise<SessionData[]> {
     return Array.from(this.sessions.values()).filter(s => 
       s.userId === userId && (!type || s.sessionType === type)
     );
   }
 }
-
 /**
  * STRATEGIC FIX: REDIS INTEGRITY
  * Resolves: Property 'keys' does not exist on type 'RedisLike'
@@ -123,40 +109,32 @@ async function getRedisSessionStore() {
   try {
     const redisModule = await import('@/lib/redis');
     const redisClient = redisModule.default || redisModule.redisClient;
-    
     if (!redisClient) throw new Error('Redis Unavailable');
-
     // Type assertion to bypass strict type checking
     const redisAny = redisClient as any;
-
     return {
       async set(sessionId: string, data: SessionData, ttl?: number): Promise<void> {
         const key = `session:${sessionId}`;
         const ttlSeconds = ttl ? Math.floor(ttl / 1000) : 3600;
         await redisClient.set(key, JSON.stringify(data), 'EX', ttlSeconds);
       },
-
       async get(sessionId: string): Promise<SessionData | null> {
         const data = await redisClient.get(`session:${sessionId}`);
         return data ? JSON.parse(data) : null;
       },
-
       async delete(sessionId: string): Promise<void> {
         await redisClient.del(`session:${sessionId}`);
       },
-
       async findByUserId(userId: string, sessionType?: SessionType): Promise<SessionData[]> {
         const pattern = `session:*`;
-        
         // FIX: Cast to 'any' to bypass TypeScript property check
         // Check if keys method exists dynamically at runtime
         if (typeof redisAny.keys === 'function') {
           try {
             const keys: string[] = await redisAny.keys(pattern);
             const sessions: SessionData[] = [];
-            
             // Limit scan for build-time safety
-            for (const key of keys.slice(0, 100)) {
+            for (const key of safeSlice(keys, 0, 100)) {
               const data = await redisClient.get(key);
               if (data) {
                 const session = JSON.parse(data);
@@ -172,10 +150,8 @@ async function getRedisSessionStore() {
         }
         return InMemStore.getInstance().findByUserId(userId, sessionType);
       },
-
       async revokeAll(userId: string, sessionType?: SessionType): Promise<void> {
         const sessions = await this.findByUserId(userId, sessionType);
-        
         for (const session of sessions) {
           if (session.status === 'active') {
             session.status = 'revoked';
@@ -189,9 +165,7 @@ async function getRedisSessionStore() {
     return InMemStore.getInstance();
   }
 }
-
 // ==================== EXPORT API (CORE LOGIC) ====================
-
 export async function createSession(options: CreateSessionOptions): Promise<{
   sessionId: string;
   csrfToken: string;
@@ -210,21 +184,16 @@ export async function createSession(options: CreateSessionOptions): Promise<{
     deviceId,
     metadata = {}
   } = options;
-
   if (!userId || typeof userId !== 'string' || userId.length > 255) {
     throw new Error('Invalid userId');
   }
-
   const config = SESSION_CONFIG[sessionType];
   const ttl = rememberMe ? config.ttl * 2 : config.ttl;
-  
   const sessionId = `sess_${generateSecureToken(32)}`;
   const csrfToken = generateSecureToken(24);
   const refreshToken = config.refreshable ? `refresh_${generateSecureToken(32)}` : undefined;
-
   const now = new Date();
   const expiresAt = new Date(now.getTime() + ttl);
-
   const sessionData: SessionData = {
     id: sessionId,
     userId,
@@ -243,13 +212,10 @@ export async function createSession(options: CreateSessionOptions): Promise<{
     csrfToken,
     refreshToken
   };
-
   const store = await getRedisSessionStore();
   await store.set(sessionId, sessionData, ttl);
-
   return { sessionId, csrfToken, refreshToken, expiresAt };
 }
-
 export async function verifySession(
   sessionId: string,
   options: VerifySessionOptions = {}
@@ -262,23 +228,18 @@ export async function verifySession(
   if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 512) {
     return { valid: false, error: 'Invalid session ID', statusCode: 400 };
   }
-
   const store = await getRedisSessionStore();
   const session = await store.get(sessionId);
-
   if (!session) {
     return { valid: false, error: 'Session not found', statusCode: 401 };
   }
-
   const now = new Date();
-
   // Check expiration
   if (session.expiresAt <= now) {
     session.status = 'expired';
     await store.set(sessionId, session);
     return { valid: false, error: 'Session expired', statusCode: 401 };
   }
-
   // Check status
   if (session.status !== 'active') {
     return { 
@@ -287,30 +248,24 @@ export async function verifySession(
       statusCode: 401 
     };
   }
-
   // Check CSRF token if required
   const config = SESSION_CONFIG[session.sessionType];
   if (config.requiresCsrf && options.requireCsrf !== false) {
     if (!options.csrfToken) {
       return { valid: false, error: 'CSRF token required', statusCode: 403 };
     }
-
     // Create safe comparison
     const providedToken = Buffer.from(options.csrfToken);
     const storedToken = Buffer.from(session.csrfToken);
-    
     if (providedToken.length !== storedToken.length || !timingSafeEqual(providedToken, storedToken)) {
       return { valid: false, error: 'Invalid CSRF token', statusCode: 403 };
     }
   }
-
   // Update last active timestamp
   session.lastActiveAt = now;
   await store.set(sessionId, session);
-
   return { valid: true, session };
 }
-
 export async function refreshSession(
   sessionId: string,
   refreshToken: string
@@ -322,32 +277,25 @@ export async function refreshSession(
 }> {
   const store = await getRedisSessionStore();
   const session = await store.get(sessionId);
-
   if (!session) {
     return { success: false, error: 'Session not found' };
   }
-
   const config = SESSION_CONFIG[session.sessionType];
   if (!config.refreshable) {
     return { success: false, error: 'Session type not refreshable' };
   }
-
   if (session.refreshToken !== refreshToken) {
     return { success: false, error: 'Invalid refresh token' };
   }
-
   if (session.status !== 'active') {
     return { success: false, error: `Session ${session.status}` };
   }
-
   // Create new session with same data
   const newSessionId = `sess_${generateSecureToken(32)}`;
   const newCsrfToken = generateSecureToken(24);
   const newRefreshToken = `refresh_${generateSecureToken(32)}`;
-
   const now = new Date();
   const newExpiresAt = new Date(now.getTime() + config.ttl);
-
   const newSession: SessionData = {
     ...session,
     id: newSessionId,
@@ -357,44 +305,34 @@ export async function refreshSession(
     expiresAt: newExpiresAt,
     lastActiveAt: now
   };
-
   // Store new session
   await store.set(newSessionId, newSession, config.ttl);
-  
   // Revoke old session
   session.status = 'revoked';
   await store.set(sessionId, session);
-
   return {
     success: true,
     newSessionId,
     newCsrfToken
   };
 }
-
 export async function revokeSession(sessionId: string): Promise<boolean> {
   const store = await getRedisSessionStore();
   const session = await store.get(sessionId);
-
   if (!session) {
     return false;
   }
-
   session.status = 'revoked';
   await store.set(sessionId, session);
-
   return true;
 }
-
 export async function revokeAllUserSessions(
   userId: string,
   sessionType?: SessionType
 ): Promise<number> {
   const store = await getRedisSessionStore();
   const sessions = await store.findByUserId(userId, sessionType);
-  
   let revokedCount = 0;
-  
   for (const session of sessions) {
     if (session.status === 'active') {
       session.status = 'revoked';
@@ -402,10 +340,8 @@ export async function revokeAllUserSessions(
       revokedCount++;
     }
   }
-
   return revokedCount;
 }
-
 export async function getActiveSessions(
   userId: string,
   sessionType?: SessionType
@@ -413,17 +349,14 @@ export async function getActiveSessions(
   const store = await getRedisSessionStore();
   const sessions = await store.findByUserId(userId, sessionType);
   const now = new Date();
-  
   return sessions.filter(s => 
     s.status === 'active' && s.expiresAt > now
   );
 }
-
 // ==================== SECURITY UTILITIES ====================
 function generateSecureToken(length: number): string {
-  return randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+  return randomBytes(Math.ceil(length / 2)).toString('hex').slice, 0, length);
 }
-
 // ==================== COOKIE MANAGEMENT ====================
 export function createSessionCookie(
   sessionId: string,
@@ -444,7 +377,6 @@ export function createSessionCookie(
   const config = SESSION_CONFIG[sessionType];
   const ttl = rememberMe ? config.ttl * 2 : config.ttl;
   const cookieName = getCookieName(sessionType);
-
   return {
     name: cookieName,
     value: sessionId,
@@ -458,7 +390,6 @@ export function createSessionCookie(
     }
   };
 }
-
 export function createCsrfCookie(
   csrfToken: string,
   sessionType: SessionType = 'admin',
@@ -477,7 +408,6 @@ export function createCsrfCookie(
   const config = SESSION_CONFIG[sessionType];
   const ttl = rememberMe ? config.ttl * 2 : config.ttl;
   const cookieName = getCsrfCookieName(sessionType);
-
   return {
     name: cookieName,
     value: csrfToken,
@@ -490,17 +420,14 @@ export function createCsrfCookie(
     }
   };
 }
-
 function getCookieName(sessionType: SessionType): string {
   const prefix = process.env.SESSION_COOKIE_PREFIX || 'aol';
   return `${prefix}_${sessionType}_session`;
 }
-
 function getCsrfCookieName(sessionType: SessionType): string {
   const prefix = process.env.SESSION_COOKIE_PREFIX || 'aol';
   return `${prefix}_${sessionType}_csrf`;
 }
-
 // ==================== EXPORT API ====================
 const sessionsApi = {
   createSession,
@@ -512,5 +439,4 @@ const sessionsApi = {
   createSessionCookie,
   createCsrfCookie,
 };
-
 export default sessionsApi;

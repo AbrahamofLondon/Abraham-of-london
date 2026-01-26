@@ -13,12 +13,10 @@ import {
   getRateLimiterStatsSync,
   resetRateLimitSync,
   unblockSync,
+  createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
   type RateLimitOptions as UnifiedRateLimitOptions,
-  type RateLimitResult as UnifiedRateLimitResult,
-  isRateLimitedRequest,
-  checkRateLimit as unifiedCheckRateLimit,
-  rateLimitForRequestIp as unifiedRateLimitForRequestIp
+  type RateLimitResult as UnifiedRateLimitResult
 } from "./rate-limit-unified";
 
 // ==================== TYPE DEFINITIONS ====================
@@ -47,9 +45,8 @@ export {
   getRateLimiterStatsSync,
   resetRateLimitSync,
   unblockSync,
-  RATE_LIMIT_CONFIGS,
-  type RateLimitOptions,
-  type RateLimitResult
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS
 };
 
 // Re-export specific unified functions with the expected names
@@ -141,6 +138,7 @@ const rateLimitModule = {
   resetRateLimit,
   unblock,
   withApiRateLimit,
+  createRateLimitHeaders,
   
   // Compatibility functions
   rateLimitForRequestIp,

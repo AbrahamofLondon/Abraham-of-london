@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import * as Generated from "@/scripts/pdf/pdf-registry.generated";
+import { safeArraySlice } from "@/lib/utils/safe";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -365,7 +368,7 @@ export const PDF_REGISTRY = getPDFRegistry();
 
 // CLI Interface
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2);
+  const args = safeArraySlice(process.argv, 2);
   
   if (args.includes('--scan') || args.includes('--discover')) {
     console.log('🔍 Scanning for PDF assets...\n');
@@ -437,3 +440,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
 }
 
+export const PDF_REGISTRY = Generated;
+export const PDF_CATEGORIES = Generated.CATEGORIES;
+export const PDF_TIERS = Generated.PDF_TIERS;

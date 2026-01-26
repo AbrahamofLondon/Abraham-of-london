@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
+import { safeSlice } from "@/lib/utils/safe";
 import crypto from "node:crypto";
-
 // 1. Import Shared Utilities
 import { 
   DatabaseClient, 
@@ -9,14 +9,11 @@ import {
   toIso, 
   sanitizeString 
 } from "./inner-circle-utils";
-
 // 2. Import Audit Logging
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "./audit";
-
 /* =============================================================================
    CONFIGURATION & CONSTANTS
    ============================================================================= */
-
 const CONFIG = {
   KEY_EXPIRY_DAYS: Number(process.env.INNER_CIRCLE_KEY_EXPIRY_DAYS || 90),
   KEY_PREFIX: "icl_",
@@ -29,13 +26,10 @@ const CONFIG = {
   MAX_UNLOCKS_PER_DAY: 100,
   JWT_EXPIRY_HOURS: 24,
 } as const;
-
 /* =============================================================================
    TYPES
    ============================================================================= */
-
 export type InnerCircleStatus = "pending" | "active" | "revoked" | "expired" | "suspended";
-
 export type CreateOrUpdateMemberArgs = {
   email: string;
   name?: string;
@@ -45,7 +39,6 @@ export type CreateOrUpdateMemberArgs = {
   source?: "registration" | "invite" | "admin" | "api";
   referrer?: string;
 };
-
 export type IssuedKey = {
   key: string;
   keySuffix: string;
@@ -56,7 +49,6 @@ export type IssuedKey = {
   keyHash: string;
   totalUnlocks: number;
 };
-
 export type VerifyInnerCircleKeyResult = {
   valid: boolean;
   reason?: "empty" | "not_found" | "revoked" | "expired" | "no_db" | "invalid_format" | "suspended" | "rate_limited";
@@ -67,7 +59,6 @@ export type VerifyInnerCircleKeyResult = {
   remainingUnlocks?: number;
   unlocksToday?: number;
 };
-
 export type CleanupResult = {
   deletedMembers: number;
   deletedKeys: number;
@@ -75,7 +66,6 @@ export type CleanupResult = {
   cleanedAt: string;
   suspendedKeys: number;
 };
-
 export type PrivacySafeKeyRow = {
   id: string;
   keySuffix: string;
@@ -89,7 +79,6 @@ export type PrivacySafeKeyRow = {
   memberName: string | null;
   flags: string[];
 };
-
 export type AdminExportRow = PrivacySafeKeyRow & {
   memberId: string;
   memberCreatedAt: string;
@@ -99,7 +88,6 @@ export type AdminExportRow = PrivacySafeKeyRow & {
   revokedBy: string | null;
   revokedReason: string | null;
 };
-
 export type InnerCircleMember = {
   id: string;
   emailHashPrefix: string;
@@ -112,7 +100,6 @@ export type InnerCircleMember = {
   tier?: "basic" | "premium" | "vip";
   metadata?: Record<string, any>;
 };
-
 export type InnerCircleStats = {
   totalMembers: number;
   totalKeys: number;
@@ -125,7 +112,6 @@ export type InnerCircleStats = {
   dailyUnlocks: number;
   weeklyGrowth: number;
 };
-
 export type PaginationParams = {
   page?: number;
   limit?: number;
@@ -139,7 +125,6 @@ export type PaginationParams = {
     search?: string;
   };
 };
-
 export type PaginatedResult<T> = {
   data: T[];
   pagination: {
@@ -152,7 +137,6 @@ export type PaginatedResult<T> = {
   };
   filters?: PaginationParams['filters'];
 };
-
 export type MemberKeyRow = {
   id: string;
   keySuffix: string;
@@ -168,58 +152,47 @@ export type MemberKeyRow = {
   flags: string[];
   metadata?: Record<string, any>;
 };
-
 export type ActiveKeyRow = Pick<
   MemberKeyRow,
   "id" | "keySuffix" | "createdAt" | "expiresAt" | "totalUnlocks" | "lastUsedAt" | "lastIp" | "flags"
 >;
-
 /* =============================================================================
    STORE-SPECIFIC HELPERS
    ============================================================================= */
-
 function sha256Hex(value: string): string {
   return crypto.createHash("sha256").update(value, "utf8").digest("hex");
 }
-
 function generateAccessKey(): { key: string; keyHash: string; keySuffix: string } {
   const raw = crypto.randomBytes(CONFIG.KEY_LENGTH).toString("base64url");
   const key = `${CONFIG.KEY_PREFIX}${raw}`;
   return {
     key,
     keyHash: sha256Hex(key),
-    keySuffix: key.slice(-8),
+    keySuffix: safeSlice(key, -8),
   };
 }
-
 function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email.trim().toLowerCase());
 }
-
 function handleAuditError(_error: unknown, context: string): void {
   // Log audit error for debugging in development
   if (process.env.NODE_ENV === 'development') {
     console.warn(`[InnerCircle] Audit log failed for ${context}:`, _error);
   }
 }
-
 /* =============================================================================
    MAIN STORE CLASS
    ============================================================================= */
-
 class InnerCircleStore {
   async createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
     const email = sanitizeString(args.email).toLowerCase();
     if (!validateEmail(email)) throw new Error("Invalid email address");
-
     const emailHash = sha256Hex(email);
     const now = new Date();
     const expiresAt = new Date(now);
     expiresAt.setDate(expiresAt.getDate() + CONFIG.KEY_EXPIRY_DAYS);
-
     const { key, keyHash, keySuffix } = generateAccessKey();
-
     const fallback: IssuedKey = {
       key,
       keySuffix,
@@ -230,7 +203,6 @@ class InnerCircleStore {
       keyHash,
       totalUnlocks: 0,
     };
-
     return DatabaseClient.transactional(
       "createOrUpdateMemberAndIssueKey",
       async (client) => {
@@ -244,15 +216,12 @@ class InnerCircleStore {
              AND k.expires_at > NOW()`,
           [emailHash]
         );
-
         // FIX: Explicitly cast row access
         const acRow = activeCountRows.rows[0] as any;
         const activeCount = toInt(acRow?.active_count, 0);
-        
         if (activeCount >= CONFIG.MAX_KEYS_PER_MEMBER) {
           throw new Error(`Member already has ${CONFIG.MAX_KEYS_PER_MEMBER} active keys`);
         }
-
         // Upsert Member
         const memberRes = await client.query<{ id: string }>(
           `INSERT INTO inner_circle_members (email_hash, email_hash_prefix, name, last_ip, metadata)
@@ -266,22 +235,19 @@ class InnerCircleStore {
            RETURNING id`,
           [
             emailHash,
-            emailHash.slice(0, 12),
+            safeSlice(emailHash, 0, 12),
             args.name ? sanitizeString(args.name) : null,
             args.ipAddress ?? null,
             args.metadata ? JSON.stringify(args.metadata) : null,
           ]
         );
-
         const memberId = (memberRes.rows[0] as any).id;
-
         // Insert Key
         await client.query(
           `INSERT INTO inner_circle_keys (member_id, key_hash, key_suffix, status, expires_at, created_by_ip)
            VALUES ($1, $2, $3, 'active', $4, $5)`,
           [memberId, keyHash, keySuffix, expiresAt, args.ipAddress ?? null]
         );
-
         // Audit Log
         try {
           await logAuditEvent({
@@ -302,7 +268,6 @@ class InnerCircleStore {
         } catch (_error) {
           handleAuditError(_error, 'createOrUpdateMemberAndIssueKey');
         }
-
         return {
           key,
           keySuffix,
@@ -317,14 +282,11 @@ class InnerCircleStore {
       fallback
     );
   }
-
   async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
     const cleaned = key.trim();
     if (!cleaned) return { valid: false, reason: "empty" };
     if (!cleaned.startsWith(CONFIG.KEY_PREFIX)) return { valid: false, reason: "invalid_format" };
-
     const keyHash = sha256Hex(cleaned);
-
     try {
       // Note: We use any[] for the query type to avoid complex type mismatches
       const rows = await DatabaseClient.query<any[]>(
@@ -335,7 +297,6 @@ class InnerCircleStore {
         [keyHash],
         []
       );
-
       if (!rows || rows.length === 0) {
         // Log failures for security monitoring
         try {
@@ -350,20 +311,16 @@ class InnerCircleStore {
         } catch (_error) { 
           handleAuditError(_error, 'verifyInnerCircleKey-login-failed');
         }
-        
         return { valid: false, reason: "not_found" };
       }
-
       // FIX: Explicit cast to handle potential any/unknown issues
       const row = rows[0] as any;
       if (row.status === "revoked") return { valid: false, reason: "revoked", memberId: row.member_id, keySuffix: row.key_suffix, status: "revoked" };
       if (row.status === "suspended") return { valid: false, reason: "suspended", memberId: row.member_id, keySuffix: row.key_suffix, status: "suspended" };
-
       const exp = new Date(row.expires_at);
       if (Number.isNaN(exp.getTime()) || exp < new Date()) {
         return { valid: false, reason: "expired", memberId: row.member_id, keySuffix: row.key_suffix, status: "expired", expiresAt: row.expires_at };
       }
-
       // Check daily limit
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -376,14 +333,11 @@ class InnerCircleStore {
         [keyHash, today],
         []
       );
-
       const unlocksRow = usageResult[0] as any;
       const unlocksToday = toInt(unlocksRow?.unlocks_today, 0);
-      
       if (unlocksToday >= CONFIG.MAX_UNLOCKS_PER_DAY) {
         return { valid: false, reason: "rate_limited", memberId: row.member_id, keySuffix: row.key_suffix, status: row.status, remainingUnlocks: 0, unlocksToday };
       }
-
       return {
         valid: true,
         memberId: row.member_id,
@@ -398,12 +352,10 @@ class InnerCircleStore {
       return { valid: false, reason: "no_db" };
     }
   }
-
   async recordInnerCircleUnlock(key: string, ip?: string, userAgent?: string): Promise<void> {
     const cleaned = key.trim();
     if (!cleaned) return;
     const keyHash = sha256Hex(cleaned);
-
     await DatabaseClient.query(
       "recordInnerCircleUnlock",
       `UPDATE inner_circle_keys
@@ -412,7 +364,6 @@ class InnerCircleStore {
       [keyHash, ip ?? null],
       null
     );
-
     // Log to key_unlock_logs (Best Effort)
     try {
       await DatabaseClient.query(
@@ -425,7 +376,6 @@ class InnerCircleStore {
     } catch (_error) { 
       // Ignore table missing error
     }
-
     // Log to System Audit
     try {
       await logAuditEvent({
@@ -441,12 +391,10 @@ class InnerCircleStore {
       handleAuditError(_error, 'recordInnerCircleUnlock');
     }
   }
-
   async revokeInnerCircleKey(key: string, revokedBy = "admin", reason = "manual_revocation", actorId?: string): Promise<boolean> {
     const cleaned = key.trim();
     if (!cleaned) return false;
     const keyHash = sha256Hex(cleaned);
-
     const rows = await DatabaseClient.query<any[]>(
       "revokeInnerCircleKey",
       `UPDATE inner_circle_keys
@@ -456,7 +404,6 @@ class InnerCircleStore {
       [keyHash, sanitizeString(revokedBy), sanitizeString(reason)],
       []
     );
-
     if (rows && rows.length > 0) {
       try {
         await logAuditEvent({
@@ -479,7 +426,6 @@ class InnerCircleStore {
     }
     return (rows?.length ?? 0) > 0;
   }
-
   async getPrivacySafeStats(): Promise<InnerCircleStats> {
     const result = await DatabaseClient.query<any[]>(
       "getPrivacySafeStats",
@@ -498,10 +444,8 @@ class InnerCircleStore {
       [],
       []
     );
-
     const rows = result || [];
     const r = (rows[0] as any) ?? {};
-    
     return {
       totalMembers: toInt(r.totalMembers, 0),
       totalKeys: toInt(r.totalKeys, 0),
@@ -515,12 +459,10 @@ class InnerCircleStore {
       weeklyGrowth: toInt(r.weeklyGrowth, 0),
     };
   }
-
   async deleteMemberByEmail(email: string): Promise<boolean> {
     const cleaned = email.trim().toLowerCase();
     if (!validateEmail(cleaned)) throw new Error("Invalid email address");
     const emailHash = sha256Hex(cleaned);
-
     return DatabaseClient.transactional(
       "deleteMemberByEmail",
       async (client) => {
@@ -537,12 +479,10 @@ class InnerCircleStore {
       false
     );
   }
-
   async getMemberByEmail(email: string): Promise<InnerCircleMember | null> {
     const cleaned = email.trim().toLowerCase();
     if (!validateEmail(cleaned)) throw new Error("Invalid email address");
     const emailHash = sha256Hex(cleaned);
-
     const result = await DatabaseClient.query<any[]>(
       "getMemberByEmail",
       `SELECT id, email_hash_prefix, name, created_at, last_seen_at, status, tier, metadata::text
@@ -550,10 +490,8 @@ class InnerCircleStore {
       [emailHash],
       []
     );
-
     const rows = result || [];
     if (rows.length === 0) return null;
-    
     const r = rows[0] as any;
     return {
       id: r.id,
@@ -568,18 +506,14 @@ class InnerCircleStore {
       metadata: r.metadata ? JSON.parse(r.metadata) : undefined,
     };
   }
-
   // --- Helpers for Admin Table Views ---
-
   async getPrivacySafeKeyRows(params: PaginationParams = {}): Promise<PaginatedResult<PrivacySafeKeyRow>> {
     const page = Math.max(1, params.page ?? 1);
     const limit = Math.min(200, Math.max(1, params.limit ?? 50));
     const offset = (page - 1) * limit;
-    
     // Sort Mapping
     const sortField = params.sortBy === 'createdAt' ? 'k.created_at' : 'k.created_at';
     const sortDir = (params.sortOrder ?? "desc") === "asc" ? "ASC" : "DESC";
-
     const rowsResult = await DatabaseClient.query<any[]>(
       "getPrivacySafeKeyRows",
       `SELECT k.id, k.key_suffix, k.created_at, k.expires_at, k.status, k.total_unlocks, k.last_used_at, k.last_ip, 
@@ -591,15 +525,12 @@ class InnerCircleStore {
       [limit, offset],
       []
     );
-
     const rows = rowsResult || [];
-
     // Get total count
     const countResult = await DatabaseClient.query<any[]>("count", `SELECT COUNT(*)::text as total FROM inner_circle_keys`, [], [{total: "0"}]);
     const countRows = countResult || [];
     const countRow = countRows[0] as any;
     const total = toInt(countRow?.total, 0);
-
     return {
       data: rows.map((r: any) => ({
         id: r.id,
@@ -618,9 +549,7 @@ class InnerCircleStore {
       filters: params.filters
     };
   }
-
   // --- Maintenance & Extras ---
-
   async cleanupExpiredData(): Promise<CleanupResult> {
     return DatabaseClient.transactional("cleanup", async (client) => {
       await client.query(
@@ -632,11 +561,9 @@ class InnerCircleStore {
          AND (last_used_at IS NULL OR last_used_at < NOW() - INTERVAL '${CONFIG.CLEANUP_KEY_TTL_DAYS} days') 
          RETURNING id`
       );
-      
       const suspendedRes = await client.query(
         `SELECT COUNT(*)::text as count FROM inner_circle_keys WHERE status = 'suspended'`
       );
-      
       const memberRes = await client.query(
         `DELETE FROM inner_circle_members m 
          WHERE NOT EXISTS (
@@ -646,9 +573,7 @@ class InnerCircleStore {
            OR (k.last_used_at > NOW() - INTERVAL '${CONFIG.CLEANUP_MEMBER_INACTIVE_DAYS} days'))
          ) RETURNING id`
       );
-      
       const suspendedCount = toInt((suspendedRes.rows[0] as any)?.count as unknown, 0);
-
       // Record cleanup in audit log
       try {
         // FIX: AUDIT_ACTIONS.CLEANUP does not exist -> used DELETE
@@ -667,7 +592,6 @@ class InnerCircleStore {
       } catch (_error) {
         handleAuditError(_error, 'cleanupExpiredData');
       }
-      
       return {
         deletedMembers: memberRes.rowCount ?? 0,
         deletedKeys: keysRes.rowCount ?? 0,
@@ -677,24 +601,20 @@ class InnerCircleStore {
       };
     }, { deletedMembers: 0, deletedKeys: 0, totalOrphanedKeys: 0, cleanedAt: "", suspendedKeys: 0 });
   }
-
   getClientIp(req: unknown): string | undefined {
     const r = req as { headers?: Record<string, string | string[] | undefined>; socket?: { remoteAddress?: string } };
     if (!r?.headers) return r?.socket?.remoteAddress;
     const h = r.headers['x-forwarded-for'];
     return Array.isArray(h) ? h[0] : (h?.split(',')[0] || r.socket?.remoteAddress);
   }
-
   getPrivacySafeKeyExport(key: string): string {
     if (!key || key.length < 8) return "***";
     if (!key.startsWith(CONFIG.KEY_PREFIX)) return "***";
-    return `${CONFIG.KEY_PREFIX}***${key.slice(-6)}`;
+    return `${CONFIG.KEY_PREFIX}***${safeSlice(key, -6)}`;
   }
-
   async healthCheck(): Promise<{ ok: boolean; details: string }> {
     try {
       await DatabaseClient.query("health", "SELECT 1", [], null);
-      
       // Additional health checks
       const stats = await this.getPrivacySafeStats();
       const details = [
@@ -703,14 +623,12 @@ class InnerCircleStore {
         `Active keys: ${stats.activeKeys}`,
         `Daily unlocks: ${stats.dailyUnlocks}`
       ].join(", ");
-      
       return { ok: true, details };
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       return { ok: false, details: `Database health check failed: ${msg}` };
     }
   }
-
   async getMemberKeys(memberId: string): Promise<MemberKeyRow[]> {
     if (!memberId) return [];
     const result = await DatabaseClient.query<any[]>(
@@ -719,7 +637,6 @@ class InnerCircleStore {
       [memberId], 
       []
     );
-    
     const rows = result || [];
     return rows.map((r: any) => ({ 
       id: r.id,
@@ -737,7 +654,6 @@ class InnerCircleStore {
       metadata: r.metadata
     }));
   }
-
   async getActiveKeysForMember(memberId: string): Promise<ActiveKeyRow[]> {
     if (!memberId) return [];
     const result = await DatabaseClient.query<any[]>(
@@ -746,7 +662,6 @@ class InnerCircleStore {
       [memberId], 
       []
     );
-    
     const rows = result || [];
     return rows.map((r: any) => ({ 
       id: r.id,
@@ -759,7 +674,6 @@ class InnerCircleStore {
       flags: r.flags || []
     }));
   }
-
   async suspendKey(key: string, reason: string, actorId?: string): Promise<boolean> {
     const cleaned = key.trim();
     if (!cleaned) return false;
@@ -770,7 +684,6 @@ class InnerCircleStore {
       [keyHash, reason], 
       []
     );
-    
     const rows = result || [];
     if (rows.length > 0) {
       try {
@@ -791,10 +704,8 @@ class InnerCircleStore {
         handleAuditError(_error, 'suspendKey');
       }
     }
-    
     return rows.length > 0;
   }
-
   async renewKey(key: string, extensionDays: number = 30): Promise<boolean> {
     const cleaned = key.trim();
     if (!cleaned) return false;
@@ -809,7 +720,6 @@ class InnerCircleStore {
       [keyHash], 
       []
     );
-    
     const rows = result || [];
     if (rows.length > 0) {
       try {
@@ -829,17 +739,13 @@ class InnerCircleStore {
         handleAuditError(_error, 'renewKey');
       }
     }
-    
     return rows.length > 0;
   }
 }
-
 /* =============================================================================
    SINGLETON EXPORT
    ============================================================================= */
-
 const storeInstance = new InnerCircleStore();
-
 // Default Export Object (Legacy Compatibility)
 const innerCircleStore = {
   createOrUpdateMemberAndIssueKey: storeInstance.createOrUpdateMemberAndIssueKey.bind(storeInstance),
@@ -859,9 +765,7 @@ const innerCircleStore = {
   getPrivacySafeKeyExport: storeInstance.getPrivacySafeKeyExport.bind(storeInstance),
   healthCheck: storeInstance.healthCheck.bind(storeInstance),
 };
-
 export default innerCircleStore;
-
 // Named Exports
 export const {
   createOrUpdateMemberAndIssueKey,
@@ -881,4 +785,3 @@ export const {
   getPrivacySafeKeyExport,
   healthCheck,
 } = innerCircleStore;
-

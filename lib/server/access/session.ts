@@ -2,6 +2,8 @@ import crypto from "crypto";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getTokenStore } from "./tokenStore";
 import type { AccessSession, AccessTier } from "./types";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 const COOKIE_NAME = "aol_access";
 const SESSION_TTL_DAYS = Number(process.env.AOL_SESSION_TTL_DAYS || 30);
@@ -11,7 +13,7 @@ function parseCookies(req: NextApiRequest): Record<string, string> {
   const out: Record<string, string> = {};
   header.split(";").map(s => s.trim()).filter(Boolean).forEach(part => {
     const i = part.indexOf("=");
-    if (i > -1) out[part.slice(0, i)] = decodeURIComponent(part.slice(i + 1));
+    if (i > -1) out[safeSlice(part, 0, i)] = decodeURIComponent(safeSlice(part, i + 1));
   });
   return out;
 }

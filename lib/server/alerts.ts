@@ -1,3 +1,5 @@
+import { safeSlice } from "@/lib/utils/safe";
+
 // lib/server/alerts.ts - Simplified alerts without external dependencies
 export type AlertSeverity = 'info' | 'warning' | 'error' | 'critical';
 
@@ -176,7 +178,7 @@ class AlertManager {
   }
 
   async getAlertHistory(limit = 50): Promise<AlertOptions[]> {
-    return this.alertHistory.slice(0, limit);
+    return this.safeSlice(alertHistory, 0, limit);
   }
 
   async clearCooldowns(): Promise<void> {

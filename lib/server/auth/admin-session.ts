@@ -44,7 +44,7 @@ export async function getAdminSession(request: any): Promise<{
     // 3. Return Standardized Admin Context
     const user = {
       id: 'admin-primary',
-      email: 'admin@abrahamoflondon.com',
+      email: 'admin@abrahamoflondon.org',
       isAdmin: true,
       token: adminToken
     };

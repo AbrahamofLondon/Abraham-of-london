@@ -1,18 +1,16 @@
 // components/downloads/SurrenderAssetsLanding.tsx - ROBUST IMPORT
+import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
-import * as PDFRegistry from '@/scripts/pdf-registry';
+import * as PDFRegistry from "@/lib/pdf/registry";
 import { Shield, Download, FileText, Users, Zap, Award } from 'lucide-react';
-
 // Use the imported functions
 const { getAllPDFItems, getPDFsByType, configToItem } = PDFRegistry;
 type PDFItem = PDFRegistry.PDFItem;
 type PDFConfig = PDFRegistry.PDFConfig;
-
 interface AssetCardProps {
   asset: PDFItem;
   index: number;
 }
-
 const SurrenderAssetsLanding: React.FC = () => {
   // Convert PDFConfig[] to PDFItem[] for component usage
   const surrenderAssets = [
@@ -21,7 +19,6 @@ const SurrenderAssetsLanding: React.FC = () => {
     ...getPDFsByType('tool'),
     ...getPDFsByType('framework')
   ].map(configToItem);
-
   const categories = [
     {
       title: 'Worksheets & Templates',
@@ -42,7 +39,6 @@ const SurrenderAssetsLanding: React.FC = () => {
       assets: surrenderAssets.filter(a => a.type === 'tool' || a.type === 'framework')
     }
   ];
-
   const AssetCard: React.FC<AssetCardProps> = ({ asset, index }) => (
     <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-xl p-6 hover:border-amber-500/30 transition-all group hover:scale-[1.02]">
       <div className="flex justify-between items-start mb-4">
@@ -61,24 +57,20 @@ const SurrenderAssetsLanding: React.FC = () => {
           {asset.fileSize || 'PDF'}
         </div>
       </div>
-      
       <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition">
         {asset.title}
       </h3>
-      
       <p className="text-sm text-gray-400 mb-4">
         {asset.description}
       </p>
-      
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          {asset.tags?.slice(0, 2).map((tag: string) => (
+          {asset.safeArraySlice(tags, 0, 2)?.map((tag: string) => (
             <span key={tag} className="text-xs px-2 py-1 rounded bg-white/5 text-gray-400">
               {tag}
             </span>
           ))}
         </div>
-        
         <a
           href={asset.fileUrl}
           download
@@ -90,7 +82,6 @@ const SurrenderAssetsLanding: React.FC = () => {
       </div>
     </div>
   );
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 md:p-8">
       {/* Hero Section */}
@@ -100,15 +91,12 @@ const SurrenderAssetsLanding: React.FC = () => {
             <Award className="w-4 h-4 text-amber-500" />
             <span className="text-sm font-bold text-amber-500">SURRENDER FRAMEWORK ASSETS</span>
           </div>
-          
           <h1 className="text-4xl md:text-5xl font-serif italic font-bold mb-6">
             Transform Theory Into <span className="text-amber-500">Practice</span>
           </h1>
-          
           <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
             Downloadable resources, worksheets, and tools to implement the surrender framework in your daily life and work.
           </p>
-          
           <div className="flex flex-wrap justify-center gap-4">
             <a
               href="#downloads"
@@ -124,7 +112,6 @@ const SurrenderAssetsLanding: React.FC = () => {
             </a>
           </div>
         </div>
-        
         {/* Stats - Use the actual surrenderAssets array */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
@@ -151,7 +138,6 @@ const SurrenderAssetsLanding: React.FC = () => {
           </div>
         </div>
       </div>
-      
       {/* Categories */}
       <div id="downloads" className="max-w-6xl mx-auto">
         {categories.map((category, catIndex) => (
@@ -165,7 +151,6 @@ const SurrenderAssetsLanding: React.FC = () => {
                 <p className="text-gray-500">{category.description}</p>
               </div>
             </div>
-            
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {category.assets.map((asset, assetIndex) => (
                 <AssetCard 
@@ -178,7 +163,6 @@ const SurrenderAssetsLanding: React.FC = () => {
           </div>
         ))}
       </div>
-      
       {/* CTA Section */}
       <div className="max-w-4xl mx-auto mt-16 p-8 rounded-2xl bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20">
         <div className="text-center">
@@ -203,5 +187,4 @@ const SurrenderAssetsLanding: React.FC = () => {
     </div>
   );
 };
-
 export default SurrenderAssetsLanding;

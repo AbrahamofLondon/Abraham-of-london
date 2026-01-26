@@ -1,4 +1,4 @@
-// components/inner-circle/ContentGrid.tsx - PRODUCTION READY
+// components/inner-circle/ContentGrid.tsx - PRODUCTION READY (FIXED)
 import React from 'react';
 import { 
   Clock, 
@@ -13,6 +13,7 @@ import {
   Headphones,
   BarChart3
 } from 'lucide-react';
+import { capitalize } from '@/lib/utils/string'; // ✅ Add import
 
 interface ContentItem {
   id: string;
@@ -96,9 +97,14 @@ const ContentGrid: React.FC<ContentGridProps> = ({
       expert: 'bg-red-100 text-red-800'
     };
     
+    const safeDifficulty = difficulty?.toLowerCase() || 'beginner';
+    
     return (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[difficulty as keyof typeof colors] || colors.intermediate}`}>
-        {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+        colors[safeDifficulty as keyof typeof colors] || colors.intermediate
+      }`}>
+        {/* ✅ FIXED: Use safe capitalize function */}
+        {capitalize(safeDifficulty)}
       </span>
     );
   };
@@ -110,35 +116,54 @@ const ContentGrid: React.FC<ContentGridProps> = ({
       elite: 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800'
     };
     
+    const safeTier = tierLevel?.toLowerCase() || 'basic';
+    
     return (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[tierLevel as keyof typeof colors] || colors.basic}`}>
-        {tierLevel.charAt(0).toUpperCase() + tierLevel.slice(1)}
+      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+        colors[safeTier as keyof typeof colors] || colors.basic
+      }`}>
+        {/* ✅ FIXED: Use safe capitalize function */}
+        {capitalize(safeTier)}
       </span>
     );
   };
 
   const canAccess = (itemTier: string) => {
     const tierOrder = { 'basic': 1, 'premium': 2, 'elite': 3 };
-    const userTierOrder = tierOrder[userTier.replace('inner-circle-', '') as keyof typeof tierOrder] || 0;
-    const itemTierOrder = tierOrder[itemTier as keyof typeof tierOrder] || 0;
+    const safeUserTier = userTier?.replace('inner-circle-', '').toLowerCase() || 'basic';
+    const safeItemTier = itemTier?.toLowerCase() || 'basic';
+    
+    const userTierOrder = tierOrder[safeUserTier as keyof typeof tierOrder] || 0;
+    const itemTierOrder = tierOrder[safeItemTier as keyof typeof tierOrder] || 0;
     return userTierOrder >= itemTierOrder;
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (!dateString) return 'Recently';
+    
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) {
-      return 'Today';
-    } else if (diffDays === 1) {
-      return 'Yesterday';
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (diffDays === 0) {
+        return 'Today';
+      } else if (diffDays === 1) {
+        return 'Yesterday';
+      } else if (diffDays < 7) {
+        return `${diffDays} days ago`;
+      } else {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+    } catch {
+      return 'Recently';
     }
+  };
+
+  const formatCategory = (category: string) => {
+    if (!category) return 'Content';
+    return category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   if (loading) {
@@ -193,8 +218,9 @@ const ContentGrid: React.FC<ContentGridProps> = ({
                 <div className={`p-1.5 rounded-md ${getCategoryColor(item.category)}`}>
                   {getCategoryIcon(item.category)}
                 </div>
-                <span className="text-sm font-medium text-gray-700 capitalize">
-                  {item.category.replace('-', ' ')}
+                <span className="text-sm font-medium text-gray-700">
+                  {/* ✅ FIXED: Use safe formatting */}
+                  {formatCategory(item.category)}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
@@ -206,7 +232,7 @@ const ContentGrid: React.FC<ContentGridProps> = ({
             {/* Content */}
             <div className="p-6">
               <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
-                {item.title}
+                {item.title || 'Untitled Content'}
               </h3>
               
               {item.excerpt && (
@@ -242,11 +268,11 @@ const ContentGrid: React.FC<ContentGridProps> = ({
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center text-sm text-gray-500">
                       <Eye className="w-4 h-4 mr-1" />
-                      {item.views.toLocaleString()}
+                      {(item.views || 0).toLocaleString()}
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <Heart className="w-4 h-4 mr-1" />
-                      {item.likes.toLocaleString()}
+                      {(item.likes || 0).toLocaleString()}
                     </div>
                   </div>
                   <div className="text-xs text-gray-500">

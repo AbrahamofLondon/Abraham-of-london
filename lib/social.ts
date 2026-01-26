@@ -1,3 +1,5 @@
+import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
+
 // lib/social.ts
 // Robust utilities for normalising social links coming from config or content.
 
@@ -201,7 +203,7 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
       typeof rawLabel === "string" && rawLabel.trim()
         ? rawLabel.trim()
         : kind
-          ? kind.charAt(0).toUpperCase() + kind.slice(1)
+          ? safeCapitalize(kind)
           : "Social";
 
     const icon = typeof rawIcon === "string" ? rawIcon : undefined;

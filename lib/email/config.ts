@@ -45,7 +45,7 @@ class EmailConfiguration {
         user: process.env.EMAIL_SERVER_USER || '',
         pass: process.env.EMAIL_SERVER_PASSWORD || '',
       },
-      from: process.env.EMAIL_FROM || 'noreply@abrahamoflondon.com',
+      from: process.env.EMAIL_FROM || 'noreply@abrahamoflondon.org',
       replyTo: process.env.EMAIL_REPLY_TO,
     };
   }

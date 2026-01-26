@@ -1,6 +1,8 @@
 // lib/ip.ts
 
 import type { NextApiRequest } from "next";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export interface IpAnalysis {
   ip: string;
@@ -207,7 +209,7 @@ export function anonymizeIp(ip: string): string {
   // IPv6 - keep first 3 blocks
   if (ip.includes(":")) {
     const parts = ip.split(":");
-    return parts.slice(0, 3).join(":") + "::";
+    return safeSlice(parts, 0, 3).join(":") + "::";
   }
 
   // IPv4 - mask last octet

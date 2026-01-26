@@ -8,6 +8,8 @@ import {
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
 import type { Post, ContentEntry, ContentMeta } from "@/types/index";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export type PostWithContent = Post & {
   content: string;
@@ -418,7 +420,7 @@ export function getRecentPosts(limit?: number): Post[] {
       return (a.title || '').localeCompare(b.title || '');
     });
     
-    return limit && limit > 0 ? sorted.slice(0, limit) : sorted;
+    return limit && limit > 0 ? safeSlice(sorted, 0, limit) : sorted;
   } catch (error) {
     console.error("Error fetching recent posts:", error);
     return [];

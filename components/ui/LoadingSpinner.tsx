@@ -1,4 +1,4 @@
-// components/ui/LoadingSpinner.tsx - PRODUCTION READY
+// components/ui/LoadingSpinner.tsx - CORRECTED
 import React from 'react';
 
 interface LoadingSpinnerProps {
@@ -10,7 +10,7 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'md',
   color = 'blue',
   text,
@@ -135,4 +135,5 @@ export const SkeletonLoader: React.FC<{
   return <div className={className}>{skeletons}</div>;
 };
 
+// If you need a default export for backward compatibility, add:
 export default LoadingSpinner;

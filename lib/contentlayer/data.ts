@@ -1,3 +1,5 @@
+import { safeSlice } from "@/lib/utils/safe";
+
 // lib/contentlayer/data.ts
 /**
  * ContentLayer data export for build-time usage
@@ -39,7 +41,7 @@ async function loadContentlayerData(): Promise<ContentLayerDocument[]> {
   try {
     // Try to import from contentlayer/generated
     // Using dynamic import to avoid build-time errors
-    const contentlayer = await import('contentlayer/generated');
+    const contentlayer = await import('@/lib/contentlayer-generated');
     
     // Extract documents from various possible exports
     const allDocuments = 
@@ -126,7 +128,7 @@ export async function getContentlayerData(): Promise<{
     return {
       available: true,
       documentCount: documents.length,
-      documents: documents.slice(0, 50), // Limit for performance
+      documents: safeSlice(documents, 0, 50), // Limit for performance
       types
     };
   } catch (error) {

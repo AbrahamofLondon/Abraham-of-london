@@ -3,6 +3,8 @@
  * ============================================================================ */
 
 import crypto from "crypto";
+import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
+
 
 /**
  * Hash email for privacy-safe storage
@@ -28,10 +30,10 @@ export function maskEmail(email: string): string {
   if (local.length <= 2) {
     return local.length === 1 
       ? `*@${domain}`
-      : `${local.charAt(0)}*@${domain}`;
+      : `${safeFirstChar(local)}*@${domain}`;
   }
   
-  const visible = local.slice(0, 2);
+  const visible = safeSlice(local, 0, 2);
   const masked = "*".repeat(Math.max(1, local.length - 2));
   return `${visible}${masked}@${domain}`;
 }

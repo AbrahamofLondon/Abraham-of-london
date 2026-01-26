@@ -27,25 +27,32 @@ export type Framework = {
 
 export const LIBRARY_HREF = "/resources/strategic-frameworks";
 
-// ... [Keep your FRAMEWORKS array exactly as provided] ...
-export const FRAMEWORKS: Framework[] = [ 
-    /* Your data here */ 
+// KEEP YOUR DATA EXACTLY AS-IS
+export const FRAMEWORKS: Framework[] = [
+  /* Your data here */
 ];
 
 /**
- * INSTITUTIONAL GETTERS
+ * INSTITUTIONAL GETTERS (CANONICAL)
  */
-
-// MISSING PIECE: Explicitly export the full collection
 export function getAllFrameworks(): Framework[] {
   return FRAMEWORKS;
 }
 
 export function getFrameworkBySlug(slug: string): Framework | null {
-  return FRAMEWORKS.find((f) => f.slug === slug) ?? null;
+  const s = String(slug || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
+  if (!s) return null;
+  return FRAMEWORKS.find((f) => f.slug === s) ?? null;
 }
 
 export function getAllFrameworkSlugs(): string[] {
   return FRAMEWORKS.map((f) => f.slug);
 }
 
+/**
+ * CONTRACT EXPORTS (PAGES EXPECT THESE NAMES)
+ * - pages/resources/strategic-frameworks/index.tsx imports getServerAllFrameworks
+ * - pages/resources/strategic-frameworks/[slug].tsx imports getServerFrameworkBySlug
+ */
+export const getServerAllFrameworks = getAllFrameworks;
+export const getServerFrameworkBySlug = getFrameworkBySlug;

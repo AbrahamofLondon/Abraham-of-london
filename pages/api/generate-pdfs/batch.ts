@@ -1,170 +1,72 @@
-// pages/api/generate-pdfs/batch.ts - FULLY CORRECTED
+// pages/api/generate-pdfs/batch.ts - FIXED FOR ES MODULES
+import { safeSlice } from "@/lib/utils/safe";
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PDFGenerationOrchestrator } from '../../../scripts/generate-pdfs';
-
-// Types for the response
-interface GenerationResult {
-  id: string;
-  success: boolean;
-  size?: number;
-  duration: number;
-  error?: string;
-}
-
+import { spawn } from 'child_process';
+import { promisify } from 'util';
+const execAsync = promisify(spawn);
 interface BatchResponse {
   success: boolean;
-  summary?: {
-    total: number;
-    successful: number;
-    failed: number;
-    duration: number;
-  };
-  details?: GenerationResult[];
+  message: string;
+  quality: string;
+  timestamp: string;
+  details?: any;
   error?: string;
-  timestamp?: string;
 }
-
-// Helper function to get specific generation methods
-async function generateSpecificIDs(orchestrator: PDFGenerationOrchestrator, ids: string[]): Promise<GenerationResult[]> {
-  // Since the orchestrator doesn't have a generateSingle method in the provided code,
-  // we'll need to adapt. Looking at the code, we should use the content scanning approach.
-  
-  const results: GenerationResult[] = [];
-  
-  // Initialize the orchestrator (this will do content scanning)
-  const init = await orchestrator.initialize();
-  
-  if (init.contentScan) {
-    // Filter entries to only include requested IDs
-    const filteredEntries = init.contentScan.entries.filter(entry => ids.includes(entry.id));
-    
-    // Generate only the filtered entries
-    const generationResult = await orchestrator.generateFromContent(filteredEntries);
-    
-    // Convert results to the expected format
-    generationResult.results.forEach(result => {
-      results.push({
-        id: result.id,
-        success: result.success,
-        duration: result.duration,
-        size: result.size,
-        error: result.error
-      });
-    });
-  }
-  
-  return results;
-}
-
-async function generateByType(orchestrator: PDFGenerationOrchestrator, types: string[]): Promise<GenerationResult[]> {
-  const init = await orchestrator.initialize();
-  const results: GenerationResult[] = [];
-  
-  if (init.contentScan) {
-    // Filter entries by type
-    const filteredEntries = init.contentScan.entries.filter(entry => 
-      types.includes(entry.type) || types.includes(entry.category)
-    );
-    
-    // Generate the filtered entries
-    const generationResult = await orchestrator.generateFromContent(filteredEntries);
-    
-    // Convert results
-    generationResult.results.forEach(result => {
-      results.push({
-        id: result.id,
-        success: result.success,
-        duration: result.duration,
-        size: result.size,
-        error: result.error
-      });
-    });
-  }
-  
-  return results;
-}
-
-async function generateAll(orchestrator: PDFGenerationOrchestrator): Promise<GenerationResult[]> {
-  const init = await orchestrator.initialize();
-  const results: GenerationResult[] = [];
-  
-  if (init.contentScan) {
-    // Generate all entries
-    const generationResult = await orchestrator.generateFromContent(init.contentScan.entries);
-    
-    // Convert results
-    generationResult.results.forEach(result => {
-      results.push({
-        id: result.id,
-        success: result.success,
-        duration: result.duration,
-        size: result.size,
-        error: result.error
-      });
-    });
-  }
-  
-  return results;
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse<BatchResponse>) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<BatchResponse>
+) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    const { types, tiers: _tiers, ids } = req.body; // Fixed: prefixed unused variable with underscore
-    
-    console.log(`[API] Batch generation requested`);
-    
-    const orchestrator = new PDFGenerationOrchestrator();
-    let results: GenerationResult[];
-    
-    if (ids && Array.isArray(ids)) {
-      // Generate specific IDs
-      console.log(`[API] Generating specific IDs: ${ids.join(', ')}`);
-      results = await generateSpecificIDs(orchestrator, ids);
-    } else if (types && Array.isArray(types)) {
-      // Generate by type
-      console.log(`[API] Generating by types: ${types.join(', ')}`);
-      results = await generateByType(orchestrator, types);
-    } else {
-      // Generate all
-      console.log(`[API] Generating all content`);
-      results = await generateAll(orchestrator);
-    }
-    
-    const successful = results.filter(r => r.success).length;
-    const failed = results.filter(r => !r.success).length;
-    const totalDuration = results.reduce((acc, r) => acc + r.duration, 0);
-    
-    console.log(`[API] Generation complete: ${successful} successful, ${failed} failed`);
-    
-    return res.status(200).json({
-      success: true,
-      summary: {
-        total: results.length,
-        successful,
-        failed,
-        duration: totalDuration
-      },
-      details: results.map(r => ({
-        id: r.id,
-        success: r.success,
-        size: r.size,
-        duration: r.duration,
-        error: r.error
-      })),
+    return res.status(405).json({
+      success: false,
+      message: 'Method not allowed',
+      quality: 'premium',
       timestamp: new Date().toISOString()
     });
-    
+  }
+  try {
+    const { quality = 'premium' } = req.body;
+    console.log(`[API] Generating premium PDFs (${quality})`);
+    // Use spawn instead of exec for better control
+    const child = spawn('npx', ['tsx', 'scripts/generate-pdfs.tsx', '--quality', quality], {
+      cwd: process.cwd(),
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: true,
+      env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' }
+    });
+    let stdout = '';
+    let stderr = '';
+    child.stdout?.on('data', (data) => {
+      stdout += data.toString();
+    });
+    child.stderr?.on('data', (data) => {
+      stderr += data.toString();
+    });
+    // Wait for process to complete
+    const code = await new Promise<number>((resolve) => {
+      child.on('close', resolve);
+    });
+    const success = code === 0;
+    return res.status(success ? 200 : 500).json({
+      success,
+      message: success ? 'Premium PDFs generated successfully' : 'PDF generation failed',
+      quality,
+      timestamp: new Date().toISOString(),
+      details: {
+        exitCode: code,
+        stdout: safeSlice(stdout, -500), // Last 500 chars
+        stderr: safeSlice(stderr, -500)
+      },
+      error: success ? undefined : `Process exited with code ${code}`
+    });
   } catch (error: any) {
-    console.error('[API] Batch generation error:', error);
-    
+    console.error('[API] Premium PDF generation failed:', error);
     return res.status(500).json({
       success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
+      message: 'Premium PDF generation failed',
+      quality: 'premium',
+      timestamp: new Date().toISOString(),
+      error: error.message
     });
   }
 }

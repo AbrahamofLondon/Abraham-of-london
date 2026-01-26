@@ -43,7 +43,7 @@ export function InnerCircleEmail({
   requestIp = "Unknown",
   requestLocation = "Unknown",
   mode = "register",
-  supportContact = "support@abrahamoflondon.com",
+  supportContact = "support@abrahamoflondon.org",
   additionalInstructions,
   features = [
     {
@@ -148,7 +148,7 @@ export function InnerCircleEmail({
             <Row>
               <Column style={logoColumn}>
                 <Img
-                  src="https://abrahamoflondon.com/logo.png"
+                  src="https://abrahamoflondon.org/logo.png"
                   width="40"
                   height="40"
                   alt="Abraham of London"
@@ -321,7 +321,7 @@ export function InnerCircleEmail({
                   LinkedIn
                 </Link>
                 <span style={socialDivider}>•</span>
-                <Link href="https://abrahamoflondon.com" style={socialLink}>
+                <Link href="https://abrahamoflondon.org" style={socialLink}>
                   Website
                 </Link>
               </Section>
@@ -725,7 +725,7 @@ export function createEmailProps(
     ...props,
     features: options?.customFeatures || (options?.includeFeatures !== false ? defaultFeatures : []),
     expiresIn: props.expiresIn || "24 hours",
-    supportContact: props.supportContact || "support@abrahamoflondon.com",
+    supportContact: props.supportContact || "support@abrahamoflondon.org",
   };
 }
 
@@ -746,8 +746,8 @@ export async function sendInnerCircleEmail(
         to,
         subject,
         html: emailHtml,
-        from: `"Abraham of London" <noreply@abrahamoflondon.com>`,
-        replyTo: props.supportContact || "support@abrahamoflondon.com",
+        from: `"Abraham of London" <noreply@abrahamoflondon.org>`,
+        replyTo: props.supportContact || "support@abrahamoflondon.org",
         headers: {
           'X-Priority': '1',
           'X-MSMail-Priority': 'High',

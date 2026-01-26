@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from "react";
+import { safeString, capitalize } from "@/lib/utils/string"; // Add this import
 
 type Tier = "public" | "inner-circle" | "private";
 
@@ -24,8 +25,10 @@ export default function AccessGate({
   const [error, setError] = useState<string | null>(null);
 
   const requiredLabel = useMemo(() => {
-    if (requiredTier === "private") return "Private";
-    if (requiredTier === "inner-circle") return "Inner Circle";
+    // ✅ FIXED: Use safe utility
+    const tierStr = safeString(requiredTier);
+    if (tierStr.includes("private")) return "Private";
+    if (tierStr.includes("inner-circle")) return "Inner Circle";
     return "Public";
   }, [requiredTier]);
 

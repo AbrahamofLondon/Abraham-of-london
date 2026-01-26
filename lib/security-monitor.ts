@@ -2,6 +2,8 @@
 // Detect and respond to suspicious activity
 
 import { blockPermanently, RATE_LIMIT_CONFIGS } from './rate-limit';
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+
 
 // 1. Pre-compiled Patterns for Performance
 const SQL_INJECTION_PATTERNS = [
@@ -56,7 +58,7 @@ class SecurityMonitor {
 
     // Keep only recent events
     if (this.events.length > this.MAX_EVENTS) {
-      this.events = this.events.slice(-this.MAX_EVENTS);
+      this.events = this.safeArraySlice(events, -this.MAX_EVENTS);
     }
 
     // Track suspicious IPs
@@ -93,7 +95,7 @@ class SecurityMonitor {
   }
 
   getRecentEvents(limit = 100): SecurityEvent[] {
-    return this.events.slice(-limit);
+    return this.safeArraySlice(events, -limit);
   }
 
   getEventsByIp(ip: string): SecurityEvent[] {

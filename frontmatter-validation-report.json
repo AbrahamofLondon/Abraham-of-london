@@ -818,7 +818,7 @@
       "valid": true,
       "errors": [],
       "warnings": [
-        "Unknown field \"download\" for type Download"
+        "Unknown field \"label\" for type Download"
       ]
     },
     {
@@ -1145,7 +1145,7 @@
       "valid": true,
       "errors": [],
       "warnings": [
-        "Unknown field \"download\" for type Download"
+        "Unknown field \"label\" for type Download"
       ]
     }
   ]

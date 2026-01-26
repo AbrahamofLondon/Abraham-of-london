@@ -1,6 +1,6 @@
 /* lib/fs-utils.ts */
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 /**
  * SAFE FS ENTRY RESOLVER
@@ -63,3 +63,4 @@ export function safeReadFile(absPath: string): string | null {
     return null;
   }
 }
+

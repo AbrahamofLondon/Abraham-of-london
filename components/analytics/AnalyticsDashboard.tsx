@@ -4,6 +4,8 @@ import type { DashboardStats } from "@/types/pdf-dashboard";
 
 import { getAllDashboardPDFs, getDashboardStats } from "@/utils/pdf-stats-converter";
 import { LoadingState } from "@/components/ui/LoadingState";
+import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe";
+
 
 type MetricType = "generations" | "views" | "downloads" | "errors" | "size" | "categories";
 
@@ -280,7 +282,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             >
               {metrics.map((metric) => (
                 <option key={metric} value={metric}>
-                  {metric.charAt(0).toUpperCase() + metric.slice(1)}
+                  {safeCapitalize(metric)}
                 </option>
               ))}
             </select>
@@ -403,13 +405,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <h3 className="text-lg font-semibold mb-4">📈 Recent Activity</h3>
           <div className="space-y-3">
             {pdfs
-              .slice()
+              safeSlice(...)
               .sort((a, b) => {
                 const dateA = new Date(a.lastModified || a.updatedAt || 0).getTime();
                 const dateB = new Date(b.lastModified || b.updatedAt || 0).getTime();
                 return dateB - dateA;
               })
-              .slice(0, 5)
+              safeSlice(..., 0, 5)
               .map((pdf) => (
                 <div
                   key={pdf.id}

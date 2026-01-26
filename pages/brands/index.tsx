@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 interface Brand {
   id: string;
@@ -596,7 +598,7 @@ function BrandCard({
               Focus Areas
             </p>
             <div className="flex flex-wrap gap-2">
-              {brand.focus.slice(0, 3).map((area) => (
+              {brand.safeSlice(focus, 0, 3).map((area) => (
                 <span
                   key={area}
                   className="rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-gray-300"

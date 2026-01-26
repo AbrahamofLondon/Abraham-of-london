@@ -1,6 +1,6 @@
 // lib/canon.ts — CANONICAL (ASYNC, NO allCanons IMPORTS)
 
-import { getContentlayerData, isDraftContent } from "@/lib/contentlayer-compat";
+import { getContentlayerData, isDraftContent } from "@/lib/content/server";
 
 export type Canon = any;
 

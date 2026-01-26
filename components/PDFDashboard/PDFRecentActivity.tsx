@@ -1,4 +1,5 @@
 // components/PDFDashboard/PDFRecentActivity.tsx
+import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import { PDFItem } from '@/lib/pdf/types';
 import { Clock, FileText, CheckCircle, AlertCircle } from 'lucide-react';
@@ -15,7 +16,7 @@ export const PDFRecentActivity: React.FC<PDFRecentActivityProps> = ({
   // FIX: Use generatedAt instead of lastGenerated
   const recentPDFs = [...pdfs]
     .sort((a, b) => new Date(b.generatedAt || 0).getTime() - new Date(a.generatedAt || 0).getTime())
-    .slice(0, 5);
+    safeArraySlice(..., 0, 5);
 
   const formatTimeAgo = (dateString?: string) => {
     if (!dateString) return 'Never';

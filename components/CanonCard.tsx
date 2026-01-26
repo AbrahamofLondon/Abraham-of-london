@@ -1,7 +1,7 @@
 // components/CanonCard.tsx
+import { safeArraySlice } from "@/lib/utils/safe";
 import * as React from "react";
 import Link from "next/link";
-
 export type CanonCardProps = {
   canon: {
     slug: string;
@@ -18,7 +18,6 @@ export type CanonCardProps = {
     accessLevel?: string | null;
   };
 };
-
 /**
  * CanonCard
  * ----------
@@ -41,17 +40,13 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
     date,
     accessLevel,
   } = canon;
-
   const primaryLine = title || "Untitled Canon Volume";
-
   const secondaryLine =
     subtitle ||
     excerpt ||
     description ||
     "A catalogued volume from the Abraham of London Canon.";
-
   const isInnerCircle = accessLevel === "inner-circle";
-
   const displayDate =
     date && !Number.isNaN(new Date(date).getTime())
       ? new Date(date).toLocaleDateString("en-GB", {
@@ -60,10 +55,8 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
           day: "numeric",
         })
       : null;
-
   const primaryTag =
     tags && tags.length > 0 ? tags[0] : featured ? "Featured Volume" : null;
-
   return (
     <Link
       href={`/canon/${slug}`}
@@ -86,7 +79,6 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
       >
         <div className="absolute inset-x-0 -top-10 h-32 bg-[radial-gradient(circle,_rgba(226,197,120,0.25),_transparent_60%)]" />
       </div>
-
       <div className="relative flex gap-4">
         {/* Left "spine" accent & volume meta */}
         <div className="hidden md:flex flex-col items-center pr-3 border-r border-white/10 mr-3">
@@ -103,7 +95,6 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
             </div>
           )}
         </div>
-
         {/* Main content */}
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-[0.65rem] uppercase tracking-[0.22em] text-softGold/80">
@@ -111,32 +102,27 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
               <span className="h-[3px] w-[3px] rounded-full bg-softGold" />
               Canon Volume
             </span>
-
             {primaryTag && (
               <span className="inline-flex items-center gap-1 rounded-full border border-softGold/30 bg-softGold/5 px-2 py-0.5 text-[0.6rem]">
                 {primaryTag}
               </span>
             )}
-
             {isInnerCircle && (
               <span className="inline-flex items-center gap-1 rounded-full border border-softGold/60 bg-softGold/10 px-2 py-0.5 text-[0.6rem] text-softGold">
                 <span>🔒</span> Inner Circle
               </span>
             )}
           </div>
-
           <h2 className="font-serif text-lg md:text-xl font-semibold text-cream leading-snug line-clamp-2 group-hover:text-softGold transition-colors">
             {primaryLine}
           </h2>
-
           <p className="text-sm text-gray-300/90 leading-relaxed line-clamp-3">
             {secondaryLine}
           </p>
-
           {/* Tag + meta row */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
             <div className="flex flex-wrap gap-1.5 text-[0.65rem] text-gray-400">
-              {tags?.slice(0, 3).map((tag) => (
+              {safeArraySlice(tags, 0, 3)?.map((tag) => (
                 <span
                   key={tag}
                   className="
@@ -148,7 +134,6 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
                 </span>
               ))}
             </div>
-
             <div className="inline-flex items-center gap-1 text-[0.7rem] text-softGold/90">
               <span className="transition-transform duration-200 group-hover:translate-x-0.5">
                 Read Volume
@@ -157,7 +142,6 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
             </div>
           </div>
         </div>
-
         {/* Optional cover thumbnail (if present) */}
         {coverImage && (
           <div className="hidden sm:block flex-shrink-0 ml-3">
@@ -174,5 +158,4 @@ export default function CanonCard({ canon }: CanonCardProps): JSX.Element {
       </div>
     </Link>
   );
-}
-
+}

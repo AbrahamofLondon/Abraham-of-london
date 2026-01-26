@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { safeFirstChar } from "@/lib/utils/safe";
+
 
 interface Comment {
   id: string;
@@ -75,7 +77,7 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
                 />
               ) : (
                 <span className="font-semibold text-gray-600">
-                  {comment.author.name.charAt(0)}
+                  {comment.author.safeFirstChar(name)}
                 </span>
               )}
             </div>

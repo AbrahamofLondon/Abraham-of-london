@@ -1,4 +1,4 @@
-// next.config.mjs — SHIP-FIRST GREEN BUILD CONFIG (IGNORE TS + ESLINT)
+// next.config.mjs — SHIP-FIRST GREEN BUILD CONFIG
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
@@ -318,20 +318,17 @@ const baseConfig = {
   },
 };
 
-// Optional contentlayer wrapper stays (no change)
+// Optional contentlayer wrapper (v2 only)
 async function withOptionalContentlayer(config) {
   try {
     const mod = await import("next-contentlayer2");
-    if (typeof mod.withContentlayer === "function") return mod.withContentlayer(config);
+    if (typeof mod.withContentlayer === "function") {
+      return mod.withContentlayer(config);
+    }
     return config;
   } catch {
-    try {
-      const mod = await import("contentlayer");
-      if (typeof mod.withContentlayer === "function") return mod.withContentlayer(config);
-      return config;
-    } catch {
-      return config;
-    }
+    // No v1 fallback. Either v2 is present or we ship without it.
+    return config;
   }
 }
 

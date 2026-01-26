@@ -7,18 +7,21 @@ import { useRouter } from "next/router";
 
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 
+// ✅ FIXED: Import server-side functions from correct location
 import {
+  getContentlayerData,
   getAllContentlayerDocs,
   getDocBySlug,
-  getDocHref,
   isDraftContent,
+} from '@/lib/contentlayer-helper';
+
+import {
+  getDocHref,
   normalizeSlug,
   toUiDoc,
-  getContentlayerData,
-} from "@/lib/contentlayer-compat";
+} from "@/lib/content/shared";
 
-import { prepareMDX } from "@/lib/server/md-utils";
-import { sanitizeData } from "@/lib/server/md-utils";
+import { prepareMDX, sanitizeData } from "@/lib/server/md-utils";
 
 type UiDoc = ReturnType<typeof toUiDoc>;
 
@@ -69,7 +72,7 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
                 Manuscript Not Found
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mb-6">
-                This asset isn’t in the vault index.
+                This asset isn't in the vault index.
               </p>
               <button
                 onClick={() => router.push("/content")}
@@ -137,9 +140,10 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    await getContentlayerData();
+    // Wait for contentlayer data to be loaded
+    const contentlayerData = getContentlayerData();
 
-    const docs = await getAllContentlayerDocs();
+    const docs = getAllContentlayerDocs();
 
     // Only docs whose href begins with /content/
     const contentDocs = Array.isArray(docs)
@@ -188,7 +192,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     if (!normalized) return { notFound: true };
 
     // Strictly resolve content documents only
-    const rawDoc = await getDocBySlug(`content/${normalized}`);
+    const rawDoc = getDocBySlug(`content/${normalized}`);
     if (!rawDoc) return { notFound: true };
     if (isDraftContent(rawDoc)) return { notFound: true };
 

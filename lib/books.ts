@@ -1,6 +1,8 @@
 // lib/books.ts — CANONICAL (ASYNC, NO allBooks IMPORTS)
 
-import { getContentlayerData, isDraftContent, normalizeSlug } from "@/lib/contentlayer-compat";
+import { getContentlayerData, isDraftContent, normalizeSlug } from "@/lib/content/server";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export type Book = any;
 export type BookWithContent = Book;
@@ -80,7 +82,7 @@ export async function getPublicBooks(): Promise<Book[]> {
 
 export async function getFeaturedBooks(limit?: number): Promise<Book[]> {
   const featured = (await loadBooks()).filter((b: any) => b?.featured === true);
-  return typeof limit === "number" ? featured.slice(0, limit) : featured;
+  return typeof limit === "number" ? safeSlice(featured, 0, limit) : featured;
 }
 
 export async function getRecentBooks(limit?: number): Promise<Book[]> {
@@ -90,5 +92,6 @@ export async function getRecentBooks(limit?: number): Promise<Book[]> {
     return tb - ta;
   });
 
-  return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+  return typeof limit === "number" ? safeSlice(sorted, 0, limit) : sorted;
 }
+

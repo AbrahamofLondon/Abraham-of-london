@@ -1,0 +1,30 @@
+import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
+
+// lib/utils/string.ts - CREATE THIS FILE
+export function safeString(v: unknown): string {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string') return v;
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  return '';
+}
+
+export function capitalize(v: unknown): string {
+  const s = safeString(v).trim();
+  if (!s) return '';
+  return safeFirstChar(s).toUpperCase() + s.slice(1);
+}
+
+export function safeCharAt(str: unknown, index: number): string {
+  const s = safeString(str);
+  if (index >= 0 && index < s.length) {
+    return s.charAt(index);
+  }
+  return '';
+}
+
+export function formatTier(tier: unknown): 'Private' | 'Inner Circle' | 'Public' {
+  const s = safeString(tier).toLowerCase();
+  if (s.includes('private')) return 'Private';
+  if (s.includes('inner') || s.includes('member')) return 'Inner Circle';
+  return 'Public';
+}

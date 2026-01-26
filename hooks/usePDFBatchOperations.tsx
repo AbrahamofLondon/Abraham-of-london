@@ -87,3 +87,5 @@ export const usePDFBatchOperations = (): UsePDFBatchOperations => {
     batchTag,
   };
 };
+
+export { default as usePDFDashboard } from "./usePDFDashboard";

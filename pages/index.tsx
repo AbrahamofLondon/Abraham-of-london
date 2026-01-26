@@ -1,5 +1,6 @@
 // pages/index.tsx — INSTITUTIONAL HOME (FIXED LINKS + STRATEGIC FRAMEWORK STRIP)
 // NOTE: Tailwind-safe classes only (no decimals like h-4.5 / py-4.5)
+import { safeArraySlice } from "@/lib/utils/safe";
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
@@ -36,7 +37,14 @@ import {
   Workflow,
 } from "lucide-react";
 
-import { getAllShorts, getDocHref } from "@/lib/contentlayer-compat";
+// ✅ FIXED: Import server-side functions from correct location
+import {
+  getAllShorts,
+} from '@/lib/contentlayer-helper';
+
+import {
+  getDocHref,
+} from "@/lib/content/shared";
 
 /* -----------------------------------------------------------------------------
    TYPES
@@ -807,7 +815,7 @@ export default HomePage;
 ----------------------------------------------------------------------------- */
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   try {
-    const allShorts = await getAllShorts();
+    const allShorts = getAllShorts(); // ✅ Removed await - it's synchronous now
 
     const featuredShorts = (allShorts as any[])
       .filter((s) => (s?.published ?? true) && !(s?.draft ?? false))
@@ -816,7 +824,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
         const db = b?.date ? new Date(b.date).getTime() : 0;
         return db - da;
       })
-      .slice(0, 3);
+      safeArraySlice(..., 0, 3);
 
     return { props: { featuredShorts }, revalidate: 3600 };
   } catch (error) {

@@ -2,6 +2,8 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type {
+import { safeSlice } from "@/lib/utils/safe";
+
   BaseCardProps,
   DocumentCardProps,
   CoverAspect,
@@ -170,7 +172,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
   
   // FIX: Ensure tags is treated as an array even if passed as null
   const safeTags = Array.isArray(tags) ? tags : [];
-  const displayTags = safeTags.slice(0, 3);
+  const displayTags = safeSlice(safeTags, 0, 3);
   
   const formattedDate = date ? formatDate(date) : "";
 

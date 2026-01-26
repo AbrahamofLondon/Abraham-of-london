@@ -20,6 +20,8 @@ import { PDFQuickActions } from "./PDFQuickActions";
 import { PDFRecentActivity } from "./PDFRecentActivity";
 import { PDFExportPanel } from "./PDFExportPanel";
 import { PDFShareModal } from "./PDFShareModal";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 const PDFAnnotations = React.lazy(() => import("./PDFAnnotations"));
 const PDFComparisonView = React.lazy(() => import("./PDFComparisonView"));
@@ -265,7 +267,7 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({
                   canDelete={canDelete}
                 />
 
-                <PDFRecentActivity pdfs={filteredPDFs.slice(0, 5)} onSelectPDF={handleSelectPDF} />
+                <PDFRecentActivity pdfs={safeSlice(filteredPDFs, 0, 5)} onSelectPDF={handleSelectPDF} />
               </div>
 
               <div className="lg:col-span-9 xl:col-span-9 space-y-6">

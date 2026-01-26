@@ -3,6 +3,8 @@
 import Link from "next/link";
 import LockClosedIcon from "@/components/icons/LockClosedIcon";
 import InnerCircleBadge from "@/components/InnerCircleBadge";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 export interface CanonSummary {
   slug: string;
@@ -123,7 +125,7 @@ export default function CanonResourceCard({
 
           {tags && tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              {tags.slice(0, 3).map((tag) => (
+              {safeSlice(tags, 0, 3).map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-gray-200 px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.12em] dark:border-gray-700"

@@ -7,6 +7,8 @@ import {
   RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rate-limit-unified";
 import type { RateLimitOptions } from "@/lib/server/rate-limit-unified";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 type BlockPayload = {
   ok: false;
@@ -100,7 +102,7 @@ export async function requireAdmin(req: NextApiRequest, res: NextApiResponse): P
   }
 
   const auth = String(req.headers.authorization || "");
-  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : auth.trim();
+  const token = auth.startsWith("Bearer ") ? safeSlice(auth, 7).trim() : auth.trim();
 
   if (!token || token !== adminKey) {
     res.status(403).json({

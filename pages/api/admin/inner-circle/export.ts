@@ -1,4 +1,5 @@
 /* pages/api/admin/inner-circle/export.ts */
+import { safeSlice } from "@/lib/utils/safe";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { 
   getPrivacySafeKeyExportWithRateLimit, 
@@ -6,7 +7,6 @@ import {
   withInnerCircleRateLimit,
   createRateLimitHeaders 
 } from "@/lib/inner-circle";
-
 type AdminExportRow = {
   id: string;
   created_at: string;
@@ -18,7 +18,6 @@ type AdminExportRow = {
   member_name?: string;
   tier?: string;
 };
-
 type AdminStats = {
   totalMembers: number;
   activeMembers: number;
@@ -36,14 +35,12 @@ type AdminStats = {
   dailyActiveMembers: number;
   weeklyGrowthRate?: number;
 };
-
 type PaginationMeta = {
   total: number;
   page: number;
   limit: number;
   totalPages: number;
 };
-
 type AdminExportResponse = {
   ok: boolean;
   rows?: AdminExportRow[];
@@ -58,7 +55,6 @@ type AdminExportResponse = {
     resetAt: number;
   };
 };
-
 // Apply rate limiting middleware
 const rateLimitedHandler = withInnerCircleRateLimit({ 
   adminOperation: true, 
@@ -74,12 +70,10 @@ const rateLimitedHandler = withInnerCircleRateLimit({
       error: "Method requires GET for secure export." 
     });
   }
-
   // Admin authentication - support both Bearer token and x-inner-circle-admin-key header
   const ADMIN_BEARER_TOKEN = process.env.INNER_CIRCLE_ADMIN_KEY;
   const authHeader = req.headers.authorization;
   const adminKeyFromHeader = req.headers['x-inner-circle-admin-key'] as string;
-
   // Helper function to get client IP
   const getClientIp = (req: NextApiRequest) => {
     const forwardedFor = req.headers['x-forwarded-for'];
@@ -90,36 +84,29 @@ const rateLimitedHandler = withInnerCircleRateLimit({
     }
     return req.socket.remoteAddress || 'unknown';
   };
-
   // Check authentication
   const isAuthenticated = () => {
     // Try Bearer token first
     if (ADMIN_BEARER_TOKEN && authHeader?.startsWith("Bearer ")) {
-      const token = authHeader.slice(7);
+      const token = safeSlice(authHeader, 7);
       return token === ADMIN_BEARER_TOKEN;
     }
-    
     // Try custom header
     if (ADMIN_BEARER_TOKEN && adminKeyFromHeader) {
       return adminKeyFromHeader === ADMIN_BEARER_TOKEN;
     }
-    
     return false;
   };
-
   if (!ADMIN_BEARER_TOKEN || !isAuthenticated()) {
     const clientIp = getClientIp(req);
     console.error(`[Security Alert] Unauthorized export attempt from IP: ${clientIp}`);
-    
     // Add delay to prevent timing attacks
     await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
-    
     return res.status(401).json({ 
       ok: false, 
       error: "Authorization required." 
     });
   }
-
   try {
     // Get pagination and filter params
     const page = parseInt(req.query.page as string) || 1;
@@ -130,11 +117,9 @@ const rateLimitedHandler = withInnerCircleRateLimit({
     const endDate = req.query.endDate as string;
     const sortBy = (req.query.sortBy as string) || 'created_at';
     const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
-    
     // Get admin token for ID generation
-    const adminToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : adminKeyFromHeader;
-    const adminId = `admin_${Buffer.from(adminToken || '').toString('hex').slice(0, 16)}`;
-    
+    const adminToken = authHeader?.startsWith("Bearer ") ? safeSlice(authHeader, 7) : adminKeyFromHeader;
+    const adminId = `admin_${Buffer.from(adminToken || '').toString('hex').slice, 0, 16)}`;
     // Build filter options
     const filterOptions = {
       page,
@@ -146,7 +131,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
       sortBy,
       sortOrder,
     };
-    
     // Fetch data with rate limiting
     const [{ data: exportData, rateLimit: exportRateLimit }, { stats, rateLimit: statsRateLimit }] = await Promise.all([
       getPrivacySafeKeyExportWithRateLimit(
@@ -156,11 +140,9 @@ const rateLimitedHandler = withInnerCircleRateLimit({
       ),
       getPrivacySafeStatsWithRateLimit(adminId, req)
     ]);
-
     // Use the stricter rate limit result
     const rateLimit = !exportRateLimit?.allowed ? exportRateLimit : 
                      (!statsRateLimit?.allowed ? statsRateLimit : exportRateLimit);
-
     // Add rate limit headers
     if (rateLimit) {
       const headers = createRateLimitHeaders(rateLimit);
@@ -168,7 +150,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
         res.setHeader(key, value);
       });
     }
-
     // If rate limited, return 429
     if (rateLimit && !rateLimit.allowed) {
       return res.status(429).json({
@@ -183,7 +164,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
         },
       });
     }
-
     // Transform rows to match expected format with all required fields
     const rows: AdminExportRow[] = (exportData.items || []).map((row: any, index: number) => ({
       id: row.id || `key_${index + 1}`,
@@ -196,7 +176,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
       member_name: row.memberName || row.member_name || (Math.random() > 0.5 ? `Member ${index + 1}` : undefined),
       tier: row.tier || ['basic', 'premium', 'enterprise'][index % 3],
     }));
-
     // Create pagination info
     const pagination: PaginationMeta = {
       total: exportData.totalItems || rows.length * 10, // Mock multiplication for demo
@@ -204,7 +183,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
       limit: exportData.limit || limit,
       totalPages: exportData.totalPages || Math.ceil((exportData.totalItems || rows.length * 10) / limit),
     };
-
     // Create complete stats
     const adminStats: AdminStats = {
       totalMembers: stats?.totalMembers || 1000,
@@ -224,7 +202,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
       dailyActiveMembers: stats?.dailyActiveMembers || 150,
       weeklyGrowthRate: stats?.weeklyGrowthRate || 5.2,
     };
-
     return res.status(200).json({
       ok: true,
       rows,
@@ -238,10 +215,8 @@ const rateLimitedHandler = withInnerCircleRateLimit({
         resetAt: rateLimit.resetAt,
       } : undefined,
     });
-
   } catch (error: any) {
     console.error("[Admin Export] System Exception:", error);
-    
     // Check if it's a rate limit error
     if (error.message?.includes('Rate limit') || error.message?.includes('too many')) {
       return res.status(429).json({
@@ -250,7 +225,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
         generatedAt: new Date().toISOString(),
       });
     }
-    
     // Check if it's an authentication error
     if (error.message?.includes('Unauthorized') || error.message?.includes('Authentication')) {
       return res.status(401).json({
@@ -259,7 +233,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
         generatedAt: new Date().toISOString(),
       });
     }
-    
     return res.status(500).json({ 
       ok: false, 
       error: error.message || "Export subsystem failure.",
@@ -267,8 +240,6 @@ const rateLimitedHandler = withInnerCircleRateLimit({
     });
   }
 });
-
 export default rateLimitedHandler;
-
 // Export types for use elsewhere
 export type { AdminExportRow, AdminStats, PaginationMeta, AdminExportResponse };

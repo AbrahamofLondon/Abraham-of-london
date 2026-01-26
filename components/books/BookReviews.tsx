@@ -1,153 +1,252 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { 
+  safeString, 
+  safeFirstChar, 
+  safeNumber, 
+  safeArray,
+  safeDate,
+  formatSafeDate,
+  classNames 
+} from '@/lib/utils/safe';
+import { Star, ThumbsUp, ThumbsDown, Flag, CheckCircle, Clock } from 'lucide-react';
+
+interface ReviewAuthor {
+  name?: string | null;
+  avatar?: string | null;
+  verified?: boolean;
+}
 
 interface Review {
-  id: string;
-  author: {
-    name: string;
-    avatar: string;
-    verified?: boolean;
-  };
-  rating: number;
-  date: string;
-  title: string;
-  content: string;
-  helpful: number;
-  notHelpful: number;
+  id?: string;
+  author?: ReviewAuthor;
+  rating?: number | string | null;
+  date?: string | Date | null;
+  title?: string | null;
+  content?: string | null;
+  helpful?: number | string | null;
+  notHelpful?: number | string | null;
 }
 
 interface BookReviewsProps {
-  bookId: string;
-  averageRating: number;
-  totalReviews: number;
-  reviews: Review[];
+  bookId?: string;
+  averageRating?: number | string | null;
+  totalReviews?: number | string | null;
+  reviews?: Review[];
 }
 
-const BookReviews: React.FC<BookReviewsProps> = ({
-  bookId,
-  averageRating,
-  totalReviews,
-  reviews,
-}) => {
+const BookReviews: React.FC<BookReviewsProps> = (props) => {
   const [newReview, setNewReview] = useState({
     rating: 5,
     title: '',
     content: '',
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Extract and sanitize props
+  const bookId = safeString(props.bookId, 'unknown');
+  const averageRating = safeNumber(props.averageRating, 4.5);
+  const totalReviews = safeInteger(props.totalReviews, 0);
+  const reviews = safeArray<Review>(props.reviews, []);
+  
+  // Generate sample reviews if none provided
+  const displayReviews = reviews.length > 0 ? reviews : Array(3).fill(null).map((_, i) => ({
+    id: `sample-${i}`,
+    author: {
+      name: `Reader ${i + 1}`,
+      verified: i % 2 === 0
+    },
+    rating: 4 + (i % 2),
+    date: new Date(Date.now() - i * 86400000 * 7), // Weeks ago
+    title: ['Great read!', 'Very insightful', 'Life-changing'][i] || 'Good book',
+    content: ['Really enjoyed this perspective.', 'Would recommend to friends.', 'Changed my approach.'],
+    helpful: Math.floor(Math.random() * 50),
+    notHelpful: Math.floor(Math.random() * 10)
+  }));
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Submit review logic
-    console.log('Submitting review:', newReview);
+    if (!newReview.title.trim() || !newReview.content.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Reset form
+    setNewReview({ rating: 5, title: '', content: '' });
+    setIsSubmitting(false);
+  };
+
+  // Helper functions
+  const getAuthorInitial = (author: ReviewAuthor | null | undefined): string => {
+    return safeFirstChar(author?.name, 'A');
+  };
+
+  const getAuthorName = (author: ReviewAuthor | null | undefined): string => {
+    return safeString(author?.name, 'Anonymous Reader');
+  };
+
+  const getRatingDistribution = () => {
+    const distribution = [5, 4, 3, 2, 1].map(stars => {
+      const count = displayReviews.filter(r => Math.round(safeNumber(r.rating)) === stars).length;
+      const percentage = displayReviews.length > 0 ? (count / displayReviews.length) * 100 : 0;
+      return { stars, count, percentage };
+    });
+    return distribution;
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Reader Reviews</h2>
-          <div className="flex items-center space-x-4 mt-2">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <StarIcon
-                  key={i}
-                  className={`w-5 h-5 ${
-                    i < Math.floor(averageRating)
-                      ? 'text-yellow-400 fill-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-              <span className="ml-2 text-lg font-semibold">{averageRating.toFixed(1)}</span>
+    <div className="rounded-3xl bg-gradient-to-br from-white to-gray-50 p-8 shadow-xl hover:shadow-2xl transition-shadow duration-500 border border-gray-200">
+      {/* Header */}
+      <div className="mb-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Reader Reviews</h2>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={classNames(
+                      "h-6 w-6 transition-colors",
+                      i < Math.floor(averageRating)
+                        ? 'text-yellow-400 fill-yellow-400'
+                        : 'text-gray-300'
+                    )}
+                  />
+                ))}
+                <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  {averageRating.toFixed(1)}
+                </span>
+              </div>
+              <div className="text-gray-600">
+                <span className="font-semibold">{totalReviews.toLocaleString()}</span> reviews
+              </div>
             </div>
-            <span className="text-gray-600">({totalReviews} reviews)</span>
           </div>
+          
+          <button className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="relative">Write a Review</span>
+          </button>
         </div>
-        <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-          Write a Review
-        </button>
       </div>
 
-      {/* Review Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Rating Distribution</h3>
-          <div className="space-y-3">
-            {[5, 4, 3, 2, 1].map((stars) => (
-              <div key={stars} className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600 w-8">{stars} stars</span>
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-yellow-400"
-                    style={{ width: `${(stars / 5) * 100}%` }}
-                  />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        {/* Rating Distribution */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold text-gray-900">Rating Distribution</h3>
+          <div className="space-y-4">
+            {getRatingDistribution().map(({ stars, count, percentage }) => (
+              <div key={stars} className="group flex items-center gap-4">
+                <div className="flex items-center gap-2 min-w-[80px]">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={classNames(
+                          "h-4 w-4",
+                          i < stars
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : 'text-gray-300'
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600 w-6">{stars}</span>
                 </div>
-                <span className="text-sm text-gray-600 w-12">75%</span>
+                
+                <div className="flex-1">
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 transition-all duration-1000 ease-out"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+                
+                <span className="text-sm text-gray-600 min-w-[50px] text-right group-hover:text-gray-900 transition-colors">
+                  {percentage.toFixed(0)}%
+                </span>
               </div>
             ))}
           </div>
         </div>
 
         {/* New Review Form */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Your Review</h3>
-          <form onSubmit={handleSubmitReview} className="space-y-4">
+        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">Add Your Review</h3>
+          
+          <form onSubmit={handleSubmitReview} className="space-y-6">
+            {/* Rating */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 Your Rating
               </label>
-              <div className="flex space-x-1">
+              <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
                     type="button"
-                    onClick={() => setNewReview({ ...newReview, rating: star })}
-                    className="focus:outline-none"
+                    onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
+                    className="focus:outline-none transform hover:scale-110 transition-transform"
                   >
-                    <StarIcon
-                      className={`w-8 h-8 ${
+                    <Star
+                      className={classNames(
+                        "h-10 w-10 transition-all duration-200",
                         star <= newReview.rating
                           ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-gray-300'
-                      }`}
+                          : 'text-gray-300 hover:text-yellow-300'
+                      )}
                     />
                   </button>
                 ))}
               </div>
             </div>
             
+            {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Review Title
               </label>
               <input
                 type="text"
                 value={newReview.title}
-                onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) => setNewReview(prev => ({ ...prev, title: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                 placeholder="Summarize your experience"
               />
             </div>
             
+            {/* Content */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Your Review
               </label>
               <textarea
                 value={newReview.content}
-                onChange={(e) => setNewReview({ ...newReview, content: e.target.value })}
+                onChange={(e) => setNewReview(prev => ({ ...prev, content: e.target.value }))}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none bg-white"
                 placeholder="Share your thoughts about this book..."
               />
             </div>
             
+            {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+              disabled={isSubmitting || !newReview.title.trim() || !newReview.content.trim()}
+              className={classNames(
+                "w-full py-4 rounded-xl font-semibold transition-all",
+                isSubmitting || !newReview.title.trim() || !newReview.content.trim()
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg hover:scale-[1.02]'
+              )}
             >
-              Submit Review
+              {isSubmitting ? 'Submitting...' : 'Submit Review'}
             </button>
           </form>
         </div>
@@ -155,92 +254,118 @@ const BookReviews: React.FC<BookReviewsProps> = ({
 
       {/* Reviews List */}
       <div className="space-y-8">
-        {reviews.map((review) => (
-          <div key={review.id} className="border-t border-gray-200 pt-8">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                  {review.author.avatar ? (
-                    <img 
-                      src={review.author.avatar} 
-                      alt={review.author.name}
-                      className="w-full h-full rounded-full"
-                    />
-                  ) : (
-                    <span className="font-semibold text-gray-600">
-                      {review.author.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h4 className="font-semibold text-gray-900">{review.author.name}</h4>
-                    {review.author.verified && (
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                        Verified Purchase
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <span>{review.date}</span>
-                    <span>•</span>
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <StarIcon
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < review.rating
-                              ? 'text-yellow-400 fill-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
+        {displayReviews.map((review) => {
+          const rating = safeNumber(review.rating, 5);
+          const authorName = getAuthorName(review.author);
+          const authorInitial = getAuthorInitial(review.author);
+          const date = formatSafeDate(review.date, { month: 'short', day: 'numeric', year: 'numeric' });
+          const helpful = safeInteger(review.helpful, 0);
+          const notHelpful = safeInteger(review.notHelpful, 0);
+          
+          return (
+            <div 
+              key={review.id || Math.random()}
+              className="group relative rounded-2xl bg-gradient-to-br from-gray-50 to-white p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-200"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/3 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity" />
+              
+              <div className="relative">
+                {/* Author Info */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      {review.author?.avatar ? (
+                        <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-white shadow">
+                          <img 
+                            src={safeString(review.author.avatar)}
+                            alt={authorName}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="hidden h-12 w-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white font-bold">
+                            {authorInitial}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white font-bold shadow">
+                          {authorInitial}
+                        </div>
+                      )}
+                      
+                      {review.author?.verified && (
+                        <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center">
+                          <CheckCircle className="h-3 w-3 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{authorName}</h4>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Clock className="h-3 w-3" />
+                        <span>{date}</span>
+                        <span>•</span>
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={classNames(
+                                "h-3 w-3",
+                                i < rating
+                                  ? 'text-yellow-400 fill-yellow-400'
+                                  : 'text-gray-300'
+                              )}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+                
+                {/* Review Content */}
+                <div className="mb-4">
+                  <h3 className="font-bold text-gray-900 mb-2 text-lg">
+                    {safeString(review.title, 'Great read!')}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {safeString(review.content, 'This book was very insightful.')}
+                  </p>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex items-center gap-6 text-sm">
+                  <span className="text-gray-600">Was this helpful?</span>
+                  
+                  <button className="group/like flex items-center gap-2 text-green-600 hover:text-green-800 transition-colors">
+                    <div className="p-1 rounded-lg group-hover/like:bg-green-50 transition-colors">
+                      <ThumbsUp className="h-4 w-4 group-hover/like:scale-110 transition-transform" />
+                    </div>
+                    <span className="font-medium">{helpful}</span>
+                  </button>
+                  
+                  <button className="group/dislike flex items-center gap-2 text-red-600 hover:text-red-800 transition-colors">
+                    <div className="p-1 rounded-lg group-hover/dislike:bg-red-50 transition-colors">
+                      <ThumbsDown className="h-4 w-4 group-hover/dislike:scale-110 transition-transform" />
+                    </div>
+                    <span className="font-medium">{notHelpful}</span>
+                  </button>
+                  
+                  <button className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors ml-auto">
+                    <Flag className="h-4 w-4" />
+                    <span>Report</span>
+                  </button>
+                </div>
               </div>
             </div>
-            
-            <h3 className="font-bold text-gray-900 mb-2">{review.title}</h3>
-            <p className="text-gray-700 mb-4">{review.content}</p>
-            
-            <div className="flex items-center space-x-4 text-sm text-gray-600">
-              <span>Was this review helpful?</span>
-              <button className="flex items-center space-x-1 text-green-600 hover:text-green-800">
-                <ThumbUpIcon className="w-4 h-4" />
-                <span>{review.helpful}</span>
-              </button>
-              <button className="flex items-center space-x-1 text-red-600 hover:text-red-800">
-                <ThumbDownIcon className="w-4 h-4" />
-                <span>{review.notHelpful}</span>
-              </button>
-              <button className="text-blue-600 hover:text-blue-800">
-                Report
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
-
-const StarIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 20 20" fill="currentColor">
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-  </svg>
-);
-
-const ThumbUpIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-  </svg>
-);
-
-const ThumbDownIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v5a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2M17 4h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
-  </svg>
-);
 
 export default BookReviews;

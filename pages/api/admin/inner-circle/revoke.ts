@@ -1,6 +1,6 @@
 // pages/api/admin/inner-circle/revoke.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { revokeKey } from "@/lib/inner-circle/keys";
+import { createOrUpdateMemberAndIssueKeyWithRateLimit } from "@/lib/server/inner-circle/keys"
 
 function assertAdmin(req: NextApiRequest) {
   const k = req.headers["x-admin-key"];

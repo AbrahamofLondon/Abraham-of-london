@@ -3,6 +3,8 @@
 import * as React from "react";
 import { motion, useReducedMotion, MotionProps } from "framer-motion";
 import clsx from "clsx";
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+
 
 export type Testimonial = {
   quote: string;
@@ -130,8 +132,8 @@ export default function TestimonialsSection({
   const headingId = React.useId();
 
   const data = React.useMemo(() => {
-    const arr = (items?.length ? items : DEFAULT_ITEMS).slice();
-    return typeof limit === "number" ? arr.slice(0, Math.max(0, limit)) : arr;
+    const arr = (items?.length ? items : DEFAULT_ITEMS)safeArraySlice(...);
+    return typeof limit === "number" ? safeSlice(arr, 0, Math.max(0, limit)) : arr;
   }, [items, limit]);
 
   const surface =

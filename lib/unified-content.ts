@@ -4,6 +4,8 @@
 // ✅ Supports all Vault types (Canon, Books, Strategy, etc.)
 
 import { 
+import { safeSlice } from "@/lib/utils/safe";
+
   getPublishedDocuments, 
   getDocKind, 
   normalizeSlug, 
@@ -68,7 +70,7 @@ export async function getRecentUnifiedContentSafe(limit?: number): Promise<Unifi
     const db = b.date ? new Date(b.date).getTime() : 0;
     return db - da;
   });
-  return limit ? sorted.slice(0, limit) : sorted;
+  return limit ? safeSlice(sorted, 0, limit) : sorted;
 }
 
 export async function getUnifiedContentByTypeSafe(type: string): Promise<UnifiedContentSummary[]> {

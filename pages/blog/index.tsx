@@ -1,207 +1,509 @@
-/* pages/blog/index.tsx — ESSAYS & FIELD NOTES (INTEGRITY MODE) */
+/* pages/blog/index.tsx — PRODUCTION-READY VERSION */
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Head from "next/head";
-import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
-import { 
-  getContentlayerData, 
-  normalizeSlug, 
-  getPublishedDocuments,
-  sanitizeData 
-} from "@/lib/contentlayer-compat";
 import { 
   Calendar, 
   Clock, 
   Search, 
-  Tag, 
   ArrowRight, 
-  Filter, 
-  ChevronRight, 
-  BookOpen, 
-  TrendingUp, 
-  Sparkles 
+  Tag, 
+  TrendingUp 
 } from "lucide-react";
 
-type Item = {
+// server-only functions for getStaticProps
+import { getPublishedPosts } from "@/lib/content/server";
+
+// client-safe utilities
+import { sanitizeData, normalizeSlug, resolveDocCoverImage } from "@/lib/content/shared";
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+
+
+// ============= TYPE DEFINITIONS =============
+type BlogPost = {
   slug: string;
   url: string;
   title: string;
   excerpt: string | null;
-  date: string | null;
+  date: string | null;        // Display date (formatted)
+  dateIso: string | null;     // Canonical ISO date for sorting
   readTime: string | null;
   coverImage: string | null;
   tags: string[];
   author: string | null;
+  featured?: boolean;
 };
 
-type Props = { 
-  items: Item[];
-  featuredItems: Item[];
+type BlogIndexProps = {
+  items: BlogPost[];
+  featuredItems: BlogPost[];
   popularTags: string[];
+  totalPosts: number;
+  lastUpdated: string;
 };
 
-const BlogIndex: NextPage<Props> = ({ items, featuredItems, popularTags }) => {
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
-  const [visibleItems, setVisibleItems] = React.useState(items);
+// ============= UTILITY FUNCTIONS (CLIENT-SAFE) =============
+const formatDateString = (dateInput: string | Date | null | undefined): string | null => {
+  if (!dateInput) return null;
+  try {
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) return null;
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  } catch {
+    return null;
+  }
+};
 
-  React.useEffect(() => {
+// ============= BLOG INDEX COMPONENT =============
+const BlogIndex: NextPage<BlogIndexProps> = ({ 
+  items, 
+  featuredItems, 
+  popularTags,
+  totalPosts,
+  lastUpdated 
+}) => {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
+
+  // ✅ Use useMemo for filtering (pure computation)
+  const filteredPosts = React.useMemo(() => {
     let filtered = items;
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(item => 
-        item.title.toLowerCase().includes(term) || 
-        item.excerpt?.toLowerCase().includes(term)
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(query) ||
+        post.excerpt?.toLowerCase().includes(query) ||
+        post.tags.some(tag => tag.toLowerCase().includes(query))
       );
     }
+
     if (selectedTag) {
-      filtered = filtered.filter(item => item.tags.includes(selectedTag));
+      filtered = filtered.filter(post => 
+        post.tags.includes(selectedTag)
+      );
     }
-    setVisibleItems(filtered);
-  }, [items, searchTerm, selectedTag]);
+
+    return filtered;
+  }, [items, searchQuery, selectedTag]);
+
+  // Generate safe popular tags (ensure they exist)
+  const safePopularTags = Array.isArray(popularTags) 
+    ? popularTags.filter(tag => tag && typeof tag === 'string')
+    : [];
 
   return (
-    <Layout title="Essays | Abraham of London">
+    <Layout>
       <Head>
         <title>Essays | Abraham of London</title>
-        <meta name="description" content="Field notes and strategic clarity for builders who refuse drift." />
-        <link rel="canonical" href="https://abrahamoflondon.com/blog" />
+        <meta name="description" content="Thoughtful essays on technology, design, and the human experience." />
+        <meta property="og:title" content="Essays | Abraham of London" />
+        <meta property="og:description" content="Thoughtful essays on technology, design, and the human experience." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <main className="min-h-screen bg-black text-gray-300 selection:bg-gold selection:text-black">
-        {/* HERO SECTION */}
-        <section className="relative py-20 border-b border-white/5 bg-gradient-to-b from-zinc-900 to-black">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <header className="max-w-3xl">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-gold/70 mb-6">
-                <ChevronRight size={14} /> <span>Institutional Archive</span>
-              </div>
-              <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-6">Essays</h1>
-              <p className="text-xl text-gray-400 leading-relaxed italic">
-                Field notes, convictions, and strategic clarity — written for builders who refuse drift.
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        {/* Hero Section */}
+        <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-4">
+              Essays & Insights
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Explorations in technology, design, philosophy, and the craft of building meaningful things.
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+              <span className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                {totalPosts} {totalPosts === 1 ? 'essay' : 'essays'} published
+              </span>
+              {safePopularTags.length > 0 && (
+                <span className="flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  {safePopularTags.length} {safePopularTags.length === 1 ? 'topic' : 'topics'}
+                </span>
+              )}
+            </div>
+            {lastUpdated && (
+              <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
+                Last updated: {new Date(lastUpdated).toLocaleDateString('en-GB')}
               </p>
-            </header>
+            )}
           </div>
-        </section>
 
-        {/* SEARCH & FILTER ENGINE */}
-        <section className="py-12 border-b border-white/5 bg-zinc-950/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row gap-6 items-center">
-              <div className="relative flex-1 w-full group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-gold transition-colors" size={20} />
-                <input 
-                  type="text" 
-                  placeholder="Search manuscripts..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:border-gold/50 outline-none transition-all"
-                />
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-                {popularTags.map(tag => (
-                  <button 
-                    key={tag} 
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search essays..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                aria-label="Search essays"
+              />
+            </div>
+          </div>
+
+          {/* Popular Tags */}
+          {safePopularTags.length > 0 && (
+            <div className="max-w-4xl mx-auto mb-12">
+              <div className="flex flex-wrap gap-2 justify-center">
+                <button
+                  onClick={() => setSelectedTag(null)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedTag === null
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                  aria-label="Show all essays"
+                >
+                  All
+                </button>
+                {safePopularTags.map(tag => (
+                  <button
+                    key={tag}
                     onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${selectedTag === tag ? 'bg-gold text-black' : 'bg-white/5 text-white/50 hover:bg-white/10'}`}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedTag === tag
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    }`}
+                    aria-label={`Filter by ${tag}`}
                   >
-                    #{tag}
+                    {tag}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
+          )}
         </section>
 
-        {/* GRID ENGINE */}
-        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {visibleItems.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {visibleItems.map((item) => (
-                <Link key={item.slug} href={item.url} className="group">
-                  <div className="h-full flex flex-col rounded-3xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-gold/20 transition-all overflow-hidden">
-                    <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900">
-                      {item.coverImage ? (
-                        <Image 
-                          src={item.coverImage} 
-                          alt={item.title} 
-                          fill 
-                          className="object-cover transition-transform duration-700 group-hover:scale-105" 
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center italic text-white/5 font-serif text-3xl">Essay</div>
-                      )}
-                    </div>
-                    <div className="p-8 flex flex-col flex-grow">
-                      <div className="flex items-center gap-4 text-[10px] font-mono text-gray-600 uppercase mb-4">
-                        <span className="flex items-center gap-1"><Calendar size={12} /> {item.date}</span>
-                        <span className="flex items-center gap-1"><Clock size={12} /> {item.readTime}</span>
-                      </div>
-                      <h2 className="font-serif text-2xl text-white mb-4 group-hover:text-gold transition-colors line-clamp-2">{item.title}</h2>
-                      <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed mb-8">{item.excerpt}</p>
-                      <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
-                         <div className="flex gap-2">
-                           {item.tags.slice(0, 2).map(tag => (
-                             <span key={tag} className="text-[9px] font-black uppercase text-gold/50">#{tag}</span>
-                           ))}
-                         </div>
-                         <ArrowRight size={16} className="text-gray-700 group-hover:text-gold group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+        {/* Featured Posts */}
+        {featuredItems.length > 0 && !searchQuery && !selectedTag && (
+          <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
+              Featured Essays
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredItems.map(post => (
+                <FeaturedPostCard key={post.slug} post={post} />
               ))}
             </div>
+          </section>
+        )}
+
+        {/* All Posts */}
+        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-20">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {searchQuery || selectedTag ? 'Search Results' : 'All Essays'}
+            </h2>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {filteredPosts.length} {filteredPosts.length === 1 ? 'essay' : 'essays'}
+            </span>
+          </div>
+
+          {filteredPosts.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-xl text-gray-500 dark:text-gray-400">
+                No essays found matching your criteria.
+              </p>
+              {(searchQuery || selectedTag) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedTag(null);
+                  }}
+                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
           ) : (
-            <div className="py-32 text-center">
-              <p className="font-serif text-2xl text-gray-600 italic">No essays found matching your criteria.</p>
+            <div className="grid gap-8">
+              {filteredPosts.map(post => (
+                <BlogPostCard key={post.slug} post={post} />
+              ))}
             </div>
           )}
         </section>
-      </main>
+      </div>
     </Layout>
   );
 };
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
+// ============= FEATURED POST CARD =============
+const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
+  return (
+    <Link href={post.url} className="group block">
+      <article className="h-full bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
+        {post.coverImage && (
+          <div className="relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              priority={true}
+            />
+          </div>
+        )}
+        <div className="p-6">
+          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+            {post.date && (
+              <span className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                {post.date}
+              </span>
+            )}
+            {post.readTime && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                {post.readTime}
+              </span>
+            )}
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {post.title}
+          </h3>
+          {post.excerpt && (
+            <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+              {post.excerpt}
+            </p>
+          )}
+          {post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {post.safeSlice(tags, 0, 3).map(tag => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </article>
+    </Link>
+  );
+};
+
+// ============= BLOG POST CARD =============
+const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
+  return (
+    <Link href={post.url} className="group block">
+      <article className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
+        <div className="flex gap-6">
+          {post.coverImage && (
+            <div className="relative w-48 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 hidden sm:block">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                sizes="192px"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+              {post.date && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  {post.date}
+                </span>
+              )}
+              {post.readTime && (
+                <span className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  {post.readTime}
+                </span>
+              )}
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              {post.title}
+            </h3>
+            {post.excerpt && (
+              <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+                {post.excerpt}
+              </p>
+            )}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              {post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {post.safeSlice(tags, 0, 4).map(tag => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap">
+                Read more
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+};
+
+// ============= SERVER-SIDE DATA FETCHING =============
+export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   try {
-    const data = await getContentlayerData();
-    const published = getPublishedDocuments().filter((d: any) => {
-      const dir = String(d._raw?.sourceFileDir || "").toLowerCase();
-      return dir.includes('blog') || dir.includes('posts');
+    // ✅ Use imported server-only function
+    const allPosts = getPublishedPosts();
+    
+    // Validate response
+    if (!Array.isArray(allPosts)) {
+      console.warn("[Blog] getPublishedPosts did not return array");
+      throw new Error("Invalid posts data");
+    }
+
+    // Transform to blog post format (PURE operations only)
+    const items: BlogPost[] = allPosts
+      .map((doc: any) => {
+        try {
+          if (!doc) return null;
+          
+          // Use imported normalizeSlug
+          const slug = normalizeSlug(doc.slug || "");
+          if (!slug) return null;
+          
+          const title = doc.title || "Untitled Essay";
+          const excerpt = doc.excerpt || doc.description || null;
+          
+          // Handle date parsing safely
+          let dateIso: string | null = null;
+          let dateStr: string | null = null;
+          
+          if (doc.date) {
+            try {
+              const date = new Date(doc.date);
+              if (!isNaN(date.getTime())) {
+                dateIso = date.toISOString();
+                dateStr = formatDateString(date);
+              }
+            } catch (e) {
+              console.warn(`[Blog] Invalid date for post "${title}":`, doc.date);
+            }
+          }
+          
+          const readTime = doc.readTime || "5 min read";
+          
+          // Use imported resolveDocCoverImage
+          const coverImage = resolveDocCoverImage(doc);
+          
+          // Ensure tags is an array
+          const tags = Array.isArray(doc.tags) 
+            ? doc.tags.filter((t: any) => t && typeof t === 'string')
+            : [];
+          
+          const author = doc.author || "Abraham of London";
+          const url = `/blog/${slug}`;
+          
+          // Check if featured
+          const featured = Boolean(
+            doc.featured || 
+            tags.includes('featured') || 
+            tags.includes('essentials')
+          );
+          
+          return { 
+            slug, 
+            url, 
+            title, 
+            excerpt, 
+            date: dateStr,
+            dateIso,
+            readTime, 
+            coverImage, 
+            tags, 
+            author, 
+            featured 
+          };
+        } catch (error) {
+          console.warn(`[Blog] Failed to transform post:`, error);
+          return null;
+        }
+      })
+      .filter((item: BlogPost | null): item is BlogPost => {
+        return item !== null && Boolean(item.slug) && Boolean(item.title);
+      })
+      .sort((a: BlogPost, b: BlogPost) => {
+        // Sort by ISO date, newest first
+        const aTime = a.dateIso ? Date.parse(a.dateIso) : 0;
+        const bTime = b.dateIso ? Date.parse(b.dateIso) : 0;
+        return bTime - aTime;
+      });
+
+    // Extract featured posts
+    const featuredItems = items
+      .filter(post => post.featured)
+      safeArraySlice(..., 0, 3);
+
+    // Calculate popular tags with counts
+    const tagCounts: Record<string, number> = {};
+    items.forEach(item => {
+      item.tags.forEach(tag => {
+        if (tag && typeof tag === 'string') {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        }
+      });
     });
 
-    const items: Item[] = published.map((p: any) => ({
-      slug: normalizeSlug(p.slugComputed || p.slug || p._raw?.flattenedPath || ""),
-      url: `/blog/${normalizeSlug(p.slugComputed || p.slug || p._raw?.flattenedPath || "").replace(/^blog\//, '')}`,
-      title: p.title ?? "Untitled Manuscript",
-      excerpt: p.excerpt ?? p.description ?? null,
-      date: p.date ? new Date(p.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null,
-      readTime: p.readTime ?? "5 min read",
-      coverImage: p.coverImage ?? p.image ?? null,
-      tags: Array.isArray(p.tags) ? p.tags : [],
-      author: p.author ?? "Abraham of London",
-    }))
-    .filter(x => x.url.startsWith("/blog/") && Boolean(x.title))
-    .sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0;
-      const db = b.date ? new Date(b.date).getTime() : 0;
-      return db - da;
+    const popularTags = Object.entries(tagCounts)
+      .sort(([, a], [, b]) => b - a)
+      safeSlice(..., 0, 10)
+      .map(([tag]) => tag);
+
+    // ✅ Use imported sanitizeData
+    const props: BlogIndexProps = sanitizeData({
+      items,
+      featuredItems,
+      popularTags,
+      totalPosts: items.length,
+      lastUpdated: new Date().toISOString()
     });
 
-    const popularTags = Array.from(new Set(items.flatMap(i => i.tags))).slice(0, 10);
-    const featuredItems = items.filter(i => i.tags.includes('featured')).slice(0, 2);
-
-    return { 
-      props: sanitizeData({ items, featuredItems, popularTags }), 
-      revalidate: 3600 
+    return {
+      props,
+      revalidate: 3600, // Revalidate every hour
     };
+    
   } catch (error) {
-    console.error("[BLOG_INDEX_FAILURE]", error);
-    return { props: { items: [], featuredItems: [], popularTags: [] }, revalidate: 3600 };
+    console.error("[Blog Index] Fatal error in getStaticProps:", error);
+    
+    // ✅ Graceful fallback with detailed error logging
+    return {
+      props: {
+        items: [],
+        featuredItems: [],
+        popularTags: [],
+        totalPosts: 0,
+        lastUpdated: new Date().toISOString()
+      },
+      revalidate: 60, // Try again in 1 minute
+    };
   }
 };
 

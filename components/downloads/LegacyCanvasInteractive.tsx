@@ -1,6 +1,6 @@
 // components/downloads/LegacyCanvasInteractive.tsx - PREMIUM VERSION
+import { safeDateSlice } from "@/lib/utils/safe";
 'use client';
-
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Save,
@@ -23,7 +23,6 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-
 interface CanvasField {
   id: string;
   label: string;
@@ -33,7 +32,6 @@ interface CanvasField {
   helpText?: string;
   maxLength?: number;
 }
-
 interface CanvasSection {
   id: string;
   title: string;
@@ -42,11 +40,8 @@ interface CanvasSection {
   icon: React.ReactNode;
   fields: CanvasField[];
 }
-
 type CanvasData = Record<string, string>;
-
 const STORAGE_KEY = 'legacyCanvasData';
-
 const LegacyCanvasInteractive: React.FC = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -54,7 +49,6 @@ const LegacyCanvasInteractive: React.FC = () => {
   const [canvasData, setCanvasData] = useState<CanvasData>({});
   const [exporting, setExporting] = useState(false);
   const [generationTime, setGenerationTime] = useState<string>('');
-
   // Load saved data
   useEffect(() => {
     try {
@@ -69,7 +63,6 @@ const LegacyCanvasInteractive: React.FC = () => {
       console.error('Failed to load saved data:', e);
     }
   }, []);
-
   const sections: CanvasSection[] = useMemo(
     () => [
       {
@@ -235,7 +228,6 @@ const LegacyCanvasInteractive: React.FC = () => {
     ],
     []
   );
-
   const persist = (data: CanvasData) => {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -243,19 +235,15 @@ const LegacyCanvasInteractive: React.FC = () => {
       console.error('LocalStorage write failed:', e);
     }
   };
-
   const handleFieldChange = (fieldId: string, value: string) => {
     if (isLocked) return;
-
     setCanvasData((prev) => {
       const next = { ...prev, [fieldId]: value };
       persist(next); // Auto-save
       return next;
     });
-
     setSaved(false);
   };
-
   const handleSave = async () => {
     try {
       persist(canvasData);
@@ -265,46 +253,36 @@ const LegacyCanvasInteractive: React.FC = () => {
       console.error('Save failed:', error);
     }
   };
-
   const handleReset = () => {
     const ok = window.confirm(
       'Are you sure you want to reset all fields? This cannot be undone.'
     );
     if (!ok) return;
-
     setCanvasData({});
     try {
       window.localStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
     }
-
     setSaved(true);
     window.setTimeout(() => setSaved(false), 2000);
   };
-
   const handleExportPDF = async (format: 'A4' | 'Letter' = 'A4') => {
     setExporting(true);
-
     try {
       const startTime = Date.now();
-
-      const timestamp = new Date().toISOString().slice(0, 10);
+      const timestamp = safeDateSlice(new Date(), 0, 10);
       const filename = `Legacy-Architecture-Canvas-${format}-${timestamp}.pdf`;
-
       const pdfUrl = `/assets/downloads/download-legacy-architecture-canvas-${format.toLowerCase()}-premium.pdf`;
-
       const link = document.createElement('a');
       link.href = pdfUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
       const endTime = Date.now();
       const duration = ((endTime - startTime) / 1000).toFixed(1);
       setGenerationTime(duration);
-
       console.log(`PDF exported in ${duration}s: ${filename}`);
     } catch (error) {
       console.error('PDF export failed:', error);
@@ -313,7 +291,6 @@ const LegacyCanvasInteractive: React.FC = () => {
       setExporting(false);
     }
   };
-
   const escapeHtml = (input: string) =>
     input
       .replaceAll('&', '&amp;')
@@ -321,14 +298,11 @@ const LegacyCanvasInteractive: React.FC = () => {
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
-
   const handlePrint = () => {
     const printWindow = window.open('', '_blank', 'noopener,noreferrer');
     if (!printWindow) return;
-
     const generated = new Date();
     const year = generated.getFullYear();
-
     const bodyHtml = sections
       .map((section) => {
         const fieldsHtml = section.fields
@@ -348,7 +322,6 @@ const LegacyCanvasInteractive: React.FC = () => {
             `;
           })
           .join('');
-
         return `
           <div class="section">
             <div class="section-title">${escapeHtml(section.title)}</div>
@@ -358,7 +331,6 @@ const LegacyCanvasInteractive: React.FC = () => {
         `;
       })
       .join('');
-
     printWindow.document.write(`
       <!doctype html>
       <html>
@@ -386,7 +358,7 @@ const LegacyCanvasInteractive: React.FC = () => {
         ${bodyHtml}
         <div class="footer">
           <p>© ${year} Abraham of London. All rights reserved.</p>
-          <p>www.abrahamoflondon.com</p>
+          <p>www.abrahamoflondon.org</p>
         </div>
       </body>
       </html>
@@ -395,7 +367,6 @@ const LegacyCanvasInteractive: React.FC = () => {
     printWindow.focus();
     printWindow.print();
   };
-
   const handleLockToggle = () => {
     setIsLocked((prev) => {
       const next = !prev;
@@ -406,42 +377,34 @@ const LegacyCanvasInteractive: React.FC = () => {
       return next;
     });
   };
-
   const fieldCount = useMemo(() => {
     return Object.keys(canvasData).filter((key) => canvasData[key]?.trim())
       .length;
   }, [canvasData]);
-
   const totalFields = useMemo(() => {
     return sections.reduce((acc, section) => acc + section.fields.length, 0);
   }, [sections]);
-
   const completionPercentage = useMemo(() => {
     if (totalFields === 0) return 0;
     return Math.round((fieldCount / totalFields) * 100);
   }, [fieldCount, totalFields]);
-
   const totalWords = useMemo(() => {
     return Object.values(canvasData)
       .join(' ')
       .split(/\s+/)
       .filter((word) => word.length > 0).length;
   }, [canvasData]);
-
   const helpTitleForSection = (section: CanvasSection) => {
     const lines = section.fields
       .map((f) => f.helpText)
       .filter((x): x is string => Boolean(x))
       .map((x) => x.trim())
       .filter(Boolean);
-
     if (lines.length === 0) return 'No help text available for this section yet.';
     return lines.join('\n');
   };
-
   const isPurposeOrVision = (fieldId: string) =>
     fieldId.includes('purpose') || fieldId.includes('vision');
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -455,14 +418,12 @@ const LegacyCanvasInteractive: React.FC = () => {
                   PREMIUM EDITION
                 </span>
               </div>
-
               <h1 className="text-3xl md:text-4xl font-bold mb-3">
                 Legacy Architecture Canvas
               </h1>
               <p className="text-lg text-purple-100 mb-6">
                 Institutional-Grade Framework for Sovereign Legacy Design
               </p>
-
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-emerald-300" />
@@ -482,7 +443,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                 </div>
               </div>
             </div>
-
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleSave}
@@ -496,7 +456,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                 <Save className="w-4 h-4" />
                 {saved ? 'Saved!' : 'Save Progress'}
               </button>
-
               <button
                 onClick={() => setShowPreview((p) => !p)}
                 className="px-6 py-3 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition-all flex items-center gap-2"
@@ -508,7 +467,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                 )}
                 {showPreview ? 'Hide Preview' : 'Show Preview'}
               </button>
-
               <button
                 onClick={handleLockToggle}
                 className={`px-6 py-3 rounded-lg flex items-center gap-2 font-semibold transition-all ${
@@ -531,7 +489,6 @@ const LegacyCanvasInteractive: React.FC = () => {
               </button>
             </div>
           </div>
-
           {/* Progress & Stats */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white/10 p-4 rounded-xl">
@@ -553,7 +510,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                 {fieldCount} of {totalFields} fields completed
               </div>
             </div>
-
             <div className="bg-white/10 p-4 rounded-xl">
               <div className="flex items-center gap-3 mb-2">
                 <Target className="w-5 h-5 text-purple-200" />
@@ -564,7 +520,6 @@ const LegacyCanvasInteractive: React.FC = () => {
               <div className="text-2xl font-bold text-white">{totalWords}</div>
               <div className="text-xs text-purple-200">Total words</div>
             </div>
-
             <div className="bg-white/10 p-4 rounded-xl">
               <div className="flex items-center gap-3 mb-2">
                 <Users className="w-5 h-5 text-purple-200" />
@@ -597,7 +552,6 @@ const LegacyCanvasInteractive: React.FC = () => {
             </div>
           </div>
         </div>
-
         {/* Canvas Grid */}
         {showPreview ? (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 mb-8">
@@ -685,13 +639,11 @@ const LegacyCanvasInteractive: React.FC = () => {
                     </div>
                   </div>
                 </div>
-
                 {/* Section Fields */}
                 <div className="p-6 space-y-6">
                   {section.fields.map((field) => {
                     const value = canvasData[field.id] ?? '';
                     const len = value.length;
-
                     return (
                       <div key={field.id} className="space-y-3">
                         <label className="block">
@@ -708,7 +660,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                               </span>
                             ) : null}
                           </div>
-
                           {field.type === 'textarea' ? (
                             <textarea
                               value={value}
@@ -741,7 +692,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                               }`}
                             />
                           )}
-
                           {field.helpText && !isLocked ? (
                             <div className="text-xs text-slate-500 mt-1 italic">
                               💡 {field.helpText}
@@ -756,7 +706,6 @@ const LegacyCanvasInteractive: React.FC = () => {
             ))}
           </div>
         )}
-
         {/* Action Bar */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -772,7 +721,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                 Data is automatically saved to your browser&apos;s local storage
               </div>
             </div>
-
             <div className="flex flex-wrap gap-3">
               {isLocked ? (
                 <div className="px-4 py-2 bg-amber-50 text-amber-800 rounded-lg text-sm border border-amber-200 flex items-center gap-2">
@@ -780,7 +728,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                   Canvas is locked. Unlock to edit.
                 </div>
               ) : null}
-
               <button
                 onClick={() => handleExportPDF('A4')}
                 disabled={exporting}
@@ -789,7 +736,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                 <Download className="w-4 h-4" />
                 {exporting ? 'Generating PDF...' : 'Download Premium PDF'}
               </button>
-
               <button
                 onClick={handlePrint}
                 className="px-6 py-3 rounded-lg bg-white text-slate-800 font-semibold border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-all flex items-center gap-2"
@@ -800,14 +746,12 @@ const LegacyCanvasInteractive: React.FC = () => {
             </div>
           </div>
         </div>
-
         {/* Premium Instructions */}
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl text-white p-8">
           <div className="flex items-center gap-3 mb-6">
             <Award className="w-8 h-8 text-yellow-400" />
             <h3 className="text-2xl font-bold">Premium Features & Instructions</h3>
           </div>
-
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div className="flex items-start gap-4">
@@ -822,7 +766,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                   </p>
                 </div>
               </div>
-
               <div className="flex items-start gap-4">
                 <div className="bg-white/20 p-3 rounded-lg flex-shrink-0">
                   <Save className="w-6 h-6" />
@@ -837,7 +780,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                 </div>
               </div>
             </div>
-
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <div className="bg-white/20 p-3 rounded-lg flex-shrink-0">
@@ -851,7 +793,6 @@ const LegacyCanvasInteractive: React.FC = () => {
                   </p>
                 </div>
               </div>
-
               <div className="flex items-start gap-4">
                 <div className="bg-white/20 p-3 rounded-lg flex-shrink-0">
                   <Users className="w-6 h-6" />
@@ -866,12 +807,11 @@ const LegacyCanvasInteractive: React.FC = () => {
               </div>
             </div>
           </div>
-
           <div className="mt-8 pt-6 border-t border-white/20">
             <div className="text-center">
               <p className="text-slate-300">
                 For enterprise features, bulk generation, or custom templates,
-                contact <span className="text-yellow-300">legacy@abrahamoflondon.com</span>
+                contact <span className="text-yellow-300">legacy@abrahamoflondon.org</span>
               </p>
               <p className="text-sm text-slate-400 mt-2">
                 © {new Date().getFullYear()} Abraham of London • Legacy Architecture Suite v3.1
@@ -879,7 +819,6 @@ const LegacyCanvasInteractive: React.FC = () => {
             </div>
           </div>
         </div>
-
         {/* Generation Status */}
         {generationTime ? (
           <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
@@ -903,5 +842,4 @@ const LegacyCanvasInteractive: React.FC = () => {
     </div>
   );
 };
-
 export default LegacyCanvasInteractive;

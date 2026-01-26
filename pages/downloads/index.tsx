@@ -16,11 +16,15 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+// ✅ FIXED: Import server-side functions from correct location
 import { 
-  getContentlayerData, 
+  getContentlayerData 
+} from "@/lib/content/server";
+
+import { 
   normalizeSlug, 
   sanitizeData 
-} from "@/lib/contentlayer-compat";
+} from "@/lib/content/shared";
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
@@ -79,7 +83,7 @@ function formatDate(iso: string | null): string | null {
 
 /**
  * STRATEGIC FIX: INTEGRITY MODE
- * 1. Awaits getContentlayerData for absolute synchronization.
+ * 1. Uses getContentlayerData for absolute synchronization.
  * 2. Filters strictly for titled downloads with /downloads/ path integrity.
  */
 export const getStaticProps: GetStaticProps<{
@@ -88,8 +92,8 @@ export const getStaticProps: GetStaticProps<{
   featuredCount: number;
 }> = async () => {
   try {
-    // COMMAND: Await contentlayer data for absolute build-time integrity
-    const data = await getContentlayerData();
+    // COMMAND: Get contentlayer data for absolute build-time integrity
+    const data = getContentlayerData(); // ✅ Removed await - it's synchronous now
     const docs = Array.isArray(data.allDownloads) ? data.allDownloads : [];
 
     const downloads: DownloadListItem[] = docs

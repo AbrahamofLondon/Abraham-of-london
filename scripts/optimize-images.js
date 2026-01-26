@@ -1,4 +1,4 @@
-// scripts/optimize-images.js - PRODUCTION READY Image Optimization
+// scripts/optimize-images.js - FIXED VERSION
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -6,20 +6,19 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(__filename);  // CORRECT VARIABLE NAME
 const execAsync = promisify(exec);
 
-// Configuration
+// Configuration - FIXED all __dirname references
 const CONFIG = {
-  // Image directories to optimize
   sourceDirs: [
     path.join(__dirname, '../public/images'),
     path.join(__dirname, '../public/assets/images'),
-    path.join(__irectoryname, '../public/assets'),
+    path.join(__dirname, '../public/assets'),  // FIXED HERE
     path.join(__dirname, '../public')
   ],
   
-  // Output directory for optimized images
+  outputDir: path.join(__dirname, '../public/optimized-images'),
   outputDir: path.join(__dirname, '../public/optimized-images'),
   
   // File extensions to process
@@ -415,3 +414,5 @@ if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}`) {
 }
 
 export { main as optimizeImages };
+
+

@@ -9,6 +9,8 @@ import ContentHelper, {
   type DocKind 
 } from "./contentlayer-helper";
 import { absUrl } from "@/lib/siteConfig";
+import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+
 
 /* -------------------------------------------------------------------------- */
 /* 1. SEARCH INDEX SHAPE                                                      */
@@ -104,7 +106,7 @@ export function searchDocuments(query: string, limit: number = 20): SearchDoc[] 
   const searchTerm = query.toLowerCase().trim();
   
   // Return recent content if no query provided
-  if (!searchTerm) return searchIndex.slice(0, limit);
+  if (!searchTerm) return safeSlice(searchIndex, 0, limit);
 
   return searchIndex
     .filter((doc) => {
@@ -120,6 +122,6 @@ export function searchDocuments(query: string, limit: number = 20): SearchDoc[] 
 
       return searchableText.includes(searchTerm);
     })
-    .slice(0, limit);
+    safeArraySlice(..., 0, limit);
 }
 

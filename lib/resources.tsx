@@ -7,7 +7,7 @@ import {
   getDocKind,
   isDraftContent, // Changed from isDraft to isDraftContent
   normalizeSlug,
-} from "@/lib/contentlayer";
+} from "@/lib/content";
 
 type Props = { 
   doc: any; 
@@ -81,5 +81,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 export default ResourceSlugPage;
+
 
 

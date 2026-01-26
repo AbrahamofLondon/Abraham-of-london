@@ -8,6 +8,8 @@ import rehypeSlug from "rehype-slug";
 // IMPORTANT: static imports avoid webpack warnings
 import mdxComponents from "@/components/mdx-components";
 import simpleMdxComponents from "@/components/mdx/MinimalMdxComponents";
+import { safeSlice } from "@/lib/utils/safe";
+
 
 /* -------------------------------------------------------------------------- */
 /* ENV                                                                        */
@@ -129,7 +131,7 @@ export async function prepareMDX(
     const message = error instanceof Error ? error.message : "Unknown MDX error";
 
     if (isProduction()) {
-      console.error("[MDX_PROCESSING_ERROR]", message.slice(0, 160));
+      console.error("[MDX_PROCESSING_ERROR]", safeSlice(message, 0, 160));
     } else {
       console.error("[MDX_PROCESSING_ERROR]", message, error);
     }

@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link, { LinkProps } from "next/link";
 import { ChevronRight, ExternalLink } from "lucide-react";
 import Rule from "@/components/mdx/Rule";
+import { safeFirstChar } from "@/lib/utils/safe";
+
 
 /* -------------------------------------------------------------------------- */
 /* 1. PRIMITIVE TYPES FOR STRICT TYPE SAFETY                                 */
@@ -456,7 +458,7 @@ const SpeakerCard: React.FC<SpeakerCardProps> = ({
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-softGold/20 to-softGold/10 flex items-center justify-center">
               <span className="text-2xl font-bold text-deepCharcoal/50">
-                {name.charAt(0)}
+                {safeFirstChar(name)}
               </span>
             </div>
           )}

@@ -2,8 +2,8 @@
 // Enterprise-grade "fail-soft" filesystem helpers.
 // Guarantees: never scandir a file path; never throw on EPERM/ENOENT; deterministic outputs.
 
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 export function isDirectory(absPath: string): boolean {
   try {
@@ -78,3 +78,4 @@ export function safeReadDirDirs(absPath: string, opts: Omit<SafeReadDirOptions, 
 export function safeReadDirFiles(absPath: string, opts: Omit<SafeReadDirOptions, "includeFiles" | "includeDirs"> = {}) {
   return safeReadDir(absPath, { ...opts, includeDirs: false, includeFiles: true });
 }
+

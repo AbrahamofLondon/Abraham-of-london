@@ -1,3 +1,4 @@
+import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,7 +23,7 @@ interface RelatedDownloadsProps {
 const RelatedDownloads: React.FC<RelatedDownloadsProps> = ({ downloads, currentDownloadId }) => {
   const filteredDownloads = downloads
     .filter(download => download.id !== currentDownloadId)
-    .slice(0, 4);
+    safeArraySlice(..., 0, 4);
 
   const typeColors = {
     pdf: 'bg-red-100 text-red-800',

@@ -1,3 +1,5 @@
+import { safeSlice } from "@/lib/utils/safe";
+
 // lib/utils/docs.ts
 // Enhanced document utilities for content management
 
@@ -154,7 +156,7 @@ export function paginateDocuments<T>(
   const end = start + limit;
 
   return {
-    items: safeDocs.slice(start, end),
+    items: safeSlice(safeDocs, start, end),
     total,
     page: safePage,
     totalPages,

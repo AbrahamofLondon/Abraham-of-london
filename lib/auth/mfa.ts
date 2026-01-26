@@ -2,6 +2,8 @@
 import { randomInt, randomBytes } from 'crypto';
 import { encode as encodeBase32 } from 'hi-base32';
 import { authenticator } from '@otplib/preset-default';
+import { safeSlice } from "@/lib/utils/safe";
+
 
 // Types (keep your existing types)
 export type MfaMethod = 'totp' | 'sms' | 'email' | 'backup-code' | 'push';
@@ -228,7 +230,7 @@ export function generateBackupCodes(count: number = 10): string[] {
   
   for (let i = 0; i < count; i++) {
     const code = randomBytes(6).toString('hex').toUpperCase();
-    const formatted = `${code.slice(0, 4)}-${code.slice(4, 8)}-${code.slice(8, 12)}`;
+    const formatted = `${safeSlice(code, 0, 4)}-${safeSlice(code, 4, 8)}-${safeSlice(code, 8, 12)}`;
     codes.push(formatted);
   }
   
