@@ -1,12 +1,11 @@
-// components/SocialLinks.tsx - FIXED
 import * as React from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { siteConfig } from "@/config/site";
-import { getSocialIcon } from "@/lib/utils/site-utils";
-import {
+
 import { safeSlice } from "@/lib/utils/safe";
 
+import {
   Twitter,
   Linkedin,
   Instagram,

@@ -2,182 +2,244 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * CLIENT-SAFE CONTENT API
- * - Utilities only (slug, sanitize, mapping helpers)
- * - NO contentlayer collections, NO server getters, NO fs/redis/db.
+ * lib/content/index.ts
+ * -----------------------------------------------------------------------------
+ * Contentlayer “facade” for server-side usage (Pages Router safe).
+ * - Always returns arrays (never undefined)
+ * - Caches the snapshot per process to avoid repeated work during builds
+ * - Exposes both:
+ *   1) raw collections (allPosts, allBooks, ...)
+ *   2) convenience getters (getAllPosts, getAllBooks, ...)
+ *
+ * IMPORTANT:
+ * - Keep this file SERVER-ONLY in practice. Do not import it from client components.
  */
 
-const WARN =
-  process.env.NODE_ENV !== "production"
-    ? (...args: any[]) => console.warn("[CONTENT]", ...args)
-    : () => {};
+import { getContentlayerData } from "@/lib/content/server";
 
-export function normalizeSlug(input: string): string {
-  try {
-    return (input || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
-  } catch {
-    return "";
-  }
+type AnyDoc = Record<string, any>;
+type CollectionKey =
+  | "allPosts"
+  | "allBooks"
+  | "allDownloads"
+  | "allEvents"
+  | "allPrints"
+  | "allResources"
+  | "allStrategies"
+  | "allCanons"
+  | "allShorts"
+  // optional / extended vault types (safe to be empty)
+  | "allArticles"
+  | "allGuides"
+  | "allTutorials"
+  | "allCaseStudies"
+  | "allWhitepapers"
+  | "allReports"
+  | "allNewsletters"
+  | "allSermons"
+  | "allDevotionals"
+  | "allPrayers"
+  | "allTestimonies"
+  | "allPodcasts"
+  | "allVideos"
+  | "allCourses"
+  | "allLessons";
+
+type Snapshot = Record<CollectionKey, AnyDoc[]>;
+
+let _snapshot: Snapshot | null = null;
+
+function asArray(x: any): AnyDoc[] {
+  return Array.isArray(x) ? x : [];
 }
 
-export function sanitizeData<T = any>(data: T): T {
-  try {
-    return JSON.parse(
-      JSON.stringify(data, (_k, v) => {
-        if (v === undefined) return null;
-        if (typeof v === "function") return undefined;
-        if (typeof v === "bigint") return v.toString();
-        return v;
-      })
-    );
-  } catch (e) {
-    WARN("sanitizeData failed; returning empty object.", e);
-    return {} as T;
-  }
+function buildSnapshot(): Snapshot {
+  const data = getContentlayerData() as any;
+
+  return {
+    // canonical contentlayer keys you already use
+    allPosts: asArray(data?.allPosts),
+    allBooks: asArray(data?.allBooks),
+    allDownloads: asArray(data?.allDownloads),
+    allEvents: asArray(data?.allEvents),
+    allPrints: asArray(data?.allPrints),
+    allResources: asArray(data?.allResources),
+    allStrategies: asArray(data?.allStrategies),
+    allCanons: asArray(data?.allCanons),
+    allShorts: asArray(data?.allShorts),
+
+    // optional “vault expansion” keys — safe fallback to []
+    allArticles: asArray(data?.allArticles),
+    allGuides: asArray(data?.allGuides),
+    allTutorials: asArray(data?.allTutorials),
+    allCaseStudies: asArray(data?.allCaseStudies),
+    allWhitepapers: asArray(data?.allWhitepapers),
+    allReports: asArray(data?.allReports),
+    allNewsletters: asArray(data?.allNewsletters),
+    allSermons: asArray(data?.allSermons),
+    allDevotionals: asArray(data?.allDevotionals),
+    allPrayers: asArray(data?.allPrayers),
+    allTestimonies: asArray(data?.allTestimonies),
+    allPodcasts: asArray(data?.allPodcasts),
+    allVideos: asArray(data?.allVideos),
+    allCourses: asArray(data?.allCourses),
+    allLessons: asArray(data?.allLessons),
+  };
 }
 
-export function isDraftContent(doc: any): boolean {
-  try {
-    return Boolean(doc?.draft);
-  } catch {
-    return false;
-  }
+function getSnapshot(): Snapshot {
+  if (_snapshot) return _snapshot;
+  _snapshot = buildSnapshot();
+  return _snapshot;
 }
 
-export function isPublished(doc: any): boolean {
-  try {
-    if (!doc) return false;
-    if (doc.draft === true) return false;
-    if (doc.date) {
-      const d = new Date(doc.date);
-      if (!Number.isNaN(d.getTime()) && d.getTime() > Date.now()) return false;
-    }
-    return true;
-  } catch {
-    return false;
-  }
+function isDraft(doc: any): boolean {
+  return Boolean(doc?.draft);
 }
 
-export function getAccessLevel(doc: any): string {
-  try {
-    return doc?.accessLevel || "public";
-  } catch {
-    return "public";
-  }
+function isPublished(doc: any): boolean {
+  // if published flag exists and is false → not published
+  if (typeof doc?.published === "boolean") return doc.published !== false;
+  // otherwise draft drives publication
+  return !isDraft(doc);
 }
 
-export function resolveDocCoverImage(doc: any): string | null {
-  if (!doc) return null;
-  try {
-    const pick = (v: any): string | null => {
-      if (!v) return null;
-      if (typeof v === "string") return v;
-      if (typeof v?.url === "string") return v.url;
-      return null;
-    };
-    return pick(doc.coverImage) || pick(doc.featuredImage) || pick(doc.image) || null;
-  } catch {
-    return null;
-  }
+function publishedOnly<T extends AnyDoc>(docs: T[]): T[] {
+  return docs.filter(isPublished);
 }
 
-export function resolveDocDownloadUrl(doc: any): string | null {
-  try {
-    if (!doc) return null;
-    if (typeof doc.downloadUrl === "string") return doc.downloadUrl;
-    if (typeof doc.fileUrl === "string") return doc.fileUrl;
-    if (typeof doc.url === "string") return doc.url;
-    return null;
-  } catch {
-    return null;
-  }
+function getCollection(key: CollectionKey): AnyDoc[] {
+  const snap = getSnapshot();
+  return asArray(snap[key]);
 }
 
-export function getDocKind(doc: any): string {
-  if (!doc) return "unknown";
-  try {
-    const src: string | undefined =
-      doc?._raw?.sourceFilePath || doc?._raw?.source || doc?._raw?.flattenedPath;
-    if (src) {
-      if (src.includes("/books/")) return "book";
-      if (src.includes("/canon/") || src.includes("/canons/")) return "canon";
-      if (src.includes("/downloads/")) return "download";
-      if (src.includes("/posts/") || src.includes("/blog/")) return "post";
-      if (src.includes("/prints/")) return "print";
-      if (src.includes("/resources/")) return "resource";
-      if (src.includes("/strategies/") || src.includes("/strategy/")) return "strategy";
-      if (src.includes("/events/")) return "event";
-      if (src.includes("/shorts/")) return "short";
-    }
-    return doc?.type || doc?._type || "unknown";
-  } catch {
-    return "unknown";
-  }
+/* -------------------------------------------------------------------------- */
+/* Raw exports (arrays)                                                       */
+/* -------------------------------------------------------------------------- */
+
+export const allPosts = getCollection("allPosts");
+export const allBooks = getCollection("allBooks");
+export const allDownloads = getCollection("allDownloads");
+export const allEvents = getCollection("allEvents");
+export const allPrints = getCollection("allPrints");
+export const allResources = getCollection("allResources");
+export const allStrategies = getCollection("allStrategies");
+export const allCanons = getCollection("allCanons");
+export const allShorts = getCollection("allShorts");
+
+// Optional / extended vault exports
+export const allArticles = getCollection("allArticles");
+export const allGuides = getCollection("allGuides");
+export const allTutorials = getCollection("allTutorials");
+export const allCaseStudies = getCollection("allCaseStudies");
+export const allWhitepapers = getCollection("allWhitepapers");
+export const allReports = getCollection("allReports");
+export const allNewsletters = getCollection("allNewsletters");
+export const allSermons = getCollection("allSermons");
+export const allDevotionals = getCollection("allDevotionals");
+export const allPrayers = getCollection("allPrayers");
+export const allTestimonies = getCollection("allTestimonies");
+export const allPodcasts = getCollection("allPodcasts");
+export const allVideos = getCollection("allVideos");
+export const allCourses = getCollection("allCourses");
+export const allLessons = getCollection("allLessons");
+
+/* -------------------------------------------------------------------------- */
+/* Getter exports (functions)                                                 */
+/* -------------------------------------------------------------------------- */
+
+export const getAllPosts = () => publishedOnly(getCollection("allPosts"));
+export const getAllBooks = () => publishedOnly(getCollection("allBooks"));
+export const getAllDownloads = () => publishedOnly(getCollection("allDownloads"));
+export const getAllEvents = () => publishedOnly(getCollection("allEvents"));
+export const getAllPrints = () => publishedOnly(getCollection("allPrints"));
+export const getAllResources = () => publishedOnly(getCollection("allResources"));
+export const getAllStrategies = () => publishedOnly(getCollection("allStrategies"));
+export const getAllCanons = () => publishedOnly(getCollection("allCanons"));
+export const getAllShorts = () => publishedOnly(getCollection("allShorts"));
+
+// Optional / extended vault getters
+export const getAllArticles = () => publishedOnly(getCollection("allArticles"));
+export const getAllGuides = () => publishedOnly(getCollection("allGuides"));
+export const getAllTutorials = () => publishedOnly(getCollection("allTutorials"));
+export const getAllCaseStudies = () => publishedOnly(getCollection("allCaseStudies"));
+export const getAllWhitepapers = () => publishedOnly(getCollection("allWhitepapers"));
+export const getAllReports = () => publishedOnly(getCollection("allReports"));
+export const getAllNewsletters = () => publishedOnly(getCollection("allNewsletters"));
+export const getAllSermons = () => publishedOnly(getCollection("allSermons"));
+export const getAllDevotionals = () => publishedOnly(getCollection("allDevotionals"));
+export const getAllPrayers = () => publishedOnly(getCollection("allPrayers"));
+export const getAllTestimonies = () => publishedOnly(getCollection("allTestimonies"));
+export const getAllPodcasts = () => publishedOnly(getCollection("allPodcasts"));
+export const getAllVideos = () => publishedOnly(getCollection("allVideos"));
+export const getAllCourses = () => publishedOnly(getCollection("allCourses"));
+export const getAllLessons = () => publishedOnly(getCollection("allLessons"));
+
+/* -------------------------------------------------------------------------- */
+/* Simple utility: flatten everything                                          */
+/* -------------------------------------------------------------------------- */
+
+export function getAllContent(): AnyDoc[] {
+  const snap = getSnapshot();
+  const all = Object.values(snap).flat();
+  return publishedOnly(all);
 }
 
-export function getDocHref(doc: any): string {
-  if (!doc?.slug) return "/";
-  try {
-    const slug = normalizeSlug(doc.slug);
-    switch (getDocKind(doc)) {
-      case "book":
-        return `/books/${slug}`;
-      case "canon":
-        return `/canon/${slug}`;
-      case "download":
-        return `/downloads/${slug}`;
-      case "post":
-        return `/blog/${slug}`;
-      case "print":
-        return `/prints/${slug}`;
-      case "resource":
-        return `/resources/${slug}`;
-      case "strategy":
-        return `/strategy/${slug}`;
-      case "event":
-        return `/events/${slug}`;
-      case "short":
-        return `/shorts/${slug}`;
-      default:
-        return `/${slug}`;
-    }
-  } catch {
-    return "/";
-  }
-}
-
-export function toUiDoc(doc: any): any {
-  try {
-    return {
-      ...doc,
-      slug: normalizeSlug(doc?.slug || ""),
-      href: getDocHref(doc),
-      kind: getDocKind(doc),
-      coverImage: resolveDocCoverImage(doc),
-      isPublished: isPublished(doc),
-      accessLevel: getAccessLevel(doc),
-    };
-  } catch {
-    return doc || {};
-  }
-}
-
+/* Default export (handy for server utilities) */
 const Content = {
-  normalizeSlug,
-  sanitizeData,
-  isDraftContent,
-  isPublished,
-  getAccessLevel,
-  resolveDocCoverImage,
-  resolveDocDownloadUrl,
-  getDocKind,
-  getDocHref,
-  toUiDoc,
+  // raw
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allResources,
+  allStrategies,
+  allCanons,
+  allShorts,
+  allArticles,
+  allGuides,
+  allTutorials,
+  allCaseStudies,
+  allWhitepapers,
+  allReports,
+  allNewsletters,
+  allSermons,
+  allDevotionals,
+  allPrayers,
+  allTestimonies,
+  allPodcasts,
+  allVideos,
+  allCourses,
+  allLessons,
+
+  // getters
+  getAllPosts,
+  getAllBooks,
+  getAllDownloads,
+  getAllEvents,
+  getAllPrints,
+  getAllResources,
+  getAllStrategies,
+  getAllCanons,
+  getAllShorts,
+  getAllArticles,
+  getAllGuides,
+  getAllTutorials,
+  getAllCaseStudies,
+  getAllWhitepapers,
+  getAllReports,
+  getAllNewsletters,
+  getAllSermons,
+  getAllDevotionals,
+  getAllPrayers,
+  getAllTestimonies,
+  getAllPodcasts,
+  getAllVideos,
+  getAllCourses,
+  getAllLessons,
+
+  getAllContent,
 };
 
 export default Content;
-
-// Helpful types used elsewhere (your code imports these)
-export type DocBase = any;
-export type DocKind = string;
-export type Tier = "free" | "basic" | "premium" | "enterprise" | "restricted";

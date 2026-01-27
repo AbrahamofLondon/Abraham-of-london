@@ -10,7 +10,7 @@ export function sanitizeInput(input: string): string {
   return input
     .trim()
     .replace(/[<>]/g, '') // Remove angle brackets
-    safeSlice(..., 0, 1000); // Limit length
+    safeSubstring(value, 0, 1000); // Limit length
 }
 
 /**

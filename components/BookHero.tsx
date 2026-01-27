@@ -1,11 +1,10 @@
-// components/BookHero.tsx
-import { safeSlice } from "@/lib/utils/safe";
 "use client";
 
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
 import { safeString } from "@/lib/utils";
+import { safeSlice } from "@/lib/utils/safe";
 import { getSafeImageProps, type FallbackConfig } from "@/lib/image-utils";
 import Image from "next/image";
 
@@ -185,17 +184,18 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
           {/* Tags */}
           {tags && tags.length > 0 && (
             <div className="mb-6 flex flex-wrap gap-2">
-              {tags
-                .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
-                safeSlice(..., 0, 5)
-                .map((tag, index) => (
-                  <span
-                    key={`${tag}-${index}`}
-                    className="rounded-full border border-gray-200/50 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-600 backdrop-blur-sm dark:border-white/20 dark:bg-white/10 dark:text-gray-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
+              {safeSlice(
+                tags.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0),
+                0,
+                5
+              ).map((tag, index) => (
+                <span
+                  key={`${tag}-${index}`}
+                  className="rounded-full border border-gray-200/50 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-600 backdrop-blur-sm dark:border-white/20 dark:bg-white/10 dark:text-gray-300"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           )}
 
@@ -258,4 +258,3 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
     </section>
   );
 }
-

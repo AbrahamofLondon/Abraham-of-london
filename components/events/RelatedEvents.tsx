@@ -17,7 +17,11 @@ interface RelatedEventsProps {
   currentEventId: string;
 }
 const RelatedEvents: React.FC<RelatedEventsProps> = ({ events, currentEventId }) => {
-  const filteredEvents = safeArraySlice(events.filter(...), 0, 3);
+  const filteredEvents = safeArraySlice(
+  (events || []).filter((e: any) => !!e && !e.draft),
+  0,
+  3
+);
   if (filteredEvents.length === 0) {
     return null;
   }
@@ -90,4 +94,4 @@ const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
   </svg>
 );
-export default RelatedEvents;
+export default RelatedEvents;

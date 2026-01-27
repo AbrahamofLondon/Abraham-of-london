@@ -1,7 +1,12 @@
-// components/BookCard.tsx
-import * as React from "react";
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import React, { useMemo, useState } from "react";
+
+import { safeFirstChar, safeSlice, safeCapitalize, safeArraySlice } from "@/lib/utils/safe";
+import { getSafeImageProps, getFallbackImage } from "@/lib/image-utils";
+import type { FallbackConfig } from "@/lib/image-utils";
 
 type BookCardProps = {
   slug: string;
@@ -159,4 +164,3 @@ export default function BookCard(props: BookCardProps): JSX.Element {
     </article>
   );
 }
-

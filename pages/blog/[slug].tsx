@@ -329,7 +329,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async (ctx) => {
           const currentSlug = post?.slug || "";
           return normalizeSlug(String(pSlug)) !== normalizeSlug(String(currentSlug));
         })
-        safeSlice(..., 0, 6)
+        safeSlice(tags ?? [], 0, 6)
         .map((p: any) => sanitizeData(p));
     } catch (error) {
       console.warn(`[getStaticProps] Error fetching related posts:`, error);

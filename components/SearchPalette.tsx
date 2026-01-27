@@ -1,9 +1,10 @@
-// components/SearchPalette.tsx - FINAL COMPLETE FIXED VERSION
-import { safeArraySlice } from "@/lib/utils/safe";
 "use client";
+
 import * as React from "react";
 import Fuse from "fuse.js";
 import Link from "next/link";
+import { safeArraySlice } from "@/lib/utils/safe";
+
 interface SearchItem {
   id: string;
   type: "post" | "book" | "event";
@@ -12,10 +13,12 @@ interface SearchItem {
   date: string | null;
   snippet: string;
 }
+
 interface SearchPaletteProps {
   open: boolean;
   onClose: () => void;
 }
+
 export default function SearchPalette({
   open,
   onClose,
@@ -25,12 +28,14 @@ export default function SearchPalette({
   const [fuse, setFuse] = React.useState<any>(null);
   const [active, setActive] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
+
   // Focus input when opening
   React.useEffect(() => {
     if (open && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open]);
+
   // lazy-load the index on first open
   React.useEffect(() => {
     if (!open || items) return;
@@ -53,6 +58,7 @@ export default function SearchPalette({
     };
     loadSearchIndex();
   }, [open, items]);
+
   // esc to close
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
@@ -63,6 +69,7 @@ export default function SearchPalette({
     }
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
+
   // lock background scroll while open
   React.useEffect(() => {
     if (!open) return;
@@ -82,13 +89,15 @@ export default function SearchPalette({
       window.scrollTo(0, scrollY);
     };
   }, [open]);
+
   const handleArrowNavigation = (direction: 1 | -1): void => {
     setActive((current) => {
-      const count = results.length;
+      const count = top.length;
       if (!count) return 0;
       return (current + direction + count) % count;
     });
   };
+
   const handleInputKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>
   ): void => {
@@ -102,17 +111,19 @@ export default function SearchPalette({
         handleArrowNavigation(-1);
         break;
       case "Enter":
-        if (results[active]) {
-          window.location.href = results[active].url;
+        if (top[active]) {
+          window.location.href = top[active].url;
         }
         break;
       default:
         break;
     }
   };
+
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     if (e.target === e.currentTarget) onClose();
   };
+
   const handleBackdropKeyDown = (
     e: React.KeyboardEvent<HTMLDivElement>
   ): void => {
@@ -121,14 +132,16 @@ export default function SearchPalette({
       onClose();
     }
   };
+
   if (!open) return null;
-  const results =
+
+  const results: SearchItem[] =
     query.trim() && fuse
-      ? fuse
-          .search(query)
-          const top = safeArraySlice(results, 0, 12);
-          .map((r: any) => r.item) // FIX: Add type annotation here
-      : safeArraySlice(items || [], 0, 12);
+      ? (fuse.search(query).map((r: any) => r.item) as SearchItem[])
+      : (items || []);
+
+  const top = safeArraySlice(results, 0, 12);
+
   return (
     <div
       role="dialog"
@@ -140,7 +153,7 @@ export default function SearchPalette({
       tabIndex={-1}
     >
       <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/10 dark:bg-neutral-900">
-        <div className="border-b border-neutral-200 p-3 dark:border-neutral-800">
+        <div className="border-b border-neutral-2000 p-3 dark:border-neutral-800">
           <input
             ref={inputRef}
             value={query}
@@ -155,12 +168,12 @@ export default function SearchPalette({
           />
         </div>
         <ul className="max-h-96 overflow-auto p-1">
-          {results.length === 0 ? (
+          {top.length === 0 ? (
             <li className="px-3 py-6 text-center text-sm text-neutral-500">
               {query ? "No results found" : "Start typing to search..."}
             </li>
           ) : (
-            results.map((result: SearchItem, index: number) => (
+            top.map((result: SearchItem, index: number) => (
               <li key={result.id}>
                 <Link
                   href={result.url}

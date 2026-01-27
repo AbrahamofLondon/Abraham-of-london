@@ -3,14 +3,14 @@
 // ✅ Contentlayer-native implementation
 // ✅ Supports all Vault types (Canon, Books, Strategy, etc.)
 
-import { 
 import { safeSlice } from "@/lib/utils/safe";
 
-  getPublishedDocuments, 
-  getDocKind, 
-  normalizeSlug, 
-  getDocHref, 
-  resolveDocCoverImage 
+import {
+  getPublishedDocuments,
+  getDocKind,
+  normalizeSlug,
+  getDocHref,
+  resolveDocCoverImage,
 } from "./contentlayer-helper";
 
 /**
@@ -112,5 +112,3 @@ const UnifiedContentFacade = {
 };
 
 export default UnifiedContentFacade;
-
-

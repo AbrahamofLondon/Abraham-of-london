@@ -1,16 +1,15 @@
-// lib/content-fallback.ts - FIXED WITH CORRECT TYPES
-import { 
 import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
 
-  allPosts, 
-  allBooks, 
-  allDownloads, 
-  allEvents, 
-  allPrints, 
-  allResources, 
-  allStrategies, 
-  allCanons, 
-  allShorts 
+import {
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allResources,
+  allStrategies,
+  allCanons,
+  allShorts,
 } from "@/lib/content";
 
 // Define types based on actual Contentlayer data structure

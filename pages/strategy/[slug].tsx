@@ -1,4 +1,3 @@
-// pages/strategy/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -12,7 +11,6 @@ import {
   ShieldCheck,
   Workflow,
   Landmark,
-  Users,
   ArrowRight,
   Lock,
   Download,
@@ -29,10 +27,10 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-// ✅ SERVER-SAFE content access (fixes getContentlayerData undefined)
-import {
 import { safeSlice } from "@/lib/utils/safe";
 
+// ✅ SERVER-SAFE content access
+import {
   getContentlayerData,
   normalizeSlug,
   isDraftContent,

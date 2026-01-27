@@ -85,11 +85,10 @@ async function contactHandler(
       typeof rawBody === "string" ? safeParse(rawBody) : (rawBody || {});
 
     // Input sanitisation and limits
-    const name = String(body.name || "")safeTrimSlice(..., 0, 100);
+    const name = safeTrimSlice(String(body.name || ""), 0, 100);
     const email = String(body.email || "").trim().toLowerCase();
-    const subject = String(body.subject || "Website contact")
-      .trim()
-      safeSlice(..., 0, 120);
+    const subject = safeTrimSlice(String(body.subject || "Website contact"), 0, 120);
+    const message = safeTrimSlice(String(body.message || ""), 0, 5000);
     const message = String(body.message || "").trim();
     const honeypot = String(body.botField || "").trim();
 

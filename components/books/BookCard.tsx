@@ -1,16 +1,15 @@
-// components/books/BookCard.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useMemo } from "react";
-import { safeString } from "@/lib/utils";
-import { 
-import { safeFirstChar, safeSlice, safeCapitalize, safeArraySlice } from "@/lib/utils/safe";
 
-  getSafeImageProps, 
-  getFallbackImage,
-  type FallbackConfig 
+import { safeString } from "@/lib/utils";
+import { safeSlice, safeCapitalize, safeArraySlice } from "@/lib/utils/safe";
+
+import {
+  getSafeImageProps,
+  type FallbackConfig,
 } from "@/lib/image-utils";
 
 // FIXED: Made _id optional with a fallback
@@ -336,20 +335,24 @@ export default function BookCard({
               {/* Tags */}
               {bookWithId.tags && bookWithId.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {bookWithId.tags
-                    .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
-                    safeArraySlice(tags, 0, 3)
-                    .map((tag, index) => (
-                      <span
-                        key={`${tag}-${index}`}
-                        className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  {bookWithId.tags.length > 3 && (
+                  {safeArraySlice(
+                    bookWithId.tags.filter(
+                      (tag): tag is string => typeof tag === "string" && tag.trim().length > 0
+                    ),
+                    0,
+                    3
+                  ).map((tag, index) => (
+                    <span
+                      key={`${tag}-${index}`}
+                      className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+
+                  {bookWithId.tags.filter((t): t is string => typeof t === "string" && t.trim()).length > 3 && (
                     <span className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-500 backdrop-blur-sm">
-                      +{bookWithId.tags.length - 3}
+                      +{bookWithId.tags.filter((t): t is string => typeof t === "string" && t.trim()).length - 3}
                     </span>
                   )}
                 </div>
@@ -364,4 +367,3 @@ export default function BookCard({
     </article>
   );
 }
-

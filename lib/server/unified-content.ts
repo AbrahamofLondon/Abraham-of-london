@@ -2,9 +2,9 @@
 // Server-side unified content system for Abraham of London
 // Synchronized with ContentHelper v5.2.0
 
-import { 
 import { safeSlice } from "@/lib/utils/safe";
 
+import {
   getAllPosts, getAllBooks, getAllDownloads, getAllCanons, getAllShorts,
   getAllEvents, getAllResources, getAllStrategies, getAllArticles,
   getAllGuides, getAllTutorials, getAllCaseStudies, getAllWhitepapers,
