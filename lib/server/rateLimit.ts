@@ -1,156 +1,75 @@
-// lib/server/rateLimit.ts - COMPLETELY FIXED VERSION
-// This file re-exports everything from the unified rate limiter with proper types
+// lib/server/rateLimit.ts
+import "server-only";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { safeNumber } from "@/lib/utils/safe";
 
-// First, import everything from the unified module
-import { 
-  rateLimit as unifiedRateLimit,
-  getClientIp,
-  isRateLimited as unifiedIsRateLimited,
-  getRateLimiterStats,
-  resetRateLimit,
-  unblock,
-  withApiRateLimit,
-  getRateLimiterStatsSync,
-  resetRateLimitSync,
-  unblockSync,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-  type RateLimitOptions as UnifiedRateLimitOptions,
-  type RateLimitResult as UnifiedRateLimitResult
-} from "./rate-limit-unified";
-
-// ==================== TYPE DEFINITIONS ====================
-
-// Define the specific type that rateLimitForRequestIp expects to return
-export interface RateLimitResponse {
-  limited: boolean;
-  retryAfter: number;
-  limit: number;
-  remaining: number;
-}
-
-// Alias the unified types for backward compatibility
-export type RateLimitOptions = UnifiedRateLimitOptions;
-export type RateLimitResult = UnifiedRateLimitResult;
-
-// ==================== RE-EXPORTS ====================
-
-// Re-export everything from unified module
-export {
-  getClientIp,
-  getRateLimiterStats,
-  resetRateLimit,
-  unblock,
-  withApiRateLimit,
-  getRateLimiterStatsSync,
-  resetRateLimitSync,
-  unblockSync,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS
+export type RateLimitConfig = {
+  windowMs: number;
+  max: number;
 };
 
-// Re-export specific unified functions with the expected names
-export const isRateLimited = unifiedIsRateLimited;
-export const rateLimit = unifiedRateLimit;
+export const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
+  contact: { windowMs: 60_000, max: 10 },
+  newsletter: { windowMs: 60_000, max: 10 },
+  subscribe: { windowMs: 60_000, max: 10 },
+  teaser: { windowMs: 60_000, max: 10 },
+  shortsWrite: { windowMs: 60_000, max: 30 },
+  shortsRead: { windowMs: 60_000, max: 120 },
+  adminHeavy: { windowMs: 60_000, max: 10 },
+};
 
-// ==================== COMPATIBILITY FUNCTIONS ====================
+type Bucket = { resetAt: number; count: number };
+const memoryBuckets = new Map<string, Bucket>();
 
-/**
- * Compatibility function for pages/api/inner-circle/admin/delete.ts
- * This function matches the expected signature from the error messages
- */
-export async function rateLimitForRequestIp(
-  req: any,
-  bucket: string,
-  limit: number,
-  windowMs?: number
-): Promise<RateLimitResponse> {
-  // Extract IP from request
-  let ip: string;
-  
-  // Handle different request types (NextApiRequest vs NextRequest)
-  if (req.headers?.get) {
-    // NextRequest (Edge/App Router)
-    const forwarded = req.headers.get('x-forwarded-for');
-    ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
-  } else if (req.headers?.['x-forwarded-for']) {
-    // NextApiRequest (Pages Router)
-    const forwarded = req.headers['x-forwarded-for'];
-    ip = Array.isArray(forwarded) ? forwarded[0]?.trim() || 'unknown' : forwarded?.split(',')[0]?.trim() || 'unknown';
-  } else {
-    ip = req.socket?.remoteAddress || 'unknown';
+export function getClientIp(req: NextApiRequest): string {
+  const xf = req.headers["x-forwarded-for"];
+  const ip =
+    (Array.isArray(xf) ? xf[0] : xf)?.split(",")[0]?.trim() ||
+    (req.socket as any)?.remoteAddress ||
+    "0.0.0.0";
+  return ip;
+}
+
+export function createRateLimitHeaders(result: { limit: number; remaining: number; resetAt: number }) {
+  return {
+    "X-RateLimit-Limit": String(result.limit),
+    "X-RateLimit-Remaining": String(Math.max(0, result.remaining)),
+    "X-RateLimit-Reset": String(Math.ceil(result.resetAt / 1000)),
+  } as const;
+}
+
+export function isRateLimited(key: string, cfg: RateLimitConfig): { limited: boolean; remaining: number; resetAt: number; limit: number } {
+  const now = Date.now();
+  const existing = memoryBuckets.get(key);
+
+  if (!existing || existing.resetAt <= now) {
+    const resetAt = now + cfg.windowMs;
+    memoryBuckets.set(key, { resetAt, count: 1 });
+    return { limited: false, remaining: cfg.max - 1, resetAt, limit: cfg.max };
   }
-  
-  // Use the unified rate limit function
-  const result = await unifiedRateLimit(
-    `${bucket}:${ip}`, 
-    { 
-      limit, 
-      windowMs: windowMs || 5 * 60 * 1000, // Default 5 minutes
-      keyPrefix: bucket
-    }
-  );
-  
-  return {
-    limited: !result.allowed,
-    retryAfter: Math.max(0, result.retryAfterMs),
-    limit: result.limit,
-    remaining: result.remaining
-  };
+
+  existing.count += 1;
+  const remaining = cfg.max - existing.count;
+  const limited = existing.count > cfg.max;
+  return { limited, remaining, resetAt: existing.resetAt, limit: cfg.max };
 }
 
-/**
- * Compatibility function for pages/api/shorts/[slug]/like.ts
- * This matches the expected checkRateLimit signature
- */
-export async function checkRateLimit(
-  key: string,
-  bucket: string,
-  limit: number,
-  windowMs: number = 60000
-): Promise<RateLimitResponse> {
-  const result = await unifiedRateLimit(
-    `${bucket}:${key}`,
-    { 
-      limit, 
-      windowMs,
-      keyPrefix: bucket
-    }
-  );
-  
-  return {
-    limited: !result.allowed,
-    retryAfter: Math.max(0, result.retryAfterMs),
-    limit: result.limit,
-    remaining: result.remaining
-  };
+export function rateLimit(req: NextApiRequest, res: NextApiResponse, cfg: RateLimitConfig, key: string) {
+  const result = isRateLimited(key, cfg);
+  const headers = createRateLimitHeaders(result);
+  Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
+
+  if (result.limited) {
+    res.status(429).json({
+      ok: false,
+      error: "Too Many Requests",
+      retryAfterSeconds: safeNumber((result.resetAt - Date.now()) / 1000, 1),
+    });
+    return { ok: false as const, ...result };
+  }
+
+  return { ok: true as const, ...result };
 }
 
-// ==================== DEFAULT EXPORT ====================
-
-// Default export for backward compatibility
-const rateLimitModule = {
-  // Unified functions
-  rateLimit: unifiedRateLimit,
-  getClientIp,
-  isRateLimited: unifiedIsRateLimited,
-  getRateLimiterStats,
-  resetRateLimit,
-  unblock,
-  withApiRateLimit,
-  createRateLimitHeaders,
-  
-  // Compatibility functions
-  rateLimitForRequestIp,
-  checkRateLimit,
-  
-  // Sync variants
-  getRateLimiterStatsSync,
-  resetRateLimitSync,
-  unblockSync,
-  
-  // Configs
-  RATE_LIMIT_CONFIGS
-};
-
-export default rateLimitModule;
+// Backwards-compat aliases used in older routes
+export const checkRateLimit = rateLimit;

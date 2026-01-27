@@ -1,6 +1,6 @@
 // pages/api/shorts/[slug]/like.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { checkRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
+import { getClientIp, rateLimit } from "@/lib/server/rateLimit";
 import { toggleInteraction } from "@/lib/db/interactions";
 import { getOrSetSessionId, getSlugParam } from "@/lib/session";
 
@@ -48,23 +48,19 @@ export default async function handler(
     });
   }
 
-  // 3. Institutional Rate Limiting
-  // High-frequency interactions are throttled to protect database atomicity.
-  try {
-    const rl = await checkRateLimit(req, res, RATE_LIMIT_CONFIGS.SHORTS_INTERACTIONS);
-    
-    if (rl.headers) {
-      Object.entries(rl.headers).forEach(([k, v]) => res.setHeader(k, v));
-    }
+  // 3. PER-IP RATE LIMITING (Patched - using hard fail pattern)
+  const ip = getClientIp(req);
+  const rl = rateLimit({ key: `shorts_like:${ip}`, limit: 30, windowMs: 60_000 });
 
-    if (!rl.allowed) {
-      return res.status(429).json({
-        error: "Throttling Active",
-        message: "Interaction limit reached. Please wait.",
-      });
-    }
-  } catch (rlError) {
-    console.warn("[System Warning] Rate limiting subsystem silent.");
+  res.setHeader("X-RateLimit-Limit", "30");
+  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+  res.setHeader("X-RateLimit-Reset", String(rl.resetAt));
+
+  if (!rl.ok) {
+    return res.status(429).json({
+      error: "Too many requests",
+      message: "Interaction limit reached. Please wait.",
+    });
   }
 
   // 4. Session Authority

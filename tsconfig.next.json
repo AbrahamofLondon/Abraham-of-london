@@ -1,0 +1,53 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "global.d.ts",
+    "types/**/*.d.ts",
+
+    "pages/**/*",
+    "components/**/*",
+    "lib/**/*",
+    "content/**/*",
+    "types/**/*",
+
+    "middleware.ts",
+    "middleware/**/*.ts",
+
+    ".next/types/**/*.ts",
+    ".contentlayer/generated"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "coverage",
+    ".turbo",
+    ".cache",
+
+    "app/**",
+
+    "scripts/**",
+    "tools/**",
+    "prisma/**",
+
+    "public/**",
+
+    "backup-*",
+    "**/backup-*",
+    "**/*.bak",
+    "**/*.old",
+
+    "**/*.spec.*",
+    "**/*.test.*",
+    "__tests__/**",
+    "__mocks__/**",
+
+    "test-*.ts",
+    "test-*.tsx"
+  ]
+}

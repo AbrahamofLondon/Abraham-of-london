@@ -1,11 +1,12 @@
-import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
 "use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone, Mail, ChevronRight } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+
 // --- Types & Constants -------------------------------------------------------
 type RouteId =
   | "home"
@@ -19,33 +20,41 @@ type RouteId =
   | "downloadsIndex"
   | "strategyLanding"
   | "contact";
+
 type HeaderProps = {
   initialTheme?: "light" | "dark";
   transparent?: boolean;
 };
+
 type NavItem = {
   route: RouteId;
   label: string;
   description?: string;
   highlight?: boolean;
 };
+
 // Device detection for optimal styling
 const useDeviceType = () => {
   const [deviceType, setDeviceType] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
+
   React.useEffect(() => {
     if (typeof window === "undefined") return;
+
     const checkDevice = () => {
       const width = window.innerWidth;
       if (width < 768) setDeviceType("mobile");
       else if (width < 1024) setDeviceType("tablet");
       else setDeviceType("desktop");
     };
+
     checkDevice();
     window.addEventListener("resize", checkDevice);
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
+
   return deviceType;
 };
+
 const LOCAL_SITE_CONFIG = {
   email: "info@abrahamoflondon.org",
   phone: "+44 20 8622 5909",
@@ -63,8 +72,10 @@ const LOCAL_SITE_CONFIG = {
     contact: { path: "/contact" },
   },
 } as const;
+
 const getRoutePath = (route: RouteId): string =>
   LOCAL_SITE_CONFIG.routes[route]?.path || "/";
+
 // *** CENTRAL, ORDERED NAV ITEMS ***
 // Optimized for desktop and mobile viewing
 const NAV_ITEMS: NavItem[] = [
@@ -77,18 +88,22 @@ const NAV_ITEMS: NavItem[] = [
   { route: "about", label: "About", description: "My journey" },
   { route: "contact", label: "Contact", description: "Get in touch" },
 ];
+
 // Optional: Additional items that can be toggled based on screen size
 const OPTIONAL_ITEMS: NavItem[] = [
   { route: "contentIndex", label: "Content", description: "All writings" },
   { route: "downloadsIndex", label: "Downloads", description: "Resources" },
 ];
+
 const SCROLL_THRESHOLD = 10;
+
 // Responsive header heights
 const HEADER_HEIGHTS = {
   mobile: { normal: "4.5rem", scrolled: "4rem" },
   tablet: { normal: "5rem", scrolled: "4.5rem" },
   desktop: { normal: "5.5rem", scrolled: "5rem" },
 } as const;
+
 // Professional color system with proper contrast
 const COLOR_SYSTEM = {
   light: {
@@ -132,11 +147,14 @@ const COLOR_SYSTEM = {
     },
   },
 } as const;
+
 // --- Hooks ---------------------------------------------------------
 const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
   const [scrolled, setScrolled] = React.useState(false);
+
   React.useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > threshold);
+
     let ticking = false;
     const throttledScroll = () => {
       if (!ticking) {
@@ -147,16 +165,22 @@ const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
         ticking = true;
       }
     };
+
     window.addEventListener("scroll", throttledScroll, { passive: true });
     handleScroll();
+
     return () => window.removeEventListener("scroll", throttledScroll);
   }, [threshold]);
+
   return scrolled;
 };
+
 const useSafeArea = () => {
   const [safeArea, setSafeArea] = React.useState({ top: 0, bottom: 0 });
+
   React.useEffect(() => {
     if (typeof window === "undefined") return;
+
     const updateSafeArea = () => {
       const top = parseInt(
         getComputedStyle(document.documentElement).getPropertyValue("--sat") || "0",
@@ -166,15 +190,19 @@ const useSafeArea = () => {
       );
       setSafeArea({ top, bottom });
     };
+
     updateSafeArea();
     window.addEventListener("resize", updateSafeArea);
     return () => window.removeEventListener("resize", updateSafeArea);
   }, []);
+
   return safeArea;
 };
+
 const useBodyScrollLock = (isLocked: boolean) => {
   React.useEffect(() => {
     if (typeof document === "undefined") return undefined;
+
     const body = document.body;
     if (isLocked) {
       const scrollY = window.scrollY;
@@ -183,6 +211,7 @@ const useBodyScrollLock = (isLocked: boolean) => {
       body.style.width = "100%";
       body.style.overflowY = "hidden";
       body.style.paddingRight = "15px"; // Prevent layout shift
+      
       return () => {
         body.style.position = "";
         body.style.top = "";
@@ -192,9 +221,11 @@ const useBodyScrollLock = (isLocked: boolean) => {
         window.scrollTo(0, scrollY);
       };
     }
+    
     return undefined;
   }, [isLocked]);
 };
+
 // --- Nav & Buttons ---------------------------------------------------
 interface NavLinkProps {
   item: NavItem;
@@ -203,6 +234,7 @@ interface NavLinkProps {
   onClick?: () => void;
   variant?: "desktop" | "mobile" | "compact";
 }
+
 const NavLink: React.FC<NavLinkProps> = ({
   item,
   isActive,
@@ -213,6 +245,7 @@ const NavLink: React.FC<NavLinkProps> = ({
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
   const isCompact = variant === "compact";
+
   const baseClasses = `
     relative transition-all duration-200 ease-out
     ${isMobile ? "text-base py-3 px-4 rounded-lg" : "text-sm lg:text-base"}
@@ -223,17 +256,20 @@ const NavLink: React.FC<NavLinkProps> = ({
     focus:outline-none focus-visible:ring-2 focus-visible:ring-current/50
     touch-manipulation select-none
   `;
+
   const highlightClasses = item.highlight ? `
     ${theme === "dark" 
       ? "bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-2 border-amber-400/50" 
       : "bg-gradient-to-r from-amber-100/50 via-amber-50/30 to-transparent border-l-2 border-amber-500/50"}
     rounded-r-md pl-3
   ` : "";
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (onClick) {
       onClick();
     }
   };
+
   return (
     <li className={isMobile ? "w-full" : ""}>
       <Link
@@ -268,6 +304,7 @@ const NavLink: React.FC<NavLinkProps> = ({
     </li>
   );
 };
+
 interface ContactButtonProps {
   type: "email" | "phone";
   value: string;
@@ -275,6 +312,7 @@ interface ContactButtonProps {
   onClick?: () => void;
   variant?: "desktop" | "mobile";
 }
+
 const ContactButton: React.FC<ContactButtonProps> = ({
   type,
   value,
@@ -284,14 +322,17 @@ const ContactButton: React.FC<ContactButtonProps> = ({
 }) => {
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
+
   const href = type === "email" ? `mailto:${value}` : `tel:${value.replace(/\s+/g, "")}`;
   const label = type === "email" ? "Email" : "Call";
   const Icon = type === "email" ? Mail : Phone;
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (onClick) {
       onClick();
     }
   };
+
   return (
     <a
       href={href}
@@ -312,6 +353,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({
     </a>
   );
 };
+
 // --- Main Header Component ---------------------------------------------------
 export default function Header({
   initialTheme = "light",
@@ -322,39 +364,51 @@ export default function Header({
   const currentPath = usePathname();
   const deviceType = useDeviceType();
   const safeArea = useSafeArea();
+
   // Theme detection
   const [theme, setTheme] = React.useState<"light" | "dark">(initialTheme);
+
   React.useEffect(() => {
     if (typeof document !== "undefined") {
       const isDark = document.documentElement.classList.contains("dark");
       setTheme(isDark ? "dark" : "light");
     }
   }, []);
+
   useBodyScrollLock(isOpen);
+
   // Active route detection
   const isActive = React.useCallback(
     (route: RouteId): boolean => {
       if (!currentPath) return false;
+
       const href = getRoutePath(route);
       if (href === "/") return currentPath === "/";
+      
       return currentPath === href || currentPath.startsWith(`${href}/`);
     },
     [currentPath],
   );
+
   const colors = COLOR_SYSTEM[theme];
+
   const headerHeight = scrolled
     ? HEADER_HEIGHTS[deviceType].scrolled
     : HEADER_HEIGHTS[deviceType].normal;
+
   const shellStyle =
     scrolled || !transparent ? colors.shell.normal : colors.shell.transparent;
+
   const brandSize = {
     mobile: scrolled ? "text-xl" : "text-2xl",
     tablet: scrolled ? "text-2xl" : "text-3xl",
     desktop: scrolled ? "text-2xl lg:text-3xl" : "text-3xl lg:text-4xl",
   }[deviceType];
+
   // Determine visible items based on screen width
   const [visibleItems, setVisibleItems] = React.useState(NAV_ITEMS);
   const [showMoreMenu, setShowMoreMenu] = React.useState(false);
+
   React.useEffect(() => {
     const updateVisibleItems = () => {
       const width = window.innerWidth;
@@ -368,21 +422,24 @@ export default function Header({
         setShowMoreMenu(false);
       } else if (width >= 768) {
         // MD screens: Show 6 items + "More"
-        setVisibleItems(safeSlice(NAV_ITEMS, 0, 6));
+        setVisibleItems(safeArraySlice(NAV_ITEMS, 0, 6));
         setShowMoreMenu(true);
       } else {
-        setVisibleItems(safeSlice(NAV_ITEMS, 0, 6));
+        setVisibleItems(safeArraySlice(NAV_ITEMS, 0, 6));
         setShowMoreMenu(true);
       }
     };
+
     updateVisibleItems();
     window.addEventListener("resize", updateVisibleItems);
     return () => window.removeEventListener("resize", updateVisibleItems);
   }, []);
+
   // Get items for "More" dropdown
   const moreItems = showMoreMenu 
     ? [...safeArraySlice(NAV_ITEMS, 6), ...OPTIONAL_ITEMS]
     : [];
+
   return (
     <>
       <header
@@ -412,6 +469,7 @@ export default function Header({
             >
               Abraham of London
             </Link>
+
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-4 xl:gap-6">
               <ul className="flex items-center gap-3 xl:gap-4">
@@ -424,6 +482,7 @@ export default function Header({
                     variant={deviceType === "tablet" ? "compact" : "desktop"}
                   />
                 ))}
+                
                 {/* "More" dropdown for medium screens */}
                 {showMoreMenu && moreItems.length > 0 && (
                   <li className="relative group">
@@ -462,6 +521,7 @@ export default function Header({
                   </li>
                 )}
               </ul>
+
               {/* Desktop Actions */}
               <div className="flex items-center gap-3 pl-3 border-l border-current/20">
                 <div className="flex items-center gap-2">
@@ -478,6 +538,7 @@ export default function Header({
                     variant="desktop"
                   />
                 </div>
+
                 <Link
                   href="/canon/volume-i-foundations-of-purpose"
                   className={`
@@ -496,6 +557,7 @@ export default function Header({
                 >
                   Canon Vol. I
                 </Link>
+
                 <Link
                   href={getRoutePath("contact")}
                   className={`
@@ -514,9 +576,11 @@ export default function Header({
                 >
                   Enquire
                 </Link>
+
                 <ThemeToggle />
               </div>
             </div>
+
             {/* Mobile Controls */}
             <div className="flex items-center gap-3 lg:hidden">
               <Link
@@ -537,7 +601,9 @@ export default function Header({
               >
                 Contact
               </Link>
+              
               <ThemeToggle />
+              
               <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
@@ -562,6 +628,7 @@ export default function Header({
           </nav>
         </div>
       </header>
+
       {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {isOpen && (
@@ -581,6 +648,7 @@ export default function Header({
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
+            
             <motion.div
               className={`absolute right-0 top-0 h-full w-[85vw] max-w-md ${colors.background.nav} shadow-2xl`}
               style={{
@@ -606,6 +674,7 @@ export default function Header({
                       />
                     ))}
                   </ul>
+
                   <div className="mt-8 pt-6 border-t border-current/10">
                     <div className="space-y-4">
                       <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text.secondary} px-4`}>
@@ -628,6 +697,7 @@ export default function Header({
                         />
                       </div>
                     </div>
+
                     <div className="mt-6 space-y-3">
                       <Link
                         href="/canon/volume-i-foundations-of-purpose"
@@ -647,6 +717,7 @@ export default function Header({
                       >
                         Canon Volume I
                       </Link>
+
                       <Link
                         href={getRoutePath("contact")}
                         onClick={() => setIsOpen(false)}
@@ -668,6 +739,7 @@ export default function Header({
                     </div>
                   </div>
                 </div>
+
                 {/* Mobile footer in drawer */}
                 <div className={`border-t border-current/10 px-4 py-4 ${colors.background.nav}`}>
                   <div className="flex items-center justify-between">
@@ -698,6 +770,7 @@ export default function Header({
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Global spacing for header */}
       <style jsx global>{`
         :root {
@@ -707,13 +780,16 @@ export default function Header({
           --sal: env(safe-area-inset-left, 0px);
           --sar: env(safe-area-inset-right, 0px);
         }
+
         main {
           padding-top: calc(var(--header-height) + var(--sat, 0px));
         }
+
         /* Smooth transitions */
         * {
           transition: background-color 0.2s ease, border-color 0.2s ease;
         }
+
         /* Better touch targets */
         @media (max-width: 768px) {
           button, a[role="button"] {
@@ -721,6 +797,7 @@ export default function Header({
             min-width: 44px;
           }
         }
+
         /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
           *,

@@ -1,9 +1,19 @@
-import { safeArraySlice } from "@/lib/utils/safe";
 "use client";
 
+import { safeArraySlice } from "@/lib/shared/safe";
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronRight, Sparkles, Target, Award, BookOpen, Users, Landmark, FileText, Shield, Zap, Briefcase, ScrollText } from "lucide-react";
+import {
+  ChevronRight,
+  Sparkles,
+  Target,
+  BookOpen,
+  Users,
+  FileText,
+  Shield,
+  Briefcase,
+  ScrollText,
+} from "lucide-react";
 import Link from "next/link";
 
 export type Milestone = {
@@ -32,56 +42,62 @@ const DEFAULT_ITEMS: Milestone[] = [
   {
     year: 2021,
     title: "Framework Publication: 4D Surrender Framework",
-    detail: "Published initial white paper on the 4D (Discern, Detach, Decide, Demonstrate) Surrender Framework for decision-making under pressure. Framework downloaded by 5,000+ leaders in first year.",
+    detail:
+      "Published initial white paper on the 4D (Discern, Detach, Decide, Demonstrate) Surrender Framework for decision-making under pressure. Framework downloaded by 5,000+ leaders in first year.",
     icon: FileText,
     tag: "Doctrine",
     accent: "amber",
-    href: "/canon/surrender-framework"
+    href: "/canon/surrender-framework",
   },
   {
     year: 2022,
     title: "DADx Leadership Keynote",
-    detail: "Delivered keynote to 1,200+ European leaders on 'Fatherhood as Foundational Architecture.' Presentation resulted in 300+ workshop signups for household governance tools.",
+    detail:
+      "Delivered keynote to 1,200+ European leaders on 'Fatherhood as Foundational Architecture.' Presentation resulted in 300+ workshop signups for household governance tools.",
     icon: Users,
     tag: "Leadership",
     accent: "blue",
-    href: "/talks/dadx-2022"
+    href: "/talks/dadx-2022",
   },
   {
     year: 2023,
     title: "Strategy Rooms Launch",
-    detail: "Conducted 48+ private strategy sessions for founders and boards, focusing on market positioning, narrative strategy, and execution cadence for ventures from seed to Series C.",
+    detail:
+      "Conducted 48+ private strategy sessions for founders and boards, focusing on market positioning, narrative strategy, and execution cadence for ventures from seed to Series C.",
     icon: Briefcase,
     tag: "Consulting",
     accent: "purple",
-    href: "/consulting"
+    href: "/consulting",
   },
   {
     year: 2024,
     title: "Resource Platform & Asset Registry",
-    detail: "Launched comprehensive PDF registry with 15+ field-ready tools (worksheets, assessments, templates). Assets downloaded 12,000+ times across 45+ countries.",
+    detail:
+      "Launched comprehensive PDF registry with 15+ field-ready tools (worksheets, assessments, templates). Assets downloaded 12,000+ times across 45+ countries.",
     icon: BookOpen,
     tag: "Tools",
     accent: "emerald",
-    href: "/downloads"
+    href: "/downloads",
   },
   {
     year: 2024,
     title: "Canon Platform Establishment",
-    detail: "Formalized long-form doctrine and strategy platform. Published 25+ canonical essays on strategy, fatherhood, and legacy architecture with 50,000+ total reads.",
+    detail:
+      "Formalized long-form doctrine and strategy platform. Published 25+ canonical essays on strategy, fatherhood, and legacy architecture with 50,000+ total reads.",
     icon: ScrollText,
     tag: "Doctrine",
     accent: "indigo",
-    href: "/canon"
+    href: "/canon",
   },
   {
     year: 2025,
     title: "Inner Circle Formation",
-    detail: "Launched closed accountability cohort for 75+ members. Conducted 12 mastermind sessions with documented case studies on applying surrender framework to business decisions.",
+    detail:
+      "Launched closed accountability cohort for 75+ members. Conducted 12 mastermind sessions with documented case studies on applying surrender framework to business decisions.",
     icon: Shield,
     tag: "Community",
     accent: "rose",
-    href: "/inner-circle"
+    href: "/inner-circle",
   },
 ];
 
@@ -146,7 +162,7 @@ const ACCENTS = {
     link: "text-indigo-200 hover:text-indigo-100",
     dot: "bg-indigo-400",
   },
-};
+} as const;
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -177,24 +193,21 @@ export default function MilestonesTimeline({
       ? "bg-white/5 text-cream border border-white/10 backdrop-blur"
       : "bg-white text-deepCharcoal ring-1 ring-black/5";
 
-  const subText =
-    variant === "dark"
-      ? "text-white/60"
-      : "text-gray-600";
+  const subText = variant === "dark" ? "text-white/60" : "text-gray-600";
+
+  const headingText = variant === "dark" ? "text-white" : "text-gray-900";
 
   // Helper to build motion props without undefined values
   const buildMotionProps = (index?: number) => {
-    if (reduce) {
-      return {};
-    }
-    
+    if (reduce) return {};
     return {
       initial: { opacity: 0, y: 12 },
       whileInView: { opacity: 1, y: 0 },
       viewport: { once: true },
-      transition: index !== undefined 
-        ? { duration: 0.4, delay: index * 0.06 }
-        : { duration: 0.5 }
+      transition:
+        index !== undefined
+          ? { duration: 0.4, delay: index * 0.06 }
+          : { duration: 0.5 },
     };
   };
 
@@ -214,18 +227,18 @@ export default function MilestonesTimeline({
                   Track Record
                 </span>
               </div>
-              
+
               <motion.h2
                 id={headingId}
-                className="text-center font-serif text-4xl font-bold md:text-5xl text-white"
+                className={`text-center font-serif text-4xl font-bold md:text-5xl ${headingText}`}
                 {...buildMotionProps()}
               >
                 {title}
               </motion.h2>
-              
+
               {subtitle && (
-                <motion.p 
-                  className={`mt-4 text-lg ${subText} max-w-3xl mx-auto`}
+                <motion.p
+                  className={`mt-4 text-lg ${subText} mx-auto max-w-3xl`}
                   {...buildMotionProps()}
                 >
                   {subtitle}
@@ -235,68 +248,78 @@ export default function MilestonesTimeline({
           )}
 
           {data.length === 0 ? (
-            <p className={`mt-6 text-center ${subText}`}>
-              No milestones to display (yet!).
-            </p>
+            <p className={`mt-6 text-center ${subText}`}>No milestones to display (yet!).</p>
           ) : (
             <div className="relative">
-              {/* Timeline line */}
               <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-500/20 via-white/10 to-transparent md:left-1/2 md:-translate-x-1/2" />
-              
+
               <div className="space-y-8">
                 {data.map((milestone, index) => {
                   const Icon = milestone.icon || Target;
                   const A = ACCENTS[milestone.accent || "amber"];
                   const isEven = index % 2 === 0;
-                  
+
                   return (
                     <motion.div
                       key={`${milestone.year}-${milestone.title}`}
-                      className={`relative flex flex-col md:flex-row items-center gap-8 ${isEven ? "md:flex-row-reverse" : ""}`}
+                      className={`relative flex flex-col items-center gap-8 md:flex-row ${
+                        isEven ? "md:flex-row-reverse" : ""
+                      }`}
                       {...buildMotionProps(index)}
                     >
                       {/* Year marker */}
                       <div className={`w-24 flex-shrink-0 ${isEven ? "md:text-right" : ""}`}>
                         <div className="inline-flex items-center gap-2">
-                          {!isEven && <div className="hidden md:block flex-1 h-0.5 bg-white/10" />}
-                          <div className={`px-4 py-2 rounded-full border ${A.badge} font-mono font-bold text-lg`}>
+                          {!isEven && <div className="hidden h-0.5 flex-1 bg-white/10 md:block" />}
+                          <div
+                            className={cx(
+                              "inline-flex rounded-full border px-4 py-2 font-mono text-lg font-bold",
+                              A.badge,
+                            )}
+                          >
                             {milestone.year}
                           </div>
-                          {isEven && <div className="hidden md:block flex-1 h-0.5 bg-white/10" />}
+                          {isEven && <div className="hidden h-0.5 flex-1 bg-white/10 md:block" />}
                         </div>
                       </div>
-                      
+
                       {/* Timeline dot */}
-                      <div className="absolute left-8 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 ring-4 ring-black/40 z-10 md:left-1/2 md:-translate-x-1/2" />
-                      
+                      <div className="absolute left-8 top-1/2 z-10 h-4 w-4 -translate-y-1/2 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 ring-4 ring-black/40 md:left-1/2 md:-translate-x-1/2" />
+
                       {/* Content card */}
                       <div className="flex-1">
-                        <div className={`group relative overflow-hidden rounded-2xl border bg-white/[0.04] p-6 backdrop-blur-md transition ${A.border} ${isEven ? "md:mr-auto md:max-w-[calc(50%-4rem)]" : "md:ml-auto md:max-w-[calc(50%-4rem)]"}`}>
-                          <div className={`absolute inset-0 opacity-70 bg-gradient-to-br ${A.glow}`} />
+                        <div
+                          className={cx(
+                            "group relative overflow-hidden rounded-2xl border bg-white/[0.04] p-6 backdrop-blur-md transition",
+                            A.border,
+                            isEven
+                              ? "md:mr-auto md:max-w-[calc(50%-4rem)]"
+                              : "md:ml-auto md:max-w-[calc(50%-4rem)]",
+                          )}
+                        >
+                          <div className={cx("absolute inset-0 opacity-70 bg-gradient-to-br", A.glow)} />
                           <div className="relative">
                             <div className="mb-4 flex items-start justify-between gap-4">
-                              <div className={`rounded-xl bg-white/7 p-3 ring-1 ${A.ring}`}>
-                                <Icon className={`h-6 w-6 ${A.icon}`} />
+                              <div className={cx("rounded-xl bg-white/7 p-3 ring-1", A.ring)}>
+                                <Icon className={cx("h-6 w-6", A.icon)} />
                               </div>
                               {milestone.tag && (
-                                <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${A.chip}`}>
+                                <span className={cx("rounded-full border px-3 py-1 text-xs font-semibold", A.chip)}>
                                   {milestone.tag}
                                 </span>
                               )}
                             </div>
-                            
-                            <h3 className="font-serif text-xl font-semibold text-white mb-3">
+
+                            <h3 className={cx("mb-3 font-serif text-xl font-semibold", headingText)}>
                               {milestone.title}
                             </h3>
-                            
-                            <p className={`text-sm leading-relaxed ${subText} mb-4`}>
-                              {milestone.detail}
-                            </p>
-                            
+
+                            <p className={cx("mb-4 text-sm leading-relaxed", subText)}>{milestone.detail}</p>
+
                             {milestone.href && (
                               <Link
                                 href={milestone.href}
-                                className={`inline-flex items-center gap-2 text-sm font-semibold ${A.link}`}
+                                className={cx("inline-flex items-center gap-2 text-sm font-semibold", A.link)}
                               >
                                 View details
                                 <ChevronRight className="h-4 w-4" />
@@ -313,11 +336,8 @@ export default function MilestonesTimeline({
           )}
 
           {/* Stats summary */}
-          <motion.div 
-            className="mt-12 pt-8 border-t border-white/10"
-            {...buildMotionProps()}
-          >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <motion.div className="mt-12 border-t border-white/10 pt-8" {...buildMotionProps()}>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {[
                 { label: "Years of Work", value: "5+" },
                 { label: "Tools Deployed", value: "15+" },
@@ -325,7 +345,7 @@ export default function MilestonesTimeline({
                 { label: "Global Reach", value: "45+" },
               ].map((stat, idx) => (
                 <div key={idx} className="text-center">
-                  <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                  <div className={cx("mb-1 text-2xl font-bold", headingText)}>{stat.value}</div>
                   <div className="text-xs uppercase tracking-wider text-white/60">{stat.label}</div>
                 </div>
               ))}

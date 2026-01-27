@@ -1,96 +1,97 @@
-# .eslintignore
-# Build and cache directories
+# =========================
+# Core build/cache output
+# =========================
 .next
-.out
+out
 dist
+dist-*
 build
+coverage
 node_modules
 .cache
 .contentlayer
 .turbo
+.reports
 
-# Generated files
+# =========================
+# Generated / reports / logs
+# =========================
 .generated
-.gradle
-.DS_Store
+**/*.generated.*
+**/*.report.*
+**/reports/**
 *.log
+
+# lockfiles are fine to lint-ignore (ESLint doesn't lint them anyway, but harmless)
 *.lock
 
-# Test and coverage
-coverage
-*.test.*
-*.spec.*
-__tests__
-__mocks__
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Configuration files
-*.config.*
-.env*
-.eslintrc*
-.prettierrc*
-tsconfig.json
-next.config.*
-package.json
+# =========================
+# Backups / archives / temp
+# =========================
+backup-*
+**/backup-*
+tmp
+.temp
+**/*.tmp
+**/*.bak
+**/*.old
+**/*.swp
+**/*.swo
 
-# Legacy and problematic files
+# =========================
+# Tests and mocks
+# =========================
+**/*.test.*
+**/*.spec.*
+__tests__/**
+__mocks__/**
+
+# =========================
+# Static assets / content (ESLint shouldn’t scan)
+# =========================
+public/**
+**/*.md
+**/*.mdx
+**/*.pdf
+**/*.jpg
+**/*.jpeg
+**/*.png
+**/*.webp
+**/*.svg
+**/*.ico
+
+# If you keep content as MDX and you do want ESLint on it, remove these two lines:
+content/**
+
+# =========================
+# Scripts / tools / prisma (optional)
+# If you want ESLint on scripts/tools, delete these lines.
+# =========================
+scripts/**
+tools/**
+prisma/**
+
+# =========================
+# Legacy / problematic singletons (surgical)
+# =========================
 components/downloads/LegacyCanvasInteractive.ts
 components/downloads/LegacyCanvasInteractive.js
 components/downloads/LegacyCanvasInteractive.jsx
 lib/pdf/legacy-canvas-generator.js
 
-# TypeScript declaration files
-*.d.ts
+# =========================
+# TypeScript declaration outputs
+# (Usually generated; ignore)
+# =========================
+**/*.d.ts
 
-# Content and assets
-public
-content
-*.md
-*.mdx
-*.pdf
-*.jpg
-*.png
-*.svg
-
-# Windows specific
-Thumbs.db
-desktop.ini
-
-# IDE files
+# =========================
+# IDE settings
+# =========================
 .vscode
 .idea
-*.swp
-*.swo
-
-# Temporary files
-.temp
-tmp
-*.tmp
-
-node_modules
-.next
-out
-dist
-coverage
-.turbo
-.reports
-.contentlayer
-public/assets/downloads
-public/assets/resources
-prisma/dev.db
-**/*.min.js
-**/*.min.css
-
-# generated reports / artifacts
-.reports
-**/.reports/**
-**/*.report.*
-**/reports/**
-
-Update in pages/
-Update in pages/**
-
-# Ignore problematic files
-components/downloads/LegacyCanvasInteractive.ts
-components/downloads/LegacyCanvasInteractive.js
-components/downloads/LegacyCanvasInteractive.jsx
-

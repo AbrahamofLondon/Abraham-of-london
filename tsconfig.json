@@ -73,35 +73,6 @@
     "plugins": [{ "name": "next" }]
   },
 
-  "include": [
-    "next-env.d.ts",
-    "global.d.ts",
-    "types/**/*.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".contentlayer/generated"
-  ],
-
-  "exclude": [
-    "node_modules",
-    ".next",
-    "dist",
-    "build",
-    "coverage",
-    ".turbo",
-    "scripts",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "**/__mocks__/**",
-    "**/.cache/**",
-    "**/.contentlayer/**",
-    "**/temp/**",
-    "**/tmp/**"
-  ],
-
   "ts-node": {
     "transpileOnly": true,
     "compilerOptions": { "module": "commonjs" }

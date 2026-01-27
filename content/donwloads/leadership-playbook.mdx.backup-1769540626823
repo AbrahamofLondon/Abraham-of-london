@@ -1,0 +1,101 @@
+---
+type: Download
+title: The Leadership Playbook
+subtitle: A course curriculum to transform into a highly effective leader and catalyst for change.
+excerpt: A course curriculum to transform into a highly effective leader and catalyst for change.
+author: Abraham of London
+date: "2025-10-21"
+slug: leadership-playbook
+category: Leadership
+draft: false
+coverImage: /assets/images/downloads/leadership-playbook.jpg
+accessLevel: public
+docKind: Download
+readTime: 10 min
+ogTitle: "The Leadership Playbook"
+ogDescription: "A course curriculum to transform into a highly effective leader and catalyst for change"
+socialCaption: "Download The Leadership Playbook curriculum"
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+downloadType: other
+paperFormats:
+  - A4
+isInteractive: false
+isFillable: false
+lockMessage: ""
+contentOnly: true
+downloadUrl: /assets/downloads/leadership-playbook.pdf
+---
+import PullLine from "@/components/PullLine"
+import Rule from "@/components/Rule"
+import Grid from "@/components/Grid"
+import EmbossedBrandMark from "@/components/EmbossedBrandMark"
+
+<PullLine subtle>
+  Your calendar reflects your priorities. Guard your focus blocks ruthlessly.
+</PullLine>
+
+## The EGSP® Leadership Model
+
+<p className="text-gray-700 italic">
+  A highly dynamic and versatile tool guiding the individual, the team, and the
+  organization. Themes include: responsibility, accountability, expectations,
+  communication, and resilience.
+</p>
+
+## The Seven Essential Skills (Chapter Headings)
+
+<Grid columns="2">
+  <div>
+    <h3>1. How to make a dent.</h3>
+    <p>Identifying non-negotiables and setting the vision.</p>
+  </div>
+  <div>
+    <h3>2. How to deal with poor performance.</h3>
+    <p>The coaching framework to improve performance and accountability.</p>
+  </div>
+  <div>
+    <h3>3. How to combat perfection paralysis.</h3>
+    <p>Testing ideas, minimum viable products, and bias toward action.</p>
+  </div>
+  <div>
+    <h3>4. How to reset expectations.</h3>
+    <p>Communication discipline, clear outputs, and mutual understanding.</p>
+  </div>
+  <div>
+    <h3>5. How to measure performance.</h3>
+    <p>Fact-based metrics, scorecards, and focused reporting.</p>
+  </div>
+  <div>
+    <h3>6. How to avoid setbacks.</h3>
+    <p>
+      Problem identification, decision-making frameworks, and risk mitigation.
+    </p>
+  </div>
+  <div>
+    <h3>7. How to lead with Excellence.</h3>
+    <p>Integrating the skills into a resilient, long-term leadership style.</p>
+  </div>
+</Grid>
+
+<Rule />
+
+## What to Expect
+
+- Limited edition 176-page curriculum.
+- Explore 3 big ideas per chapter.
+- Progress tracker and downloadable templates.
+- Recommended reading and resources.
+- Learn to lead with **Excellence**.
+
+<div className="mt-12 text-center pt-6 border-t border-lightGrey/80">
+  <EmbossedBrandMark
+    src="/assets/images/abraham-logo.jpg"
+    alt="Abraham of London Leadership Curriculum Seal"
+    width={100}
+    height={100}
+    effect="emboss"
+    baseColor="transparent"
+  />
+</div>

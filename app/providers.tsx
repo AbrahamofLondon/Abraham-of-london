@@ -1,7 +1,7 @@
 // app/providers.tsx
 'use client';
 
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/lib/server/theme-stub';
 import { Toaster } from '@/components/ui/toaster';
 
 export function Providers({ children }: { children: React.ReactNode }) {

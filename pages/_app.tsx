@@ -9,7 +9,7 @@ import { SessionProvider } from "next-auth/react";
 import "@/styles/tailwind.css";
 
 import { fontVariables, fontBodyClass } from "@/lib/next-fonts";
-import { ThemeProvider } from "@/lib/ThemeContext";
+import { ThemeProvider } from "@/lib/server/theme-stub";
 import { AuthProvider } from "@/hooks/useAuth";
 import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext";
 

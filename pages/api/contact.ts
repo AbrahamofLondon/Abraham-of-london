@@ -86,7 +86,6 @@ async function contactHandler(
 
     // Input sanitisation and limits
     const name = safeTrimSlice(String(body.name || ""), 0, 100);
-    const email = String(body.email || "").trim().toLowerCase();
     const subject = safeTrimSlice(String(body.subject || "Website contact"), 0, 120);
     const message = safeTrimSlice(String(body.message || ""), 0, 5000);
     const message = String(body.message || "").trim();

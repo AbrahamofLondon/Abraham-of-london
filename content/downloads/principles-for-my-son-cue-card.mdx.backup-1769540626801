@@ -1,0 +1,65 @@
+---
+type: Download
+title: Principles for My Son - Cue Card
+subtitle: "Two-up A6: cut, carry, and read a line a day."
+excerpt: "Two-up A6: cut, carry, and read a line a day."
+author: Abraham of London
+date: "2025-10-21"
+slug: principles-for-my-son-cue-card
+category: Fatherhood
+draft: false
+coverImage: /assets/images/downloads/principles-for-my-son-cue-card.jpg
+accessLevel: public
+docKind: Download
+readTime: 1 min
+ogTitle: ""
+ogDescription: ""
+socialCaption: ""
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+downloadType: other
+paperFormats:
+  - A4
+isInteractive: false
+isFillable: false
+lockMessage: ""
+contentOnly: true
+---
+{/* The entire print content is handled by a dedicated page component, but the MDX file must be clean */}
+
+<h2 className="text-lg mt-0">Front - The Six</h2>
+<ol className="list-decimal pl-4 text-sm space-y-1">
+  <li>**Presence:** Show up-on time, eyes up.</li>
+  <li>**Truth:** Confess fast; no spin.</li>
+  <li>**Work:** Finish one thing daily.</li>
+  <li>**Steward:** Budget, save, give.</li>
+  <li>**Honor:** Dignify women &amp; elders.</li>
+  <li>**Courage:** Do hard, right things.</li>
+</ol>
+
+<h2 className="text-lg mt-6">Back - The Six</h2>
+<ol start={7} className="list-decimal pl-4 text-sm space-y-1">
+  <li>**Speech:** No gossip or slander.</li>
+  <li>**Learning:** Read, ask, practice.</li>
+  <li>**Health:** Sleep, train, simple food.</li>
+  <li>**Craft:** Build things that last.</li>
+  <li>**Service:** Lift burdens at home first.</li>
+  <li>**Faith:** Listen for God, obey promptly.</li>
+</ol>
+
+<div className="mt-4 flex justify-between items-end">
+  <Caption>
+    Review one standard daily. Recite the whole list weekly. A father-son
+    pledge.
+  </Caption>
+  <EmbossedBrandMark
+    src="/assets/images/abraham-logo.jpg"
+    alt="AOL Mark"
+    width={30}
+    height={30}
+    effect="deboss"
+    baseColor="transparent"
+  />
+</div>
+

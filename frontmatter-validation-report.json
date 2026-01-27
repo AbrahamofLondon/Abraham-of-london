@@ -817,9 +817,7 @@
       "type": "Download",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Unknown field \"label\" for type Download"
-      ]
+      "warnings": []
     },
     {
       "path": "downloads\\mentorship-starter-kit.mdx",
@@ -1138,15 +1136,5 @@
     }
   ],
   "errors": [],
-  "warnings": [
-    {
-      "path": "downloads\\life-alignment-assessment.mdx",
-      "type": "Download",
-      "valid": true,
-      "errors": [],
-      "warnings": [
-        "Unknown field \"label\" for type Download"
-      ]
-    }
-  ]
+  "warnings": []
 }

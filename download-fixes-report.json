@@ -1,0 +1,174 @@
+{
+  "timestamp": "2026-01-27T19:03:46.915Z",
+  "filesFixed": 24,
+  "details": [
+    {
+      "file": "content\\downloads\\weekly-operating-rhythm.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\standards-brief.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\scripture-track-john14.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\purpose-pyramid-worksheet.mdx",
+      "changes": [
+        "+href"
+      ]
+    },
+    {
+      "file": "content\\downloads\\principles-for-my-son.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\principles-for-my-son-cue-card.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\operating-cadence-pack.mdx",
+      "changes": [
+        "+href"
+      ]
+    },
+    {
+      "file": "content\\downloads\\mentorship-starter-kit.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\legacy-canvas.mdx",
+      "changes": [
+        "+href"
+      ]
+    },
+    {
+      "file": "content\\downloads\\leadership-playbook.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\leaders-cue-card-two-up.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\family-altar-liturgy.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\entrepreneur-survival-checklist.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\entrepreneur-operating-pack.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\download-legacy-architecture-canvas.mdx",
+      "changes": [
+        "+href"
+      ]
+    },
+    {
+      "file": "content\\downloads\\decision-matrix-scorecard.mdx",
+      "changes": [
+        "+href"
+      ]
+    },
+    {
+      "file": "content\\downloads\\decision-log-template.mdx",
+      "changes": [
+        "+href"
+      ]
+    },
+    {
+      "file": "content\\downloads\\communication-script-bpf.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\canon-volume-iv-diagnostic-toolkit.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\brotherhood-covenant.mdx",
+      "changes": [
+        "+href",
+        "+downloadUrl",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\board-investor-onepager.mdx",
+      "changes": [
+        "+href",
+        "+file"
+      ]
+    },
+    {
+      "file": "content\\downloads\\board-decision-log-template.mdx",
+      "changes": [
+        "+href"
+      ]
+    },
+    {
+      "file": "content\\downloads\\abraham-vault-pack.mdx",
+      "changes": [
+        "+href"
+      ]
+    }
+  ]
+}

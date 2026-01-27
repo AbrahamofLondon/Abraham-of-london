@@ -7,6 +7,13 @@
  * - Must be stable, sync-first (Pages Router)
  */
 
+
+import "server-only";
+
+import { normalizeSlug, isDraftContent, isPublished, getAccessLevel, getDocHref, getDocKind } from "@/lib/content/utils";
+export { normalizeSlug, isDraftContent, isPublished, getAccessLevel, getDocHref, getDocKind };
+
+
 const WARN =
   process.env.NODE_ENV !== "production"
     ? (...args: any[]) => console.warn("[CONTENT:SERVER]", ...args)
@@ -52,18 +59,9 @@ import {
   allStrategies,
 } from "@/lib/contentlayer-compat";
 
-import {
-  normalizeSlug,
-  isDraftContent,
-  isPublished,
-  sanitizeData,
-  toUiDoc,
-  resolveDocCoverImage,
-  resolveDocDownloadUrl,
-  getAccessLevel,
-  getDocHref,
-  getDocKind,
-} from "@/lib/content";
+import { normalizeSlug, isDraftContent, isPublished, getAccessLevel, getDocHref, getDocKind } from "@/lib/content/index";
+import { sanitizeData, toUiDoc, resolveDocCoverImage, resolveDocDownloadUrl } from "@/lib/content/shared";
+
 
 // ---------------------------
 // Core getters (SYNC)

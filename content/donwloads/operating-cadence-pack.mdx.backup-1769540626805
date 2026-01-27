@@ -1,0 +1,46 @@
+---
+type: Download
+title: Operating Cadence Pack
+subtitle: ""
+description: Deploy an operating rhythm that makes execution predictable under constraint.
+excerpt: "A deck-based cadence system: weekly rhythm, governance checkpoints, scorecards, reviews."
+author: Abraham of London
+date: "2025-12-28"
+slug: operating-cadence-pack
+tags:
+  - operations
+  - execution
+  - cadence
+  - governance
+draft: false
+featured: false
+coverImage: /assets/images/canon/canon-resources.jpg
+accessLevel: inner-circle
+docKind: Download
+file: /assets/downloads/operating-cadence-pack.pptx
+fileSize: PowerPoint (.pptx)
+ogTitle: ""
+ogDescription: ""
+socialCaption: ""
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+downloadUrl: /assets/downloads/operating-cadence-pack.pptx
+format: POWERPOINT
+downloadType: other
+paperFormats:
+  - A4
+isInteractive: false
+isFillable: false
+lockMessage: ""
+---
+# Operating Cadence Pack (Deck)
+
+A practical cadence pack designed to **run the week**, not decorate it.
+
+## Includes:
+- Weekly execution rhythm
+- KPI / scorecard slides
+- Governance checkpoints
+- Decision review prompts
+- Retro + failure-mode containment

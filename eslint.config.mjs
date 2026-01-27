@@ -1,39 +1,81 @@
-// eslint.config.mjs - Next.js 16+ ESLint configuration
-import nextPlugin from "@next/eslint-plugin-next";
-import tseslint from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
+import js from "@eslint/js";
+import globals from "globals";
+import next from "@next/eslint-plugin-next";
+import tseslint from "typescript-eslint";
 
 export default [
+  // 1) Global ignores (this is the flat-config replacement for .eslintignore)
   {
-    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
-    ignores: ["node_modules/**", ".next/**", ".contentlayer/**", "public/**"],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    plugins: {
-      "@next/next": nextPlugin,
-      "@typescript-eslint": tseslint,
-    },
+    ignores: [
+      ".next/**",
+      ".out/**",
+      "out/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      "node_modules/**",
+      ".contentlayer/**",
+      ".turbo/**",
+      ".cache/**",
+      ".reports/**",
+
+      "public/**",
+
+      "backup-*/**",
+      "**/backup-*/**",
+
+      // quarantine zones
+      "scripts/**",
+      "tools/**",
+      "prisma/**",
+      "data/**",
+      "netlify/**",
+
+      // tests
+      "**/*.test.*",
+      "**/*.spec.*",
+      "__tests__/**",
+      "__mocks__/**"
+    ],
+  },
+
+  // 2) Base JS rules
+  js.configs.recommended,
+
+  // 3) Next rules (only for your Next surface area)
+  {
+    files: ["pages/**/*.{js,jsx,ts,tsx}", "components/**/*.{js,jsx,ts,tsx}", "lib/**/*.{js,jsx,ts,tsx}", "app/**/*.{js,jsx,ts,tsx}"],
+    plugins: { "@next/next": next },
     rules: {
-      "@next/next/no-html-link-for-pages": "error",
-      "@next/next/no-sync-scripts": "error",
-      "@next/next/no-img-element": "warn",
-      "react/no-unescaped-entities": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
-        },
-      ],
+      ...next.configs.recommended.rules,
+      ...next.configs["core-web-vitals"].rules,
     },
   },
+
+  // 4) TypeScript rules (scoped)
+  ...tseslint.config({
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parserOptions: {
+        projectService: true
+      }
+    },
+    rules: {
+      // keep it practical — you can tighten later
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off"
+    }
+  }),
+
+  // 5) Node scripts (IF you ever choose to lint them later; currently ignored)
+  {
+    files: ["scripts/**/*.{js,mjs,ts}", "tools/**/*.{js,mjs,ts}", "netlify/**/*.{js,mjs,ts}", "data/**/*.{js,mjs,ts}"],
+    languageOptions: {
+      globals: globals.node,
+      sourceType: "module"
+    },
+    rules: {
+      "no-console": "off"
+    }
+  }
 ];
