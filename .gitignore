@@ -187,3 +187,6 @@ public/downloads/desktop.ini
 # Lock files
 public/downloads/~$*
 public/downloads/._*
+# TS build cache
+tsconfig.tsbuildinfo
+
