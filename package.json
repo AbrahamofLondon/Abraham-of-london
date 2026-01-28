@@ -4,6 +4,7 @@
   "name": "abraham-of-london",
   "version": "1.0.0",
   "private": true,
+  {
   "scripts": {
     "dev": "next dev",
     "dev:full": "pnpm env:check && concurrently --kill-others-on-fail=false --names \"CONTENT,DEV\" \"pnpm contentlayer\" \"next dev\"",
@@ -61,11 +62,11 @@
     "assets:images:optimize": "node scripts/optimize-images.js",
     "optimize:images": "node scripts/optimize-images.js",
     "optimize:premium": "tsx scripts/enterprise-asset-optimizer.ts --images-only --avif --ultra-quality",
-    "optimize:images:debug": "set DEBUG=true && node scripts/optimize-images.js",
+    "optimize:images:debug": "cross-env DEBUG=true node scripts/optimize-images.js",
     "optimize:images:force": "node scripts/optimize-images.js --force",
-    "assets:images-only": "tsx scripts/enterprise-asset-optimizer.ts --images-only",
-    "assets:fonts-only": "tsx scripts/enterprise-asset-optimizer.ts --fonts-only",
-    "assets:security-only": "tsx scripts/enterprise-asset-optimizer.ts --security-only",
+    "assets:images-only": "node scripts/optimize-images.js",
+    "assets:fonts-only": "node scripts/optimize-fonts.js",
+    "assets:security-only": "node scripts/security-audit.js",
     "assets:images:resize": "node scripts/resize-images.js",
     "prisma:generate": "pnpm exec prisma generate --schema=./prisma/schema.prisma",
     "prisma:push": "pnpm exec prisma db push --accept-data-loss --schema=./prisma/schema.prisma",

@@ -1,21 +1,20 @@
 # netlify.toml — PRODUCTION READY CONFIGURATION
 [build]
-  # First install ALL dependencies (including devDependencies like cross-env)
-  command = "pnpm install --frozen-lockfile && pnpm build"
+  # Netlify automatically runs 'pnpm install' before this command.
+  command = "pnpm build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
   NODE_OPTIONS = "--max-old-space-size=4096"
+  # Your CI/CD control variable - skip heavy image processing in cloud builds
+  SKIP_ASSET_OPTIMIZE = "1"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_ENV = "production"
   NEXT_PUBLIC_APP_ENV = "production"
   # Security: disable Next.js source maps in production
   NEXT_DISABLE_SOURCEMAPS = "true"
-  # Tell Netlify to install devDependencies (required for cross-env)
-  NPM_CONFIG_PRODUCTION = "false"
-  YARN_PRODUCTION = "false"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -29,13 +28,11 @@
   NEXT_PUBLIC_APP_ENV = "staging"
   # Keep sourcemaps for debugging previews
   NEXT_DISABLE_SOURCEMAPS = "false"
-  NPM_CONFIG_PRODUCTION = "false"
 
 [context.branch-deploy.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
-  NPM_CONFIG_PRODUCTION = "false"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

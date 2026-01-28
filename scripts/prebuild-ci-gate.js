@@ -1,8 +1,7 @@
-// scripts/prebuild-ci-gate.js - CI/CD PREBUILD GATE
-
-const { execSync } = require("child_process");
-const fs = require("fs");
-const path = require("path");
+// scripts/prebuild-ci-gate.js - ES MODULE VERSION
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 console.log('🔧 CI/CD Prebuild Gate - Checking environment...');
 console.log('📁 Current directory:', process.cwd());
@@ -10,12 +9,12 @@ console.log('📄 Node version:', process.version);
 console.log('🏷️  NODE_ENV:', process.env.NODE_ENV || 'not set');
 console.log('🌐 NETLIFY:', process.env.NETLIFY || 'false');
 console.log('🔄 CI:', process.env.CI || 'false');
+console.log('🚫 SKIP_ASSET_OPTIMIZE:', process.env.SKIP_ASSET_OPTIMIZE || 'not set');
 
 // Check if we should skip heavy optimization
 const skip = process.env.SKIP_ASSET_OPTIMIZE === "1" || 
              process.env.NETLIFY === "true" ||
-             process.env.CI === "true" ||
-             process.argv.includes('--skip-optimize');
+             process.env.CI === "true";
 
 if (skip) {
   const reason = process.env.NETLIFY ? 'Netlify' : 
@@ -39,10 +38,10 @@ console.log('[prebuild] Running full asset optimization...');
 console.log('[prebuild] Environment allows heavy processing.');
 
 try {
-  // First check if required scripts exist
+  // Check if required scripts exist
   const scriptsToCheck = [
     'scripts/optimize-images.js',
-    'scripts/enterprise-asset-optimizer.js'
+    'scripts/optimize-assets.js'
   ];
   
   let allScriptsExist = true;
