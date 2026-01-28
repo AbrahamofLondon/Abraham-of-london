@@ -1,0 +1,59 @@
+<!-- 1600×900, brand-typographic cover -->
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Brand palette -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F2D2A"></stop>
+      <stop offset="100%" stop-color="#183C34"></stop>
+    </linearGradient>
+    <radialGradient id="glow" cx="55%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#D6B573" stop-opacity="0.22"></stop>
+      <stop offset="60%" stop-color="#D6B573" stop-opacity="0.07"></stop>
+      <stop offset="100%" stop-color="#D6B573" stop-opacity="0"></stop>
+    </radialGradient>
+    <filter id="soften" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="30"></feGaussianBlur>
+    </filter>
+  </defs>
+
+  <!-- Deep green base -->
+  <rect width="1600" height="900" fill="url(#bg)"></rect>
+
+  <!-- Soft gold glow -->
+  <circle cx="920" cy="260" r="520" fill="url(#glow)"></circle>
+
+  <!-- Cross-light motif (very subtle) -->
+  <g opacity="0.08" filter="url(#soften)">
+    <rect x="780" y="120" width="40" height="660" fill="#FFD37A"></rect>
+    <rect x="480" y="420" width="990" height="40" fill="#FFD37A"></rect>
+  </g>
+
+  <!-- Title block -->
+  <g transform="translate(164,210)">
+    <!-- Top kicker -->
+    <text x="0" y="0" fill="#DCC59B" font-size="28" font-weight="600" font-family="Georgia, 'Times New Roman', serif" letter-spacing="1.5">
+      ABRAHAM OF LONDON
+    </text>
+
+    <!-- Main title -->
+    <text x="0" y="96" fill="#F7F2E8" font-size="92" font-weight="700" font-family="Georgia, 'Times New Roman', serif">
+      <tspan x="0" dy="0">Christianity Is Not</tspan>
+      <tspan x="0" dy="92">Extremism — It Is</tspan>
+      <tspan x="0" dy="92">the Light That Built</tspan>
+      <tspan x="0" dy="92">the World</tspan>
+    </text>
+
+    <!-- Rule -->
+    <rect x="0" y="470" width="760" height="2" fill="#D6B573" opacity="0.7"></rect>
+
+    <!-- Subtitle -->
+    <text x="0" y="520" fill="#E8D9B5" font-size="30" font-weight="500" font-family="Georgia, 'Times New Roman', serif" opacity="0.92">
+      A call to repentance and life under the lordship of Jesus
+    </text>
+
+    <!-- Footer -->
+    <text x="0" y="590" fill="#D6B573" font-size="26" font-weight="600" font-family="Georgia, 'Times New Roman', serif" letter-spacing="1">
+      BY ABRAHAM OF LONDON
+    </text>
+  </g>
+</svg>

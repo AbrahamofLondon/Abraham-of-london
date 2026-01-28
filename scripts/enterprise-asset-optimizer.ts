@@ -1,161 +1,80 @@
-// scripts/enterprise-asset-optimizer.ts
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// scripts/enterprise-asset-optimizer.js
 
 async function main() {
   const args = process.argv.slice(2);
   const isImagesOnly = args.includes('--images-only');
   const isFontsOnly = args.includes('--fonts-only');
-  const isSecurityOnly = args.includes('--security-only');
-  const verboseMode = args.includes('--verbose') || args.includes('-v');
+  const verbose = args.includes('--verbose') || args.includes('-v');
+  const force = args.includes('--force') || args.includes('-f');
+  const avif = args.includes('--avif');
+  const ultraQuality = args.includes('--ultra-quality');
   
-  console.log('\n\x1b[1;35m🏢 ENTERPRISE ASSET OPTIMIZER\x1b[0m');
-  console.log('\x1b[1;37m════════════════════════════════════════════════════════════════════\x1b[0m');
-  console.log(`\x1b[90mArguments: ${args.join(' ')}\x1b[0m`);
+  console.log('\n🏢 ENTERPRISE ASSET OPTIMIZER');
+  console.log('════════════════════════════════════════════════════════════════════');
   
-  // Delegate to specialized scripts when requested
   if (isImagesOnly) {
-    console.log('\x1b[90m🖼️  Running in images-only mode\x1b[0m');
+    console.log('🖼️  Running image optimization...');
+    
+    // Set environment variables for the optimizer
+    if (force) process.env.FORCE_MODE = 'true';
+    if (avif) process.env.GENERATE_AVIF = 'true';
+    if (ultraQuality) process.env.ULTRA_QUALITY = 'true';
+    if (verbose) process.env.VERBOSE_MODE = 'true';
     
     try {
-      // Direct import and execution - this is the key change
       const { optimizeImages } = await import('./optimize-images.js');
       const result = await optimizeImages();
       
-      if (result?.success) {
-        console.log('\n\x1b[1;32m✅ IMAGE OPTIMIZATION COMPLETE!\x1b[0m');
+      if (result.success) {
+        console.log('\n✅ IMAGE OPTIMIZATION COMPLETE!');
+        console.log(`Optimized ${result.summary?.optimized || 0}/${result.summary?.total || 0} images`);
+        console.log(`Space saved: ${result.summary?.savingsPercent || 0}%`);
+        process.exit(0);
       } else {
-        console.log('\n\x1b[1;33m⚠️  Image optimization completed with warnings\x1b[0m');
+        console.log('\n⚠️  Image optimization completed with warnings');
+        console.log(result.message || 'Check logs for details');
+        process.exit(1);
       }
-    } catch (error: any) {
-      console.error('\n\x1b[1;31m❌ Image optimization failed:\x1b[0m', error.message);
-      if (verboseMode && error.stack) {
-        console.error('\x1b[90mStack trace:\x1b[0m', error.stack);
+    } catch (error) {
+      console.error('\n❌ Image optimization failed:', error.message);
+      if (verbose && error.stack) {
+        console.error('Stack trace:', error.stack);
       }
-      // Don't exit here - let the script continue or handle gracefully
-      throw error;
+      process.exit(1);
     }
-    return;
   }
   
-  if (isFontsOnly) {
-    console.log('\x1b[90m🔤 Running in fonts-only mode\x1b[0m');
-    try {
-      const { optimizeFonts } = await import('./optimize-fonts.js');
-      await optimizeFonts();
-      console.log('\n\x1b[1;32m✅ FONT OPTIMIZATION COMPLETE!\x1b[0m');
-    } catch (error: any) {
-      console.error('\n\x1b[1;31m❌ Font optimization failed:\x1b[0m', error.message);
-      throw error;
-    }
-    return;
-  }
-  
-  if (isSecurityOnly) {
-    console.log('\x1b[90m🔒 Running in security-only mode\x1b[0m');
-    console.log('\n\x1b[1;32m✅ SECURITY CHECK COMPLETE!\x1b[0m');
-    return;
-  }
-  
-  // Full enterprise optimization mode (default)
-  console.log('\x1b[90m🚀 Starting comprehensive enterprise optimization...\x1b[0m');
+  // Default: just optimize images
+  console.log('🚀 Starting comprehensive optimization...');
   
   try {
-    // 1. Optimize Images
-    console.log('\n\x1b[1;36m════════════════════════════════════════════════════════════════════\x1b[0m');
-    console.log('\x1b[1;36m🖼️  PHASE 1: IMAGE OPTIMIZATION\x1b[0m');
-    console.log('\x1b[1;36m════════════════════════════════════════════════════════════════════\x1b[0m');
+    // Set environment variables
+    if (force) process.env.FORCE_MODE = 'true';
+    if (avif) process.env.GENERATE_AVIF = 'true';
+    if (ultraQuality) process.env.ULTRA_QUALITY = 'true';
     
-    try {
-      const { optimizeImages } = await import('./optimize-images.js');
-      const imageResult = await optimizeImages();
-      
-      if (imageResult?.success) {
-        console.log('\x1b[90m✅ Image optimization completed successfully\x1b[0m');
-      } else {
-        console.log('\x1b[33m⚠️  Image optimization completed with warnings\x1b[0m');
-      }
-    } catch (error) {
-      console.log('\x1b[33m⚠️  Image optimization skipped or failed\x1b[0m');
-      if (verboseMode) {
-        console.error('\x1b[90mError:\x1b[0m', error);
-      }
+    const { optimizeImages } = await import('./optimize-images.js');
+    const result = await optimizeImages();
+    
+    if (result.success) {
+      console.log('\n✅ ENTERPRISE OPTIMIZATION COMPLETE!');
+      console.log(`📊 ${result.message}`);
+      process.exit(0);
+    } else {
+      console.log('\n⚠️  Optimization completed with warnings');
+      console.log(`📊 ${result.message}`);
+      process.exit(1);
     }
-    
-    // 2. Optimize Fonts
-    console.log('\n\x1b[1;36m════════════════════════════════════════════════════════════════════\x1b[0m');
-    console.log('\x1b[1;36m🔤 PHASE 2: FONT OPTIMIZATION\x1b[0m');
-    console.log('\x1b[1;36m════════════════════════════════════════════════════════════════════\x1b[0m');
-    
-    try {
-      const { optimizeFonts } = await import('./optimize-fonts.js');
-      await optimizeFonts();
-      console.log('\x1b[90m✅ Font optimization completed\x1b[0m');
-    } catch (error) {
-      console.log('\x1b[33m⚠️  Font optimization skipped or failed\x1b[0m');
-      if (verboseMode) {
-        console.error('\x1b[90mError:\x1b[0m', error);
-      }
-    }
-    
-    // 3. Generate PDFs
-    console.log('\n\x1b[1;36m════════════════════════════════════════════════════════════════════\x1b[0m');
-    console.log('\x1b[1;36m📄 PHASE 3: PDF GENERATION\x1b[0m');
-    console.log('\x1b[1;36m════════════════════════════════════════════════════════════════════\x1b[0m');
-    
-    try {
-      console.log('\x1b[90m📦 Loading PDF generator...\x1b[0m');
-      const pdfModule = await import('./pdf/unified-pdf-generator');
-      const { UnifiedPDFGenerator } = pdfModule;
-      
-      const options = {
-        tier: 'all' as const,
-        quality: 'enterprise' as const,
-        formats: ['A4', 'Letter', 'A3'] as const,
-        output: './public/assets/downloads',
-        clean: true,
-        verbose: verboseMode,
-        scanContent: true,
-        scanOnly: false,
-        skipCanvas: false,
-        usePuppeteer: true,
-        useUniversal: true,
-        strict: true,
-        overwrite: true,
-        minBytes: 8000,
-      };
-      
-      const generator = new UnifiedPDFGenerator(options);
-      await generator.run();
-      console.log('\x1b[90m✅ PDF generation completed\x1b[0m');
-    } catch (error) {
-      console.log('\x1b[33m⚠️  PDF generation skipped or failed\x1b[0m');
-      if (verboseMode) {
-        console.error('\x1b[90mError:\x1b[0m', error);
-      }
-    }
-    
-    console.log('\n\x1b[1;35m════════════════════════════════════════════════════════════════════\x1b[0m');
-    console.log('\x1b[1;32m✅ ENTERPRISE OPTIMIZATION COMPLETE!\x1b[0m');
-    console.log('\x1b[1;35m════════════════════════════════════════════════════════════════════\x1b[0m');
-    
-  } catch (error: any) {
-    console.error('\n\x1b[1;31m❌ Enterprise optimization failed:\x1b[0m', error.message);
-    if (verboseMode && error.stack) {
-      console.error('\x1b[90mStack trace:\x1b[0m', error.stack);
-    }
-    throw error;
+  } catch (error) {
+    console.error('\n❌ Enterprise optimization failed:', error.message);
+    process.exit(1);
   }
 }
 
 // Run if executed directly
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {
-  console.log('🚀 Running enterprise-asset-optimizer as standalone script');
-  main().catch((error) => {
-    console.error('\n\x1b[1;31m❌ Fatal error:\x1b[0m', error.message);
+if (import.meta.url.includes(process.argv[1])) {
+  main().catch(error => {
+    console.error('Fatal error:', error.message);
     process.exit(1);
   });
 }

@@ -1,0 +1,10 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<svg role="img" viewBox="0 0 24 24" aria-label="TikTok" xmlns="http://www.w3.org/2000/svg">
+  <title>TikTok</title>
+  <g fill="currentColor">
+    <!-- circular backdrop for visual parity with other social chips -->
+    <circle cx="12" cy="12" r="10" opacity="0.12"></circle>
+    <!-- stylized music note (monotone) -->
+    <path d="M14 4v6.2a3.8 3.8 0 1 1-1.5-3.06V4h1.5zm2 .5v2.2a4.8 4.8 0 0 0 2.5.8v1.6a6.4 6.4 0 0 1-2.5-.6v3.2a5.3 5.3 0 1 1-5.3-5.3c.1 0 .2 0 .3.01V4.5H16z"></path>
+  </g>
+</svg>
