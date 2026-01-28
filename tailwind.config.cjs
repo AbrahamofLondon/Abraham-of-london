@@ -4,13 +4,18 @@ module.exports = {
   darkMode: "class",
 
   content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
   ],
+
+  // Uncomment ONLY if you generate class names dynamically in code:
+  // safelist: [
+  //   { pattern: /(bg|text|border)-(primary|secondary|accent|success|error)(\/\d+)?/ },
+  // ],
 
   theme: {
     container: {
@@ -32,7 +37,6 @@ module.exports = {
 
     extend: {
       colors: {
-        // Safe fallbacks prevent invalid CSS if a var is missing
         background: "rgb(var(--color-background, 3 7 18) / <alpha-value>)",
         foreground: "rgb(var(--color-on-background, 249 250 251) / <alpha-value>)",
         surface: "rgb(var(--color-surface, 17 24 39) / <alpha-value>)",
@@ -40,8 +44,6 @@ module.exports = {
         primary: {
           DEFAULT: "rgb(var(--color-primary, 245 158 11) / <alpha-value>)",
           light: "rgb(var(--color-primary-light, 251 191 36) / <alpha-value>)",
-
-          // keep your fixed palette steps if you want deterministic shades
           50: "#fffbeb",
           100: "#fef3c7",
           200: "#fde68a",
@@ -61,7 +63,6 @@ module.exports = {
         border: "rgb(var(--ui-alpha-border, 55 65 81) / <alpha-value>)",
       },
 
-      // Prefer CSS variables if you’re loading fonts via next/font
       fontFamily: {
         sans: ["var(--font-family-sans)", "Inter", "system-ui", "-apple-system", "sans-serif"],
         mono: ["var(--font-family-mono)", "JetBrains Mono", "Fira Code", "monospace"],
@@ -70,8 +71,8 @@ module.exports = {
       },
 
       fontSize: {
-        "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
         "3xs": ["0.5rem", { lineHeight: "0.75rem" }],
+        "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
       },
 
       spacing: {
