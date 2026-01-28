@@ -1,4 +1,4 @@
-// app/layout.tsx — PRODUCTION ROOT LAYOUT (APP ROUTER)
+// app/layout.tsx
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
@@ -22,7 +22,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Public env var only — safe to use client-side
   const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (

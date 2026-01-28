@@ -1,19 +1,11 @@
-// postcss.config.cjs — CJS, Netlify-safe
-function tryRequire(id) {
-  try {
-    return require(id);
-  } catch {
-    return null;
-  }
-}
-
-const autoprefixer = tryRequire("autoprefixer");
-const tailwindPostcss = tryRequire("@tailwindcss/postcss");
-const tailwindLegacy = tryRequire("tailwindcss");
+// postcss.config.cjs — NEXT 16 COMPLIANT (NO FUNCTION PLUGINS)
 
 module.exports = {
-  plugins: [
-    ...(tailwindPostcss ? [tailwindPostcss] : tailwindLegacy ? [tailwindLegacy] : []),
-    ...(autoprefixer ? [autoprefixer] : []),
-  ],
+  plugins: {
+    // Tailwind v4:
+    "@tailwindcss/postcss": {},
+
+    // Autoprefixer:
+    autoprefixer: {},
+  },
 };
