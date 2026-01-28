@@ -1,4 +1,4 @@
-// scripts/optimize-images.js - FIXED VERSION
+// scripts/optimize-images.js - FIXED VERSION WITH ROBUST ERROR HANDLING
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -6,19 +6,18 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);  // CORRECT VARIABLE NAME
+const __dirname = path.dirname(__filename);
 const execAsync = promisify(exec);
 
-// Configuration - FIXED all __dirname references
+// Configuration
 const CONFIG = {
   sourceDirs: [
     path.join(__dirname, '../public/images'),
     path.join(__dirname, '../public/assets/images'),
-    path.join(__dirname, '../public/assets'),  // FIXED HERE
+    path.join(__dirname, '../public/assets'),
     path.join(__dirname, '../public')
   ],
   
-  outputDir: path.join(__dirname, '../public/optimized-images'),
   outputDir: path.join(__dirname, '../public/optimized-images'),
   
   // File extensions to process
@@ -111,17 +110,46 @@ async function getFileStats(filePath) {
 
 // Optimize image using Sharp (if available)
 async function optimizeImageWithSharp(sourcePath, outputPath, config) {
+  const fileName = path.basename(sourcePath);
+  
   try {
     const sharp = (await import('sharp')).default;
     const stats = await getFileStats(sourcePath);
     
     if (!stats || stats.size > config.maxFileSize) {
-      logger.warning(`Skipping large file: ${path.basename(sourcePath)} (${Math.round(stats.size / 1024)}KB)`);
-      return { optimized: false, reason: 'file_too_large', originalSize: stats.size };
+      logger.warning(`Skipping large file: ${fileName} (${Math.round(stats?.size / 1024 || 0)}KB)`);
+      return { optimized: false, reason: 'file_too_large', originalSize: stats?.size || 0 };
+    }
+    
+    // Skip empty files
+    if (stats.size === 0) {
+      logger.warning(`Skipping empty file: ${fileName}`);
+      return { optimized: false, reason: 'empty_file', originalSize: 0 };
     }
     
     let image = sharp(sourcePath);
-    const metadata = await image.metadata();
+    let metadata;
+    
+    // Guard: Try to read metadata
+    try {
+      metadata = await image.metadata();
+    } catch (metaErr) {
+      logger.warning(`Skipping ${fileName} — cannot read metadata: ${metaErr.message}`);
+      return { optimized: false, reason: 'metadata_unreadable', originalSize: stats.size };
+    }
+    
+    // Guard: Check if format is supported
+    const imgFormat = metadata?.format;
+    if (!imgFormat) {
+      logger.warning(`Skipping ${fileName} — unknown format (metadata missing format field)`);
+      return { optimized: false, reason: 'unknown_format', originalSize: stats.size };
+    }
+    
+    // Guard: Verify sharp supports this format
+    if (!sharp.format || !sharp.format[imgFormat]) {
+      logger.warning(`Skipping ${fileName} — unsupported format: ${imgFormat}`);
+      return { optimized: false, reason: 'unsupported_format', format: imgFormat, originalSize: stats.size };
+    }
     
     // Resize if necessary
     if (metadata.width > config.maxWidth || metadata.height > config.maxHeight) {
@@ -148,14 +176,21 @@ async function optimizeImageWithSharp(sourcePath, outputPath, config) {
       case '.gif':
         // For GIFs, we might want to convert to MP4 or keep as is
         await fs.copyFile(sourcePath, outputPath);
-        break;
+        return { optimized: false, reason: 'gif_copied_as_is', originalSize: stats.size, optimizedSize: stats.size };
       default:
         await fs.copyFile(sourcePath, outputPath);
+        return { optimized: false, reason: 'unsupported_extension', originalSize: stats.size, optimizedSize: stats.size };
     }
     
     const optimizedStats = await getFileStats(outputPath);
+    
+    if (!optimizedStats) {
+      logger.warning(`Failed to get stats for optimized file: ${fileName}`);
+      return { optimized: false, reason: 'output_stats_failed', originalSize: stats.size };
+    }
+    
     const savings = stats.size - optimizedStats.size;
-    const savingsPercent = ((savings / stats.size) * 100).toFixed(1);
+    const savingsPercent = stats.size > 0 ? ((savings / stats.size) * 100).toFixed(1) : '0';
     
     return {
       optimized: true,
@@ -169,8 +204,8 @@ async function optimizeImageWithSharp(sourcePath, outputPath, config) {
     };
     
   } catch (error) {
-    logger.error(`Sharp optimization failed for ${path.basename(sourcePath)}: ${error.message}`);
-    return { optimized: false, reason: 'optimization_failed', error: error.message };
+    logger.error(`Sharp optimization failed for ${fileName}: ${error.message}`);
+    return { optimized: false, reason: 'optimization_failed', error: error.message, originalSize: 0 };
   }
 }
 
@@ -278,7 +313,7 @@ function generateReport(results, startTime) {
   const optimized = results.filter(r => r.optimized);
   const failed = results.filter(r => !r.optimized);
   
-  const totalOriginalSize = results.reduce((sum, r) => sum + r.originalSize, 0);
+  const totalOriginalSize = results.reduce((sum, r) => sum + (r.originalSize || 0), 0);
   const totalOptimizedSize = results.reduce((sum, r) => sum + (r.optimizedSize || 0), 0);
   const totalSavings = totalOriginalSize - totalOptimizedSize;
   const totalSavingsPercent = totalOriginalSize > 0 ? ((totalSavings / totalOriginalSize) * 100).toFixed(1) : 0;
@@ -414,5 +449,3 @@ if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}`) {
 }
 
 export { main as optimizeImages };
-
-
