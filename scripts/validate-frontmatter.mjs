@@ -369,9 +369,9 @@ const validateOne = (filePath) => {
   }
 
   // Only warn if BOTH slug and href are missing (very rare edge case)
-  if (!parsed.slug && !parsed.href) {
-    warnings.push("Both slug and href are missing - at least one should be present");
-  }
+if (!parsed.slug && !parsed.href) {
+  warnings.push("Both slug and href are missing - at least one should be present");
+}
 
   // Slug vs filename consistency (warning)
   const expectedSlug = fileSlug(filePath);
