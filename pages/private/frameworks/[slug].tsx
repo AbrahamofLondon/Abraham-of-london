@@ -4,7 +4,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { getInnerCircleAccess } from "@/lib/inner-circle";
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import { ShieldAlert, Lock, ArrowLeft } from "lucide-react";
 
 type Props = { slug: string };

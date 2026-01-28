@@ -44,7 +44,7 @@ import {
 
 import {
   getDocHref,
-} from "@/lib/content/shared";
+} from "@/lib/content/client-utils";
 
 /* -----------------------------------------------------------------------------
    TYPES

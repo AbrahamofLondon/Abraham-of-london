@@ -1,13 +1,12 @@
 // pages/api/contact.ts
-import { safeTrimSlice, safeSlice } from "@/lib/utils/safe";
+import { safeTrimSlice } from "@/lib/utils/safe";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { withSecurity } from "@/lib/apiGuard";
 import {
   rateLimit,
-  RATE_LIMIT_CONFIGS,
+  getClientIp,
   createRateLimitHeaders,
 } from "@/lib/server/rateLimit";
-import { getRateLimitKey } from "@/lib/server/ip";
 
 interface OkResponse {
   ok: true;
@@ -62,16 +61,19 @@ async function contactHandler(
     return res.status(405).json({ ok: false, message: "Method Not Allowed" });
   }
 
-  // 🔒 Per-IP rate limiting (shared infra)
-  const rlKey = getRateLimitKey(
-    req,
-    RATE_LIMIT_CONFIGS.CONTACT_FORM.keyPrefix,
-  );
-  const rl = rateLimit(rlKey, RATE_LIMIT_CONFIGS.CONTACT_FORM);
-  const rlHeaders = createRateLimitHeaders(rl);
-  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
+  // 🔒 Per-IP rate limiting (using new signature)
+  const ip = getClientIp(req);
+  const rl = rateLimit({ 
+    key: `contact:${ip}`, 
+    limit: 10, 
+    windowMs: 60_000 
+  });
+  
+  // Set headers manually
+  const headers = createRateLimitHeaders(rl);
+  Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
 
-  if (!rl.allowed) {
+  if (!rl.ok) {
     return res.status(429).json({
       ok: false,
       message: "Too many requests. Please slow down.",
@@ -86,9 +88,9 @@ async function contactHandler(
 
     // Input sanitisation and limits
     const name = safeTrimSlice(String(body.name || ""), 0, 100);
+    const email = String(body.email || "").trim().toLowerCase(); // FIXED: Added email variable
     const subject = safeTrimSlice(String(body.subject || "Website contact"), 0, 120);
-    const message = safeTrimSlice(String(body.message || ""), 0, 5000);
-    const message = String(body.message || "").trim();
+    const message = safeTrimSlice(String(body.message || ""), 0, 5000); // FIXED: Removed duplicate
     const honeypot = String(body.botField || "").trim();
 
     const teaserOptIn = !!body.teaserOptIn;
@@ -403,4 +405,3 @@ export default withSecurity(contactHandler, {
   expectedAction: "contact_form",
   requireHoneypot: false,
 });
-

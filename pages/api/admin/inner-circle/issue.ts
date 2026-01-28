@@ -1,7 +1,7 @@
-// pages/api/admin/inner-circle/issue.ts
+// FIXED: pages/api/admin/inner-circle/issue.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { createAccessToken } from "@/lib/inner-circle/access";
-import { createOrUpdateMemberAndIssueKeyWithRateLimit } from "@/lib/server/inner-circle/keys"
+import { createOrUpdateMemberAndIssueKeyWithRateLimit } from "@/lib/inner-circle/exports.server";
+import { createAccessToken } from "@/lib/inner-circle/access.server";
 
 function assertAdmin(req: NextApiRequest) {
   const k = req.headers["x-admin-key"];

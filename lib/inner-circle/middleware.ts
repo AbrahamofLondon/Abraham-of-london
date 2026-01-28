@@ -1,6 +1,6 @@
 // lib/inner-circle/middleware.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getInnerCircleAccess } from '@/lib/inner-circle';
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 
 export function withInnerCircleApi(
   handler: (req: NextApiRequest, res: NextApiResponse, access: any) => Promise<void>

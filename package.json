@@ -110,6 +110,7 @@
     "security:full": "pnpm security:scan && pnpm security:audit",
     "health": "tsx scripts/system/check-system-health.ts",
     "check:system": "tsx scripts/system/check-system.ts",
+    "check:no-inner-circle-barrel": "rg -n \"from\\s+['\\\"]@/lib/inner-circle['\\\"]\" pages app lib scripts && exit 1 || exit 0",
     "check:dependencies": "tsx scripts/system/check-dependencies.ts",
     "check:security": "pnpm exec audit-ci --config .auditci.json",
     "check:unsafe-strings": "node scripts/check-unsafe-strings.js",

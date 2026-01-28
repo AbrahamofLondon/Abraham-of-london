@@ -1,6 +1,7 @@
 // lib/auth/unified-auth.ts
 import type { GetServerSidePropsContext } from 'next';
-import { getInnerCircleAccess, type InnerCircleAccess } from '@/lib/inner-circle';
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
+import type { InnerCircleAccess } from "@/lib/inner-circle/access.client";
 import type { User, UserRole } from '@/types/auth';
 
 export type UnifiedAuthResult = {

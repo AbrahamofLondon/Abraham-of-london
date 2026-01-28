@@ -1,11 +1,10 @@
-// lib/content/shared.ts
+// lib/content/shared.ts - CLIENT-SAFE VERSION ONLY
 /**
- * Shared adapter used by some legacy pages.
- * In Pages Router, these are typically used in getStaticProps only.
+ * Client-safe utilities for content handling
+ * DO NOT re-export server-only code
  */
-export * from "@/lib/content/server";
-export { default } from "@/lib/content";
 
+// Only export client-safe functions
 export function sanitizeData<T>(input: T): T {
   // Keep this intentionally conservative; do NOT mutate unknown shapes aggressively.
   return input;

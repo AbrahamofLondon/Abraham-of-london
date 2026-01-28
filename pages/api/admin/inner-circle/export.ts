@@ -1,12 +1,13 @@
-/* pages/api/admin/inner-circle/export.ts */
+// FIXED: pages/api/admin/inner-circle/export.ts
 import { safeSlice } from "@/lib/utils/safe";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { 
-  getPrivacySafeKeyExportWithRateLimit, 
+import {
+  getPrivacySafeKeyExportWithRateLimit,
   getPrivacySafeStatsWithRateLimit,
   withInnerCircleRateLimit,
-  createRateLimitHeaders 
-} from "@/lib/inner-circle";
+  createRateLimitHeaders
+} from "@/lib/inner-circle/exports.server";
+
 type AdminExportRow = {
   id: string;
   created_at: string;

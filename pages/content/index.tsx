@@ -22,7 +22,7 @@ import Layout from "@/components/Layout";
 
 import { getPublishedDocuments } from "@/lib/content/server";
 import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
-import { getDocKind, getDocHref, resolveDocCoverImage, sanitizeData } from "@/lib/content/shared";
+import { getDocKind, getDocHref, resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
 
 type Item = {
   key: string;

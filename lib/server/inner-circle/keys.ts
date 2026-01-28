@@ -28,7 +28,6 @@ export {
   type VerifyInnerCircleKeyResult,
   type InnerCircleStats,
   type CleanupResult
-} from "@/lib/inner-circle";
+} from "@/lib/inner-circle/exports.server";
 
-// Default export for convenience
-export { default } from "@/lib/inner-circle";
+export * from "@/lib/inner-circle/exports.server";

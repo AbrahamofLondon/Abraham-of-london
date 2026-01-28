@@ -32,10 +32,10 @@ export function safeEquals(a: unknown, b: unknown): boolean {
   return safeString(a) === safeString(b);
 }
 
-export function truncate(input: unknown, max = 120): string {
+export function truncate(input: unknown, max = 140): string {
   const s = safeString(input);
   if (max <= 0) return "";
-  return s.length > max ? s.slice(0, max - 1) + "…" : s;
+  return s.length > max ? s.substring(0, Math.max(0, max - 1)) + "…" : s;
 }
 
 export function safeJoin(parts: unknown[], sep = " "): string {
@@ -55,10 +55,9 @@ export function toSlug(input: unknown): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function safeCharAt(input: unknown, index: number): string {
+export function safeCharAt(input: unknown, i: number): string {
   const s = safeString(input);
-  const i = index | 0;
-  return i >= 0 && i < s.length ? s.charAt(i) : "";
+  return i >= 0 && i < s.length ? (s[i] ?? "") : "";
 }
 
 export function safeArraySlice<T>(arr: T[] | null | undefined, start: number, end?: number): T[] {
@@ -69,7 +68,7 @@ export function safeArraySlice<T>(arr: T[] | null | undefined, start: number, en
 export function capitalize(input: unknown): string {
   const s = safeString(input).trim();
   if (!s) return "";
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  return safeCharAt(s, 0).toUpperCase() + s.substring(1);
 }
 
 export function formatBytes(bytes: unknown): string {

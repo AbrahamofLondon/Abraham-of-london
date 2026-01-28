@@ -9,6 +9,9 @@ export { getContentlayerData } from "./data";
 import type { ContentDoc, DocKind } from "../contentlayer-helper";
 export type { ContentDoc, DocKind };
 
+// Re-export document types from ContentLayer
+export type { Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short } from '@/contentlayer/generated/types';
+
 // Define and export the missing functions that CardDisplay needs
 export const isPost = (doc: any): boolean => doc.type === "Post";
 export const isBook = (doc: any): boolean => doc.type === "Book";
@@ -51,7 +54,7 @@ export const getCardImage = (coverImage: string | null | undefined, fallback: st
   return coverImage || fallback;
 };
 
-// Default export
+// Import the actual ContentHelper
 import ContentHelper from "../contentlayer-helper";
 import { getContentlayerData } from "./data";
 
@@ -74,5 +77,4 @@ const DefaultExport = {
   DocumentTypes: {} as DocumentTypes, // For type-only
 };
 
-export { default as CardDisplay } from "@/components/content/CardDisplay"; 
 export default DefaultExport;

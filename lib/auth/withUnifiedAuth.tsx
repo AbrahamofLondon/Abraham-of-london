@@ -2,9 +2,9 @@
 import React, { ComponentType, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { getInnerCircleAccess } from '@/lib/inner-circle';
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import type { User, UserRole } from '@/types/auth';
-import type { InnerCircleAccess } from '@/lib/inner-circle';
+import type { InnerCircleAccess } from "@/lib/inner-circle/access.client";
 
 interface WithUnifiedAuthProps {
   user?: User;

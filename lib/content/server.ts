@@ -7,12 +7,37 @@
  * - Must be stable, sync-first (Pages Router)
  */
 
+// IMPORTANT: Remove "server-only" import for Pages Router compatibility
+// Remove or comment out this line:
+// import "server-only";
 
-import "server-only";
+// Import from utils (which re-exports from client-utils)
+import { 
+  normalizeSlug, 
+  isDraftContent, 
+  isPublished, 
+  getAccessLevel, 
+  getDocHref, 
+  getDocKind,
+  sanitizeData,
+  toUiDoc,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl
+} from "@/lib/content/utils";
 
-import { normalizeSlug, isDraftContent, isPublished, getAccessLevel, getDocHref, getDocKind } from "@/lib/content/utils";
-export { normalizeSlug, isDraftContent, isPublished, getAccessLevel, getDocHref, getDocKind };
-
+// Export the functions
+export { 
+  normalizeSlug, 
+  isDraftContent, 
+  isPublished, 
+  getAccessLevel, 
+  getDocHref, 
+  getDocKind,
+  sanitizeData,
+  toUiDoc,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl
+};
 
 const WARN =
   process.env.NODE_ENV !== "production"
@@ -59,9 +84,11 @@ import {
   allStrategies,
 } from "@/lib/contentlayer-compat";
 
-import { normalizeSlug, isDraftContent, isPublished, getAccessLevel, getDocHref, getDocKind } from "@/lib/content/index";
-import { sanitizeData, toUiDoc, resolveDocCoverImage, resolveDocDownloadUrl } from "@/lib/content/shared";
+// IMPORTANT: Remove duplicate imports that cause "defined multiple times" errors
+// import { normalizeSlug, isDraftContent, isPublished, getAccessLevel, getDocHref, getDocKind } from "@/lib/content/index"; // REMOVE THIS LINE
 
+// These functions are already imported from shared above
+// No need to re-declare them
 
 // ---------------------------
 // Core getters (SYNC)
@@ -278,17 +305,3 @@ export async function getServerAllDownloadsAsync() {
 export async function getServerAllShortsAsync() {
   return getServerAllShorts();
 }
-
-// Re-export safe utilities for server callers
-export {
-  normalizeSlug,
-  isDraftContent,
-  isPublished,
-  sanitizeData,
-  toUiDoc,
-  resolveDocCoverImage,
-  resolveDocDownloadUrl,
-  getAccessLevel,
-  getDocHref,
-  getDocKind,
-};

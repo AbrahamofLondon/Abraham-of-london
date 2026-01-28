@@ -1,9 +1,10 @@
-// lib/inner-circle/index.ts - PRODUCTION BARREL EXPORT
-// This file re-exports everything from the exports file
-// It ensures consistent exports regardless of client/server environment
+// lib/inner-circle/index.ts
+// MAIN ENTRYPOINT (SAFE BARREL)
+// - No default export.
+// - No re-export hop through ./exports (prevents circularity).
+// - Export explicit, stable surfaces.
 
-export * from './exports';
-export { default } from './exports';
-
-// For backwards compatibility, also export common constants
-export { INNER_CIRCLE_CONFIG } from './exports';
+export * from "./access";          // client-safe wrapper
+export * from "./access.client";   // client utilities/types
+export * from "./access.server";   // server utilities (guarded by server-only inside file)
+export * from "./keys.client";     // only if truly client-safe

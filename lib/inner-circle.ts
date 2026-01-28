@@ -1,3 +1,5 @@
 // lib/inner-circle.ts
-export * from "@/lib/inner-circle/index";
-export { default } from "@/lib/inner-circle/index";
+import "server-only";
+
+export * from "@/lib/inner-circle/exports.server";
+export { default } from "@/lib/inner-circle/exports.server";

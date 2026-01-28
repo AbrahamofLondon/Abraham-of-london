@@ -18,7 +18,7 @@ import {
 import { getPublishedPosts } from "@/lib/content/server";
 
 // client-safe utilities
-import { sanitizeData, normalizeSlug, resolveDocCoverImage } from "@/lib/content/shared";
+import { sanitizeData, normalizeSlug, resolveDocCoverImage } from "@/lib/content/client-utils";
 import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
 
 // ============= TYPE DEFINITIONS =============

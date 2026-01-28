@@ -14,7 +14,7 @@ import {
   normalizeSlug,
   getDocHref
 } from '@/lib/contentlayer-helper';
-import { isDraftContent as isDraft } from '@/lib/content/shared';
+import { isDraftContent as isDraft } from "@/lib/content/client-utils";
 import { safeSlice } from "@/lib/utils/safe";
 
 

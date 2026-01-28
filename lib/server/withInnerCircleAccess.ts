@@ -1,6 +1,6 @@
 // lib/server/withInnerCircleAccess.ts
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
-import { getInnerCircleAccess } from "@/lib/inner-circle/access";
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 
 export function withInnerCircleAccess(
   handler: NextApiHandler,

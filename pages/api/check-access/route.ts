@@ -1,6 +1,6 @@
 // app/api/check-access/route.ts - PRODUCTION-READY
 import { NextRequest, NextResponse } from 'next/server';
-import { getInnerCircleAccess } from '@/lib/inner-circle';
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic'; // Ensure fresh checks

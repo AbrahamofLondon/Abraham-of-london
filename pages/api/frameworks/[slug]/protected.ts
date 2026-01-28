@@ -1,6 +1,6 @@
 /* pages/api/frameworks/[slug]/protected.ts - PRODUCTION VERSION - FULLY CORRECTED */
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getInnerCircleAccess } from '@/lib/inner-circle'; 
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 
 type Data = {
   error?: string;

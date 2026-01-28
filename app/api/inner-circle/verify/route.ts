@@ -1,6 +1,6 @@
 // app/api/inner-circle/verify/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { verifyInnerCircleKeyWithRateLimit } from "@/lib/inner-circle";
+import { verifyInnerCircleKeyWithRateLimit } from "@/lib/inner-circle/exports.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

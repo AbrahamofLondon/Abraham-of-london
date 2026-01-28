@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 // Import only client-safe components
 const Layout = dynamic(() => import("@/components/Layout"));
 const { getRecaptchaTokenSafe } = await import("@/lib/recaptchaClient");
-import { hasInnerCircleAccess } from "@/lib/inner-circle/access"; // Now safe!
+import { hasInnerCircleAccess } from "@/lib/inner-circle/access.client";
 
 // Lazy load motion to avoid SSR issues
 const MotionSection = dynamic(() => 

@@ -1,11 +1,26 @@
 // lib/inner-circle/access.ts
-// SAFE RE-EXPORTS ONLY - No server imports in client builds
+// UNIVERSAL ROUTER (SAFE):
+// - exports client-only helpers
+// - exports server-only helpers by re-exporting from access.server
+// - contains NO Node-only logic directly (no Buffer, no crypto, etc.)
 
-// Re-export types
 export type { InnerCircleAccess } from "./access.client";
-
-// Export client-side functions only
 export { hasInnerCircleAccess, checkClientAccess } from "./access.client";
 
-// For server usage, import directly from "./access.server"
-// This prevents bundling server code in client builds
+// Server-side exports (only exist on server)
+export {
+  getInnerCircleAccess,
+  withInnerCircleAccess,
+  getClientIp,
+  rateLimitForRequestIp,
+  createPublicApiHandler,
+  createStrictApiHandler,
+  withInnerCircleRateLimit,
+  getPrivacySafeStatsWithRateLimit,
+  verifyInnerCircleKeyWithRateLimit,
+  getPrivacySafeKeyExportWithRateLimit,
+  createOrUpdateMemberAndIssueKeyWithRateLimit,
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
+  createAccessToken,
+} from "./access.server";

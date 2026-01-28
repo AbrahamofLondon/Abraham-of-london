@@ -12,6 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "jsxImportSource": "react",
 
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -37,7 +38,7 @@
     "preserveConstEnums": true,
 
     "typeRoots": ["./node_modules/@types", "./types"],
-    "types": ["node", "react", "react-dom"],
+    "types": ["node", "react", "react-dom", "next"],
 
     "baseUrl": ".",
     "paths": {
@@ -67,7 +68,11 @@
       "@/lib/premium/download-token": ["./lib/premium/download-token.ts"],
       "@/lib/next-fonts": ["./lib/next-fonts.ts"],
 
-      "@prisma/client": ["./.prisma/client"]
+      "@prisma/client": ["./.prisma/client"],
+      
+      // React type helpers
+      "react": ["./node_modules/@types/react"],
+      "react-dom": ["./node_modules/@types/react-dom"]
     },
 
     "plugins": [{ "name": "next" }]
@@ -76,5 +81,19 @@
   "ts-node": {
     "transpileOnly": true,
     "compilerOptions": { "module": "commonjs" }
-  }
+  },
+
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist"
+  ]
 }

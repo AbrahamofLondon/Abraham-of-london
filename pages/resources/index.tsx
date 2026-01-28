@@ -9,7 +9,7 @@ import Image from "next/image";
 
 import Layout from "@/components/Layout";
 import { getContentlayerData } from "@/lib/content/server";
-import { normalizeSlug } from "@/lib/content/shared";
+import { normalizeSlug } from "@/lib/content/client-utils";
 import { safeSlice } from "@/lib/utils/safe";
 
 type ResourceMeta = {

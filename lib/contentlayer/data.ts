@@ -6,109 +6,39 @@ import { safeSlice } from "@/lib/utils/safe";
  * This file provides the getContentlayerData function that pages need during build
  */
 
-export interface ContentLayerDocument {
-  _id: string;
-  _raw: {
-    sourceFilePath: string;
-    sourceFileName: string;
-    sourceFileDir: string;
-    contentType: string;
-    flattenedPath: string;
-  };
-  type: string;
-  title?: string;
-  description?: string;
-  date?: string;
-  slug: string;
-  body: {
-    raw: string;
-    code: string;
-  };
-  [key: string]: any;
-}
+// Import REAL data from your contentlayer-generated files
+import { 
+  allDocuments,
+  allPosts,
+  allBooks,
+  allDownloads,
+  allEvents,
+  allPrints,
+  allResources,
+  allStrategies,
+  allCanons,
+  allShorts
+} from '@/lib/contentlayer-generated';
 
-let cachedContentlayerData: ContentLayerDocument[] | null = null;
-let lastLoadTime = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+// Import document types from your contentlayer config
+import type { 
+  Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short 
+} from '@/contentlayer/generated/types';
 
-async function loadContentlayerData(): Promise<ContentLayerDocument[]> {
-  // Check cache
-  const now = Date.now();
-  if (cachedContentlayerData && (now - lastLoadTime) < CACHE_DURATION) {
-    return cachedContentlayerData;
-  }
+export type ContentLayerDocument = Post | Book | Download | Event | Print | Resource | Strategy | Canon | Short;
 
-  try {
-    // Try to import from contentlayer/generated
-    // Using dynamic import to avoid build-time errors
-    const contentlayer = await import('@/lib/contentlayer-generated');
-    
-    // Extract documents from various possible exports
-    const allDocuments = 
-      contentlayer.allDocuments || 
-      contentlayer.documents || 
-      (contentlayer as any).default?.allDocuments ||
-      [];
-    
-    cachedContentlayerData = allDocuments as ContentLayerDocument[];
-    lastLoadTime = now;
-    
-    return cachedContentlayerData;
-  } catch (error) {
-    console.warn('[ContentLayer] Could not load from contentlayer/generated:', error);
-    
-    // Fallback: try to read from filesystem
-    try {
-      const fs = require('fs');
-      const path = require('path');
-      const generatedDir = path.join(process.cwd(), '.contentlayer/generated');
-      
-      if (fs.existsSync(generatedDir)) {
-        const files = fs.readdirSync(generatedDir)
-          .filter((f: string) => f.endsWith('.json'));
-        
-        const documents: ContentLayerDocument[] = [];
-        
-        for (const file of files) {
-          try {
-            const filePath = path.join(generatedDir, file);
-            const content = fs.readFileSync(filePath, 'utf-8');
-            const data = JSON.parse(content);
-            
-            // Only include if it has required fields
-            if (data._id && data.slug) {
-              documents.push(data);
-            }
-          } catch (e) {
-            console.warn(`[ContentLayer] Failed to parse ${file}:`, e);
-          }
-        }
-        
-        cachedContentlayerData = documents;
-        lastLoadTime = now;
-        return documents;
-      }
-    } catch (fsError) {
-      console.warn('[ContentLayer] Filesystem fallback failed:', fsError);
-    }
-    
-    // Return empty array if all attempts fail
-    return [];
-  }
-}
-
-export async function getContentlayerData(): Promise<{
+export function getContentlayerData(): {
   available: boolean;
   documentCount: number;
   documents: ContentLayerDocument[];
   types: string[];
   error?: string;
   warning?: string;
-}> {
+} {
   try {
-    const documents = await loadContentlayerData();
+    const documents = allDocuments as unknown as ContentLayerDocument[];
     
-    if (documents.length === 0) {
+    if (!documents || documents.length === 0) {
       return {
         available: false,
         documentCount: 0,
@@ -121,7 +51,7 @@ export async function getContentlayerData(): Promise<{
     // Extract unique document types
     const types = Array.from(
       new Set(
-        documents.map(doc => doc.type || doc._raw?.sourceFileDir || 'unknown')
+        documents.map(doc => doc.type || 'unknown')
       )
     );
     
@@ -144,42 +74,165 @@ export async function getContentlayerData(): Promise<{
   }
 }
 
-export async function getAllDocuments(): Promise<ContentLayerDocument[]> {
-  return await loadContentlayerData();
+export function getAllDocuments(): ContentLayerDocument[] {
+  return allDocuments as unknown as ContentLayerDocument[];
 }
 
-export async function getDocumentsByType(type: string): Promise<ContentLayerDocument[]> {
-  const documents = await loadContentlayerData();
-  return documents.filter(doc => 
-    doc.type === type || doc._raw?.sourceFileDir === type
-  );
+export function getDocumentsByType(type: string): ContentLayerDocument[] {
+  const documents = getAllDocuments();
+  return documents.filter(doc => doc.type === type);
 }
 
-export async function getDocumentBySlug(slug: string): Promise<ContentLayerDocument | null> {
-  const documents = await loadContentlayerData();
+export function getDocumentBySlug(slug: string): ContentLayerDocument | null {
+  const documents = getAllDocuments();
   return documents.find(doc => doc.slug === slug) || null;
 }
 
-export async function getStaticPathsData() {
-  const documents = await loadContentlayerData();
-  
-  return documents.map(doc => ({
-    params: { 
-      slug: doc.slug,
-      type: doc.type || doc._raw?.sourceFileDir || 'unknown'
-    }
-  }));
+export function getPublishedDocuments(): ContentLayerDocument[] {
+  const documents = getAllDocuments();
+  return documents.filter(doc => !doc.draft && doc.published !== false);
 }
+
+// Document type specific getters
+export function getPostBySlug(slug: string): Post | null {
+  const post = allPosts.find(post => post.slug === slug);
+  return post || null;
+}
+
+export function getPostBySlugWithContent(slug: string): Post | null {
+  return getPostBySlug(slug);
+}
+
+export function getPublishedPosts(): Post[] {
+  return allPosts.filter(post => !post.draft && post.published !== false);
+}
+
+export function getBookBySlug(slug: string): Book | null {
+  const book = allBooks.find(book => book.slug === slug);
+  return book || null;
+}
+
+export function getPublishedBooks(): Book[] {
+  return allBooks.filter(book => !book.draft && book.published !== false);
+}
+
+export function getDownloadBySlug(slug: string): Download | null {
+  const download = allDownloads.find(download => download.slug === slug);
+  return download || null;
+}
+
+export function getPublishedDownloads(): Download[] {
+  return allDownloads.filter(download => !download.draft && download.published !== false);
+}
+
+export function getEventBySlug(slug: string): Event | null {
+  const event = allEvents.find(event => event.slug === slug);
+  return event || null;
+}
+
+export function getPublishedEvents(): Event[] {
+  return allEvents.filter(event => !event.draft && event.published !== false);
+}
+
+export function getPrintBySlug(slug: string): Print | null {
+  const print = allPrints.find(print => print.slug === slug);
+  return print || null;
+}
+
+export function getPublishedPrints(): Print[] {
+  return allPrints.filter(print => !print.draft && print.published !== false);
+}
+
+export function getResourceBySlug(slug: string): Resource | null {
+  const resource = allResources.find(resource => resource.slug === slug);
+  return resource || null;
+}
+
+export function getPublishedResources(): Resource[] {
+  return allResources.filter(resource => !resource.draft && resource.published !== false);
+}
+
+export function getStrategyBySlug(slug: string): Strategy | null {
+  const strategy = allStrategies.find(strategy => strategy.slug === slug);
+  return strategy || null;
+}
+
+export function getPublishedStrategies(): Strategy[] {
+  return allStrategies.filter(strategy => !strategy.draft && strategy.published !== false);
+}
+
+export function getCanonBySlug(slug: string): Canon | null {
+  const canon = allCanons.find(canon => canon.slug === slug);
+  return canon || null;
+}
+
+export function getPublishedCanons(): Canon[] {
+  return allCanons.filter(canon => !canon.draft && canon.published !== false);
+}
+
+export function getShortBySlug(slug: string): Short | null {
+  const short = allShorts.find(short => short.slug === slug);
+  return short || null;
+}
+
+export function getPublishedShorts(): Short[] {
+  return allShorts.filter(short => !short.draft && short.published !== false);
+}
+
+export function coerceShortTheme(theme: any): string {
+  if (typeof theme === 'string') return theme;
+  return theme?.toString() || 'default';
+}
+
+// Alias functions for compatibility
+export const getDocBySlug = getDocumentBySlug;
 
 // Default export for backward compatibility
 const dataApi = {
-
   getContentlayerData,
   getAllDocuments,
   getDocumentsByType,
   getDocumentBySlug,
-  getStaticPathsData
-
+  getPublishedDocuments,
+  getDocBySlug,
+  
+  // Post functions
+  getPostBySlug,
+  getPostBySlugWithContent,
+  getPublishedPosts,
+  
+  // Book functions
+  getBookBySlug,
+  getPublishedBooks,
+  
+  // Download functions
+  getDownloadBySlug,
+  getPublishedDownloads,
+  
+  // Event functions
+  getEventBySlug,
+  getPublishedEvents,
+  
+  // Print functions
+  getPrintBySlug,
+  getPublishedPrints,
+  
+  // Resource functions
+  getResourceBySlug,
+  getPublishedResources,
+  
+  // Strategy functions
+  getStrategyBySlug,
+  getPublishedStrategies,
+  
+  // Canon functions
+  getCanonBySlug,
+  getPublishedCanons,
+  
+  // Short functions
+  getShortBySlug,
+  getPublishedShorts,
+  coerceShortTheme
 };
-export default dataApi;
 
+export default dataApi;

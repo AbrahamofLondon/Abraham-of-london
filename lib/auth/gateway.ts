@@ -1,7 +1,7 @@
 // lib/auth/gateway.ts - ALIGNED WITH ADMIN-SESSION
 import { NextRequest } from 'next/server';
 import { getAdminSession } from '@/lib/server/auth/admin-session';
-import { getInnerCircleAccess } from '@/lib/inner-circle/access';
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 
 // Define types that match the actual return types
 interface AdminSessionResult {

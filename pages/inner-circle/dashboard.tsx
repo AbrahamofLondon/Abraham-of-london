@@ -1,6 +1,6 @@
 /* pages/inner-circle/dashboard.tsx — MEMBER CONSOLE (INTEGRITY MODE) */
 import { GetServerSideProps } from 'next';
-import { getInnerCircleAccess } from '@/lib/inner-circle';
+import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import { prisma } from '@/lib/server/prisma';
 import Layout from '@/components/Layout';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';

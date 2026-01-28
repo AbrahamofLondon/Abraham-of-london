@@ -37,7 +37,7 @@ type Framework = {
 
 // Types for auth-injected props
 import type { User } from "@/types/auth";
-import type { InnerCircleAccess } from "@/lib/inner-circle";
+import type { InnerCircleAccess } from "@/lib/inner-circle/access.client";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
