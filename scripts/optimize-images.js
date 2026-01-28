@@ -138,48 +138,62 @@ async function optimizeImageWithSharp(sourcePath, outputPath, config) {
       return { optimized: false, reason: 'metadata_unreadable', originalSize: stats.size };
     }
     
-    // Guard: Check if format is supported
-    const imgFormat = metadata?.format;
+    // Guard: Prefer metadata.format, but fall back to file extension
+    let imgFormat = metadata?.format;
     if (!imgFormat) {
-      logger.warning(`Skipping ${fileName} — unknown format (metadata missing format field)`);
-      return { optimized: false, reason: 'unknown_format', originalSize: stats.size };
+      const ext = path.extname(sourcePath).slice(1).toLowerCase();
+      // Normalize common aliases
+      imgFormat = (ext === 'jpg') ? 'jpeg' : ext;
+      logger.warning(`[${fileName}] metadata.format missing; falling back to extension "${imgFormat}"`);
     }
     
-    // Guard: Verify sharp supports this format
-    if (!sharp.format || !sharp.format[imgFormat]) {
-      logger.warning(`Skipping ${fileName} — unsupported format: ${imgFormat}`);
+    // Guard: Ensure sharp.format exists and supports this format
+    const formatInfo = sharp && sharp.format && sharp.format[imgFormat];
+    if (!formatInfo) {
+      logger.warning(`Skipping ${fileName} — format "${imgFormat}" not supported by sharp or formatInfo unavailable`);
       return { optimized: false, reason: 'unsupported_format', format: imgFormat, originalSize: stats.size };
     }
     
-    // Resize if necessary
-    if (metadata.width > config.maxWidth || metadata.height > config.maxHeight) {
-      image = image.resize(config.maxWidth, config.maxHeight, {
-        fit: 'inside',
-        withoutEnlargement: true
-      });
+    // Resize if necessary (guard against missing dimensions)
+    if (metadata?.width && metadata?.height) {
+      if (metadata.width > config.maxWidth || metadata.height > config.maxHeight) {
+        image = image.resize(config.maxWidth, config.maxHeight, {
+          fit: 'inside',
+          withoutEnlargement: true
+        });
+      }
+    } else {
+      logger.warning(`[${fileName}] Missing dimensions in metadata, skipping resize`);
     }
     
     // Apply optimization based on format
     const ext = path.extname(sourcePath).toLowerCase();
     
-    switch (ext) {
-      case '.jpg':
-      case '.jpeg':
-        await image.jpeg(config.optimization.jpeg).toFile(outputPath);
-        break;
-      case '.png':
-        await image.png(config.optimization.png).toFile(outputPath);
-        break;
-      case '.webp':
-        await image.webp(config.optimization.webp).toFile(outputPath);
-        break;
-      case '.gif':
-        // For GIFs, we might want to convert to MP4 or keep as is
-        await fs.copyFile(sourcePath, outputPath);
-        return { optimized: false, reason: 'gif_copied_as_is', originalSize: stats.size, optimizedSize: stats.size };
-      default:
-        await fs.copyFile(sourcePath, outputPath);
-        return { optimized: false, reason: 'unsupported_extension', originalSize: stats.size, optimizedSize: stats.size };
+    try {
+      switch (ext) {
+        case '.jpg':
+        case '.jpeg':
+          await image.jpeg(config.optimization.jpeg).toFile(outputPath);
+          break;
+        case '.png':
+          await image.png(config.optimization.png).toFile(outputPath);
+          break;
+        case '.webp':
+          await image.webp(config.optimization.webp).toFile(outputPath);
+          break;
+        case '.gif':
+          // For GIFs, we might want to convert to MP4 or keep as is
+          await fs.copyFile(sourcePath, outputPath);
+          return { optimized: false, reason: 'gif_copied_as_is', originalSize: stats.size, optimizedSize: stats.size };
+        default:
+          await fs.copyFile(sourcePath, outputPath);
+          return { optimized: false, reason: 'unsupported_extension', originalSize: stats.size, optimizedSize: stats.size };
+      }
+    } catch (sharpErr) {
+      logger.error(`Sharp processing failed for ${fileName}: ${sharpErr.message}`);
+      // Fallback: copy original file
+      await fs.copyFile(sourcePath, outputPath);
+      return { optimized: false, reason: 'sharp_processing_failed', error: sharpErr.message, originalSize: stats.size, optimizedSize: stats.size };
     }
     
     const optimizedStats = await getFileStats(outputPath);
@@ -198,9 +212,9 @@ async function optimizeImageWithSharp(sourcePath, outputPath, config) {
       optimizedSize: optimizedStats.size,
       savings: savings,
       savingsPercent: savingsPercent,
-      width: metadata.width,
-      height: metadata.height,
-      format: metadata.format
+      width: metadata?.width || null,
+      height: metadata?.height || null,
+      format: imgFormat // Use validated imgFormat instead of metadata.format
     };
     
   } catch (error) {
@@ -215,7 +229,7 @@ async function optimizeImageWithImageMagick(sourcePath, outputPath, config) {
     const stats = await getFileStats(sourcePath);
     
     if (!stats || stats.size > config.maxFileSize) {
-      return { optimized: false, reason: 'file_too_large' };
+      return { optimized: false, reason: 'file_too_large', originalSize: stats?.size || 0 };
     }
     
     const ext = path.extname(sourcePath).toLowerCase();
@@ -228,11 +242,15 @@ async function optimizeImageWithImageMagick(sourcePath, outputPath, config) {
     } else {
       // Just copy for unsupported formats
       await fs.copyFile(sourcePath, outputPath);
-      return { optimized: false, reason: 'format_not_supported' };
+      return { optimized: false, reason: 'format_not_supported', originalSize: stats.size, optimizedSize: stats.size };
     }
     
     await execAsync(command);
     const optimizedStats = await getFileStats(outputPath);
+    
+    if (!optimizedStats) {
+      return { optimized: false, reason: 'output_stats_unavailable', originalSize: stats.size };
+    }
     
     return {
       optimized: true,
@@ -243,21 +261,33 @@ async function optimizeImageWithImageMagick(sourcePath, outputPath, config) {
     
   } catch (error) {
     logger.warning(`ImageMagick not available or failed: ${error.message}`);
-    return { optimized: false, reason: 'imagemagick_unavailable' };
+    return { optimized: false, reason: 'imagemagick_unavailable', originalSize: 0 };
   }
 }
 
 // Simple copy if no optimization is available
 async function copyImage(sourcePath, outputPath) {
-  await fs.copyFile(sourcePath, outputPath);
-  const stats = await getFileStats(sourcePath);
-  return {
-    optimized: false,
-    originalSize: stats.size,
-    optimizedSize: stats.size,
-    savings: 0,
-    reason: 'no_optimization_tool'
-  };
+  try {
+    await fs.copyFile(sourcePath, outputPath);
+    const stats = await getFileStats(sourcePath);
+    return {
+      optimized: false,
+      originalSize: stats?.size || 0,
+      optimizedSize: stats?.size || 0,
+      savings: 0,
+      reason: 'no_optimization_tool'
+    };
+  } catch (copyErr) {
+    logger.error(`Failed to copy ${path.basename(sourcePath)}: ${copyErr.message}`);
+    return {
+      optimized: false,
+      originalSize: 0,
+      optimizedSize: 0,
+      savings: 0,
+      reason: 'copy_failed',
+      error: copyErr.message
+    };
+  }
 }
 
 // Process a single image file

@@ -1,7 +1,6 @@
-// lib/env.ts
 import { z } from 'zod';
 // security-scan-ignore-file
-// Reason: This file only contains environment variable NAMES, not values.
+// Reason: This file only contains DEFAULT/PLACEHOLDER values for development, not production secrets.
 
 // Define schema for required environment variables
 const envSchema = z.object({
@@ -10,16 +9,16 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   
   // Secrets (required in production, optional in development)
-  JWT_SECRET: z.string().min(32).optional().default('dev-secret-change-in-production'),
-  NEXTAUTH_SECRET: z.string().min(32).optional().default('dev-nextauth-secret'),
+  JWT_SECRET: z.string().min(32),
+  NEXTAUTH_SECRET: z.string().min(32),
   
   // URLs
   NEXT_PUBLIC_SITE_URL: z.string().url(),
   NEXTAUTH_URL: z.string().url(),
   
   // Feature flags
-  ENABLE_AUDIT_LOGGING: z.enum(['true', 'false']).transform(val => val === 'true'),
-  SKIP_AUTH_IN_DEV: z.enum(['true', 'false']).transform(val => val === 'true'),
+  ENABLE_AUDIT_LOGGING: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
+  SKIP_AUTH_IN_DEV: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
 });
 
 // Parse and validate
@@ -28,28 +27,29 @@ const env = envSchema.safeParse(process.env);
 if (!env.success) {
   console.error('❌ Invalid environment variables:', env.error.format());
   
-  // In production, throw error
+  // In production, throw error - NO DEFAULT VALUES
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('Invalid environment variables');
+    throw new Error('Invalid environment variables - required secrets missing in production');
   }
   
-  // In development, use defaults with warnings
-  console.warn('⚠️ Using default values for missing environment variables');
+  // In development only, provide clear placeholder messages
+  console.warn('⚠️  Missing required environment variables. Using development placeholders.');
 }
 
+// NEVER provide default values for secrets in the fallback object
 export const ENV = env.success ? env.data : {
   NODE_ENV: 'development' as const,
   DATABASE_URL: 'file:./dev.db',
-  JWT_SECRET: 'dev-secret-change-me',
-  NEXTAUTH_SECRET: 'dev-nextauth-secret-change-me',
+  JWT_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
+  NEXTAUTH_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
   NEXT_PUBLIC_SITE_URL: 'http://localhost:3000',
   NEXTAUTH_URL: 'http://localhost:3000',
-  ENABLE_AUDIT_LOGGING: true,
-  SKIP_AUTH_IN_DEV: true,
+  ENABLE_AUDIT_LOGGING: false,
+  SKIP_AUTH_IN_DEV: false,
 };
 
 // Helper to get environment variables with fallbacks
-export function getEnv(key: string, defaultValue?: string): string {
+export function getEnv(key: keyof typeof ENV, defaultValue?: string): string {
   const value = process.env[key];
   
   if (value === undefined && defaultValue === undefined) {
@@ -81,4 +81,3 @@ export const Config = {
     skipAuthInDev: ENV.SKIP_AUTH_IN_DEV,
   },
 } as const;
-
