@@ -371,6 +371,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.1.18)
+      toml:
+        specifier: ^3.0.0
+        version: 3.0.0
       ts-morph:
         specifier: ^27.0.2
         version: 27.0.2
