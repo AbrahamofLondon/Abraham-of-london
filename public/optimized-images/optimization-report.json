@@ -1,0 +1,1819 @@
+{
+  "timestamp": "2026-01-28T18:47:45.284Z",
+  "config": {
+    "sourceDirs": [
+      "C:\\Abraham-of-london\\public\\assets\\images",
+      "C:\\Abraham-of-london\\public\\images"
+    ],
+    "outputDir": "C:\\Abraham-of-london\\public\\optimized-images",
+    "extensions": [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".webp"
+    ],
+    "maxWidth": 1920,
+    "maxHeight": 1080,
+    "quality": 85,
+    "concurrentLimit": 4,
+    "force": false,
+    "verbose": false
+  },
+  "summary": {
+    "total": 223,
+    "optimized": 223,
+    "failed": 0,
+    "originalSize": 133395534,
+    "optimizedSize": 17562806,
+    "savings": 115832728,
+    "savingsPercent": "86.8",
+    "duration": 10904
+  },
+  "files": [
+    {
+      "file": "abraham-logo.jpg",
+      "optimized": true,
+      "originalSize": 37270,
+      "optimizedSize": 36233,
+      "savings": 1037,
+      "savingsPercent": "2.8"
+    },
+    {
+      "file": "abraham-of-london-banner.webp",
+      "optimized": true,
+      "originalSize": 350988,
+      "optimizedSize": 401952,
+      "savings": -50964,
+      "savingsPercent": "-14.5"
+    },
+    {
+      "file": "abraham-of-london-banner@2560.webp",
+      "optimized": true,
+      "originalSize": 167484,
+      "optimizedSize": 153228,
+      "savings": 14256,
+      "savingsPercent": "8.5"
+    },
+    {
+      "file": "alomarada-ltd.webp",
+      "optimized": true,
+      "originalSize": 20840,
+      "optimizedSize": 23560,
+      "savings": -2720,
+      "savingsPercent": "-13.1"
+    },
+    {
+      "file": "chrisitianity-not-extremism.jpg",
+      "optimized": true,
+      "originalSize": 642562,
+      "optimizedSize": 101969,
+      "savings": 540593,
+      "savingsPercent": "84.1"
+    },
+    {
+      "file": "christianity-not-extremism.jpg",
+      "optimized": true,
+      "originalSize": 86466,
+      "optimizedSize": 84100,
+      "savings": 2366,
+      "savingsPercent": "2.7"
+    },
+    {
+      "file": "christianity-not-extremism.webp",
+      "optimized": true,
+      "originalSize": 40750,
+      "optimizedSize": 42846,
+      "savings": -2096,
+      "savingsPercent": "-5.1"
+    },
+    {
+      "file": "default-blog-cover.jpg",
+      "optimized": true,
+      "originalSize": 1324096,
+      "optimizedSize": 84364,
+      "savings": 1239732,
+      "savingsPercent": "93.6"
+    },
+    {
+      "file": "fathering-principles.jpg",
+      "optimized": true,
+      "originalSize": 1699253,
+      "optimizedSize": 106637,
+      "savings": 1592616,
+      "savingsPercent": "93.7"
+    },
+    {
+      "file": "fathering-without-fear-teaser.jpg",
+      "optimized": true,
+      "originalSize": 2840395,
+      "optimizedSize": 85360,
+      "savings": 2755035,
+      "savingsPercent": "97.0"
+    },
+    {
+      "file": "fathering-without-fear.jpg",
+      "optimized": true,
+      "originalSize": 2622519,
+      "optimizedSize": 84616,
+      "savings": 2537903,
+      "savingsPercent": "96.8"
+    },
+    {
+      "file": "in-my-fathers-house.jpg",
+      "optimized": true,
+      "originalSize": 72021,
+      "optimizedSize": 76030,
+      "savings": -4009,
+      "savingsPercent": "-5.6"
+    },
+    {
+      "file": "kingdom-strategies-for-a-loving-legacy.jpg",
+      "optimized": true,
+      "originalSize": 2827342,
+      "optimizedSize": 142124,
+      "savings": 2685218,
+      "savingsPercent": "95.0"
+    },
+    {
+      "file": "leadership-begins-at-home.jpg",
+      "optimized": true,
+      "originalSize": 2203936,
+      "optimizedSize": 75648,
+      "savings": 2128288,
+      "savingsPercent": "96.6"
+    },
+    {
+      "file": "lessons-from-noah-hero.jpg",
+      "optimized": true,
+      "originalSize": 168230,
+      "optimizedSize": 147074,
+      "savings": 21156,
+      "savingsPercent": "12.6"
+    },
+    {
+      "file": "out-of-context-truth.jpg",
+      "optimized": true,
+      "originalSize": 125017,
+      "optimizedSize": 97325,
+      "savings": 27692,
+      "savingsPercent": "22.2"
+    },
+    {
+      "file": "principles-for-my-son.jpg",
+      "optimized": true,
+      "originalSize": 2663463,
+      "optimizedSize": 90102,
+      "savings": 2573361,
+      "savingsPercent": "96.6"
+    },
+    {
+      "file": "purpose-cover.jpg",
+      "optimized": true,
+      "originalSize": 2476945,
+      "optimizedSize": 85198,
+      "savings": 2391747,
+      "savingsPercent": "96.6"
+    },
+    {
+      "file": "purpose-is-the-anchor.jpg",
+      "optimized": true,
+      "originalSize": 182004,
+      "optimizedSize": 156823,
+      "savings": 25181,
+      "savingsPercent": "13.8"
+    },
+    {
+      "file": "reclaiming-the-narrative.jpg",
+      "optimized": true,
+      "originalSize": 1836905,
+      "optimizedSize": 158376,
+      "savings": 1678529,
+      "savingsPercent": "91.4"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 1819040,
+      "optimizedSize": 241694,
+      "savings": 1577346,
+      "savingsPercent": "86.7"
+    },
+    {
+      "file": "sovereignty-truth-fathers.jpg",
+      "optimized": true,
+      "originalSize": 2277723,
+      "optimizedSize": 71905,
+      "savings": 2205818,
+      "savingsPercent": "96.8"
+    },
+    {
+      "file": "surrender-framework-diagram.jpg",
+      "optimized": true,
+      "originalSize": 83497,
+      "optimizedSize": 66673,
+      "savings": 16824,
+      "savingsPercent": "20.1"
+    },
+    {
+      "file": "surrender-vs-submission.jpg",
+      "optimized": true,
+      "originalSize": 78648,
+      "optimizedSize": 68533,
+      "savings": 10115,
+      "savingsPercent": "12.9"
+    },
+    {
+      "file": "the-brotherhood-code.jpg",
+      "optimized": true,
+      "originalSize": 2312261,
+      "optimizedSize": 62061,
+      "savings": 2250200,
+      "savingsPercent": "97.3"
+    },
+    {
+      "file": "when-the-foundation-is-destroyed.jpg",
+      "optimized": true,
+      "originalSize": 255187,
+      "optimizedSize": 188481,
+      "savings": 66706,
+      "savingsPercent": "26.1"
+    },
+    {
+      "file": "when-the-storm-finds-you.jpg",
+      "optimized": true,
+      "originalSize": 3088668,
+      "optimizedSize": 113912,
+      "savings": 2974756,
+      "savingsPercent": "96.3"
+    },
+    {
+      "file": "when-the-system-breaks-you.jpg",
+      "optimized": true,
+      "originalSize": 1723199,
+      "optimizedSize": 130977,
+      "savings": 1592222,
+      "savingsPercent": "92.4"
+    },
+    {
+      "file": "fathering-without-fear.jpg",
+      "optimized": true,
+      "originalSize": 2809542,
+      "optimizedSize": 95699,
+      "savings": 2713843,
+      "savingsPercent": "96.6"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 2069179,
+      "optimizedSize": 227974,
+      "savings": 1841205,
+      "savingsPercent": "89.0"
+    },
+    {
+      "file": "the-architecture-of-human-purpose.jpg",
+      "optimized": true,
+      "originalSize": 2837575,
+      "optimizedSize": 114220,
+      "savings": 2723355,
+      "savingsPercent": "96.0"
+    },
+    {
+      "file": "the-fiction-adaptation.jpg",
+      "optimized": true,
+      "originalSize": 1709001,
+      "optimizedSize": 210262,
+      "savings": 1498739,
+      "savingsPercent": "87.7"
+    },
+    {
+      "file": "architecture-cover.jpg",
+      "optimized": true,
+      "originalSize": 2837575,
+      "optimizedSize": 114220,
+      "savings": 2723355,
+      "savingsPercent": "96.0"
+    },
+    {
+      "file": "builders-catechism-cover.jpg",
+      "optimized": true,
+      "originalSize": 2800768,
+      "optimizedSize": 103061,
+      "savings": 2697707,
+      "savingsPercent": "96.3"
+    },
+    {
+      "file": "canon-campaign-cover.jpg",
+      "optimized": true,
+      "originalSize": 2214901,
+      "optimizedSize": 48346,
+      "savings": 2166555,
+      "savingsPercent": "97.8"
+    },
+    {
+      "file": "canon-index-cover.jpg",
+      "optimized": true,
+      "originalSize": 1302261,
+      "optimizedSize": 63519,
+      "savings": 1238742,
+      "savingsPercent": "95.1"
+    },
+    {
+      "file": "canon-intro-letter-cover.jpg",
+      "optimized": true,
+      "originalSize": 2279424,
+      "optimizedSize": 49948,
+      "savings": 2229476,
+      "savingsPercent": "97.8"
+    },
+    {
+      "file": "canon-resources.jpg",
+      "optimized": true,
+      "originalSize": 1302261,
+      "optimizedSize": 63519,
+      "savings": 1238742,
+      "savingsPercent": "95.1"
+    },
+    {
+      "file": "legacy-canvas-heirloom.jpg",
+      "optimized": true,
+      "originalSize": 2867626,
+      "optimizedSize": 377268,
+      "savings": 2490358,
+      "savingsPercent": "86.8"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 2098734,
+      "optimizedSize": 247799,
+      "savings": 1850935,
+      "savingsPercent": "88.2"
+    },
+    {
+      "file": "vol-i-foundations-for-purpose.jpg",
+      "optimized": true,
+      "originalSize": 1471066,
+      "optimizedSize": 96563,
+      "savings": 1374503,
+      "savingsPercent": "93.4"
+    },
+    {
+      "file": "volume-i-teaching-edition.jpg",
+      "optimized": true,
+      "originalSize": 2554148,
+      "optimizedSize": 66730,
+      "savings": 2487418,
+      "savingsPercent": "97.4"
+    },
+    {
+      "file": "volume-ii-governance-and-formation.jpg",
+      "optimized": true,
+      "originalSize": 1665770,
+      "optimizedSize": 119171,
+      "savings": 1546599,
+      "savingsPercent": "92.8"
+    },
+    {
+      "file": "volume-ii-teaching-edition.jpg",
+      "optimized": true,
+      "originalSize": 2559382,
+      "optimizedSize": 66349,
+      "savings": 2493033,
+      "savingsPercent": "97.4"
+    },
+    {
+      "file": "volume-iii-teaching-edition.jpg",
+      "optimized": true,
+      "originalSize": 2578328,
+      "optimizedSize": 66967,
+      "savings": 2511361,
+      "savingsPercent": "97.4"
+    },
+    {
+      "file": "volume-iv-diagnostic-toolkit.jpg",
+      "optimized": true,
+      "originalSize": 2277815,
+      "optimizedSize": 87845,
+      "savings": 2189970,
+      "savingsPercent": "96.1"
+    },
+    {
+      "file": "volume-iv-teaching-edition.jpg",
+      "optimized": true,
+      "originalSize": 2558087,
+      "optimizedSize": 65836,
+      "savings": 2492251,
+      "savingsPercent": "97.4"
+    },
+    {
+      "file": "volume-v-governance-toolkit.jpg",
+      "optimized": true,
+      "originalSize": 2115398,
+      "optimizedSize": 89186,
+      "savings": 2026212,
+      "savingsPercent": "95.8"
+    },
+    {
+      "file": "volume-x-cover.jpg",
+      "optimized": true,
+      "originalSize": 2214901,
+      "optimizedSize": 48346,
+      "savings": 2166555,
+      "savingsPercent": "97.8"
+    },
+    {
+      "file": "canon-resources.jpeg",
+      "optimized": true,
+      "originalSize": 1302261,
+      "optimizedSize": 63519,
+      "savings": 1238742,
+      "savingsPercent": "95.1"
+    },
+    {
+      "file": "canon-resources.jpg",
+      "optimized": true,
+      "originalSize": 253958,
+      "optimizedSize": 302803,
+      "savings": -48845,
+      "savingsPercent": "-19.2"
+    },
+    {
+      "file": "cta-bg.jpg",
+      "optimized": true,
+      "originalSize": 3758374,
+      "optimizedSize": 511881,
+      "savings": 3246493,
+      "savingsPercent": "86.4"
+    },
+    {
+      "file": "cta-bg.webp",
+      "optimized": true,
+      "originalSize": 417642,
+      "optimizedSize": 487056,
+      "savings": -69414,
+      "savingsPercent": "-16.6"
+    },
+    {
+      "file": "board-investor-one-pager-template.jpg",
+      "optimized": true,
+      "originalSize": 49558,
+      "optimizedSize": 44503,
+      "savings": 5055,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "board-update-jpg.jpg",
+      "optimized": true,
+      "originalSize": 37918,
+      "optimizedSize": 34796,
+      "savings": 3122,
+      "savingsPercent": "8.2"
+    },
+    {
+      "file": "board-update-onepager-2.jpg",
+      "optimized": true,
+      "originalSize": 43620,
+      "optimizedSize": 39449,
+      "savings": 4171,
+      "savingsPercent": "9.6"
+    },
+    {
+      "file": "board-update-onepager.jpg",
+      "optimized": true,
+      "originalSize": 42641,
+      "optimizedSize": 38712,
+      "savings": 3929,
+      "savingsPercent": "9.2"
+    },
+    {
+      "file": "board-update-template-2.jpg",
+      "optimized": true,
+      "originalSize": 42619,
+      "optimizedSize": 38751,
+      "savings": 3868,
+      "savingsPercent": "9.1"
+    },
+    {
+      "file": "board-update-template.jpg",
+      "optimized": true,
+      "originalSize": 41570,
+      "optimizedSize": 37871,
+      "savings": 3699,
+      "savingsPercent": "8.9"
+    },
+    {
+      "file": "boardinvestor-one-pager-template-2.jpg",
+      "optimized": true,
+      "originalSize": 50376,
+      "optimizedSize": 45126,
+      "savings": 5250,
+      "savingsPercent": "10.4"
+    },
+    {
+      "file": "boardinvestor-one-pager-template.jpg",
+      "optimized": true,
+      "originalSize": 49455,
+      "optimizedSize": 44306,
+      "savings": 5149,
+      "savingsPercent": "10.4"
+    },
+    {
+      "file": "brotherhood-covenant-2.jpg",
+      "optimized": true,
+      "originalSize": 41619,
+      "optimizedSize": 37868,
+      "savings": 3751,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "brotherhood-covenant-jpg.jpg",
+      "optimized": true,
+      "originalSize": 43865,
+      "optimizedSize": 39714,
+      "savings": 4151,
+      "savingsPercent": "9.5"
+    },
+    {
+      "file": "brotherhood-covenant-printable.jpg",
+      "optimized": true,
+      "originalSize": 47363,
+      "optimizedSize": 42657,
+      "savings": 4706,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "brotherhood-covenant.jpg",
+      "optimized": true,
+      "originalSize": 40659,
+      "optimizedSize": 37044,
+      "savings": 3615,
+      "savingsPercent": "8.9"
+    },
+    {
+      "file": "brotherhood-cue-card-2.jpg",
+      "optimized": true,
+      "originalSize": 41465,
+      "optimizedSize": 37738,
+      "savings": 3727,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "brotherhood-cue-card-jpg.jpg",
+      "optimized": true,
+      "originalSize": 43596,
+      "optimizedSize": 39533,
+      "savings": 4063,
+      "savingsPercent": "9.3"
+    },
+    {
+      "file": "brotherhood-cue-card-two-up-2.jpg",
+      "optimized": true,
+      "originalSize": 46847,
+      "optimizedSize": 42279,
+      "savings": 4568,
+      "savingsPercent": "9.8"
+    },
+    {
+      "file": "brotherhood-cue-card-two-up.jpg",
+      "optimized": true,
+      "originalSize": 46032,
+      "optimizedSize": 41680,
+      "savings": 4352,
+      "savingsPercent": "9.5"
+    },
+    {
+      "file": "brotherhood-cue-card.jpg",
+      "optimized": true,
+      "originalSize": 40411,
+      "optimizedSize": 36865,
+      "savings": 3546,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "brotherhood-leader-guide-4-weeks-2.jpg",
+      "optimized": true,
+      "originalSize": 51007,
+      "optimizedSize": 45846,
+      "savings": 5161,
+      "savingsPercent": "10.1"
+    },
+    {
+      "file": "brotherhood-leader-guide-4-weeks.jpg",
+      "optimized": true,
+      "originalSize": 50149,
+      "optimizedSize": 45117,
+      "savings": 5032,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "brotherhood-starter-kit-2.jpg",
+      "optimized": true,
+      "originalSize": 42930,
+      "optimizedSize": 38972,
+      "savings": 3958,
+      "savingsPercent": "9.2"
+    },
+    {
+      "file": "brotherhood-starter-kit.jpg",
+      "optimized": true,
+      "originalSize": 41920,
+      "optimizedSize": 38138,
+      "savings": 3782,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "comms-script-bpf-jpg.jpg",
+      "optimized": true,
+      "originalSize": 40770,
+      "optimizedSize": 37192,
+      "savings": 3578,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "communication-script-bpf-2-2.jpg",
+      "optimized": true,
+      "originalSize": 45370,
+      "optimizedSize": 41022,
+      "savings": 4348,
+      "savingsPercent": "9.6"
+    },
+    {
+      "file": "communication-script-bpf-2.jpg",
+      "optimized": true,
+      "originalSize": 44302,
+      "optimizedSize": 40124,
+      "savings": 4178,
+      "savingsPercent": "9.4"
+    },
+    {
+      "file": "communication-script-bpf-3-2.jpg",
+      "optimized": true,
+      "originalSize": 45791,
+      "optimizedSize": 41384,
+      "savings": 4407,
+      "savingsPercent": "9.6"
+    },
+    {
+      "file": "communication-script-bpf-3.jpg",
+      "optimized": true,
+      "originalSize": 44734,
+      "optimizedSize": 40503,
+      "savings": 4231,
+      "savingsPercent": "9.5"
+    },
+    {
+      "file": "communication-script-bpf-4.jpg",
+      "optimized": true,
+      "originalSize": 44089,
+      "optimizedSize": 40041,
+      "savings": 4048,
+      "savingsPercent": "9.2"
+    },
+    {
+      "file": "communication-script-bpf-jpg-2.jpg",
+      "optimized": true,
+      "originalSize": 47666,
+      "optimizedSize": 42958,
+      "savings": 4708,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "communication-script-bpf-jpg.jpg",
+      "optimized": true,
+      "originalSize": 46641,
+      "optimizedSize": 42044,
+      "savings": 4597,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "communication-script-bpf.jpg",
+      "optimized": true,
+      "originalSize": 56518,
+      "optimizedSize": 35740,
+      "savings": 20778,
+      "savingsPercent": "36.8"
+    },
+    {
+      "file": "communication-script-budget-plan-forecast-2.jpg",
+      "optimized": true,
+      "originalSize": 56524,
+      "optimizedSize": 50684,
+      "savings": 5840,
+      "savingsPercent": "10.3"
+    },
+    {
+      "file": "communication-script-budget-plan-forecast.jpg",
+      "optimized": true,
+      "originalSize": 55517,
+      "optimizedSize": 49829,
+      "savings": 5688,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "downloadsboard-update-onepager-2.jpg",
+      "optimized": true,
+      "originalSize": 51384,
+      "optimizedSize": 46130,
+      "savings": 5254,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "downloadsboard-update-onepager.jpg",
+      "optimized": true,
+      "originalSize": 50368,
+      "optimizedSize": 45282,
+      "savings": 5086,
+      "savingsPercent": "10.1"
+    },
+    {
+      "file": "downloadsgrid-tsx-2.jpg",
+      "optimized": true,
+      "originalSize": 39891,
+      "optimizedSize": 36413,
+      "savings": 3478,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "downloadsgrid-tsx.jpg",
+      "optimized": true,
+      "originalSize": 38771,
+      "optimizedSize": 35485,
+      "savings": 3286,
+      "savingsPercent": "8.5"
+    },
+    {
+      "file": "downloadsgrid.jpg",
+      "optimized": true,
+      "originalSize": 36054,
+      "optimizedSize": 33272,
+      "savings": 2782,
+      "savingsPercent": "7.7"
+    },
+    {
+      "file": "entrepreneur-operating-jpg.jpg",
+      "optimized": true,
+      "originalSize": 44702,
+      "optimizedSize": 40398,
+      "savings": 4304,
+      "savingsPercent": "9.6"
+    },
+    {
+      "file": "entrepreneur-operating-pack-2.jpg",
+      "optimized": true,
+      "originalSize": 46431,
+      "optimizedSize": 41839,
+      "savings": 4592,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "entrepreneur-operating-pack-week-in-review-system-2.jpg",
+      "optimized": true,
+      "originalSize": 57245,
+      "optimizedSize": 51391,
+      "savings": 5854,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "entrepreneur-operating-pack-week-in-review-system.jpg",
+      "optimized": true,
+      "originalSize": 56975,
+      "optimizedSize": 51165,
+      "savings": 5810,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "entrepreneur-operating-pack.jpg",
+      "optimized": true,
+      "originalSize": 59710,
+      "optimizedSize": 38194,
+      "savings": 21516,
+      "savingsPercent": "36.0"
+    },
+    {
+      "file": "entrepreneur-operating.jpg",
+      "optimized": true,
+      "originalSize": 153852,
+      "optimizedSize": 114241,
+      "savings": 39611,
+      "savingsPercent": "25.7"
+    },
+    {
+      "file": "entrepreneur-survival-checklist-2-2.jpg",
+      "optimized": true,
+      "originalSize": 48547,
+      "optimizedSize": 43689,
+      "savings": 4858,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "entrepreneur-survival-checklist-2.jpg",
+      "optimized": true,
+      "originalSize": 47479,
+      "optimizedSize": 42812,
+      "savings": 4667,
+      "savingsPercent": "9.8"
+    },
+    {
+      "file": "entrepreneur-survival-checklist-3-2.jpg",
+      "optimized": true,
+      "originalSize": 49015,
+      "optimizedSize": 44092,
+      "savings": 4923,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "entrepreneur-survival-checklist-3.jpg",
+      "optimized": true,
+      "originalSize": 47952,
+      "optimizedSize": 43191,
+      "savings": 4761,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "entrepreneur-survival-checklist-4.jpg",
+      "optimized": true,
+      "originalSize": 47363,
+      "optimizedSize": 42763,
+      "savings": 4600,
+      "savingsPercent": "9.7"
+    },
+    {
+      "file": "entrepreneur-survival-checklist-jpg-2.jpg",
+      "optimized": true,
+      "originalSize": 50907,
+      "optimizedSize": 45672,
+      "savings": 5235,
+      "savingsPercent": "10.3"
+    },
+    {
+      "file": "entrepreneur-survival-checklist-jpg.jpg",
+      "optimized": true,
+      "originalSize": 49880,
+      "optimizedSize": 44777,
+      "savings": 5103,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "entrepreneur-survival-checklist.jpg",
+      "optimized": true,
+      "originalSize": 46638,
+      "optimizedSize": 42134,
+      "savings": 4504,
+      "savingsPercent": "9.7"
+    },
+    {
+      "file": "evidence-log-template-2.jpg",
+      "optimized": true,
+      "originalSize": 41859,
+      "optimizedSize": 38109,
+      "savings": 3750,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "evidence-log-template.jpg",
+      "optimized": true,
+      "originalSize": 40882,
+      "optimizedSize": 37304,
+      "savings": 3578,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "example.jpg",
+      "optimized": true,
+      "originalSize": 30609,
+      "optimizedSize": 28666,
+      "savings": 1943,
+      "savingsPercent": "6.3"
+    },
+    {
+      "file": "family-altar-liturgy-2.jpg",
+      "optimized": true,
+      "originalSize": 39486,
+      "optimizedSize": 36229,
+      "savings": 3257,
+      "savingsPercent": "8.2"
+    },
+    {
+      "file": "family-altar-liturgy-jpg-2.jpg",
+      "optimized": true,
+      "originalSize": 42801,
+      "optimizedSize": 38999,
+      "savings": 3802,
+      "savingsPercent": "8.9"
+    },
+    {
+      "file": "family-altar-liturgy-jpg.jpg",
+      "optimized": true,
+      "originalSize": 41778,
+      "optimizedSize": 38095,
+      "savings": 3683,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "family-altar-liturgy.jpg",
+      "optimized": true,
+      "originalSize": 38453,
+      "optimizedSize": 35381,
+      "savings": 3072,
+      "savingsPercent": "8.0"
+    },
+    {
+      "file": "fatherhood-guide-2.jpg",
+      "optimized": true,
+      "originalSize": 38660,
+      "optimizedSize": 35492,
+      "savings": 3168,
+      "savingsPercent": "8.2"
+    },
+    {
+      "file": "fatherhood-guide-jpg.jpg",
+      "optimized": true,
+      "originalSize": 40968,
+      "optimizedSize": 37431,
+      "savings": 3537,
+      "savingsPercent": "8.6"
+    },
+    {
+      "file": "fatherhood-guide.jpg",
+      "optimized": true,
+      "originalSize": 37717,
+      "optimizedSize": 34751,
+      "savings": 2966,
+      "savingsPercent": "7.9"
+    },
+    {
+      "file": "fathering-without-fear-2.jpg",
+      "optimized": true,
+      "originalSize": 42289,
+      "optimizedSize": 38554,
+      "savings": 3735,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "fathering-without-fear-epub.jpg",
+      "optimized": true,
+      "originalSize": 45261,
+      "optimizedSize": 41038,
+      "savings": 4223,
+      "savingsPercent": "9.3"
+    },
+    {
+      "file": "fathering-without-fear-jpg.jpg",
+      "optimized": true,
+      "originalSize": 44561,
+      "optimizedSize": 40400,
+      "savings": 4161,
+      "savingsPercent": "9.3"
+    },
+    {
+      "file": "fathering-without-fear-mobile-2.jpg",
+      "optimized": true,
+      "originalSize": 47710,
+      "optimizedSize": 43065,
+      "savings": 4645,
+      "savingsPercent": "9.7"
+    },
+    {
+      "file": "fathering-without-fear-mobile-jpg.jpg",
+      "optimized": true,
+      "originalSize": 49886,
+      "optimizedSize": 44963,
+      "savings": 4923,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "fathering-without-fear-mobile.jpg",
+      "optimized": true,
+      "originalSize": 46657,
+      "optimizedSize": 42202,
+      "savings": 4455,
+      "savingsPercent": "9.5"
+    },
+    {
+      "file": "fathering-without-fear-teaser-2.jpg",
+      "optimized": true,
+      "originalSize": 47241,
+      "optimizedSize": 42591,
+      "savings": 4650,
+      "savingsPercent": "9.8"
+    },
+    {
+      "file": "fathering-without-fear-teaser-a4-2.jpg",
+      "optimized": true,
+      "originalSize": 49268,
+      "optimizedSize": 44332,
+      "savings": 4936,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "fathering-without-fear-teaser-a4-3.jpg",
+      "optimized": true,
+      "originalSize": 49685,
+      "optimizedSize": 44690,
+      "savings": 4995,
+      "savingsPercent": "10.1"
+    },
+    {
+      "file": "fathering-without-fear-teaser-a4.jpg",
+      "optimized": true,
+      "originalSize": 48482,
+      "optimizedSize": 43719,
+      "savings": 4763,
+      "savingsPercent": "9.8"
+    },
+    {
+      "file": "fathering-without-fear-teaser-jpg.jpg",
+      "optimized": true,
+      "originalSize": 49278,
+      "optimizedSize": 44372,
+      "savings": 4906,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "fathering-without-fear-teaser-mobile-2.jpg",
+      "optimized": true,
+      "originalSize": 52472,
+      "optimizedSize": 47205,
+      "savings": 5267,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "fathering-without-fear-teaser-mobile.jpg",
+      "optimized": true,
+      "originalSize": 51635,
+      "optimizedSize": 46533,
+      "savings": 5102,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "fathering-without-fear-teaser.jpg",
+      "optimized": true,
+      "originalSize": 46253,
+      "optimizedSize": 41780,
+      "savings": 4473,
+      "savingsPercent": "9.7"
+    },
+    {
+      "file": "fathering-without-fear.jpg",
+      "optimized": true,
+      "originalSize": 41275,
+      "optimizedSize": 37688,
+      "savings": 3587,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "fathers-in-family-court-practical-pack-2.jpg",
+      "optimized": true,
+      "originalSize": 51986,
+      "optimizedSize": 46754,
+      "savings": 5232,
+      "savingsPercent": "10.1"
+    },
+    {
+      "file": "fathers-in-family-court-practical-pack.jpg",
+      "optimized": true,
+      "originalSize": 50996,
+      "optimizedSize": 45923,
+      "savings": 5073,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "foo-jpg.jpg",
+      "optimized": true,
+      "originalSize": 30192,
+      "optimizedSize": 28352,
+      "savings": 1840,
+      "savingsPercent": "6.1"
+    },
+    {
+      "file": "foo.jpg",
+      "optimized": true,
+      "originalSize": 26915,
+      "optimizedSize": 25620,
+      "savings": 1295,
+      "savingsPercent": "4.8"
+    },
+    {
+      "file": "household-rhythm-starter-2.jpg",
+      "optimized": true,
+      "originalSize": 44288,
+      "optimizedSize": 40202,
+      "savings": 4086,
+      "savingsPercent": "9.2"
+    },
+    {
+      "file": "household-rhythm-starter-jpg.jpg",
+      "optimized": true,
+      "originalSize": 46344,
+      "optimizedSize": 41940,
+      "savings": 4404,
+      "savingsPercent": "9.5"
+    },
+    {
+      "file": "household-rhythm-starter.jpg",
+      "optimized": true,
+      "originalSize": 43228,
+      "optimizedSize": 39349,
+      "savings": 3879,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "leaders-cue-card-2.jpg",
+      "optimized": true,
+      "originalSize": 38024,
+      "optimizedSize": 34891,
+      "savings": 3133,
+      "savingsPercent": "8.2"
+    },
+    {
+      "file": "leaders-cue-card-a6-two-up.jpg",
+      "optimized": true,
+      "originalSize": 44460,
+      "optimizedSize": 40388,
+      "savings": 4072,
+      "savingsPercent": "9.2"
+    },
+    {
+      "file": "leaders-cue-card-jpg.jpg",
+      "optimized": true,
+      "originalSize": 40363,
+      "optimizedSize": 36853,
+      "savings": 3510,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "leaders-cue-card-two-up-2.jpg",
+      "optimized": true,
+      "originalSize": 43160,
+      "optimizedSize": 39301,
+      "savings": 3859,
+      "savingsPercent": "8.9"
+    },
+    {
+      "file": "leaders-cue-card-two-up.jpg",
+      "optimized": true,
+      "originalSize": 42347,
+      "optimizedSize": 38629,
+      "savings": 3718,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "leaders-cue-card.jpg",
+      "optimized": true,
+      "originalSize": 36878,
+      "optimizedSize": 33951,
+      "savings": 2927,
+      "savingsPercent": "7.9"
+    },
+    {
+      "file": "leadership-playbook-2.jpg",
+      "optimized": true,
+      "originalSize": 40912,
+      "optimizedSize": 37351,
+      "savings": 3561,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "leadership-playbook.jpg",
+      "optimized": true,
+      "originalSize": 153503,
+      "optimizedSize": 111683,
+      "savings": 41820,
+      "savingsPercent": "27.2"
+    },
+    {
+      "file": "mentorship-starter-jpg.jpg",
+      "optimized": true,
+      "originalSize": 41753,
+      "optimizedSize": 37969,
+      "savings": 3784,
+      "savingsPercent": "9.1"
+    },
+    {
+      "file": "mentorship-starter-kit-2.jpg",
+      "optimized": true,
+      "originalSize": 41952,
+      "optimizedSize": 38191,
+      "savings": 3761,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "mentorship-starter-kit-90-day-covenant-2.jpg",
+      "optimized": true,
+      "originalSize": 54040,
+      "optimizedSize": 48568,
+      "savings": 5472,
+      "savingsPercent": "10.1"
+    },
+    {
+      "file": "mentorship-starter-kit-90-day-covenant.jpg",
+      "optimized": true,
+      "originalSize": 53017,
+      "optimizedSize": 47685,
+      "savings": 5332,
+      "savingsPercent": "10.1"
+    },
+    {
+      "file": "mentorship-starter-kit.jpg",
+      "optimized": true,
+      "originalSize": 41022,
+      "optimizedSize": 37450,
+      "savings": 3572,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "mentorship-starter.jpg",
+      "optimized": true,
+      "originalSize": 147538,
+      "optimizedSize": 106655,
+      "savings": 40883,
+      "savingsPercent": "27.7"
+    },
+    {
+      "file": "onepager-template.jpg",
+      "optimized": true,
+      "originalSize": 49558,
+      "optimizedSize": 44503,
+      "savings": 5055,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "operating-pack-jpg.jpg",
+      "optimized": true,
+      "originalSize": 39418,
+      "optimizedSize": 36083,
+      "savings": 3335,
+      "savingsPercent": "8.5"
+    },
+    {
+      "file": "page-tsx.jpg",
+      "optimized": true,
+      "originalSize": 31071,
+      "optimizedSize": 29042,
+      "savings": 2029,
+      "savingsPercent": "6.5"
+    },
+    {
+      "file": "principles-for-my-son-12-standards-2.jpg",
+      "optimized": true,
+      "originalSize": 50525,
+      "optimizedSize": 45418,
+      "savings": 5107,
+      "savingsPercent": "10.1"
+    },
+    {
+      "file": "principles-for-my-son-12-standards.jpg",
+      "optimized": true,
+      "originalSize": 49655,
+      "optimizedSize": 44574,
+      "savings": 5081,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "principles-for-my-son-2.jpg",
+      "optimized": true,
+      "originalSize": 40984,
+      "optimizedSize": 37415,
+      "savings": 3569,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "principles-for-my-son-card-jpg.jpg",
+      "optimized": true,
+      "originalSize": 47182,
+      "optimizedSize": 42573,
+      "savings": 4609,
+      "savingsPercent": "9.8"
+    },
+    {
+      "file": "principles-for-my-son-cue-card-2.jpg",
+      "optimized": true,
+      "originalSize": 47826,
+      "optimizedSize": 43065,
+      "savings": 4761,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "principles-for-my-son-cue-card-jpg.jpg",
+      "optimized": true,
+      "originalSize": 50083,
+      "optimizedSize": 44986,
+      "savings": 5097,
+      "savingsPercent": "10.2"
+    },
+    {
+      "file": "principles-for-my-son-cue-card.jpg",
+      "optimized": true,
+      "originalSize": 47163,
+      "optimizedSize": 42631,
+      "savings": 4532,
+      "savingsPercent": "9.6"
+    },
+    {
+      "file": "principles-for-my-son-jpg.jpg",
+      "optimized": true,
+      "originalSize": 43329,
+      "optimizedSize": 39359,
+      "savings": 3970,
+      "savingsPercent": "9.2"
+    },
+    {
+      "file": "principles-for-my-son.jpg",
+      "optimized": true,
+      "originalSize": 40208,
+      "optimizedSize": 36799,
+      "savings": 3409,
+      "savingsPercent": "8.5"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 2150875,
+      "optimizedSize": 238142,
+      "savings": 1912733,
+      "savingsPercent": "88.9"
+    },
+    {
+      "file": "route-ts.jpg",
+      "optimized": true,
+      "originalSize": 30357,
+      "optimizedSize": 28501,
+      "savings": 1856,
+      "savingsPercent": "6.1"
+    },
+    {
+      "file": "scripture-track-john-14-2.jpg",
+      "optimized": true,
+      "originalSize": 41786,
+      "optimizedSize": 38042,
+      "savings": 3744,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "scripture-track-john-14.jpg",
+      "optimized": true,
+      "originalSize": 40664,
+      "optimizedSize": 37101,
+      "savings": 3563,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "scripture-track-john14-2.jpg",
+      "optimized": true,
+      "originalSize": 41745,
+      "optimizedSize": 37985,
+      "savings": 3760,
+      "savingsPercent": "9.0"
+    },
+    {
+      "file": "scripture-track-john14-jpg.jpg",
+      "optimized": true,
+      "originalSize": 44116,
+      "optimizedSize": 39945,
+      "savings": 4171,
+      "savingsPercent": "9.5"
+    },
+    {
+      "file": "scripture-track-john14.jpg",
+      "optimized": true,
+      "originalSize": 40681,
+      "optimizedSize": 37150,
+      "savings": 3531,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "standards-brief-2.jpg",
+      "optimized": true,
+      "originalSize": 37362,
+      "optimizedSize": 34305,
+      "savings": 3057,
+      "savingsPercent": "8.2"
+    },
+    {
+      "file": "standards-brief-jpg.jpg",
+      "optimized": true,
+      "originalSize": 39648,
+      "optimizedSize": 36265,
+      "savings": 3383,
+      "savingsPercent": "8.5"
+    },
+    {
+      "file": "standards-brief.jpg",
+      "optimized": true,
+      "originalSize": 36304,
+      "optimizedSize": 33482,
+      "savings": 2822,
+      "savingsPercent": "7.8"
+    },
+    {
+      "file": "survival-checklist-jpg.jpg",
+      "optimized": true,
+      "originalSize": 40667,
+      "optimizedSize": 37142,
+      "savings": 3525,
+      "savingsPercent": "8.7"
+    },
+    {
+      "file": "the-fiction-adaptation-onepager.jpg",
+      "optimized": true,
+      "originalSize": 48206,
+      "optimizedSize": 43517,
+      "savings": 4689,
+      "savingsPercent": "9.7"
+    },
+    {
+      "file": "the-leadership-playbook.jpg",
+      "optimized": true,
+      "originalSize": 42583,
+      "optimizedSize": 38830,
+      "savings": 3753,
+      "savingsPercent": "8.8"
+    },
+    {
+      "file": "weekly-operating-rhythm-2.jpg",
+      "optimized": true,
+      "originalSize": 44373,
+      "optimizedSize": 40323,
+      "savings": 4050,
+      "savingsPercent": "9.1"
+    },
+    {
+      "file": "weekly-operating-rhythm-daily-blocks-2.jpg",
+      "optimized": true,
+      "originalSize": 53646,
+      "optimizedSize": 48302,
+      "savings": 5344,
+      "savingsPercent": "10.0"
+    },
+    {
+      "file": "weekly-operating-rhythm-daily-blocks.jpg",
+      "optimized": true,
+      "originalSize": 52693,
+      "optimizedSize": 47466,
+      "savings": 5227,
+      "savingsPercent": "9.9"
+    },
+    {
+      "file": "weekly-operating-rhythm-jpg.jpg",
+      "optimized": true,
+      "originalSize": 46656,
+      "optimizedSize": 42228,
+      "savings": 4428,
+      "savingsPercent": "9.5"
+    },
+    {
+      "file": "weekly-operating-rhythm.jpg",
+      "optimized": true,
+      "originalSize": 59573,
+      "optimizedSize": 38132,
+      "savings": 21441,
+      "savingsPercent": "36.0"
+    },
+    {
+      "file": "endureluxe-ltd.webp",
+      "optimized": true,
+      "originalSize": 4242,
+      "optimizedSize": 4094,
+      "savings": 148,
+      "savingsPercent": "3.5"
+    },
+    {
+      "file": "default.jpg",
+      "optimized": true,
+      "originalSize": 1157949,
+      "optimizedSize": 43330,
+      "savings": 1114619,
+      "savingsPercent": "96.3"
+    },
+    {
+      "file": "founders-salon.jpg",
+      "optimized": true,
+      "originalSize": 2523492,
+      "optimizedSize": 183763,
+      "savings": 2339729,
+      "savingsPercent": "92.7"
+    },
+    {
+      "file": "leadership-workshop.jpg",
+      "optimized": true,
+      "originalSize": 1800324,
+      "optimizedSize": 122388,
+      "savings": 1677936,
+      "savingsPercent": "93.2"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 2123853,
+      "optimizedSize": 214206,
+      "savings": 1909647,
+      "savingsPercent": "89.9"
+    },
+    {
+      "file": "fathering-principles.jpg",
+      "optimized": true,
+      "originalSize": 476216,
+      "optimizedSize": 126243,
+      "savings": 349973,
+      "savingsPercent": "73.5"
+    },
+    {
+      "file": "fathering-without-fear-teaser.jpg",
+      "optimized": true,
+      "originalSize": 2745833,
+      "optimizedSize": 90339,
+      "savings": 2655494,
+      "savingsPercent": "96.7"
+    },
+    {
+      "file": "fathering-without-fear.jpg",
+      "optimized": true,
+      "originalSize": 3143842,
+      "optimizedSize": 119817,
+      "savings": 3024025,
+      "savingsPercent": "96.2"
+    },
+    {
+      "file": "innovatehub-logo-full.jpg",
+      "optimized": true,
+      "originalSize": 35473,
+      "optimizedSize": 29986,
+      "savings": 5487,
+      "savingsPercent": "15.5"
+    },
+    {
+      "file": "entrepreneur-operating-pack.jpg",
+      "optimized": true,
+      "originalSize": 2461833,
+      "optimizedSize": 96134,
+      "savings": 2365699,
+      "savingsPercent": "96.1"
+    },
+    {
+      "file": "fatherhood-standards-card.jpg",
+      "optimized": true,
+      "originalSize": 2141623,
+      "optimizedSize": 211348,
+      "savings": 1930275,
+      "savingsPercent": "90.1"
+    },
+    {
+      "file": "leadership-playbook.jpg",
+      "optimized": true,
+      "originalSize": 2573386,
+      "optimizedSize": 104812,
+      "savings": 2468574,
+      "savingsPercent": "95.9"
+    },
+    {
+      "file": "mentorship-starter-kit.jpg",
+      "optimized": true,
+      "originalSize": 2350655,
+      "optimizedSize": 79645,
+      "savings": 2271010,
+      "savingsPercent": "96.6"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 824254,
+      "optimizedSize": 131982,
+      "savings": 692272,
+      "savingsPercent": "84.0"
+    },
+    {
+      "file": "standards-brief.jpg",
+      "optimized": true,
+      "originalSize": 3277600,
+      "optimizedSize": 120365,
+      "savings": 3157235,
+      "savingsPercent": "96.3"
+    },
+    {
+      "file": "weekly-operating-rhythm.jpg",
+      "optimized": true,
+      "originalSize": 1961698,
+      "optimizedSize": 176075,
+      "savings": 1785623,
+      "savingsPercent": "91.0"
+    },
+    {
+      "file": "profile-portrait.webp",
+      "optimized": true,
+      "originalSize": 46112,
+      "optimizedSize": 31084,
+      "savings": 15028,
+      "savingsPercent": "32.6"
+    },
+    {
+      "file": "purpose-cover.jpg",
+      "optimized": true,
+      "originalSize": 2476945,
+      "optimizedSize": 85198,
+      "savings": 2391747,
+      "savingsPercent": "96.6"
+    },
+    {
+      "file": "brotherhood-starter-kit.jpg",
+      "optimized": true,
+      "originalSize": 253958,
+      "optimizedSize": 302803,
+      "savings": -48845,
+      "savingsPercent": "-19.2"
+    },
+    {
+      "file": "getting-started.jpg",
+      "optimized": true,
+      "originalSize": 253958,
+      "optimizedSize": 302803,
+      "savings": -48845,
+      "savingsPercent": "-19.2"
+    },
+    {
+      "file": "institutional-health-scorecard.jpg",
+      "optimized": true,
+      "originalSize": 253958,
+      "optimizedSize": 302803,
+      "savings": -48845,
+      "savingsPercent": "-19.2"
+    },
+    {
+      "file": "leadership-standards-blueprint.jpg",
+      "optimized": true,
+      "originalSize": 253958,
+      "optimizedSize": 302803,
+      "savings": -48845,
+      "savingsPercent": "-19.2"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 1197348,
+      "optimizedSize": 179393,
+      "savings": 1017955,
+      "savingsPercent": "85.0"
+    },
+    {
+      "file": "cover-instagram.jpg",
+      "optimized": true,
+      "originalSize": 45035,
+      "optimizedSize": 44043,
+      "savings": 992,
+      "savingsPercent": "2.2"
+    },
+    {
+      "file": "cover-linkedin.jpg",
+      "optimized": true,
+      "originalSize": 62434,
+      "optimizedSize": 65910,
+      "savings": -3476,
+      "savingsPercent": "-5.6"
+    },
+    {
+      "file": "cover.jpg",
+      "optimized": true,
+      "originalSize": 69423,
+      "optimizedSize": 76034,
+      "savings": -6611,
+      "savingsPercent": "-9.5"
+    },
+    {
+      "file": "default-cover-1.jpg",
+      "optimized": true,
+      "originalSize": 67222,
+      "optimizedSize": 69641,
+      "savings": -2419,
+      "savingsPercent": "-3.6"
+    },
+    {
+      "file": "default-cover-2.jpg",
+      "optimized": true,
+      "originalSize": 69423,
+      "optimizedSize": 76034,
+      "savings": -6611,
+      "savingsPercent": "-9.5"
+    },
+    {
+      "file": "default-cover-3.jpg",
+      "optimized": true,
+      "originalSize": 73623,
+      "optimizedSize": 54160,
+      "savings": 19463,
+      "savingsPercent": "26.4"
+    },
+    {
+      "file": "default-cover.jpg",
+      "optimized": true,
+      "originalSize": 41812,
+      "optimizedSize": 58047,
+      "savings": -16235,
+      "savingsPercent": "-38.8"
+    },
+    {
+      "file": "default-cover.jpg",
+      "optimized": true,
+      "originalSize": 73623,
+      "optimizedSize": 54160,
+      "savings": 19463,
+      "savingsPercent": "26.4"
+    },
+    {
+      "file": "faith.jpg",
+      "optimized": true,
+      "originalSize": 69423,
+      "optimizedSize": 76034,
+      "savings": -6611,
+      "savingsPercent": "-9.5"
+    },
+    {
+      "file": "gentle.jpg",
+      "optimized": true,
+      "originalSize": 45035,
+      "optimizedSize": 44043,
+      "savings": 992,
+      "savingsPercent": "2.2"
+    },
+    {
+      "file": "hard-truths.jpg",
+      "optimized": true,
+      "originalSize": 73623,
+      "optimizedSize": 54160,
+      "savings": 19463,
+      "savingsPercent": "26.4"
+    },
+    {
+      "file": "inner-life.jpg",
+      "optimized": true,
+      "originalSize": 62434,
+      "optimizedSize": 65910,
+      "savings": -3476,
+      "savingsPercent": "-5.6"
+    },
+    {
+      "file": "outer-life.jpg",
+      "optimized": true,
+      "originalSize": 70526,
+      "optimizedSize": 76034,
+      "savings": -5508,
+      "savingsPercent": "-7.8"
+    },
+    {
+      "file": "purpose.jpg",
+      "optimized": true,
+      "originalSize": 62434,
+      "optimizedSize": 65910,
+      "savings": -3476,
+      "savingsPercent": "-5.6"
+    },
+    {
+      "file": "relationships.jpg",
+      "optimized": true,
+      "originalSize": 67222,
+      "optimizedSize": 69641,
+      "savings": -2419,
+      "savingsPercent": "-3.6"
+    },
+    {
+      "file": "og-image.jpg",
+      "optimized": true,
+      "originalSize": 19436,
+      "optimizedSize": 19464,
+      "savings": -28,
+      "savingsPercent": "-0.1"
+    },
+    {
+      "file": "twitter-image.jpg",
+      "optimized": true,
+      "originalSize": 37507,
+      "optimizedSize": 26533,
+      "savings": 10974,
+      "savingsPercent": "29.3"
+    },
+    {
+      "file": "twitter-image.webp",
+      "optimized": true,
+      "originalSize": 92792,
+      "optimizedSize": 94674,
+      "savings": -1882,
+      "savingsPercent": "-2.0"
+    },
+    {
+      "file": "replace.jpg",
+      "optimized": true,
+      "originalSize": 2683626,
+      "optimizedSize": 353176,
+      "savings": 2330450,
+      "savingsPercent": "86.8"
+    },
+    {
+      "file": "writing-desk.webp",
+      "optimized": true,
+      "originalSize": 253958,
+      "optimizedSize": 255870,
+      "savings": -1912,
+      "savingsPercent": "-0.8"
+    }
+  ]
+}
