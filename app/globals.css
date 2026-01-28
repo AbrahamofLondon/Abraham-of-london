@@ -1,62 +1,65 @@
-/* app/globals.css - Production ready, minimal, precise */
+/* app/globals.css — Tailwind v4 + next/font (NO @fontsource imports) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-
 /* ==================== CSS VARIABLES ==================== */
 :root {
-  /* Colors */
   --color-background: 255 255 255;
   --color-on-background: 10 10 10;
   --color-surface: 250 250 250;
-  --color-primary: 245 158 11;    /* amber-500 */
-  --color-secondary: 59 130 246;  /* blue-500 */
-  --color-error: 239 68 68;       /* red-500 */
-  
-  /* UI */
+  --color-primary: 245 158 11;   /* amber-500 */
+  --color-secondary: 59 130 246; /* blue-500 */
+  --color-error: 239 68 68;      /* red-500 */
+
   --ui-alpha-border: 0 0 0 / 0.1;
-  
-  /* Brand */
+
   --brand-soft-gold: 226 197 120;
   --brand-deep-charcoal: 28 28 30;
-  
-  /* Typography */
+
   --font-base-size: 16px;
+
+  /* semantic font tokens (populated by next/font via html className variables) */
+  --font-family-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --font-family-serif: var(--font-aol-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --font-editorial: var(--font-editorial), var(--font-family-serif);
 }
 
 .dark {
   --color-background: 10 10 10;
   --color-on-background: 250 250 250;
   --color-surface: 28 28 30;
-  --color-primary: 251 191 36;    /* amber-400 */
-  --color-secondary: 96 165 250;  /* blue-400 */
-  --color-error: 248 113 113;     /* red-400 */
+  --color-primary: 251 191 36;   /* amber-400 */
+  --color-secondary: 96 165 250; /* blue-400 */
+  --color-error: 248 113 113;    /* red-400 */
   --ui-alpha-border: 255 255 255 / 0.1;
 }
 
-/* ==================== BASE STYLES ==================== */
+/* ==================== BASE ==================== */
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
   }
 
   html {
     font-size: var(--font-base-size);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-family-sans);
     color: rgb(var(--color-on-background));
     background-color: rgb(var(--color-background));
-    min-height: 100vh;
   }
 
   a {
@@ -68,23 +71,30 @@
     color: rgb(var(--color-primary));
   }
 
-  button {
+  button,
+  input,
+  textarea,
+  select {
     font-family: inherit;
+  }
+
+  button {
     cursor: pointer;
   }
 
   button:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.55;
   }
 
   input,
   textarea,
   select {
-    font-family: inherit;
     border: 1px solid rgb(var(--ui-alpha-border));
     border-radius: 0.375rem;
     padding: 0.75rem;
+    background: transparent;
+    color: inherit;
   }
 
   input:focus,
@@ -94,7 +104,8 @@
     outline-offset: 2px;
   }
 
-  img {
+  img,
+  video {
     max-width: 100%;
     height: auto;
   }
@@ -104,92 +115,8 @@
   }
 }
 
-/* ==================== UTILITY COMPONENTS ==================== */
-@layer components {
-  /* Layout containers */
-  .section {
-    padding: 3rem 1rem;
-  }
-
-  .container-custom {
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 1rem;
-    max-width: 1536px;
-  }
-
-  /* Cards - minimal set */
-  .card {
-    background-color: rgb(var(--color-surface));
-    border-radius: 1rem;
-    border: 1px solid rgb(var(--ui-alpha-border));
-    padding: 1.5rem;
-  }
-
-  /* Buttons - essential only */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-weight: 500;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    border: none;
-    transition: all 150ms;
-  }
-
-  .btn-primary {
-    background-color: rgb(var(--color-primary));
-    color: rgb(var(--color-on-background));
-  }
-
-  .btn-primary:hover {
-    background-color: rgb(var(--color-primary) / 0.9);
-    transform: translateY(-1px);
-  }
-
-  .btn-outline {
-    background-color: transparent;
-    border: 1px solid rgb(var(--ui-alpha-border));
-  }
-
-  .btn-outline:hover {
-    border-color: rgb(var(--color-primary));
-  }
-
-  /* Form elements */
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .input-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-
-  /* Badges */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border-radius: 9999px;
-    white-space: nowrap;
-  }
-
-  .badge-primary {
-    background-color: rgb(var(--color-primary) / 0.1);
-    color: rgb(var(--color-primary));
-  }
-}
-
-/* ==================== UTILITIES ==================== */
+/* ==================== UTILITIES (small, safe set) ==================== */
 @layer utilities {
-  /* Text truncation */
   .truncate-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -204,7 +131,6 @@
     overflow: hidden;
   }
 
-  /* Aspect ratios */
   .aspect-book {
     aspect-ratio: 3/4;
   }
@@ -213,7 +139,6 @@
     aspect-ratio: 16/9;
   }
 
-  /* Glass effect */
   .glass {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -224,56 +149,34 @@
     background-color: rgb(0 0 0 / 0.2);
   }
 
-  /* Animations */
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-
-  /* Focus states */
-  .focus-ring {
-    outline: 2px solid rgb(var(--color-primary));
-    outline-offset: 2px;
-  }
-
-  /* Smooth transitions */
   .transition-smooth {
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
 /* ==================== OVERRIDES & FIXES ==================== */
-/* Fix for Next.js image wrapper */
 span[style*="display: block"] > img {
   width: 100% !important;
   height: auto !important;
 }
 
-/* Print styles */
 @media print {
   .no-print {
     display: none !important;
   }
-  
   body {
     color: #000;
     background: #fff;
   }
 }
 
-/* High contrast mode */
 @media (prefers-contrast: high) {
   :root {
-    --color-primary: 217 119 6;   /* amber-600 */
-    --color-secondary: 37 99 235; /* blue-600 */
+    --color-primary: 217 119 6;
+    --color-secondary: 37 99 235;
   }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -281,5 +184,6 @@ span[style*="display: block"] > img {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

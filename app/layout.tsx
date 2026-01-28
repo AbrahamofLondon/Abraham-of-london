@@ -1,19 +1,13 @@
-// app/layout.tsx
+// app/layout.tsx — Production hardened, single-source fonts, GA safe
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Inter } from "next/font/google";
 
 import "./globals.css";
-
 import Navigation from "@/components/Navigation.app";
 import Footer from "@/components/Footer";
 import { Providers } from "./providers";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-family-sans",
-});
+import { fontVariables, fontBodyClass } from "@/lib/next-fonts";
 
 export const metadata: Metadata = {
   title: "Abraham of London - Strategic Consulting & Leadership Development",
@@ -21,12 +15,12 @@ export const metadata: Metadata = {
     "Premium strategic consulting, leadership development frameworks, and executive coaching from Abraham of London.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
 
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-white`}>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
+      <body className={`${fontBodyClass} min-h-screen`}>
         {GA_ID ? (
           <>
             <Script
@@ -45,9 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : null}
 
         <Providers>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-screen flex-col bg-background text-foreground">
             <Navigation />
-            <main className="flex-grow">{children}</main>
+            <main className="flex-1">{children}</main>
             <Footer />
           </div>
         </Providers>

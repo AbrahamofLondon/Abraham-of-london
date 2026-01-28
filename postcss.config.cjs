@@ -1,11 +1,7 @@
-// postcss.config.cjs — NEXT 16 COMPLIANT (NO FUNCTION PLUGINS)
-
+// postcss.config.cjs — Tailwind v4 compatible (Next.js)
 module.exports = {
   plugins: {
-    // Tailwind v4:
     "@tailwindcss/postcss": {},
-
-    // Autoprefixer:
     autoprefixer: {},
   },
 };

@@ -1,95 +1,141 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "es2022"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022"
+    ],
     "allowJs": true,
-
     "strict": true,
     "noEmit": true,
-
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "jsxImportSource": "react",
-
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
-
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
-
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-
     "exactOptionalPropertyTypes": false,
-
     "sourceMap": true,
     "inlineSources": false,
     "removeComments": true,
     "preserveConstEnums": true,
-
-    "typeRoots": ["./node_modules/@types", "./types"],
-    "types": ["node", "react", "react-dom", "next"],
-
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ],
+    "types": [
+      "node",
+      "react",
+      "react-dom",
+      "next"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/styles/*": ["./styles/*"],
-      "@/components/*": ["./components/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/fonts/*": ["./fonts/*"],
-      "@/hooks/*": ["./hooks/*"],
-
-      "@/lib/redis": ["./lib/redis.ts"],
-      "@/lib/redis/*": ["./lib/redis/*"],
-      "@/lib/redis-enhanced": ["./lib/redis-enhanced.ts"],
-
-      "@/lib/db": ["./lib/db.ts"],
-      "@/lib/contentlayer-compat": ["./lib/contentlayer-compat.ts"],
-      "@/lib/contentlayer/status": ["./lib/contentlayer/status.ts"],
-      "contentlayer/generated": ["./lib/contentlayer-compat.ts"],
-
-      "@/lib/server/rate-limit-unified": ["./lib/server/rate-limit-unified.ts"],
-      "@/lib/server/inner-circle-access": ["./lib/server/inner-circle-access.ts"],
-      "@/lib/server/inner-circle-store": ["./lib/server/inner-circle-store.ts"],
-      "@/lib/server/with-inner-circle-access": ["./lib/server/with-inner-circle-access.ts"],
-
-      "@/lib/rate-limit": ["./lib/rate-limit.ts"],
-      "@/lib/inner-circle/access": ["./lib/inner-circle/access.ts"],
-      "@/lib/premium/download-token": ["./lib/premium/download-token.ts"],
-      "@/lib/next-fonts": ["./lib/next-fonts.ts"],
-
-      "@prisma/client": ["./.prisma/client"],
-      
+      "@/*": [
+        "./*"
+      ],
+      "@/styles/*": [
+        "./styles/*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
+      "@/fonts/*": [
+        "./fonts/*"
+      ],
+      "@/hooks/*": [
+        "./hooks/*"
+      ],
+      "@/lib/redis": [
+        "./lib/redis.ts"
+      ],
+      "@/lib/redis/*": [
+        "./lib/redis/*"
+      ],
+      "@/lib/redis-enhanced": [
+        "./lib/redis-enhanced.ts"
+      ],
+      "@/lib/db": [
+        "./lib/db.ts"
+      ],
+      "@/lib/contentlayer-compat": [
+        "./lib/contentlayer-compat.ts"
+      ],
+      "@/lib/contentlayer/status": [
+        "./lib/contentlayer/status.ts"
+      ],
+      "contentlayer/generated": [
+        "./lib/contentlayer-compat.ts"
+      ],
+      "@/lib/server/rate-limit-unified": [
+        "./lib/server/rate-limit-unified.ts"
+      ],
+      "@/lib/server/inner-circle-access": [
+        "./lib/server/inner-circle-access.ts"
+      ],
+      "@/lib/server/inner-circle-store": [
+        "./lib/server/inner-circle-store.ts"
+      ],
+      "@/lib/server/with-inner-circle-access": [
+        "./lib/server/with-inner-circle-access.ts"
+      ],
+      "@/lib/rate-limit": [
+        "./lib/rate-limit.ts"
+      ],
+      "@/lib/inner-circle/access": [
+        "./lib/inner-circle/access.ts"
+      ],
+      "@/lib/premium/download-token": [
+        "./lib/premium/download-token.ts"
+      ],
+      "@/lib/next-fonts": [
+        "./lib/next-fonts.ts"
+      ],
+      "@prisma/client": [
+        "./.prisma/client"
+      ],
       // React type helpers
-      "react": ["./node_modules/@types/react"],
-      "react-dom": ["./node_modules/@types/react-dom"]
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "react-dom": [
+        "./node_modules/@types/react-dom"
+      ]
     },
-
-    "plugins": [{ "name": "next" }]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-
   "ts-node": {
     "transpileOnly": true,
-    "compilerOptions": { "module": "commonjs" }
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   },
-
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
-  
   "exclude": [
     "node_modules",
     ".next",

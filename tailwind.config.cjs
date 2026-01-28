@@ -1,21 +1,16 @@
-// tailwind.config.cjs — PRODUCTION CLEAN, CONTENT-AWARE, FONT-VAR FIRST
+// tailwind.config.cjs — Production clean, content-aware, font-var first
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
 
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
   ],
-
-  // Uncomment ONLY if you generate class names dynamically in code:
-  // safelist: [
-  //   { pattern: /(bg|text|border)-(primary|secondary|accent|success|error)(\/\d+)?/ },
-  // ],
 
   theme: {
     container: {
@@ -38,12 +33,15 @@ module.exports = {
     extend: {
       colors: {
         background: "rgb(var(--color-background, 3 7 18) / <alpha-value>)",
-        foreground: "rgb(var(--color-on-background, 249 250 251) / <alpha-value>)",
+        foreground:
+          "rgb(var(--color-on-background, 249 250 251) / <alpha-value>)",
         surface: "rgb(var(--color-surface, 17 24 39) / <alpha-value>)",
 
         primary: {
           DEFAULT: "rgb(var(--color-primary, 245 158 11) / <alpha-value>)",
-          light: "rgb(var(--color-primary-light, 251 191 36) / <alpha-value>)",
+          light:
+            "rgb(var(--color-primary-light, 251 191 36) / <alpha-value>)",
+
           50: "#fffbeb",
           100: "#fef3c7",
           200: "#fde68a",
@@ -64,10 +62,20 @@ module.exports = {
       },
 
       fontFamily: {
-        sans: ["var(--font-family-sans)", "Inter", "system-ui", "-apple-system", "sans-serif"],
-        mono: ["var(--font-family-mono)", "JetBrains Mono", "Fira Code", "monospace"],
-        serif: ["var(--font-family-serif)", "Georgia", "Times New Roman", "serif"],
-        editorial: ["var(--font-editorial)", "var(--font-family-serif)", "Georgia", "serif"],
+        sans: [
+          "var(--font-family-sans)",
+          "system-ui",
+          "-apple-system",
+          "sans-serif",
+        ],
+        mono: ["var(--font-family-mono)", "ui-monospace", "monospace"],
+        serif: ["var(--font-family-serif)", "ui-serif", "serif"],
+        editorial: [
+          "var(--font-editorial)",
+          "var(--font-family-serif)",
+          "ui-serif",
+          "serif",
+        ],
       },
 
       fontSize: {
@@ -88,8 +96,10 @@ module.exports = {
       },
 
       boxShadow: {
-        soft: "0 2px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-        elevation: "0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+        soft:
+          "0 2px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        elevation:
+          "0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
         "inner-strong": "inset 0 2px 4px 0 rgb(0 0 0 / 0.15)",
         "gold-glow": "0 0 25px rgba(245, 158, 11, 0.25)",
         "gold-glow-strong": "0 0 40px rgba(245, 158, 11, 0.4)",

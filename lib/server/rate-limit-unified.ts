@@ -1,10 +1,8 @@
-// lib/server/rate-limit-unified.ts - EDGE RUNTIME COMPATIBLE
+// lib/server/rate-limit-unified.ts — PRODUCTION HARDENED, EDGE-SAFE, NO @vercel/kv
 import type { NextApiRequest } from "next";
 import type { NextRequest } from "next/server";
 
-// ==================== TYPES ====================
-
-export type RateLimitOptions = {
+type RateLimitOptions = {
   limit: number;
   windowMs: number;
   keyPrefix?: string;
@@ -15,11 +13,10 @@ export type RateLimitResult = {
   remaining: number;
   limit: number;
   retryAfterMs: number;
-  resetTime: number;
+  resetTime: number; // epoch ms
   windowMs: number;
+  source: "upstash" | "memory";
 };
-
-// ==================== CONFIGS ====================
 
 export const RATE_LIMIT_CONFIGS: Record<string, RateLimitOptions> = {
   API_STRICT: { limit: 30, windowMs: 60_000, keyPrefix: "api-strict" },
@@ -37,284 +34,178 @@ export const RATE_LIMIT_CONFIGS: Record<string, RateLimitOptions> = {
   ADMIN: { limit: 100, windowMs: 60_000, keyPrefix: "admin" },
 };
 
-// ==================== RUNTIME DETECTION (EDGE-SAFE) ====================
+// ─────────────────────────────────────────────────────────────────────────────
+// Runtime & env (Edge-safe)
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Edge runtime detection - safe for top-level
-const isEdgeRuntime = 
-  typeof EdgeRuntime !== 'undefined' || 
-  typeof caches !== 'undefined' ||
-  (typeof globalThis !== 'undefined' && 'caches' in globalThis);
-
-// Node runtime detection - wrapped in function to avoid top-level process.versions
-function isNodeRuntime(): boolean {
+function getEnv(name: string): string | undefined {
   try {
-    // Check for Node.js without touching process.versions at module top-level
-    return typeof process !== 'undefined' && 
-           typeof process.release === 'object' && 
-           process.release.name === 'node';
-  } catch {
-    return false;
-  }
-}
-
-// ==================== ENVIRONMENT DETECTION ====================
-
-function getEnvVar(name: string): string | undefined {
-  try {
-    return typeof process !== 'undefined' && process.env ? process.env[name] : undefined;
+    // don’t touch process at module top-level beyond a guarded read
+    return typeof process !== "undefined" && process.env ? process.env[name] : undefined;
   } catch {
     return undefined;
   }
 }
 
-function getEnvVars(): { 
-  kvUrl?: string; 
-  kvToken?: string; 
-  upstashUrl?: string; 
-  upstashToken?: string;
-  redisUrl?: string;
-} {
-  try {
-    return {
-      kvUrl: getEnvVar('KV_REST_API_URL'),
-      kvToken: getEnvVar('KV_REST_API_TOKEN'),
-      upstashUrl: getEnvVar('UPSTASH_REDIS_REST_URL'),
-      upstashToken: getEnvVar('UPSTASH_REDIS_REST_TOKEN'),
-      redisUrl: getEnvVar('REDIS_URL'),
-    };
-  } catch {
-    return {};
-  }
+function getUpstashEnv(): { url?: string; token?: string } {
+  // Standard Upstash REST vars
+  const url = getEnv("UPSTASH_REDIS_REST_URL");
+  const token = getEnv("UPSTASH_REDIS_REST_TOKEN");
+  return { url, token };
 }
 
-// ==================== STORAGE LAYER ====================
+// ─────────────────────────────────────────────────────────────────────────────
+// Storage: Upstash Ratelimit (preferred) + Memory fallback
+// ─────────────────────────────────────────────────────────────────────────────
 
 type StoreRecord = { count: number; resetTime: number };
 
-// Memory store (works in both Node and Edge)
+// Memory store fallback (works everywhere; not multi-instance safe)
 const memoryStore = new Map<string, StoreRecord>();
 
-function makeStoreKey(identifier: string, options: RateLimitOptions): string {
-  return `${options.keyPrefix ?? "rl"}:${identifier}`;
+function makeKey(identifier: string, options: RateLimitOptions): string {
+  const prefix = options.keyPrefix ?? "rl";
+  return `${prefix}:${identifier}`;
 }
 
-// ✅ EDGE-SAFE: Upstash Redis REST client (works in Edge Runtime)
-let upstashRedis: any = null;
+// Lazily created Upstash rate limiter (Edge-safe)
+let upstashLimiterPromise:
+  | Promise<{
+      limiter: any;
+      windowMs: number;
+    } | null>
+  | null = null;
 
-async function getUpstashRedis(): Promise<any | null> {
-  if (upstashRedis !== null) return upstashRedis;
+async function getUpstashLimiter(windowMs: number, limit: number, prefix?: string) {
+  const { url, token } = getUpstashEnv();
+  if (!url || !token) return null;
 
-  const envVars = getEnvVars();
-  const url = envVars.upstashUrl;
-  const token = envVars.upstashToken;
-
-  if (!url || !token) {
-    upstashRedis = false; // Mark as unavailable
-    return null;
-  }
-
+  // Cache per-process (good enough for serverless runtime reuse)
+  // but window/limit differ per call, so we build per-call limiter.
   try {
-    // Dynamic import of Upstash Redis (Edge-compatible)
-    const { Redis } = await import('@upstash/redis');
-    upstashRedis = new Redis({
-      url,
-      token,
+    const [{ Redis }, { Ratelimit }] = await Promise.all([
+      import("@upstash/redis"),
+      import("@upstash/ratelimit"),
+    ]);
+
+    const redis = new Redis({ url, token });
+
+    // Sliding window behaves well for UX
+    const limiter = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(limit, `${Math.max(1, Math.ceil(windowMs / 1000))} s`),
+      prefix: prefix ?? "aol",
+      analytics: false,
+      ephemeralCache: false,
     });
-    return upstashRedis;
-  } catch (error) {
-    console.warn('[Rate Limit] Upstash Redis not available, using memory store');
-    upstashRedis = false;
+
+    return { limiter };
+  } catch {
     return null;
   }
 }
 
-// ✅ EDGE-SAFE: KV storage using Vercel KV or Upstash
-async function getKVStore(): Promise<any | null> {
-  try {
-    const envVars = getEnvVars();
-    
-    // Try Vercel KV first (if available)
-    if (envVars.kvUrl && envVars.kvToken) {
-      const { kv } = await import('@vercel/kv');
-      return kv;
-    }
-  } catch {
-    // Vercel KV not available
-  }
-
-  // Fall back to Upstash
-  return getUpstashRedis();
-}
-
-async function getRecord(key: string): Promise<StoreRecord | null> {
-  // Try KV store first (Edge-compatible)
-  if (isEdgeRuntime) {
-    try {
-      const kv = await getKVStore();
-      if (kv?.get) {
-        const data = await kv.get(key);
-        if (data && typeof data === 'object') {
-          return data as StoreRecord;
-        }
-      }
-    } catch {
-      // Fall back to memory
-    }
-  }
-
-  // Node runtime: try ioredis (only if not in Edge)
-  if (isNodeRuntime() && !isEdgeRuntime) {
-    try {
-      const envVars = getEnvVars();
-      if (!envVars.redisUrl) return memoryStore.get(key) ?? null;
-      
-      // Dynamic import to prevent Edge runtime errors
-      const redisModule = await import('@/lib/redis');
-      const redis = typeof redisModule.getRedis === 'function' ? redisModule.getRedis() : null;
-      
-      if (redis?.get) {
-        const raw = await redis.get(key);
-        if (raw) {
-          return JSON.parse(raw) as StoreRecord;
-        }
-      }
-    } catch {
-      // Redis not available or failed
-    }
-  }
-
-  // Fall back to memory store
-  return memoryStore.get(key) ?? null;
-}
-
-async function setRecord(key: string, data: StoreRecord, windowMs: number): Promise<void> {
-  // Try KV store first (Edge-compatible)
-  if (isEdgeRuntime) {
-    try {
-      const kv = await getKVStore();
-      if (kv?.set) {
-        const ttlSeconds = Math.ceil(windowMs / 1000);
-        await kv.set(key, data, { ex: ttlSeconds });
-      }
-    } catch {
-      // Fall back to memory
-    }
-  }
-
-  // Node runtime: try ioredis (only if not in Edge)
-  if (isNodeRuntime() && !isEdgeRuntime) {
-    try {
-      const envVars = getEnvVars();
-      if (envVars.redisUrl) {
-        const redisModule = await import('@/lib/redis');
-        const redis = typeof redisModule.getRedis === 'function' ? redisModule.getRedis() : null;
-        
-        if (redis?.set) {
-          const seconds = Math.ceil(windowMs / 1000);
-          await redis.set(key, JSON.stringify(data), "EX", seconds);
-        }
-      }
-    } catch {
-      // Redis not available
-    }
-  }
-
-  // Always update memory store as fallback
-  memoryStore.set(key, data);
-  
-  // Clean up after TTL (memory only)
-  setTimeout(() => memoryStore.delete(key), windowMs);
-}
-
-async function deleteRecord(key: string): Promise<void> {
-  // Try KV store first (Edge-compatible)
-  if (isEdgeRuntime) {
-    try {
-      const kv = await getKVStore();
-      if (kv?.del) {
-        await kv.del(key);
-      }
-    } catch {
-      // Ignore
-    }
-  }
-
-  // Node runtime: try ioredis (only if not in Edge)
-  if (isNodeRuntime() && !isEdgeRuntime) {
-    try {
-      const envVars = getEnvVars();
-      if (envVars.redisUrl) {
-        const redisModule = await import('@/lib/redis');
-        const redis = typeof redisModule.getRedis === 'function' ? redisModule.getRedis() : null;
-        
-        if (redis?.del) {
-          await redis.del(key);
-        }
-      }
-    } catch {
-      // Ignore
-    }
-  }
-
-  // Always clean memory store
-  memoryStore.delete(key);
-}
-
-// ==================== CORE RATE LIMITING ====================
-
-export async function rateLimit(
-  identifier: string,
-  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
-): Promise<RateLimitResult> {
+async function memoryRateLimit(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
   const now = Date.now();
-  const key = makeStoreKey(identifier, options);
-  const existing = await getRecord(key);
+  const existing = memoryStore.get(key);
 
   if (existing && now < existing.resetTime) {
     const nextCount = existing.count + 1;
-    const updated: StoreRecord = { count: nextCount, resetTime: existing.resetTime };
-    await setRecord(key, updated, options.windowMs);
+    const resetTime = existing.resetTime;
+    memoryStore.set(key, { count: nextCount, resetTime });
 
     const remaining = Math.max(0, options.limit - nextCount);
     const allowed = nextCount <= options.limit;
-    const retryAfterMs = allowed ? 0 : Math.max(0, existing.resetTime - now);
+    const retryAfterMs = allowed ? 0 : Math.max(0, resetTime - now);
 
     return {
       allowed,
       remaining,
       limit: options.limit,
       retryAfterMs,
-      resetTime: existing.resetTime,
+      resetTime,
       windowMs: options.windowMs,
+      source: "memory",
     };
   }
 
-  const newData: StoreRecord = { count: 1, resetTime: now + options.windowMs };
-  await setRecord(key, newData, options.windowMs);
+  const resetTime = now + options.windowMs;
+  memoryStore.set(key, { count: 1, resetTime });
 
   return {
     allowed: true,
     remaining: Math.max(0, options.limit - 1),
     limit: options.limit,
     retryAfterMs: 0,
-    resetTime: newData.resetTime,
+    resetTime,
     windowMs: options.windowMs,
+    source: "memory",
   };
 }
 
-// ==================== IP EXTRACTION (EDGE-COMPATIBLE) ====================
+// ─────────────────────────────────────────────────────────────────────────────
+// Public API
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function rateLimit(
+  identifier: string,
+  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
+): Promise<RateLimitResult> {
+  const key = makeKey(identifier, options);
+
+  // 1) Try Upstash if configured
+  const upstash = await getUpstashLimiter(options.windowMs, options.limit, options.keyPrefix);
+  if (upstash?.limiter) {
+    try {
+      const r = await upstash.limiter.limit(key);
+
+      // Upstash returns reset as ms timestamp in newer libs; be defensive.
+      const resetTime =
+        typeof r.reset === "number"
+          ? r.reset
+          : typeof r.resetTime === "number"
+          ? r.resetTime
+          : Date.now() + options.windowMs;
+
+      const remaining =
+        typeof r.remaining === "number" ? Math.max(0, r.remaining) : 0;
+
+      const allowed = Boolean(r.success);
+
+      const retryAfterMs = allowed ? 0 : Math.max(0, resetTime - Date.now());
+
+      return {
+        allowed,
+        remaining,
+        limit: options.limit,
+        retryAfterMs,
+        resetTime,
+        windowMs: options.windowMs,
+        source: "upstash",
+      };
+    } catch {
+      // fall through to memory
+    }
+  }
+
+  // 2) Memory fallback
+  return memoryRateLimit(key, options);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IP extraction (Edge + Node)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function firstNonEmpty(v: unknown): string | null {
-  if (typeof v === "string") {
-    const s = v.trim();
-    return s ? s : null;
-  }
-  return null;
+  if (typeof v !== "string") return null;
+  const s = v.trim();
+  return s ? s : null;
 }
 
 export function getClientIp(req: NextApiRequest | NextRequest): string {
-  // ✅ EDGE-SAFE: NextRequest / Edge style headers.get()
   const maybeHeaders = (req as any)?.headers;
+
+  // Edge style: headers.get()
   if (maybeHeaders && typeof maybeHeaders.get === "function") {
     const h = maybeHeaders as { get: (k: string) => string | null };
 
@@ -330,20 +221,22 @@ export function getClientIp(req: NextApiRequest | NextRequest): string {
     );
   }
 
-  // Node.js API Routes style
+  // Node API routes: req.headers object
   const apiReq = req as NextApiRequest;
   const fwd = apiReq.headers?.["x-forwarded-for"];
   if (typeof fwd === "string" && fwd.trim()) return fwd.split(",")[0]?.trim() || "unknown";
-  if (Array.isArray(fwd) && fwd.length > 0) return (fwd[0] ?? "").trim() || "unknown";
+  if (Array.isArray(fwd) && fwd.length) return (fwd[0] ?? "").trim() || "unknown";
 
   const real = apiReq.headers?.["x-real-ip"];
   if (typeof real === "string" && real.trim()) return real.trim();
-  if (Array.isArray(real) && real.length > 0) return (real[0] ?? "").trim() || "unknown";
+  if (Array.isArray(real) && real.length) return (real[0] ?? "").trim() || "unknown";
 
   return apiReq.socket?.remoteAddress?.trim() || "unknown";
 }
 
-// ==================== HEADERS ====================
+// ─────────────────────────────────────────────────────────────────────────────
+// Headers + middleware wrappers
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
   const headers: Record<string, string> = {
@@ -356,8 +249,6 @@ export function createRateLimitHeaders(result: RateLimitResult): Record<string, 
   }
   return headers;
 }
-
-// ==================== MIDDLEWARE WRAPPERS ====================
 
 export function withApiRateLimit(
   handler: (req: NextApiRequest, res: any) => Promise<void> | void,
@@ -413,87 +304,25 @@ export function withEdgeRateLimit(
 // Single alias (no duplicates)
 export const withRateLimit = withApiRateLimit;
 
-// ==================== ADMIN / DEBUG ====================
+// ─────────────────────────────────────────────────────────────────────────────
+// Debug helpers
+// ─────────────────────────────────────────────────────────────────────────────
 
 export async function getRateLimiterStats(): Promise<{
   memoryStoreSize: number;
-  usingRedis: boolean;
-  runtime: 'edge' | 'node' | 'unknown';
+  upstashConfigured: boolean;
 }> {
-  let usingRedis = false;
-  const runtime = isEdgeRuntime ? 'edge' : isNodeRuntime() ? 'node' : 'unknown';
-
-  if (isEdgeRuntime) {
-    try {
-      const kv = await getKVStore();
-      if (kv) {
-        usingRedis = true;
-      }
-    } catch {
-      usingRedis = false;
-    }
-  } else if (isNodeRuntime()) {
-    try {
-      const envVars = getEnvVars();
-      if (envVars.redisUrl) {
-        const redisModule = await import('@/lib/redis');
-        const redis = typeof redisModule.getRedis === 'function' ? redisModule.getRedis() : null;
-        if (redis?.ping) {
-          await redis.ping();
-          usingRedis = true;
-        }
-      }
-    } catch {
-      usingRedis = false;
-    }
-  }
-
+  const { url, token } = getUpstashEnv();
   return {
     memoryStoreSize: memoryStore.size,
-    usingRedis,
-    runtime,
+    upstashConfigured: Boolean(url && token),
   };
 }
 
 export async function resetRateLimit(keyPrefix: string): Promise<void> {
-  // Edge runtime
-  if (isEdgeRuntime) {
-    try {
-      const kv = await getKVStore();
-      if (kv?.keys) {
-        const keys = await kv.keys(`${keyPrefix}*`);
-        if (keys.length > 0) {
-          await Promise.all(keys.map((k: string) => kv.del(k)));
-        }
-      }
-    } catch {
-      // Ignore
-    }
-  }
-
-  // Node runtime
-  if (isNodeRuntime() && !isEdgeRuntime) {
-    try {
-      const envVars = getEnvVars();
-      if (envVars.redisUrl) {
-        const redisModule = await import('@/lib/redis');
-        const redis = typeof redisModule.getRedis === 'function' ? redisModule.getRedis() : null;
-        
-        if (redis?.keys && redis?.del) {
-          const keys: string[] = await redis.keys(`${keyPrefix}*`);
-          if (keys.length) {
-            await redis.del(...keys);
-          }
-        }
-      }
-    } catch {
-      // Ignore
-    }
-  }
-
-  // Clean memory store
+  // Memory only reset: clear matching keys
   for (const k of memoryStore.keys()) {
-    if (k.startsWith(keyPrefix)) memoryStore.delete(k);
+    if (k.startsWith(`${keyPrefix}:`)) memoryStore.delete(k);
   }
 }
 
@@ -501,8 +330,7 @@ export async function unblock(
   identifier: string,
   options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
 ): Promise<void> {
-  const key = makeStoreKey(identifier, options);
-  await deleteRecord(key);
+  memoryStore.delete(makeKey(identifier, options));
 }
 
 export async function isRateLimited(
@@ -512,8 +340,6 @@ export async function isRateLimited(
   const r = await rateLimit(identifier, options);
   return !r.allowed;
 }
-
-// ==================== DEFAULT EXPORT ====================
 
 const rateLimitModule = {
   rateLimit,
