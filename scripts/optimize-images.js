@@ -113,7 +113,22 @@ async function optimizeImageWithSharp(sourcePath, outputPath, config) {
   const fileName = path.basename(sourcePath);
   
   try {
-    const sharp = (await import('sharp')).default;
+    // ✅ Correct Sharp import handling for ESM/CJS
+    let sharpMod;
+    try {
+      sharpMod = await import('sharp');
+    } catch (importErr) {
+      logger.error(`Failed to import Sharp: ${importErr.message}`);
+      return { optimized: false, reason: 'sharp_import_failed', originalSize: 0 };
+    }
+    
+    const sharp = sharpMod.default ?? sharpMod; // Handles both ESM and CJS
+    
+    if (typeof sharp !== 'function') {
+      logger.error(`Sharp is not a function (got ${typeof sharp})`);
+      return { optimized: false, reason: 'sharp_not_function', originalSize: 0 };
+    }
+    
     const stats = await getFileStats(sourcePath);
     
     if (!stats || stats.size > config.maxFileSize) {

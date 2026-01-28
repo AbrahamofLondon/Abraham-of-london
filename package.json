@@ -13,7 +13,7 @@
     "build:fast": "cross-env TURBOPACK_DISABLED=false next build",
     "build:netlify": "pnpm install --frozen-lockfile && pnpm prebuild && pnpm build",
     "build:pdfs": "pnpm pdf:generate -- --tier=architect --quality=premium",
-    "prebuild": "pnpm contentlayer && pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm content:full && pnpm assets:optimize && pnpm security:scan && pnpm check:unsafe-strings",
+    "prebuild": "pnpm contentlayer && pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm content:full && node scripts/prebuild-ci-gate.js",
     "postbuild": "pnpm sitemap:generate && pnpm pdf:validate && pnpm test:unit",
     "start": "next start",
     "preview": "next start --port 3001",
