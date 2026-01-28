@@ -5,6 +5,9 @@
   publish = ".next"
   functions = "netlify/functions"
 
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 [build.environment]
   NODE_VERSION = "20.11.1"
   NODE_OPTIONS = "--max-old-space-size=4096"
@@ -34,9 +37,6 @@
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 # =============== DOMAIN REDIRECTS ===============
 [[redirects]]
