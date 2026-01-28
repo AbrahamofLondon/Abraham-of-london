@@ -1,8 +1,13 @@
 # netlify.toml — PRODUCTION READY CONFIGURATION
 [build]
   # Netlify automatically runs 'pnpm install' before this command.
+  [build]
   command = "pnpm build"
   publish = ".next"
+  functions = "netlify/functions"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
