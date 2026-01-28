@@ -246,6 +246,9 @@ const baseFields = {
   volume: { type: "string", required: false },
   part: { type: "string", required: false },
 
+  // ... other fields
+  contentOnly: { type: "boolean", required: false },
+
   ...seoFields,
 } as const;
 
