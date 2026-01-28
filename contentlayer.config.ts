@@ -354,6 +354,42 @@ const coreFields = {
   // misc + warning fix
   label: { type: "string", required: false },
 
+  // Download-specific fields (added to core to avoid warnings across types)
+  file: { type: "string", required: false },
+  downloadUrl: { type: "string", required: false },
+  fileSize: { type: "string", required: false },
+  fileFormat: { type: "string", required: false },
+  format: { type: "string", required: false },
+  downloadType: { type: "string", required: false },
+  paperFormats: { type: "list", of: { type: "string" }, required: false },
+  isInteractive: { type: "boolean", required: false },
+  isFillable: { type: "boolean", required: false },
+  
+  // Additional Download UI/metadata fields
+  version: { type: "string", required: false },
+  language: { type: "string", required: false },
+  useLegacyDiagram: { type: "boolean", required: false },
+  useProTip: { type: "boolean", required: false },
+  useFeatureGrid: { type: "boolean", required: false },
+  useDownloadCTA: { type: "boolean", required: false },
+  proTipType: { type: "string", required: false },
+  proTipContent: { type: "string", required: false },
+  featureGridColumns: { type: "number", required: false },
+  featureGridItems: { type: "list", of: FeatureGridItem, required: false },
+  downloadProcess: { type: "nested", of: DownloadProcess, required: false },
+  ctaConfig: { type: "nested", of: CTAConfig, required: false },
+  ctaPrimary: { type: "nested", of: CTAButton, required: false },
+  ctaSecondary: { type: "nested", of: CTAButton, required: false },
+  related: { type: "list", of: { type: "string" }, required: false },
+  relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+
+  // Additional nested type for download metadata
+  download: { type: "nested", of: DownloadMeta, required: false },
+
+  // Additional fields for other types that might be used
+  downloads: { type: "list", of: DownloadLink, required: false },
+  aliases: { type: "list", of: { type: "string" }, required: false },
+
   // SEO
   ...seoFields,
 } as const;
@@ -469,8 +505,6 @@ export const Post = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...coreFields,
-    downloads: { type: "list", of: DownloadLink, required: false },
-    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
     series: { type: "string", required: false },
     part: { type: "number", required: false },
   },
@@ -495,7 +529,6 @@ export const Book = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...coreFields,
-    aliases: { type: "list", of: { type: "string" }, required: false },
     isbn: { type: "string", required: false },
     pages: { type: "number", required: false },
     publisher: { type: "string", required: false },
@@ -539,48 +572,7 @@ export const Download = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...coreFields,
-
-    // file info
-    file: { type: "string", required: false },
-    downloadUrl: { type: "string", required: false },
-    fileSize: { type: "string", required: false },
-    fileFormat: { type: "string", required: false },
-
-    // toggles
-    isInteractive: { type: "boolean", required: false },
-    isFillable: { type: "boolean", required: false },
-
-    // metadata
-    format: { type: "string", required: false },
-    downloadType: { type: "string", required: false },
-    paperFormats: { type: "list", of: { type: "string" }, required: false },
-
-    // versioning
-    version: { type: "string", required: false },
-    language: { type: "string", required: false },
-    aliases: { type: "list", of: { type: "string" }, required: false },
-
-    // UI blocks
-    useLegacyDiagram: { type: "boolean", required: false },
-    useProTip: { type: "boolean", required: false },
-    useFeatureGrid: { type: "boolean", required: false },
-    useDownloadCTA: { type: "boolean", required: false },
-
-    proTipType: { type: "string", required: false },
-    proTipContent: { type: "string", required: false },
-
-    featureGridColumns: { type: "number", required: false },
-    featureGridItems: { type: "list", of: FeatureGridItem, required: false },
-
-    ctaConfig: { type: "nested", of: CTAConfig, required: false },
-    downloadProcess: { type: "nested", of: DownloadProcess, required: false },
-    ctaPrimary: { type: "nested", of: CTAButton, required: false },
-    ctaSecondary: { type: "nested", of: CTAButton, required: false },
-
-    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
-    related: { type: "list", of: { type: "string" }, required: false },
-
-    download: { type: "nested", of: DownloadMeta, required: false },
+    // All Download-specific fields are now in coreFields
   },
   computedFields: createComputedFields("downloads/", "downloads"),
 }));
@@ -645,7 +637,6 @@ export const Resource = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...coreFields,
-    downloadUrl: { type: "string", required: false },
     fileType: { type: "string", required: false },
     difficulty: { type: "string", required: false },
     prerequisites: { type: "list", of: { type: "string" }, required: false },
@@ -659,7 +650,6 @@ export const Strategy = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...coreFields,
-    version: { type: "string", required: false },
     strategyType: { type: "string", required: false },
     industry: { type: "string", required: false },
     region: { type: "string", required: false },
@@ -689,7 +679,6 @@ function getExclusions(): string[] {
     "media/**",
     "**/.DS_Store",
     "**/Thumbs.db",
-    "**/desktop.ini",
     "**/*.lnk",
     "**/*.bak",
     "**/*.tmp",
@@ -709,6 +698,7 @@ function getExclusions(): string[] {
 
   if (IS_WINDOWS) {
     exclusions.push("**/~$*.docx", "**/~$*.xlsx", "**/~$*.pptx");
+    exclusions.push("**/desktop.ini");
   }
 
   return exclusions;

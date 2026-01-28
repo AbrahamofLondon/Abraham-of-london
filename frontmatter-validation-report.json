@@ -883,6 +883,424 @@
       "warnings": []
     },
     {
+      "path": "donwloads\\abraham-vault-pack.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\board-decision-log-template.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\board-investor-onepager.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\brotherhood-covenant.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\canon-volume-iv-diagnostic-toolkit.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\communication-script-bpf.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\decision-log-template.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\decision-matrix-scorecard.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\download-legacy-architecture-canvas.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"fileFormat\" for type Document",
+        "Unknown field \"useLegacyDiagram\" for type Document",
+        "Unknown field \"useProTip\" for type Document",
+        "Unknown field \"useFeatureGrid\" for type Document",
+        "Unknown field \"useDownloadCTA\" for type Document",
+        "Unknown field \"proTipType\" for type Document",
+        "Unknown field \"proTipContent\" for type Document",
+        "Unknown field \"featureGridColumns\" for type Document",
+        "Unknown field \"featureGridItems\" for type Document",
+        "Unknown field \"ctaConfig\" for type Document",
+        "Unknown field \"downloadProcess\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\entrepreneur-operating-pack.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\entrepreneur-survival-checklist.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\family-altar-liturgy.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\leaders-cue-card-two-up.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\leadership-playbook.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\legacy-canvas.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"fileFormat\" for type Document",
+        "Unknown field \"useLegacyDiagram\" for type Document",
+        "Unknown field \"useProTip\" for type Document",
+        "Unknown field \"useFeatureGrid\" for type Document",
+        "Unknown field \"useDownloadCTA\" for type Document",
+        "Unknown field \"ctaConfig\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\life-alignment-assessment.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"isInteractive\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\mentorship-starter-kit.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\operating-cadence-pack.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\principles-for-my-son-cue-card.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\principles-for-my-son.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\purpose-pyramid-worksheet.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\scripture-track-john14.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\standards-brief.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\ultimate-purpose-of-man-editorial.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"version\" for type Document",
+        "Unknown field \"language\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"ctaPrimary\" for type Document",
+        "Unknown field \"ctaSecondary\" for type Document",
+        "Unknown field \"related\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\weekly-operating-rhythm.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
       "path": "canon\\builders-catechism.mdx",
       "type": "Canon",
       "valid": true,
@@ -1136,5 +1554,424 @@
     }
   ],
   "errors": [],
-  "warnings": []
+  "warnings": [
+    {
+      "path": "donwloads\\abraham-vault-pack.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\board-decision-log-template.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\board-investor-onepager.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\brotherhood-covenant.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\canon-volume-iv-diagnostic-toolkit.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\communication-script-bpf.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\decision-log-template.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\decision-matrix-scorecard.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\download-legacy-architecture-canvas.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"fileFormat\" for type Document",
+        "Unknown field \"useLegacyDiagram\" for type Document",
+        "Unknown field \"useProTip\" for type Document",
+        "Unknown field \"useFeatureGrid\" for type Document",
+        "Unknown field \"useDownloadCTA\" for type Document",
+        "Unknown field \"proTipType\" for type Document",
+        "Unknown field \"proTipContent\" for type Document",
+        "Unknown field \"featureGridColumns\" for type Document",
+        "Unknown field \"featureGridItems\" for type Document",
+        "Unknown field \"ctaConfig\" for type Document",
+        "Unknown field \"downloadProcess\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\entrepreneur-operating-pack.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\entrepreneur-survival-checklist.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\family-altar-liturgy.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\leaders-cue-card-two-up.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\leadership-playbook.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\legacy-canvas.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"fileFormat\" for type Document",
+        "Unknown field \"useLegacyDiagram\" for type Document",
+        "Unknown field \"useProTip\" for type Document",
+        "Unknown field \"useFeatureGrid\" for type Document",
+        "Unknown field \"useDownloadCTA\" for type Document",
+        "Unknown field \"ctaConfig\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\life-alignment-assessment.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"isInteractive\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\mentorship-starter-kit.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\operating-cadence-pack.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"fileSize\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\principles-for-my-son-cue-card.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\principles-for-my-son.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\purpose-pyramid-worksheet.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\scripture-track-john14.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\standards-brief.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\ultimate-purpose-of-man-editorial.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"version\" for type Document",
+        "Unknown field \"language\" for type Document",
+        "Unknown field \"format\" for type Document",
+        "Unknown field \"file\" for type Document",
+        "Unknown field \"ctaPrimary\" for type Document",
+        "Unknown field \"ctaSecondary\" for type Document",
+        "Unknown field \"related\" for type Document",
+        "Unknown field \"downloadUrl\" for type Document",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document"
+      ]
+    },
+    {
+      "path": "donwloads\\weekly-operating-rhythm.mdx",
+      "type": "Document",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Frontmatter type \"Download\" conflicts with folder type \"Document\".",
+        "Unknown field \"downloadType\" for type Document",
+        "Unknown field \"paperFormats\" for type Document",
+        "Unknown field \"isInteractive\" for type Document",
+        "Unknown field \"isFillable\" for type Document",
+        "Unknown field \"contentOnly\" for type Document"
+      ]
+    }
+  ]
 }
