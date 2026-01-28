@@ -9,7 +9,7 @@
     "dev:full": "pnpm env:check && concurrently --kill-others-on-fail=false --names \"CONTENT,DEV\" \"pnpm contentlayer\" \"next dev\"",
     "dev:windows": "cross-env IS_WINDOWS=true next dev",
     "dev:profile": "cross-env NEXT_PROFILING=true next dev",
-    "build": "cross-env TURBOPACK_DISABLED=true NEXT_RUNTIME=nodejs next build",
+    "build": "cross-env NEXT_DISABLE_TURBOPACK=1 next build",
     "build:fast": "cross-env TURBOPACK_DISABLED=false next build",
     "build:netlify": "pnpm install --frozen-lockfile && pnpm prebuild && pnpm build",
     "build:pdfs": "pnpm pdf:generate -- --tier=architect --quality=premium",
