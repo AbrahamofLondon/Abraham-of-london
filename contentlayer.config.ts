@@ -1,4 +1,4 @@
-// contentlayer.config.ts — PRODUCTION-GRADE, STRICT, CLEAN, INVARIANTS-FIRST
+// contentlayer.config.ts — STRICT INVARIANTS, REAL-WORLD FIELDS, NO DRIFT
 import {
   defineDocumentType,
   defineNestedType,
@@ -13,13 +13,9 @@ const IS_WINDOWS = process.platform === "win32";
 const IS_CI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
 
-// Hard fail only when you explicitly want it:
+// Hard fail only when explicitly enabled or in CI+prod
 const FAIL_ON_INVALID =
   process.env.CONTENTLAYER_FAIL_ON_INVALID === "true" || (IS_CI && IS_PROD);
-
-// Optional: stop long-running builds from "hanging" on validation work.
-// (Contentlayer itself can still take time if you have huge MDX.)
-const QUIET = process.env.CONTENTLAYER_QUIET === "true";
 
 // ------------------------------------------------------------
 // SAFE HELPERS
@@ -49,8 +45,8 @@ function defaultSlugFrom(doc: any, prefix: string): string {
 
 function defaultHrefFrom(doc: any, prefix: string, routeBase: string): string {
   const slug = cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix);
-  if (!slug) return `/${routeBase}`;
-  return `/${routeBase}/${slug.replace(/\/index$/i, "")}`;
+  const normalized = slug.replace(/\/index$/i, "");
+  return normalized ? `/${routeBase}/${normalized}` : `/${routeBase}`;
 }
 
 type AccessLevel = "public" | "inner-circle" | "private";
@@ -58,13 +54,7 @@ type AccessLevel = "public" | "inner-circle" | "private";
 function asAccessLevel(v: unknown): AccessLevel {
   const s = safeString(v).toLowerCase().trim();
   if (s === "private") return "private";
-  if (
-    s === "inner-circle" ||
-    s === "innercircle" ||
-    s === "member" ||
-    s === "members"
-  )
-    return "inner-circle";
+  if (s === "inner-circle" || s === "innercircle" || s === "member" || s === "members") return "inner-circle";
   return "public";
 }
 
@@ -78,7 +68,6 @@ function safeRawBody(doc: any): string {
 
 function analyzeContent(text: string): { images: number; codeBlocks: number; words: number } {
   const t = safeString(text);
-
   const images = (t.match(/\!\[.*?\]\(.*?\)/g) || []).length;
   const codeBlocks = (t.match(/```[\s\S]*?```/g) || []).length;
 
@@ -107,7 +96,6 @@ type ValidationResult = { isValid: boolean; errors: string[] };
 
 function validateBase(doc: any): ValidationResult {
   const errors: string[] = [];
-
   if (!safeString(doc?.title).trim()) errors.push("Missing required field: title");
 
   const flat = cleanSlug(doc?._raw?.flattenedPath || "");
@@ -117,16 +105,9 @@ function validateBase(doc: any): ValidationResult {
   return { isValid: errors.length === 0, errors };
 }
 
-// ------------------------------------------------------------
-// EVENTS: tolerant parsing with computed "parsed" fields
-// Accepts:
-// - ISO string: "2026-11-11T19:00:00Z"
-// - Range: "2026-11-11T19:00 - 22:00"
-// ------------------------------------------------------------
 function parseEventStartISO(raw: unknown): string | null {
   const s = safeString(raw).trim();
   if (!s) return null;
-
   const left = s.includes(" - ") ? s.split(" - ")[0].trim() : s;
   const d = new Date(left);
   if (isNaN(d.getTime())) return null;
@@ -141,7 +122,6 @@ function parseEventEndISO(raw: unknown): string | null {
   const start = new Date(startPart);
   if (isNaN(start.getTime())) return null;
 
-  // endPart is "22:00" or "22:00:00"
   const parts = endPart.split(":").map((n) => parseInt(n, 10));
   if (!parts.length || Number.isNaN(parts[0])) return null;
 
@@ -154,7 +134,6 @@ function parseEventEndISO(raw: unknown): string | null {
 function validateEvent(doc: any): ValidationResult {
   const base = validateBase(doc);
   const errors = [...base.errors];
-
   if (doc?.startDate && !parseEventStartISO(doc?.startDate)) {
     errors.push(`Invalid startDate format: ${safeString(doc.startDate)}`);
   }
@@ -162,7 +141,7 @@ function validateEvent(doc: any): ValidationResult {
 }
 
 // ------------------------------------------------------------
-// NESTED TYPES (ONLY where stable)
+// NESTED TYPES
 // ------------------------------------------------------------
 const FeatureGridItem = defineNestedType(() => ({
   name: "FeatureGridItem",
@@ -188,10 +167,7 @@ const CTAButton = defineNestedType(() => ({
 }));
 
 // ------------------------------------------------------------
-// FIELD SETS (CLEAN SEPARATION)
-// NOTE:
-// - Anything present in your corpus must be declared (or Contentlayer warns "extra fields").
-// - Prefer json for flexible shapes you haven't fully standardized yet.
+// FIELD SETS
 // ------------------------------------------------------------
 const seoFields = {
   ogTitle: { type: "string", required: false },
@@ -207,23 +183,32 @@ const seoFields = {
 } as const;
 
 const baseFields = {
-  // identity
+  // core identity
   title: { type: "string", required: true },
   subtitle: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
 
+  // dates
+  date: { type: "date", required: false },
+  updated: { type: "date", required: false },
+
+  // publishing flags
+  published: { type: "boolean", required: false },
+  draft: { type: "boolean", required: false },
+  featured: { type: "boolean", required: false },
+
   // routing
   slug: { type: "string", required: false },
   href: { type: "string", required: false },
+  aliases: { type: "list", of: { type: "string" }, required: false },
 
-  // dates / publish flags
-  date: { type: "date", required: false },
-  updated: { type: "date", required: false },
-  published: { type: "boolean", required: false },
-  draft: { type: "boolean", required: false },
+  // presentation
+  docKind: { type: "string", required: false },
+  layout: { type: "string", required: false },
+  density: { type: "string", required: false },
 
-  // taxonomies
+  // authoring / taxonomy
   author: { type: "string", required: false },
   authorTitle: { type: "string", required: false },
   tags: { type: "list", of: { type: "string" }, required: false },
@@ -232,47 +217,38 @@ const baseFields = {
   // visuals
   coverImage: { type: "string", required: false },
   featuredImage: { type: "string", required: false },
-  featured: { type: "boolean", required: false },
+  coverAspect: { type: "string", required: false },
+  coverFit: { type: "string", required: false },
+  coverPosition: { type: "string", required: false },
 
-  // access
+  // sharing
+  socialCaption: { type: "string", required: false },
+  readTime: { type: "string", required: false },
+
+  // access control
   accessLevel: { type: "string", required: false },
   requiresAuth: { type: "boolean", required: false },
   tier: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
 
-  // misc
-  contentOnly: { type: "boolean", required: false },
+  // structured blobs / attachments (kept permissive)
   resources: { type: "json", required: false },
-
-  // ✅ fields present in your Posts (avoid "extra fields" warnings)
-  docKind: { type: "string", required: false },
-  density: { type: "string", required: false },
-  socialCaption: { type: "string", required: false },
-  readTime: { type: "string", required: false },
-  keyInsights: { type: "list", of: { type: "string" }, required: false },
-  authorNote: { type: "string", required: false },
-
-  // ✅ cover tuning fields present in your Posts
-  coverAspect: { type: "string", required: false }, // e.g. "wide", "book"
-  coverFit: { type: "string", required: false },    // e.g. "cover", "contain"
-  coverPosition: { type: "string", required: false }, // e.g. "center"
-
-  // ✅ downloads blocks embedded in some posts
   downloads: { type: "json", required: false },
   relatedDownloads: { type: "list", of: { type: "string" }, required: false },
 
-  // ✅ A) Add these fields to eliminate "extra fields" warnings
-  layout: { type: "string", required: false },
-  aliases: { type: "list", of: { type: "string" }, required: false },
+  // editorial extras
+  keyInsights: { type: "list", of: { type: "string" }, required: false },
+  authorNote: { type: "string", required: false },
+
+  // canon ordering (used in your content)
   order: { type: "number", required: false },
   volumeNumber: { type: "string", required: false },
-  downloadUrl: { type: "string", required: false },
-  resourceType: { type: "string", required: false },
+  volume: { type: "string", required: false },
+  part: { type: "string", required: false },
 
   ...seoFields,
 } as const;
 
-// Download-only fields
 const downloadFields = {
   file: { type: "string", required: false },
   downloadUrl: { type: "string", required: false },
@@ -301,15 +277,29 @@ const downloadFields = {
   ctaSecondary: { type: "nested", of: CTAButton, required: false },
 
   related: { type: "list", of: { type: "string" }, required: false },
-  relatedDownloads: { type: "list", of: { type: "string" }, required: false },
 
-  // ✅ B) Add JSON fields for complex Download objects
+  // these were explicitly in your warnings
   ctaConfig: { type: "json", required: false },
   downloadProcess: { type: "json", required: false },
 } as const;
 
+const resourceFields = {
+  resourceType: { type: "string", required: false },
+  downloadUrl: { type: "string", required: false },
+  links: { type: "json", required: false },
+} as const;
+
+const strategyFields = {
+  strategyType: { type: "string", required: false },
+  industry: { type: "string", required: false },
+  region: { type: "string", required: false },
+  timeline: { type: "string", required: false },
+  status: { type: "string", required: false },
+  resourceType: { type: "string", required: false }, // your sample-strategy
+} as const;
+
 // ------------------------------------------------------------
-// COMPUTED FIELDS FACTORY (INVARIANTS)
+// COMPUTED FIELDS
 // ------------------------------------------------------------
 function createComputedFields(prefix: string, routeBase: string): ComputedFields {
   return {
@@ -317,21 +307,14 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
       type: "string",
       resolve: (doc) => cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix) || "",
     },
-
-    // ✅ Always computed; NEVER require href in frontmatter.
     hrefSafe: {
       type: "string",
-      resolve: (doc) =>
-        cleanSlug(doc?.href)
-          ? safeString(doc.href)
-          : defaultHrefFrom(doc, prefix, routeBase),
+      resolve: (doc) => (cleanSlug(doc?.href) ? safeString(doc.href) : defaultHrefFrom(doc, prefix, routeBase)),
     },
-
     titleSafe: {
       type: "string",
       resolve: (doc) => safeString(doc?.title).trim() || "Untitled",
     },
-
     excerptSafe: {
       type: "string",
       resolve: (doc) => {
@@ -341,40 +324,32 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
         return d || "";
       },
     },
-
     accessLevelSafe: {
       type: "string",
       resolve: (doc) => asAccessLevel(doc?.accessLevel),
     },
-
     publishedSafe: {
       type: "boolean",
       resolve: (doc) => (doc?.published === undefined ? true : Boolean(doc?.published)),
     },
-
     draftSafe: {
       type: "boolean",
       resolve: (doc) => Boolean(doc?.draft),
     },
-
     readTimeSafe: {
       type: "string",
       resolve: (doc) => safeString(doc?.readTime).trim() || estimateReadTime(safeRawBody(doc)),
     },
-
     wordCount: {
       type: "number",
       resolve: (doc) => analyzeContent(safeRawBody(doc)).words,
     },
-
     validation: {
       type: "json",
       resolve: (doc) => {
         const r = validateBase(doc);
         if (!r.isValid && FAIL_ON_INVALID) {
-          throw new Error(
-            `[Contentlayer] Invalid doc (${doc?._id || "unknown"}): ${r.errors.join("; ")}`
-          );
+          throw new Error(`[Contentlayer] Invalid doc (${doc?._id || "unknown"}): ${r.errors.join("; ")}`);
         }
         return r;
       },
@@ -383,7 +358,7 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
 }
 
 // ------------------------------------------------------------
-// DOCUMENT TYPES (STRICT + CORRECT)
+// DOCUMENT TYPES
 // ------------------------------------------------------------
 export const Post = defineDocumentType(() => ({
   name: "Post",
@@ -392,7 +367,7 @@ export const Post = defineDocumentType(() => ({
   fields: {
     ...baseFields,
     series: { type: "string", required: false },
-    part: { type: "number", required: false },
+    seriesOrder: { type: "number", required: false },
   },
   computedFields: createComputedFields("blog/", "blog"),
 }));
@@ -403,8 +378,8 @@ export const Short = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
-    mood: { type: "string", required: false },
-    inspiration: { type: "string", required: false },
+    hook: { type: "string", required: false },
+    callToAction: { type: "string", required: false },
   },
   computedFields: createComputedFields("shorts/", "shorts"),
 }));
@@ -418,6 +393,8 @@ export const Book = defineDocumentType(() => ({
     isbn: { type: "string", required: false },
     pages: { type: "number", required: false },
     publisher: { type: "string", required: false },
+    edition: { type: "string", required: false },
+    format: { type: "string", required: false },
     year: { type: "number", required: false },
   },
   computedFields: createComputedFields("books/", "books"),
@@ -429,10 +406,8 @@ export const Canon = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
+    canonType: { type: "string", required: false },
     edition: { type: "string", required: false },
-    isStandard: { type: "boolean", required: false },
-    difficulty: { type: "string", required: false },
-    estimatedHours: { type: "number", required: false },
   },
   computedFields: createComputedFields("canon/", "canon"),
 }));
@@ -454,48 +429,31 @@ export const Event = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
+    eventType: { type: "string", required: false },
     location: { type: "string", required: false },
     registrationUrl: { type: "string", required: false },
-
-    // raw string (ISO or range format)
     startDate: { type: "string", required: false },
-    endDate: { type: "string", required: false }, // optional if you store separately
+    endDate: { type: "string", required: false },
     timezone: { type: "string", required: false },
-
     isVirtual: { type: "boolean", required: false },
-    maxAttendees: { type: "number", required: false },
+    meetingLink: { type: "string", required: false },
   },
   computedFields: {
     ...createComputedFields("events/", "events"),
-
     parsedStartDate: {
       type: "string",
       resolve: (doc) => parseEventStartISO(doc?.startDate) || "",
     },
-
-    // ✅ FIXED: parse end from startDate range OR from endDate if provided
     parsedEndDate: {
       type: "string",
-      resolve: (doc) => {
-        const fromRange = parseEventEndISO(doc?.startDate);
-        if (fromRange) return fromRange;
-
-        // If endDate is provided as ISO, try it
-        const end = safeString(doc?.endDate).trim();
-        if (!end) return "";
-        const d = new Date(end);
-        return isNaN(d.getTime()) ? "" : d.toISOString();
-      },
+      resolve: (doc) => parseEventEndISO(doc?.startDate) || "",
     },
-
     validation: {
       type: "json",
       resolve: (doc) => {
         const r = validateEvent(doc);
         if (!r.isValid && FAIL_ON_INVALID) {
-          throw new Error(
-            `[Contentlayer] Invalid Event (${doc?._id || "unknown"}): ${r.errors.join("; ")}`
-          );
+          throw new Error(`[Contentlayer] Invalid Event (${doc?._id || "unknown"}): ${r.errors.join("; ")}`);
         }
         return r;
       },
@@ -509,6 +467,10 @@ export const Print = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
+    printType: { type: "string", required: false },
+    price: { type: "number", required: false },
+    currency: { type: "string", required: false },
+    isPhysical: { type: "boolean", required: false },
     dimensions: { type: "string", required: false },
     paperType: { type: "string", required: false },
     orientation: { type: "string", required: false },
@@ -523,6 +485,7 @@ export const Resource = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
+    ...resourceFields,
     fileType: { type: "string", required: false },
     difficulty: { type: "string", required: false },
     prerequisites: { type: "list", of: { type: "string" }, required: false },
@@ -536,20 +499,13 @@ export const Strategy = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
-    strategyType: { type: "string", required: false },
-    industry: { type: "string", required: false },
-    region: { type: "string", required: false },
-    timeline: { type: "string", required: false },
-    status: { type: "string", required: false },
-    
-    // ✅ C) Strategy-specific resourceType (makes it explicit)
-    resourceType: { type: "string", required: false },
+    ...strategyFields,
   },
   computedFields: createComputedFields("strategy/", "strategy"),
 }));
 
 // ------------------------------------------------------------
-// EXCLUSIONS (sane + OS aware)
+// EXCLUSIONS
 // ------------------------------------------------------------
 function getExclusions(): string[] {
   const exclusions = [
@@ -568,7 +524,6 @@ function getExclusions(): string[] {
     "**/*.tmp",
     "**/*.swp",
     "**/*.backup*",
-    // binaries
     "**/*.pdf",
     "**/*.pptx",
     "**/*.docx",
@@ -578,6 +533,10 @@ function getExclusions(): string[] {
     "**/*.7z",
     "**/*.mp4",
     "**/*.mp3",
+
+    // Important: ignore the typo folder if it exists
+    "donwloads",
+    "donwloads/**",
   ];
 
   if (IS_WINDOWS) {
@@ -592,49 +551,15 @@ function getExclusions(): string[] {
 // ------------------------------------------------------------
 export default makeSource({
   contentDirPath: "content",
-
-  // IMPORTANT: include only canonical folders (do NOT include the typo folder)
-  contentDirInclude: [
-    "blog",
-    "shorts",
-    "books",
-    "canon",
-    "downloads",
-    "events",
-    "prints",
-    "resources",
-    "strategy",
-  ],
-
+  contentDirInclude: ["blog", "shorts", "books", "canon", "downloads", "events", "prints", "resources", "strategy"],
   contentDirExclude: getExclusions(),
-
   documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy],
-
   disableImportAliasWarning: true,
-
   mdx: { remarkPlugins: [], rehypePlugins: [] },
 
   onSuccess: async (importData) => {
-    if (!QUIET) {
-      if (IS_WINDOWS) {
-        console.warn("Warning: Contentlayer might not work as expected on Windows");
-      }
-    }
-
     const data = await importData();
-    const allDocs: any[] =
-      (data as any)?.allDocuments ||
-      [
-        ...(data as any)?.allPosts || [],
-        ...(data as any)?.allShorts || [],
-        ...(data as any)?.allBooks || [],
-        ...(data as any)?.allCanons || [],
-        ...(data as any)?.allDownloads || [],
-        ...(data as any)?.allEvents || [],
-        ...(data as any)?.allPrints || [],
-        ...(data as any)?.allResources || [],
-        ...(data as any)?.allStrategies || [],
-      ];
+    const allDocs: any[] = (data as any)?.allDocuments || [];
 
     const counts: Record<string, number> = {};
     let valid = 0;
@@ -642,50 +567,35 @@ export default makeSource({
     const samples: string[] = [];
 
     for (const doc of allDocs) {
-      // contentlayer2 usually provides `_type`; fallback to `type`
-      const t = safeString((doc as any)?._type || (doc as any)?.type || "unknown");
+      const t = safeString(doc?.type || "unknown");
       counts[t] = (counts[t] || 0) + 1;
 
-      const v = (doc as any)?.validation as ValidationResult | undefined;
+      const v = doc?.validation as ValidationResult | undefined;
       if (v?.isValid) valid++;
       else {
         invalid++;
         if (samples.length < 12) {
-          samples.push(
-            `${t} ${safeString(doc?._id)} → ${(v?.errors || ["Validation failed"]).join(", ")}`
-          );
+          samples.push(`${t} ${safeString(doc?._id)} → ${(v?.errors || ["Validation failed"]).join(", ")}`);
         }
       }
     }
 
-    if (!QUIET) {
-      console.log("\n============================================================");
-      console.log("📊 CONTENTLAYER BUILD COMPLETE (STRICT SCHEMA)");
-      console.log("============================================================");
-      console.log(`Platform: ${process.platform}${IS_WINDOWS ? " (Windows)" : ""}`);
-      console.log(`Docs: ${allDocs.length}`);
-      console.log("By type:", counts);
-      console.log(`Validation: valid=${valid} invalid=${invalid}`);
+    console.log("\n============================================================");
+    console.log("📊 CONTENTLAYER BUILD COMPLETE (SCHEMA ALIGNED)");
+    console.log("============================================================");
+    console.log(`Platform: ${process.platform}${IS_WINDOWS ? " (Windows)" : ""}`);
+    console.log(`Docs: ${allDocs.length}`);
+    console.log("By type:", counts);
+    console.log(`Validation: valid=${valid} invalid=${invalid}`);
 
-      if (invalid > 0) {
-        console.warn("\n⚠️  Invalid document samples:");
-        samples.forEach((s) => console.warn("  -", s));
-
-        if (FAIL_ON_INVALID) {
-          throw new Error(
-            `Contentlayer invariants failed (${invalid} invalid docs). Fix frontmatter or set CONTENTLAYER_FAIL_ON_INVALID=false.`
-          );
-        }
-      }
-
-      console.log("============================================================\n");
-    } else {
-      // still hard-fail if requested
-      if (invalid > 0 && FAIL_ON_INVALID) {
-        throw new Error(
-          `Contentlayer invariants failed (${invalid} invalid docs). Fix frontmatter or set CONTENTLAYER_FAIL_ON_INVALID=false.`
-        );
+    if (invalid > 0) {
+      console.warn("\n⚠️  Invalid document samples:");
+      samples.forEach((s) => console.warn("  -", s));
+      if (FAIL_ON_INVALID) {
+        throw new Error(`Contentlayer invariants failed (${invalid} invalid docs).`);
       }
     }
+
+    console.log("============================================================\n");
   },
 });
