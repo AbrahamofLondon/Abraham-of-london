@@ -116,7 +116,7 @@ const extractFirstFrontmatter = (raw) => {
   return { yamlText, body: bodyHrNormalized };
 };
 
-// Detect suspicious “second frontmatter” embedded in body
+// Detect suspicious "second frontmatter" embedded in body
 const hasFrontmatterLikeBlockInBody = (body) => {
   if (!body) return false;
 
@@ -368,6 +368,11 @@ const validateOne = (filePath) => {
       errors.push(`Invalid date format: "${parsed.date}" (YYYY-MM-DD)`);
   }
 
+  // Only warn if BOTH slug and href are missing (very rare edge case)
+  if (!parsed.slug && !parsed.href) {
+    warnings.push("Both slug and href are missing - at least one should be present");
+  }
+
   // Slug vs filename consistency (warning)
   const expectedSlug = fileSlug(filePath);
   const actualSlug = String(parsed.slug || "").trim();
@@ -432,7 +437,7 @@ const validateOne = (filePath) => {
 // ------------------------------------------------------------
 const files = getAllFiles(contentDir);
 
-// Ignore _partials by default (they often aren’t documents)
+// Ignore _partials by default (they often aren't documents)
 const results = files
   .map(validateOne)
   .filter((r) => r.type !== "Partial");
