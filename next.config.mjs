@@ -1,17 +1,58 @@
-// next.config.mjs — SHIP-FIRST GREEN BUILD CONFIG
+// next.config.mjs — ENTERPRISE PRODUCTION CONFIG (HARDENED, FAIL-SAFE)
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
+/**
+ * Safe resolver:
+ * - returns null if module is missing (prevents build failures)
+ */
+function tryResolve(id) {
+  try {
+    return require.resolve(id);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Only enable browser polyfills if the project actually has them installed.
+ * This prevents "Cannot find module 'crypto-browserify'" type failures.
+ */
+function buildBrowserFallbacks() {
+  const crypto = tryResolve("crypto-browserify");
+  const stream = tryResolve("stream-browserify");
+  const url = tryResolve("url/");
+  const util = tryResolve("util/");
+  const path = tryResolve("path-browserify");
+  const os = tryResolve("os-browserify/browser"); // prefer /browser entry
+  // If some are missing, we simply omit them (webpack will handle, or code must avoid them)
+
+  return {
+    fs: false,
+    net: false,
+    tls: false,
+    dns: false,
+    child_process: false,
+    ...(crypto ? { crypto } : {}),
+    ...(stream ? { stream } : {}),
+    ...(url ? { url } : {}),
+    ...(util ? { util } : {}),
+    ...(path ? { path } : {}),
+    ...(os ? { os } : {}),
+  };
+}
+
 /** @type {import("next").NextConfig} */
-const baseConfig = {
+const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
   compress: true,
   poweredByHeader: false,
 
+  // Keep high enough for large SSG, but not absurd
   staticPageGenerationTimeout: 300,
 
-  // ✅ SHIP-FIRST: stop TS from failing the build
+  // Ship-first (your choice) — do not block production deploy on TS errors
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -134,6 +175,10 @@ const baseConfig = {
       ...(isProd ? ["upgrade-insecure-requests"] : []),
     ].join("; ");
 
+    // Production caching: do NOT set no-store for everything.
+    // Let Next handle HTML caching semantics; only lock down truly sensitive paths elsewhere.
+    const defaultCache = isProd ? "public, max-age=0, must-revalidate" : "no-store";
+
     return [
       {
         source: "/fonts/:path*",
@@ -166,7 +211,7 @@ const baseConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-XSS-Protection", value: "1; mode=block" },
-          { key: "Cache-Control", value: "no-store" },
+          { key: "Cache-Control", value: defaultCache },
           ...(isProd ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }] : []),
           {
             key: "Permissions-Policy",
@@ -211,11 +256,11 @@ const baseConfig = {
     ];
   },
 
-  webpack: (config, { isServer, dev, webpack }) => {
+  webpack: (config, { isServer, dev }) => {
     config.plugins = Array.isArray(config.plugins) ? config.plugins : [];
     config.module.rules = Array.isArray(config.module.rules) ? config.module.rules : [];
 
-    // Windows watch ignores (safe)
+    // Windows watch stability (dev-only)
     if (process.platform === "win32" && dev) {
       config.watchOptions = {
         ...(config.watchOptions || {}),
@@ -240,25 +285,8 @@ const baseConfig = {
           "**/*.woff",
           "**/*.woff2",
           "**/*.eot",
-          "**/*.png",
-          "**/*.jpg",
-          "**/*.jpeg",
-          "**/*.gif",
-          "**/*.bmp",
-          "**/*.webp",
-          "**/*.avif",
-          "**/*.ico",
-          "**/*.svg",
-          "**/*.mp4",
-          "**/*.webm",
-          "**/*.mov",
-          "**/*.avi",
-          "**/*.wmv",
-          "**/*.mp3",
-          "**/*.wav",
-          "**/*.ogg",
-          "**/*.m4a",
-          "**/*.flac",
+          "**/*.{png,jpg,jpeg,gif,bmp,webp,avif,ico,svg}",
+          "**/*.{mp4,webm,mov,avi,wmv,mp3,wav,ogg,m4a,flac}",
           "**/Thumbs.db",
           "**/desktop.ini",
           "**/*.lnk",
@@ -268,43 +296,16 @@ const baseConfig = {
       };
     }
 
-    // Asset rules excluding /public (safe)
-    config.module.rules.push({
-      test: /\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$/i,
-      type: "asset/resource",
-      generator: { filename: "static/media/[name].[hash][ext]" },
-      exclude: /[\\/]public[\\/]/i,
-    });
+    // Do NOT add aggressive asset/resource rules for everything.
+    // Next already handles assets + public folder. Adding rules can increase build time.
+    // Keep only what you truly need (none required here).
 
-    config.module.rules.push({
-      test: /\.(woff|woff2|eot|ttf|otf)$/i,
-      type: "asset/resource",
-      generator: { filename: "static/fonts/[name].[hash][ext]" },
-      exclude: /[\\/]public[\\/]/i,
-    });
-
-    config.module.rules.push({
-      test: /\.(pdf|pptx|docx|xlsx|zip|rar|7z|tar|gz)$/i,
-      type: "asset/resource",
-      generator: { filename: "static/docs/[name].[hash][ext]" },
-      exclude: /[\\/]public[\\/]/i,
-    });
-
-    // Browser fallbacks (safe)
+    // Optional browser fallbacks (only if needed & installed)
     if (!isServer) {
+      config.resolve = config.resolve || {};
       config.resolve.fallback = {
         ...(config.resolve.fallback || {}),
-        fs: false,
-        net: false,
-        tls: false,
-        dns: false,
-        child_process: false,
-        crypto: require.resolve("crypto-browserify"),
-        stream: require.resolve("stream-browserify"),
-        url: require.resolve("url/"),
-        util: require.resolve("util/"),
-        path: require.resolve("path-browserify"),
-        os: require.resolve("os-browserify"),
+        ...buildBrowserFallbacks(),
       };
     }
 
@@ -312,7 +313,7 @@ const baseConfig = {
   },
 };
 
-// Optional contentlayer wrapper (v2 only)
+// Optional contentlayer wrapper (v2 only) — fail-safe
 async function withOptionalContentlayer(config) {
   try {
     const mod = await import("next-contentlayer2");
@@ -321,9 +322,8 @@ async function withOptionalContentlayer(config) {
     }
     return config;
   } catch {
-    // No v1 fallback. Either v2 is present or we ship without it.
     return config;
   }
 }
 
-export default withOptionalContentlayer(baseConfig);
+export default withOptionalContentlayer(nextConfig);
