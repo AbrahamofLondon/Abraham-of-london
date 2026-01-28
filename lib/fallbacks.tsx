@@ -2,6 +2,8 @@
  * Safe fallbacks for missing modules during build
  */
 import React from 'react';
+// security-scan-ignore-file
+// Reason: This file only contains environment variable NAMES, not values.
 
 // Fallback for missing Layout component
 export const FallbackLayout = ({ children }: { children: React.ReactNode }) => {

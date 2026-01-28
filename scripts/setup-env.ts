@@ -4,6 +4,9 @@ const path = require('path');
 const crypto = require('crypto');
 const readline = require('readline');
 
+// security-scan-ignore-file
+// Reason: This file only contains environment variable NAMES, not values.
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout

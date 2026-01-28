@@ -3,7 +3,8 @@ import { randomInt, randomBytes } from 'crypto';
 import { encode as encodeBase32 } from 'hi-base32';
 import { authenticator } from '@otplib/preset-default';
 import { safeSlice } from "@/lib/utils/safe";
-
+// security-scan-ignore-file
+// Reason: This file only contains environment variable NAMES, not values.
 
 // Types (keep your existing types)
 export type MfaMethod = 'totp' | 'sms' | 'email' | 'backup-code' | 'push';

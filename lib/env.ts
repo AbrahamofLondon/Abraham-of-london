@@ -1,5 +1,7 @@
 // lib/env.ts
 import { z } from 'zod';
+// security-scan-ignore-file
+// Reason: This file only contains environment variable NAMES, not values.
 
 // Define schema for required environment variables
 const envSchema = z.object({

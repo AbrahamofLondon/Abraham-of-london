@@ -48,6 +48,7 @@ build/
 .env.production.local
 .env
 .env.*
+.env.production
 
 # Exception: Keep example file
 !.env.example

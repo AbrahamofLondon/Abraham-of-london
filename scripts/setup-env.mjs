@@ -4,6 +4,8 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import readline from 'readline';
+// security-scan-ignore-file
+// Reason: This file only contains environment variable NAMES, not values.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');

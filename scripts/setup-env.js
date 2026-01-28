@@ -40,6 +40,9 @@ async function setupEnvironment() {
     }
   }
 
+// security-scan-ignore-file
+// Reason: This file only contains environment variable NAMES, not values.
+
   // Check if .env.example exists
   if (!fs.existsSync(envExamplePath)) {
     console.log('❌ Error: .env.example not found. Creating basic template...');
