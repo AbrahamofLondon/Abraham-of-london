@@ -212,3 +212,4 @@ const PDFActionsBar: React.FC<PDFActionsBarProps> = ({
 
 PDFActionsBar.displayName = "PDFActionsBar";
 export default React.memo(PDFActionsBar);
+// Build fix: 01/28/2026 09:04:13
