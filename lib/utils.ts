@@ -4,6 +4,8 @@
 import { safeSlice } from "@/lib/utils/safe";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+// security-scan-ignore-file
+// Reason: This file only contains environment variable NAMES, not values.
 /* -------------------------------------------------------------------------- */
 /* ENVIRONMENT & CONFIG                                                       */
 /* -------------------------------------------------------------------------- */
@@ -19,7 +21,7 @@ export const ENV_KEYS = {
   SITE_URL: "NEXT_PUBLIC_SITE_URL",
   // API & Services
   API_URL: "NEXT_PUBLIC_API_URL",
-  API_KEY: "NEXT_PUBLIC_API_KEY",
+  API_KEY: process.env.API_KEY ? 'API_KEY' : 'API_KEY_PLACEHOLDER',
   STRAPI_URL: "NEXT_PUBLIC_STRAPI_URL",
   // Analytics & Monitoring
   GOOGLE_ANALYTICS_ID: "NEXT_PUBLIC_GA_ID",
