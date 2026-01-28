@@ -1,7 +1,7 @@
-# netlify.toml — PRODUCTION READY CONFIGURATION
+# netlify.toml — ENTERPRISE PRODUCTION CONFIG (NEXT.js)
+
 [build]
-  # Netlify automatically runs 'pnpm install' before this command.
-  command = "pnpm build"
+  command = "pnpm build:netlify"
   publish = ".next"
   functions = "netlify/functions"
 
@@ -9,28 +9,33 @@
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  NODE_VERSION = "20.11.1"
+  # Use Netlify's Node, keep it aligned with your .nvmrc/lock expectations
+  NODE_VERSION = "20.20.0"
   NODE_OPTIONS = "--max-old-space-size=4096"
-  # Your CI/CD control variable - skip heavy image processing in cloud builds
+
+  # Critical: do NOT set NODE_ENV here.
+  # Netlify/Next will run production builds correctly without blocking devDependencies install.
+  # NODE_ENV = "production"  (INTENTIONALLY REMOVED)
+
+  # CI controls
+  CI = "true"
   SKIP_ASSET_OPTIMIZE = "1"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
   NEXT_TELEMETRY_DISABLED = "1"
-  NODE_ENV = "production"
-  NEXT_PUBLIC_APP_ENV = "production"
-  # Security: disable Next.js source maps in production
   NEXT_DISABLE_SOURCEMAPS = "true"
+
+  # App env
+  NEXT_PUBLIC_APP_ENV = "production"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
-  # Enable production optimizations
   NEXT_OPTIMIZE_FONTS = "true"
   NEXT_OPTIMIZE_IMAGES = "true"
 
 [context.deploy-preview.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
-  # Keep sourcemaps for debugging previews
   NEXT_DISABLE_SOURCEMAPS = "false"
 
 [context.branch-deploy.environment]
@@ -183,12 +188,11 @@
   to = "/downloads/leadership-standards-blueprint"
   status = 301
 
-# =============== 404 CATCH-ALL ===============
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = { StatusCode = "404" }
+# IMPORTANT:
+# Remove this catch-all SPA redirect for Next.js.
+# Next handles routing/404. This rule can cause confusing behavior and extra work.
+# If you truly need SPA behavior, do it intentionally with next.config rewrites.
+# (INTENTIONALLY OMITTED)  [[redirects]] from="/*" to="/index.html" status=200 conditions={StatusCode="404"}
 
 # =============== SECURITY HEADERS ===============
 [[headers]]
@@ -198,7 +202,6 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Production-only HSTS
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
 [[headers]]
@@ -218,7 +221,7 @@
     Content-Type = "application/pdf"
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
-    Content-Disposition = "inline"  # Show in browser instead of download
+    Content-Disposition = "inline"
 
 [[headers]]
   for = "/assets/downloads/*"
@@ -226,13 +229,11 @@
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
 
-# =============== IMAGE CACHE HEADERS ===============
 [[headers]]
   for = "/_next/image/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# =============== API ROUTES (if you have them) ===============
 [[headers]]
   for = "/api/*"
   [headers.values]
