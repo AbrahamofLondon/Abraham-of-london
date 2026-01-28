@@ -1,16 +1,53 @@
-// tailwind.config.js - PROFESSIONAL PRODUCTION CONFIGURATION
+// tailwind.config.cjs - OPTIMIZED PRODUCTION VERSION
+const fs = require("fs");
+const path = require("path");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
-  
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
-    "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+
+  content: (() => {
+    const scanFile = path.join(__dirname, "tailwind.scan.txt");
+
+    // Optional: log only when explicitly enabled
+    const shouldLog = process.env.TAILWIND_SCAN_LOG === "1";
+
+    try {
+      if (fs.existsSync(scanFile)) {
+        const patterns = fs
+          .readFileSync(scanFile, "utf8")
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter((l) => l && !l.startsWith("#") && !l.startsWith("//"));
+
+        if (shouldLog) {
+          console.log(`[tailwind] scanning ${patterns.length} patterns from tailwind.scan.txt`);
+        }
+        return patterns;
+      }
+    } catch (e) {
+      if (shouldLog) {
+        console.warn("[tailwind] could not read tailwind.scan.txt; using fallback patterns");
+      }
+    }
+
+    // Fallback patterns (match YOUR repo structure)
+    return [
+      "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+      "./components/**/*.{js,ts,jsx,tsx,mdx}",
+      "./app/**/*.{js,ts,jsx,tsx,mdx}",
+      "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
+      "./content/**/*.{md,mdx}",
+
+      // lib — whitelist only folders likely to contain Tailwind class strings
+      "./lib/mdx/**/*.{js,ts,jsx,tsx}",
+      "./lib/client/**/*.{js,ts,jsx,tsx}",
+      "./lib/shared/**/*.{js,ts,jsx,tsx}",
+      "./lib/downloads/**/*.{js,ts,jsx,tsx}",
+      "./lib/resources/**/*.{js,ts,jsx,tsx}",
+      "./lib/premium/**/*.{js,ts,jsx,tsx}",
+    ];
+  })(),
 
   theme: {
     container: {
@@ -136,4 +173,4 @@ module.exports = {
   },
   
   plugins: [],
-}
+};

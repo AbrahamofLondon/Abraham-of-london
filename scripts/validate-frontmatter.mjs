@@ -48,9 +48,21 @@ const getAllFiles = (dir) => {
 
 const normalizeSlashes = (p) => p.replace(/\\/g, "/");
 
+// Canonicalise top-level folder name:
+// - "donwloads" => "downloads" (typo alias)
+// - allow future aliases here if needed
+const canonicalTopFolder = (top) => {
+  const t = String(top || "").trim();
+  if (!t) return t;
+  if (t === "donwloads") return "downloads";
+  return t;
+};
+
 const getTypeFromRelativePath = (relativePath) => {
   const p = normalizeSlashes(relativePath);
-  const top = p.split("/")[0];
+  const rawTop = p.split("/")[0];
+  const top = canonicalTopFolder(rawTop);
+
   switch (top) {
     case "blog":
       return "Post";
@@ -70,6 +82,8 @@ const getTypeFromRelativePath = (relativePath) => {
       return "Resource";
     case "strategy":
       return "Strategy";
+    case "_partials":
+      return "Partial";
     default:
       return "Document";
   }
@@ -97,10 +111,7 @@ const extractFirstFrontmatter = (raw) => {
   const bodyWithoutAnyFrontmatterBlocks = raw.slice(match[0].length);
 
   // Convert markdown HR '---' to '***' inside body to avoid confusing downstream tools
-  const bodyHrNormalized = bodyWithoutAnyFrontmatterBlocks.replace(
-    /^\s*---\s*$/gm,
-    "***"
-  );
+  const bodyHrNormalized = bodyWithoutAnyFrontmatterBlocks.replace(/^\s*---\s*$/gm, "***");
 
   return { yamlText, body: bodyHrNormalized };
 };
@@ -117,15 +128,39 @@ const hasFrontmatterLikeBlockInBody = (body) => {
     for (let j = i + 1; j < Math.min(i + 60, lines.length); j++) {
       const t = lines[j].trim();
 
-      if (t === "---") {
-        return sawYamlKey;
-      }
+      if (t === "---") return sawYamlKey;
 
       // YAML-ish: "key: value"
       if (/^[A-Za-z0-9_][A-Za-z0-9_-]*\s*:\s*.*$/.test(t)) sawYamlKey = true;
     }
   }
   return false;
+};
+
+// Normalize legacy type values to canonical Contentlayer doc names.
+// This prevents noisy warnings for harmless legacy values.
+const normalizeLegacyType = (v) => {
+  const s = String(v || "").trim();
+  if (!s) return "";
+  const low = s.toLowerCase();
+
+  // already canonical
+  const canonical = ["Post", "Book", "Canon", "Download", "Short", "Event", "Print", "Resource", "Strategy", "Document"];
+  if (canonical.includes(s)) return s;
+
+  // common legacy variants
+  if (low === "post" || low === "blog") return "Post";
+  if (low === "book" || low === "books") return "Book";
+  if (low === "canon") return "Canon";
+  if (low === "download" || low === "downloads") return "Download";
+  if (low === "short" || low === "shorts") return "Short";
+  if (low === "event" || low === "events") return "Event";
+  if (low === "print" || low === "prints") return "Print";
+  if (low === "resource" || low === "resources") return "Resource";
+  if (low === "strategy" || low === "strategies") return "Strategy";
+
+  // unknown: return raw
+  return s;
 };
 
 // ------------------------------------------------------------
@@ -138,7 +173,7 @@ const COMMON_FIELDS = new Set([
   "href",
   "aliases",
   "docKind", // ✅ new global field replacing "type:"
-  "type", // keep allowed in case legacy files still have it
+  "type", // legacy field allowed
 
   // dates
   "date",
@@ -191,7 +226,7 @@ const COMMON_FIELDS = new Set([
   "downloads",
   "relatedDownloads",
 
-  // editorial extras (your new additions)
+  // editorial extras
   "keyInsights",
   "authorNote",
 
@@ -202,23 +237,12 @@ const COMMON_FIELDS = new Set([
   "twitterTitle",
   "twitterDescription",
   "twitterImage",
-
-  // canon specifics
-  "volumeNumber",
-  "order",
-  "volume",
-  "part",
-
-  // misc
-  "resourceType",
-  "shortType",
-  "audience",
 ]);
 
 const TYPE_FIELDS = {
   Post: new Set(["series", "isSeriesPart", "seriesOrder"]),
   Book: new Set(["isbn", "pages", "publisher", "edition", "format"]),
-  Canon: new Set(["canonType"]),
+  Canon: new Set(["canonType", "volumeNumber", "order", "volume", "part"]),
   Download: new Set([
     "downloadType",
     "format",
@@ -254,7 +278,7 @@ const TYPE_FIELDS = {
     "features",
     "version",
   ]),
-  Short: new Set(["hook", "callToAction"]),
+  Short: new Set(["hook", "callToAction", "shortType"]),
   Event: new Set([
     "eventType",
     "location",
@@ -268,9 +292,10 @@ const TYPE_FIELDS = {
     "meetingLink",
   ]),
   Print: new Set(["printType", "price", "currency", "isPhysical"]),
-  Resource: new Set(["downloadUrl", "links"]),
+  Resource: new Set(["downloadUrl", "links", "resourceType"]),
   Strategy: new Set(["strategyType", "stage", "industry", "region", "complexity", "timeframe", "deliverables", "version"]),
   Document: new Set([]),
+  Partial: new Set([]),
 };
 
 const allowedForType = (type) =>
@@ -283,9 +308,7 @@ const validateOne = (filePath) => {
   const relativePath = path.relative(contentDir, filePath);
   const raw = readFileSafe(filePath);
 
-  if (!raw) {
-    return { path: relativePath, valid: false, errors: ["Cannot read file"], warnings: [] };
-  }
+  if (!raw) return { path: relativePath, valid: false, errors: ["Cannot read file"], warnings: [] };
 
   const fmCount = countFrontmatterBlocks(raw);
   const fm = extractFirstFrontmatter(raw);
@@ -321,11 +344,17 @@ const validateOne = (filePath) => {
   const folderType = getTypeFromRelativePath(relativePath);
   const allowed = allowedForType(folderType);
 
-  // If legacy "type" is present and conflicts with folder type, warn (or error if strict)
-  if (parsed.type && String(parsed.type).trim() && String(parsed.type) !== folderType) {
-    const msg = `Frontmatter type "${parsed.type}" conflicts with folder type "${folderType}".`;
-    if (STRICT_TYPE_CONFLICT) errors.push(msg);
-    else warnings.push(msg);
+  // Legacy type conflict handling:
+  // - Normalize the legacy type value
+  // - If it matches folder type after normalization => no warning
+  // - If it conflicts => warn or error depending on STRICT_TYPE_CONFLICT
+  if (parsed.type && String(parsed.type).trim()) {
+    const legacy = normalizeLegacyType(parsed.type);
+    if (legacy && legacy !== folderType) {
+      const msg = `Frontmatter type "${parsed.type}" (→ ${legacy}) conflicts with folder type "${folderType}".`;
+      if (STRICT_TYPE_CONFLICT) errors.push(msg);
+      else warnings.push(msg);
+    }
   }
 
   if (!parsed.title || String(parsed.title).trim() === "") {
@@ -341,15 +370,14 @@ const validateOne = (filePath) => {
 
   // Slug vs filename consistency (warning)
   const expectedSlug = fileSlug(filePath);
-const actualSlug = String(parsed.slug || "").trim();
+  const actualSlug = String(parsed.slug || "").trim();
+  const normalizedExpected = expectedSlug
+    .replace(/^post-/, "")
+    .replace(/^book-/, "");
 
-const normalizedExpected = expectedSlug
-  .replace(/^post-/, "")
-  .replace(/^book-/, "");
-
-if (actualSlug && actualSlug !== expectedSlug && actualSlug !== normalizedExpected) {
-  warnings.push(`Slug "${actualSlug}" differs from filename "${expectedSlug}"`);
-}
+  if (actualSlug && actualSlug !== expectedSlug && actualSlug !== normalizedExpected) {
+    warnings.push(`Slug "${actualSlug}" differs from filename "${expectedSlug}"`);
+  }
 
   // Strict slug format: kebab-case only (fatal)
   if (STRICT_SLUG_FORMAT && parsed.slug && String(parsed.slug).trim()) {
@@ -357,20 +385,16 @@ if (actualSlug && actualSlug !== expectedSlug && actualSlug !== normalizedExpect
     if (s.endsWith(".mdx") || s.endsWith(".md")) {
       errors.push(`Invalid slug format: "${s}" (must not include file extension)`);
     } else if (!isValidSlug(s)) {
-      errors.push(
-        `Invalid slug format: "${s}" (use kebab-case: lowercase, digits, hyphens)`
-      );
+      errors.push(`Invalid slug format: "${s}" (use kebab-case: lowercase, digits, hyphens)`);
     }
   }
 
   // keyInsights should be array if present
-  if (parsed.keyInsights && !Array.isArray(parsed.keyInsights)) {
-    warnings.push(`keyInsights should be an array of strings`);
-  }
-
+  if (parsed.keyInsights && !Array.isArray(parsed.keyInsights)) warnings.push(`keyInsights should be an array of strings`);
   if (parsed.tags && !Array.isArray(parsed.tags)) warnings.push("Tags should be an array");
   if (parsed.aliases && !Array.isArray(parsed.aliases)) warnings.push("Aliases should be an array");
 
+  // Unknown fields (type-aware)
   for (const key of Object.keys(parsed)) {
     if (!allowed.has(key)) {
       const msg = `Unknown field "${key}" for type ${folderType}`;
@@ -400,20 +424,18 @@ if (actualSlug && actualSlug !== expectedSlug && actualSlug !== normalizedExpect
     }
   }
 
-  return {
-    path: relativePath,
-    type: folderType,
-    valid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  return { path: relativePath, type: folderType, valid: errors.length === 0, errors, warnings };
 };
 
 // ------------------------------------------------------------
 // RUN
 // ------------------------------------------------------------
 const files = getAllFiles(contentDir);
-const results = files.map(validateOne);
+
+// Ignore _partials by default (they often aren’t documents)
+const results = files
+  .map(validateOne)
+  .filter((r) => r.type !== "Partial");
 
 const errorRows = results.filter((r) => r.errors?.length);
 const warningRows = results.filter((r) => r.warnings?.length);

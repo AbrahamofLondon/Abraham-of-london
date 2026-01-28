@@ -1,0 +1,15 @@
+# Tailwind scan whitelist (keep small, keep fast)
+
+./pages/**/*.{js,ts,jsx,tsx,mdx}
+./components/**/*.{js,ts,jsx,tsx,mdx}
+./app/**/*.{js,ts,jsx,tsx,mdx}
+./layouts/**/*.{js,ts,jsx,tsx,mdx}
+./content/**/*.{md,mdx}
+
+# lib: only where Tailwind classes are realistically present
+./lib/mdx/**/*.{js,ts,jsx,tsx}
+./lib/client/**/*.{js,ts,jsx,tsx}
+./lib/shared/**/*.{js,ts,jsx,tsx}
+./lib/downloads/**/*.{js,ts,jsx,tsx}
+./lib/resources/**/*.{js,ts,jsx,tsx}
+./lib/premium/**/*.{js,ts,jsx,tsx}
