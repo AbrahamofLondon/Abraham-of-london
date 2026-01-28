@@ -1,41 +1,76 @@
-// lib/inner-circle/access.ts - FIXED
-// Re-export for API compatibility
+// lib/inner-circle/access.server.ts — SINGLE SOURCE OF TRUTH (SERVER ONLY)
+import "server-only";
 
-export function createAccessToken(payload: {
-  email: string;
-  name?: string;
-  tier?: string;
-  expiresIn?: string;
-}): string {
-  // This is a server-side implementation
-  // In a real app, you'd use JWT or similar
-  const tokenData = {
-    ...payload,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7) // 7 days
-  };
-  
-  // For now, return a base64 encoded string
-  // In production, use proper JWT signing
-  return Buffer.from(JSON.stringify(tokenData)).toString('base64');
+export type InnerCircleTier = "public" | "basic" | "premium" | "enterprise" | "restricted";
+
+export type InnerCircleAccess = {
+  ok: boolean;
+  tier: InnerCircleTier;
+  isAuthenticated: boolean;
+  // For route guards:
+  canAccessBasic: boolean;
+  canAccessPremium: boolean;
+  canAccessEnterprise: boolean;
+  canAccessRestricted: boolean;
+};
+
+function envTier(): InnerCircleTier | null {
+  const raw = (process.env.DEFAULT_ACCESS_TIER || "").toLowerCase().trim();
+  if (!raw) return null;
+  if (raw === "public" || raw === "basic" || raw === "premium" || raw === "enterprise" || raw === "restricted")
+    return raw;
+  return null;
 }
 
-// Re-export types
-export type { InnerCircleAccess } from "./access.client";
+function tierToFlags(tier: InnerCircleTier) {
+  const rank: Record<InnerCircleTier, number> = {
+    public: 0,
+    basic: 1,
+    premium: 2,
+    enterprise: 3,
+    restricted: 4,
+  };
+  const r = rank[tier];
+  return {
+    canAccessBasic: r >= 1,
+    canAccessPremium: r >= 2,
+    canAccessEnterprise: r >= 3,
+    canAccessRestricted: r >= 4,
+  };
+}
 
-// Export client-side functions
-export { hasInnerCircleAccess, checkClientAccess } from "./access.client";
+/**
+ * getInnerCircleAccess(session)
+ * Works with NextAuth v4 session objects, but doesn't require them.
+ * If you pass nothing, it returns "public".
+ */
+export async function getInnerCircleAccess(session?: any): Promise<InnerCircleAccess> {
+  // If you want a quick “keep deploying” override:
+  const forced = envTier();
+  if (forced) {
+    return {
+      ok: true,
+      tier: forced,
+      isAuthenticated: Boolean(session),
+      ...tierToFlags(forced),
+    };
+  }
 
-// Export from access.server for API routes - ONLY WHAT EXISTS
-export { 
-  // These are the actual functions that exist in access.server.ts
-  getPrivacySafeStatsWithRateLimit,
-  verifyInnerCircleKeyWithRateLimit,
-  getPrivacySafeKeyExportWithRateLimit,
-  createOrUpdateMemberAndIssueKeyWithRateLimit,
-  withInnerCircleRateLimit,
-  createRateLimitHeaders,
-  RATE_LIMIT_CONFIGS,
-  createStrictApiHandler,
-  createPublicApiHandler
-} from "./access.server";
+  // Default behavior (safe):
+  // - If authenticated and has a tier on session.user.tier, use it
+  // - else "public"
+  const tier =
+    (session?.user?.tier as InnerCircleTier) ||
+    (session?.user?.accessLevel as InnerCircleTier) ||
+    "public";
+
+  const normalized: InnerCircleTier =
+    tier === "basic" || tier === "premium" || tier === "enterprise" || tier === "restricted" ? tier : "public";
+
+  return {
+    ok: true,
+    tier: normalized,
+    isAuthenticated: Boolean(session),
+    ...tierToFlags(normalized),
+  };
+}

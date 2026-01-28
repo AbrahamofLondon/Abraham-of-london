@@ -1,10 +1,7 @@
-// pages/auth/signin.tsx
+// pages/auth/signin.tsx — BUILD-SAFE (NextAuth v4), SSR guarded
 import type { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth/next";
 import { signIn } from "next-auth/react";
-
 import Layout from "@/components/Layout";
-import { authOptions } from "@/lib/auth";
 
 export default function SignIn() {
   return (
@@ -26,7 +23,7 @@ export default function SignIn() {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
 
-              signIn("credentials", {
+              void signIn("credentials", {
                 email: formData.get("email"),
                 password: formData.get("password"),
                 callbackUrl: "/",
@@ -81,12 +78,20 @@ export default function SignIn() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  // Build/CI safety: never let auth SSR crash the build
+  try {
+    const [{ getServerSession }, { authOptions }] = await Promise.all([
+      import("next-auth/next"),
+      import("@/lib/auth/options"),
+    ]);
 
-  if (session) {
-    return {
-      redirect: { destination: "/", permanent: false },
-    };
+    const session = await getServerSession(context.req, context.res, authOptions);
+
+    if (session) {
+      return { redirect: { destination: "/", permanent: false } };
+    }
+  } catch {
+    // If auth env isn’t ready at build time, we still render the sign-in page
   }
 
   return { props: {} };

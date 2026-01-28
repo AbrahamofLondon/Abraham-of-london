@@ -1,39 +1,30 @@
-// lib/redis-safe.ts - EDGE-SAFE REDIS WRAPPER
+// lib/redis-safe.ts — PRODUCTION HARDENED, EDGE-SAFE, NO @vercel/kv
 /**
- * This module provides a safe way to access Redis that works in both
- * Node.js and Edge runtimes. It never throws errors and always returns
- * null when Redis is unavailable.
- * 
- * USE THIS instead of importing @/lib/redis directly in Edge routes!
+ * Safe Redis access that works in both Node + Edge without bundling hazards.
+ *
+ * Strategy:
+ * - Prefer Upstash REST (Edge-safe) if UPSTASH_REDIS_REST_URL/TOKEN are present.
+ * - In Node runtime only, fall back to your local ioredis client via "@/lib/redis".
+ * - Final fallback: in-memory store (process-local; best-effort).
+ *
+ * RULE: This module must NEVER import "@vercel/kv".
  */
 
-// ==================== RUNTIME DETECTION (EDGE-SAFE) ====================
+type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 
-// Edge runtime detection - safe for top-level
-const isEdgeRuntime = 
-  typeof EdgeRuntime !== 'undefined' || 
-  typeof caches !== 'undefined' ||
-  (typeof globalThis !== 'undefined' && 'caches' in globalThis);
-
-// Node runtime detection - wrapped in function to avoid top-level process.versions
-function isNodeRuntime(): boolean {
-  try {
-    // Check for Node.js without touching process.versions at module top-level
-    return typeof process !== 'undefined' && 
-           typeof process.release === 'object' && 
-           process.release.name === 'node';
-  } catch {
-    return false;
-  }
-}
-
-// ==================== TYPES ====================
+export type RedisStats = {
+  available: boolean;
+  type: "upstash" | "ioredis" | "memory" | "none";
+  runtime: "edge" | "node" | "unknown";
+  connectionStatus: "connected" | "disconnected" | "unknown";
+  error?: string;
+};
 
 export type SafeRedisClient = {
   get: (key: string) => Promise<string | null>;
   set: (key: string, value: string, ...args: any[]) => Promise<any>;
   del: (...keys: string[]) => Promise<number>;
-  ping: () => Promise<string>;
+  ping: () => Promise<any>;
   keys: (pattern: string) => Promise<string[]>;
   exists: (...keys: string[]) => Promise<number>;
   expire: (key: string, seconds: number) => Promise<number>;
@@ -48,319 +39,83 @@ export type SafeRedisClient = {
   lrange: (key: string, start: number, stop: number) => Promise<string[]>;
 };
 
-export type RedisStats = {
-  available: boolean;
-  type: 'upstash' | 'vercel-kv' | 'ioredis' | 'none';
-  runtime: 'edge' | 'node' | 'unknown';
-  connectionStatus: 'connected' | 'disconnected' | 'unknown';
-  error?: string;
-};
+// -------------------- runtime detection (edge-safe) --------------------
 
-// ==================== ENVIRONMENT DETECTION ====================
+const isEdgeRuntime =
+  typeof (globalThis as any).EdgeRuntime !== "undefined" ||
+  typeof (globalThis as any).caches !== "undefined" ||
+  (typeof globalThis !== "undefined" && "caches" in globalThis);
 
-function getEnvVar(name: string): string | undefined {
+function isNodeRuntime(): boolean {
   try {
-    // Use try-catch for safe environment variable access
-    return typeof process !== 'undefined' && process.env ? process.env[name] : undefined;
+    return (
+      typeof process !== "undefined" &&
+      typeof process.release === "object" &&
+      process.release?.name === "node"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getRuntime(): RedisStats["runtime"] {
+  return isEdgeRuntime ? "edge" : isNodeRuntime() ? "node" : "unknown";
+}
+
+function getEnv(name: string): string | undefined {
+  try {
+    return typeof process !== "undefined" && process.env ? process.env[name] : undefined;
   } catch {
     return undefined;
   }
 }
 
-function getEnvVars(): { 
-  kvUrl?: string; 
-  kvToken?: string; 
-  upstashUrl?: string; 
-  upstashToken?: string;
-  redisUrl?: string;
-} {
-  try {
-    return {
-      kvUrl: getEnvVar('KV_REST_API_URL'),
-      kvToken: getEnvVar('KV_REST_API_TOKEN'),
-      upstashUrl: getEnvVar('UPSTASH_REDIS_REST_URL'),
-      upstashToken: getEnvVar('UPSTASH_REDIS_REST_TOKEN'),
-      redisUrl: getEnvVar('REDIS_URL'),
-    };
-  } catch {
-    return {};
-  }
-}
-
-// ==================== UPSTASH/VERCEL KV (EDGE-COMPATIBLE) ====================
-
-async function getEdgeCompatibleRedis(): Promise<any | null> {
-  const envVars = getEnvVars();
-  
-  // Try Vercel KV first
-  if (envVars.kvUrl && envVars.kvToken) {
-    try {
-      // Dynamic import to avoid bundling issues
-      const { kv } = await import('@vercel/kv');
-      return { client: kv, type: 'vercel-kv' };
-    } catch (error) {
-      console.warn('[Redis Safe] Vercel KV import failed:', error);
-    }
-  }
-
-  // Try Upstash Redis
-  if (envVars.upstashUrl && envVars.upstashToken) {
-    try {
-      const { Redis } = await import('@upstash/redis');
-      const client = new Redis({
-        url: envVars.upstashUrl,
-        token: envVars.upstashToken,
-      });
-      return { client, type: 'upstash' };
-    } catch (error) {
-      console.warn('[Redis Safe] Upstash Redis import failed:', error);
-    }
-  }
-
-  return null;
-}
-
-// ==================== IOREDIS (NODE.JS ONLY) ====================
-
-async function getNodeRedis(): Promise<any | null> {
-  if (isEdgeRuntime) return null; // Never try ioredis in Edge
-  
-  // Only proceed if we're in Node runtime
-  if (!isNodeRuntime()) return null;
-
-  const envVars = getEnvVars();
-  if (!envVars.redisUrl) return null;
-
-  try {
-    // Use dynamic import for ioredis to avoid bundling in Edge
-    const redisModule = await import('@/lib/redis');
-    const redis = typeof redisModule.getRedis === 'function' 
-      ? redisModule.getRedis() 
-      : redisModule.redisClient || null;
-    
-    if (redis) {
-      return { client: redis, type: 'ioredis' };
-    }
-  } catch (error) {
-    console.warn('[Redis Safe] ioredis import failed (this is OK in Edge):', error);
-  }
-
-  return null;
-}
-
-// ==================== MAIN CLIENT GETTER ====================
-
-let cachedRedis: { client: any; type: string } | null | false = null;
-
-async function getRedisClient(): Promise<{ client: any; type: string } | null> {
-  // Return cached result
-  if (cachedRedis !== null) {
-    return cachedRedis || null;
-  }
-
-  // Try Edge-compatible Redis first (works everywhere)
-  const edgeRedis = await getEdgeCompatibleRedis();
-  if (edgeRedis) {
-    cachedRedis = edgeRedis;
-    return edgeRedis;
-  }
-
-  // Try Node.js Redis (only in Node runtime)
-  const nodeRedis = await getNodeRedis();
-  if (nodeRedis) {
-    cachedRedis = nodeRedis;
-    return nodeRedis;
-  }
-
-  // Mark as unavailable
-  cachedRedis = false;
-  return null;
-}
-
-// ==================== SAFE WRAPPER FUNCTIONS ====================
-
-export async function getRedis(): Promise<SafeRedisClient | null> {
-  const redis = await getRedisClient();
-  return redis?.client || null;
-}
-
-export async function getRedisStats(): Promise<RedisStats> {
-  const redis = await getRedisClient();
-  const runtime = isEdgeRuntime ? 'edge' : isNodeRuntime() ? 'node' : 'unknown';
-
-  if (!redis) {
-    return {
-      available: false,
-      type: 'none',
-      runtime,
-      connectionStatus: 'disconnected',
-    };
-  }
-
-  // Test connection
-  let connectionStatus: 'connected' | 'disconnected' | 'unknown' = 'unknown';
-  try {
-    await redis.client.ping();
-    connectionStatus = 'connected';
-  } catch (error) {
-    connectionStatus = 'disconnected';
-  }
-
+function getUpstashEnv(): { url?: string; token?: string } {
   return {
-    available: connectionStatus === 'connected',
-    type: redis.type as any,
-    runtime,
-    connectionStatus,
+    url: getEnv("UPSTASH_REDIS_REST_URL"),
+    token: getEnv("UPSTASH_REDIS_REST_TOKEN"),
   };
 }
 
-// ==================== SAFE OPERATIONS ====================
+// -------------------- in-memory fallback store --------------------
 
-export async function safeGet(key: string): Promise<string | null> {
-  try {
-    const redis = await getRedis();
-    if (!redis?.get) return null;
-    return await redis.get(key);
-  } catch (error) {
-    console.error('[Redis Safe] Get failed:', error);
+type MemRec = { v: string; expiresAt?: number };
+const memory = new Map<string, MemRec>();
+
+function memGet(key: string): string | null {
+  const rec = memory.get(key);
+  if (!rec) return null;
+  if (rec.expiresAt && Date.now() > rec.expiresAt) {
+    memory.delete(key);
     return null;
   }
+  return rec.v ?? null;
 }
 
-export async function safeSet(
-  key: string, 
-  value: string, 
-  options?: { ex?: number; px?: number }
-): Promise<boolean> {
-  try {
-    const redis = await getRedis();
-    if (!redis?.set) return false;
-
-    if (options?.ex) {
-      await redis.set(key, value, 'EX', options.ex);
-    } else if (options?.px) {
-      await redis.set(key, value, 'PX', options.px);
-    } else {
-      await redis.set(key, value);
-    }
-
-    return true;
-  } catch (error) {
-    console.error('[Redis Safe] Set failed:', error);
-    return false;
-  }
+function memSet(key: string, value: string, exSeconds?: number): void {
+  const expiresAt = exSeconds ? Date.now() + exSeconds * 1000 : undefined;
+  memory.set(key, { v: value, expiresAt });
 }
 
-export async function safeDel(...keys: string[]): Promise<number> {
-  try {
-    const redis = await getRedis();
-    if (!redis?.del) return 0;
-    return await redis.del(...keys);
-  } catch (error) {
-    console.error('[Redis Safe] Del failed:', error);
-    return 0;
-  }
+function memDel(...keys: string[]): number {
+  let n = 0;
+  for (const k of keys) if (memory.delete(k)) n++;
+  return n;
 }
 
-export async function safeExists(...keys: string[]): Promise<number> {
-  try {
-    const redis = await getRedis();
-    if (!redis?.exists) return 0;
-    return await redis.exists(...keys);
-  } catch (error) {
-    console.error('[Redis Safe] Exists failed:', error);
-    return 0;
-  }
+function memKeys(pattern: string): string[] {
+  // very light glob: "*" only
+  if (pattern === "*") return Array.from(memory.keys());
+  if (!pattern.includes("*")) return memory.has(pattern) ? [pattern] : [];
+  const prefix = pattern.split("*")[0] ?? "";
+  return Array.from(memory.keys()).filter((k) => k.startsWith(prefix));
 }
 
-export async function safeIncr(key: string): Promise<number | null> {
-  try {
-    const redis = await getRedis();
-    if (!redis?.incr) return null;
-    return await redis.incr(key);
-  } catch (error) {
-    console.error('[Redis Safe] Incr failed:', error);
-    return null;
-  }
-}
-
-export async function safePing(): Promise<boolean> {
-  try {
-    const redis = await getRedis();
-    if (!redis?.ping) return false;
-    const result = await redis.ping();
-    return result === 'PONG' || result === true;
-  } catch (error) {
-    return false;
-  }
-}
-
-// ==================== UTILITY FUNCTIONS ====================
-
-export function isRedisAvailable(): boolean {
-  const envVars = getEnvVars();
-  
-  return Boolean(
-    envVars.upstashUrl ||
-    envVars.kvUrl ||
-    (!isEdgeRuntime && envVars.redisUrl)
-  );
-}
-
-export function getRedisType(): 'upstash' | 'vercel-kv' | 'ioredis' | 'none' {
-  const envVars = getEnvVars();
-  
-  if (envVars.kvUrl) return 'vercel-kv';
-  if (envVars.upstashUrl) return 'upstash';
-  if (!isEdgeRuntime && envVars.redisUrl) return 'ioredis';
-  return 'none';
-}
-
-// ==================== HEALTH CHECK ====================
-
-export async function redisHealthCheck(): Promise<{
-  healthy: boolean;
-  details: RedisStats;
-  latencyMs?: number;
-}> {
-  const start = Date.now();
-  const stats = await getRedisStats();
-  const latencyMs = Date.now() - start;
-
-  return {
-    healthy: stats.available && stats.connectionStatus === 'connected',
-    details: stats,
-    latencyMs,
-  };
-}
-
-// ==================== DEFAULT EXPORT ====================
-
-export default {
-  getRedis,
-  getRedisStats,
-  safeGet,
-  safeSet,
-  safeDel,
-  safeExists,
-  safeIncr,
-  safePing,
-  isRedisAvailable,
-  getRedisType,
-  redisHealthCheck,
-};
-
-// ==================== EXPORT STUB CLIENT ====================
-
-/**
- * Safe stub client that always returns null/false
- * Use this when Redis is definitely not available
- */
 export const redisStub: SafeRedisClient = {
   get: async () => null,
   set: async () => null,
   del: async () => 0,
-  ping: async () => 'PONG',
+  ping: async () => "PONG",
   keys: async () => [],
   exists: async () => 0,
   expire: async () => 0,
@@ -373,4 +128,375 @@ export const redisStub: SafeRedisClient = {
   lpush: async () => 0,
   rpush: async () => 0,
   lrange: async () => [],
+};
+
+// -------------------- client resolution (cached) --------------------
+
+type Resolved = { client: SafeRedisClient; type: RedisStats["type"] };
+
+let cached: Resolved | null | false = null;
+
+async function makeUpstashClient(): Promise<Resolved | null> {
+  const { url, token } = getUpstashEnv();
+  if (!url || !token) return null;
+
+  try {
+    const { Redis } = await import("@upstash/redis");
+    const r = new Redis({ url, token });
+
+    const client: SafeRedisClient = {
+      get: async (k) => {
+        const v = await r.get(k);
+        return typeof v === "string" ? v : v == null ? null : String(v);
+      },
+      set: async (k, v, ...args) => {
+        // support "EX seconds" or "PX ms" style calls
+        if (args?.length >= 2 && typeof args[0] === "string") {
+          const mode = String(args[0]).toUpperCase();
+          const n = Number(args[1]);
+          if (mode === "EX" && Number.isFinite(n)) return r.set(k, v, { ex: n });
+          if (mode === "PX" && Number.isFinite(n)) return r.set(k, v, { px: n });
+        }
+        return r.set(k, v);
+      },
+      del: async (...keys) => {
+        // upstash del accepts variadic keys in newer versions; be defensive:
+        if (keys.length === 1) return (await r.del(keys[0])) as any;
+        const results = await Promise.all(keys.map((k) => r.del(k)));
+        return results.reduce((a, b) => a + (Number(b) || 0), 0);
+      },
+      ping: async () => r.ping(),
+      keys: async (pattern) => {
+        // Upstash REST keys() exists; if not, return []
+        const anyR: any = r as any;
+        if (typeof anyR.keys === "function") return (await anyR.keys(pattern)) as string[];
+        return [];
+      },
+      exists: async (...keys) => {
+        const anyR: any = r as any;
+        if (typeof anyR.exists === "function") return (await anyR.exists(...keys)) as number;
+        // fallback: probe
+        const vals = await Promise.all(keys.map((k) => r.get(k)));
+        return vals.filter((v) => v != null).length;
+      },
+      expire: async (key, seconds) => {
+        const anyR: any = r as any;
+        if (typeof anyR.expire === "function") return (await anyR.expire(key, seconds)) as number;
+        // emulate by reset
+        const v = await r.get(key);
+        if (v == null) return 0;
+        await r.set(key, v as any, { ex: seconds });
+        return 1;
+      },
+      ttl: async (key) => {
+        const anyR: any = r as any;
+        if (typeof anyR.ttl === "function") return (await anyR.ttl(key)) as number;
+        return -1;
+      },
+      incr: async (key) => {
+        const anyR: any = r as any;
+        if (typeof anyR.incr === "function") return (await anyR.incr(key)) as number;
+        const cur = await r.get(key);
+        const next = (Number(cur) || 0) + 1;
+        await r.set(key, String(next));
+        return next;
+      },
+      decr: async (key) => {
+        const anyR: any = r as any;
+        if (typeof anyR.decr === "function") return (await anyR.decr(key)) as number;
+        const cur = await r.get(key);
+        const next = (Number(cur) || 0) - 1;
+        await r.set(key, String(next));
+        return next;
+      },
+      hget: async (key, field) => {
+        const anyR: any = r as any;
+        if (typeof anyR.hget === "function") return (await anyR.hget(key, field)) as string | null;
+        return null;
+      },
+      hset: async (key, field, value) => {
+        const anyR: any = r as any;
+        if (typeof anyR.hset === "function") return (await anyR.hset(key, field, value)) as number;
+        return 0;
+      },
+      hgetall: async (key) => {
+        const anyR: any = r as any;
+        if (typeof anyR.hgetall === "function") return (await anyR.hgetall(key)) as Record<string, string>;
+        return {};
+      },
+      lpush: async (key, ...values) => {
+        const anyR: any = r as any;
+        if (typeof anyR.lpush === "function") return (await anyR.lpush(key, ...values)) as number;
+        return 0;
+      },
+      rpush: async (key, ...values) => {
+        const anyR: any = r as any;
+        if (typeof anyR.rpush === "function") return (await anyR.rpush(key, ...values)) as number;
+        return 0;
+      },
+      lrange: async (key, start, stop) => {
+        const anyR: any = r as any;
+        if (typeof anyR.lrange === "function") return (await anyR.lrange(key, start, stop)) as string[];
+        return [];
+      },
+    };
+
+    return { client, type: "upstash" };
+  } catch {
+    return null;
+  }
+}
+
+async function makeNodeIoredisClient(): Promise<Resolved | null> {
+  if (isEdgeRuntime) return null;
+  if (!isNodeRuntime()) return null;
+
+  // Only attempt if REDIS_URL exists (avoid pointless imports)
+  const redisUrl = getEnv("REDIS_URL");
+  if (!redisUrl) return null;
+
+  try {
+    const mod: any = await import("@/lib/redis");
+    const r =
+      typeof mod.getRedis === "function"
+        ? mod.getRedis()
+        : mod.redisClient
+          ? mod.redisClient
+          : null;
+
+    if (!r) return null;
+
+    const client: SafeRedisClient = {
+      get: (k) => r.get(k),
+      set: (k, v, ...args) => r.set(k, v, ...args),
+      del: (...keys) => r.del(...keys),
+      ping: () => r.ping(),
+      keys: (pattern) => r.keys(pattern),
+      exists: (...keys) => r.exists(...keys),
+      expire: (k, s) => r.expire(k, s),
+      ttl: (k) => r.ttl(k),
+      incr: (k) => r.incr(k),
+      decr: (k) => r.decr(k),
+      hget: (k, f) => r.hget(k, f),
+      hset: (k, f, v) => r.hset(k, f, v),
+      hgetall: (k) => r.hgetall(k),
+      lpush: (k, ...v) => r.lpush(k, ...v),
+      rpush: (k, ...v) => r.rpush(k, ...v),
+      lrange: (k, s, e) => r.lrange(k, s, e),
+    };
+
+    return { client, type: "ioredis" };
+  } catch {
+    return null;
+  }
+}
+
+function makeMemoryClient(): Resolved {
+  const client: SafeRedisClient = {
+    get: async (k) => memGet(k),
+    set: async (k, v, ...args) => {
+      // support set(key,val,'EX',seconds)
+      if (args?.length >= 2 && typeof args[0] === "string") {
+        const mode = String(args[0]).toUpperCase();
+        const n = Number(args[1]);
+        if (mode === "EX" && Number.isFinite(n)) {
+          memSet(k, v, n);
+          return "OK";
+        }
+      }
+      memSet(k, v);
+      return "OK";
+    },
+    del: async (...keys) => memDel(...keys),
+    ping: async () => "PONG",
+    keys: async (pattern) => memKeys(pattern),
+    exists: async (...keys) => keys.filter((k) => memGet(k) != null).length,
+    expire: async (k, s) => {
+      const v = memGet(k);
+      if (v == null) return 0;
+      memSet(k, v, s);
+      return 1;
+    },
+    ttl: async () => -1,
+    incr: async (k) => {
+      const cur = Number(memGet(k) ?? "0") || 0;
+      const next = cur + 1;
+      memSet(k, String(next));
+      return next;
+    },
+    decr: async (k) => {
+      const cur = Number(memGet(k) ?? "0") || 0;
+      const next = cur - 1;
+      memSet(k, String(next));
+      return next;
+    },
+    hget: async () => null,
+    hset: async () => 0,
+    hgetall: async () => ({}),
+    lpush: async () => 0,
+    rpush: async () => 0,
+    lrange: async () => [],
+  };
+
+  return { client, type: "memory" };
+}
+
+async function resolveClient(): Promise<Resolved | null> {
+  if (cached !== null) return cached || null;
+
+  // Upstash first (works in Edge + Node)
+  const upstash = await makeUpstashClient();
+  if (upstash) {
+    cached = upstash;
+    return upstash;
+  }
+
+  // Node ioredis second (Node only)
+  const node = await makeNodeIoredisClient();
+  if (node) {
+    cached = node;
+    return node;
+  }
+
+  // Memory fallback last
+  const mem = makeMemoryClient();
+  cached = mem;
+  return mem;
+}
+
+// -------------------- public API --------------------
+
+export async function getRedis(): Promise<SafeRedisClient | null> {
+  try {
+    const r = await resolveClient();
+    return r?.client ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getRedisStats(): Promise<RedisStats> {
+  const runtime = getRuntime();
+
+  try {
+    const r = await resolveClient();
+    if (!r) {
+      return {
+        available: false,
+        type: "none",
+        runtime,
+        connectionStatus: "disconnected",
+      };
+    }
+
+    let status: RedisStats["connectionStatus"] = "unknown";
+    try {
+      await r.client.ping();
+      status = "connected";
+    } catch {
+      status = "disconnected";
+    }
+
+    return {
+      available: status === "connected" && r.type !== "memory",
+      type: r.type,
+      runtime,
+      connectionStatus: status,
+    };
+  } catch (e: any) {
+    return {
+      available: false,
+      type: "none",
+      runtime,
+      connectionStatus: "disconnected",
+      error: e?.message ? String(e.message) : "unknown error",
+    };
+  }
+}
+
+// Convenience helpers (never throw)
+export async function safeGet(key: string): Promise<string | null> {
+  try {
+    const r = await getRedis();
+    return r?.get ? await r.get(key) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function safeSet(
+  key: string,
+  value: string,
+  options?: { ex?: number; px?: number }
+): Promise<boolean> {
+  try {
+    const r = await getRedis();
+    if (!r?.set) return false;
+
+    if (options?.ex) {
+      await r.set(key, value, "EX", options.ex);
+      return true;
+    }
+    if (options?.px) {
+      await r.set(key, value, "PX", options.px);
+      return true;
+    }
+
+    await r.set(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function safeDel(...keys: string[]): Promise<number> {
+  try {
+    const r = await getRedis();
+    return r?.del ? await r.del(...keys) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function safePing(): Promise<boolean> {
+  try {
+    const r = await getRedis();
+    if (!r?.ping) return false;
+    const out = await r.ping();
+    return out === "PONG" || out === true;
+  } catch {
+    return false;
+  }
+}
+
+export async function redisHealthCheck(): Promise<{
+  healthy: boolean;
+  details: RedisStats;
+  latencyMs?: number;
+}> {
+  const start = Date.now();
+  const details = await getRedisStats();
+  return {
+    healthy: details.connectionStatus === "connected",
+    details,
+    latencyMs: Date.now() - start,
+  };
+}
+
+export function isRedisConfigured(): boolean {
+  const { url, token } = getUpstashEnv();
+  const nodeUrl = getEnv("REDIS_URL");
+  return Boolean((url && token) || nodeUrl);
+}
+
+export default {
+  getRedis,
+  getRedisStats,
+  safeGet,
+  safeSet,
+  safeDel,
+  safePing,
+  redisHealthCheck,
+  isRedisConfigured,
+  redisStub,
 };
