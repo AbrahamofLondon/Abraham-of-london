@@ -2,7 +2,8 @@
 
 [build]
   command = "pnpm build:netlify"
-  publish = ".next"
+  # DO NOT set publish here - let the Next.js plugin handle it
+  # publish = ".next"  # REMOVE THIS LINE
   functions = "netlify/functions"
 
 [[plugins]]
