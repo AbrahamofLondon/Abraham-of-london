@@ -1,11 +1,7 @@
-# netlify.toml — PROMISED LAND (NEXT 16 + PNPM 10, ZERO PUBLISH DRAMA)
-# ✅ Next.js runtime handled by @netlify/plugin-nextjs
-# ✅ No publish dir (plugin decides)
-# ✅ Deterministic installs, stable Node, sane memory
+# netlify.toml — PROMISED LAND (Next.js + PNPM, plugin-first, parse-safe)
 
 [build]
   command = "pnpm build:netlify"
-  publish = ".next"
   functions = "netlify/functions"
 
 [[plugins]]
@@ -18,13 +14,6 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
-
-  CI = "true"
-  NEXT_TELEMETRY_DISABLED = "1"
-
-  # keep CI predictable
-  CONTENTLAYER_DISABLE_WARNINGS = "1"
-  NEXT_DISABLE_SOURCEMAPS = "true"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -43,6 +32,7 @@
   NEXT_DISABLE_SOURCEMAPS = "false"
 
 # ===================== DOMAIN CANONICALIZATION =====================
+
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -60,7 +50,8 @@
   to = "/"
   status = 301
 
-# ===================== OPTIONAL CONTENT ALIASES =====================
+# ===================== CONTENT ALIASES =====================
+
 [[redirects]]
   from = "/blog/:slug"
   to = "/insights/:slug"
@@ -77,6 +68,7 @@
   status = 301
 
 # ===================== SECURITY HEADERS =====================
+
 [[headers]]
   for = "/*"
   [headers.values]
