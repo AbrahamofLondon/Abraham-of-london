@@ -1,7 +1,8 @@
-# netlify.toml — PROMISED LAND (Next.js + PNPM, plugin-first, parse-safe)
+# netlify.toml — NEXTJS PLUGIN COMPAT (publish cannot equal base)
 
 [build]
   command = "pnpm build:netlify"
+  publish = ".next"
   functions = "netlify/functions"
 
 [[plugins]]
@@ -31,8 +32,6 @@
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
 
-# ===================== DOMAIN CANONICALIZATION =====================
-
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -50,8 +49,6 @@
   to = "/"
   status = 301
 
-# ===================== CONTENT ALIASES =====================
-
 [[redirects]]
   from = "/blog/:slug"
   to = "/insights/:slug"
@@ -66,8 +63,6 @@
   from = "/news/:slug"
   to = "/insights/:slug"
   status = 301
-
-# ===================== SECURITY HEADERS =====================
 
 [[headers]]
   for = "/*"
