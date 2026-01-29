@@ -97,11 +97,29 @@ const config = {
     };
   },
   
+  // ==================== XML OPTIONS ====================
   autoLastmod: true,
   trailingSlash: false,
   sourceDir: '.next',
   outDir: 'public',
+  
+  // ==================== GZIP COMPRESSION ====================
+  // ✅ FIXED: Enable gzip compression
   gzip: true,
+  
+  // ==================== ADDITIONAL OPTIONS ====================
+  // These help with Next.js specific optimizations
+  excludeExtensions: [
+    'js',
+    'css',
+    'map',
+    'json',
+  ],
+  
+  // Custom transform for better performance
+  async additionalPaths(config) {
+    return [];
+  },
 };
 
 function calculatePriority(path) {
@@ -112,6 +130,10 @@ function calculatePriority(path) {
   if (path.includes('/blog/')) return 0.8;
   if (path.includes('/canons/')) return 0.8;
   if (path.includes('/strategies/')) return 0.8;
+  if (path.includes('/resources/')) return 0.7;
+  if (path.includes('/books/')) return 0.6;
+  
+  // Calculate based on depth
   const depth = path.split('/').filter(Boolean).length;
   return Math.max(0.3, 1.0 - (depth * 0.1));
 }
@@ -122,6 +144,7 @@ function calculateChangeFrequency(path) {
   if (path.includes('/canons/')) return 'monthly';
   if (path.includes('/strategies/')) return 'monthly';
   if (path.includes('/resources/')) return 'monthly';
+  if (path.includes('/books/')) return 'yearly';
   return 'monthly';
 }
 

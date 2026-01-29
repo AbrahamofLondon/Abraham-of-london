@@ -24,7 +24,7 @@
     "//6": "─────────────────────────────────────────────────────────────────────────────",
     "//7": "POST-BUILD (KEEP CI LIGHT — run heavier tests elsewhere)",
     "//8": "─────────────────────────────────────────────────────────────────────────────",
-    "postbuild": "pnpm sitemap:generate",
+    "postbuild": "next-sitemap --config next-sitemap.config.js",
     "start": "next start",
     "preview": "next start --port 3001",
     "//9": "─────────────────────────────────────────────────────────────────────────────",
@@ -320,6 +320,7 @@
     "url": "^0.11.4",
     "util": "^0.12.5",
     "uuid": "^13.0.0",
+    "xml2js": "^0.6.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -371,6 +372,7 @@
     "pg": "^8.17.2",
     "puppeteer": "^24.36.1",
     "puppeteer-core": "^24.36.1",
+    "next-sitemap": "4.2.3",
     "tsx": "^4.21.0"
   },
   "pnpm": {
