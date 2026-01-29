@@ -1,32 +1,27 @@
-# netlify.toml — ENTERPRISE PRODUCTION CONFIG (NEXT.js)
+# netlify.toml — PROMISED LAND (NEXT 16 + PNPM 10, ZERO PUBLISH DRAMA)
+# ✅ Next.js runtime handled by @netlify/plugin-nextjs
+# ✅ No publish dir (plugin decides)
+# ✅ Deterministic installs, stable Node, sane memory
 
 [build]
   command = "pnpm build:netlify"
-  # DO NOT set publish here - let the Next.js plugin handle it
-  # publish = ".next"  # REMOVE THIS LINE
   functions = "netlify/functions"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  # Use Netlify's Node, keep it aligned with your .nvmrc/lock expectations
   NODE_VERSION = "20.20.0"
+  NPM_FLAGS = "--version" # harmless; keeps Netlify from trying npm nonsense
+  PNPM_VERSION = "10.28.1"
   NODE_OPTIONS = "--max-old-space-size=4096"
 
-  # Critical: do NOT set NODE_ENV here.
-  # Netlify/Next will run production builds correctly without blocking devDependencies install.
-  # NODE_ENV = "production"  (INTENTIONALLY REMOVED)
-
-  # CI controls
   CI = "true"
-  SKIP_ASSET_OPTIMIZE = "1"
-  CONTENTLAYER_DISABLE_WARNINGS = "1"
   NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_DISABLE_SOURCEMAPS = "true"
 
-  # App env
-  NEXT_PUBLIC_APP_ENV = "production"
+  # keep CI predictable
+  CONTENTLAYER_DISABLE_WARNINGS = "1"
+  NEXT_DISABLE_SOURCEMAPS = "true"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -44,7 +39,7 @@
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
 
-# =============== DOMAIN REDIRECTS ===============
+# ===================== DOMAIN CANONICALIZATION =====================
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -57,117 +52,12 @@
   status = 301
   force = true
 
-# =============== CANONICAL REDIRECTS ===============
 [[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
 
-# =============== WORKSHOP REDIRECTS ===============
-[[redirects]]
-  from = "/workshop/purpose-pyramid"
-  to = "/workshops/purpose-pyramid"
-  status = 301
-
-[[redirects]]
-  from = "/workshop/decision-matrix"
-  to = "/workshops/decision-matrix"
-  status = 301
-
-[[redirects]]
-  from = "/workshop/legacy-canvas"
-  to = "/workshops/legacy-canvas"
-  status = 301
-
-[[redirects]]
-  from = "/workshops/purpose-pyramid-workshop"
-  to = "/workshops/purpose-pyramid"
-  status = 301
-
-[[redirects]]
-  from = "/workshops/decision-matrix-workshop"
-  to = "/workshops/decision-matrix"
-  status = 301
-
-[[redirects]]
-  from = "/workshops/legacy-canvas-workshop"
-  to = "/workshops/legacy-canvas"
-  status = 301
-
-# =============== PDF DOWNLOAD REDIRECTS ===============
-[[redirects]]
-  from = "/downloads/purpose-pyramid-worksheet-fillable.pdf"
-  to = "/downloads/purpose-pyramid.pdf"
-  status = 301
-
-[[redirects]]
-  from = "/downloads/decision-matrix-worksheet-fillable.pdf"
-  to = "/downloads/decision-matrix.pdf"
-  status = 301
-
-[[redirects]]
-  from = "/downloads/legacy-canvas-worksheet-fillable.pdf"
-  to = "/downloads/legacy-canvas.pdf"
-  status = 301
-
-[[redirects]]
-  from = "/public/downloads/purpose-pyramid.pdf"
-  to = "/downloads/purpose-pyramid.pdf"
-  status = 301
-
-[[redirects]]
-  from = "/public/downloads/decision-matrix.pdf"
-  to = "/downloads/decision-matrix.pdf"
-  status = 301
-
-[[redirects]]
-  from = "/public/downloads/legacy-canvas.pdf"
-  to = "/downloads/legacy-canvas.pdf"
-  status = 301
-
-# =============== RESOURCE REDIRECTS ===============
-[[redirects]]
-  from = "/resources/leadership-standards"
-  to = "/resources/leadership-standards-blueprint"
-  status = 301
-
-[[redirects]]
-  from = "/resources/purpose-pyramid-guide"
-  to = "/resources/purpose-pyramid"
-  status = 301
-
-[[redirects]]
-  from = "/resources/legacy-framework"
-  to = "/resources/legacy-canvas"
-  status = 301
-
-# =============== PAGE ALIAS REDIRECTS ===============
-[[redirects]]
-  from = "/about-us"
-  to = "/about"
-  status = 301
-
-[[redirects]]
-  from = "/contact-us"
-  to = "/contact"
-  status = 301
-
-[[redirects]]
-  from = "/get-in-touch"
-  to = "/contact"
-  status = 301
-
-[[redirects]]
-  from = "/services/coaching"
-  to = "/services/executive-coaching"
-  status = 301
-
-[[redirects]]
-  from = "/services/consulting"
-  to = "/services/leadership-development"
-  status = 301
-
-# =============== CONTENT ALIAS REDIRECTS ===============
+# ===================== OPTIONAL CONTENT ALIASES =====================
 [[redirects]]
   from = "/blog/:slug"
   to = "/insights/:slug"
@@ -183,19 +73,7 @@
   to = "/insights/:slug"
   status = 301
 
-# =============== DOWNLOAD ALIAS REDIRECTS ===============
-[[redirects]]
-  from = "/downloads/leadership-standards-blueprint.pdf"
-  to = "/downloads/leadership-standards-blueprint"
-  status = 301
-
-# IMPORTANT:
-# Remove this catch-all SPA redirect for Next.js.
-# Next handles routing/404. This rule can cause confusing behavior and extra work.
-# If you truly need SPA behavior, do it intentionally with next.config rewrites.
-# (INTENTIONALLY OMITTED)  [[redirects]] from="/*" to="/index.html" status=200 conditions={StatusCode="404"}
-
-# =============== SECURITY HEADERS ===============
+# ===================== SECURITY HEADERS =====================
 [[headers]]
   for = "/*"
   [headers.values]
@@ -223,17 +101,6 @@
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
     Content-Disposition = "inline"
-
-[[headers]]
-  for = "/assets/downloads/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    X-Content-Type-Options = "nosniff"
-
-[[headers]]
-  for = "/_next/image/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/api/*"

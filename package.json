@@ -375,7 +375,6 @@
   },
   "pnpm": {
     "overrides": {
-      "eslint": "8.57.1",
       "hono": "^4.11.4",
       "@modelcontextprotocol/sdk": "^1.25.2",
       "opencontrol>hono": "^4.11.7",
