@@ -1,45 +1,88 @@
-// FIXED: pages/api/admin/inner-circle/issue.ts
+// pages/api/admin/inner-circle/issue.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { createOrUpdateMemberAndIssueKeyWithRateLimit } from "@/lib/inner-circle/exports.server";
-import { createAccessToken } from "@/lib/inner-circle/access.server";
+import "server-only";
 
-function assertAdmin(req: NextApiRequest) {
-  const k = req.headers["x-admin-key"];
-  const provided = Array.isArray(k) ? k[0] : k;
-  if (!provided || provided !== process.env.ADMIN_API_KEY) throw new Error("forbidden");
+import { createOrUpdateMemberAndIssueKey } from "@/lib/inner-circle/keys.server";
+import { normalizeTier } from "@/lib/inner-circle/access.server";
+
+type Ok = {
+  ok: true;
+  memberId: string;
+  tier: string;
+  key: string; // issued key (admin route, so allowed)
+};
+
+type Err = { ok: false; error: string };
+
+function methodNotAllowed(res: NextApiResponse<Err>) {
+  res.setHeader("Allow", "POST");
+  return res.status(405).json({ ok: false, error: "Method Not Allowed" });
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+// ✅ Minimal admin gate placeholder.
+// Replace with your real admin auth (session, key, allowlist, etc.).
+function assertAdmin(req: NextApiRequest) {
+  const expected = process.env.INNER_CIRCLE_ADMIN_SECRET;
+  if (!expected) {
+    // Fail closed: if not configured, don't issue keys.
+    throw new Error("Server misconfigured: INNER_CIRCLE_ADMIN_SECRET not set");
+  }
+  const provided =
+    (req.headers["x-admin-secret"] as string | undefined) ||
+    (req.query.adminSecret as string | undefined);
+
+  if (!provided || provided !== expected) {
+    throw new Error("Unauthorized");
+  }
+}
+
+function pickString(v: unknown): string {
+  return typeof v === "string" ? v.trim() : "";
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Err>) {
   try {
+    if (req.method !== "POST") return methodNotAllowed(res);
+
     assertAdmin(req);
 
-    if (req.method !== "POST") return res.status(405).end();
+    const email = pickString(req.body?.email);
+    const memberId = pickString(req.body?.memberId);
+    const tierRaw = req.body?.tier;
 
-    const { memberId, tier = "member", mode = "jwt", expiresAt } = req.body ?? {};
-
-    if (!memberId) return res.status(400).json({ error: "memberId_required" });
-    if (!["member", "patron", "founder"].includes(tier)) return res.status(400).json({ error: "invalid_tier" });
-    if (!["jwt", "key"].includes(mode)) return res.status(400).json({ error: "invalid_mode" });
-
-    if (mode === "jwt") {
-      const token = createAccessToken({ memberId, tier, ttlDays: 30 });
-      return res.status(200).json({ success: true, mode: "jwt", token, tier, memberId });
+    if (!email && !memberId) {
+      return res.status(400).json({ ok: false, error: "Provide email or memberId" });
     }
 
-    const key = generateAccessKey();
-    const record: StoredKey = {
-      key,
-      memberId,
-      tier,
-      createdAt: new Date().toISOString(),
-      expiresAt: expiresAt || undefined,
-      revoked: false,
-    };
+    const tier = normalizeTier(tierRaw);
 
-    await storeKey(record);
-    return res.status(200).json({ success: true, mode: "key", key, tier, memberId, expiresAt: record.expiresAt ?? null });
+    // ✅ issues/updates a key (single source of truth: keys.server)
+    const result = await createOrUpdateMemberAndIssueKey({
+      email: email || undefined,
+      memberId: memberId || undefined,
+      tier,
+      meta: {
+        issuedBy: "admin-api",
+        issuedAt: new Date().toISOString(),
+        ip: (req.headers["x-forwarded-for"] as string | undefined) || req.socket.remoteAddress || "",
+        ua: req.headers["user-agent"] || "",
+      },
+    });
+
+    // Expected shape: { memberId, tier, key } (adapt if yours differs)
+    if (!result?.key || !result?.memberId) {
+      return res.status(500).json({ ok: false, error: "Failed to issue key" });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      memberId: String(result.memberId),
+      tier: String(result.tier || tier),
+      key: String(result.key),
+    });
   } catch (e: any) {
-    if (e?.message === "forbidden") return res.status(403).json({ error: "forbidden" });
-    return res.status(500).json({ error: "server_error" });
+    const msg = typeof e?.message === "string" ? e.message : "Unknown error";
+    const status = msg === "Unauthorized" ? 401 : 500;
+    return res.status(status).json({ ok: false, error: msg });
   }
 }

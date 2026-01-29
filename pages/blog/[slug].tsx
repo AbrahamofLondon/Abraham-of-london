@@ -1,354 +1,232 @@
-/* pages/blog/[slug].tsx — ESSAY READER (INTEGRITY MODE) */
+/* pages/blog/[slug].tsx — Production Stable (Pages Router, map-safe) */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
 
-// ✅ FIXED: Use contentlayer-helper for ALL server-side functions
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+
 import {
+  getAllContentlayerDocs,
+  getDocBySlug,
   normalizeSlug,
-  getPublishedPosts,
-  getPostBySlug,
-  getPostBySlugWithContent,
-} from "@/lib/contentlayer-helper";
+  sanitizeData,
+} from "@/lib/content/server";
 
-import { prepareMDX, simpleMdxComponents } from "@/lib/server/md-utils";
-
-// UI components
-import BlogHeader from "@/components/blog/BlogHeader";
-import BlogContent from "@/components/blog/BlogContent";
-import BlogSidebar from "@/components/blog/BlogSidebar";
-import BlogFooter from "@/components/blog/BlogFooter";
-import ShareButtons from "@/components/ShareButtons";
-import AuthorBio from "@/components/AuthorBio";
-import RelatedPosts from "@/components/blog/RelatedPosts";
-import ResourceGrid from "@/components/blog/ResourceGrid";
-
-import { ChevronLeft, Clock, Calendar, User, Tag } from "lucide-react";
-import { safeSlice } from "@/lib/utils/safe";
-
-
-// Client-only hydration-safe components
+// Client-only enhancements
 const ReadingProgress = dynamic(() => import("@/components/enhanced/ReadingProgress"), { ssr: false });
 const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
 const TableOfContents = dynamic(() => import("@/components/enhanced/TableOfContents"), { ssr: false });
 const ReadTime = dynamic(() => import("@/components/enhanced/ReadTime"), { ssr: false });
 
-const extendedComponents = {
-  ...simpleMdxComponents,
-  ResourceGrid,
-};
-
-type TocItem = { id: string; text: string; level: number };
-type ReadingTime = { minutes: number; words: number };
-
-type PostLike = {
-  _id?: string;
+type PostDoc = {
   title?: string | null;
   excerpt?: string | null;
-  author?: string | null;
+  description?: string | null;
   date?: string | null;
-  slug: string;
-  coverImage?: string | null;
+  author?: string | null;
+  slug?: string | null;
   tags?: string[] | null;
+  coverImage?: string | null;
+  draft?: boolean;
+  published?: boolean;
+  status?: string;
+  accessLevel?: string | null;
   body?: { raw?: string };
   bodyRaw?: string;
-  [key: string]: any;
+  _raw?: { flattenedPath?: string; sourceFileDir?: string };
+  kind?: string;
+  type?: string;
+  [k: string]: any;
 };
 
-type PageProps = {
-  post: PostLike;
+type Props = {
+  post: {
+    title: string;
+    excerpt: string | null;
+    description: string | null;
+    date: string | null;
+    author: string | null;
+    slug: string;
+    url: string;
+    tags: string[];
+    coverImage: string | null;
+    readTime: string | null;
+  };
   source: MDXRemoteSerializeResult;
-  toc: TocItem[] | null;
-  readingTime: ReadingTime | null;
-  related: any[];
 };
 
-function getRawBody(post: PostLike): string {
-  return post?.body?.raw || (typeof post?.bodyRaw === "string" ? post.bodyRaw : "") || "";
+function isDraftContent(doc: any): boolean {
+  if (!doc) return true;
+  if (doc.draft === true) return true;
+  if (doc.published === false) return true;
+  const s = String(doc.status || "").toLowerCase();
+  if (s === "draft" || s === "unpublished") return true;
+  return false;
 }
 
-/**
- * Normalize the return shape of prepareMDX.
- * Some codebases return MDXRemoteSerializeResult.
- * Others return { source, toc, readingTime }.
- */
-function normalizePrepareMdxResult(
-  mdxResult: unknown
-): { source: MDXRemoteSerializeResult | null; toc: TocItem[] | null; readingTime: ReadingTime | null } {
-  // If it already looks like an MDXRemoteSerializeResult (compiledSource is typical)
-  const r = mdxResult as any;
-  if (r && typeof r === "object") {
-    if (typeof r.compiledSource === "string") {
-      return { source: r as MDXRemoteSerializeResult, toc: null, readingTime: null };
-    }
-    if (r.source && typeof r.source === "object") {
-      return {
-        source: r.source as MDXRemoteSerializeResult,
-        toc: Array.isArray(r.toc) ? (r.toc as TocItem[]) : null,
-        readingTime: r.readingTime && typeof r.readingTime === "object" ? (r.readingTime as ReadingTime) : null,
-      };
-    }
-  }
-  return { source: null, toc: null, readingTime: null };
+function isPostDoc(d: any): boolean {
+  const kind = String(d?.kind || d?.type || "").toLowerCase();
+  if (kind === "post" || kind === "blog") return true;
+  const dir = String(d?._raw?.sourceFileDir || "").toLowerCase();
+  const flat = String(d?._raw?.flattenedPath || "").toLowerCase();
+  return dir.includes("blog") || flat.startsWith("blog/");
 }
 
-const BlogSlugPage: NextPage<PageProps> = ({ post, source, toc, readingTime, related }) => {
-  const router = useRouter();
+function postSlugFromDoc(d: PostDoc): string {
+  const raw =
+    normalizeSlug(String(d.slug || "")) ||
+    normalizeSlug(String(d._raw?.flattenedPath || "")) ||
+    "";
+  return raw.replace(/^blog\//, "").replace(/\.(md|mdx)$/i, "");
+}
 
-  // fallback="blocking" should reduce this, but keep it safe
-  if (router.isFallback) {
-    return (
-      <Layout>
-        <div className="mx-auto max-w-5xl px-4 py-16">
-          <div className="h-8 w-2/3 rounded bg-gray-200 animate-pulse mb-6" />
-          <div className="h-4 w-full rounded bg-gray-200 animate-pulse mb-2" />
-          <div className="h-4 w-5/6 rounded bg-gray-200 animate-pulse mb-2" />
-          <div className="h-4 w-3/4 rounded bg-gray-200 animate-pulse" />
-        </div>
-      </Layout>
-    );
+function getRawBody(d: PostDoc): string {
+  return d?.body?.raw || (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") || "";
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  try {
+    const docs = getAllContentlayerDocs();
+    const posts = (Array.isArray(docs) ? docs : [])
+      .filter(isPostDoc)
+      .filter((p: any) => !isDraftContent(p));
+
+    const paths = posts
+      .map((p: any) => postSlugFromDoc(p))
+      .filter(Boolean)
+      .map((slug: string) => ({ params: { slug } }));
+
+    return { paths, fallback: "blocking" };
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Error generating blog paths:", e);
+    return { paths: [], fallback: "blocking" };
   }
+};
 
-  const title = post?.title ?? "Essay";
-  const description = post?.excerpt ?? "";
-  const canonical = post?.slug
-    ? `https://www.abrahamoflondon.org/blog/${normalizeSlug(post.slug)}`
-    : undefined;
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  try {
+    const raw = params?.slug;
+    const slug = Array.isArray(raw) ? raw[0] : raw;
+    const s = normalizeSlug(String(slug || ""));
+    if (!s) return { notFound: true };
+
+    const doc =
+      (getDocBySlug(`blog/${s}`) as PostDoc | null) ||
+      (getDocBySlug(s) as PostDoc | null);
+
+    if (!doc || !isPostDoc(doc) || isDraftContent(doc)) return { notFound: true };
+
+    const mdx = getRawBody(doc);
+    const source = await serialize(mdx || " ", {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug],
+      },
+    });
+
+    const cleanSlug = postSlugFromDoc(doc) || s;
+    const url = `/blog/${cleanSlug}`;
+
+    const post = {
+      title: String(doc.title || "Post").trim() || "Post",
+      excerpt: typeof doc.excerpt === "string" ? doc.excerpt : null,
+      description: typeof doc.description === "string" ? doc.description : (typeof doc.excerpt === "string" ? doc.excerpt : null),
+      date: typeof doc.date === "string" ? doc.date : null,
+      author: typeof doc.author === "string" ? doc.author : "Abraham of London",
+      slug: cleanSlug,
+      url,
+      tags: Array.isArray(doc.tags) ? doc.tags : [],
+      coverImage: typeof doc.coverImage === "string" ? doc.coverImage : null,
+      readTime: typeof (doc as any).readTime === "string" ? (doc as any).readTime : null,
+    };
+
+    return {
+      props: sanitizeData({
+        post,
+        source,
+      }),
+      revalidate: 1800,
+    };
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Error building blog slug:", e);
+    return { notFound: true };
+  }
+};
+
+const BlogPostPage: NextPage<Props> = ({ post, source }) => {
+  const tags = Array.isArray(post.tags) ? post.tags : [];
 
   return (
-    <Layout>
+    <Layout title={post.title} description={post.description || post.excerpt || ""} ogImage={post.coverImage || ""}>
       <Head>
-        <title>{title}</title>
-        {description ? <meta name="description" content={description} /> : null}
-        {canonical ? <link rel="canonical" href={canonical} /> : null}
-
+        <link rel="canonical" href={`https://www.abrahamoflondon.org${post.url}`} />
         <meta property="og:type" content="article" />
-        <meta property="og:title" content={title} />
-        {description ? <meta property="og:description" content={description} /> : null}
-        {canonical ? <meta property="og:url" content={canonical} /> : null}
+        <meta property="og:url" content={`https://www.abrahamoflondon.org${post.url}`} />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.description || post.excerpt || ""} />
+        {post.coverImage ? <meta property="og:image" content={post.coverImage} /> : null}
       </Head>
 
-      <div className="relative">
-        {/* Top utilities */}
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Back
-          </button>
-        </div>
+      <ReadingProgress />
 
-        {/* Reading Progress */}
-        <ReadingProgress />
+      <main className="min-h-screen bg-black text-cream pt-20 pb-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <header className="mb-10 border-b border-white/10 pb-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">Blog</p>
+            <h1 className="mt-4 font-serif text-4xl md:text-5xl text-white">{post.title}</h1>
+            {post.excerpt ? <p className="mt-6 text-lg text-gray-400">{post.excerpt}</p> : null}
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            {/* Main */}
-            <article className="lg:col-span-8">
-              <BlogHeader post={post} />
-
-              {/* Meta Row */}
-              <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
-                {post?.date ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    {post.date}
-                  </span>
-                ) : null}
-
-                {post?.author ? (
-                  <span className="inline-flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    {post.author}
-                  </span>
-                ) : null}
-
-                {readingTime?.minutes ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    {readingTime.minutes} min read
-                  </span>
-                ) : (
-                  <ReadTime content={getRawBody(post)} />
-                )}
-
-                {Array.isArray(post?.tags) && post.tags.length ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Tag className="h-4 w-4" />
-                    {post.safeSlice(tags, 0, 3).join(", ")}
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="mt-8">
-                <BlogContent>
-                  <MDXRemote {...source} components={extendedComponents} />
-                </BlogContent>
-              </div>
-
-              <div className="mt-10">
-                <ShareButtons title={title} />
-              </div>
-
-              <div className="mt-10">
-                <AuthorBio post={post} />
-              </div>
-
-              {Array.isArray(related) && related.length ? (
-                <div className="mt-12">
-                  <RelatedPosts posts={related} />
-                </div>
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+              {post.date ? <span>{new Date(post.date).toLocaleDateString("en-GB")}</span> : null}
+              {post.readTime ? (
+                <span className="inline-flex items-center gap-2">
+                  <ReadTime content={post.readTime} />
+                  <span>{post.readTime}</span>
+                </span>
               ) : null}
+              {post.author ? <span>— {post.author}</span> : null}
+            </div>
 
-              <div className="mt-12">
-                <BlogFooter post={post} />
+            {tags.length ? (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {tags.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-400"
+                  >
+                    #{t}
+                  </span>
+                ))}
               </div>
-            </article>
+            ) : null}
+          </header>
 
-            {/* Sidebar */}
-            <aside className="lg:col-span-4">
-              <div className="sticky top-20 space-y-6">
-                <BlogSidebar post={post} />
-
-                {toc && toc.length ? <TableOfContents toc={toc} /> : <TableOfContents />}
-
-                <BackToTop />
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
+            <aside className="lg:col-span-3">
+              <div className="sticky top-24">
+                <TableOfContents contentRef={null as any} content={(source as any)?.compiledSource || ""} />
               </div>
             </aside>
+
+            <article className="lg:col-span-9 prose prose-invert prose-gold max-w-none">
+              <MDXRemote {...source} components={mdxComponents as any} />
+            </article>
           </div>
         </div>
-      </div>
+      </main>
+
+      <BackToTop />
     </Layout>
   );
 };
 
-export default BlogSlugPage;
-
-// ---------------------------------------------
-// SSG (Pages Router)
-// ---------------------------------------------
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const posts = getPublishedPosts();
-
-    const paths = posts
-      .map((p: any) => {
-        const slug = p?.slug || "";
-        return typeof slug === "string" ? normalizeSlug(slug) : "";
-      })
-      .filter((s: string) => Boolean(s))
-      .map((slug: string) => ({ params: { slug } }));
-
-    return {
-      paths,
-      fallback: "blocking",
-    };
-  } catch (error) {
-    console.error("[getStaticPaths] Error generating blog paths:", error);
-    return {
-      paths: [],
-      fallback: "blocking",
-    };
-  }
-};
-
-export const getStaticProps: GetStaticProps<PageProps> = async (ctx) => {
-  try {
-    const slugParam = ctx.params?.slug;
-
-    const slug =
-      typeof slugParam === "string"
-        ? slugParam
-        : Array.isArray(slugParam)
-          ? slugParam.join("/")
-          : "";
-
-    const normalized = normalizeSlug(slug);
-    if (!normalized) {
-      console.warn(`[getStaticProps] Invalid slug: ${slug}`);
-      return { notFound: true };
-    }
-
-    // First try getPostBySlug from the main content library
-    let post = getPostBySlug(normalized);
-    
-    // If not found, try getPostBySlugWithContent from server module
-    if (!post) {
-      try {
-        post = getPostBySlugWithContent(normalized);
-      } catch (error) {
-        console.warn(`[getStaticProps] getPostBySlugWithContent failed for ${normalized}:`, error);
-      }
-    }
-
-    if (!post) {
-      console.warn(`[getStaticProps] Post not found: ${normalized}`);
-      return { notFound: true };
-    }
-
-    if (isDraftContent(post)) {
-      console.warn(`[getStaticProps] Draft content accessed: ${normalized}`);
-      return { notFound: true };
-    }
-
-    const raw = getRawBody(post);
-
-    // Compile MDX
-    let mdxResult;
-    try {
-      mdxResult = await prepareMDX(raw);
-    } catch (error) {
-      console.error(`[getStaticProps] MDX compilation failed for ${normalized}:`, error);
-      return { notFound: true };
-    }
-
-    const { source, toc, readingTime } = normalizePrepareMdxResult(mdxResult);
-
-    if (!source) {
-      console.error(`[getStaticProps] No MDX source generated for ${normalized}`);
-      return { notFound: true };
-    }
-
-    const safePost = sanitizeData(post);
-
-    // Related posts - filter out current post and get up to 6 related
-    let related: any[] = [];
-    try {
-      const allPosts = getPublishedPosts();
-      related = allPosts
-        .filter((p: any) => {
-          const pSlug = p?.slug || "";
-          const currentSlug = post?.slug || "";
-          return normalizeSlug(String(pSlug)) !== normalizeSlug(String(currentSlug));
-        })
-        safeSlice(tags ?? [], 0, 6)
-        .map((p: any) => sanitizeData(p));
-    } catch (error) {
-      console.warn(`[getStaticProps] Error fetching related posts:`, error);
-    }
-
-    return {
-      props: {
-        post: safePost,
-        source,
-        toc,
-        readingTime,
-        related,
-      },
-      revalidate: 60, // Incremental static regeneration every minute
-    };
-  } catch (error) {
-    console.error(`[getStaticProps] Fatal error for slug ${ctx.params?.slug}:`, error);
-    return {
-      notFound: true,
-    };
-  }
-};
+export default BlogPostPage;

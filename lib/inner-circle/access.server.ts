@@ -1,28 +1,41 @@
 // lib/inner-circle/access.server.ts — SINGLE SOURCE OF TRUTH (SERVER ONLY)
-import "server-only";
+// IMPORTANT:
+// - Do NOT import "server-only" here (pages/ router does not support it).
+// - Must only be imported in server contexts. If bundled client-side, hard-fail.
+
+function assertServerOnly(moduleName: string) {
+  if (typeof window !== "undefined") {
+    throw new Error(
+      `[${moduleName}] is server-only but was loaded in the browser. ` +
+        `Move the import into getServerSideProps/getStaticProps or an API route.`
+    );
+  }
+}
+
+assertServerOnly("lib/inner-circle/access.server.ts");
 
 export type InnerCircleTier = "public" | "basic" | "premium" | "enterprise" | "restricted";
 
 export type InnerCircleAccess = {
-  ok: boolean;
   tier: InnerCircleTier;
-  isAuthenticated: boolean;
-  // For route guards:
-  canAccessBasic: boolean;
-  canAccessPremium: boolean;
-  canAccessEnterprise: boolean;
-  canAccessRestricted: boolean;
+  // You can expand later (expiresAt, entitlements, flags, etc.)
+  ok: boolean;
 };
 
-function envTier(): InnerCircleTier | null {
-  const raw = (process.env.DEFAULT_ACCESS_TIER || "").toLowerCase().trim();
-  if (!raw) return null;
-  if (raw === "public" || raw === "basic" || raw === "premium" || raw === "enterprise" || raw === "restricted")
-    return raw;
-  return null;
+export function normalizeTier(input: unknown): InnerCircleTier {
+  const v = String(input || "public").toLowerCase().trim();
+  if (v === "basic" || v === "premium" || v === "enterprise" || v === "restricted") return v;
+  return "public";
 }
 
-function tierToFlags(tier: InnerCircleTier) {
+// Placeholder rule engine (replace with your actual policy)
+export function getInnerCircleAccess(params: {
+  userTier?: unknown;
+  requiresTier?: InnerCircleTier;
+}): InnerCircleAccess {
+  const tier = normalizeTier(params.userTier);
+  const requiresTier = params.requiresTier ?? "public";
+
   const rank: Record<InnerCircleTier, number> = {
     public: 0,
     basic: 1,
@@ -30,47 +43,8 @@ function tierToFlags(tier: InnerCircleTier) {
     enterprise: 3,
     restricted: 4,
   };
-  const r = rank[tier];
-  return {
-    canAccessBasic: r >= 1,
-    canAccessPremium: r >= 2,
-    canAccessEnterprise: r >= 3,
-    canAccessRestricted: r >= 4,
-  };
-}
 
-/**
- * getInnerCircleAccess(session)
- * Works with NextAuth v4 session objects, but doesn't require them.
- * If you pass nothing, it returns "public".
- */
-export async function getInnerCircleAccess(session?: any): Promise<InnerCircleAccess> {
-  // If you want a quick “keep deploying” override:
-  const forced = envTier();
-  if (forced) {
-    return {
-      ok: true,
-      tier: forced,
-      isAuthenticated: Boolean(session),
-      ...tierToFlags(forced),
-    };
-  }
+  const ok = rank[tier] >= rank[requiresTier];
 
-  // Default behavior (safe):
-  // - If authenticated and has a tier on session.user.tier, use it
-  // - else "public"
-  const tier =
-    (session?.user?.tier as InnerCircleTier) ||
-    (session?.user?.accessLevel as InnerCircleTier) ||
-    "public";
-
-  const normalized: InnerCircleTier =
-    tier === "basic" || tier === "premium" || tier === "enterprise" || tier === "restricted" ? tier : "public";
-
-  return {
-    ok: true,
-    tier: normalized,
-    isAuthenticated: Boolean(session),
-    ...tierToFlags(normalized),
-  };
+  return { tier, ok };
 }

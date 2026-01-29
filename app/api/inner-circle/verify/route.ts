@@ -1,93 +1,78 @@
-// app/api/inner-circle/verify/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { verifyInnerCircleKeyWithRateLimit } from "@/lib/inner-circle/exports.server";
+// app/api/inner-circle/verify/route.ts — PRODUCTION STABLE (NO GHOST EXPORTS)
+import "server-only";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { NextResponse, type NextRequest } from "next/server";
+import { verifyInnerCircleKey } from "@/lib/inner-circle/exports.server";
 
-type AnyObj = Record<string, unknown>;
+// Best-effort in-memory limiter (resets on cold start; acceptable for light abuse protection)
+type Bucket = { count: number; resetAt: number };
+const BUCKETS = new Map<string, Bucket>();
 
-type RateLimitShape = {
-  allowed?: boolean;
-  remaining?: number;
-  resetAt?: string | number | null;
-  resetTime?: string | number | null;
-};
-
-type VerificationShape = {
-  valid?: boolean;
-  member?: unknown;
-  expiresAt?: unknown;
-};
-
-function pickVerificationPayload(out: AnyObj): VerificationShape {
-  const maybe = out?.verification;
-  if (maybe && typeof maybe === "object") return maybe as VerificationShape;
-  return out as VerificationShape;
+function getIp(req: NextRequest) {
+  const xf = req.headers.get("x-forwarded-for");
+  if (xf) return xf.split(",")[0]?.trim() || "unknown";
+  return req.headers.get("x-real-ip") || "unknown";
 }
 
-function recordHeaders(h: unknown): Record<string, string> | null {
-  if (!h || typeof h !== "object") return null;
-  const rec: Record<string, string> = {};
-  for (const [k, v] of Object.entries(h as Record<string, unknown>)) {
-    if (typeof v === "string") rec[k] = v;
-    else if (typeof v === "number") rec[k] = String(v);
-    else if (typeof v === "boolean") rec[k] = v ? "true" : "false";
+function rateLimit(req: NextRequest, limit = 30, windowMs = 60_000) {
+  const ip = getIp(req);
+  const now = Date.now();
+  const key = `verify:${ip}`;
+  const b = BUCKETS.get(key);
+
+  if (!b || b.resetAt <= now) {
+    BUCKETS.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: limit - 1, limit, resetAt: now + windowMs };
   }
-  return Object.keys(rec).length ? rec : null;
+
+  if (b.count >= limit) {
+    return { allowed: false, remaining: 0, limit, resetAt: b.resetAt };
+  }
+
+  b.count += 1;
+  BUCKETS.set(key, b);
+  return { allowed: true, remaining: Math.max(0, limit - b.count), limit, resetAt: b.resetAt };
 }
 
-function normalizeResetAt(rateLimit?: RateLimitShape): string | null {
-  const v = rateLimit?.resetAt ?? rateLimit?.resetTime ?? null;
-  if (v == null) return null;
-  if (typeof v === "number") return new Date(v).toISOString();
-  if (typeof v === "string") return v;
-  return null;
-}
+export async function POST(req: NextRequest) {
+  const rl = rateLimit(req);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Rate limit exceeded. Try again shortly.",
+        rateLimit: rl,
+      },
+      { status: 429 }
+    );
+  }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-    const key = typeof body?.key === "string" ? body.key.trim() : "";
+    const body = await req.json().catch(() => ({}));
+    const key = String(body?.key || body?.accessKey || "").trim();
 
     if (!key) {
-      return NextResponse.json({ error: "Key is required" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Missing access key.", rateLimit: rl }, { status: 400 });
     }
 
-    const out = (await verifyInnerCircleKeyWithRateLimit(key, req as any)) as AnyObj;
+    const result = await verifyInnerCircleKey(key);
 
-    const verification = pickVerificationPayload(out);
-    const headers = recordHeaders((out as any)?.headers);
-    const rateLimit = ((out as any)?.rateLimit ?? null) as RateLimitShape | null;
-
-    const res = NextResponse.json(
+    return NextResponse.json(
       {
-        valid: !!verification?.valid,
-        member: (verification as any)?.member ?? null,
-        expiresAt: (verification as any)?.expiresAt ?? null,
-        rateLimit: rateLimit
-          ? {
-              allowed: !!rateLimit.allowed,
-              remaining: rateLimit.remaining ?? null,
-              resetAt: normalizeResetAt(rateLimit),
-            }
-          : undefined,
+        ok: true,
+        result,
+        rateLimit: rl,
       },
       { status: 200 }
     );
-
-    // Pass-through provided headers (safe only)
-    if (headers) for (const [k, v] of Object.entries(headers)) res.headers.set(k, v);
-
-    res.headers.set("X-Inner-Circle-Valid", String(!!verification?.valid));
-    res.headers.set("Cache-Control", "no-store");
-
-    return res;
-  } catch (err: any) {
-    console.error("[InnerCircle] verify error:", err);
+  } catch (e: any) {
     return NextResponse.json(
-      { error: "Internal server error", message: err?.message ?? String(err) },
-      { status: 500, headers: { "Cache-Control": "no-store" } }
+      {
+        ok: false,
+        error: e?.message || "Verification failed.",
+        rateLimit: rl,
+      },
+      { status: 500 }
     );
   }
 }

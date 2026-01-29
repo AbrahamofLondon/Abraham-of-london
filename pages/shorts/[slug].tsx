@@ -4,6 +4,7 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 
@@ -28,26 +29,23 @@ import {
   Share2,
 } from "lucide-react";
 
-// 🔥 CRITICAL FIX: Dynamically import MDXRemote to avoid SSR issues
-const MDXRemote = dynamic(
-  () => import('next-mdx-remote').then((mod) => mod.MDXRemote),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="animate-pulse space-y-4">
-        <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-        <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-        <div className="h-4 bg-gray-700 rounded w-5/6"></div>
-      </div>
-    )
-  }
-);
 
 // Client-only engagement components
 const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
-const ShortHero = dynamic(() => import("@/components/shorts/ShortHero"), { ssr: false });
-const ShortComments = dynamic(() => import("@/components/shorts/ShortComments"), { ssr: false });
-const ShortNavigation = dynamic(() => import("@/components/shorts/ShortNavigation"), { ssr: false });
+const ShortHero = dynamic(
+  () => import("@/components/shorts/ShortHero").then((m) => m.default ?? (m as any).ShortHero),
+  { ssr: false }
+);
+
+const ShortComments = dynamic(
+  () => import("@/components/shorts/ShortComments").then((m) => m.default ?? (m as any).ShortComments),
+  { ssr: false }
+);
+
+const ShortNavigation = dynamic(
+  () => import("@/components/shorts/ShortNavigation").then((m) => m.default ?? (m as any).ShortNavigation),
+  { ssr: false }
+);
 
 type ShortDoc = {
   title?: string | null;
@@ -84,7 +82,7 @@ type Short = {
 
 type Props = {
   short: Short;
-  source: any; // Changed from MDXRemoteSerializeResult to any for safety
+  source: MDXRemoteSerializeResult | null;
 };
 
 function getShortSlug(doc: ShortDoc): string {
@@ -101,7 +99,7 @@ function getRawBody(doc: ShortDoc): string {
 
 function normalizePrepareMdxResult(
   mdxResult: unknown
-): { source: any | null } {
+): { source: MDXRemoteSerializeResult | null } {
   const r = mdxResult as any;
 
   // direct MDXRemoteSerializeResult
@@ -306,20 +304,15 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
                 />
 
                 <article className="mt-8 prose prose-invert prose-gold max-w-none prose-p:leading-relaxed prose-p:text-gray-300">
-                  {source && isClient ? (
+                  {source ? (
                     <MDXRemote 
                       {...source} 
                       components={mdxComponents}
                     />
                   ) : (
-                    // Server-side/fallback rendering
+                    // Fallback when no MDX source is available
                     <div className="prose prose-invert max-w-none">
-                      <div 
-                        dangerouslySetInnerHTML={{ 
-                          __html: source?.compiledSource || 
-                          '<p>Content loading...</p>' 
-                        }} 
-                      />
+                      <p className="text-gray-500 italic">Content unavailable.</p>
                     </div>
                   )}
                 </article>
@@ -410,21 +403,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const raw = getRawBody(data);
     
     // 🔥 SAFETY: Ensure we have valid MDX source
-    let source: any = {};
+    let source: MDXRemoteSerializeResult | null = null;
     if (typeof raw === "string" && raw.trim()) {
       try {
         const mdxResult = await prepareMDX(raw);
         const { source: mdxSource } = normalizePrepareMdxResult(mdxResult);
-        source = mdxSource || { compiledSource: '' };
+        source = mdxSource;
       } catch (mdxError) {
         console.error(`MDX compilation error for ${normalized}:`, mdxError);
-        source = { compiledSource: '' };
+        source = null;
       }
-    } else {
-      source = { compiledSource: '' };
     }
-
-    if (!source) return { notFound: true };
 
     const slugPath = getShortSlug(data);
     const url = `/shorts/${slugPath}`;
@@ -447,7 +436,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return {
       props: {
         short: sanitizeData(short),
-        source: JSON.parse(JSON.stringify(source)), // Ensure serializable
+        source: source ? JSON.parse(JSON.stringify(source)) : null, // Ensure serializable
       },
       revalidate: 3600,
     };

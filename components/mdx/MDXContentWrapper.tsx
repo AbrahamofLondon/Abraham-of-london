@@ -1,15 +1,41 @@
-// components/mdx/MDXContentWrapper.tsx
+// components/mdx/MDXContentWrapper.tsx — PRODUCTION STABLE (PAGES ROUTER SAFE)
+// ✅ No SSR window access
+// ✅ Dynamic DownloadCTA mapped correctly (default export guaranteed)
+// ✅ Strict guards around frontmatter shapes
+// ✅ Stable memo deps (no optional-chaining-in-deps pitfalls)
+// ✅ Safe download handler (client-only)
+
 import * as React from "react";
+import dynamic from "next/dynamic";
+
 import LegacyDiagram from "@/components/diagrams/LegacyDiagram";
 import ProTip from "@/components/content/ProTip";
 import FeatureGrid from "@/components/content/FeatureGrid";
-import dynamic from "next/dynamic";
 
-const DownloadCTA = dynamic(() => import("@/components/content/DownloadCTA.client"), {
-  ssr: false,
-});
+// IMPORTANT:
+// If DownloadCTA.client exports a named export instead of default, this was your crash:
+// "Cannot read properties of undefined (reading 'default')"
+// We force a default export mapping here, regardless of how the module exports it.
+const DownloadCTA = dynamic(
+  () =>
+    import("@/components/content/DownloadCTA.client").then((m: any) => ({
+      default: m?.default ?? m?.DownloadCTA ?? m,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6">
+        <div className="h-4 w-40 rounded bg-white/10" />
+        <div className="mt-3 h-3 w-72 rounded bg-white/5" />
+        <div className="mt-6 h-10 w-full rounded-xl bg-white/10" />
+      </div>
+    ),
+  }
+);
 
-// Type definitions
+// -------------------------
+// Types
+// -------------------------
 interface CTADetail {
   label: string;
   value: string;
@@ -54,82 +80,121 @@ export interface MDXContentWrapperProps {
   };
 }
 
-export function MDXContentWrapper({
-  content,
-  frontmatter,
-}: MDXContentWrapperProps) {
-  // Handler for download CTA click
-  const handleDownloadClick = React.useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const downloadLink = frontmatter?.file || frontmatter?.downloadUrl;
-    if (downloadLink) {
-      window.open(downloadLink, '_blank', 'noopener,noreferrer');
-    }
-  }, [frontmatter?.file, frontmatter?.downloadUrl]);
+function asArray<T>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
+}
 
-  // Build details array for download CTA
-  const downloadDetails = React.useMemo(() => {
+function safeStr(v: unknown): string {
+  return typeof v === "string" ? v : "";
+}
+
+function safeUpper(v: unknown): string {
+  const s = safeStr(v);
+  return s ? s.toUpperCase() : "";
+}
+
+function safeUrl(v: unknown): string {
+  const s = safeStr(v).trim();
+  return s;
+}
+
+// -------------------------
+// Component
+// -------------------------
+export function MDXContentWrapper({ content, frontmatter }: MDXContentWrapperProps) {
+  // Flatten frontmatter values for stable deps / guardrails
+  const file = safeUrl(frontmatter?.file);
+  const downloadUrl = safeUrl(frontmatter?.downloadUrl);
+  const title = safeStr(frontmatter?.title) || "Download Resource";
+
+  const useLegacyDiagram = !!frontmatter?.useLegacyDiagram;
+
+  const useProTip = !!frontmatter?.useProTip;
+  const proTipContent = safeStr(frontmatter?.proTipContent);
+  const proTipType = (frontmatter?.proTipType ?? "info") as "info" | "warning" | "success" | "danger";
+
+  const useFeatureGrid = !!frontmatter?.useFeatureGrid;
+  const featureGridItems = asArray<FeatureGridItem>(frontmatter?.featureGridItems);
+  const featureGridColumns =
+    typeof frontmatter?.featureGridColumns === "number" && frontmatter.featureGridColumns > 0
+      ? frontmatter.featureGridColumns
+      : 2;
+
+  const useDownloadCTA = !!frontmatter?.useDownloadCTA;
+  const ctaConfig: CTAConfig | undefined = frontmatter?.ctaConfig;
+  const ctaBadge = safeStr(ctaConfig?.badge) || "Download";
+  const ctaFeatures = asArray<string>(ctaConfig?.features);
+  const ctaDetailsExtra = asArray<CTADetail>(ctaConfig?.details);
+  const steps = asArray<string>(frontmatter?.downloadProcess?.steps);
+
+  const fileSize = safeStr(frontmatter?.fileSize);
+  const fileFormat = safeUpper(frontmatter?.fileFormat);
+
+  const effectiveHref = file || downloadUrl || "";
+
+  const handleDownloadClick = React.useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      // DownloadCTA might render anchor; prevent default so we can enforce noopener/noreferrer
+      e.preventDefault();
+
+      if (typeof window === "undefined") return;
+      const link = effectiveHref;
+      if (!link) return;
+
+      window.open(link, "_blank", "noopener,noreferrer");
+    },
+    [effectiveHref]
+  );
+
+  const downloadDetails = React.useMemo<CTADetail[]>(() => {
     const details: CTADetail[] = [];
-    
-    if (frontmatter?.fileSize) {
-      details.push({
-        label: "File Size",
-        value: frontmatter.fileSize,
-        icon: "📦"
-      });
+
+    if (fileSize) {
+      details.push({ label: "File Size", value: fileSize, icon: "📦" });
     }
-    
-    if (frontmatter?.fileFormat) {
-      details.push({
-        label: "Format",
-        value: frontmatter.fileFormat.toUpperCase(),
-        icon: "📄"
-      });
+
+    if (fileFormat) {
+      details.push({ label: "Format", value: fileFormat, icon: "📄" });
     }
-    
-    // Add any additional details from ctaConfig
-    if (frontmatter?.ctaConfig?.details && Array.isArray(frontmatter.ctaConfig.details)) {
-      details.push(...frontmatter.ctaConfig.details);
+
+    // Append extra details from config (if any)
+    if (ctaDetailsExtra.length) {
+      details.push(...ctaDetailsExtra);
     }
-    
+
     return details;
-  }, [frontmatter?.fileSize, frontmatter?.fileFormat, frontmatter?.ctaConfig?.details]);
+  }, [fileSize, fileFormat, ctaDetailsExtra]);
+
+  const showDownloadCTA = useDownloadCTA && !!ctaConfig && !!effectiveHref;
 
   return (
     <div className="mdx-content">
       {content}
-      
+
       {/* Legacy Diagram */}
-      {frontmatter?.useLegacyDiagram && <LegacyDiagram />}
-      
+      {useLegacyDiagram ? <LegacyDiagram /> : null}
+
       {/* Pro Tip */}
-      {frontmatter?.useProTip && frontmatter?.proTipContent && (
-        <ProTip type={frontmatter?.proTipType || "info"}>
-          {frontmatter.proTipContent}
-        </ProTip>
-      )}
-      
+      {useProTip && proTipContent ? <ProTip type={proTipType}>{proTipContent}</ProTip> : null}
+
       {/* Feature Grid */}
-      {frontmatter?.useFeatureGrid && frontmatter?.featureGridItems && (
-        <FeatureGrid
-          columns={frontmatter?.featureGridColumns || 2}
-          items={frontmatter.featureGridItems}
-        />
-      )}
-      
+      {useFeatureGrid && featureGridItems.length ? (
+        <FeatureGrid columns={featureGridColumns} items={featureGridItems} />
+      ) : null}
+
       {/* Download CTA */}
-      {frontmatter?.useDownloadCTA && frontmatter?.ctaConfig && (
+      {showDownloadCTA ? (
         <DownloadCTA
-          title={frontmatter?.title || "Download Resource"}
-          badge={frontmatter?.ctaConfig?.badge || "Download"}
+          title={title}
+          badge={ctaBadge}
           details={downloadDetails}
-          features={frontmatter?.ctaConfig?.features || []}
-          steps={frontmatter?.downloadProcess?.steps || []}
+          features={ctaFeatures}
+          steps={steps}
           buttonText="Download Now"
           onClick={handleDownloadClick}
-          href={frontmatter?.file || frontmatter?.downloadUrl || "#"}
+          href={effectiveHref}
         />
-      )}
+      ) : null}
     </div>
   );
 }

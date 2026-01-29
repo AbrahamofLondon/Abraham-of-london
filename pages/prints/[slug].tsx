@@ -1,4 +1,4 @@
-/* pages/prints/[slug].tsx — Institutional Print Collection Detail (Integrity Mode) */
+/* pages/prints/[slug].tsx — Institutional Print Collection Detail (Production Stable) */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -8,12 +8,11 @@ import Layout from "@/components/Layout";
 
 import { withInnerCircleAuth } from "@/lib/auth/withInnerCircleAuth";
 
-// ✅ Server-safe content access (SSG)
+// ✅ Server-safe content access (SSG) — do NOT rely on isDraftContent export here
 import {
   getAllContentlayerDocs,
   getDocBySlug,
   normalizeSlug,
-  isDraftContent,
   sanitizeData,
 } from "@/lib/content/server";
 
@@ -89,6 +88,9 @@ type PrintDoc = {
   _raw?: { flattenedPath?: string; sourceFileDir?: string };
   kind?: string;
   type?: string;
+  draft?: boolean;
+  published?: boolean;
+  status?: string;
   [k: string]: any;
 };
 
@@ -117,6 +119,18 @@ type Props = {
   user?: User; // injected by HOC
   requiredRole?: string; // injected by HOC
 };
+
+// ------------------------------------------------------------
+// ✅ LOCAL draft detector — removes dependency mismatch risk
+// ------------------------------------------------------------
+function isDraftContent(doc: any): boolean {
+  if (!doc) return true;
+  if (doc.draft === true) return true;
+  if (doc.published === false) return true;
+  const s = String(doc.status || "").toLowerCase();
+  if (s === "draft" || s === "unpublished") return true;
+  return false;
+}
 
 // ------------------------------------------------------------
 // Helpers
@@ -181,7 +195,9 @@ function safeDateLabel(input: string | null): string {
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const docs = getAllContentlayerDocs();
-    const prints = docs.filter(isPrintDoc).filter((p: any) => !isDraftContent(p));
+    const prints = (Array.isArray(docs) ? docs : [])
+      .filter(isPrintDoc)
+      .filter((p: any) => !isDraftContent(p));
 
     const paths = prints
       .map((p: any) => printSlugFromDoc(p))
@@ -283,9 +299,7 @@ const AccessDeniedComponent: React.FC<{ print: Props["print"]; requiredRole?: st
           <button
             onClick={() =>
               router.push(
-                `/login?redirect=${encodeURIComponent(router.asPath)}&tier=${encodeURIComponent(
-                  requiredRole || ""
-                )}`
+                `/login?redirect=${encodeURIComponent(router.asPath)}&tier=${encodeURIComponent(requiredRole || "")}`
               )
             }
             className="w-full py-3 px-4 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 transition-colors"
@@ -333,13 +347,11 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
     if (typeof window === "undefined") return;
     if (!hasAccessToThisContent) return;
 
-    // track views
     const key = `print-views-${print.slug}`;
     const views = parseInt(localStorage.getItem(key) || "0", 10);
     localStorage.setItem(key, String(views + 1));
     setViewCount((v) => v + 1);
 
-    // bookmarks
     try {
       const bookmarks = JSON.parse(localStorage.getItem("bookmarkedPrints") || "[]");
       setIsBookmarked(Array.isArray(bookmarks) && bookmarks.includes(print.slug));
@@ -458,7 +470,6 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
         <link rel="canonical" href={`https://www.abrahamoflondon.org/prints/${print.slug}`} />
       </Head>
 
-      {/* Nav */}
       <div className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <button
@@ -471,32 +482,8 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
         </div>
       </div>
 
-      {/* Access strip */}
-      {print.accessLevel !== "public" && user ? (
-        <div className="bg-gradient-to-r from-amber-500/10 to-amber-600/5 border-l-4 border-amber-500 p-4">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 text-amber-600" />
-                <div>
-                  <div className="font-semibold text-amber-800">{print.accessLevel.replace("-", " ").toUpperCase()} ACCESS</div>
-                  <div className="text-sm text-amber-700">Welcome, {(user as any).name || "Member"}</div>
-                </div>
-              </div>
-              <div className="text-sm text-amber-600">
-                {(user as any).membershipDate
-                  ? `Member since ${new Date((user as any).membershipDate).getFullYear()}`
-                  : "Exclusive Access"}
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {/* Main */}
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-8">
         <div className="max-w-7xl mx-auto px-4">
-          {/* Header */}
           <div className="mb-8">
             <div className="mb-4">
               <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-amber-600">
@@ -506,12 +493,10 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
             </div>
 
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">{print.title}</h1>
-
             {print.excerpt ? <p className="text-lg text-slate-600 max-w-3xl">{print.excerpt}</p> : null}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main column */}
             <div className="lg:col-span-2">
               {print.coverImage ? (
                 <div className="mb-8 rounded-2xl overflow-hidden border border-slate-200 bg-white">
@@ -533,14 +518,14 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                 </div>
               ) : null}
 
-              {print.tags.length ? (
+              {(print.tags ?? []).length ? (
                 <div className="mt-8">
                   <div className="flex items-center gap-2 mb-3">
                     <Tag className="w-4 h-4 text-slate-500" />
                     <span className="text-sm font-semibold text-slate-700">Tags</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {print.tags.map((tag) => (
+                    {(print.tags ?? []).map((tag) => (
                       <span
                         key={tag}
                         className="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm rounded-full border border-slate-200 hover:border-amber-300 transition-colors"
@@ -553,10 +538,8 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
               ) : null}
             </div>
 
-            {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-8 space-y-6">
-                {/* Details */}
                 <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                   <h3 className="text-lg font-bold text-slate-900 mb-4">Print Details</h3>
 
@@ -581,16 +564,6 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                       </div>
                     ) : null}
 
-                    {print.paperType ? (
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <div className="text-sm text-slate-600">Paper Type</div>
-                          <div className="font-medium text-slate-900">{print.paperType}</div>
-                        </div>
-                      </div>
-                    ) : null}
-
                     <div className="pt-4 border-t border-slate-200">
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-600">Views</span>
@@ -604,7 +577,6 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                   </div>
                 </div>
 
-                {/* Downloads */}
                 <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                   <h3 className="text-lg font-bold text-slate-900 mb-4">Download Options</h3>
 
@@ -634,7 +606,6 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                   <div className="space-y-3">
                     <button
@@ -659,7 +630,6 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                   </div>
                 </div>
 
-                {/* Requirements */}
                 <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
                   <h3 className="text-lg font-bold text-slate-900 mb-4">Print Requirements</h3>
                   <ul className="space-y-2">
@@ -667,20 +637,6 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                       <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-sm text-slate-700">High-quality printer recommended</span>
                     </li>
-
-                    {print.paperType ? (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-slate-700">{print.paperType} paper recommended</span>
-                      </li>
-                    ) : null}
-
-                    {print.inkType ? (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-slate-700">{print.inkType} ink compatible</span>
-                      </li>
-                    ) : null}
 
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />

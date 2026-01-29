@@ -1,4 +1,11 @@
 // components/ContentlayerDocPage.tsx — PRODUCTION STABLE (PAGES ROUTER SAFE)
+// ✅ No server-only imports
+// ✅ No SSR-hard dependency on framer-motion
+// ✅ Dynamic chunks mapped correctly (named exports -> then(m => m.Named))
+// ✅ MDXRemote rendered normally (no fake Suspense promise boundary)
+// ✅ Canonical URL safe, OG image normalized
+// ✅ Bookmark + view count local (no API dependency)
+
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -7,28 +14,41 @@ import dynamic from "next/dynamic";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 
-// ✅ Pages Router compatible MDXRemote
+// Pages Router compatible MDXRemote
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
-// Icons (safe)
-import { ArrowLeft, Share2, Clock, Calendar, Tag, BookOpen, Eye, Users } from "lucide-react";
+// Icons
+import { BookOpen } from "lucide-react";
 
-// ✅ framer-motion should never be a hard dependency in a pages route render path.
-// If you want motion, load it client-side only.
+// Motion components (client-only, named exports)
 const MotionNav = dynamic(() => import("./_motion/MotionNav").then((m) => m.MotionNav), {
   ssr: false,
-});
-const MotionHeader = dynamic(() => import("./_motion/MotionHeader").then((m) => m.MotionHeader), {
-  ssr: false,
+  loading: () => (
+    <div className="sticky top-0 z-40 border-b border-white/10 bg-black/60 backdrop-blur-sm">
+      <div className="mx-auto max-w-6xl px-6 py-3 text-xs text-gray-400">Loading navigation…</div>
+    </div>
+  ),
 });
 
+const MotionHeader = dynamic(() => import("./_motion/MotionHeader").then((m) => m.MotionHeader), {
+  ssr: false,
+  loading: () => (
+    <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div className="h-5 w-1/2 bg-white/10 rounded mb-3" />
+      <div className="h-4 w-2/3 bg-white/5 rounded" />
+    </div>
+  ),
+});
+
+// ReadTime: keep SSR=true only if it is SSR-safe (no window/document usage)
 const SimpleReadTime = dynamic(
-  () => import("@/components/enhanced/ReadTime").then((mod) => mod.SimpleReadTime),
+  () => import("@/components/enhanced/ReadTime").then((m) => m.SimpleReadTime),
   { ssr: true }
 );
 
+// Table of contents should be client-only (needs DOM measurements)
 const SafeTableOfContents = dynamic(
-  () => import("@/components/enhanced/TableOfContents").then((mod) => mod.SafeTableOfContents),
+  () => import("@/components/enhanced/TableOfContents").then((m) => m.SafeTableOfContents),
   { ssr: false }
 );
 
@@ -49,7 +69,6 @@ type ContentlayerDoc = {
 
 type Props = {
   doc: ContentlayerDoc;
-  // ✅ In Pages Router, use serialized MDX (not a raw string)
   mdxSource: MDXRemoteSerializeResult;
   canonicalPath: string;
   backHref?: string;
@@ -61,8 +80,9 @@ type Props = {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 function safeCanonicalUrl(path: string) {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${SITE_URL}${p}`;
+  const p = (path || "").trim();
+  const norm = p.startsWith("/") ? p : `/${p}`;
+  return `${SITE_URL}${norm}`;
 }
 
 function formatDateEnGb(input?: string | null) {
@@ -72,13 +92,26 @@ function formatDateEnGb(input?: string | null) {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+function normalizeOgImage(img?: string | null): string {
+  const s = String(img || "").trim();
+  if (!s) return "";
+  // Accept absolute URLs or site-relative paths
+  if (/^https?:\/\//i.test(s)) return s;
+  return s.startsWith("/") ? `${SITE_URL}${s}` : `${SITE_URL}/${s}`;
+}
+
+function safeText(input: unknown, fallback = ""): string {
+  const s = typeof input === "string" ? input : "";
+  return s.trim() || fallback;
+}
+
 export default function ContentlayerDocPage({
   doc,
   mdxSource,
   canonicalPath,
   backHref = "/content",
   label = "Reading Room",
-  components = mdxComponents,
+  components = mdxComponents as any,
   rawContent = "",
 }: Props) {
   const [viewCount, setViewCount] = React.useState<number | null>(null);
@@ -87,16 +120,21 @@ export default function ContentlayerDocPage({
 
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  const title = (doc.title ?? "").trim() || "Untitled Volume";
+  const title = safeText(doc?.title, "Untitled Volume");
   const description =
-    (doc.excerpt ?? "").trim() ||
-    (doc.description ?? "").trim() ||
+    safeText(doc?.excerpt) ||
+    safeText(doc?.description) ||
     "Strategic assets for institutional architects.";
 
   const canonicalUrl = safeCanonicalUrl(canonicalPath);
-  const ogImage = (doc.coverImage ?? "").trim();
+  const ogImage = normalizeOgImage(doc?.coverImage);
 
-  const displayDate = React.useMemo(() => formatDateEnGb(doc.date), [doc.date]);
+  const displayDate = React.useMemo(() => formatDateEnGb(doc?.date), [doc?.date]);
+
+  const bookmarkKey = React.useMemo(() => {
+    const slug = safeText(doc?.slug) || safeText(canonicalPath);
+    return `aol_bookmark_${slug}`;
+  }, [doc?.slug, canonicalPath]);
 
   const onShare = React.useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -110,18 +148,39 @@ export default function ContentlayerDocPage({
       setIsShareTooltipVisible(true);
       window.setTimeout(() => setIsShareTooltipVisible(false), 2000);
     } catch {
-      // user cancelled or browser blocked share/clipboard
+      // user cancelled or browser blocked
     }
   }, [canonicalUrl, title, description]);
 
   React.useEffect(() => {
-    // placeholder; replace with API call later
-    setViewCount(Math.floor(Math.random() * 1000) + 100);
-  }, []);
+    if (typeof window === "undefined") return;
+
+    // Very simple local view counter (swap to API later)
+    const key = `aol_view_${canonicalPath}`;
+    const prev = Number(window.localStorage.getItem(key) || "0");
+    const next = prev + 1;
+    window.localStorage.setItem(key, String(next));
+    setViewCount(next);
+
+    // Load bookmark state
+    const bm = window.localStorage.getItem(bookmarkKey);
+    setIsBookmarked(bm === "1");
+  }, [canonicalPath, bookmarkKey]);
 
   const toggleBookmark = React.useCallback(() => {
-    setIsBookmarked((v) => !v);
-  }, []);
+    if (typeof window === "undefined") return;
+    setIsBookmarked((v) => {
+      const next = !v;
+      window.localStorage.setItem(bookmarkKey, next ? "1" : "0");
+      return next;
+    });
+  }, [bookmarkKey]);
+
+  const wordsCount = React.useMemo(() => {
+    const txt = typeof rawContent === "string" ? rawContent : "";
+    const words = txt.split(/\s+/).filter(Boolean);
+    return words.length;
+  }, [rawContent]);
 
   const ProseClass = `
     prose prose-invert prose-gold max-w-none
@@ -143,12 +202,14 @@ export default function ContentlayerDocPage({
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
         <meta name="twitter:card" content="summary_large_image" />
         {ogImage ? <meta property="og:image" content={ogImage} /> : null}
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-cream">
-        {/* If motion chunks fail, you still ship. */}
+        {/* Motion Nav/Header are optional enhancements; page works without them */}
         <MotionNav
           backHref={backHref}
           label={label}
@@ -164,41 +225,23 @@ export default function ContentlayerDocPage({
             <div className="lg:col-span-8">
               <MotionHeader
                 title={title}
-                excerpt={doc.excerpt ?? ""}
-                category={doc.category ?? ""}
+                excerpt={safeText(doc?.excerpt)}
+                category={safeText(doc?.category)}
                 label={label}
-                featured={!!doc.featured}
+                featured={!!doc?.featured}
                 displayDate={displayDate}
-                readTime={doc.readTime ?? ""}
+                readTime={safeText(doc?.readTime)}
                 viewCount={viewCount}
-                author={doc.author ?? ""}
-                tags={doc.tags ?? []}
+                author={safeText(doc?.author)}
+                tags={Array.isArray(doc?.tags) ? doc!.tags! : []}
               />
 
               <div className="relative" ref={contentRef}>
                 <SafeTableOfContents contentRef={contentRef} className="mb-8" />
 
                 <div className={ProseClass}>
-                  <React.Suspense
-                    fallback={
-                      <div className="min-h-[400px] flex flex-col items-center justify-center space-y-6 opacity-50">
-                        <div className="relative">
-                          <div className="h-12 w-12 animate-spin rounded-full border-4 border-amber-500/20 border-t-amber-500" />
-                          <div className="absolute inset-0 animate-ping rounded-full border-4 border-amber-500/10" />
-                        </div>
-                        <div>
-                          <p className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-amber-300">
-                            Initializing Vault Content
-                          </p>
-                          <p className="mt-2 text-center text-xs text-gray-500">
-                            Decrypting strategic intelligence...
-                          </p>
-                        </div>
-                      </div>
-                    }
-                  >
-                    <MDXRemote {...mdxSource} components={components as any} />
-                  </React.Suspense>
+                  {/* Suspense does not help here; MDXRemote is synchronous given a pre-serialized source */}
+                  <MDXRemote {...mdxSource} components={components as any} />
                 </div>
               </div>
 
@@ -207,11 +250,11 @@ export default function ContentlayerDocPage({
                   <div className="flex flex-col items-center text-center">
                     <div className="mb-6 h-px w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
                     <p className="font-serif text-2xl italic text-white mb-4">
-                      "Architecture is destiny, made visible."
+                      &quot;Architecture is destiny, made visible.&quot;
                     </p>
                     <p className="text-sm text-gray-400 mb-8">— Abraham of London</p>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-wrap items-center justify-center gap-4">
                       <SimpleReadTime content={rawContent} />
                       <span className="text-xs text-gray-500">•</span>
                       <Link
@@ -259,7 +302,7 @@ export default function ContentlayerDocPage({
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-400">Words</span>
                           <span className="font-mono text-sm text-white">
-                            {rawContent.split(/\s+/).filter(Boolean).length.toLocaleString()}
+                            {wordsCount.toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -285,7 +328,7 @@ export default function ContentlayerDocPage({
                   </div>
                 </div>
 
-                {String(doc.type || "").toLowerCase() === "download" ? (
+                {String(doc?.type || "").toLowerCase() === "download" ? (
                   <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-6 backdrop-blur-sm">
                     <h3 className="mb-3 text-sm font-bold uppercase tracking-widest text-amber-300">
                       Download Asset
@@ -293,11 +336,22 @@ export default function ContentlayerDocPage({
                     <p className="mb-4 text-sm text-gray-300">
                       Save this framework for offline reference
                     </p>
-                    <button className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-black transition-all hover:shadow-lg hover:scale-105">
+                    <button className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-black transition-all hover:shadow-lg hover:scale-[1.02]">
                       Download PDF
                     </button>
                   </div>
                 ) : null}
+
+                <div className="rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-sm">
+                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-white">Quick Nav</h3>
+                  <Link
+                    href={backHref}
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-200 hover:bg-white/10 transition-colors"
+                  >
+                    <BookOpen className="h-4 w-4 text-amber-400" />
+                    Back to {label}
+                  </Link>
+                </div>
               </div>
             </aside>
           </div>

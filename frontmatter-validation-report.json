@@ -5,9 +5,7 @@
       "type": "Strategy",
       "valid": true,
       "errors": [],
-      "warnings": [
-        "Unknown field \"resourceType\" for type Strategy"
-      ]
+      "warnings": []
     },
     {
       "path": "shorts\\when-a-single-yes-changes-everything.mdx",
@@ -693,7 +691,9 @@
       "type": "Event",
       "valid": true,
       "errors": [],
-      "warnings": []
+      "warnings": [
+        "Multiple frontmatter blocks detected (found 2). Only the first is used."
+      ]
     },
     {
       "path": "events\\leadership-workshop.mdx",
@@ -973,7 +973,9 @@
       "type": "Book",
       "valid": true,
       "errors": [],
-      "warnings": []
+      "warnings": [
+        "Multiple frontmatter blocks detected (found 3). Only the first is used."
+      ]
     },
     {
       "path": "books\\the-architecture-of-human-purpose.mdx",
@@ -1140,12 +1142,21 @@
   "errors": [],
   "warnings": [
     {
-      "path": "strategy\\sample-strategy.mdx",
-      "type": "Strategy",
+      "path": "events\\founders-salon.mdx",
+      "type": "Event",
       "valid": true,
       "errors": [],
       "warnings": [
-        "Unknown field \"resourceType\" for type Strategy"
+        "Multiple frontmatter blocks detected (found 2). Only the first is used."
+      ]
+    },
+    {
+      "path": "books\\book-fathering-without-fear.mdx",
+      "type": "Book",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Multiple frontmatter blocks detected (found 3). Only the first is used."
       ]
     }
   ]

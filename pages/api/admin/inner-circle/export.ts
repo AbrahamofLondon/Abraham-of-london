@@ -1,11 +1,16 @@
-// FIXED: pages/api/admin/inner-circle/export.ts
-import { safeSlice } from "@/lib/utils/safe";
+// pages/api/admin/inner-circle/export.ts — PRODUCTION STABLE (NO GHOST EXPORTS)
+import "server-only";
+
 import type { NextApiRequest, NextApiResponse } from "next";
+import { safeSlice } from "@/lib/utils/safe";
+
 import {
-  getPrivacySafeKeyExportWithRateLimit,
-  getPrivacySafeStatsWithRateLimit,
-  withInnerCircleRateLimit,
-  createRateLimitHeaders
+  normalizeTier,
+  getActiveKeys,
+  getKeysByTier,
+  getKeysByMember,
+  getPrivacySafeStats,
+  isExpired,
 } from "@/lib/inner-circle/exports.server";
 
 type AdminExportRow = {
@@ -19,6 +24,7 @@ type AdminExportRow = {
   member_name?: string;
   tier?: string;
 };
+
 type AdminStats = {
   totalMembers: number;
   activeMembers: number;
@@ -36,12 +42,21 @@ type AdminStats = {
   dailyActiveMembers: number;
   weeklyGrowthRate?: number;
 };
+
 type PaginationMeta = {
   total: number;
   page: number;
   limit: number;
   totalPages: number;
 };
+
+type RateLimitMeta = {
+  allowed: boolean;
+  remaining: number;
+  limit: number;
+  resetAt: number;
+};
+
 type AdminExportResponse = {
   ok: boolean;
   rows?: AdminExportRow[];
@@ -49,198 +64,181 @@ type AdminExportResponse = {
   pagination?: PaginationMeta;
   generatedAt?: string;
   error?: string;
-  rateLimit?: {
-    allowed: boolean;
-    remaining: number;
-    limit: number;
-    resetAt: number;
-  };
+  rateLimit?: RateLimitMeta;
 };
-// Apply rate limiting middleware
-const rateLimitedHandler = withInnerCircleRateLimit({ 
-  adminOperation: true, 
-  adminId: 'export' 
-})(async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<AdminExportResponse>
-) {
+
+const ADMIN_ENV_KEY = "INNER_CIRCLE_ADMIN_KEY";
+
+// best-effort in-memory rate limit
+type Bucket = { count: number; resetAt: number };
+const BUCKETS = new Map<string, Bucket>();
+
+function getClientIp(req: NextApiRequest): string {
+  const xf = req.headers["x-forwarded-for"];
+  if (Array.isArray(xf)) return (xf[0] || "").split(",")[0]?.trim() || "unknown";
+  if (typeof xf === "string") return xf.split(",")[0]?.trim() || "unknown";
+  return req.socket.remoteAddress || "unknown";
+}
+
+function rateLimit(req: NextApiRequest, limit = 20, windowMs = 60_000): RateLimitMeta {
+  const ip = getClientIp(req);
+  const now = Date.now();
+  const key = `admin-export:${ip}`;
+
+  const b = BUCKETS.get(key);
+  if (!b || b.resetAt <= now) {
+    BUCKETS.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: limit - 1, limit, resetAt: now + windowMs };
+  }
+
+  if (b.count >= limit) return { allowed: false, remaining: 0, limit, resetAt: b.resetAt };
+
+  b.count += 1;
+  BUCKETS.set(key, b);
+  return { allowed: true, remaining: Math.max(0, limit - b.count), limit, resetAt: b.resetAt };
+}
+
+function setRateLimitHeaders(res: NextApiResponse, rl: RateLimitMeta) {
+  res.setHeader("X-RateLimit-Limit", String(rl.limit));
+  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+  res.setHeader("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
+}
+
+function assertAdmin(req: NextApiRequest) {
+  const expected = process.env[ADMIN_ENV_KEY];
+  if (!expected) throw new Error(`Server misconfigured: ${ADMIN_ENV_KEY} not set`);
+
+  const authHeader = String(req.headers.authorization || "");
+  const headerKey = String(req.headers["x-inner-circle-admin-key"] || "");
+
+  if (authHeader.startsWith("Bearer ")) {
+    const token = safeSlice(authHeader, 7);
+    if (token && token === expected) return;
+  }
+  if (headerKey && headerKey === expected) return;
+
+  throw new Error("Unauthorized");
+}
+
+function toInt(v: unknown, fallback: number, min: number, max: number) {
+  const n = typeof v === "string" ? parseInt(v, 10) : typeof v === "number" ? Math.floor(v) : NaN;
+  const x = Number.isFinite(n) ? (n as number) : fallback;
+  return Math.max(min, Math.min(max, x));
+}
+
+function suffixFromKey(key: unknown): string {
+  const k = String(key || "").trim();
+  if (!k) return "";
+  const tail = k.slice(-6);
+  return tail ? `…${tail}` : "";
+}
+
+function prefixFromEmailHash(h: unknown): string {
+  const s = String(h || "").trim();
+  return s ? s.slice(0, 10) : "";
+}
+
+function statusFromRecord(r: any): AdminExportRow["status"] {
+  const raw = String(r?.status || "").toLowerCase();
+  if (raw === "revoked") return "revoked";
+  if (raw === "pending") return "pending";
+  if (raw === "expired") return "expired";
+  try {
+    if (typeof isExpired === "function" && isExpired(r?.expiresAt)) return "expired";
+  } catch {}
+  return r?.revoked ? "revoked" : "active";
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<AdminExportResponse>) {
   if (req.method !== "GET") {
     res.setHeader("Allow", ["GET"]);
-    return res.status(405).json({ 
-      ok: false, 
-      error: "Method requires GET for secure export." 
-    });
+    return res.status(405).json({ ok: false, error: "Method requires GET.", generatedAt: new Date().toISOString() });
   }
-  // Admin authentication - support both Bearer token and x-inner-circle-admin-key header
-  const ADMIN_BEARER_TOKEN = process.env.INNER_CIRCLE_ADMIN_KEY;
-  const authHeader = req.headers.authorization;
-  const adminKeyFromHeader = req.headers['x-inner-circle-admin-key'] as string;
-  // Helper function to get client IP
-  const getClientIp = (req: NextApiRequest) => {
-    const forwardedFor = req.headers['x-forwarded-for'];
-    if (Array.isArray(forwardedFor)) {
-      return forwardedFor[0];
-    } else if (typeof forwardedFor === 'string') {
-      return forwardedFor.split(',')[0].trim();
-    }
-    return req.socket.remoteAddress || 'unknown';
-  };
-  // Check authentication
-  const isAuthenticated = () => {
-    // Try Bearer token first
-    if (ADMIN_BEARER_TOKEN && authHeader?.startsWith("Bearer ")) {
-      const token = safeSlice(authHeader, 7);
-      return token === ADMIN_BEARER_TOKEN;
-    }
-    // Try custom header
-    if (ADMIN_BEARER_TOKEN && adminKeyFromHeader) {
-      return adminKeyFromHeader === ADMIN_BEARER_TOKEN;
-    }
-    return false;
-  };
-  if (!ADMIN_BEARER_TOKEN || !isAuthenticated()) {
-    const clientIp = getClientIp(req);
-    console.error(`[Security Alert] Unauthorized export attempt from IP: ${clientIp}`);
-    // Add delay to prevent timing attacks
-    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
-    return res.status(401).json({ 
-      ok: false, 
-      error: "Authorization required." 
-    });
+
+  const rl = rateLimit(req);
+  setRateLimitHeaders(res, rl);
+  if (!rl.allowed) {
+    return res.status(429).json({ ok: false, error: "Rate limit exceeded.", generatedAt: new Date().toISOString(), rateLimit: rl });
   }
+
   try {
-    // Get pagination and filter params
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
-    const status = req.query.status as string;
-    const search = req.query.search as string;
-    const startDate = req.query.startDate as string;
-    const endDate = req.query.endDate as string;
-    const sortBy = (req.query.sortBy as string) || 'created_at';
-    const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
-    // Get admin token for ID generation
-    const adminToken = authHeader?.startsWith("Bearer ") ? safeSlice(authHeader, 7) : adminKeyFromHeader;
-    const adminId = `admin_${Buffer.from(adminToken || "").toString("hex").slice(0, 16)}`;
-    // Build filter options
-    const filterOptions = {
-      page,
-      limit,
-      status,
-      search,
-      startDate,
-      endDate,
-      sortBy,
-      sortOrder,
-    };
-    // Fetch data with rate limiting
-    const [{ data: exportData, rateLimit: exportRateLimit }, { stats, rateLimit: statsRateLimit }] = await Promise.all([
-      getPrivacySafeKeyExportWithRateLimit(
-        filterOptions,
-        adminId,
-        req
-      ),
-      getPrivacySafeStatsWithRateLimit(adminId, req)
-    ]);
-    // Use the stricter rate limit result
-    const rateLimit = !exportRateLimit?.allowed ? exportRateLimit : 
-                     (!statsRateLimit?.allowed ? statsRateLimit : exportRateLimit);
-    // Add rate limit headers
-    if (rateLimit) {
-      const headers = createRateLimitHeaders(rateLimit);
-      Object.entries(headers).forEach(([key, value]) => {
-        res.setHeader(key, value);
-      });
-    }
-    // If rate limited, return 429
-    if (rateLimit && !rateLimit.allowed) {
-      return res.status(429).json({
-        ok: false,
-        error: "Rate limit exceeded. Please try again later.",
-        generatedAt: new Date().toISOString(),
-        rateLimit: {
-          allowed: false,
-          remaining: rateLimit.remaining,
-          limit: rateLimit.limit,
-          resetAt: rateLimit.resetAt,
-        },
-      });
-    }
-    // Transform rows to match expected format with all required fields
-    const rows: AdminExportRow[] = (exportData.items || []).map((row: any, index: number) => ({
-      id: row.id || `key_${index + 1}`,
-      created_at: row.createdAt || row.created_at || new Date(Date.now() - index * 86400000).toISOString(),
-      status: (row.status || 'active').toLowerCase() as "active" | "revoked" | "expired" | "pending",
-      key_suffix: row.keySuffix || row.key_suffix || `...${Math.random().toString(36).substring(2, 8)}`,
-      email_hash_prefix: row.emailHashPrefix || row.email_hash_prefix || `hash_${index}`,
-      total_unlocks: row.totalUnlocks || row.total_unlocks || Math.floor(Math.random() * 100),
-      last_used_at: row.lastUsedAt || row.last_used_at || (Math.random() > 0.7 ? new Date(Date.now() - Math.random() * 86400000).toISOString() : undefined),
-      member_name: row.memberName || row.member_name || (Math.random() > 0.5 ? `Member ${index + 1}` : undefined),
-      tier: row.tier || ['basic', 'premium', 'enterprise'][index % 3],
+    assertAdmin(req);
+  } catch {
+    await new Promise((r) => setTimeout(r, 150));
+    return res.status(401).json({ ok: false, error: "Authorization required.", generatedAt: new Date().toISOString(), rateLimit: rl });
+  }
+
+  try {
+    const page = toInt(req.query.page, 1, 1, 10_000);
+    const limit = toInt(req.query.limit, 50, 1, 500);
+    const status = String(req.query.status || "").toLowerCase().trim();
+    const search = String(req.query.search || "").toLowerCase().trim();
+    const tier = String(req.query.tier || "").trim();
+    const memberId = String(req.query.memberId || "").trim();
+
+    let keys: any[] = [];
+
+    if (memberId) keys = await getKeysByMember(memberId);
+    else if (tier) keys = await getKeysByTier(normalizeTier(tier));
+    else keys = await getActiveKeys();
+
+    if (!Array.isArray(keys)) keys = [];
+
+    let rows: AdminExportRow[] = keys.map((k: any) => ({
+      id: String(k?.id || k?._id || k?.keyId || ""),
+      created_at: String(k?.createdAt || k?.created_at || k?.issuedAt || k?.issued_at || new Date().toISOString()),
+      status: statusFromRecord(k),
+      key_suffix: String(k?.keySuffix || "") || suffixFromKey(k?.key),
+      email_hash_prefix: String(k?.emailHashPrefix || "") || prefixFromEmailHash(k?.emailHash),
+      total_unlocks: Number(k?.usedCount ?? k?.totalUnlocks ?? k?.total_unlocks ?? 0) || 0,
+      last_used_at: k?.lastUsedAt ? String(k.lastUsedAt) : undefined,
+      member_name: k?.memberName ? String(k.memberName) : undefined,
+      tier: k?.tier ? String(k.tier) : undefined,
     }));
-    // Create pagination info
-    const pagination: PaginationMeta = {
-      total: exportData.totalItems || rows.length * 10, // Mock multiplication for demo
-      page: exportData.page || page,
-      limit: exportData.limit || limit,
-      totalPages: exportData.totalPages || Math.ceil((exportData.totalItems || rows.length * 10) / limit),
+
+    if (status) rows = rows.filter((r) => r.status === status);
+
+    if (search) {
+      rows = rows.filter((r) => {
+        const hay = [r.member_name, r.tier, r.key_suffix, r.email_hash_prefix, r.status, r.id].join(" ").toLowerCase();
+        return hay.includes(search);
+      });
+    }
+
+    const total = rows.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * limit;
+    const paged = rows.slice(start, start + limit);
+
+    const statsRaw: any = await getPrivacySafeStats();
+    const stats: AdminStats = {
+      totalMembers: Number(statsRaw?.totalMembers ?? 0) || 0,
+      activeMembers: Number(statsRaw?.activeMembers ?? 0) || 0,
+      pendingMembers: Number(statsRaw?.pendingMembers ?? 0) || 0,
+      totalKeys: Number(statsRaw?.totalKeys ?? 0) || 0,
+      activeKeys: Number(statsRaw?.activeKeys ?? 0) || 0,
+      revokedKeys: Number(statsRaw?.revokedKeys ?? 0) || 0,
+      totalUnlocks: Number(statsRaw?.totalUnlocks ?? 0) || 0,
+      averageUnlocksPerMember: Number(statsRaw?.averageUnlocksPerMember ?? 0) || 0,
+      dataRetentionDays: Number(statsRaw?.dataRetentionDays ?? 0) || 0,
+      estimatedMemoryBytes: Number(statsRaw?.estimatedMemoryBytes ?? 0) || 0,
+      lastCleanup: String(statsRaw?.lastCleanup || new Date().toISOString()),
+      storageType: String(statsRaw?.storageType || "unknown"),
+      uptimeDays: Number(statsRaw?.uptimeDays ?? 0) || 0,
+      dailyActiveMembers: Number(statsRaw?.dailyActiveMembers ?? 0) || 0,
+      weeklyGrowthRate: typeof statsRaw?.weeklyGrowthRate === "number" ? statsRaw.weeklyGrowthRate : undefined,
     };
-    // Create complete stats
-    const adminStats: AdminStats = {
-      totalMembers: stats?.totalMembers || 1000,
-      activeMembers: stats?.activeMembers || 750,
-      pendingMembers: stats?.pendingMembers || 50,
-      totalKeys: stats?.totalKeys || 1000,
-      activeKeys: stats?.activeKeys || rows.filter(r => r.status === 'active').length,
-      revokedKeys: stats?.revokedKeys || rows.filter(r => r.status === 'revoked').length,
-      totalUnlocks: stats?.totalUnlocks || rows.reduce((sum, row) => sum + row.total_unlocks, 0),
-      averageUnlocksPerMember: stats?.averageUnlocksPerMember || 
-        (rows.length > 0 ? rows.reduce((sum, row) => sum + row.total_unlocks, 0) / rows.length : 0),
-      dataRetentionDays: stats?.dataRetentionDays || 90,
-      estimatedMemoryBytes: stats?.estimatedMemoryBytes || 1024 * 1024 * 50, // 50MB
-      lastCleanup: stats?.lastCleanup || new Date(Date.now() - 86400000).toISOString(),
-      storageType: stats?.storageType || 'memory',
-      uptimeDays: stats?.uptimeDays || 30,
-      dailyActiveMembers: stats?.dailyActiveMembers || 150,
-      weeklyGrowthRate: stats?.weeklyGrowthRate || 5.2,
-    };
+
     return res.status(200).json({
       ok: true,
-      rows,
-      stats: adminStats,
-      pagination,
+      rows: paged,
+      stats,
+      pagination: { total, page: safePage, limit, totalPages },
       generatedAt: new Date().toISOString(),
-      rateLimit: rateLimit ? {
-        allowed: rateLimit.allowed,
-        remaining: rateLimit.remaining,
-        limit: rateLimit.limit,
-        resetAt: rateLimit.resetAt,
-      } : undefined,
+      rateLimit: rl,
     });
-  } catch (error: any) {
-    console.error("[Admin Export] System Exception:", error);
-    // Check if it's a rate limit error
-    if (error.message?.includes('Rate limit') || error.message?.includes('too many')) {
-      return res.status(429).json({
-        ok: false,
-        error: "Rate limit exceeded. Please wait before re-exporting.",
-        generatedAt: new Date().toISOString(),
-      });
-    }
-    // Check if it's an authentication error
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Authentication')) {
-      return res.status(401).json({
-        ok: false,
-        error: "Authentication failed.",
-        generatedAt: new Date().toISOString(),
-      });
-    }
-    return res.status(500).json({ 
-      ok: false, 
-      error: error.message || "Export subsystem failure.",
-      generatedAt: new Date().toISOString(),
-    });
+  } catch (e: any) {
+    return res.status(500).json({ ok: false, error: e?.message || "Export failed.", generatedAt: new Date().toISOString(), rateLimit: rl });
   }
-});
-export default rateLimitedHandler;
-// Export types for use elsewhere
-export type { AdminExportRow, AdminStats, PaginationMeta, AdminExportResponse };
+}
