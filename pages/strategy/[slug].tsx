@@ -1,7 +1,9 @@
+/* pages/strategy/[slug].tsx - FINAL BUILD-PROOF (seed + proxy, Pages Router) */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import {
   BookOpen,
   FileSpreadsheet,
@@ -20,16 +22,17 @@ import {
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import SafeMDXRemote from "@/components/SafeMDXRemote";
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components"; // CHANGED: Use seeded-safe function
 
 import { serialize } from "next-mdx-remote/serialize";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 import { safeSlice } from "@/lib/utils/safe";
 
-// ✅ SERVER-SAFE content access
+// ✅ SERVER-SAFE content access from the server boundary
 import {
   getContentlayerData,
   normalizeSlug,
@@ -37,10 +40,15 @@ import {
   sanitizeData,
 } from "@/lib/content/server";
 
+// ==================== TYPES ====================
+
 type Props = {
   strategy: any;
-  source: any;
+  source: MDXRemoteSerializeResult;
+  mdxRaw: string; // ✅ ADDED: Required for seeding
 };
+
+// ==================== HELPERS ====================
 
 function stripMdxExt(s: string): string {
   return String(s || "").replace(/\.(md|mdx)$/, "");
@@ -66,9 +74,23 @@ function strategySlugFromDoc(d: any): string {
   return stripStrategyPrefix(noExt);
 }
 
+// Paranoid MDX extraction
+function getRawBody(d: any): string {
+  return (
+    d?.body?.raw ||
+    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
+    (typeof d?.content === "string" ? d.content : "") ||
+    (typeof d?.body === "string" ? d.body : "") ||
+    (typeof d?.mdx === "string" ? d.mdx : "") ||
+    ""
+  );
+}
+
+// ==================== STATIC PATHS ====================
+
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const { allStrategies } = getContentlayerData(); // ✅ sync; defined
+    const { allStrategies } = getContentlayerData();
     const paths = (allStrategies ?? [])
       .filter((d: any) => d && isStrategyDoc(d) && !isDraftContent(d))
       .map((d: any) => strategySlugFromDoc(d))
@@ -77,11 +99,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     return { paths, fallback: "blocking" };
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error("Error generating static paths:", e);
     return { paths: [], fallback: "blocking" };
   }
 };
+
+// ==================== STATIC PROPS ====================
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
@@ -101,47 +124,52 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const strategy =
       (allStrategies ?? []).find((d: any) => {
         if (!d || isDraftContent(d) || !isStrategyDoc(d)) return false;
-
         const dSlug = strategySlugFromDoc(d);
         return dSlug === want || normalizeSlug(dSlug) === normalizeSlug(want);
       }) ?? null;
 
     if (!strategy) return { notFound: true };
 
-    const raw = strategy?.body?.raw ?? "";
-    let source: any;
-
-    try {
-      source = await serialize(raw, {
-        mdxOptions: {
-          remarkPlugins: [remarkGfm],
-          rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
-        },
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(`[Strategy Serialize Error] ${want}:`, err);
-      source = await serialize("This strategy framework is currently being updated.");
-    }
+    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
+    const mdxRaw = getRawBody(strategy);
+    
+    // ✅ SERIALIZE MDX CONTENT
+    const source = await serialize(mdxRaw || " ", {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
+      },
+    });
 
     return {
       props: {
         strategy: sanitizeData(strategy),
         source,
+        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
       },
       revalidate: 1800,
     };
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error("Error generating static props:", e);
     return { notFound: true };
   }
 };
 
-const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
+// ==================== PAGE COMPONENT ====================
+
+const StrategyDetailPage: NextPage<Props> = ({ strategy, source, mdxRaw }) => {
   const [isVisible, setIsVisible] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState<string>("");
   const [progress, setProgress] = React.useState(0);
+
+  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+  const safeComponents = React.useMemo(
+    () =>
+      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+        warnOnFallback: process.env.NODE_ENV === "development",
+      }),
+    [mdxRaw]
+  );
 
   React.useEffect(() => {
     setIsVisible(true);
@@ -402,7 +430,7 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
 
           <div className="lg:col-span-3">
             <div className={`transition-all duration-1000 delay-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-              <div
+              <article
                 className="prose prose-invert max-w-none
                 prose-headings:font-serif prose-headings:font-bold
                 prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-white
@@ -418,8 +446,9 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source }) => {
                 prose-img:rounded-xl prose-img:border prose-img:border-zinc-800
                 prose-strong:text-white prose-strong:font-semibold"
               >
-                <SafeMDXRemote {...source} components={mdxComponents} />
-              </div>
+                {/* ✅ SEED + PROXY: Safe components with mdxRaw seeding */}
+                <MDXRemote {...source} components={safeComponents as any} />
+              </article>
 
               <div id="download" className="mt-16">
                 <div className="rounded-2xl border border-gold/20 bg-gradient-to-r from-black via-zinc-950 to-black p-8">

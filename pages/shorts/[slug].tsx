@@ -1,10 +1,13 @@
-/* pages/shorts/[slug].tsx — MICRO-INSIGHT ENGINE (INTEGRITY MODE) */
+// pages/shorts/[slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 
 import Layout from "@/components/Layout";
 
@@ -15,10 +18,11 @@ import {
   isDraftContent,
   normalizeSlug,
   sanitizeData,
-} from "@/lib/contentlayer-helper";  // Single source for server functions
+} from "@/lib/contentlayer-helper";
 
-// MDX utilities
-import { prepareMDX, simpleMdxComponents } from "@/lib/server/md-utils";
+// ✅ STANDARDIZED: Use createSeededSafeMdxComponents for seed + proxy
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
+import mdxComponents from "@/components/mdx-components";
 
 import {
   Heart,
@@ -28,7 +32,6 @@ import {
   Sparkles,
   Share2,
 } from "lucide-react";
-
 
 // Client-only engagement components
 const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
@@ -83,6 +86,7 @@ type Short = {
 type Props = {
   short: Short;
   source: MDXRemoteSerializeResult | null;
+  mdxRaw: string; // ✅ ADDED: Required for seeding
 };
 
 function getShortSlug(doc: ShortDoc): string {
@@ -93,51 +97,19 @@ function getShortSlug(doc: ShortDoc): string {
   return chosen.replace(/^shorts\//, "");
 }
 
+// Paranoid MDX extraction
 function getRawBody(doc: ShortDoc): string {
-  return doc?.body?.raw || (typeof doc?.bodyRaw === "string" ? doc.bodyRaw : "") || "";
+  return (
+    doc?.body?.raw ||
+    (typeof doc?.bodyRaw === "string" ? doc.bodyRaw : "") ||
+    (typeof doc?.content === "string" ? doc.content : "") ||
+    (typeof doc?.body === "string" ? doc.body : "") ||
+    (typeof doc?.mdx === "string" ? doc.mdx : "") ||
+    ""
+  );
 }
 
-function normalizePrepareMdxResult(
-  mdxResult: unknown
-): { source: MDXRemoteSerializeResult | null } {
-  const r = mdxResult as any;
-
-  // direct MDXRemoteSerializeResult
-  if (r && typeof r === "object" && typeof r.compiledSource === "string") {
-    return { source: r };
-  }
-
-  // wrapped shape: { source }
-  if (r && typeof r === "object" && r.source && typeof r.source === "object") {
-    return { source: r.source };
-  }
-
-  return { source: null };
-}
-
-// 🔥 SAFE MDX COMPONENTS: Ensure no undefined components
-const getSafeMdxComponents = () => {
-  const safeComponents: any = {};
-  
-  if (typeof simpleMdxComponents === 'object') {
-    Object.keys(simpleMdxComponents).forEach(key => {
-      const Comp = (simpleMdxComponents as any)[key];
-      if (Comp && typeof Comp === 'function') {
-        safeComponents[key] = Comp;
-      } else {
-        // Fallback component for safety
-        safeComponents[key] = ({ children, ...props }: any) => {
-          console.warn(`MDX Component "${key}" is not properly defined`);
-          return React.createElement('div', props, children);
-        };
-      }
-    });
-  }
-  
-  return safeComponents;
-};
-
-const ShortPage: NextPage<Props> = ({ short, source }) => {
+const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
   const router = useRouter();
   const [likes, setLikes] = React.useState<number>(short.likes || 0);
   const [isLiked, setIsLiked] = React.useState<boolean>(false);
@@ -145,11 +117,18 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
   const [streak, setStreak] = React.useState<number>(0);
   const [readProgress, setReadProgress] = React.useState<number>(0);
   const [isClient, setIsClient] = React.useState(false);
-  const [mdxComponents, setMdxComponents] = React.useState<any>({});
+
+  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+  const safeComponents = React.useMemo(
+    () =>
+      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+        warnOnFallback: process.env.NODE_ENV === "development",
+      }),
+    [mdxRaw]
+  );
 
   React.useEffect(() => {
     setIsClient(true);
-    setMdxComponents(getSafeMdxComponents());
   }, []);
 
   React.useEffect(() => {
@@ -279,6 +258,7 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
                     : "bg-white/5 border-white/10 text-gray-500 hover:text-white"
                 }`}
                 aria-label="Like"
+                disabled={!isClient}
               >
                 <Heart size={18} className={isLiked ? "fill-current" : ""} />
               </button>
@@ -287,6 +267,7 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
                 onClick={handleShare}
                 className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-500 hover:text-white transition-all"
                 aria-label="Share"
+                disabled={!isClient}
               >
                 <Share2 size={18} />
               </button>
@@ -296,18 +277,23 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
           <div className="grid lg:grid-cols-12 gap-12">
             <div className="lg:col-span-8">
               <div className="bg-zinc-900/40 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
-                <ShortHero
-                  title={short.title}
-                  theme={short.theme}
-                  author={short.author}
-                  coverImage={short.coverImage}
-                />
+                {isClient ? (
+                  <ShortHero
+                    title={short.title}
+                    theme={short.theme}
+                    author={short.author}
+                    coverImage={short.coverImage}
+                  />
+                ) : (
+                  <div className="h-48 bg-white/5 animate-pulse rounded-xl mb-8"></div>
+                )}
 
                 <article className="mt-8 prose prose-invert prose-gold max-w-none prose-p:leading-relaxed prose-p:text-gray-300">
                   {source ? (
+                    /* ✅ SEED + PROXY: Guaranteed no missing component errors */
                     <MDXRemote 
                       {...source} 
-                      components={mdxComponents}
+                      components={safeComponents as any}
                     />
                   ) : (
                     // Fallback when no MDX source is available
@@ -330,7 +316,13 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
               </div>
 
               <div className="mt-12">
-                <ShortComments shortId={short.slugPath} />
+                {isClient ? (
+                  <ShortComments shortId={short.slugPath} />
+                ) : (
+                  <div className="h-32 rounded-lg bg-white/5 animate-pulse flex items-center justify-center">
+                    <p className="text-xs text-gray-500">Loading comments…</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -340,7 +332,15 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-gold mb-6">
                     Continue the Build
                   </h3>
-                  <ShortNavigation currentSlug={short.slugPath} />
+                  {isClient ? (
+                    <ShortNavigation currentSlug={short.slugPath} />
+                  ) : (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-16 rounded-lg bg-white/5 animate-pulse"></div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-8 rounded-3xl bg-gradient-to-br from-gold/10 to-transparent border border-gold/20 text-center">
@@ -352,6 +352,7 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
                   <button
                     onClick={() => router.push("/inner-circle")}
                     className="w-full py-3 rounded-xl bg-gold text-black text-xs font-black uppercase tracking-widest hover:bg-gold/80 transition-all"
+                    disabled={!isClient}
                   >
                     Subscribe
                   </button>
@@ -362,7 +363,7 @@ const ShortPage: NextPage<Props> = ({ short, source }) => {
         </div>
       </main>
 
-      <BackToTop />
+      {isClient && <BackToTop />}
     </Layout>
   );
 };
@@ -400,15 +401,19 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
     if (!data || isDraftContent(data)) return { notFound: true };
 
-    const raw = getRawBody(data);
+    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
+    const mdxRaw = getRawBody(data);
     
-    // 🔥 SAFETY: Ensure we have valid MDX source
+    // ✅ USE DIRECT SERIALIZE
     let source: MDXRemoteSerializeResult | null = null;
-    if (typeof raw === "string" && raw.trim()) {
+    if (typeof mdxRaw === "string" && mdxRaw.trim()) {
       try {
-        const mdxResult = await prepareMDX(raw);
-        const { source: mdxSource } = normalizePrepareMdxResult(mdxResult);
-        source = mdxSource;
+        source = await serialize(mdxRaw || " ", {
+          mdxOptions: {
+            remarkPlugins: [remarkGfm],
+            rehypePlugins: [rehypeSlug],
+          },
+        });
       } catch (mdxError) {
         console.error(`MDX compilation error for ${normalized}:`, mdxError);
         source = null;
@@ -437,6 +442,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       props: {
         short: sanitizeData(short),
         source: source ? JSON.parse(JSON.stringify(source)) : null, // Ensure serializable
+        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
       },
       revalidate: 3600,
     };

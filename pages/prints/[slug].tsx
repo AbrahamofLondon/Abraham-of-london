@@ -1,4 +1,4 @@
-/* pages/prints/[slug].tsx — Institutional Print Collection Detail (Production Stable) */
+// pages/prints/[slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -8,7 +8,7 @@ import Layout from "@/components/Layout";
 
 import { withInnerCircleAuth } from "@/lib/auth/withInnerCircleAuth";
 
-// ✅ Server-safe content access (SSG) — do NOT rely on isDraftContent export here
+// ✅ Server-safe content access (SSG)
 import {
   getAllContentlayerDocs,
   getDocBySlug,
@@ -20,6 +20,8 @@ import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
+// ✅ STANDARDIZED: Use createSeededSafeMdxComponents for seed + proxy
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 import mdxComponents from "@/components/mdx-components";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
@@ -111,11 +113,12 @@ type Props = {
     fileSize: string | null;
     printInstructions: string | null;
     accessLevel: AccessLevel;
-    paperType?: string;
-    inkType?: string;
-    orientation?: "portrait" | "landscape";
+    paperType: string | null;
+    inkType: string | null;
+    orientation: "portrait" | "landscape" | null;
   };
   source: MDXRemoteSerializeResult;
+  mdxRaw: string; // ✅ ADDED: Required for seeding
   user?: User; // injected by HOC
   requiredRole?: string; // injected by HOC
 };
@@ -178,8 +181,16 @@ function resolveCoverImageLocal(d: PrintDoc): string | null {
   return alt2 || null;
 }
 
+// Paranoid MDX extraction
 function getRawBody(d: PrintDoc): string {
-  return d?.body?.raw || (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") || " ";
+  return (
+    d?.body?.raw ||
+    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
+    (typeof d?.content === "string" ? d.content : "") ||
+    (typeof d?.body === "string" ? d.body : "") ||
+    (typeof d?.mdx === "string" ? d.mdx : "") ||
+    ""
+  );
 }
 
 function safeDateLabel(input: string | null): string {
@@ -230,8 +241,10 @@ export const getStaticProps: GetStaticProps<Omit<Props, "user" | "requiredRole">
 
     if (!doc || !isPrintDoc(doc) || isDraftContent(doc)) return { notFound: true };
 
-    const mdxContent = getRawBody(doc);
+    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
+    const mdxRaw = getRawBody(doc);
 
+    // ✅ FIX: Ensure all optional fields are either null or defined values
     const print = {
       title: doc.title || "Print Resource",
       excerpt: doc.excerpt ?? null,
@@ -248,12 +261,13 @@ export const getStaticProps: GetStaticProps<Omit<Props, "user" | "requiredRole">
       fileSize: (doc.fileSize ?? null) as string | null,
       printInstructions: (doc.printInstructions ?? null) as string | null,
       accessLevel: toAccessLevel(doc.accessLevel),
-      paperType: doc.paperType,
-      inkType: doc.inkType,
-      orientation: doc.orientation,
+      // ✅ FIXED: Use null instead of undefined for optional fields
+      paperType: doc.paperType ?? null,
+      inkType: doc.inkType ?? null,
+      orientation: (doc.orientation === "portrait" || doc.orientation === "landscape" ? doc.orientation : null) as "portrait" | "landscape" | null,
     };
 
-    const source = await serialize(mdxContent, {
+    const source = await serialize(mdxRaw || " ", {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
         rehypePlugins: [rehypeSlug],
@@ -261,7 +275,11 @@ export const getStaticProps: GetStaticProps<Omit<Props, "user" | "requiredRole">
     });
 
     return {
-      props: { print: sanitizeData(print), source },
+      props: { 
+        print: sanitizeData(print), 
+        source,
+        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
+      },
       revalidate: 3600,
     };
   } catch (error) {
@@ -332,19 +350,34 @@ const AccessDeniedComponent: React.FC<{ print: Props["print"]; requiredRole?: st
 // ------------------------------------------------------------
 // Main page component
 // ------------------------------------------------------------
-const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
+const PrintDetailPageComponent: NextPage<Props> = ({ print, source, mdxRaw, user }) => {
   const router = useRouter();
+  
+  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+  const safeComponents = React.useMemo(
+    () =>
+      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+        warnOnFallback: process.env.NODE_ENV === "development",
+      }),
+    [mdxRaw]
+  );
+  
   const [isDownloading, setIsDownloading] = React.useState(false);
   const [isBookmarked, setIsBookmarked] = React.useState(false);
   const [viewCount, setViewCount] = React.useState<number>(print.viewCount || 0);
   const [downloadCount, setDownloadCount] = React.useState<number>(print.downloadCount || 0);
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const hasAccessToThisContent =
     print.accessLevel === "public" ||
     (user && ROLE_HIERARCHY[String((user as any).role || "public")] >= ROLE_HIERARCHY[print.accessLevel]);
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isClient) return;
     if (!hasAccessToThisContent) return;
 
     const key = `print-views-${print.slug}`;
@@ -359,9 +392,10 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
       localStorage.setItem("bookmarkedPrints", "[]");
       setIsBookmarked(false);
     }
-  }, [print.slug, hasAccessToThisContent]);
+  }, [print.slug, hasAccessToThisContent, isClient]);
 
   const handleDownload = async (urlType: "pdf" | "highres") => {
+    if (!isClient) return;
     if (!hasAccessToThisContent) {
       router.push(`/login?redirect=${encodeURIComponent(router.asPath)}&tier=${encodeURIComponent(print.accessLevel)}`);
       return;
@@ -411,7 +445,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
   };
 
   const handleBookmarkToggle = () => {
-    if (typeof window === "undefined") return;
+    if (!isClient) return;
 
     try {
       const bookmarks = JSON.parse(localStorage.getItem("bookmarkedPrints") || "[]");
@@ -433,7 +467,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
   };
 
   const handleShare = async () => {
-    if (typeof window === "undefined") return;
+    if (!isClient) return;
 
     const url = window.location.href;
     try {
@@ -475,6 +509,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
           <button
             onClick={() => router.back()}
             className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors group"
+            disabled={!isClient}
           >
             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Back to Prints
@@ -505,7 +540,8 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
               ) : null}
 
               <div className="prose prose-slate max-w-none bg-white rounded-2xl p-6 md:p-8 border border-slate-200">
-                <MDXRemote {...source} components={mdxComponents} />
+                {/* ✅ SEED + PROXY: Guaranteed no missing component errors */}
+                <MDXRemote {...source} components={safeComponents as any} />
               </div>
 
               {print.printInstructions ? (
@@ -564,6 +600,37 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                       </div>
                     ) : null}
 
+                    {/* ✅ FIXED: Conditionally show paperType, inkType, orientation only when not null */}
+                    {print.paperType && (
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-slate-400" />
+                        <div>
+                          <div className="text-sm text-slate-600">Paper Type</div>
+                          <div className="font-medium text-slate-900">{print.paperType}</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {print.inkType && (
+                      <div className="flex items-center gap-3">
+                        <Printer className="w-5 h-5 text-slate-400" />
+                        <div>
+                          <div className="text-sm text-slate-600">Ink Type</div>
+                          <div className="font-medium text-slate-900">{print.inkType}</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {print.orientation && (
+                      <div className="flex items-center gap-3">
+                        <Maximize2 className="w-5 h-5 text-slate-400" />
+                        <div>
+                          <div className="text-sm text-slate-600">Orientation</div>
+                          <div className="font-medium text-slate-900">{print.orientation.charAt(0).toUpperCase() + print.orientation.slice(1)}</div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="pt-4 border-t border-slate-200">
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-600">Views</span>
@@ -584,7 +651,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                     {print.pdfUrl ? (
                       <button
                         onClick={() => handleDownload("pdf")}
-                        disabled={isDownloading}
+                        disabled={isDownloading || !isClient}
                         className="w-full py-3 px-4 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-3"
                       >
                         <Download className="w-5 h-5" />
@@ -596,7 +663,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                     {print.highResUrl ? (
                       <button
                         onClick={() => handleDownload("highres")}
-                        disabled={isDownloading}
+                        disabled={isDownloading || !isClient}
                         className="w-full py-3 px-4 bg-white border border-amber-500 text-amber-600 rounded-lg font-semibold hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-3"
                       >
                         <Maximize2 className="w-5 h-5" />
@@ -610,6 +677,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
                   <div className="space-y-3">
                     <button
                       onClick={handleBookmarkToggle}
+                      disabled={!isClient}
                       className={`w-full py-3 px-4 rounded-lg border flex items-center justify-center gap-3 transition-colors ${
                         isBookmarked
                           ? "bg-amber-50 border-amber-200 text-amber-700"
@@ -622,6 +690,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
 
                     <button
                       onClick={handleShare}
+                      disabled={!isClient}
                       className="w-full py-3 px-4 rounded-lg border border-slate-200 text-slate-700 hover:border-amber-300 transition-colors flex items-center justify-center gap-3"
                     >
                       <Share2 className="w-5 h-5" />
@@ -650,7 +719,7 @@ const PrintDetailPageComponent: NextPage<Props> = ({ print, source, user }) => {
         </div>
       </div>
 
-      <BackToTop />
+      {isClient && <BackToTop />}
     </Layout>
   );
 };

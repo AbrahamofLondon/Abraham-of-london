@@ -1,7 +1,8 @@
 // scripts/generate-sitemap.js
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 console.log('📄 Generating sitemap...');
 
@@ -10,7 +11,9 @@ try {
   execSync('npx next-sitemap', { stdio: 'inherit' });
   
   // Verify sitemap was created
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+  
   if (fs.existsSync(sitemapPath)) {
     console.log('✅ Sitemap generated successfully at', sitemapPath);
   } else {

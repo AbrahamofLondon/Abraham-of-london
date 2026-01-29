@@ -1,101 +1,174 @@
+// components/books/RelatedBooks.tsx
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { safeArraySlice } from "@/lib/utils/safe";
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { ArrowRight, BookOpen, Star } from "lucide-react";
 
 interface RelatedBook {
-  id: string;
+  id?: string; // Make optional
   title: string;
-  author: string;
-  description: string;
-  rating: number;
-  price: number;
-  coverImage: string;
+  author?: string; // Make optional
+  description?: string; // Make optional
+  rating?: number; // Make optional
+  price?: number; // Make optional
+  coverImage?: string; // Make optional
   slug: string;
-  category: string;
+  category?: string; // Make optional
 }
 
 interface RelatedBooksProps {
-  books: RelatedBook[];
-  currentBookId: string;
+  books?: RelatedBook[]; // Make optional
+  currentBookSlug?: string;
+  currentBookId?: string;
 }
 
-const RelatedBooks: React.FC<RelatedBooksProps> = ({ books, currentBookId }) => {
-  const filteredBooks = safeArraySlice(
-  books.filter((book) => book.id !== currentBookId),
-  0,
-  3
-);
+const RelatedBooks: React.FC<RelatedBooksProps> = ({ 
+  books = [], 
+  currentBookSlug,
+  currentBookId 
+}) => {
+  const [isClient, setIsClient] = React.useState(false);
+  const [relatedBooks, setRelatedBooks] = React.useState<RelatedBook[]>([]);
+
+  React.useEffect(() => {
+    setIsClient(true);
+    
+    // Only process on client side
+    if (typeof window === 'undefined') return;
+
+    const currentBook = currentBookSlug || currentBookId;
+    
+    // SAFE: Handle undefined/null books
+    const safeBooks = Array.isArray(books) ? books : [];
+    
+    // Filter out current book safely
+    const filteredBooks = safeArraySlice(
+      safeBooks.filter((book) => {
+        if (!book || !currentBook) return true;
+        
+        // Ensure book has required properties
+        if (!book.title || !book.slug) return false;
+        
+        // Try to match by ID or slug
+        if (book.id && book.id === currentBook) return false;
+        if (book.slug && book.slug === currentBook) return false;
+        
+        return true;
+      }),
+      0,
+      3
+    );
+
+    setRelatedBooks(filteredBooks);
+  }, [books, currentBookSlug, currentBookId]);
+
+  // Don't render on server during SSG - return loading skeleton
+  if (!isClient) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-64 bg-white/5 animate-pulse rounded-xl"></div>
+        ))}
+      </div>
+    );
+  }
+
+  // If no books to display, show fallback
+  if (relatedBooks.length === 0) {
+    return (
+      <div className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
+        <BookOpen className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+        <p className="text-xs text-gray-500">No related books available</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">You Might Also Like</h2>
-          <p className="text-gray-600">More books from our collection</p>
+          <h3 className="text-lg font-bold text-white">Related Intelligence</h3>
+          <p className="text-sm text-gray-400">More from the collection</p>
         </div>
         <Link
           href="/books"
-          className="text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-2"
+          className="text-sm text-gold hover:text-gold/80 font-semibold flex items-center gap-1"
         >
-          <span>Browse All Books</span>
-          <ArrowIcon className="w-4 h-4" />
+          <span>Browse All</span>
+          <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredBooks.map((book) => (
-          <Link key={book.id} href={`/books/${book.slug}`}>
-            <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-              <div className="relative h-64">
-                <Image
-                  src={book.coverImage}
-                  alt={book.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded">
-                    {book.category}
-                  </span>
+      <div className="space-y-4">
+        {relatedBooks.map((book) => (
+          <Link 
+            key={book.slug || book.id || `book-${Math.random()}`}
+            href={`/books/${book.slug}`}
+            className="group block"
+          >
+            <div className="bg-zinc-900/60 border border-white/10 rounded-xl p-4 hover:bg-white/5 hover:border-gold/30 transition-all duration-300 group-hover:scale-[1.02]">
+              <div className="flex gap-4">
+                <div className="relative w-16 h-24 flex-shrink-0 rounded overflow-hidden border border-white/10">
+                  {book.coverImage ? (
+                    <Image
+                      src={book.coverImage}
+                      alt={book.title || 'Book cover'}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                      unoptimized={book.coverImage?.startsWith('/')}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                      <BookOpen className="w-8 h-8 text-gray-500" />
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                  {book.title}
-                </h3>
                 
-                <p className="text-gray-600 text-sm mb-3">by {book.author}</p>
-                
-                <div className="flex items-center mb-4">
-                  <div className="flex items-center mr-3">
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(book.rating)
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-gray-600">
-                      {book.rating.toFixed(1)}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-white group-hover:text-gold transition-colors truncate">
+                        {book.title || 'Untitled Book'}
+                      </h4>
+                      <p className="text-sm text-gray-400 truncate">
+                        by {book.author || 'Abraham of London'}
+                      </p>
+                    </div>
+                    
+                    {book.price !== undefined && (
+                      <div className="text-gold font-bold text-sm">
+                        ${book.price.toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {book.rating !== undefined && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3 h-3 ${
+                              i < Math.floor(book.rating || 0)
+                                ? 'text-yellow-400 fill-yellow-400'
+                                : 'text-gray-600'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {(book.rating || 0).toFixed(1)}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {book.category && (
+                    <span className="inline-block px-2 py-1 bg-gold/10 text-gold text-[10px] font-bold uppercase tracking-widest rounded">
+                      {book.category}
                     </span>
-                  </div>
-                  <div className="text-lg font-bold text-gray-900">
-                    ${book.price.toFixed(2)}
-                  </div>
-                </div>
-                
-                <p className="text-gray-700 mb-4 line-clamp-3 text-sm">
-                  {book.description}
-                </p>
-                
-                <div className="flex items-center text-blue-600 font-semibold">
-                  <span>View Details</span>
-                  <ArrowSmallRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  )}
                 </div>
               </div>
             </div>
@@ -105,23 +178,5 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ books, currentBookId }) => 
     </div>
   );
 };
-
-const StarIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 20 20" fill="currentColor">
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-  </svg>
-);
-
-const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-  </svg>
-);
-
-const ArrowSmallRightIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-  </svg>
-);
 
 export default RelatedBooks;

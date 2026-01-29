@@ -1,4 +1,4 @@
-// pages/[slug].tsx - UPDATED IMPORT SECTION
+// pages/[slug].tsx - FINAL BUILD-PROOF (seed + proxy, Pages Router)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -7,11 +7,15 @@ import { useRouter } from "next/router";
 import { ArrowRight, Calendar, Clock, Tag, User } from "lucide-react";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 
 import Layout from "@/components/Layout";
 
-// ✅ Import directly from components, not md-utils
+// ✅ Import registry and SEEDED safety function
 import mdxComponents from "@/components/mdx-components";
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 
 import {
   getAllCombinedDocs,
@@ -28,9 +32,6 @@ import {
   sanitizeData,
 } from "@/lib/content/shared";
 
-// ✅ Import only prepareMDX from md-utils
-import { prepareMDX } from "@/lib/server/md-utils";
-
 /* -----------------------------------------------------------------------------
   TYPES
 ----------------------------------------------------------------------------- */
@@ -41,7 +42,7 @@ type Doc = {
   href: string;
   excerpt?: string | null;
   date?: string | null;
-  dateIso?: string | null;  // ✅ ISO for reliable handling
+  dateIso?: string | null;
   image?: string | null;
   tags?: string[];
   author?: string | null;
@@ -52,10 +53,11 @@ type Doc = {
 interface Props {
   doc: Doc;
   source: MDXRemoteSerializeResult | null;
+  mdxRaw: string; // ✅ ADDED: Required for seeding
 }
 
 /* -----------------------------------------------------------------------------
-  ROUTE PROTECTION - UPDATED WITH ALL RESERVED ROUTES
+  ROUTE PROTECTION
 ----------------------------------------------------------------------------- */
 const RESERVED_TOP_LEVEL = new Set<string>([
   "vault",
@@ -107,7 +109,6 @@ const RESERVED_TOP_LEVEL = new Set<string>([
   "consulting",
   "content-simple",
   "strategy-room",
-  // ✅ ADDED: Problematic slugs from export errors
   "abraham-vault-pack",
   "download-legacy-architecture-canvas",
   "the-brotherhood-code",
@@ -126,11 +127,7 @@ function topSlugFromDoc(d: any): string {
     normalizeSlug(String(d?.slug || "")) ||
     normalizeSlug(String(d?._raw?.flattenedPath || "")) ||
     "";
-
   const noExt = stripMdxExt(raw);
-
-  // Only allow *single-segment* slugs for this page.
-  // Anything with "/" belongs to a nested router.
   const seg = noExt.split("/").filter(Boolean)[0] || "";
   return seg;
 }
@@ -151,13 +148,34 @@ function safeText(v: unknown, fallback = ""): string {
   return s.trim() || fallback;
 }
 
+// Paranoid MDX extraction
+function getRawBody(d: any): string {
+  return (
+    d?.body?.raw ||
+    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
+    (typeof d?.content === "string" ? d.content : "") ||
+    (typeof d?.body === "string" ? d.body : "") ||
+    (typeof d?.mdx === "string" ? d.mdx : "") ||
+    ""
+  );
+}
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
 /* -----------------------------------------------------------------------------
   PAGE COMPONENT
 ----------------------------------------------------------------------------- */
-const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
+const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
   const router = useRouter();
+
+  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+  const safeComponents = React.useMemo(
+    () =>
+      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+        warnOnFallback: process.env.NODE_ENV === "development",
+      }),
+    [mdxRaw]
+  );
 
   if (router.isFallback) {
     return (
@@ -249,7 +267,6 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
 
       <section className="bg-black">
         <div className="mx-auto max-w-3xl px-6 py-12">
-          {/* Kind pill */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
             {safeText(doc.kind, "document")}
           </div>
@@ -258,7 +275,6 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
             {doc.title}
           </h1>
 
-          {/* Meta row */}
           <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-gray-300">
             {formattedDate && (
               <span className="inline-flex items-center gap-2">
@@ -266,14 +282,12 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
                 {formattedDate}
               </span>
             )}
-
             {doc.readTime && (
               <span className="inline-flex items-center gap-2">
                 <Clock className="h-4 w-4 text-amber-300" />
                 {doc.readTime}
               </span>
             )}
-
             {doc.author && (
               <span className="inline-flex items-center gap-2">
                 <User className="h-4 w-4 text-amber-300" />
@@ -282,30 +296,27 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
             )}
           </div>
 
-          {/* Excerpt */}
           {doc.excerpt && (
             <p className="mt-6 text-lg leading-relaxed text-gray-200">
               {doc.excerpt}
             </p>
           )}
 
-          {/* Cover */}
           {doc.image && (
             <div className="mt-10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
               <img src={doc.image} alt={doc.title} className="h-auto w-full" />
             </div>
           )}
 
-          {/* Content */}
           <article className="prose prose-invert mt-10 max-w-none">
             {source ? (
-              <MDXRemote {...source} components={mdxComponents || {}} />
+              // ✅ SEED + PROXY: Safe components with mdxRaw seeding
+              <MDXRemote {...source} components={safeComponents as any} />
             ) : (
               <p className="text-gray-300">Content not available.</p>
             )}
           </article>
 
-          {/* Tags */}
           {doc.tags && doc.tags.length > 0 && (
             <div className="mt-10 border-t border-white/10 pt-8">
               <div className="mb-3 inline-flex items-center gap-2 text-sm text-gray-300">
@@ -325,7 +336,6 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
             </div>
           )}
 
-          {/* Actions */}
           <div className="mt-12 flex flex-wrap gap-3">
             <Link
               href="/"
@@ -352,12 +362,10 @@ const GenericContentPage: NextPage<Props> = ({ doc, source }) => {
 
 /* -----------------------------------------------------------------------------
   BUILD: PATHS
-  STRICT: only generates /{slug} for documents whose href is exactly "/slug"
 ----------------------------------------------------------------------------- */
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const docs = getAllCombinedDocs();
-
     const candidates = docs
       .filter((d: any) => {
         if (!d) return false;
@@ -370,7 +378,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
       .map(topSlugFromDoc)
       .filter(Boolean);
 
-    // ✅ CRITICAL: Filter out reserved routes
     const unique = Array.from(new Set(candidates)).filter((s) => {
       if (!s) return false;
       if (RESERVED_TOP_LEVEL.has(s)) return false;
@@ -389,19 +396,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 /* -----------------------------------------------------------------------------
   BUILD: PROPS
-  STRICT: only serves top-level "/slug", never nested content
 ----------------------------------------------------------------------------- */
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
     const raw = String((params as any)?.slug || "");
     const slug = normalizeSlug(raw);
 
-    // ✅ CRITICAL: REJECT reserved routes
     if (!slug || RESERVED_TOP_LEVEL.has(slug)) {
       return { notFound: true };
     }
 
-    // Try direct slug, and also flattenedPath variants (defensive)
     const rawDoc =
       getDocBySlug(slug) ||
       getDocBySlug(`${slug}/index`) ||
@@ -409,23 +413,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       getDocBySlug(`${slug}.md`) ||
       null;
 
-    if (!rawDoc) {
-      return { notFound: true };
-    }
-
-    // Check if draft or unpublished
-    if (isDraftContent(rawDoc) || !isPublished(rawDoc)) {
-      return { notFound: true };
-    }
+    if (!rawDoc) return { notFound: true };
+    if (isDraftContent(rawDoc) || !isPublished(rawDoc)) return { notFound: true };
 
     const href = getDocHref(rawDoc);
-    
-    // ✅ CRITICAL: Ensure it's truly top-level (not nested)
-    if (!href || href !== `/${slug}`) {
-      return { notFound: true };
-    }
+    if (!href || href !== `/${slug}`) return { notFound: true };
 
-    // ✅ Store both ISO date (for schema) and display date
     const dateIso = toISODate(rawDoc?.date);
     const dateStr = rawDoc?.date ? String(rawDoc.date) : null;
 
@@ -444,19 +437,27 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       category: rawDoc.category || null,
     };
 
-    // ✅ Prepare MDX content
-    const rawMdx = rawDoc.body?.raw || rawDoc.body || "";
+    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
+    const mdxRaw = getRawBody(rawDoc);
+    
+    // ✅ USE DIRECT SERIALIZE INSTEAD OF prepareMDX
     const source =
-      typeof rawMdx === "string" && rawMdx.trim()
-        ? await prepareMDX(rawMdx)
+      typeof mdxRaw === "string" && mdxRaw.trim()
+        ? await serialize(mdxRaw, {
+            mdxOptions: {
+              remarkPlugins: [remarkGfm],
+              rehypePlugins: [rehypeSlug],
+            },
+          })
         : null;
 
     return {
       props: {
         doc: sanitizeData(doc),
         source: sanitizeData(source),
+        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
       },
-      revalidate: 3600, // Revalidate every hour
+      revalidate: 3600,
     };
   } catch (error) {
     console.error("[Slug Page] Error in getStaticProps:", error);

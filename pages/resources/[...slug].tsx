@@ -1,14 +1,19 @@
-// pages/resources/[...slug].tsx
+// pages/resources/[...slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import AccessGate from "@/components/AccessGate";
+
+// ✅ STANDARDIZED: Use createSeededSafeMdxComponents for seed + proxy
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 
 import {
   getAllCombinedDocs,
@@ -36,6 +41,7 @@ type Props = {
   resource: ResourceMeta;
   locked: boolean;
   initialSource: MDXRemoteSerializeResult | null;
+  mdxRaw: string; // ✅ ADDED: Required for seeding
 };
 
 type ApiOk = {
@@ -43,6 +49,7 @@ type ApiOk = {
   tier: AccessLevel;
   requiredTier: AccessLevel;
   source: MDXRemoteSerializeResult;
+  mdxRaw: string; // ✅ ADDED: For re-seeding on client if needed
 };
 
 type ApiFail = {
@@ -86,8 +93,16 @@ function resourceSlugFromDoc(d: any): string {
   return stripResourcesPrefix(noExt);
 }
 
+// Paranoid MDX extraction
 function getRawBody(d: any): string {
-  return d?.body?.raw || (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") || "";
+  return (
+    d?.body?.raw ||
+    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
+    (typeof d?.content === "string" ? d.content : "") ||
+    (typeof d?.body === "string" ? d.body : "") ||
+    (typeof d?.mdx === "string" ? d.mdx : "") ||
+    ""
+  );
 }
 
 // 🔒 Prevent conflicts with real, concrete routes under /resources
@@ -148,10 +163,18 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
   const accessLevel = toAccessLevel((doc as any).accessLevel ?? (doc as any).tier);
   const locked = accessLevel !== "public";
 
+  // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
+  const mdxRaw = getRawBody(doc);
+  
   let initialSource: MDXRemoteSerializeResult | null = null;
   if (!locked) {
-    const raw = getRawBody(doc);
-    initialSource = await serialize(raw);
+    // ✅ USE DIRECT SERIALIZE WITH PLUGINS
+    initialSource = await serialize(mdxRaw || " ", {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug],
+      },
+    });
   }
 
   const resource: ResourceMeta = {
@@ -167,13 +190,28 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
   };
 
   return {
-    props: { resource: sanitizeData(resource), locked, initialSource },
+    props: { 
+      resource: sanitizeData(resource), 
+      locked, 
+      initialSource,
+      mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
+    },
     revalidate: 3600,
   };
 };
 
-const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource }) => {
+const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, mdxRaw }) => {
   const router = useRouter();
+  
+  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+  const safeComponents = React.useMemo(
+    () =>
+      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+        warnOnFallback: process.env.NODE_ENV === "development",
+      }),
+    [mdxRaw]
+  );
+  
   const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
   const [loading, setLoading] = React.useState(false);
   const [errMsg, setErrMsg] = React.useState<string | null>(null);
@@ -261,7 +299,8 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource }) 
 
         {source ? (
           <div className="prose prose-invert mt-10 max-w-none">
-            <MDXRemote {...source} components={mdxComponents} />
+            {/* ✅ SEED + PROXY: Guaranteed no missing component errors */}
+            <MDXRemote {...source} components={safeComponents as any} />
           </div>
         ) : null}
       </div>

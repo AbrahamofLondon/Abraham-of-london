@@ -1,7 +1,8 @@
-// pages/events/[slug].tsx — PRODUCTION STABLE (PAGES ROUTER SAFE)
+// pages/events/[slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
 // ✅ Default export present
 // ✅ Child components are client-only (ssr:false) to prevent SSG crashes
-// ✅ MDXRemote guarded
+// ✅ MDXRemote guarded with SEEDED safe components (seed + proxy)
+// ✅ mdxRaw passed from getStaticProps
 // ✅ Build-safe serialization + robust frontmatter defaults
 // ✅ All array operations are safe
 
@@ -10,20 +11,20 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
-
-import Layout from "@/components/Layout";
-
-// MDX
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
+import Layout from "@/components/Layout";
+
 // Your MDX components map
 import mdxComponents from "@/components/mdx-components";
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components"; // CHANGED: Use seeded-safe function
 
 // Data access
 import { getServerAllEvents, getServerEventBySlug } from "@/lib/content/server";
-import { sanitizeData } from "@/lib/content/shared";
+import { sanitizeData, normalizeSlug } from "@/lib/content/shared";
 
 import {
   Bookmark,
@@ -139,6 +140,7 @@ type EventDoc = {
 type Props = {
   event: EventDoc;
   source: MDXRemoteSerializeResult | null;
+  mdxRaw: string | null; // ✅ ADDED: Required for seeding
 };
 
 // -------------------------------------------------------------------
@@ -153,14 +155,16 @@ function cleanSlug(raw: unknown): string {
   return s.replace(/^\/+|\/+$/g, "").replace(/^events\//, "").replace(/\.(md|mdx)$/i, "");
 }
 
-async function serializeMdx(raw: string): Promise<MDXRemoteSerializeResult> {
-  const { serialize } = await import("next-mdx-remote/serialize");
-  return serialize(raw, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [rehypeSlug],
-    },
-  });
+// Paranoid MDX extraction
+function getRawBody(d: any): string {
+  return (
+    d?.body?.raw ||
+    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
+    (typeof d?.content === "string" ? d.content : "") ||
+    (typeof d?.body === "string" ? d.body : "") ||
+    (typeof d?.mdx === "string" ? d.mdx : "") ||
+    ""
+  );
 }
 
 // ===================================================================
@@ -188,16 +192,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
     const raw = params?.slug;
     const slug = Array.isArray(raw) ? raw[0] : raw;
-    if (!slug) return { notFound: true };
+    const s = normalizeSlug(String(slug || ""));
+    if (!s) return { notFound: true };
 
-    const eventData = typeof getServerEventBySlug === "function" ? getServerEventBySlug(String(slug)) : null;
+    const eventData = typeof getServerEventBySlug === "function" ? getServerEventBySlug(String(s)) : null;
     if (!eventData) return { notFound: true };
 
     const event: EventDoc = {
       title: String(eventData.title || "").trim() || "Event",
       excerpt: String(eventData.excerpt || "").trim() ? String(eventData.excerpt).trim() : null,
       description: String(eventData.description || "").trim() ? String(eventData.description).trim() : null,
-      slug: String(eventData.slug || slug).trim() || String(slug),
+      slug: String(eventData.slug || s).trim() || String(s),
       coverImage: String(eventData.coverImage || "").trim() ? String(eventData.coverImage).trim() : null,
       tags: Array.isArray(eventData.tags) ? eventData.tags : [],
 
@@ -221,13 +226,20 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const isPublic = event.accessLevel === "public";
 
     let source: MDXRemoteSerializeResult | null = null;
+    let mdxRaw: string | null = null;
+
     if (isPublic) {
-      const rawMdx = String(eventData?.body?.raw ?? eventData?.body ?? "").trim();
-      source = rawMdx ? await serializeMdx(rawMdx) : await serializeMdx(" ");
+      mdxRaw = getRawBody(eventData);
+      source = mdxRaw ? await serialize(mdxRaw, {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [rehypeSlug],
+        },
+      }) : await serialize(" ");
     }
 
     return {
-      props: sanitizeData({ event, source }),
+      props: sanitizeData({ event, source, mdxRaw }),
       revalidate: 1800,
     };
   } catch (e) {
@@ -239,8 +251,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 // ===================================================================
 // Page Component
 // ===================================================================
-const EventPage: NextPage<Props> = ({ event, source }) => {
+const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
   const router = useRouter();
+
+  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+  const safeComponents = React.useMemo(
+    () =>
+      createSeededSafeMdxComponents(mdxComponents, mdxRaw || "", {
+        warnOnFallback: process.env.NODE_ENV === "development",
+      }),
+    [mdxRaw]
+  );
 
   const [isBookmarked, setIsBookmarked] = React.useState(false);
   const [isPastEvent, setIsPastEvent] = React.useState(false);
@@ -477,7 +498,8 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
                           </p>
                         </div>
                       ) : source ? (
-                        <MDXRemote {...source} components={(mdxComponents ?? {}) as any} />
+                        // ✅ SEED + PROXY: Safe components with mdxRaw seeding
+                        <MDXRemote {...source} components={safeComponents as any} />
                       ) : (
                         <div className="text-sm text-gray-600">Content is being prepared.</div>
                       )}

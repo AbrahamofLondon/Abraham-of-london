@@ -1,9 +1,12 @@
-// pages/content/[...slug].tsx — CONTENT VAULT DOC ROUTE (CATCH-ALL, LINK-SAFE)
+// pages/content/[...slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 
@@ -21,7 +24,7 @@ import {
   toUiDoc,
 } from "@/lib/content/shared";
 
-import { prepareMDX, sanitizeData } from "@/lib/server/md-utils";
+import { sanitizeData } from "@/lib/server/md-utils";
 
 type UiDoc = ReturnType<typeof toUiDoc>;
 
@@ -29,12 +32,25 @@ interface Props {
   doc: UiDoc;
   source: MDXRemoteSerializeResult;
   canonicalPath: string;
+  mdxRaw: string; // ✅ ADDED: Required for seeding
 }
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
-const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
+// Paranoid MDX extraction
+function getRawBody(d: any): string {
+  return (
+    d?.body?.raw ||
+    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
+    (typeof d?.content === "string" ? d.content : "") ||
+    (typeof d?.body === "string" ? d.body : "") ||
+    (typeof d?.mdx === "string" ? d.mdx : "") ||
+    ""
+  );
+}
+
+const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath, mdxRaw }) => {
   const router = useRouter();
 
   // Loading state
@@ -127,12 +143,14 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath }) => {
         {doc.author ? <meta property="article:author" content={doc.author} /> : null}
       </Head>
 
+      {/* ✅ ContentlayerDocPage must be updated to accept mdxRaw and use createSeededSafeMdxComponents */}
       <ContentlayerDocPage
         doc={doc}
         source={source}
         canonicalPath={canonicalPath}
         backHref="/content"
         label="Kingdom Vault"
+        mdxRaw={mdxRaw} // ✅ PASS MDX RAW FOR SEEDING
       />
     </>
   );
@@ -202,14 +220,23 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
     const doc = toUiDoc(rawDoc);
 
-    const rawMdx = rawDoc.body?.raw || rawDoc.body || "";
-    const source = await prepareMDX(typeof rawMdx === "string" ? rawMdx : "");
+    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
+    const mdxRaw = getRawBody(rawDoc);
+    
+    // ✅ USE DIRECT SERIALIZE INSTEAD OF prepareMDX
+    const source = await serialize(mdxRaw || " ", {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug],
+      },
+    });
 
     return {
       props: {
         doc: sanitizeData(doc),
         source,
         canonicalPath: href,
+        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
       },
       revalidate: 1800,
     };

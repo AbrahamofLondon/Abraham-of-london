@@ -6,11 +6,12 @@ import {
   safeFirstChar, 
   safeNumber, 
   safeArray,
-  safeDate,
   formatSafeDate,
   classNames 
-} from '@/lib/utils/safe';
-import { Star, ThumbsUp, ThumbsDown, Flag, CheckCircle, Clock } from 'lucide-react';
+} from '@/lib/utils/safe'; // From barrel file
+
+// Import any missing functions from the extras file
+import { safeInteger, safeBoolean, clamp } from '@/lib/utils/safe-extras';
 
 interface ReviewAuthor {
   name?: string | null;
@@ -36,6 +37,16 @@ interface BookReviewsProps {
   reviews?: Review[];
 }
 
+// Helper function to safely parse integers
+const parseSafeInteger = (value: any, defaultValue: number = 0): number => {
+  if (typeof value === 'number') return Math.floor(value);
+  if (typeof value === 'string') {
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? defaultValue : parsed;
+  }
+  return defaultValue;
+};
+
 const BookReviews: React.FC<BookReviewsProps> = (props) => {
   const [newReview, setNewReview] = useState({
     rating: 5,
@@ -48,10 +59,10 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
   // Extract and sanitize props
   const bookId = safeString(props.bookId, 'unknown');
   const averageRating = safeNumber(props.averageRating, 4.5);
-  const totalReviews = safeInteger(props.totalReviews, 0);
+  const totalReviews = parseSafeInteger(props.totalReviews, 0);
   const reviews = safeArray<Review>(props.reviews, []);
   
-  // Generate sample reviews if none provided
+  // Generate sample reviews if none provided - FIXED with safe values
   const displayReviews = reviews.length > 0 ? reviews : Array(3).fill(null).map((_, i) => ({
     id: `sample-${i}`,
     author: {
@@ -60,15 +71,18 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
     },
     rating: 4 + (i % 2),
     date: new Date(Date.now() - i * 86400000 * 7), // Weeks ago
-    title: ['Great read!', 'Very insightful', 'Life-changing'][i] || 'Good book',
-    content: ['Really enjoyed this perspective.', 'Would recommend to friends.', 'Changed my approach.'],
+    title: safeString(['Great read!', 'Very insightful', 'Life-changing'][i], 'Good book'),
+    content: safeString(['Really enjoyed this perspective.', 'Would recommend to friends.', 'Changed my approach.'][i], 'Good book'),
     helpful: Math.floor(Math.random() * 50),
     notHelpful: Math.floor(Math.random() * 10)
   }));
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReview.title.trim() || !newReview.content.trim()) return;
+    const trimmedTitle = safeString(newReview.title).trim();
+    const trimmedContent = safeString(newReview.content).trim();
+    
+    if (!trimmedTitle || !trimmedContent) return;
     
     setIsSubmitting(true);
     
@@ -91,12 +105,27 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
 
   const getRatingDistribution = () => {
     const distribution = [5, 4, 3, 2, 1].map(stars => {
-      const count = displayReviews.filter(r => Math.round(safeNumber(r.rating)) === stars).length;
+      const count = displayReviews.filter(r => {
+        const rating = safeNumber(r.rating, 0);
+        return Math.round(rating) === stars;
+      }).length;
       const percentage = displayReviews.length > 0 ? (count / displayReviews.length) * 100 : 0;
-      return { stars, count, percentage };
+      return { stars, count, percentage: Math.max(0, Math.min(100, percentage)) }; // Clamp between 0-100
     });
     return distribution;
   };
+
+  // Safely calculate average rating from reviews
+  const calculateAverageRating = () => {
+    if (displayReviews.length === 0) return 4.5;
+    const sum = displayReviews.reduce((acc, review) => {
+      return acc + safeNumber(review.rating, 0);
+    }, 0);
+    return Math.max(0, Math.min(5, sum / displayReviews.length)); // Clamp between 0-5
+  };
+
+  const finalAverageRating = safeNumber(props.averageRating, calculateAverageRating());
+  const finalTotalReviews = parseSafeInteger(props.totalReviews, displayReviews.length);
 
   return (
     <div className="rounded-3xl bg-gradient-to-br from-white to-gray-50 p-8 shadow-xl hover:shadow-2xl transition-shadow duration-500 border border-gray-200">
@@ -112,18 +141,18 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
                     key={i}
                     className={classNames(
                       "h-6 w-6 transition-colors",
-                      i < Math.floor(averageRating)
+                      i < Math.floor(finalAverageRating)
                         ? 'text-yellow-400 fill-yellow-400'
                         : 'text-gray-300'
                     )}
                   />
                 ))}
                 <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  {averageRating.toFixed(1)}
+                  {finalAverageRating.toFixed(1)}
                 </span>
               </div>
               <div className="text-gray-600">
-                <span className="font-semibold">{totalReviews.toLocaleString()}</span> reviews
+                <span className="font-semibold">{finalTotalReviews.toLocaleString()}</span> reviews
               </div>
             </div>
           </div>
@@ -214,10 +243,11 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
               </label>
               <input
                 type="text"
-                value={newReview.title}
+                value={safeString(newReview.title)}
                 onChange={(e) => setNewReview(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                 placeholder="Summarize your experience"
+                maxLength={100}
               />
             </div>
             
@@ -227,11 +257,12 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
                 Your Review
               </label>
               <textarea
-                value={newReview.content}
+                value={safeString(newReview.content)}
                 onChange={(e) => setNewReview(prev => ({ ...prev, content: e.target.value }))}
                 rows={4}
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none bg-white"
                 placeholder="Share your thoughts about this book..."
+                maxLength={2000}
               />
             </div>
             
@@ -254,17 +285,19 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
 
       {/* Reviews List */}
       <div className="space-y-8">
-        {displayReviews.map((review) => {
+        {displayReviews.map((review, index) => {
           const rating = safeNumber(review.rating, 5);
           const authorName = getAuthorName(review.author);
           const authorInitial = getAuthorInitial(review.author);
           const date = formatSafeDate(review.date, { month: 'short', day: 'numeric', year: 'numeric' });
-          const helpful = safeInteger(review.helpful, 0);
-          const notHelpful = safeInteger(review.notHelpful, 0);
+          const helpful = parseSafeInteger(review.helpful, 0);
+          const notHelpful = parseSafeInteger(review.notHelpful, 0);
+          const reviewTitle = safeString(review.title, 'Great read!');
+          const reviewContent = safeString(review.content, 'This book was very insightful.');
           
           return (
             <div 
-              key={review.id || Math.random()}
+              key={safeString(review.id, `review-${index}`)}
               className="group relative rounded-2xl bg-gradient-to-br from-gray-50 to-white p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-200"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/3 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity" />
@@ -282,7 +315,10 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
                             className="h-full w-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                              const fallback = e.currentTarget.nextElementSibling;
+                              if (fallback) {
+                                fallback.classList.remove('hidden');
+                              }
                             }}
                           />
                           <div className="hidden h-12 w-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white font-bold">
@@ -314,7 +350,7 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
                               key={i}
                               className={classNames(
                                 "h-3 w-3",
-                                i < rating
+                                i < Math.floor(rating)
                                   ? 'text-yellow-400 fill-yellow-400'
                                   : 'text-gray-300'
                               )}
@@ -329,10 +365,10 @@ const BookReviews: React.FC<BookReviewsProps> = (props) => {
                 {/* Review Content */}
                 <div className="mb-4">
                   <h3 className="font-bold text-gray-900 mb-2 text-lg">
-                    {safeString(review.title, 'Great read!')}
+                    {reviewTitle}
                   </h3>
                   <p className="text-gray-700 leading-relaxed">
-                    {safeString(review.content, 'This book was very insightful.')}
+                    {reviewContent}
                   </p>
                 </div>
                 

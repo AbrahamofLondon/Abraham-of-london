@@ -1,7 +1,4 @@
-/* pages/resources/strategic-frameworks/[slug].tsx
- * STRATEGIC FRAMEWORK DETAIL — BUILD-SAFE + RUNTIME AUTH (INTEGRITY MODE)
- */
-
+/* pages/resources/strategic-frameworks/[slug].tsx — FIXED */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -13,12 +10,8 @@ import { ArrowLeft, Lock, Key, Eye, Shield } from "lucide-react";
 import Layout from "@/components/Layout";
 import { withUnifiedAuth } from "@/lib/auth/withUnifiedAuth";
 
-// ✅ FIXED: Use local implementation since these functions don't exist in public API
-// import {
-//   getAllFrameworkSlugs,
-//   getFrameworkBySlug,
-//   type Framework,
-// } from "@/lib/resources/strategic-frameworks";
+// ✅ REMOVED: MDX imports since this page doesn't use MDX
+// No need for mdxComponents or useSafeMdxComponents
 
 // Types
 type Framework = {
@@ -57,7 +50,6 @@ type PrivatePageProps = PublicPageProps & {
 /* MOCK DATA / LOCAL IMPLEMENTATION                                           */
 /* -------------------------------------------------------------------------- */
 
-// Mock data for frameworks (replace with your actual data)
 const FRAMEWORKS_MOCK: Framework[] = [
   {
     title: "Digital Transformation Framework",
@@ -71,10 +63,8 @@ const FRAMEWORKS_MOCK: Framework[] = [
     operatingLogic: [{ title: "Phase 1", body: "Assessment phase" }],
     artifactHref: "/downloads/digital-transformation-pack.pdf"
   },
-  // Add more frameworks as needed
 ];
 
-// Local implementations
 function getAllFrameworkSlugs(): string[] {
   return FRAMEWORKS_MOCK.map(f => f.slug);
 }
@@ -102,7 +92,6 @@ const PublicFrameworkView: React.FC<{ framework: Framework }> = ({ framework }) 
         />
       </Head>
 
-      {/* Navigation */}
       <div className="border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-4">
           <Link
@@ -115,12 +104,10 @@ const PublicFrameworkView: React.FC<{ framework: Framework }> = ({ framework }) 
         </div>
       </div>
 
-      {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-black to-purple-900/20" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            {/* Build-safe preview badge */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-amber-200 text-xs font-black uppercase tracking-widest">
               <Eye className="h-4 w-4" />
               Preview Mode — Authentication Required
@@ -184,7 +171,6 @@ const PublicFrameworkView: React.FC<{ framework: Framework }> = ({ framework }) 
         </div>
       </section>
 
-      {/* Gate CTA (always shown in public preview) */}
       <section className="py-16 border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-amber-600/5 p-8 text-center">
@@ -228,10 +214,12 @@ const PublicFrameworkView: React.FC<{ framework: Framework }> = ({ framework }) 
 /* -------------------------------------------------------------------------- */
 
 const PrivateFrameworkView: React.FC<PrivatePageProps> = ({ framework, user, innerCircleAccess }) => {
+  // ✅ FIXED: Removed useSafeMdxComponents since this page doesn't use MDX
+  // This page uses structured data, not MDX content
+
   const hasAccess =
     Boolean(innerCircleAccess?.hasAccess) || user?.role === "admin" || user?.role === "editor";
 
-  // If not authorized, show public preview (integrity mode: no leaks)
   if (!hasAccess) return <PublicFrameworkView framework={framework} />;
 
   return (
@@ -249,7 +237,6 @@ const PrivateFrameworkView: React.FC<PrivatePageProps> = ({ framework, user, inn
         />
       </Head>
 
-      {/* Access badge */}
       <div className="border-b border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent">
         <div className="mx-auto max-w-7xl px-4 py-3">
           <div className="flex items-center justify-between">
@@ -270,7 +257,6 @@ const PrivateFrameworkView: React.FC<PrivatePageProps> = ({ framework, user, inn
         </div>
       </div>
 
-      {/* Full content */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
@@ -355,7 +341,7 @@ const PrivateFrameworkView: React.FC<PrivatePageProps> = ({ framework, user, inn
 };
 
 /* -------------------------------------------------------------------------- */
-/* ACCESS DENIED FALLBACK (used by withUnifiedAuth)                           */
+/* ACCESS DENIED FALLBACK                                                     */
 /* -------------------------------------------------------------------------- */
 
 const AccessDeniedFallback: React.FC<{ requiredRole?: string }> = ({ requiredRole }) => {
@@ -389,18 +375,16 @@ const AccessDeniedFallback: React.FC<{ requiredRole?: string }> = ({ requiredRol
 };
 
 /* -------------------------------------------------------------------------- */
-/* RUNTIME AUTH WRAPPER (client-only wrapper, stable)                         */
+/* RUNTIME AUTH WRAPPER                                                       */
 /* -------------------------------------------------------------------------- */
 
-// We dynamically load the protected wrapper so the build output is always the Public view.
-// This avoids "conditional HOC" footguns.
 const ProtectedShell = dynamic(
   async () => {
     const Protected: React.FC<PrivatePageProps> = (props) => {
       const ProtectedComponent = withUnifiedAuth(PrivateFrameworkView, {
         requiredRole: "inner-circle",
         fallbackComponent: AccessDeniedFallback,
-        publicFallback: true, // show preview if no access
+        publicFallback: true,
       });
       return <ProtectedComponent {...props} />;
     };
@@ -412,7 +396,6 @@ const ProtectedShell = dynamic(
 const FrameworkDetailPage: NextPage<PublicPageProps> = (props) => {
   const router = useRouter();
 
-  // During fallback/blocking, you can show a minimal placeholder.
   if (router.isFallback) {
     return (
       <Layout title="Loading…" className="bg-black min-h-screen">
@@ -421,8 +404,6 @@ const FrameworkDetailPage: NextPage<PublicPageProps> = (props) => {
     );
   }
 
-  // Always render the public preview in the server-rendered HTML (build-safe).
-  // Then, on the client, mount the protected shell which upgrades view for authorized users.
   return (
     <>
       <PublicFrameworkView framework={props.framework} />
@@ -432,7 +413,7 @@ const FrameworkDetailPage: NextPage<PublicPageProps> = (props) => {
 };
 
 /* -------------------------------------------------------------------------- */
-/* SSG                                                                         */
+/* SSG                                                                        */
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
