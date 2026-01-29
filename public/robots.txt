@@ -23,39 +23,13 @@ Disallow: /admin/*
 Disallow: /assets/private/*
 Crawl-delay: 1
 
-# Googlebot-Image
-User-agent: Googlebot-Image
-Allow: /
-Disallow: /api/*
-Disallow: /inner-circle/*
-Disallow: /admin/*
-Disallow: /assets/private/*
-
-# Bingbot
-User-agent: Bingbot
-Allow: /
-Disallow: /api/*
-Disallow: /inner-circle/*
-Disallow: /admin/*
-Disallow: /assets/private/*
-Crawl-delay: 2
-
-# Slurp
-User-agent: Slurp
-Allow: /
-Disallow: /api/*
-Disallow: /inner-circle/*
-Disallow: /admin/*
-Disallow: /assets/private/*
-Crawl-delay: 3
-
 # Host
-Host: https://abrahamadaramola.org
+Host: https://www.abrahamoflondon.org
 
 # Sitemaps
-Sitemap: https://abrahamadaramola.org/sitemap.xml
-Sitemap: https://abrahamadaramola.org/blog-sitemap.xml
-Sitemap: https://abrahamadaramola.org/canons-sitemap.xml
-Sitemap: https://abrahamadaramola.org/strategies-sitemap.xml
-Sitemap: https://abrahamadaramola.org/resources-sitemap.xml
-Sitemap: https://abrahamadaramola.org/books-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/blog-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/canons-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/strategies-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/resources-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/books-sitemap.xml
