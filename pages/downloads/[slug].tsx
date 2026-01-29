@@ -1,22 +1,23 @@
-/* pages/downloads/[slug].tsx — INSTITUTIONAL DOWNLOAD DETAIL (CLEAN VERSION) */
+// pages/downloads/[slug].tsx — INSTITUTIONAL DOWNLOAD DETAIL (FIXED)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { MDXRemote } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
+import DownloadCard from "@/components/DownloadCard";
 import AccessGate from "@/components/AccessGate";
+
+// ✅ Import mdxComponents directly from components
+import mdxComponents from "@/components/mdx-components";
+
+// ✅ Import utilities from md-utils (no circular dependency)
+import { prepareMDX, sanitizeData } from "@/lib/server/md-utils";
 
 // ✅ Server-side imports
 import { getAllContentlayerDocs } from "@/lib/content/real";
-import { sanitizeData } from "@/lib/content/shared";
 
 // ==================== TYPES ====================
 
@@ -100,6 +101,14 @@ function asTier(v: unknown): Tier {
   return "public";
 }
 
+// ==================== MDX COMPONENTS WITH DOWNLOADCARD ====================
+
+// Create components object for downloads page
+const downloadMdxComponents = {
+  ...mdxComponents,
+  DownloadCard: (props: any) => <DownloadCard {...props} />,
+};
+
 // ==================== STATIC PATHS ====================
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -115,9 +124,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
       }))
       .filter((p) => p.params.slug);
 
+    console.log(`[downloads/getStaticPaths] Generated ${paths.length} paths`);
     return { paths, fallback: "blocking" };
   } catch (error) {
-    console.error("[Downloads] Error in getStaticPaths:", error);
+    console.error("[downloads/getStaticPaths] Error:", error);
     return { paths: [], fallback: "blocking" };
   }
 };
@@ -129,25 +139,32 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const raw = typeof params?.slug === "string" ? params.slug : "";
     const slug = stripDownloadsPrefix(raw);
 
-    if (!slug) return { notFound: true };
+    console.log(`[downloads/getStaticProps] Processing slug: ${slug}`);
+
+    if (!slug) {
+      console.warn("[downloads/getStaticProps] Empty slug");
+      return { notFound: true };
+    }
 
     const doc: any = getServerDownloadBySlug(slug);
-    if (!doc || isDraftContent(doc)) return { notFound: true };
+    if (!doc || isDraftContent(doc)) {
+      console.warn(`[downloads/getStaticProps] No document found or draft: ${slug}`);
+      return { notFound: true };
+    }
+
+    console.log(`[downloads/getStaticProps] Found download: ${doc.title}`);
 
     const accessLevel = asTier(doc.accessLevel || "inner-circle");
     const locked = accessLevel !== "public";
 
-    // ✅ Only pre-serialize for public downloads (no gated MDX in HTML)
+    // ✅ Use prepareMDX for consistent handling (only for public downloads)
     let initialSource: MDXRemoteSerializeResult | null = null;
     if (!locked) {
       const rawMdx = String(doc?.body?.raw ?? doc?.body ?? doc?.content ?? "");
       if (rawMdx.trim()) {
-        initialSource = await serialize(rawMdx, {
-          mdxOptions: {
-            remarkPlugins: [remarkGfm],
-            rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
-          },
-        });
+        // prepareMDX guarantees a valid result
+        initialSource = await prepareMDX(rawMdx);
+        console.log(`[downloads/getStaticProps] Successfully prepared MDX for: ${slug}`);
       }
     }
 
@@ -169,7 +186,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       revalidate: 1800,
     };
   } catch (error) {
-    console.error("[Downloads] Error in getStaticProps:", error);
+    console.error("[downloads/getStaticProps] Fatal error:", error);
     return { notFound: true };
   }
 };
@@ -304,7 +321,7 @@ const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource }) 
         {/* MDX Content */}
         {source && (
           <article className="prose prose-invert mt-12 max-w-none animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <MDXRemote {...source} components={mdxComponents} />
+            <MDXRemote {...source} components={downloadMdxComponents} />
           </article>
         )}
 

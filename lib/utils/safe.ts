@@ -1,33 +1,28 @@
-// lib/utils/safe.ts
+// lib/utils/safe.ts - FINAL SIMPLE VERSION
 // Barrel file that re-exports ALL safe utilities
 
+// Export everything from the source
 export * from "@/lib/shared/safe";
 
-// Explicitly export all functions for clarity
+// Explicitly re-export key functions to ensure they're available
 export {
-  safeSlice,
-  safeArraySlice,
-  safeFirstChar,
-  safeCapitalize,
-  safeGet,
-  safeDate,
-  safeInteger,
-  safeTrimSlice,
-  safeSubstring,
+  // Core functions
+  safeString,
   safeNumber,
+  safeArray,
+  safeBoolean,
   safeUrl,
   safeImageSrc,
-  safeDateSlice,
-  classNames,
-  formatSafeDate,
-  safeParseInt,
-  safeParseFloat,
-  safeBoolean,
-  safeArray,
-  safeSliceAlt,
+  safeDate,
+  safeInteger,
+  
   // String utilities
-  safeString,
   safeTrim,
+  safeSubstring,
+  safeFirstChar, // This should be exported
+  safeCharAt,
+  safeCapitalize, // This should be exported
+  capitalize,
   isNonEmptyString,
   safeEquals,
   formatBytes,
@@ -35,6 +30,24 @@ export {
   safeJoin,
   safeReplace,
   toSlug,
-  safeCharAt,
-  capitalize,
+  
+  // Array utilities
+  safeSlice, // This should be exported
+  safeSliceAlt,
+  safeArraySlice,
+  safeTrimSlice,
+  
+  // Date utilities
+  safeDateSlice,
+  formatSafeDate,
+  
+  // Type conversion
+  safeParseInt,
+  safeParseFloat,
+  
+  // Object utilities
+  safeGet,
+  
+  // CSS utilities
+  classNames,
 } from "@/lib/shared/safe";

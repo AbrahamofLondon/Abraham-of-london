@@ -1,4 +1,4 @@
-// pages/[slug].tsx — STRICT TOP-LEVEL DOC HANDLER (RETAINS ORIGINAL IMPORTS)
+// pages/[slug].tsx - UPDATED IMPORT SECTION
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -10,7 +10,9 @@ import { MDXRemote } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 
-// ✅ KEEP ORIGINAL IMPORTS - They exist and work
+// ✅ Import directly from components, not md-utils
+import mdxComponents from "@/components/mdx-components";
+
 import {
   getAllCombinedDocs,
   getDocBySlug,
@@ -26,7 +28,8 @@ import {
   sanitizeData,
 } from "@/lib/content/shared";
 
-import { prepareMDX, mdxComponents } from "@/lib/server/md-utils";
+// ✅ Import only prepareMDX from md-utils
+import { prepareMDX } from "@/lib/server/md-utils";
 
 /* -----------------------------------------------------------------------------
   TYPES

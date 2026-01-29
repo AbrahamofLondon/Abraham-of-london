@@ -1,15 +1,9 @@
-// lib/server/md-utils.tsx
+// lib/server/md-utils.tsx - UPDATED VERSION
 import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import type { SerializeOptions } from 'next-mdx-remote/serialize';
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-
-// IMPORTANT: static imports avoid webpack warnings
-import mdxComponents from "@/components/mdx-components";
-import simpleMdxComponents from "@/components/mdx/MinimalMdxComponents";
-import { safeSlice } from "@/lib/utils/safe";
-
 
 /* -------------------------------------------------------------------------- */
 /* ENV                                                                        */
@@ -17,7 +11,6 @@ import { safeSlice } from "@/lib/utils/safe";
 
 const NODE_ENV = process.env.NODE_ENV ?? "development";
 export const isProduction = () => NODE_ENV === "production";
-export const isDevelopment = () => !isProduction();
 
 /* -------------------------------------------------------------------------- */
 /* CONTENT NORMALISATION                                                      */
@@ -26,7 +19,6 @@ export const isDevelopment = () => !isProduction();
 export function validateAndSanitizeContent(content: unknown): string {
   if (content == null) return "Transmission pending...";
 
-  // Contentlayer docs sometimes pass body.raw or body as non-string
   const asString =
     typeof content === "string"
       ? content
@@ -44,14 +36,6 @@ export function validateAndSanitizeContent(content: unknown): string {
 /* SANITIZER                                                                  */
 /* -------------------------------------------------------------------------- */
 
-/**
- * sanitizeData()
- * - JSON-safe output (no functions/symbols)
- * - cycle-safe
- * - Date-safe
- * - BigInt-safe
- * - trims extremely deep objects to avoid runaway recursion
- */
 export function sanitizeData<T = any>(input: T, maxDepth: number = 25): any {
   const seen = new WeakSet<object>();
 
@@ -64,7 +48,7 @@ export function sanitizeData<T = any>(input: T, maxDepth: number = 25): any {
 
     if (t === "string" || t === "number" || t === "boolean") return val;
 
-    if (t === "bigint") return val.toString(); // JSON can't serialize BigInt
+    if (t === "bigint") return val.toString();
 
     if (t === "function" || t === "symbol") return undefined;
 
@@ -75,7 +59,7 @@ export function sanitizeData<T = any>(input: T, maxDepth: number = 25): any {
     }
 
     if (t === "object") {
-      if (seen.has(val)) return null; // break cycles
+      if (seen.has(val)) return null;
       seen.add(val);
 
       const out: Record<string, any> = {};
@@ -86,7 +70,6 @@ export function sanitizeData<T = any>(input: T, maxDepth: number = 25): any {
       return out;
     }
 
-    // fallback for weird types
     try {
       return JSON.parse(JSON.stringify(val));
     } catch {
@@ -98,12 +81,169 @@ export function sanitizeData<T = any>(input: T, maxDepth: number = 25): any {
 }
 
 /* -------------------------------------------------------------------------- */
+/* SIMPLE MDX COMPONENTS (FOR BASIC PAGES)                                   */
+/* -------------------------------------------------------------------------- */
+
+export const simpleMdxComponents = {
+  // Basic HTML elements with minimal styling
+  h1: ({ children, ...props }: any) => (
+    <h1 className="text-3xl font-bold mb-6 text-white" {...props}>
+      {children}
+    </h1>
+  ),
+  h2: ({ children, ...props }: any) => (
+    <h2 className="text-2xl font-bold mt-8 mb-4 text-white" {...props}>
+      {children}
+    </h2>
+  ),
+  h3: ({ children, ...props }: any) => (
+    <h3 className="text-xl font-bold mt-6 mb-3 text-white" {...props}>
+      {children}
+    </h3>
+  ),
+  h4: ({ children, ...props }: any) => (
+    <h4 className="text-lg font-bold mt-6 mb-2 text-white" {...props}>
+      {children}
+    </h4>
+  ),
+  p: ({ children, ...props }: any) => (
+    <p className="mb-4 text-gray-300 leading-relaxed" {...props}>
+      {children}
+    </p>
+  ),
+  ul: ({ children, ...props }: any) => (
+    <ul className="mb-6 ml-6 list-disc space-y-2 text-gray-300" {...props}>
+      {children}
+    </ul>
+  ),
+  ol: ({ children, ...props }: any) => (
+    <ol className="mb-6 ml-6 list-decimal space-y-2 text-gray-300" {...props}>
+      {children}
+    </ol>
+  ),
+  li: ({ children, ...props }: any) => (
+    <li className="leading-relaxed" {...props}>
+      {children}
+    </li>
+  ),
+  strong: ({ children, ...props }: any) => (
+    <strong className="font-bold text-white" {...props}>
+      {children}
+    </strong>
+  ),
+  em: ({ children, ...props }: any) => (
+    <em className="italic text-gray-300" {...props}>
+      {children}
+    </em>
+  ),
+  blockquote: ({ children, ...props }: any) => (
+    <blockquote className="border-l-4 border-gold pl-4 my-6 italic text-gray-400" {...props}>
+      {children}
+    </blockquote>
+  ),
+  hr: (props: any) => (
+    <hr className="my-8 border-white/10" {...props} />
+  ),
+  a: ({ children, href, ...props }: any) => (
+    <a 
+      href={href} 
+      className="text-gold hover:text-amber-400 underline transition-colors"
+      target="_blank"
+      rel="noopener noreferrer"
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+  img: ({ src, alt, ...props }: any) => (
+    <img 
+      src={src} 
+      alt={alt} 
+      className="rounded-lg my-6 max-w-full"
+      {...props}
+    />
+  ),
+  code: ({ children, ...props }: any) => (
+    <code className="bg-white/10 px-2 py-1 rounded text-sm font-mono" {...props}>
+      {children}
+    </code>
+  ),
+  pre: ({ children, ...props }: any) => (
+    <pre className="bg-white/5 p-4 rounded-lg overflow-x-auto my-6" {...props}>
+      {children}
+    </pre>
+  ),
+  table: ({ children, ...props }: any) => (
+    <div className="overflow-x-auto my-6">
+      <table className="min-w-full divide-y divide-white/10" {...props}>
+        {children}
+      </table>
+    </div>
+  ),
+  th: ({ children, ...props }: any) => (
+    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-300 bg-white/5" {...props}>
+      {children}
+    </th>
+  ),
+  td: ({ children, ...props }: any) => (
+    <td className="px-4 py-3 text-sm text-gray-300 border-t border-white/5" {...props}>
+      {children}
+    </td>
+  ),
+  // Common components that might be used in MDX
+  Callout: ({ children, type = "info" }: any) => {
+    const typeStyles = {
+      info: "border-blue-500/20 bg-blue-500/10 text-blue-200",
+      warning: "border-amber-500/20 bg-amber-500/10 text-amber-200",
+      success: "border-emerald-500/20 bg-emerald-500/10 text-emerald-200",
+      error: "border-red-500/20 bg-red-500/10 text-red-200",
+      default: "border-white/20 bg-white/10 text-gray-200",
+    };
+    
+    const style = typeStyles[type] || typeStyles.default;
+    
+    return (
+      <div className={`my-6 rounded-lg border p-4 ${style}`}>
+        <div className="prose-invert max-w-none">{children}</div>
+      </div>
+    );
+  },
+  Quote: ({ children, author }: any) => (
+    <div className="my-8 border-l-4 border-gold pl-6 py-2">
+      <blockquote className="text-xl italic text-gray-300 leading-relaxed">
+        "{children}"
+      </blockquote>
+      {author && (
+        <p className="mt-4 text-sm text-gray-500">— {author}</p>
+      )}
+    </div>
+  ),
+  Note: ({ children }: any) => (
+    <div className="my-6 rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
+      <div className="flex items-start gap-3">
+        <div className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
+          i
+        </div>
+        <div className="prose-invert max-w-none">{children}</div>
+      </div>
+    </div>
+  ),
+  Warning: ({ children }: any) => (
+    <div className="my-6 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
+      <div className="flex items-start gap-3">
+        <div className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">
+          !
+        </div>
+        <div className="prose-invert max-w-none">{children}</div>
+      </div>
+    </div>
+  ),
+};
+
+/* -------------------------------------------------------------------------- */
 /* MDX PROCESSOR                                                              */
 /* -------------------------------------------------------------------------- */
 
-/**
- * MDX PROCESSOR - Production safe with comprehensive error handling
- */
 export async function prepareMDX(
   content: unknown,
   options?: Partial<SerializeOptions>
@@ -113,129 +253,65 @@ export async function prepareMDX(
   const mdxOptions: SerializeOptions["mdxOptions"] = {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
-    development: isDevelopment(),
-    /**
-     * providerImportSource is only useful when you're actually using MDX provider patterns.
-     * Keeping it dev-only avoids unexpected runtime/provider coupling.
-     */
-    providerImportSource: isDevelopment() ? "@mdx-js/react" : undefined,
+    development: !isProduction(),
   };
 
   try {
-    return await serialize(safeContent, {
+    const result = await serialize(safeContent, {
       mdxOptions,
       parseFrontmatter: false,
       ...(options ?? {}),
     });
+
+    if (!result || typeof result !== 'object') {
+      console.error("[MDX_PROCESSING] serialize() returned invalid result:", typeof result);
+      throw new Error("serialize() returned invalid result");
+    }
+
+    if (!result.compiledSource || typeof result.compiledSource !== 'string') {
+      console.warn("[MDX_PROCESSING] Missing or invalid compiledSource, using fallback");
+      return {
+        compiledSource: result.compiledSource || "",
+        scope: result.scope || {},
+        frontmatter: result.frontmatter || {},
+      } as MDXRemoteSerializeResult;
+    }
+
+    return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown MDX error";
 
     if (isProduction()) {
-      console.error("[MDX_PROCESSING_ERROR]", safeSlice(message, 0, 160));
+      console.error("[MDX_PROCESSING_ERROR]", message.slice(0, 160));
     } else {
       console.error("[MDX_PROCESSING_ERROR]", message, error);
     }
 
-    // Guaranteed-valid fallback MDX
     try {
-      return await serialize("Transmission pending...", {
+      const fallbackResult = await serialize("Transmission pending...", {
         mdxOptions: {
           remarkPlugins: [remarkGfm],
           rehypePlugins: [rehypeSlug],
-          development: isDevelopment(),
+          development: !isProduction(),
         },
         parseFrontmatter: false,
       });
+
+      if (!fallbackResult || !fallbackResult.compiledSource) {
+        throw new Error("Fallback serialize also failed");
+      }
+
+      return fallbackResult;
     } catch (fallbackError) {
-      // Absolute last-resort: return an empty MDXRemoteSerializeResult shape
       if (!isProduction()) {
         console.error("[MDX_FALLBACK_FAILED]", fallbackError);
       }
 
       return {
-        compiledSource: "",
-        frontmatter: {},
+        compiledSource: "function MDXContent(props) { return null; }",
         scope: {},
-      } as unknown as MDXRemoteSerializeResult;
+        frontmatter: {},
+      } as MDXRemoteSerializeResult;
     }
   }
 }
-
-/* -------------------------------------------------------------------------- */
-/* PROPS SANITIZER                                                            */
-/* -------------------------------------------------------------------------- */
-
-/**
- * PROPS SANITIZER - Production safe
- */
-export function sanitizeProps<T extends Record<string, any>>(props: T): T {
-  const out: any = { ...props };
-
-  for (const key of Object.keys(out)) {
-    // Never touch MDXRemoteSerializeResult or component maps
-    if (key === "source" || key === "components") continue;
-    out[key] = sanitizeData(out[key]);
-  }
-
-  return out as T;
-}
-
-/* -------------------------------------------------------------------------- */
-/* SAFE COMPONENT SELECTOR                                                    */
-/* -------------------------------------------------------------------------- */
-
-/**
- * SAFE COMPONENT SELECTOR - Chooses appropriate components based on environment
- */
-export function getSafeMdxComponents(useSimpleFallback: boolean = false) {
-  if (useSimpleFallback || isProduction()) return simpleMdxComponents;
-  return mdxComponents;
-}
-
-/* -------------------------------------------------------------------------- */
-/* VALIDATION                                                                 */
-/* -------------------------------------------------------------------------- */
-
-/**
- * MDX CONTENT VALIDATION UTILITY
- */
-export function validateMdxContent(content: unknown): {
-  isValid: boolean;
-  length: number;
-  issues: string[];
-} {
-  const issues: string[] = [];
-
-  if (!content) {
-    issues.push("Content is empty");
-    return { isValid: false, length: 0, issues };
-  }
-
-  const contentStr = validateAndSanitizeContent(content);
-  const length = contentStr.length;
-
-  if (length === 0 || contentStr === "Transmission pending...") {
-    issues.push("Content is effectively empty");
-  }
-
-  if (length > 1_000_000) {
-    issues.push(`Content is very large (${length} characters)`);
-  }
-
-  // Common MDX landmines
-  if (contentStr.includes("\u0000")) issues.push("Contains null bytes");
-  if (contentStr.includes("<!--")) issues.push("Contains HTML comments (may cause parsing issues)");
-
-  // Unbalanced braces can choke MDX if embedded in JSX
-  const openBraces = (contentStr.match(/{/g) ?? []).length;
-  const closeBraces = (contentStr.match(/}/g) ?? []).length;
-  if (openBraces !== closeBraces) {
-    issues.push(`Possibly unbalanced braces: {=${openBraces}, }=${closeBraces}`);
-  }
-
-  return { isValid: issues.length === 0, length, issues };
-}
-
-export { mdxComponents, simpleMdxComponents };
-
-

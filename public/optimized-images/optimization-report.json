@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-29T01:48:20.213Z",
+  "timestamp": "2026-01-29T10:11:54.319Z",
   "config": {
     "sourceDirs": [
       "C:\\Abraham-of-london\\public\\assets\\images",
@@ -60,7 +60,7 @@
     }
   },
   "summary": {
-    "durationMs": 997,
+    "durationMs": 3949,
     "optimized": 0,
     "copied": 0,
     "skipped": 474,
@@ -148,6 +148,24 @@
       "optimizedSize": 230720
     },
     {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\alomarada-ltd.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\alomarada-ltd.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 20840,
+      "optimizedSize": 24186
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\alomarada-ltd.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\alomarada-ltd.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 20840,
+      "optimizedSize": 24186
+    },
+    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\abraham-logo.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\abraham-logo.jpg",
       "format": "jpg",
@@ -164,24 +182,6 @@
       "reason": "up_to_date",
       "originalSize": 37270,
       "optimizedSize": 23228
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\alomarada-ltd.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\alomarada-ltd.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 20840,
-      "optimizedSize": 24186
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\alomarada-ltd.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\alomarada-ltd.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 20840,
-      "optimizedSize": 24186
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\contact.element.svg",
@@ -247,15 +247,6 @@
       "optimizedSize": 4012
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\innovatehub.svg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\innovatehub.svg",
-      "format": "svg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 598,
-      "optimizedSize": 598
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\fathering-principles.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\fathering-principles.jpg",
       "format": "jpg",
@@ -272,6 +263,15 @@
       "reason": "up_to_date",
       "originalSize": 476216,
       "optimizedSize": 296092
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\innovatehub.svg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\innovatehub.svg",
+      "format": "svg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 598,
+      "optimizedSize": 598
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\fathering-without-fear-teaser.jpg",
@@ -346,42 +346,6 @@
       "optimizedSize": 40792
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\email.svg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\email.svg",
-      "format": "svg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 1061,
-      "optimizedSize": 1061
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\writing-desk.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\writing-desk.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 253958,
-      "optimizedSize": 306114
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\writing-desk.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\writing-desk.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 253958,
-      "optimizedSize": 306114
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\facebook.svg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\facebook.svg",
-      "format": "svg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 57504,
-      "optimizedSize": 57504
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\strategy\\replace.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\strategy\\replace.jpg",
       "format": "jpg",
@@ -398,6 +362,42 @@
       "reason": "up_to_date",
       "originalSize": 2683626,
       "optimizedSize": 369932
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\email.svg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\email.svg",
+      "format": "svg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 1061,
+      "optimizedSize": 1061
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\facebook.svg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\facebook.svg",
+      "format": "svg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 57504,
+      "optimizedSize": 57504
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\writing-desk.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\writing-desk.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 253958,
+      "optimizedSize": 306114
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\writing-desk.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\writing-desk.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 253958,
+      "optimizedSize": 306114
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\instagram.svg",
@@ -463,15 +463,6 @@
       "optimizedSize": 202
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\whatsapp.svg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\whatsapp.svg",
-      "format": "svg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 81438,
-      "optimizedSize": 81438
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\og-image.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\og-image.jpg",
       "format": "jpg",
@@ -490,6 +481,15 @@
       "optimizedSize": 9572
     },
     {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\whatsapp.svg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\whatsapp.svg",
+      "format": "svg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 81438,
+      "optimizedSize": 81438
+    },
+    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\x.svg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\x.svg",
       "format": "svg",
@@ -499,6 +499,24 @@
       "optimizedSize": 183
     },
     {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\twitter-image.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\twitter-image.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 92792,
+      "optimizedSize": 106926
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\twitter-image.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\twitter-image.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 92792,
+      "optimizedSize": 106926
+    },
+    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\youtube.svg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\youtube.svg",
       "format": "svg",
@@ -506,6 +524,15 @@
       "reason": "up_to_date",
       "originalSize": 288147,
       "optimizedSize": 288147
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\mono\\facebook.svg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\mono\\facebook.svg",
+      "format": "svg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 305,
+      "optimizedSize": 305
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\twitter-image.jpg",
@@ -524,33 +551,6 @@
       "reason": "up_to_date",
       "originalSize": 37507,
       "optimizedSize": 106926
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\twitter-image.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\twitter-image.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 92792,
-      "optimizedSize": 106926
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\svg\\twitter-image.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\svg\\twitter-image.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 92792,
-      "optimizedSize": 106926
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\mono\\facebook.svg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\mono\\facebook.svg",
-      "format": "svg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 305,
-      "optimizedSize": 305
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\mono\\instagram.svg",
@@ -580,15 +580,6 @@
       "optimizedSize": 353
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\mono\\whatsapp.svg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\mono\\whatsapp.svg",
-      "format": "svg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 815,
-      "optimizedSize": 815
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\mono\\phone.svg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\mono\\phone.svg",
       "format": "svg",
@@ -596,6 +587,15 @@
       "reason": "up_to_date",
       "originalSize": 353,
       "optimizedSize": 353
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\mono\\whatsapp.svg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\social\\mono\\whatsapp.svg",
+      "format": "svg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 815,
+      "optimizedSize": 815
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\social\\mono\\x.svg",
@@ -661,24 +661,6 @@
       "optimizedSize": 66862
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\cover.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\cover.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 69423,
-      "optimizedSize": 199163
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\cover.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\cover.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 69423,
-      "optimizedSize": 78122
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\default-cover-1.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\default-cover-1.jpg",
       "format": "jpg",
@@ -695,6 +677,24 @@
       "reason": "up_to_date",
       "originalSize": 67222,
       "optimizedSize": 66924
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\cover.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\cover.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 69423,
+      "optimizedSize": 199163
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\cover.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\cover.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 69423,
+      "optimizedSize": 78122
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\default-cover.jpg",
@@ -733,24 +733,6 @@
       "optimizedSize": 78122
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\default-cover-3.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\default-cover-3.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 73623,
-      "optimizedSize": 345698
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\default-cover-3.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\default-cover-3.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 73623,
-      "optimizedSize": 74330
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\default-cover.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\default-cover.jpg",
       "format": "jpg",
@@ -767,6 +749,24 @@
       "reason": "up_to_date",
       "originalSize": 41812,
       "optimizedSize": 73906
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\default-cover-3.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\default-cover-3.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 73623,
+      "optimizedSize": 345698
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\default-cover-3.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\default-cover-3.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 73623,
+      "optimizedSize": 74330
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\faith.jpg",
@@ -841,6 +841,24 @@
       "optimizedSize": 66862
     },
     {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\purpose.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\themes\\purpose.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 62434,
+      "optimizedSize": 181543
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\purpose.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\themes\\purpose.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 62434,
+      "optimizedSize": 66862
+    },
+    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\outer-life.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\themes\\outer-life.jpg",
       "format": "jpg",
@@ -875,24 +893,6 @@
       "reason": "up_to_date",
       "originalSize": 253958,
       "optimizedSize": 304458
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\purpose.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\themes\\purpose.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 62434,
-      "optimizedSize": 181543
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\purpose.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\shorts\\themes\\purpose.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 62434,
-      "optimizedSize": 66862
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\shorts\\themes\\relationships.jpg",
@@ -1084,24 +1084,6 @@
       "optimizedSize": 77806
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\prints\\standards-brief.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\prints\\standards-brief.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 3277600,
-      "optimizedSize": 1145051
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\prints\\standards-brief.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\prints\\standards-brief.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 3277600,
-      "optimizedSize": 397780
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\logo\\alomarada.svg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\logo\\alomarada.svg",
       "format": "svg",
@@ -1118,6 +1100,24 @@
       "reason": "up_to_date",
       "originalSize": 32376,
       "optimizedSize": 32376
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\prints\\standards-brief.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\prints\\standards-brief.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 3277600,
+      "optimizedSize": 1145051
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\prints\\standards-brief.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\prints\\standards-brief.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 3277600,
+      "optimizedSize": 397780
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\prints\\weekly-operating-rhythm.jpg",
@@ -1624,24 +1624,6 @@
       "optimizedSize": 22652
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-2-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-2-2.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 45370,
-      "optimizedSize": 67254
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-2-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-2-2.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 45370,
-      "optimizedSize": 25938
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-2.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-2.jpg",
       "format": "jpg",
@@ -1658,6 +1640,24 @@
       "reason": "up_to_date",
       "originalSize": 44302,
       "optimizedSize": 25330
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-2-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-2-2.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 45370,
+      "optimizedSize": 67254
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-2-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-2-2.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 45370,
+      "optimizedSize": 25938
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-3-2.jpg",
@@ -1696,24 +1696,6 @@
       "optimizedSize": 25482
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-4.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-4.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 44089,
-      "optimizedSize": 65517
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-4.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-4.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 44089,
-      "optimizedSize": 25212
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-jpg-2.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-jpg-2.jpg",
       "format": "jpg",
@@ -1730,6 +1712,24 @@
       "reason": "up_to_date",
       "originalSize": 47666,
       "optimizedSize": 27506
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-4.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-4.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 44089,
+      "optimizedSize": 65517
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-4.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\communication-script-bpf-4.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 44089,
+      "optimizedSize": 25212
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\communication-script-bpf-jpg.jpg",
@@ -1858,24 +1858,6 @@
       "optimizedSize": 22420
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\downloadsgrid.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\downloadsgrid.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 36054,
-      "optimizedSize": 52908
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\downloadsgrid.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\downloadsgrid.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 36054,
-      "optimizedSize": 19976
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\downloadsgrid-tsx.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\downloadsgrid-tsx.jpg",
       "format": "jpg",
@@ -1892,6 +1874,24 @@
       "reason": "up_to_date",
       "originalSize": 38771,
       "optimizedSize": 21820
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\downloadsgrid.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\downloadsgrid.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 36054,
+      "optimizedSize": 52908
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\downloadsgrid.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\downloadsgrid.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 36054,
+      "optimizedSize": 19976
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-jpg.jpg",
@@ -1912,22 +1912,22 @@
       "optimizedSize": 25266
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-2.jpg",
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.jpg",
       "format": "jpg",
       "status": "skipped",
       "reason": "up_to_date",
-      "originalSize": 46431,
-      "optimizedSize": 69011
+      "originalSize": 57245,
+      "optimizedSize": 86407
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-2.webp",
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.webp",
       "format": "webp",
       "status": "skipped",
       "reason": "up_to_date",
-      "originalSize": 46431,
-      "optimizedSize": 26940
+      "originalSize": 57245,
+      "optimizedSize": 33984
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-week-in-review-system.jpg",
@@ -1948,22 +1948,22 @@
       "optimizedSize": 34454
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.jpg",
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-2.jpg",
       "format": "jpg",
       "status": "skipped",
       "reason": "up_to_date",
-      "originalSize": 57245,
-      "optimizedSize": 86407
+      "originalSize": 46431,
+      "optimizedSize": 69011
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-week-in-review-system-2.webp",
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-operating-pack-2.webp",
       "format": "webp",
       "status": "skipped",
       "reason": "up_to_date",
-      "originalSize": 57245,
-      "optimizedSize": 33984
+      "originalSize": 46431,
+      "optimizedSize": 26940
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-operating-pack.jpg",
@@ -2002,24 +2002,6 @@
       "optimizedSize": 64846
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-survival-checklist-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-survival-checklist-2.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 47479,
-      "optimizedSize": 70940
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-survival-checklist-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-survival-checklist-2.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 47479,
-      "optimizedSize": 27618
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-survival-checklist-2-2.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-survival-checklist-2-2.jpg",
       "format": "jpg",
@@ -2036,6 +2018,24 @@
       "reason": "up_to_date",
       "originalSize": 48547,
       "optimizedSize": 28258
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-survival-checklist-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-survival-checklist-2.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 47479,
+      "optimizedSize": 70940
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-survival-checklist-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\entrepreneur-survival-checklist-2.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 47479,
+      "optimizedSize": 27618
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\entrepreneur-survival-checklist-3-2.jpg",
@@ -2686,24 +2686,6 @@
       "optimizedSize": 24612
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\household-rhythm-starter-jpg.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\household-rhythm-starter-jpg.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 46344,
-      "optimizedSize": 69095
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\household-rhythm-starter-jpg.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\household-rhythm-starter-jpg.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 46344,
-      "optimizedSize": 26572
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\household-rhythm-starter.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\household-rhythm-starter.jpg",
       "format": "jpg",
@@ -2720,6 +2702,24 @@
       "reason": "up_to_date",
       "originalSize": 43228,
       "optimizedSize": 23910
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\household-rhythm-starter-jpg.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\household-rhythm-starter-jpg.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 46344,
+      "optimizedSize": 69095
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\household-rhythm-starter-jpg.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\household-rhythm-starter-jpg.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 46344,
+      "optimizedSize": 26572
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\leaders-cue-card-2.jpg",
@@ -2758,24 +2758,6 @@
       "optimizedSize": 24982
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\leaders-cue-card-jpg.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\leaders-cue-card-jpg.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 40363,
-      "optimizedSize": 59437
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\leaders-cue-card-jpg.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\leaders-cue-card-jpg.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 40363,
-      "optimizedSize": 22334
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\leaders-cue-card-two-up-2.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\leaders-cue-card-two-up-2.jpg",
       "format": "jpg",
@@ -2792,6 +2774,24 @@
       "reason": "up_to_date",
       "originalSize": 43160,
       "optimizedSize": 24236
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\leaders-cue-card-jpg.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\leaders-cue-card-jpg.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 40363,
+      "optimizedSize": 59437
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\leaders-cue-card-jpg.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\leaders-cue-card-jpg.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 40363,
+      "optimizedSize": 22334
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\leaders-cue-card-two-up.jpg",
@@ -3010,24 +3010,6 @@
       "optimizedSize": 22232
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-12-standards-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-12-standards-2.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 50525,
-      "optimizedSize": 75357
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-12-standards-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-12-standards-2.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 50525,
-      "optimizedSize": 29440
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\page-tsx.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\page-tsx.jpg",
       "format": "jpg",
@@ -3044,6 +3026,24 @@
       "reason": "up_to_date",
       "originalSize": 31071,
       "optimizedSize": 16992
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-12-standards-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-12-standards-2.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 50525,
+      "optimizedSize": 75357
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-12-standards-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-12-standards-2.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 50525,
+      "optimizedSize": 29440
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-12-standards.jpg",
@@ -3082,24 +3082,6 @@
       "optimizedSize": 23204
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-cue-card-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-cue-card-2.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 47826,
-      "optimizedSize": 70994
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-cue-card-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-cue-card-2.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 47826,
-      "optimizedSize": 27658
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-card-jpg.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-card-jpg.jpg",
       "format": "jpg",
@@ -3116,6 +3098,24 @@
       "reason": "up_to_date",
       "originalSize": 47182,
       "optimizedSize": 27236
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-cue-card-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-cue-card-2.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 47826,
+      "optimizedSize": 70994
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-cue-card-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\principles-for-my-son-cue-card-2.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 47826,
+      "optimizedSize": 27658
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\principles-for-my-son-cue-card-jpg.jpg",
@@ -3226,24 +3226,6 @@
       "optimizedSize": 15824
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\scripture-track-john-14-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\scripture-track-john-14-2.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 41786,
-      "optimizedSize": 61773
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\scripture-track-john-14-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\scripture-track-john-14-2.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 41786,
-      "optimizedSize": 23608
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\scripture-track-john-14.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\scripture-track-john-14.jpg",
       "format": "jpg",
@@ -3260,6 +3242,24 @@
       "reason": "up_to_date",
       "originalSize": 40664,
       "optimizedSize": 22290
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\scripture-track-john-14-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\scripture-track-john-14-2.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 41786,
+      "optimizedSize": 61773
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\scripture-track-john-14-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\scripture-track-john-14-2.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 41786,
+      "optimizedSize": 23608
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\scripture-track-john14-2.jpg",
@@ -3298,6 +3298,24 @@
       "optimizedSize": 24486
     },
     {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\standards-brief-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\standards-brief-2.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 37362,
+      "optimizedSize": 55012
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\standards-brief-2.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\standards-brief-2.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 37362,
+      "optimizedSize": 21062
+    },
+    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\scripture-track-john14.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\scripture-track-john14.jpg",
       "format": "jpg",
@@ -3332,24 +3350,6 @@
       "reason": "up_to_date",
       "originalSize": 39648,
       "optimizedSize": 22592
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\standards-brief-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\standards-brief-2.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 37362,
-      "optimizedSize": 55012
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\standards-brief-2.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\standards-brief-2.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 37362,
-      "optimizedSize": 21062
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\standards-brief.jpg",
@@ -3388,24 +3388,6 @@
       "optimizedSize": 22656
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\the-leadership-playbook.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\the-leadership-playbook.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 42583,
-      "optimizedSize": 63218
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\the-leadership-playbook.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\the-leadership-playbook.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 42583,
-      "optimizedSize": 23656
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\the-fiction-adaptation-onepager.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\the-fiction-adaptation-onepager.jpg",
       "format": "jpg",
@@ -3422,6 +3404,24 @@
       "reason": "up_to_date",
       "originalSize": 48206,
       "optimizedSize": 27794
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\the-leadership-playbook.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\the-leadership-playbook.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 42583,
+      "optimizedSize": 63218
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\the-leadership-playbook.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\the-leadership-playbook.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 42583,
+      "optimizedSize": 23656
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\weekly-operating-rhythm-2.jpg",
@@ -3460,24 +3460,6 @@
       "optimizedSize": 31998
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\weekly-operating-rhythm-daily-blocks.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\weekly-operating-rhythm-daily-blocks.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 52693,
-      "optimizedSize": 79426
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\weekly-operating-rhythm-daily-blocks.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\weekly-operating-rhythm-daily-blocks.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 52693,
-      "optimizedSize": 31268
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\weekly-operating-rhythm-jpg.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\weekly-operating-rhythm-jpg.jpg",
       "format": "jpg",
@@ -3496,22 +3478,22 @@
       "optimizedSize": 27362
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\cta\\cta-bg.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\cta\\cta-bg.jpg",
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\weekly-operating-rhythm-daily-blocks.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\weekly-operating-rhythm-daily-blocks.jpg",
       "format": "jpg",
       "status": "skipped",
       "reason": "up_to_date",
-      "originalSize": 3758374,
-      "optimizedSize": 1584973
+      "originalSize": 52693,
+      "optimizedSize": 79426
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\cta\\cta-bg.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\cta\\cta-bg.webp",
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\weekly-operating-rhythm-daily-blocks.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\downloads\\weekly-operating-rhythm-daily-blocks.webp",
       "format": "webp",
       "status": "skipped",
       "reason": "up_to_date",
-      "originalSize": 3758374,
-      "optimizedSize": 530746
+      "originalSize": 52693,
+      "optimizedSize": 31268
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\downloads\\weekly-operating-rhythm.jpg",
@@ -3530,6 +3512,24 @@
       "reason": "up_to_date",
       "originalSize": 59573,
       "optimizedSize": 22794
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\cta\\cta-bg.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\cta\\cta-bg.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 3758374,
+      "optimizedSize": 1584973
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\cta\\cta-bg.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\cta\\cta-bg.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 3758374,
+      "optimizedSize": 530746
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\cta\\cta-bg.webp",
@@ -3568,24 +3568,6 @@
       "optimizedSize": 243864
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\canon-campaign-cover.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\canon-campaign-cover.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 2214901,
-      "optimizedSize": 547783
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\canon-campaign-cover.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\canon-campaign-cover.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 2214901,
-      "optimizedSize": 67058
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\builders-catechism-cover.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\builders-catechism-cover.jpg",
       "format": "jpg",
@@ -3602,6 +3584,24 @@
       "reason": "up_to_date",
       "originalSize": 2800768,
       "optimizedSize": 231594
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\canon-campaign-cover.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\canon-campaign-cover.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 2214901,
+      "optimizedSize": 547783
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\canon-campaign-cover.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\canon-campaign-cover.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 2214901,
+      "optimizedSize": 67058
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\canon-index-cover.jpg",
@@ -3640,24 +3640,6 @@
       "optimizedSize": 79214
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\legacy-canvas-heirloom.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\legacy-canvas-heirloom.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 2867626,
-      "optimizedSize": 1332534
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\legacy-canvas-heirloom.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\legacy-canvas-heirloom.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 2867626,
-      "optimizedSize": 440266
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\canon-resources.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\canon-resources.jpg",
       "format": "jpg",
@@ -3674,6 +3656,24 @@
       "reason": "up_to_date",
       "originalSize": 1302261,
       "optimizedSize": 33450
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\legacy-canvas-heirloom.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\legacy-canvas-heirloom.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 2867626,
+      "optimizedSize": 1332534
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\legacy-canvas-heirloom.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\canon\\legacy-canvas-heirloom.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 2867626,
+      "optimizedSize": 440266
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\canon\\replace.jpg",
@@ -3892,24 +3892,6 @@
       "optimizedSize": 228460
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\books\\the-architecture-of-human-purpose.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\books\\the-architecture-of-human-purpose.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 2837575,
-      "optimizedSize": 888844
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\books\\the-architecture-of-human-purpose.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\books\\the-architecture-of-human-purpose.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 2837575,
-      "optimizedSize": 243864
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\books\\the-fiction-adaptation.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\books\\the-fiction-adaptation.jpg",
       "format": "jpg",
@@ -3926,6 +3908,24 @@
       "reason": "up_to_date",
       "originalSize": 1709001,
       "optimizedSize": 220282
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\books\\the-architecture-of-human-purpose.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\books\\the-architecture-of-human-purpose.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 2837575,
+      "optimizedSize": 888844
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\books\\the-architecture-of-human-purpose.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\books\\the-architecture-of-human-purpose.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 2837575,
+      "optimizedSize": 243864
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\christianity-not-extremism.svg",
@@ -3973,6 +3973,24 @@
       "optimizedSize": 46958
     },
     {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\christianity-not-extremism.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\christianity-not-extremism.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 40750,
+      "optimizedSize": 46958
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\christianity-not-extremism.webp",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\christianity-not-extremism.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 40750,
+      "optimizedSize": 46958
+    },
+    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\default-blog-cover.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\default-blog-cover.jpg",
       "format": "jpg",
@@ -3989,24 +4007,6 @@
       "reason": "up_to_date",
       "originalSize": 1324096,
       "optimizedSize": 50136
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\christianity-not-extremism.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\christianity-not-extremism.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 40750,
-      "optimizedSize": 46958
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\christianity-not-extremism.webp",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\christianity-not-extremism.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 40750,
-      "optimizedSize": 46958
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\fathering-principles.jpg",
@@ -4063,24 +4063,6 @@
       "optimizedSize": 186390
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\in-my-fathers-house.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\in-my-fathers-house.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 72021,
-      "optimizedSize": 176278
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\in-my-fathers-house.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\in-my-fathers-house.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 72021,
-      "optimizedSize": 63552
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\kingdom-strategies-for-a-loving-legacy.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\kingdom-strategies-for-a-loving-legacy.jpg",
       "format": "jpg",
@@ -4115,6 +4097,24 @@
       "reason": "up_to_date",
       "originalSize": 2203936,
       "optimizedSize": 93192
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\in-my-fathers-house.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\in-my-fathers-house.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 72021,
+      "optimizedSize": 176278
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\in-my-fathers-house.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\in-my-fathers-house.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 72021,
+      "optimizedSize": 63552
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\lessons-from-noah-hero.jpg",
@@ -4225,24 +4225,6 @@
       "optimizedSize": 237604
     },
     {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\purpose-is-the-anchor.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\purpose-is-the-anchor.jpg",
-      "format": "jpg",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 182004,
-      "optimizedSize": 361232
-    },
-    {
-      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\purpose-is-the-anchor.jpg",
-      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\purpose-is-the-anchor.webp",
-      "format": "webp",
-      "status": "skipped",
-      "reason": "up_to_date",
-      "originalSize": 182004,
-      "optimizedSize": 181066
-    },
-    {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\sovereignty-truth-fathers.jpg",
       "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\sovereignty-truth-fathers.jpg",
       "format": "jpg",
@@ -4259,6 +4241,24 @@
       "reason": "up_to_date",
       "originalSize": 2277723,
       "optimizedSize": 102896
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\purpose-is-the-anchor.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\purpose-is-the-anchor.jpg",
+      "format": "jpg",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 182004,
+      "optimizedSize": 361232
+    },
+    {
+      "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\purpose-is-the-anchor.jpg",
+      "out": "C:\\Abraham-of-london\\public\\optimized-images\\blog\\purpose-is-the-anchor.webp",
+      "format": "webp",
+      "status": "skipped",
+      "reason": "up_to_date",
+      "originalSize": 182004,
+      "optimizedSize": 181066
     },
     {
       "src": "C:\\Abraham-of-london\\public\\assets\\images\\blog\\the-brotherhood-code.jpg",

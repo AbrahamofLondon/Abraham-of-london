@@ -1,35 +1,27 @@
 // pages/events/[slug].tsx — PRODUCTION STABLE (PAGES ROUTER SAFE)
-// ✅ No undefined.map()
-// ✅ MDXRemote render guarded
+// ✅ Default export present
+// ✅ Child components are client-only (ssr:false) to prevent SSG crashes
+// ✅ MDXRemote guarded
 // ✅ Build-safe serialization + robust frontmatter defaults
-// ✅ Private events won’t crash prerender
+// ✅ All array operations are safe
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
-
-// Event UI (assumed existing in your codebase)
-import EventHero from "@/components/events/EventHero";
-import EventDetails from "@/components/events/EventDetails";
-import EventContent from "@/components/events/EventContent";
-import EventSchedule from "@/components/events/EventSchedule";
-import EventSpeakers from "@/components/events/EventSpeakers";
-import EventRegistration from "@/components/events/EventRegistration";
-import RelatedEvents from "@/components/events/RelatedEvents";
-import ShareButtons from "@/components/events/ShareButtons";
 
 // MDX
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
-// Your MDX components map (adjust if your path differs)
+// Your MDX components map
 import mdxComponents from "@/components/mdx-components";
 
-// Data access (adjust to your actual server boundary)
+// Data access
 import { getServerAllEvents, getServerEventBySlug } from "@/lib/content/server";
 import { sanitizeData } from "@/lib/content/shared";
 
@@ -44,6 +36,72 @@ import {
   Users,
 } from "lucide-react";
 
+// -------------------------------------------------------------------
+// Client-only components to prevent SSG crashes
+// -------------------------------------------------------------------
+const EventHero = dynamic(() => import("@/components/events/EventHero"), {
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-xl" />,
+});
+
+const EventDetails = dynamic(() => import("@/components/events/EventDetails"), {
+  ssr: false,
+  loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-xl" />,
+});
+
+const EventContent = dynamic(() => import("@/components/events/EventContent"), {
+  ssr: false,
+  loading: () => <div className="h-48 bg-gray-100 animate-pulse rounded-xl" />,
+});
+
+const EventSchedule = dynamic(() => import("@/components/events/EventSchedule"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
+      <p className="text-sm text-gray-500">Loading schedule…</p>
+    </div>
+  ),
+});
+
+const EventSpeakers = dynamic(() => import("@/components/events/EventSpeakers"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
+      <p className="text-sm text-gray-500">Loading speakers…</p>
+    </div>
+  ),
+});
+
+const EventRegistration = dynamic(() => import("@/components/events/EventRegistration"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
+      <p className="text-sm text-gray-500">Loading registration…</p>
+    </div>
+  ),
+});
+
+const RelatedEvents = dynamic(() => import("@/components/events/RelatedEvents"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
+      <p className="text-sm text-gray-500">Loading related events…</p>
+    </div>
+  ),
+});
+
+const ShareButtons = dynamic(() => import("@/components/events/ShareButtons"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-12 rounded-lg bg-gray-50 flex items-center justify-center px-4">
+      <p className="text-sm text-gray-500">Loading share options…</p>
+    </div>
+  ),
+});
+
+// -------------------------------------------------------------------
+// Types
+// -------------------------------------------------------------------
 type Tier = "public" | "inner-circle" | "private";
 
 function asTier(v: unknown): Tier {
@@ -56,30 +114,26 @@ function asTier(v: unknown): Tier {
 type EventDoc = {
   title: string;
   excerpt: string | null;
-  description?: string | null;
+  description: string | null;
   slug: string;
   coverImage: string | null;
-  tags?: string[] | null;
+  tags: string[]; // always array
 
-  // event metadata (optional; keep flexible)
   accessLevel: Tier;
-  lockMessage?: string | null;
+  lockMessage: string | null;
 
-  eventDate?: string | null; // canonical single date field (you used event.eventDate in UI)
-  time?: string | null;
-  location?: string | null;
+  eventDate: string | null;
+  time: string | null;
+  location: string | null;
 
-  venue?: string | null;
-  price?: string | null;
-  endDate?: string | null;
-  speaker?: string | null;
-  category?: string | null;
-  capacity?: number | null;
+  venue: string | null;
+  price: string | null;
+  endDate: string | null;
+  speaker: string | null;
+  category: string | null;
+  capacity: number | null;
 
-  registrationUrl?: string | null;
-
-  // any other fields
-  [key: string]: any;
+  registrationUrl: string | null;
 };
 
 type Props = {
@@ -87,11 +141,14 @@ type Props = {
   source: MDXRemoteSerializeResult | null;
 };
 
+// -------------------------------------------------------------------
+// Helpers
+// -------------------------------------------------------------------
 function safeSiteUrl() {
   return (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(/\/+$/, "");
 }
 
-function cleanSlug(raw: unknown) {
+function cleanSlug(raw: unknown): string {
   const s = String(raw || "").trim();
   return s.replace(/^\/+|\/+$/g, "").replace(/^events\//, "").replace(/\.(md|mdx)$/i, "");
 }
@@ -110,8 +167,10 @@ async function serializeMdx(raw: string): Promise<MDXRemoteSerializeResult> {
 // getStaticPaths
 // ===================================================================
 export const getStaticPaths: GetStaticPaths = async () => {
-  const all = getServerAllEvents?.() || [];
-  const paths = (Array.isArray(all) ? all : [])
+  const all = (typeof getServerAllEvents === "function" ? getServerAllEvents() : []) as any[];
+  const safeAll = Array.isArray(all) ? all : [];
+
+  const paths = safeAll
     .map((e: any) => {
       const raw = e?.slug || e?._raw?.flattenedPath || "";
       const slug = cleanSlug(raw);
@@ -119,10 +178,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     })
     .filter(Boolean) as Array<{ params: { slug: string } }>;
 
-  return {
-    paths,
-    fallback: "blocking",
-  };
+  return { paths, fallback: "blocking" };
 };
 
 // ===================================================================
@@ -134,7 +190,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const slug = Array.isArray(raw) ? raw[0] : raw;
     if (!slug) return { notFound: true };
 
-    const eventData = getServerEventBySlug?.(String(slug));
+    const eventData = typeof getServerEventBySlug === "function" ? getServerEventBySlug(String(slug)) : null;
     if (!eventData) return { notFound: true };
 
     const event: EventDoc = {
@@ -143,12 +199,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       description: String(eventData.description || "").trim() ? String(eventData.description).trim() : null,
       slug: String(eventData.slug || slug).trim() || String(slug),
       coverImage: String(eventData.coverImage || "").trim() ? String(eventData.coverImage).trim() : null,
-      tags: Array.isArray(eventData.tags) ? eventData.tags : null,
+      tags: Array.isArray(eventData.tags) ? eventData.tags : [],
 
       accessLevel: asTier(eventData.accessLevel),
       lockMessage: String(eventData.lockMessage || "").trim() ? String(eventData.lockMessage).trim() : null,
 
-      // tolerate multiple schemas (your MDX currently has startDate/endDate)
       eventDate: String(eventData.eventDate || eventData.startDate || eventData.date || "").trim() || null,
       endDate: String(eventData.endDate || "").trim() || null,
       time: String(eventData.time || "").trim() || null,
@@ -163,20 +218,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       registrationUrl: String(eventData.registrationUrl || "").trim() || null,
     };
 
-    // For private/inner-circle events, you can still render the page shell,
-    // but don’t compile/render full MDX unless you explicitly want to.
     const isPublic = event.accessLevel === "public";
 
     let source: MDXRemoteSerializeResult | null = null;
-
     if (isPublic) {
       const rawMdx = String(eventData?.body?.raw ?? eventData?.body ?? "").trim();
-      if (rawMdx) {
-        source = await serializeMdx(rawMdx);
-      } else {
-        // Build-safe empty content
-        source = await serializeMdx(" ");
-      }
+      source = rawMdx ? await serializeMdx(rawMdx) : await serializeMdx(" ");
     }
 
     return {
@@ -190,21 +237,20 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 // ===================================================================
-// Page
+// Page Component
 // ===================================================================
 const EventPage: NextPage<Props> = ({ event, source }) => {
   const router = useRouter();
+
   const [isBookmarked, setIsBookmarked] = React.useState(false);
   const [isPastEvent, setIsPastEvent] = React.useState(false);
-
-  // ✅ SAFETY FIX: Always ensure arrays are valid before using .map()
-  const safeTags = Array.isArray(event?.tags) ? event.tags : [];
-  const safeSpeakers = Array.isArray((event as any)?.speakers) ? (event as any).speakers : [];
-  const safeAgenda = Array.isArray((event as any)?.agenda) ? (event as any).agenda : [];
-  const safeRelatedEvents = Array.isArray((event as any)?.relatedEvents) ? (event as any).relatedEvents : [];
+  const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
+    // ✅ Client-only guard
     if (typeof window === "undefined") return;
+
+    setIsClient(true);
 
     // bookmarks
     try {
@@ -217,12 +263,13 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
 
     // past/future
     const dateValue = event.eventDate || "";
-    const isPast = dateValue ? new Date(dateValue) < new Date() : false;
+    const d = dateValue ? new Date(dateValue) : null;
+    const isPast = !!d && !Number.isNaN(d.getTime()) && d.getTime() < Date.now();
     setIsPastEvent(isPast);
   }, [event.slug, event.eventDate]);
 
   const handleBookmark = () => {
-    if (typeof window === "undefined") return;
+    if (!isClient) return;
 
     try {
       const bookmarks = JSON.parse(localStorage.getItem("bookmarkedEvents") || "[]");
@@ -251,12 +298,16 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
   const cover = event.coverImage || "/assets/images/events/replace.jpg";
 
   const formattedDate = event.eventDate
-    ? new Date(event.eventDate).toLocaleDateString("en-GB", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+    ? (() => {
+        const d = new Date(event.eventDate as string);
+        if (Number.isNaN(d.getTime())) return "";
+        return d.toLocaleDateString("en-GB", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      })()
     : "";
 
   const formattedTime = event.time || "Time TBA";
@@ -307,14 +358,19 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
       </div>
 
       <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100">
-        <EventHero
-          title={event.title}
-          date={formattedDate}
-          location={locationText}
-          coverImage={event.coverImage || undefined}
-          excerpt={event.excerpt || undefined}
-          isPast={isPastEvent}
-        />
+        {/* Client-only Hero */}
+        {isClient ? (
+          <EventHero
+            title={event.title}
+            date={formattedDate}
+            location={locationText}
+            coverImage={event.coverImage || undefined}
+            excerpt={event.excerpt || undefined}
+            isPast={isPastEvent}
+          />
+        ) : (
+          <div className="h-96 bg-gray-100 animate-pulse rounded-xl" />
+        )}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -330,6 +386,7 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
                         : "bg-gray-100 text-gray-700 border border-gray-200 hover:border-amber-500/30 hover:text-amber-600"
                     }`}
                     type="button"
+                    disabled={!isClient}
                   >
                     {isBookmarked ? (
                       <>
@@ -394,37 +451,47 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
                   ) : null}
                 </div>
 
-                <EventDetails
-                  venue={event.venue || undefined}
-                  price={event.price || undefined}
-                  endDate={event.endDate || undefined}
-                  speaker={event.speaker || undefined}
-                  category={event.category || undefined}
-                />
+                {/* Client-only Details */}
+                {isClient ? (
+                  <EventDetails
+                    venue={event.venue || undefined}
+                    price={event.price || undefined}
+                    endDate={event.endDate || undefined}
+                    speaker={event.speaker || undefined}
+                    category={event.category || undefined}
+                  />
+                ) : (
+                  <div className="h-32 bg-gray-100 animate-pulse rounded-xl mb-8" />
+                )}
 
+                {/* Content */}
                 <div className="mt-8 prose prose-gray max-w-none">
-                  <EventContent>
-                    {isLocked ? (
-                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-6">
-                        <p className="text-sm font-semibold text-gray-900">Private event</p>
-                        <p className="mt-2 text-sm text-gray-700">
-                          {event.lockMessage ||
-                            "This event is reserved for invited guests. Request an invitation to be considered."}
-                        </p>
-                      </div>
-                    ) : source ? (
-                      <MDXRemote {...source} components={(mdxComponents ?? {}) as any} />
-                    ) : (
-                      <div className="text-sm text-gray-600">Content is being prepared.</div>
-                    )}
-                  </EventContent>
+                  {isClient ? (
+                    <EventContent>
+                      {isLocked ? (
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-6">
+                          <p className="text-sm font-semibold text-gray-900">Private event</p>
+                          <p className="mt-2 text-sm text-gray-700">
+                            {event.lockMessage ||
+                              "This event is reserved for invited guests. Request an invitation to be considered."}
+                          </p>
+                        </div>
+                      ) : source ? (
+                        <MDXRemote {...source} components={(mdxComponents ?? {}) as any} />
+                      ) : (
+                        <div className="text-sm text-gray-600">Content is being prepared.</div>
+                      )}
+                    </EventContent>
+                  ) : (
+                    <div className="h-48 bg-gray-100 animate-pulse rounded-xl" />
+                  )}
                 </div>
 
                 {/* Tags */}
-                {safeTags.length > 0 ? (
+                {event.tags.length > 0 ? (
                   <div className="mt-8 pt-6 border-t border-gray-200">
                     <div className="flex flex-wrap gap-2">
-                      {safeTags.map((tag, index) => (
+                      {event.tags.map((tag, index) => (
                         <span
                           key={`${tag}-${index}`}
                           className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full border border-gray-200 hover:bg-gray-200 transition-colors"
@@ -436,33 +503,48 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
                   </div>
                 ) : null}
 
-                {!isPastEvent ? (
-                  <div className="mt-12">
-                    <EventSchedule eventId={event.slug} agenda={safeAgenda} />
-                  </div>
-                ) : null}
+                {/* Client-only components */}
+                {isClient ? (
+                  <>
+                    {!isPastEvent ? (
+                      <div className="mt-12">
+                        <EventSchedule eventId={event.slug} />
+                      </div>
+                    ) : null}
 
-                <div className="mt-12">
-                  <EventSpeakers eventTitle={event.title} speakers={safeSpeakers} />
-                </div>
-
-                <div className="mt-12">
-                  <EventRegistration
-                    isPast={isPastEvent}
-                    registrationUrl={event.registrationUrl || undefined}
-                    price={event.price || undefined}
-                  />
-                </div>
-
-                <div className="mt-12 pt-8 border-t border-gray-200">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Share this event</h3>
-                      <p className="text-sm text-gray-600">Spread the word with your network</p>
+                    <div className="mt-12">
+                      <EventSpeakers eventTitle={event.title} />
                     </div>
-                    <ShareButtons url={canonicalUrl} title={event.title} excerpt={event.excerpt || ""} />
+
+                    <div className="mt-12">
+                      <EventRegistration
+                        isPast={isPastEvent}
+                        registrationUrl={event.registrationUrl || undefined}
+                        price={event.price || undefined}
+                      />
+                    </div>
+
+                    <div className="mt-12 pt-8 border-t border-gray-200">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="text-center sm:text-left">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1">Share this event</h3>
+                          <p className="text-sm text-gray-600 max-w-md">
+                            Spread the word with your network and help others discover this gathering
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <ShareButtons url={canonicalUrl} title={event.title} excerpt={event.excerpt || ""} />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-12 space-y-6">
+                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-600">
+                      Loading event details…
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </main>
 
@@ -470,7 +552,13 @@ const EventPage: NextPage<Props> = ({ event, source }) => {
               <div className="sticky top-24 space-y-6">
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Events</h3>
-                  <RelatedEvents currentEventTitle={event.title} relatedEvents={safeRelatedEvents} />
+                  {isClient ? (
+                    <RelatedEvents currentEventTitle={event.title} />
+                  ) : (
+                    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
+                      <p className="text-sm text-gray-500">Loading related events…</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-white rounded-xl shadow-lg p-6">

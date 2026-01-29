@@ -1,24 +1,15 @@
-// components/books/BookContent.tsx
+// components/books/BookContent.tsx - FIXED
 import React from 'react';
-import { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { MDXRemote } from 'next-mdx-remote';
 
 interface BookContentProps {
-  content: MDXRemoteSerializeResult;
-  components?: Record<string, React.ComponentType>;
+  children: React.ReactNode;
 }
 
-const BookContent: React.FC<BookContentProps> = ({ content, components = {} }) => {
-  const defaultComponents = {
-    // Custom components for book content
-    ...components,
-  };
-
+const BookContent: React.FC<BookContentProps> = ({ children }) => {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
       <article className="prose prose-lg prose-blue max-w-none">
-        {/* Spread the content object - it has compiledSource, scope, frontmatter */}
-        <MDXRemote {...content} components={defaultComponents} />
+        {children}
         
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">

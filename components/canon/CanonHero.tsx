@@ -1,14 +1,17 @@
+// components/canon/CanonHero.tsx - SIMPLE FIX (NO NEED FOR safe-compat.ts)
 import React from "react";
 import Image from "next/image";
 import { 
   safeString, 
-  safeCapitalize, 
   safeNumber, 
   safeImageSrc,
   safeArray,
   safeUrl,
-  classNames 
-} from "@/lib/utils/safe";
+  classNames,
+  safeFirstChar, // Already exists in /lib/shared/safe.ts
+  safeSlice, // Already exists in /lib/shared/safe.ts  
+  safeCapitalize, // Already exists in /lib/shared/safe.ts
+} from "@/lib/utils/safe"; // ✅ Use the main safe module
 import { BookOpen, Clock, Award, Download, Sparkles, Calendar, ArrowRight } from "lucide-react";
 
 interface CanonHeroProps {
