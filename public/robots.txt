@@ -1,5 +1,61 @@
+# *
 User-agent: *
 Allow: /
-Disallow: /downloads/*.pdf$
+Disallow: /api/*
+Disallow: /inner-circle/*
+Disallow: /admin/*
+Disallow: /_next/*
+Disallow: /assets/private/*
+Disallow: /404
+Disallow: /500
+Disallow: /maintenance
+Disallow: /test/*
+Disallow: /debug/*
+Disallow: /server-sitemap.xml
+Crawl-delay: 2
 
-Sitemap: https://www.abrahamoflondon.org/sitemap.xml
+# Googlebot
+User-agent: Googlebot
+Allow: /
+Disallow: /api/*
+Disallow: /inner-circle/*
+Disallow: /admin/*
+Disallow: /assets/private/*
+Crawl-delay: 1
+
+# Googlebot-Image
+User-agent: Googlebot-Image
+Allow: /
+Disallow: /api/*
+Disallow: /inner-circle/*
+Disallow: /admin/*
+Disallow: /assets/private/*
+
+# Bingbot
+User-agent: Bingbot
+Allow: /
+Disallow: /api/*
+Disallow: /inner-circle/*
+Disallow: /admin/*
+Disallow: /assets/private/*
+Crawl-delay: 2
+
+# Slurp
+User-agent: Slurp
+Allow: /
+Disallow: /api/*
+Disallow: /inner-circle/*
+Disallow: /admin/*
+Disallow: /assets/private/*
+Crawl-delay: 3
+
+# Host
+Host: https://abrahamadaramola.org
+
+# Sitemaps
+Sitemap: https://abrahamadaramola.org/sitemap.xml
+Sitemap: https://abrahamadaramola.org/blog-sitemap.xml
+Sitemap: https://abrahamadaramola.org/canons-sitemap.xml
+Sitemap: https://abrahamadaramola.org/strategies-sitemap.xml
+Sitemap: https://abrahamadaramola.org/resources-sitemap.xml
+Sitemap: https://abrahamadaramola.org/books-sitemap.xml

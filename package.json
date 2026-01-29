@@ -134,6 +134,7 @@
     "pdf:cleanup": "tsx scripts/pdf/cleanup-pdfs.ts",
     "pdf:optimize": "tsx scripts/pdf/optimize-pdfs.ts",
     "pdf:audit": "pnpm pdf:list && pnpm pdf:validate",
+    "pdf:validate": "tsx scripts/pdf-validate.ts --check-empty --check-corrupt",
     "pdf:repair": "tsx scripts/pdf/repair-pdfs.ts --repair-empty --regenerate-corrupt",
     "pdf:sync": "tsx scripts/pdf/sync-pdfs.ts --update-downloads --fix-placeholders",
     "pdf:scan-registry": "tsx scripts/pdf/scan-content-for-registry.ts",

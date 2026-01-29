@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://www.abrahamoflondon.org/</loc>
-    <lastmod>2024-01-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <!-- Add other pages -->
-</urlset>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemap><loc>https://abrahamadaramola.org/sitemap-0.xml</loc></sitemap>
+<sitemap><loc>https://abrahamadaramola.org/sitemap.xml</loc></sitemap>
+<sitemap><loc>https://abrahamadaramola.org/blog-sitemap.xml</loc></sitemap>
+<sitemap><loc>https://abrahamadaramola.org/canons-sitemap.xml</loc></sitemap>
+<sitemap><loc>https://abrahamadaramola.org/strategies-sitemap.xml</loc></sitemap>
+<sitemap><loc>https://abrahamadaramola.org/resources-sitemap.xml</loc></sitemap>
+<sitemap><loc>https://abrahamadaramola.org/books-sitemap.xml</loc></sitemap>
+</sitemapindex>

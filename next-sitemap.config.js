@@ -1,6 +1,6 @@
 // next-sitemap.config.js - Advanced SEO Configuration
 /** @type {import('next-sitemap').IConfig} */
-module.exports = {
+const config = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org',
   
   // ==================== GENERATION SETTINGS ====================
@@ -74,12 +74,12 @@ module.exports = {
       },
     ],
     additionalSitemaps: [
-      `${process.env.NEXT_PUBLIC_SITE_URL}/sitemap.xml`,
-      `${process.env.NEXT_PUBLIC_SITE_URL}/blog-sitemap.xml`,
-      `${process.env.NEXT_PUBLIC_SITE_URL}/canons-sitemap.xml`,
-      `${process.env.NEXT_PUBLIC_SITE_URL}/strategies-sitemap.xml`,
-      `${process.env.NEXT_PUBLIC_SITE_URL}/resources-sitemap.xml`,
-      `${process.env.NEXT_PUBLIC_SITE_URL}/books-sitemap.xml`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/sitemap.xml`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/blog-sitemap.xml`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/canons-sitemap.xml`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/strategies-sitemap.xml`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/resources-sitemap.xml`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/books-sitemap.xml`,
     ],
   },
   
@@ -262,7 +262,7 @@ async function getImagesForPath(path) {
   if (path.includes('/blog/')) {
     return [
       {
-        loc: `${process.env.NEXT_PUBLIC_SITE_URL}/images/blog/featured/${path.split('/').pop()}.jpg`,
+        loc: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/images/blog/featured/${path.split('/').pop()}.jpg`,
         title: 'Featured Image',
         caption: 'Featured image for blog post',
         geoLocation: 'London, UK',
@@ -282,7 +282,7 @@ async function getVideosForPath(path) {
   if (path.includes('/tutorials/')) {
     return [
       {
-        thumbnailLoc: `${process.env.NEXT_PUBLIC_SITE_URL}/images/video-thumbnails/${path.split('/').pop()}.jpg`,
+        thumbnailLoc: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org'}/images/video-thumbnails/${path.split('/').pop()}.jpg`,
         title: 'Tutorial Video',
         description: 'Video tutorial for this content',
         contentLoc: `https://youtube.com/watch?v=example123`,
@@ -341,3 +341,6 @@ function getPostTitle(path) {
   // Implement logic to get post title from path
   return 'Blog Post Title';
 }
+
+// Export as ES module
+export default config;
