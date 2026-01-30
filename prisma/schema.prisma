@@ -6,7 +6,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = psql 'postgresql://neondb\_owner:npg\_lVTc95DapNuM@ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require\&channel\_binding=require'
+  url      = env("DATABASE_URL")
 }
 
 model DownloadAuditEvent {
