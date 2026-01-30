@@ -1,104 +1,183 @@
 # scripts/netlify-set-prefix-contexts.ps1
-[CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+# Enterprise-safe Netlify env context synchronizer (PowerShell 7+)
+# - Matches env vars by Prefix
+# - Optional Only/Exclude filters
+# - Copies the current value (or a forced -Value) to multiple contexts
+# - Supports -WhatIf via ShouldProcess (CmdletBinding)
+# Usage:
+#   pwsh scripts/netlify-set-prefix-contexts.ps1 -Prefix "NEXT_PUBLIC_GISCUS_" -WhatIf
+#   pwsh scripts/netlify-set-prefix-contexts.ps1 -Prefix "NEXT_PUBLIC_GISCUS_" -Force
+#   pwsh scripts/netlify-set-prefix-contexts.ps1 -Prefix "NEXT_PUBLIC_GISCUS_" -Only "A","B" -Force
+
+[CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
-  [Parameter(Mandatory = $true)]
+  [Parameter(Mandatory=$true)]
+  [ValidateNotNullOrEmpty()]
   [string]$Prefix,
 
-  # Optional: apply this literal value to ALL matched vars (skips env:get)
-  [string]$Value = "",
-
-  # Optional: only update these exact var names
+  # Can be array or comma-separated entries
   [string[]]$Only = @(),
 
-  # Optional: exclude these exact var names
+  # Can be array or comma-separated entries
   [string[]]$Exclude = @(),
 
-  # Overwrite without prompts
+  # If set, overrides the value for ALL matched vars
+  [string]$Value,
+
+  # Target contexts
+  [string[]]$Contexts = @('production','deploy-preview','branch-deploy'),
+
+  # Pass --force to netlify env:set
   [switch]$Force
 )
 
-function Require-Cmd([string]$name) {
-  if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {
-    throw "Required command not found: $name (Netlify CLI not on PATH)."
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+function Assert-Cmd {
+  param([string]$Name)
+  $cmd = Get-Command $Name -ErrorAction SilentlyContinue
+  if (-not $cmd) { throw "Missing required command: $Name. Install/enable it and retry." }
+}
+
+function Normalize-List {
+  param([string[]]$Items)
+  $acc = New-Object System.Collections.Generic.List[string]
+  foreach ($i in @($Items)) {
+    if ([string]::IsNullOrWhiteSpace($i)) { continue }
+    foreach ($p in ($i -split ',')) {
+      $t = $p.Trim()
+      if ($t) { $acc.Add($t) }
+    }
+  }
+  return @($acc.ToArray())
+}
+
+function Get-NetlifyEnvJsonObject {
+  $raw = & netlify env:list --json 2>$null
+  if (-not $raw) { throw "netlify env:list --json returned no output." }
+
+  $text = ($raw | Out-String)
+
+  try {
+    return ($text | ConvertFrom-Json)
+  } catch {
+    # Some Netlify CLIs wrap JSON with banners; extract { ... } safely
+    $start = $text.IndexOf('{')
+    $end   = $text.LastIndexOf('}')
+    if ($start -lt 0 -or $end -lt 0 -or $end -le $start) {
+      throw "Could not parse JSON from netlify output."
+    }
+    $json = $text.Substring($start, $end - $start + 1)
+    return ($json | ConvertFrom-Json)
   }
 }
 
-Require-Cmd netlify
-
-$contexts = @("production", "deploy-preview", "branch-deploy")
-
-# 1) Pull env list JSON
-$json = netlify env:list --json 2>$null
-if (-not $json) { throw "netlify env:list --json returned nothing. Are you linked/logged in?" }
-
-try { $data = $json | ConvertFrom-Json } catch { throw "Failed to parse JSON from netlify env:list --json" }
-
-# 2) Extract variable names robustly (handles object map OR array forms)
-$names = @()
-
-# Case A: JSON is a plain object map { "KEY": "VALUE", ... }
-if ($data -is [psobject] -and $data.PSObject.Properties.Count -gt 0 -and -not ($data -is [System.Collections.IEnumerable] -and $data.GetType().Name -match 'Array')) {
-  $names = $data.PSObject.Properties.Name
+function New-NameSet {
+  param([string[]]$Names)
+  if (-not $Names -or @($Names).Count -eq 0) { return $null }
+  return [System.Collections.Generic.HashSet[string]]::new([string[]]$Names, [System.StringComparer]::OrdinalIgnoreCase)
 }
-# Case B: JSON is an array of objects (various Netlify CLI shapes)
-elseif ($data -is [System.Collections.IEnumerable]) {
-  # Some CLI versions wrap under .vars
-  if ($data.vars) { $data = $data.vars }
 
-  foreach ($v in $data) {
-    if ($v.key)  { $names += [string]$v.key;  continue }
-    if ($v.name) { $names += [string]$v.name; continue }
+function Try-GetValueFromJson {
+  param(
+    [Parameter(Mandatory=$true)][object]$EnvObj,
+    [Parameter(Mandatory=$true)][string]$Name
+  )
+  try {
+    $prop = $EnvObj.PSObject.Properties[$Name]
+    if ($null -ne $prop) {
+      # May be masked; still treated as "value present" for copy-with-override scenarios
+      return [string]$prop.Value
+    }
+  } catch {}
+  return $null
+}
+
+function Get-VarValue {
+  param(
+    [Parameter(Mandatory=$true)][object]$EnvObj,
+    [Parameter(Mandatory=$true)][string]$Name
+  )
+
+  # Best effort from JSON
+  $v = Try-GetValueFromJson -EnvObj $EnvObj -Name $Name
+  if (-not [string]::IsNullOrWhiteSpace($v)) { return $v }
+
+  # Fallback to netlify env:get in production
+  $got = & netlify env:get $Name --context production 2>$null
+  if ($LASTEXITCODE -ne 0) { return $null }
+  return ([string]($got | Select-Object -First 1)).Trim()
+}
+
+function Set-VarInContext {
+  param(
+    [Parameter(Mandatory=$true)][string]$Name,
+    [Parameter(Mandatory=$true)][string]$Val,
+    [Parameter(Mandatory=$true)][string]$Context,
+    [switch]$Force
+  )
+
+  $args = @('env:set', $Name, $Val, '--context', $Context)
+  if ($Force) { $args += '--force' }
+
+  $target = "${Name} (${Context})"
+  $action = "netlify $($args -join ' ')"
+
+  if ($PSCmdlet.ShouldProcess($target, $action)) {
+    & netlify @args | Out-Host
+    if ($LASTEXITCODE -ne 0) { throw "Failed to set ${Name} in ${Context}." }
+    Write-Host "✅ ${Name} set in ${Context}"
   }
 }
 
-$names = $names | Where-Object { $_ -like "$Prefix*" } | Sort-Object -Unique
+# ---------------- MAIN ----------------
+Assert-Cmd netlify
 
-if ($Only.Count -gt 0) {
-  $onlySet = [System.Collections.Generic.HashSet[string]]::new([string[]]$Only)
-  $names = $names | Where-Object { $onlySet.Contains($_) }
+$Only    = Normalize-List $Only
+$Exclude = Normalize-List $Exclude
+
+$onlySet = New-NameSet $Only
+$exSet   = New-NameSet $Exclude
+
+$envObj = Get-NetlifyEnvJsonObject
+
+$allNames = @($envObj.PSObject.Properties.Name)
+
+$matched = @(
+  foreach ($n in $allNames) {
+    if ($n -notlike "$Prefix*") { continue }
+    if ($onlySet -and -not $onlySet.Contains($n)) { continue }
+    if ($exSet   -and $exSet.Contains($n)) { continue }
+    $n
+  }
+) | Sort-Object
+
+if (@($matched).Count -eq 0) {
+  Write-Host "No env vars match prefix '$Prefix' (after filters)."
+  return
 }
 
-if ($Exclude.Count -gt 0) {
-  $exSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$Exclude)
-  $names = $names | Where-Object { -not $exSet.Contains($_) }
-}
+Write-Host "Matched vars:"
+$matched | ForEach-Object { Write-Host " - $_" }
 
-if ($names.Count -eq 0) {
-  Write-Host "No env vars match prefix '$Prefix' (after filters)." -ForegroundColor Yellow
-  exit 0
-}
+foreach ($name in $matched) {
 
-Write-Host "Matched vars:" -ForegroundColor Cyan
-$names | ForEach-Object { Write-Host " - $_" }
+  $valToUse = $null
 
-# 3) Apply across contexts
-foreach ($name in $names) {
-
-  $applyValue = $Value
-
-  if ([string]::IsNullOrWhiteSpace($applyValue)) {
-    # Read from production (source of truth)
-    $applyValue = netlify env:get $name --context production 2>$null
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($applyValue)) {
-      Write-Host "⚠️  Skipping ${name}: couldn't read value from production." -ForegroundColor Yellow
+  if ($PSBoundParameters.ContainsKey('Value')) {
+    $valToUse = $Value
+  } else {
+    $valToUse = Get-VarValue -EnvObj $envObj -Name $name
+    if ([string]::IsNullOrWhiteSpace($valToUse)) {
+      Write-Host "⚠️  Skipping ${name}: could not read value (and no -Value supplied)."
       continue
     }
   }
 
-  foreach ($ctx in $contexts) {
-    $args = @("env:set", $name, $applyValue, "--context", $ctx)
-    if ($Force) { $args += "--force" }
-
-    $label = "netlify $($args -join ' ')"
-    if ($PSCmdlet.ShouldProcess("${name} (${ctx})", $label)) {
-      & netlify @args | Out-Host
-      if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ Failed setting ${name} in ${ctx}" -ForegroundColor Red
-      } else {
-        Write-Host "✅ ${name} set in ${ctx}" -ForegroundColor Green
-      }
-    }
+  foreach ($ctx in @($Contexts)) {
+    Set-VarInContext -Name $name -Val $valToUse -Context $ctx -Force:$Force
   }
 }
 
-Write-Host "Done." -ForegroundColor Cyan
+Write-Host "Done."
