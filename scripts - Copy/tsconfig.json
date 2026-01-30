@@ -1,0 +1,116 @@
+{
+  "compilerOptions": {
+    // =================== TYPE CHECKING ===================
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    
+    // =================== MODULES ===================
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "preserveSymlinks": false,
+    "allowImportingTsExtensions": false,
+    
+    // =================== EMIT ===================
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": true,
+    "importHelpers": true,
+    "importsNotUsedAsValues": "remove",
+    "downlevelIteration": true,
+    
+    // =================== INTEROP CONSTRAINTS ===================
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowUmdGlobalAccess": false,
+    "forceConsistentCasingInFileNames": true,
+    
+    // =================== LANGUAGE & ENVIRONMENT ===================
+    "target": "es2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022",
+      "esnext.disposable"
+    ],
+    "jsx": "preserve",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": true,
+    
+    // =================== PATHS & ALIASES ===================
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["components/*"],
+      "@lib/*": ["lib/*"],
+      "@utils/*": ["utils/*"],
+      "@hooks/*": ["hooks/*"],
+      "@styles/*": ["styles/*"],
+      "@content/*": ["content/*"],
+      "@types/*": ["types/*"],
+      "@public/*": ["public/*"],
+      "contentlayer/generated": [".contentlayer/generated"]
+    },
+    
+    // =================== PERFORMANCE ===================
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    
+    // =================== INCREMENTAL BUILDING ===================
+    "incremental": true,
+    "tsBuildInfoFile": "./.next/tsbuildinfo",
+    
+    // =================== COMPLETENESS ===================
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".contentlayer/generated"
+  ],
+  
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".contentlayer",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.e2e.ts",
+    "cypress",
+    "playwright",
+    "jest.config.*",
+    "**/__tests__/*",
+    "**/__mocks__/*"
+  ]
+}

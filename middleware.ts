@@ -4,12 +4,7 @@ import { NextResponse } from "next/server";
 import { edgeRateLimit } from "@/lib/server/rate-limit-edge";
 
 export const config = {
-  // Adjust matchers to what you actually need to protect at the edge
-  matcher: [
-    "/api/:path*",
-    "/admin/:path*",
-    "/inner-circle/:path*",
-  ],
+  matcher: ["/api/:path*", "/admin/:path*", "/inner-circle/:path*"],
 };
 
 function getClientIp(req: NextRequest): string {
@@ -20,20 +15,31 @@ function getClientIp(req: NextRequest): string {
   return "unknown";
 }
 
-export async function middleware(req: NextRequest) {
-  // IMPORTANT: do not import ANY node-only module here.
-  // Only call Edge-safe utilities (fetch/WebCrypto).
+function isEdgeRateLimitEnabled(): boolean {
+  // Explicit off-switch wins
+  if (process.env.DISABLE_EDGE_RATE_LIMIT === "true") return false;
 
-  const ip = getClientIp(req);
+  // Only enable if explicitly turned on (recommended)
+  if (process.env.EDGE_RATE_LIMIT_ENABLED === "true") return true;
+
+  // Sensible default: ON in production, OFF otherwise
+  return process.env.NODE_ENV === "production";
+}
+
+export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  // Example: only rate-limit sensitive endpoints
   const shouldLimit =
     path.startsWith("/api/") ||
     path.startsWith("/admin") ||
     path.startsWith("/inner-circle");
 
   if (!shouldLimit) return NextResponse.next();
+
+  // Don’t even call Redis unless enabled
+  if (!isEdgeRateLimitEnabled()) return NextResponse.next();
+
+  const ip = getClientIp(req);
 
   const rl = await edgeRateLimit({
     key: `edge:${ip}:${path}`,
@@ -46,16 +52,12 @@ export async function middleware(req: NextRequest) {
       { error: "Too many requests", retryAfterSeconds: rl.retryAfterSeconds ?? 60 },
       {
         status: 429,
-        headers: {
-          "Cache-Control": "no-store",
-          ...rl.headers,
-        },
+        headers: { "Cache-Control": "no-store", ...rl.headers },
       }
     );
   }
 
   const res = NextResponse.next();
-  // attach rate limit headers (optional but useful)
   for (const [k, v] of Object.entries(rl.headers)) res.headers.set(k, v);
   return res;
 }
