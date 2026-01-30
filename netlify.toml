@@ -1,14 +1,8 @@
-# netlify.toml — NEXTJS PLUGIN COMPAT (publish cannot equal base)
-
+# netlify.toml — CONSOLIDATED & CORRECTED
 [build]
-  [build]
   command = "pnpm install --frozen-lockfile && pnpm build:netlify && pnpm prune --prod"
   publish = ".next"
-
   functions = "netlify/functions"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
@@ -17,6 +11,16 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[plugins]]
+  package = "@netlify/plugin-emails"
+
+# If you use the Netlify Emails plugin and need template files
+[functions.emails]
+  included_files = ["./emails/**"]
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
