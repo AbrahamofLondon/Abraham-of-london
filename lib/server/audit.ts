@@ -1,8 +1,8 @@
-import { safeSlice } from "@/lib/utils/safe";
-/* lib/server/audit.ts - PRODUCTION SAFE UPGRADE */
+// lib/server/audit.ts - PRODUCTION SAFE VERSION - FIXED
+import { safeString, safeSubstring, safeJsonStringify } from "@/lib/utils/safe";
+
 /**
  * AUDIT EVENT INTERFACE
- * Principled Analysis: Aligns with the SystemAuditLog database schema.
  */
 export interface AuditEvent {
   actorType: "system" | "api" | "member" | "admin" | "cron" | "webhook";
@@ -24,6 +24,7 @@ export interface AuditEvent {
   durationMs?: number;
   errorMessage?: string | null;
 }
+
 /**
  * AUDIT EVENT CATEGORIES
  */
@@ -40,6 +41,7 @@ export const AUDIT_CATEGORIES = {
   API_CALL: "api_call",
   ADMIN_ACTION: "admin_action",
 } as const;
+
 /**
  * COMMON AUDIT ACTIONS
  */
@@ -82,6 +84,7 @@ export const AUDIT_ACTIONS = {
   WEBHOOK_RECEIVED: "webhook_received",
   WEBHOOK_PROCESSED: "webhook_processed",
 } as const;
+
 export interface PerformanceMetrics {
   operation: string;
   durationMs: number;
@@ -89,116 +92,63 @@ export interface PerformanceMetrics {
   resourceId?: string;
   metadata?: Record<string, any>;
 }
-// SAFE: Environment detection without crashing
+
+// SAFE: Environment detection
 const isEdgeRuntime = (): boolean => {
   if (typeof process === 'undefined') return false;
   if (!process.env) return false;
   return process.env.NEXT_RUNTIME === 'edge';
 };
+
 const isProduction = (): boolean => {
   if (typeof process === 'undefined') return false;
   if (!process.env) return false;
   return process.env.NODE_ENV === 'production';
 };
+
 const isDevelopment = (): boolean => {
   if (typeof process === 'undefined') return false;
   if (!process.env) return false;
   return process.env.NODE_ENV === 'development';
 };
-export class AuditContext {
-  private context: {
-    requestId?: string;
-    sessionId?: string;
-    userId?: string;
-    userEmail?: string;
-    userIp?: string;
-    userAgent?: string;
-    startTime: number;
-  };
-  constructor(context?: Partial<Omit<AuditContext['context'], 'startTime'>>) {
-    this.context = {
-      requestId: this.generateRequestId(),
-      startTime: Date.now(),
-      ...this.sanitizeContext(context || {}),
-    };
-  }
-  private sanitizeContext(context: Partial<Omit<AuditContext['context'], 'startTime'>>) {
-    // SAFE: Sanitize all string inputs to prevent injection
-    const sanitized: any = {};
-    const sanitizeString = (str: string, maxLength: number): string => {
-      return safeSlice(String(str || ''), 0, maxLength).replace(/[^\w\-_@.]/g, '');
-    };
-    if (context.requestId && typeof context.requestId === 'string') {
-      sanitized.requestId = sanitizeString(context.requestId, 100);
-    }
-    if (context.sessionId && typeof context.sessionId === 'string') {
-      sanitized.sessionId = sanitizeString(context.sessionId, 100);
-    }
-    if (context.userId && typeof context.userId === 'string') {
-      sanitized.userId = sanitizeString(context.userId, 255);
-    }
-    if (context.userEmail && typeof context.userEmail === 'string') {
-      sanitized.userEmail = sanitizeString(context.userEmail, 255);
-    }
-    if (context.userIp && typeof context.userIp === 'string') {
-      // Basic IP sanitization
-      sanitized.userIp = safeSlice(String(context.userIp), 0, 45).replace(/[^\d.:]/g, '');
-    }
-    if (context.userAgent && typeof context.userAgent === 'string') {
-      sanitized.userAgent = safeSlice(String(context.userAgent), 0, 500);
-    }
-    return sanitized;
-  }
-  private generateRequestId(): string {
-    try {
-      // SAFE: Use crypto.randomUUID if available (modern browsers/Node)
-      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        return `req_${crypto.randomUUID()}`;
-      }
-    } catch {
-      // Fall through to timestamp method
-    }
-    // Fallback: timestamp + random (still safe for production)
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().tosafeSlice(String(36), 2, 10);
-    return `req_${timestamp}_${random}`;
-  }
-  getContext() {
-    return { ...this.context };
-  }
-  updateContext(updates: Partial<Omit<AuditContext['context'], 'startTime'>>) {
-    this.context = { 
-      ...this.context, 
-      ...this.sanitizeContext(updates) 
-    };
-  }
-  getDuration(): number {
-    return Date.now() - this.context.startTime;
-  }
-}
+
 /**
- * SAFE: Sanitize audit event data before processing
+ * SAFE: Sanitize audit event data before processing - FIXED VERSION
  */
 function sanitizeAuditEvent(event: AuditEvent): AuditEvent {
   const sanitized: any = { ...event };
-  // String length limits and sanitization
+  
+  // SAFE: Helper to sanitize fields - FIXED: Use safeString for strings, not safeSlice
   const sanitizeField = (field: any, maxLength: number): any => {
-    if (typeof field === 'string') {
-      return safeSlice(field, 0, maxLength).replace(/[\x00-\x1F\x7F]/g, '');
+    if (field == null) return field;
+    
+    // Always convert to string first
+    let strValue: string;
+    try {
+      strValue = typeof field === 'string' ? field : String(field);
+    } catch {
+      return '';
     }
-    return field;
+    
+    // Use safeString to limit length and ensure it's a string
+    const safeStr = safeString(strValue, maxLength);
+    
+    // Remove control characters
+    return safeStr.replace(/[\x00-\x1F\x7F]/g, '');
   };
+
   sanitized.actorId = sanitizeField(sanitized.actorId, 255);
   sanitized.actorEmail = sanitizeField(sanitized.actorEmail, 255);
   sanitized.ipAddress = sanitizeField(sanitized.ipAddress, 45);
-  sanitized.action = sanitizeField(sanitized.action, 100);
-  sanitized.resourceType = sanitizeField(sanitized.resourceType, 100);
+  sanitized.action = sanitizeField(sanitized.action, 100) || 'unknown';
+  sanitized.resourceType = sanitizeField(sanitized.resourceType, 100) || 'unknown';
   sanitized.resourceId = sanitizeField(sanitized.resourceId, 255);
   sanitized.userAgent = sanitizeField(sanitized.userAgent, 500);
   sanitized.requestId = sanitizeField(sanitized.requestId, 100);
   sanitized.sessionId = sanitizeField(sanitized.sessionId, 100);
   sanitized.errorMessage = sanitizeField(sanitized.errorMessage, 1000);
-  // SAFE: JSON size limits to prevent memory issues
+
+  // SAFE: JSON size limits
   const limitJsonSize = (obj: any, maxSize: number): any => {
     try {
       const jsonStr = JSON.stringify(obj);
@@ -215,29 +165,106 @@ function sanitizeAuditEvent(event: AuditEvent): AuditEvent {
       return { _invalidJson: true };
     }
   };
+
   sanitized.oldValue = limitJsonSize(sanitized.oldValue, 10000);
   sanitized.newValue = limitJsonSize(sanitized.newValue, 10000);
   sanitized.metadata = limitJsonSize(sanitized.metadata, 5000);
   sanitized.details = limitJsonSize(sanitized.details, 5000);
+
   // Numeric bounds
   if (typeof sanitized.durationMs === 'number') {
     sanitized.durationMs = Math.max(0, Math.min(999999, sanitized.durationMs));
   }
+
   return sanitized;
 }
+
+export class AuditContext {
+  private context: {
+    requestId?: string;
+    sessionId?: string;
+    userId?: string;
+    userEmail?: string;
+    userIp?: string;
+    userAgent?: string;
+    startTime: number;
+  };
+
+  constructor(context?: Partial<Omit<AuditContext['context'], 'startTime'>>) {
+    this.context = {
+      requestId: this.generateRequestId(),
+      startTime: Date.now(),
+      ...this.sanitizeContext(context || {}),
+    };
+  }
+
+  private sanitizeContext(context: Partial<Omit<AuditContext['context'], 'startTime'>>) {
+    const sanitized: any = {};
+    
+    if (context.requestId && typeof context.requestId === 'string') {
+      sanitized.requestId = safeString(context.requestId, 100);
+    }
+    if (context.sessionId && typeof context.sessionId === 'string') {
+      sanitized.sessionId = safeString(context.sessionId, 100);
+    }
+    if (context.userId && typeof context.userId === 'string') {
+      sanitized.userId = safeString(context.userId, 255);
+    }
+    if (context.userEmail && typeof context.userEmail === 'string') {
+      sanitized.userEmail = safeString(context.userEmail, 255);
+    }
+    if (context.userIp && typeof context.userIp === 'string') {
+      sanitized.userIp = safeString(context.userIp, 45);
+    }
+    if (context.userAgent && typeof context.userAgent === 'string') {
+      sanitized.userAgent = safeString(context.userAgent, 500);
+    }
+
+    return sanitized;
+  }
+
+  private generateRequestId(): string {
+    try {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return `req_${crypto.randomUUID()}`;
+      }
+    } catch {
+      // Fall through to timestamp method
+    }
+    
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 10);
+    return `req_${timestamp}_${random}`;
+  }
+
+  getContext() {
+    return { ...this.context };
+  }
+
+  updateContext(updates: Partial<Omit<AuditContext['context'], 'startTime'>>) {
+    this.context = { 
+      ...this.context, 
+      ...this.sanitizeContext(updates) 
+    };
+  }
+
+  getDuration(): number {
+    return Date.now() - this.context.startTime;
+  }
+}
+
 /**
  * INSTITUTIONAL AUDIT LOGGER
- * EDGE SAFE: Uses dynamic imports to prevent crashing Middleware
- * PRODUCTION SAFE: With comprehensive fallbacks and error handling
  */
 export async function logAuditEvent(event: AuditEvent): Promise<any> {
   const startTime = Date.now();
+  
   // SAFE: Always sanitize event data first
   const sanitizedEvent = sanitizeAuditEvent(event);
+
   try {
     // CRITICAL: Edge Runtime Guard
     if (isEdgeRuntime()) {
-      // Fallback to console log in Edge (safe for production)
       const edgeLog = {
         timestamp: new Date().toISOString(),
         actorType: sanitizedEvent.actorType,
@@ -247,15 +274,20 @@ export async function logAuditEvent(event: AuditEvent): Promise<any> {
         _edge: true,
         _fallback: true
       };
+      
       if (isDevelopment()) {
         console.log('[AUDIT_EDGE_FALLBACK]', edgeLog);
       }
+      
       return { success: true, edge: true, logged: edgeLog };
     }
+
     // SAFE: Dynamic Import - Prevents Edge runtime crashes
     const { default: prisma } = await import("@/lib/prisma");
+    
     const finalDetails = sanitizedEvent.details || sanitizedEvent.metadata || null;
     const severity = sanitizedEvent.severity || determineSeverity(sanitizedEvent.action, sanitizedEvent.status);
+
     // SAFE: Create audit log with sanitized data
     const auditLog = await prisma.systemAuditLog.create({
       data: {
@@ -279,17 +311,19 @@ export async function logAuditEvent(event: AuditEvent): Promise<any> {
         createdAt: new Date(),
       },
     });
+
     const durationMs = Date.now() - startTime;
-    // Performance warning (development only)
+    
     if (durationMs > 1000 && isDevelopment()) {
       console.warn(`[AUDIT_PERF_WARNING] Audit logging took ${durationMs}ms`);
     }
+
     return auditLog;
   } catch (error) {
-    // SAFE: Comprehensive error handling without exposing sensitive data
+    // SAFE: Comprehensive error handling
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = isDevelopment() && error instanceof Error ? error.stack : undefined;
-    // Critical error logging (safe for production)
+
     console.error("[AUDIT_CRITICAL_FAILURE] Failed to persist institutional log:", {
       timestamp: new Date().toISOString(),
       actorType: sanitizedEvent.actorType,
@@ -298,7 +332,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<any> {
       status: sanitizedEvent.status,
       error: isProduction() ? 'Database persistence failed' : errorMessage,
     });
-    // Fallback console log (always works, safe for production)
+
     const fallbackLog = {
       timestamp: new Date().toISOString(),
       ...sanitizedEvent,
@@ -307,7 +341,9 @@ export async function logAuditEvent(event: AuditEvent): Promise<any> {
       _error: isProduction() ? undefined : errorMessage,
       _stack: isDevelopment() ? errorStack : undefined
     };
+
     console.log("[AUDIT_FALLBACK]", JSON.stringify(fallbackLog));
+    
     return { 
       success: false, 
       error: 'Audit logging failed', 
@@ -316,6 +352,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<any> {
     };
   }
 }
+
 function determineSeverity(action: string, status: string): AuditEvent['severity'] {
   if ([
     AUDIT_ACTIONS.LOGIN_FAILED,
@@ -327,6 +364,7 @@ function determineSeverity(action: string, status: string): AuditEvent['severity
   ].includes(action as any)) {
     return status === 'failed' ? 'critical' : 'high';
   }
+
   if ([
     AUDIT_ACTIONS.CONFIGURATION_CHANGE,
     AUDIT_ACTIONS.PERMISSION_CHANGED,
@@ -335,6 +373,7 @@ function determineSeverity(action: string, status: string): AuditEvent['severity
   ].includes(action as any)) {
     return 'high';
   }
+
   if ([
     AUDIT_ACTIONS.UPDATE,
     AUDIT_ACTIONS.EXPORT,
@@ -343,16 +382,19 @@ function determineSeverity(action: string, status: string): AuditEvent['severity
   ].includes(action as any)) {
     return 'medium';
   }
+
   return 'low';
 }
-// SAFE: Helper functions with input validation
+
+// SAFE: Helper functions
 export async function logAuthEvent(data: any) {
-  // Validate input data
   if (!data || typeof data !== 'object') {
     console.error('[AUDIT_INVALID_INPUT] logAuthEvent received invalid data:', data);
     return null;
   }
+
   const safeData = { ...data };
+  
   return logAuditEvent({
     actorType: safeData.actorType || 'member',
     actorId: safeData.actorId,
@@ -368,12 +410,15 @@ export async function logAuthEvent(data: any) {
     errorMessage: safeData.errorMessage,
   });
 }
+
 export async function logDataAccessEvent(data: any) {
   if (!data || typeof data !== 'object') {
     console.error('[AUDIT_INVALID_INPUT] logDataAccessEvent received invalid data:', data);
     return null;
   }
+
   const safeData = { ...data };
+  
   return logAuditEvent({
     actorType: safeData.actorType || 'member',
     actorId: safeData.actorId,
@@ -390,12 +435,15 @@ export async function logDataAccessEvent(data: any) {
     details: safeData.details,
   });
 }
+
 export async function logSecurityEvent(data: any) {
   if (!data || typeof data !== 'object') {
     console.error('[AUDIT_INVALID_INPUT] logSecurityEvent received invalid data:', data);
     return null;
   }
+
   const safeData = { ...data };
+  
   return logAuditEvent({
     actorType: safeData.actorType || 'system',
     actorId: safeData.actorId,
@@ -412,12 +460,15 @@ export async function logSecurityEvent(data: any) {
     errorMessage: safeData.errorMessage,
   });
 }
+
 export async function logPerformanceMetrics(metrics: PerformanceMetrics) {
   if (!metrics || typeof metrics !== 'object') {
     console.error('[AUDIT_INVALID_INPUT] logPerformanceMetrics received invalid data:', metrics);
     return null;
   }
+
   const safeMetrics = { ...metrics };
+  
   return logAuditEvent({
     actorType: "system",
     action: AUDIT_ACTIONS.API_CALL,
@@ -433,6 +484,7 @@ export async function logPerformanceMetrics(metrics: PerformanceMetrics) {
     },
   });
 }
+
 export function withAuditLog(handler: Function, options?: any) {
   return async (req: any, res: any, ...args: any[]) => {
     const context = new AuditContext({
@@ -441,11 +493,14 @@ export function withAuditLog(handler: Function, options?: any) {
       userIp: req.headers['x-forwarded-for']?.split(',')[0]?.trim(),
       userAgent: req.headers['user-agent'],
     });
+
     const startTime = Date.now();
     let status: AuditEvent['status'] = 'success';
     let errorMessage: string | undefined;
+
     try {
       const result = await handler(req, res, ...args);
+      
       if (options?.logSuccess !== false) {
         await logAuditEvent({
           actorType: req.user?.id ? "member" : "api",
@@ -467,10 +522,12 @@ export function withAuditLog(handler: Function, options?: any) {
           },
         });
       }
+      
       return result;
     } catch (error) {
       status = 'failed';
       errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       if (options?.logErrors !== false) {
         await logAuditEvent({
           actorType: req.user?.id ? "member" : "api",
@@ -493,56 +550,66 @@ export function withAuditLog(handler: Function, options?: any) {
           },
         });
       }
+      
       throw error;
     }
   };
 }
+
 export async function queryAuditLogs(filters?: any) {
-  // Edge Guard with safe response
   if (isEdgeRuntime()) return { 
     success: false, 
     error: 'Not supported in Edge runtime',
     data: [],
     pagination: { total: 0, limit: 0, offset: 0, pageCount: 0 }
   };
+
   try {
     const { default: prisma } = await import("@/lib/prisma");
-    // SAFE: Build where clause with validation
+    
     const where: any = {};
-    // Validate and sanitize all filter inputs
     const validActorTypes = ['system', 'api', 'member', 'admin', 'cron', 'webhook'];
+    const validStatuses = ['success', 'failed', 'warning', 'pending'];
+    const validSeverities = ['low', 'medium', 'high', 'critical'];
+
     if (filters?.actorType && typeof filters.actorType === 'string' && validActorTypes.includes(filters.actorType)) {
       where.actorType = filters.actorType;
     }
-    if (filters?.actorId && typeof filters.actorId === 'string' && filters.actorId.length <= 255) {
-      where.actorId = filters.actorId;
+    
+    if (filters?.actorId && typeof filters.actorId === 'string') {
+      where.actorId = safeString(filters.actorId, 255);
     }
-    if (filters?.action && typeof filters.action === 'string' && filters.action.length <= 100) {
-      where.action = { contains: filters.action, mode: 'insensitive' };
+    
+    if (filters?.action && typeof filters.action === 'string') {
+      where.action = { contains: safeString(filters.action, 100), mode: 'insensitive' };
     }
-    if (filters?.resourceType && typeof filters.resourceType === 'string' && filters.resourceType.length <= 100) {
-      where.resourceType = filters.resourceType;
+    
+    if (filters?.resourceType && typeof filters.resourceType === 'string') {
+      where.resourceType = safeString(filters.resourceType, 100);
     }
-    if (filters?.resourceId && typeof filters.resourceId === 'string' && filters.resourceId.length <= 255) {
-      where.resourceId = filters.resourceId;
+    
+    if (filters?.resourceId && typeof filters.resourceId === 'string') {
+      where.resourceId = safeString(filters.resourceId, 255);
     }
-    const validStatuses = ['success', 'failed', 'warning', 'pending'];
+    
     if (filters?.status && typeof filters.status === 'string' && validStatuses.includes(filters.status)) {
       where.status = filters.status;
     }
-    const validSeverities = ['low', 'medium', 'high', 'critical'];
+    
     if (filters?.severity && typeof filters.severity === 'string' && validSeverities.includes(filters.severity)) {
       where.severity = filters.severity;
     }
-    // Date range validation
+
     if (filters?.startDate || filters?.endDate) {
       where.createdAt = {};
+      
       if (filters?.startDate) {
         const startDate = new Date(filters.startDate);
         if (!isNaN(startDate.getTime())) {
           where.createdAt.gte = startDate;
         }
       }
+      
       if (filters?.endDate) {
         const endDate = new Date(filters.endDate);
         if (!isNaN(endDate.getTime())) {
@@ -550,9 +617,10 @@ export async function queryAuditLogs(filters?: any) {
         }
       }
     }
-    // SAFE: Pagination limits
-    const limit = Math.max(1, Math.min(1000, parseInt(filters?.limit) || 100));
-    const offset = Math.max(0, parseInt(filters?.offset) || 0);
+
+    const limit = Math.max(1, Math.min(1000, Number(filters?.limit) || 100));
+    const offset = Math.max(0, Number(filters?.offset) || 0);
+
     const [logs, total] = await Promise.all([
       prisma.systemAuditLog.findMany({
         where,
@@ -562,6 +630,7 @@ export async function queryAuditLogs(filters?: any) {
       }),
       prisma.systemAuditLog.count({ where }),
     ]);
+
     return {
       success: true,
       data: logs,
@@ -582,33 +651,37 @@ export async function queryAuditLogs(filters?: any) {
     };
   }
 }
+
 export async function cleanupOldAuditLogs(retentionDays: number = 90) {
-  // Edge Guard
   if (isEdgeRuntime()) return { 
     success: false, 
     error: 'Not supported in Edge runtime',
     deletedCount: 0 
   };
+
   try {
     const { default: prisma } = await import("@/lib/prisma");
-    // SAFE: Validate retention days
+    
     const safeRetentionDays = Math.max(1, Math.min(365 * 10, retentionDays));
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - safeRetentionDays);
+
     const result = await prisma.systemAuditLog.deleteMany({
       where: {
         createdAt: { lt: cutoffDate },
         severity: { in: ['low', 'medium'] },
       },
     });
+
     console.log(`[AUDIT_CLEANUP] Deleted ${result.count} audit logs older than ${safeRetentionDays} days`);
+    
     return { success: true, deletedCount: result.count };
   } catch (error) {
     console.error('[AUDIT_CLEANUP_ERROR]', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Cleanup failed', deletedCount: 0 };
   }
 }
-// SAFE: Default export for backward compatibility
+
 const auditApi = {
   logAuditEvent,
   logAuthEvent,
@@ -622,4 +695,5 @@ const auditApi = {
   AUDIT_ACTIONS,
   AuditContext,
 };
-export default auditApi;
+
+export default auditApi;
