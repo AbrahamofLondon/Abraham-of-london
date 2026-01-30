@@ -1,8 +1,10 @@
 # netlify.toml — NEXTJS PLUGIN COMPAT (publish cannot equal base)
 
 [build]
-  command = "pnpm build:netlify"
+  [build]
+  command = "pnpm install --frozen-lockfile && pnpm build:netlify && pnpm prune --prod"
   publish = ".next"
+
   functions = "netlify/functions"
 
 [[plugins]]
