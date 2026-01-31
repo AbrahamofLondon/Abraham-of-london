@@ -1,324 +1,102 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // components/mdx-components.tsx — BULLETPROOF PRODUCTION STABLE
-// ✅ Graceful handling of ALL missing components
-// ✅ Fallback components with clear error indicators (dev/prod aware)
-// ✅ Zero build errors even if components don't exist
-// ✅ Full type safety with proper error boundaries
-
 import * as React from "react";
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
-
-// --- Optional imports with graceful fallbacks ---
-// These will NEVER crash your build if files don't exist
-
-let Divider: ComponentType<any> | undefined;
-let Callout: ComponentType<any> | undefined;
-let Quote: ComponentType<any> | undefined;
-let GlossaryTerm: ComponentType<any> | undefined;
-
-try {
-  // Use dynamic imports to prevent build failures
-  Divider = require("@/components/Divider").default;
-} catch {
-  // Component doesn't exist yet
-}
-
-try {
-  Callout = require("@/components/mdx/Callout").default;
-} catch {
-  // Component doesn't exist yet
-}
-
-try {
-  Quote = require("@/components/mdx/Quote").default;
-} catch {
-  // Component doesn't exist yet
-}
-
-try {
-  GlossaryTerm = require("@/components/GlossaryTerm").default;
-} catch {
-  // Component doesn't exist yet
-}
-
-// --- Icons (safe resolver with fallback) ---
-import {
-  Target,
-  Map,
-  Building2,
-  Shield,
-  RefreshCw,
-  ScrollText,
-  FileText,
-  HardDrive,
-  Files,
-  PenLine,
-  Ruler,
-  PenTool,
-  Printer,
-  Type,
-  Accessibility,
-  Download,
-  Users,
-  CircleHelp,
-  HelpCircle,
-} from "lucide-react";
+import { HelpCircle, Shield, Clock, ChevronRight, ArrowUpRight } from "lucide-react";
 
 type AnyProps = Record<string, any>;
+const isDev = process.env.NODE_ENV === "development";
 
-// Helper for conditional className
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-// Helper to check if we're in development
-const isDev = process.env.NODE_ENV === "development";
-
 /* -----------------------------------------------------------------------------
-  MISSING COMPONENT BOUNDARY (Critical for bulletproofing)
+  MISSING COMPONENT BOUNDARY
 ----------------------------------------------------------------------------- */
-
-interface MissingComponentProps {
-  name: string;
-  children?: ReactNode;
-  [key: string]: any;
-}
-
-const MissingComponent: ComponentType<MissingComponentProps> = ({ name, children, ...rest }) => {
+const MissingComponent: ComponentType<{ name: string; children?: ReactNode }> = ({ name, children, ...rest }) => {
   if (isDev) {
-    // Development: Show clear error indicator
     return (
-      <div
-        className="my-4 rounded-lg border-2 border-dashed border-red-400 bg-red-50 p-4 dark:border-red-600 dark:bg-red-950/30"
-        {...rest}
-      >
-        <div className="flex items-center gap-2 text-sm font-semibold text-red-700 dark:text-red-300">
-          <HelpCircle className="h-4 w-4" />
-          Missing component: <code className="rounded bg-red-100 px-2 py-1 font-mono dark:bg-red-900/50">{name}</code>
+      <div className="my-6 rounded-xl border-2 border-dashed border-amber-500/20 bg-amber-500/5 p-6" {...rest}>
+        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-500">
+          <HelpCircle className="h-4 w-4" /> Component Missing: {name}
         </div>
-        {children && (
-          <div className="mt-2 rounded border border-red-200 bg-white p-3 text-sm dark:border-red-800 dark:bg-gray-900">
-            {children}
-          </div>
-        )}
-        <div className="mt-2 text-xs text-red-600 dark:text-red-400">
-          Create this component at: <code>components/{name}.tsx</code>
-        </div>
+        {children && <div className="mt-4 opacity-50">{children}</div>}
       </div>
     );
   }
-  
-  // Production: Render children gracefully without error
   return children ? <>{children}</> : null;
 };
-MissingComponent.displayName = "MissingComponent";
 
 /* -----------------------------------------------------------------------------
-  SAFE HTML TAG OVERRIDES (fail-safe)
+  INSTITUTIONAL HTML TAG OVERRIDES
 ----------------------------------------------------------------------------- */
-
 const A: ComponentType<any> = (props: AnyProps) => {
-  if (!props || typeof props !== 'object') {
-    return <MissingComponent name="Link" {...props} />;
-  }
-
   const href = String(props?.href || "");
-  const className = props?.className;
+  const isInternal = href.startsWith("/");
+  const styles = "text-amber-500 underline underline-offset-4 decoration-amber-500/30 hover:decoration-amber-500 transition-all";
 
-  // Internal links => Next Link
-  if (href.startsWith("/")) {
-    return (
-      <Link
-        href={href}
-        className={cx("underline underline-offset-4 hover:opacity-80", className)}
-        {...props}
-      >
-        {props.children}
-      </Link>
-    );
+  if (isInternal) {
+    return <Link href={href} className={cx(styles, props.className)} {...props}>{props.children}</Link>;
   }
-
-  // External links
   return (
-    <a
-      {...props}
-      href={href}
-      target={href ? "_blank" : undefined}
-      rel={href ? "noopener noreferrer" : undefined}
-      className={cx("underline underline-offset-4 hover:opacity-80", className)}
-    />
+    <a {...props} href={href} target="_blank" rel="noopener noreferrer" className={cx(styles, "inline-flex items-center gap-1", props.className)}>
+      {props.children} <ArrowUpRight className="h-3 w-3 opacity-50" />
+    </a>
   );
 };
-A.displayName = "A";
-
-const InlineCode: ComponentType<any> = (props: AnyProps) => (
-  <code
-    {...props}
-    className={cx(
-      "rounded bg-black/5 px-1 py-0.5 font-mono text-[0.95em]",
-      "dark:bg-white/10",
-      props?.className
-    )}
-  />
-);
-InlineCode.displayName = "InlineCode";
 
 const H1: ComponentType<any> = (props: AnyProps) => (
-  <h1 {...props} className={cx("mt-10 mb-4 text-3xl font-bold", props?.className)} />
+  <h1 {...props} className={cx("font-serif text-4xl md:text-5xl lg:text-6xl text-white mb-8 mt-16 tracking-tight", props?.className)} />
 );
-H1.displayName = "H1";
 
 const H2: ComponentType<any> = (props: AnyProps) => (
-  <h2 {...props} className={cx("mt-10 mb-3 text-2xl font-bold", props?.className)} />
+  <h2 {...props} className={cx("font-serif text-2xl md:text-3xl text-white/90 mb-6 mt-12 tracking-tight border-b border-white/5 pb-2", props?.className)} />
 );
-H2.displayName = "H2";
 
 const H3: ComponentType<any> = (props: AnyProps) => (
-  <h3 {...props} className={cx("mt-8 mb-2 text-xl font-semibold", props?.className)} />
+  <h3 {...props} className={cx("font-serif text-xl md:text-2xl text-white/80 mb-4 mt-8 tracking-tight", props?.className)} />
 );
-H3.displayName = "H3";
 
 const P: ComponentType<any> = (props: AnyProps) => (
-  <p {...props} className={cx("my-4 leading-7", props?.className)} />
+  <p {...props} className={cx("font-sans text-lg leading-relaxed text-white/70 my-6 font-light", props?.className)} />
 );
-P.displayName = "P";
+
+const Blockquote: ComponentType<any> = (props: AnyProps) => (
+  <blockquote {...props} className={cx("my-12 border-l-2 border-amber-500/50 bg-white/[0.03] py-8 px-8 rounded-r-2xl font-serif italic text-xl text-white/90 leading-snug", props?.className)} />
+);
+
+const Ul: ComponentType<any> = (props: AnyProps) => (
+  <ul {...props} className={cx("list-none space-y-4 my-8 ml-2", props?.className)} />
+);
+
+const Li: ComponentType<any> = (props: AnyProps) => (
+  <li className="flex gap-4 font-sans text-white/70">
+    <span className="text-amber-500/50 font-mono text-xs mt-1.5">/</span>
+    <span className="text-lg leading-relaxed font-light">{props.children}</span>
+  </li>
+);
 
 /* -----------------------------------------------------------------------------
-  ICON RESOLVER (with fallback)
+  REGISTRY EXPORT
 ----------------------------------------------------------------------------- */
-
-const ICONS: Record<string, ComponentType<any>> = {
-  TARGET: Target,
-  MAP: Map,
-  BUILDING: Building2,
-  SHIELD: Shield,
-  CYCLE: RefreshCw,
-  SCROLL: ScrollText,
-  FILE: FileText,
-  DISK: HardDrive,
-  PAGES: Files,
-  PEN: PenTool,
-  WRITE: PenLine,
-  RULER: Ruler,
-  SIGNATURE: PenLine,
-  PRINTER: Printer,
-  FONT: Type,
-  ACCESSIBLE: Accessibility,
-  DOWNLOAD: Download,
-  PEOPLE: Users,
-};
-
-const Icon: ComponentType<any> = ({ name, ...rest }: { name?: string } & AnyProps) => {
-  const key = String(name || "").trim().toUpperCase();
-  const Comp = ICONS[key] || CircleHelp;
-  return <Comp aria-hidden="true" {...rest} />;
-};
-Icon.displayName = "Icon";
-
-/* -----------------------------------------------------------------------------
-  FEATURE CARD (with existence check)
------------------------------------------------------------------------------ */
-
-const FeatureCard: ComponentType<any> = ({
-  title,
-  icon,
-  badge,
-  color,
-  children,
-  content,
-  ...rest
-}: AnyProps) => {
-  const body = children ?? content;
-
-  return (
-    <div
-      {...rest}
-      className={cx(
-        "my-4 rounded-2xl border border-black/10 bg-white p-5 shadow-sm",
-        "dark:border-white/10 dark:bg-white/[0.02]",
-        rest?.className
-      )}
-      style={color ? { borderColor: String(color) } : undefined}
-    >
-      <div className="flex items-start gap-3">
-        {icon ? (
-          <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-black/5 dark:bg-white/10">
-            {typeof icon === "string" ? <Icon name={icon} className="h-5 w-5" /> : icon}
-          </div>
-        ) : null}
-
-        <div className="min-w-0">
-          {badge ? (
-            <div className="mb-1 inline-flex rounded-full border border-black/10 bg-black/5 px-2 py-0.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200">
-              {badge}
-            </div>
-          ) : null}
-
-          {title ? <div className="text-base font-semibold text-gray-900 dark:text-white">{title}</div> : null}
-        </div>
-      </div>
-
-      {body ? <div className="mt-3 text-sm text-gray-700 dark:text-gray-200">{body}</div> : null}
-    </div>
-  );
-};
-FeatureCard.displayName = "FeatureCard";
-
-/* -----------------------------------------------------------------------------
-  SAFE COMPONENT GETTER (returns fallback if component missing)
------------------------------------------------------------------------------ */
-
-function getSafeComponent(name: string, Component?: ComponentType<any>): ComponentType<any> {
-  if (Component && typeof Component === 'function') {
-    return Component;
-  }
-  
-  // Return a MissingComponent wrapper for this specific component
-  const SafeComponent: ComponentType<any> = (props) => (
-    <MissingComponent name={name} {...props} />
-  );
-  SafeComponent.displayName = `Safe${name}`;
-  
-  return SafeComponent;
-}
-
-/* -----------------------------------------------------------------------------
-  EXPORT MDX MAP (BULLETPROOF)
------------------------------------------------------------------------------ */
-
 const mdxComponents: Record<string, ComponentType<any>> = {
-  // Core HTML tags (always available)
   a: A,
-  code: InlineCode,
   h1: H1,
   h2: H2,
   h3: H3,
   p: P,
+  blockquote: Blockquote,
+  ul: Ul,
+  li: Li,
+  hr: () => <hr className="my-16 border-t border-white/10" />,
+  code: (props: any) => <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[0.85em] text-amber-200" {...props} />,
   
-  // Custom components with safe fallbacks
-  Divider: getSafeComponent("Divider", Divider),
-  Callout: getSafeComponent("Callout", Callout),
-  Quote: getSafeComponent("Quote", Quote),
-  GlossaryTerm: getSafeComponent("GlossaryTerm", GlossaryTerm),
-  
-  // Always available components
-  FeatureCard,
-  Icon,
+  // Custom Block Handlers
+  FeatureCard: (props: any) => <MissingComponent name="FeatureCard" {...props} />,
+  ResourcesCTA: (props: any) => <MissingComponent name="ResourcesCTA" {...props} />,
+  BrandFrame: (props: any) => <MissingComponent name="BrandFrame" {...props} />,
 };
-
-// Export individual components for direct use (except Icon which is already in the map)
-export {
-  A,
-  InlineCode,
-  H1,
-  H2,
-  H3,
-  P,
-  FeatureCard,
-  MissingComponent,
-};
-
-// Type for MDX components
-export type MDXComponents = typeof mdxComponents;
 
 export default mdxComponents;

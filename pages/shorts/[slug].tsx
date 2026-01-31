@@ -1,4 +1,3 @@
-// pages/shorts/[slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -8,10 +7,12 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Heart, Eye, Clock, Zap, Share2, ArrowLeft, Shield } from "lucide-react";
 
 import Layout from "@/components/Layout";
 
-// ✅ FIXED: Use contentlayer-helper for ALL server-side functions
+// ✅ CORE: Contentlayer Helpers
 import {
   getAllContentlayerDocs,
   getDocBySlug,
@@ -20,26 +21,11 @@ import {
   sanitizeData,
 } from "@/lib/contentlayer-helper";
 
-// ✅ STANDARDIZED: Use createSeededSafeMdxComponents for seed + proxy
+// ✅ SECURITY: Seed + Proxy MDX
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 import mdxComponents from "@/components/mdx-components";
 
-import {
-  Heart,
-  Eye,
-  Clock,
-  Zap,
-  Sparkles,
-  Share2,
-} from "lucide-react";
-
-// Client-only engagement components
-const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
-const ShortHero = dynamic(
-  () => import("@/components/shorts/ShortHero").then((m) => m.default ?? (m as any).ShortHero),
-  { ssr: false }
-);
-
+// Client-only components
 const ShortComments = dynamic(
   () => import("@/components/shorts/ShortComments").then((m) => m.default ?? (m as any).ShortComments),
   { ssr: false }
@@ -49,24 +35,6 @@ const ShortNavigation = dynamic(
   () => import("@/components/shorts/ShortNavigation").then((m) => m.default ?? (m as any).ShortNavigation),
   { ssr: false }
 );
-
-type ShortDoc = {
-  title?: string | null;
-  excerpt?: string | null;
-  date?: string | null;
-  coverImage?: string | null;
-  tags?: string[] | null;
-  author?: string | null;
-  slug?: string | null;
-  readTime?: string | null;
-  draft?: boolean;
-  kind?: string;
-  href?: string;
-  body?: { raw?: string };
-  bodyRaw?: string;
-  _raw?: { flattenedPath?: string };
-  [k: string]: any;
-};
 
 type Short = {
   title: string;
@@ -86,43 +54,24 @@ type Short = {
 type Props = {
   short: Short;
   source: MDXRemoteSerializeResult | null;
-  mdxRaw: string; // ✅ ADDED: Required for seeding
+  mdxRaw: string;
 };
-
-function getShortSlug(doc: ShortDoc): string {
-  // prefer slug; fallback to flattenedPath; strip "shorts/" prefix if present
-  const fromSlug = normalizeSlug(String(doc.slug || ""));
-  const fromFlat = normalizeSlug(String(doc._raw?.flattenedPath || ""));
-  const chosen = fromSlug || fromFlat;
-  return chosen.replace(/^shorts\//, "");
-}
-
-// Paranoid MDX extraction
-function getRawBody(doc: ShortDoc): string {
-  return (
-    doc?.body?.raw ||
-    (typeof doc?.bodyRaw === "string" ? doc.bodyRaw : "") ||
-    (typeof doc?.content === "string" ? doc.content : "") ||
-    (typeof doc?.body === "string" ? doc.body : "") ||
-    (typeof doc?.mdx === "string" ? doc.mdx : "") ||
-    ""
-  );
-}
 
 const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
   const router = useRouter();
-  const [likes, setLikes] = React.useState<number>(short.likes || 0);
-  const [isLiked, setIsLiked] = React.useState<boolean>(false);
-  const [isBookmarked, setIsBookmarked] = React.useState<boolean>(false);
-  const [streak, setStreak] = React.useState<number>(0);
-  const [readProgress, setReadProgress] = React.useState<number>(0);
   const [isClient, setIsClient] = React.useState(false);
+  const [isLiked, setIsLiked] = React.useState(false);
+  const { scrollYProgress } = useScroll();
 
-  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+  // Focus Mode: Interface fades on scroll to center the intellect
+  const navOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
+  const progressLine = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  // ✅ SEED + PROXY Implementation
   const safeComponents = React.useMemo(
     () =>
       createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
-        warnOnFallback: process.env.NODE_ENV === "development",
+        warnOnFallback: false,
       }),
     [mdxRaw]
   );
@@ -131,297 +80,189 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
     setIsClient(true);
   }, []);
 
-  React.useEffect(() => {
-    if (!isClient) return;
-
-    // Habit Formation: Streak Logic
-    const today = new Date().toDateString();
-    const lastRead = localStorage.getItem("aol_last_short");
-    const currentStreak = parseInt(localStorage.getItem("aol_streak") || "0", 10);
-
-    if (lastRead !== today) {
-      const yesterday = new Date(Date.now() - 86400000).toDateString();
-      const newStreak = lastRead === yesterday ? currentStreak + 1 : 1;
-      setStreak(newStreak);
-      localStorage.setItem("aol_streak", String(newStreak));
-      localStorage.setItem("aol_last_short", today);
-    } else {
-      setStreak(currentStreak);
-    }
-
-    // Interaction State: Bookmarks & Likes
-    try {
-      const bookmarks = JSON.parse(localStorage.getItem("aol_bookmarks_shorts") || "[]");
-      setIsBookmarked(Array.isArray(bookmarks) && bookmarks.includes(short.slugPath));
-
-      const liked = JSON.parse(localStorage.getItem("aol_liked_shorts") || "[]");
-      setIsLiked(Array.isArray(liked) && liked.includes(short.slugPath));
-    } catch {
-      setIsBookmarked(false);
-      setIsLiked(false);
-    }
-
-    const handleScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = max > 0 ? (window.scrollY / max) * 100 : 0;
-      setReadProgress(Math.max(0, Math.min(100, progress)));
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [short.slugPath, isClient]);
-
-  const toggleLike = () => {
-    if (!isClient || isLiked) return;
-
-    setLikes((v) => v + 1);
-    setIsLiked(true);
-
-    try {
-      const liked = JSON.parse(localStorage.getItem("aol_liked_shorts") || "[]");
-      const next = Array.isArray(liked) ? Array.from(new Set([...liked, short.slugPath])) : [short.slugPath];
-      localStorage.setItem("aol_liked_shorts", JSON.stringify(next));
-    } catch {
-      localStorage.setItem("aol_liked_shorts", JSON.stringify([short.slugPath]));
-    }
-  };
+  // ✅ DYNAMIC OG IMAGE URL CONSTRUCTION
+  const ogUrl = `https://www.abrahamoflondon.org/api/og/short?title=${encodeURIComponent(
+    short.title
+  )}&category=${encodeURIComponent(short.theme || "Intel")}&readTime=${encodeURIComponent(
+    short.readTime || "2 min"
+  )}`;
 
   const handleShare = async () => {
     if (!isClient) return;
-
     const shareUrl = `https://www.abrahamoflondon.org${short.url}`;
-    const payload = { title: short.title, text: short.excerpt || "", url: shareUrl };
-
     try {
-      // Prefer Web Share API if available
       if (navigator.share) {
-        await navigator.share(payload);
-        return;
+        await navigator.share({ title: short.title, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
       }
-    } catch {
-      // fall through to clipboard
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      // you can swap this for your toaster if you have one
-      // eslint-disable-next-line no-console
-      console.log("Copied to clipboard:", shareUrl);
-    } catch {
-      // eslint-disable-next-line no-console
-      console.log("Share failed:", shareUrl);
+    } catch (err) {
+      console.error("Share failed", err);
     }
   };
 
   return (
-    <Layout title={`${short.title} | Field Note`}>
+    <Layout title={`${short.title} | Field Note`} className="bg-black">
       <Head>
         <title>{short.title} | Abraham of London</title>
         <meta name="description" content={short.excerpt || ""} />
         <link rel="canonical" href={`https://www.abrahamoflondon.org${short.url}`} />
+        
+        {/* ✅ PRODUCTION OG METADATA */}
         <meta property="og:type" content="article" />
         <meta property="og:title" content={short.title} />
         <meta property="og:description" content={short.excerpt || ""} />
         <meta property="og:url" content={`https://www.abrahamoflondon.org${short.url}`} />
+        <meta property="og:image" content={ogUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        
+        {/* ✅ TWITTER METADATA */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={short.title} />
+        <meta name="twitter:description" content={short.excerpt || ""} />
+        <meta name="twitter:image" content={ogUrl} />
       </Head>
 
-      {/* PROGRESS ENGINE */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-white/5 z-50">
-        <div className="h-full bg-gold transition-all duration-300" style={{ width: `${readProgress}%` }} />
-      </div>
+      {/* Progress Line: Subtle aesthetic guide */}
+      <motion.div 
+        style={{ width: progressLine }} 
+        className="fixed top-0 left-0 h-[1px] bg-gold z-[100] transition-all duration-75" 
+      />
 
-      <main className="min-h-screen bg-black text-gray-300 selection:bg-gold selection:text-black pt-20 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* INTERACTION BAR */}
-          <div className="mb-10 flex items-center justify-between border-b border-white/5 pb-8">
-            <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-gray-500">
-              <span className="flex items-center gap-2">
-                <Eye size={14} className="text-gold/50" /> {Number(short.views || 0).toLocaleString()}
-              </span>
-              <span className="flex items-center gap-2">
-                <Clock size={14} className="text-gold/50" /> {short.readTime || "2 min read"}
-              </span>
-              {streak > 1 ? (
-                <span className="flex items-center gap-2 text-gold">
-                  <Zap size={14} /> {streak} Day Streak
-                </span>
-              ) : null}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={toggleLike}
-                className={`p-2 rounded-lg border transition-all ${
-                  isLiked
-                    ? "bg-rose-500/10 border-rose-500/30 text-rose-500"
-                    : "bg-white/5 border-white/10 text-gray-500 hover:text-white"
-                }`}
-                aria-label="Like"
-                disabled={!isClient}
-              >
-                <Heart size={18} className={isLiked ? "fill-current" : ""} />
-              </button>
-
-              <button
-                onClick={handleShare}
-                className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-500 hover:text-white transition-all"
-                aria-label="Share"
-                disabled={!isClient}
-              >
-                <Share2 size={18} />
-              </button>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-8">
-              <div className="bg-zinc-900/40 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
-                {isClient ? (
-                  <ShortHero
-                    title={short.title}
-                    theme={short.theme}
-                    author={short.author}
-                    coverImage={short.coverImage}
-                  />
-                ) : (
-                  <div className="h-48 bg-white/5 animate-pulse rounded-xl mb-8"></div>
-                )}
-
-                <article className="mt-8 prose prose-invert prose-gold max-w-none prose-p:leading-relaxed prose-p:text-gray-300">
-                  {source ? (
-                    /* ✅ SEED + PROXY: Guaranteed no missing component errors */
-                    <MDXRemote 
-                      {...source} 
-                      components={safeComponents as any}
-                    />
-                  ) : (
-                    // Fallback when no MDX source is available
-                    <div className="prose prose-invert max-w-none">
-                      <p className="text-gray-500 italic">Content unavailable.</p>
-                    </div>
-                  )}
-                </article>
-
-                <div className="mt-12 pt-8 border-t border-white/5 flex flex-wrap gap-2">
-                  {short.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-500"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-12">
-                {isClient ? (
-                  <ShortComments shortId={short.slugPath} />
-                ) : (
-                  <div className="h-32 rounded-lg bg-white/5 animate-pulse flex items-center justify-center">
-                    <p className="text-xs text-gray-500">Loading comments…</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <aside className="lg:col-span-4 space-y-6">
-              <div className="sticky top-24 space-y-6">
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gold mb-6">
-                    Continue the Build
-                  </h3>
-                  {isClient ? (
-                    <ShortNavigation currentSlug={short.slugPath} />
-                  ) : (
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-16 rounded-lg bg-white/5 animate-pulse"></div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-8 rounded-3xl bg-gradient-to-br from-gold/10 to-transparent border border-gold/20 text-center">
-                  <Sparkles className="mx-auto text-gold mb-4" />
-                  <h3 className="font-serif text-xl font-bold text-white mb-2">Daily Field Notes</h3>
-                  <p className="text-xs text-gray-500 mb-6">
-                    2-minute insights delivered to your dashboard daily.
-                  </p>
-                  <button
-                    onClick={() => router.push("/inner-circle")}
-                    className="w-full py-3 rounded-xl bg-gold text-black text-xs font-black uppercase tracking-widest hover:bg-gold/80 transition-all"
-                    disabled={!isClient}
-                  >
-                    Subscribe
-                  </button>
-                </div>
-              </div>
-            </aside>
-          </div>
+      {/* Monastic Nav: Fades out for maximum focus */}
+      <motion.nav 
+        style={{ opacity: navOpacity }}
+        className="fixed top-0 inset-x-0 z-50 px-8 py-10 flex justify-between items-center"
+      >
+        <button 
+          onClick={() => router.push("/shorts")} 
+          className="p-3 hover:bg-white/5 rounded-full transition-colors group"
+        >
+          <ArrowLeft className="h-5 w-5 text-white/30 group-hover:text-gold transition-colors" />
+        </button>
+        <div className="flex items-center gap-6 font-mono text-[9px] tracking-[0.5em] text-white/10 uppercase">
+          <Shield className="h-3 w-3" /> Secure Node
         </div>
-      </main>
+        <button 
+          onClick={handleShare} 
+          className="p-3 hover:bg-white/5 rounded-full transition-colors group"
+        >
+          <Share2 className="h-4 w-4 text-white/30 group-hover:text-gold transition-colors" />
+        </button>
+      </motion.nav>
 
-      {isClient && <BackToTop />}
+      <main className="max-w-2xl mx-auto px-6 pt-56 pb-40">
+        <header className="mb-24">
+          <motion.div 
+            initial={{ opacity: 0, y: 5 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="font-mono text-[10px] text-gold/60 uppercase tracking-[0.6em] mb-10"
+          >
+            Entry // {short.theme || "Intel"}
+          </motion.div>
+          <h1 className="font-serif text-6xl md:text-7xl italic leading-tight text-white mb-12 tracking-tight">
+            {short.title}
+          </h1>
+          <div className="flex items-center gap-6 text-white/20 font-mono text-[9px] uppercase tracking-widest">
+             <span className="flex items-center gap-2"><Eye size={12}/> {short.views} Views</span>
+             <span className="h-1 w-1 rounded-full bg-white/10" />
+             <span>ID: {short.slugPath.toUpperCase()}</span>
+          </div>
+        </header>
+
+        {/* The Body: Clean, elegant, focused */}
+        <article className="prose prose-invert prose-gold max-w-none 
+          prose-p:text-white/60 prose-p:text-xl prose-p:leading-[1.9] prose-p:font-light prose-p:mb-10
+          prose-headings:font-serif prose-headings:italic prose-headings:text-white prose-headings:mt-20
+          prose-strong:text-gold/90 prose-strong:font-medium
+          prose-blockquote:border-gold/20 prose-blockquote:bg-white/[0.01] prose-blockquote:px-10 prose-blockquote:py-2 prose-blockquote:rounded-r-xl prose-blockquote:text-gold/60"
+        >
+          {source && (
+            <MDXRemote 
+              {...source} 
+              components={safeComponents as any} 
+            />
+          )}
+        </article>
+
+        {/* Engagement Layer */}
+        <footer className="mt-40 pt-20 border-t border-white/[0.05]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-32">
+            <button 
+              onClick={() => setIsLiked(!isLiked)}
+              className={`flex items-center justify-center gap-3 px-10 py-5 rounded-full border transition-all duration-700 ${
+                isLiked ? 'bg-gold/10 border-gold/40 text-gold' : 'border-white/10 text-white/30 hover:border-white/30'
+              }`}
+            >
+              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+              <span className="font-mono text-[10px] uppercase tracking-widest">Signal Endorsement</span>
+            </button>
+            <div className="flex flex-wrap gap-3">
+              {short.tags.map(tag => (
+                <span key={tag} className="text-[10px] font-mono text-white/10 italic border border-white/5 px-3 py-1 rounded-full">#{tag}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-40">
+            {isClient && <ShortNavigation currentSlug={short.slugPath} />}
+            {isClient && <ShortComments shortId={short.slugPath} />}
+          </div>
+          
+          <div className="mt-48 text-center">
+            <button onClick={() => router.push('/shorts')} className="group inline-flex flex-col items-center gap-8">
+              <div className="h-20 w-[1px] bg-gradient-to-b from-gold to-transparent group-hover:h-32 transition-all duration-1000" />
+              <span className="font-mono text-[9px] uppercase tracking-[0.5em] text-white/20 group-hover:text-gold transition-colors">
+                Terminate Briefing
+              </span>
+            </button>
+          </div>
+        </footer>
+      </main>
     </Layout>
   );
 };
 
 export default ShortPage;
 
-// ---------------------------------------------
-// SSG (Pages Router)
-// ---------------------------------------------
+// --- Server-Side Logic ---
+
+function getShortSlug(doc: any): string {
+  const fromSlug = normalizeSlug(String(doc.slug || ""));
+  const fromFlat = normalizeSlug(String(doc._raw?.flattenedPath || ""));
+  return (fromSlug || fromFlat).replace(/^shorts\//, "");
+}
+
+function getRawBody(doc: any): string {
+  return doc?.body?.raw || doc?.bodyRaw || doc?.content || "";
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  // We use compat docs and filter by kind/dir — no server-only functions.
   const docs = getAllContentlayerDocs();
-
   const shorts = docs.filter((d: any) => d.kind === "Short" || d._raw?.sourceFileDir?.toLowerCase?.().includes("short"));
-
+  
   const paths = shorts
     .filter((s: any) => !isDraftContent(s))
-    .map((s: any) => getShortSlug(s))
-    .filter((slug: string) => Boolean(slug))
-    .map((slug: string) => ({ params: { slug } }));
+    .map((s: any) => ({ params: { slug: getShortSlug(s) } }));
 
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
-    const slug = typeof params?.slug === "string" ? params.slug : Array.isArray(params?.slug) ? params?.slug.join("/") : "";
-    const normalized = normalizeSlug(slug);
-    if (!normalized) return { notFound: true };
-
-    // Prefer Short lookup by slugPath: `shorts/<slug>` or `<slug>` depending on how contentlayer stores it.
-    // Try both to be resilient.
-    const direct = getDocBySlug(`shorts/${normalized}`) || getDocBySlug(normalized);
-    const data = (direct as ShortDoc | null) ?? null;
+    const slug = typeof params?.slug === "string" ? params.slug : "";
+    const data = getDocBySlug(`shorts/${slug}`) || getDocBySlug(slug);
 
     if (!data || isDraftContent(data)) return { notFound: true };
 
-    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
     const mdxRaw = getRawBody(data);
-    
-    // ✅ USE DIRECT SERIALIZE
-    let source: MDXRemoteSerializeResult | null = null;
-    if (typeof mdxRaw === "string" && mdxRaw.trim()) {
-      try {
-        source = await serialize(mdxRaw || " ", {
-          mdxOptions: {
-            remarkPlugins: [remarkGfm],
-            rehypePlugins: [rehypeSlug],
-          },
-        });
-      } catch (mdxError) {
-        console.error(`MDX compilation error for ${normalized}:`, mdxError);
-        source = null;
-      }
-    }
-
-    const slugPath = getShortSlug(data);
-    const url = `/shorts/${slugPath}`;
+    const source = await serialize(mdxRaw || " ", {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeSlug],
+      },
+    });
 
     const short: Short = {
       title: data.title || "Field Note",
@@ -430,8 +271,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       coverImage: data.coverImage || null,
       tags: Array.isArray(data.tags) ? data.tags : [],
       author: data.author || "Abraham of London",
-      url,
-      slugPath,
+      url: `/shorts/${getShortSlug(data)}`,
+      slugPath: getShortSlug(data),
       readTime: data.readTime || "2 min read",
       theme: (data as any).theme || null,
       views: Number((data as any).views || 0),
@@ -441,13 +282,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return {
       props: {
         short: sanitizeData(short),
-        source: source ? JSON.parse(JSON.stringify(source)) : null, // Ensure serializable
-        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
+        source: JSON.parse(JSON.stringify(source)),
+        mdxRaw,
       },
       revalidate: 3600,
     };
-  } catch (error) {
-    console.error(`Error in getStaticProps for /shorts/${params?.slug}:`, error);
+  } catch (err) {
+    console.error("Shorts SSR Error:", err);
     return { notFound: true };
   }
 };
