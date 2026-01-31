@@ -2,7 +2,7 @@
 
 import React from 'react';
 // Use the root import - this is the confirmed path for contentlayer2 v0.5.8+
-import { useMDXComponent } from 'contentlayer2'; 
+import { useMDXComponent } from 'next-contentlayer2/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
 
