@@ -1,4 +1,4 @@
-# netlify.toml — CONSOLIDATED & CORRECTED
+# netlify.toml — FINALISED STRATEGIC VERSION
 [build]
   command = "pnpm install --frozen-lockfile && pnpm build:netlify"
   publish = ".next"
@@ -11,6 +11,7 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
+  PNPM_FLAGS = "--frozen-lockfile"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -18,7 +19,6 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# If you use the Netlify Emails plugin and need template files
 [functions.emails]
   included_files = ["./emails/**"]
 
@@ -26,12 +26,15 @@
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
   NEXT_OPTIMIZE_FONTS = "true"
-  NEXT_OPTIMIZE_IMAGES = "true"
+  # Set to false because we use custom 'OptimizedImage' component and local pre-processing.
+  # This prevents Netlify from generating massive duplicate asset folders.
+  NEXT_OPTIMIZE_IMAGES = "false" 
 
 [context.deploy-preview.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
+  NEXT_OPTIMIZE_IMAGES = "false"
 
 [context.branch-deploy.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"

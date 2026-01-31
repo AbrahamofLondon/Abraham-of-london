@@ -1,13 +1,20 @@
-// components/homepage/OperatorBriefing.tsx — DECLASSIFIED BRIEF (viral, institutional, premium)
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Lock, ScrollText, Shield } from "lucide-react";
-
-function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
+import { 
+  ArrowRight, 
+  CheckCircle2, 
+  Lock, 
+  ScrollText, 
+  Shield, 
+  Terminal,
+  Fingerprint,
+  FileSearch
+} from "lucide-react";
 
 type BriefLine = {
+  id: string;
   title: string;
   body: string;
 };
@@ -15,127 +22,147 @@ type BriefLine = {
 export default function OperatorBriefing() {
   const lines: BriefLine[] = [
     {
-      title: "Every strategy must survive cross-examination.",
-      body: "If it can’t withstand scrutiny, it isn’t strategy — it’s theatre.",
+      id: "STRAT-01",
+      title: "Scrutiny-Ready Architecture.",
+      body: "If a strategy cannot survive a hostile cross-examination, it isn't a plan—it's theatre. We build for the audit, not the applause.",
     },
     {
-      title: "Cadence is the hidden engine.",
-      body: "Install routines and decision rights; performance becomes a habit.",
+      id: "OPS-04",
+      title: "The Engine of Cadence.",
+      body: "Institutional performance isn't a spark; it's a rhythm. We install the routines and decision rights that make excellence a default habit.",
     },
     {
-      title: "Ethics isn’t branding. It’s load-bearing.",
-      body: "Character shows up in controls, incentives, and accountability loops.",
+      id: "ETHIC-09",
+      title: "Load-Bearing Integrity.",
+      body: "Character isn't a marketing claim. It is found in the pressure-testing of controls, incentives, and accountability loops.",
     },
   ];
 
   return (
-    <section className="relative bg-black py-20">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_35%_30%,rgba(245,158,11,0.10),transparent_55%)]" />
+    <section className="relative bg-black py-24 lg:py-32 overflow-hidden">
+      {/* Background: Digital Topography */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('/assets/images/grid.svg')] bg-[size:40px_40px]" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-500/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-          {/* Left: Briefing header */}
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-16 lg:grid-cols-12 lg:items-start">
+          
+          {/* Left: The "Official" Posture */}
           <div className="lg:col-span-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500">
-              Operator briefing
-            </p>
+            <div className="inline-flex items-center gap-2 mb-8 px-3 py-1 rounded-md border border-white/10 bg-white/5">
+              <Terminal className="h-3 w-3 text-amber-500/70" />
+              <span className="text-[10px] font-mono tracking-[0.3em] text-white/40 uppercase">
+                Briefing ID: AOL-2026-X
+              </span>
+            </div>
 
-            <h2 className="mt-6 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
-              A memo for serious people.
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.05] tracking-tight">
+              A memorandum <br />
+              <span className="italic text-amber-200/80">for the Serious.</span>
             </h2>
 
-            <p className="mt-6 text-lg font-light leading-relaxed text-gray-300">
-              If someone forwards this page, it’s because it doesn’t feel like the internet.
-              It feels like governance.
+            <p className="mt-8 text-lg font-light leading-relaxed text-white/40 max-w-md">
+              This isn't content to be consumed. It is doctrine to be deployed. 
+              We operate where scripture, history, and market reality intersect.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <Link
                 href="/resources/strategic-frameworks"
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-sm font-bold text-black shadow-2xl shadow-amber-900/25 transition-all duration-300 hover:scale-[1.02]"
+                className="group inline-flex items-center justify-center gap-3 rounded-xl bg-white px-8 py-4 text-sm font-black text-black hover:bg-amber-400 transition-all"
               >
-                Strategic Frameworks <ArrowRight className="h-4 w-4" />
+                View Frameworks
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
-
               <Link
-                href="/blog/ultimate-purpose-of-man"
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
+                href="/canon"
+                className="inline-flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-bold text-white hover:bg-white/10 transition-all"
               >
-                <ScrollText className="h-4 w-4 text-amber-300" />
-                Ultimate Purpose <ArrowRight className="h-4 w-4" />
+                <ScrollText className="h-4 w-4 text-amber-400" />
+                The Canon
               </Link>
             </div>
           </div>
 
-          {/* Right: Declassified card */}
+          {/* Right: The Declassified Interface */}
           <div className="lg:col-span-7">
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl">
-              {/* top rail */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 p-2 text-amber-300">
-                    <Shield className="h-full w-full" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
-                      Governance-grade notes
-                    </p>
-                    <p className="mt-1 text-sm font-light text-gray-300">
-                      Built for builders who deploy, not spectators who scroll.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/10 px-4 py-2">
-                  <span className="h-2 w-2 rounded-full bg-amber-400" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-amber-200">
-                    declassified extract
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-7 space-y-6">
-                {lines.map((x) => (
-                  <div key={x.title} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-300">
-                        <CheckCircle2 className="h-5 w-5" />
+            <div className="relative group">
+              {/* Outer Decorative Border */}
+              <div className="absolute -inset-4 border border-white/[0.03] rounded-[40px] pointer-events-none" />
+              
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent p-1">
+                <div className="bg-black/90 rounded-[22px] p-8 md:p-10 backdrop-blur-md">
+                  
+                  {/* Header: Document Metadata */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-8 mb-8">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                        <Fingerprint className="h-6 w-6 text-amber-400" />
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-base font-semibold text-amber-100">{x.title}</p>
-                        <p className="mt-2 text-sm font-light leading-relaxed text-gray-300">
-                          {x.body}
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">
+                          Governance Extract
+                        </h3>
+                        <p className="text-[10px] font-mono text-white/30 uppercase mt-1">
+                          Ref: AOL-SYS-CORE // Verified
                         </p>
                       </div>
                     </div>
+                    
+                    <div className="px-4 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/5">
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-400">
+                        Institutional Grade
+                      </span>
+                    </div>
                   </div>
-                ))}
+
+                  {/* Body: The Lines */}
+                  <div className="space-y-4">
+                    {lines.map((line) => (
+                      <div 
+                        key={line.id} 
+                        className="group/line relative p-6 rounded-2xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/10 transition-all duration-300"
+                      >
+                        <div className="flex items-start gap-5">
+                          <span className="mt-1 font-mono text-[10px] text-amber-500/40 group-hover/line:text-amber-500 transition-colors">
+                            {line.id}
+                          </span>
+                          <div>
+                            <h4 className="text-base font-bold text-white mb-2 tracking-wide">
+                              {line.title}
+                            </h4>
+                            <p className="text-sm font-light leading-relaxed text-white/50 group-hover/line:text-white/70 transition-colors">
+                              {line.body}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Footer: Secure Access Call-to-Action */}
+                  <div className="mt-10 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-3">
+                      <FileSearch className="h-5 w-5 text-white/20" />
+                      <p className="text-xs text-white/40 max-w-[240px]">
+                        Access the full repository of templates and artifacts.
+                      </p>
+                    </div>
+                    
+                    <Link
+                      href="/downloads/vault"
+                      className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs font-black uppercase tracking-widest text-amber-200 hover:bg-amber-500/10 hover:border-amber-500/40 transition-all"
+                    >
+                      <Lock className="h-3.5 w-3.5" />
+                      Access Vault
+                    </Link>
+                  </div>
+
+                </div>
               </div>
-
-              {/* bottom rail */}
-              <div className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-7 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-light text-gray-300">
-                  Want the artefacts behind the method? Templates, packs, and operator notes live in the Vault.
-                </p>
-
-                <Link
-                  href="/downloads/vault"
-                  className={cx(
-                    "inline-flex items-center justify-center gap-2 rounded-2xl",
-                    "border border-amber-400/25 bg-amber-500/10 px-6 py-3",
-                    "text-sm font-semibold text-amber-200 transition-all duration-300",
-                    "hover:border-amber-400/45 hover:bg-amber-500/15"
-                  )}
-                >
-                  <Lock className="h-4 w-4 text-amber-300" />
-                  Open Vault <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              {/* aura */}
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(245,158,11,0.08),transparent_60%)]" />
             </div>
           </div>
+
         </div>
       </div>
     </section>

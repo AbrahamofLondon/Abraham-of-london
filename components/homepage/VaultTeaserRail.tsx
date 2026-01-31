@@ -1,79 +1,142 @@
-// components/homepage/VaultTeaserRail.tsx — VAULT TEASER (conversion without begging)
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, FileText, Workflow, Scale } from "lucide-react";
+import { motion } from "framer-motion";
+import { 
+  ArrowRight, 
+  Lock, 
+  FileText, 
+  Workflow, 
+  Scale, 
+  Binary, 
+  Zap 
+} from "lucide-react";
 
 export default function VaultTeaserRail() {
   const items = [
-    { icon: <Workflow className="h-5 w-5" />, title: "Operating Cadence", body: "Weekly rhythm, meeting packs, and owner loops." },
-    { icon: <Scale className="h-5 w-5" />, title: "Governance Artefacts", body: "Decision rights, controls, and accountability rails." },
-    { icon: <FileText className="h-5 w-5" />, title: "Templates & Packs", body: "Institutional objects you can deploy immediately." },
+    { 
+      icon: <Workflow className="h-5 w-5" />, 
+      title: "Operating Cadence", 
+      body: "Weekly rhythms and meeting packs for rapid execution.",
+      tag: "OS-V1"
+    },
+    { 
+      icon: <Scale className="h-5 w-5" />, 
+      title: "Governance Artefacts", 
+      body: "Decision rights and accountability rails for high-stakes leadership.",
+      tag: "GOV-CORE"
+    },
+    { 
+      icon: <FileText className="h-5 w-5" />, 
+      title: "Deployable Packs", 
+      body: "Institutional objects ready for immediate environment integration.",
+      tag: "ASSET-09"
+    },
   ];
 
   return (
-    <section className="relative bg-black py-20">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_45%,rgba(59,130,246,0.06),transparent_55%)]" />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
-                Vault assets
-              </p>
-              <h3 className="mt-5 font-serif text-4xl font-light text-amber-100">
-                The work behind the words.
-              </h3>
-              <p className="mt-5 text-lg font-light leading-relaxed text-gray-300">
-                The Vault is a curated pack of institutional artefacts — built for builders who actually deploy.
-              </p>
+    <section className="relative bg-black py-24 overflow-hidden">
+      {/* 1. Ambient Background (The Vault Atmosphere) */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-amber-500/[0.03] blur-[150px] rounded-full" />
+        <div className="absolute inset-0 bg-[url('/assets/images/dots.svg')] opacity-5" />
+      </div>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/downloads/vault"
-                  className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-sm font-bold text-black shadow-2xl shadow-amber-900/25 transition-all hover:scale-[1.02]"
-                >
-                  <Lock className="h-4 w-4" />
-                  Open the Vault
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-
-                <Link
-                  href="/resources/strategic-frameworks"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold text-gray-200 transition-all hover:border-white/20 hover:bg-white/10"
-                >
-                  Preview Frameworks <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
+          
+          {/* Left: The "Access Point" */}
+          <div className="lg:col-span-5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-[1px] w-8 bg-amber-500/50" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/80">
+                Authorized Access Only
+              </span>
             </div>
 
-            <div className="lg:col-span-7">
-              <div className="grid gap-6 md:grid-cols-3">
-                {items.map((x) => (
-                  <div
-                    key={x.title}
-                    className="rounded-2xl border border-white/10 bg-white/[0.02] p-6"
-                  >
-                    <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-300">
+            <h3 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.1] tracking-tight">
+              The work <br />
+              <span className="text-white/40 italic">behind the words.</span>
+            </h3>
+
+            <p className="mt-8 text-lg font-light leading-relaxed text-white/40 max-w-md">
+              A curated repository of high-signal institutional artefacts. These are not resources to be "read"—they are tools to be <span className="text-white">deployed</span>.
+            </p>
+
+            <div className="mt-10 flex flex-col sm:flex-row gap-4">
+              <Link
+                href="/downloads/vault"
+                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-xl bg-amber-500 px-8 py-4 text-sm font-black text-black transition-all hover:bg-amber-400"
+              >
+                <Lock className="h-4 w-4" />
+                Open the Vault
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+              
+              <Link
+                href="/resources/strategic-frameworks"
+                className="inline-flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-white/10 hover:border-white/20"
+              >
+                Preview Systems
+              </Link>
+            </div>
+          </div>
+
+          {/* Right: The Grid of Artefacts */}
+          <div className="lg:col-span-7 relative">
+            {/* The "Blueprint" Grid lines */}
+            <div className="absolute -inset-6 border border-white/[0.03] pointer-events-none rounded-[40px]" />
+            
+            <div className="grid gap-4 sm:grid-cols-2">
+              {items.map((x, idx) => (
+                <motion.div
+                  key={x.title}
+                  whileHover={{ y: -5 }}
+                  className={`relative p-8 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-sm transition-all duration-300 hover:border-amber-500/30 group ${
+                    idx === 2 ? "sm:col-span-2" : ""
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-12">
+                    <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 group-hover:bg-amber-500/20 transition-colors">
                       {x.icon}
                     </div>
-                    <p className="text-base font-semibold text-amber-100">{x.title}</p>
-                    <p className="mt-2 text-sm font-light leading-relaxed text-gray-300">
-                      {x.body}
+                    <span className="font-mono text-[9px] text-white/20 tracking-tighter uppercase">
+                      {x.tag}
+                    </span>
+                  </div>
+
+                  <h4 className="text-lg font-bold text-white mb-2 tracking-wide group-hover:text-amber-100 transition-colors">
+                    {x.title}
+                  </h4>
+                  <p className="text-sm font-light leading-relaxed text-white/40 group-hover:text-white/60 transition-colors">
+                    {x.body}
+                  </p>
+
+                  {/* Decorative Scanline */}
+                  <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-amber-500/40 transition-all duration-500 group-hover:w-full" />
+                </motion.div>
+              ))}
+
+              {/* Secure Footer Bar */}
+              <div className="sm:col-span-2 mt-4 p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20">
+                <div className="flex items-center gap-4">
+                  <div className="hidden sm:flex h-8 w-8 rounded-full bg-amber-500/20 items-center justify-center">
+                    <Zap className="h-4 w-4 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">
+                      Standard Issue Performance
+                    </p>
+                    <p className="text-[11px] text-white/40 mt-1 uppercase font-mono">
+                      Pack contents: Templates • Playbooks • Playlists • Guides
                     </p>
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-7 rounded-2xl border border-amber-400/20 bg-amber-500/10 p-6">
-                <p className="text-sm font-light text-amber-100">
-                  **Conversion line that doesn’t beg:** If you can’t deploy it, it doesn’t belong in the Vault.
-                </p>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-amber-200/80">
-                  Templates • Playbooks • Packs • Operator Notes
-                </p>
+                </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>

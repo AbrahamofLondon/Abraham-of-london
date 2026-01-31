@@ -1,28 +1,23 @@
 # =====================================================
-# DATABASE FILES & CREDENTIALS
+# ABRAHAM OF LONDON — CONSOLIDATED .GITIGNORE
 # =====================================================
-# Local database files
+
+# DATABASE FILES & CREDENTIALS
 *.db
 *.sqlite
 *.sqlite3
 dev.db
 local.db
 .abraham.db
-
-# Database credentials & backups
 database-credentials.json
 backup/
 backups/
 *.backup
 *.dump
-
-# CRITICAL FIX: Ignore temporary SQL dumps but TRACK the institutional /sql folder
 *.sql
 !/sql/*.sql
 
-# =====================================================
 # CORE DEPENDENCIES & BUILDS
-# =====================================================
 node_modules/
 .next/
 out/
@@ -34,136 +29,33 @@ build/
 .vercel/
 .netlify/
 .netlify-edge-functions/
-
-# Contentlayer generated output
 .contentlayer/
 .contentlayer-cache/
+tsconfig.tsbuildinfo
 
-# =====================================================
-# ENVIRONMENT FILES (SENSITIVE - DO NOT COMMIT)
-# =====================================================
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# WINDOWS PATH-FIX SPECIFIC (Shortened Cache Paths)
+.wfix/
+_sc/
+
+# ENVIRONMENT FILES (SENSITIVE)
 .env
+.env.local
 .env.*
-.env.production
-
-# Exception: Keep example file
 !.env.example
 
-# =====================================================
-# PDF CACHE / GENERATED EXPORTS
-# =====================================================
+# PDF CACHE & EXPORTS
 .pdfcache/
 exports/
 downloads/cache/
 scripts/output/
 
-# =====================================================
-# OFFICE DOCUMENTS IN PUBLIC (CAUSING BUILD ERRORS)
-# =====================================================
-# CRITICAL: Ignore Office files in downloads folder to prevent Windows lock errors
-public/downloads/*.pptx
-public/downloads/*.docx
-public/downloads/*.xlsx
-public/downloads/*.ppt
-public/downloads/*.doc
-public/downloads/*.xls
-
-# Temporary/generated downloads
-public/downloads/temp/
-public/downloads/generated/
-
-# =====================================================
-# MEDIA OUTPUTS (GENERATED)
-# =====================================================
-uploads/
-media/temp/
-output_*.mp4
-output_*.mp3
-
-# =====================================================
-# PRISMA SPECIFIC
-# =====================================================
-# Keep migrations, but ignore the lock file
-prisma/migrations/*/migration_lock.toml
-
-# =====================================================
-# INSTITUTIONAL ASSETS (NEVER IGNORE)
-# =====================================================
-!public/assets/
-!public/assets/**/*
-!public/favicon.ico
-!public/favicon.svg
-!public/apple-touch-icon.png
-!public/android-chrome-192x192.png
-!public/android-chrome-512x512.png
-!public/site.webmanifest
-!public/robots.txt
-
-# =====================================================
-# SCRIPTS & BACKUPS
-# =====================================================
-scripts/**/*.log
-scripts/**/*.tmp
-*.bak_emergency-backup.tar
-
-# =====================================================
-# LARGE FILES & BACKUPS
-# =====================================================
-*.tar
-*.zip
-*.tar.gz
-*.tgz
-_backups/
-*.backup
-_emergency-backup.*
-
-# Emergency backups (remove duplicates)
-_emergency-backup.tar
-_emergency-backup.tar.bak
-
-# =====================================================
-# SENSITIVE DATA
-# =====================================================
-*.pem
-*.key
-*.cert
-*.crt
-id_rsa
-id_dsa
-
-# =====================================================
-# TEMPORARY FILES & CACHES
-# =====================================================
-*.tmp
-*.temp
-.temp/
-tmp/
-temp/
-.image-cache/
-.fixlogs/
-
-# =====================================================
-# USER UPLOADS (GENERATED CONTENT)
-# =====================================================
+# ASSET PIPELINE (GENERATED)
+public/optimized-images/
 public/user-uploads/
+.image-cache/
 
-# =====================================================
-# SYSTEM FILES
-# =====================================================
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
-
-# =====================================================
-# OFFICE DOCUMENTS IN PUBLIC (CAUSING BUILD ERRORS)
-# =====================================================
-# CRITICAL: Ignore Office files in downloads folder to prevent Windows lock errors
+# OFFICE DOCUMENTS & LOCK FILES (Public/Downloads)
+# Prevents Windows file-lock errors during build/sync
 public/downloads/*.pptx
 public/downloads/*.docx
 public/downloads/*.xlsx
@@ -176,18 +68,52 @@ public/downloads/*.odp
 public/downloads/*.numbers
 public/downloads/*.pages
 public/downloads/*.key
-
-# Temporary/generated downloads
 public/downloads/temp/
 public/downloads/generated/
-
-# Windows Thumbs.db and desktop.ini
-public/downloads/Thumbs.db
-public/downloads/desktop.ini
-
-# Lock files
 public/downloads/~$*
 public/downloads/._*
-# TS build cache
-tsconfig.tsbuildinfo
 
+# LARGE FILES, BACKUPS & INSTALLERS
+*.tar
+*.zip
+*.tar.gz
+*.tgz
+_backups/
+_emergency-backup.*
+*.bak
+nvm-setup.exe
+
+# SYSTEM & SENSITIVE DATA
+.DS_Store
+Thumbs.db
+desktop.ini
+*.pem
+*.key
+*.cert
+*.crt
+id_rsa
+id_dsa
+*.tmp
+*.temp
+.temp/
+tmp/
+temp/
+.fixlogs/
+
+# INSTITUTIONAL ASSETS (NEVER IGNORE)
+!public/assets/
+!public/assets/**/*
+!public/favicon.ico
+!public/favicon.svg
+!public/apple-touch-icon.png
+!public/android-chrome-192x192.png
+!public/android-chrome-512x512.png
+!public/site.webmanifest
+!public/robots.txt
+# Environment files
+.env.*.local
+.env.production
+.env.development
+# Sensitive data
+*.db-journal
+# Temporary files

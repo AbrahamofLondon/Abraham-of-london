@@ -12,9 +12,9 @@ import {
   Wrench,
   ShieldCheck,
   LucideIcon,
+  ChevronRight,
 } from "lucide-react";
 
-// 1. Precise type definition for Icons using Lucide's own type
 type CardItem = {
   href: string;
   label: string;
@@ -31,246 +31,151 @@ type CardItem = {
 const CARDS: readonly CardItem[] = [
   {
     href: "/consulting",
-    label: "Consulting & Advisory",
-    kicker: "Execution with accountability",
+    label: "Advisory & Strategy",
+    kicker: "Direct Implementation",
     description:
-      "Board-level strategy for founders and senior leaders — designed to survive budgets, deadlines, and real consequences.",
+      "Board-level architecture for founders. We don't just advise; we build the operating logic required to survive growth and pressure.",
     Icon: Briefcase,
-    pillar: {
-      icon: Wrench,
-      name: "Tools",
-      phase: "Operating Systems",
-    },
+    pillar: { icon: Wrench, name: "Tools", phase: "Execution" },
   },
   {
     href: "/chatham-rooms",
     label: "The Chatham Rooms",
-    kicker: "Closed rooms, plain truth",
+    kicker: "Asymmetric Intelligence",
     description:
-      "Off-record conversations under Chatham House Rule — a rare place to speak plainly, think clearly, and sharpen judgment.",
+      "Private, off-record sessions under strict protocol. A dedicated space for sharpening judgment away from the public eye.",
     Icon: Users,
-    pillar: {
-      icon: ShieldCheck,
-      name: "Rooms",
-      phase: "Proof Under Pressure",
-    },
+    pillar: { icon: ShieldCheck, name: "Rooms", phase: "Pressure" },
   },
   {
     href: "/events",
-    label: "Events & Salons",
-    kicker: "Public sessions, serious work",
+    label: "Executive Salons",
+    kicker: "Public Discourse",
     description:
-      "Live rooms blending Scripture, history, and hard market reality — without performance or therapy-speak.",
+      "High-signal environments blending Scripture, history, and market reality. Strategy sessions for the serious operator.",
     Icon: CalendarDays,
-    pillar: {
-      icon: ShieldCheck,
-      name: "Rooms",
-      phase: "Proof Under Pressure",
-    },
+    pillar: { icon: ShieldCheck, name: "Rooms", phase: "Pressure" },
   },
 ] as const;
 
-// 2. Smoother animation variants
 const containerAnim = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
   },
 };
 
 const cardAnim = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-    },
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
   },
 };
 
 export default function StrategicFunnelStrip(): JSX.Element {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-charcoal via-charcoal to-black/95 py-20 lg:py-28">
-      {/* Background Grid Pattern */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(212,175,55,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(212,175,55,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]" />
+    <section className="relative overflow-hidden bg-black py-24 lg:py-32">
+      {/* 1. Background Architecture: Radial Glow + Grain */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-amber-500/5 blur-[120px] rounded-full" />
+        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.03] mix-blend-overlay" />
+      </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* --- Header Section --- */}
-        <header className="mx-auto mb-16 max-w-3xl text-center md:mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          >
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold/60">
-              The Framework
-            </p>
-
-            <h2 className="mt-6 font-serif text-3xl font-semibold leading-tight text-cream sm:text-4xl lg:text-5xl">
-              Principles <span className="text-gold/40">→</span> Tools{" "}
-              <span className="text-gold/40">→</span> Rooms
-            </h2>
-
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gold/70 sm:text-lg">
-              The Canon establishes first principles. The tools translate them
-              into operating systems. The rooms prove them under pressure — in
-              the boardroom, the household, and the real world.
-            </p>
-          </motion.div>
-
-          {/* Three Pillars Visualizer */}
-          <motion.div
-            className="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10"
+        {/* --- Header: The Logic Bridge --- */}
+        <div className="flex flex-col items-center text-center mb-20">
+          <motion.span 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/60 mb-6"
           >
-            {/* Pillar 1 */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 ring-1 ring-gold/20">
-                <BookOpen className="h-5 w-5 text-gold" />
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gold/50">
-                  Canon
-                </div>
-                <div className="text-sm font-medium text-cream/90">
-                  Principles
-                </div>
-              </div>
-            </div>
+            The Operational Funnel
+          </motion.span>
+          
+          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-white tracking-tight leading-none mb-8">
+            Doctrine <ChevronRight className="inline h-8 w-8 text-white/10" /> 
+            Logic <ChevronRight className="inline h-8 w-8 text-white/10" /> 
+            Artifacts
+          </h2>
 
-            {/* Divider */}
-            <div className="hidden h-px w-12 bg-gradient-to-r from-transparent via-gold/30 to-transparent sm:block" />
+          <p className="max-w-2xl text-white/40 text-lg font-light leading-relaxed">
+            From the deep architecture of the <span className="text-white/80">Canon</span> to the 
+            reproducible <span className="text-white/80">Tools</span>, finally proven in the 
+            <span className="text-white/80">Rooms</span>.
+          </p>
+        </div>
 
-            {/* Pillar 2 */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 ring-1 ring-gold/20">
-                <Wrench className="h-5 w-5 text-gold" />
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gold/50">
-                  Tools
-                </div>
-                <div className="text-sm font-medium text-cream/90">
-                  Systems
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="hidden h-px w-12 bg-gradient-to-r from-transparent via-gold/30 to-transparent sm:block" />
-
-            {/* Pillar 3 */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 ring-1 ring-gold/20">
-                <ShieldCheck className="h-5 w-5 text-gold" />
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gold/50">
-                  Rooms
-                </div>
-                <div className="text-sm font-medium text-cream/90">
-                  Pressure
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </header>
-
-        {/* --- Cards Grid --- */}
+        {/* --- Card Grid: Modular Components --- */}
         <motion.div
-          className="grid gap-6 md:grid-cols-3 lg:gap-8"
+          className="grid gap-4 md:grid-cols-3"
           variants={containerAnim}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, margin: "-100px" }}
         >
           {CARDS.map((card, index) => (
-            <motion.article
+            <motion.div
               key={card.href}
               variants={cardAnim}
-              className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gold/15 bg-gradient-to-br from-charcoal/80 to-charcoal/40 p-1 backdrop-blur-md transition-all duration-500 hover:border-gold/30 hover:shadow-2xl hover:shadow-gold/5"
+              className="group relative"
             >
-              {/* Pillar Badge (Absolute Top Right) */}
-              <div className="absolute right-5 top-5 z-20">
-                <div className="flex items-center gap-1.5 rounded-full border border-gold/20 bg-black/40 px-3 py-1 backdrop-blur-md transition-colors group-hover:border-gold/40 group-hover:bg-gold/10">
-                  <card.pillar.icon className="h-3 w-3 text-gold/70 group-hover:text-gold" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gold/70 group-hover:text-gold">
-                    {card.pillar.name}
-                  </span>
-                </div>
-              </div>
-
-              {/* Inner Card Content */}
-              <div className="relative flex h-full flex-col rounded-xl bg-charcoal/40 p-6 sm:p-8">
-                {/* Icon Wrapper */}
-                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-gold/10 to-transparent ring-1 ring-gold/20 transition-all duration-500 group-hover:scale-110 group-hover:from-gold/20 group-hover:ring-gold/40">
-                  <card.Icon className="h-7 w-7 text-gold transition-transform duration-500 group-hover:-rotate-6" />
-                </div>
-
-                {/* Kicker */}
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gold/50 transition-colors group-hover:text-gold/80">
-                  {card.kicker}
-                </p>
-
-                {/* Title */}
-                <h3 className="mb-4 font-serif text-2xl font-semibold leading-tight text-cream transition-colors group-hover:text-white">
-                  {card.label}
-                </h3>
-
-                {/* Description */}
-                <p className="mb-8 flex-1 text-sm leading-relaxed text-gold/60 transition-colors group-hover:text-gold/80">
-                  {card.description}
-                </p>
-
-                {/* Footer / CTA */}
-                <div className="mt-auto flex items-center justify-between border-t border-gold/10 pt-6">
-                  <Link
-                    href={card.href}
-                    className="group/link flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-gold transition-colors hover:text-white"
-                  >
-                    <span>Explore</span>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold/10 transition-all duration-300 group-hover/link:translate-x-1 group-hover/link:bg-gold group-hover/link:text-charcoal">
-                      <ArrowRight className="h-3.5 w-3.5" />
+              <Link href={card.href} className="block h-full">
+                <div className="relative h-full flex flex-col p-8 rounded-3xl border border-white/5 bg-white/[0.02] transition-all duration-500 hover:bg-white/[0.04] hover:border-amber-500/20 group-hover:-translate-y-1">
+                  
+                  {/* Phase Indicator */}
+                  <div className="flex items-center gap-2 mb-10">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-amber-500/60 transition-colors">
+                      Phase 0{index + 1} // {card.pillar.name}
                     </span>
-                  </Link>
+                  </div>
 
-                  <span className="text-[10px] font-bold text-gold/20">
-                    0{index + 1}
-                  </span>
+                  {/* Icon & Heading */}
+                  <div className="mb-6">
+                    <card.Icon className="h-6 w-6 text-white/40 mb-4 group-hover:text-amber-400 transition-colors duration-500" />
+                    <h3 className="font-serif text-2xl font-medium text-white group-hover:text-amber-50 group-hover:tracking-tight transition-all">
+                      {card.label}
+                    </h3>
+                  </div>
+
+                  {/* Body */}
+                  <p className="text-white/40 text-sm leading-relaxed mb-8 flex-1 group-hover:text-white/60 transition-colors">
+                    {card.description}
+                  </p>
+
+                  {/* Footer Action */}
+                  <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-amber-500/80">
+                      Explore Asset
+                    </span>
+                    <div className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center group-hover:border-amber-500/40 transition-colors">
+                      <ArrowRight className="h-4 w-4 text-white/20 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </div>
+
+                  {/* Corner Accent */}
+                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-8 h-[1px] bg-amber-500/30" />
+                    <div className="w-[1px] h-8 bg-amber-500/30 absolute top-4 right-4" />
+                  </div>
                 </div>
-              </div>
-
-              {/* Hover Glow Effects */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            </motion.article>
+              </Link>
+            </motion.div>
           ))}
         </motion.div>
 
-        {/* --- Bottom Note --- */}
-        <motion.div
-          className="mt-16 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.8 }}
-        >
-          <p className="text-xs font-medium text-gold/40">
-            STRATEGY • OPERATIONS • LEGACY
-          </p>
-        </motion.div>
+        {/* --- Technical Footer --- */}
+        <div className="mt-20 flex flex-col items-center gap-4">
+           <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+           <p className="text-[9px] font-black uppercase tracking-[0.5em] text-white/20">
+             System Verification: Operational
+           </p>
+        </div>
       </div>
     </section>
   );
 }
-

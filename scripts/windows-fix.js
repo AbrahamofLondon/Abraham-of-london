@@ -1,10 +1,11 @@
 // scripts/windows-fix.js
 // ESM-safe (repo has "type": "module").
-// Purpose: do small Windows hygiene WITHOUT ever scandir'ing files.
+// Purpose: Windows hygiene + Path Flattening for Deep Build Caches.
 // This must NEVER throw, otherwise it breaks prebuild -> build.
 
 import fs from "node:fs";
 import path from "node:path";
+import { execSync } from "node:child_process";
 
 const fsp = fs.promises;
 
@@ -29,10 +30,43 @@ async function safeReaddir(dir) {
 }
 
 /**
- * Walk directories safely.
- * - Only calls readdir on confirmed directories.
- * - Silently skips unreadable nodes (EPERM) instead of failing builds.
+ * Path Shortener (The Windows "Long Path" Killer)
+ * Creates a Junction from deep cache dirs to a short root-relative dir.
  */
+async function ensureShortCachePaths() {
+  const shortDir = path.resolve(".wfix");
+  const deepDirs = [
+    { target: path.resolve(".contentlayer/.cache"), link: path.join(shortDir, "cc") },
+    { target: path.resolve(".next/cache"), link: path.join(shortDir, "nc") }
+  ];
+
+  if (!fs.existsSync(shortDir)) {
+    await fsp.mkdir(shortDir, { recursive: true });
+  }
+
+  for (const item of deepDirs) {
+    // Ensure parent target exists before linking
+    if (!fs.existsSync(path.dirname(item.target))) {
+      await fsp.mkdir(path.dirname(item.target), { recursive: true });
+    }
+    if (!fs.existsSync(item.target)) {
+      await fsp.mkdir(item.target, { recursive: true });
+    }
+
+    const linkExists = await safeLstat(item.link);
+    if (!linkExists) {
+      try {
+        // 'junction' is the most stable Windows symlink type for directories
+        // and doesn't require Admin privileges.
+        await fsp.symlink(item.target, item.link, 'junction');
+        console.log(`[fix:windows] Created junction: ${item.link} -> ${item.target}`);
+      } catch (e) {
+        console.warn(`[fix:windows] Could not create junction for ${item.target}:`, e.message);
+      }
+    }
+  }
+}
+
 async function walkDirs(rootDir, onFile) {
   const st = await safeLstat(rootDir);
   if (!st || !st.isDirectory()) return;
@@ -40,8 +74,6 @@ async function walkDirs(rootDir, onFile) {
   const entries = await safeReaddir(rootDir);
   for (const ent of entries) {
     const full = path.join(rootDir, ent.name);
-
-    // Never follow symlinks/junctions during build hygiene
     if (ent.isSymbolicLink?.()) continue;
 
     if (ent.isDirectory()) {
@@ -55,13 +87,10 @@ async function walkDirs(rootDir, onFile) {
   }
 }
 
-// Best-effort: remove read-only attribute by chmodding writable bit.
-// (On Windows this is limited, but harmless. Do NOT fail.)
 async function tryMakeWritable(filePath) {
   try {
     const st = await fsp.lstat(filePath);
     if (!st.isFile()) return;
-    // Add owner-write bit
     await fsp.chmod(filePath, st.mode | 0o200);
   } catch {
     // swallow
@@ -74,10 +103,12 @@ async function main() {
     return;
   }
 
-  console.log("[fix:windows] Running safe Windows hygiene...");
+  console.log("[fix:windows] Running safe Windows hygiene and path flattening...");
 
-  // Only touch what actually needs “writability” during build steps.
-  // Avoid walking ALL of /public — that’s exactly how you hit random EPERM.
+  // 1. Handle Path Lengths first
+  await ensureShortCachePaths();
+
+  // 2. Handle Writability (Standard Hygiene)
   const targets = [
     path.resolve("public", "fonts"),
     path.resolve("public", "assets", "images"),
@@ -103,6 +134,5 @@ async function main() {
 }
 
 main().catch((e) => {
-  // HARD RULE: this script must never break builds
   console.warn("[fix:windows] Non-fatal error:", e?.message || e);
 });

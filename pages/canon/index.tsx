@@ -544,21 +544,14 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
             </div>
 
             <div className="mt-12 flex flex-wrap gap-4">
-              {items.length > 0 ? (
-                <Link
-                  href={items[0]?.href || "/canon"}
-                  className="group inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-sm font-bold text-black transition-all hover:scale-105 hover:from-amber-400 hover:to-amber-500"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Start with Foundations
-                  <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              ) : (
-                <div className="inline-flex items-center gap-3 rounded-xl bg-gray-800 px-8 py-4 text-sm font-bold text-gray-400">
-                  <BookOpen className="w-5 h-5" />
-                  Content Loading...
-                </div>
-              )}
+              <Link
+                href="/books/the-architecture-of-human-purpose"
+                className="group inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-sm font-bold text-black transition-all hover:scale-105 hover:from-amber-400 hover:to-amber-500"
+              >
+                <BookOpen className="w-5 h-5" />
+                Start with the Canon Prelude
+                <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Link>
 
               <Link
                 href="#series"
@@ -704,11 +697,11 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
 
           <div className="mt-12 text-center">
             <Link
-              href="/canon/volume-i-foundations-of-purpose"
+              href="/books/the-architecture-of-human-purpose"
               className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-sm font-bold text-black hover:from-amber-400 hover:to-amber-500 transition-all"
             >
               <BookOpen className="w-5 h-5" />
-              Start with Volume I
+              Read the Canon Prelude
               <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
