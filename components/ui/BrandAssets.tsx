@@ -1,69 +1,85 @@
-import * as React from "react";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+@import "tailwindcss";
 
-/**
- * InterfaceCard: The fundamental container for all institutional content.
- */
-export function InterfaceCard({ 
-  children, 
-  className = "", 
-  variant = "default" 
-}: { 
-  children: React.ReactNode; 
-  className?: string;
-  variant?: "default" | "ghost";
-}) {
-  const styles = {
-    default: "border-white/10 bg-white/[0.02] backdrop-blur-xl",
-    ghost: "border-transparent bg-transparent"
-  };
+@layer base {
+  /* This directive is essential for Tailwind v4 to resolve @apply classes */
+  @reference "../tailwind.config.js"; 
 
-  return (
-    <div className={`relative overflow-hidden rounded-[2rem] border transition-all duration-500 hover:border-amber-500/30 group ${styles[variant]} ${className}`}>
-      {children}
-      {/* Subtle bottom scanline animation */}
-      <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-amber-500/40 transition-all duration-700 group-hover:w-full" />
-    </div>
-  );
+  :root {
+    /* The Core Palette: High-Contrast Obsidian & Burnished Amber */
+    --brand-obsidian: #000000;
+    --brand-charcoal: #050505;
+    --brand-amber: #f59e0b; /* Amber 500 */
+    --brand-amber-glow: rgba(245, 158, 11, 0.4);
+    --brand-cream: #fdfaf3;
+    
+    /* Technical Metadata Colors */
+    --meta-white: rgba(255, 255, 255, 0.4);
+    --meta-border: rgba(255, 255, 255, 0.08);
+  }
 }
 
-/**
- * ProtocolButton: High-contrast call to action.
- */
-export function ProtocolButton({ 
-  href, 
-  children, 
-  variant = "primary" 
-}: { 
-  href: string; 
-  children: React.ReactNode; 
-  variant?: "primary" | "secondary";
-}) {
-  const base = "group relative inline-flex items-center justify-center gap-3 rounded-xl px-8 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all duration-300";
-  const styles = {
-    primary: "bg-white text-black hover:bg-amber-400",
-    secondary: "border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20"
-  };
+@layer components {
+  @reference "../tailwind.config.js";
 
-  return (
-    <Link href={href} className={`${base} ${styles[variant]}`}>
-      {children}
-      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-    </Link>
-  );
+  /* 1. The Glass-Interface Card */
+  .city-gate-card {
+    @apply relative overflow-hidden rounded-[2rem] border border-white/10 
+           bg-white/[0.02] backdrop-blur-xl transition-all duration-500;
+  }
+
+  .city-gate-card:hover {
+    @apply border-amber-500/30 bg-white/[0.04] -translate-y-1;
+    box-shadow: 0 20px 40px -20px rgba(245, 158, 11, 0.1);
+  }
+
+  /* 2. Tactical Monospace Typography */
+  .text-metadata {
+    @apply font-mono text-[9px] uppercase tracking-[0.4em] text-white/30;
+  }
+
+  .text-kicker {
+    @apply text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/80;
+  }
+
+  /* 3. The "Institutional" Header */
+  .heading-statement {
+    @apply font-serif text-4xl md:text-6xl font-medium tracking-tight text-white leading-[1.05];
+  }
+
+  /* 4. Active Signal LED */
+  .signal-dot {
+    @apply h-1.5 w-1.5 rounded-full bg-amber-500;
+    box-shadow: 0 0 8px var(--brand-amber-glow);
+  }
 }
 
-/**
- * MetadataTag: For technical labeling and status markers.
- */
-export function MetadataTag({ children, icon: Icon }: { children: React.ReactNode; icon?: any }) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded border border-white/5 bg-white/[0.02] px-2 py-1">
-      {Icon && <Icon className="h-3 w-3 text-amber-500/60" />}
-      <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">
-        {children}
-      </span>
-    </div>
-  );
+@layer utilities {
+  @reference "../tailwind.config.js";
+
+  /* 5. Custom Animations */
+  .animate-protocol-shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: protocol-shimmer 2s infinite linear;
+  }
+
+  .bg-grid-technical {
+    background-image: linear-gradient(var(--meta-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--meta-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .mask-radial-fade {
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+  }
+}
+
+@keyframes protocol-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }

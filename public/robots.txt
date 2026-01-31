@@ -14,22 +14,17 @@ Disallow: /debug/*
 Disallow: /server-sitemap.xml
 Crawl-delay: 2
 
-# Googlebot
+# Googlebot-Specific (Prioritize High-Signal Content)
 User-agent: Googlebot
 Allow: /
+Allow: /shorts/
+Allow: /canon/
 Disallow: /api/*
 Disallow: /inner-circle/*
 Disallow: /admin/*
 Disallow: /assets/private/*
 Crawl-delay: 1
 
-# Host
+# Host & Sitemaps
 Host: https://www.abrahamoflondon.org
-
-# Sitemaps
 Sitemap: https://www.abrahamoflondon.org/sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/blog-sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/canons-sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/strategies-sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/resources-sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/books-sitemap.xml

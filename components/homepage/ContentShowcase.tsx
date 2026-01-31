@@ -1,4 +1,3 @@
-// components/homepage/ContentShowcase.tsx — SIGNAL FEED (institutional)
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -11,7 +10,6 @@ import { safeSlice } from "@/lib/utils/safe";
 interface ContentItem {
   slug: string;
   title: string;
-
   _type?: string;
   type?: string;
   _id?: string;
@@ -23,7 +21,6 @@ interface ContentItem {
   author?: any;
   tags?: string[];
   featured?: boolean;
-
   [key: string]: any;
 }
 
@@ -84,8 +81,10 @@ export default function ContentShowcase({
   const displayedItems = safeSlice(validItems, 0, maxItems);
 
   return (
-    <section className={`relative bg-black py-20 ${className}`}>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_40%,rgba(245,158,11,0.06),transparent_55%)]" />
+    <section className={`relative bg-black py-24 ${className}`}>
+      {/* Technical Grid Overlay */}
+      <div className="bg-grid-technical mask-radial-fade absolute inset-0 opacity-20 pointer-events-none" />
+      
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -95,123 +94,88 @@ export default function ContentShowcase({
           transition={{ duration: 0.5 }}
           className="mb-14"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-amber-300">
-            Intelligence
-          </p>
-          <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="signal-dot" />
+            <span className="text-kicker">Intelligence Feed</span>
+          </div>
+          
+          <h2 className="heading-statement">
             {title}
           </h2>
-          {description ? (
-            <p className="mt-6 max-w-3xl text-xl font-light text-gray-300">
+          
+          {description && (
+            <p className="mt-6 max-w-3xl text-xl font-light text-white/40 leading-relaxed">
               {description}
             </p>
-          ) : null}
+          )}
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/canon"
-              className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/10 px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/45 hover:bg-amber-500/15 transition-all"
-            >
-              <BookOpen className="h-4 w-4 text-amber-300" />
-              Canon
-              <ArrowRight className="h-4 w-4" />
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link href="/canon" className="city-gate-card px-6 py-3 flex items-center gap-3 group">
+              <BookOpen className="h-4 w-4 text-amber-500" />
+              <span className="text-metadata text-white/70 group-hover:text-amber-500 transition-colors">Canon</span>
             </Link>
-            <Link
-              href="/downloads/vault"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/20 hover:bg-white/10 transition-all"
-            >
-              <Vault className="h-4 w-4 text-amber-300" />
-              Vault
-              <ArrowRight className="h-4 w-4" />
+            <Link href="/downloads/vault" className="city-gate-card px-6 py-3 flex items-center gap-3 group">
+              <Vault className="h-4 w-4 text-amber-500" />
+              <span className="text-metadata text-white/70 group-hover:text-amber-500 transition-colors">Vault</span>
             </Link>
-            <Link
-              href="/shorts"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/20 hover:bg-white/10 transition-all"
-            >
-              <PenTool className="h-4 w-4 text-amber-300" />
-              Shorts
-              <ArrowRight className="h-4 w-4" />
+            <Link href="/shorts" className="city-gate-card px-6 py-3 flex items-center gap-3 group">
+              <PenTool className="h-4 w-4 text-amber-500" />
+              <span className="text-metadata text-white/70 group-hover:text-amber-500 transition-colors">Shorts</span>
             </Link>
           </div>
         </motion.div>
 
         {/* Content Grid */}
-        {displayedItems.length > 0 ? (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {displayedItems.map((item, index) => {
-              const type = String(item._type || item.type || "").toLowerCase();
-              const key = item.slug || item._id || item.id || `item-${index}`;
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {displayedItems.map((item, index) => {
+            const type = String(item._type || item.type || "").toLowerCase();
+            const key = item.slug || item._id || item.id || `item-${index}`;
 
-              return (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.45, delay: index * 0.04 }}
-                >
-                  {type === "post" ? (
-                    <BlogPostCard post={asBlogPost(item)} />
-                  ) : type === "book" ? (
-                    <BookCard book={asBook(item)} />
-                  ) : (
-                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
-                        Object
-                      </p>
-                      <h3 className="mt-4 font-serif text-2xl font-semibold text-amber-100">
-                        {item.title || "Untitled"}
-                      </h3>
-                      <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">
-                        {item.excerpt || item.description || "High-signal object designed for deployment."}
-                      </p>
+            return (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.45, delay: index * 0.05 }}
+              >
+                {type === "post" ? (
+                  <BlogPostCard post={asBlogPost(item)} />
+                ) : type === "book" ? (
+                  <BookCard book={asBook(item)} />
+                ) : (
+                  <div className="city-gate-card p-8 h-full flex flex-col">
+                    <span className="text-metadata mb-6 italic opacity-50">Artefact // {index + 1}</span>
+                    <h3 className="font-serif text-2xl font-light text-white group-hover:text-amber-500 transition-colors">
+                      {item.title || "Untitled"}
+                    </h3>
+                    <p className="mt-4 text-sm font-light leading-relaxed text-white/40 flex-grow">
+                      {item.excerpt || item.description || "High-signal object designed for deployment."}
+                    </p>
+                    <div className="mt-8 pt-6 border-t border-white/5">
+                        <Link href={`/resources/${item.slug}`} className="text-kicker flex items-center gap-2 group/btn">
+                            Access Module <ArrowRight className="h-3 w-3 group-hover/btn:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        ) : (
-          // No "coming soon" — immediate routing
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
-              No browsing required
-            </p>
-            <h3 className="mt-5 font-serif text-3xl font-semibold text-amber-100">
-              Start with the assets that prove substance fast.
-            </h3>
-            <p className="mt-4 max-w-2xl text-lg font-light text-gray-300">
-              If you’re here to judge credibility, don’t scroll. Open the Canon or the Vault and evaluate the artefacts.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/resources/strategic-frameworks"
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-sm font-bold text-black"
-              >
-                Strategic Frameworks <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/downloads/vault"
-                className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-7 py-4 text-sm font-semibold text-amber-200 hover:border-amber-400/45 hover:bg-amber-500/15 transition-all"
-              >
-                Open the Vault <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        )}
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
 
         {/* View All CTA */}
-        {validItems.length > maxItems ? (
-          <div className="mt-12">
+        {validItems.length > maxItems && (
+          <div className="mt-16 flex justify-center">
             <Link
               href={viewAllHref}
-              className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all hover:border-amber-400/25 hover:bg-white/10"
+              className="group city-gate-card px-10 py-5 flex items-center gap-4 hover:border-amber-500/50"
             >
-              <span>{viewAllLabel}</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <span className="text-metadata group-hover:text-white transition-colors">{viewAllLabel}</span>
+              <ArrowRight className="h-4 w-4 text-amber-500 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-        ) : null}
+        )}
       </div>
     </section>
   );

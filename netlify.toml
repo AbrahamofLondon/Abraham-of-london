@@ -1,11 +1,13 @@
-# netlify.toml — FINALISED STRATEGIC VERSION
+# netlify.toml — FINALISED STRATEGIC VERSION (HARDENED FOR ABRAHAM OF LONDON)
 [build]
+  # Combined command: ensures pnpm frozen-lockfile and custom netlify build script
   command = "pnpm install --frozen-lockfile && pnpm build:netlify"
   publish = ".next"
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
+  # Increased memory for processing 75+ intelligence briefs through Contentlayer
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "true"
   NEXT_TELEMETRY_DISABLED = "1"
@@ -26,8 +28,7 @@
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
   NEXT_OPTIMIZE_FONTS = "true"
-  # Set to false because we use custom 'OptimizedImage' component and local pre-processing.
-  # This prevents Netlify from generating massive duplicate asset folders.
+  # Custom optimization preferred over Netlify's generic processing
   NEXT_OPTIMIZE_IMAGES = "false" 
 
 [context.deploy-preview.environment]
@@ -40,6 +41,8 @@
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
+
+# --- Redirect Strategy: Canonical & Semantic Migration ---
 
 [[redirects]]
   from = "http://abrahamoflondon.org/*"
@@ -73,6 +76,8 @@
   to = "/insights/:slug"
   status = 301
 
+# --- Security & Caching Headers ---
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -99,6 +104,7 @@
     Content-Type = "application/pdf"
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
+    # 'inline' ensures the intelligence brief opens in the browser rather than forcing a download
     Content-Disposition = "inline"
 
 [[headers]]
