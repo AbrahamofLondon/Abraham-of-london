@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
-
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,7 +9,6 @@ module.exports = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
   ],
-
   theme: {
     container: {
       center: true,
@@ -27,13 +25,10 @@ module.exports = {
         "2xl": "1440px",
       },
     },
-
     extend: {
-        colors: {
-        // Institutional core palette
+      colors: {
         background: "var(--brand-obsidian, #000000)",
         foreground: "var(--brand-cream, #fdfaf3)",
-        
         primary: {
           DEFAULT: "#f59e0b",
           light: "#fbbf24",
@@ -48,16 +43,13 @@ module.exports = {
           800: "#92400e",
           900: "#78350f",
         },
-
         gold: {
           DEFAULT: "#D4AF37",
           glow: "rgba(212, 175, 55, 0.4)",
         },
-
         surface: "var(--brand-charcoal, #050505)",
         border: "rgba(255, 255, 255, 0.08)",
       },
-      // ... keep the rest of your file exactly as it is
       fontFamily: {
         sans: ["var(--font-family-sans, 'Inter')", "system-ui", "sans-serif"],
         mono: ["var(--font-family-mono, 'JetBrains Mono')", "monospace"],
@@ -93,7 +85,6 @@ module.exports = {
       zIndex: { 60: "60", 70: "70", 80: "80", 90: "90", 100: "100" },
     },
   },
-
   plugins: [
     require("@tailwindcss/typography"),
     require("@tailwindcss/forms"),
