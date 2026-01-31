@@ -636,6 +636,85 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, featuredItem
         </section>
       )}
 
+      {/* NEW: Campaign Section - Canon Campaign / Access pathway / how to use the Canon */}
+      <section id="campaign" className="py-20 border-b border-white/10 bg-gradient-to-b from-black to-amber-950/10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Compass className="w-5 h-5 text-amber-400" />
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400">Access Pathway</p>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-6">
+              How to Use the Canon
+            </h2>
+            <p className="text-gray-400 max-w-3xl mx-auto text-lg">
+              A structured approach to engaging with the foundational work. Start here if you're new to the methodology.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Step 1 */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-black/50 p-8 transition-all hover:border-amber-500/30 hover:bg-white/10">
+              <div className="mb-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-200">Step 1</span>
+                </div>
+              </div>
+              <h3 className="font-serif text-2xl font-bold text-white mb-4">Read the Foundations</h3>
+              <p className="text-gray-400 mb-6">
+                Begin with Volume I to understand the core principles of purpose and intentional existence.
+              </p>
+              <div className="text-sm text-amber-400/70">
+                <span className="font-semibold">Recommended:</span> Start with "Volume I: Foundations of Purpose"
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-black/50 p-8 transition-all hover:border-amber-500/30 hover:bg-white/10">
+              <div className="mb-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-200">Step 2</span>
+                </div>
+              </div>
+              <h3 className="font-serif text-2xl font-bold text-white mb-4">Explore the Series</h3>
+              <p className="text-gray-400 mb-6">
+                Progress through the volumes in order to build a comprehensive framework for governance, civilisation, and legacy.
+              </p>
+              <div className="text-sm text-amber-400/70">
+                <span className="font-semibold">Path:</span> Volume I → Volume II → Volume III → Volume IV
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-black/50 p-8 transition-all hover:border-amber-500/30 hover:bg-white/10">
+              <div className="mb-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-200">Step 3</span>
+                </div>
+              </div>
+              <h3 className="font-serif text-2xl font-bold text-white mb-4">Apply with Teaching Editions</h3>
+              <p className="text-gray-400 mb-6">
+                Use the Teaching Editions to implement the methodology in your own context, organisation, or work.
+              </p>
+              <div className="text-sm text-amber-400/70">
+                <span className="font-semibold">Tools:</span> Practical frameworks, templates, and implementation guides
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/canon/volume-i-foundations-of-purpose"
+              className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-sm font-bold text-black hover:from-amber-400 hover:to-amber-500 transition-all"
+            >
+              <BookOpen className="w-5 h-5" />
+              Start with Volume I
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {featuredItems.length > 0 && (
         <section className="py-20 border-b border-white/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
