@@ -400,6 +400,7 @@
       "lodash": "4.17.23",
       "diff": "5.2.2",
       "@types/dompurify": "3.2.0",
+      "fast-xml-parser": "^5.3.4",
       "@prisma/client": "$@prisma/client",
       "prisma": "$prisma"
     },
