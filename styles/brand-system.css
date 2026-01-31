@@ -1,4 +1,9 @@
+@import "tailwindcss";
+
 @layer base {
+  /* This directive is essential for Tailwind v4 to resolve @apply classes */
+  @reference "../tailwind.config.js"; 
+
   :root {
     /* The Core Palette: High-Contrast Obsidian & Burnished Amber */
     --brand-obsidian: #000000;
@@ -14,6 +19,8 @@
 }
 
 @layer components {
+  @reference "../tailwind.config.js";
+
   /* 1. The Glass-Interface Card */
   .city-gate-card {
     @apply relative overflow-hidden rounded-[2rem] border border-white/10 
@@ -47,6 +54,8 @@
 }
 
 @layer utilities {
+  @reference "../tailwind.config.js";
+
   /* 5. Custom Animations */
   .animate-protocol-shimmer {
     background: linear-gradient(

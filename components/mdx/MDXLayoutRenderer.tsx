@@ -1,45 +1,51 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { useMDXComponent } from 'next-contentlayer2/hooks';
+import React from 'react';
+import { useMDXComponent } from 'contentlayer2'; 
 import Image from 'next/image';
 import Link from 'next/link';
 
-/**
- * Abraham of London: MDX Component Mapping
- * Defines the strict UI elements permitted within institutional documents.
- */
+// Discovery-driven Imports
+import Callout from './Callout';
+import Badge from './Badge';
+import CTA from './CTA';
+import Quote from './Quote';
+import Note from './Note';
+import Grid from './Grid';
+import Verse from './Verse';
+import EmbossedBrandMark from './EmbossedBrandMark';
+import { components as shortcodes } from './shortcodes';
+
 const components = {
   Image,
   a: ({ href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-    const isInternalLink = href && href.startsWith('/');
-    const isAnchorLink = href && href.startsWith('#');
-
-    if (isInternalLink) {
-      return <Link href={href} {...props} />;
-    }
-
-    if (isAnchorLink) {
-      return <a href={href} {...props} />;
-    }
-
+    const isInternal = href && href.startsWith('/');
+    if (isInternal) return <Link href={href} {...props} className="text-amber-500 hover:underline" />;
     return <a target="_blank" rel="noopener noreferrer" href={href} {...props} />;
   },
-  // Add custom institutional components here (e.g., ProtocolAlert, DataInsight)
+  // Mapping your exact CSS classes to MDX elements
+  h1: (p: any) => <h1 {...p} className="heading-statement mb-8" />,
+  h2: (p: any) => <h2 {...p} className="text-kicker text-xl border-b border-white/10 pb-2 mt-12 mb-4" />,
+  
+  // Custom Components
+  Callout,
+  Badge,
+  CTA,
+  Quote,
+  Note,
+  Grid,
+  Verse,
+  EmbossedBrandMark,
+  ...shortcodes,
 };
 
-interface MDXLayoutRendererProps {
-  code: string;
-  [key: string]: any;
-}
-
-export const MDXLayoutRenderer = ({ code, ...rest }: MDXLayoutRendererProps) => {
+export const MDXLayoutRenderer = ({ code, ...rest }: { code: string; [key: string]: any }) => {
   const MDXComponent = useMDXComponent(code);
 
   return (
-    <div className="prose prose-slate max-w-none dark:prose-invert">
+    <article className="prose prose-invert prose-slate max-w-none">
       <MDXComponent components={components} {...rest} />
-    </div>
+    </article>
   );
 };
 

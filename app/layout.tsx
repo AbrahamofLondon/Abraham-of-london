@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+// We import the CSS here where the PostCSS loader expects it
 import "@/styles/brand-system.css"; 
 
-// Update these imports to the new Institutional Components
 import CommandNavigation from "@/components/layout/CommandNavigation";
 import ProtocolFooter from "@/components/layout/ProtocolFooter";
 import { Providers } from "./providers";
@@ -19,7 +19,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
-      <body className={`${fontBodyClass} min-h-screen bg-black`}>
+      <body className={`${fontBodyClass} min-h-screen bg-black antialiased`}>
         {GA_ID ? (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
@@ -30,9 +30,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : null}
 
         <Providers>
-          <div className="flex min-h-screen flex-col bg-black text-foreground">
+          <div className="flex min-h-screen flex-col bg-black text-white selection:bg-amber-500/30">
             <CommandNavigation />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 w-full relative">
+              {children}
+            </main>
             <ProtocolFooter />
           </div>
         </Providers>
