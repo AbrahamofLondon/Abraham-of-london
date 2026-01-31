@@ -29,8 +29,8 @@ module.exports = {
     },
 
     extend: {
-      colors: {
-        // Fix for Line 29: Use standard hex or simple var references
+        colors: {
+        // Institutional core palette
         background: "var(--brand-obsidian, #000000)",
         foreground: "var(--brand-cream, #fdfaf3)",
         
