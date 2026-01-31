@@ -140,6 +140,6 @@ export default function ProtocolFooter() {
           </div>
         </div>
       </div>
-    </section>
+    </footer>
   );
 }

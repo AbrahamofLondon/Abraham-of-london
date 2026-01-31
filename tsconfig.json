@@ -80,7 +80,7 @@
         "./lib/contentlayer/status.ts"
       ],
       "contentlayer/generated": [
-        "./lib/contentlayer-compat.ts"
+        "./.contentlayer/generated"
       ],
       "@/lib/server/rate-limit-unified": [
         "./lib/server/rate-limit-unified.ts"
@@ -109,7 +109,6 @@
       "@prisma/client": [
         "./.prisma/client"
       ],
-      // React type helpers
       "react": [
         "./node_modules/@types/react"
       ],
@@ -134,7 +133,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".contentlayer/generated"
   ],
   "exclude": [
     "node_modules",
