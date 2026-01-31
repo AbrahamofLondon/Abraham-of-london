@@ -3,208 +3,225 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  Building2,
-  Cpu,
-  Shield,
-  Globe,
   ArrowRight,
-  CheckCircle2,
-  Lock,
+  BookOpen,
+  Briefcase,
+  Compass,
+  Cpu,
+  Globe,
+  Landmark,
+  Shield,
+  Target,
+  Vault,
+  Workflow,
 } from "lucide-react";
 
-type Status = "live" | "development" | "incubation";
-
-type Venture = {
+type Dossier = {
   title: string;
   description: string;
   icon: React.ReactNode;
-  status: Status;
   href: string;
-  tags: string[];
-  proof: string;
+  meta: string;
+  accent?: "amber" | "blue" | "neutral";
 };
 
-function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
+const cx = (...parts: Array<string | false | null | undefined>) =>
+  parts.filter(Boolean).join(" ");
 
-const statusUI: Record<Status, { label: string; cls: string; dot: string }> = {
-  live: {
-    label: "Live",
-    cls: "border-emerald-400/25 bg-emerald-500/10 text-emerald-200",
-    dot: "bg-emerald-400",
-  },
-  development: {
-    label: "In build",
-    cls: "border-amber-400/25 bg-amber-500/10 text-amber-200",
-    dot: "bg-amber-400",
-  },
-  incubation: {
-    label: "Incubation",
-    cls: "border-blue-400/25 bg-blue-500/10 text-blue-200",
-    dot: "bg-blue-400",
-  },
-};
-
-export const EnhancedVenturesSection: React.FC = () => {
-  const ventures: Venture[] = [
+export default function EnhancedVenturesSection() {
+  // Everything live. Choose only routes you actually have.
+  // You can swap hrefs later without touching layout.
+  const dossiers: Dossier[] = [
     {
       title: "Institutional Advisory",
-      description: "Governance-grade strategy for serious operators: mandate, decision rights, cadence, and assets.",
-      icon: <Building2 className="h-6 w-6" />,
-      status: "live",
+      description:
+        "Governance-grade strategy for founders, leadership teams, and private institutions — built to hold under pressure.",
+      icon: <Landmark className="h-6 w-6" />,
       href: "/consulting",
-      tags: ["Governance", "Decision Rights", "Execution Cadence"],
-      proof: "Owner maps + board-ready packs",
+      meta: "Engagements • advisory • delivery",
+      accent: "amber",
     },
     {
-      title: "Founder OS",
-      description: "Operating systems for founders building institutions, not just companies — discipline as a product.",
-      icon: <Cpu className="h-6 w-6" />,
-      status: "development",
-      href: "/ventures/founder-os",
-      tags: ["Systems", "Routines", "Compounding"],
-      proof: "Cadence modules + templates",
+      title: "Strategic Frameworks",
+      description:
+        "Models, matrices, and decision tools engineered for use — not applause. Deploy the system.",
+      icon: <Target className="h-6 w-6" />,
+      href: "/resources/strategic-frameworks",
+      meta: "Framework library • matrices • models",
+      accent: "amber",
     },
     {
-      title: "Household Architecture",
-      description: "Blueprints for multi-generational family systems: standards, legacy design, and durable leadership.",
-      icon: <Shield className="h-6 w-6" />,
-      status: "live",
-      href: "/ventures/household-architecture",
-      tags: ["Legacy", "Formation", "Family Governance"],
-      proof: "Constitutional patterns for households",
+      title: "The Canon",
+      description:
+        "A coherent architecture: purpose, morality, governance, and institutional design — structured like a library, used like a weapon.",
+      icon: <BookOpen className="h-6 w-6" />,
+      href: "/canon",
+      meta: "Volumes • thesis • operator manuals",
+      accent: "neutral",
     },
     {
-      title: "Public Strategy",
-      description: "Institutional positioning and narrative architecture that holds under pressure and scrutiny.",
-      icon: <Globe className="h-6 w-6" />,
-      status: "incubation",
-      href: "/ventures/public-strategy",
-      tags: ["Positioning", "Narrative", "Public Trust"],
-      proof: "Signal engineering + credibility rails",
+      title: "The Vault",
+      description:
+        "Templates, operator packs, and execution artefacts. Practical, clean, and brutally deployable.",
+      icon: <Vault className="h-6 w-6" />,
+      href: "/downloads/vault",
+      meta: "Packs • templates • operating assets",
+      accent: "amber",
+    },
+    {
+      title: "Strategy",
+      description:
+        "Positioning, systems, and decision discipline — a public library of methods that don’t crumble when reality shows up.",
+      icon: <Compass className="h-6 w-6" />,
+      href: "/strategy",
+      meta: "Positioning • governance • execution",
+      accent: "blue",
+    },
+    {
+      title: "Ventures",
+      description:
+        "Practical deployment across multiple vectors — systems shipped, products built, institutions formed.",
+      icon: <Workflow className="h-6 w-6" />,
+      href: "/ventures",
+      meta: "Portfolio • deployments • case notes",
+      accent: "neutral",
     },
   ];
 
-  return (
-    <section className="relative bg-black py-24">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(245,158,11,0.08),transparent_55%)]" />
+  const accentClass = (accent?: Dossier["accent"]) => {
+    if (accent === "amber") {
+      return "border-amber-400/20 hover:border-amber-400/35 hover:shadow-amber-500/10";
+    }
+    if (accent === "blue") {
+      return "border-blue-400/15 hover:border-blue-400/25 hover:shadow-blue-500/10";
+    }
+    return "border-white/10 hover:border-white/20 hover:shadow-white/10";
+  };
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  const iconBg = (accent?: Dossier["accent"]) => {
+    if (accent === "amber") return "bg-amber-500/10 text-amber-300";
+    if (accent === "blue") return "bg-blue-500/10 text-blue-200";
+    return "bg-white/5 text-gray-200";
+  };
+
+  return (
+    <section className="relative overflow-hidden bg-black py-12">
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_20%,rgba(245,158,11,0.10),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(59,130,246,0.08),transparent_55%)]" />
+        <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:84px_84px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-16 grid gap-8 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-8">
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-amber-300">
-              Portfolio proof
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.45em] text-amber-300">
+              Portfolio dossiers
             </p>
-            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
-              Ventures built like institutions.
+            <h2 className="mt-3 font-serif text-3xl font-light text-amber-100 sm:text-4xl">
+              Choose a file. Open it.
             </h2>
-            <p className="mt-6 max-w-3xl text-xl font-light text-gray-300">
-              This is where principles become operating reality — standards, cadence, controls, and
-              deployable artefacts.
+            <p className="mt-3 max-w-2xl text-sm font-light leading-relaxed text-gray-300">
+              No “coming soon”. No placeholders. Each item is a live destination —
+              built like a library and used like a war room.
             </p>
           </div>
 
-          <div className="lg:col-span-4 lg:flex lg:justify-end">
+          <div className="flex flex-wrap gap-3">
             <Link
-              href="/ventures"
-              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-amber-400/25 hover:bg-white/10"
+              href="/consulting"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-sm font-extrabold text-black shadow-2xl shadow-amber-900/25 transition-all hover:scale-[1.02]"
             >
-              View all ventures <ArrowRight className="h-4 w-4" />
+              <Briefcase className="h-5 w-5" />
+              Engage
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+
+            <Link
+              href="/downloads/vault"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-200 transition-all hover:border-white/20 hover:bg-white/10"
+            >
+              <Shield className="h-5 w-5 text-amber-300" />
+              Vault
+              <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
 
-        {/* Portfolio grid */}
-        <div className="grid gap-8 lg:grid-cols-2">
-          {ventures.map((v) => {
-            const ui = statusUI[v.status];
-            return (
-              <Link
-                key={v.title}
-                href={v.href}
-                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/25 hover:bg-white/[0.05] hover:shadow-2xl hover:shadow-amber-500/10"
-              >
-                {/* top rail */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
-                    {v.icon}
-                  </div>
-
-                  <div className={cx("inline-flex items-center gap-2 rounded-full border px-4 py-2", ui.cls)}>
-                    <span className={cx("h-2 w-2 rounded-full", ui.dot)} />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.35em]">
-                      {ui.label}
-                    </span>
-                  </div>
+        {/* Grid */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {dossiers.map((d) => (
+            <Link
+              key={d.title}
+              href={d.href}
+              className={cx(
+                "group relative overflow-hidden rounded-3xl border bg-white/[0.03] p-7 backdrop-blur-xl transition-all duration-300 hover:bg-white/[0.05] hover:shadow-xl",
+                accentClass(d.accent)
+              )}
+            >
+              <div className="flex items-start justify-between gap-6">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-400">
+                    dossier
+                  </p>
+                  <h3 className="mt-3 font-serif text-2xl font-semibold text-amber-100">
+                    {d.title}
+                  </h3>
+                  <p className="mt-3 text-sm font-light leading-relaxed text-gray-300">
+                    {d.description}
+                  </p>
+                  <p className="mt-5 text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-500">
+                    {d.meta}
+                  </p>
                 </div>
 
-                <h3 className="mt-8 font-serif text-3xl font-semibold text-amber-100">
-                  {v.title}
-                </h3>
-                <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">
-                  {v.description}
-                </p>
-
-                {/* tags */}
-                <div className="mt-7 flex flex-wrap gap-2">
-                  {v.tags.slice(0, 3).map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-gray-300"
-                    >
-                      {t}
-                    </span>
-                  ))}
+                <div
+                  className={cx(
+                    "flex h-14 w-14 items-center justify-center rounded-2xl",
+                    iconBg(d.accent)
+                  )}
+                >
+                  {d.icon}
                 </div>
+              </div>
 
-                {/* proof line */}
-                <div className="mt-9 flex items-center justify-between border-t border-white/10 pt-7">
-                  <span className="inline-flex items-center gap-2 text-sm font-light text-gray-300">
-                    <CheckCircle2 className="h-4 w-4 text-amber-300" />
-                    {v.proof}
-                  </span>
-                  <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
-                    Open <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </span>
-                </div>
+              <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-500">
+                  open file
+                </span>
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
+                  View{" "}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </div>
 
-                {/* hover aura */}
-                <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.08),transparent_55%)]" />
-                </div>
-              </Link>
-            );
-          })}
+              {/* Sheen */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.07),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            </Link>
+          ))}
         </div>
 
-        {/* Close rail: ties ventures back to vault + inner circle */}
-        <div className="mt-14 rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl">
-          <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-8">
-              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
-                Access pathway
-              </p>
-              <p className="mt-3 text-lg font-light text-gray-300">
-                Want the artefacts behind these builds? The templates, packs, and operator notes live in the Vault.
-              </p>
-            </div>
-            <div className="lg:col-span-4 lg:flex lg:justify-end">
-              <Link
-                href="/downloads/vault"
-                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/45 hover:bg-amber-500/15"
-              >
-                <Lock className="h-4 w-4 text-amber-300" />
-                Open the Vault
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
+        {/* Compact bottom rail */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          {[
+            { href: "/resources", label: "Resources", icon: <Cpu className="h-4 w-4" /> },
+            { href: "/shorts", label: "Shorts", icon: <BookOpen className="h-4 w-4" /> },
+            { href: "/strategy", label: "Strategy", icon: <Compass className="h-4 w-4" /> },
+            { href: "/canon", label: "Canon", icon: <Globe className="h-4 w-4" /> },
+          ].map((x) => (
+            <Link
+              key={x.href}
+              href={x.href}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.25em] text-gray-200 transition-all hover:border-white/20 hover:bg-white/10"
+            >
+              <span className="text-amber-300">{x.icon}</span>
+              {x.label}
+            </Link>
+          ))}
         </div>
       </div>
     </section>
   );
-};
-
-export default EnhancedVenturesSection;
+}
