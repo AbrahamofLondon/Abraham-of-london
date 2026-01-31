@@ -1,6 +1,6 @@
 # netlify.toml — CONSOLIDATED & CORRECTED
 [build]
-  command = "pnpm install --frozen-lockfile && pnpm build:netlify && pnpm prune --prod"
+  command = "pnpm install --frozen-lockfile && pnpm build:netlify"
   publish = ".next"
   functions = "netlify/functions"
 

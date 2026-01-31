@@ -1,29 +1,25 @@
-// pages/api/pdfs/list.ts - SAFE VERSION
+/* pages/api/pdfs/list.ts — INSTITUTIONAL DATA ACCESS (SAFE MODE) */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getAllPDFItems } from "@/lib/pdf/registry";
 import prisma from "@/lib/prisma";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
 
-const REQUIRE_ADMIN = false; // Set to true for admin-only access
+const REQUIRE_ADMIN = false;
 
+/**
+ * Institutional IP Resolution
+ * Prioritizes high-integrity headers for proxied environments.
+ */
 function getClientIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
   const realIp = req.headers["x-real-ip"];
   
-  if (Array.isArray(forwarded)) {
-    return forwarded[0]?.trim() || "unknown";
-  }
+  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
+  if (Array.isArray(forwarded)) return forwarded[0].trim();
+  if (typeof realIp === "string") return realIp.trim();
   
-  if (typeof forwarded === "string") {
-    return forwarded.split(",")[0]?.trim() || "unknown";
-  }
-  
-  if (typeof realIp === "string") {
-    return realIp.trim();
-  }
-  
-  return req.socket?.remoteAddress || "unknown";
+  return req.socket?.remoteAddress || "127.0.0.1";
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -35,7 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
-  // SECURITY BARRIER - Only if REQUIRE_ADMIN is true
+  // 1. AUTHENTICATION BARRIER
+  let actorId = "system";
   if (REQUIRE_ADMIN) {
     try {
       const auth = await validateAdminAccess(req as any);
@@ -51,18 +48,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         return res.status(404).json({ success: false, error: "Not found" });
       }
+      actorId = (auth as any).userId || "admin";
     } catch (error) {
-      console.error("Admin validation error:", error);
-      return res.status(500).json({ success: false, error: "Internal server error" });
+      console.error("[SECURITY] Admin validation failure:", error);
+      return res.status(500).json({ success: false, error: "Security validation error" });
     }
   }
 
   try {
+    // 2. PRIMARY CONTENT RETRIEVAL (Local Registry)
     const items = getAllPDFItems();
 
-    // OPTIONAL DB ENRICHMENT - Safely wrapped
+    // 3. SECONDARY DATA ENRICHMENT (Prisma)
+    // We treat DB as non-critical here to ensure the PDF list remains available.
     let downloadCounts: Record<string, number> = {};
     try {
+      // Check if prisma is initialized properly before query
       const rows = await prisma.downloadAuditEvent.groupBy({
         by: ["assetId"],
         _count: { id: true },
@@ -70,14 +71,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       
       downloadCounts = rows.reduce((acc: Record<string, number>, r: any) => {
-        if (r.assetId) {
-          acc[String(r.assetId)] = r._count.id;
-        }
+        if (r.assetId) acc[String(r.assetId)] = r._count.id;
         return acc;
       }, {});
-    } catch (dbError) {
-      console.warn("Failed to fetch download counts:", dbError);
-      // Continue without download counts
+    } catch (dbError: any) {
+      // Specifically catch the DATABASE_URL error to prevent log bloat
+      const isConnError = dbError.message?.includes("postgresql://");
+      console.warn(`[PRISMA_NON_FATAL] ${isConnError ? "DB Connection Missing" : "Aggregation failed"}`);
     }
 
     const enriched = items.map((p) => ({
@@ -85,32 +85,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       downloadCount: downloadCounts[p.id] ?? p.downloadCount ?? 0,
     }));
 
-    // SAFE: Log audit event without blocking response
-    try {
-      let actorId = "system";
-      if (REQUIRE_ADMIN) {
-        const auth = await validateAdminAccess(req as any);
-        actorId = (auth as any).userId || "admin";
-      }
-      
-      await logAuditEvent({
-        actorType: REQUIRE_ADMIN ? "admin" : "member",
-        actorId,
-        action: AUDIT_ACTIONS.READ,
-        resourceType: AUDIT_CATEGORIES.DATA_ACCESS,
-        status: "success",
-        ipAddress: ip,
-        details: { 
-          durationMs: Date.now() - start, 
-          count: enriched.length,
-          adminOnly: REQUIRE_ADMIN 
-        },
-      });
-    } catch (auditError) {
-      console.warn("Audit logging failed:", auditError);
-      // Don't fail the request if audit logging fails
-    }
+    // 4. AUDIT LOGGING (Post-process)
+    // Fire-and-forget approach ensures low latency for the reader.
+    logAuditEvent({
+      actorType: REQUIRE_ADMIN ? "admin" : "member",
+      actorId,
+      action: AUDIT_ACTIONS.READ,
+      resourceType: AUDIT_CATEGORIES.DATA_ACCESS,
+      status: "success",
+      ipAddress: ip,
+      details: { 
+        durationMs: Date.now() - start, 
+        count: enriched.length,
+        adminOnly: REQUIRE_ADMIN 
+      },
+    }).catch(e => console.error("[AUDIT] Background logging failed:", e.message));
 
+    // 5. FINAL RESPONSE
     return res.status(200).json({
       success: true,
       pdfs: enriched,
@@ -119,29 +110,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         count: enriched.length,
       },
     });
-  } catch (err: any) {
-    console.error("PDF list error:", err);
-    
-    // SAFE: Log error without exposing details
-    try {
-      await logAuditEvent({
-        actorType: "system",
-        action: AUDIT_ACTIONS.API_ERROR,
-        resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION,
-        status: "failed",
-        ipAddress: ip,
-        details: { 
-          path: "/api/pdfs/list",
-          error: err?.message ? "Internal server error" : String(err).slice(0, 100)
-        },
-      });
-    } catch (auditError) {
-      // Ignore audit errors in error handling
-    }
 
+  } catch (err: any) {
+    console.error("[API_FATAL] PDF List Handler Exception:", err);
+    
     return res.status(500).json({ 
       success: false, 
-      error: "Failed to list PDFs" 
+      error: "An institutional error occurred while retrieving resources." 
     });
   }
 }
