@@ -1,5 +1,5 @@
 // pages/index.tsx — INSTITUTIONAL HOME (EDELMAN / THINK-TANK / “DOUBLE-TAKE” EDITION)
-// Tailwind-safe classes only (no decimals like h-4.5 / py-4.5)
+// Refined: reduced scroll fatigue, single accent discipline, cleaner hierarchy
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -11,6 +11,9 @@ import Layout from "@/components/Layout";
 import EnhancedVenturesSection from "@/components/enhanced/VenturesSection";
 import CanonPrimaryCard from "@/components/Cards/CanonPrimaryCard";
 import AnimatedStatsBar from "@/components/enhanced/AnimatedStatsBar";
+import ExecutiveIntelligenceStrip from "@/components/homepage/ExecutiveIntelligenceStrip";
+import OperatorBriefing from "@/components/homepage/OperatorBriefing";
+import VaultTeaserRail from "@/components/homepage/VaultTeaserRail";
 
 import { safeArraySlice } from "@/lib/utils/safe";
 import { getAllShorts } from "@/lib/contentlayer-helper";
@@ -62,7 +65,7 @@ type HomePageProps = {
 };
 
 /* -----------------------------------------------------------------------------
-   ROUTES (Assume these exist; adjust if your actual slugs differ)
+   ROUTES
 ----------------------------------------------------------------------------- */
 const ROUTES = {
   consulting: "/consulting",
@@ -88,26 +91,46 @@ const ROUTES = {
 const cx = (...parts: Array<string | false | null | undefined>) =>
   parts.filter(Boolean).join(" ");
 
-const SectionDivider: React.FC<{ tight?: boolean; withOrnament?: boolean }> = ({
-  tight = false,
-  withOrnament = true,
-}) => (
-  <div className={cx("relative overflow-hidden bg-black", tight ? "h-16" : "h-24")}>
-    {withOrnament ? (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative">
-          <div className="h-px w-44 bg-gradient-to-r from-transparent via-amber-400/25 to-transparent" />
-          <div className="mx-10 flex items-center gap-3">
-            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-90" />
-            <div className="h-1.5 w-1.5 rounded-full bg-amber-300/70" />
-            <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 opacity-90" />
-          </div>
-          <div className="h-px w-44 bg-gradient-to-r from-transparent via-amber-400/25 to-transparent" />
-        </div>
-      </div>
-    ) : (
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/[0.02] to-transparent" />
-    )}
+const Eyebrow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-300/90">
+    {children}
+  </p>
+);
+
+const SectionHeader: React.FC<{
+  eyebrow: string;
+  title: string;
+  body?: string;
+  align?: "left" | "center";
+}> = ({ eyebrow, title, body, align = "left" }) => (
+  <div className={cx("mb-10", align === "center" ? "text-center" : "text-left")}>
+    <Eyebrow>{eyebrow}</Eyebrow>
+    <h2
+      className={cx(
+        "mt-5 font-serif font-light text-3xl sm:text-4xl text-amber-100",
+        align === "center" ? "mx-auto" : ""
+      )}
+    >
+      {title}
+    </h2>
+    {body ? (
+      <p
+        className={cx(
+          "mt-4 text-sm sm:text-[15px] leading-relaxed font-light text-zinc-300/90",
+          align === "center" ? "mx-auto max-w-2xl" : "max-w-3xl"
+        )}
+      >
+        {body}
+      </p>
+    ) : null}
+  </div>
+);
+
+const SectionDivider: React.FC<{ tight?: boolean }> = ({ tight = false }) => (
+  <div className={cx("relative bg-black", tight ? "py-8" : "py-12")}>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    </div>
   </div>
 );
 
@@ -115,7 +138,7 @@ const Pill: React.FC<{ children: React.ReactNode; icon?: React.ReactNode }> = ({
   children,
   icon,
 }) => (
-  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
+  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
     {icon}
     {children}
   </span>
@@ -136,10 +159,12 @@ const GlassCard: React.FC<{
   <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/20 hover:bg-white/[0.05]">
     <div className="flex items-start justify-between gap-6">
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-400">
           {title}
         </p>
-        <p className="mt-4 text-sm font-light leading-relaxed text-gray-200">{body}</p>
+        <p className="mt-4 text-sm font-light leading-relaxed text-zinc-200/90">
+          {body}
+        </p>
         {meta ? (
           <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.35em] text-amber-200/80">
             {meta}
@@ -162,7 +187,7 @@ const GoldButtonLink: React.FC<{
 }> = ({ href, children, iconLeft, iconRight }) => (
   <Link
     href={href}
-    className="inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-10 py-5 text-base font-bold text-black shadow-2xl shadow-amber-900/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-amber-900/45"
+    className="inline-flex items-center justify-center gap-3 rounded-2xl bg-amber-300 px-8 py-4 text-sm font-bold uppercase tracking-[0.12em] text-black shadow-2xl shadow-amber-900/25 transition-all duration-300 hover:bg-amber-200 hover:scale-[1.01]"
   >
     {iconLeft}
     {children}
@@ -180,10 +205,10 @@ const GhostButtonLink: React.FC<{
   <Link
     href={href}
     className={cx(
-      "inline-flex items-center justify-center gap-3 rounded-2xl border bg-white/5 px-10 py-5 text-sm font-semibold uppercase tracking-[0.15em] backdrop-blur-sm transition-all duration-300 hover:scale-[1.02]",
+      "inline-flex items-center justify-center gap-3 rounded-2xl border bg-white/[0.03] px-8 py-4 text-sm font-semibold uppercase tracking-[0.12em] backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] hover:bg-white/[0.06]",
       tone === "amber"
-        ? "border-amber-400/25 text-amber-100 hover:border-amber-400/45 hover:bg-white/10"
-        : "border-white/10 text-gray-200 hover:border-white/20 hover:bg-white/10"
+        ? "border-amber-400/25 text-amber-100 hover:border-amber-400/45"
+        : "border-white/10 text-zinc-200 hover:border-white/20"
     )}
   >
     {iconLeft}
@@ -193,22 +218,21 @@ const GhostButtonLink: React.FC<{
 );
 
 /* -----------------------------------------------------------------------------
-   HERO — “Authority + Proof + Routing” (double-take)
+   HERO — Authority + Proof + Routing
 ----------------------------------------------------------------------------- */
 const InstitutionalHero: React.FC = () => {
   return (
     <section className="relative overflow-hidden bg-black">
-      {/* Background: grid + aurora + vignette */}
+      {/* Background: disciplined grid + warm signal only */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:72px_72px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(245,158,11,0.12),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(59,130,246,0.06),transparent_60%)]" />
+        <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:72px_72px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(245,158,11,0.14),transparent_55%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pb-24">
+      <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 lg:px-8 lg:pb-18">
         {/* Authority pills */}
-        <div className="mb-10 flex flex-wrap gap-3">
+        <div className="mb-9 flex flex-wrap gap-3">
           <Pill icon={<Landmark className="h-4 w-4" />}>Institutional OS</Pill>
           <Pill icon={<Target className="h-4 w-4" />}>Mandate & Strategy</Pill>
           <Pill icon={<Scale className="h-4 w-4" />}>Governance</Pill>
@@ -216,26 +240,26 @@ const InstitutionalHero: React.FC = () => {
           <Pill icon={<Shield className="h-4 w-4" />}>Ethics</Pill>
         </div>
 
-        <div className="grid gap-14 lg:grid-cols-12 lg:items-start">
-          {/* Left: statement + CTAs + credibility rail */}
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
+          {/* Left */}
           <div className="lg:col-span-7">
-            <h1 className="mb-8 font-serif text-5xl font-semibold leading-tight text-amber-100 sm:text-7xl lg:text-8xl">
+            <h1 className="mb-7 font-serif text-4xl font-semibold leading-tight text-amber-100 sm:text-6xl lg:text-7xl">
               Abraham of London
-              <span className="mt-6 block text-2xl font-normal text-amber-100/90 sm:text-4xl lg:text-5xl">
+              <span className="mt-5 block text-xl font-normal text-amber-100/90 sm:text-3xl lg:text-4xl">
                 Less theatre.{" "}
                 <span className="relative inline-block">
                   <span className="relative z-10">More operating system.</span>
-                  <span className="absolute -bottom-1 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-transparent opacity-80" />
+                  <span className="absolute -bottom-1 left-0 h-1 w-full bg-gradient-to-r from-amber-400/80 to-transparent" />
                 </span>
               </span>
             </h1>
 
-            <p className="mb-10 max-w-3xl text-lg font-light leading-relaxed text-gray-200 sm:text-xl lg:text-2xl">
-              I build consulting-grade decision systems for founders, leadership teams, and
-              institutions — so strategy survives pressure, scrutiny, and scale.
+            <p className="mb-9 max-w-3xl text-base font-light leading-relaxed text-zinc-200 sm:text-lg lg:text-xl">
+              I build consulting-grade decision systems for founders, leadership teams, and institutions —
+              so strategy survives pressure, scrutiny, and scale.
             </p>
 
-            {/* Primary CTAs */}
+            {/* CTAs */}
             <div className="flex flex-wrap gap-4">
               <GoldButtonLink
                 href={ROUTES.consulting}
@@ -264,8 +288,8 @@ const InstitutionalHero: React.FC = () => {
               </GhostButtonLink>
             </div>
 
-            {/* Proof rail (fast signal) */}
-            <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {/* Proof rail: compact (reduces scroll fatigue) */}
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
               {[
                 { k: "Mode", v: "Advisory + Assets" },
                 { k: "Output", v: "Systems, not slogans" },
@@ -275,7 +299,7 @@ const InstitutionalHero: React.FC = () => {
                   key={x.k}
                   className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-500">
                     {x.k}
                   </p>
                   <p className="mt-3 text-sm font-semibold text-amber-100">{x.v}</p>
@@ -284,7 +308,7 @@ const InstitutionalHero: React.FC = () => {
             </div>
 
             {/* Values rail */}
-            <div className="mt-10 flex flex-wrap items-center gap-7 text-sm font-light text-gray-300">
+            <div className="mt-8 flex flex-wrap items-center gap-7 text-sm font-light text-zinc-300">
               <span className="inline-flex items-center gap-2.5">
                 <Shield className="h-4 w-4 text-amber-300" />
                 Conviction-led ethics
@@ -300,9 +324,9 @@ const InstitutionalHero: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: executive cards */}
+          {/* Right */}
           <div className="lg:col-span-5">
-            <div className="grid gap-7">
+            <div className="grid gap-6">
               <GlassCard
                 title="Delivery posture"
                 icon={<Landmark className="h-6 w-6" />}
@@ -326,9 +350,9 @@ const InstitutionalHero: React.FC = () => {
         </div>
 
         {/* Hero visual */}
-        <div className="relative mt-16 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
+        <div className="relative mt-14 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
           <div className="relative aspect-[16/9]">
-            <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/0 via-black/30 to-black/75" />
+            <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/0 via-black/25 to-black/75" />
             <Image
               src="/assets/images/abraham-of-london-banner.webp"
               alt="Abraham of London — Institutional Advisory Platform"
@@ -340,7 +364,7 @@ const InstitutionalHero: React.FC = () => {
             />
           </div>
 
-          <div className="flex flex-col gap-6 px-7 py-7 sm:flex-row sm:items-start sm:justify-between sm:px-9">
+          <div className="flex flex-col gap-5 px-7 py-7 sm:flex-row sm:items-start sm:justify-between sm:px-9">
             <div className="flex items-start gap-5">
               <div className="mt-1 h-12 w-12 rounded-xl bg-amber-500/10 p-2.5">
                 <Cpu className="h-full w-full text-amber-300" />
@@ -349,25 +373,64 @@ const InstitutionalHero: React.FC = () => {
                 <p className="text-base font-medium text-amber-100 sm:text-lg">
                   Blueprint → pressure-test → deploy.
                 </p>
-                <p className="mt-2.5 text-sm font-light text-gray-300">
+                <p className="mt-2.5 text-sm font-light text-zinc-300">
                   Strategy becomes routine. Routine becomes compounding.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <span className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200">
-                <CheckCircle2 className="h-4 w-4 text-amber-300" />
-                Partner-led
-              </span>
-              <span className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200">
-                <Shield className="h-4 w-4 text-amber-300" />
-                Governance-grade
-              </span>
-              <span className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-200">
-                <Globe className="h-4 w-4 text-amber-300" />
-                UK ↔ Africa
-              </span>
+              {[
+                { icon: <CheckCircle2 className="h-4 w-4 text-amber-300" />, label: "Partner-led" },
+                { icon: <Shield className="h-4 w-4 text-amber-300" />, label: "Governance-grade" },
+                { icon: <Globe className="h-4 w-4 text-amber-300" />, label: "UK ↔ Africa" },
+              ].map((x) => (
+                <span
+                  key={x.label}
+                  className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-200"
+                >
+                  {x.icon}
+                  {x.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Routes (kills scroll fatigue early) */}
+        <div className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">
+                Quick routes
+              </p>
+              <p className="mt-2 text-sm font-light text-zinc-300">
+                Busy? Start with these three objects — they communicate seriousness fast.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={ROUTES.strategicFrameworks}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-zinc-200 hover:border-white/20 hover:bg-white/10 transition-colors"
+              >
+                <Compass className="h-4 w-4 text-amber-300" />
+                Frameworks
+              </Link>
+              <Link
+                href={ROUTES.ultimatePurpose}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-zinc-200 hover:border-white/20 hover:bg-white/10 transition-colors"
+              >
+                <ScrollText className="h-4 w-4 text-amber-300" />
+                Purpose Thesis
+              </Link>
+              <Link
+                href={ROUTES.vault}
+                className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/45 hover:bg-white/10 transition-colors"
+              >
+                <Vault className="h-4 w-4 text-amber-300" />
+                Vault
+              </Link>
             </div>
           </div>
         </div>
@@ -377,14 +440,14 @@ const InstitutionalHero: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   FLAGSHIP ASSETS — requested links surfaced as “primary objects”
+   FLAGSHIP ASSETS
 ----------------------------------------------------------------------------- */
 const FlagshipAssets: React.FC = () => {
   const assets = [
     {
       title: "Strategic Frameworks",
       eyebrow: "Framework library",
-      body: "The models, matrices, and decision tools that turn theory into an operating system.",
+      body: "Models, matrices, and decision tools that turn theory into an operating system.",
       href: ROUTES.strategicFrameworks,
       icon: <Compass className="h-6 w-6" />,
       meta: "Method • Options • Trade-offs",
@@ -400,7 +463,7 @@ const FlagshipAssets: React.FC = () => {
     {
       title: "The Vault",
       eyebrow: "High-signal assets",
-      body: "A curated pack of institutional templates, playbooks, and operator notes — built for builders.",
+      body: "Templates, playbooks, and operator notes — built for builders who deploy.",
       href: ROUTES.vault,
       icon: <Vault className="h-6 w-6" />,
       meta: "Templates • Playbooks • Packs",
@@ -408,37 +471,15 @@ const FlagshipAssets: React.FC = () => {
   ] as const;
 
   return (
-    <section className="relative bg-black py-20">
+    <section className="relative bg-black py-16 sm:py-18">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_60%,rgba(245,158,11,0.06),transparent_55%)]" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              Flagship assets
-            </p>
-            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
-              Don’t browse. Deploy.
-            </h2>
-            <p className="mt-5 text-xl font-light text-gray-300">
-              These are not “posts.” They are institutional objects — designed to be used.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3.5">
-            <Link
-              href={ROUTES.resources}
-              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
-            >
-              Resources <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href={ROUTES.downloads}
-              className="inline-flex items-center justify-center gap-2.5 rounded-full border border-amber-400/30 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
-            >
-              Downloads <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
+        <SectionHeader
+          eyebrow="Flagship assets"
+          title="Don’t browse. Deploy."
+          body="These aren’t “posts.” They are institutional objects designed to be used."
+          align="left"
+        />
 
         <div className="grid gap-8 md:grid-cols-3">
           {assets.map((a) => (
@@ -447,7 +488,7 @@ const FlagshipAssets: React.FC = () => {
               href={a.href}
               className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/30 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-amber-500/5"
             >
-              <div className="absolute right-6 top-6 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.35em] text-gray-300">
+              <div className="absolute right-6 top-6 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-300">
                 {a.eyebrow}
               </div>
 
@@ -458,12 +499,12 @@ const FlagshipAssets: React.FC = () => {
               <h3 className="mt-8 font-serif text-3xl font-semibold text-amber-100">
                 {a.title}
               </h3>
-              <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">
+              <p className="mt-4 text-sm font-light leading-relaxed text-zinc-300">
                 {a.body}
               </p>
 
               <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-7">
-                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-500">
                   {a.meta}
                 </span>
                 <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
@@ -476,13 +517,28 @@ const FlagshipAssets: React.FC = () => {
             </Link>
           ))}
         </div>
+
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link
+            href={ROUTES.resources}
+            className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10"
+          >
+            Resources <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href={ROUTES.downloads}
+            className="inline-flex items-center justify-center gap-2.5 rounded-full border border-amber-400/30 bg-white/5 px-7 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 transition-colors hover:border-amber-400/50 hover:bg-white/10"
+          >
+            Downloads <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </section>
   );
 };
 
 /* -----------------------------------------------------------------------------
-   TRUST SIGNALS — institutional posture (no fluff)
+   TRUST SIGNALS — disciplined palette (NO emerald/blue riot)
 ----------------------------------------------------------------------------- */
 const TrustSignals: React.FC = () => {
   const signals = [
@@ -493,13 +549,13 @@ const TrustSignals: React.FC = () => {
         "Mandates, controls, decision rights, cadence — engineered to survive scrutiny and scale.",
     },
     {
-      icon: <BarChart3 className="h-6 w-6 text-emerald-300" />,
+      icon: <BarChart3 className="h-6 w-6 text-amber-300" />,
       title: "Strategy → execution linkage",
       description:
         "No deck theatre. Decisions become deployable assets, milestones, and owners.",
     },
     {
-      icon: <Shield className="h-6 w-6 text-blue-300" />,
+      icon: <Shield className="h-6 w-6 text-amber-300" />,
       title: "Conviction, not vibes",
       description:
         "Christian ethics + historical realism + disciplined incentives — because systems reveal character under stress.",
@@ -507,19 +563,14 @@ const TrustSignals: React.FC = () => {
   ];
 
   return (
-    <section className="bg-black py-20">
+    <section className="bg-black py-16 sm:py-18">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-            Institutional assurance
-          </p>
-          <h2 className="mt-6 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
-            Built to survive pressure
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg font-light text-gray-300">
-            Repeatable method that holds under cross-examination.
-          </p>
-        </div>
+        <SectionHeader
+          eyebrow="Institutional assurance"
+          title="Built to survive pressure"
+          body="Repeatable method that holds under cross-examination."
+          align="center"
+        />
 
         <div className="grid gap-8 md:grid-cols-3">
           {signals.map((s) => (
@@ -530,8 +581,8 @@ const TrustSignals: React.FC = () => {
               <div className="mb-7 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5">
                 {s.icon}
               </div>
-              <h3 className="text-xl font-semibold text-amber-100">{s.title}</h3>
-              <p className="mt-3.5 text-sm font-light leading-relaxed text-gray-300">
+              <h3 className="text-lg font-semibold text-amber-100">{s.title}</h3>
+              <p className="mt-3.5 text-sm font-light leading-relaxed text-zinc-300">
                 {s.description}
               </p>
             </div>
@@ -539,7 +590,7 @@ const TrustSignals: React.FC = () => {
         </div>
 
         {/* Proof rail */}
-        <div className="mt-12 rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl">
+        <div className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl">
           <div className="grid gap-6 md:grid-cols-4">
             {[
               { k: "Deliverables", v: "Packs + Playbooks" },
@@ -548,7 +599,7 @@ const TrustSignals: React.FC = () => {
               { k: "Orientation", v: "UK ↔ Africa systems" },
             ].map((x) => (
               <div key={x.k} className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-500">
                   {x.k}
                 </p>
                 <p className="mt-3 text-sm font-semibold text-amber-100">{x.v}</p>
@@ -562,7 +613,7 @@ const TrustSignals: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   SERVICE LINES — consulting spine
+   SERVICE LINES
 ----------------------------------------------------------------------------- */
 const ServiceLines: React.FC = () => {
   const lines = [
@@ -599,24 +650,22 @@ const ServiceLines: React.FC = () => {
   ] as const;
 
   return (
-    <section className="bg-black py-20">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
+    <section className="bg-black py-16 sm:py-18">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              Service lines
-            </p>
-            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
+            <Eyebrow>Service lines</Eyebrow>
+            <h2 className="mt-5 font-serif text-3xl sm:text-4xl font-light text-amber-100">
               A proper consulting spine
             </h2>
-            <p className="mt-5 text-xl font-light text-gray-300">
+            <p className="mt-4 text-sm sm:text-[15px] leading-relaxed font-light text-zinc-300/90">
               We don’t “help.” We build the decision system that makes help unnecessary.
             </p>
           </div>
 
           <Link
             href={ROUTES.consulting}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 transition-colors hover:border-amber-400/50 hover:bg-white/10"
           >
             <span>See engagements</span>
             <ArrowRight className="h-4 w-4" />
@@ -634,9 +683,11 @@ const ServiceLines: React.FC = () => {
                 {l.icon}
               </div>
 
-              <h3 className="font-serif text-2xl font-semibold text-amber-100">{l.title}</h3>
+              <h3 className="font-serif text-xl sm:text-2xl font-semibold text-amber-100">
+                {l.title}
+              </h3>
 
-              <ul className="mt-7 space-y-3.5 text-sm font-light text-gray-300">
+              <ul className="mt-7 space-y-3.5 text-sm font-light text-zinc-300">
                 {l.bullets.map((b) => (
                   <li key={b} className="flex gap-3.5">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
@@ -646,7 +697,7 @@ const ServiceLines: React.FC = () => {
               </ul>
 
               <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-7">
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">
                   Output-driven
                 </span>
                 <span className="inline-flex items-center gap-2.5 text-sm font-semibold text-amber-200">
@@ -662,7 +713,7 @@ const ServiceLines: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   CANON — introduced as a “hierarchy + access pathway”
+   CANON — hierarchy + access pathway
 ----------------------------------------------------------------------------- */
 const CanonInstitutionalIntro: React.FC = () => {
   const tiers = [
@@ -693,40 +744,36 @@ const CanonInstitutionalIntro: React.FC = () => {
   ] as const;
 
   return (
-    <section className="relative bg-black py-20">
+    <section className="relative bg-black py-16 sm:py-18">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,rgba(245,158,11,0.06),transparent_55%)]" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
+        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              Canon — institutional backbone
-            </p>
-            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
+            <Eyebrow>Canon — institutional backbone</Eyebrow>
+            <h2 className="mt-5 font-serif text-3xl sm:text-4xl font-light text-amber-100">
               Not content. A system.
             </h2>
-            <p className="mt-5 text-xl font-light text-gray-300">
-              The Canon is the intellectual infrastructure behind the advisory work — designed for
-              durability, not dopamine.
+            <p className="mt-4 text-sm sm:text-[15px] leading-relaxed font-light text-zinc-300/90">
+              The Canon is the intellectual infrastructure behind the advisory work — designed for durability, not dopamine.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3.5">
             <Link
               href={ROUTES.canonVolume1}
-              className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 transition-colors hover:border-amber-400/50 hover:bg-white/10"
             >
               Start Volume I <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={ROUTES.vault}
-              className="inline-flex items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10"
             >
               Inner Circle Access <Lock className="h-4 w-4" />
             </Link>
           </div>
         </div>
 
-        {/* Tier cards */}
         <div className="grid gap-8 md:grid-cols-3">
           {tiers.map((t) => (
             <Link
@@ -737,10 +784,14 @@ const CanonInstitutionalIntro: React.FC = () => {
               <div className="mb-8 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 {t.icon}
               </div>
-              <h3 className="font-serif text-2xl font-semibold text-amber-100">{t.title}</h3>
-              <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">{t.body}</p>
+              <h3 className="font-serif text-xl sm:text-2xl font-semibold text-amber-100">
+                {t.title}
+              </h3>
+              <p className="mt-4 text-sm font-light leading-relaxed text-zinc-300">
+                {t.body}
+              </p>
               <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-7">
-                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-500">
                   {t.meta}
                 </span>
                 <span className="inline-flex items-center gap-2.5 text-sm font-semibold text-amber-200">
@@ -752,8 +803,7 @@ const CanonInstitutionalIntro: React.FC = () => {
           ))}
         </div>
 
-        {/* Canon Primary Card (existing component) */}
-        <div className="mt-14">
+        <div className="mt-12">
           <CanonPrimaryCard
             title="The Architecture of Human Purpose"
             href={ROUTES.canonVolume1}
@@ -769,7 +819,7 @@ const CanonInstitutionalIntro: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   CREDIBILITY QUOTES — tone: serious, restrained, institutional
+   CREDIBILITY QUOTES
 ----------------------------------------------------------------------------- */
 const CredibilityQuotes: React.FC = () => {
   const quotes = [
@@ -788,29 +838,14 @@ const CredibilityQuotes: React.FC = () => {
   ];
 
   return (
-    <section className="bg-black py-20">
+    <section className="bg-black py-16 sm:py-18">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              Credibility
-            </p>
-            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
-              Signal, not noise.
-            </h2>
-            <p className="mt-5 text-xl font-light text-gray-300">
-              The work is engineered to stand up when serious people ask serious questions.
-            </p>
-          </div>
-
-          <Link
-            href={ROUTES.resources}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
-          >
-            <span>View resources</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+        <SectionHeader
+          eyebrow="Credibility"
+          title="Signal, not noise."
+          body="The work is engineered to stand up when serious people ask serious questions."
+          align="left"
+        />
 
         <div className="grid gap-8 md:grid-cols-3">
           {quotes.map((q, idx) => (
@@ -821,8 +856,8 @@ const CredibilityQuotes: React.FC = () => {
               <div className="mb-7 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
                 <Quote className="h-6 w-6" />
               </div>
-              <p className="text-sm font-light leading-relaxed text-gray-200">“{q.text}”</p>
-              <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+              <p className="text-sm font-light leading-relaxed text-zinc-200">“{q.text}”</p>
+              <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-500">
                 {q.byline}
               </p>
             </div>
@@ -834,7 +869,7 @@ const CredibilityQuotes: React.FC = () => {
 };
 
 /* -----------------------------------------------------------------------------
-   SHORTS — surfaced as “field intelligence”
+   SHORTS — field intelligence
 ----------------------------------------------------------------------------- */
 const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
   const items = safeArraySlice(shorts ?? [], 0, 6) as LooseShort[];
@@ -849,29 +884,14 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
   };
 
   return (
-    <section className="bg-black py-20">
+    <section className="bg-black py-16 sm:py-18">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-              Field intelligence
-            </p>
-            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
-              Executive notes for builders.
-            </h2>
-            <p className="mt-5 text-xl font-light text-gray-300">
-              Short, sharp signals — designed to translate into action.
-            </p>
-          </div>
-
-          <Link
-            href={ROUTES.shorts}
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-amber-400/30 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/50 hover:bg-white/10"
-          >
-            <span>Browse all shorts</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+        <SectionHeader
+          eyebrow="Field intelligence"
+          title="Executive notes for builders."
+          body="Short, sharp signals — designed to translate into action."
+          align="left"
+        />
 
         <div className="grid gap-8 md:grid-cols-3">
           {items.map((s, idx) => (
@@ -880,7 +900,7 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
               href={getHref(s)}
               className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/20 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-amber-500/5"
             >
-              <div className="absolute right-6 top-6 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.35em] text-gray-300">
+              <div className="absolute right-6 top-6 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-300">
                 {(s.readTime || "SHORT").toString()}
               </div>
 
@@ -888,16 +908,16 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
                 <PenTool className="h-6 w-6" />
               </div>
 
-              <h3 className="font-serif text-2xl font-semibold text-amber-100">
+              <h3 className="font-serif text-xl sm:text-2xl font-semibold text-amber-100">
                 {s.title || "Untitled"}
               </h3>
 
-              <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">
+              <p className="mt-4 text-sm font-light leading-relaxed text-zinc-300">
                 {(s.excerpt || s.description || "High-signal notes designed for execution.").toString()}
               </p>
 
               <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-7">
-                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-zinc-500">
                   Deployable signal
                 </span>
                 <span className="inline-flex items-center gap-2.5 text-sm font-semibold text-amber-200">
@@ -916,14 +936,13 @@ const ShortsStrip: React.FC<{ shorts: LooseShort[] }> = ({ shorts }) => {
 };
 
 /* -----------------------------------------------------------------------------
-   FINAL CTA — “Close the loop” (serious people need a next step)
+   FINAL CTA
 ----------------------------------------------------------------------------- */
 const InstitutionalClose: React.FC = () => {
   return (
-    <section className="relative overflow-hidden bg-black py-24">
+    <section className="relative overflow-hidden bg-black py-20 sm:py-24">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(245,158,11,0.10),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(59,130,246,0.06),transparent_55%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
       </div>
 
@@ -931,19 +950,17 @@ const InstitutionalClose: React.FC = () => {
         <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl sm:p-12">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-                Next step
-              </p>
-              <h2 className="mt-5 font-serif text-4xl font-light text-amber-100 sm:text-5xl">
+              <Eyebrow>Next step</Eyebrow>
+              <h2 className="mt-5 font-serif text-3xl sm:text-4xl font-light text-amber-100">
                 If you’re serious, don’t “follow.”
                 <span className="block">Install the system.</span>
               </h2>
-              <p className="mt-5 max-w-2xl text-lg font-light leading-relaxed text-gray-300">
-                Advisory for leaders. Canon for thinkers. Vault assets for builders who actually deploy.
+              <p className="mt-4 max-w-2xl text-sm sm:text-[15px] font-light leading-relaxed text-zinc-300/90">
+                Advisory for leaders. Canon for thinkers. Vault assets for builders who deploy.
                 No drama — just durable operating standards.
               </p>
 
-              <div className="mt-10 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap gap-4">
                 <GoldButtonLink
                   href={ROUTES.consulting}
                   iconLeft={<Briefcase className="h-5 w-5" />}
@@ -1001,7 +1018,7 @@ const InstitutionalClose: React.FC = () => {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-amber-100">{x.title}</p>
-                        <p className="mt-2 text-sm font-light leading-relaxed text-gray-300">
+                        <p className="mt-2 text-sm font-light leading-relaxed text-zinc-300">
                           {x.body}
                         </p>
                       </div>
@@ -1017,28 +1034,28 @@ const InstitutionalClose: React.FC = () => {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={ROUTES.strategicFrameworks}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10"
                 >
                   <Compass className="h-4 w-4 text-amber-300" />
                   Strategic Frameworks
                 </Link>
                 <Link
                   href={ROUTES.ultimatePurpose}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10"
                 >
                   <ScrollText className="h-4 w-4 text-amber-300" />
                   Ultimate Purpose
                 </Link>
                 <Link
                   href={ROUTES.vault}
-                  className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/45 hover:bg-white/10"
+                  className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 transition-colors hover:border-amber-400/45 hover:bg-white/10"
                 >
                   <Vault className="h-4 w-4 text-amber-300" />
                   Vault
                 </Link>
               </div>
 
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">
                 Less talk. More deployment.
               </p>
             </div>
@@ -1064,29 +1081,34 @@ function toTime(input: LooseShort["date"]): number {
 ----------------------------------------------------------------------------- */
 const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
   return (
-    <Layout>
-      <Head>
-        <title>Abraham of London — Institutional Advisory, Canon, and Vault Assets</title>
-        <meta
-          name="description"
-          content="Consulting-grade decision systems for founders, leadership teams, and institutions. Strategy that survives pressure — with deployable assets, governance discipline, and execution cadence."
-        />
-        <meta property="og:title" content="Abraham of London — Institutional Operating System" />
-        <meta
-          property="og:description"
-          content="Less theatre. More operating system. Advisory + Canon + Vault assets built to survive scrutiny and scale."
-        />
-        <meta property="og:image" content="/assets/images/social/og-image.jpg" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Head>
-
+    <Layout
+      title="Abraham of London — Institutional Advisory, Canon, and Vault Assets"
+      description="Consulting-grade decision systems for founders, leadership teams, and institutions. Strategy that survives pressure — with deployable assets, governance discipline, and execution cadence."
+      ogImage="/assets/images/social/og-image.jpg"
+      canonicalUrl="/"
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Abraham of London",
+        url: (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(
+          /\/+$/,
+          ""
+        ),
+        description:
+          "Consulting-grade decision systems for founders, leadership teams, and institutions. Strategy that survives pressure — with deployable assets, governance discipline, and execution cadence.",
+      }}
+    >
       <main className="bg-black">
         <InstitutionalHero />
 
-        {/* Optional existing stats component — keep it early for credibility */}
+        {/* Credibility early */}
         <section className="bg-black">
           <AnimatedStatsBar />
         </section>
+
+        <SectionDivider tight />
+
+        <OperatorBriefing />
 
         <SectionDivider />
 
@@ -1102,10 +1124,13 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
         <SectionDivider />
 
-        {/* Existing ventures section (kept), positioned after spine so it reads as “portfolio proof” */}
         <section className="bg-black">
           <EnhancedVenturesSection />
         </section>
+
+        <SectionDivider tight />
+
+        <VaultTeaserRail />
 
         <SectionDivider tight />
 
@@ -1117,7 +1142,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
         <SectionDivider tight />
 
-        <ShortsStrip shorts={featuredShorts} />
+        <ExecutiveIntelligenceStrip shorts={featuredShorts} />
 
         <SectionDivider />
 

@@ -26,6 +26,8 @@ import {
   Network,
   Shield,
   Lock,
+  Mic2,
+  Calendar,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -129,8 +131,50 @@ export default function ConsultingPage(): JSX.Element {
         </div>
       </section>
 
+      {/* SPEAKING SECTION */}
+      <section id="speaking" className="bg-zinc-950 py-20 lg:py-32 border-t border-white/5">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-16 lg:grid-cols-2 items-center">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold mb-6">Keynotes & Appearances</p>
+              <h2 className="font-serif text-3xl font-semibold text-white sm:text-4xl mb-6">Speaking & Discourse</h2>
+              <p className="text-lg text-gray-400 leading-relaxed mb-8">
+                I provide keynote addresses and facilitate private sessions on institutional governance, 
+                frontier market architecture, and the intersection of principle and profit.
+              </p>
+              <div className="space-y-4">
+                {[
+                  "Keynote Addresses for Annual General Meetings",
+                  "Private Executive Retreat Facilitation",
+                  "Strategic Roundtables & Panel Discourse",
+                  "Institutional Guest Lectures"
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 text-cream/80">
+                    <CheckCircle className="h-4 w-4 text-gold" />
+                    <span className="text-sm font-medium">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="relative group">
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-gold/20 to-transparent opacity-25 blur transition duration-1000 group-hover:opacity-40" />
+              <div className="relative rounded-2xl border border-white/5 bg-black p-8 lg:p-12">
+                <Mic2 className="mb-6 h-10 w-10 text-gold" />
+                <h3 className="font-serif text-2xl font-semibold text-white mb-4">Engage for Speaking</h3>
+                <p className="text-gray-500 text-sm mb-8 italic">
+                  "Thought leadership is secondary to structural clarity. I speak to catalyze action, not just provide commentary."
+                </p>
+                <Link href="/contact?intent=speaking-engagement" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all">
+                  Submit Speaking Enquiry <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* METHODOLOGY & FIT */}
-      <section className="bg-zinc-950 py-20 lg:py-32 border-t border-gold/10">
+      <section className="bg-black py-20 lg:py-32 border-t border-gold/10">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-16 lg:grid-cols-2">
             <div>
@@ -153,7 +197,7 @@ export default function ConsultingPage(): JSX.Element {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-gold/20 bg-gold/5 p-8 lg:p-12">
+            <div id="book" className="rounded-3xl border border-gold/20 bg-gold/5 p-8 lg:p-12 scroll-mt-24">
               <ShieldCheck className="mb-6 h-10 w-10 text-gold" />
               <h3 className="font-serif text-2xl font-semibold text-cream">Is this for you?</h3>
               <ul className="mt-8 space-y-4">

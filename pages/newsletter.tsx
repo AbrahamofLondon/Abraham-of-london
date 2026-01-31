@@ -1,336 +1,189 @@
-// pages/newsletter.tsx
+/* pages/newsletter.tsx — THE STRATEGIC BRIEF (INTEGRITY MODE) */
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { 
+  ArrowRight, 
+  Mail, 
+  ShieldCheck, 
+  Users, 
+  Zap, 
+  Lock, 
+  BookOpen,
+  Calendar
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
+import NewsletterForm from "@/components/NewsletterForm";
 
-export default function NewsletterPage() {
+export default function NewsletterPage(): JSX.Element {
   const pageTitle = "The Inner Circle";
 
   return (
     <Layout
       title={pageTitle}
-      description="Join Abraham of London's Inner Circle - a curated newsletter for founders, fathers, and leaders who build with depth. Occasional, high-signal emails with early access to selected events."
+      description="Join the Inner Circle - a curated brief for founders, boards, and leaders building with depth. High-signal strategic insights and early access to mandates."
+      className="bg-black text-cream"
     >
-      <div className="min-h-screen bg-gradient-to-b from-charcoal to-black">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-gold/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-amber-200/5" />
-          <div className="relative mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <motion.h1
-                className="mb-6 font-serif text-4xl font-bold text-cream sm:text-5xl lg:text-6xl"
+      <div className="min-h-screen bg-black">
+        {/* HERO SECTION */}
+        <section className="relative overflow-hidden border-b border-gold/10 bg-gradient-to-b from-black via-zinc-950 to-black pt-24 pb-16 lg:pt-32 lg:pb-24">
+          <div className="absolute inset-0 bg-[url('/assets/images/texture-grain.png')] opacity-20 mix-blend-overlay" />
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
+                transition={{ duration: 0.8 }}
               >
-                The Inner Circle
-              </motion.h1>
-              <motion.p
-                className="mx-auto mb-8 max-w-2xl text-xl leading-relaxed text-gold/70"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Curated wisdom for founders, fathers, and leaders building
-                lasting legacies. Thoughtful emails, sent when there is
-                something genuinely worth your attention.
-              </motion.p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold mb-6">Strategic Intelligence</p>
+                <h1 className="font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+                  The Inner Circle
+                </h1>
+                <p className="mt-8 text-lg leading-relaxed text-gray-400 sm:text-xl">
+                  Curated wisdom for those navigating high-stakes complexity. 
+                  Sent only when there is structural clarity to be shared.
+                </p>
+              </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Main Content */}
-        <section className="py-16">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
-              {/* Left Column - Benefits */}
+        {/* MAIN CONTENT GRID */}
+        <section className="py-20 lg:py-32 bg-black">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="grid items-start gap-16 lg:grid-cols-2">
+              
+              {/* LEFT: THE PROMISE */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="space-y-8">
-                  <div>
-                    <h2 className="mb-4 font-serif text-2xl font-bold text-cream">
-                      Why Join The Inner Circle?
-                    </h2>
-                    <p className="leading-relaxed text-gold/70">
-                      Receive selective content that bridges ancient wisdom
-                      with modern leadership and fatherhood-delivered directly
-                      to your inbox, without noise or gimmicks.
-                    </p>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="flex gap-4">
-                      <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gold/20">
-                        <span className="text-sm text-gold">→</span>
+                <h2 className="font-serif text-3xl font-semibold text-white mb-8">Signal Over Noise</h2>
+                <div className="space-y-10">
+                  {[
+                    {
+                      icon: Calendar,
+                      title: "Priority Access",
+                      desc: "Early insight into private salons, board retreats, and limited advisory mandates before they are broadly announced."
+                    },
+                    {
+                      icon: BookOpen,
+                      title: "Strategic Volumes",
+                      desc: "Excerpts from the private Canon and frameworks for institutional governance and market architecture."
+                    },
+                    {
+                      icon: ShieldCheck,
+                      title: "Decision Hygiene",
+                      desc: "Practical notes on maintaining operating cadence, governance integrity, and leadership culture."
+                    }
+                  ].map((item, i) => (
+                    <div key={i} className="flex gap-6">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gold/20 bg-gold/5 text-gold">
+                        <item.icon size={24} />
                       </div>
                       <div>
-                        <h3 className="mb-2 font-semibold text-cream">
-                          Early Event Insight
-                        </h3>
-                        <p className="text-sm leading-relaxed text-gold/60">
-                          Hear first about upcoming salons, workshops, and
-                          intimate gatherings. Where capacity is limited,
-                          subscribers are often given early access to details.
-                        </p>
+                        <h3 className="text-lg font-bold text-cream mb-2">{item.title}</h3>
+                        <p className="text-sm leading-relaxed text-gray-500">{item.desc}</p>
                       </div>
                     </div>
+                  ))}
+                </div>
 
-                    <div className="flex gap-4">
-                      <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gold/20">
-                        <span className="text-sm text-gold">→</span>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 font-semibold text-cream">
-                          Exclusive Essays
-                        </h3>
-                        <p className="text-sm leading-relaxed text-gold/60">
-                          Deep-dive writings on leadership, legacy, fatherhood,
-                          and the art of meaningful conversation-often shared
-                          here before appearing anywhere else.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gold/20">
-                        <span className="text-sm text-gold">→</span>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 font-semibold text-cream">
-                          Private Resources
-                        </h3>
-                        <p className="text-sm leading-relaxed text-gold/60">
-                          Access to curated reading lists, conversation
-                          frameworks, and tools for personal and family growth
-                          that are not broadly published.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gold/20">
-                        <span className="text-sm text-gold">→</span>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 font-semibold text-cream">
-                          Community Insights
-                        </h3>
-                        <p className="text-sm leading-relaxed text-gold/60">
-                          Occasional reflections drawn from the collective
-                          wisdom of founders, leaders, and fathers within our
-                          wider network-shared with discretion and respect.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                    <h4 className="mb-3 font-serif font-semibold text-cream">
-                      What to Expect
-                    </h4>
-                    <ul className="space-y-2 text-sm text-gold/60">
-                      <li className="flex items-center gap-2">
-                        <span className="h-1 w-1 rounded-full bg-gold/40" />
-                        Typically 1-2 carefully crafted emails per month
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="h-1 w-1 rounded-full bg-gold/40" />
-                        Early insight into selected events and gatherings
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="h-1 w-1 rounded-full bg-gold/40" />
-                        Occasional exclusive interviews and Q&amp;A sessions
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="h-1 w-1 rounded-full bg-gold/40" />
-                        No routine list rental or sale; your attention is
-                        treated as a trust, not a commodity
-                      </li>
-                    </ul>
-                  </div>
+                <div className="mt-12 rounded-2xl border border-white/5 bg-zinc-900/30 p-8">
+                  <h4 className="font-serif text-lg font-semibold text-gold mb-4 text-center italic">Institutional Standard</h4>
+                  <ul className="grid grid-cols-2 gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                    <li className="flex items-center gap-2"><div className="h-1 w-1 bg-gold rounded-full" /> No routine spam</li>
+                    <li className="flex items-center gap-2"><div className="h-1 w-1 bg-gold rounded-full" /> High Signal Only</li>
+                    <li className="flex items-center gap-2"><div className="h-1 w-1 bg-gold rounded-full" /> Encrypted Data</li>
+                    <li className="flex items-center gap-2"><div className="h-1 w-1 bg-gold rounded-full" /> Easy Revocation</li>
+                  </ul>
                 </div>
               </motion.div>
 
-              {/* Right Column - Signup Form */}
+              {/* RIGHT: THE INTAKE */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="lg:sticky lg:top-8"
+                className="lg:sticky lg:top-32"
               >
-                <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-charcoal/80 to-charcoal/60 p-8 backdrop-blur-sm">
-                  <div className="mb-8 text-center">
-                    <h3 className="mb-3 font-serif text-2xl font-bold text-cream">
-                      Join The Inner Circle
-                    </h3>
-                    <p className="text-gold/70">
-                      Enter your email to receive curated insights and
-                      occasional invitations. You&apos;re free to leave at any
-                      time.
-                    </p>
+                <div className="rounded-3xl border border-gold/20 bg-gold/5 p-8 lg:p-12 backdrop-blur-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Lock size={120} className="text-gold" />
                   </div>
+                  
+                  <div className="relative">
+                    <h3 className="font-serif text-2xl font-bold text-white mb-4">Request Subscription</h3>
+                    <p className="text-gray-400 mb-10 text-sm">
+                      Enter your institutional or personal email to join the distribution list for The Inner Circle.
+                    </p>
 
-                  {/* Reuse your existing NewsletterForm component */}
-                  {/* Ensure this component itself does NOT touch window/document at build time */}
-                  {/* If it does, we'll refactor that next. */}
-                  {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
-                  {React.createElement(require("@/components/NewsletterForm").default, {
-                    variant: "premium",
-                    placeholder: "your.email@example.com",
-                    buttonText: "Subscribe to Inner Circle",
-                  })}
+                    <NewsletterForm 
+                      variant="premium" 
+                      placeholder="advisory@firm.com"
+                      buttonText="Join the Circle"
+                    />
 
-                  <div className="mt-6 space-y-2 text-center">
-                    <p className="text-xs text-gold/40">
-                      By subscribing, you consent to receive email
-                      communications from Abraham of London about content,
-                      events, and related offerings.
-                    </p>
-                    <p className="text-xs text-gold/40">
-                      You can unsubscribe at any time via the link in each
-                      email. For details on how we handle your data, please see
-                      our{" "}
-                      <Link
-                        href="/privacy-policy"
-                        className="text-gold underline underline-offset-2 hover:text-amber-200"
-                      >
-                        Privacy Policy
-                      </Link>{" "}
-                      and{" "}
-                      <Link
-                        href="/cookie-policy"
-                        className="text-gold underline underline-offset-2 hover:text-amber-200"
-                      >
-                        Cookie Policy
-                      </Link>
-                      .
-                    </p>
-                  </div>
-                </div>
-
-                {/* Testimonials */}
-                <div className="mt-8 space-y-4">
-                  <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                    <p className="mb-3 text-sm italic leading-relaxed text-gold/70">
-                      &quot;Abraham&apos;s newsletter is the one email I
-                      actually make time to read. The reflections on legacy and
-                      leadership have shifted how I show up at home and in the
-                      boardroom.&quot;
-                    </p>
-                    <p className="text-sm font-semibold text-gold">
-                      - Founder, Tech Company
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                    <p className="mb-3 text-sm italic leading-relaxed text-gold/70">
-                      &quot;The curated nature of The Inner Circle means less
-                      noise and more depth. The invite-only gatherings I heard
-                      about through the list have been worth their weight in
-                      gold.&quot;
-                    </p>
-                    <p className="text-sm font-semibold text-gold">
-                      - CEO, Financial Services
-                    </p>
+                    <div className="mt-8 pt-8 border-t border-gold/10">
+                      <div className="space-y-4">
+                        <blockquote className="border-l border-gold/40 pl-4 py-1">
+                          <p className="text-sm italic text-gray-400">
+                            "The only brief I read twice. It provides structural clarity where others provide commentary."
+                          </p>
+                          <cite className="mt-2 block text-[10px] font-bold uppercase tracking-widest text-gold">— Managing Director, PE</cite>
+                        </blockquote>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
+
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section className="border-t border-gold/20 py-16">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 text-center">
-              <h2 className="mb-4 font-serif text-3xl font-bold text-cream">
-                Common Questions
-              </h2>
-              <p className="mx-auto max-w-2xl text-gold/70">
-                A brief overview of what you are-and are not-signing up for
-                when you join The Inner Circle.
-              </p>
+        {/* FAQ SECTION */}
+        <section className="border-t border-white/5 bg-zinc-950 py-20 lg:py-32">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-16 text-center">
+              <h2 className="font-serif text-3xl font-bold text-white mb-4">Terms of Engagement</h2>
+              <p className="text-gray-500">Frequently asked questions regarding the distribution.</p>
             </div>
 
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                <h3 className="mb-3 font-serif font-semibold text-cream">
-                  How often will I receive emails?
-                </h3>
-                <p className="text-sm leading-relaxed text-gold/70">
-                  Typically 1-2 times per month. Frequency may vary slightly
-                  depending on season and relevance, but the bias is firmly
-                  towards quality over volume.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                <h3 className="mb-3 font-serif font-semibold text-cream">
-                  Is this different from event notifications?
-                </h3>
-                <p className="text-sm leading-relaxed text-gold/70">
-                  Yes. While subscribers may receive earlier insight into
-                  selected events, the focus of The Inner Circle is depth:
-                  essays, reflections, and frameworks that stand on their own,
-                  whether or not you attend any gathering.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                <h3 className="mb-3 font-serif font-semibold text-cream">
-                  Can I suggest topics or ask questions?
-                </h3>
-                <p className="text-sm leading-relaxed text-gold/70">
-                  In many cases, yes. Replies to the newsletter are monitored,
-                  and topic suggestions from subscribers often influence future
-                  essays and dialogues. We cannot promise an individual
-                  response to every message, but all constructive feedback is
-                  reviewed.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                <h3 className="mb-3 font-serif font-semibold text-cream">
-                  What if I want to unsubscribe?
-                </h3>
-                <p className="text-sm leading-relaxed text-gold/70">
-                  Every email includes a one-click unsubscribe link. If you
-                  prefer, you can also contact us using the details in our{" "}
-                  <Link
-                    href="/privacy-policy"
-                    className="text-gold underline underline-offset-2 hover:text-amber-200"
-                  >
-                    Privacy Policy
-                  </Link>
-                  , and we will action your request in line with applicable
-                  data protection laws.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                <h3 className="mb-3 font-serif font-semibold text-cream">
-                  How is my data used?
-                </h3>
-                <p className="text-sm leading-relaxed text-gold/70">
-                  Your email address is used to send you the newsletter and
-                  related communications you have opted into. We may also use
-                  high-level engagement metrics (opens, clicks) to refine what
-                  we send. We do not sell your data and handle it in accordance
-                  with our{" "}
-                  <Link
-                    href="/privacy-policy"
-                    className="text-gold underline underline-offset-2 hover:text-amber-200"
-                  >
-                    Privacy Policy
-                  </Link>
-                  .
-                </p>
-              </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              {[
+                {
+                  q: "How often are notes sent?",
+                  a: "Typically 1-2 times per month. We value your attention; frequency is dictated by relevance, not a schedule."
+                },
+                {
+                  q: "Is this for everyone?",
+                  a: "The content is curated for founders, board members, and leaders. It assumes a base level of operational responsibility."
+                },
+                {
+                  q: "Is my data shared?",
+                  a: "Never. Your email is used strictly for The Inner Circle distribution and handled under GDPR compliance."
+                },
+                {
+                  q: "How do I unsubscribe?",
+                  a: "Every brief contains a secure one-click revocation link. Your data is purged immediately upon request."
+                }
+              ].map((faq, i) => (
+                <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                  <h4 className="font-bold text-cream mb-2 text-sm uppercase tracking-wider">{faq.q}</h4>
+                  <p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-16 text-center">
+              <p className="text-xs text-gray-600">
+                For deeper concerns, view our <Link href="/privacy-policy" className="text-gold/60 hover:text-gold transition-colors">Privacy Policy</Link>.
+              </p>
             </div>
           </div>
         </section>
@@ -338,4 +191,3 @@ export default function NewsletterPage() {
     </Layout>
   );
 }
-

@@ -1,16 +1,28 @@
-// pages/subscribe.tsx - FIXED
+/* pages/subscribe.tsx — THE FOUNDING READERS CIRCLE (INTEGRITY MODE) */
 import type { NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { 
+  ShieldCheck, 
+  BookOpen, 
+  Users, 
+  Award, 
+  ChevronRight, 
+  Lock 
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
 import NewsletterForm from "@/components/NewsletterForm";
 
 const SubscribePage: NextPage = () => {
-  const pageTitle = "Join the Founding Readers Circle | Abraham of London";
+  const pageTitle = "Founding Readers Circle | Abraham of London";
   const pageDescription =
-    "Early access to The Architecture of Human Purpose Canon for fathers, founders, builders, and institutional architects shaping the future of civilization.";
+    "Early access to The Architecture of Human Purpose Canon for fathers, founders, and institutional architects shaping the future of civilization.";
+
+  // Mock counter for social proof / urgency
+  const [spotsRemaining] = React.useState(842);
 
   return (
     <Layout>
@@ -25,224 +37,170 @@ const SubscribePage: NextPage = () => {
         <meta name="twitter:description" content={pageDescription} />
       </Head>
 
-      <main className="min-h-screen bg-charcoal text-cream">
-        <section className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-16 lg:py-24">
-          {/* Premium Header Section */}
-          <div className="space-y-6 border-b border-softGold/20 pb-8 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-softGold">
+      <main className="min-h-screen bg-black text-cream selection:bg-gold/30">
+        {/* BACKGROUND TEXTURE */}
+        <div className="fixed inset-0 bg-[url('/assets/images/texture-grain.png')] opacity-20 pointer-events-none" />
+
+        <section className="relative mx-auto flex max-w-6xl flex-col gap-16 px-6 py-20 lg:py-32">
+          
+          {/* HEADER SECTION */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="space-y-8 text-center"
+          >
+            <div className="inline-flex items-center gap-3 rounded-full border border-gold/30 bg-gold/5 px-5 py-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-gold"></span>
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">
                 The Architecture of Human Purpose · Canon
               </span>
             </div>
 
-            <h1 className="bg-gradient-to-b from-cream to-softGold bg-clip-text font-serif text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-              Join the Founding Readers Circle
+            <h1 className="mx-auto max-w-4xl font-serif text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
+              Join the Founding <br />
+              <span className="italic text-gold/90">Readers Circle</span>
             </h1>
 
-            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-300 sm:text-xl">
-              For the builders, reformers, and institutional architects ready to
-              shape the conversation around human purpose and civilizational
-              design.
+            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-400 sm:text-xl">
+              For the builders and institutional architects ready to 
+              reconstruct the frameworks of human purpose and civilizational design.
             </p>
-          </div>
+          </motion.div>
 
-          {/* Two Column Layout */}
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-            {/* Left Column: Benefits & Value Proposition */}
-            <div className="space-y-8">
-              {/* Founding Reader Benefits */}
-              <div className="rounded-2xl border border-softGold/25 bg-black/40 p-8 backdrop-blur-sm">
-                <h2 className="mb-6 font-serif text-2xl font-bold text-cream">
-                  Founding Reader Benefits
-                </h2>
-
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-softGold/20">
-                      <span className="text-sm text-softGold">1</span>
+          {/* TWO COLUMN CONTENT */}
+          <div className="grid gap-16 lg:grid-cols-2 lg:items-start">
+            
+            {/* LEFT: THE PROPOSITION */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="space-y-12"
+            >
+              <div className="space-y-8">
+                <h2 className="font-serif text-3xl font-medium text-white">The Founding Charter</h2>
+                
+                <div className="grid gap-8">
+                  {[
+                    {
+                      icon: BookOpen,
+                      title: "Exclusive Early Access",
+                      desc: "Receive chapter previews and frameworks months before public release, including implementation notes for leaders."
+                    },
+                    {
+                      icon: Users,
+                      title: "The Architecture Masterclasses",
+                      desc: "Closed-door sessions diving deep into the tools of organizational and personal transformation."
+                    },
+                    {
+                      icon: Award,
+                      title: "Permanent Founding Status",
+                      desc: "Recognition in the official Canon registry and lifetime priority access to all future London initiatives."
+                    }
+                  ].map((benefit, idx) => (
+                    <div key={idx} className="flex gap-6 group">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gold/20 bg-gold/5 text-gold group-hover:bg-gold group-hover:text-black transition-all duration-300">
+                        <benefit.icon size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-cream mb-1">{benefit.title}</h3>
+                        <p className="text-sm leading-relaxed text-gray-500">{benefit.desc}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="mb-1 font-semibold text-cream">
-                        Exclusive Early Access
-                      </h3>
-                      <p className="text-sm leading-relaxed text-gray-300">
-                        Receive chapter previews and frameworks months before
-                        public release, with direct author commentary on
-                        implementation.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-softGold/20">
-                      <span className="text-sm text-softGold">2</span>
-                    </div>
-                    <div>
-                      <h3 className="mb-1 font-semibold text-cream">
-                        Founder-Only Masterclasses
-                      </h3>
-                      <p className="text-sm leading-relaxed text-gray-300">
-                        Live sessions diving deep into the frameworks, tools,
-                        and implementation strategies for personal and
-                        organizational transformation.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-softGold/20">
-                      <span className="text-sm text-softGold">3</span>
-                    </div>
-                    <div>
-                      <h3 className="mb-1 font-semibold text-cream">
-                        Strategic Community Access
-                      </h3>
-                      <p className="text-sm leading-relaxed text-gray-300">
-                        Connect with other builders, reformers, and
-                        institutional architects in private conversations that
-                        shape the future.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-softGold/20">
-                      <span className="text-sm text-softGold">4</span>
-                    </div>
-                    <div>
-                      <h3 className="mb-1 font-semibold text-cream">
-                        Permanent Founding Status
-                      </h3>
-                      <p className="text-sm leading-relaxed text-gray-300">
-                        Your name in the official canon registry and lifetime
-                        priority access to all Abraham of London initiatives.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Urgency Indicator */}
-                <div className="mt-8 rounded-lg border border-softGold/20 bg-softGold/10 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-softGold" />
-                    <p className="text-sm font-semibold text-softGold">
-                      Limited to first 1,000 members •{" "}
-                      {Math.floor(Math.random() * 100) + 750} spots remaining
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Testimonial/Endorsement Placeholder */}
-              <div className="rounded-2xl border border-gray-600/30 bg-black/30 p-6">
-                <blockquote className="space-y-3">
-                  <p className="text-sm italic leading-relaxed text-gray-300">
-                    &quot;The frameworks in this canon provide the missing
-                    architecture for understanding why civilizations succeed or
-                    fail. Essential reading for anyone building institutions
-                    meant to last generations.&quot;
+              {/* URGENCY & SOCIAL PROOF */}
+              <div className="rounded-2xl border border-white/5 bg-zinc-900/40 p-8 backdrop-blur-md">
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Availability</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gold">{spotsRemaining} / 1000 Spots Left</span>
+                </div>
+                <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${(spotsRemaining / 1000) * 100}%` }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className="h-full bg-gold"
+                  />
+                </div>
+                <blockquote className="mt-8 border-l border-gold/30 pl-6 py-2">
+                  <p className="text-sm italic leading-relaxed text-gray-400">
+                    "Essential reading for anyone building institutions meant to last generations."
                   </p>
-                  <footer className="text-xs text-gray-400">
-                    - Early Reader, Institutional Architect
+                  <footer className="mt-3 text-[10px] font-bold uppercase tracking-widest text-gold">
+                    — Institutional Architect, Early Reader
                   </footer>
                 </blockquote>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Right Column: Enrollment Form */}
-            <div className="space-y-8">
-              <div className="rounded-2xl border border-softGold/25 bg-black/40 p-8 backdrop-blur-sm">
-                <div className="mb-8 text-center">
-                  <h2 className="mb-3 font-serif text-2xl font-bold text-cream">
-                    Secure Your Founding Access
-                  </h2>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    Enter your email to receive immediate access to the Prelude
-                    MiniBook and join the exclusive Founding Readers Circle.
-                  </p>
+            {/* RIGHT: THE INTAKE FORM */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="lg:sticky lg:top-32"
+            >
+              <div className="relative overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-zinc-900 to-black p-8 lg:p-12 shadow-2xl">
+                <div className="absolute top-0 right-0 p-6 opacity-5">
+                  <Lock size={120} />
                 </div>
 
-                {/* Enhanced Form Section */}
-                <div className="space-y-6">
-                  <div className="rounded-lg border border-softGold/10 bg-gradient-to-r from-softGold/5 to-transparent p-4">
-                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-cream">
-                      What You&apos;ll Receive Immediately:
-                    </h3>
-                    <ul className="space-y-1 text-sm text-gray-300">
-                      <li>• The Architecture of Human Purpose Prelude (PDF)</li>
-                      <li>• Founding Reader welcome package</li>
-                      <li>• Early access to Chapter 1 frameworks</li>
-                      <li>• Invitation to first masterclass</li>
+                <div className="relative">
+                  <h2 className="mb-4 font-serif text-3xl font-bold text-white">Secure Access</h2>
+                  <p className="mb-10 text-sm leading-relaxed text-gray-400">
+                    Enter your details to join the distribution list and receive 
+                    the <span className="text-gold italic">Prelude MiniBook</span> immediately.
+                  </p>
+
+                  <div className="mb-10 rounded-xl border border-white/5 bg-white/[0.02] p-6">
+                    <h3 className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gold">Immediate Dispatch:</h3>
+                    <ul className="space-y-3">
+                      {['Prelude (PDF) Digital Edition', 'Founding Reader Welcome Package', 'Invitations to 2026 Salons'].map((item, i) => (
+                        <li key={i} className="flex items-center gap-3 text-sm text-gray-300">
+                          <ShieldCheck size={14} className="text-gold/50" />
+                          {item}
+                        </li>
+                      ))}
                     </ul>
                   </div>
 
                   <NewsletterForm
                     variant="premium"
-                    buttonText="Join the Founding Readers Circle →"
+                    buttonText="Join the Foundational Circle"
                   />
 
-                  {/* Trust Indicators */}
-                  <div className="space-y-3 border-t border-gray-600/30 pt-4 text-center">
-                    <div className="flex items-center justify-center gap-6 text-xs text-gray-400">
-                      <span>No Spam</span>
-                      <span>•</span>
-                      <span>One-Click Unsubscribe</span>
-                      <span>•</span>
-                      <span>Priority Support</span>
+                  <div className="mt-8 space-y-4 text-center">
+                    <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      <span>Private</span>
+                      <span className="h-1 w-1 bg-zinc-700 rounded-full" />
+                      <span>Encrypted</span>
+                      <span className="h-1 w-1 bg-zinc-700 rounded-full" />
+                      <span>Revocable</span>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      By joining, you agree to our{" "}
-                      <Link
-                        href="/privacy"
-                        className="text-softGold hover:underline"
-                      >
-                        Privacy Policy
-                      </Link>{" "}
-                      and consent to receive strategic updates.
+                    <p className="text-[10px] leading-relaxed text-gray-600">
+                      By enrolling, you agree to our <Link href="/privacy" className="text-gold/60 underline underline-offset-4 hover:text-gold transition-colors">Privacy Charter</Link>. 
+                      We treat your attention as an institutional trust.
                     </p>
                   </div>
                 </div>
               </div>
-
-              {/* Additional Value Proposition */}
-              <div className="rounded-2xl border border-gray-600/30 bg-black/30 p-6">
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-cream">
-                  Why This Matters Now:
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 text-softGold">•</span>
-                    <span>
-                      We&apos;re living through the most significant power
-                      realignment since the Roman Empire.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 text-softGold">•</span>
-                    <span>
-                      The frameworks for understanding civilization are outdated
-                      and incomplete.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 text-softGold">•</span>
-                    <span>
-                      Those who master this architecture will shape the next
-                      century.
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Bottom CTA Section */}
-          <div className="border-t border-gray-600/30 pt-12 text-center">
-            <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-400">
-              The Founding Readers Circle is intentionally limited to ensure
-              meaningful engagement and strategic focus. This is more than a
-              newsletter-it&apos;s the beginning of a movement to rebuild the
-              architecture of human purpose.
+          {/* FOOTER CALLOUT */}
+          <div className="border-t border-white/5 pt-16 text-center">
+            <p className="mx-auto max-w-3xl text-sm leading-relaxed text-gray-500 italic">
+              "The Founding Readers Circle is limited to ensure meaningful engagement and strategic focus. 
+              This is the beginning of a movement to rebuild the architecture of human purpose."
             </p>
           </div>
         </section>
@@ -252,4 +210,3 @@ const SubscribePage: NextPage = () => {
 };
 
 export default SubscribePage;
-

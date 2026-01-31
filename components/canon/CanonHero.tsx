@@ -1,18 +1,16 @@
-// components/canon/CanonHero.tsx - SIMPLE FIX (NO NEED FOR safe-compat.ts)
+// components/canon/CanonHero.tsx — GROWN-UP, DISCIPLINED (BLACK + AMBER + ZINC)
 import React from "react";
 import Image from "next/image";
-import { 
-  safeString, 
-  safeNumber, 
+import {
+  safeString,
+  safeNumber,
   safeImageSrc,
   safeArray,
-  safeUrl,
   classNames,
-  safeFirstChar, // Already exists in /lib/shared/safe.ts
-  safeSlice, // Already exists in /lib/shared/safe.ts  
-  safeCapitalize, // Already exists in /lib/shared/safe.ts
-} from "@/lib/utils/safe"; // ✅ Use the main safe module
-import { BookOpen, Clock, Award, Download, Sparkles, Calendar, ArrowRight } from "lucide-react";
+  safeFirstChar,
+  safeSlice,
+} from "@/lib/utils/safe";
+import { BookOpen, Clock, Download, Calendar, ArrowRight, Sparkles } from "lucide-react";
 
 interface CanonHeroProps {
   title?: string | null;
@@ -26,238 +24,180 @@ interface CanonHeroProps {
   tags?: (string | null | undefined)[];
   author?: string | null;
   publishedDate?: string | Date | null;
+
+  // Optional: allow caller to wire buttons without rewriting hero
+  primaryHref?: string;
+  secondaryHref?: string;
 }
 
 const difficultyConfig = {
-  beginner: {
-    label: "Beginner",
-    classes: "bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 text-emerald-400 border-emerald-500/30",
-    icon: "🌱"
-  },
-  intermediate: {
-    label: "Intermediate",
-    classes: "bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-400 border-amber-500/30",
-    icon: "⚡"
-  },
-  advanced: {
-    label: "Advanced",
-    classes: "bg-gradient-to-r from-rose-500/20 to-rose-600/10 text-rose-400 border-rose-500/30",
-    icon: "🔥"
-  }
-};
+  beginner: { label: "Foundations" },
+  intermediate: { label: "Practitioner" },
+  advanced: { label: "Advanced" },
+} as const;
 
 const CanonHero: React.FC<CanonHeroProps> = (props) => {
-  // Extract and sanitize all values
   const title = safeString(props.title, "Manuscript");
   const subtitle = safeString(props.subtitle);
-  const description = safeString(props.description, "A foundational text for builders and thinkers.");
+  const description = safeString(
+    props.description,
+    "A disciplined text for builders—strategy, governance, and operational clarity."
+  );
   const category = safeString(props.category, "Canon");
-  const difficulty = safeString(props.difficulty, "beginner").toLowerCase() as keyof typeof difficultyConfig;
+  const difficultyKey = safeString(props.difficulty, "beginner").toLowerCase() as keyof typeof difficultyConfig;
   const estimatedHours = safeNumber(props.estimatedHours, 0);
   const version = safeString(props.version, "1.0.0");
   const author = safeString(props.author, "Abraham of London");
-  const publishedDate = props.publishedDate;
   const tags = safeArray<string>(props.tags);
-  
-  // Get difficulty configuration
-  const diffConfig = difficultyConfig[difficulty] || difficultyConfig.beginner;
-  
-  // Format hours
-  const hoursText = estimatedHours > 0 
-    ? `${Math.round(estimatedHours)} ${estimatedHours === 1 ? 'hour' : 'hours'}`
-    : "Self-paced";
-  
-  // Format date
-  const formattedDate = publishedDate 
-    ? new Date(publishedDate).toLocaleDateString('en-GB', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+
+  const diff = difficultyConfig[difficultyKey] || difficultyConfig.beginner;
+
+  const hoursText =
+    estimatedHours > 0
+      ? `${Math.round(estimatedHours)} ${Math.round(estimatedHours) === 1 ? "hour" : "hours"}`
+      : "Self-paced";
+
+  const formattedDate = props.publishedDate
+    ? new Date(props.publishedDate).toLocaleDateString("en-GB", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       })
-    : "Coming soon";
-  
-  // Safe image source
+    : "Staged release";
+
   const imageSrc = safeImageSrc(props.coverImage);
 
+  const primaryHref = props.primaryHref || "#";
+  const secondaryHref = props.secondaryHref || "#";
+
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-950 to-black">
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/5 via-transparent to-purple-900/5 animate-gradient-shift" />
-      
-      {/* Subtle grid overlay */}
-      <div className="absolute inset-0 bg-[size:50px_50px] bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)]" />
-      
-      <div className="relative mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-24">
-          {/* Left Column: Content */}
+    <section className="relative overflow-hidden bg-black">
+      {/* disciplined surface */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-500/[0.045] via-transparent to-transparent" />
+        <div className="absolute inset-0 [background:radial-gradient(1100px_520px_at_18%_-10%,rgba(245,158,11,0.11),transparent_55%),radial-gradient(900px_480px_at_90%_10%,rgba(255,255,255,0.04),transparent_55%)]" />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-18">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* Left */}
           <div className="space-y-8">
-            {/* Meta badges */}
+            {/* Meta */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-semibold backdrop-blur-sm border border-white/10">
-                <Sparkles className="h-3 w-3 text-gold" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-sm font-semibold text-zinc-50">
+                <Sparkles className="h-4 w-4 text-amber-300" />
                 {category}
               </span>
-              
-              <span className={classNames(
-                "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border",
-                diffConfig.classes
-              )}>
-                <span>{diffConfig.icon}</span>
-                {diffConfig.label}
+
+              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-zinc-200">
+                {diff.label}
               </span>
-              
-              {estimatedHours > 0 && (
-                <span className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-400 border border-blue-500/20">
-                  <Clock className="h-3 w-3" />
-                  {hoursText}
-                </span>
-              )}
-              
-              <span className="font-mono text-xs text-gray-400">
-                v{version}
+
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-zinc-200">
+                <Clock className="h-4 w-4 text-amber-300/90" />
+                {hoursText}
               </span>
+
+              <span className="font-mono text-xs text-zinc-500">v{version}</span>
             </div>
 
-            {/* Title & Subtitle */}
+            {/* Title */}
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-                <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-                  {title}
-                </span>
+              <h1 className="font-serif text-3xl md:text-5xl font-semibold tracking-tight text-zinc-50 leading-tight">
+                {title}
               </h1>
-              
-              {subtitle && (
-                <h2 className="text-xl font-light text-purple-200 md:text-2xl">
+
+              {subtitle ? (
+                <p className="text-base md:text-xl text-zinc-300/90 font-light leading-relaxed">
                   {subtitle}
-                </h2>
-              )}
+                </p>
+              ) : null}
             </div>
 
             {/* Description */}
-            <p className="text-lg leading-relaxed text-gray-300 max-w-3xl">
+            <p className="text-sm md:text-[15px] leading-relaxed text-zinc-300/90 font-light max-w-2xl">
               {description}
             </p>
 
-            {/* Metadata */}
+            {/* Author / date */}
             <div className="flex flex-wrap items-center gap-6 text-sm">
-              <div className="flex items-center gap-2 text-gray-400">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">
-                    {safeFirstChar(author, 'A')}
+              <div className="flex items-center gap-3 text-zinc-300/90">
+                <div className="h-9 w-9 rounded-full bg-amber-300/10 border border-amber-300/15 flex items-center justify-center">
+                  <span className="text-xs font-bold text-amber-200">
+                    {safeFirstChar(author, "A")}
                   </span>
                 </div>
-                <span>{author}</span>
+                <span className="font-light">{author}</span>
               </div>
-              
-              <div className="flex items-center gap-2 text-gray-400">
-                <Calendar className="h-4 w-4" />
-                <span>{formattedDate}</span>
-              </div>
-              
-              <div className="flex items-center gap-2 text-gray-400">
-                <Award className="h-4 w-4" />
-                <span>Certificate Available</span>
+
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Calendar className="h-4 w-4 text-amber-300/90" />
+                <span className="font-light">{formattedDate}</span>
               </div>
             </div>
 
             {/* Tags */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-4">
+            {tags.length > 0 ? (
+              <div className="flex flex-wrap gap-2 pt-2">
                 {safeSlice(tags, 0, 6).map((tag, index) => (
                   <span
-                    key={index}
-                    className="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors cursor-pointer border border-white/10 hover:border-white/20"
+                    key={`${tag}-${index}`}
+                    className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
                   >
                     #{tag}
                   </span>
                 ))}
               </div>
-            )}
+            ) : null}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 pt-6">
-              <button className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-6 py-3 font-semibold text-black transition-all hover:shadow-lg hover:shadow-gold/20">
+            {/* Buttons */}
+            <div className="flex flex-wrap gap-4 pt-2">
+              <a
+                href={primaryHref}
+                className="group inline-flex items-center gap-2 rounded-xl bg-amber-300 px-6 py-3 font-semibold text-black hover:bg-amber-200 transition-colors shadow-lg shadow-amber-300/10"
+              >
                 <BookOpen className="h-5 w-5" />
                 <span>Start Reading</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
-              
-              <button className="flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20">
-                <Download className="h-5 w-5" />
+              </a>
+
+              <a
+                href={secondaryHref}
+                className="inline-flex items-center gap-2 rounded-xl border border-amber-300/25 bg-amber-300/[0.06] px-6 py-3 font-semibold text-zinc-50 hover:border-amber-300/40 hover:bg-amber-300/[0.10] transition-colors"
+              >
+                <Download className="h-5 w-5 text-amber-300" />
                 <span>Download PDF</span>
-              </button>
+              </a>
             </div>
           </div>
 
-          {/* Right Column: Cover Image */}
+          {/* Right */}
           <div className="relative">
-            {/* Floating image container */}
-            <div className="relative h-[480px] overflow-hidden rounded-3xl shadow-2xl border border-white/10 group">
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
               {imageSrc ? (
-                <Image
-                  src={imageSrc}
-                  alt={title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    target.style.display = 'none';
-                    target.parentElement?.classList.add('bg-gradient-to-br', 'from-purple-900', 'to-blue-900');
-                  }}
-                />
+                <div className="relative h-[440px] md:h-[520px]">
+                  <Image
+                    src={imageSrc}
+                    alt={title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                  />
+                </div>
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-blue-900" />
+                <div className="h-[440px] md:h-[520px] bg-[radial-gradient(900px_480px_at_25%_0%,rgba(245,158,11,0.14),transparent_55%)]" />
               )}
-              
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              
-              {/* Decorative corner accents */}
-              <div className="absolute top-0 left-0 h-12 w-12 border-t-2 border-l-2 border-gold/50 rounded-tl-xl" />
-              <div className="absolute bottom-0 right-0 h-12 w-12 border-b-2 border-r-2 border-gold/50 rounded-br-xl" />
+
+              {/* Corner accents (subtle) */}
+              <div className="pointer-events-none absolute top-0 left-0 h-12 w-12 border-t border-l border-amber-300/35 rounded-tl-2xl" />
+              <div className="pointer-events-none absolute bottom-0 right-0 h-12 w-12 border-b border-r border-amber-300/35 rounded-br-2xl" />
             </div>
-            
-            {/* Decorative floating elements */}
-            <div className="absolute -top-6 -left-6 h-48 w-48 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-3xl animate-pulse-slow" />
-            <div className="absolute -bottom-6 -right-6 h-48 w-48 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 blur-3xl animate-pulse-slower" />
           </div>
         </div>
       </div>
-      
-      {/* Subtle scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="h-8 w-px bg-gradient-to-b from-gold via-transparent to-transparent" />
-      </div>
-      
-      {/* Custom animations */}
-      <style jsx>{`
-        @keyframes gradient-shift {
-          0%, 100% { opacity: 0.1; }
-          50% { opacity: 0.3; }
-        }
-        .animate-gradient-shift {
-          animation: gradient-shift 8s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.05; }
-          50% { opacity: 0.15; }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 6s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-slower {
-          0%, 100% { opacity: 0.03; }
-          50% { opacity: 0.1; }
-        }
-        .animate-pulse-slower {
-          animation: pulse-slower 10s ease-in-out infinite;
-        }
-      `}</style>
-    </div>
+    </section>
   );
 };
 

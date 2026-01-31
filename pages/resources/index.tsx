@@ -104,7 +104,7 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
       </Head>
 
       <main className="min-h-screen bg-black text-cream">
-        <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+        <section id="founder-tools" className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
           <header className="mb-16 border-b border-gold/10 pb-12 text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Strategic Assets</span>
@@ -210,6 +210,10 @@ const ResourcesIndexPage: NextPage<Props> = ({ resources }) => {
               <h3 className="font-serif text-2xl italic text-cream opacity-50">Resources are being initialized…</h3>
             </div>
           )}
+        </section>
+
+        <section id="leadership" className="mx-auto max-w-6xl px-6 pb-16 lg:pb-24">
+          {/* Leadership content can be added here */}
         </section>
       </main>
     </Layout>

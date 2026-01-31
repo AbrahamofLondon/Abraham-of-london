@@ -1,16 +1,12 @@
-// components/homepage/ContentShowcase.tsx
+// components/homepage/ContentShowcase.tsx — SIGNAL FEED (institutional)
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, FileText } from "lucide-react";
-import BlogPostCard from "@/components/BlogPostCard"; // ✅ FIX (default import)
+import { ArrowRight, BookOpen, Vault, PenTool } from "lucide-react";
+
+import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/books/BookCard";
 import { safeSlice } from "@/lib/utils/safe";
-
-
-// -----------------------------------------------------------------------------
-// Types - ENSURE required properties exist
-// -----------------------------------------------------------------------------
 
 interface ContentItem {
   slug: string;
@@ -33,7 +29,6 @@ interface ContentItem {
 
 const asBlogPost = (item: ContentItem): any => {
   const { slug, title, excerpt, description, ...rest } = item;
-
   return {
     slug: slug || "",
     title: title || "Untitled",
@@ -49,7 +44,6 @@ const asBlogPost = (item: ContentItem): any => {
 
 const asBook = (item: ContentItem): any => {
   const { slug, title, excerpt, description, _id, id, ...rest } = item;
-
   return {
     slug: slug || "",
     title: title || "Untitled",
@@ -76,135 +70,149 @@ interface ContentShowcaseProps {
 
 export default function ContentShowcase({
   items,
-  title = "Latest Content",
-  description = "Explore our latest writings and resources",
-  viewAllHref = "/content",
-  viewAllLabel = "View all content",
+  title = "Signal Feed",
+  description = "High-signal writing and assets engineered for deployment — not entertainment.",
+  viewAllHref = "/resources",
+  viewAllLabel = "Browse resources",
   maxItems = 6,
   className = "",
 }: ContentShowcaseProps): JSX.Element {
   const validItems = (items || []).filter(
-    (item) => item && typeof item === "object" && item.slug && item.title,
+    (item) => item && typeof item === "object" && item.slug && item.title
   );
 
   const displayedItems = safeSlice(validItems, 0, maxItems);
 
   return (
-    <section className={`py-16 ${className}`}>
-      <div className="mx-auto max-w-7xl px-4">
+    <section className={`relative bg-black py-20 ${className}`}>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_40%,rgba(245,158,11,0.06),transparent_55%)]" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-12 text-center"
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5 }}
+          className="mb-14"
         >
-          <h2 className="font-serif text-3xl font-semibold text-deepCharcoal md:text-4xl">
+          <p className="text-xs font-bold uppercase tracking-[0.35em] text-amber-300">
+            Intelligence
+          </p>
+          <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
             {title}
           </h2>
           {description ? (
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
+            <p className="mt-6 max-w-3xl text-xl font-light text-gray-300">
               {description}
             </p>
           ) : null}
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/canon"
+              className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/10 px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-amber-200 hover:border-amber-400/45 hover:bg-amber-500/15 transition-all"
+            >
+              <BookOpen className="h-4 w-4 text-amber-300" />
+              Canon
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/downloads/vault"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/20 hover:bg-white/10 transition-all"
+            >
+              <Vault className="h-4 w-4 text-amber-300" />
+              Vault
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/shorts"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-200 hover:border-white/20 hover:bg-white/10 transition-all"
+            >
+              <PenTool className="h-4 w-4 text-amber-300" />
+              Shorts
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </motion.div>
 
         {/* Content Grid */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {displayedItems.map((item, index) => {
-            const type = String(item._type || item.type || "").toLowerCase();
-            const key = item.slug || item._id || item.id || `item-${index}`;
+        {displayedItems.length > 0 ? (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {displayedItems.map((item, index) => {
+              const type = String(item._type || item.type || "").toLowerCase();
+              const key = item.slug || item._id || item.id || `item-${index}`;
 
-            if (type === "post") {
               return (
                 <motion.div
                   key={key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.06 }}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ duration: 0.45, delay: index * 0.04 }}
                 >
-                  <BlogPostCard post={asBlogPost(item)} />
+                  {type === "post" ? (
+                    <BlogPostCard post={asBlogPost(item)} />
+                  ) : type === "book" ? (
+                    <BookCard book={asBook(item)} />
+                  ) : (
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                        Object
+                      </p>
+                      <h3 className="mt-4 font-serif text-2xl font-semibold text-amber-100">
+                        {item.title || "Untitled"}
+                      </h3>
+                      <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">
+                        {item.excerpt || item.description || "High-signal object designed for deployment."}
+                      </p>
+                    </div>
+                  )}
                 </motion.div>
               );
-            }
-
-            if (type === "book") {
-              return (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.06 }}
-                >
-                  <BookCard book={asBook(item)} />
-                </motion.div>
-              );
-            }
-
-            return (
-              <motion.div
-                key={key}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.06 }}
+            })}
+          </div>
+        ) : (
+          // No "coming soon" — immediate routing
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl">
+            <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+              No browsing required
+            </p>
+            <h3 className="mt-5 font-serif text-3xl font-semibold text-amber-100">
+              Start with the assets that prove substance fast.
+            </h3>
+            <p className="mt-4 max-w-2xl text-lg font-light text-gray-300">
+              If you’re here to judge credibility, don’t scroll. Open the Canon or the Vault and evaluate the artefacts.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/resources/strategic-frameworks"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-sm font-bold text-black"
               >
-                <div className="rounded-2xl border border-gray-200 bg-white/70 p-6 backdrop-blur-sm">
-                  <h3 className="font-semibold text-deepCharcoal">
-                    {item.title || "Untitled"}
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Type: {type || "unknown"}
-                  </p>
-                  {item.excerpt ? (
-                    <p className="mt-2 text-sm text-gray-500">{item.excerpt}</p>
-                  ) : null}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                Strategic Frameworks <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/downloads/vault"
+                className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-7 py-4 text-sm font-semibold text-amber-200 hover:border-amber-400/45 hover:bg-amber-500/15 transition-all"
+              >
+                Open the Vault <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* View All CTA */}
         {validItems.length > maxItems ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-12 text-center"
-          >
+          <div className="mt-12">
             <Link
               href={viewAllHref}
-              className="group inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 font-semibold text-cream transition-all hover:bg-forest/90 hover:shadow-lg"
+              className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all hover:border-amber-400/25 hover:bg-white/10"
             >
               <span>{viewAllLabel}</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
-          </motion.div>
-        ) : null}
-
-        {/* Empty State */}
-        {displayedItems.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="mx-auto max-w-md rounded-2xl bg-warmWhite/50 p-8">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-softGold/20">
-                <FileText className="h-8 w-8 text-softGold" />
-              </div>
-              <h3 className="mt-4 font-serif text-xl font-semibold text-deepCharcoal">
-                Content Coming Soon
-              </h3>
-              <p className="mt-2 text-gray-600">
-                We&apos;re preparing some valuable content for you. Check back
-                soon!
-              </p>
-            </div>
-          </motion.div>
+          </div>
         ) : null}
       </div>
     </section>
   );
 }
-

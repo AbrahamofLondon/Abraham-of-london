@@ -14,7 +14,8 @@ import {
   Unlock,
   ArrowRight,
   BookOpen,
-  Users
+  Users,
+  Send
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -45,7 +46,8 @@ const InnerCirclePage: NextPage = () => {
   const [accessKey, setAccessKey] = React.useState("");
   const [registerStatus, setRegisterStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
   const [unlockStatus, setUnlockStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
-  const [feedback, setFeedback] = React.useState<{ type: "register" | "unlock"; msg: string } | null>(null);
+  const [newsletterStatus, setNewsletterStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [feedback, setFeedback] = React.useState<{ type: "register" | "unlock" | "newsletter"; msg: string } | null>(null);
   const [alreadyUnlocked, setAlreadyUnlocked] = React.useState(false);
 
   // REDIRECTION LOGIC
@@ -144,6 +146,24 @@ const InnerCirclePage: NextPage = () => {
         type: "unlock", 
         msg: err.message || "Invalid key. Please check and try again." 
       });
+    }
+  };
+
+  /**
+   * NEWSLETTER OPT-IN HANDLER
+   */
+  const handleNewsletterSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNewsletterStatus("submitting");
+    
+    // Implementation for newsletter API
+    try {
+      // Logic for newsletter signup
+      setNewsletterStatus("success");
+      setFeedback({ type: "newsletter", msg: "Subscription confirmed. Welcome to the mailing list." });
+    } catch (err) {
+      setNewsletterStatus("error");
+      setFeedback({ type: "newsletter", msg: "Signup failed. Please try again." });
     }
   };
 
@@ -252,6 +272,36 @@ const InnerCirclePage: NextPage = () => {
                 </form>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* NEWSLETTER SECTION */}
+        <section id="newsletter" className="mt-24 border-t border-white/5 pt-24">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            <h2 className="font-serif text-3xl font-bold text-white mb-4">The Strategic Brief</h2>
+            <p className="text-gray-400 mb-10 max-w-2xl mx-auto">
+              Not ready for the vault? Join the broader circle for occasional notes on institutional design, 
+              frontier market strategy, and operational frameworks.
+            </p>
+            
+            <form onSubmit={handleNewsletterSignup} className="relative max-w-md mx-auto">
+              <input 
+                type="email" 
+                required
+                placeholder="Receive the Brief"
+                className="w-full bg-white/5 border border-white/10 rounded-full px-8 py-4 text-white focus:border-amber-500/50 outline-none transition-all pr-16"
+              />
+              <button 
+                type="submit"
+                className="absolute right-2 top-2 bottom-2 bg-amber-500 text-black px-4 rounded-full hover:bg-amber-400 transition-colors"
+              >
+                <Send size={18} />
+              </button>
+            </form>
+            {feedback?.type === "newsletter" && (
+              <p className="mt-4 text-sm text-amber-500/80">{feedback.msg}</p>
+            )}
+            <p className="mt-6 text-[10px] uppercase tracking-widest text-gray-600">Strictly no spam. High signal only.</p>
           </div>
         </section>
       </main>

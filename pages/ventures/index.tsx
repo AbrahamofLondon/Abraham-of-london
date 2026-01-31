@@ -14,7 +14,8 @@ import {
   TrendingUp as TrendingUpIcon,
   Building,
   Shield,
-  Layers
+  Layers,
+  Users
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -61,6 +62,16 @@ const VenturesPage: NextPage = () => {
       status: "Operational"
     },
     {
+      name: "Chatham Rooms",
+      slug: "chatham-rooms",
+      sector: "Knowledge Exchange",
+      description: "A secure environment for high-stakes discourse and institutional knowledge exchange. We facilitate structured dialogue between stakeholders under protocols designed to ensure candor, confidentiality, and objective synthesis of complex issues.",
+      domain: ["Discourse Architecture", "Knowledge Management", "Strategic Dialogue"],
+      established: "2025",
+      url: "https://alomarada.com/chatham-rooms",
+      status: "Operational"
+    },
+    {
       name: "InnovateHub",
       slug: "innovatehub",
       sector: "Product & Venture Development",
@@ -82,6 +93,9 @@ const VenturesPage: NextPage = () => {
     "Product Strategy": Lightbulb,
     "Venture Architecture": Building2,
     "Market Development": TrendingUpIcon,
+    "Discourse Architecture": Users,
+    "Knowledge Management": Briefcase,
+    "Strategic Dialogue": Activity,
   };
 
   return (
@@ -115,7 +129,7 @@ const VenturesPage: NextPage = () => {
             <div className="space-y-24">
               {ventures.map((venture, index) => {
                 return (
-                  <div key={venture.slug} className={`${index !== 0 ? 'border-t border-white/5 pt-24' : ''}`}>
+                  <div key={venture.slug} id={venture.slug} className={`${index !== 0 ? 'border-t border-white/5 pt-24' : ''}`}>
                     <div className="grid lg:grid-cols-12 gap-12">
                       {/* Meta Column */}
                       <div className="lg:col-span-4">

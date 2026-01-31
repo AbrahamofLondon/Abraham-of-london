@@ -2,135 +2,205 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { 
-  Building2, Briefcase, TrendingUp, Target, 
-  Zap, Globe, Shield, Cpu,
-  ArrowRight, ExternalLink
+import {
+  Building2,
+  Cpu,
+  Shield,
+  Globe,
+  ArrowRight,
+  CheckCircle2,
+  Lock,
 } from "lucide-react";
 
-interface Venture {
+type Status = "live" | "development" | "incubation";
+
+type Venture = {
   title: string;
   description: string;
   icon: React.ReactNode;
-  color: string;
-  status: 'live' | 'development' | 'incubation';
-  link: string;
+  status: Status;
+  href: string;
+  tags: string[];
+  proof: string;
+};
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
 }
+
+const statusUI: Record<Status, { label: string; cls: string; dot: string }> = {
+  live: {
+    label: "Live",
+    cls: "border-emerald-400/25 bg-emerald-500/10 text-emerald-200",
+    dot: "bg-emerald-400",
+  },
+  development: {
+    label: "In build",
+    cls: "border-amber-400/25 bg-amber-500/10 text-amber-200",
+    dot: "bg-amber-400",
+  },
+  incubation: {
+    label: "Incubation",
+    cls: "border-blue-400/25 bg-blue-500/10 text-blue-200",
+    dot: "bg-blue-400",
+  },
+};
 
 export const EnhancedVenturesSection: React.FC = () => {
   const ventures: Venture[] = [
     {
       title: "Institutional Advisory",
-      description: "Governance-grade strategy for family offices and private institutions.",
+      description: "Governance-grade strategy for serious operators: mandate, decision rights, cadence, and assets.",
       icon: <Building2 className="h-6 w-6" />,
-      color: "from-blue-500/20 to-blue-600/10",
-      status: 'live',
-      link: "/consulting",
+      status: "live",
+      href: "/consulting",
+      tags: ["Governance", "Decision Rights", "Execution Cadence"],
+      proof: "Owner maps + board-ready packs",
     },
     {
       title: "Founder OS",
-      description: "Operating systems for founders building institutions, not just companies.",
+      description: "Operating systems for founders building institutions, not just companies — discipline as a product.",
       icon: <Cpu className="h-6 w-6" />,
-      color: "from-emerald-500/20 to-emerald-600/10",
-      status: 'development',
-      link: "/ventures/founder-os",
+      status: "development",
+      href: "/ventures/founder-os",
+      tags: ["Systems", "Routines", "Compounding"],
+      proof: "Cadence modules + templates",
     },
     {
       title: "Household Architecture",
-      description: "Blueprints for multi-generational family systems and legacy planning.",
+      description: "Blueprints for multi-generational family systems: standards, legacy design, and durable leadership.",
       icon: <Shield className="h-6 w-6" />,
-      color: "from-amber-500/20 to-amber-600/10",
-      status: 'live',
-      link: "/ventures/household-architecture",
+      status: "live",
+      href: "/ventures/household-architecture",
+      tags: ["Legacy", "Formation", "Family Governance"],
+      proof: "Constitutional patterns for households",
     },
     {
       title: "Public Strategy",
-      description: "Institutional positioning and public narrative architecture.",
+      description: "Institutional positioning and narrative architecture that holds under pressure and scrutiny.",
       icon: <Globe className="h-6 w-6" />,
-      color: "from-purple-500/20 to-purple-600/10",
-      status: 'incubation',
-      link: "/ventures/public-strategy",
+      status: "incubation",
+      href: "/ventures/public-strategy",
+      tags: ["Positioning", "Narrative", "Public Trust"],
+      proof: "Signal engineering + credibility rails",
     },
   ];
 
-  const statusColors = {
-    live: "bg-green-500/20 text-green-400 border-green-500/30",
-    development: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    incubation: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  };
-
   return (
-    <section className="bg-gradient-to-b from-white to-slate-50 py-20 dark:from-slate-900 dark:to-slate-950">
+    <section className="relative bg-black py-24">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(245,158,11,0.08),transparent_55%)]" />
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-16 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400">
-            Ventures · Deployment
-          </p>
-          <h2 className="mt-6 font-serif text-4xl font-light text-slate-900 dark:text-white sm:text-5xl">
-            Where theory meets<br />
-            <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
-              institutional reality
-            </span>
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600 dark:text-gray-300">
-            Practical deployment of canonical principles across multiple venture vectors.
-          </p>
+        <div className="mb-16 grid gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-8">
+            <p className="text-xs font-bold uppercase tracking-[0.35em] text-amber-300">
+              Portfolio proof
+            </p>
+            <h2 className="mt-6 font-serif text-5xl font-light text-amber-100 sm:text-6xl">
+              Ventures built like institutions.
+            </h2>
+            <p className="mt-6 max-w-3xl text-xl font-light text-gray-300">
+              This is where principles become operating reality — standards, cadence, controls, and
+              deployable artefacts.
+            </p>
+          </div>
+
+          <div className="lg:col-span-4 lg:flex lg:justify-end">
+            <Link
+              href="/ventures"
+              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-gray-200 transition-all duration-300 hover:border-amber-400/25 hover:bg-white/10"
+            >
+              View all ventures <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
-        {/* Ventures Grid */}
-        <div className="grid gap-8 md:grid-cols-2">
-          {ventures.map((venture, index) => (
-            <Link
-              key={index}
-              href={venture.link}
-              className="group relative overflow-hidden rounded-3xl border-2 border-slate-200/50 bg-gradient-to-b from-white to-slate-50 p-8 shadow-xl transition-all hover:-translate-y-2 hover:border-amber-400/50 hover:shadow-2xl hover:shadow-amber-900/20 dark:border-slate-800/50 dark:from-slate-900 dark:to-slate-950"
-            >
-              {/* Status Badge */}
-              <div className={`absolute right-6 top-6 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider ${statusColors[venture.status]}`}>
-                {venture.status}
-              </div>
-              
-              {/* Icon */}
-              <div className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${venture.color}`}>
-                <div className="text-slate-700 dark:text-slate-300">
-                  {venture.icon}
+        {/* Portfolio grid */}
+        <div className="grid gap-8 lg:grid-cols-2">
+          {ventures.map((v) => {
+            const ui = statusUI[v.status];
+            return (
+              <Link
+                key={v.title}
+                href={v.href}
+                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl transition-all duration-300 hover:border-amber-400/25 hover:bg-white/[0.05] hover:shadow-2xl hover:shadow-amber-500/10"
+              >
+                {/* top rail */}
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
+                    {v.icon}
+                  </div>
+
+                  <div className={cx("inline-flex items-center gap-2 rounded-full border px-4 py-2", ui.cls)}>
+                    <span className={cx("h-2 w-2 rounded-full", ui.dot)} />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.35em]">
+                      {ui.label}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              
-              {/* Content */}
-              <h3 className="mb-3 text-2xl font-semibold text-slate-900 dark:text-white">
-                {venture.title}
-              </h3>
-              <p className="mb-6 text-slate-600 dark:text-gray-300">
-                {venture.description}
-              </p>
-              
-              {/* CTA */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
-                  Explore venture
-                </span>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-amber-600/5 transition-all group-hover:border-amber-500/60 group-hover:from-amber-500/20 group-hover:to-amber-600/10">
-                  <ArrowRight className="h-5 w-5 text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400" />
+
+                <h3 className="mt-8 font-serif text-3xl font-semibold text-amber-100">
+                  {v.title}
+                </h3>
+                <p className="mt-4 text-sm font-light leading-relaxed text-gray-300">
+                  {v.description}
+                </p>
+
+                {/* tags */}
+                <div className="mt-7 flex flex-wrap gap-2">
+                  {v.tags.slice(0, 3).map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-gray-300"
+                    >
+                      {t}
+                    </span>
+                  ))}
                 </div>
-              </div>
-              
-              {/* Hover Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-400/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            </Link>
-          ))}
+
+                {/* proof line */}
+                <div className="mt-9 flex items-center justify-between border-t border-white/10 pt-7">
+                  <span className="inline-flex items-center gap-2 text-sm font-light text-gray-300">
+                    <CheckCircle2 className="h-4 w-4 text-amber-300" />
+                    {v.proof}
+                  </span>
+                  <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
+                    Open <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </span>
+                </div>
+
+                {/* hover aura */}
+                <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.08),transparent_55%)]" />
+                </div>
+              </Link>
+            );
+          })}
         </div>
-        
-        {/* Footer CTA */}
-        <div className="mt-16 text-center">
-          <Link
-            href="/ventures"
-            className="group inline-flex items-center justify-center gap-3 rounded-full border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/5 to-amber-600/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-700 transition-all hover:border-amber-500/80 hover:from-amber-500/10 hover:to-amber-600/10 dark:text-amber-300"
-          >
-            <span>View all ventures</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
-          </Link>
+
+        {/* Close rail: ties ventures back to vault + inner circle */}
+        <div className="mt-14 rounded-3xl border border-white/10 bg-white/[0.03] p-9 backdrop-blur-xl">
+          <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-8">
+              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                Access pathway
+              </p>
+              <p className="mt-3 text-lg font-light text-gray-300">
+                Want the artefacts behind these builds? The templates, packs, and operator notes live in the Vault.
+              </p>
+            </div>
+            <div className="lg:col-span-4 lg:flex lg:justify-end">
+              <Link
+                href="/downloads/vault"
+                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-amber-200 transition-all duration-300 hover:border-amber-400/45 hover:bg-amber-500/15"
+              >
+                <Lock className="h-4 w-4 text-amber-300" />
+                Open the Vault
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,131 +1,139 @@
 "use client";
 
 import * as React from "react";
-import { TrendingUp, Users, BookOpen, Target, Award, Globe } from "lucide-react";
+import { Award, BookOpen, Target, Users } from "lucide-react";
 
-interface StatItem {
-  icon: React.ReactNode;
-  value: string;
+type Stat = {
   label: string;
+  value: number;
   suffix?: string;
+  icon: React.ReactNode;
+  meta: string;
+};
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
 }
 
 export const AnimatedStatsBar: React.FC = () => {
-  const [counts, setCounts] = React.useState({
-    frameworks: 0,
-    clients: 0,
-    publications: 0,
-    years: 0,
-  });
+  const [v, setV] = React.useState({ a: 0, b: 0, c: 0, d: 0 });
 
-  const stats: StatItem[] = [
+  const stats: Stat[] = [
     {
-      icon: <Target className="h-5 w-5" />,
-      value: counts.frameworks.toString(),
-      label: "Strategic Frameworks",
+      label: "Frameworks",
+      value: 24,
       suffix: "+",
+      icon: <Target className="h-4 w-4" />,
+      meta: "Decision tools & matrices",
     },
     {
-      icon: <Users className="h-5 w-5" />,
-      value: counts.clients.toString(),
-      label: "Institutional Clients",
+      label: "Institutions",
+      value: 18,
       suffix: "+",
+      icon: <Users className="h-4 w-4" />,
+      meta: "Advisory + delivery packs",
     },
     {
-      icon: <BookOpen className="h-5 w-5" />,
-      value: counts.publications.toString(),
       label: "Canon Volumes",
+      value: 12,
       suffix: "+",
+      icon: <BookOpen className="h-4 w-4" />,
+      meta: "Thesis → systems → deployment",
     },
     {
-      icon: <Award className="h-5 w-5" />,
-      value: counts.years.toString(),
-      label: "Years of Excellence",
+      label: "Years",
+      value: 8,
       suffix: "",
+      icon: <Award className="h-4 w-4" />,
+      meta: "Governance discipline",
     },
   ];
 
   React.useEffect(() => {
-    const targetValues = {
-      frameworks: 24,
-      clients: 18,
-      publications: 12,
-      years: 8,
+    const duration = 900;
+    const start = performance.now();
+    const targets = { a: stats[0].value, b: stats[1].value, c: stats[2].value, d: stats[3].value };
+
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+
+      setV({
+        a: Math.floor(eased * targets.a),
+        b: Math.floor(eased * targets.b),
+        c: Math.floor(eased * targets.c),
+        d: Math.floor(eased * targets.d),
+      });
+
+      if (t < 1) requestAnimationFrame(tick);
     };
 
-    const duration = 2000;
-    const frameRate = 60;
-    const totalFrames = (duration / 1000) * frameRate;
-
-    const animate = (
-      key: keyof typeof targetValues,
-      target: number,
-      startTime: number
-    ) => {
-      const step = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const currentValue = Math.floor(easeOut * target);
-
-        setCounts(prev => ({ ...prev, [key]: currentValue }));
-
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        }
-      };
-
-      requestAnimationFrame(step);
-    };
-
-    const startTime = performance.now();
-    Object.entries(targetValues).forEach(([key, value]) => {
-      animate(key as keyof typeof targetValues, value, startTime);
-    });
+    requestAnimationFrame(tick);
   }, []);
 
+  const values = [v.a, v.b, v.c, v.d];
+
   return (
-    <div className="bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-sm dark:from-slate-900/80 dark:to-slate-950/80">
-      <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200/50 bg-white/50 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-amber-400/50 hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-white/50 hover:shadow-xl dark:border-slate-800/50 dark:bg-slate-900/50 dark:hover:border-amber-500/30 dark:hover:from-amber-900/20 dark:hover:to-slate-900/50"
-            >
-              <div className="relative z-10">
-                {/* Icon */}
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10">
-                  <div className="text-amber-500 dark:text-amber-400">
-                    {stat.icon}
+    <section className="relative bg-black">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(245,158,11,0.10),transparent_55%)]" />
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
+          <div className="flex flex-col gap-4 border-b border-white/10 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-500">
+                Authority snapshot
+              </p>
+              <p className="mt-2 text-sm font-light text-gray-300">
+                High-signal metrics. No vanity. Just shipped assets and durable standards.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2">
+              <span className="h-2 w-2 rounded-full bg-amber-400" />
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-amber-200">
+                Live posture
+              </span>
+            </div>
+          </div>
+
+          <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
+            {stats.map((s, i) => (
+              <div
+                key={s.label}
+                className={cx(
+                  "relative px-6 py-7",
+                  "border-white/10",
+                  i === 0 ? "" : "border-t sm:border-t-0 sm:border-l"
+                )}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                    <span className="text-amber-300">{s.icon}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gray-300">
+                      {s.label}
+                    </span>
                   </div>
                 </div>
-                
-                {/* Value */}
-                <div className="mb-2 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-slate-900 dark:text-white">
-                    {stat.value}
+
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="font-serif text-4xl font-semibold text-amber-100">
+                    {values[i]}
                   </span>
-                  {stat.suffix && (
-                    <span className="text-lg font-semibold text-amber-500">
-                      {stat.suffix}
-                    </span>
-                  )}
+                  {s.suffix ? (
+                    <span className="text-lg font-bold text-amber-300">{s.suffix}</span>
+                  ) : null}
                 </div>
-                
-                {/* Label */}
-                <p className="text-sm font-medium text-slate-600 dark:text-gray-300">
-                  {stat.label}
-                </p>
+
+                <p className="mt-3 text-sm font-light text-gray-300">{s.meta}</p>
+
+                <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.08),transparent_55%)]" />
+                </div>
               </div>
-              
-              {/* Hover effect */}
-              <div className="absolute -bottom-4 -right-4 h-8 w-8 rounded-full bg-gradient-to-br from-amber-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
