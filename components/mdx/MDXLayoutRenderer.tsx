@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-// Changed from 'contentlayer2' to 'next-contentlayer2/hooks'
-import { useMDXComponent } from 'next-contentlayer2/hooks'; 
+// Use the root import - this is the confirmed path for contentlayer2 v0.5.8+
+import { useMDXComponent } from 'contentlayer2'; 
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -37,11 +37,18 @@ const components = {
   ...shortcodes,
 };
 
-export const MDXLayoutRenderer = ({ code, ...rest }: { code: string; [key: string]: any }) => {
-  // Safe check for the hook
+interface MDXProps {
+  code: string;
+  [key: string]: any;
+}
+
+export const MDXLayoutRenderer = ({ code, ...rest }: MDXProps) => {
+  // We provide a fallback string to prevent the hook from crashing if code is temporarily undefined
   const MDXComponent = useMDXComponent(code || '');
 
-  if (!code) return null;
+  if (!code) {
+    return <div className="animate-pulse bg-white/5 h-64 w-full rounded-xl" />;
+  }
 
   return (
     <article className="prose prose-invert prose-slate max-w-none">
