@@ -1,11 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { InterfaceCard, MetadataTag, ProtocolButton } from "@/components/ui/BrandAssets";
+// Import with fallback names to prevent "undefined" crashes
+import * as Brand from "@/components/ui/BrandAssets";
 import { ShieldCheck, Activity, Terminal, Zap } from "lucide-react";
 
 export default function DiagnosticsPage() {
   const [apiStatus, setApiStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+
+  // Fallback components to prevent Prerender Error if BrandAssets exports are missing
+  const InterfaceCard = Brand.InterfaceCard || (({children, className}: any) => <div className={className}>{children}</div>);
+  const MetadataTag = Brand.MetadataTag || (({children}: any) => <div>{children}</div>);
 
   const testApi = async () => {
     setApiStatus("loading");
@@ -28,7 +33,7 @@ export default function DiagnosticsPage() {
   };
 
   return (
-    <div className="min-h-screen py-24 px-6 max-w-5xl mx-auto space-y-12">
+    <div className="min-h-screen bg-black py-24 px-6 max-w-5xl mx-auto space-y-12">
       <header className="space-y-4">
         <MetadataTag icon={Activity}>System Status: Diagnostic Mode</MetadataTag>
         <h1 className="font-serif text-5xl text-white">Institutional <span className="italic text-white/30">Readiness.</span></h1>
@@ -66,7 +71,7 @@ export default function DiagnosticsPage() {
           </div>
           
           <p className="text-sm text-white/40 font-light">
-            Testing the <code>/api/contact</code> route with current security guards (Rate Limiting & sanitization).
+            Testing the <code>/api/contact</code> route with current security guards.
           </p>
 
           <button 

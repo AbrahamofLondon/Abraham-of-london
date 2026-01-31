@@ -139,12 +139,12 @@ export default function ContentShowcase({
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ duration: 0.45, delay: index * 0.05 }}
               >
-                {type === "post" ? (
+                {type === "post" || type === "short" ? (
                   <BlogPostCard post={asBlogPost(item)} />
                 ) : type === "book" ? (
                   <BookCard book={asBook(item)} />
                 ) : (
-                  <div className="city-gate-card p-8 h-full flex flex-col">
+                  <div className="city-gate-card p-8 h-full flex flex-col group">
                     <span className="text-metadata mb-6 italic opacity-50">Artefact // {index + 1}</span>
                     <h3 className="font-serif text-2xl font-light text-white group-hover:text-amber-500 transition-colors">
                       {item.title || "Untitled"}

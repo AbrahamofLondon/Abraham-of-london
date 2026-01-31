@@ -11,8 +11,44 @@ import rehypeSlug from "rehype-slug";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
-import { getAllCombinedDocs, getDocBySlug, normalizeSlug, isDraftContent, isPublished } from "@/lib/contentlayer-helper";
-import { getDocKind, getDocHref, resolveDocCoverImage, sanitizeData } from "@/lib/content/shared";
+import {
+  getAllCombinedDocs,
+  getDocBySlug,
+  normalizeSlug,
+  isDraftContent,
+  isPublished,
+} from "@/lib/contentlayer-helper";
+import { getDocKind, sanitizeData } from "@/lib/content/shared";
+
+// -----------------------------
+// Routing Guardrails
+// -----------------------------
+function norm(input: string): string {
+  return String(input || "")
+    .trim()
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
+}
+
+function isNested(slug: string): boolean {
+  return slug.includes("/");
+}
+
+const RESERVED_ROOT = new Set<string>([
+  "admin", "api", "auth", "blog", "board", "books", "brands", "canon",
+  "canon-campaign", "chatham-rooms", "consulting", "content", "debug",
+  "downloads", "events", "fatherhood", "founders", "inner-circle",
+  "leadership", "prints", "private", "resources", "shorts", "speaking",
+  "strategy", "vault", "ventures", "about", "contact", "privacy",
+  "security", "terms", "subscribe", "newsletter", "cookies", "diagnostic",
+  "accessibility", "accessibility-statement", "works-in-progress", "404",
+]);
+
+function allowRootSlug(slug: string): boolean {
+  const s = norm(slug).toLowerCase();
+  if (!s || isNested(s) || RESERVED_ROOT.has(s)) return false;
+  return true;
+}
 
 interface Props {
   doc: any;
@@ -22,11 +58,12 @@ interface Props {
 
 const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
   const router = useRouter();
-  
+
   const safeComponents = React.useMemo(
-    () => createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
-      warnOnFallback: process.env.NODE_ENV === "development",
-    }),
+    () =>
+      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+        warnOnFallback: process.env.NODE_ENV === "development",
+      }),
     [mdxRaw]
   );
 
@@ -41,7 +78,6 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
       </Head>
 
       <article className="relative min-h-screen bg-black pt-24 pb-32">
-        {/* Institutional Header */}
         <header className="mx-auto max-w-3xl px-6 text-center mb-16">
           <div className="mb-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60 border border-amber-500/20 px-4 py-1.5 rounded-full">
             {doc.kind} // Protocol v2.6
@@ -56,7 +92,6 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
           </div>
         </header>
 
-        {/* Content Body: Focused for elite readability */}
         <div className="mx-auto max-w-2xl px-6">
           <div className="prose prose-invert max-w-none">
             {source && <MDXRemote {...source} components={safeComponents as any} />}
@@ -68,28 +103,54 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllCombinedDocs().filter(d => !isDraftContent(d) && isPublished(d));
-  const paths = docs.map(d => ({ params: { slug: normalizeSlug(d.slug) } }));
+  const docs = getAllCombinedDocs().filter((d) => !isDraftContent(d) && isPublished(d));
+  const seen = new Set<string>();
+  const paths: Array<{ params: { slug: string } }> = [];
+
+  for (const d of docs) {
+    const raw = normalizeSlug(d.slug || d?._raw?.flattenedPath || "");
+    const slug = norm(raw);
+    const key = slug.toLowerCase();
+
+    if (!slug || !allowRootSlug(slug) || seen.has(key)) continue;
+
+    seen.add(key);
+    paths.push({ params: { slug } });
+  }
+
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const rawDoc = getDocBySlug(slug);
+  const slug = norm(String(params?.slug || ""));
 
-  if (!rawDoc || isDraftContent(rawDoc)) return { notFound: true };
+  if (!allowRootSlug(slug)) return { notFound: true, revalidate: 60 };
+
+  const needle = norm(normalizeSlug(slug));
+  const rawDoc = getDocBySlug(needle);
+
+  if (!rawDoc || isDraftContent(rawDoc) || !isPublished(rawDoc)) {
+    return { notFound: true, revalidate: 60 };
+  }
+
+  // ✅ FIX: Extract featureGridItems or default to empty array to prevent ReferenceError
+  const featureGridItems = Array.isArray((rawDoc as any).featureGridItems) 
+    ? (rawDoc as any).featureGridItems 
+    : [];
 
   const mdxRaw = rawDoc.body?.raw || "";
   const source = await serialize(mdxRaw, {
-    mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] }
+    // ✅ PASS TO SCOPE: This makes {featureGridItems} available inside MDX files
+    scope: { featureGridItems },
+    mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
   });
 
   const doc = sanitizeData({
-    title: rawDoc.title,
-    kind: getDocKind(rawDoc),
+    title: rawDoc.title || "Untitled",
+    kind: getDocKind(rawDoc) || "Content",
     date: rawDoc.date ? new Date(rawDoc.date).toLocaleDateString("en-GB") : null,
     excerpt: rawDoc.excerpt || rawDoc.description || "",
-    readTime: rawDoc.readTime,
+    readTime: rawDoc.readTime ?? null,
   });
 
   return { props: { doc, source, mdxRaw }, revalidate: 3600 };

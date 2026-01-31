@@ -1,25 +1,22 @@
-"use client";
+// components/ui/BrandAssets.tsx
 
-import * as React from "react";
+import React from 'react';
 
-/**
- * Abraham of London: Metadata Tag
- * A React implementation that uses the CSS classes defined in brand-system.css
- */
-interface MetadataTagProps {
-  icon?: React.ElementType;
-  children: React.ReactNode;
-}
+export const InterfaceCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+  <div className={`city-gate-card ${className}`}>
+    {children}
+  </div>
+);
 
-export const MetadataTag = ({ icon: Icon, children }: MetadataTagProps) => {
-  return (
-    <div className="flex items-center gap-2 rounded-full border border-white/5 bg-white/[0.03] px-3 py-1">
-      {Icon && <Icon className="h-3 w-3 text-amber-500/60" />}
-      <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">
-        {children}
-      </span>
-    </div>
-  );
-};
+export const MetadataTag = ({ children, icon: Icon }: { children: React.ReactNode, icon?: any }) => (
+  <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60 border border-amber-500/20 px-4 py-1.5 rounded-full">
+    {Icon && <Icon className="h-3 w-3" />}
+    {children}
+  </div>
+);
 
-// This file is now pure TypeScript. No CSS directives here.
+export const ProtocolButton = ({ children, ...props }: any) => (
+  <button className="aol-btn" {...props}>
+    {children}
+  </button>
+);

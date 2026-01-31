@@ -39,13 +39,14 @@ const nextConfig = {
   poweredByHeader: false,
 
   // SSG Performance: Vital for your 75+ intelligence briefs
-  staticPageGenerationTimeout: 600, // Increased to 600 for Netlify stability
+  staticPageGenerationTimeout: 600, 
 
+  // Combined Linting & Typing Guardrails
   typescript: {
-    ignoreBuildErrors: true, // Priority: Deployment speed
+    ignoreBuildErrors: true, 
   },
   eslint: {
-    ignoreDuringBuilds: true, // Prevent ESLint hangs
+    ignoreDuringBuilds: true, 
   },
 
   env: {
@@ -70,11 +71,9 @@ const nextConfig = {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
-    // Fix for Windows dev vs Linux build environments
     disableStaticImages: false, 
   },
 
-  // Security & Protocol Headers
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
     const csp = [
@@ -122,7 +121,6 @@ const nextConfig = {
   },
 };
 
-// Fail-safe Contentlayer Wrapper for ESM
 const finalConfig = async () => {
   try {
     const { withContentlayer } = await import("next-contentlayer2");
@@ -132,7 +130,7 @@ const finalConfig = async () => {
       const { withContentlayer } = await import("next-contentlayer");
       return withContentlayer(nextConfig);
     } catch (e) {
-      console.warn("Contentlayer not found, proceeding with standard config");
+      console.warn("Contentlayer wrapper failed, returning raw config");
       return nextConfig;
     }
   }

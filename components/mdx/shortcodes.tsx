@@ -179,7 +179,7 @@ export function ResourcesCTA({
 }
 
 /* -------------------------------------------------------------------------- */
-/* ✅ Export the object mdx-components.tsx expects                              */
+/* ✅ Final Exports: Aligned with MDXLayoutRenderer expectations              */
 /* -------------------------------------------------------------------------- */
 
 export const shortcodes = {
@@ -192,5 +192,8 @@ export const shortcodes = {
   Note,
   ResourcesCTA,
 } as const;
+
+// Create an alias named 'components' to satisfy the import in MDXLayoutRenderer.tsx
+export const components = shortcodes;
 
 export default shortcodes;

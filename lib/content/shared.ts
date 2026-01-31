@@ -111,8 +111,9 @@ export function getDocHref(doc: AnyDoc): string {
 // ------- small safe helpers you already had -------
 
 export function sanitizeData<T>(input: T): T {
-  // Keep intentionally conservative; do not mutate unknown shapes aggressively.
-  return input;
+  return JSON.parse(
+    JSON.stringify(input, (_k, v) => (v === undefined ? null : v))
+  );
 }
 
 export function toUiDoc<T extends Record<string, any>>(doc: T): T {

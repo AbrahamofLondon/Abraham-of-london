@@ -2,6 +2,7 @@ import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { motion } from "framer-motion"; // ✅ CRITICAL MISSING IMPORT FIXED
 import {
   ArrowRight,
   BookOpen,
@@ -60,7 +61,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
 
       {/* 2. THE SYSTEM OVERVIEW - Using City-Gate Design Patterns */}
       <section className="relative bg-black py-32 overflow-hidden border-y border-white/[0.03]">
-        {/* Technical Grid Background */}
         <div className="bg-grid-technical mask-radial-fade absolute inset-0 opacity-20 pointer-events-none" />
         
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -82,7 +82,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
                 The <span className="text-white/80 font-medium">Shorts</span> provide real-time intel.
               </p>
 
-              {/* High-Signal Cards */}
               <div className="mt-16 grid gap-6 sm:grid-cols-2">
                 <div className="city-gate-card p-8 group">
                   <Shield className="h-6 w-6 text-amber-500/50 group-hover:text-amber-500 transition-colors mb-6" />
@@ -97,7 +96,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
               </div>
             </div>
 
-            {/* Tactical Navigation Sidebar */}
             <div className="lg:col-span-5">
               <div className="sticky top-24 space-y-6">
                 {[
@@ -142,7 +140,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
       <VaultTeaserRail />
       
       <SectionDivider />
-      {/* Passing fetched shorts to the Showcase for real-time visibility */}
       <ContentShowcase items={featuredShorts as any} />
       
       <SectionDivider />
@@ -151,7 +148,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
       <SectionDivider />
       <EventsSection />
 
-      {/* CLOSING: THE DECISION POINT */}
       <section className="bg-black py-48 relative overflow-hidden">
         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
         
@@ -162,9 +158,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
             className="city-gate-card p-16 md:p-24 bg-white/[0.01]"
           >
             <Zap className="h-10 w-10 text-amber-500 mx-auto mb-10" />
-            <h2 className="heading-statement mb-8">
-              Enter the system.
-            </h2>
+            <h2 className="heading-statement mb-8">Enter the system.</h2>
             <p className="text-white/40 max-w-xl mx-auto mb-12 text-lg font-light leading-relaxed">
               Architecture, then logic, then deployment. Start with the Canon or go straight to the Vault to evaluate the assets.
             </p>
@@ -189,15 +183,10 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts }) => {
   );
 };
 
-// -----------------------------
-// Build-safe content fetch (Sanitized & Systematic)
-// -----------------------------
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   const featuredShorts: FeaturedShort[] = [];
-
   try {
     const { getAllContentlayerDocs, normalizeSlug, isDraftContent } = await import("@/lib/contentlayer-helper");
-    
     const docs = getAllContentlayerDocs();
     const shorts = docs
       .filter((d: any) => (d.kind === "Short" || d._raw?.sourceFileDir?.includes("short")) && !isDraftContent(d))
