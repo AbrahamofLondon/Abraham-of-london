@@ -1,7 +1,7 @@
 {
   "version": "2026.1",
-  "timestamp": "2026-02-01T15:09:26.570Z",
-  "count": 163,
+  "timestamp": "2026-02-01T15:41:45.740Z",
+  "count": 161,
   "entries": [
     {
       "title": "Christianity Is Not Extremism - It Is the Light That Built the World",
@@ -15,20 +15,6 @@
         "fathers",
         "apologetics",
         "culture"
-      ]
-    },
-    {
-      "title": "Fathering Principles: A Blueprint for Men",
-      "slug": "/fathering-principles",
-      "date": "2025-05-15T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "principles",
-        "legacy",
-        "masculinity",
-        "formation"
       ]
     },
     {
@@ -236,7 +222,7 @@
       ]
     },
     {
-      "title": "When God's [Sovereignty](/vault/lexicon/sovereignty) Collides With Our Pain",
+      "title": "When God's Sovereignty Collides With Our Pain",
       "slug": "/when-gods-sovereignty-collides-with-our-pain",
       "date": "2025-09-11T00:00:00.000Z",
       "folder": "blog",
@@ -277,7 +263,7 @@
       ]
     },
     {
-      "title": "On Institutional [Sovereignty](/vault/lexicon/sovereignty)",
+      "title": "On Institutional Sovereignty",
       "slug": "/institutional-sovereignty",
       "date": "2026-01-31T00:00:00.000Z",
       "folder": "shorts",
@@ -1815,14 +1801,6 @@
       "title": "Institutional Health Scorecard",
       "slug": "/institutional-health-scorecard",
       "date": "2025-03-02T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Leadership Standards Blueprint",
-      "slug": "/leadership-standards-blueprint",
-      "date": "2025-01-05T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
       "tags": []

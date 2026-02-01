@@ -69,7 +69,7 @@ const getTypeFromRelativePath = (relativePath) => {
 
 const fileSlug = (filePath) => path.basename(filePath, path.extname(filePath));
 const isValidDateString = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
-const isValidSlug = (s) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(s || ""));
+const isValidSlug = (s) => /^[a-z0-9/]+(?:-[a-z0-9/]+)*$/.test(String(s || ""));
 
 const countFrontmatterBlocks = (raw) => {
   const matches = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/gm);

@@ -2,10 +2,8 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * INSTITUTIONAL GLOSSARY INJECTOR (Idempotent Version)
- * 1. Cleanses existing lexicon links to prevent duplicates/drift.
- * 2. Re-injects current lexicon mapping across the 163-brief portfolio.
- * 3. Ensures structural integrity for high-scale growth.
+ * INSTITUTIONAL GLOSSARY INJECTOR (v3.0 - YAML-Safe & Idempotent)
+ * Purpose: Systematically manages cross-links for the 163-brief portfolio.
  */
 async function runInjector() {
   const SDK_PATH = path.resolve('./.contentlayer/generated/index.mjs');
@@ -18,61 +16,76 @@ async function runInjector() {
   try {
     const { allDocuments } = await import('../.contentlayer/generated/index.mjs');
     
-    // THE SOURCE OF TRUTH: Update these paths here to sync the entire vault.
+    // THE SOURCE OF TRUTH: All roads lead to the Lexicon.
     const LEXICON = {
       "Institutional Integrity": "/vault/lexicon/integrity",
       "Strategic Autonomy": "/vault/lexicon/strategic-autonomy",
       "Sovereignty": "/vault/lexicon/sovereignty",
+      "Purpose": "/vault/lexicon/purpose",
+      "Governance": "/vault/lexicon/governance",
+      "Father": "/vault/lexicon/father",
+      "Legacy": "/vault/lexicon/legacy",
+      "Surrender": "/vault/lexicon/surrender",
+      "Family": "/vault/lexicon/family",
+      "Responsibility": "/vault/lexicon/responsibility",
+      "Identity": "/vault/lexicon/identity",
+      "Leadership": "/vault/lexicon/leadership",
+      "Clarity": "/vault/lexicon/clarity",
       "Integrity": "/vault/lexicon/integrity"
     };
 
-    // Sort terms by length (descending) to ensure "Institutional Integrity" matches before "Integrity"
     const sortedTerms = Object.keys(LEXICON).sort((a, b) => b.length - a.length);
-    
     let totalInjections = 0;
     let modifiedFiles = 0;
 
-    console.log(`\n--- 📚 Synchronizing Glossary across ${allDocuments.length} Briefs ---`);
+    console.log(`\n--- 📚 Synchronizing Glossary: Protecting Frontmatter for ${allDocuments.length} Briefs ---`);
 
     allDocuments.forEach(doc => {
       const fullPath = path.join(process.cwd(), 'content', doc._raw.sourceFilePath);
       if (!fs.existsSync(fullPath)) return;
 
-      let content = fs.readFileSync(fullPath, 'utf8');
-      const originalContent = content;
+      const rawContent = fs.readFileSync(fullPath, 'utf8');
+      
+      // STEP 1: SEGREGATE FRONTMATTER FROM BODY
+      // This ensures we never break the YAML block that Contentlayer relies on.
+      const parts = rawContent.split('---');
+      if (parts.length < 3) return; // Skip files without proper frontmatter delimiters
 
-      // STEP 1: CLEANSE (Idempotency)
-      // Removes existing lexicon links: [Term](/vault/lexicon/path) -> Term
-      // This allows us to "reset" the state before re-linking.
-      content = content.replace(/\[([^\]]+)\]\(\/vault\/lexicon\/[^)]+\)/g, '$1');
+      const frontmatter = parts[1];
+      let body = parts.slice(2).join('---');
+      const originalBody = body;
 
-      // STEP 2: INJECT
+      // STEP 2: CLEANSE BODY ONLY (Idempotency)
+      // Removes existing lexicon links specifically to avoid nesting/drift.
+      body = body.replace(/\[([^\]]+)\]\(\/vault\/lexicon\/[^)]+\)/g, '$1');
+
+      // STEP 3: INJECT INTO BODY
       sortedTerms.forEach(term => {
         const url = LEXICON[term];
         
-        // Matches the term only if:
-        // - Not already inside a Markdown link bracket: (?<!\[)
-        // - Is a full word: \b
-        // - Not followed by a markdown link or parenthesis: (?!\]|\()
+        // Regex Logic:
+        // (?<!\[)           -> Not already inside a link bracket
+        // \b(${term})\b     -> Exact word/phrase match
+        // (?![^\[]*\])      -> Not followed by a closing bracket (prevents breaking existing Markdown links)
         const termRegex = new RegExp(`(?<!\\[)\\b(${term})\\b(?![^\\[]*\\]|\\(.*?\\))`, 'g');
         
-        if (termRegex.test(content)) {
-          content = content.replace(termRegex, `[$1](${url})`);
+        if (termRegex.test(body)) {
+          body = body.replace(termRegex, `[$1](${url})`);
         }
       });
 
-      // STEP 3: PERSIST
-      if (content !== originalContent) {
-        fs.writeFileSync(fullPath, content, 'utf8');
+      // STEP 4: RECONSTRUCT AND PERSIST
+      if (body !== originalBody) {
+        const newFileContent = `---${frontmatter}---${body}`;
+        fs.writeFileSync(fullPath, newFileContent, 'utf8');
         modifiedFiles++;
         
-        // Count matches in this file for the log
-        const matches = (content.match(/\[[^\]]+\]\(\/vault\/lexicon\//g) || []).length;
-        totalInjections += matches;
+        const fileMatches = (body.match(/\[[^\]]+\]\(\/vault\/lexicon\//g) || []).length;
+        totalInjections += fileMatches;
       }
     });
 
-    console.log(`✅ Success: Updated ${modifiedFiles} files with ${totalInjections} active lexicon links.`);
+    console.log(`✅ Success: ${modifiedFiles} briefs hardened with ${totalInjections} semantic links.`);
     process.exit(0);
   } catch (err) {
     console.error('❌ Glossary Runtime Error:', err.message);
