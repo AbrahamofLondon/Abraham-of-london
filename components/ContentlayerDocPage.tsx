@@ -1,11 +1,4 @@
 // components/ContentlayerDocPage.tsx — PRODUCTION STABLE (PAGES ROUTER SAFE)
-// ✅ No server-only imports
-// ✅ No SSR-hard dependency on framer-motion
-// ✅ Dynamic chunks mapped correctly (named exports -> then(m => m.Named))
-// ✅ MDXRemote rendered normally (no fake Suspense promise boundary)
-// ✅ Canonical URL safe, OG image normalized
-// ✅ Bookmark + view count local (no API dependency)
-
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -13,6 +6,7 @@ import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 
 // Pages Router compatible MDXRemote
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -20,37 +14,19 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 // Icons
 import { BookOpen } from "lucide-react";
 
-// Motion components (client-only, named exports)
+// Motion components (client-only)
 const MotionNav = dynamic(() => import("./_motion/MotionNav").then((m) => m.MotionNav), {
   ssr: false,
-  loading: () => (
-    <div className="sticky top-0 z-40 border-b border-white/10 bg-black/60 backdrop-blur-sm">
-      <div className="mx-auto max-w-6xl px-6 py-3 text-xs text-gray-400">Loading navigation…</div>
-    </div>
-  ),
+  loading: () => <div className="h-14 w-full bg-black/60 backdrop-blur-sm border-b border-white/10" />
 });
 
 const MotionHeader = dynamic(() => import("./_motion/MotionHeader").then((m) => m.MotionHeader), {
   ssr: false,
-  loading: () => (
-    <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-      <div className="h-5 w-1/2 bg-white/10 rounded mb-3" />
-      <div className="h-4 w-2/3 bg-white/5 rounded" />
-    </div>
-  ),
+  loading: () => <div className="h-64 w-full bg-white/5 animate-pulse rounded-2xl" />
 });
 
-// ReadTime: keep SSR=true only if it is SSR-safe (no window/document usage)
-const SimpleReadTime = dynamic(
-  () => import("@/components/enhanced/ReadTime").then((m) => m.SimpleReadTime),
-  { ssr: true }
-);
-
-// Table of contents should be client-only (needs DOM measurements)
-const SafeTableOfContents = dynamic(
-  () => import("@/components/enhanced/TableOfContents").then((m) => m.SafeTableOfContents),
-  { ssr: false }
-);
+const SimpleReadTime = dynamic(() => import("@/components/enhanced/ReadTime").then((m) => m.SimpleReadTime), { ssr: true });
+const SafeTableOfContents = dynamic(() => import("@/components/enhanced/TableOfContents").then((m) => m.SafeTableOfContents), { ssr: false });
 
 type ContentlayerDoc = {
   title?: string | null;
@@ -69,151 +45,74 @@ type ContentlayerDoc = {
 
 type Props = {
   doc: ContentlayerDoc;
-  mdxSource: MDXRemoteSerializeResult;
+  source: MDXRemoteSerializeResult; // ✅ Standardized naming
   canonicalPath: string;
   backHref?: string;
   label?: string;
-  components?: Record<string, React.ComponentType<any>>;
-  rawContent?: string;
+  mdxRaw?: string; // ✅ Required for Seeding
 };
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
-function safeCanonicalUrl(path: string) {
-  const p = (path || "").trim();
-  const norm = p.startsWith("/") ? p : `/${p}`;
-  return `${SITE_URL}${norm}`;
-}
-
-function formatDateEnGb(input?: string | null) {
-  if (!input) return null;
-  const d = new Date(input);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-}
-
-function normalizeOgImage(img?: string | null): string {
-  const s = String(img || "").trim();
-  if (!s) return "";
-  // Accept absolute URLs or site-relative paths
-  if (/^https?:\/\//i.test(s)) return s;
-  return s.startsWith("/") ? `${SITE_URL}${s}` : `${SITE_URL}/${s}`;
-}
-
-function safeText(input: unknown, fallback = ""): string {
-  const s = typeof input === "string" ? input : "";
-  return s.trim() || fallback;
-}
-
 export default function ContentlayerDocPage({
   doc,
-  mdxSource,
+  source,
   canonicalPath,
   backHref = "/content",
   label = "Reading Room",
-  components = mdxComponents as any,
-  rawContent = "",
+  mdxRaw = "",
 }: Props) {
   const [viewCount, setViewCount] = React.useState<number | null>(null);
   const [isShareTooltipVisible, setIsShareTooltipVisible] = React.useState(false);
   const [isBookmarked, setIsBookmarked] = React.useState(false);
-
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  const title = safeText(doc?.title, "Untitled Volume");
-  const description =
-    safeText(doc?.excerpt) ||
-    safeText(doc?.description) ||
-    "Strategic assets for institutional architects.";
+  // ✅ SEED + PROXY: Guaranteed no missing component errors
+  const safeComponents = React.useMemo(() => 
+    createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+      warnOnFallback: process.env.NODE_ENV === "development",
+    }), [mdxRaw]
+  );
 
-  const canonicalUrl = safeCanonicalUrl(canonicalPath);
-  const ogImage = normalizeOgImage(doc?.coverImage);
-
-  const displayDate = React.useMemo(() => formatDateEnGb(doc?.date), [doc?.date]);
-
-  const bookmarkKey = React.useMemo(() => {
-    const slug = safeText(doc?.slug) || safeText(canonicalPath);
-    return `aol_bookmark_${slug}`;
-  }, [doc?.slug, canonicalPath]);
-
-  const onShare = React.useCallback(async () => {
-    if (typeof window === "undefined") return;
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, text: description, url: canonicalUrl });
-        return;
-      }
-      await navigator.clipboard.writeText(canonicalUrl);
-      setIsShareTooltipVisible(true);
-      window.setTimeout(() => setIsShareTooltipVisible(false), 2000);
-    } catch {
-      // user cancelled or browser blocked
-    }
-  }, [canonicalUrl, title, description]);
+  const title = doc?.title || "Untitled Volume";
+  const description = doc?.excerpt || doc?.description || "Strategic assets for institutional architects.";
+  const canonicalUrl = `${SITE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-
-    // Very simple local view counter (swap to API later)
     const key = `aol_view_${canonicalPath}`;
     const prev = Number(window.localStorage.getItem(key) || "0");
-    const next = prev + 1;
-    window.localStorage.setItem(key, String(next));
-    setViewCount(next);
+    window.localStorage.setItem(key, String(prev + 1));
+    setViewCount(prev + 1);
+    setIsBookmarked(window.localStorage.getItem(`aol_bookmark_${doc?.slug || canonicalPath}`) === "1");
+  }, [canonicalPath, doc?.slug]);
 
-    // Load bookmark state
-    const bm = window.localStorage.getItem(bookmarkKey);
-    setIsBookmarked(bm === "1");
-  }, [canonicalPath, bookmarkKey]);
-
-  const toggleBookmark = React.useCallback(() => {
-    if (typeof window === "undefined") return;
-    setIsBookmarked((v) => {
-      const next = !v;
-      window.localStorage.setItem(bookmarkKey, next ? "1" : "0");
-      return next;
+  const toggleBookmark = () => {
+    setIsBookmarked(v => {
+      window.localStorage.setItem(`aol_bookmark_${doc?.slug || canonicalPath}`, !v ? "1" : "0");
+      return !v;
     });
-  }, [bookmarkKey]);
-
-  const wordsCount = React.useMemo(() => {
-    const txt = typeof rawContent === "string" ? rawContent : "";
-    const words = txt.split(/\s+/).filter(Boolean);
-    return words.length;
-  }, [rawContent]);
-
-  const ProseClass = `
-    prose prose-invert prose-gold max-w-none
-    prose-headings:font-serif prose-headings:relative
-    prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8 prose-h2:pt-8 prose-h2:border-t prose-h2:border-white/10
-    prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
-    prose-p:text-gray-300 prose-p:leading-relaxed prose-p:text-lg
-    prose-strong:text-amber-300 prose-strong:font-semibold
-    prose-a:text-amber-400 prose-a:no-underline hover:prose-a:text-amber-300 hover:prose-a:underline
-    prose-blockquote:border-l-4 prose-blockquote:border-amber-500/50 prose-blockquote:bg-gradient-to-r prose-blockquote:from-amber-500/5 prose-blockquote:to-transparent prose-blockquote:p-8 prose-blockquote:rounded-xl
-    prose-pre:bg-black prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:shadow-2xl
-    prose-ul:space-y-3 prose-li:text-gray-300
-    prose-img:rounded-2xl prose-img:shadow-2xl prose-img:border prose-img:border-white/10
-  `;
+  };
 
   return (
-    <Layout title={title} description={description} ogImage={ogImage || ""}>
+    <Layout title={title} description={description} ogImage={doc?.coverImage || ""}>
       <Head>
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta name="twitter:card" content="summary_large_image" />
-        {ogImage ? <meta property="og:image" content={ogImage} /> : null}
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-cream">
-        {/* Motion Nav/Header are optional enhancements; page works without them */}
         <MotionNav
           backHref={backHref}
           label={label}
-          onShare={onShare}
+          onShare={async () => {
+            if (navigator.share) await navigator.share({ title, url: canonicalUrl });
+            else {
+              await navigator.clipboard.writeText(canonicalUrl);
+              setIsShareTooltipVisible(true);
+              setTimeout(() => setIsShareTooltipVisible(false), 2000);
+            }
+          }}
           isBookmarked={isBookmarked}
           toggleBookmark={toggleBookmark}
           isShareTooltipVisible={isShareTooltipVisible}
@@ -221,191 +120,53 @@ export default function ContentlayerDocPage({
 
         <article className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-            {/* Main */}
             <div className="lg:col-span-8">
               <MotionHeader
                 title={title}
-                excerpt={safeText(doc?.excerpt)}
-                category={safeText(doc?.category)}
+                excerpt={doc?.excerpt}
+                category={doc?.category}
                 label={label}
                 featured={!!doc?.featured}
-                displayDate={displayDate}
-                readTime={safeText(doc?.readTime)}
+                displayDate={doc?.date ? new Date(doc.date).toLocaleDateString("en-GB") : null}
+                readTime={doc?.readTime}
                 viewCount={viewCount}
-                author={safeText(doc?.author)}
-                tags={Array.isArray(doc?.tags) ? doc!.tags! : []}
+                author={doc?.author}
+                tags={doc?.tags || []}
               />
 
               <div className="relative" ref={contentRef}>
                 <SafeTableOfContents contentRef={contentRef} className="mb-8" />
-
-                <div className={ProseClass}>
-                  {/* Suspense does not help here; MDXRemote is synchronous given a pre-serialized source */}
-                  <MDXRemote {...mdxSource} components={components as any} />
+                <div className="prose prose-invert prose-gold max-w-none prose-p:text-gray-300 prose-p:text-lg">
+                  {/* ✅ Using safeComponents from the seed+proxy utility */}
+                  <MDXRemote {...source} components={safeComponents as any} />
                 </div>
               </div>
 
-              <footer className="mt-24 border-t border-white/10 pt-12">
-                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-8 backdrop-blur-sm">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-6 h-px w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
-                    <p className="font-serif text-2xl italic text-white mb-4">
-                      &quot;Architecture is destiny, made visible.&quot;
-                    </p>
-                    <p className="text-sm text-gray-400 mb-8">— Abraham of London</p>
-
-                    <div className="flex flex-wrap items-center justify-center gap-4">
-                      <SimpleReadTime content={rawContent} />
-                      <span className="text-xs text-gray-500">•</span>
-                      <Link
-                        href={backHref}
-                        className="text-sm font-medium text-amber-300 hover:text-amber-400 transition-colors"
-                      >
-                        Explore more from the {label}
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 pt-8 border-t border-white/10">
-                    <p className="font-mono text-center text-[9px] uppercase tracking-[0.4em] text-gray-600">
-                      Abraham of London · Strategic Archives · Established London
-                    </p>
-                  </div>
-                </div>
+              <footer className="mt-24 border-t border-white/10 pt-12 text-center">
+                <p className="font-serif text-2xl italic text-white mb-2">&quot;Architecture is destiny, made visible.&quot;</p>
+                <SimpleReadTime content={mdxRaw} />
               </footer>
             </div>
 
-            {/* Sidebar */}
             <aside className="lg:col-span-4">
               <div className="sticky top-24 space-y-8">
                 <div className="rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-sm">
-                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-white">
-                    Reading Stats
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <div className="mb-1 flex justify-between text-xs text-gray-400">
-                        <span>Completion</span>
-                        <span>25%</span>
-                      </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-1000"
-                          style={{ width: "25%" }}
-                        />
-                      </div>
-                    </div>
-
-                    {rawContent ? (
-                      <div className="border-t border-white/10 pt-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400">Words</span>
-                          <span className="font-mono text-sm text-white">
-                            {wordsCount.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-white mb-4">Intelligence Stats</h3>
+                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gold w-1/4" />
+                   </div>
+                   <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-tighter">Reading Progress</p>
                 </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-sm">
-                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-white">
-                    Related Intelligence
-                  </h3>
-                  <div className="space-y-3">
-                    {["Architectural Principles", "Institutional Strategy", "Founder Framework"].map((item) => (
-                      <a
-                        key={item}
-                        href="#"
-                        className="group flex items-center gap-3 rounded-lg p-3 transition-all hover:bg-white/5"
-                      >
-                        <div className="h-2 w-2 rounded-full bg-amber-500/60 group-hover:bg-amber-500" />
-                        <span className="text-sm text-gray-300 group-hover:text-white">{item}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-
-                {String(doc?.type || "").toLowerCase() === "download" ? (
-                  <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-6 backdrop-blur-sm">
-                    <h3 className="mb-3 text-sm font-bold uppercase tracking-widest text-amber-300">
-                      Download Asset
-                    </h3>
-                    <p className="mb-4 text-sm text-gray-300">
-                      Save this framework for offline reference
-                    </p>
-                    <button className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-black transition-all hover:shadow-lg hover:scale-[1.02]">
-                      Download PDF
-                    </button>
-                  </div>
-                ) : null}
-
-                <div className="rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-sm">
-                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-white">Quick Nav</h3>
-                  <Link
-                    href={backHref}
-                    className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-200 hover:bg-white/10 transition-colors"
-                  >
-                    <BookOpen className="h-4 w-4 text-amber-400" />
-                    Back to {label}
+                
+                <div className="rounded-2xl border border-white/10 bg-black/50 p-6">
+                  <Link href={backHref} className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 transition-colors">
+                    <BookOpen className="h-4 w-4" /> Back to {label}
                   </Link>
                 </div>
               </div>
             </aside>
           </div>
         </article>
-
-        <style jsx global>{`
-          @keyframes gradientShift {
-            0%,
-            100% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-          }
-
-          .prose pre {
-            position: relative;
-            background: linear-gradient(135deg, #000, #111);
-            background-size: 200% 200%;
-            animation: gradientShift 10s ease infinite;
-          }
-
-          .prose pre::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(
-              90deg,
-              transparent,
-              rgba(245, 158, 11, 0.3),
-              rgba(245, 158, 11, 0.6),
-              rgba(245, 158, 11, 0.3),
-              transparent
-            );
-          }
-
-          .prose h2::before {
-            content: "#";
-            position: absolute;
-            left: -2rem;
-            opacity: 0.3;
-            color: rgba(245, 158, 11, 0.5);
-            font-family: monospace;
-            transition: opacity 0.3s;
-          }
-
-          .prose h2:hover::before {
-            opacity: 1;
-          }
-        `}</style>
       </main>
     </Layout>
   );

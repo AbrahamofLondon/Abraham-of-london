@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
-
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,30 +9,16 @@ module.exports = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
   ],
-
   theme: {
     container: {
       center: true,
-      padding: {
-        DEFAULT: "1.5rem",
-        sm: "2rem",
-        lg: "4rem",
-      },
-      screens: {
-        sm: "640px",
-        md: "768px",
-        lg: "1024px",
-        xl: "1280px",
-        "2xl": "1440px",
-      },
+      padding: { DEFAULT: "1.5rem", sm: "2rem", lg: "4rem" },
+      screens: { sm: "640px", md: "768px", lg: "1024px", xl: "1280px", "2xl": "1440px" },
     },
-
     extend: {
       colors: {
-        // Institutional core palette mapped for v4 compatibility
         background: "var(--brand-obsidian, #000000)",
         foreground: "var(--brand-cream, #fdfaf3)",
-        
         primary: {
           DEFAULT: "#f59e0b",
           light: "#fbbf24",
@@ -48,19 +33,14 @@ module.exports = {
           800: "#92400e",
           900: "#78350f",
         },
-
-        gold: {
-          DEFAULT: "#D4AF37",
-          glow: "rgba(212, 175, 55, 0.4)",
-        },
-
+        gold: { DEFAULT: "#D4AF37", glow: "rgba(212, 175, 55, 0.4)" },
         surface: "var(--brand-charcoal, #050505)",
         border: "rgba(255, 255, 255, 0.08)",
       },
       fontFamily: {
-        sans: ["var(--font-family-sans, 'Inter')", "system-ui", "sans-serif"],
-        mono: ["var(--font-family-mono, 'JetBrains Mono')", "monospace"],
-        serif: ["var(--font-family-serif, 'Cormorant Garamond')", "serif"],
+        sans: ["var(--font-family-sans)", "Inter", "system-ui", "sans-serif"],
+        mono: ["var(--font-family-mono)", "JetBrains Mono", "monospace"],
+        serif: ["var(--font-family-serif)", "Cormorant Garamond", "serif"],
         editorial: ["var(--font-editorial)", "var(--font-family-serif)", "serif"],
       },
       fontSize: {
@@ -92,9 +72,5 @@ module.exports = {
       zIndex: { 60: "60", 70: "70", 80: "80", 90: "90", 100: "100" },
     },
   },
-
-  plugins: [
-    require("@tailwindcss/typography"),
-    require("@tailwindcss/forms"),
-  ],
+  plugins: [require("@tailwindcss/typography"), require("@tailwindcss/forms")],
 };

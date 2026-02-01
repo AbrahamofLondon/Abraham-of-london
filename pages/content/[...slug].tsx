@@ -10,7 +10,7 @@ import rehypeSlug from "rehype-slug";
 
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 
-// ✅ FIXED: Import server-side functions from correct location
+// ✅ Server-side helpers
 import {
   getContentlayerData,
   getAllContentlayerDocs,
@@ -32,198 +32,117 @@ interface Props {
   doc: UiDoc;
   source: MDXRemoteSerializeResult;
   canonicalPath: string;
-  mdxRaw: string; // ✅ ADDED: Required for seeding
+  mdxRaw: string; // ✅ Required for seeding
 }
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
-// Paranoid MDX extraction
 function getRawBody(d: any): string {
-  return (
-    d?.body?.raw ||
-    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
-    (typeof d?.content === "string" ? d.content : "") ||
-    (typeof d?.body === "string" ? d.body : "") ||
-    (typeof d?.mdx === "string" ? d.mdx : "") ||
-    ""
-  );
+  return d?.body?.raw || d?.bodyRaw || d?.content || d?.body || d?.mdx || "";
 }
 
 const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath, mdxRaw }) => {
   const router = useRouter();
 
-  // Loading state
   if (router.isFallback) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-black flex items-center justify-center">
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="relative">
-            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-2xl rounded-full animate-pulse" />
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mx-auto mb-6" />
-              <p className="text-slate-600 dark:text-slate-400 font-medium">
-                Loading the vault…
-              </p>
-              <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">
-                Unpacking assets
-              </p>
-            </div>
-          </div>
+          <div className="w-12 h-12 border-2 border-gold/20 border-t-gold rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400 font-serif tracking-widest uppercase text-xs">Accessing Vault...</p>
         </div>
       </div>
     );
   }
 
-  // Hard 404 UI (should rarely happen because getStaticProps returns notFound)
-  if (!doc) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-black flex items-center justify-center">
-        <div className="text-center max-w-md px-6">
-          <div className="relative mb-8">
-            <div className="absolute -inset-4 bg-gradient-to-r from-rose-100 to-pink-100 dark:from-rose-900/20 dark:to-pink-900/20 blur-2xl rounded-full opacity-60" />
-            <div className="relative">
-              <div className="text-6xl mb-4">🔍</div>
-              <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">
-                Manuscript Not Found
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                This asset isn't in the vault index.
-              </p>
-              <button
-                onClick={() => router.push("/content")}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                <span>Return to Vault</span>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!doc) return null; // getStaticProps handles 404
 
   const canonicalUrl = `${SITE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
-
-  const desc =
-    doc.description || doc.excerpt || "Part of the Abraham of London vault";
+  const desc = doc.description || doc.excerpt || "Intelligence asset from the Abraham of London vault.";
 
   return (
     <>
       <Head>
-        <title>{doc.title} | Abraham of London</title>
+        <title>{`${doc.title} | Abraham of London`}</title>
         <meta name="description" content={desc} />
         <link rel="canonical" href={canonicalUrl} />
-
+        
         <meta property="og:title" content={doc.title} />
         <meta property="og:description" content={desc} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={canonicalUrl} />
-        {doc.coverImage ? <meta property="og:image" content={doc.coverImage} /> : null}
+        {doc.coverImage && <meta property="og:image" content={doc.coverImage} />}
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={doc.title} />
-        <meta name="twitter:description" content={desc} />
-        {doc.coverImage ? <meta name="twitter:image" content={doc.coverImage} /> : null}
-
-        {doc.date ? <meta property="article:published_time" content={doc.date} /> : null}
-        {doc.author ? <meta property="article:author" content={doc.author} /> : null}
+        {doc.date && <meta property="article:published_time" content={doc.date} />}
       </Head>
 
-      {/* ✅ ContentlayerDocPage must be updated to accept mdxRaw and use createSeededSafeMdxComponents */}
+      {/* ✅ ContentlayerDocPage receives mdxRaw to initialize createSeededSafeMdxComponents */}
       <ContentlayerDocPage
         doc={doc}
         source={source}
         canonicalPath={canonicalPath}
         backHref="/content"
-        label="Kingdom Vault"
-        mdxRaw={mdxRaw} // ✅ PASS MDX RAW FOR SEEDING
+        label="Strategic Archive"
+        mdxRaw={mdxRaw} 
       />
     </>
   );
 };
 
+// ==================== PATH GENERATION ====================
+
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    // Wait for contentlayer data to be loaded
-    const contentlayerData = getContentlayerData();
-
+    getContentlayerData(); // Ensure data is primed
     const docs = getAllContentlayerDocs();
 
-    // Only docs whose href begins with /content/
-    const contentDocs = Array.isArray(docs)
-      ? docs.filter((d) => {
-          if (!d || isDraftContent(d)) return false;
-          const href = getDocHref(d);
-          return Boolean(href) && href.startsWith("/content/");
-        })
-      : [];
-
-    const paths = contentDocs
+    const paths = docs
+      .filter((d) => {
+        if (!d || isDraftContent(d)) return false;
+        const href = getDocHref(d);
+        // This catch-all handles anything routed through /content/
+        return Boolean(href) && href.startsWith("/content/");
+      })
       .map((doc) => {
         const href = getDocHref(doc);
-        if (!href || !href.startsWith("/content/")) return null;
-
-        // slug segments after /content/
-        const rest = normalizeSlug(href.replace(/^\/content\//, ""));
-        if (!rest) return null;
-
+        const rest = normalizeSlug(href!.replace(/^\/content\//, ""));
         const parts = rest.split("/").filter(Boolean);
-        if (parts.length === 0) return null;
-
-        return { params: { slug: parts } };
+        return parts.length > 0 ? { params: { slug: parts } } : null;
       })
       .filter(Boolean) as { params: { slug: string[] } }[];
 
-    console.log(
-      `📄 /content: Generated ${paths.length} paths from ${contentDocs.length} documents`
-    );
-
+    console.log(`📄 Catch-all Vault: Generated ${paths.length} nested paths`);
     return { paths, fallback: "blocking" };
   } catch (error) {
-    console.error("Error generating static paths for /content:", error);
+    console.error("Static Path Error:", error);
     return { paths: [], fallback: "blocking" };
   }
 };
 
+// ==================== DATA FETCHING ====================
+
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
-    const raw = params?.slug;
-    if (!raw) return { notFound: true };
+    const slugParts = params?.slug;
+    if (!slugParts) return { notFound: true };
 
-    // catch-all always arrives as string[]
-    const joined = Array.isArray(raw) ? raw.join("/") : String(raw);
-    const normalized = normalizeSlug(joined);
-    if (!normalized) return { notFound: true };
-
-    // Strictly resolve content documents only
+    const joinedSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts;
+    const normalized = normalizeSlug(joinedSlug);
+    
+    // Attempt to find the doc across all sub-directories (canon, strategy, etc)
     const rawDoc = getDocBySlug(`content/${normalized}`);
-    if (!rawDoc) return { notFound: true };
-    if (isDraftContent(rawDoc)) return { notFound: true };
+    
+    if (!rawDoc || isDraftContent(rawDoc)) {
+      console.warn(`[Vault] Missing or Draft: content/${normalized}`);
+      return { notFound: true };
+    }
 
-    // Integrity check: the document must belong to /content/
     const href = getDocHref(rawDoc);
-    if (!href || !href.startsWith("/content/")) return { notFound: true };
-
     const doc = toUiDoc(rawDoc);
-
-    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
     const mdxRaw = getRawBody(rawDoc);
     
-    // ✅ USE DIRECT SERIALIZE INSTEAD OF prepareMDX
+    // Direct build-time serialization
     const source = await serialize(mdxRaw || " ", {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
@@ -235,13 +154,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       props: {
         doc: sanitizeData(doc),
         source,
-        canonicalPath: href,
-        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
+        canonicalPath: href || `/content/${normalized}`,
+        mdxRaw,
       },
       revalidate: 1800,
     };
   } catch (error) {
-    console.error("Error in getStaticProps for /content/[...slug]:", error);
+    console.error("Static Props Error:", error);
     return { notFound: true };
   }
 };

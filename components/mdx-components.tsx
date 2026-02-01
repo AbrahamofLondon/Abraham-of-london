@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
-import { HelpCircle, Shield, Clock, ChevronRight, ArrowUpRight } from "lucide-react";
+import { HelpCircle, ArrowUpRight } from "lucide-react";
 
 type AnyProps = Record<string, any>;
 const isDev = process.env.NODE_ENV === "development";
@@ -13,7 +13,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 /* -----------------------------------------------------------------------------
-  MISSING COMPONENT BOUNDARY
+  MISSING COMPONENT BOUNDARY (Local Fallback)
 ----------------------------------------------------------------------------- */
 const MissingComponent: ComponentType<{ name: string; children?: ReactNode }> = ({ name, children, ...rest }) => {
   if (isDev) {
@@ -52,11 +52,11 @@ const H1: ComponentType<any> = (props: AnyProps) => (
 );
 
 const H2: ComponentType<any> = (props: AnyProps) => (
-  <h2 {...props} className={cx("font-serif text-2xl md:text-3xl text-white/90 mb-6 mt-12 tracking-tight border-b border-white/5 pb-2", props?.className)} />
+  <h2 {...props} id={props.id} className={cx("font-serif text-2xl md:text-3xl text-white/90 mb-6 mt-12 tracking-tight border-b border-white/5 pb-2", props?.className)} />
 );
 
 const H3: ComponentType<any> = (props: AnyProps) => (
-  <h3 {...props} className={cx("font-serif text-xl md:text-2xl text-white/80 mb-4 mt-8 tracking-tight", props?.className)} />
+  <h3 {...props} id={props.id} className={cx("font-serif text-xl md:text-2xl text-white/80 mb-4 mt-8 tracking-tight", props?.className)} />
 );
 
 const P: ComponentType<any> = (props: AnyProps) => (
@@ -93,10 +93,11 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   hr: () => <hr className="my-16 border-t border-white/10" />,
   code: (props: any) => <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[0.85em] text-amber-200" {...props} />,
   
-  // Custom Block Handlers
+  // Custom Block Handlers (Update these as you build the real components)
   FeatureCard: (props: any) => <MissingComponent name="FeatureCard" {...props} />,
   ResourcesCTA: (props: any) => <MissingComponent name="ResourcesCTA" {...props} />,
   BrandFrame: (props: any) => <MissingComponent name="BrandFrame" {...props} />,
+  DownloadCard: (props: any) => <MissingComponent name="DownloadCard" {...props} />,
 };
 
 export default mdxComponents;

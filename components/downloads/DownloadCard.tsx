@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import * as React from "react";
-import { Download, FileText, Lock, ArrowRight } from "lucide-react";
+import { Download, FileText, Lock, ArrowRight, Layers } from "lucide-react";
 
 type DownloadCardProps = {
   slug: string;
@@ -17,10 +17,11 @@ type DownloadCardProps = {
   
   // New props for component integration
   useDownloadCTA?: boolean;
-  ctaDetails?: Array<{label: string, value: string, icon?: string}>;
+  ctaDetails?: Array<{label: string, value: string, icon?: React.ReactNode}>;
   ctaFeatures?: string[];
   ctaRequiresAuth?: boolean;
   pdfFormats?: string[];
+  pageCount?: number; // Resolved: Invariant matched to contentlayer
 };
 
 const DEFAULT_COVER = "/assets/images/downloads/default-download-cover.jpg";
@@ -29,7 +30,7 @@ function isGatedHref(href: string): boolean {
   return href.startsWith("/api/downloads/");
 }
 
-// Reusable DownloadCTA-like component (inline to avoid circular dependency)
+// Reusable DownloadCTA-like component
 const FeaturedDownloadSection = ({
   title,
   description,
@@ -41,12 +42,13 @@ const FeaturedDownloadSection = ({
   fileSize,
   fileFormat,
   buttonText,
-  pdfFormats = ["A4", "Letter", "A3"]
+  pdfFormats = ["A4", "Letter", "A3"],
+  pageCount
 }: {
   title: string;
   description: string;
   badge: string;
-  details: Array<{label: string, value: string, icon?: string}>;
+  details: Array<{label: string, value: string, icon?: React.ReactNode}>;
   features: string[];
   downloadUrl: string | null;
   requiresAuth: boolean;
@@ -54,6 +56,7 @@ const FeaturedDownloadSection = ({
   fileFormat: string;
   buttonText: string;
   pdfFormats?: string[];
+  pageCount?: number;
 }) => {
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -65,6 +68,16 @@ const FeaturedDownloadSection = ({
       setIsLoading(false);
     }, 1000);
   };
+
+  // Merge pageCount into details if present and not already there
+  const finalDetails = [...details];
+  if (pageCount && !finalDetails.some(d => d.label.toLowerCase().includes('page'))) {
+    finalDetails.push({
+      label: "Length",
+      value: `${pageCount} Pages`,
+      icon: <Layers className="w-4 h-4" />
+    });
+  }
 
   return (
     <div className="relative my-6 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 via-black/50 to-gold/5 p-8 overflow-hidden">
@@ -88,13 +101,13 @@ const FeaturedDownloadSection = ({
         </div>
 
         {/* Details Grid */}
-        {details.length > 0 && (
+        {finalDetails.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-            {details.map((detail, index) => (
+            {finalDetails.map((detail, index) => (
               <div key={index} className="flex items-start gap-3">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center text-gold">
-                    {detail.icon || '📄'}
+                    {detail.icon || <FileText className="w-4 h-4" />}
                   </div>
                 </div>
                 <div>
@@ -133,7 +146,7 @@ const FeaturedDownloadSection = ({
           <button
             onClick={handleDownload}
             disabled={isLoading || requiresAuth}
-            className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-gold to-amber-600 text-black font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-gold/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+            className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-gold to-amber-600 text-black font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-gold/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -145,9 +158,7 @@ const FeaturedDownloadSection = ({
               </>
             ) : (
               <>
-                <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
+                <Download className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" />
                 <span>{buttonText}</span>
                 <span className="text-xs opacity-80">({fileSize}, {fileFormat})</span>
               </>
@@ -156,33 +167,13 @@ const FeaturedDownloadSection = ({
 
           {/* Auth notice */}
           {requiresAuth && (
-            <div className="mt-6 p-3 rounded-lg bg-charcoal/50 border border-white/10">
+            <div className="mt-6 p-3 rounded-lg bg-black/40 border border-white/10">
               <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
-                <svg className="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                </svg>
+                <Lock className="w-4 h-4 text-gold" />
                 <span>Requires <strong className="text-gold">authenticated access</strong></span>
               </p>
             </div>
           )}
-
-          {/* File info */}
-          <div className="mt-4 text-xs text-gray-500 flex flex-wrap items-center justify-center gap-3">
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-              <span>Secure download</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-              <span>High-quality {fileFormat}</span>
-            </span>
-            {pdfFormats.length > 0 && (
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-                <span>{pdfFormats.length} formats available</span>
-              </span>
-            )}
-          </div>
         </div>
       </div>
     </div>
@@ -204,12 +195,12 @@ export default function DownloadCard({
   ctaFeatures = [],
   ctaRequiresAuth = false,
   pdfFormats = ["A4", "Letter", "A3"],
+  pageCount,
 }: DownloadCardProps) {
   const detailHref = `/downloads/${slug}`;
   const finalImageSrc = (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
   const gated = typeof fileHref === "string" && fileHref ? isGatedHref(fileHref) : false;
 
-  // If featured and useDownloadCTA is true, render the DownloadCTA-like component
   if (featured && useDownloadCTA) {
     return (
       <div className={className}>
@@ -225,12 +216,12 @@ export default function DownloadCard({
           fileFormat="PDF"
           buttonText={gated ? "Unlock Access" : "Download Now"}
           pdfFormats={pdfFormats}
+          pageCount={pageCount}
         />
       </div>
     );
   }
 
-  // Original DownloadCard layout for non-featured items
   return (
     <article
       className={clsx(
@@ -239,7 +230,6 @@ export default function DownloadCard({
         className
       )}
     >
-      {/* Rest of the original DownloadCard component remains the same */}
       <div
         className={clsx(
           "relative overflow-hidden bg-slate-100",
@@ -274,7 +264,6 @@ export default function DownloadCard({
             )}
             priority={featured}
           />
-          
           <div className="absolute inset-0 bg-slate-900/0 transition-colors duration-300 group-hover:bg-slate-900/5" />
         </Link>
       </div>
@@ -289,6 +278,12 @@ export default function DownloadCard({
                <>
                  {featured && category && <span>•</span>}
                  <span>{size}</span>
+               </>
+             )}
+             {pageCount && (
+               <>
+                 <span>•</span>
+                 <span>{pageCount} Pages</span>
                </>
              )}
              <span>PDF</span>
@@ -338,10 +333,7 @@ export default function DownloadCard({
                gated ? (
                  <a
                    href={fileHref}
-                   className={clsx(
-                     "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all",
-                     "bg-slate-900 hover:bg-slate-800 hover:shadow-md"
-                   )}
+                   className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all bg-slate-900 hover:bg-slate-800 hover:shadow-md"
                  >
                    Unlock
                  </a>

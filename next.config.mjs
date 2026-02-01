@@ -2,7 +2,8 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 /**
- * Safe resolver for browser polyfills
+ * Safe resolver for browser polyfills 
+ * Essential for processing older MDX content in the browser
  */
 function tryResolve(id) {
   try {
@@ -13,12 +14,22 @@ function tryResolve(id) {
 }
 
 function buildBrowserFallbacks() {
-  const fallbacks = ["crypto-browserify", "stream-browserify", "url", "util", "path-browserify", "os-browserify/browser"];
+  const fallbacks = [
+    "crypto-browserify", 
+    "stream-browserify", 
+    "url", 
+    "util", 
+    "path-browserify", 
+    "os-browserify/browser"
+  ];
   const resolved = {};
   
   fallbacks.forEach(id => {
     const path = tryResolve(id);
-    if (path) resolved[id.replace('-browserify', '').replace('/browser', '')] = path;
+    if (path) {
+      const key = id.replace('-browserify', '').replace('/browser', '');
+      resolved[key] = path;
+    }
   });
 
   return {
@@ -38,10 +49,11 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // SSG Performance: Vital for your 75+ intelligence briefs
+  // SSG Performance: Ensures 75+ briefs generate without timing out on Vercel
   staticPageGenerationTimeout: 600, 
 
-  // Combined Linting & Typing Guardrails
+  // Guardrails: Prevents build failure from minor linting/type issues 
+  // (Resolved the 'eslint' unrecognized key error by keeping the proper structure)
   typescript: {
     ignoreBuildErrors: true, 
   },
@@ -121,6 +133,7 @@ const nextConfig = {
   },
 };
 
+// Final Wrapper with Graceful Contentlayer Fallback
 const finalConfig = async () => {
   try {
     const { withContentlayer } = await import("next-contentlayer2");
@@ -130,7 +143,7 @@ const finalConfig = async () => {
       const { withContentlayer } = await import("next-contentlayer");
       return withContentlayer(nextConfig);
     } catch (e) {
-      console.warn("Contentlayer wrapper failed, returning raw config");
+      console.warn("⚠️ Contentlayer wrapper failed. Check dependency installation.");
       return nextConfig;
     }
   }

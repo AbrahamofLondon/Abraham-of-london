@@ -16,7 +16,7 @@
     "//4": "BUILD (CI + LOCAL)",
     "//5": "─────────────────────────────────────────────────────────────────────────────",
     "prebuild": "pnpm prebuild:ci",
-    "prebuild:ci": "pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm content:full && node scripts/prebuild-ci-gate.js",
+    "prebuild:ci": "pnpm vault:ready && pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm content:full && node scripts/prebuild-ci-gate.js",
     "prebuild:fast": "pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm contentlayer:build",
     "build": "cross-env NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "build:ci": "pnpm prebuild:ci && pnpm build",
@@ -189,9 +189,15 @@
     "audit:staging": "node scripts/check-links.js --url=https://staging.abrahamoflondon.org",
     "audit:production": "node scripts/check-links.org --url=https://www.abrahamoflondon.org",
     "//39": "─────────────────────────────────────────────────────────────────────────────",
-    "//40": "FRONTMATTER",
+    "//40": "VAULT INTELLIGENCE SUITE (2026)",
     "//41": "─────────────────────────────────────────────────────────────────────────────",
-    "fm:validate": "node scripts/validate-frontmatter.mjs"
+    "fm:validate": "node scripts/validate-frontmatter.mjs",
+    "vault:audit": "node scripts/audit-metadata.mjs",
+    "vault:fix": "node scripts/vault-repair.mjs",
+    "vault:glossary": "node scripts/glossary-injector.mjs",
+    "vault:check": "node scripts/validate-links.mjs",
+    "vault:manifest": "node scripts/generate-vault-manifest.mjs",
+    "vault:ready": "pnpm contentlayer:build && pnpm vault:audit && pnpm vault:fix && pnpm vault:glossary && pnpm vault:check && pnpm vault:manifest"
   },
   "dependencies": {
     "@auth/core": "^0.34.3",

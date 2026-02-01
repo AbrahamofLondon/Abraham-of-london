@@ -1,4 +1,4 @@
-# *
+# Abraham of London Institutional Robots Configuration
 User-agent: *
 Allow: /
 Disallow: /api/*
@@ -14,22 +14,24 @@ Disallow: /debug/*
 Disallow: /server-sitemap.xml
 Crawl-delay: 2
 
-# Googlebot
+# Targeted Googlebot Optimization
 User-agent: Googlebot
 Allow: /
 Disallow: /api/*
 Disallow: /inner-circle/*
 Disallow: /admin/*
 Disallow: /assets/private/*
-Crawl-delay: 1
 
 # Host
 Host: https://www.abrahamoflondon.org
 
-# Sitemaps
+# Sitemap Index (Primary)
 Sitemap: https://www.abrahamoflondon.org/sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/blog-sitemap.xml
+
+# Specialized Pillar Sitemaps
 Sitemap: https://www.abrahamoflondon.org/canons-sitemap.xml
 Sitemap: https://www.abrahamoflondon.org/strategies-sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/resources-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/blog-sitemap.xml
 Sitemap: https://www.abrahamoflondon.org/books-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/downloads-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/vault-sitemap.xml

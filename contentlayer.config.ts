@@ -264,6 +264,7 @@ const downloadFields = {
   isFillable: { type: "boolean", required: false },
   version: { type: "string", required: false },
   language: { type: "string", required: false },
+  pageCount: { type: "number", required: false }, // Resolved: Added to capture legacy data
 
   useLegacyDiagram: { type: "boolean", required: false },
   useProTip: { type: "boolean", required: false },
@@ -508,10 +509,16 @@ export const Strategy = defineDocumentType(() => ({
 }));
 
 // ------------------------------------------------------------
-// EXCLUSIONS
+// INSTITUTIONAL EXCLUSIONS (Optimized for v4/Contentlayer)
 // ------------------------------------------------------------
+/**
+ * INSTITUTIONAL EXCLUSIONS
+ * Purpose: Prevents EPERM locks on binary assets and stops recursive scanning
+ * of system-locked files during the intelligence brief indexing process.
+ */
 function getExclusions(): string[] {
   const exclusions = [
+    // Core Infrastructure
     "node_modules",
     ".git",
     ".next",
@@ -520,13 +527,14 @@ function getExclusions(): string[] {
     "_templates",
     "tmp",
     "temp",
-    "**/.DS_Store",
-    "**/Thumbs.db",
-    "**/*.lnk",
-    "**/*.bak",
-    "**/*.tmp",
-    "**/*.swp",
-    "**/*.backup*",
+
+    // The "Vault" - Correcting typos and barring binary scan
+    "public/assets/downloads/**",
+    "public/assets/resources/**",
+    "**/public-assets/**",
+    "**/assets/downloads/**", // Explicit production catch-all
+
+    // Binary File Extensions
     "**/*.pdf",
     "**/*.pptx",
     "**/*.docx",
@@ -537,13 +545,28 @@ function getExclusions(): string[] {
     "**/*.mp4",
     "**/*.mp3",
 
-    // Important: ignore the typo folder if it exists
+    // System Artifacts & Temporary Files
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/*.lnk",
+    "**/*.bak",
+    "**/*.tmp",
+    "**/*.swp",
+    "**/*.backup*",
+
+    // Typo Neutralization
     "donwloads",
     "donwloads/**",
   ];
 
   if (IS_WINDOWS) {
-    exclusions.push("**/~$*.docx", "**/~$*.xlsx", "**/~$*.pptx", "**/desktop.ini");
+    exclusions.push(
+      "**/~$*.docx", 
+      "**/~$*.xlsx", 
+      "**/~$*.pptx", 
+      "**/desktop.ini",
+      "**/Thumbs.db"
+    );
   }
 
   return exclusions;
