@@ -1,7 +1,9 @@
 @import "tailwindcss";
-@config "./tailwind.config.cjs";
 
-/* Brand System: Institutional Core */
+/* Link the legacy config so v4 understands your custom tokens 
+  using the official v4 @reference directive.
+*/
+@reference "../tailwind.config.cjs";
 
 @layer base {
   :root {
