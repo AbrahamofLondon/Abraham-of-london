@@ -198,7 +198,7 @@ This makes the page feel “alive” and signals your seriousness.
 - **The Household Operating System** (rhythms, rules, roles, restoration)
 - **The Pressure Protocol** (how leaders decide under stress without breaking)
 - **The Narrative & Mandate Compass** (brand, message, internal alignment)
-- **The Integrity Moat Model** (trust as a competitive advantage)
+- **The [Integrity](/vault/lexicon/integrity) Moat Model** (trust as a competitive advantage)
 - **The Institutional Design Kit** (how you build structures that don’t rot)
 
 
