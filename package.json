@@ -20,7 +20,7 @@
     "prebuild:fast": "pnpm fm:validate && pnpm fix:windows && pnpm fix:yaml && pnpm contentlayer:build",
     "build": "cross-env NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "build:ci": "pnpm prebuild:ci && pnpm build",
-    "build:netlify": "pnpm clean && pnpm build:ci",
+    "build:netlify": "pnpm vault:audit && pnpm contentlayer:build && pnpm build",
     "project:reset": "node scripts/setup-dev.js",
     "//6": "─────────────────────────────────────────────────────────────────────────────",
     "//7": "POST-BUILD (KEEP CI LIGHT — run heavier tests elsewhere)",
@@ -195,7 +195,7 @@
     "vault:audit": "node scripts/audit-metadata.mjs",
     "vault:fix": "node scripts/vault-repair.mjs",
     "vault:glossary": "node scripts/glossary-injector.mjs",
-    "vault:check": "node scripts/validate-links.mjs",
+    "vault:check": "node scripts/build-manifest.mjs && node scripts/validate-links.mjs",
     "vault:manifest": "node scripts/generate-vault-manifest.mjs",
     "vault:ready": "pnpm contentlayer:build && pnpm vault:audit && pnpm vault:fix && pnpm vault:glossary && pnpm vault:check && pnpm vault:manifest"
   },

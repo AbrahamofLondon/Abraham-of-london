@@ -1,7 +1,7 @@
 {
   "version": "2026.1",
-  "timestamp": "2026-02-01T15:50:26.424Z",
-  "count": 162,
+  "timestamp": "2026-02-01T16:39:05.481Z",
+  "count": 163,
   "entries": [
     {
       "title": "Christianity Is Not Extremism - It Is the Light That Built the World",
@@ -15,6 +15,20 @@
         "fathers",
         "apologetics",
         "culture"
+      ]
+    },
+    {
+      "title": "Fathering Principles: A Blueprint for Men",
+      "slug": "/blog/fathering-principles",
+      "date": "2025-05-15T00:00:00.000Z",
+      "folder": "blog",
+      "readingTime": "Unknown",
+      "tags": [
+        "fatherhood",
+        "principles",
+        "legacy",
+        "masculinity",
+        "formation"
       ]
     },
     {
@@ -139,7 +153,7 @@
     },
     {
       "title": "Purpose Is the Anchor: Why Meaning Beats Pleasure Every Time",
-      "slug": "/blog/\"purpose-is-the-anchor\"",
+      "slug": "/blog/purpose-is-the-anchor",
       "date": "2026-01-14T00:00:00.000Z",
       "folder": "blog",
       "readingTime": "Unknown",
@@ -168,7 +182,7 @@
     },
     {
       "title": "Surrender, Not Submission: The Path to Having It All",
-      "slug": "/blog/\"surrender-not-submission\"",
+      "slug": "/blog/surrender-not-submission",
       "date": "2024-01-04T00:00:00.000Z",
       "folder": "blog",
       "readingTime": "Unknown",
@@ -264,7 +278,7 @@
     },
     {
       "title": "On Institutional Sovereignty",
-      "slug": "/institutional-sovereignty",
+      "slug": "/shorts/institutional-sovereignty",
       "date": "2026-01-31T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -272,7 +286,7 @@
     },
     {
       "title": "When A Single Yes Changes Everything",
-      "slug": "/when-a-single-yes-changes-everything",
+      "slug": "/shorts/when-a-single-yes-changes-everything",
       "date": "2025-03-21T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -282,7 +296,7 @@
     },
     {
       "title": "When All You Can Do Is Breathe",
-      "slug": "/when-all-you-can-do-is-breathe",
+      "slug": "/shorts/when-all-you-can-do-is-breathe",
       "date": "2025-02-21T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -292,7 +306,7 @@
     },
     {
       "title": "When Avoidance Becomes Your Personality",
-      "slug": "/when-avoidance-becomes-your-personality",
+      "slug": "/shorts/when-avoidance-becomes-your-personality",
       "date": "2025-01-28T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -302,7 +316,7 @@
     },
     {
       "title": "When Busyness Becomes Your Brand",
-      "slug": "/when-busyness-becomes-your-brand",
+      "slug": "/shorts/when-busyness-becomes-your-brand",
       "date": "2025-03-30T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -312,7 +326,7 @@
     },
     {
       "title": "When Comfort Becomes Your Cage",
-      "slug": "/when-comfort-becomes-your-cage",
+      "slug": "/shorts/when-comfort-becomes-your-cage",
       "date": "2025-01-13T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -322,7 +336,7 @@
     },
     {
       "title": "When Conflict Feels Like Betrayal",
-      "slug": "/when-conflict-feels-like-betrayal",
+      "slug": "/shorts/when-conflict-feels-like-betrayal",
       "date": "2025-03-31T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -332,7 +346,7 @@
     },
     {
       "title": "When Doctrine Feels Safer Than God",
-      "slug": "/when-doctrine-feels-safer-than-god",
+      "slug": "/shorts/when-doctrine-feels-safer-than-god",
       "date": "2025-03-25T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -342,7 +356,7 @@
     },
     {
       "title": "When Every Promotion Feels Hollow",
-      "slug": "/when-every-promotion-feels-hollow",
+      "slug": "/shorts/when-every-promotion-feels-hollow",
       "date": "2025-03-09T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -352,7 +366,7 @@
     },
     {
       "title": "When Grace Finds You In The Mess",
-      "slug": "/when-grace-finds-you-in-the-mess",
+      "slug": "/shorts/when-grace-finds-you-in-the-mess",
       "date": "2025-03-07T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -362,7 +376,7 @@
     },
     {
       "title": "When Hope Feels Reckless",
-      "slug": "/when-hope-feels-reckless",
+      "slug": "/shorts/when-hope-feels-reckless",
       "date": "2025-02-25T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -372,7 +386,7 @@
     },
     {
       "title": "When Kindness Feels Like Rebellion",
-      "slug": "/when-kindness-feels-like-rebellion",
+      "slug": "/shorts/when-kindness-feels-like-rebellion",
       "date": "2025-03-28T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -382,7 +396,7 @@
     },
     {
       "title": "When Later Became Never",
-      "slug": "/when-later-became-never",
+      "slug": "/shorts/when-later-became-never",
       "date": "2025-03-20T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -392,7 +406,7 @@
     },
     {
       "title": "When Numbness Feels Safer Than Joy",
-      "slug": "/when-numbness-feels-safer-than-joy",
+      "slug": "/shorts/when-numbness-feels-safer-than-joy",
       "date": "2025-03-15T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -402,7 +416,7 @@
     },
     {
       "title": "When Productivity Becomes Punishment",
-      "slug": "/when-productivity-becomes-punishment",
+      "slug": "/shorts/when-productivity-becomes-punishment",
       "date": "2025-01-16T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -412,7 +426,7 @@
     },
     {
       "title": "When Rest Starts To Feel Dangerous",
-      "slug": "/when-rest-starts-to-feel-dangerous",
+      "slug": "/shorts/when-rest-starts-to-feel-dangerous",
       "date": "2025-02-28T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -422,7 +436,7 @@
     },
     {
       "title": "When You Argue With God In Your Head",
-      "slug": "/when-you-argue-with-god-in-your-head",
+      "slug": "/shorts/when-you-argue-with-god-in-your-head",
       "date": "2025-03-18T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -432,7 +446,7 @@
     },
     {
       "title": "When You Cant Stop Overthinking",
-      "slug": "/when-you-cant-stop-overthinking",
+      "slug": "/shorts/when-you-cant-stop-overthinking",
       "date": "2025-04-08T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -443,7 +457,7 @@
     },
     {
       "title": "When You Cant Tell If Youre Growing Or Drifting",
-      "slug": "/when-you-cant-tell-if-youre-growing-or-drifting",
+      "slug": "/shorts/when-you-cant-tell-if-youre-growing-or-drifting",
       "date": "2025-02-18T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -453,7 +467,7 @@
     },
     {
       "title": "When You Dont Know What You Want Anymore",
-      "slug": "/when-you-dont-know-what-you-want-anymore",
+      "slug": "/shorts/when-you-dont-know-what-you-want-anymore",
       "date": "2025-02-22T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -463,7 +477,7 @@
     },
     {
       "title": "When You Dont Trust Your Own Decisions",
-      "slug": "/when-you-dont-trust-your-own-decisions",
+      "slug": "/shorts/when-you-dont-trust-your-own-decisions",
       "date": "2025-04-14T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -474,7 +488,7 @@
     },
     {
       "title": "When You Fear Being Wrong About God",
-      "slug": "/when-you-fear-being-wrong-about-god",
+      "slug": "/shorts/when-you-fear-being-wrong-about-god",
       "date": "2025-04-01T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -484,7 +498,7 @@
     },
     {
       "title": "When You Fear Success More Than Failure",
-      "slug": "/when-you-fear-success-more-than-failure",
+      "slug": "/shorts/when-you-fear-success-more-than-failure",
       "date": "2025-02-27T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -494,7 +508,7 @@
     },
     {
       "title": "When You Feel Like God Is Delaying You",
-      "slug": "/when-you-feel-like-god-is-delaying-you",
+      "slug": "/shorts/when-you-feel-like-god-is-delaying-you",
       "date": "2025-04-06T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -505,7 +519,7 @@
     },
     {
       "title": "When You Feel Too Busy To Care",
-      "slug": "/when-you-feel-too-busy-to-care",
+      "slug": "/shorts/when-you-feel-too-busy-to-care",
       "date": "2025-01-06T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -515,7 +529,7 @@
     },
     {
       "title": "When You Finally Let Yourself Cry",
-      "slug": "/when-you-finally-let-yourself-cry",
+      "slug": "/shorts/when-you-finally-let-yourself-cry",
       "date": "2025-03-14T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -525,7 +539,7 @@
     },
     {
       "title": "When You Give More Than You Get",
-      "slug": "/when-you-give-more-than-you-get",
+      "slug": "/shorts/when-you-give-more-than-you-get",
       "date": "2025-01-13T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -535,7 +549,7 @@
     },
     {
       "title": "When You Keep Blaming Your Childhood",
-      "slug": "/when-you-keep-blaming-your-childhood",
+      "slug": "/shorts/when-you-keep-blaming-your-childhood",
       "date": "2025-04-03T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -546,7 +560,7 @@
     },
     {
       "title": "When You Keep Choosing People Who Cant Choose You",
-      "slug": "/when-you-keep-choosing-people-who-cant-choose-you",
+      "slug": "/shorts/when-you-keep-choosing-people-who-cant-choose-you",
       "date": "2025-03-24T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -556,7 +570,7 @@
     },
     {
       "title": "When You Keep Confusing Niceness With Goodness",
-      "slug": "/when-you-keep-confusing-niceness-with-goodness",
+      "slug": "/shorts/when-you-keep-confusing-niceness-with-goodness",
       "date": "2025-04-13T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -567,7 +581,7 @@
     },
     {
       "title": "When You Miss Who You Used To Be",
-      "slug": "/when-you-miss-who-you-used-to-be",
+      "slug": "/shorts/when-you-miss-who-you-used-to-be",
       "date": "2025-01-14T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -577,7 +591,7 @@
     },
     {
       "title": "When You Mistake Familiarity For Loyalty",
-      "slug": "/when-you-mistake-familiarity-for-loyalty",
+      "slug": "/shorts/when-you-mistake-familiarity-for-loyalty",
       "date": "2025-02-17T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -587,7 +601,7 @@
     },
     {
       "title": "When You Need God To Interrupt You",
-      "slug": "/when-you-need-god-to-interrupt-you",
+      "slug": "/shorts/when-you-need-god-to-interrupt-you",
       "date": "2025-03-11T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -597,7 +611,7 @@
     },
     {
       "title": "When You No Longer Recognise Your Own Voice",
-      "slug": "/when-you-no-longer-recognise-your-own-voice",
+      "slug": "/shorts/when-you-no-longer-recognise-your-own-voice",
       "date": "2025-03-22T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -607,7 +621,7 @@
     },
     {
       "title": "When You Outgrow Your Circle",
-      "slug": "/when-you-outgrow-your-circle",
+      "slug": "/shorts/when-you-outgrow-your-circle",
       "date": "2025-03-17T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -617,7 +631,7 @@
     },
     {
       "title": "When You Realise Prayer Is War",
-      "slug": "/when-you-realise-prayer-is-war",
+      "slug": "/shorts/when-you-realise-prayer-is-war",
       "date": "2025-04-16T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -628,7 +642,7 @@
     },
     {
       "title": "When You Realise You Were The Problem",
-      "slug": "/when-you-realise-you-were-the-problem",
+      "slug": "/shorts/when-you-realise-you-were-the-problem",
       "date": "2025-03-13T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -638,7 +652,7 @@
     },
     {
       "title": "When You Realise Youre Not Behind",
-      "slug": "/when-you-realise-youre-not-behind",
+      "slug": "/shorts/when-you-realise-youre-not-behind",
       "date": "2025-04-04T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -649,7 +663,7 @@
     },
     {
       "title": "When You Stop Waiting For Permission",
-      "slug": "/when-you-stop-waiting-for-permission",
+      "slug": "/shorts/when-you-stop-waiting-for-permission",
       "date": "2025-03-19T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -659,7 +673,7 @@
     },
     {
       "title": "When You Want To Quit But Cant",
-      "slug": "/when-you-want-to-quit-but-cant",
+      "slug": "/shorts/when-you-want-to-quit-but-cant",
       "date": "2025-02-19T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -669,7 +683,7 @@
     },
     {
       "title": "When Your Calendar Is Full But Your Life Is Empty",
-      "slug": "/when-your-calendar-is-full-but-your-life-is-empty",
+      "slug": "/shorts/when-your-calendar-is-full-but-your-life-is-empty",
       "date": "2025-01-27T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -679,7 +693,7 @@
     },
     {
       "title": "When Your Calling Stops Being Cute",
-      "slug": "/when-your-calling-stops-being-cute",
+      "slug": "/shorts/when-your-calling-stops-being-cute",
       "date": "2025-03-26T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -689,7 +703,7 @@
     },
     {
       "title": "When Your Character Is Leaking",
-      "slug": "/when-your-character-is-leaking",
+      "slug": "/shorts/when-your-character-is-leaking",
       "date": "2025-03-06T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -699,7 +713,7 @@
     },
     {
       "title": "When Your Confidence Feels Manufactured",
-      "slug": "/when-your-confidence-feels-manufactured",
+      "slug": "/shorts/when-your-confidence-feels-manufactured",
       "date": "2025-01-08T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -709,7 +723,7 @@
     },
     {
       "title": "When Your Convictions Feel Like Costumes",
-      "slug": "/when-your-convictions-feel-like-costumes",
+      "slug": "/shorts/when-your-convictions-feel-like-costumes",
       "date": "2025-01-20T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -719,7 +733,7 @@
     },
     {
       "title": "When Your Dreams Feel Too Heavy",
-      "slug": "/when-your-dreams-feel-too-heavy",
+      "slug": "/shorts/when-your-dreams-feel-too-heavy",
       "date": "2025-01-12T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -729,7 +743,7 @@
     },
     {
       "title": "When Your Excuses Become Your Identity",
-      "slug": "/when-your-excuses-become-your-identity",
+      "slug": "/shorts/when-your-excuses-become-your-identity",
       "date": "2025-02-20T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -739,7 +753,7 @@
     },
     {
       "title": "When Your Faith Feels Numb",
-      "slug": "/when-your-faith-feels-numb",
+      "slug": "/shorts/when-your-faith-feels-numb",
       "date": "2025-01-05T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -749,7 +763,7 @@
     },
     {
       "title": "When Your Hustle Has No Soul",
-      "slug": "/when-your-hustle-has-no-soul",
+      "slug": "/shorts/when-your-hustle-has-no-soul",
       "date": "2025-03-02T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -759,7 +773,7 @@
     },
     {
       "title": "When Your Legacy Terrifies You",
-      "slug": "/when-your-legacy-terrifies-you",
+      "slug": "/shorts/when-your-legacy-terrifies-you",
       "date": "2025-03-12T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -769,7 +783,7 @@
     },
     {
       "title": "When Your Silence Says Too Much",
-      "slug": "/when-your-silence-says-too-much",
+      "slug": "/shorts/when-your-silence-says-too-much",
       "date": "2025-03-03T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -779,7 +793,7 @@
     },
     {
       "title": "When Your Standards Keep You Lonely",
-      "slug": "/when-your-standards-keep-you-lonely",
+      "slug": "/shorts/when-your-standards-keep-you-lonely",
       "date": "2025-03-08T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -789,7 +803,7 @@
     },
     {
       "title": "When Your Vision Outgrows Your Environment",
-      "slug": "/when-your-vision-outgrows-your-environment",
+      "slug": "/shorts/when-your-vision-outgrows-your-environment",
       "date": "2025-02-26T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -799,7 +813,7 @@
     },
     {
       "title": "When Your Work Becomes Your Hiding Place",
-      "slug": "/when-your-work-becomes-your-hiding-place",
+      "slug": "/shorts/when-your-work-becomes-your-hiding-place",
       "date": "2025-03-16T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -809,7 +823,7 @@
     },
     {
       "title": "When Youre Addicted To Distraction",
-      "slug": "/when-youre-addicted-to-distraction",
+      "slug": "/shorts/when-youre-addicted-to-distraction",
       "date": "2025-03-29T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -819,7 +833,7 @@
     },
     {
       "title": "When Youre Afraid Of Your Own Potential",
-      "slug": "/when-youre-afraid-of-your-own-potential",
+      "slug": "/shorts/when-youre-afraid-of-your-own-potential",
       "date": "2025-01-15T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -829,7 +843,7 @@
     },
     {
       "title": "When Youre Afraid To Be Radical",
-      "slug": "/when-youre-afraid-to-be-radical",
+      "slug": "/shorts/when-youre-afraid-to-be-radical",
       "date": "2025-04-11T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -840,7 +854,7 @@
     },
     {
       "title": "When Youre Always The Strong One",
-      "slug": "/when-youre-always-the-strong-one",
+      "slug": "/shorts/when-youre-always-the-strong-one",
       "date": "2025-03-10T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -850,7 +864,7 @@
     },
     {
       "title": "When Youre Attracted To Potential Not Reality",
-      "slug": "/when-youre-attracted-to-potential-not-reality",
+      "slug": "/shorts/when-youre-attracted-to-potential-not-reality",
       "date": "2025-04-05T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -861,7 +875,7 @@
     },
     {
       "title": "When Youre Building Someone Elses Legacy",
-      "slug": "/when-youre-building-someone-elses-legacy",
+      "slug": "/shorts/when-youre-building-someone-elses-legacy",
       "date": "2025-02-03T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -871,7 +885,7 @@
     },
     {
       "title": "When Youre Done Fixing Adults",
-      "slug": "/when-youre-done-fixing-adults",
+      "slug": "/shorts/when-youre-done-fixing-adults",
       "date": "2025-02-24T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -881,7 +895,7 @@
     },
     {
       "title": "When Youre Exhausted But Still Available",
-      "slug": "/when-youre-exhausted-but-still-available",
+      "slug": "/shorts/when-youre-exhausted-but-still-available",
       "date": "2025-01-07T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -891,7 +905,7 @@
     },
     {
       "title": "When Youre Keeping Faith Out Of Habit",
-      "slug": "/when-youre-keeping-faith-out-of-habit",
+      "slug": "/shorts/when-youre-keeping-faith-out-of-habit",
       "date": "2025-03-04T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -901,7 +915,7 @@
     },
     {
       "title": "When Youre Living For Weekends",
-      "slug": "/when-youre-living-for-weekends",
+      "slug": "/shorts/when-youre-living-for-weekends",
       "date": "2025-04-15T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -912,7 +926,7 @@
     },
     {
       "title": "When Youre Loved Without Earning It",
-      "slug": "/when-youre-loved-without-earning-it",
+      "slug": "/shorts/when-youre-loved-without-earning-it",
       "date": "2025-04-12T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -923,7 +937,7 @@
     },
     {
       "title": "When Youre Measuring Everything But Meaning",
-      "slug": "/when-youre-measuring-everything-but-meaning",
+      "slug": "/shorts/when-youre-measuring-everything-but-meaning",
       "date": "2025-01-13T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -933,7 +947,7 @@
     },
     {
       "title": "When Youre Not Lazy Youre Undisciplined",
-      "slug": "/when-youre-not-lazy-youre-undisciplined",
+      "slug": "/shorts/when-youre-not-lazy-youre-undisciplined",
       "date": "2025-04-07T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -944,7 +958,7 @@
     },
     {
       "title": "When Youre Preparing For Rooms You Havent Entered",
-      "slug": "/when-youre-preparing-for-rooms-you-havent-entered",
+      "slug": "/shorts/when-youre-preparing-for-rooms-you-havent-entered",
       "date": "2025-03-05T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -954,7 +968,7 @@
     },
     {
       "title": "When Youre Productive But Not Present",
-      "slug": "/when-youre-productive-but-not-present",
+      "slug": "/shorts/when-youre-productive-but-not-present",
       "date": "2025-03-23T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -964,7 +978,7 @@
     },
     {
       "title": "When Youre Scared To Start Over",
-      "slug": "/when-youre-scared-to-start-over",
+      "slug": "/shorts/when-youre-scared-to-start-over",
       "date": "2025-03-01T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -974,7 +988,7 @@
     },
     {
       "title": "When Youre The Only One Doing The Work",
-      "slug": "/when-youre-the-only-one-doing-the-work",
+      "slug": "/shorts/when-youre-the-only-one-doing-the-work",
       "date": "2025-04-09T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -985,7 +999,7 @@
     },
     {
       "title": "When Youre Tired Of Being The Bigger Person",
-      "slug": "/when-youre-tired-of-being-the-bigger-person",
+      "slug": "/shorts/when-youre-tired-of-being-the-bigger-person",
       "date": "2025-01-10T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -995,7 +1009,7 @@
     },
     {
       "title": "When Youre Tired Of Starting Over",
-      "slug": "/when-youre-tired-of-starting-over",
+      "slug": "/shorts/when-youre-tired-of-starting-over",
       "date": "2025-04-02T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -1006,7 +1020,7 @@
     },
     {
       "title": "When Youre Winning At Work But Losing Yourself",
-      "slug": "/when-youre-winning-at-work-but-losing-yourself",
+      "slug": "/shorts/when-youre-winning-at-work-but-losing-yourself",
       "date": "2025-02-23T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -1016,7 +1030,7 @@
     },
     {
       "title": "When Youve Become Chronically Online",
-      "slug": "/when-youve-become-chronically-online",
+      "slug": "/shorts/when-youve-become-chronically-online",
       "date": "2025-04-10T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -1027,7 +1041,7 @@
     },
     {
       "title": "When Youve Worshipped The Wrong Metrics",
-      "slug": "/when-youve-worshipped-the-wrong-metrics",
+      "slug": "/shorts/when-youve-worshipped-the-wrong-metrics",
       "date": "2025-03-27T00:00:00.000Z",
       "folder": "shorts",
       "readingTime": "Unknown",
@@ -1037,7 +1051,7 @@
     },
     {
       "title": "Fathering Without Fear",
-      "slug": "/fathering-without-fear",
+      "slug": "/books/fathering-without-fear",
       "date": "2025-05-25T00:00:00.000Z",
       "folder": "books",
       "readingTime": "Unknown",
@@ -1052,7 +1066,7 @@
     },
     {
       "title": "The Architecture of Human Purpose",
-      "slug": "/the-architecture-of-human-purpose",
+      "slug": "/books/the-architecture-of-human-purpose",
       "date": "2025-11-25T00:00:00.000Z",
       "folder": "books",
       "readingTime": "Unknown",
@@ -1070,7 +1084,7 @@
     },
     {
       "title": "The Builder's Catechism",
-      "slug": "/the-builders-catechism",
+      "slug": "/books/the-builders-catechism",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "books",
       "readingTime": "Unknown",
@@ -1087,7 +1101,7 @@
     },
     {
       "title": "The Fiction Adaptation",
-      "slug": "/the-fiction-adaptation",
+      "slug": "/books/the-fiction-adaptation",
       "date": "2025-06-10T00:00:00.000Z",
       "folder": "books",
       "readingTime": "Unknown",
@@ -1103,7 +1117,7 @@
     },
     {
       "title": "The Builder’s Catechism",
-      "slug": "/builders-catechism",
+      "slug": "/canon/builders-catechism",
       "date": "2025-06-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1118,7 +1132,7 @@
     },
     {
       "title": "THE CANON - A New Era of Builders",
-      "slug": "/canon-campaign",
+      "slug": "/canon/canon-campaign",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1133,7 +1147,7 @@
     },
     {
       "title": "THE CANON: A LETTER FROM THE AUTHOR",
-      "slug": "/canon-introduction-letter",
+      "slug": "/canon/canon-introduction-letter",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1148,7 +1162,7 @@
     },
     {
       "title": "Canon Master Index & Glossary (Preview)",
-      "slug": "/canon-master-index-preview",
+      "slug": "/canon/canon-master-index-preview",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1164,7 +1178,7 @@
     },
     {
       "title": "Volume I - Foundations of Purpose",
-      "slug": "/volume-i-foundations-of-purpose",
+      "slug": "/canon/volume-i-foundations-of-purpose",
       "date": "2024-01-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1177,7 +1191,7 @@
     },
     {
       "title": "Canon Volume I - Teaching Edition",
-      "slug": "/volume-i-teaching-edition",
+      "slug": "/canon/volume-i-teaching-edition",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1191,7 +1205,7 @@
     },
     {
       "title": "Canon Volume II - Governance & Formation",
-      "slug": "/volume-ii-governance-and-formation",
+      "slug": "/canon/volume-ii-governance-and-formation",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1205,7 +1219,7 @@
     },
     {
       "title": "Canon Volume II - Teaching Edition",
-      "slug": "/volume-ii-teaching-edition",
+      "slug": "/canon/volume-ii-teaching-edition",
       "date": "2025-12-10T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1221,7 +1235,7 @@
     },
     {
       "title": "Canon Volume III - Teaching Edition",
-      "slug": "/volume-iii-teaching-edition",
+      "slug": "/canon/volume-iii-teaching-edition",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1237,7 +1251,7 @@
     },
     {
       "title": "Canon Volume IV - Teaching Edition",
-      "slug": "/volume-iv-teaching-edition",
+      "slug": "/canon/volume-iv-teaching-edition",
       "date": "2025-12-15T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1253,7 +1267,7 @@
     },
     {
       "title": "VOLUME TITLE GOES HERE",
-      "slug": "/volume-x-filename",
+      "slug": "/canon/volume-x-filename",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1266,7 +1280,7 @@
     },
     {
       "title": "VOLUME X – THE ARC OF FUTURE CIVILISATION",
-      "slug": "/volume-x-the-arc-of-future-civilisation",
+      "slug": "/canon/volume-x-the-arc-of-future-civilisation",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "canon",
       "readingTime": "Unknown",
@@ -1281,7 +1295,7 @@
     },
     {
       "title": "Abraham Vault — Strategic Artifacts Pack",
-      "slug": "/abraham-vault-pack",
+      "slug": "/downloads/abraham-vault-pack",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1295,7 +1309,7 @@
     },
     {
       "title": "Board Decision Log Template",
-      "slug": "/board-decision-log-template",
+      "slug": "/downloads/board-decision-log-template",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1308,7 +1322,7 @@
     },
     {
       "title": "Board & Investor One-Pager Template",
-      "slug": "/board-investor-onepager",
+      "slug": "/downloads/board-investor-onepager",
       "date": "2024-02-01T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1322,7 +1336,7 @@
     },
     {
       "title": "Brotherhood Covenant",
-      "slug": "/brotherhood-covenant",
+      "slug": "/downloads/brotherhood-covenant",
       "date": "2024-03-10T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1334,7 +1348,7 @@
     },
     {
       "title": "Canon Volume IV - Culture-Decadence Diagnostic Toolkit",
-      "slug": "/canon-volume-iv-diagnostic-toolkit",
+      "slug": "/downloads/canon-volume-iv-diagnostic-toolkit",
       "date": "2025-12-18T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1349,7 +1363,7 @@
     },
     {
       "title": "Canon Volume V - Governance Diagnostic Toolkit",
-      "slug": "/canon-volume-v-governance-diagnostic-toolkit",
+      "slug": "/downloads/canon-volume-v-governance-diagnostic-toolkit",
       "date": "2025-12-20T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1364,7 +1378,7 @@
     },
     {
       "title": "Brotherhood Communication Script",
-      "slug": "/communication-script-bpf",
+      "slug": "/downloads/communication-script-bpf",
       "date": "2024-03-01T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1376,7 +1390,7 @@
     },
     {
       "title": "Decision Log Template (PDF)",
-      "slug": "/decision-log-template",
+      "slug": "/downloads/decision-log-template",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1388,7 +1402,7 @@
     },
     {
       "title": "Decision Matrix Scorecard",
-      "slug": "/decision-matrix-scorecard",
+      "slug": "/downloads/decision-matrix-scorecard",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1401,7 +1415,7 @@
     },
     {
       "title": "The Legacy Architecture Canvas",
-      "slug": "/download-legacy-architecture-canvas",
+      "slug": "/downloads/download-legacy-architecture-canvas",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1415,7 +1429,7 @@
     },
     {
       "title": "Entrepreneur Operating Pack",
-      "slug": "/entrepreneur-operating-pack",
+      "slug": "/downloads/entrepreneur-operating-pack",
       "date": "2025-09-22T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1423,7 +1437,7 @@
     },
     {
       "title": "Entrepreneurial Survival Checklist",
-      "slug": "/entrepreneur-survival-checklist",
+      "slug": "/downloads/entrepreneur-survival-checklist",
       "date": "2024-03-15T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1436,7 +1450,7 @@
     },
     {
       "title": "Family Altar Liturgy",
-      "slug": "/family-altar-liturgy",
+      "slug": "/downloads/family-altar-liturgy",
       "date": "2024-03-05T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1449,7 +1463,7 @@
     },
     {
       "title": "Leader's Cue Card (Two Up)",
-      "slug": "/leaders-cue-card-two-up",
+      "slug": "/downloads/leaders-cue-card-two-up",
       "date": "2025-10-21T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1457,7 +1471,7 @@
     },
     {
       "title": "The Leadership Playbook",
-      "slug": "/leadership-playbook",
+      "slug": "/downloads/leadership-playbook",
       "date": "2025-10-21T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1465,7 +1479,7 @@
     },
     {
       "title": "The Legacy Architecture Canvas",
-      "slug": "/legacy-canvas",
+      "slug": "/downloads/legacy-canvas",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1479,7 +1493,7 @@
     },
     {
       "title": "THE PRINCIPLES of SURRENDER FRAMEWORK",
-      "slug": "/life-alignment-assessment",
+      "slug": "/downloads/life-alignment-assessment",
       "date": "2026-01-19T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1494,7 +1508,7 @@
     },
     {
       "title": "Mentorship Starter Kit",
-      "slug": "/mentorship-starter-kit",
+      "slug": "/downloads/mentorship-starter-kit",
       "date": "2025-01-01T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1505,7 +1519,7 @@
     },
     {
       "title": "Operating Cadence Pack",
-      "slug": "/operating-cadence-pack",
+      "slug": "/downloads/operating-cadence-pack",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1518,7 +1532,7 @@
     },
     {
       "title": "Principles for My Son - Cue Card",
-      "slug": "/principles-for-my-son-cue-card",
+      "slug": "/downloads/principles-for-my-son-cue-card",
       "date": "2025-10-21T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1526,7 +1540,7 @@
     },
     {
       "title": "Principles for My Son",
-      "slug": "/principles-for-my-son",
+      "slug": "/downloads/principles-for-my-son",
       "date": "2025-01-01T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1537,7 +1551,7 @@
     },
     {
       "title": "Purpose Pyramid Worksheet",
-      "slug": "/purpose-pyramid-worksheet",
+      "slug": "/downloads/purpose-pyramid-worksheet",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1550,7 +1564,7 @@
     },
     {
       "title": "Scripture Track - John 14",
-      "slug": "/scripture-track-john14",
+      "slug": "/downloads/scripture-track-john14",
       "date": "2025-01-21T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1558,7 +1572,7 @@
     },
     {
       "title": "Standards Brief",
-      "slug": "/standards-brief",
+      "slug": "/downloads/standards-brief",
       "date": "2025-10-21T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1566,7 +1580,7 @@
     },
     {
       "title": "The Ultimate Purpose of Man — Strategic Editorial (PDF)",
-      "slug": "/ultimate-purpose-of-man-editorial",
+      "slug": "/downloads/ultimate-purpose-of-man-editorial",
       "date": "2025-11-23T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1583,7 +1597,7 @@
     },
     {
       "title": "Weekly Operating Rhythm & Daily Blocks",
-      "slug": "/weekly-operating-rhythm",
+      "slug": "/downloads/weekly-operating-rhythm",
       "date": "2025-10-21T00:00:00.000Z",
       "folder": "downloads",
       "readingTime": "Unknown",
@@ -1591,7 +1605,7 @@
     },
     {
       "title": "Founders Salon",
-      "slug": "/founders-salon",
+      "slug": "/events/founders-salon",
       "date": "2025-06-01T00:00:00.000Z",
       "folder": "events",
       "readingTime": "Unknown",
@@ -1604,7 +1618,7 @@
     },
     {
       "title": "Leadership Workshop",
-      "slug": "/leadership-workshop",
+      "slug": "/events/leadership-workshop",
       "date": "2026-09-12T00:00:00.000Z",
       "folder": "events",
       "readingTime": "Unknown",
@@ -1617,7 +1631,7 @@
     },
     {
       "title": "Entrepreneur Operating Pack",
-      "slug": "/entrepreneur-operating-pack",
+      "slug": "/prints/entrepreneur-operating-pack",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "prints",
       "readingTime": "Unknown",
@@ -1629,7 +1643,7 @@
     },
     {
       "title": "Fatherhood Standards Card",
-      "slug": "/fatherhood-standards-card",
+      "slug": "/prints/fatherhood-standards-card",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "prints",
       "readingTime": "Unknown",
@@ -1641,7 +1655,7 @@
     },
     {
       "title": "Leadership Playbook (30•60•90)",
-      "slug": "/leadership-playbook",
+      "slug": "/prints/leadership-playbook",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "prints",
       "readingTime": "Unknown",
@@ -1653,7 +1667,7 @@
     },
     {
       "title": "Mentorship Starter Kit",
-      "slug": "/mentorship-starter-kit",
+      "slug": "/prints/mentorship-starter-kit",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "prints",
       "readingTime": "Unknown",
@@ -1665,7 +1679,7 @@
     },
     {
       "title": "Standards Brief",
-      "slug": "/standards-brief",
+      "slug": "/prints/standards-brief",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "prints",
       "readingTime": "Unknown",
@@ -1677,7 +1691,7 @@
     },
     {
       "title": "Weekly Operating Rhythm",
-      "slug": "/weekly-operating-rhythm",
+      "slug": "/prints/weekly-operating-rhythm",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "prints",
       "readingTime": "Unknown",
@@ -1689,7 +1703,7 @@
     },
     {
       "title": "Brotherhood Starter Kit",
-      "slug": "/brotherhood-starter-kit",
+      "slug": "/resources/brotherhood-starter-kit",
       "date": "2025-01-01T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1701,7 +1715,7 @@
     },
     {
       "title": "Canon Builder's Rule of Life",
-      "slug": "/canon-builders-rule-of-life",
+      "slug": "/resources/canon-builders-rule-of-life",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1715,7 +1729,7 @@
     },
     {
       "title": "THE CANON - A New Era of Builders",
-      "slug": "/canon-campaign",
+      "slug": "/resources/canon-campaign",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1729,7 +1743,7 @@
     },
     {
       "title": "Council Table Agenda - Canon Leadership Session",
-      "slug": "/canon-council-table-agenda",
+      "slug": "/resources/canon-council-table-agenda",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1743,7 +1757,7 @@
     },
     {
       "title": "Canon Household Charter",
-      "slug": "/canon-household-charter",
+      "slug": "/resources/canon-household-charter",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1757,7 +1771,7 @@
     },
     {
       "title": "Canon Reading Plan - Year One",
-      "slug": "/canon-reading-plan-year-one",
+      "slug": "/resources/canon-reading-plan-year-one",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1771,7 +1785,7 @@
     },
     {
       "title": "Destiny Mapping Worksheet",
-      "slug": "/destiny-mapping-worksheet",
+      "slug": "/resources/destiny-mapping-worksheet",
       "date": "2025-03-09T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1779,7 +1793,7 @@
     },
     {
       "title": "Fatherhood Impact Framework",
-      "slug": "/fatherhood-impact-framework",
+      "slug": "/resources/fatherhood-impact-framework",
       "date": "2025-01-15T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1787,7 +1801,7 @@
     },
     {
       "title": "Getting Started",
-      "slug": "/getting-started",
+      "slug": "/resources/getting-started",
       "date": "2024-01-15T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1799,7 +1813,7 @@
     },
     {
       "title": "Institutional Health Scorecard",
-      "slug": "/institutional-health-scorecard",
+      "slug": "/resources/institutional-health-scorecard",
       "date": "2025-03-02T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1815,7 +1829,7 @@
     },
     {
       "title": "Multi-Generational Legacy Ledger",
-      "slug": "/multi-generational-legacy-ledger",
+      "slug": "/resources/multi-generational-legacy-ledger",
       "date": "2025-12-01T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1829,7 +1843,7 @@
     },
     {
       "title": "Purpose Alignment Checklist",
-      "slug": "/purpose-alignment-checklist",
+      "slug": "/resources/purpose-alignment-checklist",
       "date": "2025-01-07T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1837,7 +1851,7 @@
     },
     {
       "title": "Strategic Frameworks",
-      "slug": "/strategic-frameworks",
+      "slug": "/resources/strategic-frameworks",
       "date": "2024-01-10T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1850,7 +1864,7 @@
     },
     {
       "title": "Strategy Room Intake",
-      "slug": "/strategy-room-intake",
+      "slug": "/resources/strategy-room-intake",
       "date": "2025-12-26T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1864,7 +1878,7 @@
     },
     {
       "title": "The Vault",
-      "slug": "/vault",
+      "slug": "/resources/vault",
       "date": "2025-12-28T00:00:00.000Z",
       "folder": "resources",
       "readingTime": "Unknown",
@@ -1878,7 +1892,7 @@
     },
     {
       "title": "Strategy Sample",
-      "slug": "/sample-strategy",
+      "slug": "/strategy/sample-strategy",
       "date": "2025-12-12T00:00:00.000Z",
       "folder": "strategy",
       "readingTime": "Unknown",

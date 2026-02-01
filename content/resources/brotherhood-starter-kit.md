@@ -4,7 +4,7 @@ title: Brotherhood Starter Kit
 description: Essential resources for building strong brotherhood connections
 author: Abraham of London
 date: "2025-01-01"
-slug: brotherhood-starter-kit
+slug: /resources/brotherhood-starter-kit
 tags:
   - brotherhood
   - leadership

@@ -5,7 +5,7 @@ description: Collection of strategic frameworks for decision-making.
 excerpt: Tools and models for thinking strategically about complex challenges.
 author: Abraham of London
 date: "2024-01-10"
-slug: strategic-frameworks
+slug: /resources/strategic-frameworks
 tags:
   - strategic
   - frameworks

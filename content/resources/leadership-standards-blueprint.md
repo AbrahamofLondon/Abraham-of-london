@@ -3,7 +3,7 @@ type: Resource
 title: Leadership Standards Blueprint
 description: A structural framework outlining the 12 non-negotiable standards that define leaders who build enduring organisations and legacies.
 author: Abraham of London
-date: "2025-01-05"
+date: '2025-01-05'
 slug: /resources/leadership-standards-blueprint
 draft: false
 coverImage: /assets/images/resources/leadership-standards-blueprint.jpg
@@ -11,13 +11,13 @@ accessLevel: public
 resourceType: guide
 docKind: Resource
 downloadUrl: /assets/resources/pdfs/leadership-standards-blueprint.pdf
-ogTitle: "Leadership Standards Blueprint | Abraham of London"
-ogDescription: "A structural framework outlining the 12 non-negotiable standards for enduring leadership."
-socialCaption: ""
+ogTitle: Leadership Standards Blueprint | Abraham of London
+ogDescription: A structural framework outlining the 12 non-negotiable standards for enduring leadership.
+socialCaption: ''
 coverAspect: wide
 coverFit: cover
 coverPosition: center
-lockMessage: ""
+lockMessage: ''
 readTime: 3 mins
 ---
 

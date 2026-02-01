@@ -4,7 +4,7 @@ title: Fatherhood Impact Framework
 description: A strategic model for fathers who want to shape identity, character, and destiny across generations.
 author: Abraham of London
 date: "2025-01-15"
-slug: fatherhood-impact-framework
+slug: /resources/fatherhood-impact-framework
 draft: false
 coverImage: /assets/images/canon/canon-resources.jpg
 accessLevel: public
