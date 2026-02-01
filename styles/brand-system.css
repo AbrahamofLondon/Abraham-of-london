@@ -1,9 +1,7 @@
 @import "tailwindcss";
+@config "./tailwind.config.cjs";
 
-/* Link the legacy config so v4 understands your custom tokens 
-  and default Tailwind colors (like white/10).
-*/
-@reference "../tailwind.config.cjs";
+/* Brand System: Institutional Core */
 
 @layer base {
   :root {
@@ -22,8 +20,7 @@
   .city-gate-card {
     @apply relative overflow-hidden rounded-[2rem]
       border border-white/10
-      bg-white/[0.02] backdrop-blur-xl
-      transition-all duration-500;
+      bg-white/[0.02] backdrop-blur-xl transition-all duration-500;
   }
 
   .city-gate-card:hover {
@@ -51,7 +48,12 @@
 
 @layer utilities {
   .animate-protocol-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
     background-size: 200% 100%;
     animation: protocol-shimmer 2s infinite linear;
   }
@@ -70,5 +72,5 @@
 
 @keyframes protocol-shimmer {
   from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
+  to { background-position: -200% 0; }
 }

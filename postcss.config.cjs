@@ -1,4 +1,4 @@
-// postcss.config.cjs — Tailwind v4 compatible (Next.js)
+// postcss.config.cjs
 module.exports = {
   plugins: {
     "@tailwindcss/postcss": {},
