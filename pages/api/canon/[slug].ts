@@ -1,11 +1,10 @@
-// pages/api/canon/[slug].ts
+// pages/api/canon/[slug].ts — SECURE DECRYPTION BRIDGE
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
-import { getSessionTier } from "@/lib/server/auth/tokenStore.postgres";
-import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
-import { normalizeSlug } from "@/lib/contentlayer-helper";  // FIXED: Changed import source
-import { getServerCanonBySlug } from "@/lib/contentlayer-helper";  // FIXED: Changed import source
+import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
+import { getAccessCookie } from "@/lib/server/auth/cookies";
+import { normalizeSlug, getServerCanonBySlug } from "@/lib/contentlayer-helper";
 import { prepareMDX } from "@/lib/server/md-utils";
 
 type Tier = "public" | "inner-circle" | "private";
@@ -19,7 +18,7 @@ type Ok = {
 
 type Fail = { ok: false; reason: string };
 
-const order: Tier[] = ["public", "inner-circle", "private"];
+const TIER_ORDER: Tier[] = ["public", "inner-circle", "private"];
 
 function asTier(v: unknown): Tier {
   if (v === "private") return "private";
@@ -27,47 +26,54 @@ function asTier(v: unknown): Tier {
   return "public";
 }
 
-function canAccess(sessionTier: Tier, requiredTier: Tier) {
-  return order.indexOf(sessionTier) >= order.indexOf(requiredTier);
+function hasClearance(userTier: Tier, requiredTier: Tier): boolean {
+  return TIER_ORDER.indexOf(userTier) >= TIER_ORDER.indexOf(requiredTier);
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Fail>) {
   if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
     return res.status(405).json({ ok: false, reason: "Method not allowed" });
   }
 
-  // IMPORTANT: now reading from /api/canon/[slug]
+  // 1) Slug Normalization
   const slug = normalizeSlug(String(req.query.slug || ""));
-  if (!slug) return res.status(400).json({ ok: false, reason: "Missing slug" });
+  if (!slug) return res.status(400).json({ ok: false, reason: "Identification missing" });
 
+  // 2) Manuscript Retrieval
   const doc: any = await getServerCanonBySlug(slug);
   if (!doc || doc.draft) {
     return res.status(404).json({ ok: false, reason: "Manuscript not found" });
   }
 
   const requiredTier = asTier(doc.accessLevel);
+  let userTier: Tier = "public";
 
-  let sessionTier: Tier = "public";
+  // 3) Authorization Check (Postgres verified)
   if (requiredTier !== "public") {
-    const token = getAccessTokenFromReq(req);
-    if (!token) return res.status(401).json({ ok: false, reason: "Access required" });
+    const sessionId = getAccessCookie(req);
+    if (!sessionId) return res.status(401).json({ ok: false, reason: "Clearance required" });
 
-    const t = await getSessionTier(token);
-    if (!t) return res.status(401).json({ ok: false, reason: "Session expired or invalid" });
+    const session = await verifySession(sessionId);
+    if (!session || !session.valid) {
+      return res.status(401).json({ ok: false, reason: "Session expired or revoked" });
+    }
 
-    sessionTier = asTier(t);
+    userTier = asTier(session.tier);
 
-    if (!canAccess(sessionTier, requiredTier)) {
+    if (!hasClearance(userTier, requiredTier)) {
       return res.status(403).json({ ok: false, reason: "Insufficient institutional tier" });
     }
   }
 
-  const rawMdx = String(doc?.body?.raw ?? doc?.body ?? "");
+  // 4) MDX Preparation
+  // Note: Only perform serialization on the server for gated content to protect raw MDX
+  const rawMdx = String(doc?.body?.raw || doc?.content || "");
   const source = await prepareMDX(rawMdx);
 
   return res.status(200).json({
     ok: true,
-    tier: sessionTier,
+    tier: userTier,
     requiredTier,
     source,
   });

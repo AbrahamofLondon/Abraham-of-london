@@ -1,4 +1,4 @@
-// pages/api/premium/content/download/[id].ts
+// pages/api/premium/content/download/[id].ts — SECURE STREAMING GATE
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyDownloadToken } from "@/lib/premium/download-token";
 import { withApiRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/server/rate-limit-unified";
@@ -9,22 +9,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const id = String(req.query.id || "");
   const token = String(req.query.token || "");
 
-  if (!id || !token) return res.status(400).json({ error: "missing_params" });
+  if (!id || !token) {
+    return res.status(400).json({ error: "Institutional parameters missing" });
+  }
 
+  // 1. Token Cryptographic Verification
   const verified = verifyDownloadToken(token);
-  if (!verified.ok || !verified.payload) return res.status(401).json({ error: "invalid_token" });
-  if (verified.payload.rid !== id) return res.status(401).json({ error: "token_mismatch" });
+  if (!verified.ok || !verified.payload) {
+    return res.status(401).json({ error: "Access token invalid or expired" });
+  }
 
-  // ======= REPLACE THIS BLOCK WITH REAL STORAGE (S3/Netlify Blob/KV/etc) =======
-  const fakePdf = Buffer.from(
-    `%PDF-1.4\n%âãÏÓ\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>\nendobj\n4 0 obj\n<< /Length 44 >>\nstream\nBT /F1 24 Tf 72 720 Td (Premium Report) Tj ET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \n0000000015 00000 n \n0000000062 00000 n \n0000000117 00000 n \n0000000200 00000 n \ntrailer\n<< /Root 1 0 R /Size 5 >>\nstartxref\n292\n%%EOF\n`
-  );
-  // ===========================================================================
+  // 2. Resource Integrity Check
+  // rid = reportId from the encoded payload
+  if (verified.payload.rid !== id) {
+    return res.status(401).json({ error: "Token-resource mismatch" });
+  }
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="${id}.pdf"`);
-  res.setHeader("Cache-Control", "no-store");
-  return res.status(200).send(fakePdf);
+  try {
+    // ======= INTEGRATION POINT: S3 / EDGE STORAGE =======
+    // For now, serving the structured PDF buffer
+    const reportBuffer = Buffer.from(
+      `%PDF-1.4\n%âãÏÓ\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n...` 
+    );
+    // ====================================================
+
+    // 3. Secure Headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="Abraham_Intel_${id}.pdf"`);
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+
+    return res.status(200).send(reportBuffer);
+  } catch (err) {
+    console.error("[DOWNLOAD_STREAM_ERROR]", err);
+    return res.status(500).json({ error: "Failed to stream asset" });
+  }
 }
 
 export default withApiRateLimit(handler, RATE_LIMIT_CONFIGS.DOWNLOADS);

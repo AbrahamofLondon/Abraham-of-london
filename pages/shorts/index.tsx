@@ -163,8 +163,8 @@ const ShortsIndexPage: NextPage<any> = ({ shorts, totalCount }) => {
 export default ShortsIndexPage;
 
 export const getStaticProps: GetStaticProps = async () => {
-  const allDocs = getAllCombinedDocs();
-  const shorts = allDocs
+  const allDocuments = getAllCombinedDocs();
+  const shorts = allDocuments
     .filter((d) => d.slug.startsWith("shorts/"))
     .sort((a, b) => new Date(b.date || "").getTime() - new Date(a.date || "").getTime())
     .map((s) => ({

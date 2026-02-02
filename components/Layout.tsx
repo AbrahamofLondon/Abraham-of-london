@@ -1,188 +1,283 @@
-// components/Layout.tsx — INSTITUTIONAL BASELINE (grown-up, premium, quiet authority)
-import * as React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-
-import LuxuryNavbar from "@/components/LuxuryNavbar";
+import { getPageTitle, absUrl, siteConfig } from '@/lib/imports';
+import { getOgImageUrl, generateOrganizationSchema } from '@/lib/utils/site-utils';
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const NAV_HEIGHT = 80;
+// --- Interfaces ---
 
-const DEFAULT_SEO = {
-  siteName: "Abraham of London",
-  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, ""),
-  defaultDescription: "Faith-rooted strategy and leadership for high-capacity builders.",
-  defaultOgImage: "/assets/images/social/og-image.jpg",
-  twitterHandle: "@abrahamoflondon",
-} as const;
-
-function toAbsoluteUrl(pathOrUrl: unknown): string {
-  const s = typeof pathOrUrl === "string" ? pathOrUrl.trim() : "";
-  if (!s) return `${DEFAULT_SEO.siteUrl}${DEFAULT_SEO.defaultOgImage}`;
-  if (s.startsWith("http://") || s.startsWith("https://")) return s;
-  const cleanPath = s.startsWith("/") ? s : `/${s}`;
-  return `${DEFAULT_SEO.siteUrl}${cleanPath}`;
+interface MetaTag {
+  name?: string;
+  property?: string;
+  content: string;
+  key?: string;
 }
 
-function buildTitle(inputTitle: string | undefined): string {
-  const base = DEFAULT_SEO.siteName;
-  const t = (inputTitle || "").trim();
-  if (!t) return base;
-
-  const normalized = t.replace(/\s+/g, " ");
-  const lower = normalized.toLowerCase();
-  const baseLower = base.toLowerCase();
-
-  if (lower === baseLower) return base;
-  if (lower.endsWith(`| ${baseLower}`)) return normalized;
-  if (lower.includes(baseLower) && lower.includes("|")) return normalized;
-
-  return `${normalized} | ${base}`;
+interface LinkTag {
+  rel: string;
+  href: string;
+  sizes?: string;
+  type?: string;
+  key?: string;
 }
 
-export interface LayoutProps {
+interface SiteLayoutProps {
+  pageTitle: string;
   children: React.ReactNode;
-  title?: string;
-  description?: string;
-  keywords?: string[];
+  metaDescription?: string;
+  metaTags?: MetaTag[];
+  linkTags?: LinkTag[];
   canonicalUrl?: string;
   ogImage?: string;
-  ogType?: string;
-  twitterCard?: string;
-  structuredData?: Record<string, any>;
-  transparentHeader?: boolean;
+  ogType?: "website" | "article" | "profile" | "book" | string;
+  twitterCard?: "summary" | "summary_large_image" | "app" | "player";
+  structuredData?: any; // High-tolerance type for schema objects
+  noIndex?: boolean;
+  noFollow?: boolean;
+  themeColor?: string;
+  viewport?: string;
+  charset?: string;
+  lang?: string;
   className?: string;
-  fullWidth?: boolean;
+  skipToContentId?: string;
+  errorBoundary?: React.ComponentType<{ children: React.ReactNode }>;
+  showOrganizationSchema?: boolean;
 }
 
-export default function Layout({
+const DEFAULT_CONFIG = {
+  viewport: "width=device-width, initial-scale=1.0, viewport-fit=cover",
+  charset: "UTF-8",
+  lang: "en",
+  themeColor: siteConfig.brand.primaryColor || "#d4af37",
+  ogType: "website",
+  twitterCard: "summary_large_image" as const,
+} as const;
+
+// --- Error Boundary ---
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+class LayoutErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Layout Error:", error, errorInfo);
+  }
+  override render() {
+    if (this.state.hasError) {
+      return (
+        this.props.fallback || (
+          <div className="flex min-h-screen items-center justify-center bg-gray-50" role="alert" aria-live="polite">
+            <div className="max-w-md p-8 text-center">
+              <h1 className="mb-4 text-2xl font-bold text-gray-900">Layout Error</h1>
+              <p className="mb-6 text-gray-600">We&apos;re experiencing technical difficulties. Please refresh.</p>
+              <button onClick={() => window.location.reload()} className="rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700">
+                Refresh Page
+              </button>
+            </div>
+          </div>
+        )
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// --- Components ---
+
+const SkipToContent: React.FC<{ targetId: string }> = ({ targetId }) => (
+  <a
+    href={`#${targetId}`}
+    className="sr-only z-50 rounded-lg bg-white px-4 py-2 font-medium text-gray-900 shadow-lg transition-all duration-200 focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:ring-2 focus:ring-blue-500"
+  >
+    Skip to main content
+  </a>
+);
+
+export default function SiteLayout({
+  pageTitle,
   children,
-  title,
-  description,
-  keywords = [],
+  metaDescription,
+  metaTags = [],
+  linkTags = [],
   canonicalUrl,
   ogImage,
-  ogType = "website",
-  twitterCard = "summary_large_image",
-  structuredData,
-  transparentHeader = false,
+  ogType = DEFAULT_CONFIG.ogType,
+  twitterCard = DEFAULT_CONFIG.twitterCard,
+  structuredData = [],
+  noIndex = false,
+  noFollow = false,
+  themeColor = DEFAULT_CONFIG.themeColor,
+  viewport = DEFAULT_CONFIG.viewport,
+  charset = DEFAULT_CONFIG.charset,
+  lang = DEFAULT_CONFIG.lang,
   className = "",
-  fullWidth = false,
-}: LayoutProps) {
+  skipToContentId = "main-content",
+  errorBoundary: ErrorBoundary = LayoutErrorBoundary,
+  showOrganizationSchema = true,
+}: SiteLayoutProps) {
   const router = useRouter();
+  const currentPath = router.asPath || "/";
 
-  const siteTitle = buildTitle(title);
-  const siteDesc = (description || DEFAULT_SEO.defaultDescription).trim();
-  const siteOgImage = toAbsoluteUrl(ogImage);
+  // --- Memoized Values ---
 
-  const currentPath = (router?.asPath || "/").split("?")[0]?.split("#")[0] || "/";
-  const finalCanonical = canonicalUrl ? toAbsoluteUrl(canonicalUrl) : toAbsoluteUrl(currentPath);
+  const fullTitle = React.useMemo(() => getPageTitle(pageTitle), [pageTitle]);
+  const fullCanonicalUrl = React.useMemo(() => canonicalUrl || absUrl(currentPath), [canonicalUrl, currentPath]);
+  
+  const robotsContent = React.useMemo(() => {
+    const directives: string[] = [];
+    if (noIndex) directives.push("noindex");
+    if (noFollow) directives.push("nofollow");
+    if (!directives.length) directives.push("index", "follow");
+    return directives.join(", ");
+  }, [noIndex, noFollow]);
+
+  const defaultDescription = React.useMemo(() => metaDescription || siteConfig.seo.description, [metaDescription]);
+  const siteOgImage = React.useMemo(() => getOgImageUrl(ogImage), [ogImage]);
+
+  const allMetaTags = React.useMemo(() => {
+    const defaults: MetaTag[] = [
+      { name: "description", content: defaultDescription },
+      { name: "robots", content: robotsContent },
+      { name: "theme-color", content: themeColor },
+      { property: "og:title", content: fullTitle },
+      { property: "og:type", content: ogType },
+      { property: "og:url", content: fullCanonicalUrl },
+      { property: "og:image", content: siteOgImage },
+      { property: "og:description", content: defaultDescription },
+      { property: "og:site_name", content: siteConfig.brand.name },
+      { name: "twitter:card", content: twitterCard },
+      { name: "twitter:title", content: fullTitle },
+      { name: "twitter:description", content: defaultDescription },
+      { name: "twitter:image", content: siteOgImage },
+    ];
+    
+    return [...defaults, ...metaTags].filter(
+      (tag, index, array) =>
+        array.findIndex((t) => (t.name && t.name === tag.name) || (t.property && t.property === tag.property)) === index
+    );
+  }, [defaultDescription, robotsContent, themeColor, fullTitle, ogType, fullCanonicalUrl, siteOgImage, twitterCard, metaTags]);
+
+  const allLinkTags = React.useMemo(() => {
+    const defaults: LinkTag[] = [
+      { rel: "canonical", href: fullCanonicalUrl },
+      { rel: "icon", href: "/favicon.ico" },
+    ];
+    return [...defaults, ...linkTags].filter((tag, index, array) => array.findIndex((t) => t.rel === tag.rel && t.href === tag.href) === index);
+  }, [fullCanonicalUrl, linkTags]);
+
+  // --- Hardened Structured Data Rendering ---
+
+  const structuredDataScripts = React.useMemo(() => {
+    const dataArray: any[] = [];
+    
+    // Safety check for structuredData input
+    if (Array.isArray(structuredData)) {
+      dataArray.push(...structuredData);
+    } else if (structuredData && typeof structuredData === 'object') {
+      dataArray.push(structuredData);
+    }
+
+    if (showOrganizationSchema) {
+      dataArray.push(generateOrganizationSchema());
+    }
+
+    return dataArray
+      .filter(item => item && typeof item === 'object')
+      .map((data, index) => {
+        try {
+          const jsonString = JSON.stringify(data, (_k, v) => {
+           if (typeof v === "function") return undefined;
+           if (typeof v === "symbol") return undefined;
+           if (typeof v === "bigint") return v.toString();
+           return v;
+        });
+        } catch (e) {
+          console.error("Failed to stringify schema object", e);
+          return null;
+        }
+      });
+  }, [structuredData, showOrganizationSchema]);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-black text-white ${className}`}>
+    <>
       <Head>
-        <title>{siteTitle}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="description" content={siteDesc} />
-        <link rel="canonical" href={finalCanonical} />
-        {keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
+        <title>{fullTitle}</title>
+        <meta charSet={charset} />
+        <meta name="viewport" content={viewport} />
 
-        <meta property="og:site_name" content={DEFAULT_SEO.siteName} />
-        <meta property="og:title" content={siteTitle} />
-        <meta property="og:description" content={siteDesc} />
-        <meta property="og:url" content={finalCanonical} />
-        <meta property="og:type" content={ogType} />
-        <meta property="og:image" content={siteOgImage} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        {allMetaTags.map((tag, index) => (
+          <meta key={`meta-${index}`} {...(tag.name ? { name: tag.name } : {})} {...(tag.property ? { property: tag.property } : {})} content={tag.content} />
+        ))}
 
-        <meta name="twitter:card" content={twitterCard} />
-        <meta name="twitter:site" content={DEFAULT_SEO.twitterHandle} />
-        <meta name="twitter:title" content={siteTitle} />
-        <meta name="twitter:description" content={siteDesc} />
-        <meta name="twitter:image" content={siteOgImage} />
+        {allLinkTags.map((tag, index) => (
+          <link key={`link-${index}`} rel={tag.rel} href={tag.href} {...(tag.sizes ? { sizes: tag.sizes } : {})} {...(tag.type ? { type: tag.type } : {})} />
+        ))}
 
-        {structuredData && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-          />
+        {/* ✅ INJECTED INTO HEAD AS PRIMITIVES */}
+        <React.Fragment>
+          {structuredDataScripts}
+        </React.Fragment>
+
+        {/* Font Preloading */}
+        <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/PlayfairDisplay-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+
+        {siteConfig.seo.keywords?.length > 0 && (
+          <meta name="keywords" content={siteConfig.seo.keywords.join(', ')} />
         )}
       </Head>
 
-      {/* Ambient backdrop: vignette + grain + subtle grid */}
-      <div className="pointer-events-none fixed inset-0 z-[-1]">
-        <div className="absolute inset-0 bg-black" />
-        <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.10),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(59,130,246,0.06),transparent_60%)]" />
-        <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:84px_84px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,transparent_30%,rgba(0,0,0,0.85)_75%)]" />
-        <div className="absolute inset-0 opacity-[0.06] [background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22 x=%220%22 y=%220%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%222%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.35%22/%3E%3C/svg%3E')]" />
-      </div>
+      <SkipToContent targetId={skipToContentId} />
 
-      <LuxuryNavbar transparent={transparentHeader} />
-
-      <main
-        className={`flex-1 ${fullWidth ? "w-full" : "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"}`}
-        style={{
-          paddingTop: NAV_HEIGHT,
-          minHeight: `calc(100vh - ${NAV_HEIGHT}px - 360px)`,
-        }}
-      >
-        {children}
-      </main>
-
-      <Footer />
-
-      <style jsx global>{`
-        html {
-          scroll-behavior: smooth;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-          margin: 0;
-          background: #000;
-          color: #fff;
-          font-feature-settings: "kern" 1, "liga" 1;
-          text-rendering: optimizeLegibility;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-
-        ::selection {
-          background: rgba(245, 158, 11, 0.28);
-          color: #fff;
-        }
-
-        a {
-          text-decoration: none;
-        }
-
-        /* Tight but premium scrollbar */
-        ::-webkit-scrollbar {
-          width: 10px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #060606;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #161616;
-          border-radius: 10px;
-          border: 2px solid #060606;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: rgba(245, 158, 11, 0.45);
-        }
-
-        @media (max-width: 768px) {
-          html {
-            scroll-padding-top: ${NAV_HEIGHT}px;
-          }
-          body {
-            -webkit-text-size-adjust: 100%;
-          }
-        }
-      `}</style>
-    </div>
+      <ErrorBoundary>
+        <div
+          className={`flex min-h-screen flex-col bg-warmWhite text-soft-charcoal antialiased ${className}`}
+          style={{
+            '--color-primary': siteConfig.brand.primaryColor,
+            '--color-accent': siteConfig.brand.accentColor,
+          } as React.CSSProperties}
+        >
+          <Header initialTheme="light" />
+          <main id={skipToContentId} className="flex-1 focus:outline-none" tabIndex={-1}>
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    </>
   );
+}
+
+// --- Helper Functions ---
+
+export function generateStructuredData(type: string, data: object) {
+  return { "@context": "https://schema.org", "@type": type, ...data };
+}
+
+export function generateArticleSchema({ headline, description, author = siteConfig.author.name, datePublished, image, url }: any) {
+  return generateStructuredData("Article", {
+    headline,
+    description,
+    author: { "@type": "Person", name: author },
+    datePublished,
+    image: image ? absUrl(image) : getOgImageUrl(),
+    url: url ? absUrl(url) : absUrl(),
+  });
 }

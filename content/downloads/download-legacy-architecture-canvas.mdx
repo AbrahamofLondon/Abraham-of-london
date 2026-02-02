@@ -58,7 +58,7 @@ useDownloadCTA: true
 
 # --- Pro Tip module ---
 proTipType: premium
-proTipContent: >
+proTipContent: &gt;
   This is not a document about death. It is an operating system for a living legacy —
   designed for founders, leaders, and stewards who treat their life’s work as
   capital (human, intellectual, social, structural, and financial) to be engineered
@@ -188,10 +188,10 @@ socialCaption: "Download: The [Legacy](/vault/lexicon/legacy) Architecture Canva
 
 **Beyond bequest. The framework for intentional endurance.**
 
-<ProTip type="premium">
+&lt;ProTip type="premium"&gt;
 **Premium Insight:** This canvas converts legacy from abstraction into an executable design system.
 Estate planning moves assets. This framework designs the **transmission mechanism**.
-</ProTip>
+&lt;/ProTip&gt;
 
 ## TARGET Core Philosophy
 
@@ -227,19 +227,19 @@ This canvas helps you:
 - **Risk Mitigation Architecture** — safeguards against the classic failure modes of inheritance and influence
 - **Stewardship Rituals** — repeatable cadence that keeps legacy alive instead of sentimental
 
-<FeatureGrid columns={2}>
-{(frontmatter?.featureGridItems ?? []).map((item, index) => (
-  <FeatureCard
-    key={`${item.title}-${index}`}
-    title={item.title}
-    icon={item.icon}
-    badge={item.badge}
-    color={item.color}
-  >
-    {item.content}
-  </FeatureCard>
-))}
-</FeatureGrid>
+&lt;FeatureGrid columns=&#123;2&#125;&gt;
+&#123;(frontmatter?.featureGridItems ?? []).map((item, index) =&gt; (
+  &lt;FeatureCard
+    key=&#123;`$&#123;item.title&#125;-$&#123;index&#125;`&#125;
+    title=&#123;item.title&#125;
+    icon=&#123;item.icon&#125;
+    badge=&#123;item.badge&#125;
+    color=&#123;item.color&#125;
+  &gt;
+    &#123;item.content&#125;
+  &lt;/FeatureCard&gt;
+))&#125;
+&lt;/FeatureGrid&gt;
 
 ## SHIELD Critical Implementation Notes
 
@@ -259,8 +259,8 @@ A perfect plan that cannot be adopted by the next generation is a failure.
 4. **Share** the draft thesis with one trusted advisor
 5. **Schedule** your first quarterly review before completing the full canvas
 
-> **Remember:** [Legacy](/vault/lexicon/legacy) is not a destination — it is a direction.  
-> The canvas provides the map. You still have to walk like a steward.
+&gt; **Remember:** [Legacy](/vault/lexicon/legacy) is not a destination — it is a direction.  
+&gt; The canvas provides the map. You still have to walk like a steward.
 
 ---
 

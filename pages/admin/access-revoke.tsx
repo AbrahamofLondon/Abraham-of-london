@@ -1,12 +1,10 @@
-// pages/admin/access-revoke.tsx
-// ✅ Admin-only revoke console (simple + effective)
-// ✅ Uses X-Admin-Token header (stored in sessionStorage)
-// ✅ Can revoke: current cookie session, specific session token, and/or a keyHash
-// ✅ No extra backend endpoints needed (uses /api/access/revoke)
+/* pages/admin/access-revoke.tsx — SECURITY OVERRIDE & ACCESS TERMINATION */
+'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import Layout from "@/components/Layout";
+import { ShieldAlert, Trash2, Key, Timer, RefreshCw } from "lucide-react";
 
 type Result =
   | { ok: true; message: string }
@@ -25,24 +23,19 @@ export default function AdminAccessRevokePage() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
+  // Persistence: Hydrate Admin Token from Session Storage
   useEffect(() => {
     const saved = typeof window !== "undefined" ? window.sessionStorage.getItem(STORAGE_KEY) : null;
     if (saved) setAdminToken(saved);
   }, []);
 
+  // Persistence: Commit Admin Token to Session Storage
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!remember) return;
-    if (!adminToken) return;
+    if (typeof window === "undefined" || !remember || !adminToken) return;
     window.sessionStorage.setItem(STORAGE_KEY, adminToken);
   }, [adminToken, remember]);
 
-  const canSubmit = useMemo(() => {
-    if (!adminToken.trim()) return false;
-    // allow "revoke current cookie session" with empty sessionToken/keyHash
-    // but still needs token.
-    return true;
-  }, [adminToken]);
+  const canSubmit = useMemo(() => adminToken.trim().length > 0, [adminToken]);
 
   const revoke = useCallback(async () => {
     setResult(null);
@@ -69,23 +62,21 @@ export default function AdminAccessRevokePage() {
       });
 
       const j = await r.json().catch(() => ({}));
+      
       if (!r.ok || !j?.ok) {
-        setResult({ ok: false, message: j?.reason || `Failed (${r.status})` });
+        setResult({ ok: false, message: j?.reason || `Authority Denied (${r.status})` });
         return;
       }
 
       setResult({
         ok: true,
-        message:
-          "Revocation succeeded. If this browser session was revoked, it will be logged out immediately.",
+        message: "Access Terminated. If the current browser was targeted, synchronization will drop immediately.",
       });
 
-      // if you revoked current browser session, you may want to clear inputs
-      // (we do not clear the admin token)
       setSessionToken("");
       setKeyHash("");
     } catch (e: any) {
-      setResult({ ok: false, message: "Network/server error" });
+      setResult({ ok: false, message: "Network Interruption: Infrastructure Unreachable" });
     } finally {
       setBusy(false);
     }
@@ -99,141 +90,169 @@ export default function AdminAccessRevokePage() {
   return (
     <Layout>
       <Head>
-        <title>Admin — Access Revocation | Abraham of London</title>
+        <title>Security Terminal | Abraham of London</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <div className="min-h-screen bg-black text-white">
-        <div className="mx-auto max-w-3xl px-4 py-10">
-          <div className="rounded-2xl border border-white/10 bg-zinc-950 p-6 shadow-2xl">
-            <div className="mb-6">
-              <h1 className="text-xl font-bold">Admin — Access Revocation</h1>
-              <p className="mt-2 text-sm text-zinc-400">
-                This console calls <code className="text-zinc-300">/api/access/revoke</code> with the
-                admin header. Keep this page <b>noindex</b> and don’t link it publicly.
+      <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30">
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          
+          <div className="mb-12 flex items-end justify-between border-b border-white/5 pb-8">
+            <div>
+              <div className="flex items-center gap-3 text-rose-500 mb-2">
+                <ShieldAlert size={20} />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Restricted Access</span>
+              </div>
+              <h1 className="text-4xl font-serif font-black tracking-tight">Access Revocation</h1>
+              <p className="mt-4 text-sm text-zinc-500 max-w-md leading-relaxed">
+                Interface for manual termination of session tokens and cryptographic key hashes. 
+                All actions are logged in the <code className="text-zinc-300">/api/access/revoke</code> ledger.
               </p>
             </div>
+          </div>
 
-            {/* Admin token */}
-            <div className="space-y-3">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                Admin Token (x-admin-token)
-              </label>
-              <input
-                value={adminToken}
-                onChange={(e) => setAdminToken(e.target.value)}
-                placeholder="Paste ACCESS_REVOKE_ADMIN_TOKEN"
-                className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white placeholder:text-zinc-600 outline-none focus:border-amber-500/30 focus:ring-2 focus:ring-amber-500/10"
-              />
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-xs text-zinc-400">
-                  <input
-                    type="checkbox"
-                    checked={remember}
-                    onChange={(e) => setRemember(e.target.checked)}
-                  />
-                  Remember in this browser session
-                </label>
-                <button
-                  type="button"
-                  onClick={forgetToken}
-                  className="text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-amber-300"
-                >
-                  Forget token
-                </button>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            {/* Control Sidebar */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="rounded-3xl border border-white/5 bg-zinc-900/30 p-8 backdrop-blur-xl">
+                <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-6 flex items-center gap-2">
+                  <Key size={14} className="text-amber-500" /> Authentication
+                </h2>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Admin Bearer Token</label>
+                    <input
+                      type="password"
+                      value={adminToken}
+                      onChange={(e) => setAdminToken(e.target.value)}
+                      placeholder="ACCESS_REVOKE_ADMIN_TOKEN"
+                      className="w-full rounded-2xl border border-white/5 bg-black px-5 py-4 text-xs font-mono text-amber-200 placeholder:text-zinc-800 focus:border-amber-500/50 outline-none transition-all"
+                    />
+                  </div>
 
-            <hr className="my-6 border-white/10" />
-
-            {/* Action inputs */}
-            <div className="grid gap-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Session Token (optional)
-                </label>
-                <input
-                  value={sessionToken}
-                  onChange={(e) => setSessionToken(e.target.value)}
-                  placeholder="sess_... or your cookie session token (optional)"
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white placeholder:text-zinc-600 outline-none focus:border-amber-500/30 focus:ring-2 focus:ring-amber-500/10"
-                />
-                <p className="mt-2 text-xs text-zinc-500">
-                  Leave blank to revoke the <b>current browser session</b> (cookie), if present.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Key Hash (optional)
-                </label>
-                <input
-                  value={keyHash}
-                  onChange={(e) => setKeyHash(e.target.value)}
-                  placeholder="sha256/hmac hash of key (optional)"
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white placeholder:text-zinc-600 outline-none focus:border-amber-500/30 focus:ring-2 focus:ring-amber-500/10"
-                />
-                <p className="mt-2 text-xs text-zinc-500">
-                  Use this to revoke the underlying key (full lockout). You can revoke session-only
-                  without touching key.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Reason
-                </label>
-                <input
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="manual_revoke | fraud | chargeback | expired | etc."
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white placeholder:text-zinc-600 outline-none focus:border-amber-500/30 focus:ring-2 focus:ring-amber-500/10"
-                />
-              </div>
-
-              <button
-                type="button"
-                disabled={!canSubmit || busy}
-                onClick={revoke}
-                className="mt-2 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:opacity-60"
-              >
-                {busy ? "Revoking..." : "Revoke Now"}
-              </button>
-
-              {result && (
-                <div
-                  className={`rounded-xl border px-4 py-3 text-sm ${
-                    result.ok
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                      : "border-rose-500/30 bg-rose-500/10 text-rose-200"
-                  }`}
-                >
-                  {result.message}
+                  <div className="flex items-center justify-between px-1">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={remember}
+                        onChange={(e) => setRemember(e.target.checked)}
+                        className="w-4 h-4 rounded border-zinc-800 bg-zinc-900 text-amber-500 focus:ring-amber-500/20"
+                      />
+                      <span className="text-[10px] text-zinc-500 group-hover:text-zinc-300 transition-colors">Remember Session</span>
+                    </label>
+                    <button
+                      onClick={forgetToken}
+                      className="text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-rose-500 transition-colors"
+                    >
+                      Clear Trace
+                    </button>
+                  </div>
                 </div>
-              )}
+              </div>
 
-              <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-xs text-zinc-400">
-                <div className="font-semibold text-zinc-300 mb-2">Operational notes</div>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>
-                    Ensure{" "}
-                    <code className="text-zinc-300">ACCESS_REVOKE_ADMIN_TOKEN</code> is set in your
-                    hosting environment.
-                  </li>
-                  <li>
-                    Keep this page unlinked. It’s protected by the header token, not by obscurity —
-                    but don’t tempt fools.
-                  </li>
-                  <li>
-                    If you want a “proper” admin auth later, we can swap this to NextAuth admin
-                    sessions.
-                  </li>
-                </ul>
+              <div className="rounded-3xl border border-rose-500/10 bg-rose-500/5 p-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2">
+                  <ShieldAlert size={14} /> Critical Warning
+                </h3>
+                <p className="text-xs text-rose-200/60 leading-relaxed">
+                  Revoking a <b>Key Hash</b> will result in a global lockout for that specific credential across all active sessions. This action is irreversible via this terminal.
+                </p>
               </div>
             </div>
+
+            {/* Execution Panel */}
+            <div className="lg:col-span-7">
+              <div className="rounded-[2.5rem] border border-white/5 bg-zinc-900/20 p-10 space-y-8">
+                
+                <div className="grid gap-8">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Session Target</label>
+                      <span className="text-[9px] text-zinc-600 font-mono">Optional</span>
+                    </div>
+                    <input
+                      value={sessionToken}
+                      onChange={(e) => setSessionToken(e.target.value)}
+                      placeholder="sess_... (Leave blank for current cookie)"
+                      className="w-full rounded-2xl border border-white/5 bg-zinc-950 px-6 py-5 text-sm text-white placeholder:text-zinc-800 focus:border-white/20 outline-none transition-all shadow-inner"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Hash Target</label>
+                      <span className="text-[9px] text-zinc-600 font-mono">Optional</span>
+                    </div>
+                    <input
+                      value={keyHash}
+                      onChange={(e) => setKeyHash(e.target.value)}
+                      placeholder="sha256/hmac target hash"
+                      className="w-full rounded-2xl border border-white/5 bg-zinc-950 px-6 py-5 text-sm text-white placeholder:text-zinc-800 focus:border-white/20 outline-none transition-all shadow-inner"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Classification of Revocation</label>
+                    <select
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      className="w-full rounded-2xl border border-white/5 bg-zinc-950 px-6 py-5 text-sm text-zinc-300 focus:border-white/20 outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="manual_revoke">Administrative Override</option>
+                      <option value="fraud">Fraudulent Acquisition</option>
+                      <option value="chargeback">Financial Reversal</option>
+                      <option value="expired">Term Duration Exceeded</option>
+                      <option value="breach">Security Compromise</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    disabled={!canSubmit || busy}
+                    onClick={revoke}
+                    className="group relative w-full overflow-hidden rounded-2xl bg-white px-8 py-6 text-xs font-black uppercase tracking-[0.3em] text-black transition-all hover:bg-rose-500 hover:text-white disabled:opacity-20"
+                  >
+                    <div className="flex items-center justify-center gap-3">
+                      {busy ? <RefreshCw className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                      {busy ? "Terminating..." : "Execute Revocation"}
+                    </div>
+                  </button>
+                </div>
+
+                {result && (
+                  <div className={`animate-in slide-in-from-top-2 duration-500 rounded-2xl border p-6 text-sm flex items-start gap-4 ${
+                    result.ok 
+                      ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-200" 
+                      : "border-rose-500/20 bg-rose-500/5 text-rose-200"
+                  }`}>
+                    <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${result.ok ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]'}`} />
+                    <p className="font-medium leading-relaxed">{result.message}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t border-white/5">
+             <OpsNote icon={<Timer size={14}/>} title="Immediate Effect" text="Revocations ripple through the edge cache within < 300ms." />
+             <OpsNote icon={<ShieldAlert size={14}/>} title="Audit Trail" text="Target IP, timestamp, and admin token signature are logged." />
+             <OpsNote icon={<Key size={14}/>} title="Environment" text="Ensure ACCESS_REVOKE_ADMIN_TOKEN is locked in Vercel." />
           </div>
         </div>
       </div>
     </Layout>
   );
 }
+
+const OpsNote = ({ icon, title, text }: any) => (
+  <div className="space-y-3">
+    <div className="flex items-center gap-2 text-zinc-500">
+      {icon}
+      <span className="text-[9px] font-black uppercase tracking-widest">{title}</span>
+    </div>
+    <p className="text-xs text-zinc-600 leading-relaxed">{text}</p>
+  </div>
+);

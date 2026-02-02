@@ -509,13 +509,8 @@ export const Strategy = defineDocumentType(() => ({
 }));
 
 // ------------------------------------------------------------
-// INSTITUTIONAL EXCLUSIONS (Optimized for v4/Contentlayer)
+// INSTITUTIONAL EXCLUSIONS (Hardened for Binary Safety)
 // ------------------------------------------------------------
-/**
- * INSTITUTIONAL EXCLUSIONS
- * Purpose: Prevents EPERM locks on binary assets and stops recursive scanning
- * of system-locked files during the intelligence brief indexing process.
- */
 function getExclusions(): string[] {
   const exclusions = [
     // Core Infrastructure
@@ -528,13 +523,19 @@ function getExclusions(): string[] {
     "tmp",
     "temp",
 
-    // The "Vault" - Correcting typos and barring binary scan
-    "public/assets/downloads/**",
-    "public/assets/resources/**",
-    "**/public-assets/**",
-    "**/assets/downloads/**", // Explicit production catch-all
+    // The "Vault" - Explicitly barring the public folder from being scanned
+    "public/**/*",           // 🛡️ CRITICAL: Do not let Contentlayer scan public assets
+    "**/public/assets/**",   
+    "public/assets/images/**",
 
-    // Binary File Extensions
+    // Binary File Extensions (Expanded to prevent EPERM on images)
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.png",
+    "**/*.webp",
+    "**/*.gif",
+    "**/*.svg",
+    "**/*.ico",
     "**/*.pdf",
     "**/*.pptx",
     "**/*.docx",
@@ -585,14 +586,14 @@ export default makeSource({
 
   onSuccess: async (importData) => {
     const data = await importData();
-    const allDocs: any[] = (data as any)?.allDocuments || [];
+    const allDocuments: any[] = (data as any)?.allDocuments || [];
 
     const counts: Record<string, number> = {};
     let valid = 0;
     let invalid = 0;
     const samples: string[] = [];
 
-    for (const doc of allDocs) {
+    for (const doc of allDocuments) {
       const t = safeString(doc?.type || "unknown");
       counts[t] = (counts[t] || 0) + 1;
 
@@ -610,7 +611,7 @@ export default makeSource({
     console.log("📊 CONTENTLAYER BUILD COMPLETE (SCHEMA ALIGNED)");
     console.log("============================================================");
     console.log(`Platform: ${process.platform}${IS_WINDOWS ? " (Windows)" : ""}`);
-    console.log(`Docs: ${allDocs.length}`);
+    console.log(`Docs: ${allDocuments.length}`);
     console.log("By type:", counts);
     console.log(`Validation: valid=${valid} invalid=${invalid}`);
 

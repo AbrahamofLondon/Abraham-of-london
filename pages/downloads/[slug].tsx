@@ -1,4 +1,4 @@
-// pages/downloads/[slug].tsx — HARDENED PRODUCTION BUILD
+// pages/downloads/[slug].tsx — HARDENED PRODUCTION BUILD (Bare Slug Strategy)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -13,14 +13,16 @@ import Layout from "@/components/Layout";
 import DownloadCard from "@/components/DownloadCard";
 import AccessGate from "@/components/AccessGate";
 
-// Utility & Content logic
+// ✅ Governance & Security
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 import mdxComponents from "@/components/mdx-components";
 import { sanitizeData } from "@/lib/content/shared";
-import { getAllContentlayerDocs } from "@/lib/content/real";
+// Note: Using getDownloads ensures we only query the correct collection
+import { getDownloads } from "@/lib/content/server"; 
 
-// ==================== TYPES (Immutable Invariants) ====================
-
+/* -----------------------------------------------------------------------------
+  TYPES
+----------------------------------------------------------------------------- */
 type Tier = "public" | "inner-circle" | "private";
 
 interface DownloadDTO {
@@ -28,6 +30,7 @@ interface DownloadDTO {
   excerpt: string | null;
   description: string | null;
   slug: string;
+  href: string;
   accessLevel: Tier;
   fileUrl: string | null;
   date: string | null;
@@ -44,80 +47,97 @@ interface Props {
   mdxRaw: string;
 }
 
-// ==================== DEFENSIVE HELPERS ====================
-
+/* -----------------------------------------------------------------------------
+  DEFENSIVE HELPERS
+----------------------------------------------------------------------------- */
 const normalizeSlug = (s: string) => String(s || "").replace(/^\/+|\/+$/g, "").trim();
 const stripPrefix = (s: string) => normalizeSlug(s).replace(/^downloads\//, "");
 
 function getRawBody(doc: any): string {
-  if (!doc) return "";
-  return doc.body?.raw || doc.content || doc.body || "";
+  return doc?.body?.raw || doc?.content || doc?.body || "";
 }
 
-// ==================== PAGE COMPONENT ====================
-
+/* -----------------------------------------------------------------------------
+  PAGE COMPONENT
+----------------------------------------------------------------------------- */
 const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource, mdxRaw }) => {
   const router = useRouter();
   const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
   const [loading, setLoading] = React.useState(false);
 
-  // Safe components with error boundaries internally
   const safeComponents = React.useMemo(() => 
     createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
       seeded: { DownloadCard: DownloadCard as React.ComponentType<any> }
     }), [mdxRaw]
   );
 
-  async function handleUnlock() {
+  const handleUnlock = async (): Promise<boolean> => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/downloads/${encodeURIComponent(stripPrefix(download.slug))}`);
+      // ✅ Using the stripped slug for the API call
+      const res = await fetch(`/api/downloads/${encodeURIComponent(download.slug)}`);
       const data = await res.json();
-      if (data.ok) setSource(data.source);
-      return data.ok;
+      if (data.ok) {
+        setSource(data.source);
+        return true;
+      }
+      return false;
     } catch {
       return false;
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  if (router.isFallback) return <Layout title="Loading...">...</Layout>;
+  if (router.isFallback) return <Layout title="Loading Intelligence...">...</Layout>;
 
   return (
     <Layout title={download.title} description={download.excerpt || ""}>
       <Head>
-        <meta name="robots" content={locked ? "noindex" : "index"} />
-        <link rel="canonical" href={`https://www.abrahamoflondon.org/downloads/${download.slug}`} />
+        <meta name="robots" content={locked ? "noindex, nofollow" : "index, follow"} />
+        <link rel="canonical" href={`https://www.abrahamoflondon.org${download.href}`} />
       </Head>
 
-      <div className="mx-auto max-w-4xl px-4 py-16">
-        <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-gold mb-8 transition-colors">
-          ← Back to Intelligence Vault
+      <div className="mx-auto max-w-4xl px-6 py-16">
+        <button 
+          onClick={() => router.push('/downloads')} 
+          className="text-xs uppercase tracking-widest text-gray-500 hover:text-gold mb-12 transition-colors flex items-center gap-2"
+        >
+          ← Return to Vault
         </button>
 
-        <header className="border-b border-white/5 pb-10">
-          <div className="flex items-center gap-4 mb-4 text-[10px] font-bold uppercase tracking-[0.2em]">
-            {download.category && <span className="text-gold bg-gold/10 px-2 py-1 rounded">{download.category}</span>}
+        <header className="border-b border-white/10 pb-12">
+          <div className="flex items-center gap-4 mb-6 text-[10px] font-bold uppercase tracking-[0.2em]">
+            {download.category && (
+              <span className="text-gold bg-gold/10 px-3 py-1 rounded-full border border-gold/20">
+                {download.category}
+              </span>
+            )}
             {download.pageCount && <span className="text-gray-400">{download.pageCount} Pages</span>}
-            {download.size && <span className="text-gray-600">{download.size}</span>}
+            {download.size && <span className="text-gray-500">{download.size}</span>}
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-cream leading-tight">
+          <h1 className="text-5xl md:text-6xl font-serif font-bold text-cream leading-tight italic">
             {download.title}
           </h1>
         </header>
 
-        <main className="mt-12">
+        <main className="mt-16">
           {locked && !source ? (
-            <AccessGate 
-              requiredTier={download.accessLevel} 
-              onUnlocked={handleUnlock}
-              onGoToJoin={() => router.push("/inner-circle")}
-            />
-          ) : source && (
-            <article className="prose prose-invert max-w-none">
-              <MDXRemote {...source} components={safeComponents as any} />
-            </article>
+            <div className="py-12">
+              <AccessGate 
+                title={download.title}
+                message="This tactical brief is restricted to the Inner Circle."
+                requiredTier={download.accessLevel} 
+                onUnlocked={handleUnlock}
+                onGoToJoin={() => router.push("/inner-circle")}
+              />
+            </div>
+          ) : (
+            source && (
+              <article className="prose prose-invert prose-gold max-w-none prose-p:text-gray-300 prose-p:leading-relaxed">
+                <MDXRemote {...source} components={safeComponents as any} />
+              </article>
+            )
           )}
         </main>
       </div>
@@ -125,13 +145,18 @@ const DownloadSlugPage: NextPage<Props> = ({ download, locked, initialSource, md
   );
 };
 
-// ==================== BUILD LOGIC (Zero-Risk) ====================
-
+/* -----------------------------------------------------------------------------
+  BUILD LOGIC
+----------------------------------------------------------------------------- */
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllContentlayerDocs() || [];
+  // ✅ Specifically using getDownloads to avoid mixed-content collisions
+  const docs = getDownloads() || [];
   const paths = docs
-    .filter((d: any) => d && !d.draft)
-    .map((d: any) => ({ params: { slug: stripPrefix(d.slug || d._raw?.flattenedPath) } }))
+    .filter((d: any) => !d.draft)
+    .map((d: any) => {
+      const bareSlug = stripPrefix(d.slug || d._raw?.flattenedPath || "");
+      return { params: { slug: bareSlug } };
+    })
     .filter(p => p.params.slug);
 
   return { paths, fallback: "blocking" };
@@ -140,8 +165,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
     const slug = stripPrefix(String(params?.slug || ""));
-    const allDocs = getAllContentlayerDocs() || [];
-    const doc = allDocs.find((d: any) => normalizeSlug(d.slug || d._raw?.flattenedPath).includes(slug));
+    const allDocuments = getDownloads() || [];
+    
+    // ✅ Cross-check bare slug against normalized content
+    const doc = allDocuments.find((d: any) => {
+      const dSlug = normalizeSlug(d.slug || d._raw?.flattenedPath || "");
+      return dSlug.endsWith(slug);
+    });
 
     if (!doc || doc.draft) return { notFound: true };
 
@@ -161,11 +191,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       excerpt: doc.excerpt || null,
       description: doc.description || null,
       slug: slug,
+      href: `/downloads/${slug}`,
       accessLevel,
       fileUrl: doc.fileUrl || doc.downloadUrl || null,
-      date: doc.date || null,
+      date: doc.date ? String(doc.date) : null,
       coverImage: doc.coverImage || null,
-      category: doc.category || "General",
+      category: doc.category || "General Intelligence",
       size: doc.size || null,
       pageCount: doc.pageCount ? Number(doc.pageCount) : null,
     };
@@ -175,7 +206,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       revalidate: 3600,
     };
   } catch (err) {
-    console.error("Build Error on Slug:", params?.slug, err);
     return { notFound: true };
   }
 };

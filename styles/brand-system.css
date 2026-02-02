@@ -1,10 +1,6 @@
 @import "tailwindcss";
 
-/* Link the legacy config so v4 understands your custom tokens 
-  using the official v4 @reference directive.
-*/
-@reference "../tailwind.config.cjs";
-
+/* Brand tokens (CSS variables) */
 @layer base {
   :root {
     --brand-obsidian: #000000;
@@ -22,7 +18,8 @@
   .city-gate-card {
     @apply relative overflow-hidden rounded-[2rem]
       border border-white/10
-      bg-white/[0.02] backdrop-blur-xl transition-all duration-500;
+      bg-white/[0.02] backdrop-blur-xl
+      transition-all duration-500;
   }
 
   .city-gate-card:hover {

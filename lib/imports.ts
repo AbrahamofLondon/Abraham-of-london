@@ -1,11 +1,16 @@
-/* @/lib/imports.ts — CENTRALIZED ARCHITECTURE (FIXED) */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Main imports file - exports everything needed by the app
- * Optimized for local scope availability to prevent ReferenceErrors
+ * @/lib/imports.ts — CENTRALIZED ARCHITECTURE (HARDENED)
+ * Optimized for local scope availability to prevent ReferenceErrors.
+ * Institutional source of truth for configuration, content, and security.
  */
 
 // 1. Core Config Imports
-import { siteConfig as _siteConfig, canonicalUrl as _canonicalUrl, authorImage as _authorImage } from "@/config/site";
+import { 
+  siteConfig as _siteConfig, 
+  canonicalUrl as _canonicalUrl, 
+  authorImage as _authorImage 
+} from "@/config/site";
 
 // Re-export for external use
 export const siteConfig = _siteConfig;
@@ -13,10 +18,13 @@ export const canonicalUrl = _canonicalUrl;
 export const authorImage = _authorImage;
 
 // 2. Utility & Helper Imports
-export { getPageTitle } from "@/lib/utils/getPageTitle";
-export { absUrl, isInternalUrl, normalizePath } from "@/lib/utils/url-helpers";
-import { getPageTitle } from "@/lib/utils/getPageTitle";
-import { absUrl } from "@/lib/utils/url-helpers";
+// Consolidated imports to prevent duplicate declaration errors
+import { getPageTitle as _getPageTitle } from "@/lib/utils/getPageTitle";
+import { absUrl as _absUrl, isInternalUrl, normalizePath } from "@/lib/utils/url-helpers";
+
+export const getPageTitle = _getPageTitle;
+export const absUrl = _absUrl;
+export { isInternalUrl, normalizePath };
 
 // 3. Validation & Contentlayer
 export * from "@/lib/input-validator";
@@ -128,8 +136,8 @@ const importsApi = {
   siteConfig: _siteConfig,
   canonicalUrl: _canonicalUrl,
   authorImage: _authorImage,
-  getPageTitle,
-  absUrl,
+  getPageTitle: _getPageTitle,
+  absUrl: _absUrl,
   contentlayerHelper,
   getClientIpFallback,
   isValidIp,

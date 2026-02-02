@@ -340,7 +340,7 @@ export const getPublishedDocumentsByTypeDirect = (type: DocKind): AnyDoc[] => {
 };
 
 export const getDocumentBySlugDirect = (slug: string): AnyDoc | undefined => {
-  const allDocs = [
+  const allDocuments = [
     ...getAllPostsDirect(),
     ...getAllBooksDirect(),
     ...getAllDownloadsDirect(),
@@ -352,7 +352,7 @@ export const getDocumentBySlugDirect = (slug: string): AnyDoc | undefined => {
     ...getAllShortsDirect(),
   ];
   
-  return allDocs.find(doc => getDocSlug(doc) === slug);
+  return allDocuments.find(doc => getDocSlug(doc) === slug);
 };
 
 // ============================================

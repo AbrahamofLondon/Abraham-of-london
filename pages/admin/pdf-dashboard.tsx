@@ -1,11 +1,13 @@
-// pages/admin/pdf-dashboard.tsx - FIXED VERSION
+/* pages/admin/pdf-dashboard.tsx — PDF INTELLIGENCE ENGINE (INTEGRITY MODE) */
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { withAdminAuth } from '@/lib/auth/withAdminAuth';
 import { usePDFDashboard } from '@/hooks/usePDFDashboard';
 import { useToast } from '@/hooks/useToast';
 
-// Existing dashboard components (keep all)
+// Core Dashboard Components
 import DashboardHeader from '@/components/DashboardHeader';
 import PDFListPanel from '@/components/PDFListPanel';
 import PDFViewerPanel from '@/components/PDFViewerPanel';
@@ -17,11 +19,10 @@ import PDFQuickActions from "@/components/PDFQuickActions";
 import PDFActionsBar from "@/components/PDFActionsBar";
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-// FIX: Use default imports since components export as default
+// Specialized Data Visualization Modules
 import PDFDataDashboard from '@/components/dashboard/PDFDataDashboard';
 import LiveDataDashboard from '@/components/dashboard/LiveDataDashboard';
 
-// Types
 interface PDFDashboardProps {
   user?: {
     id: string;
@@ -35,17 +36,18 @@ interface PDFDashboardProps {
 const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
   const router = useRouter();
   const { toast } = useToast();
+  
+  // viewMode controls the high-level UI state (Classic vs Live)
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'detail' | 'live'>('grid');
   const [selectedPDFs, setSelectedPDFs] = useState<Set<string>>(new Set());
 
-  // Get URL params
+  // URL Parameter Synchronization
   const searchQuery = router.query.search as string || '';
   const category = router.query.category as string || 'all';
   const sortBy = router.query.sort as string || 'updatedAt';
   const sortOrder = router.query.order as 'asc' | 'desc' || 'desc';
-  const showLiveView = router.query.live === 'true';
 
-  // Dashboard hook - keep existing
+  // Primary Hook for Data Orchestration
   const {
     pdfs,
     filteredPDFs,
@@ -70,7 +72,6 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     sortPDFs,
     clearFilters,
     batchDelete,
-    batchExport,
   } = usePDFDashboard({
     userId: user?.id || 'anonymous',
     initialFilters: {
@@ -82,115 +83,91 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     },
   });
 
-  // Update URL when filters change
+  // Persist Filter State to URL
   useEffect(() => {
     const query: Record<string, string> = {};
-    
     if (filters.search) query.search = filters.search;
     if (filters.category !== 'all') query.category = filters.category;
     if (filters.sortBy !== 'updatedAt') query.sort = filters.sortBy;
     if (filters.sortOrder !== 'desc') query.order = filters.sortOrder;
     
-    router.push({
-      pathname: router.pathname,
-      query,
-    }, undefined, { shallow: true });
+    router.push({ pathname: router.pathname, query }, undefined, { shallow: true });
   }, [filters, router]);
 
-  // Error handling
+  // Error Feedback
   useEffect(() => {
-    if (error) {
-      toast.error('Dashboard Error', error.message);
-    }
+    if (error) toast.error('Dashboard Error', error.message);
   }, [error, toast]);
 
-  // Handle PDF selection
-  const handleSelectPDF = (pdfId: string) => {
-    setSelectedPDFId(pdfId);
-  };
+  const handleSelectPDF = (pdfId: string) => setSelectedPDFId(pdfId);
 
-  // Handle batch selection
   const togglePDFSelection = (pdfId: string) => {
     setSelectedPDFs(prev => {
       const next = new Set(prev);
-      if (next.has(pdfId)) {
-        next.delete(pdfId);
-      } else {
-        next.add(pdfId);
-      }
+      next.has(pdfId) ? next.delete(pdfId) : next.add(pdfId);
       return next;
     });
   };
 
   const clearSelection = () => setSelectedPDFs(new Set());
 
-  // Handle batch delete
   const handleBatchDelete = async () => {
     if (selectedPDFs.size === 0) return;
-    
-    if (confirm(`Delete ${selectedPDFs.size} PDF(s)? This action cannot be undone.`)) {
+    if (confirm(`Authorize destruction of ${selectedPDFs.size} restricted volumes?`)) {
       try {
         await batchDelete(Array.from(selectedPDFs));
         clearSelection();
-        toast.success('Success', `${selectedPDFs.size} PDF(s) deleted successfully`);
-      } catch (error) {
-        toast.error('Delete Failed', 'Failed to delete PDFs');
+        toast.success('Sequence Complete', `${selectedPDFs.size} records purged.`);
+      } catch (err) {
+        toast.error('Authority Rejected', 'Batch deletion failed.');
       }
     }
   };
 
-  // Toggle live view
   const toggleLiveView = () => {
-    const newViewMode = viewMode === 'live' ? 'grid' : 'live';
-    setViewMode(newViewMode);
-    
-    // Update URL
+    const newMode = viewMode === 'live' ? 'grid' : 'live';
+    setViewMode(newMode);
     router.push({
       pathname: router.pathname,
-      query: { 
-        ...router.query,
-        live: newViewMode === 'live' ? 'true' : undefined 
-      },
+      query: { ...router.query, live: newMode === 'live' ? 'true' : undefined },
     }, undefined, { shallow: true });
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0b0d] flex items-center justify-center">
-        <LoadingSpinner message="Initializing PDF Intelligence System..." />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <LoadingSpinner message="Decrypting Vault Contents..." />
       </div>
     );
   }
 
   return (
     <ErrorBoundary fallback={<DashboardError onRetry={refreshPDFList} />}>
-      <div className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
-        <div className="max-w-8xl mx-auto p-4 md:p-8">
-          {/* Dashboard Header - Enhanced with live view toggle */}
+      <div className="min-h-screen bg-zinc-950 text-white selection:bg-gold/30">
+        <div className="max-w-[1600px] mx-auto p-6 md:p-10">
+          
           <DashboardHeader
-            title="PDF Intelligence System"
-            subtitle="Institutional Publishing • Dynamic Registry"
+            title="Intelligence Pipeline"
+            subtitle="Abraham of London • Restricted Portfolio Management"
             stats={stats}
             user={user}
             onRefresh={refreshPDFList}
             onGenerateAll={generateAllPDFs}
             isGenerating={isGenerating}
-            // Add live view toggle button
             additionalActions={
               <button
                 onClick={toggleLiveView}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
                   viewMode === 'live' 
-                    ? 'bg-amber-600 hover:bg-amber-700 text-white' 
-                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                    ? 'bg-gold border-gold text-black shadow-lg shadow-gold/20' 
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
                 }`}
               >
-                {viewMode === 'live' ? '📊 Switch to Classic View' : '⚡ Switch to Live View'}
+                {viewMode === 'live' ? 'Exit Live Pulse' : 'Initiate Live Pulse'}
               </button>
             }
           />
 
-          {/* Status Messages */}
           {generationStatus && (
             <StatusMessage
               status={generationStatus}
@@ -198,30 +175,20 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
             />
           )}
 
-          {/* NEW: Live Dashboard View */}
           {viewMode === 'live' ? (
-            <div className="space-y-6">
-              {/* Live Data Dashboard */}
-              <LiveDataDashboard
-                theme="dark"
-                onPDFSelect={handleSelectPDF}
-                // Removed props that don't exist: showConnectionStatus and maxPDFsDisplay
-              />
-              
-              {/* Quick toggle back to classic view */}
-              <div className="text-center">
+            <div className="space-y-8 animate-in fade-in duration-700">
+              <LiveDataDashboard theme="dark" onPDFSelect={handleSelectPDF} />
+              <div className="flex justify-center">
                 <button
                   onClick={toggleLiveView}
-                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+                  className="px-8 py-4 bg-zinc-900 border border-white/5 hover:bg-zinc-800 text-zinc-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                 >
-                  ← Back to Classic Dashboard
+                  ← Return to Manuscript Registry
                 </button>
               </div>
             </div>
           ) : (
-            /* ORIGINAL: Classic Dashboard View */
             <>
-              {/* Quick Actions Bar */}
               <PDFQuickActions
                 selectedCount={selectedPDFs.size}
                 onRefresh={refreshPDFList}
@@ -229,19 +196,12 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                 onBatchDelete={handleBatchDelete}
                 onClearSelection={clearSelection}
                 isGenerating={isGenerating}
-                // Add live view button here too
                 additionalButtons={
-                  <button
-                    onClick={toggleLiveView}
-                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-                  >
-                    ⚡ Live View
-                  </button>
+                  <div className="h-4 w-px bg-zinc-800 mx-2 hidden sm:block" />
                 }
               />
 
-              {/* Filters Section */}
-              <div className="mb-6">
+              <div className="mb-10">
                 <PDFFilters
                   searchQuery={filters.search}
                   selectedCategory={filters.category}
@@ -255,17 +215,14 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-                {/* Sidebar - PDF List */}
-                <div className="lg:col-span-4 space-y-6">
-                  <div className="rounded-2xl border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm p-4 md:p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">
-                        Document Registry ({filteredPDFs.length})
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* Sidebar: Registry */}
+                <div className="lg:col-span-4">
+                  <div className="rounded-[2rem] border border-white/5 bg-zinc-900/30 backdrop-blur-md p-8 sticky top-10">
+                    <div className="flex items-center justify-between mb-8">
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                        Indexed Manuscripts ({filteredPDFs.length})
                       </h2>
-                      <span className="text-xs text-gray-500 font-mono">
-                        {stats.availablePDFs}/{stats.totalPDFs} files
-                      </span>
                     </div>
 
                     <PDFListPanel
@@ -281,14 +238,15 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                       onDuplicatePDF={duplicatePDF}
                     />
 
-                    <DashboardStats stats={stats} selectedCount={selectedPDFs.size} />
+                    <div className="mt-8 pt-8 border-t border-white/5">
+                      <DashboardStats stats={stats} selectedCount={selectedPDFs.size} />
+                    </div>
                   </div>
                 </div>
 
-                {/* Main Viewer Area */}
+                {/* Main: Viewer */}
                 <div className="lg:col-span-8">
-                  <div className="rounded-2xl border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm p-4 md:p-8 min-h-[600px]">
-                    {/* Actions Bar */}
+                  <div className="rounded-[2rem] border border-white/5 bg-zinc-900/20 backdrop-blur-sm p-2 md:p-10 min-h-[800px] flex flex-col">
                     {selectedPDF && (
                       <PDFActionsBar
                         pdf={selectedPDF}
@@ -297,7 +255,7 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                         onDeletePDF={() => deletePDF(selectedPDF.id)}
                         onDuplicatePDF={() => duplicatePDF(selectedPDF.id)}
                         onRenamePDF={() => {
-                          const newName = prompt('Enter new name:', selectedPDF.title);
+                          const newName = prompt('Enter Institutional Designation:', selectedPDF.title);
                           if (newName) renamePDF(selectedPDF.id, newName);
                         }}
                         canEdit={user?.permissions.includes('pdf:edit')}
@@ -305,27 +263,23 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                       />
                     )}
 
-                    {/* PDF Viewer */}
-                    <PDFViewerPanel
-                      pdf={selectedPDF}
-                      isGenerating={isGenerating}
-                      onGeneratePDF={generatePDF}
-                      refreshKey={stats.totalPDFs}
-                    />
+                    <div className="flex-grow mt-6">
+                      <PDFViewerPanel
+                        pdf={selectedPDF}
+                        isGenerating={isGenerating}
+                        onGeneratePDF={generatePDF}
+                        refreshKey={stats.totalPDFs}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </>
           )}
 
-          {/* NEW: Analytics Dashboard Section (always visible) */}
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4 text-gray-300">PDF Analytics</h3>
-            <PDFDataDashboard
-              view="analytics"
-              theme="dark"
-              onPDFSelect={handleSelectPDF}
-            />
+          <div className="mt-20 border-t border-white/5 pt-12">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] mb-8 text-zinc-600">Archival Analytics</h3>
+            <PDFDataDashboard view="analytics" theme="dark" onPDFSelect={handleSelectPDF} />
           </div>
         </div>
       </div>
@@ -333,32 +287,21 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
   );
 };
 
-// Error Component
 const DashboardError: React.FC<{ onRetry: () => void }> = ({ onRetry }) => (
-  <div className="min-h-screen bg-[#0a0b0d] flex items-center justify-center p-8">
+  <div className="min-h-screen bg-black flex items-center justify-center p-8">
     <div className="max-w-md text-center">
-      <div className="text-red-500 text-6xl mb-6">⚠️</div>
-      <h2 className="text-2xl font-bold text-white mb-3">Dashboard Error</h2>
-      <p className="text-gray-400 mb-6">
-        Unable to load the PDF dashboard. Please check your connection and try again.
+      <div className="text-gold text-4xl mb-6">!</div>
+      <h2 className="text-2xl font-serif font-bold text-white mb-4">Registry Desynchronized</h2>
+      <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
+        The PDF Intelligence System encountered a structural error. Re-authentication may be required.
       </p>
       <div className="flex gap-4 justify-center">
-        <button
-          onClick={onRetry}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-        >
-          Retry
-        </button>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
-        >
-          Reload Page
+        <button onClick={onRetry} className="px-8 py-3 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all">
+          Re-Sync Registry
         </button>
       </div>
     </div>
   </div>
 );
 
-// Export with authentication HOC
 export default withAdminAuth(PDFDashboard);

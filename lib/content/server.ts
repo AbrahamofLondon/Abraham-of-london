@@ -1,10 +1,9 @@
-// lib/content/server.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * SERVER-ONLY CONTENT ACCESS
- * - Used in API routes + getStaticProps/getServerSideProps
- * - Optimized for 2026 Portfolio Scale
+ * - Optimized for 2026 Portfolio Scale (Bare Slug Strategy)
+ * - Resilience: Map all naming permutations to prevent build-time TypeErrors.
  */
 
 import { 
@@ -65,7 +64,6 @@ export type ServerContentlayerData = {
   allShorts: any[];
 };
 
-const EMPTY_ARR: any[] = [];
 const EMPTY_DATA: ServerContentlayerData = {
   allDocuments: [],
   allBooks: [],
@@ -79,14 +77,10 @@ const EMPTY_DATA: ServerContentlayerData = {
   allShorts: [],
 };
 
-// ---------------------------
-// Path-Based Intelligence (New for 2026)
-// ---------------------------
+// -----------------------------------------------------------------------------
+// Path-Based Intelligence
+// -----------------------------------------------------------------------------
 
-/**
- * Advanced Resolver: Determines the 'Kind' of document based on its 
- * physical location in the /content directory if frontmatter is missing.
- */
 export function getDocKindByPath(doc: any): string {
   if (doc.kind) return doc.kind; 
 
@@ -104,9 +98,18 @@ export function getDocKindByPath(doc: any): string {
   return "document";
 }
 
-// ---------------------------
-// Core getters (SYNC)
-// ---------------------------
+// -----------------------------------------------------------------------------
+// Core Data Access
+// -----------------------------------------------------------------------------
+
+export function isContentlayerLoaded(): boolean {
+  return Array.isArray(allDocuments) && allDocuments.length > 0;
+}
+
+export function assertContentlayerHasDocs(): void {
+  if (!isContentlayerLoaded()) throw new Error("Build aborted: Contentlayer data is empty.");
+}
+
 export function getContentlayerData(): ServerContentlayerData {
   try {
     return {
@@ -122,38 +125,113 @@ export function getContentlayerData(): ServerContentlayerData {
       allShorts: Array.isArray(allShorts) ? allShorts : [],
     };
   } catch (e) {
-    WARN("getContentlayerData failed; returning EMPTY_DATA.", e);
+    WARN("getContentlayerData failed.", e);
     return EMPTY_DATA;
   }
 }
 
-export function isContentlayerLoaded(): boolean {
-  try {
-    return (allDocuments?.length || 0) > 0;
-  } catch {
-    return false;
-  }
-}
-
-// ---------------------------
-// Published selectors
-// ---------------------------
-export function getPublishedDocuments(): any[] {
-  try {
-    return (allDocuments || []).filter(isPublished);
-  } catch (e) {
-    WARN("getPublishedDocuments failed; returning [].", e);
-    return EMPTY_ARR;
-  }
-}
+// -----------------------------------------------------------------------------
+// Advanced Selection & Resilient Slug Logic
+// -----------------------------------------------------------------------------
 
 export function getAllContentlayerDocs(): any[] {
-  return getPublishedDocuments();
+  return allDocuments || [];
 }
 
-/**
- * Specifically for the Downloads/Prints Sitemap Extension
- */
+export function getDocBySlug(slug: string): any | null {
+  if (!slug) return null;
+  const target = normalizeSlug(slug);
+  const docs = (allDocuments || []).filter(isPublished);
+
+  return docs.find((d) => {
+    const dSlug = normalizeSlug(d.slug || d._raw?.flattenedPath || "");
+    const dBare = dSlug.split('/').pop(); 
+    return dSlug === target || dBare === target;
+  }) || null;
+}
+
+export function getDocumentBySlug(slug: string): any | null {
+  return getDocBySlug(slug);
+}
+
+// -----------------------------------------------------------------------------
+// Bulletproof Collection Mapping (The Final Fix)
+// -----------------------------------------------------------------------------
+
+// Shorts
+export function getShorts() { return (allShorts || []).filter(isPublished); }
+export function getAllShorts() { return getShorts(); }
+export function getServerAllShorts() { return getShorts(); }
+
+// Canons
+export function getCanons() { return (allCanons || []).filter(isPublished); }
+export function getAllCanons() { return getCanons(); }
+export function getServerAllCanons() { return getCanons(); }
+
+// Books
+export function getBooks() { return (allBooks || []).filter(isPublished); }
+export function getAllBooks() { return getBooks(); }
+export function getServerAllBooks() { return getBooks(); }
+
+// Downloads
+export function getDownloads() { return (allDownloads || []).filter(isPublished); }
+export function getAllDownloads() { return getDownloads(); }
+export function getServerAllDownloads() { return getDownloads(); }
+
+// Events
+export function getEvents() { return (allEvents || []).filter(isPublished); }
+export function getAllEvents() { return getEvents(); }
+export function getServerAllEvents() { return getEvents(); }
+
+// Resources
+export function getResources() { return (allResources || []).filter(isPublished); }
+export function getAllResources() { return getResources(); }
+export function getServerAllResources() { return getResources(); }
+
+// Prints
+export function getPrints() { return (allPrints || []).filter(isPublished); }
+export function getAllPrints() { return getPrints(); }
+export function getServerAllPrints() { return getPrints(); }
+
+// Strategies
+export function getStrategies() { return (allStrategies || []).filter(isPublished); }
+export function getAllStrategies() { return getStrategies(); }
+export function getServerAllStrategies() { return getStrategies(); }
+
+// Posts / Blog
+export function getPublishedPosts() { return (allPosts || []).filter(isPublished); }
+export function getPosts() { return getPublishedPosts(); }
+export function getAllPosts() { return getPublishedPosts(); }
+
+// -----------------------------------------------------------------------------
+// Slug Lookups for Specific Types
+// -----------------------------------------------------------------------------
+
+export function getServerShortBySlug(slug: string) { return getShorts().find(s => normalizeSlug(s.slug || s._raw.flattenedPath).includes(normalizeSlug(slug))); }
+export function getServerBookBySlug(slug: string) { return getBooks().find(b => normalizeSlug(b.slug || b._raw.flattenedPath).includes(normalizeSlug(slug))); }
+export function getServerCanonBySlug(slug: string) { return getCanons().find(c => normalizeSlug(c.slug || c._raw.flattenedPath).includes(normalizeSlug(slug))); }
+export function getServerDownloadBySlug(slug: string) { return getDownloads().find(d => normalizeSlug(d.slug || d._raw.flattenedPath).includes(normalizeSlug(slug))); }
+export function getServerEventBySlug(slug: string) { return getEvents().find(e => normalizeSlug(e.slug || e._raw.flattenedPath).includes(normalizeSlug(slug))); }
+export function getServerResourceBySlug(slug: string) { return getResources().find(r => normalizeSlug(r.slug || r._raw.flattenedPath).includes(normalizeSlug(slug))); }
+export function getServerPrintBySlug(slug: string) { return getPrints().find(p => normalizeSlug(p.slug || p._raw.flattenedPath).includes(normalizeSlug(slug))); }
+export function getServerStrategyBySlug(slug: string) { return getStrategies().find(s => normalizeSlug(s.slug || s._raw.flattenedPath).includes(normalizeSlug(slug))); }
+
+export function getPostBySlug(slug: string): any | null {
+  const target = normalizeSlug(slug);
+  return getPublishedPosts().find((p) => {
+    const pSlug = normalizeSlug(p.slug || p._raw?.flattenedPath || "");
+    return pSlug === target || pSlug.endsWith(`/${target}`);
+  }) || null;
+}
+
+export function getPostBySlugWithContent(slug: string) { return getPostBySlug(slug); }
+
+// -----------------------------------------------------------------------------
+// Aggregators & Assets
+// -----------------------------------------------------------------------------
+
+export function getPublishedDocuments() { return (allDocuments || []).filter(isPublished); }
+
 export function getDownloadableAssets(): any[] {
   return getPublishedDocuments().filter((doc) => {
     const kind = getDocKindByPath(doc);
@@ -161,69 +239,20 @@ export function getDownloadableAssets(): any[] {
   });
 }
 
-// ---------------------------
-// Generic doc access
-// ---------------------------
-export function getDocBySlug(slug: string): any | null {
-  const target = normalizeSlug(slug);
-  return getPublishedDocuments().find((d) => normalizeSlug(d?.slug) === target) || null;
-}
-
-export function getDocumentBySlug(slug: string): any | null {
-  return getDocBySlug(slug);
-}
-
-// ---------------------------
-// Collections (Server Sync)
-// ---------------------------
-export function getServerAllBooks(): any[] { return allBooks || []; }
-export function getServerAllCanons(): any[] { return allCanons || []; }
-export async function getServerAllCanonsAsync() { return getServerAllCanons(); }
-
-export function getServerAllStrategies(): any[] { return allStrategies || []; }
-export function getServerAllShorts(): any[] { return allShorts || []; }
-export async function getServerAllShortsAsync() { return getServerAllShorts(); }
-
-export function getServerAllPrints(): any[] { return allPrints || []; }
-export function getServerAllDownloads(): any[] { return allDownloads || []; }
-export async function getServerAllDownloadsAsync() { return getServerAllDownloads(); }
-
-// ---------------------------
-// Legacy Aliases (Preserving existing Page logic)
-// ---------------------------
-export function getBooks(): any[] { return getServerAllBooks().filter(isPublished); }
-export function getCanons(): any[] { return getServerAllCanons().filter(isPublished); }
-export function getStrategies(): any[] { return getServerAllStrategies().filter(isPublished); }
-export function getShorts(): any[] { return getServerAllShorts().filter(isPublished); }
-export function getPrints(): any[] { return getServerAllPrints().filter(isPublished); }
-export function getDownloads(): any[] { return getServerAllDownloads().filter(isPublished); }
-export function getEvents(): any[] { return (allEvents || []).filter(isPublished); }
-export function getResources(): any[] { return (allResources || []).filter(isPublished); }
-
-export function getPublishedPosts(): any[] {
-  return (allPosts || []).filter(isPublished);
-}
-
-export function getPostBySlug(slug: string): any | null {
-  const target = normalizeSlug(slug);
-  return getPublishedPosts().find((p) => normalizeSlug(p?.slug) === target) || null;
-}
-
-/**
- * Aggregator for the Central Vault Index
- */
 export function getAllCombinedDocs(): any[] {
   const d = getContentlayerData();
-  return sanitizeData([
-    ...(d.allDocuments || []),
-    ...(d.allBooks || []),
-    ...(d.allCanons || []),
-    ...(d.allDownloads || []),
-    ...(d.allPosts || []),
-    ...(d.allEvents || []),
-    ...(d.allPrints || []),
-    ...(d.allResources || []),
-    ...(d.allStrategies || []),
-    ...(d.allShorts || []),
-  ]);
+  const combined = [
+    ...d.allDocuments,
+    ...d.allBooks,
+    ...d.allCanons,
+    ...d.allDownloads,
+    ...d.allPosts,
+    ...d.allEvents,
+    ...d.allPrints,
+    ...d.allResources,
+    ...d.allStrategies,
+    ...d.allShorts,
+  ].filter(isPublished);
+  
+  return sanitizeData(combined);
 }

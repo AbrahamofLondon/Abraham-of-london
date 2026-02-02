@@ -1,110 +1,155 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import * as runtime from "react/jsx-runtime";
 
-// MDX Components
-import Callout from "./Callout";
+// ✅ CORE UI COMPONENTS (Institutional Registry)
+import JsonLd from "./JsonLd";
 import Badge from "./Badge";
+import BadgeRow from "./BadgeRow";
+import BrandFrame from "./BrandFrame";
+import Callout from "./Callout";
+import Caption from "./Caption";
 import CTA from "./CTA";
-import Quote from "./Quote";
-import Note from "./Note";
-import Grid from "./Grid";
-import Verse from "./Verse";
+import { CTAPreset } from "./CTAPreset";
+import CtaPresetComponent from "./CtaPresetComponent";
+import DownloadCard from "./DownloadCard";
 import EmbossedBrandMark from "./EmbossedBrandMark";
+import Grid from "./Grid";
+import HeroEyebrow from "./HeroEyebrow";
+import Note from "./Note";
+import PullLine from "./PullLine";
+import Quote from "./Quote";
+import ResourcesCTA from "./ResourcesCTA";
+import Rule from "./Rule";
+import ShareRow from "./ShareRow";
+import Verse from "./Verse";
 import { components as shortcodes } from "./shortcodes";
+import MissingComponent from "./MissingComponent";
 
-// ✅ Build-safe loader for useMDXComponent across Contentlayer variants
-type UseMDXComponentFn = (code: string) => React.ComponentType<any>;
-
-async function loadUseMDXComponent(): Promise<UseMDXComponentFn | null> {
-  // Priority 1: contentlayer2 stable export location
-  // (Netlify error shows "contentlayer2" root is not exported — so DO NOT use `import {..} from "contentlayer2"`)
-  try {
-    const m: any = await import("contentlayer2/client");
-    if (typeof m?.useMDXComponent === "function") return m.useMDXComponent;
-  } catch {}
-
-  // Priority 2: contentlayer v1 client hook
-  try {
-    const m: any = await import("contentlayer/client");
-    if (typeof m?.useMDXComponent === "function") return m.useMDXComponent;
-  } catch {}
-
-  // Not available
-  return null;
-}
-
-const mdxComponents = {
+// ✅ MDX COMPONENT REGISTRY
+const mdxComponents: any = {
   Image,
+  JsonLd,
   a: ({ href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-    const h = href || "";
-    const isInternal = h.startsWith("/");
+    const isInternal = href?.startsWith("/") || href?.startsWith("#");
     if (isInternal) {
-      return (
-        <Link
-          href={h}
-          {...props}
-          className="text-amber-300 hover:text-amber-200 underline underline-offset-4"
-        />
-      );
+      return <Link href={href || "#"} {...props} className="text-gold hover:text-white underline underline-offset-4 transition-colors" />;
     }
-    return <a target="_blank" rel="noopener noreferrer" href={h} {...props} />;
+    return <a target="_blank" rel="noopener noreferrer" href={href} {...props} />;
   },
-  h1: (p: any) => <h1 {...p} className="heading-statement mb-8" />,
-  h2: (p: any) => (
-    <h2 {...p} className="text-kicker text-xl border-b border-white/10 pb-2 mt-12 mb-4" />
-  ),
-  Callout,
+  hr: (p: any) => <Rule {...p} />,
+  h1: (p: any) => <h1 {...p} className="heading-statement text-4xl md:text-6xl font-serif italic mb-12 text-white leading-tight" />,
+  h2: (p: any) => <h2 {...p} className="text-gold font-mono text-sm uppercase tracking-[0.3em] border-b border-white/5 pb-4 mt-16 mb-6" />,
   Badge,
+  BadgeRow,
+  BrandFrame,
+  Callout,
+  Caption,
   CTA,
-  Quote,
-  Note,
-  Grid,
-  Verse,
+  CTAPreset,
+  CtaPresetComponent,
+  DownloadCard,
   EmbossedBrandMark,
+  Grid,
+  HeroEyebrow,
+  Note,
+  PullLine,
+  Quote,
+  ResourcesCTA,
+  Rule,
+  ShareRow,
+  Verse,
   ...shortcodes,
+  Unknown: MissingComponent,
 };
 
 type MDXProps = {
-  code: string | null | undefined;
+  /** LEGACY: Compiled string from Contentlayer */
+  code?: string | null | undefined;
+  /** NEW: Serialized result from next-mdx-remote (getStaticProps) */
+  source?: MDXRemoteSerializeResult;
+  /** SEO Metadata */
+  title?: string;
+  excerpt?: string;
+  author?: string;
+  date?: string;
+  coverImage?: string;
   [key: string]: any;
 };
 
-export function MDXLayoutRenderer({ code, ...rest }: MDXProps) {
-  const [useMDXComponent, setUseMDXComponent] = React.useState<UseMDXComponentFn | null>(null);
+/**
+ * MDXLayoutRenderer
+ * BUILT TO BE UNBREAKABLE:
+ * 1. No dynamic imports of contentlayer/client (removes Netlify/Next.js worker crashes).
+ * 2. Backward compatible with old 'code' strings.
+ * 3. Forward compatible with 'source' serialized objects.
+ */
+export function MDXLayoutRenderer({ 
+  code, 
+  source, 
+  title, 
+  excerpt, 
+  author, 
+  date, 
+  coverImage, 
+  ...rest 
+}: MDXProps) {
+  
+  // ✅ 1. RESOLVE THE COMPONENT (Local Bridge)
+  const MDXContent = React.useMemo(() => {
+    // Priority 1: New serialized source (next-mdx-remote)
+    if (source) return null; 
 
-  React.useEffect(() => {
-    let alive = true;
-    loadUseMDXComponent().then((fn) => {
-      if (alive) setUseMDXComponent(() => fn);
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
+    // Priority 2: Legacy code string (Local Evaluation)
+    if (code) {
+      try {
+        const fullCode = `
+          const {jsx: _jsx, jsxs: _jsxs, Fragment: _Fragment} = arguments[0];
+          ${code}
+          return { default: MDXContent };
+        `;
+        const fn = new Function(fullCode);
+        return fn(runtime).default;
+      } catch (e) {
+        console.error("MDX Runtime Error:", e);
+        return () => <div className="p-4 border border-red-500/50 text-red-500 font-mono text-xs">Runtime Error in Brief Content</div>;
+      }
+    }
+    return null;
+  }, [code, source]);
 
-  if (!code) {
-    return <div className="animate-pulse bg-white/5 h-64 w-full rounded-xl" />;
+  // ✅ 2. PREPARE STRUCTURED DATA
+  const structuredData = React.useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "Report",
+    "headline": title || "Abraham of London Intelligence Brief",
+    "description": excerpt || "Strategic insights and tactical blueprints.",
+    "datePublished": date,
+    "author": {
+      "@type": "Organization",
+      "name": author || "Abraham of London"
+    },
+    "image": coverImage ? `https://www.abrahamoflondon.org${coverImage}` : undefined
+  }), [title, excerpt, date, author, coverImage]);
+
+  if (!code && !source) {
+    return <div className="animate-pulse bg-white/[0.02] h-64 w-full rounded-2xl border border-white/5" />;
   }
-
-  // If hook not present (or during hydration), show a safe fallback
-  if (!useMDXComponent) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white/70">
-        <p className="text-sm">
-          Loading content…
-        </p>
-      </div>
-    );
-  }
-
-  const MDXComponent = useMDXComponent(code);
 
   return (
-    <article className="prose prose-invert prose-slate max-w-none">
-      <MDXComponent components={mdxComponents} {...rest} />
+    <article className="prose prose-invert prose-gold max-w-none prose-p:text-white/70 prose-p:leading-relaxed prose-strong:text-gold">
+      <JsonLd data={structuredData} />
+      
+      {source ? (
+        <MDXRemote {...source} components={mdxComponents} />
+      ) : (
+        MDXContent && <MDXContent components={mdxComponents} {...rest} />
+      )}
     </article>
   );
 }

@@ -1,10 +1,10 @@
 import { GetServerSideProps } from "next";
-import { allDocs } from "contentlayer/generated";
+import { getAllCombinedDocs } from "@/lib/contentlayer-helper";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const docs = allDocs.filter((d) => 
+  const docs = allDocuments.filter((d) => 
     d._raw.sourceFilePath.startsWith("resources/") || 
     d._raw.sourceFilePath.startsWith("strategic-frameworks/") ||
     d._raw.sourceFilePath.startsWith("downloads/")

@@ -1,36 +1,47 @@
-// components/mdx/JsonLd.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 
 type JsonLdProps = {
-  data: unknown;
+  data: any; // Using any for high-tolerance input from MDX
   type?: string;
 } & Omit<
   React.HTMLAttributes<HTMLScriptElement>,
   "type" | "dangerouslySetInnerHTML"
 >;
 
+/**
+ * Institutional JsonLd Component
+ * Prevents "Object as React child" by ensuring strict stringification 
+ * before it ever touches the React reconciliation tree.
+ */
 export default function JsonLd({
   data,
   type = "application/ld+json",
   ...rest
 }: JsonLdProps) {
-  // Safely stringify data with error handling
+  
+  // 🛡️ Firebreak: Return null early if data is missing to prevent {} in the source
+  if (!data) return null;
+
   const jsonString = React.useMemo(() => {
     try {
-      return JSON.stringify(data);
+      // If data is already a string (common in some MDX setups), return it.
+      // Otherwise, stringify the object.
+      return typeof data === "string" ? data : JSON.stringify(data);
     } catch (error) {
-      console.error("JsonLd: Failed to stringify data", error);
-      return "{}";
+      console.error("JsonLd: Serialization Failure", error);
+      return null; // Return null to avoid rendering a broken script tag
     }
   }, [data]);
+
+  if (!jsonString) return null;
 
   return (
     <script
       type={type}
-      // eslint-disable-next-line react/no-danger
+      // This is the only place the data exists—safely inside the script tag's inner HTML.
       dangerouslySetInnerHTML={{ __html: jsonString }}
       {...rest}
     />
   );
 }
-

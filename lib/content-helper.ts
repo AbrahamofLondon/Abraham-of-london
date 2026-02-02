@@ -136,7 +136,6 @@ export function createDocumentUrl(slug: string, type?: string): string {
 
 // ===== RE-EXPORT REAL CONTENTLAYER FUNCTIONS =====
 
-// Document getters
 export {
   getAllDocuments,
   getDocumentBySlug,
@@ -176,7 +175,19 @@ export const getAllStrategies = getPublishedStrategies;
 export const getAllCanons = getPublishedCanons;
 export const getAllShorts = getPublishedShorts;
 
-// Extended collection getters (return empty arrays for now, can be implemented if needed)
+// --- SOVEREIGN SELECTOR BRIDGES (Fixes 21 Turbopack Errors) ---
+export const getServerAllBooks = getPublishedBooks;
+export const getServerAllCanons = getPublishedCanons;
+
+export function getServerBookBySlug(slug: string) {
+  return getPublishedBooks().find(b => b.slug === slug || b.slugAsParams === slug);
+}
+
+export function getServerCanonBySlug(slug: string) {
+  return getPublishedCanons().find(c => c.slug === slug || c.slugAsParams === slug);
+}
+// -------------------------------------------------------------
+
 export const getAllArticles = (): any[] => [];
 export const getAllGuides = (): any[] => [];
 export const getAllTutorials = (): any[] => [];
@@ -229,7 +240,9 @@ export const ContentHelper = {
   getPublishedResources,
   getPublishedStrategies,
   getPublishedCanons,
-  getPublishedShorts
+  getPublishedShorts,
+  getServerBookBySlug, // Added to helper object
+  getServerCanonBySlug  // Added to helper object
 };
 
 // Default export

@@ -25,3 +25,5 @@ export function CTAPreset({ presetKey, className, compact }: CTAPresetProps) {
 
   return <CTA {...ctaProps} />;
 }
+
+export default CTAPreset;

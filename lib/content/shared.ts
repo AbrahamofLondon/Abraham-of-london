@@ -1,14 +1,7 @@
-// lib/content/shared.ts — CLIENT-SAFE SHARED CONTENT UTILITIES
 /**
+ * lib/content/shared.ts — CLIENT-SAFE SHARED CONTENT UTILITIES
  * Shared utilities used across Pages Router + App Router.
  * MUST remain client-safe (no fs, no server-only imports).
- *
- * This file intentionally provides:
- * - normalizeSlug
- * - getDocKind
- * - getDocHref
- * - isDraftContent
- * - small safe helpers (sanitizeData/toUiDoc/resolve images)
  */
 
 export type DocKind =
@@ -25,6 +18,9 @@ export type DocKind =
 
 type AnyDoc = Record<string, any>;
 
+/**
+ * Institutional Slug Normalizer
+ */
 export function normalizeSlug(input: string): string {
   return (input || "")
     .trim()
@@ -33,13 +29,23 @@ export function normalizeSlug(input: string): string {
     .replace(/\/{2,}/g, "/");
 }
 
+/**
+ * ✅ REQUIRED BY BUILD: joinHref
+ * Combines multiple segments into a clean, normalized URL path.
+ */
+export function joinHref(...args: (string | undefined | null)[]): string {
+  const parts = args
+    .filter((arg): arg is string => typeof arg === 'string' && arg.length > 0)
+    .map(part => normalizeSlug(part));
+  
+  return "/" + parts.join("/");
+}
+
 export function isDraftContent(doc: AnyDoc): boolean {
-  // conservative: if any draft-like flag is true, treat as draft
   return Boolean(doc?.draft || doc?.isDraft || doc?.published === false);
 }
 
 export function getDocKind(doc: AnyDoc): DocKind {
-  // Prefer explicit `type`
   const t = String(doc?.type || "").toLowerCase();
 
   if (t.includes("post") || t.includes("blog")) return "blog";
@@ -52,8 +58,7 @@ export function getDocKind(doc: AnyDoc): DocKind {
   if (t.includes("short")) return "short";
   if (t.includes("strategy")) return "strategy";
 
-  // fallbacks by common fields
-  const slug = String(doc?.slug || doc?._raw?.flattenedPath || "");
+  const slug = normalizeSlug(String(doc?.slug || doc?._raw?.flattenedPath || ""));
   if (slug.startsWith("blog/")) return "blog";
   if (slug.startsWith("books/")) return "book";
   if (slug.startsWith("canon/")) return "canon";
@@ -68,47 +73,34 @@ export function getDocKind(doc: AnyDoc): DocKind {
 }
 
 export function getDocHref(doc: AnyDoc): string {
-  // Allow explicit href override in frontmatter/data
   const explicit = doc?.href || doc?.url || doc?.permalink;
   if (typeof explicit === "string" && explicit.trim()) return explicit.trim();
 
   const kind = getDocKind(doc);
+  const rawSlug = normalizeSlug(
+    String(doc?.slug || doc?._raw?.flattenedPath || doc?._id || "")
+  );
 
-  // Slug priority: explicit slug -> raw flattenedPath -> id-like fallback
-  const slug =
-    normalizeSlug(String(doc?.slug || "")) ||
-    normalizeSlug(String(doc?._raw?.flattenedPath || "")) ||
-    normalizeSlug(String(doc?._id || ""));
-
-  // If slug already includes section prefix, keep it
-  if (slug.includes("/")) return `/${slug}`;
+  const buildSafePath = (prefix: string, slug: string) => {
+    const cleanPrefix = prefix.replace(/^\/+/, "").replace(/\/+$/, "");
+    if (slug.startsWith(cleanPrefix + "/")) return `/${slug}`;
+    return `/${cleanPrefix}/${slug}`;
+  };
 
   switch (kind) {
-    case "blog":
-      return `/blog/${slug}`;
-    case "book":
-      return `/books/${slug}`;
-    case "canon":
-      return `/canon/${slug}`;
-    case "download":
-      return `/downloads/${slug}`;
-    case "event":
-      return `/events/${slug}`;
-    case "print":
-      return `/prints/${slug}`;
-    case "resource":
-      return `/resources/${slug}`;
-    case "short":
-      return `/shorts/${slug}`;
-    case "strategy":
-      return `/strategy/${slug}`;
+    case "blog": return buildSafePath("blog", rawSlug);
+    case "book": return buildSafePath("books", rawSlug);
+    case "canon": return buildSafePath("canon", rawSlug);
+    case "download": return buildSafePath("downloads", rawSlug);
+    case "event": return buildSafePath("events", rawSlug);
+    case "print": return buildSafePath("prints", rawSlug);
+    case "resource": return buildSafePath("resources", rawSlug);
+    case "short": return buildSafePath("shorts", rawSlug);
+    case "strategy": return buildSafePath("strategy", rawSlug);
     default:
-      // very last resort: generic content route (keeps site alive)
-      return `/content/${slug}`;
+      return rawSlug.includes("/") ? `/${rawSlug}` : `/content/${rawSlug}`;
   }
 }
-
-// ------- small safe helpers you already had -------
 
 export function sanitizeData<T>(input: T): T {
   return JSON.parse(

@@ -1,30 +1,13 @@
-// pages/prints/[slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
+// pages/prints/[slug].tsx — HARDENED (Bare Slug + Seeded Proxy)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import Layout from "@/components/Layout";
-
-import { withInnerCircleAuth } from "@/lib/auth/withInnerCircleAuth";
-
-// ✅ Server-safe content access (SSG)
-import {
-  getAllContentlayerDocs,
-  getDocBySlug,
-  normalizeSlug,
-  sanitizeData,
-} from "@/lib/content/server";
-
 import { serialize } from "next-mdx-remote/serialize";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-
-// ✅ STANDARDIZED: Use createSeededSafeMdxComponents for seed + proxy
-import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
-import mdxComponents from "@/components/mdx-components";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-
 import {
   Download,
   Share2,
@@ -41,11 +24,21 @@ import {
   Ruler,
 } from "lucide-react";
 
+import Layout from "@/components/Layout";
+import { withInnerCircleAuth } from "@/lib/auth/withInnerCircleAuth";
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
+import mdxComponents from "@/components/mdx-components";
+import {
+  getAllContentlayerDocs,
+  getDocBySlug,
+  normalizeSlug,
+  sanitizeData,
+} from "@/lib/content/server";
 import type { User } from "@/types/auth";
 
-// ------------------------------------------------------------
-// Role hierarchy
-// ------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+  CONSTANTS & TYPES
+----------------------------------------------------------------------------- */
 const ROLE_HIERARCHY: Record<string, number> = {
   public: 0,
   member: 1,
@@ -54,684 +47,224 @@ const ROLE_HIERARCHY: Record<string, number> = {
   founder: 4,
 };
 
-// ------------------------------------------------------------
-// Client-only enhancements
-// ------------------------------------------------------------
-const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
-
-// ------------------------------------------------------------
-// Types
-// ------------------------------------------------------------
 type AccessLevel = "public" | "member" | "patron" | "inner-circle" | "founder";
 
-type PrintDoc = {
-  title?: string;
-  excerpt?: string | null;
-  description?: string | null;
-  dimensions?: string | null;
-  coverImage?: string | null;
-  pdfUrl?: string | null;
-  downloadUrl?: string | null;
-  highResUrl?: string | null;
-  slug?: string;
-  date?: string | null;
-  createdAt?: string | null;
-  tags?: string[];
-  fileSize?: string | null;
-  printInstructions?: string | null;
-  accessLevel?: AccessLevel | string | null;
-  paperType?: string;
-  inkType?: string;
-  orientation?: "portrait" | "landscape";
-  downloadCount?: number | null;
-  viewCount?: number | null;
-  body?: { raw?: string };
-  bodyRaw?: string;
-  _raw?: { flattenedPath?: string; sourceFileDir?: string };
-  kind?: string;
-  type?: string;
-  draft?: boolean;
-  published?: boolean;
-  status?: string;
-  [k: string]: any;
-};
+interface PrintDTO {
+  title: string;
+  excerpt: string | null;
+  description: string | null;
+  dimensions: string | null;
+  coverImage: string | null;
+  pdfUrl: string | null;
+  highResUrl: string | null;
+  slug: string;
+  downloadCount: number;
+  viewCount: number;
+  createdAt: string | null;
+  tags: string[];
+  fileSize: string | null;
+  printInstructions: string | null;
+  accessLevel: AccessLevel;
+  paperType: string | null;
+  inkType: string | null;
+  orientation: "portrait" | "landscape" | null;
+}
 
-type Props = {
-  print: {
-    title: string;
-    excerpt: string | null;
-    description: string | null;
-    dimensions: string | null;
-    coverImage: string | null;
-    pdfUrl: string | null;
-    highResUrl: string | null;
-    slug: string;
-    downloadCount: number | null;
-    viewCount: number | null;
-    createdAt: string | null;
-    tags: string[];
-    fileSize: string | null;
-    printInstructions: string | null;
-    accessLevel: AccessLevel;
-    paperType: string | null;
-    inkType: string | null;
-    orientation: "portrait" | "landscape" | null;
-  };
+interface Props {
+  print: PrintDTO;
   source: MDXRemoteSerializeResult;
-  mdxRaw: string; // ✅ ADDED: Required for seeding
-  user?: User; // injected by HOC
-  requiredRole?: string; // injected by HOC
-};
-
-// ------------------------------------------------------------
-// ✅ LOCAL draft detector — removes dependency mismatch risk
-// ------------------------------------------------------------
-function isDraftContent(doc: any): boolean {
-  if (!doc) return true;
-  if (doc.draft === true) return true;
-  if (doc.published === false) return true;
-  const s = String(doc.status || "").toLowerCase();
-  if (s === "draft" || s === "unpublished") return true;
-  return false;
+  mdxRaw: string;
+  user?: User;
 }
 
-// ------------------------------------------------------------
-// Helpers
-// ------------------------------------------------------------
-function toAccessLevel(v: unknown): AccessLevel {
-  const n = String(v || "").toLowerCase().trim();
-  if (n === "founder") return "founder";
-  if (n === "inner-circle" || n === "inner circle") return "inner-circle";
-  if (n === "patron") return "patron";
-  if (n === "member") return "member";
-  return "public";
-}
+const BackToTop = dynamic(() => import("@/components/enhanced/BackToTop"), { ssr: false });
+
+/* -----------------------------------------------------------------------------
+  DEFENSIVE HELPERS
+----------------------------------------------------------------------------- */
+const stripPrefix = (s: string) => normalizeSlug(s).replace(/^prints\//, "");
 
 function isPrintDoc(d: any): boolean {
   const kind = String(d?.kind || d?.type || "").toLowerCase();
-  if (kind === "print") return true;
-
   const dir = String(d?._raw?.sourceFileDir || "").toLowerCase();
-  const flat = String(d?._raw?.flattenedPath || "").toLowerCase();
-  return dir.includes("prints") || flat.startsWith("prints/");
+  return kind === "print" || dir.includes("prints");
 }
 
-function stripMdxExt(s: string): string {
-  return s.replace(/\.(md|mdx)$/, "");
-}
-
-function printSlugFromDoc(d: PrintDoc): string {
-  const raw =
-    normalizeSlug(String(d.slug || "")) ||
-    normalizeSlug(String(d._raw?.flattenedPath || "")) ||
-    "";
-
-  const noExt = stripMdxExt(raw);
-  return noExt.replace(/^prints\//, "");
-}
-
-function resolveCoverImageLocal(d: PrintDoc): string | null {
-  const cover = String(d.coverImage || "").trim();
-  if (cover) return cover;
-
-  const alt1 = String((d as any).image || "").trim();
-  if (alt1) return alt1;
-
-  const alt2 = String((d as any).ogImage || (d as any).thumbnail || "").trim();
-  return alt2 || null;
-}
-
-// Paranoid MDX extraction
-function getRawBody(d: PrintDoc): string {
-  return (
-    d?.body?.raw ||
-    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
-    (typeof d?.content === "string" ? d.content : "") ||
-    (typeof d?.body === "string" ? d.body : "") ||
-    (typeof d?.mdx === "string" ? d.mdx : "") ||
-    ""
-  );
-}
-
-function safeDateLabel(input: string | null): string {
-  if (!input) return "";
-  const d = new Date(input);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-}
-
-// ------------------------------------------------------------
-// SSG
-// ------------------------------------------------------------
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const docs = getAllContentlayerDocs();
-    const prints = (Array.isArray(docs) ? docs : [])
-      .filter(isPrintDoc)
-      .filter((p: any) => !isDraftContent(p));
-
-    const paths = prints
-      .map((p: any) => printSlugFromDoc(p))
-      .filter(Boolean)
-      .map((slug: string) => ({ params: { slug } }));
-
-    return { paths, fallback: "blocking" };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating static paths:", error);
-    return { paths: [], fallback: "blocking" };
-  }
-};
-
-export const getStaticProps: GetStaticProps<Omit<Props, "user" | "requiredRole">> = async ({ params }) => {
-  try {
-    const rawSlug = (params as any)?.slug;
-    const slug =
-      typeof rawSlug === "string"
-        ? normalizeSlug(rawSlug)
-        : Array.isArray(rawSlug) && typeof rawSlug[0] === "string"
-          ? normalizeSlug(rawSlug[0])
-          : "";
-
-    if (!slug) return { notFound: true };
-
-    const doc =
-      (getDocBySlug(`prints/${slug}`) as PrintDoc | null) ||
-      (getDocBySlug(slug) as PrintDoc | null);
-
-    if (!doc || !isPrintDoc(doc) || isDraftContent(doc)) return { notFound: true };
-
-    // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
-    const mdxRaw = getRawBody(doc);
-
-    // ✅ FIX: Ensure all optional fields are either null or defined values
-    const print = {
-      title: doc.title || "Print Resource",
-      excerpt: doc.excerpt ?? null,
-      description: (doc.description ?? doc.excerpt ?? null) as string | null,
-      dimensions: (doc.dimensions ?? null) as string | null,
-      coverImage: resolveCoverImageLocal(doc),
-      pdfUrl: (doc.pdfUrl ?? doc.downloadUrl ?? null) as string | null,
-      highResUrl: (doc.highResUrl ?? null) as string | null,
-      slug,
-      downloadCount: (doc.downloadCount ?? 0) as number,
-      viewCount: (doc.viewCount ?? 0) as number,
-      createdAt: (doc.date ?? doc.createdAt ?? null) as string | null,
-      tags: Array.isArray(doc.tags) ? doc.tags : [],
-      fileSize: (doc.fileSize ?? null) as string | null,
-      printInstructions: (doc.printInstructions ?? null) as string | null,
-      accessLevel: toAccessLevel(doc.accessLevel),
-      // ✅ FIXED: Use null instead of undefined for optional fields
-      paperType: doc.paperType ?? null,
-      inkType: doc.inkType ?? null,
-      orientation: (doc.orientation === "portrait" || doc.orientation === "landscape" ? doc.orientation : null) as "portrait" | "landscape" | null,
-    };
-
-    const source = await serialize(mdxRaw || " ", {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug],
-      },
-    });
-
-    return {
-      props: { 
-        print: sanitizeData(print), 
-        source,
-        mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
-      },
-      revalidate: 3600,
-    };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating static props:", error);
-    return { notFound: true };
-  }
-};
-
-// ------------------------------------------------------------
-// Access denied
-// ------------------------------------------------------------
-const AccessDeniedComponent: React.FC<{ print: Props["print"]; requiredRole?: string }> = ({
-  print,
-  requiredRole,
-}) => {
-  const router = useRouter();
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white py-16 px-4">
-      <div className="max-w-md w-full mx-auto p-8 text-center bg-white rounded-2xl shadow-lg border border-slate-200">
-        <div className="inline-flex items-center justify-center p-4 rounded-full bg-amber-100 mb-6">
-          <Lock className="w-12 h-12 text-amber-600" />
-        </div>
-
-        <h1 className="text-2xl font-bold text-slate-900 mb-3">
-          {(requiredRole || "protected").replace("-", " ").toUpperCase()} Content
-        </h1>
-
-        <p className="text-slate-700 mb-6">
-          “{print.title}” requires <span className="font-semibold">{requiredRole}</span> access.
-        </p>
-
-        <div className="space-y-4">
-          <button
-            onClick={() =>
-              router.push(
-                `/login?redirect=${encodeURIComponent(router.asPath)}&tier=${encodeURIComponent(requiredRole || "")}`
-              )
-            }
-            className="w-full py-3 px-4 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 transition-colors"
-          >
-            Sign In to Access
-          </button>
-
-          <div className="text-sm text-slate-600">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Users className="w-4 h-4" />
-              <span>Need access?</span>
-            </div>
-            <button
-              onClick={() => router.push("/access/request")}
-              className="text-amber-600 hover:text-amber-700 underline"
-            >
-              Request {requiredRole} membership
-            </button>
-          </div>
-
-          <button onClick={() => router.back()} className="w-full py-2 text-slate-600 hover:text-slate-800 text-sm">
-            ← Go Back
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ------------------------------------------------------------
-// Main page component
-// ------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+  PAGE COMPONENT
+----------------------------------------------------------------------------- */
 const PrintDetailPageComponent: NextPage<Props> = ({ print, source, mdxRaw, user }) => {
   const router = useRouter();
-  
-  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
-  const safeComponents = React.useMemo(
-    () =>
-      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
-        warnOnFallback: process.env.NODE_ENV === "development",
-      }),
-    [mdxRaw]
-  );
-  
-  const [isDownloading, setIsDownloading] = React.useState(false);
-  const [isBookmarked, setIsBookmarked] = React.useState(false);
-  const [viewCount, setViewCount] = React.useState<number>(print.viewCount || 0);
-  const [downloadCount, setDownloadCount] = React.useState<number>(print.downloadCount || 0);
   const [isClient, setIsClient] = React.useState(false);
+  const [isDownloading, setIsDownloading] = React.useState(false);
 
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+  // ✅ SEED + PROXY Governance
+  const safeComponents = React.useMemo(() => 
+    createSeededSafeMdxComponents(mdxComponents, mdxRaw), [mdxRaw]
+  );
 
-  const hasAccessToThisContent =
-    print.accessLevel === "public" ||
-    (user && ROLE_HIERARCHY[String((user as any).role || "public")] >= ROLE_HIERARCHY[print.accessLevel]);
+  React.useEffect(() => { setIsClient(true); }, []);
 
-  React.useEffect(() => {
-    if (!isClient) return;
-    if (!hasAccessToThisContent) return;
+  const hasAccess = React.useMemo(() => {
+    if (print.accessLevel === "public") return true;
+    if (!user) return false;
+    return ROLE_HIERARCHY[String(user.role || "public")] >= ROLE_HIERARCHY[print.accessLevel];
+  }, [user, print.accessLevel]);
 
-    const key = `print-views-${print.slug}`;
-    const views = parseInt(localStorage.getItem(key) || "0", 10);
-    localStorage.setItem(key, String(views + 1));
-    setViewCount((v) => v + 1);
-
-    try {
-      const bookmarks = JSON.parse(localStorage.getItem("bookmarkedPrints") || "[]");
-      setIsBookmarked(Array.isArray(bookmarks) && bookmarks.includes(print.slug));
-    } catch {
-      localStorage.setItem("bookmarkedPrints", "[]");
-      setIsBookmarked(false);
-    }
-  }, [print.slug, hasAccessToThisContent, isClient]);
-
-  const handleDownload = async (urlType: "pdf" | "highres") => {
-    if (!isClient) return;
-    if (!hasAccessToThisContent) {
-      router.push(`/login?redirect=${encodeURIComponent(router.asPath)}&tier=${encodeURIComponent(print.accessLevel)}`);
-      return;
-    }
-
-    const url = urlType === "pdf" ? print.pdfUrl : print.highResUrl;
-    if (!url) {
-      alert("Download URL not available");
-      return;
-    }
-
-    setIsDownloading(true);
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Download failed");
-
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-
-      const ext = url.split(".").pop() || (urlType === "pdf" ? "pdf" : "bin");
-      link.download = `${print.slug}-${urlType === "highres" ? "high-res" : "print"}.${ext}`;
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-
-      setDownloadCount((v) => v + 1);
-
-      try {
-        const downloads = JSON.parse(localStorage.getItem("print-downloads") || "{}");
-        downloads[print.slug] = (downloads[print.slug] || 0) + 1;
-        localStorage.setItem("print-downloads", JSON.stringify(downloads));
-      } catch {
-        // ignore
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Download failed:", error);
-      alert("Download failed. Please try again.");
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const handleBookmarkToggle = () => {
-    if (!isClient) return;
-
-    try {
-      const bookmarks = JSON.parse(localStorage.getItem("bookmarkedPrints") || "[]");
-      const arr = Array.isArray(bookmarks) ? bookmarks : [];
-
-      if (isBookmarked) {
-        const updated = arr.filter((s: string) => s !== print.slug);
-        localStorage.setItem("bookmarkedPrints", JSON.stringify(updated));
-        setIsBookmarked(false);
-      } else {
-        const updated = Array.from(new Set([...arr, print.slug]));
-        localStorage.setItem("bookmarkedPrints", JSON.stringify(updated));
-        setIsBookmarked(true);
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Error updating bookmarks:", error);
-    }
-  };
-
-  const handleShare = async () => {
-    if (!isClient) return;
-
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: print.title, text: print.excerpt || "", url });
-        return;
-      }
-    } catch {
-      // fall through
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard!");
-    } catch {
-      alert("Could not copy link. Please copy from the address bar.");
-    }
-  };
-
-  if (!hasAccessToThisContent) {
-    return <AccessDeniedComponent print={print} requiredRole={print.accessLevel} />;
-  }
-
-  const formattedDate = safeDateLabel(print.createdAt);
+  if (router.isFallback) return <Layout title="Loading Asset...">...</Layout>;
+  if (!hasAccess && isClient) return <AccessDeniedComponent print={print} />;
 
   return (
-    <Layout
-      title={`${print.title}${print.accessLevel !== "public" ? ` [${print.accessLevel.toUpperCase()}]` : ""}`}
-      description={print.description || print.excerpt || ""}
+    <Layout 
+      title={print.title} 
+      description={print.excerpt || ""}
       ogImage={print.coverImage || undefined}
     >
       <Head>
-        <meta name="robots" content={print.accessLevel === "public" ? "index, follow" : "noindex, nofollow"} />
         <link rel="canonical" href={`https://www.abrahamoflondon.org/prints/${print.slug}`} />
+        <meta name="robots" content={print.accessLevel === "public" ? "index, follow" : "noindex, nofollow"} />
       </Head>
 
-      <div className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors group"
-            disabled={!isClient}
-          >
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Prints
+      <div className="bg-slate-50 min-h-screen">
+        <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
+          <button onClick={() => router.push('/prints')} className="flex items-center gap-2 text-sm text-slate-500 hover:text-amber-600 transition-colors">
+            <ChevronLeft size={16} /> Back to Prints
           </button>
-        </div>
-      </div>
+        </nav>
 
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-8">
-            <div className="mb-4">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-amber-600">
-                <FileText className="w-4 h-4" />
-                {print.accessLevel.replace("-", " ").toUpperCase()} PRINT
-              </span>
-            </div>
-
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">{print.title}</h1>
-            {print.excerpt ? <p className="text-lg text-slate-600 max-w-3xl">{print.excerpt}</p> : null}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              {print.coverImage ? (
-                <div className="mb-8 rounded-2xl overflow-hidden border border-slate-200 bg-white">
-                  <img src={print.coverImage} alt={print.title} className="w-full h-auto object-cover" />
+        <main className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            {/* Asset Visual & Content */}
+            <div className="lg:col-span-8 space-y-12">
+              <header>
+                <div className="flex items-center gap-3 text-amber-600 font-mono text-[10px] uppercase tracking-[0.2em] mb-4">
+                  <FileText size={14} /> {print.accessLevel} Grade Asset
                 </div>
-              ) : null}
+                <h1 className="text-4xl md:text-6xl font-serif font-bold text-slate-900 leading-tight">
+                  {print.title}
+                </h1>
+              </header>
 
-              <div className="prose prose-slate max-w-none bg-white rounded-2xl p-6 md:p-8 border border-slate-200">
-                {/* ✅ SEED + PROXY: Guaranteed no missing component errors */}
+              {print.coverImage && (
+                <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-2xl bg-white">
+                  <img src={print.coverImage} alt={print.title} className="w-full h-auto" />
+                </div>
+              )}
+
+              <article className="prose prose-slate max-w-none bg-white p-8 md:p-12 rounded-2xl border border-slate-200 shadow-sm">
                 <MDXRemote {...source} components={safeComponents as any} />
-              </div>
-
-              {print.printInstructions ? (
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Printer className="w-6 h-6 text-blue-600" />
-                    <h3 className="text-xl font-bold text-slate-900">Print Instructions</h3>
-                  </div>
-                  <div className="prose prose-blue max-w-none">{print.printInstructions}</div>
-                </div>
-              ) : null}
-
-              {(print.tags ?? []).length ? (
-                <div className="mt-8">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tag className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm font-semibold text-slate-700">Tags</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(print.tags ?? []).map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm rounded-full border border-slate-200 hover:border-amber-300 transition-colors"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+              </article>
             </div>
 
-            <div className="lg:col-span-1">
-              <div className="sticky top-8 space-y-6">
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                  <h3 className="text-lg font-bold text-slate-900 mb-4">Print Details</h3>
-
-                  <div className="space-y-4">
-                    {print.dimensions ? (
-                      <div className="flex items-center gap-3">
-                        <Ruler className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <div className="text-sm text-slate-600">Dimensions</div>
-                          <div className="font-medium text-slate-900">{print.dimensions}</div>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {formattedDate ? (
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <div className="text-sm text-slate-600">Added</div>
-                          <div className="font-medium text-slate-900">{formattedDate}</div>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {/* ✅ FIXED: Conditionally show paperType, inkType, orientation only when not null */}
-                    {print.paperType && (
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <div className="text-sm text-slate-600">Paper Type</div>
-                          <div className="font-medium text-slate-900">{print.paperType}</div>
-                        </div>
-                      </div>
-                    )}
-
-                    {print.inkType && (
-                      <div className="flex items-center gap-3">
-                        <Printer className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <div className="text-sm text-slate-600">Ink Type</div>
-                          <div className="font-medium text-slate-900">{print.inkType}</div>
-                        </div>
-                      </div>
-                    )}
-
-                    {print.orientation && (
-                      <div className="flex items-center gap-3">
-                        <Maximize2 className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <div className="text-sm text-slate-600">Orientation</div>
-                          <div className="font-medium text-slate-900">{print.orientation.charAt(0).toUpperCase() + print.orientation.slice(1)}</div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="pt-4 border-t border-slate-200">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-600">Views</span>
-                        <span className="font-medium text-slate-900">{viewCount.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm mt-2">
-                        <span className="text-slate-600">Downloads</span>
-                        <span className="font-medium text-slate-900">{downloadCount.toLocaleString()}</span>
-                      </div>
+            {/* Sidebar Controls */}
+            <div className="lg:col-span-4">
+              <aside className="sticky top-28 space-y-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Specifications</h3>
+                    <div className="space-y-4">
+                      {print.dimensions && <div className="flex justify-between text-sm"><span className="text-slate-500">Scale</span><span className="font-medium">{print.dimensions}</span></div>}
+                      {print.paperType && <div className="flex justify-between text-sm"><span className="text-slate-500">Stock</span><span className="font-medium">{print.paperType}</span></div>}
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                  <h3 className="text-lg font-bold text-slate-900 mb-4">Download Options</h3>
-
-                  <div className="space-y-3">
-                    {print.pdfUrl ? (
-                      <button
-                        onClick={() => handleDownload("pdf")}
-                        disabled={isDownloading || !isClient}
-                        className="w-full py-3 px-4 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-3"
+                  <div className="pt-6 border-t border-slate-100 space-y-3">
+                    {print.pdfUrl && (
+                      <button 
+                        onClick={() => window.open(print.pdfUrl!, '_blank')}
+                        className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-amber-600 transition-all flex items-center justify-center gap-3"
                       >
-                        <Download className="w-5 h-5" />
-                        {isDownloading ? "Downloading..." : "Download PDF"}
-                        {print.fileSize ? <span className="text-sm opacity-75">{print.fileSize}</span> : null}
+                        <Download size={18} /> Download PDF
                       </button>
-                    ) : null}
-
-                    {print.highResUrl ? (
-                      <button
-                        onClick={() => handleDownload("highres")}
-                        disabled={isDownloading || !isClient}
-                        className="w-full py-3 px-4 bg-white border border-amber-500 text-amber-600 rounded-lg font-semibold hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-3"
-                      >
-                        <Maximize2 className="w-5 h-5" />
-                        High Resolution
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                  <div className="space-y-3">
-                    <button
-                      onClick={handleBookmarkToggle}
-                      disabled={!isClient}
-                      className={`w-full py-3 px-4 rounded-lg border flex items-center justify-center gap-3 transition-colors ${
-                        isBookmarked
-                          ? "bg-amber-50 border-amber-200 text-amber-700"
-                          : "bg-white border-slate-200 text-slate-700 hover:border-amber-300"
-                      }`}
-                    >
-                      <Bookmark className={`w-5 h-5 ${isBookmarked ? "fill-amber-500" : ""}`} />
-                      {isBookmarked ? "Saved to Library" : "Save to Library"}
-                    </button>
-
-                    <button
-                      onClick={handleShare}
-                      disabled={!isClient}
-                      className="w-full py-3 px-4 rounded-lg border border-slate-200 text-slate-700 hover:border-amber-300 transition-colors flex items-center justify-center gap-3"
-                    >
-                      <Share2 className="w-5 h-5" />
-                      Share Print
+                    )}
+                    <button className="w-full py-4 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:border-amber-600 hover:text-amber-600 transition-all flex items-center justify-center gap-3">
+                      <Share2 size={18} /> Share Resource
                     </button>
                   </div>
                 </div>
-
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                  <h3 className="text-lg font-bold text-slate-900 mb-4">Print Requirements</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-slate-700">High-quality printer recommended</span>
-                    </li>
-
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-slate-700">Use borderless printing if available</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              </aside>
             </div>
           </div>
-        </div>
+        </main>
       </div>
-
       {isClient && <BackToTop />}
     </Layout>
   );
 };
 
-// ------------------------------------------------------------
-// Export wrapper (module-scope, build-safe)
-// ------------------------------------------------------------
-const Page: NextPage<any> = (props: any) => <PrintDetailPageComponent {...props} />;
+/* -----------------------------------------------------------------------------
+  BUILD LOGIC
+----------------------------------------------------------------------------- */
+export const getStaticPaths: GetStaticPaths = async () => {
+  const docs = getAllContentlayerDocs() || [];
+  const paths = docs
+    .filter(isPrintDoc)
+    .filter((d: any) => !d.draft)
+    .map((d: any) => ({ params: { slug: stripPrefix(d.slug || d._raw?.flattenedPath || "") } }));
 
-const PrintDetailPage = withInnerCircleAuth(Page, {
-  requiredRole: "public" as any,
-  fallbackComponent: (p: any) => <AccessDeniedComponent print={p.print} requiredRole={p?.print?.accessLevel} />,
-});
+  return { paths, fallback: "blocking" };
+};
 
-export default PrintDetailPage;
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  try {
+    const slug = stripPrefix(String(params?.slug || ""));
+    const doc = getDocBySlug(`prints/${slug}`) || getDocBySlug(slug);
+
+    if (!doc || doc.draft) return { notFound: true };
+
+    const mdxRaw = doc.body?.raw || doc.content || "";
+    const source = await serialize(mdxRaw || " ", {
+      mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
+    });
+
+    const print: PrintDTO = {
+      title: doc.title || "Untitled Print",
+      excerpt: doc.excerpt || null,
+      description: doc.description || null,
+      dimensions: doc.dimensions || null,
+      coverImage: doc.coverImage || null,
+      pdfUrl: doc.pdfUrl || doc.downloadUrl || null,
+      highResUrl: doc.highResUrl || null,
+      slug,
+      downloadCount: Number(doc.downloadCount || 0),
+      viewCount: Number(doc.viewCount || 0),
+      createdAt: doc.date || doc.createdAt || null,
+      tags: Array.isArray(doc.tags) ? doc.tags : [],
+      fileSize: doc.fileSize || null,
+      printInstructions: doc.printInstructions || null,
+      accessLevel: (doc.accessLevel || "public") as AccessLevel,
+      paperType: doc.paperType || null,
+      inkType: doc.inkType || null,
+      orientation: doc.orientation || null,
+    };
+
+    return {
+      props: sanitizeData({ print, source, mdxRaw }),
+      revalidate: 3600,
+    };
+  } catch (err) {
+    return { notFound: true };
+  }
+};
+
+/* -----------------------------------------------------------------------------
+  ACCESS CONTROL UI
+----------------------------------------------------------------------------- */
+const AccessDeniedComponent = ({ print }: { print: PrintDTO }) => (
+  <Layout title="Access Restricted">
+    <div className="min-h-[70vh] flex items-center justify-center px-6">
+      <div className="max-w-md text-center space-y-8 bg-white p-12 rounded-3xl border border-slate-200 shadow-xl">
+        <div className="inline-flex p-5 bg-amber-50 rounded-full text-amber-600">
+          <Lock size={48} />
+        </div>
+        <h2 className="text-3xl font-serif font-bold text-slate-900">Restricted Asset</h2>
+        <p className="text-slate-500"> The <strong>{print.title}</strong> requires {print.accessLevel} clearance.</p>
+        <button className="w-full py-4 bg-amber-500 text-white rounded-xl font-bold">Request Access</button>
+      </div>
+    </div>
+  </Layout>
+);
+
+const Page: NextPage<any> = (props) => <PrintDetailPageComponent {...props} />;
+export default withInnerCircleAuth(Page, { requiredRole: "public" as any });

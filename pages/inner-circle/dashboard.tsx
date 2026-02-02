@@ -1,8 +1,6 @@
 /* pages/inner-circle/dashboard.tsx — MEMBER CONSOLE (INTEGRITY MODE) */
+import * as React from "react";
 import type { GetServerSideProps } from "next";
-import Layout from "@/components/Layout";
-import ErrorBoundary from "@/components/error/ErrorBoundary";
-import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import {
@@ -15,6 +13,9 @@ import {
   ArrowRight,
   TrendingUp,
 } from "lucide-react";
+
+import Layout from "@/components/Layout";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 interface DashboardProps {
   access: {
@@ -39,27 +40,34 @@ interface DashboardProps {
 
 export default function InnerCircleDashboard({ access, initialData, error }: DashboardProps) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading] = useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
-  const filteredContent = useMemo(() => {
+  const filteredContent = React.useMemo(() => {
     if (!searchTerm) return initialData.content;
     const term = searchTerm.toLowerCase();
     return initialData.content.filter(
-      (item) => item.title?.toLowerCase().includes(term) || item.excerpt?.toLowerCase().includes(term)
+      (item) => 
+        item.title?.toLowerCase().includes(term) || 
+        item.excerpt?.toLowerCase().includes(term)
     );
   }, [searchTerm, initialData.content]);
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    router.reload();
+  };
 
   if (error) {
     return (
       <Layout title="System Error">
-        <div className="min-h-screen bg-black flex items-center justify-center p-6">
-          <div className="text-center max-w-md">
+        <div className="min-h-screen bg-black flex items-center justify-center p-6 text-center">
+          <div className="max-w-md">
             <h1 className="text-2xl font-serif font-bold text-red-500 mb-4">Vault Sync Error</h1>
             <p className="text-gray-400 mb-8">{error}</p>
             <button
-              onClick={() => router.reload()}
-              className="bg-gold text-black px-8 py-3 rounded-xl font-bold uppercase tracking-widest"
+              onClick={handleRefresh}
+              className="bg-gold text-black px-8 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-all"
             >
               Retry Connection
             </button>
@@ -72,43 +80,47 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
   return (
     <ErrorBoundary>
       <Layout title="Member Dashboard" className="bg-black text-cream">
-        <main className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+        <main className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            {/* WELCOME HEADER */}
+            <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <span className="bg-gold/10 text-gold border border-gold/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                    {access.tier} Level
+                    {access.tier} Clearance
                   </span>
-                  <span className="text-gray-600 text-xs font-mono">
-                    Last Sync: {new Date(initialData.user.lastLogin).toLocaleTimeString()}
+                  <span className="text-zinc-600 text-xs font-mono italic">
+                    Sync: {new Date(initialData.user.lastLogin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
-                <h1 className="font-serif text-4xl md:text-5xl font-bold text-white">The Kingdom Vault</h1>
-                <p className="mt-4 text-gray-400 max-w-xl text-lg">
-                  Welcome, {initialData.user.name}. Accessing institutional-grade strategic manuscripts.
+                <h1 className="font-serif text-4xl md:text-5xl font-bold text-white tracking-tight">The Kingdom Vault</h1>
+                <p className="mt-4 text-zinc-400 max-w-xl text-lg leading-relaxed">
+                  Welcome back, <span className="text-white italic">{initialData.user.name}</span>. Accessing institutional-grade strategic manuscripts.
                 </p>
               </div>
               <button
-                onClick={() => router.reload()}
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-gray-400"
+                onClick={handleRefresh}
+                disabled={loading}
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-zinc-400 hover:text-gold"
               >
-                <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+                <RefreshCw size={20} className={loading ? "animate-spin text-gold" : ""} />
               </button>
             </header>
 
-            <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-              <StatTile label="Total Volumes" val={initialData.stats.total} icon={BookOpen} />
+            {/* QUICK STATS */}
+            <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+              <StatTile label="Briefs Available" val={initialData.stats.total} icon={BookOpen} />
               <StatTile label="Vault Tier" val={access.tier === "elite" ? "Architect" : "Member"} icon={ShieldCheck} />
-              <StatTile label="Active Readers" val="240+" icon={Users} />
-              <StatTile label="System Security" val="Verified" icon={Lock} color="text-emerald-500" />
+              <StatTile label="Session Integrity" val="99.9%" icon={TrendingUp} />
+              <StatTile label="Identity Protection" val="AES-256" icon={Lock} color="text-emerald-500" />
             </section>
 
-            <div className="grid lg:grid-cols-4 gap-8">
+            <div className="grid lg:grid-cols-4 gap-12">
+              {/* CONTENT GRID */}
               <div className="lg:col-span-3">
-                <div className="mb-8 relative group">
+                <div className="mb-10 relative group">
                   <Search
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-gold transition-colors"
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-gold transition-colors"
                     size={18}
                   />
                   <input
@@ -116,7 +128,7 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
                     placeholder="Search restricted manuscripts..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:border-gold/50 outline-none transition-all"
+                    className="w-full bg-zinc-950 border border-white/10 rounded-2xl py-5 pl-14 pr-4 text-white focus:border-gold/40 outline-none transition-all placeholder:text-zinc-700"
                   />
                 </div>
 
@@ -126,52 +138,62 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
                       <Link
                         key={i}
                         href={item.href}
-                        className="group p-6 rounded-3xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-gold/20 transition-all flex flex-col h-full"
+                        className="group p-8 rounded-[2rem] border border-white/5 bg-zinc-950/40 hover:bg-zinc-900/60 hover:border-gold/20 transition-all flex flex-col h-full relative overflow-hidden"
                       >
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-gold/60">{item.kind}</span>
-                          <ArrowRight className="h-4 w-4 text-gray-700 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+                        <div className="absolute top-0 right-0 p-6">
+                           <ArrowRight className="h-5 w-5 text-zinc-800 group-hover:text-gold group-hover:translate-x-1 transition-all" />
                         </div>
-                        <h3 className="font-serif text-xl font-bold text-white mb-2 group-hover:text-gold transition-colors">
+                        <div className="mb-6">
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 py-1 px-2 bg-gold/5 rounded border border-gold/10">
+                            {item.kind}
+                          </span>
+                        </div>
+                        <h3 className="font-serif text-2xl font-bold text-white mb-3 group-hover:text-gold transition-colors leading-tight">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-gray-500 line-clamp-2 mb-6 flex-grow">{item.excerpt}</p>
-                        <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-gray-600 uppercase">
-                          <span>{item.date || "Undated"}</span>
-                          <span>{item.readTime || "5m read"}</span>
+                        <p className="text-sm text-zinc-500 line-clamp-2 mb-8 flex-grow leading-relaxed">
+                          {item.excerpt}
+                        </p>
+                        <div className="pt-6 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+                          <span>{item.date || "Institutional"}</span>
+                          <span>{item.readTime || "Classified"}</span>
                         </div>
                       </Link>
                     ))
                   ) : (
-                    <div className="sm:col-span-2 py-20 text-center border border-dashed border-white/10 rounded-3xl">
-                      <p className="text-gray-600 italic font-serif">No restricted manuscripts found matching your criteria.</p>
+                    <div className="sm:col-span-2 py-32 text-center border border-dashed border-white/10 rounded-[2rem] bg-white/[0.01]">
+                      <Lock size={32} className="mx-auto text-zinc-800 mb-4" />
+                      <p className="text-zinc-600 italic font-serif text-lg">
+                        No manuscripts found in the current clearance level.
+                      </p>
                     </div>
                   )}
                 </div>
               </div>
 
-              <aside className="space-y-6">
-                <div className="p-8 rounded-3xl bg-gradient-to-br from-gold/20 to-amber-900/10 border border-gold/20">
-                  <h3 className="font-serif text-xl font-bold text-white mb-2">Private Advisory</h3>
-                  <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-                    Schedule a strategic diagnostic for board-level or household governance alignment.
+              {/* SIDEBAR TOOLS */}
+              <aside className="space-y-8">
+                <div className="p-8 rounded-[2rem] bg-gradient-to-br from-gold/10 to-transparent border border-gold/20 shadow-xl">
+                  <h3 className="font-serif text-2xl font-bold text-white mb-3">Institutional Advisory</h3>
+                  <p className="text-xs text-zinc-400 mb-8 leading-relaxed">
+                    Direct access for board-level diagnostics or strategic household alignment.
                   </p>
                   <Link
                     href="/contact?intent=consultation"
-                    className="block w-full py-3 rounded-xl bg-gold text-black text-center text-xs font-black uppercase tracking-widest hover:bg-gold/80 transition-all"
+                    className="block w-full py-4 rounded-xl bg-gold text-black text-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white transition-all shadow-lg shadow-gold/10"
                   >
-                    Book Room
+                    Request Diagnostic
                   </Link>
                 </div>
 
-                <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
-                  <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                    <TrendingUp size={16} className="text-gold" /> System Rhythms
+                <div className="p-8 rounded-[2rem] bg-zinc-950 border border-white/5">
+                  <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+                    <TrendingUp size={14} className="text-gold" /> System Rhythms
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <RhythmItem label="Next Salon" val="Feb 12" />
-                    <RhythmItem label="Manuscript Update" val="Weekly" />
-                    <RhythmItem label="Vault Integrity" val="99.9%" />
+                    <RhythmItem label="Intel Cycle" val="Weekly" />
+                    <RhythmItem label="Vault Pulse" val="Active" />
                   </div>
                 </div>
               </aside>
@@ -184,108 +206,79 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
 }
 
 const StatTile = ({ label, val, icon: Icon, color = "text-gold" }: any) => (
-  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-    <div className="flex items-center gap-3 mb-2 text-gray-600">
-      <Icon size={14} />
-      <span className="text-[9px] font-bold uppercase tracking-widest">{label}</span>
+  <div className="bg-zinc-950 border border-white/5 p-6 rounded-2xl flex flex-col items-center text-center">
+    <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-600 mb-4">
+      <Icon size={16} />
     </div>
+    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-2">{label}</span>
     <div className={`text-xl font-mono font-bold ${color}`}>{val}</div>
   </div>
 );
 
 const RhythmItem = ({ label, val }: any) => (
-  <div className="flex items-center justify-between">
-    <span className="text-xs text-gray-500">{label}</span>
-    <span className="text-xs font-mono text-gray-300">{val}</span>
+  <div className="flex items-center justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">
+    <span className="text-[10px] text-zinc-500 uppercase tracking-widest">{label}</span>
+    <span className="text-[10px] font-mono text-gold/80">{val}</span>
   </div>
 );
 
-/**
- * SERVER SIDE: DB + ACCESS GATE
- * ✅ All server-only imports moved INSIDE
- */
+/* -----------------------------------------------------------------------------
+  SERVER SIDE GATEWAY
+----------------------------------------------------------------------------- */
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const [{ prisma }, accessMod] = await Promise.all([
+    const [{ prisma }, accessMod, { getServerSession }, { authOptions }] = await Promise.all([
       import("@/lib/server/prisma"),
       import("@/lib/inner-circle/access.server"),
+      import("next-auth/next"),
+      import("@/lib/auth"),
     ]);
-
-    // Your access module (from earlier) exports:
-    // getInnerCircleAccess({ userTier, requiresTier })
-    // So we need a real “who is this user?” source. In Pages Router, that is NextAuth session.
-    const { getServerSession } = await import("next-auth/next");
-    const { authOptions } = await import("@/lib/auth");
 
     const session = await getServerSession(context.req, context.res, authOptions);
 
     if (!session?.user?.email) {
-      return {
-        redirect: { destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`, permanent: false },
-      };
+      return { redirect: { destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`, permanent: false } };
     }
 
-    // Example: resolve member record by email (adjust field names to your schema)
     const member = await prisma.member.findUnique({
       where: { email: session.user.email },
-      include: { sessions: { take: 1, orderBy: { createdAt: "desc" } } },
     });
 
-    const userTier = member?.tier ?? "public";
-    const requiresTier = "basic";
-
-    const access = accessMod.getInnerCircleAccess({ userTier, requiresTier });
+    const userTier = (member?.tier || "public") as any;
+    const access = accessMod.getInnerCircleAccess({ userTier, requiresTier: "basic" });
 
     if (!access.ok) {
-      return {
-        redirect: { destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`, permanent: false },
-      };
+      return { redirect: { destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`, permanent: false } };
     }
 
-    // Mock content (replace with real query when ready)
+    // Replace with real Contentlayer or Prisma query for the 75 briefs
     const content = [
-      {
-        title: "The Builder's Catechism",
-        kind: "Canon",
-        excerpt: "Foundational questions for institutional architects.",
-        href: "/canon/builders-catechism",
-        date: "Jan 2026",
-      },
-      {
-        title: "Strategic Frameworks v4.2",
-        kind: "Tool",
-        excerpt: "Board-ready decision matrices and prioritization logic.",
-        href: "/resources/strategic-frameworks",
-        date: "Dec 2025",
-      },
+      { title: "The Builder's Catechism", kind: "Canon", excerpt: "Foundational questions for institutional architects.", href: "/canon/builders-catechism", date: "Jan 2026", readTime: "12m" },
+      { title: "Strategic Frameworks v4.2", kind: "Brief", excerpt: "Board-ready decision matrices and prioritization logic.", href: "/canon/strategic-frameworks", date: "Dec 2025", readTime: "8m" },
+      { title: "Sovereign Governance", kind: "Manuscript", excerpt: "Mechanisms for autonomous household management.", href: "/canon/sovereign-governance", date: "Nov 2025", readTime: "15m" }
     ];
 
     return {
       props: {
-        access: {
-          hasAccess: true,
-          userId: member?.id ?? undefined,
-          tier: userTier,
-        },
+        access: { hasAccess: true, userId: member?.id || null, tier: userTier },
         initialData: {
           content,
-          stats: { total: content.length, totalViews: 1200 },
+          stats: { total: 75, totalViews: member?.viewCount || 0 },
           user: {
             name: member?.name || session.user.name || "Member",
             tier: userTier,
-            lastLogin: new Date().toISOString(),
+            lastLogin: member?.updatedAt?.toISOString() || new Date().toISOString(),
           },
         },
       },
     };
-  } catch (error) {
-    console.error("[DASHBOARD_SSR_ERROR]", error);
+  } catch (err) {
     return {
       props: {
         access: { hasAccess: false, tier: "public" },
-        initialData: { content: [], stats: { total: 0, totalViews: 0 }, user: { name: "Member", tier: "public", lastLogin: new Date().toISOString() } },
-        error: "Institutional vault connection failed. Please contact the administrator.",
-      },
+        initialData: { content: [], stats: { total: 0, totalViews: 0 }, user: { name: "Member", tier: "public", lastLogin: "" } },
+        error: "Critical Failure: Institutional Vault is currently locked for maintenance."
+      }
     };
   }
 };

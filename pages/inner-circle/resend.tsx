@@ -1,4 +1,6 @@
 /* pages/inner-circle/resend.tsx — ACCESS RECOVERY (INTEGRITY MODE) */
+'use client';
+
 import * as React from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -21,8 +23,10 @@ const InnerCircleResendPage: NextPage = () => {
   const [status, setStatus] = React.useState<"idle" | "success" | "error">("idle");
   const [feedback, setFeedback] = React.useState<string | null>(null);
 
-  // Redirection target after recovery
-  const returnTo = typeof router.query.returnTo === "string" ? router.query.returnTo : "/inner-circle/dashboard";
+  // Redirection target after recovery for UX continuity
+  const returnTo = React.useMemo(() => {
+    return typeof router.query.returnTo === "string" ? router.query.returnTo : "/inner-circle/dashboard";
+  }, [router.query.returnTo]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -38,7 +42,7 @@ const InnerCircleResendPage: NextPage = () => {
     setFeedback(null);
 
     try {
-      // 1. Security Check: Recaptcha verification
+      // 1. Security Check: Recaptcha verification to prevent bot exhaustion of SMTP
       const recaptchaToken = await getRecaptchaTokenSafe("inner_circle_resend");
 
       if (!recaptchaToken) {
@@ -48,7 +52,7 @@ const InnerCircleResendPage: NextPage = () => {
         return;
       }
 
-      // 2. Postgres Synchronization: Request fresh key from database
+      // 2. Postgres Synchronization: Request fresh key via API
       const res = await fetch("/api/inner-circle/resend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,29 +85,31 @@ const InnerCircleResendPage: NextPage = () => {
   };
 
   return (
-    <Layout title="Resend Access">
-      <main className="min-h-[80vh] flex items-center justify-center px-4 py-20 bg-black">
-        <section className="w-full max-w-xl">
-          <header className="mb-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-gold text-[10px] font-bold uppercase tracking-widest mb-6">
+    <Layout title="Access Recovery | Inner Circle">
+      <main className="min-h-screen flex items-center justify-center px-4 py-20 bg-black relative overflow-hidden">
+        {/* Institutional Ambience */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/[0.03] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        
+        <section className="w-full max-w-xl relative z-10">
+          <header className="mb-12 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-gold text-[10px] font-black uppercase tracking-[0.2em] mb-8">
               <Mail size={12} />
               Access Recovery
             </div>
-            <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white mb-4">
-              Resend Access Email
+            <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+              Request <span className="italic">Fresh Link</span>
             </h1>
-            <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-              If you have already registered but cannot locate your access key, 
-              provide your registered email to receive a fresh entry link.
+            <p className="text-zinc-500 text-sm md:text-base leading-relaxed max-w-md mx-auto">
+              Lost your entry point? Enter your registered email to synchronize your session and receive a new secure access key.
             </p>
           </header>
 
           <form
             onSubmit={handleSubmit}
-            className="space-y-6 rounded-3xl border border-white/10 bg-zinc-900/50 p-8 backdrop-blur-xl shadow-2xl"
+            className="space-y-8 rounded-[2rem] border border-white/10 bg-zinc-950/50 p-10 backdrop-blur-xl shadow-2xl"
           >
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">
+            <div className="space-y-3">
+              <label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 ml-1">
                 Registered Email
               </label>
               <input
@@ -113,14 +119,14 @@ const InnerCircleResendPage: NextPage = () => {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-gold/50 transition-all font-medium"
-                placeholder="you@institutional-firm.com"
+                className="w-full rounded-xl border border-white/5 bg-black px-5 py-4 text-white outline-none focus:border-gold/40 transition-all font-mono text-sm placeholder:text-zinc-800"
+                placeholder="identity@institution.com"
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">
-                Name <span className="text-gray-700">(optional)</span>
+            <div className="space-y-3">
+              <label htmlFor="name" className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 ml-1">
+                Verify Name <span className="text-zinc-800">(Optional)</span>
               </label>
               <input
                 id="name"
@@ -128,51 +134,53 @@ const InnerCircleResendPage: NextPage = () => {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-gold/50 transition-all"
-                placeholder="Institutional ID or Name"
+                className="w-full rounded-xl border border-white/5 bg-black px-5 py-4 text-white outline-none focus:border-gold/40 transition-all font-mono text-sm placeholder:text-zinc-800"
+                placeholder="Institutional Name"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading || status === "success"}
-              className="w-full bg-gold text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-gold/80 disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-lg shadow-gold/10"
+              className="w-full bg-gold text-black py-5 rounded-xl font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-xl shadow-gold/5"
             >
               {loading ? (
                 <RefreshCw size={18} className="animate-spin" />
               ) : status === "success" ? (
                 <CheckCircle size={18} />
               ) : (
-                "Dispatch Recovery Email"
+                "Dispatch Recovery Key"
               )}
             </button>
 
             {feedback && (
               <div
-                className={`flex items-start gap-3 p-4 rounded-xl text-sm font-medium border ${
+                className={`flex items-start gap-4 p-5 rounded-2xl text-xs font-medium border leading-relaxed ${
                   status === "success"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                    : status === "error"
-                    ? "border-red-500/30 bg-red-500/10 text-red-400"
-                    : "border-white/10 bg-white/5 text-gray-400"
+                    ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-400"
+                    : "border-red-500/30 bg-red-500/5 text-red-400"
                 }`}
               >
-                {status === "error" ? <AlertCircle size={18} className="shrink-0" /> : <CheckCircle size={18} className="shrink-0" />}
+                {status === "error" ? (
+                  <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                ) : (
+                  <CheckCircle size={18} className="shrink-0 mt-0.5" />
+                )}
                 <p>{feedback}</p>
               </div>
             )}
           </form>
 
-          <footer className="mt-10 flex flex-col items-center gap-4">
+          <footer className="mt-12 flex flex-col items-center gap-6">
             <Link 
               href="/inner-circle" 
-              className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-white transition-colors group"
+              className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors group"
             >
               <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-              Return to Access Gate
+              Return to Gate
             </Link>
-            <p className="text-[11px] text-gray-600 text-center max-w-sm">
-              Note: If you do not receive the email within 10 minutes, please check your spam folder or contact support for manual institutional verification.
+            <p className="text-[10px] text-zinc-700 text-center max-w-sm leading-loose uppercase tracking-widest">
+              Automated institutional verification may take up to 600 seconds.
             </p>
           </footer>
         </section>

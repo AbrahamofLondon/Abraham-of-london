@@ -95,10 +95,10 @@ function getDownloadUrl(doc: any): string | null {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
     const contentlayerData = getContentlayerData(); // ✅ Removed await - it's synchronous now
-    const allDocs = getPublishedDocuments();
+    const allDocuments = getPublishedDocuments();
 
     // Filter for prints (adjust based on your content structure)
-    const printDocs = allDocs.filter((doc: any) => {
+    const printDocs = allDocuments.filter((doc: any) => {
       const kind = String(doc._raw?.sourceFileDir || doc.kind || "").toLowerCase();
       const tags = Array.isArray(doc.tags) ? doc.tags.map((t: string) => t.toLowerCase()) : [];
       return (

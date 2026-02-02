@@ -1,11 +1,11 @@
 import { GetServerSideProps } from "next";
-import { allDocs } from "contentlayer/generated";
+import { getAllCombinedDocs } from "@/lib/contentlayer-helper";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   // Filter for specific content types (e.g., 'Canon')
-  const docs = allDocs.filter((d) => d.type === "Canon" || d.slug.includes("canon"));
+  const docs = allDocuments.filter((d) => d.type === "Canon" || d.slug.includes("canon"));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

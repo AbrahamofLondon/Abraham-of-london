@@ -224,11 +224,11 @@ class CanonicalAndTieredRunner {
       });
     }
 
-    const allDocs = dedupeDocs(docs)
+    const allDocuments = dedupeDocs(docs)
       .filter((d) => !args.only || d.pdfName === args.only)
       .filter((d) => fs.existsSync(absMdx(d.mdxPath)));
 
-    if (!allDocs.length) {
+    if (!allDocuments.length) {
       console.log("ℹ️ No documents found to process (check --only or missing MDX paths).");
       return;
     }
@@ -238,7 +238,7 @@ class CanonicalAndTieredRunner {
     let tieredOk = 0;
     let tieredFail = 0;
 
-    for (const doc of allDocs) {
+    for (const doc of allDocuments) {
       console.log(`\n📚 ${doc.displayName}  (${doc.pdfName})`);
       console.log("─".repeat(60));
 

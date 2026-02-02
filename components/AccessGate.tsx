@@ -1,7 +1,9 @@
+// components/AccessGate.tsx — REFINED
 'use client';
 
 import React, { useMemo, useState } from "react";
-import { safeString, capitalize } from "@/lib/utils/string"; // Add this import
+import { Shield, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { safeString } from "@/lib/utils/string";
 
 type Tier = "public" | "inner-circle" | "private";
 
@@ -25,8 +27,7 @@ export default function AccessGate({
   const [error, setError] = useState<string | null>(null);
 
   const requiredLabel = useMemo(() => {
-    // ✅ FIXED: Use safe utility
-    const tierStr = safeString(requiredTier);
+    const tierStr = safeString(requiredTier).toLowerCase();
     if (tierStr.includes("private")) return "Private";
     if (tierStr.includes("inner-circle")) return "Inner Circle";
     return "Public";
@@ -37,7 +38,7 @@ export default function AccessGate({
     setError(null);
 
     const t = token.trim();
-    if (!t) return setError("Enter your access key.");
+    if (!t) return setError("Credential required.");
 
     setBusy(true);
     try {
@@ -49,62 +50,70 @@ export default function AccessGate({
 
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j?.ok) {
-        setError(j?.reason || "Access denied.");
+        setError(j?.reason || "Verification failed. Check your key.");
         return;
       }
 
       onUnlocked?.(j.tier as Tier);
     } catch (err) {
-      setError("Network error. Try again.");
+      setError("Encryption error. Check connection.");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl">
-        <div className="border-b border-white/10 p-6 text-center">
-          <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-amber-500/15 ring-1 ring-amber-500/30" />
-          <h2 className="text-xl font-bold text-white">{title}</h2>
-          <p className="mt-2 text-sm text-zinc-400">{message}</p>
-          <div className="mt-4 inline-flex rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-300">
-            {requiredLabel} Access Required
+    <div className="flex items-center justify-center p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl animate-in fade-in zoom-in duration-500">
+        <div className="bg-gradient-to-b from-white/[0.03] to-transparent p-8 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/10 ring-1 ring-gold/20">
+            <Shield className="h-8 w-8 text-gold" />
+          </div>
+          <h2 className="text-2xl font-serif italic text-white">{title}</h2>
+          <p className="mt-3 text-sm text-zinc-500 leading-relaxed">{message}</p>
+          
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 text-[10px] font-mono uppercase tracking-[0.2em] text-gold">
+            <Lock size={10} /> {requiredLabel} Clearance Required
           </div>
         </div>
 
-        <div className="p-6">
-          <form onSubmit={submit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                Access Key
+        <div className="p-8 pt-0">
+          <form onSubmit={submit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 ml-1">
+                Security Key
               </label>
               <input
+                type="password"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                placeholder="Enter your key"
-                className="mt-2 w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-white placeholder:text-zinc-600 outline-none ring-0 focus:border-amber-500/30 focus:ring-2 focus:ring-amber-500/10"
+                placeholder="••••••••••••"
+                className="w-full rounded-xl border border-white/5 bg-black/40 px-5 py-4 text-white placeholder:text-zinc-800 outline-none transition-all focus:border-gold/30 focus:ring-1 focus:ring-gold/20"
               />
-              {error && <p className="mt-2 text-sm text-rose-400">{error}</p>}
+              {error && <p className="text-xs text-rose-500 mt-2 font-medium">{error}</p>}
             </div>
 
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:opacity-60"
+              className="group relative w-full overflow-hidden rounded-xl bg-gold px-6 py-4 text-sm font-bold text-black transition-all hover:bg-white active:scale-[0.98] disabled:opacity-50"
             >
-              {busy ? "Verifying..." : "Unlock"}
+              <span className="flex items-center justify-center gap-2">
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>Unlock Brief <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></>
+                )}
+              </span>
             </button>
 
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={onGoToJoin}
-                className="text-xs font-semibold uppercase tracking-widest text-zinc-400 hover:text-amber-300"
-              >
-                Need access? Join Inner Circle
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={onGoToJoin}
+              className="w-full text-center text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600 hover:text-gold transition-colors"
+            >
+              Request Access // Inner Circle
+            </button>
           </form>
         </div>
       </div>
