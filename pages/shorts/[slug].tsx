@@ -1,4 +1,4 @@
-// pages/shorts/[slug].tsx — HARDENED (Bare Slug + Seeded Proxy)
+// pages/shorts/[slug].tsx — HARDENED (Netlify-Resilient)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -12,15 +12,6 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Heart, Eye, Share2, ArrowLeft, Shield } from "lucide-react";
 
 import Layout from "@/components/Layout";
-
-// ✅ Governance
-import { 
-  getAllContentlayerDocs, 
-  getDocBySlug, 
-  isDraftContent, 
-  normalizeSlug, 
-  sanitizeData 
-} from "@/lib/contentlayer-helper";
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 import mdxComponents from "@/components/mdx-components";
 
@@ -58,13 +49,12 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
   const router = useRouter();
   const { scrollYProgress } = useScroll();
   
-  // UI Aesthetic Logic
   const navOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
   const progressLine = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   
   const safeComponents = React.useMemo(() => 
     createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
-      warnOnFallback: process.env.NODE_ENV === "development",
+      warnOnFallback: false,
     }), [mdxRaw]
   );
 
@@ -74,16 +64,13 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
     <Layout title={`${short.title} | Field Note`} className="bg-black">
       <Head>
         <link rel="canonical" href={`https://www.abrahamoflondon.org/shorts/${short.slugPath}`} />
-        <meta name="robots" content="index, follow" />
       </Head>
 
-      {/* Reading Progress Line */}
       <motion.div 
         style={{ width: progressLine }} 
-        className="fixed top-0 left-0 h-[1px] bg-gold z-[100] transition-all duration-75" 
+        className="fixed top-0 left-0 h-[1px] bg-amber-500 z-[100]" 
       />
 
-      {/* Monastic Navigation */}
       <motion.nav 
         style={{ opacity: navOpacity }} 
         className="fixed top-0 inset-x-0 z-50 px-8 py-10 flex justify-between items-center pointer-events-none"
@@ -92,34 +79,27 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
           onClick={() => router.push("/shorts")} 
           className="p-3 hover:bg-white/5 rounded-full transition-colors group pointer-events-auto"
         >
-          <ArrowLeft className="h-5 w-5 text-white/30 group-hover:text-gold transition-colors" />
+          <ArrowLeft className="h-5 w-5 text-white/30 group-hover:text-amber-500" />
         </button>
-        
         <div className="font-mono text-[9px] tracking-[0.5em] text-white/10 uppercase flex items-center gap-2">
-          <Shield size={12} className="text-gold/20" /> Secure Briefing
+          <Shield size={12} className="text-amber-500/20" /> Secure Briefing
         </div>
-
         <button className="p-3 hover:bg-white/5 rounded-full group pointer-events-auto">
-          <Share2 size={16} className="text-white/30 group-hover:text-gold transition-colors" />
+          <Share2 size={16} className="text-white/30 group-hover:text-amber-500" />
         </button>
       </motion.nav>
 
       <main className="max-w-2xl mx-auto px-6 pt-56 pb-40">
         <header className="mb-24">
-          <div className="font-mono text-[10px] text-gold/60 uppercase tracking-[0.6em] mb-10">
+          <div className="font-mono text-[10px] text-amber-500/60 uppercase tracking-[0.6em] mb-10">
             Entry // {short.theme || "Tactical"}
           </div>
           <h1 className="font-serif text-6xl md:text-7xl italic leading-tight text-white mb-12 tracking-tight">
             {short.title}
           </h1>
-          <div className="flex items-center gap-6 text-white/20 font-mono text-[9px] uppercase tracking-widest">
-             <span className="flex items-center gap-2"><Eye size={12}/> {short.views} Views</span>
-             <span className="h-1 w-1 rounded-full bg-white/10" />
-             <span>ID: {short.slugPath.toUpperCase()}</span>
-          </div>
         </header>
 
-        <article className="prose prose-invert prose-gold max-w-none prose-p:text-white/60 prose-p:text-xl prose-p:leading-[1.9] prose-p:font-light">
+        <article className="prose prose-invert prose-amber max-w-none prose-p:text-white/60 prose-p:text-xl prose-p:leading-[1.9] prose-p:font-light">
           {source && (
             <MDXRemote 
               {...source} 
@@ -134,7 +114,6 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
               <span key={tag} className="text-[10px] font-mono text-white/10 italic border border-white/5 px-3 py-1 rounded-full">#{tag}</span>
             ))}
           </div>
-
           <div className="space-y-32">
             <ShortNavigation currentSlug={short.slugPath} />
             <ShortComments shortId={short.slugPath} />
@@ -146,11 +125,29 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
 };
 
 /* -----------------------------------------------------------------------------
-  BUILD LOGIC
+  BUILD LOGIC (DYNAMIC PROXY TO PREVENT TYPE ERRORS)
 ----------------------------------------------------------------------------- */
+
+/**
+ * Hardened Contentlayer dynamic loader.
+ * In production builds, dynamic imports often return the module wrapped in a .default key.
+ * This logic checks both to ensure helper functions like getAllContentlayerDocs are found.
+ */
+async function getContentLayer() {
+  const helperModule = await import("@/lib/contentlayer-helper");
+  const sharedModule = await import("@/lib/content/shared");
+
+  // Fallback to .default if named exports are not at the top level (Interop)
+  const helper = helperModule.getAllContentlayerDocs ? helperModule : (helperModule as any).default;
+  const shared = sharedModule.normalizeSlug ? sharedModule : (sharedModule as any).default;
+
+  return { ...helper, ...shared };
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllContentlayerDocs();
-  // Filter for shorts by kind or directory path
+  const { getAllContentlayerDocs, normalizeSlug, isDraftContent } = await getContentLayer();
+  
+  const docs = getAllContentlayerDocs() || [];
   const shorts = docs.filter((d: any) => 
     d.kind === "Short" || d._raw?.sourceFileDir?.toLowerCase().includes("shorts")
   );
@@ -166,10 +163,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const { getDocBySlug, isDraftContent, sanitizeData } = await getContentLayer();
+  
   try {
     const slug = String(params?.slug || "");
-    
-    // ✅ Resilient Lookup
     const data = getDocBySlug(`shorts/${slug}`) || getDocBySlug(slug);
 
     if (!data || isDraftContent(data)) return { notFound: true };

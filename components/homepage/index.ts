@@ -15,3 +15,4 @@ export { default as ServiceLines } from "./ServiceLines";
 export { default as CanonInstitutionalIntro } from "./CanonInstitutionalIntro";
 export { default as CredibilityQuotes } from "./CredibilityQuotes";
 export { default as InstitutionalClose } from "./InstitutionalClose";
+export { default as LogoWall } from "../branding/LogoWall";

@@ -1,5 +1,10 @@
-// lib/contentlayer-compat.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * CONTENTLAYER COMPATIBILITY LAYER (HARDENED)
+ * - Directly resolves "getAllContentlayerDocs is not a function" errors.
+ * - Standardizes data access for Pages Router stability.
+ */
 
 import {
   allBooks,
@@ -12,14 +17,26 @@ import {
   allResources,
   allShorts,
   allStrategies,
-  isType,
-} from "@/lib/contentlayer-generated";
+} from "contentlayer/generated";
 
 /**
- * Pages Router stability: SYNC-FIRST only.
- * This file exports raw Contentlayer collections and basic selectors.
+ * Core Governance: Filters out drafts and future-dated content.
  */
+export function isPublished(doc: any): boolean {
+  if (!doc) return false;
+  if (doc.draft === true || doc.status === 'draft') return false;
 
+  if (doc.date) {
+    const d = new Date(doc.date);
+    // If the date is valid and in the future, it's not "published" yet
+    if (!Number.isNaN(d.getTime()) && d.getTime() > Date.now()) return false;
+  }
+  return true;
+}
+
+/**
+ * Standardized Data Fetchers
+ */
 export function getContentlayerData() {
   return {
     allBooks,
@@ -35,32 +52,25 @@ export function getContentlayerData() {
   };
 }
 
-export function isPublished(doc: any): boolean {
-  if (!doc) return false;
-  if (doc.draft === true) return false;
-
-  if (doc.date) {
-    const d = new Date(doc.date);
-    if (!Number.isNaN(d.getTime()) && d.getTime() > Date.now()) return false;
-  }
-  return true;
-}
-
 export function getPublishedDocuments(): any[] {
   return (allDocuments ?? []).filter(isPublished);
 }
 
+// Resilient Type Check replacing the complex isType helper
 export function getPublishedDocumentsByType(kind: string): any[] {
-  return getPublishedDocuments().filter((d) => isType(kind as any, d));
+  const targetKind = kind.toLowerCase();
+  return getPublishedDocuments().filter((d) => {
+    const docKind = (d.kind || d.type || d._type || "").toLowerCase();
+    return docKind === targetKind;
+  });
 }
 
-export function getAllContentlayerDocs(): any[] {
-  return getPublishedDocuments();
-}
+/**
+ * CRITICAL EXPORTS: These resolve the Netlify Build Panics
+ */
+export const getAllContentlayerDocs = () => getPublishedDocuments();
 
-export function getAllShorts(): any[] {
-  return getPublishedDocumentsByType("Short");
-}
+export const getAllShorts = () => getPublishedDocumentsByType("Short");
 
 export {
   allBooks,
@@ -72,6 +82,5 @@ export {
   allPrints,
   allResources,
   allShorts,
-  allStrategies,
-  isType,
+  allStrategies
 };

@@ -1,13 +1,12 @@
-// components/HeroSection.tsx
+// components/HeroSection.tsx — EDELMAN HERO (premium, civilised, build-safe)
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
-import { BaseCard, CARD_ANIMATIONS } from '@/components/Cards';
+import { ArrowRight, Sparkles, ShieldCheck, BookOpen, Vault, LineChart } from "lucide-react";
 
 // --- Utility Components ------------------------------------------------------
 
-/** Small "eyebrow" pill used above the H1 */
 function Eyebrow({
   children,
   className,
@@ -16,15 +15,52 @@ function Eyebrow({
     <span
       className={clsx(
         "inline-flex items-center gap-2 rounded-full",
-        "border border-lightGrey/70 bg-warmWhite/70 px-3 py-1",
-        "text-xs uppercase tracking-wide font-semibold",
-        "text-[color:var(--color-on-secondary)] opacity-70",
-        "dark:text-[color:var(--color-on-primary)] dark:opacity-80",
+        "border border-white/10 bg-white/[0.04] px-3 py-1",
+        "text-[11px] uppercase tracking-[0.28em] font-bold",
+        "text-white/70",
         className
       )}
     >
+      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/15 text-amber-300">
+        <Sparkles className="h-3.5 w-3.5" />
+      </span>
       {children}
     </span>
+  );
+}
+
+function Pill({
+  children,
+  className,
+  icon,
+}: React.PropsWithChildren<{ className?: string; icon?: React.ReactNode }>) {
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center gap-2 rounded-full",
+        "border border-white/10 bg-white/[0.03] px-3 py-1",
+        "text-[11px] font-semibold text-white/70",
+        className
+      )}
+    >
+      {icon ? <span className="text-amber-300/80">{icon}</span> : null}
+      {children}
+    </span>
+  );
+}
+
+function Stat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="text-[10px] uppercase tracking-[0.26em] text-white/45">{label}</div>
+      <div className="mt-1 font-serif text-lg text-white/90">{value}</div>
+    </div>
   );
 }
 
@@ -37,31 +73,22 @@ type AspectRatio = "book" | "wide" | "square" | "cover-wide";
 type HeroProps = {
   title?: string;
   subtitle?: string;
+  eyebrow?: string;
+
   primaryCta?: Cta;
   secondaryCta?: Cta;
 
-  /** Image shown when no video or as poster fallback */
   coverImage?: string | null;
-  /** Aspect ratio: 'book' (2/3), 'wide' (16/9), 'square' (1/1), 'cover-wide' (21/9) */
   coverAspect?: AspectRatio;
-  /** 'contain' (book covers) or 'cover' (edge-to-edge) */
   coverFit?: "contain" | "cover";
-  /** object position for Image/Video */
   coverPosition?: "left" | "center" | "right" | "top";
 
-  /** Optional autoplaying looped background video */
   videoSources?: VideoSource[] | null;
-  /** Poster image for the video (defaults to coverImage) */
   poster?: string | null;
-
-  eyebrow?: string;
 };
 
 // --- Utilities ---------------------------------------------------------------
 
-/**
- * Normalizes a URL path: ensures relative paths start with a slash.
- */
 function normalizeLocal(src?: string | null): string | undefined {
   if (!src) return undefined;
   if (/^https?:\/\//i.test(src)) return src;
@@ -69,10 +96,6 @@ function normalizeLocal(src?: string | null): string | undefined {
   return `/${cleanSrc}`;
 }
 
-/**
- * Maps the AspectRatio prop to responsive *heights* (not full-screen boxes).
- * The parent controls width; these classes just keep the box civilised.
- */
 function getAspectClass(aspect: AspectRatio): string {
   switch (aspect) {
     case "square":
@@ -83,8 +106,7 @@ function getAspectClass(aspect: AspectRatio): string {
       return "h-[180px] sm:h-[210px] md:h-[240px] lg:h-[280px]";
     case "book":
     default:
-      // Portrait / book-style, but capped
-      return "h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px]";
+      return "h-[260px] sm:h-[320px] md:h-[380px] lg:h-[440px]";
   }
 }
 
@@ -92,8 +114,9 @@ function getAspectClass(aspect: AspectRatio): string {
 
 export default function HeroSection({
   title = "When the System Breaks You: Finding Purpose in Pain",
-  subtitle = "Win the only battle you fully control - the one inside your chest.",
-  eyebrow = "Featured Insight",
+  subtitle = "Win the only battle you fully control — the one inside your chest.",
+  eyebrow = "Operational Briefing",
+
   primaryCta = {
     href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
     label: "Get the free teaser",
@@ -109,26 +132,22 @@ export default function HeroSection({
   videoSources = [],
   poster = null,
 }: HeroProps) {
-  // 1. --- Core Data and Fallbacks ---
   const defaultImage = "/assets/images/abraham-of-london-banner.webp";
   const imgSrc = normalizeLocal(coverImage) || normalizeLocal(defaultImage)!;
   const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
   const posterSrc = normalizeLocal(poster) || imgSrc;
 
-  // 2. --- Dynamic Class Generation (with clsx) ---
   const frameClasses = clsx(
-    "relative overflow-hidden rounded-2xl shadow-lg shadow-black/15",
-    // contained visual - NEVER full-width skyscraper
-    "max-w-[520px] w-full mx-auto",
+    "relative overflow-hidden rounded-3xl",
+    "border border-white/10 bg-white/[0.02]",
+    "shadow-[0_30px_120px_rgba(0,0,0,0.55)]",
+    "max-w-[560px] w-full mx-auto",
     getAspectClass(coverAspect),
-    {
-      "p-2 sm:p-3 md:p-4 bg-warmWhite border border-lightGrey/70":
-        coverFit === "contain",
-    }
+    coverFit === "contain" ? "p-3 sm:p-4" : "p-0"
   );
 
   const mediaClasses = clsx(
-    "block h-full w-full", // parent controls the box size
+    "block h-full w-full",
     coverFit === "contain" ? "object-contain" : "object-cover",
     {
       "object-left": coverPosition === "left",
@@ -138,113 +157,186 @@ export default function HeroSection({
     }
   );
 
-  // 3. --- Render -------------------------------------------------------------
   return (
     <section
       className={clsx(
-        "relative overflow-hidden bg-white dark:bg-black",
+        "relative overflow-hidden bg-black",
+        // premium light bloom
         "before:pointer-events-none before:absolute before:inset-0",
-        "before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)]",
-        "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]"
+        "before:bg-[radial-gradient(70%_55%_at_50%_0%,rgba(245,158,11,.18),transparent_60%)]",
+        // subtle technical grid (low contrast)
+        "after:pointer-events-none after:absolute after:inset-0 after:opacity-20",
+        "after:bg-[radial-gradient(rgba(255,255,255,0.10)_1px,transparent_1px)] after:[background-size:18px_18px]"
       )}
       role="region"
-      aria-label="Featured content section"
+      aria-label="Homepage hero"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12 md:py-16">
-        {/* LEFT: copy -------------------------------------------------------- */}
+      {/* top edge line */}
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/25 to-transparent" />
+
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-14 md:grid-cols-2 md:gap-14 md:py-20">
+        {/* LEFT: copy */}
         <div className="relative z-[1]">
-          {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
+          {eyebrow && <Eyebrow className="mb-5">{eyebrow}</Eyebrow>}
 
           <h1
             id="hero-title"
-            className="font-serif text-[clamp(2rem,3.6vw,3.25rem)] font-semibold leading-[1.08] text-deepCharcoal dark:text-cream [text-wrap:balance]"
+            className={clsx(
+              "font-serif font-semibold leading-[1.06] text-white [text-wrap:balance]",
+              "text-[clamp(2.1rem,3.6vw,3.55rem)]"
+            )}
           >
-            {title}
+            <span className="text-white/90">{title}</span>
           </h1>
 
           {subtitle && (
-            <p className="mt-4 max-w-prose text-[color:var(--color-on-secondary)] opacity-85 dark:text-[color:var(--color-on-primary)] dark:opacity-85">
+            <p className="mt-5 max-w-prose text-white/55 leading-relaxed text-[15px] sm:text-[16px]">
               {subtitle}
             </p>
           )}
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {/* Primary CTA */}
+          {/* credibility signals */}
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Pill icon={<ShieldCheck className="h-4 w-4" />}>Canon-rooted doctrine</Pill>
+            <Pill icon={<LineChart className="h-4 w-4" />}>High-stakes execution</Pill>
+            <Pill icon={<Vault className="h-4 w-4" />}>Artifacts in the Vault</Pill>
+          </div>
+
+          {/* mini stats (subtle social proof without “brag”) */}
+          <div className="mt-7 grid grid-cols-2 gap-3 sm:max-w-[520px] sm:grid-cols-3">
+            <Stat label="Canon" value="12 Volumes" />
+            <Stat label="Shorts" value="76 Briefings" />
+            <Stat label="Assets" value="Vault-ready" />
+          </div>
+
+          {/* CTAs */}
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             {primaryCta && (
               <Link
                 href={primaryCta.href}
                 aria-label={primaryCta.ariaLabel || `Go to ${primaryCta.label}`}
-                className="aol-btn"
+                className={clsx(
+                  "inline-flex items-center justify-center gap-2 rounded-full",
+                  "bg-amber-500 px-5 py-2.5",
+                  "text-[11px] font-black uppercase tracking-[0.22em] text-black",
+                  "hover:bg-amber-400 transition",
+                  "shadow-[0_0_38px_rgba(245,158,11,0.22)]"
+                )}
               >
                 {primaryCta.label}
+                <ArrowRight className="h-4 w-4" />
               </Link>
             )}
 
-            {/* Secondary CTA */}
             {secondaryCta && (
               <Link
                 href={secondaryCta.href}
-                aria-label={
-                  secondaryCta.ariaLabel || `Go to ${secondaryCta.label}`
-                }
-                className="rounded-full border border-lightGrey bg-warmWhite px-4 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-[.98] focus:outline-none focus-visible:ring-2"
+                aria-label={secondaryCta.ariaLabel || `Go to ${secondaryCta.label}`}
+                className={clsx(
+                  "inline-flex items-center justify-center gap-2 rounded-full",
+                  "border border-white/12 bg-white/[0.04] px-5 py-2.5",
+                  "text-[11px] font-black uppercase tracking-[0.22em] text-white/85",
+                  "hover:border-white/25 hover:bg-white/[0.06] transition"
+                )}
               >
                 {secondaryCta.label}
               </Link>
             )}
+
+            {/* tertiary link: Canon (quietly forces serious positioning) */}
+            <Link
+              href="/canon/the-architecture-of-human-purpose"
+              className="ml-1 inline-flex items-center gap-2 text-xs font-semibold text-white/55 hover:text-white/80 transition"
+            >
+              <BookOpen className="h-4 w-4 text-amber-300/70" />
+              Start with the Mini-Book
+            </Link>
           </div>
+
+          {/* micro disclaimer line (tone: serious, not salesy) */}
+          <p className="mt-6 text-xs text-white/35">
+            Not motivation. Not noise. <span className="text-white/55">Architecture → Logic → Deployment.</span>
+          </p>
         </div>
 
-        {/* RIGHT: visual media container ------------------------------------ */}
-        <div className={frameClasses}>
-          {/* Gradient veil for cover-fit visuals */}
-          {coverFit === "cover" && (
+        {/* RIGHT: media */}
+        <div className="relative">
+          {/* back glow */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-6 rounded-[2.25rem] bg-amber-500/10 blur-[55px] opacity-60"
+          />
+
+          <div className={frameClasses}>
+            {/* inner bevel */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 z-[1]
-                         bg-[linear-gradient(to_bottom,rgba(0,0,0,0.30),transparent_35%,transparent_65%,rgba(0,0,0,0.25))]
-                         dark:bg-[linear-gradient(to_bottom,rgba(0,0,0,0.45),transparent_40%,transparent_60%,rgba(0,0,0,0.35))]"
+              className={clsx(
+                "pointer-events-none absolute inset-0 rounded-3xl",
+                "shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]"
+              )}
             />
-          )}
 
-          {/* Media: Video or Image Fallback */}
-          {hasVideo ? (
-            <video
-              className={mediaClasses}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster={posterSrc}
-              aria-describedby="hero-title"
-              onContextMenu={(e) => e.preventDefault()}
+            {/* gradient veil when cover-fit */}
+            {coverFit === "cover" && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-[1]
+                           bg-[linear-gradient(to_bottom,rgba(0,0,0,0.40),transparent_35%,transparent_65%,rgba(0,0,0,0.32))]"
+              />
+            )}
+
+            {/* subtle “brand stamp” */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-5 top-5 z-[2] inline-flex items-center gap-2 rounded-full
+                         border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/70"
             >
-              {videoSources!.map((s) => (
-                <source key={s.src} src={normalizeLocal(s.src)} type={s.type} />
-              ))}
-            </video>
-          ) : (
-            <Image
-              src={imgSrc}
-              alt={title || "Hero image illustrating the page content"}
-              // IMPORTANT: do NOT use fill - we size via CSS
-              width={800}
-              height={1200} // portrait-ish; actual box is controlled by classes
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className={mediaClasses}
+              A•O•L
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-300/70" />
+              Featured
+            </div>
+
+            {/* Media: Video or Image */}
+            {hasVideo ? (
+              <video
+                className={mediaClasses}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                poster={posterSrc}
+                aria-describedby="hero-title"
+                onContextMenu={(e) => e.preventDefault()}
+              >
+                {videoSources!.map((s) => (
+                  <source key={s.src} src={normalizeLocal(s.src)} type={s.type} />
+                ))}
+              </video>
+            ) : (
+              <Image
+                src={imgSrc}
+                alt={title || "Hero image illustrating the page content"}
+                width={900}
+                height={1200}
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className={mediaClasses}
+              />
+            )}
+
+            {/* bottom edge line */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent"
             />
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Decorative grid dots */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[radial-gradient(rgba(0,0,0,0.06)_1px,transparent_1px)] [background-size:18px_18px] dark:opacity-30"
-      />
+      {/* bottom fade */}
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black to-transparent" />
     </section>
   );
 }
-

@@ -1,120 +1,94 @@
-// ============================================================================
-// pages/api/generate-all-pdfs.ts  (SERVER) — BULK GENERATION ENTRYPOINT
-//    - Generates missing assets only (no risky deletes)
-//    - Audited, admin-only
-//    - Patched with rate limiting and internal auth
-// ============================================================================
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getClientIp, rateLimit } from "@/lib/server/rateLimit";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
-import { generateMissingPdfs } from "@/scripts/pdf/intelligent-generator";
+
+// Core Logic Imports
+import { generateMissingPdfs } from "@/scripts/pdf/intelligent-generator.server";
+import { clearRegistryCache } from "@/scripts/pdf-registry";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const start = Date.now();
-  
-  // PER-IP RATE LIMITING (Patched - using hard fail pattern with higher limit for admin)
   const ip = getClientIp(req);
-  const rl = rateLimit({ key: `generate_pdfs:${ip}`, limit: 5, windowMs: 60_000 });
 
-  res.setHeader("X-RateLimit-Limit", "5");
-  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
-  res.setHeader("X-RateLimit-Reset", String(rl.resetAt));
-
-  if (!rl.ok) {
-    await logAuditEvent({
-      actorType: "member",
-      actorId: "anonymous",
-      action: AUDIT_ACTIONS.ACCESS_DENIED,
-      resourceType: AUDIT_CATEGORIES.ADMIN_ACTION,
-      status: "failed",
-      ipAddress: ip,
-      details: { 
-        path: "/api/generate-all-pdfs", 
-        reason: "rate_limited",
-        rateLimitKey: `generate_pdfs:${ip}`
-      },
-    });
-    return res.status(429).json({ 
-      success: false, 
-      error: "Too many requests. Please wait before retrying." 
-    });
-  }
-
+  // 1. SECURITY: METHOD GUARD
   if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
-  // INTERNAL AUTH VALIDATION
+  // 2. SECURITY: RATE LIMIT (3 attempts per 5 minutes per admin IP)
+  const rl = rateLimit({ key: `bulk_pdf_sync:${ip}`, limit: 3, windowMs: 300_000 });
+  res.setHeader("X-RateLimit-Limit", "3");
+  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+
+  if (!rl.ok) {
+    return res.status(429).json({ 
+      success: false, 
+      error: "Cool-down active. Please wait 5 minutes." 
+    });
+  }
+
+  // 3. SECURITY: ADMIN AUTH (Return 404 if unauthorized for stealth)
   const auth = await validateAdminAccess(req as any);
   if (!auth.valid) {
     await logAuditEvent({
-      actorType: "member",
-      actorId: "anonymous",
+      actorType: "member", actorId: "anonymous",
       action: AUDIT_ACTIONS.ACCESS_DENIED,
       resourceType: AUDIT_CATEGORIES.ADMIN_ACTION,
-      status: "failed",
-      ipAddress: ip,
-      details: { 
-        path: "/api/generate-all-pdfs", 
-        reason: auth.reason || "unauthorized" 
-      },
+      status: "failed", ipAddress: ip,
+      details: { reason: auth.reason || "unauthorized_endpoint_hit" },
     });
-    return res.status(404).end();
+    return res.status(404).end(); 
   }
 
   try {
-    const results = await generateMissingPdfs();
+    const { force = false, batchSize = 10 } = req.body;
+
+    // 4. EXECUTION: ATOMIC GENERATION
+    // This uses the .server.ts logic to safely swap files without deletion risk
+    const results = await generateMissingPdfs({
+      forceRefresh: force,
+      batchSize: batchSize,
+      createPlaceholders: true,
+    });
+
+    // 5. CACHE FLUSH: Force the registry to re-read the disk state
+    clearRegistryCache();
+
     const okCount = results.filter((r) => r.success).length;
 
+    // 6. AUDIT
     await logAuditEvent({
       actorType: "admin",
       actorId: auth.userId,
-      action: AUDIT_ACTIONS.WRITE,
+      action: force ? AUDIT_ACTIONS.UPDATE : AUDIT_ACTIONS.WRITE,
       resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION,
       status: "success",
       ipAddress: ip,
-      details: {
-        path: "/api/generate-all-pdfs",
-        durationMs: Date.now() - start,
-        okCount,
-        total: results.length,
-        rateLimitRemaining: rl.remaining,
+      details: { 
+        total: results.length, 
+        success: okCount, 
+        force,
+        duration: Date.now() - start 
       },
     });
 
     return res.status(200).json({
       success: true,
-      count: okCount,
-      results,
-      meta: { 
-        durationMs: Date.now() - start, 
+      meta: {
+        durationMs: Date.now() - start,
         total: results.length,
-        rateLimit: {
-          limit: 5,
-          remaining: rl.remaining,
-          resetAt: rl.resetAt
-        }
+        success: okCount,
+        mode: force ? "Full Premium Upgrade" : "Incremental Sync"
       },
-    });
-  } catch (err: any) {
-    await logAuditEvent({
-      actorType: "system",
-      action: AUDIT_ACTIONS.API_ERROR,
-      resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION,
-      status: "failed",
-      ipAddress: ip,
-      details: { 
-        path: "/api/generate-all-pdfs", 
-        error: err?.message || String(err),
-        rateLimitRemaining: rl.remaining,
-      },
+      results: results.map(r => ({ id: r.id, action: r.action, status: r.success ? "OK" : "ERR" }))
     });
 
-    return res.status(500).json({ 
-      success: false, 
-      error: "Bulk generation failed" 
-    });
+  } catch (err: any) {
+    console.error("Critical Asset Sync Failure:", err);
+    return res.status(500).json({ success: false, error: "Internal processing error." });
   }
 }

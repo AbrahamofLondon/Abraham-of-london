@@ -202,18 +202,34 @@ export const STATIC_PDF_REGISTRY: Record<string, PDFConfig> = Object.fromEntries
 export const PDF_REGISTRY = STATIC_PDF_REGISTRY;
 
 /* -------------------------------------------------------------------------- */
-/* CACHES                                                                     */
+/* CACHE INVALIDATION                                                         */
 /* -------------------------------------------------------------------------- */
 
-let cachedAllPDFs: PDFConfig[] | null = null;
-let cachedAllPDFItems: PDFItem[] | null = null;
-
-const cachedByType: Map<PDFType, PDFConfig[]> = new Map();
-const cachedByTier: Map<PDFTier, PDFConfig[]> = new Map();
+export function clearRegistryCache() {
+  cachedAllPDFs = null;
+  cachedAllPDFItems = null;
+  cachedByType.clear();
+  cachedByTier.clear();
+}
 
 /* -------------------------------------------------------------------------- */
-/* PUBLIC API                                                                 */
+/* PUBLIC API (UPDATED)                                                       */
 /* -------------------------------------------------------------------------- */
+
+export function getAllPDFs(opts?: { includeMissing?: boolean }): PDFConfig[] {
+  // Re-verify existence if we aren't using the cache
+  if (!cachedAllPDFs) {
+    const includeMissing = Boolean(opts?.includeMissing);
+    cachedAllPDFs = Array.from(PDF_REGISTRY_MAP.values())
+      .map(cfg => ({
+        ...cfg,
+        // Re-check disk status to ensure 'exists' is accurate after a sync
+        exists: fileExistsSafeFromWebPath(cfg.outputPath)
+      }))
+      .filter((pdf) => (includeMissing ? true : pdf.exists))
+      .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
+  }
+  return cachedAllPDFs;
 
 export function getPDFRegistry(): Record<string, PDFConfig> {
   return PDF_REGISTRY;

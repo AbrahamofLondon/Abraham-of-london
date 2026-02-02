@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="240" viewBox="0 0 920 240" role="img" aria-label="Abraham of London Private Clients">
+  <defs>
+    <linearGradient id="aolBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B3AA6"></stop>
+      <stop offset="1" stop-color="#061B4E"></stop>
+    </linearGradient>
+    <linearGradient id="aolRed" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF3B4D"></stop>
+      <stop offset="1" stop-color="#B3122A"></stop>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(40,30)">
+    <path d="M90 0 L150 140 L120 140 L105 104 L45 104 L30 140 L0 140 L60 0 Z" fill="url(#aolBlue)"></path>
+    <path d="M60 64 C82 52, 104 54, 122 70 C132 79, 140 88, 150 92
+             C132 96, 114 100, 98 108 C82 116, 66 128, 52 140
+             C50 121, 50 92, 60 64 Z" fill="url(#aolRed)" opacity="0.95"></path>
+  </g>
+
+  <g fill="#FFFFFF" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-weight="800" letter-spacing="0.14em">
+    <text x="240" y="105" font-size="60">PRIVATE</text>
+    <text x="240" y="170" font-size="60">CLIENTS</text>
+  </g>
+</svg>
