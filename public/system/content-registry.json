@@ -1,0 +1,2296 @@
+{
+  "meta": {
+    "total": 252,
+    "updatedAt": "2026-02-03T16:07:05.176Z",
+    "version": "2026.1.0"
+  },
+  "index": [
+    {
+      "id": "fr-001",
+      "t": "Frontier Resilience // Briefing 001",
+      "slug": "fr-001",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-004",
+      "t": "Frontier Resilience // Briefing 004",
+      "slug": "fr-004",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-007",
+      "t": "Frontier Resilience // Briefing 007",
+      "slug": "fr-007",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-010",
+      "t": "Frontier Resilience // Briefing 010",
+      "slug": "fr-010",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-013",
+      "t": "Frontier Resilience // Briefing 013",
+      "slug": "fr-013",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-016",
+      "t": "Frontier Resilience // Briefing 016",
+      "slug": "fr-016",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-019",
+      "t": "Frontier Resilience // Briefing 019",
+      "slug": "fr-019",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-022",
+      "t": "Frontier Resilience // Briefing 022",
+      "slug": "fr-022",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-025",
+      "t": "Frontier Resilience // Briefing 025",
+      "slug": "fr-025",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-028",
+      "t": "Frontier Resilience // Briefing 028",
+      "slug": "fr-028",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-031",
+      "t": "Frontier Resilience // Briefing 031",
+      "slug": "fr-031",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-034",
+      "t": "Frontier Resilience // Briefing 034",
+      "slug": "fr-034",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-037",
+      "t": "Frontier Resilience // Briefing 037",
+      "slug": "fr-037",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-040",
+      "t": "Frontier Resilience // Briefing 040",
+      "slug": "fr-040",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-043",
+      "t": "Frontier Resilience // Briefing 043",
+      "slug": "fr-043",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-046",
+      "t": "Frontier Resilience // Briefing 046",
+      "slug": "fr-046",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-049",
+      "t": "Frontier Resilience // Briefing 049",
+      "slug": "fr-049",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-052",
+      "t": "Frontier Resilience // Briefing 052",
+      "slug": "fr-052",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-055",
+      "t": "Frontier Resilience // Briefing 055",
+      "slug": "fr-055",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-058",
+      "t": "Frontier Resilience // Briefing 058",
+      "slug": "fr-058",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-061",
+      "t": "Frontier Resilience // Briefing 061",
+      "slug": "fr-061",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-064",
+      "t": "Frontier Resilience // Briefing 064",
+      "slug": "fr-064",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-067",
+      "t": "Frontier Resilience // Briefing 067",
+      "slug": "fr-067",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-070",
+      "t": "Frontier Resilience // Briefing 070",
+      "slug": "fr-070",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "fr-073",
+      "t": "Frontier Resilience // Briefing 073",
+      "slug": "fr-073",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "frontier-resilience-01",
+      "t": "Institutional Resilience in Frontier Markets",
+      "slug": "frontier-resilience-01",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2024-01-15",
+      "w": 153
+    },
+    {
+      "id": "ia-003",
+      "t": "Institutional Alpha // Briefing 003",
+      "slug": "ia-003",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-006",
+      "t": "Institutional Alpha // Briefing 006",
+      "slug": "ia-006",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-009",
+      "t": "Institutional Alpha // Briefing 009",
+      "slug": "ia-009",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-012",
+      "t": "Institutional Alpha // Briefing 012",
+      "slug": "ia-012",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-015",
+      "t": "Institutional Alpha // Briefing 015",
+      "slug": "ia-015",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-018",
+      "t": "Institutional Alpha // Briefing 018",
+      "slug": "ia-018",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-021",
+      "t": "Institutional Alpha // Briefing 021",
+      "slug": "ia-021",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-024",
+      "t": "Institutional Alpha // Briefing 024",
+      "slug": "ia-024",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-027",
+      "t": "Institutional Alpha // Briefing 027",
+      "slug": "ia-027",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-030",
+      "t": "Institutional Alpha // Briefing 030",
+      "slug": "ia-030",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-033",
+      "t": "Institutional Alpha // Briefing 033",
+      "slug": "ia-033",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-036",
+      "t": "Institutional Alpha // Briefing 036",
+      "slug": "ia-036",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-039",
+      "t": "Institutional Alpha // Briefing 039",
+      "slug": "ia-039",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-042",
+      "t": "Institutional Alpha // Briefing 042",
+      "slug": "ia-042",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-045",
+      "t": "Institutional Alpha // Briefing 045",
+      "slug": "ia-045",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-048",
+      "t": "Institutional Alpha // Briefing 048",
+      "slug": "ia-048",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-051",
+      "t": "Institutional Alpha // Briefing 051",
+      "slug": "ia-051",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-054",
+      "t": "Institutional Alpha // Briefing 054",
+      "slug": "ia-054",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-057",
+      "t": "Institutional Alpha // Briefing 057",
+      "slug": "ia-057",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-060",
+      "t": "Institutional Alpha // Briefing 060",
+      "slug": "ia-060",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-063",
+      "t": "Institutional Alpha // Briefing 063",
+      "slug": "ia-063",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-066",
+      "t": "Institutional Alpha // Briefing 066",
+      "slug": "ia-066",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-069",
+      "t": "Institutional Alpha // Briefing 069",
+      "slug": "ia-069",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-072",
+      "t": "Institutional Alpha // Briefing 072",
+      "slug": "ia-072",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "ia-075",
+      "t": "Institutional Alpha // Briefing 075",
+      "slug": "ia-075",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-002",
+      "t": "Sovereign Intelligence // Briefing 002",
+      "slug": "si-002",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-005",
+      "t": "Sovereign Intelligence // Briefing 005",
+      "slug": "si-005",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-008",
+      "t": "Sovereign Intelligence // Briefing 008",
+      "slug": "si-008",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-011",
+      "t": "Sovereign Intelligence // Briefing 011",
+      "slug": "si-011",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-014",
+      "t": "Sovereign Intelligence // Briefing 014",
+      "slug": "si-014",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-017",
+      "t": "Sovereign Intelligence // Briefing 017",
+      "slug": "si-017",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-020",
+      "t": "Sovereign Intelligence // Briefing 020",
+      "slug": "si-020",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-023",
+      "t": "Sovereign Intelligence // Briefing 023",
+      "slug": "si-023",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-026",
+      "t": "Sovereign Intelligence // Briefing 026",
+      "slug": "si-026",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-029",
+      "t": "Sovereign Intelligence // Briefing 029",
+      "slug": "si-029",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-032",
+      "t": "Sovereign Intelligence // Briefing 032",
+      "slug": "si-032",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-035",
+      "t": "Sovereign Intelligence // Briefing 035",
+      "slug": "si-035",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-038",
+      "t": "Sovereign Intelligence // Briefing 038",
+      "slug": "si-038",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-041",
+      "t": "Sovereign Intelligence // Briefing 041",
+      "slug": "si-041",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-044",
+      "t": "Sovereign Intelligence // Briefing 044",
+      "slug": "si-044",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-047",
+      "t": "Sovereign Intelligence // Briefing 047",
+      "slug": "si-047",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-050",
+      "t": "Sovereign Intelligence // Briefing 050",
+      "slug": "si-050",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-053",
+      "t": "Sovereign Intelligence // Briefing 053",
+      "slug": "si-053",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-056",
+      "t": "Sovereign Intelligence // Briefing 056",
+      "slug": "si-056",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-059",
+      "t": "Sovereign Intelligence // Briefing 059",
+      "slug": "si-059",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-062",
+      "t": "Sovereign Intelligence // Briefing 062",
+      "slug": "si-062",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-065",
+      "t": "Sovereign Intelligence // Briefing 065",
+      "slug": "si-065",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-068",
+      "t": "Sovereign Intelligence // Briefing 068",
+      "slug": "si-068",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-071",
+      "t": "Sovereign Intelligence // Briefing 071",
+      "slug": "si-071",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "si-074",
+      "t": "Sovereign Intelligence // Briefing 074",
+      "slug": "si-074",
+      "type": "INTEL_BRIEF",
+      "tier": "public",
+      "d": "2026-02-02",
+      "w": 78
+    },
+    {
+      "id": "sample-strategy",
+      "t": "Strategy Sample",
+      "slug": "sample-strategy",
+      "type": "STRATEGY",
+      "tier": "public",
+      "d": "2025-12-12",
+      "w": 199
+    },
+    {
+      "id": "christianity-not-extremism",
+      "t": "Christianity Is Not Extremism - It Is the Light That Built the World",
+      "slug": "christianity-not-extremism",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-08-28",
+      "w": 520
+    },
+    {
+      "id": "fathering-principles",
+      "t": "Fathering Principles: A Blueprint for Men",
+      "slug": "fathering-principles",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-05-15",
+      "w": 492
+    },
+    {
+      "id": "fathering-without-fear-teaser",
+      "t": "Fathering Without Fear - Teaser",
+      "slug": "fathering-without-fear-teaser",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-06-15",
+      "w": 360
+    },
+    {
+      "id": "fathering-without-fear",
+      "t": "Fathering Without Fear - A Memoir",
+      "slug": "fathering-without-fear",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-06-01",
+      "w": 544
+    },
+    {
+      "id": "in-my-fathers-house",
+      "t": "In My Father's House: Not Mansions-Home",
+      "slug": "in-my-fathers-house",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-09-30",
+      "w": 559
+    },
+    {
+      "id": "kingdom-strategies-for-a-loving-legacy",
+      "t": "Kingdom Strategies for a Loving Legacy: Fathering O.J.A-Y",
+      "slug": "kingdom-strategies-for-a-loving-legacy",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-10-12",
+      "w": 675
+    },
+    {
+      "id": "leadership-begins-at-home",
+      "t": "Leadership Begins at Home",
+      "slug": "leadership-begins-at-home",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-08-15",
+      "w": 690
+    },
+    {
+      "id": "lessons-from-noah",
+      "t": "Lessons from Noah - Fathers Who Listen, Hear, and Build",
+      "slug": "lessons-from-noah",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-10-19",
+      "w": 480
+    },
+    {
+      "id": "out-of-context-truth",
+      "t": "Out of Context Truth",
+      "slug": "out-of-context-truth",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-10-13",
+      "w": 753
+    },
+    {
+      "id": "post-when-the-system-breaks-you",
+      "t": "When the System Breaks You",
+      "slug": "post-when-the-system-breaks-you",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-02-15",
+      "w": 453
+    },
+    {
+      "id": "principles-for-my-son",
+      "t": "Principles for My Son: Building a Foundation of Character",
+      "slug": "principles-for-my-son",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-08-01",
+      "w": 488
+    },
+    {
+      "id": "purpose-is-the-anchor",
+      "t": "Purpose Is the Anchor: Why Meaning Beats Pleasure Every Time",
+      "slug": "purpose-is-the-anchor",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2026-01-14",
+      "w": 313
+    },
+    {
+      "id": "reclaiming-the-narrative",
+      "t": "Reclaiming The Narrative",
+      "slug": "reclaiming-the-narrative",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-04-01",
+      "w": 1705
+    },
+    {
+      "id": "surrender-not-submission",
+      "t": "Surrender, Not Submission: The Path to Having It All",
+      "slug": "surrender-not-submission",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2024-01-04",
+      "w": 471
+    },
+    {
+      "id": "surrender-operational-framework",
+      "t": "Surrender Applied: The Operational Framework",
+      "slug": "surrender-operational-framework",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2024-01-05",
+      "w": 396
+    },
+    {
+      "id": "the-brotherhood-code",
+      "t": "The Brotherhood Code: Breaking the Cycle of Father Absence",
+      "slug": "the-brotherhood-code",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-07-14",
+      "w": 1505
+    },
+    {
+      "id": "ultimate-purpose-of-man",
+      "t": "The Ultimate Purpose of Man",
+      "slug": "ultimate-purpose-of-man",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-11-23",
+      "w": 965
+    },
+    {
+      "id": "when-gods-sovereignty-collides-with-our-pain",
+      "t": "When God's Sovereignty Collides With Our Pain",
+      "slug": "when-gods-sovereignty-collides-with-our-pain",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-09-11",
+      "w": 793
+    },
+    {
+      "id": "when-the-foundation-is-destroyed",
+      "t": "When the Foundation Is Destroyed",
+      "slug": "when-the-foundation-is-destroyed",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-01-01",
+      "w": 717
+    },
+    {
+      "id": "when-the-storm-finds-you",
+      "t": "When the Storm Finds You: Lessons from Jonah, Jesus, and the Men Who Build Legacies",
+      "slug": "when-the-storm-finds-you",
+      "type": "DISPATCH",
+      "tier": "public",
+      "d": "2025-11-10",
+      "w": 401
+    },
+    {
+      "id": "institutional-sovereignty",
+      "t": "On Institutional Sovereignty",
+      "slug": "institutional-sovereignty",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2026-01-31",
+      "w": 120
+    },
+    {
+      "id": "when-a-single-yes-changes-everything",
+      "t": "When A Single Yes Changes Everything",
+      "slug": "when-a-single-yes-changes-everything",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-21",
+      "w": 114
+    },
+    {
+      "id": "when-all-you-can-do-is-breathe",
+      "t": "When All You Can Do Is Breathe",
+      "slug": "when-all-you-can-do-is-breathe",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-21",
+      "w": 92
+    },
+    {
+      "id": "when-avoidance-becomes-your-personality",
+      "t": "When Avoidance Becomes Your Personality",
+      "slug": "when-avoidance-becomes-your-personality",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-28",
+      "w": 151
+    },
+    {
+      "id": "when-busyness-becomes-your-brand",
+      "t": "When Busyness Becomes Your Brand",
+      "slug": "when-busyness-becomes-your-brand",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-30",
+      "w": 121
+    },
+    {
+      "id": "when-comfort-becomes-your-cage",
+      "t": "When Comfort Becomes Your Cage",
+      "slug": "when-comfort-becomes-your-cage",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-13",
+      "w": 149
+    },
+    {
+      "id": "when-conflict-feels-like-betrayal",
+      "t": "When Conflict Feels Like Betrayal",
+      "slug": "when-conflict-feels-like-betrayal",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-31",
+      "w": 136
+    },
+    {
+      "id": "when-doctrine-feels-safer-than-god",
+      "t": "When Doctrine Feels Safer Than God",
+      "slug": "when-doctrine-feels-safer-than-god",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-25",
+      "w": 148
+    },
+    {
+      "id": "when-every-promotion-feels-hollow",
+      "t": "When Every Promotion Feels Hollow",
+      "slug": "when-every-promotion-feels-hollow",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-09",
+      "w": 93
+    },
+    {
+      "id": "when-grace-finds-you-in-the-mess",
+      "t": "When Grace Finds You In The Mess",
+      "slug": "when-grace-finds-you-in-the-mess",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-07",
+      "w": 104
+    },
+    {
+      "id": "when-hope-feels-reckless",
+      "t": "When Hope Feels Reckless",
+      "slug": "when-hope-feels-reckless",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-25",
+      "w": 135
+    },
+    {
+      "id": "when-kindness-feels-like-rebellion",
+      "t": "When Kindness Feels Like Rebellion",
+      "slug": "when-kindness-feels-like-rebellion",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-28",
+      "w": 106
+    },
+    {
+      "id": "when-later-became-never",
+      "t": "When Later Became Never",
+      "slug": "when-later-became-never",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-20",
+      "w": 142
+    },
+    {
+      "id": "when-numbness-feels-safer-than-joy",
+      "t": "When Numbness Feels Safer Than Joy",
+      "slug": "when-numbness-feels-safer-than-joy",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-15",
+      "w": 133
+    },
+    {
+      "id": "when-productivity-becomes-punishment",
+      "t": "When Productivity Becomes Punishment",
+      "slug": "when-productivity-becomes-punishment",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-16",
+      "w": 146
+    },
+    {
+      "id": "when-rest-starts-to-feel-dangerous",
+      "t": "When Rest Starts To Feel Dangerous",
+      "slug": "when-rest-starts-to-feel-dangerous",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-28",
+      "w": 107
+    },
+    {
+      "id": "when-you-argue-with-god-in-your-head",
+      "t": "When You Argue With God In Your Head",
+      "slug": "when-you-argue-with-god-in-your-head",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-18",
+      "w": 140
+    },
+    {
+      "id": "when-you-cant-stop-overthinking",
+      "t": "When You Cant Stop Overthinking",
+      "slug": "when-you-cant-stop-overthinking",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-08",
+      "w": 99
+    },
+    {
+      "id": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "t": "When You Cant Tell If Youre Growing Or Drifting",
+      "slug": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-18",
+      "w": 132
+    },
+    {
+      "id": "when-you-dont-know-what-you-want-anymore",
+      "t": "When You Dont Know What You Want Anymore",
+      "slug": "when-you-dont-know-what-you-want-anymore",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-22",
+      "w": 124
+    },
+    {
+      "id": "when-you-dont-trust-your-own-decisions",
+      "t": "When You Dont Trust Your Own Decisions",
+      "slug": "when-you-dont-trust-your-own-decisions",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-14",
+      "w": 113
+    },
+    {
+      "id": "when-you-fear-being-wrong-about-god",
+      "t": "When You Fear Being Wrong About God",
+      "slug": "when-you-fear-being-wrong-about-god",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-01",
+      "w": 123
+    },
+    {
+      "id": "when-you-fear-success-more-than-failure",
+      "t": "When You Fear Success More Than Failure",
+      "slug": "when-you-fear-success-more-than-failure",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-27",
+      "w": 137
+    },
+    {
+      "id": "when-you-feel-like-god-is-delaying-you",
+      "t": "When You Feel Like God Is Delaying You",
+      "slug": "when-you-feel-like-god-is-delaying-you",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-06",
+      "w": 124
+    },
+    {
+      "id": "when-you-feel-too-busy-to-care",
+      "t": "When You Feel Too Busy To Care",
+      "slug": "when-you-feel-too-busy-to-care",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-06",
+      "w": 155
+    },
+    {
+      "id": "when-you-finally-let-yourself-cry",
+      "t": "When You Finally Let Yourself Cry",
+      "slug": "when-you-finally-let-yourself-cry",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-14",
+      "w": 110
+    },
+    {
+      "id": "when-you-give-more-than-you-get",
+      "t": "When You Give More Than You Get",
+      "slug": "when-you-give-more-than-you-get",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-13",
+      "w": 182
+    },
+    {
+      "id": "when-you-keep-blaming-your-childhood",
+      "t": "When You Keep Blaming Your Childhood",
+      "slug": "when-you-keep-blaming-your-childhood",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-03",
+      "w": 128
+    },
+    {
+      "id": "when-you-keep-choosing-people-who-cant-choose-you",
+      "t": "When You Keep Choosing People Who Cant Choose You",
+      "slug": "when-you-keep-choosing-people-who-cant-choose-you",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-24",
+      "w": 135
+    },
+    {
+      "id": "when-you-keep-confusing-niceness-with-goodness",
+      "t": "When You Keep Confusing Niceness With Goodness",
+      "slug": "when-you-keep-confusing-niceness-with-goodness",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-13",
+      "w": 95
+    },
+    {
+      "id": "when-you-miss-who-you-used-to-be",
+      "t": "When You Miss Who You Used To Be",
+      "slug": "when-you-miss-who-you-used-to-be",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-14",
+      "w": 168
+    },
+    {
+      "id": "when-you-mistake-familiarity-for-loyalty",
+      "t": "When You Mistake Familiarity For Loyalty",
+      "slug": "when-you-mistake-familiarity-for-loyalty",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-17",
+      "w": 137
+    },
+    {
+      "id": "when-you-need-god-to-interrupt-you",
+      "t": "When You Need God To Interrupt You",
+      "slug": "when-you-need-god-to-interrupt-you",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-11",
+      "w": 144
+    },
+    {
+      "id": "when-you-no-longer-recognise-your-own-voice",
+      "t": "When You No Longer Recognise Your Own Voice",
+      "slug": "when-you-no-longer-recognise-your-own-voice",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-22",
+      "w": 132
+    },
+    {
+      "id": "when-you-outgrow-your-circle",
+      "t": "When You Outgrow Your Circle",
+      "slug": "when-you-outgrow-your-circle",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-17",
+      "w": 128
+    },
+    {
+      "id": "when-you-realise-prayer-is-war",
+      "t": "When You Realise Prayer Is War",
+      "slug": "when-you-realise-prayer-is-war",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-16",
+      "w": 143
+    },
+    {
+      "id": "when-you-realise-you-were-the-problem",
+      "t": "When You Realise You Were The Problem",
+      "slug": "when-you-realise-you-were-the-problem",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-13",
+      "w": 158
+    },
+    {
+      "id": "when-you-realise-youre-not-behind",
+      "t": "When You Realise Youre Not Behind",
+      "slug": "when-you-realise-youre-not-behind",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-04",
+      "w": 91
+    },
+    {
+      "id": "when-you-stop-waiting-for-permission",
+      "t": "When You Stop Waiting For Permission",
+      "slug": "when-you-stop-waiting-for-permission",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-19",
+      "w": 126
+    },
+    {
+      "id": "when-you-want-to-quit-but-cant",
+      "t": "When You Want To Quit But Cant",
+      "slug": "when-you-want-to-quit-but-cant",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-19",
+      "w": 139
+    },
+    {
+      "id": "when-your-calendar-is-full-but-your-life-is-empty",
+      "t": "When Your Calendar Is Full But Your Life Is Empty",
+      "slug": "when-your-calendar-is-full-but-your-life-is-empty",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-27",
+      "w": 152
+    },
+    {
+      "id": "when-your-calling-stops-being-cute",
+      "t": "When Your Calling Stops Being Cute",
+      "slug": "when-your-calling-stops-being-cute",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-26",
+      "w": 112
+    },
+    {
+      "id": "when-your-character-is-leaking",
+      "t": "When Your Character Is Leaking",
+      "slug": "when-your-character-is-leaking",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-06",
+      "w": 132
+    },
+    {
+      "id": "when-your-confidence-feels-manufactured",
+      "t": "When Your Confidence Feels Manufactured",
+      "slug": "when-your-confidence-feels-manufactured",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-08",
+      "w": 166
+    },
+    {
+      "id": "when-your-convictions-feel-like-costumes",
+      "t": "When Your Convictions Feel Like Costumes",
+      "slug": "when-your-convictions-feel-like-costumes",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-20",
+      "w": 149
+    },
+    {
+      "id": "when-your-dreams-feel-too-heavy",
+      "t": "When Your Dreams Feel Too Heavy",
+      "slug": "when-your-dreams-feel-too-heavy",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-12",
+      "w": 186
+    },
+    {
+      "id": "when-your-excuses-become-your-identity",
+      "t": "When Your Excuses Become Your Identity",
+      "slug": "when-your-excuses-become-your-identity",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-20",
+      "w": 166
+    },
+    {
+      "id": "when-your-faith-feels-numb",
+      "t": "When Your Faith Feels Numb",
+      "slug": "when-your-faith-feels-numb",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-05",
+      "w": 175
+    },
+    {
+      "id": "when-your-hustle-has-no-soul",
+      "t": "When Your Hustle Has No Soul",
+      "slug": "when-your-hustle-has-no-soul",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-02",
+      "w": 135
+    },
+    {
+      "id": "when-your-legacy-terrifies-you",
+      "t": "When Your Legacy Terrifies You",
+      "slug": "when-your-legacy-terrifies-you",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-12",
+      "w": 140
+    },
+    {
+      "id": "when-your-silence-says-too-much",
+      "t": "When Your Silence Says Too Much",
+      "slug": "when-your-silence-says-too-much",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-03",
+      "w": 144
+    },
+    {
+      "id": "when-your-standards-keep-you-lonely",
+      "t": "When Your Standards Keep You Lonely",
+      "slug": "when-your-standards-keep-you-lonely",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-08",
+      "w": 156
+    },
+    {
+      "id": "when-your-vision-outgrows-your-environment",
+      "t": "When Your Vision Outgrows Your Environment",
+      "slug": "when-your-vision-outgrows-your-environment",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-26",
+      "w": 125
+    },
+    {
+      "id": "when-your-work-becomes-your-hiding-place",
+      "t": "When Your Work Becomes Your Hiding Place",
+      "slug": "when-your-work-becomes-your-hiding-place",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-16",
+      "w": 132
+    },
+    {
+      "id": "when-youre-addicted-to-distraction",
+      "t": "When Youre Addicted To Distraction",
+      "slug": "when-youre-addicted-to-distraction",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-29",
+      "w": 117
+    },
+    {
+      "id": "when-youre-afraid-of-your-own-potential",
+      "t": "When Youre Afraid Of Your Own Potential",
+      "slug": "when-youre-afraid-of-your-own-potential",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-15",
+      "w": 183
+    },
+    {
+      "id": "when-youre-afraid-to-be-radical",
+      "t": "When Youre Afraid To Be Radical",
+      "slug": "when-youre-afraid-to-be-radical",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-11",
+      "w": 112
+    },
+    {
+      "id": "when-youre-always-the-strong-one",
+      "t": "When Youre Always The Strong One",
+      "slug": "when-youre-always-the-strong-one",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-10",
+      "w": 136
+    },
+    {
+      "id": "when-youre-attracted-to-potential-not-reality",
+      "t": "When Youre Attracted To Potential Not Reality",
+      "slug": "when-youre-attracted-to-potential-not-reality",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-05",
+      "w": 126
+    },
+    {
+      "id": "when-youre-building-someone-elses-legacy",
+      "t": "When Youre Building Someone Elses Legacy",
+      "slug": "when-youre-building-someone-elses-legacy",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-03",
+      "w": 127
+    },
+    {
+      "id": "when-youre-done-fixing-adults",
+      "t": "When Youre Done Fixing Adults",
+      "slug": "when-youre-done-fixing-adults",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-24",
+      "w": 117
+    },
+    {
+      "id": "when-youre-exhausted-but-still-available",
+      "t": "When Youre Exhausted But Still Available",
+      "slug": "when-youre-exhausted-but-still-available",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-07",
+      "w": 171
+    },
+    {
+      "id": "when-youre-keeping-faith-out-of-habit",
+      "t": "When Youre Keeping Faith Out Of Habit",
+      "slug": "when-youre-keeping-faith-out-of-habit",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-04",
+      "w": 133
+    },
+    {
+      "id": "when-youre-living-for-weekends",
+      "t": "When Youre Living For Weekends",
+      "slug": "when-youre-living-for-weekends",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-15",
+      "w": 84
+    },
+    {
+      "id": "when-youre-loved-without-earning-it",
+      "t": "When Youre Loved Without Earning It",
+      "slug": "when-youre-loved-without-earning-it",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-12",
+      "w": 104
+    },
+    {
+      "id": "when-youre-measuring-everything-but-meaning",
+      "t": "When Youre Measuring Everything But Meaning",
+      "slug": "when-youre-measuring-everything-but-meaning",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-13",
+      "w": 134
+    },
+    {
+      "id": "when-youre-not-lazy-youre-undisciplined",
+      "t": "When Youre Not Lazy Youre Undisciplined",
+      "slug": "when-youre-not-lazy-youre-undisciplined",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-07",
+      "w": 115
+    },
+    {
+      "id": "when-youre-preparing-for-rooms-you-havent-entered",
+      "t": "When Youre Preparing For Rooms You Havent Entered",
+      "slug": "when-youre-preparing-for-rooms-you-havent-entered",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-05",
+      "w": 126
+    },
+    {
+      "id": "when-youre-productive-but-not-present",
+      "t": "When Youre Productive But Not Present",
+      "slug": "when-youre-productive-but-not-present",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-23",
+      "w": 130
+    },
+    {
+      "id": "when-youre-scared-to-start-over",
+      "t": "When Youre Scared To Start Over",
+      "slug": "when-youre-scared-to-start-over",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-01",
+      "w": 107
+    },
+    {
+      "id": "when-youre-the-only-one-doing-the-work",
+      "t": "When Youre The Only One Doing The Work",
+      "slug": "when-youre-the-only-one-doing-the-work",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-09",
+      "w": 109
+    },
+    {
+      "id": "when-youre-tired-of-being-the-bigger-person",
+      "t": "When Youre Tired Of Being The Bigger Person",
+      "slug": "when-youre-tired-of-being-the-bigger-person",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-01-10",
+      "w": 177
+    },
+    {
+      "id": "when-youre-tired-of-starting-over",
+      "t": "When Youre Tired Of Starting Over",
+      "slug": "when-youre-tired-of-starting-over",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-02",
+      "w": 125
+    },
+    {
+      "id": "when-youre-winning-at-work-but-losing-yourself",
+      "t": "When Youre Winning At Work But Losing Yourself",
+      "slug": "when-youre-winning-at-work-but-losing-yourself",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-02-23",
+      "w": 114
+    },
+    {
+      "id": "when-youve-become-chronically-online",
+      "t": "When Youve Become Chronically Online",
+      "slug": "when-youve-become-chronically-online",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-04-10",
+      "w": 108
+    },
+    {
+      "id": "when-youve-worshipped-the-wrong-metrics",
+      "t": "When Youve Worshipped The Wrong Metrics",
+      "slug": "when-youve-worshipped-the-wrong-metrics",
+      "type": "SHORT",
+      "tier": "public",
+      "d": "2025-03-27",
+      "w": 134
+    },
+    {
+      "id": "clarity",
+      "t": "Clarity",
+      "slug": "clarity",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 28
+    },
+    {
+      "id": "family",
+      "t": "Family",
+      "slug": "family",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 26
+    },
+    {
+      "id": "father",
+      "t": "Father",
+      "slug": "father",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 36
+    },
+    {
+      "id": "governance",
+      "t": "Governance",
+      "slug": "governance",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 31
+    },
+    {
+      "id": "identity",
+      "t": "Identity",
+      "slug": "identity",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 22
+    },
+    {
+      "id": "integrity",
+      "t": "Integrity",
+      "slug": "integrity",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 138
+    },
+    {
+      "id": "leadership",
+      "t": "Leadership",
+      "slug": "leadership",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 21
+    },
+    {
+      "id": "legacy",
+      "t": "Legacy",
+      "slug": "legacy",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 27
+    },
+    {
+      "id": "purpose",
+      "t": "Purpose",
+      "slug": "purpose",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 36
+    },
+    {
+      "id": "responsibility",
+      "t": "Responsibility",
+      "slug": "responsibility",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 24
+    },
+    {
+      "id": "sovereignty",
+      "t": "Sovereignty",
+      "slug": "sovereignty",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 73
+    },
+    {
+      "id": "strategic-autonomy",
+      "t": "Strategic Autonomy",
+      "slug": "strategic-autonomy",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 161
+    },
+    {
+      "id": "surrender",
+      "t": "Surrender",
+      "slug": "surrender",
+      "type": "LEXICON",
+      "tier": "public",
+      "d": "2026-02-01",
+      "w": 29
+    },
+    {
+      "id": "builders-catechism",
+      "t": "The Builder’s Catechism",
+      "slug": "builders-catechism",
+      "type": "CANON",
+      "tier": "public",
+      "d": "2025-06-01",
+      "w": 369
+    },
+    {
+      "id": "canon-campaign",
+      "t": "THE CANON - A New Era of Builders",
+      "slug": "canon-campaign",
+      "type": "CANON",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 213
+    },
+    {
+      "id": "canon-introduction-letter",
+      "t": "THE CANON: A LETTER FROM THE AUTHOR",
+      "slug": "canon-introduction-letter",
+      "type": "CANON",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 441
+    },
+    {
+      "id": "canon-master-index-preview",
+      "t": "Canon Master Index & Glossary (Preview)",
+      "slug": "canon-master-index-preview",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2025-12-01",
+      "w": 519
+    },
+    {
+      "id": "volume-i-foundations-of-purpose",
+      "t": "Volume I - Foundations of Purpose",
+      "slug": "volume-i-foundations-of-purpose",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2024-01-01",
+      "w": 539
+    },
+    {
+      "id": "volume-i-teaching-edition",
+      "t": "Canon Volume I - Teaching Edition",
+      "slug": "volume-i-teaching-edition",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2025-12-01",
+      "w": 582
+    },
+    {
+      "id": "volume-ii-governance-and-formation",
+      "t": "Canon Volume II - Governance & Formation",
+      "slug": "volume-ii-governance-and-formation",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2025-12-01",
+      "w": 600
+    },
+    {
+      "id": "volume-ii-teaching-edition",
+      "t": "Canon Volume II - Teaching Edition",
+      "slug": "volume-ii-teaching-edition",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2025-12-10",
+      "w": 569
+    },
+    {
+      "id": "volume-iii-teaching-edition",
+      "t": "Canon Volume III - Teaching Edition",
+      "slug": "volume-iii-teaching-edition",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2025-12-12",
+      "w": 473
+    },
+    {
+      "id": "volume-iv-teaching-edition",
+      "t": "Canon Volume IV - Teaching Edition",
+      "slug": "volume-iv-teaching-edition",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2025-12-15",
+      "w": 553
+    },
+    {
+      "id": "volume-x-filename",
+      "t": "VOLUME TITLE GOES HERE",
+      "slug": "volume-x-filename",
+      "type": "CANON",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 196
+    },
+    {
+      "id": "volume-x-the-arc-of-future-civilisation",
+      "t": "VOLUME X – THE ARC OF FUTURE CIVILISATION",
+      "slug": "volume-x-the-arc-of-future-civilisation",
+      "type": "CANON",
+      "tier": "inner-circle",
+      "d": "2025-12-01",
+      "w": 256
+    },
+    {
+      "id": "book-fathering-without-fear",
+      "t": "Fathering Without Fear",
+      "slug": "book-fathering-without-fear",
+      "type": "BOOK",
+      "tier": "public",
+      "d": "2025-05-25",
+      "w": 493
+    },
+    {
+      "id": "the-architecture-of-human-purpose",
+      "t": "The Architecture of Human Purpose",
+      "slug": "the-architecture-of-human-purpose",
+      "type": "BOOK",
+      "tier": "public",
+      "d": "2025-11-25",
+      "w": 1771
+    },
+    {
+      "id": "the-builders-catechism",
+      "t": "The Builder's Catechism",
+      "slug": "the-builders-catechism",
+      "type": "BOOK",
+      "tier": "inner-circle",
+      "d": "2025-12-01",
+      "w": 616
+    },
+    {
+      "id": "the-fiction-adaptation",
+      "t": "The Fiction Adaptation",
+      "slug": "the-fiction-adaptation",
+      "type": "BOOK",
+      "tier": "public",
+      "d": "2025-06-10",
+      "w": 335
+    },
+    {
+      "id": "brotherhood-starter-kit",
+      "t": "Brotherhood Starter Kit",
+      "slug": "brotherhood-starter-kit",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-01-01",
+      "w": 153
+    },
+    {
+      "id": "canon-builders-rule-of-life",
+      "t": "Canon Builder's Rule of Life",
+      "slug": "canon-builders-rule-of-life",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 365
+    },
+    {
+      "id": "canon-campaign",
+      "t": "THE CANON - A New Era of Builders",
+      "slug": "canon-campaign",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 237
+    },
+    {
+      "id": "canon-council-table-agenda",
+      "t": "Council Table Agenda - Canon Leadership Session",
+      "slug": "canon-council-table-agenda",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 445
+    },
+    {
+      "id": "canon-household-charter",
+      "t": "Canon Household Charter",
+      "slug": "canon-household-charter",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 371
+    },
+    {
+      "id": "canon-reading-plan-year-one",
+      "t": "Canon Reading Plan - Year One",
+      "slug": "canon-reading-plan-year-one",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 385
+    },
+    {
+      "id": "destiny-mapping-worksheet",
+      "t": "Destiny Mapping Worksheet",
+      "slug": "destiny-mapping-worksheet",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-03-09",
+      "w": 140
+    },
+    {
+      "id": "fatherhood-impact-framework",
+      "t": "Fatherhood Impact Framework",
+      "slug": "fatherhood-impact-framework",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-01-15",
+      "w": 126
+    },
+    {
+      "id": "getting-started",
+      "t": "Getting Started",
+      "slug": "getting-started",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2024-01-15",
+      "w": 143
+    },
+    {
+      "id": "institutional-health-scorecard",
+      "t": "Institutional Health Scorecard",
+      "slug": "institutional-health-scorecard",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-03-02",
+      "w": 93
+    },
+    {
+      "id": "leadership-standards-blueprint",
+      "t": "Leadership Standards Blueprint",
+      "slug": "leadership-standards-blueprint",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-01-05",
+      "w": 181
+    },
+    {
+      "id": "multi-generational-legacy-ledger",
+      "t": "Multi-Generational Legacy Ledger",
+      "slug": "multi-generational-legacy-ledger",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-01",
+      "w": 399
+    },
+    {
+      "id": "purpose-alignment-checklist",
+      "t": "Purpose Alignment Checklist",
+      "slug": "purpose-alignment-checklist",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-01-07",
+      "w": 110
+    },
+    {
+      "id": "strategic-frameworks",
+      "t": "Strategic Frameworks",
+      "slug": "strategic-frameworks",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2024-01-10",
+      "w": 951
+    },
+    {
+      "id": "strategy-room-intake",
+      "t": "Strategy Room Intake",
+      "slug": "strategy-room-intake",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-26",
+      "w": 162
+    },
+    {
+      "id": "vault",
+      "t": "The Vault",
+      "slug": "vault",
+      "type": "RESOURCE",
+      "tier": "public",
+      "d": "2025-12-28",
+      "w": 86
+    },
+    {
+      "id": "abraham-vault-pack",
+      "t": "Abraham Vault — Strategic Artifacts Pack",
+      "slug": "abraham-vault-pack",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-12-28",
+      "w": 96
+    },
+    {
+      "id": "board-decision-log-template",
+      "t": "Board Decision Log Template",
+      "slug": "board-decision-log-template",
+      "type": "DOWNLOAD",
+      "tier": "inner-circle",
+      "d": "2025-12-28",
+      "w": 43
+    },
+    {
+      "id": "board-investor-onepager",
+      "t": "Board & Investor One-Pager Template",
+      "slug": "board-investor-onepager",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2024-02-01",
+      "w": 26
+    },
+    {
+      "id": "brotherhood-covenant",
+      "t": "Brotherhood Covenant",
+      "slug": "brotherhood-covenant",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2024-03-10",
+      "w": 301
+    },
+    {
+      "id": "canon-volume-iv-diagnostic-toolkit",
+      "t": "Canon Volume IV - Culture-Decadence Diagnostic Toolkit",
+      "slug": "canon-volume-iv-diagnostic-toolkit",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-12-18",
+      "w": 754
+    },
+    {
+      "id": "canon-volume-v-governance-diagnostic-toolkit",
+      "t": "Canon Volume V - Governance Diagnostic Toolkit",
+      "slug": "canon-volume-v-governance-diagnostic-toolkit",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-12-20",
+      "w": 664
+    },
+    {
+      "id": "communication-script-bpf",
+      "t": "Brotherhood Communication Script",
+      "slug": "communication-script-bpf",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2024-03-01",
+      "w": 346
+    },
+    {
+      "id": "decision-log-template",
+      "t": "Decision Log Template (PDF)",
+      "slug": "decision-log-template",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-12-28",
+      "w": 33
+    },
+    {
+      "id": "decision-matrix-scorecard",
+      "t": "Decision Matrix Scorecard",
+      "slug": "decision-matrix-scorecard",
+      "type": "DOWNLOAD",
+      "tier": "inner-circle",
+      "d": "2025-12-28",
+      "w": 61
+    },
+    {
+      "id": "download-legacy-architecture-canvas",
+      "t": "The Legacy Architecture Canvas",
+      "slug": "download-legacy-architecture-canvas",
+      "type": "DOWNLOAD",
+      "tier": "inner-circle-elite",
+      "d": "2025-12-28",
+      "w": 426
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "t": "Entrepreneur Operating Pack",
+      "slug": "entrepreneur-operating-pack",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-09-22",
+      "w": 295
+    },
+    {
+      "id": "entrepreneur-survival-checklist",
+      "t": "Entrepreneurial Survival Checklist",
+      "slug": "entrepreneur-survival-checklist",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2024-03-15",
+      "w": 334
+    },
+    {
+      "id": "family-altar-liturgy",
+      "t": "Family Altar Liturgy",
+      "slug": "family-altar-liturgy",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2024-03-05",
+      "w": 326
+    },
+    {
+      "id": "leaders-cue-card-two-up",
+      "t": "Leader's Cue Card (Two Up)",
+      "slug": "leaders-cue-card-two-up",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-10-21",
+      "w": 138
+    },
+    {
+      "id": "leadership-playbook",
+      "t": "The Leadership Playbook",
+      "slug": "leadership-playbook",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-10-21",
+      "w": 223
+    },
+    {
+      "id": "legacy-canvas",
+      "t": "The Legacy Architecture Canvas",
+      "slug": "legacy-canvas",
+      "type": "DOWNLOAD",
+      "tier": "inner-circle-elite",
+      "d": "2025-12-28",
+      "w": 315
+    },
+    {
+      "id": "life-alignment-assessment",
+      "t": "THE PRINCIPLES of SURRENDER FRAMEWORK",
+      "slug": "life-alignment-assessment",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2026-01-19",
+      "w": 949
+    },
+    {
+      "id": "mentorship-starter-kit",
+      "t": "Mentorship Starter Kit",
+      "slug": "mentorship-starter-kit",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-01-01",
+      "w": 174
+    },
+    {
+      "id": "operating-cadence-pack",
+      "t": "Operating Cadence Pack",
+      "slug": "operating-cadence-pack",
+      "type": "DOWNLOAD",
+      "tier": "inner-circle",
+      "d": "2025-12-28",
+      "w": 40
+    },
+    {
+      "id": "principles-for-my-son-cue-card",
+      "t": "Principles for My Son - Cue Card",
+      "slug": "principles-for-my-son-cue-card",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-10-21",
+      "w": 144
+    },
+    {
+      "id": "principles-for-my-son",
+      "t": "Principles for My Son",
+      "slug": "principles-for-my-son",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-01-01",
+      "w": 463
+    },
+    {
+      "id": "purpose-pyramid-worksheet",
+      "t": "Purpose Pyramid Worksheet",
+      "slug": "purpose-pyramid-worksheet",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-12-28",
+      "w": 39
+    },
+    {
+      "id": "scripture-track-john14",
+      "t": "Scripture Track - John 14",
+      "slug": "scripture-track-john14",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-01-21",
+      "w": 710
+    },
+    {
+      "id": "standards-brief",
+      "t": "Standards Brief",
+      "slug": "standards-brief",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-10-21",
+      "w": 204
+    },
+    {
+      "id": "ultimate-purpose-of-man-editorial",
+      "t": "The Ultimate Purpose of Man — Strategic Editorial (PDF)",
+      "slug": "ultimate-purpose-of-man-editorial",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-11-23",
+      "w": 861
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "t": "Weekly Operating Rhythm & Daily Blocks",
+      "slug": "weekly-operating-rhythm",
+      "type": "DOWNLOAD",
+      "tier": "public",
+      "d": "2025-10-21",
+      "w": 260
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "t": "Entrepreneur Operating Pack",
+      "slug": "entrepreneur-operating-pack",
+      "type": "PRINT",
+      "tier": "public",
+      "d": "2025-12-12",
+      "w": 132
+    },
+    {
+      "id": "fatherhood-standards-card",
+      "t": "Fatherhood Standards Card",
+      "slug": "fatherhood-standards-card",
+      "type": "PRINT",
+      "tier": "public",
+      "d": "2025-12-12",
+      "w": 102
+    },
+    {
+      "id": "leadership-playbook",
+      "t": "Leadership Playbook (30•60•90)",
+      "slug": "leadership-playbook",
+      "type": "PRINT",
+      "tier": "public",
+      "d": "2025-12-12",
+      "w": 104
+    },
+    {
+      "id": "mentorship-starter-kit",
+      "t": "Mentorship Starter Kit",
+      "slug": "mentorship-starter-kit",
+      "type": "PRINT",
+      "tier": "public",
+      "d": "2025-12-12",
+      "w": 84
+    },
+    {
+      "id": "standards-brief",
+      "t": "Standards Brief",
+      "slug": "standards-brief",
+      "type": "PRINT",
+      "tier": "public",
+      "d": "2025-12-12",
+      "w": 89
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "t": "Weekly Operating Rhythm",
+      "slug": "weekly-operating-rhythm",
+      "type": "PRINT",
+      "tier": "public",
+      "d": "2025-12-12",
+      "w": 103
+    },
+    {
+      "id": "founders-salon",
+      "t": "Founders Salon",
+      "slug": "founders-salon",
+      "type": "EVENT",
+      "tier": "private",
+      "d": "2025-06-01",
+      "w": 216
+    },
+    {
+      "id": "leadership-workshop",
+      "t": "Leadership Workshop",
+      "slug": "leadership-workshop",
+      "type": "EVENT",
+      "tier": "public",
+      "d": "2026-09-12",
+      "w": 101
+    }
+  ],
+  "tiers": {
+    "public": 237,
+    "inner-circle": 12,
+    "inner-circle-elite": 2,
+    "private": 1
+  },
+  "types": [
+    "INTEL_BRIEF",
+    "STRATEGY",
+    "DISPATCH",
+    "SHORT",
+    "LEXICON",
+    "CANON",
+    "BOOK",
+    "RESOURCE",
+    "DOWNLOAD",
+    "PRINT",
+    "EVENT"
+  ]
+}

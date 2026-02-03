@@ -5,13 +5,14 @@ import Fuse from "fuse.js";
 import Link from "next/link";
 import { safeArraySlice } from "@/lib/utils/safe";
 
-interface SearchItem {
-  id: string;
-  type: "post" | "book" | "event";
-  title: string;
-  url: string;
-  date: string | null;
-  snippet: string;
+/* --- 1. DATA SHAPE --- */
+interface RegistryAsset {
+  id: string;   
+  t: string;    
+  type: string; 
+  tier: string; 
+  d: string;    
+  w: number;    
 }
 
 interface SearchPaletteProps {
@@ -24,193 +25,163 @@ export default function SearchPalette({
   onClose,
 }: SearchPaletteProps): JSX.Element | null {
   const [query, setQuery] = React.useState("");
-  const [items, setItems] = React.useState<SearchItem[] | null>(null);
-  const [fuse, setFuse] = React.useState<any>(null);
+  const [items, setItems] = React.useState<RegistryAsset[]>([]);
+  const [fuse, setFuse] = React.useState<Fuse<RegistryAsset> | null>(null);
   const [active, setActive] = React.useState(0);
+  const [isLoading, setIsLoading] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Focus input when opening
+  // Focus and Scroll Lock logic
   React.useEffect(() => {
-    if (open && inputRef.current) {
+    if (open) {
       setTimeout(() => inputRef.current?.focus(), 100);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
     }
+    return () => { document.body.style.overflow = 'unset'; };
   }, [open]);
 
-  // lazy-load the index on first open
+  // Load the Registry
   React.useEffect(() => {
-    if (!open || items) return;
-    const loadSearchIndex = async (): Promise<void> => {
+    if (!open || items.length > 0) return;
+
+    const loadRegistry = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch("/api/search-index");
+        const res = await fetch("/system/content-registry.json");
         const data = await res.json();
-        const list: SearchItem[] = data.items;
+        const list: RegistryAsset[] = data.index;
+
         const fuseInstance = new Fuse(list, {
           includeScore: true,
-          threshold: 0.35,
-          ignoreLocation: true,
-          keys: ["title", "snippet", "url", "type"],
+          threshold: 0.4,
+          keys: ["t", "id", "type"],
         });
+
         setItems(list);
         setFuse(fuseInstance);
       } catch (error) {
-        console.error("Failed to load search index:", error);
+        console.error("❌ Registry Sync Error:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    loadSearchIndex();
+    loadRegistry();
   }, [open, items]);
 
-  // esc to close
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") onClose();
-    };
-    if (open) {
-      document.addEventListener("keydown", handleKeyDown);
-    }
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
-
-  // lock background scroll while open
-  React.useEffect(() => {
-    if (!open) return;
-    const scrollY = window.scrollY;
-    const { style } = document.documentElement;
-    style.position = "fixed";
-    style.top = `-${scrollY}px`;
-    style.left = "0";
-    style.right = "0";
-    style.width = "100%";
-    return () => {
-      style.position = "";
-      style.top = "";
-      style.left = "";
-      style.right = "";
-      style.width = "";
-      window.scrollTo(0, scrollY);
-    };
-  }, [open]);
-
-  const handleArrowNavigation = (direction: 1 | -1): void => {
-    setActive((current) => {
-      const count = top.length;
-      if (!count) return 0;
-      return (current + direction + count) % count;
-    });
-  };
-
-  const handleInputKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ): void => {
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        handleArrowNavigation(1);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        handleArrowNavigation(-1);
-        break;
-      case "Enter":
-        if (top[active]) {
-          window.location.href = top[active].url;
-        }
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>): void => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
-  const handleBackdropKeyDown = (
-    e: React.KeyboardEvent<HTMLDivElement>
-  ): void => {
-    if (e.key === "Enter" || e.key === " ") {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") onClose();
+    if (e.key === "ArrowDown") {
       e.preventDefault();
+      setActive((prev) => (prev + 1) % Math.min(results.length, 12));
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((prev) => (prev - 1 + Math.min(results.length, 12)) % Math.min(results.length, 12));
+    }
+    if (e.key === "Enter" && results[active]) {
+      // In a real scenario, you could push to router here
       onClose();
     }
   };
 
   if (!open) return null;
 
-  const results: SearchItem[] =
-    query.trim() && fuse
-      ? (fuse.search(query).map((r: any) => r.item) as SearchItem[])
-      : (items || []);
+  const results = query.trim() && fuse
+    ? fuse.search(query).map((r) => r.item)
+    : items;
 
   const top = safeArraySlice(results, 0, 12);
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Site search"
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 p-4 pt-24"
-      onClick={handleBackdropClick}
-      onKeyDown={handleBackdropKeyDown}
-      tabIndex={-1}
+      className="fixed inset-0 z-[100] flex items-start justify-center bg-[#0a0a0a]/80 backdrop-blur-md p-4 pt-24 transition-opacity duration-300"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/10 dark:bg-neutral-900">
-        <div className="border-b border-neutral-2000 p-3 dark:border-neutral-800">
+      <div className="w-full max-w-2xl overflow-hidden rounded-sm bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] ring-1 ring-black/5 dark:bg-[#111] dark:ring-white/5">
+        
+        {/* Minimal Search Input */}
+        <div className="flex items-center border-b border-neutral-100 p-5 dark:border-neutral-800">
           <input
             ref={inputRef}
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setActive(0);
-            }}
-            onKeyDown={handleInputKeyDown}
-            placeholder="Search posts, books, events..."
-            className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-forest dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
-            aria-label="Search"
+            onChange={(e) => { setQuery(e.target.value); setActive(0); }}
+            onKeyDown={handleKeyDown}
+            placeholder="Search Intelligence Archive..."
+            className="w-full bg-transparent text-xl font-light tracking-tight outline-none dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
           />
+          {isLoading && <div className="animate-spin rounded-full h-4 w-4 border border-emerald-800 border-t-transparent" />}
         </div>
-        <ul className="max-h-96 overflow-auto p-1">
+
+        {/* Conservative Results List */}
+        <ul className="max-h-[65vh] overflow-y-auto">
           {top.length === 0 ? (
-            <li className="px-3 py-6 text-center text-sm text-neutral-500">
-              {query ? "No results found" : "Start typing to search..."}
+            <li className="py-20 text-center text-xs uppercase tracking-widest text-neutral-400">
+              {query ? "No relevant records found." : "Awaiting selection..."}
             </li>
           ) : (
-            top.map((result: SearchItem, index: number) => (
-              <li key={result.id}>
+            top.map((asset, index) => (
+              <li key={asset.id}>
                 <Link
-                  href={result.url}
-                  className={`block rounded-lg px-3 py-2 text-sm transition ${
+                  href={`/vault/${asset.id}`}
+                  onClick={onClose}
+                  className={`group flex flex-col border-l-2 px-8 py-5 transition-all duration-300 ${
                     index === active
-                      ? "bg-forest text-cream"
-                      : "hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      ? "border-emerald-800 bg-neutral-50/50 dark:bg-white/[0.02] dark:border-emerald-500"
+                      : "border-transparent hover:bg-neutral-50/30 dark:hover:bg-white/[0.01]"
                   }`}
                   onMouseEnter={() => setActive(index)}
-                  onClick={onClose}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full border px-2 py-0.5 text-xs uppercase tracking-wide opacity-75 dark:border-neutral-700">
-                      {result.type}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={getTierStyles(asset.tier)}>
+                      {asset.tier.replace('-', ' ')}
                     </span>
-                    {result.date && (
-                      <time className="text-xs opacity-70">
-                        {new Date(result.date).toLocaleDateString()}
-                      </time>
-                    )}
+                    <span className="text-[9px] text-neutral-400 font-mono tracking-tighter opacity-60">
+                      {asset.type} // {asset.w} WORDS
+                    </span>
                   </div>
-                  <div className="mt-1 font-medium">{result.title}</div>
-                  {result.snippet && (
-                    <div className="mt-0.5 line-clamp-2 text-xs opacity-80">
-                      {result.snippet}
-                    </div>
-                  )}
+                  
+                  <div className="text-base font-medium tracking-tight text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white">
+                    {asset.t}
+                  </div>
+                  
+                  <div className="mt-2 text-[10px] text-neutral-400 font-light tracking-wide uppercase">
+                    Ref: {asset.id} — {new Date(asset.d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </div>
                 </Link>
               </li>
             ))
           )}
         </ul>
-        <div className="flex items-center justify-between border-t border-neutral-200 px-3 py-2 text-xs text-neutral-500 dark:border-neutral-800">
-          <span>Tip: Use ↑ ↓ and Enter</span>
-          <span>Esc to close</span>
+
+        {/* Formal Footer */}
+        <div className="flex items-center justify-between border-t border-neutral-100 bg-[#fafafa] px-6 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-400 dark:border-neutral-800 dark:bg-[#0d0d0d]">
+          <div className="flex gap-6">
+            <span className="flex items-center gap-2"><span className="opacity-50">↓↑</span> Navigate</span>
+            <span className="flex items-center gap-2"><span className="opacity-50">↵</span> Access Record</span>
+          </div>
+          <span className="font-medium text-neutral-300 dark:text-neutral-700">Established 2026</span>
         </div>
       </div>
     </div>
   );
+}
+
+/* --- TIER STYLING: INSTITUTIONAL MINIMALISM --- */
+function getTierStyles(tier: string) {
+  const base = "text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-none border transition-all duration-300";
+  
+  switch (tier.toLowerCase()) {
+    case 'inner-circle-elite':
+      return `${base} bg-amber-50/30 text-amber-700 border-amber-200/50 dark:bg-amber-950/20 dark:text-amber-300/80 dark:border-amber-900/40`;
+    case 'inner-circle':
+      return `${base} bg-emerald-50/30 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400/80 dark:border-emerald-900/40`;
+    case 'private':
+      return `${base} bg-rose-50/30 text-rose-900 border-rose-200/50 dark:bg-rose-950/20 dark:text-rose-400/80 dark:border-rose-900/40`;
+    case 'member':
+      return `${base} bg-slate-50/30 text-slate-700 border-slate-200/50 dark:bg-slate-900/30 dark:text-slate-400/80 dark:border-slate-800/40`;
+    default:
+      return `${base} bg-neutral-50/50 text-neutral-500 border-neutral-200 dark:bg-neutral-900/30 dark:text-neutral-500 dark:border-neutral-800/50`;
+  }
 }

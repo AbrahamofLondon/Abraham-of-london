@@ -1,9 +1,11 @@
 ---
 type: Resource
 title: Fatherhood Impact Framework
-description: A strategic model for fathers who want to shape identity, character, and destiny across generations.
+description: >-
+  A strategic model for fathers who want to shape identity, character, and
+  destiny across generations.
 author: Abraham of London
-date: "2025-01-15"
+date: '2025-01-15'
 slug: /resources/fatherhood-impact-framework
 draft: false
 coverImage: /assets/images/canon/canon-resources.jpg
@@ -11,14 +13,17 @@ accessLevel: public
 resourceType: guide
 docKind: Resource
 downloadUrl: /assets/resources/pdfs/fatherhood-impact-framework.pdf
-ogTitle: ""
-ogDescription: ""
-socialCaption: ""
+ogTitle: ''
+ogDescription: ''
+socialCaption: ''
 coverAspect: wide
 coverFit: cover
 coverPosition: center
-lockMessage: ""
+lockMessage: ''
 readTime: 4 mins
+tags:
+  - intel
+  - institutional-brief
 ---
 # Fatherhood Impact Framework
 
@@ -28,7 +33,7 @@ This resource defines the five domains every father must architect intentionally
 
 ## The 5 Domains
 
-### 1. **[Identity](/vault/lexicon/identity) Formation**
+### 1. **[Identity](/lexicon/identity) Formation**
 
 - Who am I?
 - What does it mean to carry this name?
@@ -55,7 +60,7 @@ This resource defines the five domains every father must architect intentionally
 
 - Vision
 - Calling
-- [Purpose](/vault/lexicon/purpose)
+- [Purpose](/lexicon/purpose)
 
 > "A father's presence becomes a child's first definition of safety."
 
