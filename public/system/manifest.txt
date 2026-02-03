@@ -1,5 +1,5 @@
 ABRAHAM OF LONDON — INTEL AUDIT MANIFEST
-Generated: 2026-02-03T14:50:05.932Z
+Generated: 2026-02-03T15:05:43.465Z
 Policy: Missing accessLevel defaults to directory standard.
 --------------------------------------------------
 
