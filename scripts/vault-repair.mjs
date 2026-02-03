@@ -1,68 +1,115 @@
-import { allDocuments } from '../.contentlayer/generated/index.mjs';
+// scripts/vault-repair.mjs — UNIFIED INSTITUTIONAL REPAIR ENGINE
 import fs from 'fs';
 import path from 'path';
 
 /**
- * VAULT REPAIR ENGINE
- * Safely auto-corrects internal links across 75+ intelligence briefs.
+ * MASTER REPAIR LOGIC:
+ * 1. [SHORTS PATCH] Injects accessLevel: "public" into naked shorts.
+ * 2. [METADATA FLATTEN] Converts category arrays to strings.
+ * 3. [LINK RESOLUTION] Heals broken internal Markdown links via slug-mapping.
+ * 4. [DIR SYNC] Ensures all institutional folders exist.
  */
 
-const VALID_SLUGS = new Set(allDocuments.map(doc => doc.slug.startsWith('/') ? doc.slug : `/${doc.slug}`));
-const SLUG_TO_FILE = Object.fromEntries(allDocuments.map(doc => [
-  doc.slug.startsWith('/') ? doc.slug : `/${doc.slug}`,
-  doc._raw.sourceFilePath
-]));
+const CONTENT_ROOT = path.join(process.cwd(), 'content');
+const DIRS_TO_REPAIR = ['shorts', 'dispatches', 'vault'];
 
-// Map of filenames to current slugs (for "Moved File" detection)
-const FILENAME_TO_SLUG = Object.fromEntries(allDocuments.map(doc => [
-  path.basename(doc._raw.sourceFilePath),
-  doc.slug.startsWith('/') ? doc.slug : `/${doc.slug}`
-]));
+console.log('🏛️  [MASTER_REPAIR] Initiating Full Portfolio Alignment...');
 
-console.log(`\n--- 🔧 Initialising Safe Auto-Repair ---`);
+// --- STEP 1: DIRECTORY SENSE CHECK ---
+if (!fs.existsSync(CONTENT_ROOT)) {
+  console.log('📁 Initializing content root...');
+  fs.mkdirSync(CONTENT_ROOT, { recursive: true });
+}
 
-let repairCount = 0;
+DIRS_TO_REPAIR.forEach(dir => {
+  const dirPath = path.join(CONTENT_ROOT, dir);
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+});
 
-allDocuments.forEach(doc => {
-  const filePath = path.join(process.cwd(), 'content', doc._raw.sourceFilePath);
-  if (!fs.existsSync(filePath)) return;
+// --- STEP 2: MAP BUILDING (For Link Resolution) ---
+const ALL_FILES = [];
+function walk(dir) {
+  const files = fs.readdirSync(dir, { withFileTypes: true });
+  for (const f of files) {
+    const res = path.resolve(dir, f.name);
+    if (f.isDirectory()) walk(res);
+    else if (f.name.endsWith('.mdx') || f.name.endsWith('.md')) ALL_FILES.push(res);
+  }
+}
+walk(CONTENT_ROOT);
 
+const SLUG_MAP = {};
+const FILENAME_TO_SLUG = {};
+
+ALL_FILES.forEach(filePath => {
+  const relative = path.relative(CONTENT_ROOT, filePath);
+  const slug = '/' + relative.replace(/\\/g, '/').replace(/\.mdx?$/, '');
+  const filename = path.basename(relative);
+  SLUG_MAP[slug] = true;
+  FILENAME_TO_SLUG[filename] = slug;
+  FILENAME_TO_SLUG[filename.replace(/\.mdx?$/, '')] = slug;
+});
+
+// --- STEP 3: SURGICAL REPAIR ---
+let linksFixed = 0;
+let metaFixed = 0;
+
+ALL_FILES.forEach(filePath => {
   let content = fs.readFileSync(filePath, 'utf8');
-  const linkRegex = /\[([^\]]+)\]\((?!\http|\/\/)([^)]+)\)/g;
   let hasChanges = false;
+  const fileName = path.basename(filePath);
 
-  const newContent = content.replace(linkRegex, (match, text, linkPath) => {
+  // A. Metadata Injection (Shorts & Global Access)
+  if (!content.includes('accessLevel:')) {
+    const lines = content.split('\n');
+    if (lines[0].startsWith('---')) {
+      // Determine default based on folder
+      const defaultLevel = filePath.includes('vault') ? 'inner-circle' : 'public';
+      lines.splice(1, 0, `accessLevel: "${defaultLevel}"`);
+      content = lines.join('\n');
+      metaFixed++;
+      hasChanges = true;
+    }
+  }
+
+  // B. Category Array Flattening
+  if (content.includes('category: [')) {
+    content = content.replace(/category:\s*\[\s*["'](.+?)["'].*?\]/g, 'category: "$1"');
+    metaFixed++;
+    hasChanges = true;
+  }
+
+  // C. Link Healing
+  const linkRegex = /\[([^\]]+)\]\((?!\http|\/\/)([^)]+)\)/g;
+  content = content.replace(linkRegex, (match, text, linkPath) => {
     const [purePath, anchor] = linkPath.split('#');
-    
-    // 1. If link is already valid, do nothing
-    if (VALID_SLUGS.has(purePath)) return match;
+    const suffix = anchor ? `#${anchor}` : '';
+    if (SLUG_MAP[purePath]) return match;
 
-    // 2. Attempt Correction: Is it just a missing leading slash?
     const withSlash = purePath.startsWith('/') ? purePath : `/${purePath}`;
-    if (VALID_SLUGS.has(withSlash)) {
+    if (SLUG_MAP[withSlash]) {
+      linksFixed++;
       hasChanges = true;
-      repairCount++;
-      return `[${text}](${withSlash}${anchor ? '#' + anchor : ''})`;
+      return `[${text}](${withSlash}${suffix})`;
     }
 
-    // 3. Attempt Correction: Was the file moved to a different folder?
-    // (Checks if the filename exists elsewhere in the vault)
-    const filename = path.basename(purePath);
-    const correctedSlug = FILENAME_TO_SLUG[filename] || FILENAME_TO_SLUG[`${filename}.mdx`];
-    
-    if (correctedSlug) {
+    const fname = path.basename(purePath);
+    if (FILENAME_TO_SLUG[fname]) {
+      linksFixed++;
       hasChanges = true;
-      repairCount++;
-      console.log(`Fixed: ${purePath} -> ${correctedSlug} in ${doc._raw.sourceFilePath}`);
-      return `[${text}](${correctedSlug}${anchor ? '#' + anchor : ''})`;
+      return `[${text}](${FILENAME_TO_SLUG[fname]}${suffix})`;
     }
-
-    return match; // Keep original if no safe fix found
+    return match;
   });
 
   if (hasChanges) {
-    fs.writeFileSync(filePath, newContent, 'utf8');
+    fs.writeFileSync(filePath, content, 'utf8');
   }
 });
 
-console.log(`\n✅ Repair Complete. ${repairCount} links safely updated.`);
+
+
+console.log(`\n✅ ALIGNMENT COMPLETE`);
+console.log(`📊 Metadata Patched: ${metaFixed}`);
+console.log(`📊 Links Healed:    ${linksFixed}`);
+console.log(`📊 Total Portfolio: ${ALL_FILES.length} briefs`);

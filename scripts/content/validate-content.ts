@@ -1,20 +1,26 @@
-import { readdirSync, existsSync, statSync, readFileSync } from 'fs';
+// scripts/content/validate-content.ts — HARDENED (Content Quality Gate)
+import { readdirSync, existsSync, statSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-console.log('🔍 Validating content files...');
+/**
+ * INSTITUTIONAL AUDIT POLICY:
+ * 1. Category must be a STRING (Contentlayer constraint).
+ * 2. AccessLevel defaults to PUBLIC if missing (Abraham's Policy).
+ * 3. Size fields must contain UNITS (MB/KB) for the UI.
+ */
+
+console.log('🔍 [IQC] Initiating deep content validation...');
 
 const contentDir = join(process.cwd(), 'content');
 
 if (!existsSync(contentDir)) {
-  console.log('📁 Content directory does not exist');
+  console.log('📁 [IQC] Content registry not found. Skipping validation.');
   process.exit(0);
 }
 
-// Track validation issues
 const validationErrors: Array<{file: string, errors: string[]}> = [];
 const validationWarnings: Array<{file: string, warnings: string[]}> = [];
 
-// Count and analyze content files
 let fileCount = 0;
 let totalSize = 0;
 const extensions: Record<string, number> = {};
@@ -26,41 +32,39 @@ function validateMdxFile(filePath: string, category?: string) {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Check for category arrays (will break build)
+    // --- 1. THE CONTENTLAYER KILLERS (CRITICAL) ---
     if (content.includes('category: [')) {
-      errors.push('Category field is an array - should be single string. Will cause build failure.');
+      errors.push('Category field is an array (Contentlayer requires a single string).');
     }
 
-    // Check for problematic access field
-    const accessMatch = content.match(/access:\s*\n\s+tier:/);
-    if (accessMatch) {
-      warnings.push('Access field with tier may cause validation issues. Consider using draft: true instead.');
+    // --- 2. ABRAHAM'S ACCESS POLICY (ADAPTIVE) ---
+    const hasAccessLevel = content.match(/accessLevel:\s*['"]?(\w+)['"]?/);
+    if (!hasAccessLevel) {
+      // We don't error here anymore; we just note the auto-resolution
+      warnings.push('Missing accessLevel: System will default to "public".');
     }
 
-    // Check for malformed size fields
-    const sizeMatch = content.match(/size:\s*(\d+(?:\.\d+)?)(?:\s|$|\n)/g);
+    // --- 3. UI INTEGRITY (WARNINGS) ---
+    // Check for size fields without units (e.g., size: 2.5 vs size: 2.5MB)
+    const sizeMatch = content.match(/size:\s*["']?(\d+(?:\.\d+)?)(?:\s|["']|$|\n)/g);
     if (sizeMatch) {
       sizeMatch.forEach(match => {
         if (!match.includes('MB') && !match.includes('KB') && !match.includes('GB')) {
-          warnings.push(`Size without unit: "${match.trim()}" - should be like "2.1MB"`);
+          warnings.push(`Unitless size detected: "${match.trim()}" (Add MB/KB).`);
         }
       });
     }
 
-    // Check for missing closing frontmatter
-    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontmatterMatch) {
-      warnings.push('Missing or malformed frontmatter');
+    // --- 4. STRUCTURAL INTEGRITY ---
+    if (!content.startsWith('---') || content.split('---').length < 3) {
+      errors.push('Malformed or missing YAML frontmatter delimiters.');
     }
 
-    if (errors.length > 0) {
-      validationErrors.push({ file: filePath, errors });
-    }
-    if (warnings.length > 0) {
-      validationWarnings.push({ file: filePath, warnings });
-    }
+    if (errors.length > 0) validationErrors.push({ file: filePath, errors });
+    if (warnings.length > 0) validationWarnings.push({ file: filePath, warnings });
+    
   } catch (error: any) {
-    console.log(`  ⚠️ Could not validate: ${filePath} - ${error.message}`);
+    console.log(`  ⚠️  [IQC_SKIPPED] ${filePath}: ${error.message}`);
   }
 }
 
@@ -71,37 +75,21 @@ function scanDirectory(dir: string, currentCategory?: string) {
     const itemPath = join(dir, item.name);
     
     if (item.isDirectory()) {
-      // Recursively scan subdirectories
       scanDirectory(itemPath, item.name);
     } else if (item.isFile()) {
-      // Check if it's a content file
       const extMatch = item.name.match(/\.([a-zA-Z0-9]+)$/);
       if (extMatch) {
         const ext = extMatch[1].toLowerCase();
-        const isContentFile = ['md', 'mdx', 'json', 'yml', 'yaml', 'txt'].includes(ext);
-        
-        if (isContentFile) {
+        if (['md', 'mdx'].includes(ext)) {
           fileCount++;
+          validateMdxFile(itemPath, currentCategory);
           
-          // Validate MDX/MD files for build-breaking issues
-          if (ext === 'mdx' || ext === 'md') {
-            validateMdxFile(itemPath, currentCategory);
-          }
+          const stats = statSync(itemPath);
+          totalSize += stats.size;
+          extensions[ext] = (extensions[ext] || 0) + 1;
           
-          // Get file stats
-          try {
-            const stats = statSync(itemPath);
-            totalSize += stats.size;
-            
-            // Track extensions
-            extensions[ext] = (extensions[ext] || 0) + 1;
-            
-            // Track categories
-            if (currentCategory) {
-              categories[currentCategory] = (categories[currentCategory] || 0) + 1;
-            }
-          } catch (error) {
-            console.log(`  ⚠️ Could not read stats: ${item.name}`);
+          if (currentCategory) {
+            categories[currentCategory] = (categories[currentCategory] || 0) + 1;
           }
         }
       }
@@ -109,84 +97,39 @@ function scanDirectory(dir: string, currentCategory?: string) {
   }
 }
 
-function generateFixCommands(): string[] {
-  const commands: string[] = [];
-  
-  validationErrors.forEach(({ file, errors }) => {
-    if (errors.some(e => e.includes('Category field is an array'))) {
-      const relativePath = file.replace(process.cwd() + '/', '');
-      commands.push(`# Fix category in ${relativePath}:`);
-      commands.push(`# sed -i '' "s/category: \\[.*\\]/category: \"Practical Application\"/" "${file}"`);
-    }
-  });
-  
-  return commands;
-}
-
+// EXECUTE
 try {
   scanDirectory(contentDir);
   
-  console.log(`\n📊 Content Analysis:`);
-  console.log(`  Total files: ${fileCount}`);
-  console.log(`  Total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`\n📊 [AUDIT_SUMMARY]`);
+  console.log(`  Assets Scanned: ${fileCount}`);
+  console.log(`  Total Payload: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
   
-  if (Object.keys(extensions).length > 0) {
-    console.log(`  File types:`);
-    Object.entries(extensions).forEach(([ext, count]) => {
-      console.log(`    .${ext}: ${count} files`);
-    });
-  }
-  
-  if (Object.keys(categories).length > 0) {
-    console.log(`  Categories:`);
-    Object.entries(categories).forEach(([category, count]) => {
-      console.log(`    ${category}: ${count} files`);
-    });
-  }
-  
-  // Show validation results
   if (validationErrors.length > 0) {
-    console.log(`\n🚨 BUILD-BREAKING ERRORS (${validationErrors.length}):`);
+    console.log(`\n🚨 [IQC_REJECTED] ${validationErrors.length} Critical Issues:`);
     validationErrors.forEach(({ file, errors }) => {
-      const relativePath = file.replace(process.cwd() + '/', '');
-      console.log(`  ❌ ${relativePath}`);
-      errors.forEach(error => console.log(`     • ${error}`));
+      console.log(`  ❌ ${file.split('content/')[1]}`);
+      errors.forEach(e => console.log(`     • ${e}`));
     });
+    
+    console.log('\n💡 [SOLUTION] Run "pnpm vault:fix" or manually convert category arrays to strings.');
+    process.exit(1); 
   }
-  
+
   if (validationWarnings.length > 0) {
-    console.log(`\n⚠️  WARNINGS (${validationWarnings.length}):`);
-    validationWarnings.forEach(({ file, warnings }) => {
-      const relativePath = file.replace(process.cwd() + '/', '');
-      console.log(`  ⚠️  ${relativePath}`);
-      warnings.forEach(warning => console.log(`     • ${warning}`));
+    console.log(`\n⚠️  [IQC_ADVISORY] ${validationWarnings.length} Optimizations possible:`);
+    // Only show first 5 warnings to prevent log-bloat in CI
+    validationWarnings.slice(0, 5).forEach(({ file, warnings }) => {
+      console.log(`  ⚠️  ${file.split('content/')[1]}`);
+      warnings.forEach(w => console.log(`     • ${w}`));
     });
+    if (validationWarnings.length > 5) console.log(`     ... and ${validationWarnings.length - 5} more.`);
   }
-  
-  if (fileCount === 0) {
-    console.log('\n⚠️ No content files found. Consider adding Markdown files to the content directory.');
-  } else if (validationErrors.length === 0) {
-    console.log('\n✅ Content validation completed - no build-breaking issues found');
-  } else {
-    console.log('\n❌ Content validation failed with build-breaking errors');
-    
-    // Generate quick fix suggestions
-    console.log('\n💡 Quick fix commands:');
-    const fixCommands = generateFixCommands();
-    fixCommands.forEach(cmd => console.log(cmd));
-    
-    // Also provide a quick manual fix approach
-    console.log('\n📝 Manual fix approach:');
-    console.log('1. For category arrays: Change "category: [\"A\", \"B\"]" to "category: \"A\""');
-    console.log('2. For access fields: Remove or replace with "draft: true"');
-    console.log('3. For size units: Ensure format like "2.1MB" not just "2.1"');
-    
-    process.exit(1);
-  }
-  
+
+  console.log('\n✅ [IQC_PASSED] Content integrity verified for production.');
+  process.exit(0);
+
 } catch (error: any) {
-  console.error('❌ Error during content validation:', error.message);
+  console.error('❌ [IQC_CRASH] Failure:', error.message);
   process.exit(1);
 }
-
-process.exit(0);

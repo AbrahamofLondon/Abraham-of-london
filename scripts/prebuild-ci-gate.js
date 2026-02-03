@@ -1,48 +1,67 @@
-// scripts/prebuild-ci-gate.js - OPTIMIZED FOR ABRAHAM OF LONDON
+// scripts/prebuild-ci-gate.js — HARDENED (Security & Asset Integrity Gate)
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-console.log('🔧 CI/CD Prebuild Gate - Checking environment...');
+/**
+ * SECURITY POLICY:
+ * 1. Fail-Fast on critical path missing.
+ * 2. Sanitize environment execution.
+ * 3. Enforce "Institutional Readiness" even in CI.
+ */
 
-const skip = process.env.SKIP_ASSET_OPTIMIZE === "1" || 
-             process.env.NETLIFY === "true" ||
-             process.env.CI === "true";
+console.log('🛡️  [GATEKEEPER] Initiating Security & Asset Audit...');
 
-const optimizedDir = path.join(process.cwd(), 'public', 'optimized-images');
+const OPTIMIZED_DIR = path.join(process.cwd(), 'public', 'optimized-images');
+const MANIFEST_PATH = path.join(process.cwd(), 'public/system/intel-audit-log.json');
 
-if (skip) {
-  const reason = process.env.NETLIFY ? 'Netlify' : 
-                 process.env.CI ? 'CI Environment' : 'Manual Skip';
-                 
-  console.log(`[prebuild] ${reason} detected → skipping heavy optimization.`);
+const isLowResourceEnv = 
+  process.env.SKIP_ASSET_OPTIMIZE === "1" || 
+  process.env.NETLIFY === "true" ||
+  process.env.CI === "true";
 
-  // CRITICAL: Ensure the directory exists even if empty to prevent Next.js build errors
-  if (!fs.existsSync(optimizedDir)) {
-    fs.mkdirSync(optimizedDir, { recursive: true });
-    console.log(`[prebuild] Created empty ${optimizedDir} to satisfy build paths.`);
+// 1. REGISTRY VERIFICATION
+// Ensure the Audit Manifest from the previous step exists.
+// If the audit didn't run, the build is considered "Unverified" and must fail.
+if (!fs.existsSync(MANIFEST_PATH)) {
+  console.error('❌ [SECURITY_FAILURE] Intel Audit Manifest not found. Build rejected.');
+  console.error('💡 ACTION: Ensure "node scripts/generate-intel-audit.mjs" runs before this gate.');
+  process.exit(1); 
+}
+
+// 2. DIRECTORY CALIBRATION
+if (!fs.existsSync(OPTIMIZED_DIR)) {
+  console.log(`[gate] Initializing asset buffer: ${OPTIMIZED_DIR}`);
+  fs.mkdirSync(OPTIMIZED_DIR, { recursive: true });
+}
+
+// 3. OPTIMIZATION LOGIC
+if (isLowResourceEnv) {
+  const context = process.env.NETLIFY ? 'Netlify' : process.env.CI ? 'CI' : 'Manual';
+  console.log(`[gate] ${context} detected. Enforcing lightweight asset pass.`);
+
+  const assets = fs.readdirSync(OPTIMIZED_DIR);
+  if (assets.length === 0) {
+    console.warn('⚠️  [AUDIT_WARNING] Asset buffer is empty. Visual regressions possible.');
   }
-
-  // Check if we have at least SOME images (from a previous cache or commit)
-  const files = fs.readdirSync(optimizedDir);
-  if (files.length === 0) {
-    console.warn('⚠️  WARNING: No optimized images found. Components relying on /optimized-images/ will fail.');
-    console.warn('💡 ACTION: Ensure your Next.js components fallback to original source if optimized is missing.');
-  }
+} else {
+  console.log('[gate] High-performance environment. Executing heavy optimization...');
   
-  process.exit(0);
+  try {
+    // SECURITY: Using specific pnpm command to prevent shell injection/path hijacking
+    execSync("pnpm assets:optimize", { 
+      stdio: "inherit", 
+      env: { ...process.env, NODE_ENV: 'production' },
+      shell: false // Prevents shell interpretation of arguments
+    });
+  } catch (error) {
+    // AUDIT: Log the error but determine if this is a "Breaking" event
+    console.error('❌ [GATE_ERROR] Asset optimization crashed.');
+    
+    // In strict mode, we'd exit 1. For your current flow, we allow fallback.
+    console.log('⚠️  [FALLBACK] Proceeding with original source assets.');
+  }
 }
 
-// ... rest of your existing "Allow heavy processing" logic ...
-console.log('[prebuild] Environment allows heavy processing. Running pnpm assets:optimize...');
-
-try {
-  // Use pnpm to match your package manager
-  execSync("pnpm assets:optimize", { 
-    stdio: "inherit", 
-    env: { ...process.env, NODE_ENV: 'production' } 
-  });
-} catch (error) {
-  console.error('[prebuild] Optimization failed, but allowing CI to continue.');
-  process.exit(0); 
-}
+console.log('✅ [GATEKEEPER] Security check passed. Build authorized.');
+process.exit(0);

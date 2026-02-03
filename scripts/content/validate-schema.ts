@@ -1,60 +1,60 @@
+// scripts/content/validate-schema.ts — INSTITUTIONAL ALIGNMENT
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-console.log('📋 Validating content schema...');
+console.log('🛡️  [SCHEMA] Validating Intelligence Portfolio structure...');
 
-// Check if contentlayer.config.ts exists
-const configPath = join(process.cwd(), 'contentlayer.config.ts');
-if (!existsSync(configPath)) {
-  console.log('⚠️ No contentlayer.config.ts found, skipping advanced validation');
+const ROOT_DIR = process.cwd();
+const CONTENT_DIR = join(ROOT_DIR, 'content');
+
+// Updated to your specific Institutional Folders
+const INSTITUTIONAL_FOLDERS = [
+  'vault',        // Core intelligence briefs
+  'dispatches',   // Updates and reports
+  'shorts',       // Quick insights
+  'legal',        // Compliance and privacy
+  'system'        // Internal configuration
+];
+
+if (!existsSync(CONTENT_DIR)) {
+  console.log('📁 [SCHEMA] Content root missing. Initializing Foundation...');
+  mkdirSync(CONTENT_DIR, { recursive: true });
 }
 
-// Ensure content directory exists with basic structure
-const contentDir = join(process.cwd(), 'content');
-if (!existsSync(contentDir)) {
-  console.log('📁 Creating content directory structure...');
-  
-  // Create directories
-  const directories = ['blog', 'pages', 'docs', 'authors', 'products'];
-  directories.forEach(dir => {
-    const dirPath = join(contentDir, dir);
-    if (!existsSync(dirPath)) {
-      mkdirSync(dirPath, { recursive: true });
-      console.log(`  Created: ${dir}/`);
-    }
-  });
-
-  // Create a welcome post
-  const welcomePost = join(contentDir, 'blog', 'welcome.md');
-  if (!existsSync(welcomePost)) {
-    const content = `---
-title: "Welcome to Abraham of London"
+INSTITUTIONAL_FOLDERS.forEach(dir => {
+  const dirPath = join(CONTENT_DIR, dir);
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath, { recursive: true });
+    console.log(`  ✅ Created Directory: content/${dir}/`);
+    
+    // Seed an initial brief if the directory was just created
+    if (dir === 'vault') {
+      const seedFile = join(dirPath, 'intel-001-foundation.mdx');
+      const seedContent = `---
+title: "Institutional Foundation"
 date: "${new Date().toISOString().split('T')[0]}"
-description: "Welcome to our premium luxury brand experience"
-author: "Admin"
-tags: ["welcome", "introduction"]
-featured: true
+accessLevel: "inner-circle"
+category: "Intelligence"
+description: "Initial system-generated intelligence brief."
 ---
 
-# Welcome to Abraham of London
+# Institutional Foundation
 
-Thank you for visiting our premium luxury brand website. We are currently setting up our content.
-
-## What to Expect
-
-- Exclusive product showcases
-- Luxury lifestyle insights
-- Brand heritage stories
-- Seasonal collections
-
-Stay tuned for more premium content coming soon!
-
-*The Abraham of London Team*`;
-    
-    writeFileSync(welcomePost, content);
-    console.log('  Created sample blog post: blog/welcome.md');
+This document serves as the foundation for the Abraham of London intelligence portfolio.
+`;
+      writeFileSync(seedFile, seedContent);
+      console.log('     ✨ Seeded: vault/intel-001-foundation.mdx');
+    }
   }
+});
+
+// Verify Contentlayer Config (The "Brain" of the schema)
+const configPath = join(ROOT_DIR, 'contentlayer.config.ts');
+if (!existsSync(configPath)) {
+  console.warn('⚠️  [SCHEMA_WARNING] contentlayer.config.ts not found. Build may rely on runtime fallbacks.');
+} else {
+  console.log('✅ [SCHEMA] Contentlayer configuration verified.');
 }
 
-console.log('✅ Content schema validation completed');
+console.log('✅ [SCHEMA] Portfolio validation complete.');
 process.exit(0);
