@@ -1,32 +1,39 @@
-/* lib/briefs/registry.ts — MISSION CONTROL FOR 75 BRIEFS */
+/* ============================================================================
+ * SOVEREIGN INTELLIGENCE REGISTRY [V1.0.0]
+ * ============================================================================ */
+
+export type Classification = "Public" | "Private" | "Restricted";
 
 export interface BriefEntry {
-  id: string;
-  title: string;
-  abstract: string;
-  series: string;
+  id: string;        // Vol ID (e.g., "brief-01")
   volume: number;
-  date: string;
-  classification: "Public" | "Inner Circle" | "Restricted";
+  title: string;
+  series: string;    // e.g., "Institutional Design", "Market Intelligence"
+  abstract: string;
+  classification: Classification;
   readingTime: string;
   tags: string[];
+  publishedAt: string;
 }
 
 export const BRIEF_REGISTRY: BriefEntry[] = [
   {
-    id: "frontier-resilience-01",
-    title: "Institutional Resilience in Frontier Markets",
-    abstract: "A framework for designing robust operational architectures in high-volatility environments.",
-    series: "Frontier Strategy",
+    id: "v1-resilience",
     volume: 1,
-    date: "2026-01-15",
-    classification: "Inner Circle",
+    title: "The Resilience Framework",
+    series: "Institutional Design",
+    abstract: "A fundamental re-evaluation of institutional stability within frontier markets.",
+    classification: "Restricted",
     readingTime: "12 min",
-    tags: ["Strategy", "Risk", "Emerging-Markets"]
+    tags: ["Governance", "Stability", "Directorate"],
+    publishedAt: "2026-01-15",
   },
-  // ... Imagine 74 more entries here
+  // ... We will expand this to all 75 assets
 ];
 
-export function getBriefById(id: string) {
-  return BRIEF_REGISTRY.find(b => b.id === id);
-}
+/**
+ * Helper to fetch a brief by its unique ID
+ */
+export const getBriefById = (id: string): BriefEntry | undefined => {
+  return BRIEF_REGISTRY.find((brief) => brief.id === id);
+};

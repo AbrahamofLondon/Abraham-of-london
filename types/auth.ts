@@ -1,6 +1,7 @@
 // types/auth.ts
-export type UserRole = 'guest' | 'viewer' | 'editor' | 'admin' | 
-                      'member' | 'patron' | 'inner-circle' | 'founder';
+
+export type UserRole = 'guest' | 'viewer' | 'member' | 'patron' | 
+                      'inner-circle' | 'editor' | 'admin' | 'founder';
 
 export interface User {
   id: string;
@@ -12,26 +13,33 @@ export interface User {
   lastAccess?: string;
 }
 
+/**
+ * FIXED HIERARCHY: 
+ * We want Admin/Founder at the top so they can access EVERYTHING.
+ */
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
   'guest': 0,
   'viewer': 1,
-  'editor': 2,
-  'admin': 3,
-  'member': 4,
-  'patron': 5,
-  'inner-circle': 6,
+  'member': 2,
+  'patron': 3,
+  'inner-circle': 4,
+  'editor': 5,
+  'admin': 6,
   'founder': 7
 } as const;
 
-// Content access levels mapped to roles
+/**
+ * CONTENT ACCESS MAPPING
+ * Added 'restricted' to match your MDX classification.
+ */
 export const CONTENT_ACCESS = {
-  'public': ['guest', 'viewer', 'editor', 'admin', 'member', 'patron', 'inner-circle', 'founder'],
-  'member': ['member', 'patron', 'inner-circle', 'founder'],
-  'patron': ['patron', 'inner-circle', 'founder'],
-  'inner-circle': ['inner-circle', 'founder'],
-  'founder': ['founder'],
-  'admin': ['admin'],
-  'editor': ['editor', 'admin']
+  'public': ['guest', 'viewer', 'member', 'patron', 'inner-circle', 'editor', 'admin', 'founder'],
+  'member': ['member', 'patron', 'inner-circle', 'editor', 'admin', 'founder'],
+  'patron': ['patron', 'inner-circle', 'editor', 'admin', 'founder'],
+  'inner-circle': ['inner-circle', 'editor', 'admin', 'founder'],
+  'restricted': ['admin', 'founder'], // ONLY Directorate level
+  'admin': ['admin', 'founder'],
+  'editor': ['editor', 'admin', 'founder']
 } as const;
 
 export type ContentAccessLevel = keyof typeof CONTENT_ACCESS;
@@ -39,8 +47,13 @@ export type ContentAccessLevel = keyof typeof CONTENT_ACCESS;
 /**
  * Check if a user role has access to a specific content level
  */
-export function hasContentAccess(userRole: UserRole, contentLevel: ContentAccessLevel): boolean {
-  return CONTENT_ACCESS[contentLevel].includes(userRole);
+export function hasContentAccess(userRole: UserRole, contentLevel: string): boolean {
+  // Fallback to public if the level doesn't exist in our map
+  const level = (contentLevel.toLowerCase() in CONTENT_ACCESS) 
+    ? (contentLevel.toLowerCase() as ContentAccessLevel) 
+    : 'public';
+    
+  return (CONTENT_ACCESS[level] as readonly string[]).includes(userRole);
 }
 
 /**
@@ -59,6 +72,3 @@ export function getHighestRole(roles: UserRole[]): UserRole {
     'guest' as UserRole
   );
 }
-
-// Re-export for backward compatibility
-export type { UserRole };

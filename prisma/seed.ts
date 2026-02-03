@@ -1,24 +1,15 @@
 #!/usr/bin/env tsx
-/* prisma/seed.ts — THE SOVEREIGN ARCHIVE INITIALIZATION [V2.7.1] */
+/* prisma/seed.ts — THE SOVEREIGN ARCHIVE INITIALIZATION [V3.0.0] */
 
 import { PrismaClient } from '@prisma/client';
 import { config } from 'dotenv';
 import path from 'path';
-import { createHash } from 'crypto';
+import { hashEmail, encryptDocument } from '../lib/security';
 
 // Initialize environment variables
 config({ path: path.resolve(process.cwd(), '.env') });
 
-const prisma = new PrismaClient({
-  log: ['error', 'warn'],
-});
-
-/**
- * Security: SHA-256 hashing for Inner Circle anonymity.
- */
-function hashEmail(email: string): string {
-  return createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
-}
+const prisma = new PrismaClient();
 
 async function seed() {
   console.log('🚀 INITIALIZING SOVEREIGN ARCHIVE...');
@@ -26,11 +17,9 @@ async function seed() {
 
   try {
     // 1. SYSTEM CONFIGURATION
-    console.log('⚙️ CONFIGURING SYSTEM PARAMETERS...');
     const systemConfigs = [
-      { key: 'app.version', value: '1.0.0', type: 'string', description: 'Sovereign OS Version', isPublic: true },
-      { key: 'security.tier_clearance', value: 'Level 3', type: 'string', description: 'Active security protocol' },
-      { key: 'portfolio.total_assets', value: '75', type: 'number', description: 'Target brief count' }
+      { key: 'app.version', value: '1.1.0', type: 'string', description: 'Sovereign OS Version', isPublic: true },
+      { key: 'security.encryption_mode', value: 'AES-256-GCM', type: 'string', description: 'Active Cipher' }
     ];
 
     for (const cfg of systemConfigs) {
@@ -41,8 +30,7 @@ async function seed() {
       });
     }
 
-    // 2. INITIAL ADMIN ELEVATION
-    // Target: info@abrahamoflondon.org
+    // 2. DIRECTORATE ELEVATION
     const adminEmail = process.env.INITIAL_ADMIN_EMAIL || 'info@abrahamoflondon.org';
     const adminEmailHash = hashEmail(adminEmail);
     
@@ -62,74 +50,77 @@ async function seed() {
       },
     });
 
-    // 3. THE 75 INTELLIGENCE BRIEFS
-    console.log('📚 GENERATING PORTFOLIO: 75 ASSETS...');
-    
-    const foundationalBriefs = [
+    // 3. PORTFOLIO & CANON ASSETS
+    // Example including your "Restricted" document
+    const assets = [
       {
-        slug: 'legacy-architecture-canvas',
-        title: 'The Legacy Architecture Canvas',
-        contentType: 'PDF',
-        version: '1.2.0',
-        classification: 'Level 3',
-        tags: JSON.stringify(['legacy', 'governance']),
-        metadata: JSON.stringify({ category: 'Special Ops' })
+        slug: 'frontier-resilience-01',
+        title: 'Institutional Resilience in Frontier Markets',
+        classification: 'Restricted', // TRIGGER ENCRYPTION
+        rawContent: 'This is highly sensitive intelligence regarding MGM models...',
+        metadata: { series: 'Frontier Strategy', volume: 1 }
       },
       {
-        slug: 'ultimate-purpose-of-man',
-        title: 'The Ultimate Purpose of Man',
-        contentType: 'PDF',
-        version: '1.0.1',
-        classification: 'Level 1',
-        tags: JSON.stringify(['philosophy', 'editorial']),
-        metadata: JSON.stringify({ category: 'Theology' })
+        slug: 'public-blog-post',
+        title: 'Welcome to the Archive',
+        classification: 'Public', // STAY PLAINTEXT
+        rawContent: 'This is a public welcome message.',
+        metadata: { series: 'Announcements' }
       }
     ];
 
-    const generatedBriefs = Array.from({ length: 73 }).map((_, i) => {
-      const idNum = 100 + i;
-      return {
-        slug: `intelligence-brief-${idNum}`,
-        title: `Intelligence Brief ${idNum}: Global Strategic Analysis`,
-        contentType: 'PDF',
-        version: '1.0.0',
-        classification: i % 10 === 0 ? 'Level 3' : 'Level 2',
-        tags: JSON.stringify(['strategy', 'intelligence', '2026']),
-        metadata: JSON.stringify({ category: i % 2 === 0 ? 'Geopolitical' : 'Economic', index: idNum })
-      };
-    });
+    console.log(`📚 PROCESSING ${assets.length} ASSETS...`);
 
-    const allBriefs = [...foundationalBriefs, ...generatedBriefs];
+    for (const asset of assets) {
+      let contentToStore = asset.rawContent;
+      let securityMetadata = {};
 
-    for (const brief of allBriefs) {
+      // Logic: Encryption for Restricted or Private assets
+      if (asset.classification === 'Restricted' || asset.classification === 'Private') {
+        console.log(`🔒 ENCRYPTING: ${asset.slug}`);
+        const encrypted = encryptDocument(asset.rawContent);
+        contentToStore = encrypted.content;
+        securityMetadata = {
+          iv: encrypted.iv,
+          authTag: encrypted.authTag,
+          isEncrypted: true
+        };
+      }
+
       await prisma.contentMetadata.upsert({
-        where: { slug: brief.slug },
-        update: brief,
-        create: brief,
+        where: { slug: asset.slug },
+        update: {
+          title: asset.title,
+          classification: asset.classification,
+          content: contentToStore,
+          metadata: JSON.stringify({ ...asset.metadata, ...securityMetadata })
+        },
+        create: {
+          slug: asset.slug,
+          title: asset.title,
+          classification: asset.classification,
+          content: contentToStore,
+          metadata: JSON.stringify({ ...asset.metadata, ...securityMetadata })
+        }
       });
     }
 
     // 4. SYSTEM AUDIT LOG
-console.log('📝 RECORDING INITIALIZATION AUDIT...');
-await prisma.systemAuditLog.create({
-  data: {
-    actorType: 'SYSTEM',
-    actorId: adminMember.id,
-    actorEmail: adminEmail, // Required by schema
-    action: 'DATABASE_SEED_COMPLETE',
-    resourceType: 'PORTFOLIO',
-    resourceId: 'INITIAL_SEED', // Required by schema
-    status: 'SUCCESS',
-    severity: 'info',
-    metadata: JSON.stringify({ 
-      count: allBriefs.length, 
-      schemaVersion: '2.7.0' 
-    }), // Required by schema
-  },
-});
+    await prisma.systemAuditLog.create({
+      data: {
+        actorType: 'SYSTEM',
+        actorId: adminMember.id,
+        actorEmail: adminEmail,
+        action: 'DATABASE_SEED_COMPLETE',
+        resourceType: 'PORTFOLIO',
+        resourceId: 'SEED_V3',
+        status: 'SUCCESS',
+        severity: 'info',
+        metadata: JSON.stringify({ assetsProcessed: assets.length }),
+      },
+    });
 
-    const duration = Date.now() - startTime;
-    console.log(`✅ PORTFOLIO SYNC COMPLETE: ${allBriefs.length} ASSETS READY. [${duration}ms]`);
+    console.log(`✅ SYNC COMPLETE [${Date.now() - startTime}ms]`);
 
   } catch (error) {
     console.error('❌ SEED FAILURE:', error);

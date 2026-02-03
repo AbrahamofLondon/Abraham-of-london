@@ -159,7 +159,7 @@ importers:
         specifier: ^14.1.2
         version: 14.1.2
       '@types/node':
-        specifier: ^25.2.0
+        specifier: ^25.1.0
         version: 25.2.0
       '@types/react':
         specifier: ^19.2.10
@@ -231,7 +231,7 @@ importers:
         specifier: ^16.1.6
         version: 16.1.6(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       framer-motion:
-        specifier: ^12.30.0
+        specifier: ^12.29.2
         version: 12.30.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       fuse.js:
         specifier: ^7.1.0
@@ -393,7 +393,7 @@ importers:
         specifier: ^2.2.6
         version: 2.2.6
       swr:
-        specifier: ^2.4.0
+        specifier: ^2.3.8
         version: 2.4.0(react@19.2.4)
       tailwind-merge:
         specifier: ^3.4.0
