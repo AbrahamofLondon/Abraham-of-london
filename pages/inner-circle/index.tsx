@@ -3,16 +3,16 @@ import * as React from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ShieldCheck, 
-  Key, 
-  Mail, 
-  RefreshCw, 
+import {
+  ShieldCheck,
+  Key,
+  Mail,
+  RefreshCw,
   CheckCircle,
   Unlock,
   ArrowRight,
   Send,
-  Lock
+  Lock,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -24,6 +24,7 @@ const INNER_CIRCLE_COOKIE_NAME = "aol_access";
 
 /**
  * CLIENT-SIDE ACCESS VERIFICATION
+ * Note: Presence != validity. Server must verify on protected routes.
  */
 function hasInnerCircleCookie(): boolean {
   if (typeof document === "undefined") return false;
@@ -31,6 +32,33 @@ function hasInnerCircleCookie(): boolean {
     .split(";")
     .map((c) => c.trim())
     .some((c) => c.startsWith(`${INNER_CIRCLE_COOKIE_NAME}=`));
+}
+
+/**
+ * Prevent open redirects. Only allow internal, absolute paths.
+ */
+function safeReturnTo(input: unknown, fallback = "/inner-circle/dashboard"): string {
+  try {
+    const raw = typeof input === "string" ? input.trim() : "";
+    if (!raw) return fallback;
+
+    // Disallow protocol/host, double-slash, or javascript:
+    if (/^(https?:)?\/\//i.test(raw)) return fallback;
+    if (/^javascript:/i.test(raw)) return fallback;
+
+    // Must be an internal path
+    if (!raw.startsWith("/")) return fallback;
+
+    // Optional: avoid redirecting back to the same page endlessly
+    if (raw.startsWith("/inner-circle") && raw !== "/inner-circle/dashboard") {
+      // allow inner-circle dashboard & subroutes; block the entry page itself to reduce loops
+      if (raw === "/inner-circle") return fallback;
+    }
+
+    return raw;
+  } catch {
+    return fallback;
+  }
 }
 
 const InnerCirclePage: NextPage = () => {
@@ -41,34 +69,51 @@ const InnerCirclePage: NextPage = () => {
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [accessKey, setAccessKey] = React.useState("");
+
+  // Newsletter uses its own state (prevents accidental overwrite by other flows)
+  const [newsletterEmail, setNewsletterEmail] = React.useState("");
+
   const [registerStatus, setRegisterStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
   const [unlockStatus, setUnlockStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
   const [newsletterStatus, setNewsletterStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
-  const [feedback, setFeedback] = React.useState<{ type: "register" | "unlock" | "newsletter"; msg: string } | null>(null);
+
+  const [feedback, setFeedback] = React.useState<{ type: "register" | "unlock" | "newsletter"; msg: string } | null>(
+    null
+  );
   const [alreadyUnlocked, setAlreadyUnlocked] = React.useState(false);
 
-  // REDIRECTION LOGIC
-  const returnTo = typeof router.query.returnTo === "string" ? router.query.returnTo : "/inner-circle/dashboard";
+  // REDIRECTION LOGIC (sanitised)
+  const returnTo = React.useMemo(
+    () => safeReturnTo(router.query.returnTo, "/inner-circle/dashboard"),
+    [router.query.returnTo]
+  );
 
   React.useEffect(() => {
+    if (!router.isReady) return;
+
     const unlocked = hasInnerCircleCookie();
     setAlreadyUnlocked(unlocked);
-    
-    if (unlocked && router.isReady) {
-      const redirectTimer = setTimeout(() => {
-        if (returnTo && !window.location.pathname.includes(returnTo)) {
-          router.push(returnTo);
+
+    // If already unlocked, redirect gently
+    if (unlocked) {
+      const timer = window.setTimeout(() => {
+        // Avoid pointless redirect if you're already there
+        if (window.location.pathname !== returnTo) {
+          router.replace(returnTo);
         }
-      }, 1500);
-      return () => clearTimeout(redirectTimer);
+      }, 900);
+
+      return () => window.clearTimeout(timer);
     }
-  }, [router.isReady, returnTo]);
+  }, [router.isReady, returnTo, router]);
 
   /**
    * MEMBERSHIP REQUEST HANDLER (POSTGRES-SYNCED)
    */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (registerStatus === "submitting") return;
+
     setRegisterStatus("submitting");
     setFeedback(null);
 
@@ -80,68 +125,73 @@ const InnerCirclePage: NextPage = () => {
     }
 
     try {
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanName = name.trim();
+
       const res = await fetch("/api/inner-circle/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: email.trim(), 
-          name: name.trim(), 
-          recaptchaToken: token 
+        body: JSON.stringify({
+          email: cleanEmail,
+          name: cleanName,
+          recaptchaToken: token,
         }),
       });
-      const data = await res.json();
 
-      if (!data.ok) throw new Error(data.error || "Registration failed");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "Registration failed");
 
       setRegisterStatus("success");
-      setFeedback({ 
-        type: "register", 
-        msg: "Request received. Check your inbox for your access key." 
-      });
-      trackEvent("inner_circle_register_success", { domain: email.split("@")[1] });
+      setFeedback({ type: "register", msg: "Request received. Check your inbox for your access key." });
+
+      trackEvent("inner_circle_register_success", { domain: cleanEmail.split("@")[1] || "unknown" });
+
       setEmail("");
       setName("");
     } catch (err: any) {
       setRegisterStatus("error");
-      setFeedback({ 
-        type: "register", 
-        msg: err.message || "Request failed. Please try again." 
-      });
+      setFeedback({ type: "register", msg: err?.message || "Request failed. Please try again." });
     }
   };
 
   /**
    * VAULT DEPLOYMENT HANDLER (POSTGRES-SYNCED)
+   * Adds optional Recaptcha token — server can ignore if not implemented.
    */
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (unlockStatus === "submitting") return;
+
     setUnlockStatus("submitting");
     setFeedback(null);
+
+    // Optional: if your API expects this, great. If not, it can ignore it safely.
+    const token = await getRecaptchaTokenSafe("inner_circle_unlock");
 
     try {
       const res = await fetch("/api/inner-circle/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: accessKey.trim() }),
+        body: JSON.stringify({
+          key: accessKey.trim(),
+          ...(token ? { recaptchaToken: token } : {}),
+        }),
       });
-      const data = await res.json();
 
-      if (!data.ok) throw new Error(data.error || "Invalid security key");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "Invalid security key");
 
       setUnlockStatus("success");
       setAlreadyUnlocked(true);
-      
+
       trackEvent("inner_circle_vault_unlocked");
-      
-      setTimeout(() => {
-        router.push(returnTo);
-      }, 1200);
+
+      window.setTimeout(() => {
+        router.replace(returnTo);
+      }, 650);
     } catch (err: any) {
       setUnlockStatus("error");
-      setFeedback({ 
-        type: "unlock", 
-        msg: err.message || "Invalid key. Please check and try again." 
-      });
+      setFeedback({ type: "unlock", msg: err?.message || "Invalid key. Please check and try again." });
     }
   };
 
@@ -150,37 +200,43 @@ const InnerCirclePage: NextPage = () => {
    */
   const handleNewsletterSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (newsletterStatus === "submitting") return;
+
     setNewsletterStatus("submitting");
-    
+    setFeedback(null);
+
     try {
-      // Integration with Mailchimp/Resend logic
+      const cleanEmail = newsletterEmail.trim().toLowerCase();
       const res = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: cleanEmail }),
       });
-      if (!res.ok) throw new Error();
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.ok === false) throw new Error(data?.error || "Signup failed");
 
       setNewsletterStatus("success");
       setFeedback({ type: "newsletter", msg: "Subscription confirmed. Welcome to the mailing list." });
-    } catch (err) {
+
+      trackEvent("newsletter_subscribe_success", { source: "inner_circle", domain: cleanEmail.split("@")[1] || "unknown" });
+
+      setNewsletterEmail("");
+    } catch (err: any) {
       setNewsletterStatus("error");
-      setFeedback({ type: "newsletter", msg: "Signup failed. Please try again." });
+      setFeedback({ type: "newsletter", msg: err?.message || "Signup failed. Please try again." });
     }
   };
 
   return (
-    <Layout 
-      title="Inner Circle" 
-      description="Private access to exclusive strategic volumes and architectural notes."
-    >
+    <Layout title="Inner Circle" description="Private access to exclusive strategic volumes and architectural notes.">
       <main className="min-h-screen bg-[#050505] text-zinc-400 pt-32 pb-24">
         {/* Decorative background element */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-amber-500/5 blur-[120px] pointer-events-none" />
 
         <section className="relative mx-auto max-w-6xl px-6">
           <header className="text-center mb-20">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-1.5 mb-8 text-amber-500/80"
@@ -188,18 +244,20 @@ const InnerCirclePage: NextPage = () => {
               <ShieldCheck size={14} className="text-amber-500" />
               <span className="text-[10px] font-mono uppercase tracking-[0.3em]">Identity Protocol 2.0</span>
             </motion.div>
+
             <h1 className="font-serif text-5xl md:text-6xl font-medium text-white mb-6 italic tracking-tight">
               The Inner Circle
             </h1>
+
             <p className="mx-auto max-w-2xl text-sm md:text-base text-zinc-500 font-light leading-relaxed">
-              Entry is strictly reserved for stakeholders and collaborators. 
-              Authenticating your identity unlocks the complete <span className="text-amber-500/80">Intelligence Portfolio</span>.
+              Entry is strictly reserved for stakeholders and collaborators. Authenticating your identity unlocks the complete{" "}
+              <span className="text-amber-500/80">Intelligence Portfolio</span>.
             </p>
           </header>
 
           <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
             {/* REQUEST ACCESS */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
@@ -214,41 +272,55 @@ const InnerCirclePage: NextPage = () => {
                   <p className="text-[10px] uppercase tracking-widest text-zinc-600">Verification Required</p>
                 </div>
               </div>
-              
+
               <form onSubmit={handleRegister} className="space-y-6">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 ml-1">Full Name</label>
-                  <input 
-                    type="text" required value={name} 
-                    onChange={e => setName(e.target.value)}
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3.5 text-sm text-white focus:border-amber-500/40 outline-none transition-all placeholder:text-zinc-700"
                     placeholder="Institutional Identity"
+                    autoComplete="name"
                   />
                 </div>
+
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 ml-1">Professional Email</label>
-                  <input 
-                    type="email" required value={email} 
-                    onChange={e => setEmail(e.target.value)}
+                  <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 ml-1">
+                    Professional Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3.5 text-sm text-white focus:border-amber-500/40 outline-none transition-all placeholder:text-zinc-700"
                     placeholder="name@organization.com"
+                    autoComplete="email"
                   />
                 </div>
-                <button 
-                  type="submit" 
+
+                <button
+                  type="submit"
                   disabled={registerStatus === "submitting" || registerStatus === "success"}
                   className="w-full bg-white text-black py-4 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-500 transition-all flex items-center justify-center gap-3 disabled:opacity-30"
                 >
                   {registerStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
                   Issue Access Key
                 </button>
-                
+
                 <AnimatePresence>
                   {feedback?.type === "register" && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
-                      className={`p-4 rounded-lg text-xs font-light leading-relaxed border ${registerStatus === "error" ? 'text-red-400 bg-red-500/5 border-red-500/10' : 'text-amber-500 bg-amber-500/5 border-amber-500/10'}`}
+                      className={`p-4 rounded-lg text-xs font-light leading-relaxed border ${
+                        registerStatus === "error"
+                          ? "text-red-400 bg-red-500/5 border-red-500/10"
+                          : "text-amber-500 bg-amber-500/5 border-amber-500/10"
+                      }`}
                     >
                       {feedback.msg}
                     </motion.div>
@@ -258,7 +330,7 @@ const InnerCirclePage: NextPage = () => {
             </motion.div>
 
             {/* UNLOCK VAULT */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
@@ -284,8 +356,9 @@ const InnerCirclePage: NextPage = () => {
                     <CheckCircle className="h-10 w-10 text-emerald-500" />
                   </div>
                   <h3 className="text-lg font-serif text-white italic mb-8">Access Granted</h3>
-                  <button 
-                    onClick={() => router.push(returnTo)} 
+                  <button
+                    type="button"
+                    onClick={() => router.replace(returnTo)}
                     className="w-full bg-emerald-600 text-white py-4 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-emerald-500 transition-all"
                   >
                     Enter Dashboard <ArrowRight size={16} />
@@ -294,25 +367,32 @@ const InnerCirclePage: NextPage = () => {
               ) : (
                 <form onSubmit={handleUnlock} className="space-y-6 relative z-10">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-mono uppercase tracking-widest text-amber-500/60 ml-1">Cryptographic Key</label>
-                    <input 
-                      type="password" required value={accessKey} 
-                      onChange={e => setAccessKey(e.target.value)}
+                    <label className="text-[10px] font-mono uppercase tracking-widest text-amber-500/60 ml-1">
+                      Cryptographic Key
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={accessKey}
+                      onChange={(e) => setAccessKey(e.target.value)}
                       className="w-full bg-black/60 border border-amber-500/20 rounded-lg px-4 py-3.5 font-mono text-sm text-amber-500 focus:border-amber-500/60 outline-none transition-all placeholder:text-amber-900/30"
                       placeholder="ic_••••••••••••"
+                      autoComplete="one-time-code"
                     />
                   </div>
-                  <button 
-                    type="submit" 
+
+                  <button
+                    type="submit"
                     disabled={unlockStatus === "submitting"}
                     className="w-full border border-amber-500/40 text-amber-500 py-4 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all flex items-center justify-center gap-3 disabled:opacity-30"
                   >
                     {unlockStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <Unlock size={16} />}
                     Authenticate
                   </button>
+
                   <AnimatePresence>
                     {feedback?.type === "unlock" && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="p-4 rounded-lg bg-red-500/5 text-red-400 text-[11px] border border-red-500/10 font-light"
@@ -332,24 +412,46 @@ const InnerCirclePage: NextPage = () => {
           <div className="mx-auto max-w-2xl px-6 text-center">
             <h2 className="font-serif text-3xl text-white mb-6 italic">The Strategic Brief</h2>
             <p className="text-zinc-500 text-sm font-light leading-relaxed mb-12">
-              For those not requiring vault-level access, the Brief offers periodic analysis 
-              on institutional design and frontier market strategy.
+              For those not requiring vault-level access, the Brief offers periodic analysis on institutional design and
+              frontier market strategy.
             </p>
-            
+
             <form onSubmit={handleNewsletterSignup} className="relative group">
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
                 placeholder="Institutional Email"
-                className="w-full bg-white/[0.02] border border-white/10 rounded-full px-8 py-5 text-sm text-white focus:border-amber-500/30 outline-none transition-all pr-16"
+                className="w-full bg-white/[0.02] border border-white/10 rounded-full px-8 py-5 text-sm text-white focus:border-amber-500/30 outline-none transition-all pr-16 placeholder:text-zinc-700"
+                autoComplete="email"
               />
-              <button 
+              <button
                 type="submit"
-                className="absolute right-2 top-2 bottom-2 bg-amber-500 text-black px-6 rounded-full hover:bg-white transition-colors flex items-center justify-center"
+                disabled={newsletterStatus === "submitting" || newsletterStatus === "success"}
+                className="absolute right-2 top-2 bottom-2 bg-amber-500 text-black px-6 rounded-full hover:bg-white transition-colors flex items-center justify-center disabled:opacity-40"
+                aria-label="Subscribe"
               >
-                <Send size={18} />
+                {newsletterStatus === "submitting" ? <RefreshCw className="animate-spin" size={18} /> : <Send size={18} />}
               </button>
             </form>
+
+            <AnimatePresence>
+              {feedback?.type === "newsletter" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`mt-6 p-4 rounded-lg text-[11px] border font-light ${
+                    newsletterStatus === "error"
+                      ? "text-red-400 bg-red-500/5 border-red-500/10"
+                      : "text-amber-500 bg-amber-500/5 border-amber-500/10"
+                  }`}
+                >
+                  {feedback.msg}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <p className="mt-8 text-[9px] uppercase tracking-[0.4em] text-zinc-700">Signal Only • No Proliferation</p>
           </div>
         </section>

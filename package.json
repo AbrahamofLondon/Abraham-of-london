@@ -9,16 +9,13 @@
     "dev:profile": "cross-env NEXT_PROFILING=true next dev --webpack",
     "start": "next start",
     "preview": "next start --port 3001",
-    
     "prebuild": "pnpm vault:audit",
     "build": "cross-env NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "build:ci": "pnpm prebuild:ci && pnpm build",
     "build:netlify": "pnpm build:ci",
     "build:safe": "pnpm vault:fix && pnpm fix:encoding && pnpm content:validate && pnpm build",
     "postbuild": "next-sitemap --config next-sitemap.config.js",
-    
     "prebuild:ci": "pnpm vault:fix && pnpm fix:yaml && pnpm fix:windows && pnpm vault:ready",
-    
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
@@ -28,13 +25,11 @@
     "db:reset": "prisma migrate reset --force && pnpm db:seed",
     "db:status": "prisma migrate status",
     "portfolio:sync": "pnpm db:generate && pnpm db:push && pnpm db:seed",
-    
     "content:clean": "rimraf .contentlayer .next/content",
     "contentlayer:build": "contentlayer2 build",
     "contentlayer:safe": "contentlayer2 build --clearCache",
     "contentlayer:watch": "contentlayer2 watch",
     "content:validate": "node scripts/validate-frontmatter.mjs",
-    
     "vault:audit": "node scripts/generate-intel-audit.mjs",
     "vault:fix": "node scripts/vault-repair.mjs",
     "vault:glossary": "node scripts/glossary-injector.mjs",
@@ -42,7 +37,6 @@
     "vault:manifest": "node scripts/generate-vault-manifest.mjs",
     "vault:ready": "pnpm contentlayer:safe && pnpm vault:audit && pnpm vault:glossary && pnpm vault:check && pnpm vault:manifest",
     "vault:dry": "node scripts/vault-repair-dry.mjs",
-    
     "assets:optimize": "node scripts/optimize-assets.js",
     "assets:enterprise": "tsx scripts/enterprise-asset-optimizer.ts",
     "assets:enterprise:production": "cross-env NODE_ENV=production tsx scripts/enterprise-asset-optimizer.ts --quality=premium",
@@ -52,7 +46,6 @@
     "assets:images:optimize": "node scripts/optimize-images.js",
     "optimize:premium": "tsx scripts/enterprise-asset-optimizer.ts --images-only --avif --ultra-quality",
     "assets:fonts:generate": "node scripts/generate-fonts.cjs",
-    
     "pdf:build:full": "pnpm pdf:registry:full && pnpm pdf:generate-all && pnpm pdf:sync",
     "pdf:generate-all": "tsx scripts/pdf/unified-pdf-generator.ts --tier all --scan-content --use-puppeteer --use-universal --validate --no-empty",
     "pdf:registry:full": "pnpm pdf:registry:build && pnpm pdf:registry && pnpm pdf:variants",
@@ -60,21 +53,17 @@
     "pdf:sync": "tsx scripts/pdf/sync-pdfs.ts --update-downloads --fix-placeholders",
     "pdf:audit": "pnpm pdf:list && pnpm pdf:validate",
     "pdf:repair": "tsx scripts/pdf/repair-pdfs.ts --repair-empty --regenerate-corrupt",
-    
     "health": "tsx scripts/system/check-system-health.ts",
     "check:all": "pnpm health && pnpm check:system && pnpm check:security && pnpm check:content-boundary",
     "check:system": "tsx scripts/system/check-system.ts",
     "check:security": "pnpm exec audit-ci --config .auditci.json",
     "security:audit": "pnpm audit --audit-level=high",
-    
     "fix:all": "pnpm fix:prisma && pnpm fix:imports && pnpm fix:build && pnpm fix:windows && pnpm fix:yaml && pnpm fix:unsafe",
     "fix:windows": "node scripts/windows-fix.js",
     "fix:yaml": "node scripts/fix-yaml-specific.cjs",
     "fix:unsafe": "node scripts/fix-unsafe-strings-surgical.cjs",
-    
     "env:check": "tsx scripts/environment/check-env.ts || echo 'Environment check completed'",
     "clean:hard": "node scripts/clean-project.js",
-    
     "verify:production": "cross-env TARGET_URL=https://www.abrahamoflondon.org node scripts/system/verify-deployment.mjs",
     "verify:local": "cross-env TARGET_URL=http://localhost:3000 node scripts/system/verify-deployment.mjs"
   },
@@ -130,6 +119,7 @@
     "algoliasearch": "^5.47.0",
     "argon2": "^0.44.0",
     "axios": "^1.13.4",
+    "chalk": "^5.6.2",
     "cheerio": "^1.2.0",
     "clsx": "^2.1.1",
     "color": "^5.0.3",

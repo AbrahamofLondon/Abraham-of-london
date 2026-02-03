@@ -31,6 +31,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
+export function getAllPDFItems(): RegistryEntry[] {
+  const registryMap = getPDFRegistry();
+  return Object.values(registryMap).sort((a, b) => {
+    // Priority-based sorting for institutional importance
+    const pA = (a as any).priority ?? 99;
+    const pB = (b as any).priority ?? 99;
+    return pA - pB;
+  });
+}
   // 1. AUTHENTICATION BARRIER
   let actorId = "system";
   if (REQUIRE_ADMIN) {

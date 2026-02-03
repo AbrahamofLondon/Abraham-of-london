@@ -8,7 +8,7 @@
 // - Output paths below match what you actually have under /public/assets/downloads/** right now,
 //   so your dashboard can “see” the library immediately.
 
-type Tier = "free" | "member" | "architect" | "inner-circle";
+type Tier = "free" | "member" | "architect" | "inner-circle" | "inner-circle-elite";
 
 export type SourcePDFItem = {
   id: string;
@@ -987,6 +987,77 @@ const LEGACY_PDFS: SourcePDFItem[] = [
     priority: 5,
   },
 ];
+
+// ... continuing from previous block
+  {
+    id: "legacy-architecture-canvas-a3-enterprise-architect",
+    title: "Legacy Architecture Canvas (A3 • Enterprise Architect)",
+    type: "canvas",
+    tier: "architect",
+    outputPath: "/assets/downloads/legacy-architecture-canvas-a3-enterprise-architect.pdf",
+    description: "Enterprise-grade Legacy Architecture Canvas (A3) for Architect tier.",
+    tags: ["legacy", "canvas", "enterprise", "architect", "a3"],
+    formats: ["bundle"],
+    format: "PDF",
+    isInteractive: false,
+    isFillable: false,
+    requiresAuth: true,
+    version: "1.0.0",
+    category: "legacy",
+  },
+  {
+    id: "legacy-architecture-canvas-a4-enterprise-architect",
+    title: "Legacy Architecture Canvas (A4 • Enterprise Architect)",
+    type: "canvas",
+    tier: "architect",
+    outputPath: "/assets/downloads/legacy-architecture-canvas-a4-enterprise-architect.pdf",
+    description: "Enterprise-grade Legacy Architecture Canvas (A4) for Architect tier.",
+    tags: ["legacy", "canvas", "enterprise", "architect", "a4"],
+    formats: ["bundle"],
+    format: "PDF",
+    isInteractive: false,
+    isFillable: false,
+    requiresAuth: true,
+    version: "1.0.0",
+    category: "legacy",
+  },
+  {
+    id: "legacy-architecture-canvas-letter-enterprise-architect",
+    title: "Legacy Architecture Canvas (Letter • Enterprise Architect)",
+    type: "canvas",
+    tier: "architect",
+    outputPath: "/assets/downloads/legacy-architecture-canvas-letter-enterprise-architect.pdf",
+    description: "Enterprise-grade Legacy Architecture Canvas (Letter) for Architect tier.",
+    tags: ["legacy", "canvas", "enterprise", "architect", "letter"],
+    formats: ["bundle"],
+    format: "PDF",
+    isInteractive: false,
+    isFillable: false,
+    requiresAuth: true,
+    version: "1.0.0",
+    category: "legacy",
+  },
+];
+
+// -----------------------------------------------------------------------------
+// FINAL REGISTRY ASSEMBLY
+// -----------------------------------------------------------------------------
+
+/**
+ * Combined Source of Truth.
+ * This is the variable imported by the generator script.
+ */
+export const ALL_SOURCE_PDFS: SourcePDFItem[] = [
+  ...NEW_PDFS,
+  ...LEGACY_PDFS,
+];
+
+/**
+ * Utility to find a PDF by ID (used for API and Build Lookups)
+ */
+export function getSourcePDFById(id: string): SourcePDFItem | undefined {
+  return ALL_SOURCE_PDFS.find((p) => p.id === id);
+}
 
 // -----------------------------------------------------------------------------
 // EXPORT
