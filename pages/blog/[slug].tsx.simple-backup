@@ -14,7 +14,7 @@ import {
   getPublishedPosts,
   getPostBySlug,
   getPostBySlugWithContent,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/content/server";
 
 import { prepareMDX, simpleMdxComponents } from "@/lib/server/md-utils";
 

@@ -40,7 +40,7 @@ import { safeSlice } from "@/lib/utils/safe";
   getDocKind,
   getDocHref,
   getPublishedDocuments,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/content/server";
 
 type ShortDoc = {
   _id: string;

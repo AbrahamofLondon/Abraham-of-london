@@ -28,7 +28,7 @@ const importReplacements = {
   "from '@/lib/server/content'": "from '@/lib/contentlayer'",
   "from '@/lib/contentlayer-compat'": "from '@/lib/contentlayer'",
   "from '@/lib/contentlayer-helper.server'": "from '@/lib/contentlayer'",
-  "from '@/lib/contentlayer-helper'": "from '@/lib/contentlayer'",
+  "from '@/lib/content/server'": "from '@/lib/contentlayer'",
   
   // These should stay the same - just ensure they come from the right place
   "getServerAllPosts": "getServerAllPosts",
