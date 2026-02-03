@@ -8,6 +8,7 @@ export type LogoTileProps = {
   alt: string;
   /** Max logo height in px (applied inline). Defaults to 40. */
   size?: number;
+  /** If true, hides alt text (purely decorative). */
   decorative?: boolean;
   className?: string;
 };

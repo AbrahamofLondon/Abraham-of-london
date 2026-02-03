@@ -24,8 +24,8 @@ const replacements = [
   ['from "@/lib/content"', 'from "@/lib/content"'],
   ["from '@/lib/contentlayer-compat'", "from '@/lib/content'"],
 
-  ['from "@/lib/contentlayer-helper"', 'from "@/lib/content"'],
-  ["from '@/lib/contentlayer-helper'", "from '@/lib/content'"],
+  ['from "@/lib/content/server"', 'from "@/lib/content"'],
+  ["from '@/lib/content/server'", "from '@/lib/content'"],
 
   ['from "@/lib/contentlayer"', 'from "@/lib/content"'],
   ["from '@/lib/contentlayer'", "from '@/lib/content'"],

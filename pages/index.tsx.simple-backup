@@ -39,7 +39,7 @@ import {
 // ✅ FIXED: Import server-side functions from correct location
 import {
   getAllShorts,
-} from '@/lib/contentlayer-helper';
+} from '@/lib/content/server';
 
 import {
   getDocHref,
